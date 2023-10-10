@@ -9,7 +9,6 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     public static $label_prime = "Apport externe";
     public static $label_prime2 = "Apport externe2";
     public static $use_cgv = true;
-    
     public static $type = 'pdf';
 
     # Objets: 
@@ -32,7 +31,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     public $nbPeriods = 0;
     public $max_line_serials = 50;
 
-    # Options: 
+    # Options:
     public $hide_pu = false;
     public $hideReduc = false;
     public $hideTtc = false;
@@ -109,28 +108,41 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     }
                 }
 
-                if (method_exists($this->object, 'fetch_optionals')) {
-                    $this->object->fetch_optionals();
-                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
-                        $entrepot = new Entrepot($this->db);
-                        $entrepot->fetch($this->object->array_options['options_entrepot']);
-                        if ($entrepot->address != "" && $entrepot->town != "") {
-                            $this->fromCompany->zip = $entrepot->zip;
-                            $this->fromCompany->address = $entrepot->address;
-                            $this->fromCompany->town = $entrepot->town;
-
-                            if (BimpCore::isEntity('bimp')) {
-                                if ($this->fromCompany->name == "Bimp Groupe Olys")
-                                    $this->fromCompany->name = "Bimp Olys SAS";
-
-                                if ($entrepot->ref == "PR") {
-                                    $this->fromCompany->address = "2 rue des Erables CS 21055  ";
-                                    $this->fromCompany->town = "LIMONEST";
-                                    $this->fromCompany->zip = "69760";
+                switch (BimpCore::getEntity()) {
+                    case 'bimp':
+                        if (method_exists($this->object, 'fetch_optionals')) {
+                            $this->object->fetch_optionals();
+                            if (isset($this->object->array_options['options_type']) && (string) $this->object->array_options['options_type']) {
+                                $secteur = $this->object->array_options['options_type'];
+                                if ($secteur == 'S') {
+                                    // DOCS SAV : 
+                                    $this->fromCompany->name = 'OLYS LDLC';
+                                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
+                                        $entrepot = new Entrepot($this->db);
+                                        $entrepot->fetch($this->object->array_options['options_entrepot']);
+                                        if ($entrepot->ref == "PR") {
+                                            $this->fromCompany->address = "2 rue des Erables CS 21055  ";
+                                            $this->fromCompany->town = "LIMONEST";
+                                            $this->fromCompany->zip = "69760";
+                                        } elseif ($entrepot->address != "" && $entrepot->town != "") {
+                                            $this->fromCompany->zip = $entrepot->zip;
+                                            $this->fromCompany->address = $entrepot->address;
+                                            $this->fromCompany->town = $entrepot->town;
+                                        }
+                                    }
+                                } else {
+                                    $this->fromCompany->name = 'BIMP';
+                                    if (in_array($secteur, array('C', 'CTC', 'E', 'CTE'))) {
+                                        // DOCS EDUC: 
+                                        $this->fromCompany->url = 'www.bimp-pro.fr - www.bimp-education.fr';
+                                    }
                                 }
                             }
                         }
-                    }
+                        break;
+
+                    case 'actimag':
+                        break;
                 }
 
                 if (isset($this->object->statut) && !(int) $this->object->statut) {
@@ -229,11 +241,11 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         $desc = '';
         if (!is_null($product)) {
             if (!$this->hideRef) {
-                $desc .= $product->ref;
+                $desc .= '<b>' . $product->ref . '</b>';
             }
 
             if (!$hide_product_label) {
-                $desc .= ($desc ? ' - ' : '') . $product->label;
+                $desc .= ($desc ? ' - ' : '') . '<b>' . $product->label . '</b>';
             }
 
 //            if ($product->type == 1) {
@@ -492,7 +504,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                                 $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
                             }
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
-                            $totalvat .= vatrate(abs((float)$tvakey), 1) . $tvacompl;
+                            $totalvat .= vatrate(abs((float) $tvakey), 1) . $tvacompl;
 
                             if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
                                 $tvaval /= $this->nbPeriods;
@@ -663,6 +675,13 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         }
 
         $html .= '</table>';
+        if(is_a($this->bimpCommObject, 'BimpComm')){
+            if($this->bimpCommObject->getData('zone_vente') == 2)
+                $html .= '* Autoliquidation';
+            elseif($this->bimpCommObject->getData('zone_vente') == 3)
+                $html .= '* TVA non applicable – art. 259-1 du CGI';
+        }
+        
         $html .= '<br/>';
 
         return $html . $htmlInfo;
@@ -1091,12 +1110,15 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 //        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
 //        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
-            if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv) {
+            if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && (static::$use_cgv || is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF'))) {
                 $html .= '<span style="font-weight: bold;">';
-                if ($this->pdf->addCgvPages)
+                if (is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF')) {
+                    $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et en boutique pour les particuliers.';
+                } elseif ($this->pdf->addCgvPages) {
                     $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
-                else
+                } else {
                     $html .= 'Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                }
                 $html .= "</span>";
                 $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
    En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
@@ -1113,6 +1135,18 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
             }
 
             $this->writeContent($html);
+        }
+        else{
+            if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv){
+                $html = '';
+                $html .= '<p style="font-size: 6px; font-style: italic">';
+                $html .= '<span style="font-weight: bold;">';
+                $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées';
+                $html .= "</span>";
+                $html .= "</p>";
+                $this->writeContent($html);
+            }
+            
         }
     }
 

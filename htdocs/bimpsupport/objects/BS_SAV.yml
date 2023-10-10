@@ -10,6 +10,8 @@ list_page_url:
         id_entrepot: 
             field_value: id_entrepot
             
+entity_name: bs_sav
+            
 header_list_name: default
 header_edit_form: edit
 
@@ -62,6 +64,12 @@ objects:
             id_object: 
                 field_value: id_propal
                 
+    facture: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture
+                
     facture_acompte: 
         extends: facture
         instance: 
@@ -74,15 +82,15 @@ objects:
             id_object: 
                 field_value: id_facture_avoir
                 
-    propal_lines: 
-        relation: hasMany
-        delete: 0
-        instance: 
-            bimp_object: BS_SavPropalLine
-        list: 
-            filters: 
-                id_obj: 
-                    field_value: id_propal
+#    propal_lines: 
+#        relation: hasMany
+#        delete: 0
+#        instance: 
+#            bimp_object: BS_SavPropalLine
+#        list: 
+#            filters: 
+#                id_obj: 
+#                    field_value: id_propal
                     
     apple_parts: 
         relation: hasMany
@@ -280,6 +288,10 @@ fields:
                 type: search_societe
                 societe_type: customer    
         create_form: light
+        create_form_values: 
+            fields: 
+                marche: 
+                    - 18
         edit_form: default
     id_contact:
         label: Contact
@@ -569,157 +581,202 @@ fields:
 forms: 
     default:
         rows: 
-            - field: replaced_ref
-            - field: code_centre
-            - field: code_centre_repa
-            - field: id_client
-            - field: id_contact
-            - field: id_equipment
-            - custom: 1
-              label: Conserver l'équipement dans son emplacement actuel
-              input_name: keep_equipment_current_place
-              data_type: bool
-              content: 
-                  callback: renderEquipmentPlaceOptionInput
-              display_if: 
-                  field_name: id_equipment
-                  hide_values: 0,
-              depends_on: id_equipment
-            - field: symptomes
-            - field: id_contrat
-            - field: prioritaire
-            - field: acompte
-            - label: Mode de paiement de l'acompte
-              custom: 1
-              data_type: int
-              input_name: mode_paiement_acompte
-              input: 
-                  type: select_payment
-                  include_empty: 1
-              display_if: 
-                  field_name: acompte
-                  hide_values: 0,
-              value: 6
-            - field: system
-            - field: login_admin
-            - field: pword_admin
-            - field: contact_pref
-            - field: accessoires
-            - field: etat_materiel
-            - field: etat_materiel_desc
-            - field: save_option
-            - field: sav_pro
-            - field: prestataire_number
-            - custom: 1
-              label: Notifier le client de la création du SAV
-              input_name: send_msg
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 1
-            - field: id_ticket
-              hidden: 1
-            - field: sacs
-            - object: files
-              multiple: 1
-#            - custom: 1
-#              label: Fichier
-#              input_name: file
-#              input: 
-#                  type: file_upload
-#            - custom: 1
-#              label: Fichier 2
-#              input_name: file2
-#              input: 
-#                  type: file_upload
-              
+            replaced_ref: 
+                field: replaced_ref
+            code_centre: 
+                field: code_centre
+            code_centre_repa: 
+                field: code_centre_repa
+            id_client: 
+                field: id_client
+            id_contact: 
+                field: id_contact
+            id_equipment: 
+                field: id_equipment
+            keep_equipment_current_place: 
+                custom: 1
+                label: Conserver l'équipement dans son emplacement actuel
+                input_name: keep_equipment_current_place
+                data_type: bool
+                content: 
+                    callback: renderEquipmentPlaceOptionInput
+                display_if: 
+                    field_name: id_equipment
+                    hide_values: 0,
+                depends_on: id_equipment
+            symptomes: 
+                field: symptomes
+            id_contrat:  
+                field: id_contrat
+            prioritaire: 
+                field: prioritaire
+            acompte: 
+                field: acompte
+            mode_paiement_acompte: 
+                label: Mode de paiement de l'acompte
+                custom: 1
+                data_type: int
+                input_name: mode_paiement_acompte
+                input: 
+                    type: select_payment
+                    include_empty: 1
+                display_if: 
+                    field_name: acompte
+                    hide_values: 0,
+                value: 6
+            system: 
+                field: system
+            login_admin: 
+                field: login_admin
+            pword_admin: 
+                field: pword_admin
+            contact_pref: 
+                field: contact_pref
+            accessoires: 
+                field: accessoires
+            etat_materie: 
+                field: etat_materiel
+            etat_materiel_desc: 
+                field: etat_materiel_desc
+            save_option: 
+                field: save_option
+            sav_pro: 
+                field: sav_pro
+            prestataire_number: 
+                field: prestataire_number
+            id_ticket: 
+                field: id_ticket
+                hidden: 1
+            sacs: 
+                field: sacs
+            send_msg: 
+                custom: 1
+                label: Notifier le client de la création du SAV
+                input_name: send_msg
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            create_signature_pc: 
+                custom: 1
+                label: Demander la signature du bon de prise en charge
+                input_name: create_signature_pc
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            files: 
+                object: files
+                multiple: 1
+                
     prise_en_charge: 
         rows: 
-            - field: code_centre
-              edit: 0
-            - field: code_centre_repa
-            - field: id_client
-            - field: id_contact
-            - field: id_equipment
-            - custom: 1
-              label: Conserver l'équipement dans son emplacement actuel
-              input_name: keep_equipment_current_place
-              data_type: bool
-              content: 
-                  callback: renderEquipmentPlaceOptionInput
-              display_if: 
-                  field_name: id_equipment
-                  hide_values: 0,
-              depends_on: id_equipment
-            - field: symptomes
-            - field: id_contrat
-            - field: prioritaire
-            - field: acompte
-            - label: Mode de paiement de l'acompte
-              custom: 1
-              data_type: int
-              input_name: mode_paiement_acompte
-              input: 
-                  type: select_payment
-                  include_empty: 1
-              display_if: 
-                  field_name: acompte
-                  hide_values: 0,
-              value: 6
-            - field: system
-            - field: login_admin
-            - field: pword_admin
-            - field: contact_pref
-            - field: accessoires
-            - field: etat_materiel
-            - field: etat_materiel_desc
-            - field: save_option
-            - field: sav_pro
-            - field: prestataire_number
-            - field: sacs
+            code_centre: 
+                field: code_centre
+                edit: 0
+            code_centre_repa: 
+                field: code_centre_repa
+            id_client: 
+                field: id_client
+            id_contact: 
+                field: id_contact
+            id_equipment: 
+                field: id_equipment
+            keep_equipment_current_place: 
+                custom: 1
+                label: Conserver l'équipement dans son emplacement actuel
+                input_name: keep_equipment_current_place
+                data_type: bool
+                content: 
+                    callback: renderEquipmentPlaceOptionInput
+                display_if: 
+                    field_name: id_equipment
+                    hide_values: 0,
+                depends_on: id_equipment
+            symptomes: 
+                field: symptomes
+            id_contrat: 
+                field: id_contrat
+            prioritaire: 
+                field: prioritaire
+            acompte: 
+                field: acompte
+            mode_paiement_acompte: 
+                label: Mode de paiement de l'acompte
+                custom: 1
+                data_type: int
+                input_name: mode_paiement_acompte
+                input: 
+                    type: select_payment
+                    include_empty: 1
+                display_if: 
+                    field_name: acompte
+                    hide_values: 0,
+                value: 6
+            system: 
+                field: system
+            login_admin: 
+                field: login_admin
+            pword_admin: 
+                field: pword_admin
+            contact_pref: 
+                field: contact_pref
+            accessoires: 
+                field: accessoires
+            etat_materiel: 
+                field: etat_materiel
+            etat_materiel_desc: 
+                field: etat_materiel_desc
+            save_option: 
+                field: save_option
+            sav_pro: 
+                field: sav_pro
+            prestataire_number: 
+                field: prestataire_number
+            sacs: 
+                field: sacs
               
     edit: 
         rows: 
-            - field: replaced_ref
-            - field: code_centre
-            - field: code_centre_repa
-            - field: id_client
-            - field: id_contact
-            - field: id_equipment
-            - field: prioritaire
-            - field: id_contrat
-            - field: prestataire_number
-            - field: id_user_tech
-            - field: system
-            - field: login_admin
-            - field: pword_admin
-            - field: sacs
-            - field: in_fac_emails_files
-#            - custom: 1 => Pourquoi mettre ça dans le form d'édition du SAV alors qu'il suffit d'aller dans l'onglet "Fichiers" > Ajouter un fichier ?
-#              label: Fichier
-#              input_name: file
-#              input: 
-#                  type: file_upload
-#            - custom: 1
-#              label: Fichier 2
-#              input_name: file2
-#              input: 
-#                  type: file_upload
-            - field: name_reseller
+            replaced_ref: 
+                field: replaced_ref
+            code_centre: 
+                field: code_centre
+            code_centre_repa: 
+                field: code_centre_repa
+            id_client: 
+                field: id_client
+            id_contact: 
+                field: id_contact
+            id_equipment: 
+                field: id_equipment
+            prioritaire: 
+                field: prioritaire
+            id_contrat: 
+                field: id_contrat
+            prestataire_number: 
+                field: prestataire_number
+            id_user_tech: 
+                field: id_user_tech
+            system: 
+                field: system
+            login_admin: 
+                field: login_admin
+            pword_admin: 
+                field: pword_admin
+            sacs: 
+                field: sacs
+            in_fac_emails_files: 
+                field: in_fac_emails_files
+            name_reseller: 
+                field: name_reseller
             
     public_edit: 
         rows: 
             - field: system
             - field: contact_pref
             - field: etat_materiel
-            - field: symptomes
-#            - object: client
-#              on_edit: 1
-#              form_name: public
-#            - object: contact
-#              on_edit: 1
-#              form_name: public_edit
-            
+            - field: symptomes            
             
     send_msg: 
         title: Envoi de notification
@@ -827,6 +884,27 @@ forms:
               data_type: bool
               content: 
                   callback: renderEquipmentPlaceOptionInput
+            - custom: 1
+              label: Demander la signature du bon de restitution
+              input_name: create_signature_resti
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Contact signataire
+              input_name: id_contact_signataire
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Obligatoire pour les clients pros
+              value: 
+                  field_value: id_contact
+              display_if: 
+                  field_name: create_signature_resti
+                  show_values: 1
                   
     close_refused: 
         title: Fermeture
@@ -881,6 +959,27 @@ forms:
               display_if: 
                   field_name: bon_resti_raison
                   show_values: 99
+            - custom: 1
+              label: Demander la signature du bon de restitution
+              input_name: create_signature_resti
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Contact signataire
+              input_name: id_contact_signataire
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Obligatoire pour les clients pros
+              value: 
+                  field_value: id_contact
+              display_if: 
+                  field_name: create_signature_resti
+                  show_values: 1
               
     contact: 
         title: Recontacter
@@ -1072,6 +1171,14 @@ forms:
 #                  field_name: acompte
 #                  hide_values: 0,
               value: 6
+            - custom: 1
+              label: Compte bancaire
+              input_name: bank_account
+              data_type: int
+              value: 
+                  callback: getDefaultBankAccount
+              input: 
+                    type: select_mysoc_account
               
     gsx_token: 
         title: Authentification GSX
@@ -1255,6 +1362,7 @@ forms:
               values: 
                 LDLC: LDLC
                 BIMP: BIMP
+                ACTIMAC: ACTIMAC
                 AUTRE: Autre
                 
             other_name_reseller:
@@ -1276,40 +1384,60 @@ fields_tables:
         footer_extra_btn: 
             callback: getInfosExtraBtn
         rows: 
-            - field: replaced_ref
-              show: 
-                  field_value: replaced_ref
-            - field: ref
-            - field: date_rdv
-            - field: resgsx
-            - field: status
-              display: actions
-            - field: code_centre
-            - field: code_centre_repa
-            - field: id_entrepot
-              display: nom_url
-            - field: id_user_tech
-              display: nom_url
-            - field: id_equipment
-              display: card
-            - field: id_ticket
-              display: card
-            - field: prioritaire
-            - field: sav_pro
-              edit: 1
-            - field: prestataire_number
-            - label: Autre
-              value:
-                 callback: displayExtraSav
-            - field: date_terminer
-            - label: Lien publique
-              value:
-                 callback: displayPublicLink
-            - field: bon_resti_raison
-              show: 
-                  callback: isGratuit
-            - field: name_reseller
-            - field: alert_unrestitute
+            replaced_ref: 
+                field: replaced_ref
+                show: 
+                    field_value: replaced_ref
+            ref: 
+                field: ref
+            date_rdv: 
+                field: date_rdv
+            resgsx: 
+                field: resgsx
+            status: 
+                field: status
+                display: actions
+            code_centre: 
+                field: code_centre
+            code_centre_repa: 
+                field: code_centre_repa
+            id_entrepot: 
+                field: id_entrepot
+                display: nom_url
+            id_user_tech: 
+                field: id_user_tech
+                display: nom_url
+            id_equipment: 
+                field: id_equipment
+                display: card
+            id_ticket: 
+                field: id_ticket
+                display: card
+            prioritaire: 
+                field: prioritaire
+            sav_pro: 
+                field: sav_pro
+                edit: 
+            prestataire_number: 
+                field: prestataire_number
+            extra_sav: 
+                label: Autre
+                value: 
+                    callback: displayExtraSav
+            date_terminer: 
+                field: date_terminer
+            public_link: 
+                label: Lien publique
+                value: 
+                    callback: displayPublicLink
+            bon_resti_raison: 
+                field: bon_resti_raison
+                show: 
+                    callback: isGratuit
+            name_reseller: 
+                field: name_reseller
+            alert_unrestitute: 
+                field: alert_unrestitute
                  
     facturation:
         title: Facturation
@@ -1495,6 +1623,10 @@ views:
                     col_md: 6
                     fields_table:
                         name: suivi
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: renderNotesList
             - cols: 
                 - type: list
                   list: 

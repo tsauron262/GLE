@@ -41,7 +41,7 @@ class modsynopsisfav extends DolibarrModules {
      *   \brief      Constructor. Define names, constants, directories, boxes, permissions
      *   \param      DB      Database handler
      */
-    function modsynopsisfav($DB) {
+    function __construct($DB) {
         global $langs, $conf;
 
         $this->db = $DB;

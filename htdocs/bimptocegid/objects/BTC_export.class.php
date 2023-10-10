@@ -2,6 +2,22 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
 
+/*
+ * paramétre
+ * dans entrepot
+ * dans bank
+ * en conf
+ * 
+ * 
+ * 
+ * Dans entrepot 
+ *  compte_comptable_banque = CB + AE
+ *  compte_compta        = espéce
+ *  Compte_aux           = client divers pour vente tickets 
+ *  code_journal_compta  = code journal   liquide + CB + AE
+ * 
+ */
+
 class BTC_export extends BimpObject {
 
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited

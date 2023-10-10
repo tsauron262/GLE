@@ -45,7 +45,7 @@ class BDS_ExportsComptaProcess extends BDSImportProcess
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_dir',
                 'label'      => 'Dossier FTP',
-                'value'      => '/FTP-BIMP-ERP/accounting/'
+                'value'      => '/'.BimpCore::getConf('exports_ldlc_ftp_dir').'/accounting/'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(

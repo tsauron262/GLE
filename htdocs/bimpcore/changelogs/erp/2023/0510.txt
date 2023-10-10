@@ -1,0 +1,2 @@
+ - Possibilité d'ajouter tout un groupe à un RDV agenda
+ - Fiche Inters : debug mise en copie du technicien lors de l'envoi de la FI au client par e-mail

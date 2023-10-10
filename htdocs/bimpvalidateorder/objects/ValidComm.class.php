@@ -151,9 +151,13 @@ class ValidComm extends BimpObject
 
         // Création contact
         /* TODO Pourquoi ici ? TODO */
-        $bimp_object->dol_object->db = $this->db2;
-        $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
-        $bimp_object->dol_object->db = $this->db->db;
+//        $bimp_object->dol_object->db = $this->db2;
+//        $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
+//        
+//        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+//            BimpDebug::addDebugTime('finCheckContacts');
+//        }
+//        $bimp_object->dol_object->db = $this->db->db;
 
         list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp, $percent_service) = $this->getObjectParams($bimp_object, $errors);
 
@@ -161,6 +165,9 @@ class ValidComm extends BimpObject
             return 0;
 
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Valid commercial');
+        }
         // Validation commerciale
         if (!is_a($bimp_object, 'BContract_contrat')) {
             if (($percent_pv != 0 or $percent_marge != 0) and in_array(self::TYPE_COMMERCIAL, $validations)) {
@@ -170,6 +177,9 @@ class ValidComm extends BimpObject
             }
         }
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Valid encours');
+        }
         // Validation encours
         if ($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS and in_array(self::TYPE_ENCOURS, $validations)) {
             
@@ -188,6 +198,9 @@ class ValidComm extends BimpObject
                         $valid_encours = (int) $this->tryValidateByType($user, self::TYPE_ENCOURS, $secteur, $class, $val_euros, $bimp_object, $errors);
                 }
             }
+        }
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Valid impayé');
         }
 
         // Validation impayé
@@ -208,6 +221,9 @@ class ValidComm extends BimpObject
         } elseif (!$rtp)
             $this->validatePayed($class, $bimp_object);
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Valid services');
+        }
         // Validation service
         if (($percent_service != 0)) {
             $valid_service = (int) $this->tryValidateByType($user, self::TYPE_SUR_SERVICE, $secteur, $class, $percent_service, $bimp_object, $errors);
@@ -255,6 +271,9 @@ class ValidComm extends BimpObject
         if ($this->nb_validation > 0)
             $this->sendMailValidation($bimp_object);
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Fin validations');
+        }
         return $ret;
     }
 
@@ -361,6 +380,7 @@ class ValidComm extends BimpObject
             $client = $bimp_object->getClientFacture();
         else
             $client = $bimp_object->getChildObject('client');
+        
         $max = $client->getData('outstanding_limit') * 1.2;
 
         $actuel = $client->getEncours();
@@ -464,6 +484,9 @@ class ValidComm extends BimpObject
     public function getObjectParams($object, &$errors = array(), $withRtp = true)
     {
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('getObjectParams');
+        }
         // Secteur
         $secteur = (!is_a($object, 'BContract_contrat')) ? $object->getData('ef_type') : $object->getData('secteur');
 
@@ -478,12 +501,19 @@ class ValidComm extends BimpObject
         }
 
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Get remise');
+        }
         $infos_remises = (!is_a($object, 'BContract_contrat')) ? $object->getRemisesInfos() : [];
 
         // Percent prix de vente %
         $percent_pv = (float) $infos_remises['remise_total_percent'];
 
         // Remises arrières : 
+        
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Get remise arriére');
+        }
         if (!is_a($object, 'BContract_contrat')) {
             $lines = $object->getLines('not_text');
             $remises_arrieres = $remise_service = $service_total_amount_ht =  $service_total_ht_without_remises = 0;
@@ -511,6 +541,9 @@ class ValidComm extends BimpObject
             }
 
         // Impayé
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Impayée');
+        }
         if (method_exists($object, 'getClientFacture')) {
             $client = $object->getClientFacture();
         } else
@@ -531,6 +564,9 @@ class ValidComm extends BimpObject
             $rtp = 0;
         
         
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Services');
+        }
         // Service
         if($service_total_ht_without_remises != 0)
             $percent_service = $service_total_amount_ht / $service_total_ht_without_remises * 100;

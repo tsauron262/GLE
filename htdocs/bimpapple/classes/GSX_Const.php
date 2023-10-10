@@ -92,6 +92,10 @@ class GSX_Const
         897316 => array(
             'test' => array('AppleCare-Partner-0001442050.Test.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Test.apple.com.key'),
             'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Prod.apple.com.key')
+        ),
+        608111 => array(
+             'test' => array('AppleCare-Partner-0000608111.Test.apple.com.fullchain.pem', 'tresor', 'AppleCare-Partner-0000608111.Test.apple.com.key'),
+             'prod' => array('AppleCare-Partner-0000608111.Prod.apple.com.fullchain.pem', 'tresor', 'AppleCare-Partner-0000608111.Prod.apple.com.key')
         )
     );
     public static $test_ids = array(
@@ -106,7 +110,7 @@ class GSX_Const
         'ship_to'     => '1442050'
     );
     public static $default_ids = array(
-        'apple_id'    => 't.sauron@ldlc.com',
+        'apple_id'    => 'admin.gle@bimp.fr',
 //        'apple_id'    => 't.sauron@ldlc.com',
         'apple_pword' => '@LdLc.com#69760',
         'sold_to'     => '1442050',
@@ -289,7 +293,7 @@ class GSX_Const
         if (is_null(self::$centres_array)) {
             self::$centres_array = array();
 
-            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
             global $tabCentre;
             foreach ($tabCentre as $code => $centre) {

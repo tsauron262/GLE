@@ -7,11 +7,11 @@ include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 //    
 //}
 
-if(!defined('PATH_TMP'))
+if (!defined('PATH_TMP'))
     define('PATH_TMP', DOL_DATA_ROOT);
 
-
-class synopsisHook {//FA1506-0369
+class synopsisHook
+{//FA1506-0369
 
     static $timeDeb = 0;
     static $timeDebRel = 0;
@@ -19,21 +19,25 @@ class synopsisHook {//FA1506-0369
     private static $MAX_REQ_LOG = 1200;
     private static $reload = false;
 
-    function __construct() {
+    function __construct()
+    {
         global $conf, $db, $dbBIMPERP, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
 
         static::initDeb();
-        
-        require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/centre.inc.php");
+
+        if (!defined('BIMP_LIB')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        }
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
         //Pour les logiciel externe.
         $dbBIMPERP = $db;
 
         if (defined('MAX_TIME_LOG'))
             self::$MAX_TIME_LOG = MAX_TIME_LOG;
-        
 
-        
+
+
 
 
         if (is_object($db) && isset($conf->global->MAIN_MODULE_SYNOPSISTOOLS)) {
@@ -41,11 +45,9 @@ class synopsisHook {//FA1506-0369
             $fileInfo = new fileInfo($db);
             $fileInfo->showNewFile();
         }
-        
+
         global $tabProdPrixModifToujours;
         $tabProdPrixModifToujours = array("REMISECRT");
-
-
 
         date_default_timezone_set('Europe/Paris');
 
@@ -67,7 +69,6 @@ class synopsisHook {//FA1506-0369
         ini_set('log_errors', '1');
         ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, $conf->global->SYSLOG_FILE));
 
-
         setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
 
         if (defined("TAB_IP_INTERNE") && in_array($_SERVER['REMOTE_ADDR'], explode(",", str_replace(" ", "", TAB_IP_INTERNE))))
@@ -81,7 +82,7 @@ class synopsisHook {//FA1506-0369
 
         $conf->global->MAIN_APPLICATION_TITLE = "BIMP-ERP";
         $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
-        $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
+        //$conf->global->MAIN_MODULE_MULTICOMPANY = "1";
         $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 
         $conf->global->MAIN_MODULES_FOR_EXTERNAL .= ',synopsisficheinter,synopsisdemandeinterv';
@@ -90,7 +91,6 @@ class synopsisHook {//FA1506-0369
 
         define('PREF_BDD_ORIG', 'llx_');
 
-
         $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER = false;
 
 //$conf->global->PROJET_ADDON = "mod_projet_tourmaline";
@@ -98,14 +98,11 @@ class synopsisHook {//FA1506-0369
 
         $conf->global->devMailTo = 'tommy@drsi.fr';
 
-
 //Key chrono
         define('CHRONO_KEY_SITE_DUREE_DEP', 1029);
 
-
         $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat", "Logiciel");
         $tabTypeLigneSimple = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
-
 
         $tabSelectNatureIntrv = array("Choix", "Installation", "Dépannage", "Télémaintenance", "Formation", "Audit", "Suivi");
 
@@ -129,24 +126,24 @@ class synopsisHook {//FA1506-0369
         if (defined('PORT_INTERNE') && $_SERVER["SERVER_PORT"] != PORT_INTERNE)
             $conf->global->MAIN_SECURITY_ENABLECAPTCHA = 1;
     }
-    
-    public static function initDeb(){
-        if(self::$timeDeb == 0){
+
+    public static function initDeb()
+    {
+        if (self::$timeDeb == 0) {
             self::$timeDeb = microtime(true);
             self::$timeDebRel = microtime(true);
         }
     }
-    
 
-    public static function reloadPage() {
+    public static function reloadPage()
+    {
         ob_start();
         self::$reload = true;
     }
 
-    function initRightsSyn() {
+    function initRightsSyn()
+    {
         global $conf, $user, $db;
-
-
 
         //bimp pas de logo pour sav
         if ($user->id && isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
@@ -182,92 +179,92 @@ class synopsisHook {//FA1506-0369
         }
     }
 
-    static function getMenu() {
+    static function getMenu()
+    {
         if (self::$reload)
             header("Location: " . $_SERVER['PHP_SELF'] . "?" . (isset($_REQUEST['id']) ? "id=" . $_REQUEST['id'] : ""));
     }
-    
-    static function getUserIp(){
-        if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])){
+
+    static function getUserIp()
+    {
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $tmp = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
             $ipUser = $tmp[0];
         }
         $tmp = explode(".", $ipUser);
-        if(count($tmp) < 4)
+        if (count($tmp) < 4)
             $ipUser = $_SERVER['REMOTE_ADDR'];
         $tmp = explode(".", $ipUser);
-        if(count($tmp) < 4)
+        if (count($tmp) < 4)
             $ipUser = $_SERVER['HTTP_X_REAL_IP'];
         return $ipUser;
     }
 
-    static function getHeader() {
+    static function getHeader()
+    {
         global $db, $langs, $isMobile, $conf, $user;
         static::initDeb();
-        
-        
+
         //version avec bimpcore
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-        
+
         $admin = false;
         $ipAdmin = BimpCore::getConf('IP_ADMIN', '');
-        if($ipAdmin && !defined('IP_ADMIN2')){
+        if ($ipAdmin && !defined('IP_ADMIN2')) {
             define('IP_ADMIN2', json_decode($ipAdmin));
         }
         $CLOSE_DATE = BimpCore::getConf('CLOSE_DATE', '');
-        if($CLOSE_DATE && !defined('CLOSE_DATE')){
+        if ($CLOSE_DATE && !defined('CLOSE_DATE')) {
             define('CLOSE_DATE', $CLOSE_DATE);
         }
-        
+
         $admin = false;
         $ipUser = static::getUserIp();
-        if(defined('IP_ADMIN')){
-            if(is_array(IP_ADMIN)){
-                foreach(IP_ADMIN as $ip){
-                    if($ip == $ipUser)
-                        $admin =true;
+        if (defined('IP_ADMIN')) {
+            if (is_array(IP_ADMIN)) {
+                foreach (IP_ADMIN as $ip) {
+                    if ($ip == $ipUser)
+                        $admin = true;
                 }
-            }
-            elseif(IP_ADMIN == $ipUser)
-                $admin = true;
-        }        
-        if(defined('IP_ADMIN2')){
-            if(is_array(IP_ADMIN2)){
-                foreach(IP_ADMIN2 as $ip){
-                    if($ip == $ipUser)
-                        $admin =true;
-                }
-            }
-            elseif(IP_ADMIN2 == $ipUser)
+            } elseif (IP_ADMIN == $ipUser)
                 $admin = true;
         }
-        
-        
+        if (defined('IP_ADMIN2')) {
+            if (is_array(IP_ADMIN2)) {
+                foreach (IP_ADMIN2 as $ip) {
+                    if ($ip == $ipUser)
+                        $admin = true;
+                }
+            } elseif (IP_ADMIN2 == $ipUser)
+                $admin = true;
+        }
+
+
         $ipAdmin = BimpCore::getConf('IP_ADMIN', null);
-        if($ipAdmin){
+        if ($ipAdmin) {
             $tabIpAdmion = explode(',', $ipAdmin);
-            foreach($tabIpAdmion as $ip){
-                if($ip == $ipUser)
-                    $admin =true;
+            foreach ($tabIpAdmion as $ip) {
+                if ($ip == $ipUser)
+                    $admin = true;
             }
         }
 
         if (defined("CLOSE_DATE") && CLOSE_DATE != '' && !stripos($_SERVER['REQUEST_URI'], 'close.php') && !$admin) {
-            if(is_object($langs))
+            if (is_object($langs))
                 $langs->load("main");
             require (DOL_DOCUMENT_ROOT . "/synopsistools/public/close.php");
             die;
         }
-             
+
 //        if (isset($conf->file->main_force_https) && $conf->file->main_force_https != "" && stripos($_SERVER["SCRIPT_URI"], str_replace("https://", "", $conf->file->main_force_https)) === false) {
         if (defined("REDIRECT_DOMAINE") && REDIRECT_DOMAINE != "" && stripos($_SERVER["HTTP_HOST"], str_replace(array("https://", "http://"), "", REDIRECT_DOMAINE)) === false) {
 
             header('HTTP/1.1 301 Moved Permanently');
-            header('Location: '.REDIRECT_DOMAINE . "/" . $_SERVER["REQUEST_URI"]);
+            header('Location: ' . REDIRECT_DOMAINE . "/" . $_SERVER["REQUEST_URI"]);
         }
 
-        if (defined('URL_REDIRECT') && !$admin){
-                header("Location:" . URL_REDIRECT);
+        if (defined('URL_REDIRECT') && !$admin) {
+            header("Location:" . URL_REDIRECT);
         }
 
         $useragent = $_SERVER['HTTP_USER_AGENT'];
@@ -332,22 +329,23 @@ class synopsisHook {//FA1506-0369
 
         return $return;
     }
-    
-    static function getTime($relatif = false){
-        if($relatif){
+
+    static function getTime($relatif = false)
+    {
+        if ($relatif) {
             $return = (microtime(true) - self::$timeDebRel);
             self::$timeDebRel = microtime(true);
-        }
-        else
+        } else
             $return = (microtime(true) - self::$timeDeb);
         return $return;
     }
 
-    static function footer() {
+    static function footer()
+    {
         global $conf, $db, $logLongTime, $user;
 
         $return = "";
-        
+
         $return .= '<script>var DEFAULT_ENTREPOT = "' . $user->array_options['options_defaultentrepot'] . '";</script>';
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
@@ -362,8 +360,8 @@ class synopsisHook {//FA1506-0369
 
         $nbReq = $db->countReq;
         $nbReq2 = $db->countReq2;
-        if(isset($db->timeReconnect))
-            $tmRecon = " reconn (".number_format($db->timeReconnect, 2).") s";
+        if (isset($db->timeReconnect))
+            $tmRecon = " reconn (" . number_format($db->timeReconnect, 2) . ") s";
         else
             $tmRecon = "";
 
@@ -374,8 +372,8 @@ class synopsisHook {//FA1506-0369
             dol_syslog("Pages lente " . $time . " s", 4, 0, "_time", '', false);
         elseif ($nbReq > self::$MAX_REQ_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages trop de req " . $nbReq . " ", 4, 0, "_time", '', false);
-        $idErp = (defined('ID_ERP')? ' ('.ID_ERP.')': '');
-        $return .= "<span class='timePage'>" . number_format($time, 4) . " s".$idErp." | " . $nbReq . " requetes + ". $nbReq2. $tmRecon. "</span>";
+        $idErp = (defined('ID_ERP') ? ' (' . ID_ERP . ')' : '');
+        $return .= "<span class='timePage'>" . number_format($time, 4) . " s" . $idErp . " | " . $nbReq . " requetes + " . $nbReq2 . $tmRecon . "</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
             $return .= "<br/>";
             $return .= "<br/>";
@@ -387,25 +385,28 @@ class synopsisHook {//FA1506-0369
         return $return;
     }
 
-    public static function getObj($type) {
+    public static function getObj($type)
+    {
         $tabResult = self::getObjAndMenu($type);
         return $tabResult[0];
     }
-
 }
 
-class consigneCommande {
+class consigneCommande
+{
 
     var $note = '';
     var $rowid = 0;
     var $fk_group = 0;
     var $fk_comm = 0;
 
-    public function consigneCommande($db) {
+    public function consigneCommande($db)
+    {
         $this->db = $db;
     }
 
-    public function fetch($element_type, $element_id) {
+    public function fetch($element_type, $element_id)
+    {
         global $conf;
         $db = $this->db;
         if ($element_id > 0) {
@@ -435,7 +436,8 @@ class consigneCommande {
         }
     }
 
-    public function init() {
+    public function init()
+    {
         $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
         if ($this->fk_group)
             $sql .= " fk_group = " . $this->fk_group;
@@ -452,7 +454,8 @@ class consigneCommande {
         }
     }
 
-    public function setNote($note) {
+    public function setNote($note)
+    {
         $this->note = $note;
         if ($this->rowid == 0) {
             if ($this->fk_group) {
@@ -469,12 +472,13 @@ class consigneCommande {
         $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_commande_consigne SET note ='" . $this->note . "' WHERE rowid = " . $this->rowid;
         $result = $this->db->query($sql);
     }
-
 }
 
-class Synopsis_Commande extends Commande {
+class Synopsis_Commande extends Commande
+{
 
-    function fetch($id, $ref = '', $ref_ext = '', $ref_int = '') {
+    function fetch($id, $ref = '', $ref_ext = '', $ref_int = '')
+    {
         $return = parent::fetch($id, $ref, $ref_ext, $ref_int);
         if (isset($this->id) && $this->id > 0) {
             $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $this->id);
@@ -492,7 +496,8 @@ class Synopsis_Commande extends Commande {
         }
     }
 
-    function fetch_lines($only_product = 0, $loadalsotranslation = 0) {
+    function fetch_lines($only_product = 0, $loadalsotranslation = 0)
+    {
 //        parent::fetch_lines($only_product);
 ////        $this->lines=array();
 //
@@ -506,7 +511,8 @@ class Synopsis_Commande extends Commande {
     }
 
 //La commande est elle membre d'un groupe
-    public function listIdGroupMember() {
+    public function listIdGroupMember()
+    {
 //        return false;
         $requete = "SELECT command_refid "
                 . "FROM `" . MAIN_DB_PREFIX . "Synopsis_commande_grpdet` "
@@ -525,7 +531,8 @@ class Synopsis_Commande extends Commande {
         return array($this->id);
     }
 
-    public function isGroupMember() {
+    public function isGroupMember()
+    {
 //        return false;
         $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_commande_grp.id as gid
                       FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet,
@@ -544,7 +551,8 @@ class Synopsis_Commande extends Commande {
         return false;
     }
 
-    public function listGroupMember($excludeMyself = true) {
+    public function listGroupMember($excludeMyself = true)
+    {
         $ret = $this->isGroupMember();
         if ($ret) {
             $this->OrderGroup = $ret;
@@ -560,7 +568,8 @@ class Synopsis_Commande extends Commande {
         return array();
     }
 
-    function fetch_commande_lignes($arrId, $only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
+    function fetch_commande_lignes($arrId, $only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0)
+    {
 
         $sql1 = 'SELECT l.rowid FROM ' . MAIN_DB_PREFIX . 'commandedet as l';
         $sql2 = ' WHERE l.fk_commande IN (' . implode(",", $arrId) . ")";
@@ -597,7 +606,8 @@ class Synopsis_Commande extends Commande {
         }
     }
 
-    function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
+    function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0)
+    {
         $grp = $this->listIdGroupMember();
         return $this->fetch_commande_lignes($grp, $only_product, $only_service, $only_contrat, $only_dep, $srv_dep);
 //        $lines = array();
@@ -619,7 +629,8 @@ class Synopsis_Commande extends Commande {
 ////        return $this->fetch_lines($only_product);
     }
 
-    function getNomUrl($withpicto = 0, $option = '', $max = 0, $short = 0, $notooltip = 0, $save_lastsearch_value = -1, $addlinktonotes = 0, $target = '') {
+    function getNomUrl($withpicto = 0, $option = '', $max = 0, $short = 0, $notooltip = 0, $save_lastsearch_value = -1, $addlinktonotes = 0, $target = '')
+    {
         global $conf, $langs;
 
         $result = '';
@@ -646,12 +657,13 @@ class Synopsis_Commande extends Commande {
         $result .= $linkstart . $this->ref . $linkend . $connect;
         return $result;
     }
-
 }
 
-class Synopsis_OrderLine extends OrderLine {
+class Synopsis_OrderLine extends OrderLine
+{
 
-    function fetch($id) {
+    function fetch($id)
+    {
         $return = parent::fetch($id);
         if ($id > 0 && $this->qty > 0) {
             $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commandedet WHERE rowid = " . $id);
@@ -670,12 +682,13 @@ class Synopsis_OrderLine extends OrderLine {
         }
         return $return;
     }
-
 }
 
-class dashboard {
+class dashboard
+{
 
-    static function getDashboard() {
+    static function getDashboard()
+    {
 //        echo <<<EOF
 //        <script type="text/javascript" src="/synopsistools/dashboard2/js/lib/jquery.dashboard.min.js"></script>
 //    <script type="text/javascript" src="/synopsistools/dashboard2/js/lib/themeroller.js"></script>
@@ -825,12 +838,6 @@ class dashboard {
         $return .= '</div>';
         return $return;
     }
-
 }
-
-
-
-
-
 
 ?>

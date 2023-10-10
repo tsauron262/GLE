@@ -56,7 +56,7 @@ class modSynopsisFicheinter extends DolibarrModules {
      *   \brief      Constructeur. Definit les noms, constantes et boites
      *   \param      DB      handler d'acces base
      */
-    function modSynopsisFicheinter($DB) {
+    function __construct($DB) {
         $this->db = $DB;
         $this->numero = 8745;
  

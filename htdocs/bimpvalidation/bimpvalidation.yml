@@ -1,0 +1,9 @@
+
+categories: 
+    defaults: 
+        label: Valeurs par défaut
+    emails: 
+        label: E-mails
+        
+params: 
+    

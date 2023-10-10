@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bic_user` ADD `main_public_entity` VARCHAR(10) NOT NULL DEFAULT '';

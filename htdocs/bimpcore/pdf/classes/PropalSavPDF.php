@@ -9,6 +9,7 @@ class PropalSavPDF extends PropalPDF
 {
 
     public static $type = 'sav';
+    public static $use_cgv = false;
     public $sav = null;
 
     public function init($object)
@@ -30,28 +31,46 @@ class PropalSavPDF extends PropalPDF
         parent::initData();
         if (isset($this->object) && is_a($this->object, 'Propal')) {
             $this->bimpCommObject = BimpObject::getInstance('bimpsupport', 'BS_SavPropal', (int) $this->object->id);
-                
-            $secteur = $this->bimpCommObject->getData('ef_type');
-            
-            // SAV
-            if($secteur == 'S') {
 
+            $secteur = $this->bimpCommObject->getData('ef_type');
+
+            // SAV
+            if ($secteur == 'S') {
                 $code_centre = $this->sav->getData('code_centre');
 
-                if($code_centre == '') {
+                if ($code_centre == '') {
                     $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
                 } else {
 
                     $centres = BimpCache::getCentres();
-                    if(isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+                    if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
                         $centre = $centres[$code_centre];
-                        $this->fromCompany->phone   = $centre['tel'];
-                        $this->fromCompany->email   = $centre['mail'];
+                        $this->fromCompany->phone = $centre['tel'];
+                        $this->fromCompany->email = $centre['mail'];
+                    }
+
+                    // Chargement CGV : 
+                    
+                    $cgv_file = '';
+                    switch (BimpCore::getEntity()) {
+                        case 'bimp':
+                            $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+                            break;
+
+                        case 'actimac':
+                            $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_actimac.pdf';
+                            break;
+                    }
+
+                    if ($cgv_file && file_exists($cgv_file)) {
+                        $this->pdf->extra_concat_files[] = $cgv_file;
+                    } else {
+                        // CGV par défaut : 
+                        static::$use_cgv = true;
                     }
                 }
             }
         }
-
     }
 
     protected function initHeader()
@@ -113,7 +132,9 @@ class PropalSavPDF extends PropalPDF
         $html .= 'Les pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d\'un état équivalent à neuf ';
         $html .= 'en termes de performance et de fiabilité. ';
         $html .= '<br/>';
-        $html .= 'Pour du matériel couvert par Apple, la garantie initiale s\'applique. Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d\'oeuvre. Les pannes logicielles ne sont pas couvertes par la garantie du fabricant. Une garantie de 30 jours est appliquée pour les réparations logicielles.';
+        $html .= 'Pour du matériel couvert par Apple, la garantie initiale s\'applique. Pour du matériel non couvert par Apple, ';
+        $html .= 'la garantie est de 3 mois pour les pièces et la main d\'oeuvre. Les pannes logicielles ne sont pas couvertes par ';
+        $html .= 'la garantie du fabricant. Une garantie de 30 jours est appliquée pour les réparations logicielles.';
         $html .= '<br/>';
         $html .= 'Les informations personnelles requises suivantes (nom, adresse, téléphone et adresse mail) sont nécessaires pour poursuivre la ';
         $html .= 'demande de réparation.';

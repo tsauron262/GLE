@@ -116,6 +116,18 @@ sections:
                     panel: 1
                     name: inter
                     object: contrat
+          - id: divers
+            title: Divers (admin)
+            show: 
+                  callback:
+                      method: iAmAdmin
+                      object: contrat
+            struct: 
+                    type: custom
+                    custom: 
+                        callback: 
+                            method: renderBimpOjectDivers
+                            object: contrat
     - type: custom
       custom: 
           callback: 

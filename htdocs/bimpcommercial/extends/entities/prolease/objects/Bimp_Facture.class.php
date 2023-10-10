@@ -18,7 +18,11 @@ class Bimp_Facture_ExtEntity extends Bimp_Facture
     }
     
     
-    public function getProdWithFactureType(){
+    public function getProdWithFactureType($line = null){
+//        print_r($line);
+        if(stripos($line->desc, 'AppleCare') != false && $line->tva_tx == 0){
+            return 15;
+        }
         switch($this->getData('type_vente')){
             case 1:
                 return 6;

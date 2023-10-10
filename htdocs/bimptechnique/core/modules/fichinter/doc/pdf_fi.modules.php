@@ -38,7 +38,7 @@ class pdf_fi
         $this->marge_basse = 0;
         $this->option_logo = 1;
         $this->emetteur = $mysoc;
-        if (!$this->emetteur->pays_code)
+        if (!isset($this->emetteur) || !$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);
     }
 
@@ -448,7 +448,7 @@ class pdf_fi
                     if ($child->getData('type') == 3 || $child->getData('type') == 4) {
                         $pdf->Cell($W, 8, "Total HT en €", 1, null, 'C', true);
                     } else {
-                        if($child->getData('forfait') == 1 || $child->getData('type') == 0)
+                        if ($child->getData('forfait') == 1 || $child->getData('type') == 0)
                             $pdf->Cell($W, 8, "", 1, null, 'C', true);
                         else
                             $pdf->Cell($W, 8, "Service", 1, null, 'C', true);
@@ -506,18 +506,17 @@ class pdf_fi
                     } elseif ($child->getData('type') == 3) {
                         $pdf->Cell($W, 6, "Forfait", 1, 0, 'C', 1);
                     } else {
-                        if($child->getData('forfait') == 1) {
+                        if ($child->getData('forfait') == 1) {
                             $pdf->Cell($W, 6, "Forfait", 1, 0, 'C', 1);
                         } else {
                             $pdf->Cell($W, 6, $child->displayDuree(), 1, 0, 'C', 1);
                         }
-                        
                     }
                     $ref_service = '';
                     $have_pdf_ref = false;
                     if ($child->getData('id_line_commande')) {
                         $ref_commande = '';
-                        
+
                         $have_pdf_ref = true;
                         $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $child->getData('id_line_commande'));
                         if (BimpObject::objectLoaded($line)) {
@@ -578,25 +577,23 @@ class pdf_fi
                             $pareteze = "";
                             $price = "Sous contrat";
                         }
-                        
-                        $arrayAutre = Array(12,13,14);
-                        
-                        if(in_array($child->getData('type'), $arrayAutre)) {
+
+                        $arrayAutre = Array(12, 13, 14);
+
+                        if (in_array($child->getData('type'), $arrayAutre)) {
                             $servicePlus = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product");
                             $arrayCode = $child->getArrayServiceForBilling();
-                            if($servicePlus->find(array('ref' => $arrayCode[$child->getData('type')]))) {
+                            if ($servicePlus->find(array('ref' => $arrayCode[$child->getData('type')]))) {
                                 $pareteze = "(" . $servicePlus->getData('price') . "€HT/H)";
                                 $price = ($servicePlus->getData('price') * $qty) . "€";
                             }
                         }
-                        
-                        if($child->getData('forfait') == 1 || $child->getData('type') == 0)
+
+                        if ($child->getData('forfait') == 1 || $child->getData('type') == 0)
                             $pdf->Cell($W, 6, "", 1, 0, 'C', 1);
                         else {
                             $pdf->Cell($W, 6, $price . " $pareteze", 1, 0, 'C', 1);
                         }
-                            
-
                     }
 
                     $excludeDescriptionService = Array(4, 5, 1, 2, 3);
@@ -612,8 +609,8 @@ class pdf_fi
                         }
                     }
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
-                    if($child->getData('forfait') == 1) {
-                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4,'Prestation au forfait', 0, 'L');
+                    if ($child->getData('forfait') == 1) {
+                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, 'Prestation au forfait', 0, 'L');
                     } else {
                         if (BimpObject::objectLoaded($service)) {
                             $pdf->writeHTML($service->getData('description'));
@@ -622,17 +619,20 @@ class pdf_fi
                                 $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, $type, 0, 'L');
                             }
                         }
-
-                        
                     }
-                    
+
                     if ($child->getData('description') != "<br>" && $child->getData('description') != "") {
-                            $pdf->SetFont(''/* 'Arial' */, 'B', 9);
-                            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Notes de " . $tech->getName(), 0, 'L');
-                            $pdf->SetFont(''/* 'Arial' */, '', 9);
-                            $pdf->setX(16);
-                            $pdf->writeHTML($child->getData('description'));
-                        }
+                        $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Notes de " . $tech->getName(), 0, 'L');
+                        $pdf->SetFont(''/* 'Arial' */, '', 9);
+                        $pdf->setX(16);
+
+                        $desc = $child->getData('description');
+                        $desc = preg_replace("/(\n)?[ \s]*<[ \/]*br[ \/]*>[ \s]*(\n)?/", '<br/>', $desc);
+                        $desc = str_replace("\n", '<br/>', $desc);
+
+                        $pdf->writeHTML($desc);
+                    }
                     $pdf->Ln();
                 }
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);

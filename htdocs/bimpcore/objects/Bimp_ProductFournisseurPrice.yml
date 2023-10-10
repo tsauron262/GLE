@@ -65,7 +65,10 @@ fields:
         label: Taux de TVA
         type: percent
         default_value: 
-            callback: getDefaultTva
+            callback: 
+                method: cacheServeurFunction
+                params:
+                    - getDefaultTva
         decimals: 4
         min: 0
         max: 100
@@ -94,7 +97,7 @@ fields:
         
     stockFourn:
         label: Stock chez le fournisseur
-        type: int
+        type: float
     
 forms: 
     default: 

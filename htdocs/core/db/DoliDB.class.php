@@ -280,7 +280,7 @@ abstract class DoliDB implements Database
                     }
                     return 0;
                 }
-            } elseif($this->transaction_opened > 1 || $this->noTransaction) {
+            } elseif($this->transaction_opened > 1) {
                 $this->transaction_opened--;
                 return 1;
             } else {
@@ -560,8 +560,8 @@ abstract class DoliDB implements Database
         $this->transaction_opened = 0;
     }
     
-    static function stopAll(){
-        $errors = array('Problème réseau, merci de relancer l\'opération');
+    static function stopAll($msg = ''){
+        $errors = array('Problème réseau, merci de relancer l\'opération ('.$msg.')');
         if (BimpTools::isSubmit('ajax')) {
             echo json_encode(array(
                 'errors'           => $errors,

@@ -195,7 +195,7 @@ class DocusignAPI extends BimpAPI
             'url_end'    => '/restapi/v2.1/accounts/' . $id_account . '/users/'
                 ), $errors);
 
-        if (!is_array($data['users'][0])) {
+        if (!isset($data['users'][0]) || !is_array($data['users'][0])) {
             $errors[] = 'Utilisateur inconnu pour l\'adresse email : "' . $user->getData('email') . '"';
             return '';
         }

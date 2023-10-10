@@ -11,7 +11,6 @@ class Bimp_CommandeFourn extends BimpCommAchat
     const DELIV_CUSTOM = 2;
     const DELIV_DIRECT = 3;
 
-    public $idLdlc = 230880;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';
@@ -105,7 +104,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         $status = $this->getData('fk_statut');
         if (in_array($action, array('validate', 'approve', 'approve2', 'refuse', 'modify', 'sendEmail', 'reopen', 'make_order', 'receive', 'receive_products', 'classifyBilled', 'forceStatus'))) {
             if (!$this->isLoaded()) {
-                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                $errors[] = '(111) ID ' . $this->getLabel('of_the') . ' absent';
                 return 0;
             }
             if (is_null($status)) {
@@ -292,7 +291,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
     public function canCreate()
     {
         global $user;
-        return (int) ((int) $user->rights->fournisseur->commande->creer /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */);
+        return (int) $user->rights->fournisseur->commande->creer;
     }
 
     public function canEdit()
@@ -805,7 +804,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
     public function getFactureReceptionsArray($id_facture = 0)
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && BimpCore::isModuleActive('bimplogistique')){
             BimpObject::loadClass('bimplogistique', 'BL_CommandeFournReception');
 
             $receptions = $this->getChildrenObjects('receptions', array(
@@ -888,16 +887,15 @@ class Bimp_CommandeFourn extends BimpCommAchat
     public function getAdresseLivraison(&$warnings = array())
     {
         $result = array('name' => '', 'adress' => '', 'adress2' => '', 'adress3' => '', 'zip' => '', 'town' => '', 'contact' => '', 'country' => '');
-
+        
         switch ($this->getData('delivery_type')) {
             case Bimp_CommandeFourn::DELIV_ENTREPOT:
             default:
                 $entrepot = $this->getChildObject('entrepot');
                 if (BimpObject::objectLoaded($entrepot)) {
                     if ($entrepot->address) {
-                        $name = 'AGENCE BIMP';
-                        $result['name'] = $name;
-                        $result['contact'] = $name;
+                        $result['name'] = $this->agence_name;
+                        $result['contact'] = $this->agence_name;
                         $tabAdd = explode("<br/>", $entrepot->address);
                         $result['adress'] = $tabAdd[0];
                         if (isset($tabAdd[1]))
@@ -1294,48 +1292,51 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
         $lines = $this->getLines('not_text');
 
-        $receptions = $this->getChildrenList('receptions', array(
-            'status'     => BL_CommandeFournReception::BLCFR_RECEPTIONNEE,
-            'id_facture' => array(
-                'operator' => '>',
-                'value'    => 0
-            )
-        ));
+        
+        if(BimpCore::isModuleActive('bimplogistique')){
+            $receptions = $this->getChildrenList('receptions', array(
+                'status'     => BL_CommandeFournReception::BLCFR_RECEPTIONNEE,
+                'id_facture' => array(
+                    'operator' => '>',
+                    'value'    => 0
+                )
+            ));
 
-        if (count($lines)) {
-            $has_billed = 0;
-            $all_billed = 1;
+            if (count($lines)) {
+                $has_billed = 0;
+                $all_billed = 1;
 
-            foreach ($lines as $line) {
-                $line_qty = (float) $line->getFullQty();
-                $billed_qty = 0;
+                foreach ($lines as $line) {
+                    $line_qty = (float) $line->getFullQty();
+                    $billed_qty = 0;
 
-                foreach ($receptions as $id_reception) {
-                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
-                    if (BimpObject::objectLoaded($reception)) {
-                        $fac = $reception->getChildObject('facture_fourn');
-                        if (BimpObject::objectLoaded($fac)) {
-                            $reception_data = $line->getReceptionData((int) $id_reception);
-                            $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
-                            $has_billed = 1;
+                    foreach ($receptions as $id_reception) {
+                        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+                        if (BimpObject::objectLoaded($reception)) {
+                            $fac = $reception->getChildObject('facture_fourn');
+                            if (BimpObject::objectLoaded($fac)) {
+                                $reception_data = $line->getReceptionData((int) $id_reception);
+                                $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
+                                $has_billed = 1;
+                            }
                         }
+                    }
+
+                    if (abs($line_qty) > abs($billed_qty)) {
+                        $all_billed = 0;
                     }
                 }
 
-                if (abs($line_qty) > abs($billed_qty)) {
-                    $all_billed = 0;
+                if ($all_billed) {
+                    $invoice_status = 2;
+                } elseif ($has_billed) {
+                    $invoice_status = 1;
+                } else {
+                    $invoice_status = 0;
                 }
-            }
-
-            if ($all_billed) {
-                $invoice_status = 2;
-            } elseif ($has_billed) {
-                $invoice_status = 1;
             } else {
                 $invoice_status = 0;
             }
-        } else {
-            $invoice_status = 0;
         }
 
         if ($invoice_status !== (int) $this->getInitData('invoice_status')) {
@@ -2223,6 +2224,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         $new_data['attente_info'] = 0;
 
         $new_data['date_creation'] = date('Y-m-d H:i:s');
+        $new_data['date_commande'] = null;
         $new_data['date_valid'] = null;
         $new_data['date_approve'] = null;
         $new_data['date_approve2'] = null;

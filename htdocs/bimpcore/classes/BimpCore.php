@@ -69,9 +69,7 @@ class BimpCore
 
             global $noBootstrap;
 
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebugTime('Début affichage page');
-            }
+            BimpDebug::addDebugTime('Début affichage page');
 
             // Commenté car pose problème
 //            if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
@@ -135,7 +133,7 @@ class BimpCore
     {
         global $user, $conf;
         $vars = array(
-            'dol_url_root'    => '\'' . DOL_URL_ROOT . '\'',
+            'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : "'/'",
             'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
             'bimp_context'    => '\'' . self::getContext() . '\'',
             'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
@@ -148,11 +146,13 @@ class BimpCore
             $config_notification = $notification->getList(array('active' => 1));
 
             foreach ($config_notification as $cn) {
-                $notifs .= $cn['id'] . ": {";
-                $notifs .= "nom: '" . $cn['nom'] . "', ";
-                $notifs .= "id_notification: '" . $cn['id'] . "', ";
-                $notifs .= "module: '" . $cn['module'] . "', ";
-                $notifs .= "obj: null},";
+                if (BimpCore::isModuleActive($cn['module'])) {
+                    $notifs .= $cn['id'] . ": {";
+                    $notifs .= "nom: '" . $cn['nom'] . "', ";
+                    $notifs .= "id_notification: '" . $cn['id'] . "', ";
+                    $notifs .= "module: '" . $cn['module'] . "', ";
+                    $notifs .= "obj: null},";
+                }
             }
         }
         $notifs .= '}';
@@ -583,60 +583,66 @@ class BimpCore
         $cache = self::getConfCache();
 
         if (isset($cache['bimpcore'])) {
+            $modules = array('bimpcore');
+
             foreach ($cache['bimpcore'] as $name => $value) {
                 if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
-                    $module = $matches[1];
+                    if (!in_array($matches[1], $modules)) {
+                        $modules[] = $matches[1];
+                    }
+                }
+            }
 
-                    if (defined('BIMP_EXTENDS_VERSION')) {
-                        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql';
-                        if (file_exists($dir) && is_dir($dir)) {
-                            $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, 0);
-                            $files = scandir($dir);
+            foreach ($modules as $module) {
+                if (defined('BIMP_EXTENDS_VERSION')) {
+                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql';
+                    if (file_exists($dir) && is_dir($dir)) {
+                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, 0);
+                        $files = scandir($dir);
 
-                            foreach ($files as $f) {
-                                if (in_array($f, array('.', '..'))) {
-                                    continue;
-                                }
+                        foreach ($files as $f) {
+                            if (in_array($f, array('.', '..'))) {
+                                continue;
+                            }
 
-                                if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
-                                    if ((float) $matches2[1] > $current_version) {
-                                        if (!isset($updates[$module])) {
-                                            $updates[$module] = array();
-                                        }
-                                        if (!isset($updates[$module]['version'])) {
-                                            $updates[$module]['version'] = array();
-                                        }
-
-                                        $updates[$module]['version'][] = (float) $matches2[1];
+                            if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
+                                if ((float) $matches2[1] > $current_version) {
+                                    if (!isset($updates[$module])) {
+                                        $updates[$module] = array();
                                     }
+                                    if (!isset($updates[$module]['version'])) {
+                                        $updates[$module]['version'] = array();
+                                    }
+
+                                    $updates[$module]['version'][] = (float) $matches2[1];
                                 }
                             }
                         }
                     }
+                }
 
-                    if (defined('BIMP_EXTENDS_ENTITY')) {
-                        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql';
-                        if (file_exists($dir) && is_dir($dir)) {
+                if (defined('BIMP_EXTENDS_ENTITY')) {
+                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql';
+                    if (file_exists($dir) && is_dir($dir)) {
 
-                            $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
-                            $files = scandir($dir);
+                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
+                        $files = scandir($dir);
 
-                            foreach ($files as $f) {
-                                if (in_array($f, array('.', '..'))) {
-                                    continue;
-                                }
+                        foreach ($files as $f) {
+                            if (in_array($f, array('.', '..'))) {
+                                continue;
+                            }
 
-                                if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
-                                    if ((float) $matches2[1] > $current_version) {
-                                        if (!isset($updates[$module])) {
-                                            $updates[$module] = array();
-                                        }
-                                        if (!isset($updates[$module]['entity'])) {
-                                            $updates[$module]['entity'] = array();
-                                        }
-
-                                        $updates[$module]['entity'][] = (float) $matches2[1];
+                            if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
+                                if ((float) $matches2[1] > $current_version) {
+                                    if (!isset($updates[$module])) {
+                                        $updates[$module] = array();
                                     }
+                                    if (!isset($updates[$module]['entity'])) {
+                                        $updates[$module]['entity'] = array();
+                                    }
+
+                                    $updates[$module]['entity'][] = (float) $matches2[1];
                                 }
                             }
                         }
@@ -666,6 +672,7 @@ class BimpCore
 
                 if (!(string) $value) {
                     $bdb->insert('bimpcore_conf', array(
+                        'name'  => 'bimpcore_version',
                         'value' => json_encode(array(
                             'florian' => 0,
                             'tommy'   => 0,
@@ -945,8 +952,16 @@ class BimpCore
 
     public static function isEntity($entity)
     {
-        if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY == $entity) {
-            return 1;
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            if (is_array($entity)) {
+                if (in_array(BIMP_EXTENDS_ENTITY, $entity)) {
+                    return 1;
+                }
+            } else {
+                if (BIMP_EXTENDS_ENTITY == $entity) {
+                    return 1;
+                }
+            }
         }
 
         return 0;
@@ -954,11 +969,53 @@ class BimpCore
 
     public static function isVersion($version)
     {
-        if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION == $version) {
-            return 1;
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            if (is_array($version)) {
+                if (in_array(BIMP_EXTENDS_VERSION, $version)) {
+                    return 1;
+                }
+            } else {
+                if (BIMP_EXTENDS_VERSION == $version) {
+                    return 1;
+                }
+            }
         }
 
         return 0;
+    }
+
+    public static function requireFileForEntity($module, $file_name, $return_only = false)
+    {
+        // Priorités: 
+        // - Fichier "Entité" 
+        // - Fichier "Version"
+        // - Fichier entité "default" 
+        // - Fichier de base
+
+        $dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
+        $final_file_path = '';
+        $entity = self::getEntity();
+        $version = self::getVersion();
+
+        if ($entity && file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
+            $final_file_path = $dir . 'extends/entities/' . $entity . '/' . $file_name;
+        } elseif ($version && file_exists($dir . 'extends/versions/' . $version . '/' . $file_name)) {
+            $final_file_path = $dir . 'extends/versions/' . $version . '/' . $file_name;
+        } elseif (file_exists($dir . 'extends/entities/default/' . $file_name)) {
+            $final_file_path = $dir . 'extends/entities/default/' . $file_name;
+        } elseif (file_exists($dir . $file_name)) {
+            $final_file_path = $dir . $file_name;
+        }
+
+        if ($final_file_path) {
+            if ($return_only) {
+                return $final_file_path;
+            }
+            require_once $final_file_path;
+            return true;
+        }
+        
+        return false;
     }
 
     // Gestion du contexte:

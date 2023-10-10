@@ -1,0 +1,50 @@
+title: Mes demandes de validation
+bootstrap: 1
+    
+objects:
+    rule:
+        instance: 
+            bimp_object: BV_Rule
+            
+    demande:
+        instance: 
+            bimp_object: BV_Demande
+            
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Mes demandes (Valideur)
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderUserDemandesList
+                          params: 
+                              - user_to_process
+        demandes:
+            label: Mes demandes (Demandeur)
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderUserDemandesList
+                          params: 
+                              - user_demandes
+        all: 
+            label: Toutes les demandes
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderUserDemandesList
+                          params: 
+                              - all
+        rules: 
+            label: Règles de validation
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: rule
+            

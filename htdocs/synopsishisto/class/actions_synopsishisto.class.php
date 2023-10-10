@@ -38,6 +38,7 @@ class ActionsSynopsisHisto
 
     function afficherMenu($context)
     {
+        return'';
         global $conf, $user, $db;
         $return = '';
         $tabElem = getTypeAndId();
@@ -290,7 +291,7 @@ class histoNavigation
                     if (class_exists($nomObj)) {
                         $obj = new $nomObj($db);
                         if (!method_exists($obj, "getNomUrl")) {
-                            dol_syslog("Pas de methode getNomUrl dans la class " . $nomObj, 3);
+                            dol_syslog("Pas de methode getNomUrl dans la classe " . $nomObj, 3);
                             $obj = false;
                         }
                     } else {
@@ -301,9 +302,9 @@ class histoNavigation
                 $tabMenu[0] = $data['tabMenu1'];
                 $tabMenu[1] = $data['tabMenu2'];
             } else
-                dol_syslog("Impossible de chargger le fichier " . DOL_DOCUMENT_ROOT . $data['path'], 3);
+                dol_syslog("Impossible de charger le fichier " . DOL_DOCUMENT_ROOT . $data['path'], 3);
         } else {
-            dol_syslog("Type inconnue : " . $type, 3);
+            dol_syslog("Type inconnu : " . $type, 3);
         }
 
 

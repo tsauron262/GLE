@@ -99,6 +99,14 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
         $propal = $this->getParentInstance();
 
+        if (!is_a($propal, 'BS_SavPropal')) {
+            BimpCore::addlog('ERREUR INSTANCE PROPAL', 4, 'sav', $this, array(
+                'TYPE instance' => get_class($propal)
+                    ), true);
+
+            $propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj'));
+        }
+
         if (!BimpObject::objectLoaded($propal)) {
             return array('ID du devis Absent');
         }
@@ -336,6 +344,18 @@ class BS_SavPropalLine extends Bimp_PropalLine
         $is_garantie = ($this->getData('linked_object_name') === 'sav_garantie');
 
         $propal = $this->getParentInstance();
+
+        if (!is_a($propal, 'BS_SavPropal')) {
+            BimpCore::addlog('ERREUR INSTANCE PROPAL', 4, 'sav', $this, array(
+                'TYPE instance'       => get_class($propal),
+                'data line'           => $this->getDataArray(true),
+                '$this->parent class' => get_class($this->parent),
+                'Classe propal en cache'     => get_class(BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj')))
+                    ), true);
+
+//            $propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj'));
+        }
+
         if (BimpObject::objectLoaded($propal)) {
             $sav = $propal->getSav();
 

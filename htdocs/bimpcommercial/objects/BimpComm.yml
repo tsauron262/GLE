@@ -97,7 +97,6 @@ fields:
     libelle: 
         label: Libellé
         dol_extra_field: 1
-#        required: 1
     ef_type: 
         label: Secteur (Canal de Vente)
         dol_extra_field: 1
@@ -216,7 +215,7 @@ fields:
         type: money    
     model_pdf: 
         label: Modèle de document par défaut
-        dol_prop: modelpdf
+        dol_prop: model_pdf
         values: 
             array: modelsPdf
         sortable: 0

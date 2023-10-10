@@ -1,7 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 global $langs;
 $langs->load('bills');
@@ -306,7 +306,8 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement', 'ef_type', 'fk_mode_reglement', 'fk_cond_reglement', 'pdf_nb_decimal', 'litige', 'expertise'
+                    'prelevement', 'ef_type', 'fk_mode_reglement', 'fk_cond_reglement',
+                    'pdf_nb_decimal', 'pdf_hide_livraisons', 'litige', 'expertise'
                 ))) {
             return 1;
         }
@@ -331,23 +332,42 @@ class Bimp_Facture extends BimpComm
 
     public function isValidatable(&$errors = array())
     {
-        parent::isValidatable($errors);
-        if (!count($errors)) {
-            $this->areLinesValid($errors);
+        $this->areLinesValid($errors);
 
+        $client = $this->getClientFacture();
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Client absent';
+        }
+
+        //ref externe si consigne
+        if ($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == '') {
+            $errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
+        }
+
+        if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
+            $client = $this->getChildObject('client_final');
+        }
+        if (!BimpObject::objectLoaded($client)) {
             $client = $this->getChildObject('client');
-            $client_facture = $this->getClientFacture();
-            if (!BimpObject::objectLoaded($client)) {
-                $errors[] = 'Client absent';
-            }
+        }
 
+        if ($this->hasRemiseCRT()) {
+            if (!$client->getData('type_educ')) {
+                $errors[] = 'Cette facture contient une remise CRT or le type éducation n\'est pas renseigné pour ce client, veuillez corriger la fiche client avant validation de cette facture';
+            } elseif ($this->getData('type_educ') == 'E4') {
+                $date_fin_validite = $client->getData('type_educ_fin_validite');
 
-            //ref externe si consigne
-            if ($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == '') {
-                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
+                if (!$date_fin_validite) {
+                    $errors[] = 'Cette facture contient une remise CRT or date de fin de validité du statut enseignant / étudiant n\'est pas renseigné. Veuillez corriger la fiche client avant validation de la facture';
+                } elseif ($date_fin_validite < date('Y-m-d')) {
+                    $errors[] = 'Validation impossible : cette facture contient une remise CRT or la date de fin de validité du statut enseignant / étudiant du client est dépassée.';
+                }
             }
         }
 
+        if (!count($errors)) {
+            parent::isValidatable($errors);
+        }
 
         return (count($errors) ? 0 : 1);
     }
@@ -795,12 +815,11 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'exportToChorus':
-
                 if (!in_array($status, array(1, 2))) {
                     $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
                 } elseif (!$this->field_exists('chorus_status')) {
                     $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 1, 5))) {
+                } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 5))) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus' . (int) $this->getData('chorus_status');
                 } else {
                     $client = $this->getChildObject('client');
@@ -829,11 +848,6 @@ class Bimp_Facture extends BimpComm
                 if (!BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', '')) {
                     $errors[] = 'Identifiant chorus du fichier PDF absent';
                 }
-
-                if (!BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', '')) {
-                    $errors[] = 'N° facture sur Chorus absent';
-                }
-
                 return (count($errors) ? 0 : 1);
 
             case 'forceChorusExported':
@@ -1040,36 +1054,38 @@ class Bimp_Facture extends BimpComm
         }
 
         // Confirmation Chorus:
-        if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
-            $buttons[] = array(
-                'label'   => 'Valider export Chorus',
-                'icon'    => 'fas_file-export',
-                'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
-                    'form_name' => 'export_to_chorus'
-                ))
-            );
-        }
+        if (BimpCore::isModuleActive('bimpapi')) {
+            if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
+                $buttons[] = array(
+                    'label'   => 'Valider export Chorus',
+                    'icon'    => 'fas_file-export',
+                    'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
+                        'form_name' => 'export_to_chorus'
+                    ))
+                );
+            }
 
-        // Marquer exporté vers Chorus: 
-        if ($this->isActionAllowed('forceChorusExported') && $this->canSetAction('forceChorusExported')) {
-            $buttons[] = array(
-                'label'   => 'Marquer exporté vers Chorus',
-                'icon'    => 'fas_file-export',
-                'onclick' => $this->getJsActionOnclick('forceChorusExported', array(), array(
-                    'confirm_msg' => 'Veuillez confirmer que la facture a bien été déposée manuellement sur Chorus'
-                ))
-            );
-        }
+            // Marquer exporté vers Chorus: 
+            if ($this->isActionAllowed('forceChorusExported') && $this->canSetAction('forceChorusExported')) {
+                $buttons[] = array(
+                    'label'   => 'Marquer exporté vers Chorus',
+                    'icon'    => 'fas_file-export',
+                    'onclick' => $this->getJsActionOnclick('forceChorusExported', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer que la facture a bien été déposée manuellement sur Chorus'
+                    ))
+                );
+            }
 
-        // Marquer envoyé par e-mail sans export Chorus: 
-        if ($this->isActionAllowed('markSendNoChorusExport') && $this->canSetAction('markSendNoChorusExport')) {
-            $buttons[] = array(
-                'label'   => 'Marquer envoyé par e-mail sans export CHORUS',
-                'icon'    => 'fas_file-export',
-                'onclick' => $this->getJsActionOnclick('markSendNoChorusExport', array(), array(
-                    'confirm_msg' => 'Veuillez confirmer que la facture a bien été envoyée par e-mail sans eport CHORUS'
-                ))
-            );
+            // Marquer envoyé par e-mail sans export Chorus: 
+            if ($this->isActionAllowed('markSendNoChorusExport') && $this->canSetAction('markSendNoChorusExport')) {
+                $buttons[] = array(
+                    'label'   => 'Marquer envoyé par e-mail sans export CHORUS',
+                    'icon'    => 'fas_file-export',
+                    'onclick' => $this->getJsActionOnclick('markSendNoChorusExport', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer que la facture a bien été envoyée par e-mail sans eport CHORUS'
+                    ))
+                );
+            }
         }
 
         // Editer une facture deja validee, sans paiement effectue et pas exportée en compta
@@ -1309,10 +1325,20 @@ class Bimp_Facture extends BimpComm
                                 'id_facture_to_correct' => (int) $this->id,
                                 'fk_account'            => (int) $this->getData('fk_account'),
                                 'entrepot'              => (int) $this->getData('entrepot'),
+                                'libelle'               => $this->getData('libelle'),
+                                'expertise'             => $this->getData('expertise'),
                                 'centre'                => $this->getData('centre'),
                                 'ef_type'               => $this->getData('ef_type'),
                                 'fk_cond_reglement'     => $this->getData('fk_cond_reglement'),
-                                'fk_mode_reglement'     => $this->getData('fk_mode_reglement')
+                                'fk_mode_reglement'     => $this->getData('fk_mode_reglement'),
+                                'douane_number'         => $this->getData('douane_number'),
+                                'zone_vente'            => $this->getData('zone_vente'),
+                                'prime'                 => $this->getData('prime'),
+                                'prime2'                => $this->getData('prime2'),
+                                'model_pdf'             => $this->getData('model_pdf'),
+                                'rib_client'            => $this->getData('rib_client'),
+                                'note_private'          => $this->getData('note_private'),
+                                'note_public'           => $this->getData('note_public')
                             )
                         );
                         $onclick = $facture->getJsLoadModalForm('default', 'Créer un avoir', $values, null, 'redirect');
@@ -1333,10 +1359,20 @@ class Bimp_Facture extends BimpComm
                             'id_avoir_to_refacture' => (int) $this->id,
                             'fk_account'            => (int) $this->getData('fk_account'),
                             'entrepot'              => (int) $this->getData('entrepot'),
+                            'libelle'               => $this->getData('libelle'),
+                            'expertise'             => $this->getData('expertise'),
                             'centre'                => $this->getData('centre'),
                             'ef_type'               => $this->getData('ef_type'),
                             'fk_cond_reglement'     => $this->getData('fk_cond_reglement'),
-                            'fk_mode_reglement'     => $this->getData('fk_mode_reglement')
+                            'fk_mode_reglement'     => $this->getData('fk_mode_reglement'),
+                            'douane_number'         => $this->getData('douane_number'),
+                            'zone_vente'            => $this->getData('zone_vente'),
+                            'prime'                 => $this->getData('prime'),
+                            'prime2'                => $this->getData('prime2'),
+                            'model_pdf'             => $this->getData('model_pdf'),
+                            'rib_client'            => $this->getData('rib_client'),
+                            'note_private'          => $this->getData('note_private'),
+                            'note_public'           => $this->getData('note_public')
                         )
                     );
                     $onclick = $facture->getJsLoadModalForm('refacture', 'Refacturation de l\\\'avoir ' . $this->getRef(), $values, null, 'redirect');
@@ -1441,6 +1477,19 @@ class Bimp_Facture extends BimpComm
                 'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
 //                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'generateBulkPdf\', {}, null, null)'
             );
+            global $user;
+            if ($user->admin) {
+                $actions[] = array(
+                    'label'   => 'Valider',
+                    'icon'    => 'check',
+                    'onclick' => $this->getJsBulkActionOnclick('validate', array(), array('single_action' => false))
+                );
+                $actions[] = array(
+                    'label'   => 'checkLines',
+                    'icon'    => 'check',
+                    'onclick' => $this->getJsBulkActionOnclick('checkLines', array(), array('single_action' => false))
+                );
+            }
         }
 
 
@@ -1648,6 +1697,17 @@ class Bimp_Facture extends BimpComm
                     ))
                 );
             }
+
+//            // Créer un avoir
+//            if ($this->isActionAllowed('createAvoir') && $this->canSetAction('createAvoir')) {
+//                $buttons[] = array(
+//                    'label'   => 'Créer un avoir',
+//                    'icon'    => 'fas_file-import',
+//                    'onclick' => $this->getJsActionOnclick('createAvoir', array(), array(
+//                        'form_name' => 'edit'
+//                    ))
+//                );
+//            }
         }
 
         return $buttons;
@@ -3576,7 +3636,7 @@ class Bimp_Facture extends BimpComm
         $html = '';
 
         if (!$this->isLoaded()) {
-            $html .= BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+            $html .= BimpRender::renderAlerts('(345) ID ' . $this->getLabel('of_the') . ' absent');
         } else {
             // Pour être sûr d\'être à jour:
             $this->dol_object->fetch_lines();
@@ -3712,8 +3772,9 @@ class Bimp_Facture extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
+            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+
             if ($this->field_exists('applecare_data')) {
-                $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
                 $ac_data = $this->getData('applecare_data');
 
                 if (isset($ac_data['totals_by_br']) && !empty($ac_data['totals_by_br'])) {
@@ -4332,7 +4393,7 @@ class Bimp_Facture extends BimpComm
             $this->set('fk_statut', 1);
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
-            $this->checkMargin(true);
+            $this->checkMargin(true, true);
             $this->checkTotalAchat(true);
 
             $client = $this->getChildObject('client');
@@ -4430,8 +4491,8 @@ class Bimp_Facture extends BimpComm
                 $errors = BimpTools::merge_array($errors, $this->checkMargin());
                 $errors = BimpTools::merge_array($errors, $this->checkTotalAchat());
             } elseif (is_a($child, 'BimpRevalorisation')) {
-                $errors = BimpTools::merge_array($errors, $this->checkMargin(true));
-                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true));
+                $errors = BimpTools::merge_array($errors, $this->checkMargin(true, true));
+                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true, true));
             }
         }
 
@@ -4478,7 +4539,7 @@ class Bimp_Facture extends BimpComm
     public function createCreditNoteWithNegativesLines($lines = null, $convertToReduc = false, $useConvertedReduc = false)
     {
         if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
+            return array('(202) ID ' . $this->getLabel('of_the') . ' absent');
         }
 
         if ((int) $this->getData('type') !== Facture::TYPE_STANDARD) {
@@ -4982,13 +5043,17 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public function checkMargin($recalculate_revals = false, $check_base_marge = false)
+    public function checkMargin($recalculate_revals = false, $check_base_marge = true, &$infos = array())
     {
         $errors = array();
 
         if ($this->isLoaded()) {
             if ($check_base_marge) {
-                $errors = $this->checkMarge();
+                $success = '';
+                $errors = $this->checkMarge($success);
+                if ($success) {
+                    $infos[] = $success;
+                }
             }
 
             if (!count($errors)) {
@@ -4997,11 +5062,14 @@ class Bimp_Facture extends BimpComm
 
                 $marge_finale = $margin + (float) $revals['accepted'];
 
-                if ($marge_finale != (float) $this->getData('marge_finale_ok')) {
+                if ((float) $marge_finale !== (float) $this->getData('marge_finale_ok')) {
+                    $old_marge = (float) $this->getData('marge_finale_ok');
                     $up_errors = $this->updateField('marge_finale_ok', $marge_finale);
 
                     if (count($up_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du champ "Marge + reval OK"');
+                    } else {
+                        $infos[] = 'Marge + reval OK corrigée (Ancienne : ' . $old_marge . ' - Nouvelle : ' . $marge_finale . ')';
                     }
                 }
             }
@@ -5920,6 +5988,20 @@ class Bimp_Facture extends BimpComm
         );
     }
 
+    public function actionCheckLines($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Check lines Ok';
+
+        $errors = $this->checkLines();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     public function actionExportToChorus($data, &$success)
     {
         $errors = array();
@@ -5932,17 +6014,10 @@ class Bimp_Facture extends BimpComm
         $api = BimpAPI::getApiInstance('piste');
 
         if (is_a($api, 'PisteAPI')) {
-            $response = $api->deposerPdfFacture($this->id, array(), $errors, $warnings);
+            $id_pdf = $api->deposerPdfFacture($this->id, $errors, $warnings);
 
-            $id_pdf = (int) BimpTools::getArrayValueFromPath($response, 'pieceJointeId', 0);
-            $num_facture = BimpTools::getArrayValueFromPath($response, 'numeroFacture', '');
-
-            if (!$id_pdf) {
+            if (!count($errors) && !$id_pdf) {
                 $errors[] = 'ID Du PDF sur Chorus absent';
-            }
-
-            if (!$num_facture) {
-                $errors[] = 'N° Chorus de la facture absent';
             }
 
             if (!count($errors)) {
@@ -5959,7 +6034,6 @@ class Bimp_Facture extends BimpComm
                 $chorus_data = $this->getData('chorus_data');
 
                 $chorus_data['id_pdf'] = $id_pdf;
-                $chorus_data['num_facture'] = $num_facture;
 
                 $this->set('chorus_status', 1);
                 $this->set('chorus_data', $chorus_data);
@@ -5975,7 +6049,7 @@ class Bimp_Facture extends BimpComm
                             ), true);
                 }
 
-                $this->addLog('Envoi PDF sur Chorus (ID PDF: ' . $id_pdf . ' - N° fac: ' . $num_facture . ')');
+                $this->addLog('Envoi PDF sur Chorus (ID PDF: ' . $id_pdf . ')');
             }
         }
 
@@ -6419,50 +6493,51 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Facture à corriger invalide';
                     } else {
                         $this->set('fk_facture_source', $id_fac_src);
-                    }
-                }
 
-                if (!count($errors)) {
-                    $linked_objects = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
+                        if (!count($errors)) {
+                            $linked_objects = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
 
-                    foreach ($linked_objects as $item) {
-                        if (!isset($this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = array();
-                        } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = array($this->dol_object->linked_objects[$item['type']]);
+                            foreach ($linked_objects as $item) {
+                                if (!isset($this->dol_object->linked_objects[$item['type']])) {
+                                    $this->dol_object->linked_objects[$item['type']] = array();
+                                } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
+                                    $this->dol_object->linked_objects[$item['type']] = array($this->dol_object->linked_objects[$item['type']]);
+                                }
+
+                                if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
+                                    $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
+                                }
+                            }
+
+                            $errors = parent::create($warnings, true);
                         }
 
-                        if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
+                        if (count($errors)) {
+                            return $errors;
+                        }
+
+                        if ($avoir_same_lines) {
+                            $line_errors = $this->createLinesFromOrigin($facture, array(
+                                'inverse_qty' => true,
+                                'pa_editable' => false
+                            ));
+                            if (count($line_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($line_errors);
+                            }
+
+                            // Copie des remises globales: 
+                            $this->copyRemisesGlobalesFromOrigin($facture, $warnings, true);
+                        } elseif ($avoir_remain_to_pay) {
+                            $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
+                        }
+
+                        // Copie des contacts: 
+                        if (BimpObject::objectLoaded($facture)) {
+                            $this->copyContactsFromOrigin($facture, $warnings);
                         }
                     }
-
-                    $errors = parent::create($warnings, true);
                 }
 
-                if (count($errors)) {
-                    return $errors;
-                }
-
-                if ($avoir_same_lines) {
-                    $line_errors = $this->createLinesFromOrigin($facture, array(
-                        'inverse_qty' => true,
-                        'pa_editable' => false
-                    ));
-                    if (count($line_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($line_errors);
-                    }
-
-                    // Copie des remises globales: 
-                    $this->copyRemisesGlobalesFromOrigin($facture, $warnings, true);
-                } elseif ($avoir_remain_to_pay) {
-                    $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
-                }
-
-                // Copie des contacts: 
-                if (BimpObject::objectLoaded($facture)) {
-                    $this->copyContactsFromOrigin($facture, $warnings);
-                }
                 break;
 
             case Facture::TYPE_STANDARD:
@@ -6659,7 +6734,7 @@ class Bimp_Facture extends BimpComm
 
             $id_default_user = (int) BimpCore::getConf('default_id_commercial', null);
             foreach ($rows as $r) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommmercial', 'Bimp_Facture', (int) $r['rowid']);
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
 
                 if (BimpObject::objectLoaded($facture)) {
                     $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
@@ -6676,7 +6751,8 @@ class Bimp_Facture extends BimpComm
                     }
 
                     $factures[$id_user][] = $facture->getLink();
-                }
+                } else
+                    echo 'oups fact inc ' . $r['rowid'];
             }
         }
 
@@ -7135,11 +7211,11 @@ class Bimp_Facture extends BimpComm
         $rows = self::getBdb()->getRows('facture', "`datec` >= '" . $from . "'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 
         if (is_array($rows)) {
-            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($rows as $r) {
-                if ($facture->fetch((int) $r['rowid'])) {
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+                if (BimpObject::objectLoaded($facture)) {
                     $fac_errors = array();
-                    $fac_errors = $facture->checkMargin(true);
+                    $fac_errors = $facture->checkMargin(true, true);
                     $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
 
                     if (count($fac_errors)) {

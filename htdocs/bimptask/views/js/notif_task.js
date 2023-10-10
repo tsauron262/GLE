@@ -11,7 +11,6 @@ class notif_task extends AbstractNotification {
     }
 
     init() {
-
         this.my = 'my_task';
         this.unaffected = 'unaffected_task';
         var nt = this;
@@ -291,7 +290,6 @@ class notif_task extends AbstractNotification {
             var to_print = 'tâche 0 non attribuée';
 
         $nav.text(to_print);
-
     }
 
     displayNotification(element) {
@@ -449,6 +447,5 @@ class notif_task extends AbstractNotification {
 
         this.emptyNav(this.my);
         this.emptyNav(this.unaffected);
-
     }
 }

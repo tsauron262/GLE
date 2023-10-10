@@ -287,7 +287,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $tailleP = ($taille2 > 4 || $taille > 100) ? 8 : 12;
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $tailleP);
             $pdf->MultiCell(170, 6, $symptomes, 0, 'L');
-            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10.5);
 
             $save = (int) $sav->getData('save_option');
             if ($save === 2 || $save == 1)
@@ -295,8 +295,8 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->SetXY('9.3', '165.3');
             
-            if (isset(BS_SAV::$save_options_desc[$save])) {
-                $text = BS_SAV::$save_options_desc[$save];
+            if (BS_SAV::getSaveOptionDesc($save) != null) {
+                $text = BS_SAV::getSaveOptionDesc($save);
             } else {
                 $text = $sav->displayData('save_option', 'default', false, true);
             }
@@ -304,7 +304,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $pdf->MultiCell(175, 6, $text, 0, 'L');
 
             $cgv = "";
-            $cgv .= "-" . $conf->global->MAIN_INFO_SOCIETE_NOM . " ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
+            $cgv .= "-" . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . " ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
             $prixRefus = "49";
             if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
@@ -375,7 +375,22 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $data = $sav->getPublicLink();
 //            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $sav->getChildObject("equipment")->getData("serial")."&id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
             $this->getQrCode($data, $qr_dir, "suivie.png");
-            $pdf->Image($qr_dir . "/suivie.png", 100, 30, 0, 24);
+            $pdf->Image($qr_dir . "/suivie.png", 100, 33, 0, 24);
+            
+            // Logo
+            $logo = false;
+            if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
+                $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png";
+            } else {
+                $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
+            }
+            $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png", ".png"), "_SAV.png", $logo);
+            if (is_file($testFile))
+                $logo = $testFile;
+
+    //        $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
+            if ($logo && is_readable($logo))
+                    $pdf->Image($logo, 10, 16, 0, 22);
 
             if (method_exists($pdf, 'AliasNbPages'))
                 $pdf->AliasNbPages();

@@ -2648,7 +2648,7 @@ class gsxController extends BimpController
             $equipment = $sav->getChildObject('equipment');
             if (BimpObject::objectLoaded($equipment)) {
                 if (isset($data['identifiers']['serial']) && $data['identifiers']['serial'] === $equipment->getData('serial')) {
-                    if (!(int) $equipment->getData('id_product') && preg_match('/^\*+$/', $equipment->getData('product_label'))) {
+//                    if (!(int) $equipment->getData('id_product') && preg_match('/^\*+$/', $equipment->getData('product_label'))) {//Todo pourquoi ?
                         $update = false;
 
                         if (isset($data['productDescription']) && !preg_match('/^\*+$/', $data['productDescription'])) {
@@ -2666,7 +2666,7 @@ class gsxController extends BimpController
                                 (string) $data['warrantyInfo']['coverageEndDate'] &&
                                 !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['coverageEndDate'])) {
                             $dt = new DateTime($data['warrantyInfo']['coverageEndDate']);
-                            $date = $dt->format('Y-m-d H:i:s');
+                            $date = $dt->format('Y-m-d');
                             if ($date !== $equipment->getData('date_warranty_end')) {
                                 $equipment->set('date_warranty_end', $date);
                                 $update = true;
@@ -2677,7 +2677,7 @@ class gsxController extends BimpController
                                 (string) $data['warrantyInfo']['purchaseDate'] &&
                                 !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['purchaseDate'])) {
                             $dt = new DateTime($data['warrantyInfo']['purchaseDate']);
-                            $date = $dt->format('Y-m-d H:i:s');
+                            $date = $dt->format('Y-m-d');
                             if ($date !== $equipment->getData('date_purchase')) {
                                 $equipment->set('date_purchase', $date);
                                 $update = true;
@@ -2688,7 +2688,7 @@ class gsxController extends BimpController
                             $warnings = array();
                             $equipment->update($warnings, true);
                         }
-                    }
+//                    }
                 }
             }
         }
@@ -2714,6 +2714,8 @@ class gsxController extends BimpController
 
             if (is_array($data) && !empty($data) && isset($data['device'])) {
                 $data = $data['device'];
+                $pdf_data_left = array();
+                $pdf_data_right = array();
 
                 if (isset($data['identifiers']['serial'])) {
                     $this->serial2 = $data['identifiers']['serial'];
@@ -2763,6 +2765,7 @@ class gsxController extends BimpController
                     ));
                     if (!is_null($value)) {
                         $infosContent .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                        $pdf_data_left[$label] = $value;
                     }
                 }
 
@@ -2804,6 +2807,7 @@ class gsxController extends BimpController
                     ));
                     if (!is_null($value)) {
                         $warrantyContent .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                        $pdf_data_right[$label] = $value;
                     }
                 }
                 $product_label = $data['productDescription'];
@@ -2830,6 +2834,16 @@ class gsxController extends BimpController
                             'type'     => 'secondary',
                             'foldable' => true
                 ));
+
+                if (BimpCore::isEntity('bimp') && BimpObject::objectLoaded($sav)) {
+                    $sav_dir = $sav->getFilesDir();
+                    if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
+                        require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.php';
+
+                        $pdf = new InfosMateriel($data['productDescription'], $pdf_data_left, $pdf_data_right);
+                        $pdf->render($sav_dir . 'infos_materiel.pdf', 'F');
+                    }
+                }
             } else {
                 $html .= BimpRender::renderAlerts('Aucune données reçues pour le numéro de série "' . $this->serial . '"');
                 $html .= $this->gsx_v2->displayErrors();

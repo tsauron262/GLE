@@ -3,6 +3,8 @@ primary: id
 icon: fas_calendar-check
 common_fields: 0
 
+entity_name: agenda
+
 dol_object: 
     instance: 
         dol_object: 
@@ -271,7 +273,6 @@ forms:
                 required: 1
             users_assigned: 
                 custom: 1
-                required: 1
                 label: Evénement assigné à
                 input_name: users_assigned
                 input: 
@@ -281,6 +282,16 @@ forms:
                         callback: displayExternalUsers
                 value:
                     callback: getUsersAssigned
+            usergroups_assigned: 
+                custom: 1
+                label: Assigner aux utilisateurs d'un ou plusieurs groupes
+                input_name: usergroups_assigned
+                input: 
+                    multiple: 1
+                    type: select
+                    options: 
+                        array: userGroups
+                    help: Après enregistrement, tous les utilisateurs du groupe seront ajoutés au champ "Evénement assigné à"
             occupied: 
                 label: Disponibilité
                 field: transparency

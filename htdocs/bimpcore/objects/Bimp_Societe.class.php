@@ -41,22 +41,31 @@ class Bimp_Societe extends BimpDolObject
         1  => array('D', 'warning', 'Risque très Elevé'),
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
+    public static $types_educ = array(
+        ''   => '',
+        '1R' => 'Etudes supérieures',
+        'HS' => 'Lycée',
+        'M8' => 'Institutions éducatives',
+        'VO' => 'Ecole primaire',
+        'VQ' => 'Ecole secondaire',
+        'E4' => 'Enseignants / étudiants'
+    );
     public static $regions = array(
         1 => array(
-            'A' => array(1, 69),
-            'B' => array(7, 26, 38, 73, 74),
-            'C' => array(63, 3, 15, 42, 43),
+            'A' => array('01', 69),
+            'B' => array('07', 26, 38, 73, 74),
+            'C' => array(63, '03', 15, 42, 43),
             'D' => array(70, 21, 25, 39, 58, 71, 89, 90)
         ),
         2 => array(
-            'A' => array(9, 11, 12, 30, 31, 32, 34, 46, 48, 65, 66, 81, 82),
-            'B' => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
+            'A' => array('09', 11, 12, 30, 31, 32, 34, 46, 48, 65, 66, 81, 82),
+            'B' => array('04', '05', '06', 13, 83, 84, '2A', '2B'),
             'C' => array(16, 17, 19, 23, 24, 33, 40, 47, 64, 79, 86, 87)
         ),
         3 => array(
             'A' => array(75, 77, 78, 91, 92, 93, 94, 95),
-            'B' => array(2, 59, 60, 62, 80),
-            'C' => array(8, 10, 51, 52, 54, 55, 57, 67, 68, 88)
+            'B' => array('02', 59, 60, 62, 80),
+            'C' => array('08', 10, 51, 52, 54, 55, 57, 67, 68, 88)
         ),
         4 => array(
             'A' => array(18, 28, 36, 37, 41, 44, 45, 49, 53, 72, 85),
@@ -478,8 +487,9 @@ class Bimp_Societe extends BimpDolObject
 
     public function getFilesDir()
     {
+        global $conf;
         if ($this->isLoaded()) {
-            return DOL_DATA_ROOT . '/societe/' . $this->id . '/';
+            return $conf->societe->multidir_output[$this->dol_object->entity].'/' . $this->id . '/';
         } else {
             echo 'NOT LOADED';
             exit;
@@ -498,7 +508,7 @@ class Bimp_Societe extends BimpDolObject
 
         $file = $this->id . '/' . $file_name;
 
-        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&file=' . urlencode($file);
+        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&entity='.$this->dol_object->entity.'&file=' . urlencode($file);
     }
 
     public function getActionsButtons()
@@ -1517,14 +1527,17 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if (isset($needed_fields['zip'])) {
-            $dpt = substr($needed_fields['zip'], 0, 2);
+            $dpt = substr($needed_fields['zip'], 0, 3);
 
             if ($dpt) {
                 foreach (self::$regions as $region => $secteurs) {
-                    foreach ($secteurs as $secteur => $codes)
-                        if (in_array($dpt, $codes)) {
-                            return 'Région ' . $region;
+                    foreach ($secteurs as $secteur => $codes) {
+                        foreach ($codes as $code) {
+                            if (stripos($dpt, $code) === 0) {
+                                return 'Région ' . $region;
+                            }
                         }
+                    }
                 }
             }
         }
@@ -1539,14 +1552,17 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if (isset($needed_fields['zip'])) {
-            $dpt = substr($needed_fields['zip'], 0, 2);
+            $dpt = substr($needed_fields['zip'], 0, 3);
 
             if ($dpt) {
                 foreach (self::$regions as $region => $secteurs) {
-                    foreach ($secteurs as $secteur => $codes)
-                        if (in_array($dpt, $codes)) {
-                            return 'R' . $region . $secteur;
+                    foreach ($secteurs as $secteur => $codes) {
+                        foreach ($codes as $code) {
+                            if (stripos($dpt, $code) === 0) {
+                                return 'R' . $region . $secteur;
+                            }
                         }
+                    }
                 }
             }
         }
@@ -1938,13 +1954,15 @@ class Bimp_Societe extends BimpDolObject
         $zip = $this->getData('zip');
 
         if ($zip) {
-            $dpt = substr($zip, 0, 2);
+            $dpt = substr($zip, 0, 3);
 
             if ($dpt) {
                 foreach (self::$regions as $region => $secteurs) {
                     foreach ($secteurs as $secteur => $codes) {
-                        if (in_array($dpt, $codes)) {
-                            return 'Région ' . $region;
+                        foreach ($codes as $code) {
+                            if (stripos($dpt, $code) === 0) {
+                                return 'Région ' . $region;
+                            }
                         }
                     }
                 }
@@ -1963,13 +1981,15 @@ class Bimp_Societe extends BimpDolObject
         $zip = $this->getData('zip');
 
         if ($zip) {
-            $dpt = substr($zip, 0, 2);
+            $dpt = substr($zip, 0, 3);
 
             if ($dpt) {
                 foreach (self::$regions as $region => $secteurs) {
                     foreach ($secteurs as $secteur => $codes) {
-                        if (in_array($dpt, $codes)) {
-                            return 'R' . $region . $secteur;
+                        foreach ($codes as $code) {
+                            if (stripos($dpt, $code) === 0) {
+                                return 'R' . $region . $secteur;
+                            }
                         }
                     }
                 }
@@ -2589,7 +2609,7 @@ class Bimp_Societe extends BimpDolObject
             $code = (string) $this->getData('siren');
             $code_type = 'siren';
         }
-        
+
         if ($code) {
             $errors = BimpTools::merge_array($errors, $this->checkSiren($code_type, $code, $data, $warnings));
 
@@ -2619,11 +2639,11 @@ class Bimp_Societe extends BimpDolObject
                 if (isset($data['siren'])) {
                     $this->set('siren', $data['siren']);
                 }
-                
+
                 $errors = $this->update($warnings, true);
             }
         }
-        
+
         return $errors;
     }
 
@@ -3932,6 +3952,12 @@ class Bimp_Societe extends BimpDolObject
 
             if (!count($errors) && $have_already_code_comptable) {
                 $this->set('exported', 1);
+            }
+
+            if ($this->getData('type_educ') == 'E4') {
+                if (!$this->getData('type_educ_fin_validite')) {
+                    $errors[] = 'Veuillez saisir la date de fin de validité du statut "Enseignant / étudiant"';
+                }
             }
         }
         return $errors;

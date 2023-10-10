@@ -203,7 +203,7 @@ $colorbackhmenu1 = join(',', colorStringToArray($colorbackhmenu1)); // Normalize
 $tmppart = explode(',', $colorbackhmenu1);
 $tmpval = (!empty($tmppart[0]) ? $tmppart[0] : 0) + (!empty($tmppart[1]) ? $tmppart[1] : 0) + (!empty($tmppart[2]) ? $tmppart[2] : 0);
 if ($tmpval <= 460) {
-	$colortextbackhmenu = 'FFFFFF';
+	$colortextbackhmenu = '000000';
 } else {
 	$colortextbackhmenu = '000000';
 }

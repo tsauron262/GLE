@@ -96,6 +96,10 @@ class Bimp_Client extends Bimp_Societe
     {
         switch ($action) {
             case 'relancePaiements':
+                if (!(int) BimpCore::getConf('use_relances_paiements_clients', null, 'bimpcommercial')) {
+                    $errors[] = 'Les relances de paiements sont désactivées';
+                    return 0;
+                }
                 if ($this->isLoaded()) { // L'instance peut ne pas être loadée dans le cas des relances groupées. 
                     if (!(int) $this->getData('relances_actives')) {
                         $errors[] = 'Les relances de paiement ne sont pas activées pour ce client';
@@ -177,6 +181,15 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return $check;
+    }
+
+    public function isSirenValid()
+    {
+        if ($this->isLoaded()) {
+            return (string) $this->getData('siren') and (int) strlen($this->getData('siren')) == 9;
+        }
+
+        return 0;
     }
 
     // Getters params:
@@ -560,7 +573,8 @@ class Bimp_Client extends Bimp_Societe
         global $user;
         $buttons = array();
 
-        if ($this->canSetAction('relancePaiements') && $user->rights->bimpcommercial->admin_relance_global) {
+        if ($this->canSetAction('relancePaiements') && $this->isActionAllowed('relancePaiements') &&
+                $user->rights->bimpcommercial->admin_relance_global) {
             $buttons[] = array(
                 'label'       => 'Relance impayés',
                 'icon_before' => 'fas_cogs',
@@ -574,7 +588,7 @@ class Bimp_Client extends Bimp_Societe
             );
         }
 
-        if ($this->canSetAction('listClientsToExcludeForCreditLimits')) {
+        if (BimpCore::isEntity('bimp') && $this->canSetAction('listClientsToExcludeForCreditLimits')) {
             $buttons[] = array(
                 'label'   => 'Listes clients à exclure',
                 'icon'    => 'fas_bars',
@@ -612,6 +626,7 @@ class Bimp_Client extends Bimp_Societe
     }
 
     // Getters données:
+
     public function getFacturesToRelanceByClients($params = array())
     {
         $clients = array();
@@ -998,7 +1013,7 @@ class Bimp_Client extends Bimp_Societe
 
     public function getAtradiusFileName($force = false, $show_ext = true, $forced_date = null)
     {
-        if(is_null($forced_date))
+        if (is_null($forced_date))
             $name = 'icba_' . date('Y-m-d', strtotime($this->getData('date_depot_icba')));
         else
             $name = 'icba_' . date('Y-m-d', strtotime($forced_date));
@@ -1009,21 +1024,21 @@ class Bimp_Client extends Bimp_Societe
                 return $name . $ext;
             else
                 return $name;
-        // On check les fichiers avec des date de crétion mal définit
-        } elseif(is_null($forced_date)) {
+            // On check les fichiers avec des date de crétion mal définit
+        } elseif (is_null($forced_date)) {
             $date_plus_recente = null;
             $files = $this->getFilesArray();
             foreach ($files as $f) {
-                if(substr($f, 6, 5) == 'icba_') {
+                if (substr($f, 6, 5) == 'icba_') {
                     $date_a_tester = date(substr($f, 11, 10));
-                    if($date_plus_recente < $date_a_tester)
+                    if ($date_plus_recente < $date_a_tester)
                         $date_plus_recente = $date_a_tester;
                 }
             }
 
-            if(!is_null($date_plus_recente)) {
+            if (!is_null($date_plus_recente)) {
 //                die($date_plus_recente);
-                if(file_exists($this->getFilesDir() . 'icba_' . $date_plus_recente . $ext)) {
+                if (file_exists($this->getFilesDir() . 'icba_' . $date_plus_recente . $ext)) {
                     if ($show_ext)
                         return 'icba_' . $date_plus_recente . $ext;
                     else
@@ -1252,7 +1267,8 @@ class Bimp_Client extends Bimp_Societe
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         if (!is_null($file) && $file) {
             $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
-        } elseif (!$only_loaded) {
+        } 
+        if (!$only_loaded) {
 //            return BimpInput::renderInput('file_upload', 'atradius_file');
             // Demande encours altriadus
 
@@ -1265,7 +1281,7 @@ class Bimp_Client extends Bimp_Societe
                 $buttons[] = array(
                     'label'   => 'Demander encours',
                     'icon'    => 'far_paper-plane',
-                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client un encours à XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => BimpCore::getConf('id_user_group_atradius'), "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client un encours à XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
                 );
             } else {
                 $noteT = current($list);
@@ -1291,13 +1307,55 @@ class Bimp_Client extends Bimp_Societe
             $buttons[] = array(
                 'label'   => 'Demander révision encours',
                 'icon'    => 'far_paper-plane',
-                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
+                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => BimpCore::getConf('id_user_group_atradius'), "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
             );
         }
         foreach ($buttons as $button) {
             $html .= BimpRender::renderButton($button) . '<br/>';
         }
         return $html;
+    }
+
+    public function displayFormAtradius()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+
+            if ((int) $this->getData('id_atradius') == 0 and (int) !$this->isSirenValid()) {
+                $html .= BimpRender::renderAlerts('SIREN et identifiants Atradius non renseignés/invalides', 'info');
+                return $html;
+            }
+
+            // Rafraichissement encours
+            $onclick_reload = $this->getJsActionOnclick('refreshOutstandingAtradius');
+
+            $html .= '<div>';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick_reload . '">';
+            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Rafraîchir Atradius';
+            $html .= '</span>';
+
+            global $user;
+
+            if ($user->rights->bimpcommercial->admin_financier) {
+                // Demande d'encours
+                $onclick = $this->getJsActionOnclick('setOutstandingAtradius', array(), array('form_name' => 'setOutstandingAtradius'));
+
+                $html .= '<div style="margin-top: 10px">';
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Interroger Atradius';
+                $html .= '</span>';
+                $html .= BimpRender::renderAlerts("Merci de ne pas fermer la fenêtre lors de la demande d'assurance", 'info');
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
+    }
+
+    private static function displayAtradiusStatus($value)
+    {
+        return '<span class="' . self::$status_atradius[$value]['classes'][0] . '">' . self::$status_atradius[$value]['label'] . '</span>';
     }
 
     // Rendus HTML:
@@ -1351,7 +1409,7 @@ class Bimp_Client extends Bimp_Societe
         );
 
         // Utilisateurs: 
-        if($this->isModuleActif('bimpinterfaceclient')){
+        if ($this->isModuleActif('bimpinterfaceclient')) {
             $tabs[] = array(
                 'id'            => 'client_users_list_tab',
                 'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Utilisateurs',
@@ -1361,7 +1419,7 @@ class Bimp_Client extends Bimp_Societe
         }
 
         // Equipements: 
-        if($this->isModuleActif('bimpequipment')){
+        if ($this->isModuleActif('bimpequipment')) {
             $tabs[] = array(
                 'id'            => 'client_equipments_list_tab',
                 'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements',
@@ -1371,26 +1429,25 @@ class Bimp_Client extends Bimp_Societe
         }
 
         // Evénements: 
-        if($this->isDolModuleActif('agenda'))
+        if ($this->isDolModuleActif('agenda'))
             $tabs[] = array(
                 'id'            => 'client_events_list_tab',
                 'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
-            ); 
+            );
 
         // Atradius: 
-        
-        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-        $api = BimpAPI::getApiInstance('atradius');
-        if($api && $api->isApiOk()){
-            $tabs[] = array(
-                'id'            => 'client_atradius_list_tab',
-                'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
-                'ajax'          => 1,
-                'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
-            );
-        }
+//        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+//        $api = BimpAPI::getApiInstance('atradius');
+//        if ($api && $api->isApiOk()) {
+        $tabs[] = array(
+            'id'            => 'client_atradius_list_tab',
+            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
+        );
+//        }
 
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
         $html .= $this->renderNotesList();
@@ -1403,16 +1460,16 @@ class Bimp_Client extends Bimp_Societe
         $tabs = array();
 
         // Propales
-        if($this->isDolModuleActif('propale'))
+        if ($this->isDolModuleActif('propale'))
             $tabs[] = array(
                 'id'            => 'client_propales_list_tab',
                 'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
-            ); 
+            );
 
         // Commandes client
-        if($this->isDolModuleActif('commande'))
+        if ($this->isDolModuleActif('commande'))
             $tabs[] = array(
                 'id'            => 'client_commandes_list_tab',
                 'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
@@ -1421,7 +1478,7 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Livraisons
-        if($this->isDolModuleActif('commande')&& $this->isModuleActif('bimplogistique'))
+        if ($this->isDolModuleActif('commande') && $this->isModuleActif('bimplogistique'))
             $tabs[] = array(
                 'id'            => 'client_shipments_list_tab',
                 'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons',
@@ -1430,16 +1487,16 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Factures
-        if($this->isDolModuleActif('facture'))
+        if ($this->isDolModuleActif('facture'))
             $tabs[] = array(
                 'id'            => 'client_factures_list_tab',
                 'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
-            ); 
-            
+            );
+
         // Contrats
-        if($this->isModuleActif('bimpcontract'))
+        if ($this->isModuleActif('bimpcontract'))
             $tabs[] = array(
                 'id'            => 'client_contrats_list_tab',
                 'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
@@ -1447,8 +1504,19 @@ class Bimp_Client extends Bimp_Societe
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
             );
 
+        // Opérations périodiques : 
+
+        if ((int) BimpCore::getConf('use_logistique_periodicity', null, 'bimpcommercial')) {
+            $tabs[] = array(
+                'id'            => 'client_periodicity_view_tab',
+                'title'         => BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Opérations périodiques',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderPeriodicityView', '$(\'#client_periodicity_view_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+            );
+        }
+
         // Avoirs client: 
-        if($this->isDolModuleActif('facture'))
+        if ($this->isDolModuleActif('facture'))
             $tabs[] = array(
                 'id'            => 'client_remises_except_list_tab',
                 'title'         => BimpRender::renderIcon('fas_money-check-alt', 'iconLeft') . 'Avoirs client',
@@ -1457,7 +1525,7 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Paiements non identifiés:
-        if($this->isDolModuleActif('facture') && $this->isModuleActif('bimpfinanc')) 
+        if ($this->isDolModuleActif('facture') && $this->isModuleActif('bimpfinanc'))
             $tabs[] = array(
                 'id'            => 'client_paiements_inc_list_tab',
                 'title'         => BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Paiements non identifiés',
@@ -1466,7 +1534,7 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Relances paiements: 
-        if(BimpCore::getConf('use_relances_paiements_clients', false, 'bimpcommercial')){
+        if (BimpCore::getConf('use_relances_paiements_clients', false, 'bimpcommercial')) {
             $tabs[] = array(
                 'id'            => 'client_relances_list_tab',
                 'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Relances paiements',
@@ -2394,6 +2462,18 @@ class Bimp_Client extends Bimp_Societe
         return $html;
     }
 
+    public function renderPeriodicityView()
+    {
+        if (!$this->isLoaded($err)) {
+            return BimpRender::renderAlerts($err);
+        }
+        
+        $commandeController = BimpController::getInstance('bimpcommercial', 'commandes');
+        return $commandeController->renderPeriodsTab(array(
+            'id_client' => $this->id
+        ));
+    }
+
     // Traitements:
 
     public function relancePaiements($clients = array(), $mode = 'global', &$warnings = array(), &$pdf_url = '', $date_prevue = null, $send_emails = true, $bds_process = null, &$id_relance = null)
@@ -2744,6 +2824,349 @@ class Bimp_Client extends Bimp_Societe
         }
     }
 
+    // Traitements Atradius : 
+
+    public function getIdAtradius(&$errors = array())
+    {
+        if ((int) $this->getData('id_atradius') > 0) {
+            return (int) $this->getData('id_atradius');
+        }
+
+        if ($this->isSirenValid()) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('atradius');
+            if (is_a($api, 'AtradiusAPI')) {
+                $id_atradius = (int) $api->getBuyerIdBySiren((string) $this->getData('siren'), $errors);
+                if ((int) $id_atradius > 0) {
+                    $this->updateField('id_atradius', $id_atradius);
+                    return $id_atradius;
+                } else {
+                    $errors[] = "Echec de l'obtention de l'ID Atradius";
+                }
+            } else {
+                $errors[] = 'L\'API Atraidus n\'est pas configurée correctement';
+            }
+        } else {
+            $errors[] = "SIREN ivalide : impossible d'obtenir l'ID Atradius";
+        }
+
+        return 0;
+    }
+
+    public function syncroAtradius(&$warnings = array(), &$success = '')
+    {
+        $errors = array();
+        $id_atradius = $this->getIdAtradius($errors);
+        BimpObject::loadClass('bimpcore', 'BimpNote');
+
+        if ((int) $id_atradius > 0) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('atradius');
+
+            if (is_a($api, 'AtradiusAPI')) {
+                $cover = $api->getCover(array('buyerId' => $id_atradius), $errors, $warnings);
+
+                if (empty($cover)) {
+                    $warnings[] = "Aucune couverture pour ce client.";
+                    $cover['amount'] = 0;
+                }
+
+                if (is_array($cover) and!empty($cover)) {
+                    if (isset($cover['amount'])) {
+                        if ($cover['amount'] == 0) {
+                            if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK || $this->getData('outstanding_limit_credit_check') > 0)
+                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
+                            if ($cover['cover_type'] == 'credit-limit' || $this->getData('outstanding_limit_atradius') > 0)
+                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
+//                            if ($this->getData('outstanding_limit_icba') > 0)
+//                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_icba', 0);
+                            $success = 'Pas de couverture';
+                        } else {
+                            // Crédit Check
+                            if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK) {
+                                $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', (int) $cover['amount']);
+
+                                if (empty($err_update)) {
+                                    $success .= $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'] . '<br/>';
+                                    // Il y a un crédit check, donc la limite de crédit n'existe pas/plus
+                                    if ($this->getData('outstanding_limit_atradius') > 0)
+                                        $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
+                                    if ((int) $cover['amount'] != $this->getData('outstanding_limit_credit_check')) {
+                                        foreach ($this->getCommerciauxArray() as $id_commercial => $inut) {
+                                            $this->addNote($success,
+                                                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                                           BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    $errors = BimpTools::merge_array($errors, $err_update);
+                                }
+
+                                // Crédit Limit
+                            } elseif ($cover['cover_type'] == AtradiusAPI::CREDIT_LIMIT) {
+                                $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', (int) $cover['amount']);
+                                if (empty($err_update)) {
+                                    $success .= $this->displayFieldName('outstanding_limit_atradius') . " : " . (int) $cover['amount'] . '<br/>';
+                                    if ((int) $cover['amount'] != $this->getData('outstanding_limit_atradius')) {
+                                        foreach ($this->getCommerciauxArray() as $id_commercial => $inut) {
+                                            $this->addNote($success,
+                                                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                                           BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    $errors = BimpTools::merge_array($errors, $err_update);
+                                }
+                            }
+
+                            // Couverture limitée dans le temps
+                            if (key_exists('date_expire', $cover)) {
+                                $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_atradius', $cover['date_expire']);
+                                if (empty($err_update)) {
+                                    $success .= $this->displayFieldName('date_atradius') . " : " . $this->displayData('date_atradius') . '<br/>';
+                                } else {
+                                    $errors = BimpTools::merge_array($errors, $err_update);
+                                }
+                            }
+                        }
+                    }
+
+                    // Status de la demande
+                    if (isset($cover['status'])) {
+                        BimpTools::merge_array($errors, self::updateAtradiusValue($this->getData('siren'), 'status_atradius', (int) $cover['status']));
+                    }
+                }
+            } else {
+                $errors[] = "API non définit";
+            }
+        } else {
+            $errors[] = "ID atradius absent : impossible de rafraîchir les données Atradius pour ce client";
+        }
+
+        return $errors;
+    }
+
+    public function setOutstandingAtradius($amount = 7000, &$warnings = array(), &$success = '')
+    {
+        /**
+         * La nature de la demande de couverture (credit check ou limit de crédit)
+         * est définit automatiquement dans la fonction
+         * Si $amount <= 7000: credit check
+         * Si 7000 <= $amount <= 12000: credit check + limite de credit
+         * Sinon: limite de crédit
+         * 
+         * Pas d'appel d'API ici juste on set (voir askOutstandingAtradius)
+         */
+        $errors = array();
+
+        $id_atradius = $this->getIdAtradius($errors);
+        if (0 < (int) $id_atradius) {
+
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('atradius');
+
+            if (is_a($api, 'AtradiusAPI')) {
+
+                $warnings_doublon = array();
+
+                $decisions = $api->setCovers(array(
+                    'buyerId'           => (int) $id_atradius,
+                    'creditLimitAmount' => (int) $amount,
+                    'customerRefNumber' => $this->getData('code_client')
+                        ), $errors, $warnings, $success);
+
+                foreach ($decisions as $d) {
+                    if (in_array($d['status'], array(self::STATUS_ATRADIUS_OK, self::STATUS_ATRADIUS_EN_ATTENTE))) {
+                        $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_demande_atradius', date('Y-m-d H:i:s'));
+                        $errors = BimpTools::merge_array($errors, $err_update);
+                        break;
+                    }
+                }
+
+
+                if (!empty($decisions)) {
+                    $this->syncroAtradius($warnings_doublon, $success);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    private static function updateAtradiusValue($siren, $field, $value)
+    {
+        $errors = $warnings = array();
+
+        // On est en train de définir une limite de crédit => supression du crédit check
+        if ($field == 'outstanding_limit_atradius' and 0 < $value)
+            $errors = self::updateAtradiusValue($siren, 'outstanding_limit_credit_check', -1);
+
+
+        $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
+
+        foreach ($clients as $c) {
+            if ($c->field_exists($field)) {
+                if ($c->getInitData($field) != $value) {
+                    if ($field == 'date_atradius') {
+                        $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
+                    } else {
+//                        if($value > 0 || $c->getInitData($field) < 1)
+                        $errors = BimpTools::merge_array($errors, $c->set($field, $value));
+//                        else{
+//                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_icba', $value));
+//                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_credit_check', $value));
+//                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_atradius', $value));
+//                        }
+                        $errors = BimpTools::merge_array($errors, $c->update($warnings, true));
+                    }
+                }
+            }
+        }
+
+        $errors = BimpTools::merge_array($errors, $warnings);
+        return $errors;
+    }
+
+    public static function updateAtradiusStatus(&$errors = array(), &$warnings = array(), &$success = '')
+    {
+
+        $nb_update = 0;
+
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+        $api = BimpAPI::getApiInstance('atradius');
+        if (!is_a($api, 'AtradiusAPI')) {
+            $errors[] = 'Impossible de trouver la classe AtradiusAPI';
+            return $nb_update;
+        }
+
+        $filters = array(
+            'status_atradius' => self::STATUS_ATRADIUS_EN_ATTENTE
+        );
+        $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', $filters);
+
+        foreach ($clients as $c) {
+
+            $init_status = $c->getData('status_atradius');
+            $init_limit = $c->getData('outstanding_limit_atradius');
+
+            // Table-header
+            $success .= "<table class='table table-bordered table-hover'><thead>";
+            $success .= "<tr><th>" . $c->getNomUrl() . "</th><th>Satus</th><th>Limite</th></tr></thead>";
+
+            // Ligne avant MAJ
+            $success .= "<tbody><tr><td>Avant MAJ</td><td>" . $c->displayData('status_atradius') . '</td><td>' . BimpTools::displayMoneyValue((float) $c->getData('outstanding_limit_atradius')) . '</td></tr>';
+
+            // MAJ
+            $c->syncroAtradius($warnings);
+
+            // Ligne avant MAJ
+            $success .= "<tr><td>Après MAJ</td><td>" . $c->displayData('status_atradius') . '</td><td>' . BimpTools::displayMoneyValue((float) $c->getData('outstanding_limit_atradius')) . '</td></tr></tbody></table>';
+
+            $new_status = $c->getData('status_atradius');
+            $new_limit = $c->getData('outstanding_limit_atradius');
+            if ((int) $init_status != (int) $new_status or (int) $init_limit != (int) $new_limit) {
+
+                $msg = "Le statut Atradius de ce client est passé de " . self::displayAtradiusStatus($init_status) . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $init_limit) . ') ';
+                $msg .= " à " . self::displayAtradiusStatus($new_status) . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $new_limit) . ') ';
+
+                BimpObject::loadClass('bimpcore', 'BimpNote');
+
+                $c->addNote($msg,
+                            BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                            BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'));
+
+                $nb_update++;
+            }
+        }
+
+        return $nb_update;
+    }
+
+    public static function updateAllAtradius($from, &$errors = array(), &$warnings = array(), &$success = '')
+    {
+
+        $nb_update = 0;
+        $syncro_sans_maj = $syncro_avec_maj = '';
+
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+        $api = BimpAPI::getApiInstance('atradius');
+        if (!is_a($api, 'AtradiusAPI')) {
+            $errors[] = 'Impossible de trouver la classe AtradiusAPI';
+            return $nb_update;
+        }
+
+        $filters = array(
+            'buyerRatingUpdatedAfter' => $from
+        );
+
+        $buyers = $api->getMyBuyer2($filters, $errors);
+
+        foreach ($buyers['data'] as $b) {
+            $id_client = (int) self::getBdb()->getValue('societe', 'rowid', 'id_atradius = ' . $b['buyerId']);
+            $c = BimpObject::getInstance('bimpcore', 'Bimp_Client', $id_client);
+
+            if ($c->isLoaded()) {
+
+//                if ((int) $c->getData('status_atradius') == (int) Bimp_Client::STATUS_ATRADIUS_OK) {
+
+                $init_credit_check = $c->getInitData('outstanding_limit_credit_check');
+                $init_credit_limit = $c->getInitData('outstanding_limit_atradius');
+
+                // MAJ
+                $c->syncroAtradius($warnings);
+                $c = BimpObject::getInstance('bimpcore', 'Bimp_Client', $id_client);
+
+                $new_credit_check = $c->getData('outstanding_limit_credit_check');
+                $new_credit_limit = $c->getData('outstanding_limit_atradius');
+
+                $cond_cc = (int) $init_credit_check != (int) $new_credit_check;
+                $cond_limit = (int) $init_credit_limit != (int) $new_credit_limit;
+
+                // Changement du crédit check ou de la limite de crédit
+                if ($cond_cc or $cond_limit) {
+                    $msg = '';
+                    if ($cond_cc) {
+                        $msg .= "Atradius a modifié le crédit check de ce client ";
+                        $msg .= "(de " . $init_credit_check . '€ à ' . $new_credit_check . "€)";
+                    }
+                    if ($cond_limit) {
+                        if ($msg != '')
+                            $msg .= '<br/>';
+                        $msg .= "Atradius a modifié la limite de crédit de ce client ";
+                        $msg .= "(de " . $init_credit_limit . '€ à ' . $new_credit_limit . "€)";
+                    }
+
+                    BimpObject::loadClass('bimpcore', 'BimpNote');
+
+                    $syncro_avec_maj .= $c->getNomUrl() . " " . $msg . '<br/>';
+
+                    $c->addNote($msg,
+                                BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'));
+
+                    foreach ($c->getCommerciauxArray() as $id_commercial => $inut) {
+                        $c->addNote($msg,
+                                    BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                    BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
+                        break;
+                    }
+
+                    $nb_update++;
+                } else {
+                    $syncro_sans_maj .= $c->getNomUrl() . ' Syncro faite, aucun changement<br/>';
+                }
+//                }
+            }
+        }
+
+        $success .= "Syncro <strong>AVEC</strong> mise à jour:<br/>" . $syncro_avec_maj . '<br/><br/>';
+        $success .= "Syncro <strong>SANS</strong> mise à jour:<br/>" . $syncro_sans_maj . '<br/><br/>';
+
+        return $nb_update;
+    }
+
     // Actions:
 
     public function actionRelancePaiements($data, &$success)
@@ -3049,6 +3472,36 @@ class Bimp_Client extends Bimp_Societe
         );
     }
 
+    public function actionSetOutstandingAtradius($data, &$success)
+    {
+        $warnings = array();
+
+        $errors = $this->setOutstandingAtradius($data['montant_atradius'], $warnings, $success);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionRefreshOutstandingAtradius($data, &$success)
+    {
+        $errors = $warnings = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = "Objet non chargé";
+        } else {
+            $errors = $this->syncroAtradius($warnings, $success);
+            if ($success == '')
+                $success .= "Aucune modification apportée";
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides:
 
     public function validate()
@@ -3180,433 +3633,5 @@ class Bimp_Client extends Bimp_Societe
                 }
             }
         }
-    }
-
-    public function displayFormAtradius()
-    {
-
-
-        $html = '';
-
-        if ($this->isLoaded()) {
-
-            if ((int) $this->getData('id_atradius') == 0 and (int) !$this->isSirenValid()) {
-                $html .= BimpRender::renderAlerts('SIREN et identifiants Atradius non renseignés/invalides', 'info');
-                return $html;
-            }
-
-            // Rafraichissement encours
-            $onclick_reload = $this->getJsActionOnclick('refreshOutstandingAtradius');
-
-            $html .= '<div>';
-            $html .= '<span class="btn btn-default" onclick="' . $onclick_reload . '">';
-            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Rafraîchir Atradius';
-            $html .= '</span>';
-
-            global $user;
-
-            if ($user->rights->bimpcommercial->admin_financier) {
-                // Demande d'encours
-                $onclick = $this->getJsActionOnclick('setOutstandingAtradius', array(), array('form_name' => 'setOutstandingAtradius'));
-
-                $html .= '<div style="margin-top: 10px">';
-                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Interroger Atradius';
-                $html .= '</span>';
-                $html .= BimpRender::renderAlerts("Merci de ne pas fermer la fenêtre lors de la demande d'assurance", 'info');
-                $html .= '</div>';
-            }
-        }
-
-        return $html;
-    }
-
-    public function actionSetOutstandingAtradius($data, &$success)
-    {
-        $warnings = array();
-
-        $errors = $this->setOutstandingAtradius($data['montant_atradius'], $warnings, $success);
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    // Raffraichit depuis les données présentes dans l'API Atradius
-    public function actionRefreshOutstandingAtradius($data, &$success)
-    {
-
-        $errors = $warnings = array();
-
-        if (!$this->isLoaded()) {
-            $errors[] = "Objet non chargé";
-        } else {
-            $errors = $this->syncroAtradius($warnings, $success);
-            if ($success == '')
-                $success .= "Aucune modification apportée";
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function syncroAtradius(&$warnings = array(), &$success = '')
-    {
-        $success .= '';
-        $errors = array();
-        $id_atradius = $this->getIdAtradius($errors);
-        BimpObject::loadClass('bimpcore', 'BimpNote');
-        if (0 < (int) $id_atradius) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-            $api = BimpAPI::getApiInstance('atradius');
-            if (is_a($api, 'AtradiusAPI')) {
-                $cover = $api->getCover(array('buyerId' => $id_atradius), $errors, $warnings);
-
-                if (empty($cover)) {
-                    $warnings[] = "Aucune couverture pour ce client.";
-                    $cover['amount'] = 0;
-//                    return $errors;
-                }
-
-                if (is_array($cover) and!empty($cover)) {
-
-
-                    if (isset($cover['amount'])) {
-                        if ($cover['amount'] == 0) {
-                            if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK || $this->getData('outstanding_limit_credit_check') > 0)
-                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
-                            if ($cover['cover_type'] == 'credit-limit' || $this->getData('outstanding_limit_atradius') > 0)
-                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
-//                            if ($this->getData('outstanding_limit_icba') > 0)
-//                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_icba', 0);
-                            $success = 'Pas de couverture';
-                        } else {
-                            // Crédit Check
-                            if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK) {
-                                $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', (int) $cover['amount']);
-
-                                if (empty($err_update)) {
-                                    $success .= $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'] . '<br/>';
-                                    // Il y a un crédit check, donc la limite de crédit n'existe pas/plus
-                                    if($this->getData('outstanding_limit_atradius') > 0)
-                                        $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
-                                    if ((int) $cover['amount'] != $this->getData('outstanding_limit_credit_check')) {
-                                        foreach ($this->getCommerciauxArray() as $id_commercial => $inut) {
-                                            $this->addNote($success,
-                                                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                                                           BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    $errors = BimpTools::merge_array($errors, $err_update);
-                                }
-
-                                // Crédit Limit
-                            } elseif ($cover['cover_type'] == AtradiusAPI::CREDIT_LIMIT) {
-                                $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', (int) $cover['amount']);
-                                if (empty($err_update)) {
-                                    $success .= $this->displayFieldName('outstanding_limit_atradius') . " : " . (int) $cover['amount'] . '<br/>';
-                                    if ((int) $cover['amount'] != $this->getData('outstanding_limit_atradius')) {
-                                        foreach ($this->getCommerciauxArray() as $id_commercial => $inut) {
-                                            $this->addNote($success,
-                                                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                                                           BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    $errors = BimpTools::merge_array($errors, $err_update);
-                                }
-                            }
-
-                            // Couverture limitée dans le temps
-                            if (key_exists('date_expire', $cover)) {
-                                $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_atradius', $cover['date_expire']);
-                                if (empty($err_update)) {
-                                    $success .= $this->displayFieldName('date_atradius') . " : " . $this->displayData('date_atradius') . '<br/>';
-                                } else {
-                                    $errors = BimpTools::merge_array($errors, $err_update);
-                                }
-                            }
-                        }
-                    }
-
-                    // Status de la demande
-                    if (isset($cover['status'])) {
-                        BimpTools::merge_array($errors, self::updateAtradiusValue($this->getData('siren'), 'status_atradius', (int) $cover['status']));
-                    }
-                }
-            } else {
-                $errors[] = "API non définit";
-            }
-        } else {
-            $errors[] = "Id atradius non définit";
-        }
-
-        return $errors;
-    }
-
-    private static function updateAtradiusValue($siren, $field, $value)
-    {
-        $errors = $warnings = array();
-
-        // On est en train de définir une limite de crédit => supression du crédit check
-        if ($field == 'outstanding_limit_atradius' and 0 < $value)
-            $errors = self::updateAtradiusValue($siren, 'outstanding_limit_credit_check', -1);
-
-
-        $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
-
-        foreach ($clients as $c) {
-            if ($c->field_exists($field)) {
-                if ($c->getInitData($field) != $value) {
-                    if ($field == 'date_atradius') {
-                        $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
-                    } else {
-//                        if($value > 0 || $c->getInitData($field) < 1)
-                        $errors = BimpTools::merge_array($errors, $c->set($field, $value));
-//                        else{
-//                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_icba', $value));
-//                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_credit_check', $value));
-//                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_atradius', $value));
-//                        }
-                        $errors = BimpTools::merge_array($errors, $c->update($warnings, true));
-                    }
-                }
-            }
-        }
-
-        $errors = BimpTools::merge_array($errors, $warnings);
-        return $errors;
-    }
-
-    /**
-     * La nature de la demande de couverture (credit check ou limit de crédit)
-     * est définit automatiquement dans la fonction
-     * Si $amount <= 7000: credit check
-     * Si 7000 <= $amount <= 12000: credit check + limite de credit
-     * Sinon: limite de crédit
-     * 
-     * Pas d'appel d'API ici juste on set (voir askOutstandingAtradius)
-     */
-    public function setOutstandingAtradius($amount = 7000, &$warnings = array(), &$success = '')
-    {
-
-        $errors = array();
-
-        $id_atradius = $this->getIdAtradius($errors);
-        if (0 < (int) $id_atradius) {
-
-            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-            $api = BimpAPI::getApiInstance('atradius');
-
-            if (is_a($api, 'AtradiusAPI')) {
-
-                $warnings_doublon = array();
-
-                $decisions = $api->setCovers(array(
-                    'buyerId'           => (int) $id_atradius,
-                    'creditLimitAmount' => (int) $amount,
-                    'customerRefNumber' => $this->getData('code_client')
-                        ), $errors, $warnings, $success);
-
-                foreach ($decisions as $d) {
-                    if (in_array($d['status'], array(self::STATUS_ATRADIUS_OK, self::STATUS_ATRADIUS_EN_ATTENTE))) {
-                        $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_demande_atradius', date('Y-m-d H:i:s'));
-                        $errors = BimpTools::merge_array($errors, $err_update);
-                        break;
-                    }
-                }
-
-
-                if (!empty($decisions)) {
-                    $this->syncroAtradius($warnings_doublon, $success);
-                }
-            }
-        }
-
-        return $errors;
-    }
-
-    public function getIdAtradius(&$errors = array())
-    {
-
-        if (0 < (int) $this->getData('id_atradius'))
-            return (int) $this->getData('id_atradius');
-
-        if ($this->isSirenValid()) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-            $api = BimpAPI::getApiInstance('atradius');
-            if (is_a($api, 'AtradiusAPI')) {
-                $id_atradius = (int) $api->getBuyerIdBySiren((string) $this->getData('siren'), $errors);
-                if (0 < (int) $id_atradius) {
-                    $this->updateField('id_atradius', $id_atradius);
-                } else {
-                    $errors[] = "Id Atradius introuvable";
-                }
-                return $id_atradius;
-            } else {
-                $errors[] = "API inatégniable";
-            }
-        }
-
-        $errors[] = "Id adtradius non définie et SIREN erroné/non définit";
-        return 0;
-    }
-
-    public function isSirenValid()
-    {
-        if ($this->isLoaded()) {
-            return (string) $this->getData('siren') and (int) strlen($this->getData('siren')) == 9;
-        }
-
-        return 0;
-    }
-
-    public static function updateAtradiusStatus(&$errors = array(), &$warnings = array(), &$success = '')
-    {
-
-        $nb_update = 0;
-
-        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-        $api = BimpAPI::getApiInstance('atradius');
-        if (!is_a($api, 'AtradiusAPI')) {
-            $errors[] = 'Impossible de trouver la classe AtradiusAPI';
-            return $nb_update;
-        }
-
-        $filters = array(
-            'status_atradius' => self::STATUS_ATRADIUS_EN_ATTENTE
-        );
-        $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', $filters);
-
-        foreach ($clients as $c) {
-
-            $init_status = $c->getData('status_atradius');
-            $init_limit = $c->getData('outstanding_limit_atradius');
-
-            // Table-header
-            $success .= "<table class='table table-bordered table-hover'><thead>";
-            $success .= "<tr><th>" . $c->getNomUrl() . "</th><th>Satus</th><th>Limite</th></tr></thead>";
-
-            // Ligne avant MAJ
-            $success .= "<tbody><tr><td>Avant MAJ</td><td>" . $c->displayData('status_atradius') . '</td><td>' . BimpTools::displayMoneyValue((float) $c->getData('outstanding_limit_atradius')) . '</td></tr>';
-
-            // MAJ
-            $c->syncroAtradius($warnings);
-
-            // Ligne avant MAJ
-            $success .= "<tr><td>Après MAJ</td><td>" . $c->displayData('status_atradius') . '</td><td>' . BimpTools::displayMoneyValue((float) $c->getData('outstanding_limit_atradius')) . '</td></tr></tbody></table>';
-
-            $new_status = $c->getData('status_atradius');
-            $new_limit = $c->getData('outstanding_limit_atradius');
-            if ((int) $init_status != (int) $new_status or (int) $init_limit != (int) $new_limit) {
-
-                $msg = "Le statut Atradius de ce client est passé de " . self::displayAtradiusStatus($init_status) . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $init_limit) . ') ';
-                $msg .= " à " . self::displayAtradiusStatus($new_status) . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $new_limit) . ') ';
-
-                BimpObject::loadClass('bimpcore', 'BimpNote');
-
-                $c->addNote($msg,
-                            BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                            BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'));
-
-                $nb_update++;
-            }
-        }
-
-        return $nb_update;
-    }
-
-    private static function displayAtradiusStatus($value)
-    {
-        return '<span class="' . self::$status_atradius[$value]['classes'][0] . '">' . self::$status_atradius[$value]['label'] . '</span>';
-    }
-
-    public static function updateAllAtradius($from, &$errors = array(), &$warnings = array(), &$success = '')
-    {
-
-        $nb_update = 0;
-        $syncro_sans_maj = $syncro_avec_maj = '';
-
-        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-        $api = BimpAPI::getApiInstance('atradius');
-        if (!is_a($api, 'AtradiusAPI')) {
-            $errors[] = 'Impossible de trouver la classe AtradiusAPI';
-            return $nb_update;
-        }
-
-        $filters = array(
-            'buyerRatingUpdatedAfter' => $from
-        );
-
-        $buyers = $api->getMyBuyer2($filters, $errors);
-
-        foreach ($buyers['data'] as $b) {
-            $id_client = (int) self::getBdb()->getValue('societe', 'rowid', 'id_atradius = ' . $b['buyerId']);
-            $c = BimpObject::getInstance('bimpcore', 'Bimp_Client', $id_client);
-
-            if ($c->isLoaded()) {
-
-//                if ((int) $c->getData('status_atradius') == (int) Bimp_Client::STATUS_ATRADIUS_OK) {
-
-                    $init_credit_check = $c->getInitData('outstanding_limit_credit_check');
-                    $init_credit_limit = $c->getInitData('outstanding_limit_atradius');
-
-                    // MAJ
-                    $c->syncroAtradius($warnings);
-                    $c = BimpObject::getInstance('bimpcore', 'Bimp_Client', $id_client);
-
-                    $new_credit_check = $c->getData('outstanding_limit_credit_check');
-                    $new_credit_limit = $c->getData('outstanding_limit_atradius');
-
-                    $cond_cc = (int) $init_credit_check != (int) $new_credit_check;
-                    $cond_limit = (int) $init_credit_limit != (int) $new_credit_limit;
-
-                    // Changement du crédit check ou de la limite de crédit
-                    if ($cond_cc or $cond_limit) {
-                        $msg = '';
-                        if ($cond_cc) {
-                            $msg .= "Atradius a modifié le crédit check de ce client ";
-                            $msg .= "(de " . $init_credit_check . '€ à ' . $new_credit_check . "€)";
-                        }
-                        if ($cond_limit) {
-                            if ($msg != '')
-                                $msg .= '<br/>';
-                            $msg .= "Atradius a modifié la limite de crédit de ce client ";
-                            $msg .= "(de " . $init_credit_limit . '€ à ' . $new_credit_limit . "€)";
-                        }
-
-                        BimpObject::loadClass('bimpcore', 'BimpNote');
-
-                        $syncro_avec_maj .= $c->getNomUrl() . " " . $msg . '<br/>';
-
-                        $c->addNote($msg,
-                                    BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                                    BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'));
-
-                        foreach ($c->getCommerciauxArray() as $id_commercial => $inut) {
-                            $c->addNote($msg,
-                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                                        BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
-                            break;
-                        }
-
-                        $nb_update++;
-                    } else {
-                        $syncro_sans_maj .= $c->getNomUrl() . ' Syncro faite, aucun changement<br/>';
-                    }
-//                }
-            }
-        }
-
-        $success .= "Syncro <strong>AVEC</strong> mise à jour:<br/>" . $syncro_avec_maj . '<br/><br/>';
-        $success .= "Syncro <strong>SANS</strong> mise à jour:<br/>" . $syncro_sans_maj . '<br/><br/>';
-
-        return $nb_update;
     }
 }

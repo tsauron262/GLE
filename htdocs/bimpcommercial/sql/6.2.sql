@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_commande_line` ADD `periodicity_extra_params` TEXT NOT NULL DEFAULT '';

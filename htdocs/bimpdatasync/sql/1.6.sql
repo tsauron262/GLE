@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bds_report` ADD `code` VARCHAR (30) NOT NULL DEFAULT ''; 

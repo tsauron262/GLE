@@ -65,20 +65,14 @@ class ActionsBimpsupport
 
     function afficherMenu($context)
     {
+        if (!defined('BIMP_LIB')) {
+            require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+        }
+        
         global $conf, $user, $db;
         $return = '';
 
-        $mode_eco = true;
-        if (defined('BIMP_LIB')) {
-            $mode_eco = (int) BimpCore::getConf('mode_eco');
-        } else {
-            $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'mode_eco\' AND module = \'bimpcore\'');
-            if ($res && $db->num_rows($res)) {
-                $obj = $db->fetch_object($res);
-                $mode_eco = (int) $obj->value;
-                $db->free($res);
-            }
-        }
+        $mode_eco = (int) BimpCore::getConf('mode_eco');
 
         //consigne commande
         // ??? 
@@ -101,10 +95,10 @@ class ActionsBimpsupport
 //        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
 //        $groupSav = new UserGroup($db);
 //        $groupSav->fetch('', "XX SAV");
-        if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
+        if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id) || userInGroupe("SAV", $user->id)) {
             $hrefFin = "";
 
-            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
             global $tabCentre;
             $allCentre = false;
             if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre

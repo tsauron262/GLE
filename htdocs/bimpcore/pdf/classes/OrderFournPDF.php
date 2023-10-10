@@ -98,10 +98,11 @@ class OrderFournPDF extends BimpCommDocumentPDF
             switch ($this->bimpCommObject->getData('delivery_type')) {
                 case Bimp_CommandeFourn::DELIV_ENTREPOT:
                 default:
+                    global $mysoc;
                     $entrepot = $this->bimpCommObject->getChildObject('entrepot');
                     if (BimpObject::objectLoaded($entrepot)) {
                         if ($entrepot->address) {
-                            $html .= 'BIMP<br/>'.$entrepot->address . '<br/>';
+                            $html .= $mysoc->name.'<br/>'.$entrepot->address . '<br/>';
                             if ($entrepot->zip) {
                                 $html .= $entrepot->zip . ' ';
                             } else {
@@ -188,12 +189,12 @@ class OrderFournPDF extends BimpCommDocumentPDF
 
         // Date: 
         if (!empty($this->commande->date)) {
-            $html .= '<span style="font-weight: bold;">Date : </span>' . dol_print_date(strtotime($this->commande->date), "day", false, $this->langs) . '<br/>';
+            $html .= '<span style="font-weight: bold;">Date : </span>' . dol_print_date($this->commande->date, "day", false, $this->langs) . '<br/>';
         }
 
         // Date de livraison: 
         if (!empty($this->commande->date_livraison)) {
-            $html .= '<span style="font-weight: bold;">Date de livraison: </span>' . dol_print_date(strtotime($this->commande->date_livraison), "day", false, $this->langs) . '<br/>';
+            $html .= '<span style="font-weight: bold;">Date de livraison: </span>' . dol_print_date($this->commande->date_livraison, "day", false, $this->langs) . '<br/>';
         }
 
         // Code fournisseur: 

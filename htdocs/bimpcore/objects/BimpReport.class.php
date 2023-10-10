@@ -6,6 +6,11 @@ class BimpReport extends BimpObject
     public static $types = array();
 
     // Getters: 
+    
+    public function getRefProperty()
+    {
+        return '';
+    }
 
     public function getNbLinesByType($type = 'danger')
     {

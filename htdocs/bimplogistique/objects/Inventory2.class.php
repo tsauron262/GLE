@@ -84,37 +84,33 @@ HAVING scan_exp != scan_det";
             return BimpRender::renderAlerts($errors);
     }
 
-    public function fetch($id, $parent = null)
-    {
-        $return = parent::fetch($id, $parent);
-        return $return;
-    }
-
     public function displayCompletion()
     {
         $percent = 0;
         $return = '';
         $info = "";
-//        if ($this->getData('status') == self::STATUS_OPEN) {
-            $sql = $this->db->db->query('SELECT SUM(IF(`qty_scanned` > 0, qty_scanned, 0)) as scan, SUM(IF(`qty` > 0, qty, 0)) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = ' . $this->id);
+
+        $sql = $this->db->db->query('SELECT SUM(IF(`qty_scanned` > 0, qty_scanned, 0)) as scan, SUM(IF(`qty` > 0, qty, 0)) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = ' . $this->id);
+
+        if (is_object($sql)) {
             if ($this->db->db->num_rows($sql)) {
                 $ln = $this->db->db->fetch_object($sql);
                 if ($ln->scan > 0 && $ln->att > 0)
                     $percent = $ln->scan / $ln->att * 100;
                 $info = $ln->scan . ' / ' . $ln->att;
             }
-//        } elseif ($this->getData('status') == self::STATUS_CLOSED)
-//            $percent = 100;
+        }
 
         $return = price($percent) . ' %';
-        if ($info != "")
+
+        if ($info != "") {
             $return .= ' (' . $info . ')';
+        }
         return $return;
     }
 
     public function create(&$warnings = array(), $force_create = false)
     {
-
         $errors = array();
         $ids_prod = array();
 
@@ -132,13 +128,10 @@ HAVING scan_exp != scan_det";
             return $errors;
         }
 
-
-
         $warehouse_and_type = BimpTools::getValue('warehouse_and_type');
-        unset($warehouse_and_type[0]);
 
         // Définition de l'entrepot par défault
-        list($w_main, $t_main) = explode('_', $warehouse_and_type[1]);
+        list($w_main, $t_main) = explode('_', $warehouse_and_type[0]);
         $this->data['fk_warehouse'] = (int) $w_main;
         $this->data['type'] = (int) $t_main;
 
@@ -146,17 +139,31 @@ HAVING scan_exp != scan_det";
             return $errors;
 
         // Création de l'inventaire
-        $errors = BimpTools::merge_array($errors, parent::create($warnings, $force_create));
+        $errors = parent::create($warnings, $force_create);
 
-        // Création des packages
-        $errors = BimpTools::merge_array($errors, $this->createPackageVol());
-        $errors = BimpTools::merge_array($errors, $this->createPackageNouveau());
+        if (!count($errors)) {
+            // Création des packages
+            $err = $this->createPackageVol();
+            if (count($err)) {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la création du package "Vol"');
+            }
 
-        // MAJ des champ id_package_vol et id_package_nouveau
-        $errors = BimpTools::merge_array($errors, $this->updateField('id_package_vol', $this->temp_package_vol));
-        $errors = BimpTools::merge_array($errors, $this->updateField('id_package_nouveau', $this->temp_package_nouveau));
+            $err = $this->createPackageNouveau();
+            if (count($err)) {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la création du package "Nouveau"');
+            }
 
-        $errors = BimpTools::merge_array($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
+            $err = $this->createWarehouseType($warehouse_and_type, $w_main, $t_main);
+            if (count($err)) {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la création du (des) emplacement(s)');
+            }
+
+            if (!count($errors)) {
+                $this->updateField('id_package_vol', $this->temp_package_vol);
+                $this->updateField('id_package_nouveau', $this->temp_package_nouveau);
+            }
+        }
+
 
         return $errors;
     }
@@ -364,12 +371,12 @@ HAVING scan_exp != scan_det";
 
         return 0;
     }
-    
     /*
      * Requiert de faire
      * $init_filters = $this->getFiltersValue();
      * avant de modifier les filtres
      */
+
     public function resetFilters($init_filters, $init_has_filter)
     {
         foreach ($init_filters as $field => $value)
@@ -465,30 +472,33 @@ HAVING scan_exp != scan_det";
 
         foreach ($this->filters_radical as $radical) {
 
-            $inter = array_intersect(${'incl_' . $radical}, ${'excl_' . $radical});
+            if (isset(${'incl_' . $radical}) && is_array(${'incl_' . $radical}) &&
+                    isset(${'excl_' . $radical}) && is_array(${'excl_' . $radical})) {
+                $inter = array_intersect(${'incl_' . $radical}, ${'excl_' . $radical});
 
-            if (!empty($inter)) {
+                if (!empty($inter)) {
 
-                if ($radical == 'product') {
+                    if ($radical == 'product') {
 
-                    foreach ($inter as $id_prod) {
+                        foreach ($inter as $id_prod) {
 
-                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+                            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
 
-                        $errors[] = "La ref " . $prod->getRef()
-                                . " du champ produit est présente dans les inclusions et les exlusions"
-                                . ", merci de corriger.";
+                            $errors[] = "La ref " . $prod->getRef()
+                                    . " du champ produit est présente dans les inclusions et les exlusions"
+                                    . ", merci de corriger.";
+                        }
+                    } else {
+
+                        self::loadClass('bimpcore', 'Bimp_Product');
+                        $select_options = Bimp_Product::getProductsTagsByTypeArray($radical);
+
+                        foreach ($inter as $id_option)
+                            $errors[] = "L'entrée " . $select_options[$id_option]
+                                    . " du champ " . $radical
+                                    . " est présente dans les inclusions et les exlusions"
+                                    . ", merci de corriger.";
                     }
-                } else {
-
-                    self::loadClass('bimpcore', 'Bimp_Product');
-                    $select_options = Bimp_Product::getProductsTagsByTypeArray($radical);
-
-                    foreach ($inter as $id_option)
-                        $errors[] = "L'entrée " . $select_options[$id_option]
-                                . " du champ " . $radical
-                                . " est présente dans les inclusions et les exlusions"
-                                . ", merci de corriger.";
                 }
             }
         }
@@ -498,7 +508,6 @@ HAVING scan_exp != scan_det";
 
     public function getPostedFilterData()
     {
-
         $incl_categorie = BimpTools::getPostFieldValue('incl_categorie');
         $excl_categorie = BimpTools::getPostFieldValue('excl_categorie');
 
@@ -1157,6 +1166,11 @@ HAVING scan_exp != scan_det";
 
             $wt_obj = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $id_wt);
 
+            if (!BimpObject::objectLoaded($wt_obj)) {
+                $html .= BimpRender::renderAlerts('L\'entrepôt / type #' . $id_wt . ' n\'existe plus');
+                continue;
+            }
+
             $errors = '<h2>' . $wt_obj->renderName() . '</h2>';
             $has_diff = false;
 
@@ -1174,9 +1188,11 @@ HAVING scan_exp != scan_det";
                     $placeReel = $equipment->getCurrentPlace();
                     $msg = '';
 
-                    if ($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
+                    if (!BimpObject::objectLoaded($placeReel)) {
+                        $msg .= 'Aucun emplacement actuel pour l\'équipement ' . $equipment->getLink();
+                    } elseif ($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
                         $msg .= 'L\'équipement ' . $equipment->getNomUrl() . ' n\'est plus dans le dépot <strong>' . $wt_obj->displayData('fk_warehouse') . '</strong> mais dans le dépot <strong>' . $placeReel->displayData('id_entrepot') . '</strong>';
-                    if ((int) $wt_obj->getData('type') != (int) $placeReel->getData('type')) {
+                    elseif ((int) $wt_obj->getData('type') != (int) $placeReel->getData('type')) {
                         if ($msg == '')
                             $msg .= 'L\'équipement ' . $equipment->getNomUrl() . ' n\'est plus en emplacement de type <strong>' . $wt_obj->displayData('type') . '</strong> mais de type <strong>' . $placeReel->displayData('type') . '</strong>';
                         else
@@ -1391,7 +1407,11 @@ AND i.id=' . (int) $this->id;
                 $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
                 BimpObject::loadClass('bimpcore', 'BimpNote');
                 // Cet équipement a été déplacé entre temps
-                if ((int) $equip->getPlaceByDate($date_opening, $errors) != (int) $equip->getCurrentPlace()->getData('id')) {
+                $place = $equip->getCurrentPlace();
+                if(!isset($place)){
+                    $this->addObjectLog("L'équipement " . $equip->getData('serial') . " na pas d'emplacement.");
+                }
+                elseif ((int) $equip->getPlaceByDate($date_opening, $errors) != (int) $place->getData('id')) {
                     $this->addObjectLog("L'équipement " . $equip->getData('serial') . " a été déplacé après la date d'ouverture de l'inventaire.");
 
                     // Cet équipement a été volé

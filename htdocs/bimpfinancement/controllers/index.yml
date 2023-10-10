@@ -10,6 +10,10 @@ objects:
         instance: 
             bimp_object: BF_Refinanceur
             
+    lignes:
+        instance:
+            bimp_object: BF_Line
+            
 sections:
     - type: tabs
       tabs: 
@@ -30,3 +34,13 @@ sections:
                     list: 
                         panel: 1
                         object: refinanceurs
+                        
+          lignes:
+              label: Lignes de financements
+              icon: fas_university
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: lignes
+                        name: global

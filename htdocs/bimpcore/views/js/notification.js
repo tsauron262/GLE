@@ -27,6 +27,7 @@ class AbstractNotification {
             throw new Error('La classe abstraite "AbstractNotification" ne peut être instanciée.');
             return;
         }
+        
         this.id_max = 0;
         this.id_notification = id_notification;
         this.content = [];
@@ -39,6 +40,7 @@ class AbstractNotification {
 //        this.display_notification = true;
         if (bimp_storage.get(this.id_notification) === null)
             bimp_storage.set(this.id_notification, this.id_max);
+        
         this.init();
     }
 
@@ -51,10 +53,8 @@ class AbstractNotification {
 
         });
 
-
         // Fermeture des dropdown lors de cliques à côté
         $(document).click(function (e) {
-
             if (!$('#page_modal').hasClass('in') && $(e.target).attr('id') != 'page_modal') {
                 var $target = $(e.target);
                 if (!$target.closest(instance.parent_selector).length)
@@ -198,7 +198,6 @@ class AbstractNotification {
 
 
             this.elementAdded(nb_unread);
-
         }
 
     }
@@ -557,7 +556,7 @@ function BimpNotification() {
 
         for (const [id_notification, value] of Object.entries(this.notificationActive)) {
             var notification = this;
-            $.getScript(DOL_URL_ROOT + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
+            $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
                 eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '(' + value.id_notification + ');');
             });
 

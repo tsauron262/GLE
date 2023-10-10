@@ -6,6 +6,12 @@ if (!defined('BIMP_LIB')) {
     if (!defined('MOD_DEV')) {
         define('MOD_DEV', 0);
     }
+    if (!defined('ID_ERP')) {
+        define('ID_ERP', 1);
+    }
+    if (!defined('PATH_TMP')) {
+        define('PATH_TMP', DOL_DATA_ROOT);
+    }
 
     global $bimp_start_time;
     $bimp_start_time = round(microtime(1), 4);
@@ -68,7 +74,7 @@ if (!defined('BIMP_LIB')) {
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
     BimpCore::setMaxExecutionTime(600);
-    BimpCore::setMemoryLimit(256);
+    BimpCore::setMemoryLimit(1024);
 
     BimpObject::loadClass('bimpcore', 'BimpNote');
     BimpObject::loadClass('bimpcore', 'Bimp_Log');
@@ -91,8 +97,6 @@ if (!defined('BIMP_LIB')) {
             }
         }
     }
-//    elseif(!defined('BIMP_EXTENDS_ENTITY'))
-//        define('BIMP_EXTENDS_ENTITY', 'dev');
 
     if (defined('BIMP_EXTENDS_VERSION')) {
         $dir_version = DOL_DOCUMENT_ROOT . '/bimpcore/extends/versions/' . BIMP_EXTENDS_VERSION . '/';
@@ -114,10 +118,6 @@ if (!defined('BIMP_LIB')) {
 
 //    BimpConfig::initCacheServeur();
 }
-
-//if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
-//    BimpCore::setContext("private");
-//}
 
 function hookDebutFiche()
 {

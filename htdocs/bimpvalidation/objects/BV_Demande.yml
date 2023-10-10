@@ -1,0 +1,224 @@
+table: bv_demande
+icon: far_check-circle
+common_fields: 1
+
+labels: 
+    name: demande de validation
+    name_plur: demandes de validations
+    is_female: 1
+    
+header_btn: 
+    callback: getActionsButtons
+    
+objects:
+    user_demande: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_demande
+                
+    user_affected: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_affected
+                
+    user_validate:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_validate
+                
+fields: 
+    status: 
+        label: Status
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        
+    type_validation: 
+        label: Type de validation
+        values: 
+            array: typesValidations
+        required: 1
+            
+    type_object: 
+        label: Type objet
+        values: 
+            array: typesObjects
+        required: 1
+    
+    id_object: 
+        label: ID objet
+        type: id
+        required: 1
+        
+    id_user_demande: 
+        label: Demandée par
+        type: id_object
+        object: user_demande
+        default_value: 0
+        search: 
+            input:
+                type: search_user
+        
+    validation_users: 
+        label: Utilisateurs autorisés
+        type: items_list
+        items_data_type: id_object
+        object: user
+        items_sortable: 1
+        items_braces: 1
+        search: 
+            input:
+                type: search_user
+        
+    id_user_affected: 
+        label: Chargé de validation
+        type: id_object
+        object: user_affected
+        default_value: 0
+        search: 
+            input:
+                type: search_user
+        
+    id_user_validate: 
+        label: Validée / refusée par
+        type: id_object
+        object: user_validate
+        default_value: 0
+        search: 
+            input:
+                type: search_user
+        
+    date_validate: 
+        label: Date validation / refus
+        type: datetime
+        
+    comment: 
+        label: Commentaire
+        type: text
+        
+forms: 
+    refuse: 
+        title: Refus de la demande
+        rows: 
+            - custom: 1
+              label: Motif du refus
+              input_name: motif
+              input: 
+                  type: textarea
+                  auto_expand: 1
+                  rows: 3
+                  
+fields_tables: 
+    infos: 
+        title: Infos
+        rows: 
+            - field: type_validation
+            - label: Objet
+              value: 
+                  callback: displayObj
+            - label: Montant
+              value: 
+                  callback: displayObjVal
+            - label: Client
+              value: 
+                  callback: displayClient
+            - field: id_user_demande
+            - field: comment
+        
+    validation: 
+        title: Validation
+        rows: 
+            - field: id_user_affected
+            - field: validation_users
+            - field: id_user_validate
+            - field: date_validate
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: validation
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderLogsList
+                      
+filters_panels: 
+    default: 
+        filters: 
+            type_validation: 
+            type_object: 
+            status: 
+            id_user_demande:
+                
+lists_cols: 
+    obj: 
+        label: Pièce
+        value: 
+            callback: displayObj
+    val: 
+        label: Montant(s)
+        value: 
+            callback: displayObjVal
+    client: 
+        label: Client
+        value: 
+            callback: displayClient
+        search: 
+            input: 
+                type: search_societe
+            
+lists: 
+    default: 
+        title: Demandes de validation
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les demandes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        filters_panel: default
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        edit_btn: 0
+        delete_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getActionsButtons
+        cols: 
+            type_validation: 
+            obj: 
+            status: 
+            id_user_demande: 
+            validation_users: 
+            id_user_affected: 
+            id_user_validate: 
+            date_validate:
+                
+    obj: 
+        extends: default
+        cols: 
+            obj: unset
+            validation_users: unset
+            
+    user: 
+        extends: default
+        cols: 
+            validation_users: unset
+        

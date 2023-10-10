@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/BimpYmlGenerator.php';
+
 class BimpYml
 {
 
@@ -69,7 +71,7 @@ class BimpYml
                 }
 
                 if ($type === 'all' || $type === 'objects') {
-                    if(is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects'))
+                    if (is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects'))
                         foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects') as $f) {
                             if (in_array($f, array('.', '..'))) {
                                 continue;
@@ -88,7 +90,7 @@ class BimpYml
                 }
 
                 if ($type === 'all' || $type === 'controllers') {
-                    if(is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers'))
+                    if (is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers'))
                         foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers') as $f) {
                             if (in_array($f, array('.', '..'))) {
                                 continue;
@@ -103,7 +105,7 @@ class BimpYml
 
                                 $files[$value] = $m . ' - Controller: [bold]' . $matches[1] . '[/bold]';
                             }
-                        } 
+                        }
                 }
 
                 if ($type === 'all' || $type === 'configs') {
@@ -142,6 +144,8 @@ class BimpYml
 
             if ($param_value === 'unset') {
                 $params[$param_name]['unset_by'] = $file_idx;
+            } elseif (isset($param_value['unused']) && (int) $param_value['unused']) {
+                $params[$param_name]['unused_by'] = $file_idx;
             } else {
                 $params[$param_name]['file_idx'] = $file_idx;
 
@@ -293,30 +297,41 @@ class BimpYml
             $html .= BimpRender::renderAlerts($errors);
         }
 
+        $instance = BimpObject::getInstance($module, $name);
         $tabs[] = array(
             'id'      => 'analyser',
             'title'   => 'Analyseur YML',
-            'content' => self::renderAnalyserContent($params, 'objects')
+            'content' => self::renderAnalyserContent($params, 'objects', $instance)
         );
 
         $instance = BimpObject::getInstance($module, $name);
         $full_params = $instance->config->getParams('');
 
-//        $tabs[] = array(
-//            'id'      => 'full_params_formates',
-//            'title'   => 'Tous les paramètres (formaté)',
-//            'content' => BimpRender::renderRecursiveArrayContent($full_params, array(
-//                'title'    => 'Tous les paramètres après fusion',
-//                'foldable' => 1,
-//                'open'     => 0
-//            )),
-//        );
+        $tabs[] = array(
+            'id'      => 'full_params_formates',
+            'title'   => 'Tous les paramètres (formaté)',
+            'content' => BimpRender::renderRecursiveArrayContent($full_params, array(
+                'title'    => 'Tous les paramètres après fusion',
+                'foldable' => 1,
+                'open'     => 0
+            )),
+        );
 
         $tabs[] = array(
             'id'      => 'full_params_bruts',
             'title'   => 'Tous les paramètres (brut)',
             'content' => '<div><pre>' . print_r($full_params, 1) . '</pre></div>'
         );
+
+        $generator_content = BimpYmlGenerator::renderObjectYmlGeneratorView($module, $name);
+
+        if ($generator_content) {
+            $tabs[] = array(
+                'id'      => 'generator',
+                'title'   => 'Générateur',
+                'content' => $generator_content
+            );
+        }
 
         $html .= BimpRender::renderNavTabs($tabs, 'yml_analyser');
 
@@ -505,7 +520,7 @@ class BimpYml
         return $html;
     }
 
-    public static function renderAnalyserContent($params_files, $yml_type)
+    public static function renderAnalyserContent($params_files, $yml_type, $instance = null)
     {
         $html = '';
 
@@ -695,6 +710,8 @@ class BimpYml
 
                                 if ($param_value === 'unset') {
                                     $params['root'][$param_name]['unset_by'] = $file_idx;
+                                } elseif (isset($param_value['unused']) && (int) $param_value['unused']) {
+                                    $params['root'][$param_name]['unused_by'] = $file_idx;
                                 } else {
                                     $params['root'][$param_name]['file_idx'] = $file_idx;
 
@@ -740,6 +757,8 @@ class BimpYml
             $html .= '<div class="yml_analyser_params col-sm-12 col-md-9 col-lg-10">';
 
             foreach ($params as $section => $section_params) {
+                $is_obj_field = ($yml_type === 'objects' && $section === 'fields');
+
                 $html .= '<div class="yml_analyser_section_params yml_analyser_section_' . $section . '_params"' . ($default_section !== $section ? ' style="display: none"' : '');
                 $html .= ' data-section="' . $section . '">';
                 $section_title = BimpTools::getArrayValueFromPath($sections, $section, 'Section "' . $section . '"');
@@ -764,8 +783,31 @@ class BimpYml
                         $html .= ' : <span class="idx_' . str_replace('_base', '', $param_data['unset_by']) . '">';
                         $html .= BimpRender::renderIcon('fas_times-circle') . ' UNSET';
                         $html .= '</span>';
+                        if (isset($param_data['title_extra']) && $param_data['title_extra']) {
+                            $html .= ' ' . $param_data['title_extra'];
+                        }
+                        $html .= '</div>';
+                    } elseif (isset($param_data['unused_by'])) {
+                        $html .= '<div class="yml_analyser_param">';
+                        $html .= $param_title;
+                        $html .= ' : <span class="idx_' . str_replace('_base', '', $param_data['unused_by']) . '">';
+                        $html .= BimpRender::renderIcon('fas_exclamation-circle') . ' UNUSED';
+                        $html .= '</span>';
+                        if (isset($param_data['title_extra']) && $param_data['title_extra']) {
+                            $html .= ' ' . $param_data['title_extra'];
+                        }
                         $html .= '</div>';
                     } elseif (isset($param_data['sub_params']) && !empty($param_data['sub_params'])) {
+                        if ($is_obj_field && is_a($instance, 'BimpObject')) {
+                            if (isset($param_data['sub_params']['dol_extra_field']) && (int) $param_data['sub_params']['dol_extra_field']) {
+                                if (!$instance->dol_field_exists($param_name)) {
+                                    $param_title .= '<span class="danger" style="margin-left: 12px">';
+                                    $param_title .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Extrafield absent';
+                                    $param_title .= '</span>';
+                                }
+                            }
+                        }
+
                         $param_content = self::renderYmlAnalyserSubParamsContent($param_data['sub_params'], $max_idx, $files);
                         $html .= BimpRender::renderFoldableContainer($param_title, $param_content, array(
                                     'open'        => false,
@@ -823,10 +865,26 @@ class BimpYml
                 $html .= ' : <span class="idx_' . str_replace('_base', '', $param_data['unset_by']) . '">';
                 $html .= BimpRender::renderIcon('fas_times-circle') . ' UNSET';
                 $html .= '</span>';
+                if (isset($param_data['title_extra']) && $param_data['title_extra']) {
+                    $html .= ' ' . $param_data['title_extra'];
+                }
+                $html .= '</div>';
+            } elseif (isset($param_data['unused_by'])) {
+                $html .= '<div class="yml_analyser_param">';
+                $html .= $param_title;
+                $html .= ' : <span class="idx_' . str_replace('_base', '', $param_data['unused_by']) . '">';
+                $html .= BimpRender::renderIcon('fas_exclamation-circle') . ' UNUSED';
+                $html .= '</span>';
+                if (isset($param_data['title_extra']) && $param_data['title_extra']) {
+                    $html .= ' ' . $param_data['title_extra'];
+                }
                 $html .= '</div>';
             } elseif (isset($param_data['sub_params']) && !empty($param_data['sub_params'])) {
                 $html .= '<div class="yml_analyser_param">';
                 $html .= $param_title . ' : ';
+                if (isset($param_data['title_extra']) && $param_data['title_extra']) {
+                    $html .= ' ' . $param_data['title_extra'];
+                }
                 $html .= '</div>';
                 $html .= self::renderYmlAnalyserSubParamsContent($param_data['sub_params'], $max_idx, $files);
             } else {
@@ -836,7 +894,11 @@ class BimpYml
                     if (count($param_data['values']) > 1) {
                         $html .= '<span class="bold">*</span>';
                     }
-                    $html .= ' : ' . self::renderYmlAnalyserParamValues($param_data['values'], $max_idx, $files);
+                    $html .= ' : ';
+                    if (isset($param_data['title_extra']) && $param_data['title_extra']) {
+                        $html .= ' ' . $param_data['title_extra'];
+                    }
+                    $html .= self::renderYmlAnalyserParamValues($param_data['values'], $max_idx, $files);
                 }
                 $html .= '</div>';
             }

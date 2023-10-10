@@ -35,7 +35,7 @@ class modBabelNotification extends DolibarrModules
     *   \brief      Constructeur. Definit les noms, constantes et boites
     *   \param      DB      handler d'acces base
     */
-    function modBabelNotification($DB)
+    function __construct($DB)
     {
         $this->db = $DB ;
         $this->numero = 22335;

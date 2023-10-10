@@ -1,0 +1,20 @@
+# Entité : actimac
+
+fields: 
+    id_famille: 
+        label: Famille
+        type: id_object
+        
+    fabricant: 
+        label: Fabricant
+        
+    import_actimac: 
+        label: Import Actimac
+        type: bool
+        default_value: 0
+        
+    categorie: unset
+    collection: unset
+    nature: unset
+    famille: unset
+    gamme: unset

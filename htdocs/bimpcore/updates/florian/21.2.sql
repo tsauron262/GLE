@@ -1,1 +1,1 @@
-ALTER TABLE `llx_bimpcore_log` ADD `backtrace` TEXT NOT NULL DEFAULT '' AFTER `extra_data`; 
+ALTER TABLE `llx_bimpcore_log` ADD `backtrace` TEXT NOT NULL; 

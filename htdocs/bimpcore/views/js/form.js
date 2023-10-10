@@ -57,7 +57,7 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
         on_save = $form.data('on_save');
     }
 
-    console.log(data);
+//    console.log(data);
 
     BimpAjax('saveObject', data, $resultContainer, {
         $form: $form,
@@ -2152,6 +2152,9 @@ function displayInputChoices($input, choices, onItemSelected) {
                 if (card) {
                     html += ' bs-popover';
                 }
+                if (typeof (choices[i].disabled) !== 'undefined' && choices[i].disabled) {
+                    html += ' disabled';
+                }
                 html += '"';
                 if (card) {
                     data['toggle'] = 'popover';
@@ -2223,7 +2226,8 @@ function loadSearchObjectResults($input, idx) {
                                             data: {
                                                 value: result.results[i].id
                                             },
-                                            card: result.results[i].card
+                                            card: result.results[i].card,
+                                            disabled: result.results[i].disabled
                                         });
                                     }
 
@@ -4427,8 +4431,7 @@ function BimpInputHashtags() {
                     bih.$modal.modal('hide');
 
                     bih.reset();
-                } else
-                    console.log('trouve pas #');
+                }
             }
         }
     };

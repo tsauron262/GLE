@@ -1,0 +1,102 @@
+# Entité : bimp
+table: bs_sav
+fields: 
+    status_ecologic: 
+        label: Status Ecologic
+        type: int
+        values: 
+            array: status_ecologic_list
+        default_value: 0
+    ecologic_data: 
+        label: Données écologic
+        type: json
+    
+    
+
+fields_tables: 
+    infos: 
+        rows: 
+            status_ecologic:
+                field: status_ecologic
+                edit: 1
+                show: 
+                    callback: asProdEcologic
+            ecologic_data:
+                field: ecologic_data
+                show: 
+                    callback: asProdEcologic
+                
+                
+forms:              
+    resolution: 
+        rows: 
+            IRISSymtoms:
+                custom: 1
+                label: IRISSymtoms
+                input_name: IRISSymtoms
+                show: 
+                    callback: asProdEcologic
+                input: 
+                   type: select
+                   options: 
+                       callback: 
+                         method: getIRISSymtoms
+                         params:
+                             - callback: getEcologicProductId
+            RepairCodes:
+                custom: 1
+                label: RepairCodes
+                input_name: RepairCodes
+                show: 
+                     callback: asProdEcologic
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                          method: getRepairCodes
+                          params:
+                              - callback: getEcologicProductId      
+    ecologic: 
+        rows: 
+            IRISSymtoms:
+                custom: 1
+                label: IRISSymtoms
+                input_name: IRISSymtoms
+                show: 
+                    callback: asProdEcologic
+                input: 
+                   type: select
+                   options: 
+                       callback: 
+                         method: getIRISSymtoms
+                         params:
+                             - callback: getEcologicProductId
+            RepairCodes:
+                custom: 1
+                label: RepairCodes
+                input_name: RepairCodes
+                show: 
+                     callback: asProdEcologic
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                          method: getRepairCodes
+                          params:
+                              - callback: getEcologicProductId
+                              
+    ecologicPaye:
+        rows:
+            ecologicPaye:
+                custom: 1
+                label: Codes
+                input_name: ecologicPaye
+                input:
+                    type: text
+                help: Séparé par des virgules
+            
+            
+lists:
+    default:
+        header_buttons:
+            callback: getListHeaderExtraBtn

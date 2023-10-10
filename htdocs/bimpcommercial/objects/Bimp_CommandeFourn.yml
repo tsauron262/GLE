@@ -121,6 +121,7 @@ fields:
     date_creation: 
         label: Créée le
         type: datetime
+        dol_prop: date_creation
     date_valid: 
         label: Validée le
         type: datetime
@@ -519,10 +520,7 @@ fields_tables:
     infos: 
         rows:         
             - field: entrepot
-              display: nom_url
               edit: 1
-#            - field: type_entrepot
-#              edit: 1
             - field: ef_type    
             - field: fk_statut
             - field: invoice_status
@@ -540,8 +538,6 @@ fields_tables:
             - field: fk_input_method
               show: 
                   field_value: fk_input_method
-            - field: entrepot
-              display: nom_url
             - field: zone_vente
               edit: 1
             - field: edi_status

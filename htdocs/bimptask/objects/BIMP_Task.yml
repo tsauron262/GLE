@@ -123,7 +123,6 @@ fields:
         
     type_manuel:
         label: Type de tâche manuel
-        type: text
         values: 
             array: types_manuel
             
@@ -224,8 +223,8 @@ forms:
               
     addUser:
         extends: add
-        rows:
-            6: unset
+#        rows:
+#            6: unset
             
     newMail:
         rows:
@@ -297,6 +296,9 @@ forms:
               
     bug: 
         title: Signaler un bug
+        msgs: 
+            - type: warning
+              content: "NOTE IMPORTANTE : afin que les développeurs puissent répondre au mieux à votre demande, merci d'être aussi précis et détaillé que possible.<br/>"
         rows: 
             - field: type_manuel
               hidden: 1

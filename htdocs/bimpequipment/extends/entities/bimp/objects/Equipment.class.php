@@ -164,7 +164,8 @@ class Equipment_ExtEntity extends Equipment
                 'entrepot'      => $this->getIdEntrepotSpare(),
                 'ef_type'       => 'C',
                 'date_commande' => dol_now(),
-                'libelle'       => $data['libelle']
+                'libelle'       => $data['libelle'],
+                'expertise'     => 60
                     )
             );
             $errors = $commande->create($warnings, true);

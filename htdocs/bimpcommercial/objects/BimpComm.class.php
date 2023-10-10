@@ -69,10 +69,23 @@ class BimpComm extends BimpDolObject
 
     public function canEditField($field_name)
     {
+        global $user;
+
         switch ($field_name) {
             case 'logs':
-                global $user;
                 return (BimpObject::objectLoaded($user) && $user->admin ? 1 : 0);
+
+            case 'zone_vente':
+                if (static::$use_zone_vente_for_tva) {
+                    if (!(int) $user->rights->bimpcommercial->priceVente && in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
+                        return 0;
+                    }
+
+                    if (!$user->rights->bimpcommercial->edit_zone_vente) {
+                        return 0;
+                    }
+                }
+                return 1;
         }
 
         return (int) parent::canEditField($field_name);
@@ -97,10 +110,12 @@ class BimpComm extends BimpDolObject
     public function canSetAction($action)
     {
         global $user;
-//        if ($action == 'checkTotal' && !$user->admin)
-//            return 0;
-        if ($action == 'checkMarge' && !$user->admin)
-            return 0;
+
+        switch ($action) {
+            case 'checkMarge':
+                return ($user->admin ? 1 : 0);
+        }
+
         return parent::canSetAction($action);
     }
 
@@ -131,39 +146,64 @@ class BimpComm extends BimpDolObject
     {
         global $user;
 
-        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-        $type_de_piece = ValidComm::getObjectClass($this);
-
-        $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
-
-        if ($demands) {
-            if ($exclude_user_affected) {
-                foreach ($demands as $d) {
-                    if ((int) $d->getData('id_user_affected') == (int) $user->id) {
-                        return 0;
+        if (BimpCore::isModuleActive('bimpvalidation')) {
+            $demandes = BimpValidation::getObjectDemandes($this, 0);
+            if (count($demandes)) {
+                if ($exclude_user_affected) {
+                    foreach ($demandes as $demande) {
+                        $users = $demande->getData('validation_users');
+                        if (in_array($user->id, $users)) {
+                            return 0;
+                        }
                     }
                 }
-            }
 
-            // Soumis à des validations et possède des demandes de validation en brouillon
-            if ($type_de_piece != -2 and $demands) {
                 return 1;
             }
+        } else {
+            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $type_de_piece = ValidComm::getObjectClass($this);
+
+            $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
+
+            if ($demands) {
+                if ($exclude_user_affected) {
+                    foreach ($demands as $d) {
+                        if ((int) $d->getData('id_user_affected') == (int) $user->id) {
+                            return 0;
+                        }
+                    }
+                }
+
+                // Soumis à des validations et possède des demandes de validation en brouillon
+                if ($type_de_piece != -2 and $demands) {
+                    return 1;
+                }
+            }
         }
+
 
         return 0;
     }
 
-    public function isFieldActivated($field_name)
+    public function isFieldActivated($field_name, &$infos = '')
     {
-        if ($field_name == "marge" && !(int) BimpCore::getConf('use_marge_in_parent_bimpcomm', 0, 'bimpcommercial'))
+        if ($field_name == "marge" && !(int) BimpCore::getConf('use_marge_in_parent_bimpcomm', 0, 'bimpcommercial')) {
+            $infos = 'Marges désactivées pour les pièces commerciales';
             return 0;
-        if (in_array($field_name, array('statut_export', 'douane_number')) && !(int) BimpCore::getConf('use_statut_export', 0, 'bimpcommercial'))
-            return 0;
-        if (in_array($field_name, array('statut_relance', 'nb_relance')) && !(int) BimpCore::getConf('use_relances_paiements_clients', 0, 'bimpcommercial'))
-            return 0;
+        }
 
-        return parent::isFieldActivated($field_name);
+        if (in_array($field_name, array('statut_export', 'douane_number')) && !(int) BimpCore::getConf('use_statut_export', 0, 'bimpcommercial')) {
+            $infos = 'Exports désactivés pour les pièces commerciales';
+            return 0;
+        }
+
+        if (in_array($field_name, array('statut_relance', 'nb_relance')) && !(int) BimpCore::getConf('use_relances_paiements_clients', 0, 'bimpcommercial')) {
+            $infos = 'Relance de paiement désactivées';
+            return 0;
+        }
+
+        return parent::isFieldActivated($field_name, $infos);
     }
 
     public function isFieldEditable($field, $force_edit = false)
@@ -192,17 +232,9 @@ class BimpComm extends BimpDolObject
                 }
 
                 if (static::$use_zone_vente_for_tva) {
-                    global $user;
-                    if (!(int) $user->rights->bimpcommercial->priceVente && in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
-                        return 0;
-                    }
-
                     if (!(int) $this->areLinesEditable()) {
                         return 0;
                     }
-
-                    if (!$user->rights->bimpcommercial->edit_zone_vente)
-                        return 0;
                 }
                 break;
         }
@@ -220,6 +252,16 @@ class BimpComm extends BimpDolObject
 
         if (!$this->isLoaded($errors)) {
             return 0;
+        }
+
+        if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture')) && BimpCore::isModuleActive('bimpvalidation')) {
+            BimpObject::loadClass('bimpvalidation', 'BV_Demande');
+            $nb_refused = 0;
+
+            if (BV_Demande::objectHasDemandesRefused($this, $nb_refused)) {
+                $errors[] = $nb_refused . ' demande(s) de validation refusée(s)';
+                return 0;
+            }
         }
 
         // Vérif des lignes: 
@@ -249,18 +291,11 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0)
+                    if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0) {
                         $errors[] = 'Type de tiers obligatoire';
+                    }
 
-                    // Module de validation activé
-                    if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
-                        BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-
-                        // Non prit en charge par le module de validation
-                        if (ValidComm::getObjectClass($this) == -2)
-                            $errors = BimpTools::merge_array($errors, $this->checkContacts());
-                    } else
-                        $errors = BimpTools::merge_array($errors, $this->checkContacts());
+                    $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes
@@ -293,10 +328,6 @@ class BimpComm extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if ($this->erreurFatal) {
-            return 0;
-        }
-
         switch ($action) {
             case 'addAcompte':
                 if (!$this->acomptes_allowed) {
@@ -307,14 +338,6 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-//                if ($this->object_name !== 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
-//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
-//                    return 0;
-//                }
-//                if ($this->field_exists('invoice_status') && (int) $this->getData('invoice_status') === 2) {
-//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est entièrement facturé' . $this->e();
-//                    return 0;
-//                }
 
                 $client = $this->getChildObject('client');
 
@@ -440,6 +463,17 @@ class BimpComm extends BimpDolObject
             if (!empty($rgs)) {
                 return 1;
             }
+        }
+
+        return 0;
+    }
+
+    public function hasRemiseCRT()
+    {
+        $line_instance = $this->getLineInstance();
+
+        if ($line_instance->field_exists('remise_crt')) {
+            return (int) $this->db->getCount($line_instance->getTable(), 'id_obj = ' . $this->id . ' AND remise_crt > 0') > 0;
         }
 
         return 0;
@@ -592,8 +626,8 @@ class BimpComm extends BimpDolObject
 
         // Message Achat:
         $id_group = BimpCore::getUserGroupId('achat');
+        $note = BimpObject::getInstance("bimpcore", "BimpNote");
         if ($id_group) {
-            $note = BimpObject::getInstance("bimpcore", "BimpNote");
             $buttons[] = array(
                 'label'   => 'Message achat',
                 'icon'    => 'far_paper-plane',
@@ -1956,18 +1990,76 @@ class BimpComm extends BimpDolObject
             $html .= BimpDocumentation::renderBtn('liste', 'Test pour les admin, doc liste');
         }
 
+        if (BimpCore::isEntity('bimp')) {
+            if ($this->hasRemiseCRT()) {
+                $client = null;
+                if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
+                    $client = $this->getChildObject('client_final');
+                }
+                if (!BimpObject::objectLoaded($client)) {
+                    $client = $this->getChildObject('client');
+                }
+
+                if (BimpObject::objectLoaded($client)) {
+                    if (!$client->getData('type_educ')) {
+                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation pour le client "' . $client->getName() . '"', array(), '', '', 1);
+
+                        $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                        $msg .= '<b>ATTENTION : ' . $this->getLabel('this') . ' contient une remise CRT, or le type éducation du client ';
+                        $msg .= 'n\'est pas renseigné. En l\'absence de cette information, la validation des factures sera bloquée.</b>';
+                        $msg .= '<div style="text-align: center">';
+                        $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $msg .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Sélectionner le type éducation du client "' . $client->getName() . '"';
+                        $msg .= '</span>';
+
+                        $msg .= '</div>';
+
+                        $html .= BimpRender::renderAlerts($msg, 'warning');
+                    }
+                }
+            }
+        }
+
         return $html;
     }
 
     public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
-        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-        $type_de_piece = ValidComm::getObjectClass($this);
 
-        // Soumis à des validations et possède des demandes de validation en brouillon
-        if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
-            $html = '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'En cours de validation</span>';
+        if (BimpCore::isModuleActive('bimpvalidation')) {
+            if (!(int) $this->getData('fk_statut')) {
+                $demandes = BimpValidation::getObjectDemandes($this, array(
+                            'operator' => '!=',
+                            'value'    => -2
+                ));
+                if (count($demandes)) {
+                    $has_refused = false;
+                    foreach ($demandes as $demande) {
+                        if ((int) $demande->getData('status') === BV_Demande::BV_REFUSED) {
+                            $has_refused = true;
+                            break;
+                        }
+                    }
+
+                    $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($demandes) . ' demande(s) de validation :</span><br/>';
+                    if ($has_refused) {
+                        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Il y a au moins une demand de validation refusée. ' . $this->getLabel('this') . ' ne peut pas être validée</span><br/>';
+                    }
+                }
+
+                foreach ($demandes as $demande) {
+                    $html .= $demande->renderQuickView();
+                }
+            }
+        } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $type_de_piece = ValidComm::getObjectClass($this);
+
+            // Soumis à des validations et possède des demandes de validation en brouillon
+            if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
+                $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'En cours de validation</span>';
+            }
         }
 
         return $html;
@@ -2499,19 +2591,22 @@ class BimpComm extends BimpDolObject
     public function renderDemandesList()
     {
         if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-            $objectName = ValidComm::getObjectClass($this);
-            if ($objectName != -2) {
+            if (BimpCore::isModuleActive('bimpvalidation')) {
+                return BimpValidation::renderObjectDemandesList($this);
+            } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-                $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
-                $list = new BC_ListTable($demande);
-                $list->addFieldFilterValue('type_de_piece', $objectName);
-                $list->addFieldFilterValue('id_piece', (int) $this->id);
+                $objectName = ValidComm::getObjectClass($this);
+                if ($objectName != -2) {
+                    BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                    $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
+                    $list = new BC_ListTable($demande);
+                    $list->addFieldFilterValue('type_de_piece', $objectName);
+                    $list->addFieldFilterValue('id_piece', (int) $this->id);
 
-                return $list->renderHtml();
-            } else {
-                return '';
+                    return $list->renderHtml();
+                }
             }
+            return '';
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
@@ -2666,7 +2761,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
+            return array('(101) ID ' . $this->getLabel('of_the') . ' absent');
         }
 
         if (!method_exists($this->dol_object, 'createFromClone')) {
@@ -2713,6 +2808,11 @@ class BimpComm extends BimpDolObject
             $new_object->set($field, $value);
         }
 
+        // Pour commandes fourn. (temporaire, todo: trouver pourquoi c'est pas ajusté en auto)
+        if (isset($new_object->dol_object->date_creation)) {
+            $new_object->dol_object->date_creation = date('Y-m-d H:i:s');
+        }
+
         $new_object->set('id', 0);
         $new_object->set('ref', '');
         $new_object->set('fk_statut', 0);
@@ -2726,7 +2826,7 @@ class BimpComm extends BimpDolObject
         if (count($copy_errors)) {
             $errors[] = BimpTools::getMsgFromArray($copy_errors, 'Echec de la copie ' . $this->getLabel('of_the'));
         } else {
-            $new_object->addObjectLog('Créé' . $new_object->e() . ' par clonage ' . $this->getLabel('of_the') . $this->getRef());
+            $new_object->addObjectLog('Créé' . $new_object->e() . ' par clonage ' . $this->getLabel('of_the') . ' ' . $this->getRef());
             // Copie des contacts: 
             $new_object->copyContactsFromOrigin($this, $errors);
 
@@ -3161,11 +3261,17 @@ class BimpComm extends BimpDolObject
         $caisse = null;
         $id_caisse = 0;
 
-        $type_paiement = $id_mode_paiement;
-        $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
-
         if (!$id_mode_paiement) {
             $id_mode_paiement = (int) $this->getData('fk_mode_reglement');
+        }
+
+        $type_paiement = '';
+        if (preg_match('/^[0-9]+$/', $id_mode_paiement)) {
+            $id_mode_paiement = (int) $id_mode_paiement;
+            $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . $id_mode_paiement);
+        } else {
+            $type_paiement = $id_mode_paiement;
+            $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
         }
 
         if (!$this->useCaisseForPayments) {
@@ -3323,7 +3429,7 @@ class BimpComm extends BimpDolObject
 
     public function getClientFacture()
     {
-        if ((int) $this->getData('id_client_facture')) {
+        if ($this->field_exists('id_client_facture') && (int) $this->getData('id_client_facture')) {
             $client = $this->getChildObject('client_facture');
             if (BimpObject::objectLoaded($client)) {
                 return $client;
@@ -3622,7 +3728,6 @@ class BimpComm extends BimpDolObject
                     if (count($tabComm) > 0) {
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
-
                         // Il y a un commercial définit par défaut (bimpcore)
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
@@ -3919,15 +4024,18 @@ class BimpComm extends BimpDolObject
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            if ($this->field_exists('marge')) {
+            $infos = '';
+            if ($this->field_exists('marge', $infos)) {
                 $margins = $this->getMarginInfosArray();
+
                 $marge = $margins['total_margin'];
 
-                if ($marge != (float) $this->getData('marge')) {
+                if ((float) $marge !== (float) $this->getData('marge')) {
+                    $old_marge = (float) $this->getData('marge');
                     $errors = $this->updateField('marge', $marge);
 
                     if (!count($errors)) {
-                        $success = 'Marge mise à jour: ' . $marge;
+                        $success = 'Marge mise à jour. (Ancienne : ' . $old_marge . ' - Nouvelle : ' . $marge . ')';
                     }
                 }
             }
@@ -4629,20 +4737,25 @@ class BimpComm extends BimpDolObject
             }
 
             // Suppression des demandes de validation liées à cet objet
-            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-            $type_de_piece = $valid_comm::getObjectClass($this);
-            $filters = array(
-                'type_de_piece' => (int) $type_de_piece,
-                'id_piece'      => (int) $this->id
-            );
-            $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+            $demandes_a_suppr = array();
+            if (BimpCore::isModuleActive('bimpvalidation')) {
+                $demandes_a_suppr = BimpValidation::getObjectDemandes($this);
+            } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+                $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                $type_de_piece = $valid_comm::getObjectClass($this);
+                $filters = array(
+                    'type_de_piece' => (int) $type_de_piece,
+                    'id_piece'      => (int) $this->id
+                );
+                $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+            }
 
             foreach ($demandes_a_suppr as $d) {
                 $dem_warnings = array();
                 $dem_errors = $d->delete($dem_warnings, true);
 
                 if (count($dem_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $rg->id);
+                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $d->id);
                 }
             }
         }
@@ -4693,11 +4806,7 @@ class BimpComm extends BimpDolObject
         $warnings = array();
         $infos = array();
 
-        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
-
-        if ($this->isLabelFemale()) {
-            $success .= 'e';
-        }
+        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé' . $this->e();
 
         $success .= ' avec succès';
         $success_callback = 'bimp_reloadPage();';
@@ -4705,6 +4814,16 @@ class BimpComm extends BimpDolObject
         global $conf, $langs, $user;
 
         $result = $this->dol_object->valid($user);
+
+        $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+        if (!empty($obj_warnings)) {
+            $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
+        }
+
+        $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+        if (!empty($obj_infos)) {
+            $infos[] = BimpTools::getMsgFromArray($obj_infos);
+        }
 
         if ($result > 0) {
             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
@@ -4717,23 +4836,16 @@ class BimpComm extends BimpDolObject
             if (!count($obj_errors)) {
                 $obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
             }
-            $errors[] = BimpTools::getMsgFromArray($obj_errors);
-        }
 
-        $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
-
-        if (!empty($obj_warnings)) {
-            $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
-        }
-
-        $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
-        if (!empty($obj_infos)) {
-            $infos[] = BimpTools::getMsgFromArray($obj_infos);
+            if (count($obj_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($obj_errors);
+            }
         }
 
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
+            'infos'            => $infos,
             'success_callback' => $success_callback
         );
     }
@@ -4745,7 +4857,7 @@ class BimpComm extends BimpDolObject
         $success = 'Remise au statut "Brouillon" effectué avec succès';
 
         if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(102) ID ' . $this->getLabel('of_the') . ' absent';
         } elseif (!$this->can("edit")) {
             $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action';
         } elseif (!method_exists($this->dol_object, 'setDraft')) {
@@ -4783,7 +4895,7 @@ class BimpComm extends BimpDolObject
         $success = 'Suppression du contact effectué avec succès';
 
         if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(104) ID ' . $this->getLabel('of_the') . ' absent';
         } else {
             if (!isset($data['id_contact']) || !(int) $data['id_contact']) {
                 $errors[] = 'Contact à supprimer non spécifié';
@@ -4856,6 +4968,14 @@ class BimpComm extends BimpDolObject
 
         $paye = isset($data['payee']) ? $data['payee'] : 0;
         $id_mode_paiement = isset($data['id_mode_paiement']) ? $data['id_mode_paiement'] : '';
+        $type_paiement = '';
+        if (preg_match('/^[0-9]+$/', $id_mode_paiement)) {
+            $id_mode_paiement = (int) $id_mode_paiement;
+            $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . $id_mode_paiement);
+        } else {
+            $type_paiement = $id_mode_paiement;
+            $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
+        }
         $id_bank_account = isset($data['bank_account']) ? (int) $data['bank_account'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
         $id_rib = 0;
@@ -4864,14 +4984,14 @@ class BimpComm extends BimpDolObject
             $errors[] = 'Date de paiement absent';
         }
 
-        if ($data['id_mode_paiement'] == 'VIR') {
+        if ($type_paiement == 'VIR') {
             BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
             if (!Bimp_Paiement::canCreateVirement()) {
                 $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
             } elseif (!$id_bank_account) {
                 $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
             }
-        } elseif ($data['id_mode_paiement'] == 'PRE') {
+        } elseif ($type_paiement == 'PRE') {
             $id_rib = (int) BimpTools::getArrayValueFromPath($data, 'id_rib', 0);
 
             if (!$id_rib) {
@@ -4898,12 +5018,12 @@ class BimpComm extends BimpDolObject
         $nom_emetteur = '';
         $banque_emetteur = '';
 
-        if (in_array($id_mode_paiement, array('CHQ', 'VIR'))) {
+        if (in_array($type_paiement, array('CHQ', 'VIR'))) {
             $num_paiement = isset($data['num_paiement']) ? $data['num_paiement'] : '';
             $nom_emetteur = isset($data['nom_emetteur']) ? $data['nom_emetteur'] : '';
         }
 
-        if ($id_mode_paiement === 'CHQ') {
+        if ($type_paiement === 'CHQ') {
             $banque_emetteur = isset($data['banque_emetteur']) ? $data['banque_emetteur'] : '';
         }
 
@@ -5245,10 +5365,14 @@ class BimpComm extends BimpDolObject
         $cur_zone = '';
         $new_zone = '';
 
+        if ($this->getInitData('id_client_facture') != $this->getData('id_client_facture')) {
+            $this->addObjectLog('Client facturation modifié, de ' . $this->getInitData('id_client_facture') . ' a ' . $this->getData('id_client_facture'));
+        }
+
         if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente')) {
             $init_zone = $this->getInitData('zone_vente');
             $cur_zone = $this->getData('zone_vente');
-            
+
             if (!(int) $this->getData('fk_statut')) {
                 if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
                         $this->getData('entrepot') == 164 || $init_id_entrepot == 164) &&

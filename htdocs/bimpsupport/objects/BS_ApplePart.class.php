@@ -14,7 +14,7 @@ class BS_ApplePart extends BimpObject
         "661-17920", //12 pro
         "661-17939"); //12 mini
     private static $tabRefCommenceBatterie14 = array('661-30397', '661-30382', '661-30394', '661-30373'); // Iphone 14 prix à 119,00 TTC
-    private static $tabRefCommencePrixEcran = array("661-30401" => array("489,00"), "661-29370" => array("405,00"), "661-30366", array("338,99"), "661-04856" => array("229"), "661-13114" => array("338,99"), "661-07285" => array("185,00"), "661-07286" => array("185,00"), "661-07287" => array("185,00"), "661-07288" => array("185,00"), "661-07289" => array("209,00"), "661-07290" => array("209,00"), "661-07291" => array("209,00"), "661-07292" => array("209,00"), "661-07293" => array("185,00"), "661-07294" => array("185,00"), "661-07295" => array("185,00"), "661-07296" => array("185,00"), "661-07297" => array("209,00"), "661-07298" => array("209,00"), "661-07299" => array("209,00"), "661-07300" => array("209,00"), "661-08933" => array("185,00"), "661-08934" => array("185,00"), "661-09081" => array("185,00"), "661-10102" => array("185,00"), "661-09032" => array("209,00"), "661-09033" => array("209,00"), "661-09034" => array("209,00"), "661-10103" => array("209,00"), "661-09294" => array("338,99"), "661-10608" => array("338,99"), "661-11037" => array("405,00"), "661-11232 " => array("239,00"), "661-14098" => array("239,00"), "661-14096" => array("338,99"), "661-14099" => array("405,00"), "661-17940" => array("279,00"), "661-18503" => array("338,99"), "661-18504" => array("338,99"), "661-18466" => array("405,00"), "661-22311" => array("279,00"), "661-21988" => array("338,99"), "661-21993" => array("338,99"), "661-22309" => array("405,00"), "661-15743" => array("185,00"), "661-26353" => array("185,00"));
+    private static $tabRefCommencePrixEcran = array("661-30401" => array("489,00"), "661-29370" => array("405,00"), "661-30366" => array("338,99"), "661-04856" => array("229"), "661-13114" => array("338,99"), "661-07285" => array("185,00"), "661-07286" => array("185,00"), "661-07287" => array("185,00"), "661-07288" => array("185,00"), "661-07289" => array("209,00"), "661-07290" => array("209,00"), "661-07291" => array("209,00"), "661-07292" => array("209,00"), "661-07293" => array("185,00"), "661-07294" => array("185,00"), "661-07295" => array("185,00"), "661-07296" => array("185,00"), "661-07297" => array("209,00"), "661-07298" => array("209,00"), "661-07299" => array("209,00"), "661-07300" => array("209,00"), "661-08933" => array("185,00"), "661-08934" => array("185,00"), "661-09081" => array("185,00"), "661-10102" => array("185,00"), "661-09032" => array("209,00"), "661-09033" => array("209,00"), "661-09034" => array("209,00"), "661-10103" => array("209,00"), "661-09294" => array("338,99"), "661-10608" => array("338,99"), "661-11037" => array("405,00"), "661-11232 " => array("239,00"), "661-14098" => array("239,00"), "661-14096" => array("338,99"), "661-14099" => array("405,00"), "661-17940" => array("279,00"), "661-18503" => array("338,99"), "661-18504" => array("338,99"), "661-18466" => array("405,00"), "661-22311" => array("279,00"), "661-21988" => array("338,99"), "661-21993" => array("338,99"), "661-22309" => array("405,00"), "661-15743" => array("185,00"), "661-26353" => array("185,00"));
     public static $componentsTypes = array(
         0   => 'Général',
         1   => 'Visuel',
@@ -556,7 +556,7 @@ class BS_ApplePart extends BimpObject
         if ($this->isLoaded() && is_a($line, 'ObjectLine')) {
             $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
 
-            if ((int) $this->getData('not_invoiced')) {
+            if ((int) $this->getData('not_invoiced')) {//Pour l'ajout des vices sur iPhones
                 $this->pa_ht = 0;
                 $line->pu_ht = 0;
             } else {
@@ -572,7 +572,7 @@ class BS_ApplePart extends BimpObject
 
         if ($this->isLoaded($errors)) {
             $not_invoiced = $this->checkIsNotInvoiced();
-            if ($not_invoiced !== (int) $this->getInitData('not_invoiced')) {
+            if ($not_invoiced !== (int) $this->getInitData('not_invoiced') && $this->getPrice() < 30) {//POUR ajouter les vis (VOIR 011-00212) gratuitement mais pas le reste
                 $this->set('not_invoiced', $not_invoiced);
                 $part_warnings = array();
                 $part_errors = $this->update($part_warnings);

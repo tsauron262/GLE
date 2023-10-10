@@ -3409,11 +3409,11 @@ class User extends CommonObject
     //                $info2["objectclass"] = $oldInfo["objectclass"];
 //                    $info2['description'] = 'Responsable Developpement ERP Bimp';
                     $info2["sAMAccountName"] = $info["sAMAccountName"];
-                    $sql = $this->db->query("SELECT `oldMail`, `oldLogin` FROM `llx_user` WHERE `rowid` =  ".$this->id);
-                    $ln = $this->db->fetch_object($sql);
-                    $info2["bimpOldLogin"] = $ln->oldLogin;
-                    $info2["bimpOldMail"] = $ln->oldMail;
-                    $arrAlias[strtolower($ln->oldMail)] = strtolower($ln->oldMail);
+//                    $sql = $this->db->query("SELECT `oldMail`, `oldLogin` FROM `llx_user` WHERE `rowid` =  ".$this->id);
+//                    $ln = $this->db->fetch_object($sql);
+//                    $info2["bimpOldLogin"] = $ln->oldLogin;
+//                    $info2["bimpOldMail"] = $ln->oldMail;
+//                    $arrAlias[strtolower($ln->oldMail)] = strtolower($ln->oldMail);
                     $debMail = $this->ldap_sid;
                     $debMail = str_replace("ë", "e", $debMail);
 //                    $prefixe = "Z_";

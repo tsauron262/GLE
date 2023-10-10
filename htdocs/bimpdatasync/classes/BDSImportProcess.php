@@ -231,11 +231,11 @@ abstract class BDSImportProcess extends BDSProcess
     {
         // $headerRowIndex : mettre -1 si pas de header ($keys doit alors être sous la forme:  array(index_colonne => nom_champ)
 
-        if ($delimiter === '\t') {
+        if ($delimiter === '\t' || $delimiter == 'tab') {
             $delimiter = "\t";
         }
 
-//        $this->debug_content .= 'Del: "' . $delimiter . '" <br/>';
+        $this->debug_content .= 'Delimiteur: "' . $delimiter . '" <br/>';
 
         $params = BimpTools::overrideArray(array(
                     'ref_key'       => 'ref', // Nom du champ contenant la ref. 

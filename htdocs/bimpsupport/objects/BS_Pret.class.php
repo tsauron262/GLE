@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 class BS_Pret extends BimpObject
 {
@@ -282,7 +282,6 @@ class BS_Pret extends BimpObject
         }
 
         if (!(int) $this->getData('id_entrepot') && $this->getData('code_centre')) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
             global $tabCentre;
 
             if (isset($tabCentre[$this->getData('code_centre')][8])) {

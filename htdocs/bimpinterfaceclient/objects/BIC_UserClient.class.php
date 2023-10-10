@@ -456,6 +456,42 @@ class BIC_UserClient extends BimpObject
         return '';
     }
 
+    public function getPublicEntity()
+    {
+        $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : $this->getData('main_public_entity'));
+        
+        if ($public_entity && !$this->getData('main_public_entity')) {
+            $this->updateField('main_public_entity', $public_entity);
+        }
+        
+        if (!$public_entity) {
+            $public_entity = BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
+        }
+
+        return $public_entity;
+    }
+
+    public function getPublicEntityName()
+    {
+        $name = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
+        if (strpos($name, '{') === 0) {
+            $names = json_decode($name, 1);
+
+            $public_entity = $this->getPublicEntity();
+            if ($public_entity && isset($names[$public_entity])) {
+                $name = $names[$public_entity];
+            }
+        }
+
+        if (!$name) {
+            BimpCore::addlog('Aucun nom pour l\'interface publique', 4, 'bic', null, array(
+                'Entité' => ($public_entity ? $public_entity : 'aucune')
+            ));
+        }
+
+        return $name;
+    }
+
     // Getters Statics: 
 
     public static function getClientUsersArray($id_client, $include_empty = false)
@@ -587,17 +623,17 @@ class BIC_UserClient extends BimpObject
         if (count($err)) {
             $errors[] = 'Echec de la mise à jour de votre mot de passe';
         } else {
-            $nom_espace = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
+            $nom_espace = $this->getPublicEntityName();
 
-            $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+            $url = BimpObject::getPublicBaseUrl(false, $this->getPublicEntity());
             $msg = 'Bonjour, ' . "\n\n";
             $msg .= 'Le mot de passe de votre <a href="' . $url . '">espace client ' . $nom_espace . '</a> a été changé.' . "\n";
             $msg .= 'Si vous n\'êtes pas à l\'origine de cette action veuillez contacter votre ';
 
             if ($this->isAdmin()) {
-                $msg .= 'interlocuteur BIMP.';
+                $msg .= 'interlocuteur ' . $nom_espace . '.';
             } else {
-                $msg .= 'l\'administrateur de votre compte client BIMP.';
+                $msg .= 'l\'administrateur de votre compte client ' . $nom_espace . '.';
             }
 
             $subject = 'Espace client ' . $nom_espace . ' - Changement de votre mot de passe';
@@ -628,7 +664,7 @@ class BIC_UserClient extends BimpObject
         $nom_escace_client = (string) BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
 
         if (!count($errors)) {
-            $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+            $url = BimpObject::getPublicBaseUrl(false, $this->getPublicEntity());
             $subject = 'Espace client ' . $nom_escace_client . ' - Nouveau mot de passe';
             $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès à votre <a href="' . $url . '">espace client ' . $nom_escace_client . '</a> a été réinitialisé.<br/><br/>';
             $msg .= '<b>Nouveau mot de passe : </b>' . $mdp_clear;
@@ -771,17 +807,14 @@ class BIC_UserClient extends BimpObject
         $errors = $this->update($warnings, true);
 
         if (!count($errors)) {
-            $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
-            $subject = 'Espace client LDLC Apple - Vos identifiants';
+            $nom_espace = $this->getPublicEntityName();
+            $url = BimpObject::getPublicBaseUrl(false, $this->getPublicEntity());
+            $subject = 'Espace client ' . $nom_espace . ' - Vos identifiants';
 
             $msg .= 'Bonjour,<br/><br/>';
-            $msg .= 'Voici vos identifiants pour votre accès à votre <a href="' . $url . '"></a> sur notre site www.bimp.fr <br/><br/>';
+            $msg .= 'Voici vos identifiants pour votre accès à votre <a href="' . $url . '">Espace client ' . $nom_espace . '</a><br/><br/>';
             $msg = '<b>Identifiant : </b>' . $this->getData('email') . '<br />';
             $msg .= '<b>Mot de passe (Généré automatiquement) : </b>' . $mdp_clear;
-
-//            if (!mailSyn2($subject, BimpTools::cleanEmailsStr($this->getData('email')), '', $msg)) {
-//                $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
-//            }
 
             $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
 
@@ -815,6 +848,7 @@ class BIC_UserClient extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        global $conf;
         $errors = array();
 
         $mdp_clear = '';
@@ -846,12 +880,12 @@ class BIC_UserClient extends BimpObject
 
             if (!count($errors)) {
                 if ($this->use_email && (int) BimpTools::getPostFieldValue('send_mail', 1)) {
-                    $url = BimpObject::getPublicBaseUrl(false) . 'email=' . $this->getData('email');
+                    $url = BimpObject::getPublicBaseUrl(false, $this->getPublicEntity()) . 'email=' . $this->getData('email');
 
                     $sujet = "Mot de passe Interface Client LDLC Apple";
 
                     $message = "Bonjour, <br /><br />";
-                    $message .= "Bienvenue sur le service d’assistante LDLC Apple.<br />";
+                    $message .= "Bienvenue sur le service d’assistance " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".<br />";
                     $message .= "Cet espace vous est directement dédié. Il est là pour vous garantir les meilleures prestations possibles.<br /><br/>";
 
                     $contrats = $this->getContratsVisibles(true);
@@ -865,8 +899,8 @@ class BIC_UserClient extends BimpObject
                         $message .= "<li>Une fois la solution trouvée, votre ticket est clos.</li>";
                         $message .= "</ul><br /><br />";
                         $message .= "Si toutefois le problème n’est pas résolu, le ticket est attribué à un autre technicien.<br />";
-                        $message .= "Chez BIMP, nous faisons aussi le pari de la complémentarité des compétences dans nos équipes !<br />";
-                        $message .= "Vous avez la possibilité de contacter directement l’assistance technique au numéro figurant sur votre contrat (bien laisser un message) ou par mail à hotline@bimp.fr <br />";
+                        $message .= "Chez " . $this->getPublicEntityName() . ", nous faisons aussi le pari de la complémentarité des compétences dans nos équipes !<br />";
+                        $message .= "Vous avez la possibilité de contacter directement l’assistance technique au numéro figurant sur votre contrat (bien laisser un message)" . (BimpCore::isEntity('bimp') ? ' ou par mail à hotline@bimp.fr' : '') . "<br />";
                         $message .= "Le service est joignable du lundi au vendredi  (de 9 h à 12 h et de 14 h à 18 h, le vendredi à 17 h.<br /><br />";
                         $message .= "<b>Voici votre accès à votre espace client</b><br /><br />";
                     }
@@ -879,7 +913,6 @@ class BIC_UserClient extends BimpObject
                     $message .= '<br /><br /><br />';
 //                    $url_notice = "https://www.bimp-pro.fr/wp-content/uploads/2020/06/notice-utilisateur-tech.pdf";
 //                    $message .= "<a href='" . $url_notice . "'>Notice d'utilisation</a>";
-
 //                    mailSyn2($sujet, BimpTools::cleanEmailsStr($email), '', $message);
                     $bimpMail = new BimpMail($this->getChildObject('client'), $sujet, $this->getData('email'), '', $message);
 

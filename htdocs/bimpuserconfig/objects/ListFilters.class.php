@@ -48,7 +48,7 @@ class ListFilters extends BCUserConfig
 
         return (BimpObject::objectLoaded($user) ? $user->getFullName($langs) . ': l' : 'L') . 'iste des filtres enregistrés';
     }
-
+    
     // Overrides:
 
     public function validatePost()

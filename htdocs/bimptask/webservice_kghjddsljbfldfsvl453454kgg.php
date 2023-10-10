@@ -99,7 +99,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         echo "<br/>Création task";
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "", 'auto' => 0, );
-        if($dst == $task->mailReponse){
+        if($dst == BimpCore::getConf('mailReponse', '', 'bimptask')){
             $tab['auto'] = 0;
             $tab['type_manuel'] = 'dev';
             $tab['dst'] = '';
@@ -112,7 +112,7 @@ function traiteTask($dst, $src, $subj, $txt) {
             $task->addRepMail($user, $src, $txt);
         }
         else
-            mailSyn2 ('Id task non existant', 'dev@bimp.fr', null, 'Un mail a était recu avec une tache inexistante : '.$idTask);
+            mailSyn2 ('Id task non existant', 'dev@bimp.fr', null, 'Un mail a était recu avec une tache inexistante : '.$idTask.'\n'.$src.'\n'.$txt);
         
 //        $errors = BimpTools::merge_array($errors, $task->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, 3));
     }

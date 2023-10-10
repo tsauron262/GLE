@@ -51,6 +51,12 @@ fields:
         
     rum:
         label: Code RUM
+        displays: 
+            custom: 
+                label: Affichage personnalisé
+                type: callback
+                method: displayRum
+            
         edit: 0
 #        required: 1
         
@@ -167,6 +173,7 @@ lists:
             fk_soc: 
             label: 
             rum:
+                display: custom
             bank: 
             rib: 
             bic: 

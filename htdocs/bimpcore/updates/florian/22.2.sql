@@ -1,1 +1,1 @@
-ALTER TABLE `llx_entrepot` ADD `close_msg` TEXT DEFAULT '' NOT NULL;
+ALTER TABLE `llx_entrepot` ADD `close_msg` TEXT NOT NULL;

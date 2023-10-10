@@ -157,7 +157,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_dir',
                 'label'      => 'Dossier FTP',
-                'value'      => '/FTP-BIMP-ERP/innovpro/'
+                'value'      => '/'.BimpCore::getConf('exports_ldlc_ftp_dir').'/innovpro/'
                     ), true, $warnings, $warnings);
             
             // Params: Calendrier

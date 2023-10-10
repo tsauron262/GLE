@@ -739,7 +739,7 @@ class BT_ficheInter extends BimpDolObject
     {
         return $this->tmp_facturable;
     }
-    
+
     public function getSignatureContactCreateFormValues()
     {
         $client = $this->getChildObject('client');
@@ -762,10 +762,10 @@ class BT_ficheInter extends BimpDolObject
                 'fields' => $fields
             );
         }
-        
+
         return array();
     }
-    
+
     public function getEventId()
     {
         $where = 'code <> \'AC_FICHINTER_VALIDATE\' AND fk_element = ' . $this->id . ' AND elementtype = \'fichinter\'';
@@ -847,19 +847,18 @@ class BT_ficheInter extends BimpDolObject
 
         return $reattachment;
     }
-    
+
     public function getFacturesArray()
     {
 
         $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
-
 
         $filters['fk_soc'] = Array('operator' => '=', 'value' => $this->getData('fk_soc'));
 
         $factures = $instance->getList($filters);
 
         foreach ($factures as $object) {
-                $return[$object[0]] = ($object['statut'] == 2) ? '<span class=\'danger\'>' . $object['ref'] . '</span>' : $object['ref'];
+            $return[$object[0]] = ($object['statut'] == 2) ? '<span class=\'danger\'>' . $object['ref'] . '</span>' : $object['ref'];
         }
 
         return $return;
@@ -1858,11 +1857,11 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Traitements: 
-    
+
     public function duplicate($new_data)
     {
         global $user;
-        
+
         $fieldsNonClone = array('signed', 'type_signature', 'old_status', 'fk_facture', 'no_finish_reason', 'client_want_contact', 'public_signature_date_cloture', 'public_signature_date_delivrance', 'public_signature_url', 'public_signature_code', 'attente_client', 'date_signed', 'signataire', 'base_64_signature', 'fk_user_modif', 'fk_user_valid');
 
         $new_object = clone $this;
@@ -1889,7 +1888,7 @@ class BT_ficheInter extends BimpDolObject
         $errors = $new_object->create($warnings);
 
         $lines_errors = $new_object->createLinesFromOrigin($this, $new_object);
-        
+
         if (count($lines_errors)) {
             $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
         }
@@ -2029,6 +2028,7 @@ class BT_ficheInter extends BimpDolObject
                     $errors = $this->update($warnings, true);
                     $this->no_update_process = false;
                 }
+
                 //print_r($errors); die('dhudfishfds');
                 if (!count($errors)) {
                     // Mise à jour ActionComm
@@ -2050,9 +2050,6 @@ class BT_ficheInter extends BimpDolObject
 
                     if (count($result['errors'])) {
                         $warnings[] = BimpTools::getMsgFromArray($result['errors'], 'Echec création du fichier PDF');
-                        //print_r($warnings); die ('eee');
-                    } else {
-                        //die('ok');
                     }
 
                     // Fermeture auto: 
@@ -2160,7 +2157,7 @@ class BT_ficheInter extends BimpDolObject
                     $email_cli = BimpTools::cleanEmailsStr($this->getData('email_signature'));
                     if (!$email_cli) {
                         if (BimpObject::objectLoaded($client)) {
-                            $email_cli = BimpTools::cleanEmailsStr($email_cli);
+                            $email_cli = BimpTools::cleanEmailsStr($client->getData('email'));
                         }
                     }
                     if (!count($this->getData('commandes')) && !$this->getData('fk_contrat')) {
@@ -2185,7 +2182,7 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     // Envoi au client: 
-                    if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST && !$this->getData('signed')) {
+                    if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST/* && !$this->getData('signed') */) {
                         if (!is_file($pdf_file)) {
                             $mail_cli_errors[] = 'Fichier PDF de la Fiche Inter absent';
                             BimpCore::addlog('PDF Fiche Inter absent pour envoi par mail suite à signature', Bimp_Log::BIMP_LOG_ERREUR, 'bimptechnique', $this, array(
@@ -2198,17 +2195,18 @@ class BT_ficheInter extends BimpDolObject
                         }
 
                         if (!count($mail_cli_errors)) {
+                            $signed = (int) $this->getData('signed');
                             $subject = "Fiche d'intervention " . $ref;
 
                             $message = "Bonjour,<br/><br/>Veuillez trouver ci-joint votre Fiche d'Intervention<br/><br/>";
 
-                            if ($type_signature == self::TYPE_SIGN_PAPIER) {
+                            if ($type_signature == self::TYPE_SIGN_PAPIER && !$signed) {
                                 $message .= "Merci de bien vouloir l'envoyer par email à votre interlocuteur commercial, dûment complétée et signée.<br/>";
                             }
 
                             $message .= "Vous souhaitant bonne réception de ces éléments, nous restons à votre disposition pour tout complément d'information.<br/>";
 
-                            if ($type_signature == self::TYPE_SIGN_PAPIER) {
+                            if ($type_signature == self::TYPE_SIGN_PAPIER && !$signed) {
                                 $message .= "Dans l'attente de votre retour.<br/>";
                             }
 
@@ -2216,7 +2214,13 @@ class BT_ficheInter extends BimpDolObject
                             $message .= "<br/><br/><b>Le Service Technique</b>";
 
                             $reply_to = $email_comm ? $email_comm : $email_tech;
-                            $cc = ''; //$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') . t.sauron@bimp.fr, f.martinez@bimp.fr';
+                            $cc = $email_comm;
+
+                            if ($email_tech) {
+                                $cc = ($cc ? ', ' : '') . $email_tech;
+                            }
+
+//                            $cc .= ($cc ? ', ' : '') . 'f.martinez@bimp.fr';
 
                             $bimpMail = new BimpMail($this, $subject, $email_cli, '', $message, $reply_to, $cc);
                             $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
@@ -2282,13 +2286,14 @@ class BT_ficheInter extends BimpDolObject
                             }
 
                             $to = $email_comm ? $email_comm : $email_tech;
-                            $cc = ($email_comm ? $email_tech : ''); // . 't.sauron@bimp.fr, f.martinez@bimp.fr';
+                            $cc = ($email_comm ? $email_tech : '');
+
+//                            $cc .= ($cc ? ', ' : '') . 'f.martinez@bimp.fr';
 
                             if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
                                 $warnings[] = 'Echec de l\'envoi de l\'e-mail de notification au commercial du client';
                             }
                         }
-                    
                     }
                 }
             }
@@ -2477,7 +2482,7 @@ class BT_ficheInter extends BimpDolObject
         $i = 0;
 
         // Création des lignes:
-        
+
         foreach ($lines as $line) {
             $i++;
 
@@ -2902,7 +2907,7 @@ class BT_ficheInter extends BimpDolObject
                             $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
                         $new_factureLine->id_product = $product->id;
                         $new_factureLine->tva_tx = 20;
-                        $paBase = /*BimpCore::getConf('cout_horaire_technicien', */$product->getData('cur_pa_ht')/*, 'bimptechnique')*/;
+                        $paBase = /* BimpCore::getConf('cout_horaire_technicien', */$product->getData('cur_pa_ht')/* , 'bimptechnique') */;
                         $new_factureLine->pa_ht = ($this->time_to_qty($this->timestamp_to_time($child->getData('duree')))) * (float) $paBase / $new_factureLine->qty;
 
                         $line_errors = $new_factureLine->create($warnings, true);
@@ -2970,19 +2975,20 @@ class BT_ficheInter extends BimpDolObject
     public function validatePost()
     {
         $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature');
-            
-        if(0 < $id_contact) {
+
+        if ($id_contact) {
             $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-            
-            if(BimpObject::objectLoaded($contact)) {
-                if(array_key_exists('signataire', $_POST) and BimpTools::getPostFieldValue('signataire') == '')
+
+            if (BimpObject::objectLoaded($contact)) {
+                if (array_key_exists('signataire', $_POST) and BimpTools::getPostFieldValue('signataire') == '')
                     $_POST['signataire'] = $contact->getName();
-                
-                if(array_key_exists('email_signature', $_POST) and BimpTools::getPostFieldValue('email_signature') == '')
-                    $_POST['email_signature'] = $contact->getData('email');
+
+//                if(array_key_exists('email_signature', $_POST) and BimpTools::getPostFieldValue('email_signature') == '')
+                // (Certain techs mettent leur propre adresse e-mail, on force l'adresse l'adresse e-mail du contact signataire) 
+                $_POST['email_signature'] = $contact->getData('email');
             }
         }
-        
+
         $errors = parent::validatePost();
 
         if (!count($errors)) {
@@ -2996,7 +3002,7 @@ class BT_ficheInter extends BimpDolObject
 
         return $errors;
     }
-    
+
     public function validate()
     {
         $errors = parent::validate();
@@ -3393,6 +3399,7 @@ class BT_ficheInter extends BimpDolObject
     public function timestamp_to_time($timestamp)
     {
         $heures = floor($timestamp / 3600);
+        $minutes = 0;
         if (($timestamp % 3600) >= 60) {
             $minutes = floor(($timestamp % 3600) / 60);
         }

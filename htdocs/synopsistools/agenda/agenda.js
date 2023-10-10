@@ -121,7 +121,7 @@ function initSimult() {
             );
         }
         else{
-            dispatchePopIFrame(DOL_URL_ROOT + "/comm/action/card.php?id=" + id + "&action=edit&optioncss=print", function () {
+            dispatchePopIFrame(dol_url_root + "/comm/action/card.php?id=" + id + "&action=edit&optioncss=print", function () {
                 $('#calendar').weekCalendar('refresh');
             }, titre, 100);
         }

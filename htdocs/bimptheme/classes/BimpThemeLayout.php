@@ -92,7 +92,14 @@ class BimpThemeLayout extends BimpLayout
         if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimptheme/extends/entities/' . BIMP_EXTENDS_ENTITY . '/logo.png')) {
             $html .= '<img src="' . DOL_URL_ROOT . '/bimptheme/extends/entities/' . BIMP_EXTENDS_ENTITY . '/logo.png" class="header-brand-img" alt="Logo" width="125">';
         } else {
-            $html .= 'GLE';
+            global $conf;
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $conf->global->MAIN_INFO_SOCIETE_LOGO;
+            if(is_file($logo_file)){
+                $html .= '<img src="' . DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=logos%2F'.$conf->global->MAIN_INFO_SOCIETE_LOGO.'" class="header-brand-img" alt="Logo" width="125">';
+            }
+            else{
+                $html .= 'GLE';
+            }
         }
         $html .= '</div>';
         $html .= '</a>' . "\n";

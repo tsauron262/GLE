@@ -101,6 +101,9 @@ fields:
             array: langs_list
         default_value: 0
         
+    main_public_entity: 
+        label: Entité publique principale
+        
 forms:
     default:
         rows:
@@ -262,7 +265,6 @@ cards:
             - label: Societe
               field: id_client
         view_btn: 1
-        
 
 filters_panel: 
     default: 

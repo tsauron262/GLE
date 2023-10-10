@@ -301,7 +301,7 @@ Abstract class BimpModelPDF
         $html .= '</span>';
         $html .= '<span style="color: #' . $this->primary . '; font-size: 7px;"><br/>';
         if ($this->fromCompany->url) {
-            $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
+            $html .= $this->fromCompany->url . ($this->fromCompany->email ? ((strlen($this->fromCompany->url) > 30)? '<br/>' : ' - ') : '');
         }
         if ($this->fromCompany->email) {
             $html .= $this->fromCompany->email;

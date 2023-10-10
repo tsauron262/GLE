@@ -27,3 +27,13 @@ sections:
                 url_params: 
                     id: 
                         request: id
+            dol_receptions: 
+                label: Réceptions
+                hide: 
+                  callback:
+                      method: useLogistique
+                      object: commande_fourn
+                url: ../fourn/commande/dispatch.php?
+                url_params: 
+                    id: 
+                        request: id

@@ -52,6 +52,8 @@ class DoliDBMysqli extends DoliDB
     /*moddrsi */
     public $countReq = 0;
     public $countReq2 = 0;
+    public $timeDebReq = 0;
+    public $timeDebReq2 = 0;
     /* fmoddrsi */
 
     /**
@@ -1283,7 +1285,7 @@ class DoliDBMysqli extends DoliDB
         }
         if($deadLock){
             $this->transaction_opened = 0;
-            static::stopAll ();
+            static::stopAll ('catch');
         }
     }
     

@@ -30,6 +30,8 @@ class devController extends BimpController
 
         $html = '';
 
+        $html .= '<div class="container-fluid">';
+
         // ToolsBar:
         $html .= '<div class="buttonsContainer align-left" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
         if (BimpCore::isModuleActive('bimpapple')) {
@@ -44,9 +46,19 @@ class devController extends BimpController
             $html .= '</a>';
         }
 
+        $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/bimptests.php?type=sms" target="_blank">';
+        $html .= 'TEST SMS' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+        $html .= '</a>';
+
         if (BimpCore::isModuleActive('bimpinterfaceclient')) {
             $html .= '<a class="btn btn-default" href="' . BimpObject::getPublicBaseUrl(true) . '" target="_blank">';
             $html .= 'Espace client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $html .= '</a>';
+        }
+
+        if (!BimpCore::isModeDev()) {
+            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/cron_log.php" target="_blank">';
+            $html .= 'Logs CRONS client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
         }
 
@@ -79,11 +91,42 @@ class devController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
+        // Vérif des versions vérouillée: 
+        if ((int) BimpCore::getConf('check_versions_lock')) {
+            $html .= '<h4 class="danger">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . ' Vérification des versions vérouillée';
+            $html .= '</h4>';
+
+            $onclick = 'saveBimpcoreConf(\'bimpcore\', \'check_versions_lock\', \'0\', null, function() {bimp_reloadPage();})';
+
+            $html .= '<div style="margin: 15px">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= 'Dévérouiller immédiatement';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        // vérif des pull vérouillés: 
+
+        $lock_msg = BimpCore::getConf('git_pull_lock_msg');
+        if ($lock_msg) {
+            $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'GIT PULL vérouillés</h4>';
+            $html .= 'Message : <b>' . $lock_msg . '</b>';
+
+            $onclick = 'saveBimpcoreConf(\'bimpcore\', \'git_pull_lock_msg\', \'\', null, function() {bimp_reloadPage();})';
+
+            $html .= '<div style="margin: 15px">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= 'Dévérouiller immédiatement';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
         // Crons en erreur: 
         $rows = BimpCache::getBdb()->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
         if (!empty($rows)) {
             $html .= '<div class="row" style="margin-bottom: 30px">';
-            $html .= '<h3 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' tâche(s) cron en erreur</h3>';
+            $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' tâche(s) cron en erreur</h4>';
             $html .= '<ul>';
             foreach ($rows as $r) {
                 $html .= '<li>';
@@ -94,29 +137,39 @@ class devController extends BimpController
             $html .= '</div>';
         }
 
-
-        $html .= '<div class="row">';
+        // Paramètres obligatoires non définis: 
+        $missings_params = BimpModuleConf::getMissingRequiredParams();
+        if (!empty($missings_params)) {
+            $html .= '<div class="row" style="margin-bottom: 30px">';
+            $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($missings_params) . ' paramètre(s) obligatoire(s) non défini(s)</h4>';
+            $html .= '<ul>';
+            foreach ($missings_params as $p) {
+                $html .= '<li>';
+                $html .= $p;
+                $html .= '</li>';
+            }
+            $html .= '</ul>';
+            $html .= '</div>';
+        }
 
         // Récap logs: 
+        $html .= '<div class="row">';
         $html .= '<div class="col-sm-12 col-md-8">';
         $html .= Bimp_Log::renderBeforeListContent();
         $html .= '</div>';
 
-        $html .= '<div class="col-sm-12 col-md-4">';
-
-        // Liens: 
-        $content = '';
-        foreach (self::$dev_links as $link) {
-            $content .= ($content ? '<br/><br/>' : '');
-            $content .= '<a href="' . DOL_URL_ROOT . '/' . $link[2] . '" target="_blank">';
-            $content .= BimpRender::renderIcon($link[1], 'iconLeft');
-            $content .= $link[0] . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-            $content .= '</a>';
-        }
-
-        $html .= BimpRender::renderPanel('Liens utiles', $content);
-
-        $html .= '</div>';
+//        // Liens: 
+//        $html .= '<div class="col-sm-12 col-md-4">';
+//        $content = '';
+//        foreach (self::$dev_links as $link) {
+//            $content .= ($content ? '<br/><br/>' : '');
+//            $content .= '<a href="' . DOL_URL_ROOT . '/' . $link[2] . '" target="_blank">';
+//            $content .= BimpRender::renderIcon($link[1], 'iconLeft');
+//            $content .= $link[0] . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+//            $content .= '</a>';
+//        }
+//        $html .= BimpRender::renderPanel('Liens utiles', $content);
+//        $html .= '</div>';
         $html .= '</div>';
 
         if (BimpTools::isModuleDoliActif('BIMPTASK')) {
@@ -129,12 +182,16 @@ class devController extends BimpController
             $html .= '</div>';
 
             $html .= '<div class="row">';
+            $html .= '<div class="col-lg-12">';
             $list = new BC_ListTable(BimpObject::getInstance('bimptask', 'BIMP_Task'), 'main', 1, null, 'Tâches dév');
             $list->addFieldFilterValue('id_task', 0);
             //        $list->addFieldFilterValue('type_manuel', 'dev');
             $html .= $list->renderHtml();
             $html .= '</div>';
+            $html .= '</div>';
         }
+
+        $html .= '</div>';
 
         return $html;
     }

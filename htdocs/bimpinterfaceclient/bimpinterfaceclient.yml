@@ -1,9 +1,20 @@
 params: 
-    nom_espace_client: 
-        label: Nom de l'espace client
-        required: 1
-        
     base_url: 
         label: Base URL de l'espace client
+        help: Ne pas oublier le "?" si nécessaire
         required: 1
-    
+        
+    default_public_entity: 
+        label: Entité publique par défaut 
+        warning: Nécessaire si plusieurs entités publiques
+        def: ''
+        
+    nom_espace_client: 
+        label: Nom(s) de l'espace client
+        help: 'Si plusieurs entités publiques, utiliser une syntaxe json : {"code_entite":"nom_entite"}'
+        required: 1
+        
+    public_logo: 
+        label: Noms fichiers logos
+        help: 'Si plusieurs entités publiques, utiliser une syntaxe json : {"code_entite":"nom_fichier"}'
+  

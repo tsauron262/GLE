@@ -680,7 +680,7 @@ class BC_ListTable extends BC_List
                 $field_object = $this->object;
                 $errors = array();
 
-                if (!empty($children) && !empty($search_filter)) {
+                if (!empty($children) && (!empty($search_filter) || $search_filter === '0')) {
                     $errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
                 }
 
@@ -1188,7 +1188,7 @@ class BC_ListTable extends BC_List
             $html .= '</div>';
             $html .= '</div>';
         }
-        
+
         $html .= '<table class="objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
         $html .= '<thead class="listTableHead">';
 
@@ -1891,7 +1891,7 @@ class BC_ListTable extends BC_List
 
     public function renderParametersPopup()
     {
-        global $current_bc;
+        global $current_bc, $user;
         if (!is_object($current_bc)) {
             $current_bc = null;
         }
@@ -1919,13 +1919,20 @@ class BC_ListTable extends BC_List
 
         // Pagination: 
         if ($this->params['pagination']) {
+            $n_values = array(10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50', 70 => '70');
+
+            if ($this->params['allow_large_n']) {
+                $n_values[100] = '100';
+                $n_values[150] = '150';
+                $n_values[200] = '200';
+            }
+            
             $content .= '<div class="title">';
             $content .= 'Nombre d\'items par page';
             $content .= '</div>';
 
             $content .= '<div style="margin-bottom: 15px">';
-            $content .= BimpInput::renderSwitchOptionsInput('select_n', array(
-                        10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50', 70 => '70'), $this->params['n'], $this->identifier . '_n');
+            $content .= BimpInput::renderSwitchOptionsInput('select_n', $n_values, $this->params['n'], $this->identifier . '_n');
             $content .= '</div>';
         }
 
@@ -2783,4 +2790,3 @@ class BC_ListTable extends BC_List
         return $rows;
     }
 }
-                                            

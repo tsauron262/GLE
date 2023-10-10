@@ -52,7 +52,21 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
 class ModeleSynopsiscontrat extends CommonDocGenerator
 {
     var $error='';
+    public $primary = '';
+    public $primay_rgb = array();
 
+    public function __construct($db)
+    {
+        if (!defined('BIMP_LIB')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        }
+        
+        $this->primary = BimpCore::getParam('pdf/primary', '000000');
+        $this->primay_rgb = BimpTools::hex2rgb($this->primary);
+        
+        parent::__construct($db);
+    }
+        
     /**
      *      \brief      Renvoi le dernier message d'erreur de creation de deplacement
      */

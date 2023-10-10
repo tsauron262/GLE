@@ -27,7 +27,7 @@ class OrderPDF extends BimpCommDocumentPDF
         if (!array_key_exists($doc_type, self::$doc_types)) {
             $doc_type = 'commande';
         }
-        
+
         if ($doc_type === 'bl') {
             $this->signature_bloc = true;
         }
@@ -159,7 +159,6 @@ class OrderPDF extends BimpCommDocumentPDF
 //        if ($this->sitationinvoice) {
 //            $docName = self::$doc_types[$this->doc_type];
 //        }
-
         // Réf commande: 
         switch ($this->doc_type) {
             case 'commande':
@@ -633,8 +632,7 @@ class BLPDF extends OrderPDF
 
                 $ht = $line->subprice * $qties[$line->id]['qty'];
                 $ttc = $ht * (100 + $line->tva_tx) / 100;
-                
-                
+
                 $total_ht_without_remises += $line->total_ht;
                 $total_ttc_without_remises += $line->total_ttc;
                 $this->acompteHt -= $ht;
@@ -682,7 +680,7 @@ class BLPDF extends OrderPDF
                     if (isset($qties[(int) $line->id]['serials']) && count($qties[(int) $line->id]['serials'])) {
                         $desc .= '<br/>';
                         $desc .= '<strong>N° de série</strong>: ';
-                        $desc .= '<span style="font-size: ' . (count($qties[(int) $line->id]['serials']) > 10 ? (count($qties[(int) $line->id]['serials']) > 100 ? '5' : '6') : '8') . 'px">';
+                        $desc .= '<span style="font-size: ' . (count($qties[(int) $line->id]['serials']) > 10 ? (count($qties[(int) $line->id]['serials']) > 100 ? '6' : '7') : '8') . 'px">';
                         $first = true;
                         foreach ($qties[(int) $line->id]['serials'] as $serial) {
                             if (!$first) {
@@ -779,19 +777,41 @@ class BLPDF extends OrderPDF
                         if ((float) $qty > 0) {
                             $row['pu_ht'] = price($pu_ht * $qty, 0, $this->langs);
                             $row['qte'] = 1;
+                            $row['dl'] = 0;
+                            $row['ral'] = 0;
                         } elseif ((float) $qty < 0) {
                             $row['pu_ht'] = price($pu_ht * ($qty * -1), 0, $this->langs);
                             $row['qte'] = -1;
+                            $row['dl'] = 0;
+                            $row['ral'] = 0;
                         } else {
-                            continue;
+                            $row['qte'] = 0;
+                            if ((float) $row['dl']) {
+                                $qty = $row['dl'];
+                                $row['dl'] = ($qty > 0 ? 1 : -1);
+                                $row['ral'] = 0;
+                            } elseif ((float) $row['ral']) {
+                                $qty = $row['ral'];
+                                $row['ral'] = ($qty > 0 ? 1 : -1);
+                                $row['dl'] = 0;
+                            }
+                            if ($qty) {
+                                $row['pu_ht'] = price($pu_ht * abs($qty), 0, $this->langs);
+                            }
                         }
-                        $row['dl'] = 0;
-                        $row['ral'] = 0;
                     }
                 }
             }
 
             if ($this->detail || $row['qte'] != 0) {
+                if (isset($row['desc']) && $row['desc']) {
+                    if (isset($row['desc']['content']) && is_string($row['desc']['content']) && $row['desc']['content']) {
+                        $row['desc']['content'] = $this->replaceHtmlStyles($row['desc']['content']);
+                    } elseif (is_string($row['desc']) && $row['desc']) {
+                        $row['desc'] = $this->replaceHtmlStyles($row['desc']);
+                    }
+                }
+                
                 $table->rows[] = $row;
             }
 
@@ -960,8 +980,7 @@ class BLPDF extends OrderPDF
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
                 $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($this->total_ttc, 0, $this->langs) . '</td>';
                 $html .= '</tr>';
-                
-                
+
                 if ($this->acompteHt > 0) {
                     $html .= '<tr>';
                     $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("Acompte") . '</td>';

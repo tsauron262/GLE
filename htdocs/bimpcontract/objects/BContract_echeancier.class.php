@@ -257,13 +257,11 @@ class BContract_echeancier extends BimpObject
 
     public function getFacturesExterneByPeriode($periode = '')
     {
-        $return = [];
+        $return = array();
 
         if ($periode != '') {
-
             $obj = (array) json_decode($this->getData('facturesExterne_soldePeriode'));
             if (array_key_exists($periode, $obj)) {
-
                 $return['ref'] = $obj[$periode]->ref;
                 $return['ht'] = $obj[$periode]->ht;
                 $return['tva'] = $obj[$periode]->ht * 0.2;
@@ -621,26 +619,30 @@ class BContract_echeancier extends BimpObject
         }
     }
 
-    public function displayEcheancier($data, $display, $header = true)
+    public function displayEcheancier()
     {
         global $user;
 
         if (!$this->isLoaded()) {
-            return BimpRender::renderAlerts("Ce contrat ne comporte pas d'échéancier pour le moment", 'info', false);
+            return BimpRender::renderAlerts("Ce contrat ne comporte pas d'échéancier pour le moment", 'warning');
         }
 
         $html = '';
+
         if (!$this->canEdit()) {
-            $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emise", 'info', false);
+            $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emise", 'info');
         }
 
-        $parent = $this->getParentInstance();
+        $contrat = $this->getParentInstance();
 
-        if ($header) {
-            $html .= $this->renderHeaderEcheancier();
+        if (!BimpObject::objectLoaded($contrat)) {
+            return BimpRender::renderAlerts("Contrat lié absent", 'danger');
         }
 
-        $html .= '<tbody class="listRows">';
+        $data = $contrat->getEcheancierData();
+        $dateFin = new DateTime($contrat->getData('date_start'));
+        $dateFin->sub(new DateInterval('P1D'));
+
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
         $can_create_next_facture = $this->canEdit() ? true : false;
 
@@ -652,10 +654,23 @@ class BContract_echeancier extends BimpObject
                 $displayAppatenance = "<strong>Information à venir</strong>";
                 break;
         }
-        
-        $parent = $this->getParentInstance();
-        $dateFin = new DateTime($parent->getData('date_start'));
-        $dateFin->sub(new DateInterval('P1D'));
+
+        $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
+        $html .= '<thead>';
+        $html .= '<tr class="headerRow">';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Période de facturation<br />Début - Fin</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Appartenance</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody class="listRows">';
 
         if ($data->factures_send) {
             $current_number_facture = 1;
@@ -734,13 +749,15 @@ class BContract_echeancier extends BimpObject
                 }
             }
         }
+
         if ($dateFin && $this->getData('next_facture_date') < "2000-01-01" || (isset($dateFin) && $this->getData('next_facture_date') < $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00')))
             $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
-        if ($dateFin && $this->getData('next_facture_date') == 0 && (intval($parent->getTotalContrat()) - intval($parent->getTotalDejaPayer())) > 0) {
+        if ($dateFin && $this->getData('next_facture_date') == 0 && (intval($contrat->getTotalContrat()) - intval($contrat->getTotalDejaPayer())) > 0) {
             $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
             die('Echéancier corrigé, rafraichir la page');
         }
-        if ($this->getData('next_facture_date') != 0) {
+
+        if ($this->getData('next_facture_date')) {
             $startedDate = new DateTime($this->getData('next_facture_date'));
             $enderDate = new DateTime($this->getData('next_facture_date'));
             $enderDate->add(new DateInterval("P" . $data->periodicity . "M"))->sub(new DateInterval("P1D"));
@@ -768,7 +785,7 @@ class BContract_echeancier extends BimpObject
                     $dateTime_end_mkTime = $enderDate;
                 }
 
-                $getEndDate = new DateTime($parent->displayRealEndDate("Y-m-d"));
+                $getEndDate = new DateTime($contrat->displayRealEndDate("Y-m-d"));
                 if ($getEndDate < $dateTime_end_mkTime) {
                     $dateTime_end_mkTime = $getEndDate;
                 }
@@ -776,26 +793,16 @@ class BContract_echeancier extends BimpObject
                 $amount = 0;
 
                 $firstPassage = false;
-                if ($parent->getData('periodicity') > 0 && $parent->getData('periodicity') != 1200 && $data->reste_periode > 1) {
+                if ($contrat->getData('periodicity') > 0 && $contrat->getData('periodicity') != 1200 && $data->reste_periode > 1) {
                     $amount += $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
                     $tva = $amount * 0.2;
-                    $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
-                    $pa = ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa')) / ($data->reste_periode * $morceauPeriode);
+                    $nb_periode = ceil($contrat->getData('duree_mois') / $contrat->getData('periodicity'));
+                    $pa = ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')) / ($data->reste_periode * $morceauPeriode);
                 } else {
                     $amount += $data->reste_a_payer;
                     $tva = $amount * 0.2;
                     $nb_periode = 1;
-                    $pa = ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'));
-                }
-
-                if (!$display) {
-                    return array(
-                        'total_ht'   => $amount,
-                        'pa'         => $pa,
-                        'date_start' => $dateTime_start_mkTime->format('Y-m-d'),
-                        'date_end'   => $dateTime_end_mkTime->format('Y-m-d'),
-                        'origine'    => 'cron'
-                    );
+                    $pa = ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa'));
                 }
 
                 $html .= '<tr class="objectListItemRow" >';
@@ -806,7 +813,7 @@ class BContract_echeancier extends BimpObject
                 $html .= '</td>';
 
                 $infos = $this->getFacturesExterneByPeriode($dateTime_start_mkTime->format('Y-m-d') . '_' . $dateTime_end_mkTime->format('Y-m-d'));
-
+                
                 if (!count($infos)) {
                     $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'
                             . '<td style="text-align:center">' . price($tva) . ' € </td>'
@@ -840,12 +847,12 @@ class BContract_echeancier extends BimpObject
                     $enderDate->add(new DateInterval("P" . $data->periodicity . "M"));
                 }
             }
+
             $html .= '</tbody>';
             $html .= '</table>';
 
             $html .= '<div class="panel-footer">';
-            if (($parent->is_not_finish() && $user->rights->facture->creer) || ($user->admin || $user->id == 460)) {
-
+            if (($contrat->is_not_finish() && $user->rights->facture->creer) || ($user->admin || $user->id == 460)) {
                 if (($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" ' . BimpRender::renderPopoverData('Supprimer l\'échéancier') . ' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
                 }
@@ -855,35 +862,77 @@ class BContract_echeancier extends BimpObject
             }
 
 
-            if (($user->rights->facture->creer && $reste_periodeEntier == 0 && round($parent->getTotalContrat(), 2) - round($parent->getTotalDejaPayer(), 2) != 0) && $parent->getData('statut') == 11)
-                $html .= '<div class="btn-group"><button type="button" class="btn btn-default bs-popover" ' . BimpRender::renderPopoverData('Facturation supplémentaire') . ' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('labelLn' => 'Facturation supplémentaire', 'label' => 'Complément à', 'total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-plus"></i> Facturation supplémentaire</button></div>';
+            if (($user->rights->facture->creer && $reste_periodeEntier == 0 && round($contrat->getTotalContrat(), 2) - round($contrat->getTotalDejaPayer(), 2) != 0) && $contrat->getData('statut') == 11) {
+                
+                $dateDebT = new DateTime($contrat->getData('date_start'));
+                $dateFinT = $contrat->getEndDate();
+                $onclick = $this->getJsActionOnclick("createFacture", array(
+                    'labelLn'  => 'Facturation supplémentaire',
+                    'label'    => 'Complément à',
+                    'total_ht' => $contrat->getTotalContrat() - $contrat->getTotalDejaPayer(),
+                    'pa'       => ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')),
+                    'date_start' => $dateDebT->format('Y-m-d'), 
+                    'date_end' => $dateFinT->format('Y-m-d')
+                        ), array(
+                    "success_callback" => $callback
+                        )
+                );
+                $html .= '<div class="btn-group">';
+                $html .= '<button type="button" class="btn btn-default bs-popover" ';
+                $html .= BimpRender::renderPopoverData('Facturation supplémentaire') . ' aria-haspopup="true" aria-expanded="false"';
+                $html .= ' onclick="' . $onclick . '">';
+                $html .= '<i class="fa fa-plus"></i> Facturation supplémentaire';
+                $html .= '</button>';
+                $html .= '</div>';
+            }
+
             $html .= '</div>';
         }
 
-        $html .= "<br/>"
-                . "<table style='float:right' class='border' border='1'>"
-                . "<tr> <th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th><th style='background-color:#ed7c1c;color:white;text-align:center'>Achat</th> </tr>"
-                . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Contrat</th> <td style='text-align:center'><b>" . price($parent->getTotalContrat()) . " €</b></td> <td style='text-align:center'><b> " . price($parent->getTotalContrat() * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . ($parent->getTotalPa()) . " €</b></td></tr>"
-                . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Facturé</th> <td style='text-align:center'><b class='important' > " . price($parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer() * 1.20) . " €</b></td> <td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer(false, 'pa')) . " €</b></td> </tr>";
+        $html .= "<br/>";
+        $html .= "<table style='float:right' class='border' border='1'>";
+        $html .= "<tr>";
+        $html .= "<th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>";
+        $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th>";
+        $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th>";
+        $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Achat</th>";
+        $html .= '</tr>';
 
-        if ($parent->getTotalDejaPayer(true) == $parent->getTotalContrat()) {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer(true, 'pa')) . " €</b></td> </tr>";
+        $html .= "<tr>";
+        $html .= '<th style="background-color:#ed7c1c;color:white;text-align:center">Contrat</th>';
+        $html .= "<td style='text-align:center'><b>" . price($contrat->getTotalContrat()) . " €</b></td>";
+        $html .= "<td style='text-align:center'><b> " . price($contrat->getTotalContrat() * 1.20) . " €</b></td>";
+        $html .= "<td style='text-align:center'><b class='important'> " . ($contrat->getTotalPa()) . " €</b></td>";
+        $html .= "</tr>";
+
+        $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Facturé</th> <td style='text-align:center'><b class='important' > " . price($contrat->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='important'> " . price($contrat->getTotalDejaPayer() * 1.20) . " €</b></td> <td style='text-align:center'><b class='important'> " . price($contrat->getTotalDejaPayer(false, 'pa')) . " €</b></td> </tr>";
+
+        if ($contrat->getTotalDejaPayer(true) == $contrat->getTotalContrat()) {
+            $html .= "<tr>";
+            $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th>";
+            $html .= "<td style='text-align:center'><b class='success'>" . price($contrat->getTotalDejaPayer(true)) . " € </b></td>";
+            $html .= "<td style='text-align:center'><b class='success'> " . price($contrat->getTotalDejaPayer(true) * 1.20) . " €</b></td>";
+            $html .= "<td style='text-align:center'><b class='important'> " . price($contrat->getTotalDejaPayer(true, 'pa')) . " €</b></td>";
+            $html .= "</tr>";
         } else {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer(true, 'pa')) . " €</b></td> </tr>";
+            $html .= "<tr>";
+            $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th>";
+            $html .= "<td style='text-align:center'><b class='danger'> " . price($contrat->getTotalDejaPayer(true)) . " € </b></td>";
+            $html .= "<td style='text-align:center'><b class='danger'> " . price($contrat->getTotalDejaPayer(true) * 1.20) . " €</b></td>";
+            $html .= "<td style='text-align:center'><b class='important'> " . price($contrat->getTotalDejaPayer(true, 'pa')) . " €</b></td>";
+            $html .= "</tr>";
         }
 
-
-
-        if ($parent->getTotalContrat() - $parent->getTotalDejaPayer() == 0) {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='success'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa')) . " €</b></td> </tr>";
+        if ($contrat->getTotalContrat() - $contrat->getTotalDejaPayer() == 0) {
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='success'> " . price($contrat->getTotalContrat() - $contrat->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='success'> " . price(($contrat->getTotalContrat() - $contrat->getTotalDejaPayer()) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')) . " €</b></td> </tr>";
         } else {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa')) . " €</b></td>  </tr>";
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='danger'> " . price($contrat->getTotalContrat() - $contrat->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($contrat->getTotalContrat() - $contrat->getTotalDejaPayer()) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')) . " €</b></td>  </tr>";
         }
 
-        if ($parent->getTotalContrat() - $parent->getTotalDejaPayer(true) == 0) {
+        if ($contrat->getTotalContrat() - $contrat->getTotalDejaPayer(true) == 0) {
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='success'> 0 € </b></td> <td style='text-align:center'><b class='success'>0 €</b></td> </tr>";
         } else {
-            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td><td style='text-align:center'><b class='important'> " . ($parent->getTotalPa() - $parent->getTotalDejaPayer(true, 'pa')) . " €</b></td></tr>";
+            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($contrat->getTotalContrat() - $contrat->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($contrat->getTotalContrat(true) * 1.20) - ($contrat->getTotalDejaPayer(true) * 1.20)) . " €</b></td><td style='text-align:center'><b class='important'> " . ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(true, 'pa')) . " €</b></td></tr>";
         }
         if ($acomptes_ht != 0 && $acomptes_ttc != 0) {
 
@@ -894,8 +943,7 @@ class BContract_echeancier extends BimpObject
 
         $html .= "</table>";
 
-        if ($display)
-            return $html;
+        return $html;
     }
 
     public function displayNewEcheancier()
@@ -1103,26 +1151,6 @@ class BContract_echeancier extends BimpObject
             return BimpRender::renderAlerts("Il n'y à pas de facture à délier", 'warning', false);
     }
 
-    public function renderHeaderEcheancier()
-    {
-        $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
-        $html .= '<thead>';
-        $html .= '<tr class="headerRow">';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Période de facturation<br />Début - Fin</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Appartenance</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
-        $html .= '</tr>';
-        $html .= '</thead>';
-
-        return $html;
-    }
-
     // Traitements:
 
     public function cronEcheancier()
@@ -1285,8 +1313,10 @@ class BContract_echeancier extends BimpObject
     {
         global $user;
         $obj = json_decode($this->getData('facturesExterne_soldePeriode'));
+        if(!is_object($obj))
+            $obj = (object) array();
         $named = $data['date_start'] . '_' . $data['date_end'];
-        $obj->$named = Array('ref' => $data['factureExterne'], 'ht' => $data['total_ht'], 'by' => $user->id);
+        $obj->{$named} = Array('ref' => $data['factureExterne'], 'ht' => $data['total_ht'], 'by' => $user->id);
         $errors = $this->updateField('facturesExterne_soldePeriode', json_encode($obj));
         if (!count($errors))
             $success = 'Facture ' . $data['factureExterne'] . ' bien pris en compte pour cette periode';
@@ -1323,7 +1353,7 @@ class BContract_echeancier extends BimpObject
         }
 
         if (BimpTools::isDateRangeValid($date_start, $date_end, $errors)) {
-            if ($this->isPeriodInvoiced($date_start, $date_end)) {
+            if ($this->isPeriodInvoiced($date_start, $date_end) && stripos($label_line, 'supplémentaire') === false) {
                 $errors[] = 'Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l\'échéancier';
             }
         }
@@ -1342,8 +1372,8 @@ class BContract_echeancier extends BimpObject
             $facture->set('fk_soc', ($contrat->getData('fk_soc_facturation')) ? $contrat->getData('fk_soc_facturation') : $contrat->getData('fk_soc'));
 
             $bill_label = ($label ? $label . ' ' : '') . "Facture";
-            if($contrat->getData('periodicity') != $contrat::CONTRAT_PERIOD_TOTAL)
-                 $bill_label .= " ". $contrat->displayPeriode();
+            if ($contrat->getData('periodicity') != $contrat::CONTRAT_PERIOD_TOTAL)
+                $bill_label .= " " . $contrat->displayPeriode();
             $bill_label .= " du contrat N°" . $contrat->getData('ref');
             $bill_label .= ' - ' . $contrat->getData('label');
 
@@ -1421,7 +1451,7 @@ class BContract_echeancier extends BimpObject
                     $new_first_line->date_from = $date_start;
                     $new_first_line->date_to = $date_end;
                     $new_first_line->pu_ht = $total_ht;
-                    $new_first_line->tva_tx = BimpTools::getDefaultTva();
+                    $new_first_line->tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
                     $new_first_line->pa_ht = $pa_ht;
 
                     $line_warnings = array();
@@ -1435,8 +1465,8 @@ class BContract_echeancier extends BimpObject
 
                         $new_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
                         $new_line->validateArray(array(
-                                            'type'   => ObjectLine::LINE_TEXT,
-                                            'id_obj' => (int) $facture->id,
+                            'type'   => ObjectLine::LINE_TEXT,
+                            'id_obj' => (int) $facture->id,
                         ));
 
                         $new_line->desc = $description_total;

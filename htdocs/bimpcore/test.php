@@ -26,10 +26,8 @@ if (!$user->admin) {
     exit;
 }
 
-if (BimpCore::isModeDev()) {
-    BimpObject::loadClass('bimpsupport', 'BS_SAV');
-    echo BS_SAV::sendAlertesClientsUnrestituteSav();
-}
+//echo BimpTools::makeDirectories('synopsistools/fileInfo');
+
 
 echo '<br/>FIN';
 echo '</body></html>';

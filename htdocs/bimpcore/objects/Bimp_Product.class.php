@@ -166,13 +166,18 @@ class Bimp_Product extends BimpObject
         switch ($field_name) {
             case 'validate':
             case 'lock_admin':
-            case 'cur_pa_ht':
                 if ($user->admin) {
                     return 1;
                 }
                 return 0;
             case 'tobuy':
                 return $this->canValidate();
+
+            case 'no_fixe_prices':
+            case 'price':
+            case 'price_ttc':
+            case 'cur_pa_ht':
+                return $this->canEditPrices();
         }
 
         return parent::canEditField($field_name);
@@ -180,38 +185,23 @@ class Bimp_Product extends BimpObject
 
     public function canSetAction($action)
     {
+        global $user;
+
         switch ($action) {
             case 'validate':
             case 'refuse':
             case 'merge':
-            case 'updatePrice':
-            case 'mouvement':
+            case 'duplicate':
                 return $this->canValidate();
+
+            case 'mouvement':
+                return ($this->canValidate() || $user->rights->bimpcommercial->correct_stocks);
+
+            case 'updatePrice':
+                return ($this->canValidate() && $this->canEditPrices());
         }
 
         return parent::canSetAction($action);
-    }
-
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
-    {
-        if ($field == 'renta_service') {
-            $join_alias = ($main_alias ? $main_alias . '__' : '') . 'ef';
-            $joins[$join_alias] = array(
-                'alias' => $join_alias,
-                'table' => 'product_extrafields',
-                'on'    => ($main_alias ? $main_alias : 'a') . '.rowid = ' . $join_alias . '.fk_object'
-            );
-            return 'if(' . $join_alias . '.duree_i > 0, ' . $main_alias . '.price / ' . $join_alias . '.duree_i * 3600, 0)';
-        }
-
-        return '';
-    }
-
-    public function fetchExtraFields()
-    {
-        $extra = array();
-        $extra['renta_service'] = $this->getData('duree_i') > 0 ? $this->getData('price') / $this->getData('duree_i') * 3600 : 0;
-        return $extra;
     }
 
     public function canValidate()
@@ -223,11 +213,27 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
+    public function canEditPrices()
+    {
+        global $user;
+        if ($user->admin) {
+            return 1;
+        }
+
+        if ((int) BimpCore::getConf('use_product_prices_perms', null, 'bimpcore')) {
+            return $user->rights->bimpcommercial->edit_product_prices;
+        }
+
+        return 1;
+    }
+
     public function iAmAdminRedirect()
     {
         global $user;
-        if ($user->rights->bimpcommercial->validProd)
+        if ($user->id == 286)
             return 1;
+//        if ($user->rights->bimpcommercial->validProd)
+//            return 1;
 
         return parent::iAmAdminRedirect();
     }
@@ -323,6 +329,13 @@ class Bimp_Product extends BimpObject
                 if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                return 1;
+
+            case 'duplicate':
+                if (!(int) BimpCore::getConf('allow_duplicate_products')) {
+                    $errors[] = 'La copie des produits n\'est pas activée';
                     return 0;
                 }
                 return 1;
@@ -527,6 +540,11 @@ class Bimp_Product extends BimpObject
         return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER) ? 1 : 0);
     }
 
+    public function isAbonnement()
+    {
+        return (int) ((int) $this->getData('type2') === 6);
+    }
+
     // Getters codes comptables: 
 
     public function getProductTypeCompta()
@@ -631,7 +649,7 @@ class Bimp_Product extends BimpObject
 //        }
     }
 
-    public function getCodeComptableVente($zone_vente = 1, $force_type = -1)
+    public function getCodeComptableVente($zone_vente = 1, $force_type = -1, $tva_null = 0)
     {
         // ACHAT DE D3E juste pour la france
         // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
@@ -639,7 +657,8 @@ class Bimp_Product extends BimpObject
 
 
 
-        if (preg_match('.(applecare).', strtolower($this->getData('label')))) {
+        if ((preg_match('.(applecare).', strtolower($this->getData('label'))) || preg_match('.(apple care).', strtolower($this->getData('label')))
+                ) && ($this->getData('tva_tx') == 0 || $tva_null)) {
             return BimpCore::getConf('applecare_compte', null, 'bimptocegid');
         }
 
@@ -669,7 +688,7 @@ class Bimp_Product extends BimpObject
             $type = $force_type;
 
 
-        if ($type < 2 && $zone_vente == 1 && $this->getData('tva_tx') == 0) {//produit ou service tva null vendu en france
+        if ($type < 2 && $zone_vente == 1 && ($this->getData('tva_tx') == 0 || $tva_null)) {//produit ou service tva null vendu en france
             $confName = 'vente_tva_null';
         } else {
             //debut du code
@@ -768,7 +787,8 @@ class Bimp_Product extends BimpObject
 
     public function getFilesDir()
     {
-        return DOL_DATA_ROOT . '/produit/' . dol_sanitizeFileName($this->getRef()) . '/';
+        global $conf;
+        return $conf->product->multidir_output[$this->dol_object->entity] . '/' . dol_sanitizeFileName($this->getRef()) . '/';
     }
 
     public function getFileUrl($file_name, $page = 'document')
@@ -776,7 +796,7 @@ class Bimp_Product extends BimpObject
         $dir = $this->getFilesDir();
         if ($dir) {
             if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&entity=' . $this->dol_object->entity . '&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
         }
 
@@ -878,6 +898,18 @@ class Bimp_Product extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
+            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $data = $this->getDuplicateData();
+            $buttons[] = array(
+                'label'   => 'Cloner',
+                'icon'    => 'fas_copy',
+                'onclick' => $prod_instance->getJsActionOnclick('duplicate', $data, array(
+                    'form_name' => 'default'
+                ))
+            );
+        }
+
 //        if ($this->isActionAllowed('refuse') && $this->canSetAction('refuse')) {
 //            $buttons[] = array(
 //                'label'   => 'Refuser',
@@ -905,6 +937,59 @@ class Bimp_Product extends BimpObject
         }
 
         return '';
+    }
+    
+    public function getFilteredListActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('bulkEditField')) {
+            $actions[] = array(
+                'label'      => 'Editer pourcentage du prix de reviens',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'cost_price_percent',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
+                'label'      => 'Editer durée',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'duree',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
+                'label'      => 'Editer en Vente',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'tosell',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
+                'label'      => 'Editer en Achat',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'tobuy',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+        }
+        return $actions;
     }
 
     // Getters données: 
@@ -990,14 +1075,16 @@ class Bimp_Product extends BimpObject
         while ($ln = $db->fetch_object($sql)) {
             $tabT[] = $ln->rowid;
         }
-        $query = 'SELECT (total_ht / qty) as derPv, fk_product FROM `' . MAIN_DB_PREFIX . 'facturedet` l WHERE rowid IN (' . implode(",", $tabT) . ')';
-        $sql = $db->query($query);
+        if (count($tabT)) {
+            $query = 'SELECT (total_ht / qty) as derPv, fk_product FROM `' . MAIN_DB_PREFIX . 'facturedet` l WHERE rowid IN (' . implode(",", $tabT) . ')';
+            $sql = $db->query($query);
 
-        $cache_key = $dateMin . "-" . $dateMax . 'derPv';
+            $cache_key = $dateMin . "-" . $dateMax . 'derPv';
 
-        while ($ln = $db->fetch_object($sql)) {
-            self::$ventes[$cache_key][$ln->fk_product] = $ln->derPv;
-//            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+            while ($ln = $db->fetch_object($sql)) {
+                self::$ventes[$cache_key][$ln->fk_product] = $ln->derPv;
+                //            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+            }
         }
     }
 
@@ -1075,7 +1162,7 @@ class Bimp_Product extends BimpObject
                         }
                     }
                 } else {
-                    $tab_secteur = array("S", "M", "CO", "BP", "C"); //tous sauf E
+                    $tab_secteur = array("S", "M", "CO", "BP", "C", 'CT', 'CTC', 'CTE', 'P'); //tous sauf E
                     $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product, $tab_secteur, false, true);
 
                     $data[$ship_to]['ventes'] += $ventes['qty'];
@@ -1223,7 +1310,6 @@ class Bimp_Product extends BimpObject
 
     public function getValues8sens($type, $include_empty = true)
     {
-        // Utiliser ***impérativement*** le cache pour ce genre de requêtes         
         return self::getProductsTagsByTypeArray($type, $include_empty);
     }
 
@@ -1239,6 +1325,27 @@ class Bimp_Product extends BimpObject
             }
         }
         return '';
+    }
+
+    public function getDuplicateData()
+    {
+        $fields = array(
+            'label', 'description', 'fk_product_type', 'price', 'price_ttc', 'deee', 'default_vat_code',
+            'tva_tx', 'serialisable', 'remisable', 'type2', 'rpcp', 'localtax1_tx', 'localtax1_type',
+            'localtax2_tx', 'localtax2_type', 'fk_default_warehouse', 'no_fixe_prices', 'categorie',
+            'collection', 'nature', 'famille', 'gamme', 'cto', 'type_compta', 'duree', 'lock_admin', 'duree_i',
+            'renta_service', 'alerteActive'
+        );
+
+        $data = array();
+
+        foreach ($fields as $field) {
+            if ($this->field_exists($field)) {
+                $data[$field] = htmlentities($this->getData($field));
+            }
+        }
+
+        return $data;
     }
 
     // Getters stocks:
@@ -1266,11 +1373,13 @@ class Bimp_Product extends BimpObject
             }
 
             if (in_array($type, array('dispo', 'virtuel'))) {
-                BimpObject::loadClass('bimpreservation', 'BR_Reservation');
 
-                $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
-                $stocks['total_reserves'] = $reserved['total'];
-                $stocks['reel_reserves'] = $reserved['reel'];
+                if (BimpCore::isModuleActive('bimpreservation')) {
+                    BimpObject::loadClass('bimpreservation', 'BR_Reservation');
+                    $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
+                    $stocks['total_reserves'] = $reserved['total'];
+                    $stocks['reel_reserves'] = $reserved['reel'];
+                }
 
                 $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
 
@@ -1510,6 +1619,15 @@ class Bimp_Product extends BimpObject
         if (isset($result[0]->id)) {
             return (int) $result[0]->id;
         }
+    }
+
+    public function getFournisseursArray($include_empty = true, $empty_label = '')
+    {
+        if (!$this->isLoaded()) {
+            return ($include_empty ? array(0 => $empty_label) : array());
+        }
+
+        return self::getProductFournisseursArray($this->id, $include_empty, $empty_label);
     }
 
     // Gestion Prix d'achat courant: 
@@ -2471,6 +2589,16 @@ class Bimp_Product extends BimpObject
             );
         }
 
+        // Opérations périodiques
+        if (bimpcore::getConf('use_logistique_periodicity', null, 'bimpcommercial')) {
+            $tabs[] = array(
+                'id'            => 'product_periodicity_view_tab',
+                'title'         => BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Opérations périodiques',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderPeriodicityView', '$(\'#product_periodicity_view_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+            );
+        }
+
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
     }
 
@@ -2808,6 +2936,18 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
+    public function renderPeriodicityView()
+    {
+        if (!$this->isLoaded($errors)) {
+            return BimpRender::renderAlerts($errors);
+        }
+
+        $commandeController = BimpController::getInstance('bimpcommercial', 'commandes');
+        return $commandeController->renderPeriodsTab(array(
+                    'id_product' => $this->id
+        ));
+    }
+
     // Traitements: 
 
     public function addConfigExtraParams()
@@ -2902,6 +3042,14 @@ class Bimp_Product extends BimpObject
             return $errors;
         }
 
+        $email = BimpCore::getConf('product_validated_notif_email', '', 'bimpcore');
+
+        if ($email) {
+            global $langs;
+            $msg = 'Bonjour, <br/><br/>Le produit ' . $this->getLink() . ' a été validé par ' . $user->getFullName($langs);
+            mailSyn2('Produit ' . $this->getRef() . ' validé', $email, '', $msg);
+        }
+
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
@@ -2923,6 +3071,7 @@ class Bimp_Product extends BimpObject
                 $userT->fetch($commande->fk_user_author);
                 $mailCreateur = $userT->email;
             }
+
             if ($mailCreateur && $mailCreateur != '')
                 $this->sendEmailCommandeValid($commande, $mailCreateur);
 
@@ -2947,7 +3096,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -2986,7 +3135,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -3066,7 +3215,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -3101,7 +3250,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -3236,14 +3385,14 @@ class Bimp_Product extends BimpObject
     public function mailValidation($urgent = false)
     {
         global $user;
+        $mail = BimpCore::getConf('mail_achat');
         if ($urgent) {
-            $mail = "XX_Achats@bimp.fr," . BimpCore::getConf('devs_email');
+            $mail .= "," . BimpCore::getConf('devs_email');
             $msg = 'Bonjour, ' . "\n\n";
             $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
             $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
             $msg .= 'Cordialement.';
         } else {
-            $mail = "XX_Achats@bimp.fr";
             $msg = "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
         }
         if (mailSyn2("Validation produit", $mail, null, $msg)) {
@@ -3470,6 +3619,19 @@ class Bimp_Product extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function duplicate($data, &$errors = array(), &$warnings = array())
+    {
+        $new_prod = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+
+        $errors = $new_prod->validateArray($data);
+
+        if (!count($errors)) {
+            $errors = $new_prod->create($warnings, true);
+        }
+
+        return $new_prod;
     }
 
     // Stats
@@ -3934,9 +4096,57 @@ class Bimp_Product extends BimpObject
 
         $this->hydrateFromDolObject();
 
+        if ($this->getData('cost_price_percent') > 0)
+            $this->updateField('cost_price', $this->getData('price') * $this->getData('cost_price_percent') / 100);
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function validateValue($field, $value)
+    {
+        if ($field == 'cost_price_percent') {
+            if ($value > 0 && $value != $this->getData('cost_price_percent') || $this->getData('cost_price_percent') > 0) {
+                $this->updateField('cost_price', $this->getData('price') * $value / 100);
+            }
+        } elseif ($field == 'cost_price') {
+            if ($value > 0)
+                $this->setCurrentPaHt($value, 0, 'cost_price');
+            elseif ($this->getInitData('cost_price') > 0) {//repassser a zero si pa actuel = prix de reviens
+                $paO = $this->getCurrentPaObject();
+                if ($paO && $paO->getData('origin') == 'cost_price') {
+                    $this->setCurrentPaHt($value, 0, 'cost_price');
+                }
+            }
+        }
+
+        return parent::validateValue($field, $value);
+    }
+
+    public function actionDuplicate($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+        $prod = $this->duplicate($data, $errors, $warnings);
+
+        if (BimpObject::objectLoaded($prod)) {
+            $success = 'Copie du produit effectuée avec succès';
+            $url = $prod->getUrl();
+
+            if ($url) {
+                $sc = 'window.open(\'' . $url . '\');';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
         );
     }
 
@@ -3997,6 +4207,8 @@ class Bimp_Product extends BimpObject
         $new_tva_tx = (float) $this->getData('tva_tx');
         $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);
 
+//        $this->onUpdate(false);
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -4046,6 +4258,28 @@ class Bimp_Product extends BimpObject
     }
 
     // Overrodes Fields extra: 
+
+    public function fetchExtraFields()
+    {
+        $extra = array();
+        $extra['renta_service'] = $this->getData('duree_i') > 0 ? $this->getData('price') / $this->getData('duree_i') * 3600 : 0;
+        return $extra;
+    }
+
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+    {
+        if ($field == 'renta_service') {
+            $join_alias = ($main_alias ? $main_alias . '__' : '') . 'ef';
+            $joins[$join_alias] = array(
+                'alias' => $join_alias,
+                'table' => 'product_extrafields',
+                'on'    => ($main_alias ? $main_alias : 'a') . '.rowid = ' . $join_alias . '.fk_object'
+            );
+            return 'if(' . $join_alias . '.duree_i > 0, ' . $main_alias . '.price / ' . $join_alias . '.duree_i * 3600, 0)';
+        }
+
+        return '';
+    }
 
     public function deleteExtraFields()
     {
@@ -4298,26 +4532,6 @@ class Bimp_Product extends BimpObject
                 );
             }
         }
-    }
-
-    public function getFilteredListActions()
-    {
-        $actions = array();
-
-        if ($this->canSetAction('bulkEditField')) {
-            $actions[] = array(
-                'label'      => 'Editer durée',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'duree',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-        }
-        return $actions;
     }
 
     public static function correctAllProductCurPa($echo = false, $echo_errors_only = true)

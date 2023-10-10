@@ -48,3 +48,5 @@ ALTER TABLE `llx_bt_transfer_det`
 ALTER TABLE `llx_bt_transfer_det`
   ADD CONSTRAINT `fk_user_update_det` FOREIGN KEY (`user_update`) REFERENCES `llx_user` (`rowid`);
 
+ALTER TABLE `llx_bt_transfer` ADD `user_valid` INT NOT NULL AFTER `id_warehouse_dest`;
+UPDATE `llx_bt_transfer` SET user_valid=1;

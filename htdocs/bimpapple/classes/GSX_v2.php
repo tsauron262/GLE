@@ -4,8 +4,8 @@ require_once __DIR__ . '/GSX_Const.php';
 
 class GSX_v2 extends GSX_Const
 {
-
-    public static $oldShipTos = array(1111748, 1000566, 462140, 1139941, 1000565, 1000483, 494685, 466183, 484926, 1040727, 1046076, 1046075, 1187559, 1187562, 1187561, 1187560, 1199659, 897316);
+//old shipto correspond a altimac   
+    public static $oldShipTos = array(1134736, 608105, 1185605, 608111);
     protected static $instance = null;
     protected $ch;
     public $baseUrl = '';
@@ -71,9 +71,11 @@ class GSX_v2 extends GSX_Const
             //passage sur les id de base
             $userT = new User(BimpCache::getBdb()->db);
             $userT->fetch(242);
-            $this->appleId = self::$default_ids['apple_id'];
-            $this->acti_token = $userT->array_options['options_gsx_acti_token'];
-            $this->auth_token = $userT->array_options['options_gsx_auth_token'];
+            if($userT->array_options['options_gsx_acti_token'] != ''){
+                $this->appleId = self::$default_ids['apple_id'];
+                $this->acti_token = $userT->array_options['options_gsx_acti_token'];
+                $this->auth_token = $userT->array_options['options_gsx_auth_token'];
+            }
         }
         else{
             if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
@@ -134,7 +136,7 @@ class GSX_v2 extends GSX_Const
     {
         $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
         if (in_array(intval($this->shipTo), self::$oldShipTos)) {
-            $this->setSoldTo('897316');
+            $this->setSoldTo('608111');
         } else {
             $this->setSoldTo('1442050');
         }
@@ -464,9 +466,7 @@ class GSX_v2 extends GSX_Const
                     echo '<br/><br/>' . $infos;
                 }
 
-                if (BimpDebug::isActive()) {
-                    BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
-                }
+                BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
             }
             return false;
         }
@@ -510,9 +510,7 @@ class GSX_v2 extends GSX_Const
                 echo '<br/><br/>' . $infos;
             }
 
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
-            }
+            BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
         }
 
         if (is_array($data) && isset($data['errors']) && count($data['errors'])) {
@@ -525,7 +523,7 @@ class GSX_v2 extends GSX_Const
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
                             if ($this->reauthenticate()) {
-                                return $this->exec($request_name, $params, $response_headers, $extra_headers);
+                                return $this->exec($request_name, $params, $response_headers);
                             }
                             return false;
                         } else {
@@ -1205,9 +1203,7 @@ class GSX_v2 extends GSX_Const
             ));
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebug('gsx', '<span class="danger">ERREUR init GSX</span>', BimpRender::renderAlerts($msg));
-        }
+        BimpDebug::addDebug('gsx', '<span class="danger">ERREUR init GSX</span>', BimpRender::renderAlerts($msg));
     }
 
     public function curlError($request_name, $msg, $code = '', $log_error = false)
@@ -1233,9 +1229,7 @@ class GSX_v2 extends GSX_Const
             ));
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebug('gsx', '<span class="danger">ERREUR requête "' . $request_name . '"</span>', BimpRender::renderAlerts($msg . ' (CODE: ' . $code . ')'));
-        }
+        BimpDebug::addDebug('gsx', '<span class="danger">ERREUR requête "' . $request_name . '"</span>', BimpRender::renderAlerts($msg . ' (CODE: ' . $code . ')'));
     }
 
     public function displayDebug($msg)

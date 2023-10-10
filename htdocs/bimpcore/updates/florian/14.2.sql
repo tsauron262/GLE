@@ -1,1 +1,1 @@
-ALTER TABLE `llx_commande` ADD `status_forced` TEXT NOT NULL DEFAULT ''; 
+ALTER TABLE `llx_commande` ADD `status_forced` TEXT NOT NULL; 

@@ -216,7 +216,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
         modal_format: 'medium', // Format modal (small / medium / large) 
         modal_scroll_bottom: true, // Auto scroll vers le bas de la modal du formulaire (à la validation) 
         use_bimpdatasync: false, // Utiliser BimpDataSync
-        use_report: false,
+        use_report: false, // Utiliser les rapports BimpDataSync
         display_processing: true,
         processing_msg: 'Traitement en cours'
     };
@@ -310,7 +310,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
                                         $form.append('<div id="progressbar_' + id + '"></div>');
                                     },
                                     progress: function (progress) {
-                                        console.log(progress);
+//                                        console.log(progress);
                                         $("#progressbar_" + id).progressbar({value: progress});
                                     },
                                     success: function (data) {
@@ -598,4 +598,24 @@ function forceBimpObjectUnlock($button, object_data, $resultContainer) {
     });
 }
 
+function saveBimpcoreConf(module, name, value, $resultContainer, successCallback, display_success) {
+    var data = {
+        module: module,
+        name: name,
+        value: value
+    };
+
+    if (typeof (display_success) === 'undefined') {
+        display_success = true;
+    }
+
+    BimpAjax('saveBimpcoreConf', data, $resultContainer, {
+        display_success: display_success,
+        success: function (result, bimpAjax) {
+            if (typeof (successCallback) === 'function') {
+                successCallback(result);
+            }
+        }
+    });
+}
 // simpleUpload : déplacé dans functions.js

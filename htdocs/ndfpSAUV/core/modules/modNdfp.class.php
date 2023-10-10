@@ -35,7 +35,7 @@ class modNdfp extends DolibarrModules
 	 *   \brief      Constructor. Define names, constants, directories, boxes, permissions
 	 *   \param      DB      Database handler
 	 */
-	function modNdfp($DB)
+	function __construct($DB)
 	{
         global $langs, $conf;
 

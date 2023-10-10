@@ -46,6 +46,14 @@ objects:
             id_object: 
                 field_value: id_propal_renouv
 
+    achat_fourn: 
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Fournisseur
+            id_object: 
+                field_value: achat_id_fourn
+                
 fields: 
     id_obj: 
         label: Commande
@@ -163,6 +171,17 @@ fields:
         max: none
         decimals: 0
         
+    achat_id_fourn: 
+        label: Fournisseur pour les achats périodiques
+        type: id_object
+        object: achat_fourn
+        default_value: 0
+        displays: 
+            default: 
+                label: Affichage par défaut
+                type: callback
+                method: displayAchatFourn
+        
     achat_periods_start:
         label: Date 1er achat
         type: date
@@ -177,6 +196,10 @@ fields:
                 params: 
                     - achat
                     - 1
+                    
+    periodicity_extra_params: 
+        label: Paramètres supplémentaires pour les opérations périodiques
+        type: json
                     
     # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs.
     # et servent pour la liste "general" (Ne pas utiliser en PHP).
@@ -278,7 +301,7 @@ fields:
         user_edit: 1
         
 forms: 
-    commande_fourn: 
+    commande_fourn:
         title: Ajouter à une commande fournisseur
         icon: fas_cart-arrow-down
         rows: 
@@ -421,6 +444,9 @@ forms:
         title: Facturation / Livraison / Achat périodique
         force_edit: 1
         rows: 
+            # Facturation :
+            fac_title: 
+                title: Facturation
             has_fac_periodicity: 
                 custom: 1
                 label: Facturation périodique
@@ -455,6 +481,10 @@ forms:
                 display_if: 
                     field_name: has_fac_periodicity
                     show_values: 1
+                    
+            # Livraisons : 
+            exp_title: 
+                title: Livraisons
             has_exp_periodicity: 
                 custom: 1
                 label: Livraison périodique
@@ -479,6 +509,25 @@ forms:
                         show_values: 1
                     has_exp_periodicity: 
                         hide_values: 0
+            exp_id_contact: 
+                custom: 1
+                label: Contact de livraison
+                input_name: exp_id_contact
+                data_type: id
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            object: parent
+                            method: getShipmentContactsArray
+                value: 
+                    callback: 
+                        method: getPeriodicityExtraParam
+                        params: 
+                            - exp_id_contact
+                display_if: 
+                    field_name: has_exp_periodicity
+                    show_values: 1                        
             exp_periodicity: 
                 field: exp_periodicity
                 display_if: 
@@ -511,6 +560,10 @@ forms:
                 display_if: 
                     field_name: has_exp_periodicity
                     show_values: 1
+                    
+            # Achats : 
+            achat_title: 
+                title: Achats
             has_achat_periodicity: 
                 custom: 1
                 label: Achat périodique
@@ -527,6 +580,107 @@ forms:
                 display_if: 
                     field_name: has_achat_periodicity
                     show_values: 1
+            achat_type_pa: 
+                custom: 1
+                label: Type prix d'achat
+                input_name: achat_type_pa
+                input: 
+                    type: select
+                    options: 
+                      1: Prix fournisseur
+                      2: Prix d'achat exceptionnel
+                value: 
+                    callback: 
+                        method: getPeriodicityExtraParam
+                        params: 
+                            - achat_type_pa
+            achat_id_fourn_price: 
+                custom: 1
+                label: Prix d'achat fournisseur
+                input_name: achat_id_fourn_price
+                data_type: id_object
+                object: fourn_price
+                create_form: 
+                    callback: getFournisseurPriceCreateForm
+                create_form_values: 
+                    fields: 
+                        fk_product: 
+                            prop: id_product
+                input: 
+                    type: select
+                    options: 
+                        array: productFournisseursPrices
+                    extra_content: 
+                        callback: 
+                            method: renderFournPriceButtons
+                            params: 
+                                - achat_id_fourn_price
+                value: 
+                    callback: 
+                        method: getPeriodicityExtraParam
+                        params: 
+                            - achat_id_fourn_price
+                display_if: 
+                    fields_names: has_achat_periodicity,achat_type_pa
+                    has_achat_periodicity: 
+                        show_values: 1
+                    achat_type_pa: 
+                        show_values: 1
+            achat_id_fourn: 
+                custom: 1
+                label: Fournisseur
+                input_name: achat_id_fourn
+                data_type: id_object
+                object: fournisseur
+                input: 
+                  type: search_object
+                display_if: 
+                    fields_names: has_achat_periodicity,achat_type_pa
+                    has_achat_periodicity: 
+                        show_values: 1
+                    achat_type_pa: 
+                        show_values: 2
+                value: 
+                    callback: 
+                        method: getPeriodicityExtraParam
+                        params: 
+                            - achat_id_fourn
+            achat_pa_ht: 
+                custom: 1
+                label: Prix d'achat HT
+                input_name: achat_pa_ht
+                data_type: money
+                input: 
+                    type: text
+                display_if: 
+                    fields_names: has_achat_periodicity,achat_type_pa
+                    has_achat_periodicity: 
+                        show_values: 1
+                    achat_type_pa: 
+                        show_values: 2
+                value: 
+                    callback: 
+                        method: getPeriodicityExtraParam
+                        params: 
+                            - achat_pa_ht
+            achat_tva_tx: 
+                custom: 1
+                label: Taux de TVA du PA
+                input_name: achat_tva_tx
+                data_type: percent
+                input: 
+                    type: text
+                display_if: 
+                    fields_names: has_achat_periodicity,achat_type_pa
+                    has_achat_periodicity: 
+                        show_values: 1
+                    achat_type_pa: 
+                        show_values: 2
+                value: 
+                    callback: 
+                        method: getPeriodicityExtraParam
+                        params: 
+                            - achat_tva_tx
             achat_periodicity: 
                 field: achat_periodicity
                 display_if: 
@@ -559,6 +713,119 @@ forms:
                 display_if: 
                     field_name: has_achat_periodicity
                     show_values: 1
+           
+    periodicity_process: 
+        rows: 
+            client: 
+                custom: 1
+                hidden: 1
+                label: Client
+                input_name: id_client
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            client_name: 
+                custom: 1
+                label: Client
+                input_name: client_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayClientNameInput
+                depends_on: id_client
+                display_if: 
+                    field_name: id_client
+                    hide_values: 0
+            fourn: 
+                custom: 1
+                hidden: 1
+                label: Fournisseur
+                input_name: id_fourn
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            fourn_name: 
+                custom: 1
+                label: Fournisseur
+                input_name: fourn_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayFournNameInput
+                depends_on: id_fourn
+                display_if: 
+                    field_name: id_fourn
+                    hide_values: 0
+            product: 
+                custom: 1
+                hidden: 1
+                label: Produit
+                input_name: id_product
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            prod_name: 
+                custom: 1
+                label: Produit
+                input_name: prod_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayProductNameInput
+                depends_on: id_product
+                display_if: 
+                    field_name: id_product
+                    hide_values: 0
+                    
+    periodicity_mass_process: 
+        extends: periodicity_process
+        modal_format: large
+        rows: 
+            type: 
+                custom: 1
+                label: Type opération
+                input_name: operation_type
+                hidden: 1
+                input: 
+                    type: hidden
+                required: 1
+                value: achat
+            products: 
+                custom: 1
+                label: Produits à traiter
+                input_name: products
+#                depends_on: operation_type
+                input: 
+                    type: custom
+                    content: 
+                        callback: renderPeriodicityMassProcessInputs
+                        
+    periodicity_check: 
+        extends: periodicity_process
+        rows: 
+            null_dates_only: 
+                custom: 1
+                label: Vérifier les dates nulles seulement
+                input_name: null_dates_only
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            types: 
+                custom: 1
+                label: Types d'opération périodique à vérifier
+                input_name: types
+                input: 
+                    type: check_list
+                    items: 
+                        exp: Livraisons
+                        fac: Facturations
+                        achat: Achats
+                value: 
+                    array: exp,fac,achat
             
 fields_tables: 
     resume:
@@ -616,6 +883,27 @@ filters:
         type: check_list
         items: 
             array: reservationsStatus
+            
+    periodic_exps_to_process: 
+        label: Livraisons périodiques à traiter aujourd'hui
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+            
+    periodic_facs_to_process: 
+        label: Facturation périodiques à traiter aujourd'hui
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+            
+    periodic_achats_to_process: 
+        label: Achats périodiques à traiter aujourd'hui
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
                     
 filters_panels: 
     default: 
@@ -655,18 +943,21 @@ filters_panels:
     exp_periods: 
         extends: periods
         filters: 
+            periodic_exps_to_process:
             next_date_exp: 
             exp_periodicity:
                 
     fac_periods: 
         extends: periods
         filters: 
+            periodic_facs_to_process:
             next_date_fac: 
             fac_periodicity:
                 
     achat_periods: 
         extends: periods
         filters: 
+            periodic_achats_to_process:
             next_date_achat: 
             achat_periodicity:
                         
@@ -866,6 +1157,22 @@ lists:
         filters_panel: exp_periods
         sort_field: next_date_exp
         sort_way: asc
+        allow_large_n: 1
+        checkboxes: 
+            callback: 
+                method: canSetAction
+                params: 
+                    - periodicityMassprocess
+        bulk_actions: 
+            callback: 
+                method: getGeneralPeriodsListBulkActions
+                params: 
+                    - exp
+        header_buttons: 
+            callback: 
+                method: getGeneralPeriodsListHeaderButtons
+                params: 
+                    - exp
         cols:
             unextends: 1
             id_obj: 
@@ -881,6 +1188,22 @@ lists:
         filters_panel: fac_periods
         sort_field: next_date_fac
         sort_way: asc
+        allow_large_n: 1
+        checkboxes: 
+            callback: 
+                method: canSetAction
+                params: 
+                    - periodicityMassprocess
+        bulk_actions: 
+            callback: 
+                method: getGeneralPeriodsListBulkActions
+                params: 
+                    - fac
+        header_buttons: 
+            callback: 
+                method: getGeneralPeriodsListHeaderButtons
+                params: 
+                    - fac
         cols:
             unextends: 1
             parent:invoice_status: 
@@ -896,10 +1219,27 @@ lists:
         filters_panel: achat_periods
         sort_field: next_date_achat
         sort_way: asc
+        allow_large_n: 1
+        checkboxes: 
+            callback: 
+                method: canSetAction
+                params: 
+                    - periodicityMassprocess
+        bulk_actions: 
+            callback: 
+                method: getGeneralPeriodsListBulkActions
+                params: 
+                    - achat
+        header_buttons: 
+            callback: 
+                method: getGeneralPeriodsListHeaderButtons
+                params: 
+                    - achat
         cols:
             unextends: 1
             id_obj: 
             desc: 
+            achat_id_fourn:
             nb_periods_bought: 
             achat_periods_start: 
             nb_periods_tobuy:

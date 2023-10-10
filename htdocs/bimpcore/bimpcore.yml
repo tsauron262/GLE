@@ -31,6 +31,10 @@ params:
         warning: <b>En cas de plantage lors d'une mise à jour, le vérouillage doit être désactivé manuellement.</b>
         type: bool
         def: 0
+    git_pull_lock_msg: 
+        label: Message de vérouillage des GIT PULL
+        info: Si défini, les GIT PULL sont bloqués et le message est affiché lors d'une tentative de pull.<br/>Un bouton est également affiché pour dévérouillage immédiat.
+        def: ''
     mode_securlogin: 
         label: Mode Secure Login
         type: select
@@ -39,6 +43,11 @@ params:
             1: Code SMS écran
             2: Normal
         def: 0
+    send_sms: 
+        label: Activer l'envoi de SMS
+        type: bool
+        info: Désactive tous les envois de SMS (modules BIMP uniquement, sauf page de test)
+        def: 1
     use_bimp_object_instances_clones: 
         label: cloner les instances de base des BimpObject
         type: bool
@@ -83,7 +92,8 @@ params:
     public_base_url: 
         label: Base URL Publique
         info: Base de l'URL pour l'accès public à certaines pages de l'ERP.
-        warning: Différent de l'URL de l'espace client (cf bimpinterfaceclient)
+        warning: Différent de l'URL de l'espace client (cf bimpinterfaceclient).
+        help: Ne pas oublier le "?" si nécessaire
     date_archive: 
         label: Date archive
         def: ''
@@ -100,6 +110,16 @@ params:
         label: Ip Admin (pour fermeture ERP)
     git_branch:
         label: Branche GIT
+    cronjob_debug: 
+        label: Activer le débug des tâches CRON
+        type: bool
+        def: 0
+        
+    #ftp_dir => Eviter les noms trop "communs" pour les params de conf, 
+    # il faut qu'on puisse retrouver facilement les params dans le code lors des recherches globales.
+    exports_ldlc_ftp_dir:
+        label: Dossier FTP pour les exports LDLC
+        def: ''
     
     # Defaults: 
     default_id_entrepot: 
@@ -161,12 +181,28 @@ params:
         label: Adresse e-mail pour notification changement de solvabilité client (auto)
         cat: emails
         def: ''
+    mail_achat:
+        label: Email groupe achat
+        cat: emails
+        def: ''
         
     # Produits
     use_valid_product: 
         label: Validation produits obligatoire
         cat: products
         type: bool
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  product_validated_notif_email: 
+                      label: Adresse(s) e-mail pour envoi d'une notification à la validation d'un produit
+    
+    use_product_prices_perms: 
+        label: Vérifier les droits utilisateurs pour l'édition des PV / PA des produits (+ option "Pas de prix fixes")
+        cat: products
+        type: bool
+        info: Droit "bimpcommercial->use_product_prices_perms"
         def: 0
     use_products_cur_pa_history:
         label: Activer l'historique des prix d'achat courants
@@ -179,10 +215,15 @@ params:
         type: bool
         def: 1
     not_decimal_product:
-        label: Pas de decimales pour les produit
+        label: Interdire les quantités décimales pour les produits non sérialisés
         cat: products
         type: bool
-        def: 1
+        def: 0
+    allow_duplicate_products: 
+        label: Autoriser le clonage des produits
+        cat: products
+        type: bool
+        def: 0
         
     # Tiers:
     check_solvabilite_client: 
@@ -301,3 +342,7 @@ params:
                       label: Logguer les doublons SQL
                       type: bool
                       def: 0
+                      
+    code_ics:
+        label: Code ICS pour les RUM
+        

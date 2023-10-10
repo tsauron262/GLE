@@ -60,6 +60,12 @@ objects:
             bimp_object: 
                 module: bimpapple
                 name: PartStockMvt
+                
+    propal_ln:
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_SavPropalLine
             
 sections:
     - type: tabs
@@ -67,6 +73,10 @@ sections:
         default:
             label: Hotline
             icon: fas_headset
+            show: 
+                conf: 
+                    module: bimpsupport
+                    name: use_tickets
             sections:
                 - type: list
                   list: 
@@ -157,4 +167,13 @@ sections:
                           type: list
                           list: 
                               object: part_stock_mvt
+                              
+        propal_ln: 
+            label: Ligne de propal
+            icon: fas_shopping-bag
+            sections:
+                - type: list
+                  list: 
+                      object: propal_ln     
+                      name: global
                 

@@ -457,50 +457,7 @@ class Bimp_Menu extends BimpObject
 
     public static function verifCond($s, $code_path)
     {
-        $errors = array();
-        // Adapté de dol_eval() : nécessaire pour contourner cetaines restrictions. 
-
-
-        if (preg_match('/[^a-z0-9\s' . preg_quote('^$_+-.*>&|=!?():"\',/@', '/') . ']/i', $s)) {
-            $errors[] = 'Caractères interdits';
-        }
-        if (strpos($s, '`') !== false) {
-            $errors[] = '` interdit';
-        }
-        if (preg_match('/[^0-9]+\.[^0-9]+/', $s)) {
-            $errors[] = 'Point interdit';
-        }
-
-        $forbiddenphpstrings = array('$$');
-        $forbiddenphpstrings = array_merge($forbiddenphpstrings, array('_ENV', '_SESSION', '_COOKIE', '_GET', '_POST', '_REQUEST'));
-
-        $forbiddenphpfunctions = array("exec", "passthru", "shell_exec", "system", "proc_open", "popen", "eval", "dol_eval", "executeCLI", "verifCond", "base64_decode");
-        $forbiddenphpfunctions = array_merge($forbiddenphpfunctions, array("fopen", "file_put_contents", "fputs", "fputscsv", "fwrite", "fpassthru", "require", "include", "mkdir", "rmdir", "symlink", "touch", "unlink", "umask"));
-        $forbiddenphpfunctions = array_merge($forbiddenphpfunctions, array("function", "call_user_func"));
-
-        $forbiddenphpregex = 'global\s+\$|\b(' . implode('|', $forbiddenphpfunctions) . ')\b';
-
-        do {
-            $oldstringtoclean = $s;
-            $s = str_ireplace($forbiddenphpstrings, '__forbiddenstring__', $s);
-            $s = preg_replace('/' . $forbiddenphpregex . '/i', '__forbiddenstring__', $s);
-        } while ($oldstringtoclean != $s);
-
-        if (strpos($s, '__forbiddenstring__') !== false) {
-            $errors[] = 'Présence d\'une chaîne interdite';
-        }
-
-        if (count($errors)) {
-            BimpCore::addlog('Menu BimpTheme - Erreur condition', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-                'Chaîne'  => $s,
-                'Erreurs' => $errors,
-                'Item'    => $code_path
-            ));
-            return 0;
-        }
-
-        global $user, $conf;
-        return eval('return ' . $s . ';');
+        return BimpTools::verifCond($s);
     }
 
     // Actions: 

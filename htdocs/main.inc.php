@@ -320,62 +320,16 @@ if (!empty($_COOKIE[$sessiontimeout])) {
 
 
 
+
+// This create lock, released by session_write_close() or end of page.
+// We need this lock as long as we read/write $_SESSION ['vars']. We can remove lock when finished.
+
 // Init the 5 global objects, this include will make the 'new Xxx()' and set properties for: $conf, $db, $langs, $user, $mysoc
 require_once 'master.inc.php';
 /* Mod drsi */
 include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
 $synopsisHook = new synopsisHook();
 global $synopsisHook; //Pour vision global de l'objet
-
-// This create lock, released by session_write_close() or end of page.
-// We need this lock as long as we read/write $_SESSION ['vars']. We can remove lock when finished.
-if (!defined('NOSESSION')) {
-	if (PHP_VERSION_ID < 70300) {
-		session_set_cookie_params(0, '/', null, ((empty($dolibarr_main_force_https) && isHTTPS() === false) ? false : true), true); // Add tag secure and httponly on session cookie (same as setting session.cookie_httponly into php.ini). Must be called before the session_start.
-	} else {
-		// Only available for php >= 7.3
-		$sessioncookieparams = array(
-			'lifetime' => 0,
-			'path' => '/',
-			//'domain' => '.mywebsite.com', // the dot at the beginning allows compatibility with subdomains
-			'secure' => ((empty($dolibarr_main_force_https) && isHTTPS() === false) ? false : true),
-			'httponly' => true,
-			'samesite' => 'Lax'	// None || Lax  || Strict
-		);
-		session_set_cookie_params($sessioncookieparams);
-	}
-        
-        
-        if(defined('USE_BDD_FOR_SESSION')){
-            global $db;
-
-
-            require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
-        // Démarrage de la session
-            if(class_exists('BimpCache')){
-                $bdb = BimpCache::getBdb(true);
-                $dbNoTransac = $bdb->db;
-            }
-            else{
-                $dbNoTransac = $db;
-            }
-
-
-            $session = new Session($dbNoTransac);
-            if(defined('EVEN_IF_ONLY_LOGIN_ALLOWED'))
-                session_destroy();
-        }
-        
-        
-        
-        
-        
-        
-	session_name($sessionname);
-	session_start();	// This call the open and read of session handler
-	//exit;	// this exist generates a call to write and close
-}
-
 /* FMod Drsi */
 
 // If software has been locked. Only login $conf->global->MAIN_ONLY_LOGIN_ALLOWED is allowed.

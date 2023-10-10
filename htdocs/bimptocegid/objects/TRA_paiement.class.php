@@ -16,7 +16,8 @@
         private $caisse;
         private $TRA_tiers;
         public $rapportTier = [];
-        protected $compteCheque = '51124000';
+        protected $compteCheque = '51124000';//ACTIMAC 51124000
+        protected $codeJournalCheque = 'REC';//ACTIMAC 51124000
         
         
         function __construct($bimp_db, $tiers_file) { 
@@ -44,7 +45,7 @@
             
             $codeJournalByModeReglement = [
                 'LIQ'       => $entrepot->code_journal_compta,
-                'CHQ'       => $this->compteCheque,
+                'CHQ'       => $this->codeJournalCheque,
                 'CB'        => $entrepot->code_journal_compta,
                 'AE'        => $entrepot->code_journal_compta,
                 'VIR'       => $compte_bancaire->cegid_journal,

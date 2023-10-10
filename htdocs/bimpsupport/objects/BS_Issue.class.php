@@ -518,7 +518,7 @@ class BS_Issue extends BimpObject
                                 $line->qty = 1;
                                 $line->pa_ht = $pa_ht;
                                 $line->pu_ht = $pu_ht;
-                                $line->tva_tx = BimpTools::getDefaultTva();
+                                $line->tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
 
                                 $line_warnings = array();
                                 $line_errors = $line->create($line_warnings, true);

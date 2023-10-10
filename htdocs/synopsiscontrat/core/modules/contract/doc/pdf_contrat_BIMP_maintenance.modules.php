@@ -44,6 +44,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);
+
+        parent::__construct($db);
     }
 
     public static $gti = Array(2 => '2h ouvrées', 4 => '4h ouvrées', 8 => '8h ouvrées', 16 => '16h ouvrées');
@@ -55,7 +57,14 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
     public function addLogo(&$pdf, $size, $pdf1 = null)
     {
         global $conf;
-        $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
+
+        $logo_name = $this->emetteur->logo;
+        
+//        if (BimpCore::isEntity('actimac')) {
+//            $logo_name = 'carre.png';
+//        }
+
+        $logo = $conf->mycompany->dir_output . '/logos/' . $logo_name;
         $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
         if (is_file($testFile))
             $logo = $testFile;
@@ -113,7 +122,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
     public function headOfArray($pdf)
     {
         $pdf->SetFont(''/* 'Arial' */, 'B', 9);
-        $pdf->setColor('fill', 236, 147, 0);
+        $pdf->setColor('fill', $this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
         $pdf->SetTextColor(255, 255, 255);
         $pdf->setDrawColor(255, 255, 255);
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
@@ -136,7 +145,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
         $pdf->setTextColor(255, 255, 255);
         $pdf->setDrawColor(255, 255, 255);
-        $pdf->setColor('fill', 236, 147, 0);
+        $pdf->setColor('fill', $this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
         $pdf->Cell($W, 8, $titre, 1, null, 'C', true);
         $pdf->setColor('fill', 255, 255, 255);
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
@@ -322,7 +331,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
         $pdf->setTextColor(0, 0, 0);
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Conditions particulières du Contrat N°" . $contrat->ref, 0, 'C');
         $pdf->SetFont('', 'B', 9);
-        $pdf->setDrawColor(236, 147, 0);
+        $pdf->setDrawColor($this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
         $pdf->Line(15, 32, 195, 32);
         $pdf->Line(15, 42, 195, 42);
         $pdf->setDrawColor(255, 255, 255);
@@ -335,7 +344,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $parag2, 0, 'L');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, "", 0, 'C');
         $pdf->SetFont('', 'B', 9);
-        $pdf->setDrawColor(236, 147, 0);
+        $pdf->setDrawColor($this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
 
         if (!empty($contrat->note_public) || !is_null($contrat->note_public)) {
             $pdf->Line(15, 80, 195, 80);
@@ -361,7 +370,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
             $pdf->setY($pdf->getY() + 4);
             $pdf->SetFont('', 'B', 9);
         }
-        $pdf->setDrawColor(236, 147, 0);
+        $pdf->setDrawColor($this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
         $pdf->Line(15, $pdf->getY() + 3, 195, $pdf->getY() + 3);
         $pdf->setY($pdf->getY() + 5);
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Liste des sites d\'intervention', 0, 'C');
@@ -423,7 +432,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
             $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
             $pdf->SetFont('', '', 7);
             $pdf->setDrawColor(255, 255, 255);
-            $pdf->setColor('fill', 236, 147, 0);
+            $pdf->setColor('fill', $this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
             $pdf->setTextColor(255, 255, 255);
             $pdf->Cell($W, 7, 'Service', 1, null, 'C', true);
             $pdf->setDrawColor(255, 255, 255);
@@ -433,7 +442,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
             $pdf->Cell($W * 9, 7, $affichage, 1, null, 'L', true);
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
             $pdf->setDrawColor(255, 255, 255);
-            $pdf->setColor('fill', 236, 147, 0);
+            $pdf->setColor('fill', $this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
             $pdf->setTextColor(255, 255, 255);
             $pdf->Cell($W, 7, 'N° Série', 1, null, 'C', true);
             $pdf->setDrawColor(255, 255, 255);
@@ -480,7 +489,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche - 25, 7, $chaine_serial, 0, 'L');
             $pdf->SetFont('', '', 7);
             $pdf->setDrawColor(255, 255, 255);
-            $pdf->setColor('fill', 236, 147, 0);
+            $pdf->setColor('fill', $this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
             $pdf->setTextColor(255, 255, 255);
             $pdf->Cell($W, 7, 'Description', 1, null, 'C', true);
             $pdf->setDrawColor(255, 255, 255);
@@ -731,7 +740,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                     global $mysoc;
                     $pdf->setColor('fill', 255, 255, 255); //$pdf1->setColor('fill', 255, 255, 255);
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
-                    $pdf->SetDrawColor(236, 147, 0); //$pdf1->SetDrawColor(236, 147, 0);
+                    $pdf->SetDrawColor($this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]); //$pdf1->SetDrawColor($this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
                     $pdf->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
                     //$pdf1->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
                     if (strlen($client->nom) >= 30 && strlen($client->nom) <= 40) {
@@ -923,7 +932,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
 
                     $pdf->SetXY($this->marge_gauche, $pdf->getY() + 9);
-                    $pdf->setTextColor(236, 147, 0);
+                    $pdf->setTextColor($this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
                     $pdf->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
 E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://bimppro.freshdesk.com", 0, 'C');
 //                $pdf->writeHTML("<span style='color:red'>La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :</span><br/>e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client");
@@ -931,7 +940,7 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                     $pdf->setTextColor(0, 0, 0);
 
                     //$pdf1->SetXY($this->marge_gauche, //$pdf1->getY()+9);
-                    //$pdf1->setTextColor(236, 147, 0);
+                    //$pdf1->setTextColor($this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
                     //$pdf1->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
 //E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
 //                $pdf->writeHTML("<span style='color:red'>La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :</span><br/>e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client");
@@ -1184,7 +1193,7 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
         $pdf->Cell($W * 4, 3, 'Contrat ' . $this->contrat->ref, 1, null, 'L', true);
 //        if($paraphe){
 //            $pdf->Cell($W * 15, 3, 'Paraphe :', 1, null, 'R', true);
-//            $pdf->setDrawColor(236, 147, 0);
+//            $pdf->setDrawColor($this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
 //            $pdf->Cell($W, 3, '', 1, null, 'R', true);
 //            $pdf->setDrawColor(255, 255, 255);
 //            $pdf->SetTextColor(200, 200, 200);

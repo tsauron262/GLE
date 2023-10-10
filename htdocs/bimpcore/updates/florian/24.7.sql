@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_signature_signataire` (
   `fonction` varchar(255) NOT NULL DEFAULT '',
   `date_open` date DEFAULT NULL,
   `date_signed` datetime DEFAULT NULL,
-  `allowed_users_client` TEXT NOT NULL DEFAULT '',
+  `allowed_users_client` TEXT NOT NULL,
   `ip_signataire` varchar(255) NOT NULL DEFAULT '',
   `base_64_signature` mediumtext DEFAULT NULL,
   `allow_elec` tinyint(1) NOT NULL DEFAULT 1,
@@ -39,6 +39,6 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_signature_signataire` (
   `allow_docusign` tinyint(1) NOT NULL DEFAULT 0,
   `allow_refuse` tinyint(1) NOT NULL DEFAULT 0,
   `need_sms_code` tinyint(1) NOT NULL DEFAULT 0,
-  `code_sms_infos` TEXT NOT NULL DEFAULT '',
+  `code_sms_infos` TEXT NOT NULL,
   KEY `id_signature` (`id_signature`)
 );

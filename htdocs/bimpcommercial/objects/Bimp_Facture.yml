@@ -66,8 +66,22 @@ objects:
                 
     facture_source:
         extends: facture
+        instance: 
+            id_object: 
+                field_value: fk_facture_source
+        
+    client_final: 
+        extends: client
+        instance: 
+            id_object: 
+                field_value: id_client_final
         
 fields: 
+    id_client_final: 
+        label: Client final
+        type: id_object
+        object: client_final
+        default_value: 0
     exported:
         label: Etat comptable
         type: int
@@ -264,6 +278,7 @@ fields:
         label: Litige
         dol_extra_field: 1
         type: bool
+        default_value: 0
     chorus_status: 
         label: Statut export chorus
         dol_extra_field: 1
@@ -281,6 +296,10 @@ fields:
         type: datetime
     fk_mode_reglement: 
         history: 1
+    pdf_hide_livraisons: 
+        label: Masquer l'adresse de livraison dans le PDF
+        type: bool
+        default_value: 0
     
     # Validation d'avoir
     valid_avoir_fichier_joints:
@@ -896,6 +915,7 @@ fields_tables:
             - label: Remises client
               value: 
                   callback: displayRemisesClient
+            - field: id_client_final
             
     payment:
         rows:
@@ -946,6 +966,8 @@ fields_tables:
 #              edit: 1
 #            - field: pdf_hide_ttc
 #              edit: 1
+            - field: pdf_hide_livraisons
+              edit: 1
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton

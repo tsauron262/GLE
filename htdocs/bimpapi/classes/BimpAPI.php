@@ -30,6 +30,8 @@ abstract class BimpAPI
     public $last_request_errors = array();
     public $debug_content = '';
     public $is_default_user = false;
+    
+    public static $asUser = true;
 
     // Gestion instance:
 
@@ -66,6 +68,9 @@ abstract class BimpAPI
 
     public function isUserAccountOk(&$errors = array())
     {
+        if(!static::$asUser)
+            return true;
+        
         if (!BimpObject::objectLoaded($this->userAccount)) {
             $errors[] = 'Compte utilisateur absent';
             return 0;
@@ -250,6 +255,8 @@ abstract class BimpAPI
 
     public function isLogged()
     {
+        if(!static::$asUser)
+            return true;
         if ($this->isUserAccountOk()) {
             return $this->userAccount->isLogged();
         }
@@ -387,7 +394,7 @@ abstract class BimpAPI
             } elseif (isset($this->params['url_base_' . $params['url_base_type'] . '_' . $this->options['mode']])) {
                 $url = $this->params['url_base_' . $params['url_base_type'] . '_' . $this->options['mode']];
             }
-
+//            echo BimpTools::displayBacktrace();
             if (!$url) {
                 $errors[] = 'Base de l\'URL non définie';
             } else {
@@ -616,9 +623,7 @@ abstract class BimpAPI
             dol_syslog($infos);
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebug('api', 'API "' . $this->options['public_name'] . '" - Requête "' . $request_name . '"', $infos);
-        }
+        BimpDebug::addDebug('api', 'API "' . $this->options['public_name'] . '" - Requête "' . $request_name . '"', $infos);
 
         $this->addDebug($infos);
 

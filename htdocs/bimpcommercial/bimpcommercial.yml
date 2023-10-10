@@ -9,6 +9,11 @@ categories:
         label: Envoi rappels
         
 params: 
+    use_lock_num: 
+        label: Utiliser le lock pour les références des pièces commerciales
+        type: bool
+        def: 1
+        
     date_debut_exercice: 
         label: Date début exercice
         def: 2020-04-01
@@ -66,7 +71,7 @@ params:
     contact_facturation_required_for_commandes: 
         label: Contact facturation obligatoire pour les commandes
         type: bool
-        def: 1        
+        def: 0        
         
     use_free_objectline: 
         label: Autoriser les lignes libres dans les pièces
@@ -106,6 +111,11 @@ params:
     id_resp_validation_avoir_education: 
         label: Id du responsable des avoirs éducation
         def: 201
+        
+    extra_emails_from: 
+        label: Adresse e-mails supplémentaires pour l'émetteur des envois d'e-mail des pièces commerciales.
+        info: Séparer chaque adresse e-mail par une virgule sans espace. 
+        def: ''
         
     # PDFs: 
     pdf_add_cgv: 

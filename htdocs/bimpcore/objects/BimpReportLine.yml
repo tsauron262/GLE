@@ -1,5 +1,6 @@
 abstract: 1
 common_fields: 0
+no_transaction_db: 1
 
 labels: 
     name: ligne de rapport

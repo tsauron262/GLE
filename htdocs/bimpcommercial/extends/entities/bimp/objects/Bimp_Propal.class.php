@@ -94,6 +94,10 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                     return 0;
                 }
 
+                if (BimpCore::isUserDev()) {
+                    return 1;
+                }
+
                 if (!in_array((int) $this->getData('fk_statut'), array(1, 2))) {
                     $errors[] = 'Statut invalide pour la génération d\'une proposition de location';
                     return 0;
@@ -107,10 +111,9 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                 if (!$this->isDemandeFinAllowed($errors)) {
                     return 0;
                 }
-
                 return 1;
         }
-
+        
         return parent::isActionAllowed($action, $errors);
     }
 
@@ -363,9 +366,9 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                                     'qty'   => $line->getFullQty()
                                 );
                                 if ($product_type == 1) {
-                                    $montant_materiel += $line->getTotalHT(true);
+                                    $montant_materiel += $line->getTotalHTWithRemises(true);
                                 } else {
-                                    $montant_services += $line->getTotalHT(true);
+                                    $montant_services += $line->getTotalHTWithRemises(true);
                                 }
                             }
                             break;

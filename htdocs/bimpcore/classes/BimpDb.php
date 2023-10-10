@@ -100,6 +100,8 @@ class BimpDb
 
     public function execute($sql)
     {
+        global $conf;
+        $sql = str_replace('__entity__', $conf->entity, $sql);
         $result = $this->db->query($sql);
         if (!$result)
             $this->logSqlError($sql);
@@ -130,7 +132,7 @@ class BimpDb
                         break;
                 }
             }
-            
+
             $this->db->free($result);
         } else {
             $this->logSqlError($sql);
@@ -150,7 +152,8 @@ class BimpDb
                 $sql = preg_replace("/;( )*\n/U", ";\n", $sql);
                 $tabSql = explode(";\n", $sql);
                 foreach ($tabSql as $req) {
-                    if ($req != "")
+                    $req = trim($req);
+                    if ($req != "") {
                         if ($result = $this->execute($req) < 0) {
                             BimpCore::addlog('Erreur SQL maj', 3, 'sql', null, array(
                                 'Requête' => (!is_null($req) ? $req : ''),
@@ -159,6 +162,7 @@ class BimpDb
                             $errors[] = 'Echec requête "' . $req . '" - ' . $this->err();
                             return false;
                         }
+                    }
                 }
             }
             return true;
@@ -197,8 +201,13 @@ class BimpDb
 
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
 
-        foreach ($joins as $join) {
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $join['alias'];
+        foreach ($joins as $key => $join) {
+            if (isset($join['alias'])) {
+                $join_alias = $join['alias'];
+            } else {
+                $join_alias = $key;
+            }
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $join_alias;
             $sql .= ' ON ' . $join['on'];
         }
 

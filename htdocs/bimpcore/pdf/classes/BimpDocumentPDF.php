@@ -54,31 +54,38 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         global $conf;
 
-        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-        if ($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo)) {
-            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
-        } else {
-            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO', 'CTC', 'CTE'))) {
-                $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
-                if (is_file($testFile))
-                    $logo_file = $testFile;
+        // Todo : réporganiser tout ça... 
+//        if (BimpCore::isEntity('actimac')) {
+//            // Temporaire...
+//            $logo_file = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/actimac/logo_actimag_sav.png';
+//        } else {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+            if ($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo)) {
+                $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
+            } else {
+                if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO', 'CTC', 'CTE'))) {
+                    $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
+                    if (is_file($testFile))
+                        $logo_file = $testFile;
+                }
+                if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('BP'))) {
+                    $testFile = str_replace(array(".jpg", ".png"), "_BP.png", $logo_file);
+                    if (is_file($testFile))
+                        $logo_file = $testFile;
+                }
+                if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
+                    $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png", ".png"), "_SAV.png", $logo_file);
+                    if (is_file($testFile))
+                        $logo_file = $testFile;
+                }
+                if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
+                    $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
+                    if (is_file($testFile))
+                        $logo_file = $testFile;
+                }
             }
-            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('BP'))) {
-                $testFile = str_replace(array(".jpg", ".png"), "_BP.png", $logo_file);
-                if (is_file($testFile))
-                    $logo_file = $testFile;
-            }
-            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
-                $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png"), "_SAV.png", $logo_file);
-                if (is_file($testFile))
-                    $logo_file = $testFile;
-            }
-            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
-                $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
-                if (is_file($testFile))
-                    $logo_file = $testFile;
-            }
-        }
+//        }
+
 
         $logo_width = 0;
         if (!file_exists($logo_file)) {
@@ -377,6 +384,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; ">';
             $html .= '<span style="color: #' . $this->primary . '">' . ('Client Final :') . '</span></div>';
             $html .= '';
+            $html .= pdfBuildThirdpartyName($this->contactFinal, $this->langs).'<br/>';
             $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contactFinal, !is_null($this->contactFinal) ? 1 : 0, 'target');
         }
 

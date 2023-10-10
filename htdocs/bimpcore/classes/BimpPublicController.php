@@ -9,9 +9,19 @@ class BimpPublicController extends BimpController
     public $new_pw_file = 'changePw';
     public $back_url = '';
     public $back_label = 'Retour';
+    public $public_entity_name = '';
 
     public function init()
     {
+        global $public_entity;
+        $public_entity = '';
+        if (isset($_GET['e']) && (string) $_GET['e']) {
+            $public_entity = $_GET['e'];
+            $_SESSION['public_entity'] = $public_entity;
+        } else {
+            $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : '');
+        }
+
         switch (BimpTools::getValue('back', '')) {
             case 'savForm':
                 $this->back_url = BimpObject::getPublicBaseUrl() . 'fc=savForm';
@@ -47,6 +57,31 @@ class BimpPublicController extends BimpController
         }
 
         $this->initUserClient();
+
+        global $public_entity;
+
+        $name = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
+        if (strpos($name, '{') === 0) {
+            $names = json_decode($name, 1);
+            $name = '';
+
+            if (!$public_entity) {
+                $public_entity = BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
+            }
+
+            if ($public_entity && isset($names[$public_entity])) {
+                $name = $names[$public_entity];
+            }
+        }
+
+        if (!$name) {
+            BimpCore::addlog('Aucun nom pour l\'interface publique', 4, 'bic', null, array(
+                'Entité'         => ($public_entity ? $public_entity : 'aucune'),
+                'Noms en config' => (isset($names) ? '<pre>' . print_r($names, 1) . '</pre>' : '')
+            ));
+        } else {
+            $this->public_entity_name = $name;
+        }
 
         if (BimpTools::isSubmit('public_form_submit')) {
             $this->processPublicForm();
@@ -101,6 +136,14 @@ class BimpPublicController extends BimpController
                     $_SESSION['userClient'] = null;
                     unset($userClient);
                     $userClient = null;
+                } else {
+                    global $public_entity;
+                    if (!$public_entity) {
+                        $public_entity = $userClient->getData('main_public_entity');
+                        if ($public_entity) {
+                            $_SESSION['public_entity'] = $public_entity;
+                        }
+                    }
                 }
             }
         }
@@ -143,6 +186,27 @@ class BimpPublicController extends BimpController
         return BimpObject::getPublicBaseUrl() . 'bic_logout=1';
     }
 
+    public static function getPublicEntityForSecteur($secteur)
+    {
+        return (string) BimpCache::getBdb()->getValue('bimp_c_secteur', 'public_entity', 'clef = \'' . $secteur . '\'');
+    }
+
+    public static function getPublicEntityForObjectSecteur($object)
+    {
+        if (is_a($object, 'BimpObject')) {
+            $secteur = $object->getSecteur();
+
+            if ($secteur) {
+                $entity = self::getPublicEntityForSecteur($secteur);
+                if ($entity) {
+                    return $entity;
+                }
+            }
+        }
+
+        return BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
+    }
+
     // Affichage standards: 
 
     public function displayHeader()
@@ -181,11 +245,10 @@ class BimpPublicController extends BimpController
 
     public function displayPublicForm($form_name, $params = array(), $form_errors = array())
     {
-        $nom_espace_client = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
         $params = BimpTools::overrideArray(array(
-                    'page_title'     => $nom_espace_client . ' - Espace client',
+                    'page_title'     => $this->public_entity_name . ' - Espace client',
                     'main_title'     => 'Espace client',
-                    'sub_title'      => 'Votre identifiant et mot de passe sont différents de votre compte client LDLC',
+                    'sub_title'      => '',
                     'submit_label'   => 'Valider',
                     'submit_enabled' => true,
                     'js_files'       => array(),
@@ -227,7 +290,7 @@ class BimpPublicController extends BimpController
         }
 
         if ($params['sub_title']) {
-            $html .= '<h3 style="text-align: center">' . $params['sub_title'] . '</h3>';
+            $html .= $params['sub_title'];
         }
 
         $html .= '<div id="erp_bimp">';
@@ -281,8 +344,24 @@ class BimpPublicController extends BimpController
 
     public function displayLoginForm($errors = array())
     {
+        $sub_title = '<div style="text-align: center">';
+
+        $sub_title .= '<h5>';
+        $sub_title .= 'Bienvenue sur le service d’assistance ' . $this->public_entity_name . '<br/><br/>';
+        $sub_title .= 'Cet espace vous est directement dédié. Il est là pour vous garantir les meilleures prestations possibles';
+        $sub_title .= '</h5>';
+
+        if (BimpCore::isEntity('bimp')) {
+            $sub_title .= '<p style="color: #008ECC; font-size: 13px; font-weight: bold; margin-top: 30px; margin-bottom: -60px">';
+            $sub_title .= 'Votre identifiant et votre mot de passe sont différents de votre compte client LDLC';
+            $sub_title .= '</p>';
+        }
+
+        $sub_title .= '</div>';
+
         $this->displayPublicForm($this->login_file, array(
-            'page_title' => 'BIMP - Authentification'
+            'page_title' => 'BIMP - Authentification',
+            'sub_title'  => $sub_title
                 ), $errors);
     }
 
@@ -320,10 +399,12 @@ class BimpPublicController extends BimpController
         $html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
         $html .= '<p style="text-align: center"><a href="javascript: var email = document.getElementById(\'bic_login_email\').value; window.location = \'' . BimpObject::getPublicBaseUrl() . 'display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\');">Mot de passe oublié</a></p>';
 
-        $html .= '<p style="text-align: center">';
-        $html .= 'Si vous souhaitez prendre un rendez-vous en ligne dans un de nos centres SAV pour la réparation de votre matériel et que ';
-        $html .= 'vous ne disposez pas de compte client ' . BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient') . ', veuillez <a href="' . BimpObject::getPublicBaseUrl() . 'fc=savForm" style="color: #00BEE5">cliquer ici</a>';
-        $html .= '</p>';
+        if (BimpCore::getConf('use_sav', null, 'bimpsupport') && (int) BimpCore::getConf('sav_public_reservations', null, 'bimpsupport')) {
+            $html .= '<p style="text-align: center; font-size: 12px;">';
+            $html .= 'Si vous souhaitez prendre un rendez-vous en ligne dans un de nos centres SAV pour la réparation de votre matériel et que ';
+            $html .= 'vous ne disposez pas de compte client ' . $this->public_entity_name . ', veuillez <a href="' . BimpObject::getPublicBaseUrl() . 'fc=savForm" style="color: #00BEE5">cliquer ici</a>';
+            $html .= '</p>';
+        }
 
         return $html;
     }

@@ -41,7 +41,7 @@ class modsynopsissignature extends DolibarrModules {
      *   \brief      Constructor. Define names, constants, directories, boxes, permissions
      *   \param      DB      Database handler
      */
-    function modsynopsissignature($DB) {
+    function __construct($DB) {
         global $langs, $conf;
 
         $this->db = $DB;

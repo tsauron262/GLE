@@ -110,14 +110,8 @@ class BC_FieldsTable extends BC_Panel
                 if (count($field_errors)) {
                     $content .= BimpRender::renderAlerts($field_errors);
                 } else {
-                    if (!$field_object->isFieldActivated($field_name)) {
+                    if (!$field_object->field_exists($field_name)) {
                         continue;
-                    }
-
-                    if ($field_object->isDolObject()) {
-                        if (!$field_object->dol_field_exists($field_name)) {
-                            continue;
-                        }
                     }
 
                     $isBaseObjectField = ($field_name == $row_params['field']);
@@ -206,9 +200,13 @@ class BC_FieldsTable extends BC_Panel
             if (isset($row_params['extra_content'])) {
                 $content .= $row_params['extra_content'];
             }
-            
+
             if (!$label) {
                 $label = BimpTools::ucfirst($row);
+            }
+
+            if ($content === '') {
+                continue;
             }
 
             $has_content = true;

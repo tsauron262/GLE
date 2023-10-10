@@ -5,6 +5,9 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/BimpAPI.php';
 class AtradiusAPI extends BimpAPI
 {
 
+    // atradius dev https://login-app.atradius.com/
+    // page de demande d'identifiants https://group.atradius.com/api/register-now
+    // https://developer.atradius.com/
     // pass web documentation: 885xcMaS
 
     const CREDIT_CHECK = 'credit-check'; // Limité à 7000 euros
@@ -20,9 +23,9 @@ class AtradiusAPI extends BimpAPI
             'test' => 'https://api-uat.atradius.com'
         ),
         'auth'    => array(
-            'prod' => 'https://api.atradius.com/authenticate/v2/tokens',
-            'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
-            'test' => 'https://api-uat.atradius.com/authenticate/v1/tokens'
+            'prod' => 'https://api.atradius.com/authenticate/v2/tokens', /* bug si auth sur l'url de prod */
+//            'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
+            'test' => 'https://api-uat.atradius.com/authenticate/v2/tokens'
         )
     );
     public static $requests = array(
@@ -31,7 +34,7 @@ class AtradiusAPI extends BimpAPI
             'url_base_type' => 'auth'
         ),
         'getMyBuyer'   => array(
-            'label' => 'Details ce nos client',
+            'label' => 'Details de nos client',
             'url'   => '/credit-insurance/organisation-management/v1/buyers/my-buyers'
         ),
         'getBuyer'     => array(
@@ -47,7 +50,7 @@ class AtradiusAPI extends BimpAPI
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'updateCover'  => array(
-            'label' => 'MAJ assurance',
+            'label' => 'Editer assurance',
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'deleteCover'  => array(
@@ -55,7 +58,7 @@ class AtradiusAPI extends BimpAPI
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'decisions'    => array(
-            'label' => 'Check des décisions',
+            'label' => 'Vérification des décisions',
             'url'   => '/credit-insurance/cover-management/v1/covers'
         )
     );
@@ -66,8 +69,6 @@ class AtradiusAPI extends BimpAPI
     // Requêtes: 
     public function getMyBuyer($filters, &$errors = array())
     {
-
-
         $data = $this->execCurlCustom('getMyBuyer', array(
             'url_params' => $filters
                 ), $errors);
@@ -214,6 +215,7 @@ class AtradiusAPI extends BimpAPI
 
         if (!$user->rights->bimpcommercial->gestion_recouvrement) {
             $errors[] = "Vous n'avez pas le droit de créer les assurances Atradius";
+            return array();
         }
 
         if (!isset($params['currencyCode']) and $params['coverType'] != self::CREDIT_CHECK) {
@@ -253,7 +255,8 @@ class AtradiusAPI extends BimpAPI
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors[] = $cover_type . " a été refusée<br/>";
+//                $errors[] = $cover_type . " a été refusée<br/>";
+                $errors[] = "Echec de la requête auprès d'Atradius";
                 break;
         }
 
@@ -261,14 +264,15 @@ class AtradiusAPI extends BimpAPI
     }
 
     // Ne pas utiliser directement ! Passer par setCovers
-    private function updateCover($params = array(), &$errors = array(), &$success = '')
+    private function updateCover($params = array(), &$errors = array(), &$success = '', &$warnings = array())
     {
 
         global $user;
 
-        if (!$user->rights->bimpcommercial->gestion_recouvrement)
+        if (!$user->rights->bimpcommercial->gestion_recouvrement) {
             $errors[] = "Vous n'avez pas le droit de mettre à jour les assurances Atradius";
-
+            return array();
+        }
 
 //        if($params['coverType'] == self::CREDIT_CHECK) {
 //            $errors[] = "Tentative de mise à jour de crédit check impossible";
@@ -299,42 +303,53 @@ class AtradiusAPI extends BimpAPI
                 $warnings[] = "Demande en cours d'arbitrage";
                 break;
             default:
+                if (!is_array($data)) {
+                    $data = array();
+                }
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors[] = "Demande refusée";
+                $errors[] = "Echec de la requête auprès d'Atradius";
                 break;
         }
+
+        if ($data['data'][0]['response'] == 'Action has been refused.')
+            $warnings[] = "Demande refusée";
 
         return $data;
     }
 
     public function getBuyerIdBySiren($siren, &$errors = array())
     {
-        // Définir id atra pour le client
         $params_get = array(
             'country' => 'FRA',
             'uid'     => $siren,
             'uidType' => 'SN'
         );
+
         $data = $this->execCurlCustom('getBuyer', array(
             'url_params' => $params_get
                 ), $errors, $response_headers, $response_code, array('customerId', 'policyId'));
-        if (isset($data['data']) && isset($data['data'][0]) && isset($data['data'][0]) && isset($data['data'][0]['buyerId'])) {
-            if (is_array($data['errors']) and count($data['errors']))
-                $errors = BimpTools::merge_array($errors, $data['errors']);
-            return (int) $data['data'][0]['buyerId'];
+
+        if (isset($data['errors']) && is_array($data['errors']) and count($data['errors'])) {
+            $errors = BimpTools::merge_array($errors, $data['errors']);
         }
 
-        $errors[] = 'Client non trouvé (par SIREN ' . $siren . ')';
+        $id_atradius = (int) BimpTools::getArrayValueFromPath($data, 'data/0/buyerId', 0);
+        if ($id_atradius) {
+            return $id_atradius;
+        }
+
+        if (!count($errors)) {
+            $errors[] = 'Aucun ID Atradius trouvé pour le SIREN ' . $siren . '';
+        }
+
         return 0;
     }
 
     private function deleteCover($params = array(), &$errors = array(), &$success = '')
     {
-
         $params['action'] = 'cancel';
 
         if (!count($errors)) {
-
             $data = $this->execCurlCustom('deleteCover', array(
                 'fields'       => $params,
                 'type'         => 'PUT',
@@ -408,7 +423,7 @@ class AtradiusAPI extends BimpAPI
         }
 
         // Il n'y a pas encore d'assurance pour ce client, on le créer
-        if (empty($cover) /* bloque lorsqu'il y a une assaurance retiré */ or ((int) $cover['amount'] < 1 && $params['coverType'] == self::CREDIT_CHECK)) {
+        if (empty($cover) /* bloque lorsqu'il y a une assaurance retiré exemple 164940 */ /* or ((int) $cover['amount'] < 1 && $params['coverType'] == self::CREDIT_CHECK) */) {
             return $this->createCover($params, $errors);
             // Augmentation de la limite
         } elseif (/* $params['coverType'] != self::CREDIT_CHECK and */ (int) $cover['amount'] < $params['creditLimitAmount']) {
@@ -421,7 +436,7 @@ class AtradiusAPI extends BimpAPI
                 'customerRefNumber' => $params['customerRefNumber']
             );
 
-            return $this->updateCover($params_cl, $errors, $success);
+            return $this->updateCover($params_cl, $errors, $success, $warnings);
 
             // Réduction de la limite
         } elseif ($params['coverType'] != self::CREDIT_CHECK and (int) $cover['amount'] > $params['creditLimitAmount']) {
@@ -434,7 +449,7 @@ class AtradiusAPI extends BimpAPI
                 'customerRefNumber' => $params['customerRefNumber']
             );
 
-            return $this->updateCover($params_cl, $errors, $success);
+            return $this->updateCover($params_cl, $errors, $success, $warnings);
         } else {
             if ($params['coverType'] == self::CREDIT_CHECK)
                 $warnings[] = "Tentative de mettre à jour un crédit check";
@@ -463,13 +478,12 @@ class AtradiusAPI extends BimpAPI
 
     private function getErrors($response, &$errors)
     {
-
         if (isset($response['errors'])) {
             $this->getError($response, $errors);
         } else {
-
-            foreach ($response as $k => $unused)
+            foreach ($response as $k => $unused) {
                 $this->getError($response[$k], $errors);
+            }
         }
 
         return $response;
@@ -479,7 +493,6 @@ class AtradiusAPI extends BimpAPI
     {
         if (isset($response['errors'])) {
             foreach ($response['errors'] as $k => $e) {
-
                 if (isset($e['source']['parameter']))
                     $errors[] = $e['detail'] . " pour le paramètre " . $e['source']['parameter'];
                 else
@@ -598,13 +611,13 @@ class AtradiusAPI extends BimpAPI
 
             if (is_string($result)) {
                 $errors[] = $result;
-            } elseif (isset($result['data']) && isset($result['data']['accessToken']) && (string) $result['data']['accessToken']) {
+            } elseif (isset($result['data']) && isset($result['data']['access_token']) && (string) $result['data']['access_token']) {
                 $expires_in = (int) BimpTools::getArrayValueFromPath($result, 'expires_in', 3600);
 
                 $dt_now = new DateTime();
                 $dt_now->add(new DateInterval('PT' . $expires_in . 'S'));
 
-                $this->saveToken('access', $result['data']['accessToken'], $dt_now->format('Y-m-d H:i:s'));
+                $this->saveToken('access', $result['data']['access_token'], $dt_now->format('Y-m-d H:i:s'));
             } else {
                 $errors[] = 'Echec de la connexion pour une raison inconnue';
             }
@@ -630,12 +643,13 @@ class AtradiusAPI extends BimpAPI
 
             if ($client_id && $client_secret) {
                 if ($request_name == 'authenticate') {
-                    $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
-                    $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
-                    $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
+//                    $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
+//                    $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
+//                    $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
                     return array(
                         'Atradius-App-Key' => $apiKey,
-                        'Authorization'    => 'Basic ' . base64_encode($client_id . ':' . $client_secret)
+                        'Authorization'    => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
+                        'Atradius-Correlation-Id' => ''
                     );
                 } else {
                     return array(
@@ -707,6 +721,10 @@ class AtradiusAPI extends BimpAPI
         if (isset($response_body['codeRetour']) && (int) $response_body['codeRetour'] !== 0 && isset($response_body['libelle'])) {
             $errors[] = $response_body['libelle'];
         }
+        
+        if (isset($response_body['faultstring']) && (string) $response_body['faultstring']) {
+            $errors[] = $response_body['faultstring'];
+        }
 
         return $return;
     }
@@ -723,49 +741,49 @@ class AtradiusAPI extends BimpAPI
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($api)) {
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'prod_oauth_client_id',
                         'title'  => 'ID Client OAuth en mode production'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'prod_oauth_client_secret',
                         'title'  => 'Secret client OAuth en mode production'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'prod_api_key',
                         'title'  => 'Clé API en mode production'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'test_oauth_client_id',
                         'title'  => 'ID Client OAuth en mode test'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'test_oauth_client_secret',
                         'title'  => 'Secret client OAuth en mode test'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'test_api_key',
                         'title'  => 'Clé API en mode test'
                             ), true, $warnings, $warnings);
 
-            $param = (int) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'customer_id',
                         'title'  => 'Id customer'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'policy_id',
                         'title'  => 'Id policy'

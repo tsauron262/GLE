@@ -180,6 +180,7 @@ class Framework extends \Flake\Core\Framework {
 
 		if(!\Flake\Util\Tools::isCliPhp()) {
 			ini_set("html_errors", TRUE);
+                        define('NOSESSION', true);
 			session_start();
 		}
 

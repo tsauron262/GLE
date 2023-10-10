@@ -64,6 +64,10 @@ class Bimp_User extends BimpObject
             return 1;
         }
 
+        if ($user->login == 'l.gay') {
+            return 1;
+        }
+
         return $this->canCreate();
     }
 
@@ -107,6 +111,20 @@ class Bimp_User extends BimpObject
                 return 0;
         }
         return parent::canSetAction($action);
+    }
+
+    public function canEditField($field_name)
+    {
+        switch ($field_name) {
+            case 'extra_materiel':
+                global $user;
+
+                if ($user->admin || $user->login == 'l.gay') {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canEditField($field_name);
     }
 
     // Getters booléens:
@@ -205,6 +223,26 @@ class Bimp_User extends BimpObject
         return 1;
     }
 
+    public function isUserSuperior($id_user_to_check, $max_depth = 100)
+    {
+        if ($this->isLoaded()) {
+            $id_user = $this->id;
+            for ($i = 0; $i < $max_depth; $i++) {
+                $id_user = (int) $this->db->getValue('user', 'fk_user', 'rowid = ' . $id_user);
+
+                if (!$id_user) {
+                    break;
+                }
+
+                if ($id_user == $id_user_to_check) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
     // Getters données: 
 
     public function getCardFields($card_name)
@@ -298,18 +336,18 @@ class Bimp_User extends BimpObject
         $params = $this->getUserParams();
         return BimpTools::getArrayValueFromPath($params, $param_name, $default_value);
     }
-    
+
     public function getEmailOrSuperiorEmail($allow_default = true)
     {
         $email = '';
-        
+
         if ((int) $this->getData('statut')) {
-        $email = $this->getData('email');    
+            $email = $this->getData('email');
         }
-        
+
         if (!$email) {
             $id_superior = (int) $this->getData('fk_user');
-            
+
             if ($id_superior) {
                 $superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_superior);
                 if (BimpObject::objectLoaded($superior) && (int) $superior->getData('statut')) {
@@ -317,12 +355,17 @@ class Bimp_User extends BimpObject
                 }
             }
         }
-        
+
         if (!$email && $allow_default) {
             $email = BimpCore::getConf('default_user_email', null);
         }
-        
+
         return $email;
+    }
+
+    public function getFullName()
+    {
+        return $this->getData('firstname') . ' ' . $this->getData('lastname');
     }
 
     // Getters Statics: 
@@ -714,11 +757,11 @@ class Bimp_User extends BimpObject
         if ($contact_infos) {
             $html .= ($html ? '<br/>' : '') . $contact_infos;
         }
-        
+
         $errors = array();
         $am_reason = '';
         $pm_reason = '';
-        
+
         $dispo_am = $this->isAvailable(date('Y-m-d 10:00:00'), $errors, $am_reason);
         $dispo_pm = $this->isAvailable(date('Y-m-d 15:00:00'), $errors, $pm_reason);
 
@@ -870,6 +913,14 @@ class Bimp_User extends BimpObject
             'title'         => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Materiel non sérialisé',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#user_materielNS_tab .nav_tab_ajax_result\')', array('materielNS'), array('button' => ''))
+        );
+
+        $view = new BC_View($this, 'extra_materiel');
+
+        $tabs[] = array(
+            'id'      => 'user_extra_materiel',
+            'title'   => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Autre materiel',
+            'content' => $view->renderHtml()
         );
 
         return BimpRender::renderNavTabs($tabs, 'conges_tabs');
@@ -2431,7 +2482,11 @@ class Bimp_User extends BimpObject
         $data = array();
         $i = 0;
         foreach ($lns as $ln) {
-            $data[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'total' => price($ln->total), 'totalServ' => price($ln->totalServ), 'pourc' => price($ln->totalServ / $ln->total * 100) . ' %', 'qty' => round($ln->qtyTot), 'qtyServ' => round($ln->qtyServ));
+            if ($ln->total != 0)
+                $pourc = price($ln->totalServ / $ln->total * 100);
+            else
+                $pourc = 'n/c';
+            $data[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'total' => price($ln->total), 'totalServ' => price($ln->totalServ), 'pourc' => $pourc . ' %', 'qty' => round($ln->qtyTot), 'qtyServ' => round($ln->qtyServ));
         }
 
 

@@ -9,6 +9,7 @@ class CronExec extends BimpCron
 
     public function executeProcessOperation($id_process_cron)
     {
+//        mailSyn2('EXEC CRON BDS #' . $id_process_cron, 'f.martinez@bimp.fr', '', '...');
         $error = '';
 
         $this->current_cron_name = 'Opération BDS';

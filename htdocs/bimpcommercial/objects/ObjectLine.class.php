@@ -237,7 +237,7 @@ class ObjectLine extends BimpObject
     public function isActionAllowed($action, &$errors = array())
     {
         if (in_array($action, array('attributeEquipment')) && !$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(111) ID ' . $this->getLabel('of_the') . ' absent';
             return 0;
         }
 
@@ -742,6 +742,17 @@ class ObjectLine extends BimpObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'marge_neg':
+                $line_alias = $main_alias . '___dol_line';
+                $joins[$line_alias] = array(
+                    'alias' => $line_alias,
+                    'table' => static::$dol_line_table,
+                    'on'    => $line_alias . '.rowid = ' . $main_alias . '.id_line'
+                );
+                $filters[$main_alias . '___marge_neg'] = array(
+                    'custom' => $line_alias . '.buy_price_ht > (' . $line_alias . '.subprice+1) AND ' . $line_alias . '.subprice > 0'
+                );
+                break;
             case 'categ1':
             case 'categ2':
             case 'categ3':
@@ -1256,7 +1267,7 @@ class ObjectLine extends BimpObject
                         return (float) $product->getData('tva_tx');
                     }
                     if (is_null($tva_tx)) {
-                        $tva_tx = BimpTools::getDefaultTva();
+                        $tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
                     }
                     return (float) $tva_tx;
 
@@ -1688,13 +1699,16 @@ class ObjectLine extends BimpObject
 
     public function getQtyDecimals()
     {
-        $product = $this->getProduct();
+        if ((int) BimpCore::getConf('not_decimal_product')) {
+            $product = $this->getProduct();
 
-        if (BimpObject::objectLoaded($product)) {
-            if ($product->getData('fk_product_type') === 0) {
-                return 1;
+            if (BimpObject::objectLoaded($product)) {
+                if ($product->getData('fk_product_type') === 0) {
+                    return 1;
+                }
             }
         }
+
 
         return 6;
     }
@@ -2791,7 +2805,7 @@ class ObjectLine extends BimpObject
         } else {
             $id_line = (int) $this->getData('id_line');
             if (!$id_line) {
-                return array('ID de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' absent');
+                return array('(220) ID de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' absent');
             }
 
             if ($check_data) {
@@ -2983,7 +2997,7 @@ class ObjectLine extends BimpObject
         } else {
             $id_line = (int) $this->getData('id_line');
             if (!$id_line) {
-                return array('ID de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' absent');
+                return array('(221) ID de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' absent');
             }
 
             $instance->dol_object->error = '';
@@ -3288,7 +3302,7 @@ class ObjectLine extends BimpObject
                         $this->pa_ht = $new_pa_ht;
                     }
                 } else {
-                    $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                    $errors[] = '(112) ID ' . $this->getLabel('of_the') . ' absent';
                 }
             }
         }
@@ -3302,7 +3316,7 @@ class ObjectLine extends BimpObject
         $equipments_set = array();
 
         if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(113) ID ' . $this->getLabel('of_the') . ' absent';
             return $errors;
         }
 
@@ -3470,7 +3484,7 @@ class ObjectLine extends BimpObject
 
         // Vérifications: 
         if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(114) ID ' . $this->getLabel('of_the') . ' absent';
             return $errors;
         }
 
@@ -3482,7 +3496,7 @@ class ObjectLine extends BimpObject
             $parent = $this->getParentInstance();
             if (!BimpObject::ObjectLoaded($parent)) {
                 if (is_a($parent, 'BimpComm')) {
-                    $errors[] = 'ID ' . $parent->getLabel('of_the') . ' absent';
+                    $errors[] = '(224) ID ' . $parent->getLabel('of_the') . ' absent';
                 } else {
                     $errors[] = 'objet parent absent';
                 }
@@ -3869,7 +3883,7 @@ class ObjectLine extends BimpObject
         if (is_null($parent)) {
             $errors[] = 'Objet parent non défini';
         } elseif (!$parent->isLoaded()) {
-            $errors[] = 'ID ' . $parent->getLabel('of_the') . ' absent';
+            $errors[] = '(225) ID ' . $parent->getLabel('of_the') . ' absent';
         }
 
         if (!count($errors)) {
@@ -4393,7 +4407,7 @@ class ObjectLine extends BimpObject
             case 'tva_tx':
                 // ATTENTION $value contient la TVA du produit si celui-ci est sélectionné. 
                 if (is_null($value) && !$this->isLoaded()) {
-                    $value = $this->getDefaultTva();
+                    $value = BimpCache::cacheServeurFunction('getDefaultTva');
                 }
 
                 $parent = $this->getParentInstance();
@@ -4421,7 +4435,7 @@ class ObjectLine extends BimpObject
                     } else {
                         $tva_rates = BimpCache::getTaxesByRates(1);
                         if (is_null($value)) {
-                            $value = $this->getDefaultTva();
+                            $value = BimpCache::cacheServeurFunction('getDefaultTva');
                         }
                         $html = BimpInput::renderInput('select', $prefixe . 'tva_tx', (float) $value, array(
                                     'options' => $tva_rates
@@ -4605,7 +4619,7 @@ class ObjectLine extends BimpObject
         }
 
         if (BimpTools::isSubmit('line_pa_ht')) {
-            $line_pa = BimpTools::getValue('line_pa_ht');
+            $line_pa = (float) BimpTools::getValue('line_pa_ht');
         } elseif (BimpTools::isSubmit('line_id_fourn_price')) {
             $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) BimpTools::getValue('line_id_fourn_price'));
             if (BimpObject::objectLoaded($fournPrice)) {
@@ -5807,9 +5821,9 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
     {
-        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate, $no_triggers);
 
         if (!count($errors)) {
             if ($field === 'remisable' && !(int) $value) {

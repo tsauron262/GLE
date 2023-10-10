@@ -106,10 +106,12 @@ objects:
 fields: 
     ref: 
         label: Réf.
+        required: 1
         
     label: 
         label: Libellé
         user_edit: 1
+        required: 1
         
     description: 
         label: Description
@@ -191,6 +193,18 @@ fields:
         type: money
         default_value: 0
         
+    cost_price:
+        label: Prix de revient
+        type: money
+        default_value: 0
+        
+    cost_price_percent:
+        label: Pourcentage du coût de reviens
+        type: percent
+        default_value: 0
+        input:
+              help: Si renseigné est prioritaire pour le calcul du prix de revient
+        
     cur_pa_origin: 
         label: Type origine pa
         
@@ -223,7 +237,10 @@ fields:
         label: Taux de TVA
         type: percent
         default_value: 
-            callback: getDefaultTva
+            callback: 
+                method: cacheServeurFunction
+                params:
+                    - getDefaultTva
         
     recuperableonly: 
         label: TVA récupérable seulement
@@ -601,7 +618,7 @@ fields:
         default_value: 1
         
     achat_def_periodicity: 
-        label: périodicité d'achat par défaut
+        label: Périodicité d'achat par défaut
         type: int
         values: 
             array: achat_periodicities
@@ -609,17 +626,44 @@ fields:
         
     achat_def_id_fourn: 
         label: Fournisseur par défaut
+        type: id_object
+        object: achat_def_fourn
+        values: 
+            array: fournisseurs
+        display_if: 
+            field_name: achat_def_periodicity
+            hide_values: 0
         
     fac_def_periodicity: 
         label: Périodicité de facturation par défaut
         type: int
         values: 
             array: fac_periodicities
+        display_if: 
+            field_name: variable_qty
+            show_values: 1
             
     variable_qty: 
         label: Abonnement à qté variable
         type: bool
         default_value: 0        
+        
+    variable_qty_unit: 
+        label: Type d\'unité pour les qtés variables
+        display_if: 
+            field_name: variable_qty
+            show_values: 1
+        
+    variable_qty_decimals: 
+        label: Nombre de décimales autorisées pour les qtés variables
+        type: qty
+        decimals: 0
+        min: 0
+        max: 8
+        default_value: 0
+        display_if: 
+            field_name: variable_qty
+            show_values: 1
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -657,20 +701,7 @@ forms:
             - field: 2hotline
             - field: duree
             - field: duree_i
-            # Measure
-#            - field: weight
-#            - field: weight_units
-#            - field: length
-#            - field: length_units
-#            - field: width
-#            - field: width_units
-#            - field: height
-#            - field: height_units
-#            - field: surface
-#            - field: surface_units
-#            - field: volume
-#            - field: volume_units
-
+        
     card:
         extends: default
         
@@ -944,6 +975,10 @@ fields_tables:
             - field: pmp
             - field: pa_prevu
             - field: infos_pa
+            - field: cost_price
+              edit: 1
+            - field: cost_price_percent
+              edit: 1
         
     stock:
         title: Options
@@ -952,6 +987,25 @@ fields_tables:
             - field: seuil_stock_alerte
               edit: 1
             - field: desiredstock
+              edit: 1
+              
+    abonnement: 
+        title: Options abonnements
+        icon: fas_calendar-alt
+        show: 
+            callback: isAbonnement
+        rows: 
+            - field: variable_qty
+              edit: 1
+            - field: variable_qty_unit
+              edit: 1
+            - field: variable_qty_decimals
+              edit: 1
+            - field: achat_def_periodicity
+              edit: 1
+            - field: achat_def_id_fourn
+              edit: 1
+            - field: fac_def_periodicity
               edit: 1
 
 views: 
@@ -1006,7 +1060,7 @@ views:
                   col_lg: 5
                   col_md: 5
                   fields_table:
-                      name: measures
+                      name: abonnement
     
     product_price:
         objects_change_reload: Bimp_ProductPrice,BimpProductCurPa,Bimp_ProductFournisseurPrice
@@ -1182,6 +1236,9 @@ lists:
         checkboxes: 1
         configurable: 1
         bulk_actions:
+            - label: Supprimer les produits sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
             - label: étiquettes stock
               icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
@@ -1196,6 +1253,7 @@ lists:
         n: 50
         page_btn: 1
         edit_btn: 1
+        delete_btn: 1
         edit_form: card
         add_form_name: card
         modal_view: default
@@ -1322,14 +1380,15 @@ searches:
             - REPLACE(ROUND(a.price,2),'.',',') as price
             - a.stock
             - fpl.stockFourn as stockFournL
+            - a.tosell
         label_syntaxe: '<ref> - <label> - <price> € HT - Stock: [REDIFNEG]<stock>[/REDIFNEG] - Stock LDLC : <stockFournL>'
         order_by: rowid
         order_way: desc
         
     tosell: 
         extends: default
-        filters: 
-            a.tosell: 1
+        disabled: 
+            tosell: 1
             
     tobuy: 
         extends: default

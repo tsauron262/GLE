@@ -161,7 +161,8 @@ class Bimp_Propal extends Bimp_PropalTemp
             case 'createSignatureDocuSign':
                 return $user->admin;
         }
-        return 1;
+
+        return parent::canSetAction($action);
     }
 
     // Getters booléens:
@@ -176,7 +177,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         if (in_array($action, array('validate', 'modify', 'review', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'classifyBilled', 'createContrat', 'createSignature'))) {
             if (!$this->isLoaded()) {
-                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                $errors[] = '(456) ID ' . $this->getLabel('of_the') . ' absent';
                 return 0;
             }
             if (is_null($status)) {
@@ -200,6 +201,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $lines = $this->getLines('not_text');
                 if (!count($lines)) {
                     $errors[] = 'Aucune ligne enregistrée pour ' . $this->getLabel('this') . ' (Hors text)';
+                }
+                
+                if (!parent::canSetAction('validate', $errors)) { // test important dans BimpComm
+                    return 0;
                 }
                 return (count($errors) ? 0 : 1);
 
@@ -1529,7 +1534,7 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
 
         if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
+            return array('(432) ID ' . $this->getLabel('of_the') . ' absent');
         }
 
         if (!$this->fetch($this->id)) {
@@ -2312,5 +2317,63 @@ class Bimp_Propal extends Bimp_PropalTemp
     public function isSignatureReopenable($doc_type, &$errors = array())
     {
         return 1;
+    }
+
+    public function displaySignatureDocExtraInfos($doc_type)
+    {
+        $html = '';
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ($doc_type == 'devis') {
+                $lines = $this->getLines();
+
+                if (count($lines)) {
+                    $html .= '<table class="bimp_list_table">';
+                    $html .= '<thead>';
+                    $html .= '<tr>';
+                    $html .= '<th>Désignation</th>';
+                    $html .= '<th>Qté</th>';
+                    $html .= '<th>P.U. HT</th>';
+                    $html .= '<th>Tx. TVA</th>';
+                    $html .= '<th>Remise</th>';
+                    $html .= '<th>Total TTC</th>';
+                    $html .= '</tr>';
+                    $html .= '</thead>';
+
+                    $html .= '<tbody>';
+
+                    foreach ($lines as $line) {
+                        $html .= '<tr>';
+
+                        if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
+                            $html .= '<td colspan="99">' . $line->displayLineData('desc', 0, 'default', true) . '</td>';
+                        } else {
+                            $html .= '<td>' . $line->displayLineData('desc_light', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('qty', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('pu_ht', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('tva_tx', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('remise', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('total_ttc', 0, 'default', true) . '</td>';
+                        }
+
+                        $html .= '</tr>';
+                    }
+
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                }
+
+                $html .= '<div style="margin-top: 15px; text-align: right; font-weight: bold; font-size: 14px">';
+                $html .= 'Total TTC : ' . BimpTools::displayMoneyValue($this->getTotalTtc());
+                $html .= '</div>';
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
     }
 }

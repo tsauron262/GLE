@@ -503,16 +503,6 @@ forms:
                   type: hidden
               value: 1
             - field: type_signature
-            - field: signataire
-              label: Nom du signataire
-              display_if: 
-                  field_name: type_signature
-                  show_values: 2,3
-              hidden: 1
-
-            - field: email_signature
-              hidden: 1
-            
             - custom: 1
               label: Contact signataire
               data_type: id_object
@@ -529,8 +519,24 @@ forms:
                           method: getSocieteContactsArray
                           params: 
                               - field_value: fk_soc
-              value: 
-                  callback: getDefaultSignatureContact
+#              value: 
+#                  callback: getDefaultSignatureContact
+            - field: signataire
+              label: Nom du signataire
+              display_if: 
+                  fields_names: id_contact_signature,type_signature
+                  id_contact_signature: 
+                      show_values: 0
+                  type_signature:
+                      show_values: 2,3
+
+            - field: email_signature
+#              hidden: 1
+              display_if: 
+                  fields_names: id_contact_signature
+                  id_contact_signature: 
+                    show_values: 0
+            
 
             - field: note_public
             - field: attente_client

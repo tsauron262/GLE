@@ -1,0 +1,2 @@
+ - Intégration des tâche "En attente utilisateur" dans l'obglet "Tâches en attente" du popup des tâches utilisateur
+

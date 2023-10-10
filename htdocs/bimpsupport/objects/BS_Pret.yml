@@ -5,6 +5,8 @@ parent_module: bimpcore
 parent_object: Bimp_Client
 parent_id_property: id_client
 
+entity_name: bs_pret
+
 labels: 
     name: prêt de matériel
     name_plur: prêts de matériel
@@ -70,11 +72,11 @@ fields:
         label: Référence
     date_begin: 
         label: Début du prêt
-        type: date
+        type: datetime
         required: 1
     date_end: 
         label: Fin du prêt
-        type: date
+        type: datetime
         required: 1
     returned: 
         label: Restitué

@@ -3,6 +3,11 @@ common_fields: 0
 
 icon: fas_search-dollar
 
+
+parent_module: bimpcommercial
+parent_object: Bimp_Facture
+parent_id_property: id_facture
+
 list_page_url:
     controller: index
     url_params: 

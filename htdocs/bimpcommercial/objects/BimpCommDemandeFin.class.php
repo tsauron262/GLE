@@ -45,23 +45,6 @@ class BimpCommDemandeFin extends BimpObject
 
     // Droits users: 
 
-    public function canSetAction($action)
-    {
-        global $user;
-
-        switch ($action) {
-            case 'createDemandeFinancement':
-            case 'createDevisFinSignature':
-            case 'createContratFinSignature':
-            case 'createPvrFinSignature':
-                if ($user->rights->bimpcommerical->demande_financement) {
-                    return 1;
-                }
-                return 1;
-        }
-        return parent::canSetAction($action);
-    }
-
     public function canClientView()
     {
         global $userClient;
@@ -115,19 +98,31 @@ class BimpCommDemandeFin extends BimpObject
                 return 1;
 
             case 'createDevisFinSignature':
-                $devis_files = $this->getDevisFilesArray();
-                if (empty($devis_files)) {
-                    $errors[] = 'Aucun devis de location n\'a encore été reçu';
-                    return 0;
-                }
+            case 'uploadSignedDevisFin':
+//                $devis_files = $this->getDevisFilesArray();
+//                if (empty($devis_files)) {
+//                    $errors[] = 'Aucun devis de location n\'a encore été reçu';
+//                    return 0;
+//                }
 
                 if ((int) $this->getData('id_signature_devis_fin')) {
-                    $errors[] = 'La fiche signature du devis de location existe déjà';
-                    return 0;
+                    if ($action == 'createDevisFinSignature') {
+                        $errors[] = 'La fiche signature du devis de location existe déjà';
+                        return 0;
+                    } else {
+                        $signature = $this->getChildObject('signature_devis_fin');
+                        if (BimpObject::objectLoaded($signature)) {
+                            if ($signature->isSigned()) {
+                                $errors[] = 'Le devis de location signé est déjà enregistré';
+                                return 0;
+                            }
+                        }
+                    }
                 }
                 return 1;
 
             case 'createContratFinSignature':
+            case 'uploadSignedContratFin':
                 $file_name = $this->getSignatureDocFileName('contrat_fin');
                 if (!$file_name || !file_exists($this->getFilesDir() . $file_name)) {
                     $errors[] = 'Le contrat de location n\'a pas été reçu';
@@ -234,12 +229,32 @@ class BimpCommDemandeFin extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('uploadSignedDevisFin')/* && $this->canSetAction('uploadSignedDevisFin') */) {
+            $buttons[] = array(
+                'label'   => 'Déposer le devis de location signé',
+                'icon'    => 'fas_upload',
+                'onclick' => $this->getJsActionOnclick('uploadSignedDevisFin', array(), array(
+                    'form_name' => 'upload_signed_doc'
+                ))
+            );
+        }
+
         if ($this->isActionAllowed('createContratFinSignature') && $this->canSetAction('createContratFinSignature')) {
             $buttons[] = array(
                 'label'   => 'Envoyer le contrat de location pour signature',
                 'icon'    => 'fas_arrow-circle-right',
                 'onclick' => $this->getJsActionOnclick('createContratFinSignature', array(), array(
                     'form_name' => 'signature_contrat_fin'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('uploadSignedContratFin')/* && $this->canSetAction('uploadSignedContratFin') */) {
+            $buttons[] = array(
+                'label'   => 'Déposer le contrat de location signé',
+                'icon'    => 'fas_upload',
+                'onclick' => $this->getJsActionOnclick('uploadSignedContratFin', array(), array(
+                    'form_name' => 'upload_signed_doc'
                 ))
             );
         }
@@ -2090,6 +2105,113 @@ class BimpCommDemandeFin extends BimpObject
         );
     }
 
+    public function actionUploadSignedDevisFin($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $files = BimpTools::getArrayValueFromPath($data, 'signed_doc_file', array());
+
+        if (empty($files)) {
+            $errors[] = 'Aucun fichier ajouté';
+        }
+
+        $date_signed = BimpTools::getArrayValueFromPath($data, 'date_signed', '');
+        if (!$date_signed) {
+            $date_signed = date('Y-m-d H:i:s');
+        }
+
+        $parent = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($parent)) {
+            $errors[] = 'Pièce parente absente';
+        } elseif (!is_a($parent, 'BimpComm')) {
+            $errors[] = 'Pièce parente invalide';
+        }
+
+        if (!count($errors)) {
+            $id_signature = (int) $this->getData('id_signature_devis_fin');
+            $signataire = null;
+
+            if (!$id_signature) {
+                $id_client = (int) $parent->getData('fk_soc');
+
+                if (!$id_client) {
+                    $errors[] = 'Client absent';
+                } else {
+                    $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
+                                'obj_module'           => $this->module,
+                                'obj_name'             => $this->object_name,
+                                'id_obj'               => $this->id,
+                                'doc_type'             => 'devis_fin',
+                                'obj_params_field'     => 'signature_df_params',
+                                'allow_multiple_files' => 1
+                                    ), true, $errors, $warnings);
+
+                    if (!count($errors) && BimpObject::objectLoaded($signature)) {
+                        $id_signature = $signature->id;
+                        $success = 'Création de la fiche signature effectuée avec succès';
+                        $parent->addObjectLog('Fiche signature du devis de location créée', 'SIGNATURE_DEVIS_FIN_CREEE');
+                        $up_errors = $this->updateField('id_signature_devis_fin', (int) $signature->id);
+
+                        if (count($up_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregstrement de l\'ID de la fiche signature');
+                        } else {
+                            $signataire_errors = array();
+                            $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
+                                        'id_signature' => $signature->id,
+                                        'id_client'    => $id_client,
+                                        'allow_dist'   => 0,
+                                        'allow_refuse' => 0
+                                            ), true, $signataire_errors, $warnings);
+
+                            if (!BimpObject::objectLoaded($signataire)) {
+                                $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($id_signature && !count($errors)) {
+                $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', $id_signature);
+
+                if (!BimpObject::objectLoaded($signature)) {
+                    $errors[] = 'La fiche signature #' . $id_signature . 'n\'existe plus';
+                } else {
+                    $file_dir = $signature->getDocumentFileDir();
+                    $file_name = $signature->getDocumentFileName(true);
+                    BimpTools::moveTmpFiles($errors, $files, $file_dir, $file_name);
+
+                    if (!BimpObject::objectLoaded($signataire)) {
+                        $signataire = $signature->getSignataire();
+
+                        if (!BimpObject::objectLoaded($signataire)) {
+                            $errors[] = 'Signataire principal absent de la fiche signature';
+                        }
+                    }
+
+                    if (!count($errors)) {
+                        $signataire_errors = $signataire->setSignedPapier($date_signed, $warnings);
+
+                        if (count($signataire_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de la mise à jour des données du signataire');
+                        } else {
+                            $signature->checkStatus($errors, $warnings);
+                            $success .= ($success ? '<br/>' : '') . 'Enregistrement du document signé effectué avec succès';
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     public function actionCreateContratFinSignature($data, &$success)
     {
         $errors = array();
@@ -2270,6 +2392,113 @@ class BimpCommDemandeFin extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
+        );
+    }
+
+    public function actionUploadSignedContratFin($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $files = BimpTools::getArrayValueFromPath($data, 'signed_doc_file', array());
+
+        if (empty($files)) {
+            $errors[] = 'Aucun fichier ajouté';
+        }
+
+        $date_signed = BimpTools::getArrayValueFromPath($data, 'date_signed', '');
+        if (!$date_signed) {
+            $date_signed = date('Y-m-d H:i:s');
+        }
+
+        $parent = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($parent)) {
+            $errors[] = 'Pièce parente absente';
+        } elseif (!is_a($parent, 'BimpComm')) {
+            $errors[] = 'Pièce parente invalide';
+        }
+
+        if (!count($errors)) {
+            $id_signature = (int) $this->getData('id_signature_contrat_fin');
+            $signataire = null;
+
+            if (!$id_signature) {
+                $id_client = (int) $parent->getData('fk_soc');
+
+                if (!$id_client) {
+                    $errors[] = 'Client absent';
+                } else {
+                    $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
+                                'obj_module'           => $this->module,
+                                'obj_name'             => $this->object_name,
+                                'id_obj'               => $this->id,
+                                'doc_type'             => 'contrat_fin',
+                                'obj_params_field'     => 'signature_cf_params',
+                                'allow_multiple_files' => 1
+                                    ), true, $errors, $warnings);
+
+                    if (!count($errors) && BimpObject::objectLoaded($signature)) {
+                        $id_signature = $signature->id;
+                        $success = 'Création de la fiche signature effectuée avec succès';
+                        $parent->addObjectLog('Fiche signature du contrat de location créée', 'SIGNATURE_CONTRAT_FIN_CREEE');
+                        $up_errors = $this->updateField('id_signature_contrat_fin', (int) $signature->id);
+
+                        if (count($up_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregstrement de l\'ID de la fiche signature');
+                        } else {
+                            $signataire_errors = array();
+                            $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
+                                        'id_signature' => $signature->id,
+                                        'id_client'    => $id_client,
+                                        'allow_dist'   => 0,
+                                        'allow_refuse' => 0
+                                            ), true, $signataire_errors, $warnings);
+
+                            if (!BimpObject::objectLoaded($signataire)) {
+                                $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($id_signature && !count($errors)) {
+                $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', $id_signature);
+
+                if (!BimpObject::objectLoaded($signature)) {
+                    $errors[] = 'La fiche signature #' . $id_signature . 'n\'existe plus';
+                } else {
+                    $file_dir = $signature->getDocumentFileDir();
+                    $file_name = $signature->getDocumentFileName(true);
+                    BimpTools::moveTmpFiles($errors, $files, $file_dir, $file_name);
+
+                    if (!BimpObject::objectLoaded($signataire)) {
+                        $signataire = $signature->getSignataire();
+
+                        if (!BimpObject::objectLoaded($signataire)) {
+                            $errors[] = 'Signataire principal absent de la fiche signature';
+                        }
+                    }
+
+                    if (!count($errors)) {
+                        $signataire_errors = $signataire->setSignedPapier($date_signed, $warnings);
+
+                        if (count($signataire_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de la mise à jour des données du signataire');
+                        } else {
+                            $signature->checkStatus($errors, $warnings);
+                            $success .= ($success ? '<br/>' : '') . 'Enregistrement du document signé effectué avec succès';
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

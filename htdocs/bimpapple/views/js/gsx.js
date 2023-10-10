@@ -883,33 +883,6 @@ function gsx_LoadRepairPartStockForm($button, id_sav, serial) {
                 var parts = {};
                 var check = true;
 
-                // Stocks internes: 
-                $form.find('input.from_internal_stock_input').each(function () {
-                    if (parseInt($(this).val())) {
-                        var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
-
-                        if (id_part && !isNaN(id_part)) {
-                            parts[id_part] = {'stock': 'internal'};
-                        }
-                    }
-                });
-
-                $form.find('select.from_internal_stock_serial').each(function () {
-                    var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
-
-                    if (id_part && !isNaN(id_part)) {
-                        var serial = $(this).val();
-
-                        if (serial && serial !== 'none') {
-                            parts[id_part] = {'stock': 'internal', 'serial': serial};
-                        } else {
-                            var part_number = $(this).findParentByClass('part_row').data('part_number');
-                            bimp_msg('Veuillez sélectionner un n° de série pour le composant "' + part_number + '"', 'warning');
-                            check = false;
-                        }
-                    }
-                });
-
                 // Stocks consignés: 
                 $form.find('input.from_consigned_stock_check').each(function () {
                     if (parseInt($(this).val())) {
@@ -929,6 +902,41 @@ function gsx_LoadRepairPartStockForm($button, id_sav, serial) {
 
                         if (serial && serial !== 'none') {
                             parts[id_part] = {'stock': 'consigned', 'serial': serial};
+                        }
+                    }
+                });
+
+                // Stocks internes: 
+                $form.find('input.from_internal_stock_input').each(function () {
+                    if (parseInt($(this).val())) {
+                        var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
+
+                        if (id_part && !isNaN(id_part)) {
+                            if (typeof (parts[id_part]) !== 'undefined') {
+                                var part_number = $(this).findParentByClass('part_row').data('part_number');
+                                bimp_msg('Veuillez ne sélectionner qu\'un seul type de stock pour le composant "' + part_number + '"');
+                                check = false;
+                            } else {
+                                parts[id_part] = {'stock': 'internal'};
+                            }
+                        }
+                    }
+                });
+
+                $form.find('select.from_internal_stock_serial').each(function () {
+                    var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
+
+                    if (id_part && !isNaN(id_part)) {
+                        if (typeof (parts[id_part]) !== 'undefined') {
+                            var part_number = $(this).findParentByClass('part_row').data('part_number');
+                            bimp_msg('Veuillez ne sélectionner qu\'un seul type de stock pour le composant "' + part_number + '"');
+                            check = false;
+                        } else {
+                            var serial = $(this).val();
+
+                            if (serial && serial !== 'none') {
+                                parts[id_part] = {'stock': 'internal', 'serial': serial};
+                            }
                         }
                     }
                 });

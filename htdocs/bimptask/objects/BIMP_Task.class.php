@@ -6,7 +6,8 @@ class BIMP_Task extends BimpObject
     public static $valSrc = array(); // définie dans l'extends entity
     public static $types_manuel = array(
         'dev'        => 'Développement',
-        'adminVente' => 'Administration des Ventes'
+        'adminVente' => 'Administration des Ventes',
+        'dispatch' => 'Dispatch'
     );
     public static $srcNotAttribute = array(/* 'sms-apple@bimp-groupe.net' */);
     public static $nbNonLu = 0;
@@ -27,9 +28,12 @@ class BIMP_Task extends BimpObject
         'dev' => array(
             'bug' => array('label' => 'Bug'),
             'dev' => array('label' => 'Développement')
+        ),
+        'dispatch' => array(
+            'disp1' => array('label' => 'Disp1'),
+            'disp2' => array('label' => 'Disp2')
         )
     );
-    public $mailReponse = 'reponse@bimp-groupe.net';
     private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
 
     // Droits users: 
@@ -251,7 +255,7 @@ class BIMP_Task extends BimpObject
         if ($btn = $this->getAddFilesButton()) {
             $buttons[] = $btn;
         }
-        
+
         if ($this->hasSousTaches()) {
             $buttons[] = array(
                 'label'   => 'Liste des sous-tâches',
@@ -382,7 +386,7 @@ class BIMP_Task extends BimpObject
         if (isset($type) && self::$sous_types[$type])
             return self::$sous_types[$type];
 
-        return array();
+        return array('nc'=>'Divers');
     }
 
     public function getAllSousTypesArray()
@@ -479,7 +483,7 @@ class BIMP_Task extends BimpObject
                 unset($users[$id_user]);
             }
 
-            if (in_array($id_user, $users_no_follow)) {
+            if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                 unset($users[$id_user]);
             }
         }
@@ -489,7 +493,7 @@ class BIMP_Task extends BimpObject
                 continue;
             }
 
-            if (in_array($id_user, $users_no_follow)) {
+            if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                 continue;
             }
 
@@ -510,7 +514,7 @@ class BIMP_Task extends BimpObject
 
         if (BimpObject::objectLoaded($parent_task)) {
             foreach ($parent_task->getUsersToNotify($excludeMe) as $id_user => $u) {
-                if (in_array($id_user, $users_no_follow)) {
+                if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                     continue;
                 }
 
@@ -534,12 +538,25 @@ class BIMP_Task extends BimpObject
         $tasks['content'] = BimpTools::merge_array(
                         // Tâches affectées à l'utilisateur actuel        
                         self::getNewTasks(array(
-                            'id'            => array(
+                            'id'      => array(
                                 'operator' => '>',
                                 'value'    => $id_max
                             ),
-                            'id_user_owner' => (int) $id_user,
-                            'status'        => array(0, 1, 3
+                            'or_user' => array(
+                                'or' => array(
+                                    'owner'  => array(
+                                        'and_fields' => array(
+                                            'id_user_owner' => (int) $id_user,
+                                            'status'        => array(0, 1, 3)
+                                        )
+                                    ),
+                                    'author' => array(
+                                        'and_fields' => array(
+                                            'user_create' => (int) $id_user,
+                                            'status'      => 2
+                                        )
+                                    )
+                                )
                             )), 'my_task', $nb_my
                         ), self::getNewTasks(BimpTools::merge_array(array(// Tâches non affectées
                                     'id'            => array(
@@ -1010,7 +1027,7 @@ class BIMP_Task extends BimpObject
         }
         $to = implode(',', $mails);
 
-        $this->sendMail($to, 'Tâche ERP<' . $this->mailReponse . '>', $subject, $message, $rappel, $files);
+        $this->sendMail($to, 'Tâche ERP<' . BimpCore::getConf('mailReponse', '', 'bimptask') . '>', $subject, $message, $rappel, $files);
     }
 
     public function sendMail($to, $from, $sujet, $msg, $rappel = true, $files = array())

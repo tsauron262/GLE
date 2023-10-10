@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_signature` (
   `id_client` int(11) NOT NULL DEFAULT 0,
   `id_contact` int(11) NOT NULL DEFAULT 0,
   `id_user_client_signataire` int(11) NOT NULL DEFAULT 0,
-  `allowed_users_client` TEXT NOT NULL DEFAULT '',
+  `allowed_users_client` TEXT NOT NULL,
   `nom_signataire` varchar(255) NOT NULL DEFAULT '',
   `email_signataire` varchar(255) NOT NULL DEFAULT '',
   `fonction_signataire` varchar(255) NOT NULL DEFAULT '',

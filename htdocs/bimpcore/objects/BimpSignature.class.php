@@ -447,7 +447,7 @@ class BimpSignature extends BimpObject
                 $errors = array();
                 $obj = $this->getObj();
                 if ($this->isObjectValid($errors, $obj)) {
-                    if (method_exists($obj, 'getSignatureEmailContent', $signature_type)) {
+                    if (method_exists($obj, 'getSignatureEmailContent')) {
                         return $obj->getSignatureEmailContent($signature_type);
                     }
                 }
@@ -632,7 +632,7 @@ class BimpSignature extends BimpObject
             $doc_title = strip_tags($this->displayDocTitle());
             $nom_piece = $obj->getLabel('the');
             $ref_piece = $obj->getRef();
-            $lien_espace_client = '<a href="' . self::getPublicBaseUrl(false) . '">espace client</a>';
+            $lien_espace_client = '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>';
 
             $i = 1;
             foreach ($signataires as $signataire) {
@@ -1019,8 +1019,8 @@ class BimpSignature extends BimpObject
 
         $errors = array();
         if ($this->isObjectValid($errors, $obj)) {
-            if (method_exists($obj, 'displayDocExtraInfos')) {
-                $extra_infos = $obj->displayDocExtraInfos($this->getData('doc_type'));
+            if (method_exists($obj, 'displaySignatureDocExtraInfos')) {
+                $extra_infos = $obj->displaySignatureDocExtraInfos($this->getData('doc_type'));
 
                 if ($extra_infos) {
                     $html .= '<br/>' . $extra_infos;
@@ -1804,7 +1804,7 @@ class BimpSignature extends BimpObject
             $this->displayDocTitle(),
             $obj->getLabel('the'),
             $obj->getRef(),
-            '<a href="' . self::getPublicBaseUrl(false) . '">espace client</a>'
+            '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>'
                 ), $email_content);
     }
 
@@ -2032,16 +2032,9 @@ class BimpSignature extends BimpObject
                                     $signataire = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignataire', $id_signataire);
 
                                     if (BimpObject::objectLoaded($signataire)) {
-                                        $signataire_errors = $signataire_warnings = array();
-                                        $signataire_errors = $signataire->validateArray(array(
-                                            'status'         => BimpSignataire::STATUS_SIGNED,
-                                            'date_signed'    => $date,
-                                            'type_signature' => BimpSignataire::TYPE_PAPIER
-                                        ));
-
-                                        if (!count($signataire_errors)) {
-                                            $signataire_errors = $signataire->update($signataire_warnings, true);
-                                        }
+                                        $signataire_warnings = array();
+                                        $signataire_errors = $signataire->setSignedPapier($date, $signataire_warnings);
+                                        
                                         if (count($signataire_errors)) {
                                             $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de la mise à jour du signataire "' . $signataire->getName() . '"');
                                         }

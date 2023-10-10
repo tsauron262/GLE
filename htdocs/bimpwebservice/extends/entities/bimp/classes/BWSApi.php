@@ -59,6 +59,11 @@ BWSApi::$requests['reopenDemandeFinancement'] = array(
     'status'         => array('label' => 'Statut de la demande de financement', 'data_type' => 'int', 'required' => 1)
 );
 
+BWSApi::$requests['getContractInfo'] = array(
+    'date_valid'   => array('label' => 'Date ou le contrat doit être actif', 'required' => 0), 
+    'ref_cli'      => array('label' => 'Code client', 'required' => 0),
+);
+
 class BWSApi_ExtEntity extends BWSApi
 {
 
@@ -297,5 +302,55 @@ class BWSApi_ExtEntity extends BWSApi
         }
 
         return $response;
+    }
+
+    protected function wsRequest_getContractInfo()
+    {
+        $return = array();
+        $dateV = $this->getParam('date_valid', '');
+        $refCli = $this->getParam('ref_cli', '');
+        $filters = array();
+        if ($dateV) {
+            if ($dateV == 'today')
+                $dateV = date('Y-m-d');;
+            $filters['and_date'] = array('and_fields' => array(
+                    'date_start'       => array(
+                        'operator' => '<',
+                        'value'    => $dateV
+                    ),
+                    'end_date_contrat' => array(
+                        'operator' => '>',
+                        'value'    => $dateV
+            )));
+        }
+        if ($refCli) {
+            $filters['client:code_client'] = $refCli;
+        }
+
+        if (!count($filters)) {
+            $this->addError('FAIL', 'Merci de filtrer les résultat');
+        } else {
+            $list = BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', $filters);
+
+            foreach ($list as $contract) {
+                $ln = array("ref" => $contract->getData("ref"), "status" => $contract->getData('statut'), "date_contrat" => $contract->getData("date_contrat"), "date_start" => $contract->getData("date_start"), "end_date_contrat" => $contract->getData("end_date_contrat"));
+                $cli = $contract->getChildObject("client");
+                $ln['client'] = array('ref' => $cli->getData('code_client'), 'nom' => $cli->getData('nom'));
+                $contacts = $cli->getChildrenObjects('contacts');
+                foreach ($contacts as $contact) {
+                    $ln['client']['contacts'][] = array("nom" => $contact->displayNomComplet(), 'mail' => $contact->getData('email'));
+                }
+                $commerciaux = $cli->getCommercials();
+                foreach ($commerciaux as $commercial) {
+                    $ln['client']['commerciaux'][] = array("nom" => $commercial->getFullName(), 'mail' => $commercial->getData('email'));
+                }
+
+                $return[$contract->id] = $ln;
+            }
+            return array(
+                'success'        => 1,
+                'contract_infos' => $return
+            );
+        }
     }
 }

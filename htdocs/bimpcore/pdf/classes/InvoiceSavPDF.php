@@ -9,6 +9,7 @@ class InvoiceSavPDF extends InvoicePDF
 {
 
     public static $type = 'sav';
+    public static $use_cgv = false;
     public $sav = null;
     public $signature_bloc = false;
 
@@ -20,14 +21,35 @@ class InvoiceSavPDF extends InvoicePDF
                 if (!$this->sav->find(array('id_facture_acompte' => (int) $object->id))) {
                     unset($this->sav);
                     $this->sav = null;
-//                    $this->errors[] = 'Aucun SAV associé à cette facture trouvé';
                 }
+            }
+
+            // Chargement CGV : 
+            
+            $cgv_file = '';
+            switch (BimpCore::getEntity()) {
+                case 'bimp':
+                    if (BimpObject::objectLoaded($this->sav)) {
+                        $code_centre = $this->sav->getData('code_centre');
+                    }
+
+                    if (!$code_centre) {
+                        $code_centre = 'L'; // Par précaution sinon aucune CGV ne peut être intégrée.
+                    }
+                    $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+                    break;
+
+                case 'actimac':
+                    $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_actimac.pdf';
+                    break;
+            }
+
+            if ($cgv_file && file_exists($cgv_file)) {
+                $this->pdf->extra_concat_files[] = $cgv_file;
             }
         }
 
         parent::init($object);
-        
-        $this->pdf->addCgvPages = true;
     }
 
     protected function initHeader()
@@ -40,14 +62,12 @@ class InvoiceSavPDF extends InvoicePDF
             if (!is_null($equipment) && $equipment->isLoaded()) {
                 $rows .= $equipment->getData('serial');
                 $imei = $equipment->getData('imei');
-                if($imei != '' && $imei != "n/a")
-                    $rows .= "<br/>".$imei;
+                if ($imei != '' && $imei != "n/a")
+                    $rows .= "<br/>" . $imei;
 //                $prod = $equipment->getchildObject('product');
                 $pordDesc = $equipment->displayProduct('default', true, true);
-                if($pordDesc != '' && $pordDesc != "n/a")
-                    $rows .= "<br/>".'<span style="font-size: 8px;">'.$pordDesc.'</span>';
-                
-                
+                if ($pordDesc != '' && $pordDesc != "n/a")
+                    $rows .= "<br/>" . '<span style="font-size: 8px;">' . $pordDesc . '</span>';
             }
         }
 
@@ -55,9 +75,29 @@ class InvoiceSavPDF extends InvoicePDF
         $this->header_vars['header_right'] = $rows;
     }
 
+    public function renderTop()
+    {
+        parent::renderTop();
+        $this->writeContent('<div style="font-size: 9px">Pour augmenter la durée de vie de vos produits Apple, rendez vous sur :<br/><a href="https://support.apple.com/fr-fr">https://support.apple.com/fr-fr</a> ou scannez ce QR code</div><br/><br/>');
+        $qr_dir = DOL_DATA_ROOT . "/bimpcore/tmp/";
+        $this->getQrCode('https://support.apple.com/fr-fr', $qr_dir);
+        $this->pdf->Image($qr_dir . "/apple.png", 120, $this->pdf->getY() - 19, 0, 15);
+    }
+
     public function getAfterTotauxHtml()
     {
         return '';
+    }
+
+    function getQrCode($data, $dir, $file = "apple.png")
+    {
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
+        if (!is_dir($dir))
+            mkdir($dir);
+
+        QRcode::png($data
+                , $dir . "/" . $file
+                , "L", 4, 2);
     }
 
     public function renderSignature()
@@ -126,17 +166,18 @@ class InvoiceSavPDF extends InvoicePDF
         $this->renderFullBlock('renderSignature');
         $this->renderFullBlock('renderSavConditions');
     }
+
     public function renderAfterLines()
     {
         $html = parent::renderAfterLines();
         if (!is_null($this->sav)) {
             $equipment = $this->sav->getchildObject('equipment');
-            if($equipment->getData('old_serial') != ''){
+            if ($equipment->getData('old_serial') != '') {
                 $html .= '<p style="font-size: 6px; font-style: italic">';
-                if($html != '')
+                if ($html != '')
                     $html .= "<br/>";
-                $html .= 'Ancien(s) serial :<br/>'.str_replace('<br/>', ' - ',$equipment->getData('old_serial'));
-            $html .= '</p>';
+                $html .= 'Ancien(s) serial :<br/>' . str_replace('<br/>', ' - ', $equipment->getData('old_serial'));
+                $html .= '</p>';
             }
         }
         $this->writeContent($html);

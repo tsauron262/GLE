@@ -56,7 +56,7 @@ objects:
         relation: hasOne
         delete: 0
         instance: 
-            dol_object: 
+            bimp_object: 
                 module: bimpcore
                 name: Bimp_UserGroup
             id_object: 

@@ -99,14 +99,36 @@ class InterfaceClientController extends BimpPublicController
     {
         $html = '';
 
-        global $mysoc, $userClient, $langs;
+        global $userClient, $langs;
 
         $html .= '<nav class="navbar navbar-default navbar-fixed" style="background: rgba(255, 255, 255, 0.96)">';
         $html .= '<div class="container-fluid">';
 
         $html .= '<div class="navbar-header">';
         $html .= '<a class="navbar-brand" href="#">';
-        $html .= '<img src="' . BimpTools::getMyCompanyLogoUrl() . '" style="width: auto; height: 50px"/>';
+
+        $file_url = '';
+        global $public_entity;
+        if ($public_entity) {
+            $logo = BimpCore::getConf('public_logo', null, 'bimpinterfaceclient');
+            if (strpos($logo, '{') === 0) {
+                $logos = json_decode($logo, 1);
+                $logo = null;
+                if (isset($logos[$public_entity])) {
+                    $logo = $logos[$public_entity];
+                }
+            }
+        }
+
+        if (!$file_url) {
+            $file_url = BimpTools::getMyCompanyLogoUrl($logo);
+            
+            if (!$file_url) {
+                $file_url = BimpTools::getMyCompanyLogoUrl();
+            }
+        }
+
+        $html .= '<img src="' . $file_url . '" style="width: auto; height: 50px"/>';
         $html .= '</a>';
         $html .= '</div>';
 
@@ -159,7 +181,7 @@ class InterfaceClientController extends BimpPublicController
     {
         global $userClient;
 
-        $html = '<h2>Bienvenue dans votre espace client ' . BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient') . '</h2><br/>';
+        $html = '<h2>Bienvenue dans votre espace client ' . $this->public_entity_name . '</h2><br/>';
 
         if (!BimpObject::objectLoaded($userClient)) {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');

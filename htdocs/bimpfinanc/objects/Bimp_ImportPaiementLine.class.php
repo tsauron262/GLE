@@ -8,13 +8,13 @@ class Bimp_ImportPaiementLine extends BimpObject
     var $total_reste_a_paye = 0;
     var $ok = false;
     var $raisonManu = array(
-        1 => 'C2BO',
-        2 => 'Fournisseur',
-        3 => 'ONEY',
-        4 => 'YOUNITED',
+        1  => 'C2BO',
+        2  => 'Fournisseur',
+        3  => 'ONEY',
+        4  => 'YOUNITED',
         99 => 'Autre'
     );
-    
+
     function create(&$warnings = array(), $force_create = false)
     {
         $errors = parent::create($warnings, $force_create);
@@ -35,41 +35,38 @@ class Bimp_ImportPaiementLine extends BimpObject
         }
 
         $type = '';
-        
-        $codes = array(array('0517806000000669EUR2E0416135704405'), array('0417806000000669EUR2E04161357044C2', array('price' => 'methode2')), array('0417806001600669EUR2E041613570444', array('price' => 'methode2'))/*virement trés peut d'info (surement virement instentannée)*/);
-        
-        foreach ($codes as $data){
+
+        $codes = array(array('0517806000000669EUR2E0416135704405'), array('0417806000000669EUR2E04161357044C2', array('price' => 'methode2')), array('0417806001600669EUR2E041613570444', array('price' => 'methode2'))/* virement trés peut d'info (surement virement instentannée) */);
+
+        foreach ($codes as $data) {
             $code = $data[0];
-            
+
             if (stripos($this->getData('data'), $code) !== false) {
                 $type = 'vir';
-                if(isset($data[1]['price'])){
-                    if($data[1]['price'] == 'methode2'){
-                        if(preg_match('/0417806000000669EUR2E04161357044C2[0-9 A-Z\.-]*(00000)([0-9\.,}{]+)([A-Z]{1,1})/', $this->getData('data'), $matches)){
+                if (isset($data[1]['price'])) {
+                    if ($data[1]['price'] == 'methode2') {
+                        if (preg_match('/0417806000000669EUR2E04161357044C2[0-9 A-Z\.-]*(00000)([0-9\.,}{]+)([A-Z]{1,1})/', $this->getData('data'), $matches)) {
                             $price = $matches[2];
                             $lettre = $matches[3];
                             $price .= $this->lettreToChiffre($lettre);
                             $price = $price / 100;
 //die('un');
-                        }
-                        elseif(preg_match('/0417806000000669EUR2E04161357044C2[0-9 .A-Z()\.-]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)){
+                        } elseif (preg_match('/0417806000000669EUR2E04161357044C2[0-9 .A-Z()\.-]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)) {
 //                            print_r($matches);
                             $price = $matches[2];
-                            $lettre = substr($price, -1,1);
+                            $lettre = substr($price, -1, 1);
                             $price = intval(str_replace($lettre, $this->lettreToChiffre(str_replace('{', '}', $lettre)), $price)) / 100;
 //                            die('deux');
-                        }
-                        elseif(preg_match('/0417806001600669EUR2E041613570444[0-9 .A-Z()\.-]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)){
+                        } elseif (preg_match('/0417806001600669EUR2E041613570444[0-9 .A-Z()\.-\/]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)) {
 //                            print_r($matches);
 //                            die('rrr');
                             $price = $matches[2];
-                            $lettre = substr($price, -1,1);
+                            $lettre = substr($price, -1, 1);
                             $price = intval(str_replace($lettre, $this->lettreToChiffre(str_replace('{', '}', $lettre)), $price)) / 100;
 //                            die('deux');
-                        }
-                        else{
+                        } else {
                             $price = (substr(trim($this->getData('data')), -10, 10));
-                            $lettre = substr($price, -1,1);
+                            $lettre = substr($price, -1, 1);
                             $price = intval(str_replace($lettre, $this->lettreToChiffre($lettre), $price)) / 100;
 //                            die('trois');
                         }
@@ -79,14 +76,14 @@ class Bimp_ImportPaiementLine extends BimpObject
 
 
 
-                if (preg_match('/'.str_replace("", "", $code).'([0-9]{2})([0-9]{2})([0-9]{2})(.+)/', $this->getData('data'), $matches)) {
+                if (preg_match('/' . str_replace("", "", $code) . '([0-9]{2})([0-9]{2})([0-9]{2})(.+)/', $this->getData('data'), $matches)) {
                     $date = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
-                    $datebrut = $matches[1].$matches[2].$matches[3];
+                    $datebrut = $matches[1] . $matches[2] . $matches[3];
                 }
 
                 $name = '';
-                if (preg_match('/'.$code.'[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
-                    if(stripos($matches[1], '0000000100000') !== false){
+                if (preg_match('/' . $code . '[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
+                    if (stripos($matches[1], '0000000100000') !== false) {
                         $tmp = explode('0000000100000', $matches[1]);
                         $matches[1] = $tmp[0];
                     }
@@ -96,8 +93,8 @@ class Bimp_ImportPaiementLine extends BimpObject
                 }
             }
         }
-        
-        if(preg_match('/(DV)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(FV)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(TK)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(CV)[0-9]{14}/', $this->getData('data'), $matches)){//C2BO
+
+        if (preg_match('/(DV)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(FV)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(TK)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(CV)[0-9]{14}/', $this->getData('data'), $matches)) {//C2BO
             $this->set('traite', 1);
             $this->set('infos', 'C2BO');
         }
@@ -107,7 +104,7 @@ class Bimp_ImportPaiementLine extends BimpObject
         $this->set('type', $type);
         $this->set('name', $name);
         $this->set('date', $date);
-        
+
         $errors = $this->update($warnings);
 
         $this->calc();
@@ -125,11 +122,12 @@ class Bimp_ImportPaiementLine extends BimpObject
 
         return array('errors' => $errors, 'warnings' => $warnings);
     }
-    
-    private function lettreToChiffre($find){
+
+    private function lettreToChiffre($find)
+    {
         $array = array('}', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I');
-        foreach($array as $chiffre => $lettre)
-            if($lettre == $find)
+        foreach ($array as $chiffre => $lettre)
+            if ($lettre == $find)
                 return $chiffre;
         return 0;
     }
@@ -158,8 +156,9 @@ class Bimp_ImportPaiementLine extends BimpObject
         }
         return $buttons;
     }
-    
-    function getGlobalBtn(){
+
+    function getGlobalBtn()
+    {
         $buttons = array();
         $parent = $this->getParentInstance();
         if ($parent->isActionAllowed('validate')) {
@@ -188,6 +187,7 @@ class Bimp_ImportPaiementLine extends BimpObject
 
     function calc()
     {
+        $this->ok = false;
         $ln = $this->getData('data');
 
         $matches = array();
@@ -203,14 +203,22 @@ class Bimp_ImportPaiementLine extends BimpObject
         foreach ($this->getData('factures') as $idF) {
             $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idF);
 
+            if (!BimpObject::objectLoaded($obj)) {
+                return;
+            }
+
+            if (!in_array((int) $obj->getData('fk_statut'), array(0, 1, 2))) {
+                return;
+            }
+
             $this->total_reste_a_paye += $obj->getData('remain_to_pay');
             $totalFact += $obj->getData('total_ttc');
         }
 
 
-        if (($this->getData('price') - $this->total_reste_a_paye) < 0.10 /*&& ($this->getData('price') - $this->total_reste_a_paye) > -0.10*/)
+        if (($this->getData('price') - $this->total_reste_a_paye) < 0.10 /* && ($this->getData('price') - $this->total_reste_a_paye) > -0.10 */)
             $this->ok = true;
-        if($totalFact - $this->getData('price') < 0.10 && $totalFact - $this->getData('price') > -0.10)
+        if ($totalFact - $this->getData('price') < 0.10 && $totalFact - $this->getData('price') > -0.10)
             $this->ok = true;
         if ($this->getData('traite'))
             $this->ok = true;
@@ -231,65 +239,58 @@ class Bimp_ImportPaiementLine extends BimpObject
         $this->addFact($data['id']);
         return array('errors' => $errors, 'warnings' => $warnings);
     }
-    
+
     function actionCreateAcompte($data, &$success)
     {
         $errors = $warnings = array();
         $success = 'Acompte créer';
         $idFacture = 0;
-        
+
         $parent = $this->getParentInstance();
-        
-        if($data['object_type'] == 0){//pas encore géré
-            if($data['id_client'] > 0){
+
+        if ($data['object_type'] == 0) {//pas encore géré
+            if ($data['id_client'] > 0) {
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $data['id_client']);
-                if(!$client->isLoaded())
+                if (!$client->isLoaded())
                     $errors[] = 'Client introuvable';
-            }
-            else
+            } else
                 $errors[] = 'Pas de client séléctionné';
-        }
-        elseif($data['object_type'] == 1){
-            if($data['id_propal'] > 0){
+        } elseif ($data['object_type'] == 1) {
+            if ($data['id_propal'] > 0) {
                 $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $data['id_propal']);
 
-                if(!$obj->isLoaded())
+                if (!$obj->isLoaded())
                     $errors[] = 'Propal introuvable';
                 $linkedObj = getElementElement('propal', 'commande', $obj->id);
-                if(count($linkedObj)){
-                    $errors[] = 'Une commande existe : '.BimpCache::getBimpObjectLink('bimpcommercial', 'Bimp_Commande', $linkedObj[0]['d']);
+                if (count($linkedObj)) {
+                    $errors[] = 'Une commande existe : ' . BimpCache::getBimpObjectLink('bimpcommercial', 'Bimp_Commande', $linkedObj[0]['d']);
                 }
-            }
-            else
+            } else
                 $errors[] = 'Pas de propal séléctionné';
-            
-        }
-        elseif($data['object_type'] == 2){
-            if($data['id_commande'] > 0){
+        } elseif ($data['object_type'] == 2) {
+            if ($data['id_commande'] > 0) {
                 $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['id_commande']);
 //                    $propal = new Bimp_Propal();
-                if(!$obj->isLoaded())
+                if (!$obj->isLoaded())
                     $errors[] = 'Commande introuvable';
-            }
-            else
+            } else
                 $errors[] = 'Pas de commande séléctionné';
-            
         }
-        if(!count($errors)){
+        if (!count($errors)) {
             $client = $obj->getChildObject('client');
-            if($obj->getData('total_ttc')+0.1 < $this->getData('price'))
+            if ($obj->getData('total_ttc') + 0.1 < $this->getData('price'))
                 $errors[] = 'Montant plus grand que le total de la piéce';
-            if(!count($errors))
-                $errors = $obj->createAcompte($this->getData('price'), 20, $parent->id_mode_paiement, $this->getData('banque'), 1, $this->getData('date'), false, '', '', '', $warnings, 0, $this->getData('num'), $idFacture);
-            $obj->addNoteToCommercial('Bonjour.<br/>Le client '.$client->getLink().' a effectué un virement de '.$this->getData('price').' €.');
+            if (!count($errors))
+                $errors = $obj->createAcompte($this->getData('price'), 20, $parent->id_mode_paiement, $this->getData('banque'), 0, $this->getData('date'), false, '', '', '', $warnings, 0, $this->getData('num'), $idFacture);
+            $obj->addNoteToCommercial('Bonjour.<br/>Le client ' . $client->getLink() . ' a effectué un virement de ' . $this->getData('price') . ' €.');
         }
-        
-        if(!count($errors) && $idFacture > 0){
+
+        if (!count($errors) && $idFacture > 0) {
             global $user;
             $errors = BimpTools::merge_array($errors, $this->set('factures', array($idFacture)));
-            $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
-            $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
-            
+//            $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
+//            $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
+
             $errors = BimpTools::merge_array($errors, $this->update());
         }
 //        $errors[] = 'fin';
@@ -300,32 +301,30 @@ class Bimp_ImportPaiementLine extends BimpObject
     {
         global $user;
         $errors = $warnings = array();
-        
-        
+
         $code = $data['raison'];
         $detail = $data['raison_detail'];
         $infos = $this->getData('infos');
-        if($infos != '')
+        if ($infos != '')
             $infos .= '<br/>';
         $infos .= $this->raisonManu[$code];
-        
-        if($code == 99){
-            if(isset($detail) && $detail != '')
-                $infos .= ' ('. $data['raison_detail'].')';
+
+        if ($code == 99) {
+            if (isset($detail) && $detail != '')
+                $infos .= ' (' . $data['raison_detail'] . ')';
             else
                 $errors[] = 'Raison obligatoire';
         }
-        
-        if(!count($errors)){
+
+        if (!count($errors)) {
             $errors = BimpTools::merge_array($errors, $this->set('infos', $infos));
             $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
             $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
 
-
             $errors = BimpTools::merge_array($errors, $this->update());
         }
-        
-        
+
+
 
         return array('errors' => $errors, 'warnings' => $warnings);
     }
@@ -371,11 +370,11 @@ class Bimp_ImportPaiementLine extends BimpObject
                 else
                     $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ')';
             }
-            
-            
+
+
             $sql = $this->db->db->query('SELECT remain_to_pay, rowid, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 AND remain_to_pay = ' . $this->getData('price'));
             while ($ln = $this->db->db->fetch_object($sql)) {
-                if(!in_array($ln->rowid, $factIds)){
+                if (!in_array($ln->rowid, $factIds)) {
                     $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $ln->fk_soc);
                     $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
                     $facts = array();
@@ -389,8 +388,6 @@ class Bimp_ImportPaiementLine extends BimpObject
                         $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ')';
                 }
             }
-            
-            
         }
         return implode('<br/>', $return);
     }
@@ -422,7 +419,7 @@ class Bimp_ImportPaiementLine extends BimpObject
                         else
                             $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ') Total : ' . price($total);
                     }
-                    if(count($list) == $max)
+                    if (count($list) == $max)
                         $return[] = '...';
                 }
             } else {
@@ -481,13 +478,56 @@ class Bimp_ImportPaiementLine extends BimpObject
             return $this->getData('price');
         } else {
             if ($this->getData('type') == 'vir') {
+                $html = '';
+
                 $manque = $this->getData('price') - $this->total_reste_a_paye;
                 if ($this->getData('traite') == 0) {
-                    return BimpRender::renderAlerts(price($this->getData('price')) . ' - ' . price($this->total_reste_a_paye) . ' = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
-                } else
-                    return BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0 ? 'success' : 'danger'));
+                    $html .= BimpRender::renderAlerts(price($this->getData('price')) . ' - ' . price($this->total_reste_a_paye) . ' = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
+                } else {
+                    $html .= BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0 ? 'success' : 'danger'));
+                }
+
+                $facs = $this->getData('factures');
+                foreach ($facs as $id_fac) {
+                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
+                    if (BimpObject::objectLoaded($fac)) {
+                        if (!in_array((int) $fac->getData('fk_statut'), array(0, 1, 2))) {
+                            $icon = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                            $html .= BimpRender::renderAlerts($icon . 'Le statut de la facture ' . $fac->getRef() . ' est invalide');
+                        }
+                    } else {
+                        $icon = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                        $html .= BimpRender::renderAlerts($icon . 'La facture #' . $id_fac) . 'n\'existe plus';
+                    }
+                }
+
+                return $html;
             }
             return 'Non géré';
         }
+    }
+
+    public function getListsBulkActions()
+    {
+        $actions = array();
+
+        $import = BimpObject::getInstance('bimpfinanc', 'Bimp_ImportPaiement');
+        if ($import->isActionAllowed('create_all_paiement') && $import->canSetAction('create_all_paiement')) {
+            $actions[] = array(
+                'label'   => 'Traiter les lignes sélectionnées',
+                'icon'    => 'fas_cogs',
+                'onclick' => $import->getJsBulkActionOnclick('create_all_paiement', array(), array(
+                    'single_action' => true
+                ))
+            );
+        }
+
+        return $actions;
+    }
+
+    function actionCreate_all_paiement($data, &$success)
+    {
+        $import = BimpObject::getInstance('bimpfinanc', 'Bimp_ImportPaiement');
+        return $import->setObjectAction('create_all_paiement', null, $data, $success);
     }
 }

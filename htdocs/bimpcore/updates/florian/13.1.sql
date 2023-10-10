@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `llx_bl_commande_fourn_reception` (
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-ALTER TABLE `llx_bimp_commande_fourn_line` ADD `receptions` TEXT NOT NULL DEFAULT '' AFTER `force_qty_1`;
+ALTER TABLE `llx_bimp_commande_fourn_line` ADD `receptions` LONGTEXT NOT NULL;
 
 ALTER TABLE `llx_commande_fournisseur` ADD `fk_user_resp` INT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `llx_commande_fournisseur` ADD `attente_info` BOOLEAN NOT NULL DEFAULT FALSE;
@@ -45,10 +45,10 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_correctif` (
 ALTER TABLE `llx_commande` ADD `logistique_status` INT NOT NULL DEFAULT '0';
 ALTER TABLE `llx_commande` ADD `id_user_resp` INT NOT NULL DEFAULT '0';
 
-ALTER TABLE `llx_bimp_commande_line` ADD `remise_pa` DECIMAL(12,8) NOT NULL DEFAULT '0';
-ALTER TABLE `llx_bimp_propal_line` ADD `remise_pa` DECIMAL(12,8) NOT NULL DEFAULT '0';
-ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_pa` DECIMAL(12,8) NOT NULL DEFAULT '0';
-ALTER TABLE `llx_bimp_facture_line` ADD `remise_pa` DECIMAL(12,8) NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bimp_commande_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bimp_propal_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bimp_facture_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
 
 ALTER TABLE `llx_bimp_commande_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_propal_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAULT '0';
@@ -56,7 +56,7 @@ ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAUL
 ALTER TABLE `llx_bimp_facture_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAULT '0';
 
 ALTER TABLE `llx_bimp_propal_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0'; 
-ALTER TABLE `llx_bs_sav_propal_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0'; 
+ALTER TABLE `llx_bs_sav_propal_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_commande_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0'; 
 ALTER TABLE `llx_bimp_facture_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0'; 
 ALTER TABLE `llx_bimp_commande_fourn_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0'; 

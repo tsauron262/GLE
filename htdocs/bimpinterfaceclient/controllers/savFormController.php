@@ -163,7 +163,7 @@ class savFormController extends BimpPublicController
                 $html .= '</div>';
 
 //                $html .= '<p class="inputHelp">';
-//                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client '.BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient').', veuillez vous ';
+//                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client ' . $this->public_entity_name . ', veuillez vous ';
 //                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
 //                $html .= ' pour simplifier la prise de rendez-vous.';
 //                $html .= '</p>';
@@ -247,7 +247,7 @@ class savFormController extends BimpPublicController
                 $html .= 'Un compte utilisateur existe déjà pour l\'adresse e-mail "' . $email . '".<br/>';
                 $html .= '</h3>';
                 $html .= '<h4 style="text-align: center; font-weight: bold" class="info">';
-                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm';
+                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm';
 
                 if (isset($reservation['reservationId']) && isset($reservation['shipToCode'])) {
                     $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];
@@ -311,7 +311,7 @@ class savFormController extends BimpPublicController
                             $html .= ' (Contact: ' . $contact->getName() . ')';
                         }
                         $html .= '.<br/>';
-                        $html .= 'Nous vous avons ouvert un accès à votre espace client personnalisé ' . BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient') . '.<br/>';
+                        $html .= 'Nous vous avons ouvert un accès à votre espace client personnalisé ' . $this->public_entity_name . '.<br/>';
                         $html .= 'Un e-mail contenant votre mot de passe vous a été envoyé.<br/>';
                         $html .= 'Veuillez consulter votre messagerie, puis ';
                         $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm';
@@ -1015,10 +1015,10 @@ class savFormController extends BimpPublicController
         $base_url = '';
 
         if ($reservationId || BimpObject::objectLoaded($sav)) {
-            $base_url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+            $base_url = BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S'));
 
             if ($base_url) {
-                $cancel_url = $base_url . '?fc=savForm&cancel_rdv=1';
+                $cancel_url = $base_url . 'fc=savForm&cancel_rdv=1';
                 if (BimpObject::objectLoaded($sav)) {
                     $cancel_url .= '&sav=' . $sav->id . '&r=' . $sav->getRef();
                 }
@@ -1332,7 +1332,8 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                 $html .= '</div>';
             } else {
                 $html .= '<div style="text-align: center; padding: 15px">';
-                $html .= '<span class="info">Il n\'y a aucun créneau horaire disponible dans les 7 prochains jours pour ce centre BIMP</span><br/><br/>';
+                global $conf;
+                $html .= '<span class="info">Il n\'y a aucun créneau horaire disponible dans les 7 prochains jours pour ce centre ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . '</span><br/><br/>';
                 $html .= '<p>Vous pouvez toutefois valider ce formulaire et déposer votre matériel quand vous le souhaitez sans rendez-vous</p>';
                 $html .= '</div>';
 

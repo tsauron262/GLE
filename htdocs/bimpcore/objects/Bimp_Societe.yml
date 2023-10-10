@@ -621,6 +621,7 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: contact_email_facturation
+        default_value: 0
         values: 
             array: contacts
             
@@ -726,6 +727,17 @@ fields:
     consigne_ref_ext:
         label: Consigne référence externe
         type: text
+        
+    type_educ: 
+        label: Type éducation
+        values: 
+            array: types_educ
+            
+    type_educ_fin_validite: 
+        label: Date de fin de validité (Enseignants / étudiants)
+        type: date
+        input: 
+            help: Obligatoire pour les enseignants / étudiants
 
 fields_tables: 
     identity:
@@ -743,6 +755,10 @@ fields_tables:
             - field: nom
             - field: name_alias
             - field: fk_typent
+            - field: type_educ
+              edit: 1
+            - field: type_educ_fin_validite
+              edit: 1
             - field: client
               show: 
                   callback: isClient
@@ -1007,18 +1023,6 @@ forms:
                 data_type: bool
                 content: 
                     callback: renderIsCompanyInput
-            has_already_code_comptable_client:
-                custom: 1
-                label: A déjà un code comptable client
-                input_name: has_already_code_comptable_client
-                data_type: int
-                input:
-                    type: toggle
-            code_compta:
-                field: code_compta
-                display_if:
-                    field_name: has_already_code_comptable_client
-                    show_values: 1
             siren_ok: 
                 custom: 1
                 hidden: 1
@@ -1034,6 +1038,13 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
+            type_educ: 
+                field: type_educ
+            type_educ_fin_validite: 
+                field: type_educ_fin_validite
+                display_if: 
+                    field_name: type_educ
+                    show_values: E4
             mode_reglement: 
                 field: mode_reglement
             cond_reglement: 
@@ -1052,16 +1063,6 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
-            outstanding_limit_atradius:
-                field: outstanding_limit_atradius
-            outstanding_limit: 
-                field: outstanding_limit
-            outstanding_limit_credit_safe:
-                field: outstanding_limit_credit_safe
-            notecreditsafe: 
-                field: notecreditsafe
-            lettrecreditsafe:
-                field: lettrecreditsafe
             nom: 
                 field: nom
             prenom: 
@@ -1102,6 +1103,28 @@ forms:
             # ce type de champ (item_list) n'est pas filtrable pour l'instant. 
 #            secteur: 
 #                field: secteuractivite
+            has_already_code_comptable_client:
+                custom: 1
+                label: A déjà un code comptable client
+                input_name: has_already_code_comptable_client
+                data_type: int
+                input:
+                    type: toggle
+            code_compta:
+                field: code_compta
+                display_if:
+                    field_name: has_already_code_comptable_client
+                    show_values: 1
+#            outstanding_limit_atradius:
+#                field: outstanding_limit_atradius
+            outstanding_limit: 
+                field: outstanding_limit
+            outstanding_limit_credit_safe:
+                field: outstanding_limit_credit_safe
+            notecreditsafe: 
+                field: notecreditsafe
+            lettrecreditsafe:
+                field: lettrecreditsafe
             tva_assuj: 
                 field: tva_assuj
             tva_intra: 
@@ -1375,6 +1398,14 @@ forms:
               input_name: date_max
               input: 
                   type: date
+                  
+    edit_type_educ:
+        rows: 
+            - field: type_educ
+            - field: type_educ_fin_validite
+              display_if: 
+                    field_name: type_educ
+                    show_values: E4
              
 filters: 
     accounting_account:

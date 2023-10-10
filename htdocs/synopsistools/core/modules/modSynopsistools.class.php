@@ -35,7 +35,7 @@ class modSynopsistools extends DolibarrModules
     *   \brief      Constructeur. Definit les noms, constantes et boites
     *   \param      DB      handler d'acces base
     */
-    function modSynopsistools($DB)
+    function __construct($DB)
     {
         $this->db = $DB ;
         $this->numero = 8088;
@@ -277,7 +277,8 @@ class modSynopsistools extends DolibarrModules
         
         $this->tabs = array('thirdparty:-document',
             'thirdparty:+allDoc:allDoc:synopsisGene@synopsistools:$user->rights->societe->lire:/synopsistools/allDocumentSoc.php?id=__ID__',
-            'agenda:+team:Vue équipe:@synopsistools:$user->rights->agenda->myactions->read:/synopsistools/agenda/vue.php');
+            'agenda:+team:Vue équipe:@synopsistools:$user->rights->agenda->myactions->read:/synopsistools/agenda/vue.php',
+            'agenda:+list:List:@synopsistools:$user->rights->agenda->myactions->read:/bimpcore/index.php?fc=dol_agenda');
         
         
 

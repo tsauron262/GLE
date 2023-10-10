@@ -39,7 +39,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
 
         if (isset($this->options['products_file']) && (string) $this->options['products_file']) {
             $file_errors = array();
-            $file_data = $this->getFileData('products', $this->options['products_file'], $file_errors);
+            $file_data = $this->getFileData('products', $this->options['products_file'], $file_errors, $this->getOption('delimiteur', "\t"));
 
             if (count($file_errors)) {
                 $errors = array_merge($errors, $file_errors);
@@ -60,7 +60,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         ) as $opt_name => $step) {
             if (isset($this->options[$opt_name]) && (string) $this->options[$opt_name]) {
                 $file_errors = array();
-                $file_data = $this->getFileData('prices', $this->options[$opt_name], $file_errors);
+                $file_data = $this->getFileData('prices', $this->options[$opt_name], $file_errors, $this->getOption('delimiteur', "\t"));
 
                 if (count($file_errors)) {
                     $errors = array_merge($errors, $file_errors);
@@ -74,7 +74,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             }
         }
 
-        if (isset($data['steps']['import_products']) && isset(array_values($file_data)[0]['crt'])) {
+        if (isset($data['steps']['import_products'])/* && isset(array_values($file_data)[0]['crt']) */) {
             $data['steps']['crt_products'] = array(
                 'label'    => 'Traitement des CRT produits',
                 'on_error' => 'continue',
@@ -108,7 +108,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             case 'import_products':
             case 'validate_products':
             case 'crt_products':
-                $file_data = $this->getFileData('products', $this->options['products_file'], $errors);
+                $file_data = $this->getFileData('products', $this->options['products_file'], $errors, $this->getOption('delimiteur', "\t"));
 
                 $this->DebugData($file_data, 'Données fichier');
 
@@ -116,7 +116,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                     switch ($step_name) {
                         case 'crt_products':
                             foreach ($file_data as $idx => $prod_data) {
-                                if (isset($prod_data['ref']) && (string) $prod_data['ref']) {
+                                if (isset($prod_data['ref']) && (string) $prod_data['ref'] && isset($prod_data['crt']) && (float) $prod_data['crt']) {
                                     $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                                                 'ref' => $prod_data['ref']
                                     ));
@@ -130,8 +130,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                             }
                             $this->createBimpObjects('bimpcore', 'Bimp_ProductRA', $file_data, $errors, array('update_if_exists' => true, 'fields_find_exist' => array('id_product', 'type'), 'constante_fields' => array('type' => 'crt', 'nom' => 'CRT', 'active' => '1')));
                             break;
-                        
-                        
+
                         case 'import_products':
                             $this->createBimpObjects('bimpcore', 'Bimp_Product', $file_data, $errors, array('update_if_exists' => true));
                             break;
@@ -208,7 +207,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         }
 
         if ($id_fourn && $prices_file) {
-            $file_data = $this->getFileData('prices', $prices_file, $errors);
+            $file_data = $this->getFileData('prices', $prices_file, $errors, $this->getOption('delimiteur', "\t"));
 
             if (!count($errors) && !empty($file_data)) {
                 $instance = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
@@ -241,7 +240,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
 
     // Traitements:
 
-    public function getFileData($type, $file, &$errors = array())
+    public function getFileData($type, $file, &$errors = array(), $delimiter = "\t")
     {
         if (!in_array($type, array('products', 'prices'))) {
             $errors[] = 'Type de fichier invalide (' . $type . ')';
@@ -254,11 +253,11 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
 
         switch ($type) {
             case 'products':
-                $data = $this->getCsvFileDataByKeys($file, self::${$type . '_keys'}, $file_errors, "\t", 1, 2);
+                $data = $this->getCsvFileDataByKeys($file, self::${$type . '_keys'}, $file_errors, $delimiter, 1, 2);
                 break;
 
             case 'prices':
-                $data = $this->getCsvFileDataByKeys($file, self::${$type . '_keys'}, $file_errors, "\t", 0, 1);
+                $data = $this->getCsvFileDataByKeys($file, self::${$type . '_keys'}, $file_errors, $delimiter, 0, 1);
                 break;
         }
 

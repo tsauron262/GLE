@@ -24,8 +24,6 @@ class BimpMailCore
     public $url = '';
     public $files = array();
     public $parent;
-    
-    
     public static $defaultType = '';
 
     function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
@@ -33,6 +31,13 @@ class BimpMailCore
         global $dolibarr_main_url_root, $conf, $user;
 
         if (is_object($parent)) {
+            if (method_exists($parent, 'getObjectForEmailsLogs')) {
+                $obj = $parent->getObjectForEmailsLogs();
+                if (is_object($obj)) {
+                    $parent = $obj;
+                }
+            }
+            
             $this->parent = $parent;
         } elseif ($parent !== 'none') {
             BimpCore::addlog('Pas d\'objet parent pour BimpMail');
@@ -119,8 +124,8 @@ class BimpMailCore
         $this->errors_to = $errors_to;
         $this->deliveryreceipt = $deliveryreceipt;
         $this->primary = BimpCore::getParam('public_email/primary', '807F7F');
-        
-        if(static::$defaultType != '')
+
+        if (static::$defaultType != '')
             $this->setFromType(static::$defaultType);
     }
 
@@ -231,13 +236,16 @@ class BimpMailCore
 
             if ($nMailsFailed == 10) {
                 if (!BimpCore::isModeDev()) {
-                    if (!class_exists('CSMSFile')) {
-                        require_once DOL_DOCUMENT_ROOT . '/core/class/CSMSFile.class.php';
+                    global $conf;
+                    if (empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
+                        if (!class_exists('CSMSFile')) {
+                            require_once DOL_DOCUMENT_ROOT . '/core/class/CSMSFile.class.php';
+                        }
+                        $smsfile = new CSMSFile('0686691814', 'ADMIN BIMP', '10 ECHECS ENVOI EMAIL EN 2H SUR ' . DOL_URL_ROOT);
+                        $smsfile->sendfile();
+                        $smsfile = new CSMSFile('0628335081', 'ADMIN BIMP', '10 ECHECS ENVOI EMAIL EN 2H SUR ' . DOL_URL_ROOT);
+                        $smsfile->sendfile();
                     }
-                    $smsfile = new CSMSFile('0686691814', 'ADMIN BIMP', '10 ECHECS ENVOI EMAIL EN 2H SUR ' . DOL_URL_ROOT);
-                    $smsfile->sendfile();
-                    $smsfile = new CSMSFile('0628335081', 'ADMIN BIMP', '10 ECHECS ENVOI EMAIL EN 2H SUR ' . DOL_URL_ROOT);
-                    $smsfile->sendfile();
                 }
             }
 

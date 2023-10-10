@@ -26,7 +26,7 @@ CREATE TABLE `llx_bl_inventory_2` (
   `status` int(11) NOT NULL DEFAULT 0,
   `fk_warehouse` int(11) NOT NULL,
   `type` int(11) NOT NULL DEFAULT 2,
-  `config` TEXT NOT NULL DEFAULT '{"cat":[],"prod":[]}',
+  `config` TEXT NOT NULL,
   `user_create` int(11) NOT NULL,
   `user_update` int(11) NOT NULL,
   `date_create` datetime NOT NULL DEFAULT current_timestamp,

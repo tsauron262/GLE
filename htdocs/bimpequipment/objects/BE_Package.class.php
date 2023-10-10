@@ -514,16 +514,15 @@ class BE_Package extends BimpObject
         return $errors;
     }
 
-    public function addProduct($id_product, $qty, $id_entrepot = 0, &$warnings = array(), $code_mvt = '', $mvt_label = '', $origin = '', $id_origin = 0)
+    public function addProduct($id_product, $qty, $id_entrepot_origine = 0, &$warnings = array(), $code_mvt = '', $mvt_label = '', $origin = '', $id_origin = 0)
     {
-
         $errors = array();
 
         if (!$this->isLoaded($errors)) {
             return $errors;
         }
 
-        if (!$id_entrepot and $id_entrepot != -1) {
+        if (!$id_entrepot_origine and $id_entrepot_origine != -1) {
             $errors[] = 'Aucun entrepôt d\'origine spécifié';
             return $errors;
         }
@@ -567,9 +566,9 @@ class BE_Package extends BimpObject
 
         if (!count($errors)) {
             if ($qty > 0) {
-                $stock_errors = $this->onProductIn($id_product, $qty, $id_entrepot, $origin, $id_origin, $mvt_label, $code_mvt);
+                $stock_errors = $this->onProductIn($id_product, $qty, $id_entrepot_origine, $origin, $id_origin, $mvt_label, $code_mvt);
             } elseif ($qty < 0) {
-                $stock_errors = $this->onProductOut($id_product, abs($qty), $id_entrepot, $origin, $id_origin, $mvt_label, $code_mvt);
+                $stock_errors = $this->onProductOut($id_product, abs($qty), $id_entrepot_origine, $origin, $id_origin, $mvt_label, $code_mvt);
             }
 
             if (count($stock_errors)) {

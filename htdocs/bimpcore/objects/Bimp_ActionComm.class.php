@@ -15,22 +15,7 @@ class Bimp_ActionComm extends BimpObject
         100 => 'Terminé'
     );
 
-    // Getters booléens: 
-
-    public function canView()
-    {//ne fonctionne pas
-        return $this->getRight('read');
-    }
-
-    public function isCreatable($force_create = false, &$errors = array())
-    {
-        return $this->isEditable();
-    }
-
-    public function isEditable($force_edit = false, &$errors = array())
-    {
-        return $this->getRight('create');
-    }
+    // Droits users: 
 
     public function getRight($code)
     {
@@ -39,29 +24,64 @@ class Bimp_ActionComm extends BimpObject
         if ($user->rights->agenda->allactions->$code)
             return 1;
 
-        $usersPost = BimpTools::getPostFieldValue('users_assigned', array());
+        $usersAssigned = BimpTools::getPostFieldValue('users_assigned', $this->getUsersAssigned());
 
-        $users = $this->getUsersAssigned();
-        
-        $idUserCreate = $this->getData('fk_user_author');
-        if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersPost) > 0 && (int) $usersPost[0] == $user->id)) && $user->rights->agenda->myactions->$code)
+        if (!$this->isLoaded()) {
+            $idUserCreate = $user->id;
+        } else {
+            $idUserCreate = $this->getData('fk_user_author');
+        }
+
+        if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersAssigned) && in_array($user->id, $usersAssigned))) &&
+                $user->rights->agenda->myactions->$code) {
             return 1;
-
+        }
 
         return 0;
+    }
+    
+    public function renderDolTabs(){
+        global $langs;
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
+        $head = calendars_prepare_head($paramnoaction);
+
+        dol_fiche_head($head, "list", $langs->trans('Agenda'), 0, 'action');
+    }
+
+    public function canView()
+    {
+        //ne fonctionne pas
+
+        return $this->getRight('read');
+    }
+
+    public function canDelete()
+    {
+        return $this->getRight('delete');
+    }
+
+    public function canEdit()
+    {
+        return $this->getRight('create');
+    }
+
+    // Getters booléens: 
+
+    public function isCreatable($force_create = false, &$errors = array())
+    {
+        return $this->isEditable();
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+//        return $this->getRight('create');// pas de droits user ici 
+        return 1;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-        return $this->getRight('delete');
-    }
-    
-    public function canDelete() {
-        return $this->getRight('delete');
-    }
-    
-    public function canEdit() {
-        return $this->getRight('create');
+//        return $this->getRight('delete');// pas de droits user ici 
+        return 1;
     }
 
     // Getters array: 
@@ -268,7 +288,7 @@ class Bimp_ActionComm extends BimpObject
         if ($this->isLoaded() && $this->canDelete()) {
             $html .= '<div style="margin: 10px; text-align: center">';
             $html .= '<span class="btn btn-danger" onclick="' . $this->getJsDeleteOnClick(array(
-                        'on_success' => 'reload'
+                        'success_callback' => "function(){bimpModal.hide();$('#calendar').weekCalendar('refresh');}"
                     )) . '">';
             $html .= BimpRender::renderIcon('fas_trash-alt', 'iconLeft') . 'Supprimer cet événement';
             $html .= '</span>';
@@ -285,39 +305,63 @@ class Bimp_ActionComm extends BimpObject
 
         $errors = parent::validatePost();
 
-        if (BimpTools::isPostFieldSubmit('users_assigned') && $this->canEdit()) {
+        if ($this->canEdit()) {
             $this->dol_object->userassigned = array();
-
             $users = BimpTools::getPostFieldValue('users_assigned', array());
+            $transparency = (int) $this->getData('transparency');
 
-            if (empty($users)) {
-                $this->set('fk_user_action', 0);
-            } else {
-                $this->set('fk_user_action', (int) $users[0]);
-                $transparency = (int) $this->getData('transparency');
-
+            if (!empty($users)) {
                 foreach ($users as $id_user) {
-                    $this->dol_object->userassigned[$id_user] = array(
-                        'id'           => $id_user,
-                        'transparency' => $transparency
-                    );
+                    if (!isset($this->dol_object->userassigned[$id_user])) {
+                        $this->dol_object->userassigned[$id_user] = array(
+                            'id'           => $id_user,
+                            'transparency' => $transparency
+                        );
+                    }
                 }
             }
-        }
 
-        if (BimpTools::isPostFieldSubmit('contacts_assigned') && $this->canEdit()) {
-            $contacts = BimpTools::getPostFieldValue('contacts_assigned', array());
+            $usergroups = BimpTools::getPostFieldValue('usergroups_assigned', array());
+            if (!empty($usergroups)) {
+                foreach ($usergroups as $id_group) {
+                    $users = BimpCache::getGroupUsersList($id_group);
 
-            $this->dol_object->socpeopleassigned = array();
-
-            if (empty($contacts)) {
-                $this->set('fk_contact', 0);
+                    if (!empty($users)) {
+                        foreach ($users as $id_user) {
+                            if (!isset($this->dol_object->userassigned[$id_user])) {
+                                $this->dol_object->userassigned[$id_user] = array(
+                                    'id'           => $id_user,
+                                    'transparency' => $transparency
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (empty($this->dol_object->userassigned)) {
+                $this->set('fk_user_action', 0);
             } else {
-                $this->set('fk_contact', (int) $contacts[0]);
-                foreach ($contacts as $id_contact) {
-                    $this->dol_object->socpeopleassigned[$id_contact] = array(
-                        'id' => $id_contact
-                    );
+                foreach ($this->dol_object->userassigned as $id_user => $data) {
+                    $this->set('fk_user_action', $id_user);
+                    break;
+                }
+            }
+
+            if (BimpTools::isPostFieldSubmit('contacts_assigned')) {
+                $contacts = BimpTools::getPostFieldValue('contacts_assigned', array());
+
+                $this->dol_object->socpeopleassigned = array();
+
+                if (empty($contacts)) {
+                    $this->set('fk_contact', 0);
+                } else {
+                    $this->set('fk_contact', (int) $contacts[0]);
+                    foreach ($contacts as $id_contact) {
+                        $this->dol_object->socpeopleassigned[$id_contact] = array(
+                            'id' => $id_contact
+                        );
+                    }
                 }
             }
         }

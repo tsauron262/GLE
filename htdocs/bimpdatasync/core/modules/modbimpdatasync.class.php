@@ -13,7 +13,7 @@ include_once(DOL_DOCUMENT_ROOT . "/core/modules/DolibarrModules.class.php");
 class modbimpdatasync extends DolibarrModules
 {
 
-    function modbimpdatasync($db)
+    function __construct($db)
     {
         global $langs, $conf;
 

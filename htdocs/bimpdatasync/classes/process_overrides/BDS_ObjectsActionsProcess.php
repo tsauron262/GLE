@@ -19,20 +19,34 @@ class BDS_ObjectsActionsProcess extends BDSProcess
             if (!count($errors)) {
                 $data['has_finalization'] = 1;
 
-                $token = '';
-
-                if (BimpObject::objectLoaded($object)) {
-                    $msg = BimpCore::checkObjectLock($object, $token);
-                    if ($msg) {
-                        $errors[] = $msg;
-                        return;
+                if ((int) BimpCore::getConf('use_objects_locks')) {
+                    $token = '';
+                    if (BimpObject::objectLoaded($object)) {
+                        $msg = BimpCore::checkObjectLock($object, $token);
+                        if ($msg) {
+                            $errors[] = $msg;
+                            return;
+                        }
                     }
+
+                    $this->options['process_token'] = $token;
                 }
 
-                $this->options['process_token'] = $token;
                 $extra_data = $this->getOption('action_extra_data', array());
                 $force_action = (int) $this->getOption('force_action', 0);
                 $object->initBdsAction($this, $action, $data, $errors, $extra_data, $force_action);
+
+                if (BimpObject::objectLoaded($this->report)) {
+                    if (isset($data['operation_title']) && $data['operation_title']) {
+                        $title = $data['operation_title'] .' du ' . date('d / m / Y');
+                        $this->report->updateField('title', $title);
+                    }
+                    
+                    if (isset($data['report_code']) && $data['report_code']) {
+                        $this->report->updateField('code', $data['report_code']);
+                    }
+                }
+
 
                 if (!count($errors)) {
                     // On a été jusqu'au bout: on empêche le forçage du déblocage du lock (le lock doit être maintenu durant les éxécutions en ajax)
@@ -55,17 +69,19 @@ class BDS_ObjectsActionsProcess extends BDSProcess
             $object = $this->getObjectInstance($errors);
 
             if (!count($errors)) {
-                if (BimpObject::objectLoaded($object)) {
-                    $token = $this->getOption('process_token', '');
-                    if (!$token) {
-                        $errors[] = 'Token absent';
-                        return array();
-                    }
+                if ((int) BimpCore::getConf('use_objects_locks')) {
+                    if (BimpObject::objectLoaded($object)) {
+                        $token = $this->getOption('process_token', '');
+                        if (!$token) {
+                            $errors[] = 'Token absent';
+                            return array();
+                        }
 
-                    $msg = BimpCore::checkObjectLock($object, $token);
-                    if ($msg) {
-                        $errors[] = $msg;
-                        return array();
+                        $msg = BimpCore::checkObjectLock($object, $token);
+                        if ($msg) {
+                            $errors[] = $msg;
+                            return array();
+                        }
                     }
                 }
 
@@ -100,14 +116,16 @@ class BDS_ObjectsActionsProcess extends BDSProcess
             $object = $this->getObjectInstance($errors);
 
             if (!count($errors)) {
-                if (BimpObject::objectLoaded($object)) {
-                    $token = $this->getOption('process_token', '');
-                    if (!$token) {
-                        $errors[] = 'Token absent';
-                        return array();
-                    }
+                if ((int) BimpCore::getConf('use_objects_locks')) {
+                    if (BimpObject::objectLoaded($object)) {
+                        $token = $this->getOption('process_token', '');
+                        if (!$token) {
+                            $errors[] = 'Token absent';
+                            return array();
+                        }
 
-                    $errors = BimpCore::unlockObject($object->module, $object->object_name, $object->id, $token);
+                        $errors = BimpCore::unlockObject($object->module, $object->object_name, $object->id, $token);
+                    }
                 }
 
                 $action_extra_data = $this->getOption('action_extra_data', array());

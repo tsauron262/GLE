@@ -4,10 +4,15 @@ if (!defined('BIMP_LIB')) {
     require_once __DIR__ . '/../Bimp_Lib.php';
 }
 
-require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
+if (BimpCore::isModuleActive('bimpvalidation') && !defined('BV_LIB')) {
+    require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
+}
 
-class BimpDolObject extends BimpObject
-{
+if (BimpCore::isModuleActive('bimptocegid')){
+	require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
+}
+
+class BimpDolObject extends BimpObject{
 
     public static $element_name = '';
     public static $dol_module = '';
@@ -30,6 +35,7 @@ class BimpDolObject extends BimpObject
         90  => "SAV",
         14  => "Bureautique",
         15  => "Formation",
+        16  => "Sécurité",
         100 => "Autre (ne pas utiliser)"
     ];
 
@@ -153,6 +159,14 @@ class BimpDolObject extends BimpObject
                             }
                         }
                     }
+                }
+            }
+
+            $extra_emails = explode(',', BimpCore::getConf('extra_emails_from', null, 'bimpcommercial'));
+            if (!empty($extra_emails)) {
+                foreach ($extra_emails as $email) {
+                    $email = BimpTools::cleanEmailsStr($email);
+                    self::$cache[$cache_key][$email] = $email;
                 }
             }
         }
@@ -397,7 +411,7 @@ class BimpDolObject extends BimpObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity='.$this->dol_object->entity.'&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
             }
         }
 
@@ -433,8 +447,7 @@ class BimpDolObject extends BimpObject
                 if (BimpObject::objectLoaded($user)) {
                     if (!$params['check_active'] || ($params['check_active'] && (int) $user->getData('statut'))) {
                         return $user->id;
-                    }
-                    elseif ($params['check_active'] && !(int) $user->getData('statut')) {
+                    } elseif ($params['check_active'] && !(int) $user->getData('statut')) {
                         if ($params['allow_superior']) {
                             if ((int) $user->getData('fk_user')) {
                                 $is_superior = true;
@@ -462,6 +475,25 @@ class BimpDolObject extends BimpObject
         $list = $this->dol_object->liste_type_contact($type, 'position', 0, 0, $code);
         foreach ($list as $id => $inut)
             return $id;
+    }
+    
+    public function getContactsByCodes($source = 'external')
+    {
+        $contacts = array();
+        
+        if ($this->isLoaded()) {
+            $items = $this->dol_object->liste_contact(-1, $source);
+            
+            foreach ($items as $item) {
+                if (!isset($contacts[$item['code']])) {
+                    $contacts[$item['code']] = array();
+                }
+                
+                $contacts[$item['code']][] = $item['id'];
+            }
+        }
+        
+        return $contacts;
     }
 
     // Affichages: 
@@ -1251,10 +1283,11 @@ class BimpDolObject extends BimpObject
     {
         if ($this->isLoaded() && BimpObject::objectLoaded($origin) && is_a($origin, 'BimpDolObject')) {
             BimpTools::resetDolObjectErrors($this->dol_object);
-//            die('oooo');
+            
             if ($this->dol_object->copy_linked_contact($origin->dol_object, 'internal') < 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts internes');
             }
+            
             if ((int) $this->getData('fk_soc') === (int) $origin->getData('fk_soc')) {
                 BimpTools::resetDolObjectErrors($this->dol_object);
                 if ($this->dol_object->copy_linked_contact($origin->dol_object, 'external') < 0) {

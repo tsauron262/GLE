@@ -150,23 +150,35 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 return 0;
 
             case 'linesFactureQties':
-//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-//                return (int) $facture->can('create');
                 return $user->rights->bimpcommercial->factureAnticipe;
 
             case 'sendMailLatePayment':
-                $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);
+                if (BimpCore::isModuleActive('bimpvalidation')) {
+                    $demande = BimpCache::findBimpObjectInstance('bimpvalidation', 'BV_Demande', array(
+                                'status'          => 0,
+                                'type_validation' => 'rtp',
+                                'type_object'     => 'commande',
+                                'id_object'       => $this->id
+                                    ), true);
 
-                if ($demande === 0)
-                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_IMPAYE);
+                    if (BimpObject::objectLoaded($demande)) {
+                        return $demande->canProcess();
+                    }
+                } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);
 
-                // Encours
-                if (is_a($demande, 'DemandeValidComm')) {
-                    list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
-                    return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this)
-                            or $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_IMPAYE, $class, $val_euros, $this);
+                    if ($demande === 0)
+                        $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_IMPAYE);
+
+                    // Encours
+                    if (is_a($demande, 'DemandeValidComm')) {
+                        list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
+                        return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this)
+                                or $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_IMPAYE, $class, $val_euros, $this);
+                    }
                 }
+                return 0;
         }
         return parent::canSetAction($action);
     }
@@ -181,6 +193,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     return 1;
                 }
                 return 0;
+
+            case 'entrepot':
+                if ($this->isLoaded() && !$user->rights->bimpcommercial->changeEntrepot) {
+                    return 0;
+                }
+                return 1;
         }
         return parent::canEditField($field_name);
     }
@@ -331,14 +349,22 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $errors[] = $invalide_error;
                     return 0;
                 }
-                // A une demande de validation de retard de paiement
-                $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                if ($vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE) === 0) {
-                    $errors[] = "Aucune demande de validation pour cette commande";
-                    return 0;
-                }
-                if ((int) $this->getData('fk_soc')) {
 
+                // A une demande de validation de retard de paiement
+                if (BimpCore::isModuleActive('bimpvalidation')) {
+                    if (!(int) $this->db->getCount('bv_demande', "type_validation = 'rtp' AND type_object = 'commande' AND id_object = $this->id AND status = 0")) {
+                        $errors[] = "Aucune demande de validation pour retard de paiement pour cette commande";
+                        return 0;
+                    }
+                } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                    if ($vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE) === 0) {
+                        $errors[] = "Aucune demande de validation pour cette commande";
+                        return 0;
+                    }
+                }
+
+                if ((int) $this->getData('fk_soc')) {
                     $client = $this->getClientFacture();
 
                     if ($client->isLoaded()) {
@@ -347,11 +373,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             return 0;
                         }
                     } else {
-                        $errors[] = "Client mal chargé";
+                        $errors[] = "Client absent";
                         return 0;
                     }
                 } else {
-                    $errors[] = "Client inconnu " . (int) $this->getData('fk_soc');
+                    $errors[] = "Client #" . (int) $this->getData('fk_soc') . " inexistant";
                     return 0;
                 }
                 return 1;
@@ -365,15 +391,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
             return 0;
         }
 
-        global $user;
         switch ($field) {
             case 'entrepot':
-                if (!$force_edit) {
-                    // A modifier rapidement...
-                    if ($this->isLogistiqueActive() && !$user->rights->bimpcommercial->changeEntrepot) {
-                        return 0;
-                    }
-                }
+//                if (!$force_edit) {
+//                    if ($this->isLogistiqueActive()) {
+//                        return 0;
+//                    }
+//                }
                 return 1;
         }
 
@@ -423,26 +447,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         }
                     }
                 }
-
-                // Vérif validité commande: 
-//                global $user;
-                // todo: checker module activé. 
-//                include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
-//                $bvo = new BimpValidateOrder($this->db->db);
-//                if ($bvo->checkValidateRights($user, $this->dol_object) < 1) {
-//                    $errors = BimpTools::merge_array($errors, $bvo->validation_errors);
-//                    if (!count($errors)) {
-//                        $errors[] = 'Cette commande ne peut pas être validée';
-//                    }
-//                }
                 global $user;
-
-                $id_cond_a_la_commande = self::getBdb()->getValue('c_payment_term', 'rowid', '`active` > 0 and code = "RECEPCOM"');
-                if ($client_facture->getData('outstanding_limit') < 1 /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->asPreuvePaiment()) {
+                if (BimpCore::isModuleActive('bimpvalidation') && $client_facture->getData('outstanding_limit') < 1 && $this->getData('ef_type') != 'S' /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->asPreuvePaiment()) {
                     if (!in_array($user->id, array(232, 97, 1566, 512, 40))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
                         if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
-                            $errors[] = "Les clients sans encours doivent régler à la commande";
+                            $errors[] = "Les clients sans encours autorisé doivent régler à la commande";
                     }
                 }
             }
@@ -451,6 +461,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
             //ref externe si consigne
             if ($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == '') {
                 $errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
+            }
+
+            // Check contact LD: 
+            if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))) {
+                if (!$this->dol_object->getIdContact('external', 'SHIPPING')) {
+                    $errors[] = 'Pour les livraisons directes le contact client est obligatoire';
+                }
             }
         }
 
@@ -472,10 +489,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function isLogistiqueActive()
     {
-        $forced = $this->getData('status_forced');
-        if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) &&
-                (!in_array((int) $this->getData('logistique_status'), array(0, 6)) || (isset($forced['logistique']) && (int) $forced['logistique']))) {
-            return 1;
+        if(BimpCore::isModuleActive('bimplogistique')){
+            $forced = $this->getData('status_forced');
+            if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) &&
+                    (!in_array((int) $this->getData('logistique_status'), array(0, 6)) || (isset($forced['logistique']) && (int) $forced['logistique']))) {
+                return 1;
+            }
         }
 
         return 0;
@@ -795,23 +814,25 @@ class Bimp_Commande extends Bimp_CommandeTemp
 //            }
 //
             // Prendre en charge logistique:
-            if ($this->isActionAllowed('processLogitique')) {
-                if ($this->canSetAction('processLogitique')) {
-                    $buttons[] = array(
-                        'label'   => 'Prendre en charge logistique',
-                        'icon'    => 'fas_truck-loading',
-                        'onclick' => $this->getJsActionOnclick('processLogitique', array(), array(
-                            'confirm_msg' => 'Veuillez confirmer la prise en charge de la logistique pour cette commande'
-                        ))
-                    );
-                } else {
-                    $buttons[] = array(
-                        'label'    => 'Prendre en charge logistique',
-                        'icon'     => 'plus-circle',
-                        'onclick'  => '',
-                        'disabled' => 1,
-                        'popover'  => 'Vous n\'avez pas la permission'
-                    );
+            if(BimpCore::isModuleActive('bimplogistique')){
+                if ($this->isActionAllowed('processLogitique')) {
+                    if ($this->canSetAction('processLogitique')) {
+                        $buttons[] = array(
+                            'label'   => 'Prendre en charge logistique',
+                            'icon'    => 'fas_truck-loading',
+                            'onclick' => $this->getJsActionOnclick('processLogitique', array(), array(
+                                'confirm_msg' => 'Veuillez confirmer la prise en charge de la logistique pour cette commande'
+                            ))
+                        );
+                    } else {
+                        $buttons[] = array(
+                            'label'    => 'Prendre en charge logistique',
+                            'icon'     => 'plus-circle',
+                            'onclick'  => '',
+                            'disabled' => 1,
+                            'popover'  => 'Vous n\'avez pas la permission'
+                        );
+                    }
                 }
             }
 
@@ -904,30 +925,56 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
             // Envoyer mail à l'utilisateur qui a fait une demande de validation
             // pour relancer le client si il y a des impayé
-            if ($this->isActionAllowed('sendMailLatePayment') /* && $this->canSetAction('sendMailLatePayment') */) {
-                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-                BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');
-                $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_ENCOURS);
-                if (!is_a($demande, 'DemandeValidComm') || $demande->getData('status') != DemandeValidComm::STATUS_PROCESSING) {
-                    $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_IMPAYE);
-                }
-                if (is_a($demande, 'DemandeValidComm') and $demande->getData('status') == DemandeValidComm::STATUS_PROCESSING) {
-                    $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));
-                    $confirm_msg = "Confirmer l\'envoie de mail à ";
-                    $confirm_msg .= $user_ask->getData('firstname') . ' ' . $user_ask->getData('lastname');
-                    if ($user_ask->isLoaded()) {
-                        $buttons[] = array(
-                            'label'   => 'Signaler retard paiement',
-                            'icon'    => 'envelope',
-                            'type'    => 'danger',
-                            'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
-                                'user_ask_firstname' => $user_ask->getData('firstname'),
-                                'user_ask_email'     => $user_ask->getData('email')
-                                    ), array(
-                                'confirm_msg' => $confirm_msg
-                            ))
-                        );
+            if ($this->isActionAllowed('sendMailLatePayment') && $this->canSetAction('sendMailLatePayment')) {
+                if (BimpCore::isModuleActive('bimpvalidation')) {
+                    $demande = BimpCache::findBimpObjectInstance('bimpvalidation', 'BV_Demande', array(
+                                'status'          => 0,
+                                'type_validation' => 'rtp',
+                                'type_object'     => 'commande',
+                                'id_object'       => $this->id
+                                    ), true);
+
+                    if (BimpObject::objectLoaded($demande)) {
+                        $user_ask = $demande->getChildObject('user_demande');
+                        if (BimpObject::objectLoaded($user_ask)) {
+                            $buttons[] = array(
+                                'label'   => 'Signaler retard paiement',
+                                'icon'    => 'envelope',
+                                'type'    => 'danger',
+                                'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
+                                    'user_ask_firstname' => $user_ask->getData('firstname'),
+                                    'user_ask_email'     => $user_ask->getData('email')
+                                        ), array(
+                                    'confirm_msg' => "Confirmer l\'envoie de mail à " . $user_ask->getName()
+                                ))
+                            );
+                        }
+                    }
+                } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+                    BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                    BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');
+                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                    $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_ENCOURS);
+                    if (!is_a($demande, 'DemandeValidComm') || $demande->getData('status') != DemandeValidComm::STATUS_PROCESSING) {
+                        $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_IMPAYE);
+                    }
+                    if (is_a($demande, 'DemandeValidComm') and $demande->getData('status') == DemandeValidComm::STATUS_PROCESSING) {
+                        $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));
+                        $confirm_msg = "Confirmer l\'envoie de mail à ";
+                        $confirm_msg .= $user_ask->getData('firstname') . ' ' . $user_ask->getData('lastname');
+                        if ($user_ask->isLoaded()) {
+                            $buttons[] = array(
+                                'label'   => 'Signaler retard paiement',
+                                'icon'    => 'envelope',
+                                'type'    => 'danger',
+                                'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
+                                    'user_ask_firstname' => $user_ask->getData('firstname'),
+                                    'user_ask_email'     => $user_ask->getData('email')
+                                        ), array(
+                                    'confirm_msg' => $confirm_msg
+                                ))
+                            );
+                        }
                     }
                 }
             }
@@ -1020,6 +1067,56 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         return $shipments;
+    }
+
+    public function getShipmentContactsArray()
+    {
+        $commande = $this->dol_object;
+
+        $contacts = array(
+            0 => 'Addresse de livraison de la commande'
+        );
+
+        if (!is_null($commande->socid) && $commande->socid) {
+            $where = '`fk_soc` = ' . (int) $commande->socid;
+            $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
+                }
+            }
+        }
+
+        BimpTools::loadDolClass('contact');
+
+        $bill_contacts = $commande->getIdContact('external', 'BILLING');
+        if (!is_null($bill_contacts) && count($bill_contacts)) {
+            foreach ($bill_contacts as $id_contact) {
+                if (!array_key_exists((int) $id_contact, $contacts)) {
+                    $contact = new Contact($this->db->db);
+                    if ($contact->fetch((int) $id_contact) > 0) {
+                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
+                    }
+                    unset($contact);
+                }
+            }
+        }
+
+        $ship_contacts = $commande->getIdContact('external', 'SHIPPING');
+        if (!is_null($ship_contacts) && count($ship_contacts)) {
+            foreach ($ship_contacts as $id_contact) {
+                if (!array_key_exists((int) $id_contact, $contacts)) {
+                    $contact = new Contact($this->db->db);
+                    if ($contact->fetch((int) $id_contact) > 0) {
+                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
+                    }
+                    unset($contact);
+                }
+            }
+        }
+
+        return $contacts;
     }
 
     public function getInvoicesArray($editable_only = false, $include_empty = false, $empty_label = '')
@@ -1153,6 +1250,24 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         return (int) BimpCore::getConf('societe_id_default_mode_reglement', 0);
+    }
+
+    public function getShippingIdContact()
+    {
+        $id_contact = 0;
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
+            if (isset($contacts[0]) && $contacts[0]) {
+                $id_contact = $contacts[0];
+            } else {
+                $contacts = $this->dol_object->getIdContact('external', 'CUSTOMER');
+                if (isset($contacts[0]) && $contacts[0]) {
+                    $id_contact = $contacts[0];
+                }
+            }
+        }
+
+        return $id_contact;
     }
 
     // Rendus HTML: 
@@ -2424,9 +2539,69 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
 
             $this->updateField('status_forced', array(), null, true);
+            $this->updateField('logistique_status', 1, null, true);
+
             $this->checkLogistiqueStatus();
             $this->checkShipmentStatus();
             $this->checkInvoiceStatus();
+        }
+
+        return $errors;
+    }
+
+    public function sendLivraisonDirecteNotificationEmail($to_email = '', $log_errors = true)
+    {
+        $errors = array();
+
+        if (!$to_email) {
+            $id_contact = $this->getIdContact('external', 'SHIPPING');
+
+            if ($id_contact) {
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                if (BimpObject::objectLoaded($contact)) {
+                    $to_email = BimpTools::cleanEmailsStr($contact->getData('email'));
+                }
+            }
+
+            if (!$to_email) {
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $to_email = BimpTools::cleanEmailsStr($client->getData('email'));
+                }
+            }
+
+            if (!$to_email) {
+                $errors[] = 'Aucune adresse e-mail trouvée pour la livraison';
+            }
+        }
+
+        if (!count($errors)) {
+            $ref = $this->getRef();
+            $subject = 'Votre commande N° ' . $ref . ' chez BIMP.PRO va bientôt être expédiée';
+            $msg = 'Bonjour, <br/><br/>';
+            $msg .= 'Votre commande N° ' . $ref . ' chez BIMP.PRO va bientôt être expédiée.<br/><br/>';
+            $msg .= '<b>IMPORTANT - PROCEDURE DE RECEPTION :</b><br/><br/>';
+            $msg .= "Nos envois font appel à des canaux multiples fiabilisés mais la responsabilité du transporteur prend fin dès lors qu'il vous a remis la marchandise.<br/><br/>";
+            $msg .= "Il est IMPERATIF de suivre scrupuleusement  chez vous la procédure de réception ci dessous: <br/><br/>";
+            $msg .= "A réception de votre commande, nous vous demandons de vérifier le nombre de colis, leur état extérieur mais aussi intérieur  en présence du transporteur, avant la validation de la réception.<br/><br/>";
+            $msg .= "N'hésitez donc pas à ouvrir l'emballage en présence du livreur pour vérifier le matériel et réaliser un inventaire comparatif avec le bon de livraison présent dans le colis. Faites le systématiquement s'il s'agit d'un colis volumineux (en particulier: écran ou matériel fragile).<br/><br/>";
+            $msg .= "Si vous avez le moindre doute, notez les réserves sur le bon de livraison avant signature en indiquant le nombre et l'état précis des colis endommagés. Gardez une copie de vos réserves contresignées par le transporteur.<br/><br/>";
+            $msg .= "Des réserves non motivées telles que l'état du colis satisfaisant sous réserve de déballage ne peuvent être prises en compte. Sans des indications précises de votre part à réception, toute réclamation ultérieure ne pourra être prise en compte.<br/><br/>";
+            $msg .= "En cas de doute sérieux, carton déchiré, perforé nous vous invitons à refuser la marchandise en motivant votre refus.<br/><br/>";
+            $msg .= "Pour tout problème de livraison vous pouvez contacter nos services par mail à  Groupe-LDLC-Assistantes_Olys@ldlc.com <br/><br/>";
+            $msg .= "Pour les produits lourds et / ou volumineux : Sauf mention particulière présente dans notre devis, la livraison des produits s'effectue au rez-de-chaussée et sans manutention à partir du camion de livraison.<br/>";
+            $msg .= "Pour une livraison dans les étages, la demande doit être faite avant la commande et reprise sur le devis (avec un surcoût éventuel).";
+
+            $bimpMail = new BimpMail($this, $subject, $to_email, '', $msg);
+            $bimpMail->send($errors);
+
+            if (!count($errors)) {
+                $this->addObjectLog('Instructions pour la réception des livraisons directes envoyées avec succès à "' . $to_email . '"', 'LD_RECEPTION_INSTRUCTIONS_SENT');
+            } elseif ($log_errors) {
+                $log_msg = 'Echec de l\'envoi des instructions pour la réception des livraisons directes.<br/><b>Erreurs : </b><br/>';
+                $log_msg .= BimpTools::getMsgFromArray($errors);
+                $this->addObjectLog($log_msg, 'LD_RECEPTION_INSTRUCTIONS_FAIL');
+            }
         }
 
         return $errors;
@@ -2450,7 +2625,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         if (is_null($id_client)) {
-            $id_client = (int) $this->getData('fk_soc');
+            if ((int) $this->getData('id_client_facture')) {
+                $id_client = (int) $this->getData('id_client_facture');
+            } else {
+                $id_client = (int) $this->getData('fk_soc');
+            }
         }
 
         if (!$id_client) {
@@ -2568,10 +2747,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
         }
 
-        if ($id_facture && $replaced_ref) {
-            $this->db->update('facture', array(
-                'replaced_ref' => $replaced_ref
-                    ), 'rowid = ' . (int) $id_facture);
+        if ($id_facture) {
+            $data = array();
+
+            if ($replaced_ref) {
+                $data['replaced_ref'] = $replaced_ref;
+            }
+
+            if ((int) $this->getData('fk_soc') !== (int) $id_client) {
+                $data['id_client_final'] = (int) $this->getData('fk_soc');
+            }
+
+            if (!empty($data)) {
+                $this->db->update('facture', $data, 'rowid = ' . (int) $id_facture);
+            }
         }
 
         return $id_facture;
@@ -2617,17 +2806,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return $errors;
     }
 
-    public function addLinesToFacture($id_facture, $lines_data = null, $check_data = true, $new_qties = false)
+    public function addLinesToFacture($id_facture, $lines_data = null, $check_data = true, $new_qties = false, $commit_each_line = false, &$nOk = 0)
     {
+        // $commit_each_line : nécessaire pour le traitement des facturation périodiques. 
+
         BimpCore::setMaxExecutionTime(2400);
         ignore_user_abort(0);
 
         $errors = array();
-
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de la commande client absent ou invalide';
-            return $errors;
-        }
 
         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
         $facture->checkLines();
@@ -2687,13 +2873,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
         }
 
-        $this->hold_process_factures_remises_globales = true;
+        $commandes_assos = array();
 
         foreach ($lines_data as $id_commande => $commande_lines_data) {
             $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
 
-            // Création de la ligne de l'intitulé de la commande d'origine si nécessaire: 
             if (BimpObject::objectLoaded($commande)) {
+                $commande->hold_process_factures_remises_globales = true;
+
+                // Création de la ligne de l'intitulé de la commande d'origine si nécessaire: 
                 $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
                             'id_obj'             => (int) $facture->id,
                             'linked_object_name' => 'commande_origin_label',
@@ -2710,16 +2898,28 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     ));
                     $fac_line->qty = 1;
                     $fac_line->desc = 'Selon notre commande ' . $commande->getRef();
+                    $libelle = $commande->getData('libelle');
+                    if ($libelle) {
+                        $fac_line->desc .= ' - ' . $libelle;
+                    }
                     $fac_line_warnings = array();
-                    $fac_line_errors = $fac_line->create($fac_line_warnings, true);
+                    $fac_line->create($fac_line_warnings, true);
                 }
             }
 
+            $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
+            $has_line_ok = false;
             foreach ($commande_lines_data as $id_line => $line_data) {
+                if ($use_db_transactions && $commit_each_line) {
+                    $this->db->db->begin();
+                }
+
                 $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
+                $line_label = 'Ligne n° ' . $line->getData('position') . (BimpObject::objectLoaded($commande) ? ' de la commande ' . $commande->getRef() : '');
 
                 $product = $line->getProduct();
-                $fac_line_errors = array();
+                $line_errors = array();
+                $line_warnings = array();
                 $line_qty = (float) $line_data['qty'];
                 $line_equipments = array();
 
@@ -2745,16 +2945,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         ));
                         $fac_line->qty = 1;
                         $fac_line->desc = $line->desc;
-                        $fac_line_warnings = array();
 
-                        $fac_line_errors = $fac_line->create($fac_line_warnings, true);
+                        $line_errors = $fac_line->create($line_warnings, true);
 
-                        $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
-
-                        if (count($fac_line_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la création de la ligne de texte depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, $line_label . ' : échec de la création de la ligne de texte');
+                            if ($use_db_transactions && $commit_each_line) {
+                                $this->db->db->rollback();
+                            }
+                        } else {
+                            if ($use_db_transactions && $commit_each_line) {
+                                $nOk++;
+                                $this->db->db->commit();
+                            }
                         }
-
                         continue;
                     }
 
@@ -2782,34 +2986,25 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $fac_line->date_from = $line->date_from;
                     $fac_line->date_to = $line->date_to;
                     $fac_line->id_remise_except = $line->id_remise_except;
-
-                    $fac_line_warnings = array();
-
                     $fac_line->no_remises_arrieres_auto_create = true;
-                    $fac_line_errors = $fac_line->create($fac_line_warnings, true);
 
-                    $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
+                    $line_errors = $fac_line->create($line_warnings, true);
 
-                    if (count($fac_line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la création de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
-                    } else {
+                    if (!count($line_errors)) {
                         // Copie des remises: 
-
                         $remises_errors = $fac_line->copyRemisesFromOrigin($line, false, false);
 
                         if (count($remises_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Erreurs lors de la copie des remises pour la ligne n°' . $line->getData('position'));
+                            $line_errors[] = BimpTools::getMsgFromArray($remises_errors, 'Erreurs lors de la copie des remises');
                         }
 
                         $remises_arr_errors = $fac_line->copyRemisesArrieresFromOrigine($line);
 
                         if (count($remises_arr_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($remises_arr_errors, 'Erreurs lors de la copie des remises arrières pour la ligne n°' . $line->getData('position'));
+                            $line_errors[] = BimpTools::getMsgFromArray($remises_arr_errors, 'Erreurs lors de la copie des remises arrières');
                         }
 
-                        $fac_line->set('deletable', 0);
-                        $fac_line_warnings = array();
-                        $fac_line->update($fac_line_warnings, true);
+                        $fac_line->updateField('deletable', 0);
                     }
                 } else {
                     if ($new_qties) {
@@ -2823,11 +3018,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
 
                     if (!$line_qty) {
-                        $fac_line_warnings = array();
-                        $line_errors = $fac_line->delete($fac_line_warnings, true);
-                        if (count($line_errors) && (int) $line->id_remise_except) {
-                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': échec de la suppression de la ligne de facture correspondante');
+                        // Suppression de la ligne de facture : 
+                        $line_errors = $fac_line->delete($line_warnings, true);
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, $line_label . ' : échec de la suppression de la ligne de facture correspondante');
+                            if ($use_db_transactions && $commit_each_line) {
+                                $this->db->db->rollback();
+                            }
+                        } else {
+                            if ($use_db_transactions && $commit_each_line) {
+                                $nOk++;
+                                $this->db->db->commit();
+                            }
                         }
+
                         continue;
                     }
 
@@ -2843,39 +3047,27 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
 
                     if (count($fac_line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la liste des équipements pour la ligne de facture n°' . $fac_line->getData('position'));
+                        $line_errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la liste des équipements');
                     } else {
                         $fac_line_warnings = array();
                         $fac_line_errors = $fac_line->update($fac_line_warnings, true);
-                        $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
 
                         if (count($fac_line_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                            $line_errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture');
                         }
                     }
                 }
 
-                if (!count($fac_line_errors)) {
+                if (!count($line_errors) && BimpObject::objectLoaded($fac_line)) {
                     // Assignation des équipements à la ligne de facture: 
                     $equipments_set = array();
                     if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                         if (isset($line_data['equipments']) && is_array($line_data['equipments'])) {
+
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
                             $equipment->updateFieldsMasse($line_data['equipments'], array('prix_achat' => $line->pa_ht, 'achat_tva_tx' => $line->tva_tx), array('prix_achat' => 0));
-                            foreach ($line_data['equipments'] as $id_equipment) {
-//                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-//
-//                                if (!BimpObject::objectLoaded($equipment)) {
-//                                    $errors[] = 'Ligne n°' . $line->getData('position') . ': l\'équipement d\'ID ' . $id_equipment . ' n\'existe plus';
-//                                    continue;
-//                                }
-//
-//                                if (!(float) $equipment->getData('prix_achat')) {
-//                                    $equipment->set('prix_achat', $line->pa_ht);
-//                                    $equipment->set('achat_tva_tx', $line->tva_tx);
-//                                    $equipment->update();
-//                                }
-//
+
+                            foreach ($line_data['equipments'] as $id_equipment) {//
                                 $line_equipments[] = array(
                                     'id_equipment' => (int) $id_equipment
                                 );
@@ -2884,28 +3076,47 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                         $eq_errors = $fac_line->setEquipments($line_equipments, $equipments_set, false);
                         if (count($eq_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $line->getData('position'));
+                            $line_errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de l\'ajout des équipements à la ligne de facture');
                         }
                     }
+                }
 
-                    // Enregistrement des quantités facturées pour la ligne de commande: 
-                    $line_warnings = array();
-
+                if (!count($line_errors)) {
+                    // Enregistrement des quantités facturées pour la ligne de commande:
                     $line_errors = $line->setFactureData((int) $facture->id, $line_qty, $equipments_set, $line_warnings, false);
-                    $line_errors = BimpTools::merge_array($line_errors, $line_warnings);
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'enregistrement des quantités facturées pour la ligne n°' . $line->getData('position') . ' (ID: ' . $line->id . ')');
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, ucfirst($line_label));
+                    if ($use_db_transactions && $commit_each_line) {
+                        $this->db->db->rollback();
                     }
+                } else {
+                    $has_line_ok = true;
+                    if ($use_db_transactions && $commit_each_line) {
+                        $nOk++;
+                        $this->db->db->commit();
+                    }
+                }
+            }
+
+            if ($has_line_ok && !in_array($id_commande, $commandes_assos)) {
+                $commandes_assos[] = $id_commande;
+            }
+
+            if (BimpObject::objectLoaded($commande)) {
+                unset($commande->hold_process_factures_remises_globales);
+
+                if ($has_line_ok) {
+                    $commande->processFacturesRemisesGlobales();
                 }
             }
         }
 
-        unset($this->hold_process_factures_remises_globales);
-        $this->processFacturesRemisesGlobales();
-
-        if (!count($errors)) {
+        // Assos commandes / factures : 
+        if (count($commandes_assos) && (!count($errors) || ($use_db_transactions && $commit_each_line))) {
             $asso = new BimpAssociation($this, 'factures');
-            foreach ($orderedLines as $id_commande => $lines) {
+            foreach ($commandes_assos as $id_commande) {
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
 
                 if (BimpObject::objectLoaded($commande)) {
@@ -3068,6 +3279,35 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return $errors;
     }
 
+    public function checkClientsFinauxFactures(&$nbDone = 0)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $id_client_facture = (int) $this->getData('id_client_facture');
+            $id_client = (int) $this->getData('fk_soc');
+
+            if ($id_client_facture && $id_client_facture !== $id_client) {
+                $asso = new BimpAssociation($this, 'factures');
+
+                $factures_ids = $asso->getAssociatesList();
+                foreach ($factures_ids as $id_facture) {
+                    if (!(int) $this->db->getValue('facture', 'id_client_final', 'rowid = ' . $id_facture)) {
+                        if ($this->db->update('facture', array(
+                                    'id_client_final' => $id_client
+                                        ), 'rowid = ' . (int) $id_facture) <= 0) {
+                            $errors[] = 'Facture #' . $id_facture . ' : échec màj - ' . $this->db->err();
+                        } else {
+                            $nbDone++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Checks status: 
 
     public function checkStatus()
@@ -3131,6 +3371,18 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
 
                     $this->updateField('logistique_status', $new_status);
+                    if (BimpCore::isEntity('bimp')) {
+                        if (in_array($new_status, array(2, 3))) {
+                            $entrepot = $this->getChildObject('entrepot');
+                            if (BimpObject::objectLoaded($entrepot) && $entrepot->ref == 'LD') {
+                                $where = 'obj_module = \'bimpcommercial\' AND obj_name = \'Bimp_Commande\' AND id_object = ' . $this->id . ' AND code = \'LD_RECEPTION_INSTRUCTIONS_SENT\'';
+                                if (!(int) $this->db->getCount('bimpcore_object_log', $where)) {
+                                    $this->sendLivraisonDirecteNotificationEmail('', true);
+                                }
+                            }
+                        }
+                    }
+
                     if ($new_status == 3) {
                         $idComm = $this->getIdCommercial();
                         $email = BimpTools::getUserEmailOrSuperiorEmail($idComm);
@@ -3991,7 +4243,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $success = '';
 
         if (!$this->isLoaded())
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(321) ID ' . $this->getLabel('of_the') . ' absent';
         else {
 
             if ((int) $this->getData('fk_soc')) {
@@ -4094,78 +4346,64 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $infoClient = " du client " . $client->getNomUrl(1, false);
         }
 
-
-        foreach ($this->dol_object->lines as $line) {
-            // Obsolète: 
-//            if (stripos($line->ref, "REMISECRT") !== false) {
-//                $this->dol_object->array_options['options_crt'] = 2;
-//                $this->dol_object->updateExtraField('crt', '', $user);
-//            }
-//            if (stripos($line->desc, "Applecare") !== false) {
-//                $this->dol_object->array_options['options_apple_care'] = 2;
-//                $this->dol_object->updateExtraField('apple_care', '', $user);
-//            }
-        }
-
         $res_errors = $this->createReservations();
         if (count($res_errors)) {
             $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
         }
 
-
-
-        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))) {
-            if (!$this->dol_object->getIdContact('external', 'SHIPPING'))
-                $errors[] = 'Pour les livraisons directes le contact client est obligatoire';
-        }
-
-
-        // Validation encours
         if (empty($errors)) {
-            if ($this->field_exists('paiement_comptant') and $this->getData('paiement_comptant')) {
+            if (BimpCore::isModuleActive('bimpvalidation')) {
+                // Déplacé dans BimpValidation
+            } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+                // Validation encours
+                if (empty($errors)) {
+                    if ($this->field_exists('paiement_comptant') and $this->getData('paiement_comptant')) {
 
-                $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
-                if ($demande)
-                    $demande->delete($warnings, 1);
-                $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée.";
-                $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true);
-                $msg_mail .= " a été validée financièrement par paiement comptant ou mandat SEPA par ";
-                $msg_mail .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
-                $msg_mail .= "<br/>Merci de vérifier le paiement ultérieurement.";
-                mailSyn2("Validation par paiement comptant ou mandat SEPA", 'a.delauzun@bimp.fr, s.reynaud@bimp.fr', "gle@bimp.fr", $msg_mail);
-            } else {
-                $client_facture = $this->getClientFacture();
-                if (!$client_facture->getData('validation_financiere')) {
-                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
-                    if ($demande)
-                        $demande->delete($warnings, 1);
-                    $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
-//                    $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true);
+                        $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                        $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
+                        if ($demande)
+                            $demande->delete($warnings, 1);
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée.";
+                        $msg_mail = "Bonjour, <br/><br/>La commande " . $this->getNomUrl(1, true);
+                        $msg_mail .= " a été validée financièrement par paiement comptant ou mandat SEPA par ";
+                        $msg_mail .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
+                        $msg_mail .= "<br/>Merci de vérifier le paiement ultérieurement.";
+                        mailSyn2("Validation par paiement comptant ou mandat SEPA", 's.reynaud@bimp.fr', "gle@bimp.fr", $msg_mail);
+                    } else {
+                        $client_facture = $this->getClientFacture();
+                        if (!$client_facture->getData('validation_financiere')) {
+                            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                            $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
+                            if ($demande)
+                                $demande->delete($warnings, 1);
+                            $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
+//                    $msg_mail = "Bonjour, <br/><br/>La commande " . $this->getNomUrl(1, true);
 //                    $msg_mail .= " a été validée financièrement par la configuration du client ";
 //                    $msg_mail .= "(utilisateur: " . ucfirst($user->firstname) . ' ' . strtoupper($user->lastname) . ")";
 //                    mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", $msg_mail);
+                        }
+                    }
+                }
+
+                // Validation retards de paiements
+                if (empty($errors)) {
+                    if (!$client_facture)
+                        $client_facture = $this->getClientFacture();
+
+                    if (!$client_facture->getData('validation_impaye')) {
+                        if (!BimpObject::objectLoaded($vc))
+                            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+
+                        $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE);
+                        if ($demande)
+                            $demande->delete($warnings, 1);
+                        $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation de retard de paiement automatique, voir configuration client)";
+                        $this->addObjectLog("Les retard de paiement ont été validée financièrement par la configuration du client.");
+                    }
                 }
             }
         }
 
-        // Validation retards de paiements
-        if (empty($errors)) {
-            if (!$client_facture)
-                $client_facture = $this->getClientFacture();
-
-            if (!$client_facture->getData('validation_impaye')) {
-                if (!BimpObject::objectLoaded($vc))
-                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-
-                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE);
-                if ($demande)
-                    $demande->delete($warnings, 1);
-                $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation de retard de paiement automatique, voir configuration client)";
-                $this->addObjectLog("Les retard de paiement  ont été validée financièrement par la configuration du client.");
-            }
-        }
         if (empty($errors)) {
             $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
             foreach ($contacts as $contact) {
@@ -4226,8 +4464,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $new_data['id_facture'] = 0;
-//        $new_data['validFin'] = 0;
-//        $new_data['validComm'] = 0;
         $new_data['date_creation'] = date('Y-m-d H:i:s');
         $new_data['date_valid'] = null;
         $new_data['date_cloture'] = null;
@@ -4488,42 +4724,51 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $commandes = array();
             foreach ($rows as $r) {
                 $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
-                $idComm = (int) $comm->getIdCommercial();
 
-                if (!$idComm) {
-                    $idComm = $comm->getIdContact('internal', 'SALESREPSIGN');
+                if (!BimpObject::objectLoaded($comm)) {
+                    continue;
                 }
 
-                if (!isset($commandes[$idComm])) {
-                    $commandes[$idComm] = array();
+                $id_user = (int) $comm->getIdCommercial();
+
+                if (!$id_user) {
+                    $id_user = $comm->getIdContact('internal', 'SALESREPSIGN');
                 }
 
-                $commandes[$idComm][] = $comm->getLink();
+                if (!isset($commandes[$id_user])) {
+                    $commandes[$id_user] = array();
+                }
+
+                $commandes[$id_user][] = $comm;
             }
 
             if (!empty($commandes)) {
-                foreach ($commandes as $id_user => $commande) {
-                    $to = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
+                foreach ($commandes as $id_user => $user_commandes) {
+                    foreach ($user_commandes as $commande) {
+                        $to = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
 
-                    if ($to) {
-                        $soc = $commande->getChildObject('client');
+//                        $to .= ($to ? ', ' : '') . 'f.martinez@bimp.fr';
 
-                        $msg = 'Bonjour,<br/>';
-                        $msg .= 'La commande ' . $commande->getLink() . ' du client ' . $soc->getLink() . ', créée le ' . $commande->displayData('date_creation', 'default', 0, 1) . ' n\'est pas facturée.<br/>';
-                        $msg .= 'Merci de la régulariser au plus vite.';
+                        if ($to) {
+                            $soc = $commande->getChildObject('client');
 
-                        $out .= ' - Mail to ' . $to . ' : ';
-                        if (mailSyn2("Commande " . $commande->getRef() . ' non facturée', $to, '', $msg)) {
-                            $out .= '[OK]';
-                            $nOk++;
-                        } else {
-                            $out .= '[ECHEC]';
-                            $nFails++;
-                        }
-                        $out .= '<br/>';
+                            $msg = 'Bonjour,<br/>';
+                            $msg .= 'La commande ' . $commande->getLink() . ' du client ' . $soc->getLink() . ', créée le ' . $commande->displayData('date_creation', 'default', 0, 1) . ' n\'est pas facturée.<br/>';
+                            $msg .= 'Merci de la régulariser au plus vite.';
 
-                        if ($nFails > 20 || $nOk > 2100) {
-                            break;
+                            $out .= ' - Mail to ' . $to . ' : ';
+                            if (mailSyn2("Commande " . $commande->getRef() . ' non facturée', $to, '', $msg)) {
+                                $out .= '[OK]';
+                                $nOk++;
+                            } else {
+                                $out .= '[ECHEC]';
+                                $nFails++;
+                            }
+                            $out .= '<br/>';
+
+                            if ($nFails > 20 || $nOk > 2100) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -4651,7 +4896,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
                                         $lines_done[] = $line->id;
 
                                         $body .= '<tr>';
-                                        $body .= '<td style="padding: 5px; width: 300px">';
+                                        $body .= '<td style="padding: 5px;
+                                            width: 300px">';
                                         $body .= $line->displayLineData('desc_light');
                                         $body .= '</td>';
 
@@ -4675,7 +4921,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
                                 $html .= '<table>';
                                 $html .= '<thead>';
                                 $html .= '<tr>';
-                                $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Description</th>';
+                                $html .= '<th style="padding: 5px;
+                                            font-weight: bold;
+                                            border-bottom: 1px solid #000; background-color: #DCDCDC">Description</th>';
                                 $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Qté</th>';
                                 $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Echéance</th>';
                                 $html .= '</tr>';

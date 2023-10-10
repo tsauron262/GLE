@@ -1136,7 +1136,7 @@ class BimpRevalorisation extends BimpObject
             $errors[] = 'Veuillez retirer ' . ($nb_eqs - (int) abs($this->getData('qty'))) . ' équipements ou n° de série (' . $nb_eqs . ' / ' . abs($this->getData('qty')) . ')';
         }
 
-        if ($this->getData('type') === 'applecare') {
+        if (in_array($this->getData('type'), array('applecare', 'fac_ac'))) {
             if (count($eqs) == (int) $this->getData('qty')) {
                 if ((int) $this->getData('status') == 20) {
                     $this->set('status', 0);

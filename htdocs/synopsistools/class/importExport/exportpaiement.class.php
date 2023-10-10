@@ -4,7 +4,6 @@ require_once (DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
 require_once (DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once (DOL_DOCUMENT_ROOT . "/categories/class/categorie.class.php");
 
-
 /*
  * Manque
  * 
@@ -15,7 +14,8 @@ require_once (DOL_DOCUMENT_ROOT . "/categories/class/categorie.class.php");
 
 require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/export8sens.class.php");
 
-class exportpaiement extends export8sens {
+class exportpaiement extends export8sens
+{
 
     public $info = array();
     public $type = "";
@@ -27,13 +27,15 @@ class exportpaiement extends export8sens {
     public $tabIgnore = array();
     private $where = " AND fk_export_compta = 0 AND f.extraparams = 2 AND pf.exported < 1 LIMIT 0,10";
 
-    public function __construct($db, $sortie = 'html') {
+    public function __construct($db, $sortie = 'html')
+    {
         $this->db = $db;
 //        $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/extractPaiGle/";
         $this->path = "/data/synchro/export/paiement/";
     }
 
-    public function exportTout() {
+    public function exportTout()
+    {
         $this->exportPaiementNormal();
         if ($this->error == "") {
             $this->output = trim($this->nbE . " facture(s) exportée(s)");
@@ -44,16 +46,21 @@ class exportpaiement extends export8sens {
         }
     }
 
-    /* private function getId8sensByCentreSav($centre) {
-      require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/centre.inc.php");
-      global $tabCentre;
-      if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
-      return $tabCentre[$centre][3];
-      mailSyn2("Impossible de trouvé un id8sens", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
-      return 0;
-      } */
+//    private function getId8sensByCentreSav($centre)
+//    {
+//        if (!defined('BIMP_LIB')) {
+//            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+//        }
+//        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//        global $tabCentre;
+//        if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
+//            return $tabCentre[$centre][3];
+//        mailSyn2("Impossible de trouvé un id8sens", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+//        return 0;
+//    }
 
-    public function exportPaiementNormal() {
+    public function exportPaiementNormal()
+    {
         $result = $this->db->query("SELECT p.*, s.nom as name, code_client, ba.label as labB, ba.account_number as compte, cp.libelle as libP, ref, codeCli8Sens, Collab8sens, pf.rowid as pfid FROM `llx_paiement` p, llx_facture f, llx_paiement_facture pf, llx_societe s, `llx_c_paiement` cp, llx_bank b, llx_bank_account ba WHERE ba.rowid = b.fk_account AND b.rowid = fk_bank AND cp.id = p.fk_paiement AND s.rowid = f.fk_soc AND pf.`fk_paiement` = p.rowid AND pf.`fk_facture` = f.rowid " . $this->where);
         $tabPaiement = $tabPfId = array();
         //$tabPaiement[] = array("JorCode" => "Code journal", "EcrRef" => "Référence", "EcrDate" => "Date", "EcrCpt" => "Compte écriture", "EcrLib" => "Libellé Ecriture", "EcrDebit" => "Débit", "EcrCredit" => "Crédit", "EcrSolde" => "Solde", "EcrLettrage" => "Lettrage/Pointage", "EcrIsMark" => "Lettrée");
@@ -61,7 +68,7 @@ class exportpaiement extends export8sens {
             $credit = str_replace(".", ",", ($ligne->amount < 0) ? 0 : $ligne->amount);
             $debit = str_replace(".", ",", ($ligne->amount < 0) ? -$ligne->amount : 0);
             $solde = -$ligne->amount;
-            $libOp = suppr_accents($ligne->name." ".$ligne->libP." Paiement " . $ligne->ref);
+            $libOp = suppr_accents($ligne->name . " " . $ligne->libP . " Paiement " . $ligne->ref);
             $tabPaiement[] = array("EcrPiece" => "", "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date(strtotime($ligne->datec), "%d/%m/%Y"), "EcrGCptCode" => $ligne->compte, /* "EcrCpt" => "remise de paiement", */ "EcrLib" => $libOp, "EcrDebit" => $credit, "EcrCredit" => $debit, /* "EcrSolde" => -$solde, */ "EcrLettrage" => "", "PcvGpriID" => "");
             $tabPaiement[] = array("EcrPiece" => $ligne->ref, "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date(strtotime($ligne->datec), "%d/%m/%Y"), "EcrGCptCode" => "411" . $ligne->codeCli8Sens, /* "EcrCpt" => "411071719-GD", */ "EcrLib" => $libOp, "EcrDebit" => $debit, "EcrCredit" => $credit, /* "EcrSolde" => $solde, */ "EcrLettrage" => $ligne->ref, "PcvGpriID" => $ligne->Collab8sens);
             $tabPfId[] = $ligne->pfid;
@@ -79,7 +86,8 @@ class exportpaiement extends export8sens {
             echo "Rien a exportée";
     }
 
-    function getTxt($tab1, $tab2) {
+    function getTxt($tab1, $tab2)
+    {
         $sortie = "";
         if (!isset($tab1[0]) || !isset($tab1[0]))
             return 0;
@@ -109,7 +117,6 @@ class exportpaiement extends export8sens {
 
         return $sortie;
     }
-
     /*   function error($msg, $idProd = 0, $idCat = 0) {
       $this->error = $msg;
       dol_syslog($msg, 3, 0, "_extract");
@@ -134,20 +141,20 @@ class exportpaiement extends export8sens {
       } */
 }
 
-function suppr_accents($str, $encoding='utf-8')
+function suppr_accents($str, $encoding = 'utf-8')
 {
     // transformer les caractères accentués en entités HTML
     $str = htmlentities($str, ENT_NOQUOTES, $encoding);
- 
+
     // remplacer les entités HTML pour avoir juste le premier caractères non accentués
     // Exemple : "&ecute;" => "e", "&Ecute;" => "E", "à" => "a" ...
     $str = preg_replace('#&([A-za-z])(?:acute|grave|cedil|circ|orn|ring|slash|th|tilde|uml);#', '\1', $str);
- 
+
     // Remplacer les ligatures tel que : , Æ ...
     // Exemple "œ" => "oe"
     $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str);
     // Supprimer tout le reste
     $str = preg_replace('#&[^;]+;#', '', $str);
- 
+
     return $str;
 }

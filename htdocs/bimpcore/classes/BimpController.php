@@ -88,9 +88,7 @@ class BimpController
             $main_controller = $this;
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Début controller');
-        }
+        BimpDebug::addDebugTime('Début controller');
 
 
         $this->module = $module;
@@ -290,7 +288,7 @@ class BimpController
                 if (stripos($msg, 'Deadlock') !== false) {
                     global $db;
                     $db = new mysqli();
-                    $db::stopAll();
+                    $db::stopAll('deadlock');
                 }
                 return false;
         }
@@ -302,7 +300,7 @@ class BimpController
                 'Ligne'   => $line,
                 'Msg'     => $msg
             ));
-            $db::stopAll();
+            $db::stopAll('handleError');
         }
 
         return true;
@@ -558,7 +556,8 @@ class BimpController
         foreach ($tabs as $tab_name => $params) {
             $this->config->setCurrentPath($section_path . '/tabs/' . $tab_name);
             $show = $this->config->getFromCurrentPath('show', 1, false, 'bool');
-            if (!$show) {
+            $hide = $this->config->getFromCurrentPath('hide', 0, false, 'bool');
+            if (!$show || $hide) {
                 if ($this->current_tab === $tab_name) {
                     $this->current_tab = 'default';
                 }
@@ -755,8 +754,8 @@ class BimpController
         $html .= BimpRender::renderIcon('far_window-restore');
         $html .= '</div>';
 
+        BimpDebug::addDebugTime('Fin affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fin affichage page');
 
             $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
 
@@ -806,8 +805,8 @@ class BimpController
 
     protected function ajaxProcess()
     {
+        BimpDebug::addDebugTime('Début affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Début affichage page');
             BimpDebug::addParamsDebug();
         }
 
@@ -841,9 +840,9 @@ class BimpController
 
                 $result['warnings'] = BimpTools::merge_array($result['warnings'], static::getAndResetAjaxWarnings());
 
+                BimpDebug::addDebugTime('Fin affichage page');
                 if (BimpDebug::isActive()) {
                     BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
-                    BimpDebug::addDebugTime('Fin affichage page');
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
@@ -890,8 +889,8 @@ class BimpController
 
         $debug_content = '';
 
+        BimpDebug::addDebugTime('Fin affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fin affichage page');
             BimpDebug::addDebug('ajax_result', 'Erreurs', '<pre>' . htmlentities(print_r($errors, 1)) . '</pre>', array('foldable' => false));
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
         }
@@ -2412,7 +2411,8 @@ class BimpController
 
     protected function ajaxProcessSaveBimpDocumentation()
     {
-        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''), BimpTools::getValue('serializedMenu', ''));
+        $menu = BimpTools::getValue('serializedMenu', '').'.0';
+        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''), $menu);
         $BimpDocumentation->saveDoc(BimpTools::getValue('name', ''), BimpTools::getValue('html', ''));
         $return = $BimpDocumentation->displayDoc('array');
         $errors = $BimpDocumentation->errors;
@@ -3267,12 +3267,12 @@ class BimpController
         $content_only = (int) BimpTools::getValue('content_only', 0);
 
         $dir = DOL_DOCUMENT_ROOT . '/bimpcore/changelogs/' . $type . '/';
-        
+
         if (!$content_only) {
             $div_id = 'BimpChangeLog_' . random_int(111111, 999999);
-            
+
             $dirs = scandir($dir, SCANDIR_SORT_DESCENDING);
-            
+
             foreach ($dirs as $d) {
                 if (in_array($d, array('.', '..'))) {
                     continue;
@@ -3306,7 +3306,7 @@ class BimpController
         $dir .= $year . '/';
         $files = scandir($dir, SCANDIR_SORT_DESCENDING);
         $logs = '';
-        
+
         foreach ($files as $entry) {
             if (is_file($dir . $entry)) {
                 $logs .= '<br/><b>Le ' . substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2) . ' : </b><br/>';
@@ -3443,6 +3443,34 @@ class BimpController
         );
     }
 
+    protected function ajaxProcessSaveBimpcoreConf()
+    {
+        $errors = array();
+
+        $module = BimpTools::getValue('module', 'bimpcore');
+        $name = BimpTools::getValue('name', '');
+        $value = BimpTools::getValue('value', null);
+
+        if (!$name) {
+            $errors[] = 'Nom de la variable de configuration absent';
+        }
+
+        if (is_null($value)) {
+            $errors[] = 'Nouvelle valeur à définir ' . ($name ? ' pour "' . $name . '"' : '') . ' absente';
+        }
+
+        if (!count($errors)) {
+            $errors = BimpCore::setConf($name, $value, $module);
+        }
+
+        return array(
+            'errors'     => $errors,
+            'warnings'   => array(),
+            'success'    => 'Enregistrement effectué avec succès',
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
     // Callbacks:
 
     protected function getObjectIdFromPost($object_name)
@@ -3464,5 +3492,8 @@ class BimpController
         $nb = BimpTools::deloqueAll($file);
         if ($nb > 0 && !$asErrorFatal)
             BimpCore::addlog('Fin de script fichier non debloqué ' . $nb . ' ' . print_r($file, 1), Bimp_Log::BIMP_LOG_ALERTE);
+        if(class_exists('BimpDebug')){
+            BimpDebug::testLogDebug();
+        }
     }
 }

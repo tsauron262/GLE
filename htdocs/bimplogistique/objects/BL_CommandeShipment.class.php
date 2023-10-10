@@ -466,52 +466,7 @@ class BL_CommandeShipment extends BimpObject
             return array();
         }
 
-        $commande = $commande->dol_object;
-
-        $contacts = array(
-            0 => 'Addresse de livraison de la commande'
-        );
-
-        if (!is_null($commande->socid) && $commande->socid) {
-            $where = '`fk_soc` = ' . (int) $commande->socid;
-            $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
-
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
-                }
-            }
-        }
-
-        BimpTools::loadDolClass('contact');
-
-        $bill_contacts = $commande->getIdContact('external', 'BILLING');
-        if (!is_null($bill_contacts) && count($bill_contacts)) {
-            foreach ($bill_contacts as $id_contact) {
-                if (!array_key_exists((int) $id_contact, $contacts)) {
-                    $contact = new Contact($this->db->db);
-                    if ($contact->fetch((int) $id_contact) > 0) {
-                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
-                    }
-                    unset($contact);
-                }
-            }
-        }
-
-        $ship_contacts = $commande->getIdContact('external', 'SHIPPING');
-        if (!is_null($ship_contacts) && count($ship_contacts)) {
-            foreach ($ship_contacts as $id_contact) {
-                if (!array_key_exists((int) $id_contact, $contacts)) {
-                    $contact = new Contact($this->db->db);
-                    if ($contact->fetch((int) $id_contact) > 0) {
-                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
-                    }
-                    unset($contact);
-                }
-            }
-        }
-
-        return $contacts;
+        return $commande->getShipmentContactsArray();
     }
 
     public function getIdClient()
@@ -540,15 +495,7 @@ class BL_CommandeShipment extends BimpObject
         if (!$id_contact) {
             $commande = $this->getParentInstance();
             if ($commande->isLoaded()) {
-                $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
-                if (isset($contacts[0]) && $contacts[0]) {
-                    $id_contact = $contacts[0];
-                } else {
-                    $contacts = $commande->dol_object->getIdContact('external', 'CUSTOMER');
-                    if (isset($contacts[0]) && $contacts[0]) {
-                        $id_contact = $contacts[0];
-                    }
-                }
+                $id_contact = $commande->getShippingIdContact();
             }
         }
 
@@ -603,7 +550,7 @@ class BL_CommandeShipment extends BimpObject
 
                             foreach ($equipments as $eq) {
                                 $numNonInteressent = array('', 'n/a');
-                                $line_qties['serials'][] = $eq['serial'].(!in_array($eq['imei'], $numNonInteressent) ? ' '.$eq['imei'] : '').(!in_array($eq['imei2'], $numNonInteressent) ? ' '.$eq['imei2'] : '');
+                                $line_qties['serials'][] = $eq['serial'] . (!in_array($eq['imei'], $numNonInteressent) ? ' ' . $eq['imei'] : '') . (!in_array($eq['imei2'], $numNonInteressent) ? ' ' . $eq['imei2'] : '');
                             }
                         }
                     } elseif (in_array($id_shipment, $prev_shipments)) {
@@ -707,7 +654,7 @@ class BL_CommandeShipment extends BimpObject
                     if ($id_comm_contact) {
                         $id_contact = $id_comm_contact;
                     }
-                }                
+                }
                 return $id_contact;
 
             case 'id_entrepot':
@@ -775,7 +722,7 @@ class BL_CommandeShipment extends BimpObject
     public function getBulkFactureClientContactsArray()
     {
         $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
-        
+
         if (!$id_client) {
             $id_client = $this->getBulkFactureValue('id_client');
         }
@@ -2089,7 +2036,7 @@ class BL_CommandeShipment extends BimpObject
 
     // Traitements: 
 
-    public function validateShipment(&$warnings = array(), $date_shipped = null, $pdf_chiffre = 1, $pdf_detail = 1, $create_signature = 1)
+    public function validateShipment(&$warnings = array(), $date_shipped = null, $pdf_chiffre = 1, $pdf_detail = 1, $create_signature = 1, $auto_reserve_units = 0)
     {
         $errors = array();
 
@@ -2132,14 +2079,14 @@ class BL_CommandeShipment extends BimpObject
             if ((float) $data['qty']) {
                 $line_errors = array();
 
-                if (!$line->isReadyToShip($this->id, $line_errors)) {
+                if (!$line->isReadyToShip($this->id, $line_errors, $auto_reserve_units)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
                 } else {
                     $lines[] = $line;
                 }
             }
         }
-
+        
         if (count($errors)) {
             return $errors;
         }
@@ -2950,7 +2897,6 @@ class BL_CommandeShipment extends BimpObject
             $filePath = $this->getSignatureDocFileDir('bl') . $this->getSignatureDocFileName('bl');
 
             if (!file_exists($filePath)) {
-                echo 'ici';
                 $overwrite = 1;
             }
         }

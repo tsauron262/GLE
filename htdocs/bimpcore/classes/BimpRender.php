@@ -1026,16 +1026,16 @@ class BimpRender
 
             $html .= '<div class="array_content_container' . (($foldable && $title) ? ' foldable ' . ($open ? 'open' : 'closed') : '') . '">';
 
+            if ($title) {
+                $html .= '<div class="array_content_caption">';
+                $html .= '<span class="title">' . $title . '</span>';
+                $html .= '</div>';
+            }
+
             if ($foldable && $title) {
                 $html .= '<div class="folding_buttons">';
                 $html .= '<span class="open_all">' . BimpRender::renderIcon('fas_plus', 'iconLeft') . 'tout déplier</span>';
                 $html .= '<span class="close_all">' . BimpRender::renderIcon('fas_minus', 'iconLeft') . 'tout replier</span>';
-                $html .= '</div>';
-            }
-
-            if ($title) {
-                $html .= '<div class="array_content_caption">';
-                $html .= '<span class="title">' . $title . '</span>';
                 $html .= '</div>';
             }
 

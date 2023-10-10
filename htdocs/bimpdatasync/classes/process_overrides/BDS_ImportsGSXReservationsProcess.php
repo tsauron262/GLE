@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php';
-require_once DOL_DOCUMENT_ROOT . "/bimpsupport/centre.inc.php";
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 {
@@ -764,10 +764,10 @@ Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, nou
 
                 $url = '';
                 if ($shipTo) {
-                    $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+                    $url = BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S'));
 
                     if ($url) {
-                        $url .= '?fc=savForm&resgsx=' . $resId . '&ac=' . $ac->id . '&centre_id=' . $shipTo;
+                        $url .= 'fc=savForm&resgsx=' . $resId . '&ac=' . $ac->id . '&centre_id=' . $shipTo;
                         $messageClient .= "<b>Afin de faciliter votre prise en charge, merci de compléter vos informations sur notre site bimp.fr";
                         $messageClient .= ' en cliquant <a href="' . $url . '">sur ce lien</a></b>' . "\n\n";
                         $messageClient .= "Nous souhaitons également attirer votre attention sur les points suivants :\n";

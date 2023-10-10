@@ -101,7 +101,7 @@ class Bimp_Vente extends BimpObject
             return $html;
         }
 
-        return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+        return BimpRender::renderAlerts('(789) ID ' . $this->getLabel('of_the') . ' absent');
     }
 
     // Affichage:
@@ -150,29 +150,36 @@ class Bimp_Vente extends BimpObject
         set_time_limit(600000);
         ignore_user_abort(0);
 
-        $id_category = (int) BimpCore::getConf('id_categorie_apple');
+//        $id_category = (int) BimpCore::getConf('id_categorie_apple');
+//
+//        $id_category = 1;
 
-        $id_category = 1;
-
-        if (!$id_category) {
-            $errors[] = 'ID de la catégorie "APPLE" non configurée';
-            return array(
-                'filename' => '',
-                'html'     => ''
-            );
-        }
+//        if (!$id_category) {
+//            $errors[] = 'ID de la catégorie "APPLE" non configurée';
+//            return array(
+//                'filename' => '',   
+//                'html'     => ''
+//            );
+//        }
 
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
+//        $products_list = $product->getList(array(
+//            'ef.collection' => (int) $id_category
+//                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array(
+//            'ef' => array(
+//                'alias' => 'ef',
+//                'table' => 'product_extrafields',
+//                'on'    => 'a.rowid = ef.fk_object'
+//            )
+//        ));
+        
         $products_list = $product->getList(array(
-            'ef.collection' => (int) $id_category
-                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array(
-            'ef' => array(
-                'alias' => 'ef',
-                'table' => 'product_extrafields',
-                'on'    => 'a.rowid = ef.fk_object'
-            )
-        ));
+            'ref'     => array(
+                                    'operator' => 'like',
+                                    'value'    => 'app-%'
+                                )
+                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array());
 
         BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
         $entrepots = BimpCache::getEntrepotsShipTos(true);
@@ -431,26 +438,32 @@ Preferred Field
                             }
                             if (isset($prod['factures']) && !empty($prod['factures'])) {
                                 foreach ($prod['factures'] as $id_fac => $fac_lines) {
-                                    $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
-                                    $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'ref', 'datef'), 'array');
+                                    $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'ref', 'datef', 'id_client_final'), 'array');
 
                                     if (is_null($fac_data)) {
                                         continue;
                                     }
 
-                                    $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
+                                    $id_client = (int) ((int) $fac_data['id_client_final'] ? $fac_data['id_client_final'] : $fac_data['fk_soc']);
+
+                                    $soc_data = $this->db->getRow('societe', 'rowid = ' . $id_client, array('fk_typent', 'type_educ', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
                                     $soc_data['zip'] = substr($soc_data['zip'], 0, 5);
-                                    
-                                    if ($secteur == 'E' || in_array((int) $fac_data['fk_soc'], array(527782, 8786))) {
-                                        $customer_code = '1R';
-                                        //                                } elseif ($secteur == 'BP') {
-                                        //                                    $customer_code = 'BB';
+
+                                    $is_educ = false;
+                                    if ($soc_data['type_educ']) {
+                                        $is_educ = true;
+                                        $customer_code = $soc_data['type_educ'];
                                     } else {
-                                        $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
-                                        if (!$id_soc_type) {
-                                            $customer_code = 'EN';
+                                        $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
+                                        if ($secteur == 'BP') {
+                                            $customer_code = 'BB';
                                         } else {
-                                            $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
+                                            $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
+                                            if (!$id_soc_type) {
+                                                $customer_code = 'EN';
+                                            } else {
+                                                $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
+                                            }
                                         }
                                     }
 
@@ -467,7 +480,6 @@ Preferred Field
                                     $dt_fac = new DateTime($fac_data['datef']);
 
                                     foreach ($fac_lines as $id_line => $line_data) {
-//                                        print_r($line_data);die;
                                         $file_str .= '"' . implode('";"', array(
                                                     $shipTo, // A
                                                     substr($prod_ref, 0, 15), // B
@@ -477,17 +489,17 @@ Preferred Field
                                                     ($line_data['qty'] < 0 ? abs($line_data['qty']) : 0), // F
                                                     '',
                                                     $line_data['subprice'],
-                                                    $id_fac, // I
+                                                    $fac_data['ref'], // I
                                                     $line_data['position'], // J
                                                     $dt_fac->format('Ymd'),
                                                     '',
-                                                    ($customer_code == '1R' ? str_replace('"', '', $soc_data['nom']) : ($customer_code != 'EN' ? 'XXX' : '')), // M
-                                                    ($customer_code == '1R' ? str_replace(array('"', "
+                                                    ($is_educ ? str_replace('"', '', substr($soc_data['nom'], 0, 70)) : (!in_array($customer_code, array('EN', 'E4')) ? 'XXX' : '')), // M
+                                                    ($is_educ ? str_replace(array('"', "
 ", '
-', "\n", "\r", 'Hotel'), '', $soc_data['address']) : ($customer_code != 'EN' ? 'XXX' : '')), // N
-                                                    ($customer_code == '1R' ? str_replace('"', '', substr($soc_data['town'], 0, 19)) : ($customer_code != 'EN' ? 'XXX' : '')), // O
+', "\n", "\r", 'Hotel'), '', substr($soc_data['address'], 0, 70)) : ($customer_code != 'EN' ? 'XXX' : '')), // N
+                                                    ($is_educ ? str_replace('"', '', substr($soc_data['town'], 0, 19)) : (!in_array($customer_code, array('EN', 'E4')) ? 'XXX' : '')), // O
                                                     '',
-                                                    ($customer_code == '1R' ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q
+                                                    ($is_educ ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q
                                                     $country_code, // R
                                                     $customer_code // S
                                                 )) . '"' . "\n";

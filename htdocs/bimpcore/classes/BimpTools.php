@@ -18,6 +18,7 @@ class BimpTools
             'no_html' => '$'
         )
     );
+    public static $sql_operators = array('>', '<', '>=', '<=', '!=');
     public static $bloquages = array();
 
     // Gestion GET / POST
@@ -237,6 +238,8 @@ class BimpTools
                 }
             }
         }
+
+        return (count($errors) ? false : true);
     }
 
     public static function cleanTempFiles()
@@ -501,15 +504,14 @@ class BimpTools
 
         if (BimpObject::objectLoaded($dol_object)) {
             if (is_null($bdb)) {
-                global $db;
-                $bdb = new BimpDb($db);
+                $bdb = BimpCache::getBdb();
             }
 
             $where = '(`fk_source` = ' . (int) $dol_object->id . ' AND `sourcetype` = \'' . $dol_object->element . '\')';
             $where .= ' OR (`fk_target` = ' . (int) $dol_object->id . ' AND `targettype` = \'' . $dol_object->element . '\')';
-            
+
             $rows = $bdb->getRows('element_element', $where, null, 'array');
-            
+
             if (!is_null($rows) && count($rows)) {
                 foreach ($rows as $r) {
                     if ((int) $r['fk_source'] === (int) $dol_object->id &&
@@ -517,7 +519,7 @@ class BimpTools
                         if (!empty($type_filters) && !in_array($r['targettype'], $type_filters)) {
                             continue;
                         }
-                        
+
                         $list[] = array(
                             'id_object' => (int) $r['fk_target'],
                             'type'      => $r['targettype']
@@ -527,7 +529,7 @@ class BimpTools
                         if (!empty($type_filters) && !in_array($r['sourcetype'], $type_filters)) {
                             continue;
                         }
-                        
+
                         $list[] = array(
                             'id_object' => (int) $r['fk_source'],
                             'type'      => $r['sourcetype']
@@ -884,7 +886,7 @@ class BimpTools
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
 
-    public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
+    public static function getNextRef($table, $field, $prefix = '', $numCaractere = null, &$errors = array())
     {
 
         $prefix = str_replace("{AA}", date('y'), $prefix);
@@ -916,9 +918,9 @@ class BimpTools
 
         if ($numCaractere > 0) {
             $diff = $numCaractere - strlen($num);
-            if ($diff < 0)
-                die("impossible trop de caractére BimpTools::GetNextRef");
-            else {
+            if ($diff < 0) {
+                $errors[] = 'Trop de caractéres pour l\'obtention d\'une nouvelle ref';
+            } else {
                 for ($i = 0; $i < $diff; $i++) {
                     $num = "0" . $num;
                 }
@@ -1169,8 +1171,6 @@ class BimpTools
 
     public static function removeAllFilesRecursively($dir, $remove_dir = false)
     {
-        ini_set('display_errors', 1);
-
         if (is_dir($dir)) {
             if (!preg_match('/^.+\/$/', $dir)) {
                 $dir .= '/';
@@ -1691,6 +1691,20 @@ class BimpTools
         return $sql;
     }
 
+    public static function addSqlFilterEntity(&$filters, $object, $alias = '', $entity_field = 'entity')
+    {
+        if (self::isModuleDoliActif('MULTICOMPANY') && is_a($object, 'BimpObject')) {
+            $entity_name = $object->getEntity_name();
+            if ($entity_name) {
+                if (is_string($filters)) {
+                    $filters .= ($filters ? ' AND ' : '') . ($alias ? $alias . '.' : '') . $entity_field . ' IN (' . getEntity($entity_name) . '';
+                } elseif (is_array($filters)) {
+                    $filters[($alias ? $alias . '.' : '') . $entity_field] = getEntity($entity_name);
+                }
+            }
+        }
+    }
+
     // Gestion de données:
 
     public static function checkValueByType($type, &$value, &$errors = array())
@@ -2154,7 +2168,7 @@ class BimpTools
 
         return $day;
     }
-    
+
     public static function isDateRangeValid($date_start, $date_end, &$errors = array())
     {
         if (!$date_start) {
@@ -2168,7 +2182,7 @@ class BimpTools
         if ($date_end < $date_start) {
             $errors[] = 'Date de fin inférieure à la date de début';
         }
-        
+
         return (count($errors) ? 0 : 1);
     }
 
@@ -2224,11 +2238,6 @@ class BimpTools
         return BimpCache::getTaxes($id_country);
     }
 
-    public static function getDefaultTva($id_country = null)
-    {
-        return 20;
-    }
-
     public static function getTaxeRateById($id_tax)
     {
         $taxes = BimpCache::getTaxes();
@@ -2247,7 +2256,8 @@ class BimpTools
         }
 
         if ($return_default) {
-            return self::getDefaultTva($id_country);
+            return BimpCache::cacheServeurFunction('getDefaultTva');
+            ;
         }
 
         return 0;
@@ -2728,7 +2738,7 @@ class BimpTools
             $value_str = number_format($float_number, 8);
 
             if ($value_str) {
-                if (preg_match('/^(\d+)\.(\d+)0*$/U', $value_str, $matches)) {
+                if (preg_match('/^(\d+)\.(\d*)0*$/U', $value_str, $matches)) {
                     return strlen($matches[2]);
                 }
             }
@@ -2883,7 +2893,7 @@ class BimpTools
         return $html;
     }
 
-    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true)
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true, $no_zeros_decimals = false)
     {
         // $decimals: indiquer 'full' pour afficher toutes les décimales. 
 
@@ -2916,6 +2926,11 @@ class BimpTools
         // Ajustement du nombre de décimales:
         if ($decimals === 'full') {
             $decimals = (int) self::getDecimalesNumber($value);
+        } elseif ($no_zeros_decimals) {
+            $true_decimals = (int) self::getDecimalesNumber(round($value, $decimals));
+            if ($true_decimals < $decimals) {
+                $decimals = $true_decimals;
+            }
         }
 
         // Arrondi: 
@@ -3257,6 +3272,53 @@ class BimpTools
         return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=logos/' . $file;
     }
 
+    public static function verifCond($s)
+    {
+        // Adapté de dol_eval() : nécessaire pour contourner cetaines restrictions. 
+
+        $errors = array();
+
+        if (preg_match('/[^a-z0-9\s' . preg_quote('^$_+-.*>&|=!?():"\',/@', '/') . ']/i', $s)) {
+            $errors[] = 'Caractères interdits';
+        }
+        if (strpos($s, '`') !== false) {
+            $errors[] = '` interdit';
+        }
+        if (preg_match('/[^0-9]+\.[^0-9]+/', $s)) {
+            $errors[] = 'Point interdit';
+        }
+
+        $forbiddenphpstrings = array('$$');
+        $forbiddenphpstrings = array_merge($forbiddenphpstrings, array('_ENV', '_SESSION', '_COOKIE', '_GET', '_POST', '_REQUEST'));
+
+        $forbiddenphpfunctions = array("exec", "passthru", "shell_exec", "system", "proc_open", "popen", "eval", "dol_eval", "executeCLI", "verifCond", "base64_decode");
+        $forbiddenphpfunctions = array_merge($forbiddenphpfunctions, array("fopen", "file_put_contents", "fputs", "fputscsv", "fwrite", "fpassthru", "require", "include", "mkdir", "rmdir", "symlink", "touch", "unlink", "umask"));
+        $forbiddenphpfunctions = array_merge($forbiddenphpfunctions, array("function", "call_user_func"));
+
+        $forbiddenphpregex = 'global\s+\$|\b(' . implode('|', $forbiddenphpfunctions) . ')\b';
+
+        do {
+            $oldstringtoclean = $s;
+            $s = str_ireplace($forbiddenphpstrings, '__forbiddenstring__', $s);
+            $s = preg_replace('/' . $forbiddenphpregex . '/i', '__forbiddenstring__', $s);
+        } while ($oldstringtoclean != $s);
+
+        if (strpos($s, '__forbiddenstring__') !== false) {
+            $errors[] = 'Présence d\'une chaîne interdite';
+        }
+
+        if (count($errors)) {
+            BimpCore::addlog('Erreur condition', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                'Chaîne'  => $s,
+                'Erreurs' => $errors
+            ));
+            return 0;
+        }
+
+        global $user, $conf;
+        return eval('return ' . $s . ';');
+    }
+
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
@@ -3382,6 +3444,21 @@ class BimpTools
         return str_pad(dechex($rgb * 255), 2, '0', STR_PAD_LEFT);
     }
 
+    public static function hex2rgb($hex)
+    {
+        $hex = str_replace("#", "", $hex);
+        if (strlen($hex) == 3) {
+            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+        return array($r, $g, $b);
+    }
+
     // Debug: 
 
     public static function getBacktraceArray($backtrace)
@@ -3474,10 +3551,16 @@ class BimpTools
 
     public static function lockNum($type, $nb = 0, $errors = array())
     {
-        global $user, $langs;
-        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
-            return;
+        if (!(int) BimpCore::getConf('use_lock_num', null, 'bimpcommercial')) {
+            return 1;
         }
+
+//        return 1; //test 
+        global $user, $langs;
+        //il faut débuggé, si ca pose probléme c'est grave
+//        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
+//            return;
+//        }
 
         if (in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
             return true;
@@ -3619,7 +3702,7 @@ class BimpTools
                     'File' => $fichierBloquant
                 ));
                 global $db;
-                $db::stopAll();
+                $db::stopAll('sleppIfBloqued');
                 return 0;
             }
         } else
@@ -3632,7 +3715,7 @@ class BimpTools
         if (BimpObject::objectLoaded($user)) {
             return $user->getEmailOrSuperiorEmail($allow_default);
         }
-        
+
         if ($allow_default) {
             return (string) BimpCore::getConf('default_user_email', null);
         }
@@ -3692,22 +3775,32 @@ class BimpTools
     public static function isModuleDoliActif($module)
     {
         global $conf;
+
         if (stripos($module, 'MAIN_MODULE_') === false)
             $module = 'MAIN_MODULE_' . $module;
+
         if (isset($conf->global->$module) && $conf->global->$module)
             return 1;
+
         return 0;
     }
 
-    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14'))
+    public static function sendSmsAdmin($text, $tels = array('0628335081', '0686691814'))
     {
         $errors = array();
-        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-        foreach ($tels as $tel) {
-            $tel = traiteNumMobile($tel);
-            $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
-            if (!$smsfile->sendfile()) {
-                $errors[] = 'Echec de l\'envoi du sms';
+
+        global $conf;
+
+        if (!empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
+            $errors[] = 'Envoi des SMS désactivé pour le moment';
+        } else {
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+            foreach ($tels as $tel) {
+                $tel = traiteNumMobile($tel);
+                $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
+                if (!$smsfile->sendfile()) {
+                    $errors[] = 'Echec de l\'envoi du sms';
+                }
             }
         }
 
@@ -3720,12 +3813,19 @@ class BimpTools
         if ($modeCSV) {
             return $data;
         } else {
-            $return = '<span class=" bs-popover"';
-            $return .= BimpRender::renderPopoverData($data, 'top', true);
-            $return .= '>';
-            $return .= substr($data, 0, $lenght) . '...';
-            $return .= '</span>';
-            return $return;
+            $data = preg_replace('`[<br />]*$`', '', $data);
+            $data = preg_replace('`[<br>]*$`', '', $data);
+            $data = preg_replace('`[<br/>]*$`', '', $data);
+            if(strlen($data) > $lenght){
+                $return = '<span class=" bs-popover"';
+                $return .= BimpRender::renderPopoverData($data, 'top', true);
+                $return .= '>';
+                $return .= substr(strip_tags($data), 0, $lenght) . '...';
+                $return .= '</span>';
+                return $return;
+            }
+            else
+                return $data;
         }
     }
 }

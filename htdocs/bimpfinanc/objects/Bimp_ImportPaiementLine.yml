@@ -161,6 +161,8 @@ lists:
         filters_panel: default
         extra_btn: 
             callback: getListExtraButtons
+        bulk_actions:
+            callback: getListsBulkActions
         update_btn: 1
         sort_field: id
         sort_way: asc

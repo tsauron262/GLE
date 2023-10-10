@@ -81,8 +81,8 @@ class BC_Display extends BimpComponent
             'values'    => array('data_type' => 'array'),
             'value'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Afficher l\'identifiant'),
             'icon'      => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher l\'icône'),
-            'icon_only' => array('data_type' => 'bool', 'default' => 0),
-            'label'     => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher l\'intitulé'),
+            'icon_only' => array('data_type' => 'bool'),
+            'display_label'     => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher l\'intitulé'),
             'color'     => array('data_type' => 'bool', 'default' => 1, 'label' => 'Couleur')
         ),
         'int'         => array(
@@ -829,7 +829,7 @@ class BC_Display extends BimpComponent
                             $data = $array[$this->value];
 
                             if ($this->no_html) {
-                                if (isset($data['label'])) {
+                                if (isset($data['display_label'])) {
                                     $html .= $data['label'];
                                     $check = true;
                                 }
@@ -840,8 +840,8 @@ class BC_Display extends BimpComponent
 
                                 $icon_only = (int) $this->getParam('icon_only', ($this->name === 'icon' ? 1 : 0));
                                 $display_icon = (isset($data['icon']) ? (int) $this->getParam('icon', 1) : 0);
-                                $display_value = (int) $this->getParam('value', 0);
-                                $display_label = (int) $this->getParam('label', 1);
+                                $display_value = (int) !$icon_only && $this->getParam('value', 0);
+                                $display_label = (int) !$icon_only && $this->getParam('display_label', 1);
                                 $color = (isset($data['classes']) ? (int) $this->getParam('color', 1) : 0);
 
                                 if (($icon_only || ($display_icon && !$display_label)) && isset($data['icon'])) {

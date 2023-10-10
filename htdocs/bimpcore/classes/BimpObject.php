@@ -401,7 +401,7 @@ class BimpObject extends BimpCache
     }
     
     protected function addEntityFieldConfig(){
-        if ($this->getEntity_name()){
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY') && $this->getEntity_name()){
             $this->config->addParams('fields', array(
                     'entity' => array(
                         'label'    => 'Entité',

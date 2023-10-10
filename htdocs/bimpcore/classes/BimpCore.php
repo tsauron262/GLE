@@ -807,6 +807,10 @@ class BimpCore
         }
 
         $errors = array();
+        
+        if($value == "++"){
+            $value = BimpCore::getConf($name, 0, $module)+1;
+        }
 
         $current_val = (isset(self::$conf_cache[$module][$name]) ? self::$conf_cache[$module][$name] : null);
 

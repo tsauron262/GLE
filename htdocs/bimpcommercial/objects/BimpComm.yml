@@ -116,8 +116,8 @@ fields:
             array: status_list
         displays: 
             icon: 
-                icon_only: 1
-                label: Statut
+                type: array_value
+                label: Icône
     fk_soc: 
         label: Client
         dol_prop: socid

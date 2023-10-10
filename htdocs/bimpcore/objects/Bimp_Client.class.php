@@ -2995,7 +2995,7 @@ class Bimp_Client extends Bimp_Societe
         return $errors;
     }
     
-    public static function updateAtradiusValueForClient($field, $value, &$errors, &$warnings){
+    public function updateAtradiusValueForClient($field, $value, &$errors, &$warnings){
         if ($field == 'date_atradius') {
             $errors = BimpTools::merge_array($errors, $this->updateField($field, $value));
         } else {

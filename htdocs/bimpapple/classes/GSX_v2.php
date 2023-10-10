@@ -676,7 +676,7 @@ class GSX_v2 extends GSX_Const
             $params['coverageOption'] = $coverageOption;
         }
 
-        if ($consumerLaw) {
+        if ($consumerLaw && $this->getVersion() < 5) {
             $params['consumerLaw'] = $consumerLaw;
         }
 

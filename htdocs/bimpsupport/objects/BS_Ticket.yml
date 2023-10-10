@@ -245,7 +245,8 @@ fields:
             array: priorities
         displays: 
             icon:
-                icon_only: 1
+                label: Icône
+                type: array_value
     impact:
         label: Impact
         type: int
@@ -254,7 +255,8 @@ fields:
         default_value: 1
         displays: 
             icon:
-                icon_only: 1    
+                label: Icône
+                type: array_value
     impact_demande_client:
         label: Impact lors de la demande client
         type: int

@@ -3021,7 +3021,7 @@ class Bimp_Client extends Bimp_Societe
         $siren = $clientBase->getData('siren');
         
         if($siren == '' || strlen($siren) < 5){//on mais a jour que ce client
-            $clientBase->updateAtradiusValueForClient($field, $value);
+            $clientBase->updateAtradiusValueForClient($field, $value, $errors, $warnings);
         }
         else{
             $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
@@ -3029,7 +3029,7 @@ class Bimp_Client extends Bimp_Societe
             foreach ($clients as $c) {
                 if ($c->field_exists($field)) {
                     if ($c->getInitData($field) != $value) {
-                        $c->updateAtradiusValueForClient($field, $value);
+                        $c->updateAtradiusValueForClient($field, $value, $errors, $warnings);
                     }
                 }
             }

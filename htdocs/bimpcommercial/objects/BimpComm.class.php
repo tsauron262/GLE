@@ -3264,7 +3264,7 @@ class BimpComm extends BimpDolObject
         if (!$id_mode_paiement) {
             $id_mode_paiement = (int) $this->getData('fk_mode_reglement');
         }
-        
+
         $type_paiement = '';
         if (preg_match('/^[0-9]+$/', $id_mode_paiement)) {
             $id_mode_paiement = (int) $id_mode_paiement;
@@ -4030,11 +4030,12 @@ class BimpComm extends BimpDolObject
 
                 $marge = $margins['total_margin'];
 
-                if ($marge != (float) $this->getData('marge')) {
+                if ((float) $marge !== (float) $this->getData('marge')) {
+                    $old_marge = (float) $this->getData('marge');
                     $errors = $this->updateField('marge', $marge);
 
                     if (!count($errors)) {
-                        $success = 'Marge mise à jour: ' . $marge;
+                        $success = 'Marge mise à jour. (Ancienne : ' . $old_marge . ' - Nouvelle : ' . $marge . ')';
                     }
                 }
             }

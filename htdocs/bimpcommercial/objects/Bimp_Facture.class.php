@@ -343,7 +343,7 @@ class Bimp_Facture extends BimpComm
         if ($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == '') {
             $errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
         }
-        
+
         if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
             $client = $this->getChildObject('client_final');
         }
@@ -1054,7 +1054,7 @@ class Bimp_Facture extends BimpComm
         }
 
         // Confirmation Chorus:
-        if(BimpCore::isModuleActive('bimpapi')){
+        if (BimpCore::isModuleActive('bimpapi')) {
             if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
                 $buttons[] = array(
                     'label'   => 'Valider export Chorus',
@@ -1478,7 +1478,7 @@ class Bimp_Facture extends BimpComm
 //                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'generateBulkPdf\', {}, null, null)'
             );
             global $user;
-            if($user->admin){
+            if ($user->admin) {
                 $actions[] = array(
                     'label'   => 'Valider',
                     'icon'    => 'check',
@@ -5043,13 +5043,17 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public function checkMargin($recalculate_revals = false, $check_base_marge = true)//todo pourquoi $check_base_marge = false
+    public function checkMargin($recalculate_revals = false, $check_base_marge = true, &$infos = array())
     {
         $errors = array();
 
         if ($this->isLoaded()) {
             if ($check_base_marge) {
-                $errors = $this->checkMarge();
+                $success = '';
+                $errors = $this->checkMarge($success);
+                if ($success) {
+                    $infos[] = $success;
+                }
             }
 
             if (!count($errors)) {
@@ -5058,11 +5062,14 @@ class Bimp_Facture extends BimpComm
 
                 $marge_finale = $margin + (float) $revals['accepted'];
 
-                if ($marge_finale != (float) $this->getData('marge_finale_ok')) {
+                if ((float) $marge_finale !== (float) $this->getData('marge_finale_ok')) {
+                    $old_marge = (float) $this->getData('marge_finale_ok');
                     $up_errors = $this->updateField('marge_finale_ok', $marge_finale);
 
                     if (count($up_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du champ "Marge + reval OK"');
+                    } else {
+                        $infos[] = 'Marge + reval OK corrigée (Ancienne : ' . $old_marge . ' - Nouvelle : ' . $marge_finale . ')';
                     }
                 }
             }
@@ -5994,7 +6001,6 @@ class Bimp_Facture extends BimpComm
             'warnings' => $warnings
         );
     }
-    
 
     public function actionExportToChorus($data, &$success)
     {
@@ -6745,14 +6751,13 @@ class Bimp_Facture extends BimpComm
                     }
 
                     $factures[$id_user][] = $facture->getLink();
-                }
-                else
-                    echo 'oups fact inc '.$r['rowid'];
+                } else
+                    echo 'oups fact inc ' . $r['rowid'];
             }
         }
 
         $i = 0;
-        
+
         if (!empty($factures)) {
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 

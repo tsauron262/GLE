@@ -243,7 +243,8 @@ class BimpModuleConf
             foreach ($params as $name => $param_defs) {
                 $type = BimpTools::getArrayValueFromPath($param_defs, 'type', 'string');
                 $required = BimpTools::getArrayValueFromPath($param_defs, 'required', 0);
-                $value = BimpCore::getConf($name, null, $module);
+                $source = '';
+                $value = BimpCore::getConf($name, null, $module, $source);
 
                 if (is_null($value)) {
                     $value = BimpTools::getArrayValueFromPath($param_defs, 'def');
@@ -299,6 +300,9 @@ class BimpModuleConf
                 if ($warning) {
                     $html .= BimpRender::renderAlerts($warning, 'warning');
                 }
+                $html .= '</td>';
+                $html .= '<td>';
+                $html .= $source;
                 $html .= '</td>';
                 $html .= '</tr>';
 

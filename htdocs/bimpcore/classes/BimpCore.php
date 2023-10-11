@@ -704,7 +704,7 @@ class BimpCore
                 $bdb->update('bimpcore_conf', array(
                     'value' => json_encode($versions)
                         ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
-                self::$conf_cache['bimpcore']['bimpcore_version'] = json_encode($versions);
+                self::$conf_cache[0]['bimpcore']['bimpcore_version'] = json_encode($versions);
             }
         }
 
@@ -743,19 +743,17 @@ class BimpCore
                 if (!$module) {
                     $module = 'bimpcore';
                 }
-
-                if (!isset(self::$conf_cache[$module])) {
-                    self::$conf_cache[$module] = array();
-                }
-
-                self::$conf_cache[$module][$r->name] = $r->value;
+                if(isset($r->entity))
+                    self::$conf_cache[$r->entity][$module][$r->name] = $r->value;
+                else
+                    self::$conf_cache[0][$module][$r->name] = $r->value;
             }
         }
 
         return self::$conf_cache;
     }
 
-    public static function getConf($name, $default = null, $module = 'bimpcore')
+    public static function getConf($name, $default = null, $module = 'bimpcore', &$source = '')
     {
         // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
         // passée en argument de la fonction. 
@@ -769,10 +767,18 @@ class BimpCore
         }
 
         $cache = self::getConfCache();
+        
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+            $entity = getEntity('bimp_conf', 0);
+            if (isset($cache[$entity][$module][$name])) {
+                $source = 'entity'.$entity;
+                return $cache[$entity][$module][$name];
+            }
+        }
 
-        if (isset($cache[$module][$name])) {
-//            echo '<br/>OK: ' . $name . ': ' . $cache[$module][$name];
-            return $cache[$module][$name];
+        if (isset($cache[0][$module][$name])) {
+            $source = 'entityPartager';
+            return $cache[0][$module][$name];
         }
 //        else {
 //            echo '<br/>FAIL: ' . $name;
@@ -794,13 +800,14 @@ class BimpCore
         }
 
         if (!isset(self::$conf_cache_def_values[$module][$name])) {
+            $source = 'valDef';
             self::$conf_cache_def_values[$module][$name] = BimpModuleConf::getParamDefaultValue($name, $module, true);
         }
 
         return self::$conf_cache_def_values[$module][$name];
     }
 
-    public static function setConf($name, $value, $module = 'bimpcore')
+    public static function setConf($name, $value, $module = 'bimpcore', $entity = -1)
     {
         if (!$module) {
             $module = 'bimpcore';
@@ -811,8 +818,11 @@ class BimpCore
         if($value == "++"){
             $value = BimpCore::getConf($name, 0, $module)+1;
         }
-
-        $current_val = (isset(self::$conf_cache[$module][$name]) ? self::$conf_cache[$module][$name] : null);
+        
+        if($entity == -1)
+            $entity = (BimpTools::isModuleDoliActif('MULTICOMPANY') && isset(self::$conf_cache[getEntity('bimp_conf', 0)][$module][$name]))? getEntity('bimp_conf', 0) : 0;
+        
+        $current_val = (isset(self::$conf_cache[$entity][$module][$name]) ? self::$conf_cache[0][$module][$name] : null);
 
         $bdb = BimpCache::getBdb();
 
@@ -820,14 +830,15 @@ class BimpCore
             if ($bdb->insert('bimpcore_conf', array(
                         'name'   => $name,
                         'value'  => $value,
-                        'module' => $module
+                        'module' => $module,
+                        'entity' => $entity
                     )) <= 0) {
                 $errors[] = 'Echec de l\'insertion du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
             }
         } else {
             if ($bdb->update('bimpcore_conf', array(
                         'value' => $value
-                            ), '`name` = \'' . $name . '\' AND `module` = \'' . $module . '\'') <= 0) {
+                            ), '`name` = \'' . $name . '\' AND `module` = \'' . $module . '\' AND entity = '.$entity) <= 0) {
                 $errors[] = 'Echec de la mise à jour du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
             }
         }

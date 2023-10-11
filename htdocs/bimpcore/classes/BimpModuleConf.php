@@ -21,6 +21,7 @@ class BimpModuleConf
         'required' => array('label' => 'Obligatoire (en base)', 'default' => 0)
     );
     public $full_params = null;
+    protected static $entities = array();
 
     public static function getInstance($module)
     {
@@ -125,7 +126,56 @@ class BimpModuleConf
         return $full_params;
     }
 
-    public function renderFormHtml()
+    public function getParamDefs($param_name)
+    {
+        return $this->config->getCompiledParams('params/' . $param_name);
+    }
+
+    public static function getEntities($entity_type)
+    {
+        if (!isset(self::$entities[$entity_type])) {
+            self::$entities[$entity_type] = array();
+
+            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                switch ($entity_type) {
+                    case 'current':
+                        if (BimpCore::isModeDev()) {
+                            self::$entities[$entity_type][1] = 'Entité 1';
+                        } else {
+                            $entity = getEntity('bimp_conf', 0);
+                            if ($entity) {
+                                self::$entities[$entity_type][$entity] = 'Courante'; // todo: remplacer par nom
+                            } else {
+                                return BimpRender::renderAlerts('Aucune entité courante');
+                            }
+                        }
+
+                        break;
+
+                    case 'global':
+                        self::$entities[$entity_type][$entity] = 'Globale';
+                        break;
+
+                    case 'all':
+                    default:
+                        if (BimpCore::isModeDev()) {
+                            self::$entities[$entity_type][0] = 'Globale';
+                            self::$entities[$entity_type][1] = 'Entité 1';
+                            self::$entities[$entity_type][2] = 'Entité 2';
+                        } else {
+                            self::$entities[$entity_type] = BimpCache::getEntitiesCacheArray(true, 'Globale');
+                        }
+                        break;
+                }
+            } else {
+                self::$entities[$entity_type][0] = '';
+            }
+        }
+
+        return self::$entities[$entity_type];
+    }
+
+    public function renderFormHtml($entity_type = 'all')
     {
         $html = '';
 
@@ -200,7 +250,7 @@ class BimpModuleConf
                     }
 
                     $content .= '<div class="category_params_container">';
-                    $content .= self::renderParamsTable($this->module, $categ_params, $n_errors);
+                    $content .= self::renderParamsTable($this->module, $categ_params, $n_errors, $entity_type);
                     $content .= '</div>';
 
                     $title = ($categ_name ? BimpTools::getArrayValueFromPath($categories, $categ_name . '/label', $categ_name) : 'Paramètres principaux');
@@ -230,7 +280,7 @@ class BimpModuleConf
 
     // Méthodes statiques: 
 
-    public static function renderParamsTable($module, $params, &$n_errors = 0)
+    public static function renderParamsTable($module, $params, &$n_errors = 0, $entity_type = 'all')
     {
         $html = '';
 
@@ -238,74 +288,10 @@ class BimpModuleConf
             $html .= '<table class="bimp_list_table module_conf_params" data-module="' . $module . '">';
             $html .= '<tbody>';
 
-            $can_edit = BimpCore::isUserDev();
-
             foreach ($params as $name => $param_defs) {
+                $html .= self::renderParamRow($entity_type, $module, $name, $param_defs, $n_errors);
+
                 $type = BimpTools::getArrayValueFromPath($param_defs, 'type', 'string');
-                $required = BimpTools::getArrayValueFromPath($param_defs, 'required', 0);
-                $source = '';
-                $value = BimpCore::getConf($name, null, $module, $source);
-
-                if (is_null($value)) {
-                    $value = BimpTools::getArrayValueFromPath($param_defs, 'def');
-                }
-
-                $missing = false;
-                if ($required && (string) $value === '') {
-                    $missing = true;
-                    $n_errors++;
-                }
-
-                $html .= '<tr class="param_row' . ($missing ? ' has_errors' : '') . '" data-param_name="' . $name . '">';
-
-                $html .= '<td class="param_label">';
-                $label = BimpTools::getArrayValueFromPath($param_defs, 'label', '');
-
-                if ($label) {
-                    $html .= '<span class="bold param_label">' . $label . '</span>';
-                } else {
-                    $html .= '<span class="danger">Nom Absent</span>';
-                }
-
-                if ($required) {
-                    $html .= '&nbsp;<span style="color: #FF0000;"><b>*</b></span>';
-                }
-
-                $html .= '<br/>';
-
-                $displayed_name = BimpTools::getArrayValueFromPath($param_defs, 'displayed_name', $name);
-
-                $html .= '<span class="small param_name" style="color: #807F7F">' . $displayed_name . '</span>';
-                $html .= '</td>';
-
-                $html .= '<td>';
-
-                if ($can_edit) {
-                    $html .= self::renderParamInput($name, $param_defs, $value);
-                } else {
-                    $html .= self::displayParamValue($param_defs, $value);
-                }
-
-                $html .= '</td>';
-
-                $html .= '<td>';
-                if ($missing) {
-                    $html .= '<div><span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Valeur obligatoire manquante</span></div>';
-                }
-                $info = BimpTools::getArrayValueFromPath($param_defs, 'info', '');
-                if ($info) {
-                    $html .= BimpRender::renderAlerts($info, 'info');
-                }
-                $warning = BimpTools::getArrayValueFromPath($param_defs, 'warning', '');
-                if ($warning) {
-                    $html .= BimpRender::renderAlerts($warning, 'warning');
-                }
-                $html .= '</td>';
-                $html .= '<td>';
-                $html .= $source;
-                $html .= '</td>';
-                $html .= '</tr>';
-
                 $sub_params_defs = BimpTools::getArrayValueFromPath($param_defs, 'sub_params', array());
 
                 if (!empty($sub_params_defs)) {
@@ -317,34 +303,14 @@ class BimpModuleConf
                         $sub_params = BimpTools::getArrayValueFromPath($sub_params_def, 'params', array());
 
                         if (!is_null($sub_params)) {
-                            $display = true;
-
-                            if (!empty($if)) {
-                                switch ($type) {
-                                    case 'string':
-                                    case 'text':
-                                    case 'select':
-                                        if (!in_array($value, $if)) {
-                                            $display = false;
-                                        }
-                                        break;
-
-                                    case 'bool':
-                                        if (!in_array((int) $value, $if)) {
-                                            $display = false;
-                                        }
-                                        break;
-                                }
-                            }
-
-                            $html .= '<tr class="sub_params_row" data-parent_param="' . $name . '"' . (!$display ? ' style="display: none"' : '') . ' data-if="' . (!is_null($if) ? htmlentities(implode(',', $if)) : '') . '">';
+                            $html .= '<tr class="sub_params_row" data-parent_param="' . $name . '" data-if="' . (!is_null($if) ? htmlentities(implode(',', $if)) : '') . '">';
                             $html .= '<td colspan="3">';
-                            $html .= '<div class="sub_params_container"' . (!$display ? ' style="display: none"' : '') . '>';
+                            $html .= '<div class="sub_params_container">';
                             if (is_null($if)) {
                                 $html .= BimpRender::renderAlerts('Erreur: condition absente (paramètre "if")');
                             }
 
-                            $html .= self::renderParamsTable($module, $sub_params, $n_errors);
+                            $html .= self::renderParamsTable($module, $sub_params, $n_errors, $entity_type);
                             $html .= '</div>';
 
                             $html .= '</td>';
@@ -361,13 +327,146 @@ class BimpModuleConf
         return $html;
     }
 
-    public static function renderParamInput($param_name, $param_defs, $value)
+    public static function renderParamRow($entity_type, $module, $name, $param_defs = null, &$n_errors = 0, $content_only = false)
+    {
+        $html = '';
+
+        if (empty($param_defs)) {
+            $conf = new BimpModuleConf($module);
+            $param_defs = $conf->getParamDefs($name);
+        }
+
+        $entities = self::getEntities($entity_type);
+        $can_edit = BimpCore::isUserDev();
+//            $can_edit = false;
+        $required = BimpTools::getArrayValueFromPath($param_defs, 'required', 0);
+        $values = array();
+
+        $missing = false;
+        foreach ($entities as $id_entity => $entity_label) {
+            $source = '';
+            $value = BimpCore::getConf($name, null, $module, $source, $id_entity);
+
+            if (is_null($value)) {
+                $value = BimpTools::getArrayValueFromPath($param_defs, 'def');
+            }
+
+            if ($required && (string) $value === '') {
+                $missing = true;
+                $n_errors++;
+            }
+
+            $values[$id_entity] = array(
+                'val' => $value,
+                'src' => $source
+            );
+        }
+
+        if (!$content_only) {
+            $html .= '<tr class="param_row' . ($missing ? ' has_errors' : '') . '" data-module="' . $module . '" data-param_name="' . $name . '">';
+        }
+
+        $html .= '<td class="param_label">';
+        $label = BimpTools::getArrayValueFromPath($param_defs, 'label', '');
+
+        if ($label) {
+            $html .= '<span class="bold param_label">' . $label . '</span>';
+        } else {
+            $html .= '<span class="danger">Nom Absent</span>';
+        }
+
+        if ($required) {
+            $html .= '&nbsp;<span style="color: #FF0000;"><b>*</b></span>';
+        }
+
+        $html .= '<br/>';
+
+        $displayed_name = BimpTools::getArrayValueFromPath($param_defs, 'displayed_name', $name);
+
+        $html .= '<span class="small param_name" style="color: #807F7F">' . $displayed_name . '</span>';
+        $html .= '</td>';
+
+        $html .= '<td>';
+
+        $html .= '<table>';
+
+        foreach ($values as $id_entity => $val_data) {
+            $is_saved = ($val_data['src'] !== 'val_def' && ($val_data['src'] !== 'global' || $id_entity == 0));
+            $html .= '<tr class="entity_param_row" data-id_entity="' . $id_entity . '">';
+
+//            $html .= '<td>';
+//            $html .= '<pre>' . print_r($val_data, 1) . '</pre>';
+//            $html .= '</td>';
+
+            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                $html .= '<td' . ($is_saved ? ' style="font-weight: bold"' : '') . '>' . $entities[$id_entity] . '</td>';
+            }
+
+            $html .= '<td>';
+            if ($can_edit) {
+                $html .= self::renderParamInput($module, $name, $param_defs, $val_data['val'], $id_entity, $val_data['src']);
+
+                if ($is_saved) {
+                    $html .= '</td>';
+                    $html .= '<td>';
+
+                    $html .= '<span class="btn btn-light-danger iconBtn" onclick="BimpModuleConf.removeParam(\'' . $module . '\', \'' . $name . '\', ' . $id_entity . ')">';
+                    $html .= BimpRender::renderIcon('fas_trash-alt');
+                    $html .= '</span>';
+                }
+            } else {
+                $html .= '<td>';
+                $html .= self::displayParamValue($param_defs, $val_data['val'], $val_data['src']);
+
+                if ($is_saved) {
+                    $html .= '&nbsp&nbsp;<span style="color: #CCCCCC">' . BimpRender::renderIcon('fas_save') . '</span>';
+                }
+
+                $html .= '</td>';
+            }
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</table>';
+
+        $html .= '</td>';
+
+        $html .= '<td>';
+        if ($missing) {
+            $html .= '<div><span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Valeur obligatoire manquante</span></div>';
+        }
+        $info = BimpTools::getArrayValueFromPath($param_defs, 'info', '');
+        if ($info) {
+            $html .= BimpRender::renderAlerts($info, 'info');
+        }
+        $warning = BimpTools::getArrayValueFromPath($param_defs, 'warning', '');
+        if ($warning) {
+            $html .= BimpRender::renderAlerts($warning, 'warning');
+        }
+        $html .= '</td>';
+
+        if (!$content_only) {
+            $html .= '</tr>';
+        }
+
+        return $html;
+    }
+
+    public static function renderParamInput($module, $param_name, $param_defs, $value, $id_entity = 0, $src = '')
     {
         $html = '<div>';
+
+        $data = array(
+            'module'    => $module,
+            'id_entity' => $id_entity,
+            'src'       => $src
+        );
 
         switch (BimpTools::getArrayValueFromPath($param_defs, 'type', 'string')) {
             case 'string':
                 $html .= BimpInput::renderInput('text', $param_name, (string) $value, array(
+                            'data'        => $data,
                             'extra_class' => 'module_conf_input',
                             'addon_left'  => BimpRender::renderIcon('fas_pen')
                 ));
@@ -375,6 +474,7 @@ class BimpModuleConf
 
             case 'text':
                 $html .= BimpInput::renderInput('textarea', $param_name, (string) $value, array(
+                            'data'        => $data,
                             'extra_class' => 'module_conf_input',
                             'rows'        => 3,
                             'auto_expand' => true
@@ -383,6 +483,7 @@ class BimpModuleConf
 
             case 'bool':
                 $html .= BimpInput::renderInput('toggle', $param_name, (int) $value, array(
+                            'data'        => $data,
                             'extra_class' => 'module_conf_input'
                 ));
                 break;
@@ -390,6 +491,7 @@ class BimpModuleConf
             case 'select':
                 $values = BimpTools::getArrayValueFromPath($param_defs, 'values', array());
                 $html .= BimpInput::renderInput('select', $param_name, $value, array(
+                            'data'        => $data,
                             'extra_class' => 'module_conf_input',
                             'options'     => $values
                 ));
@@ -469,13 +571,14 @@ class BimpModuleConf
         return $params;
     }
 
-    public static function renderSearchParamsResults($search)
+    public static function renderSearchParamsResults($search, $entity_type = 'all')
     {
         $html = '';
 
         if (!(string) $search) {
             $html .= BimpRender::renderAlerts('Veuillez saisir un terme de recherche');
         } else {
+            $n_errors = 0;
             $bdb = BimpCache::getBdb();
             $search_words = explode(' ', str_replace(array('-', '_'), ' ', $search));
             $where = '';
@@ -576,13 +679,13 @@ class BimpModuleConf
                     $html .= '<div class="module_params_form" style="margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #000" data-module_name="' . $module . '">';
                     $html .= '<h3>Module ' . $module . '</h3>';
 
-                    $html .= self::renderParamsTable($module, $params);
+                    $html .= self::renderParamsTable($module, $params, $n_errors, $entity_type);
                     $html .= '</div>';
                 }
             }
-            
+
             foreach ($saved_params as $module => $params) {
-                if(!isset($config_params[$module])){
+                if (!isset($config_params[$module])) {
                     $params = array();
 
                     if (isset($saved_params[$module])) {
@@ -607,7 +710,7 @@ class BimpModuleConf
                         $html .= '<div class="module_params_form" style="margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #000" data-module_name="' . $module . '">';
                         $html .= '<h3>Module ' . $module . '</h3>';
 
-                        $html .= self::renderParamsTable($module, $params);
+                        $html .= self::renderParamsTable($module, $params, $n_errors, $entity_type);
                         $html .= '</div>';
                     }
                 }

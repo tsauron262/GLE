@@ -244,6 +244,12 @@ fields:
         input: 
             rows: 5
             auto_expand: 1
+    datelastlogin:
+        label: Derniére connexion
+        type: datetime
+    datepreviouslogin:
+        label: Connexion précédente
+        type: datetime
         
 forms:
     light: 

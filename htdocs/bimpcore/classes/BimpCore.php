@@ -1005,7 +1005,7 @@ class BimpCore
     {
         $entity = BimpCore::getConf('extends_entity', '');
         
-        if (defined('BIMP_EXTENDS_ENTITY')) {
+        if ($entity == '' && defined('BIMP_EXTENDS_ENTITY')) {
             return BIMP_EXTENDS_ENTITY;
         }
 

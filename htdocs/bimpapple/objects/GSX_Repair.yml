@@ -8,6 +8,10 @@ labels:
     name: réparation GSX
     name_plur: réparations GSX
     is_female: 1
+    
+parent_module: bimpsupport
+parent_object: BS_SAV
+parent_id_property: id_sav
                 
 fields: 
     serial: 

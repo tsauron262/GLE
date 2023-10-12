@@ -4677,6 +4677,7 @@ class BimpComm extends BimpDolObject
 
         $req = 'SELECT count(*) as nb, SUM(' . $fieldTotal . ') as total_ht, ' . $dateStr . ' as timestamp FROM ' . MAIN_DB_PREFIX . $this->params['table'] . ' a ';
         $filter = array();
+        $filter['entity'] = getEntity('bimp_conf', 0);
         foreach (json_decode(BimpTools::getPostFieldValue('param_list_filters'), true) as $filterT) {
             if (isset($filterT['filter']) && is_array($filterT['filter']))
                 $filter[] = $filterT['filter'];

@@ -317,12 +317,12 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
 
             $cgv .= "-Les frais de prise en charge diagnotic de " . $prixRefus . "€ TTC sont à régler pour tout matériel  hors garantie. En cas d’acceptation du devis ces frais seront déduits.\n\n";
-            $cgv .= "-Les problèmes logiciels, la récupération de données ou la réparation matériel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de " . $prixRefus . "€ TTC seront facturés en cas de refus de celui-ci." . "\n\n";
-            $cgv .= "-Des frais de " . $prixRefus . "€ TTC seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.\n\n";
+            $cgv .= "-Les problèmes logiciels, la récupération de données ou la réparation matériel liés à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de " . $prixRefus . "€ TTC seront facturés en cas de refus de celui-ci." . "\n\n";
+            $cgv .= "-Des frais de " . $prixRefus . "€ TTC seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contrefaçon ont été installées.\n\n";
             $cgv .= "-Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 4€ par jour.\n\n";
 
-            $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruit, après accord du tribunal.\n\n";
-            $cgv .= "-" . $conf->global->MAIN_INFO_SOCIETE_NOM . " n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximun de 1000 €), en carte bleue.\n\n";
+            $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruits, après accord du tribunal.\n\n";
+            $cgv .= "-" . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . " n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximum de 1000 €), en carte bleue.\n\n";
 
             if ((int) $sav->getData('prioritaire')) {
                 $pdf->SetXY('62', '111.5');

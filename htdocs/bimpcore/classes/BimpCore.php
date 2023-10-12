@@ -743,7 +743,7 @@ class BimpCore
                 if (!$module) {
                     $module = 'bimpcore';
                 }
-                
+
                 if (isset($r->entity))
                     self::$conf_cache[$r->entity][$module][$r->name] = $r->value;
                 else
@@ -778,6 +778,8 @@ class BimpCore
                 $source = ($entity ? 'entity_' . $entity : 'global');
                 return $cache[$entity][$module][$name];
             }
+        } elseif (is_null($entity)) {
+            $entity = 0;
         }
 
         if (isset($cache[0][$module][$name])) {
@@ -825,8 +827,13 @@ class BimpCore
             $value = BimpCore::getConf($name, 0, $module) + 1;
         }
 
-        if ($entity == -1) {
-            $entity = (BimpTools::isModuleDoliActif('MULTICOMPANY') && isset(self::$conf_cache[getEntity('bimp_conf', 0)][$module][$name])) ? getEntity('bimp_conf', 0) : 0;
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if ($entity == -1) {
+                $bimp_conf_entity = getEntity('bimp_conf', 0);
+                $entity = (isset(self::$conf_cache[$bimp_conf_entity][$module][$name]) ? $bimp_conf_entity : 0);
+            }
+        } else {
+            $entity = 0;
         }
 
         $current_val = (isset(self::$conf_cache[$entity][$module][$name]) ? self::$conf_cache[$entity][$module][$name] : null);
@@ -840,7 +847,7 @@ class BimpCore
                         'module' => $module,
                         'entity' => $entity
                     )) <= 0) {
-                $errors[] = 'Echec de l\'insertion du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
+                $errors[] = 'Echec de l\'insertion du paramètre "' . $name . '" (Module ' . $module . ' - ID entité : ' . $entity . ') - ' . $bdb->err();
             }
         } else {
             if ($bdb->update('bimpcore_conf', array(
@@ -863,8 +870,13 @@ class BimpCore
 
         $errors = array();
 
-        if ($entity == -1) {
-            $entity = (BimpTools::isModuleDoliActif('MULTICOMPANY') && isset(self::$conf_cache[getEntity('bimp_conf', 0)][$module][$name])) ? getEntity('bimp_conf', 0) : 0;
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if ($entity == -1) {
+                $bimp_conf_entity = getEntity('bimp_conf', 0);
+                $entity = (isset(self::$conf_cache[$bimp_conf_entity][$module][$name]) ? $bimp_conf_entity : 0);
+            }
+        } else {
+            $entity = 0;
         }
 
         $bdb = BimpCache::getBdb();

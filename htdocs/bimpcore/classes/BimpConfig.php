@@ -271,8 +271,8 @@ class BimpConfig
                 }
 
                 // Surcharge entité: 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $entity_module_dir = 'extends/entities/' . BIMP_EXTENDS_ENTITY . ($module_dir ? '/' . $module_dir : '');
+                if (BimpCore::getExtendsEntity() != '') {
+                    $entity_module_dir = 'extends/entities/' . BimpCore::getExtendsEntity() . ($module_dir ? '/' . $module_dir : '');
                     $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $entity_module_dir . '/' . $file_name . '.yml';
                     if (file_exists($entity_file)) {
                         $entity_params = $this->getParamsFromFile($module, $entity_module_dir, $file_name, $errors, false);

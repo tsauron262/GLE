@@ -64,9 +64,9 @@ class BimpLayout
                 }
             }
 
-            if (defined('BIMP_EXTENDS_ENTITY')) {
-                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/' . $layout_name . '.php')) {
-                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/' . $layout_name . '.php';
+            if (BimpCore::getExtendsEntity() != '') {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/classes/' . $layout_name . '.php')) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/classes/' . $layout_name . '.php';
                     $layout_class = $layout_name . '_ExtEntity';
                 }
             }

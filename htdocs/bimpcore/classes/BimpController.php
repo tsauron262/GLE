@@ -55,8 +55,8 @@ class BimpController
         }
 
         // Surcharge entité: 
-        if (defined('BIMP_EXTENDS_ENTITY')) {
-            $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/controllers/' . $controllerClassBase . '.php';
+        if (BimpCore::getExtendsEntity() != '') {
+            $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/controllers/' . $controllerClassBase . '.php';
             if (file_exists($entity_file)) {
                 $className = $controllerClassBase . '_ExtEntity';
                 if (!class_exists($className)) {

@@ -8,9 +8,9 @@ if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION) {
     }
 }
 
-if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY) {
-    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php')) {
-        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php';
+if (BimpCore::getExtendsEntity() != '' && BimpCore::getExtendsEntity()) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/BimpComm.class.php';
     }
 }
 

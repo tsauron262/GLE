@@ -65,7 +65,7 @@ class CepaPDF extends BimpModelPDF
                 $off_x = 0;
                 $off_y = 0;
 
-                switch (BimpCore::getEntity()) {
+                switch (BimpCore::getExtendsEntity()) {
                     case 'actimac':
                         $off_x = 2;
                         $off_y = 0.7;

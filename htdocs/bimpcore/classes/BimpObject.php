@@ -136,8 +136,8 @@ class BimpObject extends BimpCache
                 }
 
                 // Surcharge entité: 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $object_name . '.class.php';
+                if (BimpCore::getExtendsEntity() != '') {
+                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $object_name . '.class.php';
                     if (file_exists($entity_file)) {
                         $className = $object_name . '_ExtEntity';
                         if (!class_exists($className)) {
@@ -196,8 +196,8 @@ class BimpObject extends BimpCache
                             }
 
                             // Surcharge entité: 
-                            if (defined('BIMP_EXTENDS_ENTITY')) {
-                                $ext_entity_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $ext_object_name . '.class.php';
+                            if (BimpCore::getExtendsEntity() != '') {
+                                $ext_entity_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $ext_object_name . '.class.php';
                                 if (file_exists($ext_entity_file)) {
                                     $ext_className = $ext_object_name . '_ExtEntity';
                                     if (!class_exists($ext_className)) {
@@ -292,8 +292,8 @@ class BimpObject extends BimpCache
                 }
 
                 // Entité: 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $object_name . '.class.php';
+                if (BimpCore::getExtendsEntity() != '') {
+                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $object_name . '.class.php';
                     if (file_exists($entity_file)) {
                         $final_class_name = $object_name . '_ExtEntity';
                         if (!class_exists($final_class_name)) {

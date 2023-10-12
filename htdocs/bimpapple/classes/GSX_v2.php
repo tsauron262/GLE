@@ -410,7 +410,9 @@ class GSX_v2 extends GSX_Const
     
     public static function getVersion(){
         global $user;
-        if(in_array($user->id, json_decode(BimpCore::getConf('gsx_user_beta', 0, 'bimpapple'), true))){
+        $users = json_decode(BimpCore::getConf('gsx_user_beta', 0, 'bimpapple'), true);
+        
+        if(is_array($users) && in_array($user->id, $users)){
             BimpCore::setConf('nb_gsx_beta', "++", 'bimpapple');
             return 5;
         }

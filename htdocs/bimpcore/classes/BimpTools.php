@@ -3774,6 +3774,9 @@ class BimpTools
 
     public static function isModuleDoliActif($module)
     {
+        if ($module == 'MULTICOMPANY' && BimpCore::isModeDev() && defined('MULTICOMPANY_TEST')) {
+            return 1;
+        }
         global $conf;
 
         if (stripos($module, 'MAIN_MODULE_') === false)
@@ -3816,15 +3819,14 @@ class BimpTools
             $data = preg_replace('`[<br />]*$`', '', $data);
             $data = preg_replace('`[<br>]*$`', '', $data);
             $data = preg_replace('`[<br/>]*$`', '', $data);
-            if(strlen($data) > $lenght){
+            if (strlen($data) > $lenght) {
                 $return = '<span class=" bs-popover"';
                 $return .= BimpRender::renderPopoverData($data, 'top', true);
                 $return .= '>';
                 $return .= substr(strip_tags($data), 0, $lenght) . '...';
                 $return .= '</span>';
                 return $return;
-            }
-            else
+            } else
                 return $data;
         }
     }

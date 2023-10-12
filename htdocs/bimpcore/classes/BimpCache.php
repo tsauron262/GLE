@@ -66,16 +66,16 @@ class BimpCache
 
         return self::$bdb_noTransac;
     }
-    
-    public static function cacheServeurFunction($method){
-        $cache_key = 'fn_'.$method;
-        if(self::cacheServerExists($cache_key)){
+
+    public static function cacheServeurFunction($method)
+    {
+        $cache_key = 'fn_' . $method;
+        if (self::cacheServerExists($cache_key)) {
             return self::getCacheServeur($cache_key);
-        }
-        else{
+        } else {
             $result = self::$method();
             self::setCacheServeur($cache_key, $result);
-            
+
             return $result;
         }
     }
@@ -159,8 +159,9 @@ class BimpCache
             }
         }
     }
-    
-    public static function printAllCacheServeur(){
+
+    public static function printAllCacheServeur()
+    {
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
@@ -526,15 +527,15 @@ class BimpCache
     public static function getExtraFieldsArray($element)
     {
         $entitys = getEntity($element, 0);
-        
-        $cache_key = 'dol_object_' . $element . '_extrafields_array'.$entitys;
+
+        $cache_key = 'dol_object_' . $element . '_extrafields_array' . $entitys;
 
         $result = self::getCacheServeur($cache_key);
         if (!$result) {
 
             $where = '`elementtype` = \'' . $element . '\'';
-            if($entitys)
-                $where .= ' AND entity IN (0,'.$entitys.')';
+            if ($entitys)
+                $where .= ' AND entity IN (0,' . $entitys . ')';
             $rows = self::getBdb()->getRows('extrafields', $where, null, 'array', array('name', 'label'));
 
             $result = array();
@@ -2448,7 +2449,7 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            if(BimpCore::getConf('marques_parent_categories', '') != ''){
+            if (BimpCore::getConf('marques_parent_categories', '') != '') {
                 $where = 'fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
                 $rows = self::getBdb()->getRows('categorie', $where, null, 'array', array('rowid', 'label'));
                 foreach ($rows as $r) {
@@ -2467,7 +2468,7 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            if(BimpCore::getConf('marques_parent_categories', '') != ''){
+            if (BimpCore::getConf('marques_parent_categories', '') != '') {
                 $where = 'fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
                 $rows = self::getBdb()->getRows('categorie', $where, null, 'array', array('rowid'));
                 foreach ($rows as $r) {
@@ -2683,14 +2684,11 @@ class BimpCache
 
         return self::getCacheArray($cache_key, $include_empty);
     }
-    
-    
 
     public static function getTaxeIdDefault()
     {
         return (int) BimpCore::getConf('id_default_tva_tx');
     }
-    
 
     public static function getDefaultTva()
     {
@@ -2821,12 +2819,12 @@ class BimpCache
         global $langs;
         $langs->load('bills');
         $entitys = getEntity('cond_regl', 0);
-        $cacheKey = 'cond_reglements_array'.$entitys;
+        $cacheKey = 'cond_reglements_array' . $entitys;
         if (!isset(self::$cache[$cacheKey])) {
             $where = '';
-                if($entitys)
-                    $where .= ' AND entity IN (0,'.$entitys.')';
-            $rows = self::getBdb()->getRows('c_payment_term', '`active` > 0 '.$where, null, 'array', array('rowid', 'libelle', 'code'), 'sortorder');
+            if ($entitys)
+                $where .= ' AND entity IN (0,' . $entitys . ')';
+            $rows = self::getBdb()->getRows('c_payment_term', '`active` > 0 ' . $where, null, 'array', array('rowid', 'libelle', 'code'), 'sortorder');
 
             self::$cache['cond_reglements_array'] = array();
             if (!is_null($rows)) {
@@ -2889,17 +2887,20 @@ class BimpCache
 
         return self::getCacheArray($cache_key, 1, $empty_value, '');
     }
-    
-    public static function getEntitiesCacheArray(){
+
+    public static function getEntitiesCacheArray($include_empty = true, $empty_label = '')
+    {
         $cacheKey = 'entities';
-        if (!isset(self::$cache['$cacheKey'])) {
+
+        if (!isset(self::$cache[$cacheKey])) {
             $result = self::getBdb()->getRows('entity', 'active =1', null, 'object', array('rowid', 'label'));
+
             foreach ($result as $ent) {
                 self::$cache[$cacheKey][(int) $ent->rowid] = $ent->label;
             }
         }
-        return self::getCacheArray($cacheKey, 1);
-        
+
+        return self::getCacheArray($cacheKey, $include_empty, 0, $empty_label);
     }
 
     public static function getAvailabilitiesArray()

@@ -2561,8 +2561,9 @@ class ObjectLine extends BimpObject
             $this->reset();
             $this->parent = $parent;
 
+            echo $this->getTable();
             $id = (int) $this->db->getValue($this->getTable(), 'id', 'id_line = ' . $line->id);
-
+echo $id;
             if (!$id) {
                 $remisable = 1;
 

@@ -415,6 +415,17 @@ class ActionsMulticompany
 				),
 				'active' => true
 			),
+			'user' => array(
+				'type' => 'object',
+				'icon' => 'file-pdf-o',
+				'input' => array(
+					'global' => array(
+						'hide' => true,
+						'del' => true
+					)
+				),
+				'active' => true
+			),
 			'supplier_order' => array(
 				'type' => 'object',
 				'icon' => 'file-pdf-o',

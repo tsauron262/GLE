@@ -212,3 +212,8 @@ searches:
             - a.serial
             - a.repair_number
         label_syntaxe: 'Réparation n°<a.repair_number> - N° de série: <a.serial>'
+        
+        
+lists: 
+    default: 
+        title: Liste des Repa GSX

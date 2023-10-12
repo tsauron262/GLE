@@ -5,7 +5,7 @@ global $tabCentre;
 // 0: tel / 1: email / 2: label / 3: ?? / 4: shipTo / 5: zip / 6: ville / 7: adresse / 8: ID entrepôt / 9: actif / 10: Centre répa de rattachement (fac.) 
 
 $tabCentre = array(
-    "V"     => array("04 75 62 73 80", "sav07@ldlc.com", "Guillerand Granges", 19, "1461030", "07500", "GUILLERAND GRANGES", "Espace Colibri \n 85 rue Conrad Kilian", 25, 1, null, 'a1c004b1-d110-49c0-acc8-1ac8641c8696'),
+    "V"     => array("04 75 62 73 80", "sav07@ldlc.com", "Guilherand-Granges", 19, "1461030", "07500", "GUILHERAND-GRANGES", "Espace Colibri \n 85 rue Conrad Kilian", 25, 1, null, 'a1c004b1-d110-49c0-acc8-1ac8641c8696'),
     "M"     => array(/*"04 50 22 15 55"*/"04 50 32 89 07", "sav74@ldlc.com", "Meythet", 58, "462140", "74960", "Meythet", "3 RUE DU VIEUX MOULIN", 21, 0),
     "CB"    => array("09 70 72 12 32", "sav73@ldlc.com", "Chambéry", 213, "1461034", "73000", "Chambéry", "150 rue croix d'or", 36, 1, null, '7fc5cb7c-1a59-480d-89e5-252b501a0017'),
     'L'     => array("04 78 17 30 23", "sav69@ldlc.com", "Lyon 6", 21, "1461023", "69006", "Lyon", "67 rue Vendome", 23, 1, null, 'ee32024d-c3bd-4ea1-b7ce-cf82e430a426'),

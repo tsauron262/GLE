@@ -22,3 +22,4 @@ params:
     gsx_user_beta:
         label: User beta testeur
         info: Tableau json de type [1,2]
+        def: []

@@ -4023,7 +4023,8 @@ class Bimp_Product extends BimpObject
         if($field == 'cost_price_percent'){
             if($value > 0 && $value != $this->getData('cost_price_percent')
                     || $this->getData('cost_price_percent') > 0){
-                $this->updateField('cost_price', $this->getData('price') * $value / 100);
+                if($value != '')
+                    $this->updateField('cost_price', $this->getData('price') * $value / 100);
             }
         }
         elseif($field == 'cost_price'){

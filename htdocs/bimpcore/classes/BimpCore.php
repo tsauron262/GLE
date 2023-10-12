@@ -953,7 +953,7 @@ class BimpCore
         if (isset($conf->global->$name) && $conf->global->$name)
             return 1;
 
-        return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
+//        return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
     }
 
     public static function isModeDev()

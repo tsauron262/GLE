@@ -219,10 +219,10 @@ abstract class BimpAPI
                 }
             }
 
-            if (defined('BIMP_EXTENDS_ENTITY')) {
-                if (file_exists(DOL_DOCUMENT_ROOT . '/bimpapi/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/apis/' . $api_class . '.php')) {
+            if (BimpCore::getExtendsEntity() != '') {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/bimpapi/extends/entities/' . BimpCore::getExtendsEntity() . '/classes/apis/' . $api_class . '.php')) {
                     $final_class = $api_class . '_ExtEntity';
-                    require_once DOL_DOCUMENT_ROOT . '/bimpapi/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/apis/' . $api_class . '.php';
+                    require_once DOL_DOCUMENT_ROOT . '/bimpapi/extends/entities/' . BimpCore::getExtendsEntity() . '/classes/apis/' . $api_class . '.php';
                 }
             }
 

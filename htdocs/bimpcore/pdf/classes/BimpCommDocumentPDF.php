@@ -108,7 +108,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     }
                 }
 
-                switch (BimpCore::getEntity()) {
+                switch (BimpCore::getExtendsEntity()) {
                     case 'bimp':
                         if (method_exists($this->object, 'fetch_optionals')) {
                             $this->object->fetch_optionals();
@@ -1096,7 +1096,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
     public function renderAfterLines()
     {
-        if (BimpCore::getEntity() === 'bimp') {
+        if (BimpCore::getExtendsEntity() === 'bimp') {
             $this->pdf->addVMargin(2);
             $html = '';
 

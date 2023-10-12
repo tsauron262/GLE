@@ -226,8 +226,8 @@ class BimpYml
             }
 
             // Entité
-            if (defined('BIMP_EXTENDS_ENTITY')) {
-                $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $cur_name . '.yml';
+            if (BimpCore::getExtendsEntity() != '') {
+                $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $cur_name . '.yml';
                 if (file_exists($file)) {
                     $params[$idx]['entity'] = spyc_load_file($file);
                 }
@@ -378,8 +378,8 @@ class BimpYml
             }
 
             // Entité
-            if (defined('BIMP_EXTENDS_ENTITY')) {
-                $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/controllers/' . $cur_name . '.yml';
+            if (BimpCore::getExtendsEntity() != '') {
+                $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/controllers/' . $cur_name . '.yml';
                 if (file_exists($file)) {
                     $params[$idx]['entity'] = spyc_load_file($file);
                 }
@@ -500,8 +500,8 @@ class BimpYml
         }
 
         // Entité
-        if (defined('BIMP_EXTENDS_ENTITY')) {
-            $file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/' . $module . '.yml';
+        if (BimpCore::getExtendsEntity() != '') {
+            $file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/' . $module . '.yml';
             if (file_exists($file)) {
                 $params[$idx]['entity'] = spyc_load_file($file);
             }

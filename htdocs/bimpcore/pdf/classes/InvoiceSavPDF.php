@@ -27,7 +27,7 @@ class InvoiceSavPDF extends InvoicePDF
             // Chargement CGV : 
             
             $cgv_file = '';
-            switch (BimpCore::getEntity()) {
+            switch (BimpCore::getExtendsEntity()) {
                 case 'bimp':
                     if (BimpObject::objectLoaded($this->sav)) {
                         $code_centre = $this->sav->getData('code_centre');

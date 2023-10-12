@@ -81,13 +81,13 @@ class BimpCore
             }
 
             if (self::isContextPrivate()) {
-                if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BIMP_EXTENDS_ENTITY . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BIMP_EXTENDS_ENTITY . '.css';
+                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css';
                 }
                 self::$files['js'][] = '/bimpcore/views/js/notification.js';
             } else {
-                if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BIMP_EXTENDS_ENTITY . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BIMP_EXTENDS_ENTITY . '.css';
+                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css';
                 } else {
                     self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
                 }
@@ -488,8 +488,8 @@ class BimpCore
                             }
                         }
 
-                        if (defined('BIMP_EXTENDS_ENTITY') && isset($extends_updates['entity'])) {
-                            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql/';
+                        if (BimpCore::getExtendsEntity() != '' && isset($extends_updates['entity'])) {
+                            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/sql/';
                             if (!file_exists($dir) || !is_dir($dir)) {
                                 continue;
                             }
@@ -510,7 +510,7 @@ class BimpCore
                                     echo 'FICHIER ABSENT: ' . $dir . $extend_version . '.sql <br/>';
                                     continue;
                                 }
-                                echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de l\'entité "' . BIMP_EXTENDS_ENTITY . '"';
+                                echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de l\'entité "' . BimpCore::getExtendsEntity() . '"';
                                 if ($bdb->executeFile($dir . $extend_version . '.sql', $file_errors)) {
                                     echo ' [OK]<br/>';
                                 } else {
@@ -520,7 +520,7 @@ class BimpCore
                             echo '<br/>';
 
                             if ($new_version) {
-                                BimpCore::setConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, $new_version);
+                                BimpCore::setConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), $new_version);
                             }
                         }
                     }
@@ -574,7 +574,7 @@ class BimpCore
 
     public static function getModulesExtendsUpdates()
     {
-        if (!defined('BIMP_EXTENDS_VERSION') && !defined('BIMP_EXTENDS_ENTITY')) {
+        if (!defined('BIMP_EXTENDS_VERSION') && BimpCore::getExtendsEntity() == '') {
             return array();
         }
 
@@ -621,11 +621,11 @@ class BimpCore
                     }
                 }
 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql';
+                if (BimpCore::getExtendsEntity() != '') {
+                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/sql';
                     if (file_exists($dir) && is_dir($dir)) {
 
-                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
+                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), 0);
                         $files = scandir($dir);
 
                         foreach ($files as $f) {
@@ -1001,13 +1001,15 @@ class BimpCore
 
     // Gestion extends: 
 
-    public static function getEntity()
+    public static function getExtendsEntity()
     {
+        $entity = BimpCore::getConf('extends_entity', '');
+        
         if (defined('BIMP_EXTENDS_ENTITY')) {
             return BIMP_EXTENDS_ENTITY;
         }
 
-        return '';
+        return $entity;
     }
 
     public static function getVersion()
@@ -1021,13 +1023,13 @@ class BimpCore
 
     public static function isEntity($entity)
     {
-        if (defined('BIMP_EXTENDS_ENTITY')) {
+        if (BimpCore::getExtendsEntity() != '') {
             if (is_array($entity)) {
-                if (in_array(BIMP_EXTENDS_ENTITY, $entity)) {
+                if (in_array(BimpCore::getExtendsEntity(), $entity)) {
                     return 1;
                 }
             } else {
-                if (BIMP_EXTENDS_ENTITY == $entity) {
+                if (BimpCore::getExtendsEntity() == $entity) {
                     return 1;
                 }
             }
@@ -1063,7 +1065,7 @@ class BimpCore
 
         $dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
         $final_file_path = '';
-        $entity = self::getEntity();
+        $entity = self::getExtendsEntity();
         $version = self::getVersion();
 
         if ($entity && file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {

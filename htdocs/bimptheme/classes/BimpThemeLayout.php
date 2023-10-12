@@ -89,8 +89,8 @@ class BimpThemeLayout extends BimpLayout
 
         $html .= '<a class="header-brand" href="' . DOL_URL_ROOT . '/">' . "\n";
         $html .= '<div id="logo-img" class="logo-img">';
-        if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimptheme/extends/entities/' . BIMP_EXTENDS_ENTITY . '/logo.png')) {
-            $html .= '<img src="' . DOL_URL_ROOT . '/bimptheme/extends/entities/' . BIMP_EXTENDS_ENTITY . '/logo.png" class="header-brand-img" alt="Logo" width="125">';
+        if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimptheme/extends/entities/' . BimpCore::getExtendsEntity() . '/logo.png')) {
+            $html .= '<img src="' . DOL_URL_ROOT . '/bimptheme/extends/entities/' . BimpCore::getExtendsEntity() . '/logo.png" class="header-brand-img" alt="Logo" width="125">';
         } else {
             global $conf;
             $logo_file = $conf->mycompany->dir_output . '/logos/' . $conf->global->MAIN_INFO_SOCIETE_LOGO;

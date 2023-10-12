@@ -83,8 +83,8 @@ class devController extends BimpController
             $html .= '<span class="danger">Aucune</span>';
         }
         $html .= ' - Entité: ';
-        if (defined('BIMP_EXTENDS_ENTITY')) {
-            $html .= '<b>' . BIMP_EXTENDS_ENTITY . '</b>';
+        if (BimpCore::getExtendsEntity() != '') {
+            $html .= '<b>' . BimpCore::getExtendsEntity() . '</b>';
         } else {
             $html .= '<span class="danger">Aucune</span>';
         }
@@ -286,8 +286,8 @@ class devController extends BimpController
             $html .= '<span class="danger">Aucune</span>';
         }
         $html .= ' - Entité: ';
-        if (defined('BIMP_EXTENDS_ENTITY')) {
-            $html .= '<b>' . BIMP_EXTENDS_ENTITY . '</b>';
+        if (BimpCore::getExtendsEntity() != '') {
+            $html .= '<b>' . BimpCore::getExtendsEntity() . '</b>';
         } else {
             $html .= '<span class="danger">Aucune</span>';
         }

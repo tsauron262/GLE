@@ -345,4 +345,7 @@ params:
                       
     code_ics:
         label: Code ICS pour les RUM
+    extends_entity:
+        label: Extend Entitée 
+        required: 1
         

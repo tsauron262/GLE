@@ -217,10 +217,11 @@ searches:
 lists: 
     default: 
         title: Liste des Repa GSX
+        configurable: 1
         cols:
-            - id_sav
-            - repair_number
-            - closed
-            - date_closed
-            - ready_for_pick_up
-            - repair_complete
+            id_sav:
+            repair_number:
+            closed:
+            date_closed:
+            ready_for_pick_up:
+            repair_complete:

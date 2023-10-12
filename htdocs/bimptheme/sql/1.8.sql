@@ -1,0 +1,1 @@
+UPDATE llx_menu SET entity = 0 WHERE menu_handler IN ("bimptheme") ;

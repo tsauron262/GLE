@@ -66,6 +66,12 @@ objects:
             bimp_object:
                 module: bimpsupport
                 name: BS_SavPropalLine
+                
+    repa:
+        instance:
+            bimp_object:
+                module: bimpapple
+                name: GSX_Repair
             
 sections:
     - type: tabs
@@ -176,4 +182,16 @@ sections:
                   list: 
                       object: propal_ln     
                       name: global
+                              
+        repa: 
+            label: Repa GSX
+            icon: fas_shopping-bag
+            sections:
+                - type: list
+                  list: 
+                      object: repa   
+                      
+                      
+                      
+                      
                 

@@ -274,7 +274,7 @@
             
             $dateTime = $this->yesterday;
             
-            $entitie        = BimpCore::getExtendsEntity();
+            $extendsEntity        = BimpCore::getExtendsEntity();
             $day            = $dateTime->format('d');
             $month          = $dateTime->format('m');
             $year           = $dateTime->format('Y');
@@ -295,7 +295,7 @@
                 case 'bordereauxCHK': $number = 8;
             }
             
-            return $number . "_" . $entitie ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '_' . $version_tra . $extention;
+            return $number . "_" . $extendsEntity ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '_' . $version_tra . $extention;
             
         }
         

@@ -348,4 +348,7 @@ params:
     extends_entity:
         label: Extend Entitée 
         required: 1
+    entity_url:
+        label: Url par entité
+        info: json
         

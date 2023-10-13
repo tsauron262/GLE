@@ -60,6 +60,7 @@ class ActionsBimpcore
 
     var $bimp_fixe_tabs = null;
     var $resprints = '';
+    var $priority = 1;
 
     function bimpcoreInit($parameters, &$object, &$action, $hookmanager)
     {
@@ -220,6 +221,19 @@ class ActionsBimpcore
         }
         
         return 0;
+    }
+    
+    function getLoginPageOptions(&$parameters = false){
+        $tabs = json_decode(BimpCore::getConf('entity_url'), true);
+        if(is_array($tabs)){
+            foreach($tabs as $entity => $urls){
+                foreach($urls as $url){
+                    if(stripos($_SERVER['HTTP_HOST'], $url) !== false ||
+                            stripos($_SERVER['REQUEST_URI'], $url) !== false)
+                        $parameters['entity'] = $entity;
+                }
+            }
+        }
     }
 
     function printLeftBlock($parameters, &$object, &$action, $hookmanager)

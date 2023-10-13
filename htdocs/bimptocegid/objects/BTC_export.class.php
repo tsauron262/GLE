@@ -229,7 +229,7 @@ class BTC_export extends BimpObject {
     protected function create_daily_file($element = null, $date = null, $complementFileName = '', $complementDirectory = '') {
         
         $daily_files = [];
-        $entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+        $entitie = BimpCore::getExtendsEntity();
         if(empty($complementDirectory) && empty($complementFileName)) {
             if(isset($_REQUEST['date']) && !empty($_REQUEST['date']) || !is_null($date)) {
                 $complementFileName = isset($_REQUEST['date']) ? $_REQUEST['date'] : $date;

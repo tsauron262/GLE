@@ -61,7 +61,7 @@
             $errors = $warnings = Array();
             
             $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
-            $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+            $this->entitie = BimpCore::getExtendsEntity();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();
             
             if(!count($errors)) {
@@ -90,7 +90,7 @@
                     $db->begin(); //Ouvre la transaction
 
                     $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
-                    $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+                    $this->entitie = BimpCore::getExtendsEntity();
                     
                     $this->export_class->create_daily_files();
                     $this->files_for_ftp = $this->getFilesArrayForTranfert();

@@ -274,7 +274,7 @@
             
             $dateTime = $this->yesterday;
             
-            $entitie        = BimpCore::getConf('file_entity', null, "bimptocegid");
+            $entitie        = BimpCore::getExtendsEntity();
             $day            = $dateTime->format('d');
             $month          = $dateTime->format('m');
             $year           = $dateTime->format('Y');

@@ -19,7 +19,7 @@ class cegidController extends BimpController {
         global $db;
         
         $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
-        $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+        $this->entitie = BimpCore::getExtendsEntity();
         $this->traClass = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA');
         $this->exportClass = new export($db);
         

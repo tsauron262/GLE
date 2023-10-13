@@ -1,1 +1,0 @@
-INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('BIMPTOCEGID_file_entity', 'BIMP');

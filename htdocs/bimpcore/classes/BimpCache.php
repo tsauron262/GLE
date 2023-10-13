@@ -249,7 +249,11 @@ class BimpCache
         // Pas très propre mais seule solution trouvée: 
         global $conf;
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && $object_name === 'Bimp_Propal' && (int) $id_object) {
-            $id_sav = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_object);
+            $cache_key = 'id_sav_propal'.$id_object;
+            if (isset(self::$cache[$cache_key]))
+                $id_sav = self::$cache[$cache_key];
+            else
+                $id_sav = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_object);
             if ($id_sav) {
                 $module = 'bimpsupport';
                 $object_name = 'BS_SavPropal';

@@ -9,7 +9,7 @@ $sql = $db->query("SELECT * FROM `llx_user_param` WHERE `fk_user` = ".$user->id.
 if($db->num_rows($sql) > 0){
     while ($ln = $db->fetch_object($sql)){
         if($ln->value == "BimpTheme")
-            $db->query("DELETE FROM `llx_user_param` WHERE `fk_user` = ".$user->id." AND `param` LIKE 'MAIN_THEME'");
+            $db->query("UPDATE `llx_user_param` SET `value`= 'eldy' WHERE `fk_user` = ".$user->id." AND `param` LIKE 'MAIN_THEME'");
         else
             $db->query("UPDATE `llx_user_param` SET `value`= 'BimpTheme' WHERE `fk_user` = ".$user->id." AND `param` LIKE 'MAIN_THEME'");
     }

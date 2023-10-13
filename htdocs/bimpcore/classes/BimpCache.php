@@ -1239,7 +1239,7 @@ class BimpCache
         }
 
         $use_cache_serveur = $instance->getConf('in_cache_serveur', 0, false, 'bool');
-        $cacheKey = 'BimpObjectObjects_' . $module . '_' . $object_name . '_' . json_encode($filters) . '_' . $n . '_' . $order_by . '_' . $sortorder;
+        $cacheKey = 'BimpObjectObjects_' . $module . '_' . $object_name . '_' . json_encode($filters) . '_' . $n . '_' . $order_by . '_' . $sortorder.'_'. getEntity('', 0);
         if ($use_cache_serveur && static::cacheServerExists($cacheKey)) {
             $rows = static::getCacheServeur($cacheKey);
         } else {

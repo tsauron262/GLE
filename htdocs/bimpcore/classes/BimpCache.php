@@ -241,6 +241,37 @@ class BimpCache
         $coll = BimpCollection::getInstance($module, $object_name);
         return $coll->getLink($id_object, $params);
     }
+    
+    public static function getIdSavFromIdPropal($id_propal){
+        $cache_key = 'id_sav_propal'.$id_propal;
+        if (!isset(self::$cache[$cache_key]))
+            self::$cache[$cache_key] = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_propal);
+
+        return self::$cache[$cache_key];
+    }
+    
+    public static function getCallFunctionCache($instance, $method, $params, $static = false){
+        $cache_key = 'callFunction_'. $instance->module . '_' . $instance->object_name . '_'.$method. '_'. json_encode($params).'_'.$static;
+        if(!$static) 
+            $cache_key .= $instance->id;
+        if (!isset(self::$cache[$cache_key])){
+            if($static)
+                self::$cache[$cache_key] = forward_static_call_array(array(
+                        $instance, $method
+                            ), $params);
+            else{
+                // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
+                $args = array();
+                foreach ($params as $key => $value) {
+                    $args[] = $value;
+                }
+                self::$cache[$cache_key] = call_user_func_array(array(
+                    $instance, $method
+                        ), $args);
+            }
+        }
+        return self::$cache[$cache_key];
+    }
 
     public static function getBimpObjectInstance($module, $object_name, $id_object = null, $parent = null)
     {
@@ -249,11 +280,7 @@ class BimpCache
         // Pas très propre mais seule solution trouvée: 
         global $conf;
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && $object_name === 'Bimp_Propal' && (int) $id_object) {
-            $cache_key = 'id_sav_propal'.$id_object;
-            if (isset(self::$cache[$cache_key]))
-                $id_sav = self::$cache[$cache_key];
-            else
-                $id_sav = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_object);
+            $id_sav = static::getIdSavFromIdPropal($id_object);
             if ($id_sav) {
                 $module = 'bimpsupport';
                 $object_name = 'BS_SavPropal';

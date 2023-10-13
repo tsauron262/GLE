@@ -435,7 +435,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $child = $this->getChildObject("lines", $id_child);
                     $dol_line = $child->getChildObject('dol_line');
                     if ($dol_line->getData('fk_product') > 0) {
-                        $service = $this->getInstance('bimpcore', 'Bimp_Product', $dol_line->getData('fk_product'));
+                        $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $dol_line->getData('fk_product'));
                         if (!$service->isInContrat() && $dol_line->getData('total_ht') != 0) {
                             $id_services[] = $service->getData('ref');
                         }
@@ -516,9 +516,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         global $conf;
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && is_null($this->id_sav)) {
             if ($this->isLoaded()) {
-                $this->id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $this->id);
-                if(is_null($this->id_sav))
-                    $this->id_sav = 0;
+                $this->id_sav = BimpCache::getIdSavFromIdPropal($this->id);
             } else {
                 return 0;
             }

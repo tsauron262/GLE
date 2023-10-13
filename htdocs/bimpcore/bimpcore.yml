@@ -351,4 +351,8 @@ params:
     entity_url:
         label: Url par entité
         info: json
+    enabled_callback_cache:
+        label: Activer le cache des callback YML
+        type: bool
+        default: 0
         

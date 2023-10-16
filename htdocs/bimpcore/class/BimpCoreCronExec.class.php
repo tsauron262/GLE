@@ -66,10 +66,10 @@ class BimpCoreCronExec extends BimpCron
         }
 
         // Envoi FTP: 
-        $host = 'ftp-edi.groupe-ldlc.com';
+        $host = BimpCore::getConf('exports_ldlc_ftp_serv');
         $port = 21;
-        $login = 'bimp-erp';
-        $pword = 'Yu5pTR?(3q99Aa';
+        $login = BimpCore::getConf('exports_ldlc_ftp_user');
+        $pword = BimpCore::getConf('exports_ldlc_ftp_mdp');
 
         $ftp = ftp_connect($host, $port);
 

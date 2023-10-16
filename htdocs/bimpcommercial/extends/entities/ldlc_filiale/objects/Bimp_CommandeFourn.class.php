@@ -14,9 +14,9 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
 
 //            error_reporting(E_ALL);
 //            ini_set('display_errors', 1);
-        $url = "ftp-edi.groupe-ldlc.com";
-        $login = "bimp-erp";
-        $mdp = "Yu5pTR?(3q99Aa";
+        $url = BimpCore::getConf('exports_ldlc_ftp_serv');
+        $login = BimpCore::getConf('exports_ldlc_ftp_user');
+        $mdp = BimpCore::getConf('exports_ldlc_ftp_mdp');
         $folder = "/".BimpCore::getConf('exports_ldlc_ftp_dir')."/tracing/"; 
 
 //            $url = "exportftp.techdata.fr";
@@ -318,9 +318,9 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
         if (!count($errors)) {
             $arrayToXml->writeNodes($tab);
 
-            $url = "ftp-edi.groupe-ldlc.com";
-            $login = "bimp-erp";
-            $mdp = "Yu5pTR?(3q99Aa";
+            $url = BimpCore::getConf('exports_ldlc_ftp_serv');
+            $login = BimpCore::getConf('exports_ldlc_ftp_user');
+            $mdp = BimpCore::getConf('exports_ldlc_ftp_mdp');
 
             if ($conn = ftp_connect($url)) {
                 if (ftp_login($conn, $login, $mdp)) {

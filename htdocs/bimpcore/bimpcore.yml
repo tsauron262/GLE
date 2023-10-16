@@ -117,6 +117,9 @@ params:
         
     #ftp_dir => Eviter les noms trop "communs" pour les params de conf, 
     # il faut qu'on puisse retrouver facilement les params dans le code lors des recherches globales.
+    exports_ldlc_ftp_serv:
+        label: Serveur FTP pour les exports LDLC
+        def: 'ftp-edi.groupe-ldlc.com'
     exports_ldlc_ftp_dir:
         label: Dossier FTP pour les exports LDLC
         def: ''

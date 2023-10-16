@@ -162,8 +162,8 @@ class InvoicePDF extends BimpCommDocumentPDF
                     }
                 }
 
+                $secteur = $this->bimpCommObject->getData('ef_type');
                 if (BimpCore::isEntity('bimp')) {
-                    $secteur = $this->bimpCommObject->getData('ef_type');
                     // SAV
                     if ($secteur == 'S') {
                         $code_centre = $this->bimpCommObject->getData('centre');
@@ -196,7 +196,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                     }
                 }
                 elseif(BimpCore::isEntity('actimac') && $secteur != 'S'){
-                    $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac3.pdf";
+                    $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
 
                     if ($cgv_file && file_exists($cgv_file)) {
                         $this->pdf->extra_concat_files[] = $cgv_file;

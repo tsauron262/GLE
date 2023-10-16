@@ -58,6 +58,14 @@ class PropalPDF extends BimpCommDocumentPDF
         } else {
             $this->errors[] = 'Aucune proposition commerciale spécifiée';
         }
+        $secteur = $this->bimpCommObject->getData('ef_type');
+        if(BimpCore::isEntity('actimac') && $secteur != 'S'){
+            $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
+
+            if ($cgv_file && file_exists($cgv_file)) {
+                $this->pdf->extra_concat_files[] = $cgv_file;
+            }
+        }
 
         parent::initData();
     }

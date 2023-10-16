@@ -42,9 +42,9 @@ class InterfaceAddInGroups extends DolibarrTriggers {
             if(isset($object->context['newgroupid']) && $object->context['newgroupid'] > 0){
                 $gm = new BimpGroupManager($user->db);
                 if ($conf->global->GROUP_MANAGER_SET_ALL_USER == 1)
-                    $code = $gm->insertInGroups($object->id, $object->context['newgroupid'], false);
+                    $code = $gm->insertInGroups($object->id, $object->context['newgroupid'], $object->context['entity'], false);
                 else
-                    $code = $gm->insertInGroups($object->id, $object->context['newgroupid'], true);
+                    $code = $gm->insertInGroups($object->id, $object->context['newgroupid'], $object->context['entity'], true);
                 return $code;
             }
         }

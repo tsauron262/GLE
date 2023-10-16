@@ -27,6 +27,12 @@ class Bimp_User extends BimpObject
         12 => 'Vendredi (sem. paires)',
         13 => 'Samedi (sem. paires)'
     );
+    
+    public function __construct($module, $object_name) {
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY'))
+            $this->redirectMode = 5;
+        return parent::__construct($module, $object_name);
+    }
 
     // Gestion des droits: 
 

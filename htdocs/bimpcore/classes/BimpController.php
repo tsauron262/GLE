@@ -446,7 +446,7 @@ class BimpController
         if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
             global $mc,$conf;
             if($mc->checkRight($user->id, $conf->entity) != 1){
-                $this->errors[] = 'Vous n\'avez pas accés a cette entitée';
+//                $this->errors[] = 'Vous n\'avez pas accés a cette entitée';
             }
         }
         

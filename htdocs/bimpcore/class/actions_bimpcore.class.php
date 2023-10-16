@@ -235,6 +235,17 @@ class ActionsBimpcore
             }
         }
     }
+    
+    function afterLogin(&$parameters = false){
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+            global $mc,$conf;
+            $mc->dao->getEntities(false, false, true, true, true);
+            if(!in_array($conf->entity, $mc->dao->entities)){
+                if(count($mc->dao->entities) > 0)
+                    $mc->switchEntity($mc->dao->entities[0]);
+            }
+        }
+    }
 
     function printLeftBlock($parameters, &$object, &$action, $hookmanager)
     {

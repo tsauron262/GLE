@@ -6413,6 +6413,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function can($right)
     {
+//        global $user;
+//        if($this->isLoaded() && isset($this->dol_object)){//peut être un peut lourd, mais plus safe...
+//            $result = restrictedArea($user, $this->dol_object->element, $this->id, '', '', 'fk_soc', 'rowid', 0, 1);
+//            if($result == 0)
+//                return 0;
+//        }
         switch ($right) {
             case "view" :
                 if (BimpCore::isContextPublic()) {

@@ -442,6 +442,15 @@ class BimpController
         }
 
         echo '<div class="bimp_controller_content">' . "\n";
+        
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+            global $mc,$conf;
+            if($mc->checkRight($user->id, $conf->entity) != 1){
+                $this->errors[] = 'Vous n\'avez pas accés a cette entitée';
+            }
+        }
+        
+        
         if (!BimpObject::objectLoaded($user)) {
             if (!BimpCore::isContextPublic()) {
                 echo BimpRender::renderAlerts('Aucun utilisateur connecté. Veuillez vous <a href="' . DOL_URL_ROOT . '">authentifier</a>');

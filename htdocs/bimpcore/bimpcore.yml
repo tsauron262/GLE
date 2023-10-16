@@ -120,6 +120,12 @@ params:
     exports_ldlc_ftp_dir:
         label: Dossier FTP pour les exports LDLC
         def: ''
+    exports_ldlc_ftp_user:
+        label: Utilisateur FTP pour les exports LDLC
+        def: ''
+    exports_ldlc_ftp_user:
+        label: Mdp FTP pour les exports LDLC
+        def: ''
     
     # Defaults: 
     default_id_entrepot: 

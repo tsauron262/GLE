@@ -111,8 +111,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         global $user;
-        if (isset($user->rights->commande->read)) {
-            return (int) $user->rights->commande->read;
+        if (isset($user->rights->commande->lire)) {
+            return (int) $user->rights->commande->lire;
         }
 
         return 0;

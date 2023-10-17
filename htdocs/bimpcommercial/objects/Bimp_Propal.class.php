@@ -87,8 +87,8 @@ class Bimp_Propal extends Bimp_PropalTemp
     public function canView()
     {
         global $user;
-        if (isset($user->rights->propal->read)) {
-            return (int) $user->rights->propal->read;
+        if (isset($user->rights->propal->lire)) {
+            return (int) $user->rights->propal->lire;
         }
     }
 

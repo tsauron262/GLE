@@ -6414,11 +6414,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function can($right)
     {
+//        echo '<pre>'. get_class($this);
         if(isset($this->dol_object)){//peut être un peut lourd, mais plus safe...
             $return = BimpCache::dol_can($this->dol_object);
             if(!$return)
                 return 0;
         }
+//        print_r($this->dol_object);
+//        echo('rrr');
         switch ($right) {
             case "view" :
                 if (BimpCore::isContextPublic()) {

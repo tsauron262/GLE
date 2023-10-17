@@ -256,10 +256,7 @@ class BimpCache
         if(!isset(self::$cache[$cache_key])){
 //            echo 'ici';
             global $user;
-            $result = restrictedArea($user, $dol_object->element, null, $dol_object->table_element.'&'.$dol_object->table_element, '', 'fk_soc', 'rowid', 0, 1);
-            if($result == 0)
-                self::$cache[$cache_key] = 0;
-            self::$cache[$cache_key] = 1;
+            self::$cache[$cache_key] = restrictedArea($user, $dol_object->element, null, $dol_object->table_element.'&'.$dol_object->table_element, '', 'fk_soc', 'rowid', 0, 1);
         }
         return self::$cache[$cache_key];
     }

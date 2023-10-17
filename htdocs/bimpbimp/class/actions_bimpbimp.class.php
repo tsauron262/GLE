@@ -26,7 +26,7 @@ class ActionsBimpbimp {
         if ($object->sendmode == 'smtps' && !in_array($object->smtps->getFrom('host'), $tabDomainValid))
         {
             $add = $object->smtps->getFrom('user')."@".$object->smtps->getFrom('host');
-            if($add != '' && stripos($add, '@') !== false){
+            if($add != '' && stripos($add, '@') !== false && strlen($add) > 5){
                 $sql = $db->query("SELECT u.email, ue.alias FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.fk_object  
     AND (u.email = '".$add."' || ue.alias LIKE '%".$add."%')");
                 while($ln = $db->fetch_object($sql)){

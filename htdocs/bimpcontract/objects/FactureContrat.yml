@@ -5,6 +5,10 @@ table: view_facture_contrat
 icon: fas_clipboard-list
 
 
+parent_id_property: fk_contrat
+parent_object: BContract_contrat
+
+
 labels: 
     name: facuration
 

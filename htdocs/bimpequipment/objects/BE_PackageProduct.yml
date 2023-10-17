@@ -4,6 +4,8 @@ common_fields: 0
 
 labels: 
     name: produit
+
+entity_name: product
     
 parent_object: BE_Package
 parent_id_property: id_package

@@ -6,6 +6,9 @@ icon: fas_desktop
 header_list_name: default
 header_edit_form: default
 
+
+entity_name: product
+
 list_page_url: 
     controller: index
         

@@ -49,7 +49,7 @@
             global $db;
             $errors = Array();
             
-            $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datef   >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00")');
+            $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datef   >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00")'.$this->getEntityFilter());
             
             $file = PATH_TMP . $this->dir . $this->getMyFile("achats");
             if(count($list) > 0) {
@@ -68,11 +68,16 @@
                 $this->warn['ACHATS']['bimptocegid'] = "Pas de nouvelles factures à exportés";
             }
         }
+        
+        public function getEntityFilter(){
+            $entity = getEntity('', 0);
+            return ' AND entity = '.$entity;
+        }
       
         public function exportFacture($ref = ""):void {
             global $db;
             $errors = [];
-            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef >= "'.$this->lastDateExported->format('Y-m-d').'")');
+            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef >= "'.$this->lastDateExported->format('Y-m-d').'")'.$this->getEntityFilter());
                                     
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {
@@ -144,7 +149,7 @@
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile('deplacementPaiements');
             
-            $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date >= "'.$this->lastDateExported->format('Y-m-d').'"');
+            $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date >= "'.$this->lastDateExported->format('Y-m-d').'"'.$this->getEntityFilter());
             
             if(count($list) > 0)  {
                 foreach ($list as $line)  {
@@ -177,7 +182,7 @@
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile('bordereauxCHK');
             
-            $bordereaux = $this->bdb->getRows('bordereau_cheque', 'exported = 0');
+            $bordereaux = $this->bdb->getRows('bordereau_cheque', 'exported = 0'.$this->getEntityFilter());
             
             if(count($bordereaux) > 0) {
                 foreach($bordereaux as $bordereau) {
@@ -198,7 +203,7 @@
             global $db;
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile("paiements");
-            $list = $this->bdb->getRows('paiement', 'exported = 0 AND datep >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"');
+            $list = $this->bdb->getRows('paiement', 'exported = 0 AND datep >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"'.$this->getEntityFilter());
 
             foreach($list as $pay) {
                 $reglement = $this->bdb->getRow('c_paiement', 'id = ' . $pay->fk_paiement);
@@ -274,7 +279,7 @@
             
             $dateTime = $this->yesterday;
             
-            $entitie        = BimpCore::getConf('file_entity', null, "bimptocegid");
+            $extendsEntity        = BimpCore::getExtendsEntity();
             $day            = $dateTime->format('d');
             $month          = $dateTime->format('m');
             $year           = $dateTime->format('Y');
@@ -295,7 +300,7 @@
                 case 'bordereauxCHK': $number = 8;
             }
             
-            return $number . "_" . $entitie ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '_' . $version_tra . $extention;
+            return $number . "_" . $extendsEntity ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '_' . $version_tra . $extention;
             
         }
         

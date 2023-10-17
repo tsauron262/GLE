@@ -442,6 +442,15 @@ class BimpController
         }
 
         echo '<div class="bimp_controller_content">' . "\n";
+        
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+            global $mc,$conf;
+            if($mc->checkRight($user->id, $conf->entity) != 1){
+                $this->errors[] = 'Vous n\'avez pas accés a cette entitée';
+            }
+        }
+        
+        
         if (!BimpObject::objectLoaded($user)) {
             if (!BimpCore::isContextPublic()) {
                 echo BimpRender::renderAlerts('Aucun utilisateur connecté. Veuillez vous <a href="' . DOL_URL_ROOT . '">authentifier</a>');
@@ -559,9 +568,15 @@ class BimpController
             $hide = $this->config->getFromCurrentPath('hide', 0, false, 'bool');
             if (!$show || $hide) {
                 if ($this->current_tab === $tab_name) {
-                    $this->current_tab = 'default';
+                    if($this->current_tab != 'default')
+                        $this->current_tab = 'default';
+                    else
+                        $this->current_tab = '';
                 }
                 continue;
+            }
+            elseif($this->current_tab == ''){
+                $this->current_tab = $tab_name;
             }
 
             $url = $this->config->getFromCurrentPath('url', '');

@@ -265,11 +265,11 @@ class BimpGroupManager {
 
         $userids = $this->getAllUsersId();
         foreach ($userids as $userid) {
-            $groupids = $this->getGroupIdByUserId($userid);
+            $groupids = $this->getGroupIdByUserId($userid, getEntity('', 0));
             $user = new User($this->db);
             $user->fetch($userid);
             foreach ($groupids as $groupid) {
-                $this->insertInGroups($userid, $groupid, false, $user, false);
+                $this->insertInGroups($userid, $groupid, getEntity('', 0), false, $user, false);
             }
         }
         unset($conf->global->GROUP_MANAGER_SET_ALL_USER);
@@ -296,7 +296,7 @@ class BimpGroupManager {
     /**
      * Used by trigger action USER_SETINGROUP
      */
-    function insertInGroups($userid, $groupid, $setmsg, $user = null, $fromTrigger = true) {
+    function insertInGroups($userid, $groupid, $entity, $setmsg, $user = null, $fromTrigger = true) {
         if ($user == null) {
             $user = new User($this->db);
             $user->fetch($userid);
@@ -308,7 +308,7 @@ class BimpGroupManager {
         }
 
         $parentid = $this->getParentId($groupid);
-        $groups = $this->getGroupIdByUserId($userid);
+        $groups = $this->getGroupIdByUserId($userid, $entity);
         $grp = $this->getGroup($parentid);
         while (in_array($parentid, $groups) != false) {
             $parentid2 = $this->getParentId($parentid);
@@ -324,7 +324,7 @@ class BimpGroupManager {
         //dol_syslog("Ajout au groupe ".$parentid . " le user ".$user->id, 3);
         if (! is_object($user->oldcopy)) 
             $user->oldcopy = clone $user;
-        if ($user->SetInGroup($parentid, 1)) {
+        if ($user->SetInGroup($parentid, $entity, 1)) {
             $this->initCache();
             return 1;
         } else {
@@ -347,12 +347,12 @@ class BimpGroupManager {
     
     /* Get all groups id where the user is */
 
-    function getGroupIdByUserId($userid) {
+    function getGroupIdByUserId($userid, $entity = 1) {
         if (!isset($this->cache['grpsUser'][$userid])) {
             $groupids = array();
             $sql = "SELECT fk_usergroup";
             $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user";
-            $sql.= " WHERE fk_user=" . $userid;
+            $sql.= " WHERE fk_user=" . $userid. ' AND entity='.$entity;
 
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {

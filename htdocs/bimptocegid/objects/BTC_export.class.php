@@ -229,7 +229,7 @@ class BTC_export extends BimpObject {
     protected function create_daily_file($element = null, $date = null, $complementFileName = '', $complementDirectory = '') {
         
         $daily_files = [];
-        $entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+        $extendsEntity = BimpCore::getExtendsEntity();
         if(empty($complementDirectory) && empty($complementFileName)) {
             if(isset($_REQUEST['date']) && !empty($_REQUEST['date']) || !is_null($date)) {
                 $complementFileName = isset($_REQUEST['date']) ? $_REQUEST['date'] : $date;
@@ -250,25 +250,25 @@ class BTC_export extends BimpObject {
         
         switch($element) {
             case 'vente':
-                $file = '1_'.$entitie.'_(VENTES)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
+                $file = '1_'.$extendsEntity.'_(VENTES)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'tier':
-                $file = '0_'.$entitie.'_(TIERS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
+                $file = '0_'.$extendsEntity.'_(TIERS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'achat':
-                $file = '3_'.$entitie.'_(ACHATS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
+                $file = '3_'.$extendsEntity.'_(ACHATS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'paiement':
-                $file = '2_'.$entitie.'_(PAIEMENTS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
+                $file = '2_'.$extendsEntity.'_(PAIEMENTS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'rib':
-                $file = '4_'.$entitie.'_(RIBS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
+                $file = '4_'.$extendsEntity.'_(RIBS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'mandat':
-                $file = '5_'.$entitie.'_(MANDATS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
+                $file = '5_'.$extendsEntity.'_(MANDATS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'payni':
-                $file = '6_'.$entitie.'_(PAYNI)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
+                $file = '6_'.$extendsEntity.'_(PAYNI)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
         }
         

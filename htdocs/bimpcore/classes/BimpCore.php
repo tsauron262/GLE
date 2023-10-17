@@ -445,7 +445,7 @@ class BimpCore
                         echo '<br/>';
 
                         if ($new_version) {
-                            BimpCore::setConf('module_version_' . $module, $new_version);
+                            BimpCore::setConf('module_version_' . $module, $new_version, 0);
                         }
                     }
                 }
@@ -541,8 +541,8 @@ class BimpCore
 
         $cache = self::getConfCache();
 
-        if (isset($cache['bimpcore'])) {
-            foreach ($cache['bimpcore'] as $name => $value) {
+        if (isset($cache[0]['bimpcore'])) {
+            foreach ($cache[0]['bimpcore'] as $name => $value) {
                 if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
                     $module = $matches[1];
 
@@ -582,10 +582,10 @@ class BimpCore
 
         $cache = self::getConfCache();
 
-        if (isset($cache['bimpcore'])) {
+        if (isset($cache[0]['bimpcore'])) {
             $modules = array('bimpcore');
 
-            foreach ($cache['bimpcore'] as $name => $value) {
+            foreach ($cache[0]['bimpcore'] as $name => $value) {
                 if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
                     if (!in_array($matches[1], $modules)) {
                         $modules[] = $matches[1];

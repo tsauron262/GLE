@@ -90,14 +90,18 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
         return parent::initOperation($id_operation, $errors);
     }
+    
+    public function getFtpParams($params){
+        return BimpTools::getArrayValueFromPath($this->params, $params, '');
+    }
 
     public function initFtpTest(&$data, &$errors = array())
     {
         BimpObject::loadClass('bimpdatasync', 'BDS_Report');
 
-        $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
-        $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
-        $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
+        $host = $this->getFtpParams('ftp_host');
+        $login = $this->getFtpParams('ftp_login');
+        $pword = $this->getFtpParams('ftp_pwd');
         $port = BimpTools::getArrayValueFromPath($this->params, 'ftp_port', 21);
         $passive = (int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 0);
 
@@ -456,9 +460,9 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     public function downloadFtpFile($fileName, &$errors = array(), $mode = FTP_BINARY)
     {
-        $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
-        $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
-        $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
+        $host = $this->getFtpParams('ftp_host');
+        $login = $this->getFtpParams('ftp_login');
+        $pword = $this->getFtpParams('ftp_pwd');
         $port = BimpTools::getArrayValueFromPath($this->params, 'ftp_port', 21);
         $passive = ((int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 0) ? true : false);
 

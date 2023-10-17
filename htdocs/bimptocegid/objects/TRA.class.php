@@ -187,8 +187,8 @@ class TRA extends BimpObject {
         
         $html = '';        
         
-        $pattern_tiers  = 0 . '_' . BimpCore::getConf('file_entity', null, "bimptocegid") . '_(TIERS)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
-        $pattern_ventes = 1 . '_' . BimpCore::getConf('file_entity', null, "bimptocegid") . '_(VENTES)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
+        $pattern_tiers  = 0 . '_' . BimpCore::getExtendsEntity() . '_(TIERS)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
+        $pattern_ventes = 1 . '_' . BimpCore::getExtendsEntity() . '_(VENTES)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
         $files = glob(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/' . $pattern_tiers);
         
         if($searchBy == 0) {

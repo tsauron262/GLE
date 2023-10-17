@@ -3,9 +3,10 @@
 class Bimp_UserGroup extends BimpObject
 {
 
-    function __construct($module, $object_name)
-    {
-        $this->redirectMode = 1;
+    public function __construct($module, $object_name) {
+        $this->redirectMode = 4;
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY'))
+            $this->redirectMode = 5;
         return parent::__construct($module, $object_name);
     }
 

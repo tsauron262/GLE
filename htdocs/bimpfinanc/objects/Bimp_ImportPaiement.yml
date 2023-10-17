@@ -4,6 +4,8 @@ common_fields: 1
 icon: fas_file-import
 controller: import_paiement
 
+entity_name: importPaiement
+
 list_page_url:
     controller: index
     url_params: 

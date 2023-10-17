@@ -1300,11 +1300,11 @@ class gsxController extends BimpController
 
         if ($id_sav != 'none') {
             if (!$id_sav) {
-                $errors[] = 'ID du SAV absent 57';
+//                $errors[] = 'ID du SAV absent 57';
             } else {
                 $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
                 if (!BimpObject::objectLoaded($sav)) {
-                    $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
+//                    $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
                 }
             }
         }

@@ -198,10 +198,6 @@ params:
         required: 1
         def: 2022-01-01
         cat: autre
-    file_entity:
-        label: Propriétaire des fichiers TRA
-        required: 1
-        cat: autre
     version_tra:
         label: Version courrante des fichiers TRA
         required: 1

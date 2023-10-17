@@ -685,6 +685,10 @@ lists_cols:
         label: Commercial
         value: 
             callback: displayCommercial
+    total_ht_nonacompte: 
+        label: Total HT sans les acomptes
+        value: 
+            callback: displayTotalWithNonAcompte
     date_shipped: 
         label: Expédiée le
     signed: 

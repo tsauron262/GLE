@@ -11,6 +11,8 @@ header_list_name: default
 header_edit_form: edit
 header_btn: 
     callback: getActionsButtons
+    
+entity_name: bimpapi
 
 labels:
     name: API

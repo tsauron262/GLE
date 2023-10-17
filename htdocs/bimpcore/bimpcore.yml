@@ -117,8 +117,17 @@ params:
         
     #ftp_dir => Eviter les noms trop "communs" pour les params de conf, 
     # il faut qu'on puisse retrouver facilement les params dans le code lors des recherches globales.
+    exports_ldlc_ftp_serv:
+        label: Serveur FTP pour les exports LDLC
+        def: 'ftp-edi.groupe-ldlc.com'
     exports_ldlc_ftp_dir:
         label: Dossier FTP pour les exports LDLC
+        def: ''
+    exports_ldlc_ftp_user:
+        label: Utilisateur FTP pour les exports LDLC
+        def: ''
+    exports_ldlc_ftp_mdp:
+        label: Mdp FTP pour les exports LDLC
         def: ''
     
     # Defaults: 
@@ -348,4 +357,11 @@ params:
     extends_entity:
         label: Extend Entitée 
         required: 1
+    entity_url:
+        label: Url par entité
+        info: json
+    enabled_callback_cache:
+        label: Activer le cache des callback YML
+        type: bool
+        default: 0
         

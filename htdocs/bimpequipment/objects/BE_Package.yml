@@ -2,6 +2,8 @@ table: be_package
 controller: package
 icon: fas_boxes
 
+entity_name: stock
+
 header_list_name: default
 header_edit_form: default
 

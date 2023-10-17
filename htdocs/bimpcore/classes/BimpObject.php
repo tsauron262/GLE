@@ -6410,9 +6410,18 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Gestion des droits users: 
+    
 
     public function can($right)
     {
+//        echo '<pre>'. get_class($this);
+        if(isset($this->dol_object)){//peut être un peut lourd, mais plus safe...
+            $return = BimpCache::dol_can($this->dol_object);
+            if(!$return)
+                return 0;
+        }
+//        print_r($this->dol_object);
+//        echo('rrr');
         switch ($right) {
             case "view" :
                 if (BimpCore::isContextPublic()) {
@@ -10861,34 +10870,63 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
         $redirectMode = $this->redirectMode;
+        
         $texteBtn = "";
-        if (BimpTools::getValue("redirectForce_oldVersion"))
-            $_SESSION['oldVersion'] = true;
+        $btn = false;
         if ($this->iAmAdminRedirect()) {
-            if ($redirectMode == 4 && (isset($_SESSION['oldVersion']) || !$newVersion)) {//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
-                $redirectMode = 1;
-                $texteBtn = "ADMIN (N) : ";
-            } elseif ($redirectMode == 5) {
-                $redirectMode = 1;
-                $texteBtn = "ADMIN (A) : ";
+            $btn = true;
+            if ($redirectMode == 4){//auto old vers new
+                $texteBtn = "ADMIN (Normalement nouvelle) : ";
+                if($newVersion){//on est sur l'ancienne
+                    if ($redirect)
+                        unset($_SESSION['oldVersion']);
+                    elseif(!isset($_SESSION['oldVersion']))
+                        $redirect = true;
+                }
+                else{//on est deja sur la nouvelle mais si $_SESSION['oldVersion']
+                    if ($redirect)
+                        $_SESSION['oldVersion'] = true;
+                    elseif(isset($_SESSION['oldVersion']))
+                        $redirect = true;
+                }
+            }
+            if($redirectMode == 5){//auto new vers old
+                $texteBtn = "ADMIN (Normalement Ancienne) : ";
+                if(!$newVersion){//on est sur la nouvelle
+                    if ($redirect)
+                        unset($_SESSION['newVersion']);
+                    if(!isset($_SESSION['newVersion']))
+                        $redirect = true;
+                }
+                else{//on est deja sur l'ancienne mais si $_SESSION['newVersion']
+                    if ($redirect)
+                        $_SESSION['newVersion'] = true;
+                    elseif(isset($_SESSION['newVersion']))
+                        $redirect = true;
+                }
             }
         }
-        $btn = false;
+        else{
+            if($redirectMode == 4 && $newVersion)
+                $redirect = true;
+            elseif($redirectMode == 5 && !$newVersion)
+                $redirect = true;
+        }
+        
+        if($redirectMode == 1 ||
+                ($redirectMode == 2 && $newVersion) ||
+                ($redirectMode == 3 && !$newVersion))
+            $btn = true;
+        
+        
+        
         if ($newVersion) {
-            if ($redirect)
-                unset($_SESSION['oldVersion']);
             if ($this->id > 0) {
                 if ($this->getConf('controller', null))
                     $url = $this->getUrl();
             } elseif ($this->getConf('list_page_url', null))
                 $url = $this->getListUrl();
             $texteBtn .= "Nouvelle version";
-            if ($redirectMode == 4)
-                $redirect = true;
-            elseif (in_array($redirectMode, array(3, 5)))
-                $redirect = false;
-            elseif ($redirectMode != 0)
-                $btn = true;
 
             $search = null;
             if (BimpTools::getValue("sall") != "") {
@@ -10927,20 +10965,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if (BimpTools::getValue("leftmenu") != "") {
                 $url .= "&leftmenu=" . BimpTools::getValue("leftmenu");
             }
-
-//            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         } else {
-            if ($redirect)
-                $_SESSION['oldVersion'] = true;
-
             $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
             $texteBtn .= "Ancienne version";
-            if ($redirectMode == 5)
-                $redirect = true;
-            elseif (in_array($redirectMode, array(2, 4)))
-                $redirect = false;
-            elseif ($redirectMode != 0)
-                $btn = true;
         }
         if ($redirect && $url != "") {
             $ob = ob_get_contents();

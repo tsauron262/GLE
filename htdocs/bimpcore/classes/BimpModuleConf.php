@@ -139,16 +139,16 @@ class BimpModuleConf
             if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
                 switch ($entity_type) {
                     case 'current':
-                        if (BimpCore::isModeDev()) {
-                            self::$entities[$entity_type][1] = 'Entité 1';
-                        } else {
+//                        if (BimpCore::isModeDev()) {
+//                            self::$entities[$entity_type][1] = 'Entité 1';
+//                        } else {
                             $entity = getEntity('bimp_conf', 0);
                             if ($entity) {
                                 self::$entities[$entity_type][$entity] = 'Courante'; // todo: remplacer par nom
                             } else {
                                 return BimpRender::renderAlerts('Aucune entité courante');
                             }
-                        }
+//                        }
 
                         break;
 
@@ -158,13 +158,13 @@ class BimpModuleConf
 
                     case 'all':
                     default:
-                        if (BimpCore::isModeDev()) {
-                            self::$entities[$entity_type][0] = 'Globale';
-                            self::$entities[$entity_type][1] = 'Entité 1';
-                            self::$entities[$entity_type][2] = 'Entité 2';
-                        } else {
+//                        if (BimpCore::isModeDev()) {
+//                            self::$entities[$entity_type][0] = 'Globale';
+//                            self::$entities[$entity_type][1] = 'Entité 1';
+//                            self::$entities[$entity_type][2] = 'Entité 2';
+//                        } else {
                             self::$entities[$entity_type] = BimpCache::getEntitiesCacheArray(true, 'Globale');
-                        }
+//                        }
                         break;
                 }
             } else {

@@ -241,6 +241,7 @@ class ActionsBimpcore
             global $mc,$conf;
             $mc->dao->getEntities(false, false, true, true, true);
             if(!in_array($conf->entity, $mc->dao->entities)){
+//                print_r($mc->dao->entities);die;
                 if(count($mc->dao->entities) > 0)
                     $mc->switchEntity($mc->dao->entities[0]);
             }

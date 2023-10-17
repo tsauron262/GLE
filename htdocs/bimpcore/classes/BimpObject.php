@@ -6410,15 +6410,15 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Gestion des droits users: 
+    
 
     public function can($right)
     {
-//        global $user;
-//        if($this->isLoaded() && isset($this->dol_object)){//peut être un peut lourd, mais plus safe...
-//            $result = restrictedArea($user, $this->dol_object->element, $this->id, '', '', 'fk_soc', 'rowid', 0, 1);
-//            if($result == 0)
-//                return 0;
-//        }
+        if(isset($this->dol_object)){//peut être un peut lourd, mais plus safe...
+            $return = BimpCache::dol_can($this->dol_object);
+            if(!$return)
+                return 0;
+        }
         switch ($right) {
             case "view" :
                 if (BimpCore::isContextPublic()) {

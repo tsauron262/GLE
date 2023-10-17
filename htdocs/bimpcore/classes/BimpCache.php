@@ -250,6 +250,20 @@ class BimpCache
         return self::$cache[$cache_key];
     }
     
+    
+    public static function dol_can($dol_object){
+        $cache_key = 'dol_can_'.$dol_object->element;
+        if(!isset(self::$cache[$cache_key])){
+//            echo 'ici';
+            global $user;
+            $result = restrictedArea($user, $dol_object->element, null, $dol_object->table_element.'&'.$dol_object->table_element, '', 'fk_soc', 'rowid', 0, 1);
+            if($result == 0)
+                self::$cache[$cache_key] = 0;
+            self::$cache[$cache_key] = 1;
+        }
+        return self::$cache[$cache_key];
+    }
+    
     public static function getCallFunctionCache($instance, $method, $params, $static = false){
         $cache_key = 'callFunction_'. $instance->module . '_' . $instance->object_name . '_'.$method. '_'. json_encode($params).'_'.$static;
         if(!$static) 

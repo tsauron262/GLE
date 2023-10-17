@@ -257,7 +257,7 @@ class BimpCache
             global $user;
             $elem = $dol_object->element;
             $feature2 = '';
-            if($elem == 'fichinter')
+            if($elem == 'fichinter' || $elem == 'fichinterdet')
                 $elem = 'ficheinter';
             if($elem == 'order_supplier')
                 $elem = 'fournisseur';

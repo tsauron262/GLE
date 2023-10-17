@@ -259,6 +259,8 @@ class BimpCache
             $elem = $dol_object->element;
             if($elem == 'order_supplier')
                 $elem = 'fournisseur';
+            if($elem == 'invoice_supplier')
+                $elem = 'fournisseur';
             self::$cache[$cache_key] = restrictedArea($user, $elem, null, $dol_object->table_element.'&'.$dol_object->table_element, '', 'fk_soc', 'rowid', 0, 1);
         }
         return self::$cache[$cache_key];

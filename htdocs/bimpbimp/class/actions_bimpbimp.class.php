@@ -26,27 +26,27 @@ class ActionsBimpbimp {
         if ($object->sendmode == 'smtps' && !in_array($object->smtps->getFrom('host'), $tabDomainValid))
         {
             $add = $object->smtps->getFrom('user')."@".$object->smtps->getFrom('host');
-            $sql = $db->query("SELECT u.email, ue.alias FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.fk_object  
-AND (u.email = '".$add."' || ue.alias LIKE '%".$add."%')");
-            while($ln = $db->fetch_object($sql)){
-                $mails = explode(",", $ln->alias);
-                $mails[] = $ln->email;
-                foreach($mails as $mailT){
-                    $tabT = explode("@", $mailT);
-                    if(isset($tabT[1])){
-                        $domaine = $tabT[1];
-                        if(in_array($domaine, $tabDomainValid)){
-//                            $object->smtps->setFrom('user') = $tabT[0];
-//                            $object->smtps->setFrom('host') = $tabT[1];
-                            
-                            $object->smtps->setFrom($mailT);
-                            $object->smtps->setReplyTo($mailT);
-                            return 0;
+            if($add != '' && stripos($add, '@') !== false){
+                $sql = $db->query("SELECT u.email, ue.alias FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.fk_object  
+    AND (u.email = '".$add."' || ue.alias LIKE '%".$add."%')");
+                while($ln = $db->fetch_object($sql)){
+                    $mails = explode(",", $ln->alias);
+                    $mails[] = $ln->email;
+                    foreach($mails as $mailT){
+                        $tabT = explode("@", $mailT);
+                        if(isset($tabT[1])){
+                            $domaine = $tabT[1];
+                            if(in_array($domaine, $tabDomainValid)){
+    //                            $object->smtps->setFrom('user') = $tabT[0];
+    //                            $object->smtps->setFrom('host') = $tabT[1];
+
+                                $object->smtps->setFrom($mailT);
+                                $object->smtps->setReplyTo($mailT);
+                                return 0;
+                            }
                         }
                     }
                 }
-                
-                
             }
             
             $this->error = "Adresse d'envoie non bimp ".$add." !";

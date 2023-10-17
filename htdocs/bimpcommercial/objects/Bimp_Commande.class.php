@@ -104,6 +104,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return 0;
     }
 
+    public function canView()
+    {
+        if (defined('NOLOGIN')) {
+            return 1;
+        }
+
+        global $user;
+        if (isset($user->rights->commande->read)) {
+            return (int) $user->rights->commande->read;
+        }
+
+        return 0;
+    }
+
     public function canEdit()
     {
         return $this->canCreate();

@@ -293,6 +293,11 @@ class Bimp_CommandeFourn extends BimpCommAchat
         global $user;
         return (int) $user->rights->fournisseur->commande->creer;
     }
+    public function canView()
+    {
+        global $user;
+        return (int) $user->rights->fournisseur->commande->lire;
+    }
 
     public function canEdit()
     {

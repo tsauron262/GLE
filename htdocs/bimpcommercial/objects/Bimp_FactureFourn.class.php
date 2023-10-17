@@ -208,7 +208,14 @@ class Bimp_FactureFourn extends BimpCommAchat
 
     public function canCreate()
     {
-        return 1;
+        global $user;
+        return $user->rights->fournisseur->facture->creer;
+    }
+    
+    public function canView()
+    {
+        global $user;
+        return $user->rights->fournisseur->facture->lire;
     }
 
     public function canEdit()

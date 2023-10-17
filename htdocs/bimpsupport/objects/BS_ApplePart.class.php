@@ -445,6 +445,10 @@ class BS_ApplePart extends BimpObject
             return 107.5;
         }
 
+        if ($prix == 79.93) {
+            return (119 / 1.2);
+        }
+
         if ($prix == 76.72) {
             return 99.16667;
         }
@@ -453,8 +457,16 @@ class BS_ApplePart extends BimpObject
             return 82.5;
         }
 
+        if ($prix == 57.93) {
+            return (89 / 1.2);
+        }
+
         if ($prix == 51.57) {
             return (119 / 1.2);
+        }
+
+        if ($prix == 47.67) {
+            return (69 / 1.2);
         }
 
         if ($prix == 42.90) {

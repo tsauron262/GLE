@@ -1026,8 +1026,8 @@ class BIMP_Task extends BimpObject
             $mails[] = BimpTools::getUserEmailOrSuperiorEmail($userN->id);
         }
         $to = implode(',', $mails);
-
-        $this->sendMail($to, 'Tâche ERP<' . BimpCore::getConf('mailReponse', '', 'bimptask') . '>', $subject, $message, $rappel, $files);
+        
+        $this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files);
     }
 
     public function sendMail($to, $from, $sujet, $msg, $rappel = true, $files = array())

@@ -792,17 +792,17 @@ class BWSApi
 
                     foreach ($client->getChildrenObjects('contacts') as $contact) {
                         $client_data['contacts'][] = array(
-                            'nom'        => (string) $contact->getData('lastname'),
-                            'prenom'     => (string) $contact->getData('firstname'),
-                            'adresse'     => $contact->getData('address'),
-                            'code_postal' => $contact->getData('zip'),
-                            'ville'       => $contact->getData('town'),
-                            'pays'        => $contact->displayDataDefault('fk_pays', 1, 1),
-                            'tel_perso'  => (string) $contact->getData('phone_perso'),
-                            'tel_mobile' => (string) $contact->getData('phone_mobile'),
-                            'tel_pro'    => (string) $contact->getData('phone'),
-                            'poste'      => (string) $contact->getData('poste'),
-                            'email'      => (string) BimpTools::cleanEmailsStr($contact->getData('email')),
+                            'nom'         => (string) $contact->getData('lastname'),
+                            'prenom'      => (string) $contact->getData('firstname'),
+                            'adresse'     => (string) $contact->getData('address'),
+                            'code_postal' => (string) $contact->getData('zip'),
+                            'ville'       => (string) $contact->getData('town'),
+                            'pays'        => (string) $contact->displayDataDefault('fk_pays', 1, 1),
+                            'tel_perso'   => (string) $contact->getData('phone_perso'),
+                            'tel_mobile'  => (string) $contact->getData('phone_mobile'),
+                            'tel_pro'     => (string) $contact->getData('phone'),
+                            'poste'       => (string) $contact->getData('poste'),
+                            'email'       => (string) BimpTools::cleanEmailsStr($contact->getData('email')),
                         );
                     }
                 }

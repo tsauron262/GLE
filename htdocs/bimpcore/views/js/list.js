@@ -472,8 +472,6 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         var $values_input = $list.find('input[name=' + form_name + '_add_form_values]');
         if ($values_input.length) {
             data['param_values'] = $values_input.val();
-
-            bimp_msg($values_input.parent().parent().attr('id') + ' - ' + $values_input.parent().parent().attr('class'));
         }
     }
 

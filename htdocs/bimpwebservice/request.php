@@ -14,8 +14,8 @@ header("Content-Type: application/json");
 if (isset($_GET['debug']) && (int) $_GET['debug']) {
     $response = array(
 //        'server' => $_SERVER,
-        'post'   => $_POST,
-        'get'    => $_GET
+        'post' => $_POST,
+        'get'  => $_GET
     );
     die(json_encode($response, JSON_UNESCAPED_UNICODE));
 }
@@ -47,6 +47,14 @@ if (!$request_name) {
                 'code'    => 'TOKEN_MISSING',
                 'message' => 'Token absent'
             );
+        }
+    } else {
+        $pw = isset($_GET['pword']) ? $_GET['pword'] : '';
+
+        if (!$pw) {
+            $errors[] = 'Mot de passe absent';
+        } else {
+            die(json_encode(array('MDP' => $pw), JSON_UNESCAPED_UNICODE));
         }
     }
 

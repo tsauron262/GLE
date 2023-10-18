@@ -780,29 +780,29 @@ class BWSApi
                     $this->addError('UNFOUND', 'Aucun client trouvé pour le code "' . $code_client . '"');
                 } else {
                     $client_data = array(
-                        'nom'         => $client->getData('nom'),
-                        'adresse'     => $client->getData('address'),
-                        'code_postal' => $client->getData('zip'),
-                        'ville'       => $client->getData('town'),
-                        'pays'        => $client->displayDataDefault('fk_pays', 1, 1),
-                        'tel'         => $client->getData('phone'),
-                        'email'       => $client->getData('email'),
+                        'nom'         => (string) $client->getData('nom'),
+                        'adresse'     => (string) $client->getData('address'),
+                        'code_postal' => (string) $client->getData('zip'),
+                        'ville'       => (string) $client->getData('town'),
+                        'pays'        => (string) $client->displayDataDefault('fk_pays', 1, 1),
+                        'tel'         => (string) $client->getData('phone'),
+                        'email'       => (string) $client->getData('email'),
                         'contacts'    => array()
                     );
 
                     foreach ($client->getChildrenObjects('contacts') as $contact) {
                         $client_data['contacts'][] = array(
-                            'nom'        => $contact->getData('lastname'),
-                            'prenom'     => $contact->getData('firstname'),
+                            'nom'        => (string) $contact->getData('lastname'),
+                            'prenom'     => (string) $contact->getData('firstname'),
 //                            'adresse'     => $contact->getData('address'),
 //                            'code_postal' => $contact->getData('zip'),
 //                            'ville'       => $contact->getData('town'),
 //                            'pays'        => $contact->displayDataDefault('fk_pays', 1, 1),
-                            'tel_perso'  => $contact->getData('phone_perso'),
-                            'tel_mobile' => $contact->getData('phone_mobile'),
-                            'tel_pro'    => $contact->getData('phone'),
-                            'poste'      => $contact->getData('poste'),
-                            'email'      => $contact->getData('email'),
+                            'tel_perso'  => (string) $contact->getData('phone_perso'),
+                            'tel_mobile' => (string) $contact->getData('phone_mobile'),
+                            'tel_pro'    => (string) $contact->getData('phone'),
+                            'poste'      => (string) $contact->getData('poste'),
+                            'email'      => (string) BimpTools::cleanEmailsStr($contact->getData('email')),
                         );
                     }
                 }

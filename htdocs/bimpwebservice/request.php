@@ -7,12 +7,16 @@ require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/BWS_Lib.php';
 
 header("Content-Type: application/json");
 
-//$response = array(
-//    'server' => $_SERVER,
-//    'post'   => $_POST,
-//    'get'    => $_GET
-//);
-//die(json_encode($response, JSON_UNESCAPED_UNICODE));
+$request_name = (isset($_GET['debug']) ? $_GET['debug'] : '');
+
+if (isset($_GET['debug']) && (int) $_GET['debug']) {
+    $response = array(
+        'server' => $_SERVER,
+        'post'   => $_POST,
+        'get'    => $_GET
+    );
+    die(json_encode($response, JSON_UNESCAPED_UNICODE));
+}
 
 $errors = array();
 $response = array();

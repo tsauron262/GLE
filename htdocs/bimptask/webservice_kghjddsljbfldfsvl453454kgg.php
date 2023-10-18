@@ -99,7 +99,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         echo "<br/>Création task";
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "", 'auto' => 0, );
-        if($dst == BimpCore::getConf('mailReponse', '', 'bimptask')){
+        if($dst == BimpCore::getConf('mailReponse', null, 'bimptask')){
             $tab['auto'] = 0;
             $tab['type_manuel'] = 'dev';
             $tab['dst'] = '';

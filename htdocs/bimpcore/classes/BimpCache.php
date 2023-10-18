@@ -254,14 +254,23 @@ class BimpCache
     public static function dol_can($dol_object){
         $cache_key = 'dol_can_'.$dol_object->element;
         if(!isset(self::$cache[$cache_key])){
-//            echo 'ici';
             global $user;
             $elem = $dol_object->element;
+            $feature2 = '';
+            if($elem == 'fichinter' || $elem == 'fichinterdet')
+                $elem = 'ficheinter';
             if($elem == 'order_supplier')
                 $elem = 'fournisseur';
             if($elem == 'invoice_supplier')
                 $elem = 'fournisseur';
-            self::$cache[$cache_key] = restrictedArea($user, $elem, null, $dol_object->table_element.'&'.$dol_object->table_element, '', 'fk_soc', 'rowid', 0, 1);
+            if($elem == 'contratdet')
+                $elem = 'contrat';
+            if($elem == 'action'){
+                $elem = 'agenda';
+                $feature2 = 'myactions';
+            }
+            self::$cache[$cache_key] = restrictedArea($user, $elem, null, $dol_object->table_element.'&'.$dol_object->table_element, $feature2, 'fk_soc', 'rowid', 0, 1);
+//            echo 'ici_'.$elem."_".$dol_object->table_element.'_'.self::$cache[$cache_key].'<br/>';
         }
         return self::$cache[$cache_key];
     }

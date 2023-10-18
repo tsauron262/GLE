@@ -890,7 +890,7 @@ class Bimp_User extends BimpObject
             'content' => $list->renderHtml()
         );
 
-        // Liste mes tâches créées
+//        // Liste mes tâches créées
         $list = new BC_ListTable($task, 'default', 1, null, 'Mes tâches créées');
         $list->addIdentifierSuffix('by_me');
         $list->addFieldFilterValue('user_create', (int) $this->id);

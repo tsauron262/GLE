@@ -6,7 +6,7 @@
 
 
 
-curl -k -X POST -H "BWS-TOKEN: Zkd5Y0RiTFhBek4xOTByWU5PVDBxVjM1" -H "BWS-LOGIN: cGV0ZXJAYmltcC5mcg==" "https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req=getContractInfo"
+  curl -k -X POST -H "BWS-TOKEN: Zkd5Y0RiTFhBek4xOTByWU5PVDBxVjM1" -H "BWS-LOGIN: cGV0ZXJAYmltcC5mcg==" "https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req=getContractInfo"
  */
 
 class BWSApi
@@ -82,7 +82,29 @@ class BWSApi
                 'object_name' => array('label' => 'Nom de l\'objet', 'required' => 1),
                 'id'          => array('label' => 'ID de l\'objet', 'required' => 1)
             )
-        )
+        ),
+        'findClient'    => array(
+            'desc'   => 'Retourne les données d\'un client',
+            'params' => array(
+                'code' => array('Code client'),
+//                'nom'   => array('label' => 'Nom'),
+//                'tel'   => array('label' => 'Numéro de téléphone'),
+//                'email' => array('label' => 'Adresse e-mail')
+            )
+        ),
+//        'findContactsClient' => array(
+//            'desc'   => 'Retourne une liste de contacts clients selon les termes de recherche',
+//            'params' => array(
+//                'code'    => array('Code client'),
+//                'nom'     => array('label' => 'Nom'),
+//                'prenom'  => array('label' => 'Prénom'),
+//                'tel'     => array('label' => 'Numéro de téléphone'),
+//                'email'   => array('label' => 'Adresse e-mail'),
+//                'address' => array('label' => 'Adresse'),
+//                'zip'     => array('label' => 'Code postal'),
+//                'town'    => array('label' => 'Ville'),
+//            )
+//        )
     );
 
     public static function getInstance($request_name, $params)
@@ -729,6 +751,58 @@ class BWSApi
                 } else {
                     $response = array('success' => 1);
                 }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_findClient()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $code_client = $this->getParam('code', '');
+
+            if (!$code_client) {
+                $this->addError('INVALID_PARAMETERS', 'Veuillez renseigner le code client');
+            } else {
+                $client = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Client', array(
+                            'code_client' => $code_client
+                                ), true, false);
+
+                if (!BimpObject::objectLoaded($client)) {
+                    $this->addError('UNFOUND', 'Aucun client trouvé pour le code "' . $code_client . '"');
+                } else {
+                    $client_data = array(
+                        'nom'         => $client->getData('nom'),
+                        'adresse'     => $client->getData('address'),
+                        'code_postal' => $client->getData('zip'),
+                        'ville'       => $client->getData('town'),
+                        'pays'        => $client->displayDataDefault('fk_pays', 1, 1),
+                        'tel'         => $client->getData('phone'),
+                        'email'       => $client->getData('email'),
+                        'contacts'    => array()
+                    );
+
+                    foreach ($client->getChildrenObjects('contacts') as $contact) {
+                        $client_data['contacts'][] = array(
+                            'nom'        => $contact->getData('lastname'),
+                            'prenom'     => $contact->getData('firstname'),
+//                            'adresse'     => $contact->getData('address'),
+//                            'code_postal' => $contact->getData('zip'),
+//                            'ville'       => $contact->getData('town'),
+//                            'pays'        => $contact->displayDataDefault('fk_pays', 1, 1),
+                            'tel_perso'  => $contact->getData('phone_perso'),
+                            'tel_mobile' => $contact->getData('phone_mobile'),
+                            'tel_pro'    => $contact->getData('phone'),
+                            'poste'      => $contact->getData('poste'),
+                            'email'      => $contact->getData('email'),
+                        );
+                    }
+                }
+
+                $response = $client_data;
             }
         }
 

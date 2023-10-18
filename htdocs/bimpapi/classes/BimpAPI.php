@@ -512,6 +512,7 @@ abstract class BimpAPI
                     }
 
                     if (!empty($curl_options)) {
+                        $infos .= 'CURL OPTIONS : <br/>';
                         foreach ($curl_options as $opt_key => $opt_value) {
                             curl_setopt($ch, $opt_key, $opt_value);
                         }

@@ -83,7 +83,7 @@ class BWSApi
                 'id'          => array('label' => 'ID de l\'objet', 'required' => 1)
             )
         ),
-        'findClient'    => array(
+        'findClient'     => array(
             'desc'   => 'Retourne les données d\'un client',
             'params' => array(
                 'code' => array('Code client'),
@@ -528,20 +528,25 @@ class BWSApi
         $response = array();
 
         if (!count($this->errors)) {
-            $pword = base64_decode($this->getParam('pword', ''));
+            $pword = $this->getParam('pword', '');
 
             if (!$this->ws_user->checkPWord($pword)) {
-                $this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide - (PW)');
-            } else {
-                $errors = array();
-                $response = $this->ws_user->generateToken($errors);
+                $pword = base64_decode($this->getParam('pword', ''));
 
-                if (count($errors)) {
-                    BimpCore::addlog('Erreur lors de la génération d\'un token d\'authentification', Bimp_Log::BIMP_LOG_ERREUR, 'ws', $this->ws_user, array(
-                        'Erreurs' => $errors
-                    ));
-                    $this->addError('INTERNAL_ERROR', 'Une erreur est survenue - échec de l\'authentification');
+                if (!$this->ws_user->checkPWord($pword)) {
+                    $this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide - (PW)');
+                    return array();
                 }
+            }
+
+            $errors = array();
+            $response = $this->ws_user->generateToken($errors);
+
+            if (count($errors)) {
+                BimpCore::addlog('Erreur lors de la génération d\'un token d\'authentification', Bimp_Log::BIMP_LOG_ERREUR, 'ws', $this->ws_user, array(
+                    'Erreurs' => $errors
+                ));
+                $this->addError('INTERNAL_ERROR', 'Une erreur est survenue - échec de l\'authentification');
             }
         }
 

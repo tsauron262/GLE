@@ -11,7 +11,7 @@ $request_name = (isset($_GET['debug']) ? $_GET['debug'] : '');
 
 if (isset($_GET['debug']) && (int) $_GET['debug']) {
     $response = array(
-        'server' => $_SERVER,
+//        'server' => $_SERVER,
         'post'   => $_POST,
         'get'    => $_GET
     );

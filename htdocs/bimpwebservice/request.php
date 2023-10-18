@@ -7,6 +7,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/BWS_Lib.php';
 
 header("Content-Type: application/json");
 
+if (preg_match('/^\{.+\}$/', $_POST)) {
+    $_POST = json_decode($_POST, 1);
+}
+
 if (isset($_GET['debug']) && (int) $_GET['debug']) {
     $response = array(
 //        'server' => $_SERVER,

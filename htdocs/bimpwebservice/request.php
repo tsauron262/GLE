@@ -49,12 +49,10 @@ if (!$request_name) {
             );
         }
     } else {
-        $pw = isset($_GET['pword']) ? $_GET['pword'] : '';
+        $pw = isset($_POST['pword']) ? $_POST['pword'] : '';
 
         if (!$pw) {
             $errors[] = 'Mot de passe absent';
-        } else {
-            die(json_encode(array('MDP' => $pw), JSON_UNESCAPED_UNICODE));
         }
     }
 

@@ -363,10 +363,13 @@ params:
     enabled_callback_cache:
         label: Activer le cache des callback YML
         type: bool
-        default: 0
+        def: 0
     useEncours:
         label: Utiliser les encours
         type: bool
     useAtradius:
         label: Utiliser atradius
         type: bool
+    marqueur_mail_note:
+        label: Marquer pour les mails des notes
+        def: 659874

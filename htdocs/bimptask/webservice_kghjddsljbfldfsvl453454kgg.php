@@ -45,6 +45,7 @@ if(!$traiter)
 if(!$traiter)
     traiteTask($dst, $src, $subj, $txt);
 
+die('ok fin');
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
     
@@ -154,6 +155,7 @@ function traiteTask($dst, $src, $subj, $txt) {
 
 function traiteNote($dst, $src, $subj, $txt){
     $const = BimpCore::getConf('marqueur_mail_note');
+    $matches = array();
     preg_match("/" . $const . "[0-9]*/", $txt, $matches);
     if (isset($matches[0])) {
         $idNote = str_replace($const, "", $matches[0]);
@@ -161,9 +163,10 @@ function traiteNote($dst, $src, $subj, $txt){
     if(isset($idNote) && $idNote > 0){
         $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', $idNote);
         if($note && $note->isLoaded()){
-            $note->repMail($dst, $src, $subj, $txt);
+            return $note->repMail($dst, $src, $subj, $txt);
         }
     }
+    return 0;
 }
 
 function traiteMsgSav($dst, $src, $subj, $txt){

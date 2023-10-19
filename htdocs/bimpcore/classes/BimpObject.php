@@ -6923,7 +6923,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0, $id_societe = 0)
     {
         $errors = array();
 
@@ -6960,7 +6960,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'type_dest'      => $type_dest,
             'fk_group_dest'  => $fk_group_dest,
             'fk_user_dest'   => $fk_user_dest,
-            'delete_on_view' => $delete_on_view
+            'delete_on_view' => $delete_on_view,
+            'id_societe'     => $id_societe
         ));
 
         if (!count($errors)) {

@@ -266,10 +266,13 @@ class BimpMailCore
                 'id_obj'       => $this->parent->id,
             );
 
-            $errors = $instance->validateArray($data);
+            $log_errors = $instance->validateArray($data);
 
-            if (!count($errors)) {
-                $errors = $instance->create($warnings, true);
+            if (!count($log_errors)) {
+                $log_errors = $instance->create($warnings, true);
+            }
+            if (count($log_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($log_errors, 'Echec de la création du log pour cet envoi d\'email');
             }
         }
 

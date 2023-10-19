@@ -267,10 +267,12 @@ class BimpCache
                 $elem = 'contrat';
             if($elem == 'action'){
                 $elem = 'agenda';
-                $feature2 = 'myactions';
+            }
+            if($elem == 'bank_account'){
+                $elem = 'societe';
             }
             self::$cache[$cache_key] = restrictedArea($user, $elem, null, $dol_object->table_element.'&'.$dol_object->table_element, $feature2, 'fk_soc', 'rowid', 0, 1);
-//            echo 'ici_'.$elem."_".$dol_object->table_element.'_'.self::$cache[$cache_key].'<br/>';
+//            echo 'ici_'.$elem."_".$dol_object->table_element.'_'.self::$cache[$cache_key].'_'.get_class($dol_object).'<br/>';
         }
         return self::$cache[$cache_key];
     }

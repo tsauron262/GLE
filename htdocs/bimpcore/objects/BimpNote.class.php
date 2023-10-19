@@ -809,7 +809,7 @@ class BimpNote extends BimpObject
         $errors = array();
         if($this->getData('type_dest') == self::BN_DEST_SOC){
             $this->set('visiblity',self::BN_ALL);
-            $mail = BimpTools::getValue('mail_dest');
+            $mail = BimpTools::getPostFieldValue('mail_dest');
             $content = $this->getData('content');
             if($mail == '')
                 $errors[] = 'Email vide : '.$mail;

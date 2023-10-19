@@ -690,6 +690,7 @@ class BimpNote extends BimpObject
 //        $data["type_author"] = self::BN_AUTHOR_USER;
         $data["user_create"] = $user->id;
         $data["viewed"] = 0;
+        $data['id_parent_note'] = $this->id;
         
 
         if ((int) $this->getData('visibility') === self::BN_PARTNERS) {
@@ -697,31 +698,9 @@ class BimpNote extends BimpObject
             $data['type_author'] = self::BN_AUTHOR_USER;
         }
         
-        if($data['type_dest'] == self::BN_DEST_SOC){
-            $data['visiblity'] = self::BN_ALL;
-            $mail = $data['mail_dest'];
-            $content = $data['content'];
-            if($mail == '')
-                $errors[] = 'Email vide : '.$mail;
-            $data['content'] = 'Envoyée a '.$mail.'<br/>'.$data['content'];
-        }
-        
 
         if(!count($errors)){
-            $obj = BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
-        
-        
-            if($data['type_dest'] == self::BN_DEST_SOC){
-                $sep = "<br/>---------------------<br/>";
-                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $obj->id . '<br/>'. $sep . '<br/><br/>';
-                
-                $html .= 'Réponse à votre message : <br/>';
-                $html .= $content;
-                $html .= '<br/><br/>Rappel du message initial : <br/>'.$this->getData('content');
-                
-                $bimpMail = new BimpMail($this->getParentInstance(), 'Nouveau message', $mail, BimpCore::getConf('mailReponse', null, 'bimptask'), $html);
-                $bimpMail->send($errors);
-            }
+            BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
         }
 
         return array(
@@ -827,15 +806,43 @@ class BimpNote extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $return = parent::create($warnings, $force_create);
-
-        if (!count($return)) {
-            $obj = $this->getParentInstance();
-            if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote')) {
-                $obj->afterCreateNote($this);
-            }
+        $errors = array();
+        if($this->getData('type_dest') == self::BN_DEST_SOC){
+            $this->set('visiblity',self::BN_ALL);
+            $mail = BimpTools::getValue('mail_dest');
+            $content = $this->getData('content');
+            if($mail == '')
+                $errors[] = 'Email vide : '.$mail;
+            $this->set('content','Envoyée a '.$mail.'<br/>'.$this->getData('content'));
         }
-        return $return;
+        
+        if(!count($errors)){
+            $errors = parent::create($warnings, $force_create);
+
+            if($this->getData('type_dest') == self::BN_DEST_SOC){
+                $sep = "<br/>---------------------<br/>";
+                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>'. $sep . '<br/><br/>';
+
+                $html .= 'Réponse à votre message : <br/>';
+                $html .= $content;
+                if($this->getData('id_parent_note') > 0){
+                    $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));
+                    $html .= '<br/><br/>Rappel du message initial : <br/>'.$oldNote->getData('content');
+                }
+
+                $bimpMail = new BimpMail($this->getParentInstance(), 'Nouveau message', $mail, BimpCore::getConf('mailReponse', null, 'bimptask'), $html);
+                $bimpMail->send($errors);
+            }
+
+            if (!count($errors)) {
+                $obj = $this->getParentInstance();
+                if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote')) {
+                    $obj->afterCreateNote($this);
+                }
+            }
+            return $errors;
+        }
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)

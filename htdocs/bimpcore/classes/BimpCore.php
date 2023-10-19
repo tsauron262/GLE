@@ -1292,7 +1292,7 @@ class BimpCore
     {
         // On retourne un message d'erreur si blocage nécessaire. false sinon.
 
-        if (!(int) self::getConf('use_objects_locks')) {
+        if (!(int) self::getConf('use_objects_locks') || static::isModeDev()) {
             return false;
         }
 
@@ -1413,7 +1413,7 @@ class BimpCore
 
     public static function unlockObject($module, $object_name, $id_object, $token = '')
     {
-        if (!(int) self::getConf('use_objects_locks')) {
+        if (!(int) self::getConf('use_objects_locks') || static::isModeDev()) {
             return array();
         }
 

@@ -811,8 +811,10 @@ class BimpNote extends BimpObject
             $this->set('visiblity',self::BN_ALL);
             $mail = BimpTools::getPostFieldValue('mail_dest');
             $content = $this->getData('content');
-            if($mail == '')
+            if($mail == ''){
+                BimpTools::displayBacktrace();
                 $errors[] = 'Email vide : '.$mail;
+            }
             $this->set('content','Envoyée a '.$mail.'<br/>'.$this->getData('content'));
         }
         

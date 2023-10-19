@@ -460,13 +460,22 @@ abstract class BimpAPI
                     }
 
                     // Options CURL: 
+                    $curl_options_str = array();
                     $curl_options[CURLOPT_RETURNTRANSFER] = true;
+                    $curl_options_str['CURLOPT_RETURNTRANSFER'] = true;
+                    
                     $curl_options[CURLOPT_CONNECTTIMEOUT] = $this->options['connect_timeout'];
+                    $curl_options_str['CURLOPT_CONNECTTIMEOUT'] = $this->options['connect_timeout'];
+                    
                     $curl_options[CURLOPT_TIMEOUT] = $this->options['timeout'];
+                    $curl_options_str['CURLOPT_TIMEOUT'] = $this->options['timeout'];
 
                     if ($params['header_out']) {
                         $curl_options[CURLINFO_HEADER_OUT] = true;
+                        $curl_options_str['CURLINFO_HEADER_OUT'] = true;
+                        
                         $curl_options[CURLOPT_HEADER] = true;
+                        $curl_options_str['CURLOPT_HEADER'] = true;
                     }
 
                     if (!empty($headers)) {
@@ -476,6 +485,7 @@ abstract class BimpAPI
                             $headers_str[] = $header_name . ': ' . $header_value;
                         }
                         $curl_options[CURLOPT_HTTPHEADER] = $headers_str;
+                        $curl_options_str['CURLOPT_HTTPHEADER'] = $headers_str;
                     }
 
                     if (is_array($params['fields']) && !empty($params['fields'])) {
@@ -497,21 +507,31 @@ abstract class BimpAPI
 
                         if (!empty($fields)) {
                             $curl_options[CURLOPT_POSTFIELDS] = $fields;
+                            $curl_options_str['CURLOPT_POSTFIELDS'] = $fields;
                         }
                     }
 
                     switch ($params['type']) {
                         case 'GET':
                             $curl_options[CURLOPT_HTTPGET] = true;
+                            $curl_options_str['CURLOPT_HTTPGET'] = true;
                             break;
 
                         case 'PUT':
                             $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
+                            $curl_options_str['CURLOPT_CUSTOMREQUEST'] = 'PUT';
+                            
                             $curl_options[CURLOPT_HTTPHEADER][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
+                            $curl_options_str['CURLOPT_HTTPHEADER'][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
                             break;
                     }
 
                     if (!empty($curl_options)) {
+                        $infos .= '<h4>CURL OPTIONS : </h4><br/>';
+                        $infos .= '<pre>';
+                        $infos .= print_r($curl_options_str, 1);
+                        $infos .= '</pre>';
+
                         foreach ($curl_options as $opt_key => $opt_value) {
                             curl_setopt($ch, $opt_key, $opt_value);
                         }

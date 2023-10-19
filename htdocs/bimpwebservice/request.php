@@ -7,12 +7,18 @@ require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/BWS_Lib.php';
 
 header("Content-Type: application/json");
 
-//$response = array(
-//    'server' => $_SERVER,
-//    'post'   => $_POST,
-//    'get'    => $_GET
-//);
-//die(json_encode($response, JSON_UNESCAPED_UNICODE));
+//if (preg_match('/^\{.+\}$/', $_POST)) {
+//    $_POST = json_decode($_POST, 1);
+//}
+
+if (isset($_GET['debug']) && (int) $_GET['debug']) {
+    $response = array(
+//        'server' => $_SERVER,
+        'post' => $_POST,
+        'get'  => $_GET
+    );
+    die(json_encode($response, JSON_UNESCAPED_UNICODE));
+}
 
 $errors = array();
 $response = array();
@@ -41,6 +47,12 @@ if (!$request_name) {
                 'code'    => 'TOKEN_MISSING',
                 'message' => 'Token absent'
             );
+        }
+    } else {
+        $pw = isset($_POST['pword']) ? $_POST['pword'] : '';
+
+        if (!$pw) {
+            $errors[] = 'Mot de passe absent';
         }
     }
 

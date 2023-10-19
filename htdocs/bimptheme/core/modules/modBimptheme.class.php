@@ -38,7 +38,7 @@ class modBimptheme extends DolibarrModules
         $this->db = $DB;
         $this->numero = 47477;
 
-        $this->family = "BIMP";
+        $this->family = "Bimp";
         $this->name = "bimptheme";
         $this->description = "Theme BIMP";
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version

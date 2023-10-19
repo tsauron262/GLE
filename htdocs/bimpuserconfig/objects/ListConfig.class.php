@@ -32,6 +32,9 @@ class ListConfig extends BCUserConfig
             return 0;
         }
 
+//        echo '<pre>';
+//        print_r($this->data);
+//        exit;
         $obj = $this->getObjInstance();
 
         if (is_a($obj, 'BimpObject')) {

@@ -90,7 +90,6 @@ class BimpController
 
         BimpDebug::addDebugTime('Début controller');
 
-
         $this->module = $module;
         $this->controller = $controller;
 
@@ -442,15 +441,15 @@ class BimpController
         }
 
         echo '<div class="bimp_controller_content">' . "\n";
-        
-        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
-            global $mc,$conf;
-            if($mc->checkRight($user->id, $conf->entity) != 1){
-                $this->errors[] = 'Vous n\'avez pas accés a cette entitée';
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            global $mc, $conf;
+            if ($mc->checkRight($user->id, $conf->entity) != 1) {
+                $this->errors[] = 'Vous n\'avez pas accés a cette entité';
             }
         }
-        
-        
+
+
         if (!BimpObject::objectLoaded($user)) {
             if (!BimpCore::isContextPublic()) {
                 echo BimpRender::renderAlerts('Aucun utilisateur connecté. Veuillez vous <a href="' . DOL_URL_ROOT . '">authentifier</a>');
@@ -568,14 +567,13 @@ class BimpController
             $hide = $this->config->getFromCurrentPath('hide', 0, false, 'bool');
             if (!$show || $hide) {
                 if ($this->current_tab === $tab_name) {
-                    if($this->current_tab != 'default')
+                    if ($this->current_tab != 'default')
                         $this->current_tab = 'default';
                     else
                         $this->current_tab = '';
                 }
                 continue;
-            }
-            elseif($this->current_tab == ''){
+            } elseif ($this->current_tab == '') {
                 $this->current_tab = $tab_name;
             }
 
@@ -2426,7 +2424,7 @@ class BimpController
 
     protected function ajaxProcessSaveBimpDocumentation()
     {
-        $menu = BimpTools::getValue('serializedMenu', '').'.0';
+        $menu = BimpTools::getValue('serializedMenu', '') . '.0';
         $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''), $menu);
         $BimpDocumentation->saveDoc(BimpTools::getValue('name', ''), BimpTools::getValue('html', ''));
         $return = $BimpDocumentation->displayDoc('array');
@@ -3507,7 +3505,7 @@ class BimpController
         $nb = BimpTools::deloqueAll($file);
         if ($nb > 0 && !$asErrorFatal)
             BimpCore::addlog('Fin de script fichier non debloqué ' . $nb . ' ' . print_r($file, 1), Bimp_Log::BIMP_LOG_ALERTE);
-        if(class_exists('BimpDebug')){
+        if (class_exists('BimpDebug')) {
             BimpDebug::testLogDebug();
         }
     }

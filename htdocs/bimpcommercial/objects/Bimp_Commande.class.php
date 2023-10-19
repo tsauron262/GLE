@@ -849,6 +849,43 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
             }
+            else{
+                if (1) {
+                    $client_facture = $this->getClientFacture();
+                    $buttons[] = array(
+                        'label'   => 'Nouvelle facture',
+                        'icon'    => 'file-invoice-dollar',
+                        'onclick' => $this->getJsActionOnclick('linesFactureQties', array(
+                            'new_facture'       => 1,
+                            'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
+                            'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contact_id : 0),
+                            'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
+                            'note_public'       => htmlentities(addslashes($this->getData('note_public'))),
+                            'note_private'      => htmlentities(addslashes($this->getData('note_private'))),
+                        ), array(
+                            'form_name'      => 'invoice',
+//                            'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
+                            'modal_format'   => 'large'
+                        ))
+                    );
+//                    $onclick = $this->getJsActionOnclick('linesFactureQties', array(
+//                        'new_facture'       => 1,
+//                        'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
+//                        'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contact_id : 0),
+//                        'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
+////                        'note_public'       => htmlentities(addslashes($this->getData('note_public'))),
+//                        'note_private'      => htmlentities(addslashes($this->getData('note_private'))),
+//                            ), array(
+//                        'form_name'      => 'invoice',
+//                        'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
+//                        'modal_format'   => 'large'
+//                    ));
+//
+//                    $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+//                    $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture';
+//                    $html .= '</button>';
+                }
+            }
 
             // Cloner
             if ($this->canSetAction('duplicate')) {
@@ -2187,37 +2224,40 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $db = $this->db->db;
 
         if ($this->isLoaded()) {
-            $sql = $db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);
-            if ($sql) {
-                while ($ln = $db->fetch_object($sql)) {
-                    $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
-                    $icon = $inter->params['icon'];
-                    $htmlP .= '<tr>';
-                    $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
-                    $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
-                    $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
-                    $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
-                    $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
-                    $htmlP .= '</tr>';
-                }
-            } else
-                $htmlP .= BimpRender::renderAlerts('Probléme avec les DI');
-
-            $sql = $db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = " . $this->id);
-            if ($sql) {
-                while ($ln = $db->fetch_object($sql)) {
-                    $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
-                    $icon = $inter->params['icon'];
-                    $htmlP .= '<tr>';
-                    $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
-                    $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
-                    $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
-                    $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
-                    $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
-                    $htmlP .= '</tr>';
-                }
-            } else
-                $htmlP .= BimpRender::renderAlerts('Probléme avec les FI');
+            if($this->isModuleActif('bimptechnique') && 0){//di plus actif
+                $sql = $db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);
+                if ($sql) {
+                    while ($ln = $db->fetch_object($sql)) {
+                        $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Demandinter', $ln->rowid);
+                        $icon = $inter->params['icon'];
+                        $htmlP .= '<tr>';
+                        $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
+                        $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
+                        $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
+                        $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
+                        $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
+                        $htmlP .= '</tr>';
+                    }
+                } else
+                    $htmlP .= BimpRender::renderAlerts('Probléme avec les DI');
+            }
+            if($this->isModuleActif('bimptechnique') && 0){
+                $sql = $db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = " . $this->id);
+                if ($sql) {
+                    while ($ln = $db->fetch_object($sql)) {
+                        $inter = BimpCache::getBimpObjectInstance("bimpfichinter", 'Bimp_Fichinter', $ln->rowid);
+                        $icon = $inter->params['icon'];
+                        $htmlP .= '<tr>';
+                        $htmlP .= '<td><strong>' . BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($inter->getLabel()) . '</strong></td>';
+                        $htmlP .= '<td>' . $inter->getNomUrl(0) . '</td>';
+                        $htmlP .= '<td>' . $inter->displayData("date_valid") . '</td>';
+                        $htmlP .= '<td>' . $inter->displayData("total_ht") . '</td>';
+                        $htmlP .= '<td>' . $inter->displayData("fk_statut") . '</td>';
+                        $htmlP .= '</tr>';
+                    }
+                } else
+                    $htmlP .= BimpRender::renderAlerts('Probléme avec les FI');
+            }
         }
 
         $html = parent::renderLinkedObjectsTable($htmlP);

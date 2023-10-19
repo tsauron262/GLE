@@ -98,8 +98,8 @@ class ActionsBimpcore
         if(stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false){
             if(stripos($url, '/commande/') !== false)
                     $tabObj = array("bimpcommercial", "Bimp_Commande");
-            if(stripos($url, '/compta/facture/') !== false)
-                    $tabObj = array("bimpcommercial", "Bimp_Facture");
+//            if(stripos($url, '/compta/facture/') !== false && stripos($url, 'action=create&origin=') === false)
+//                    $tabObj = array("bimpcommercial", "Bimp_Facture");
             if(stripos($url, '/contrat/') !== false)
                     $tabObj = array("bimpcontract", "BContract_contrat");
             if(stripos($url, '/comm/action') === false && stripos($url, '/comm/index.php') === false && stripos($url, '/comm/rem') === false && stripos($url, 'admin') === false && (stripos($url, '/comm/') !== false || stripos($url, '/societe/') !== false)){

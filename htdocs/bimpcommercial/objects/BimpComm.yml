@@ -256,6 +256,7 @@ fields:
         label: Référence remplacée
         input: 
             help: Utiliser ce champ si perte des données de la pièce remplacée
+        show: 0
     rib_client:
         label: Rib Client
         dol_extra_field: 1

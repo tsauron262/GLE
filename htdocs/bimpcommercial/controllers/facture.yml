@@ -36,3 +36,9 @@ sections:
                                 ajax_render_method: 
                                     object: facture
                                     method: renderRevalorisationsList
+                                show: 
+                                    callback:
+                                        object: facture
+                                        method: isModuleActif
+                                        params:
+                                            - bimpfinanc

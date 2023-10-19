@@ -9,15 +9,46 @@ fields:
         label: Entrepot SPARE
         type: id_object
         object: bimp_entrepot
+    type_educ: 
+        label: Type éducation
+        values: 
+            array: types_educ
+            
+    type_educ_fin_validite: 
+        label: Date de fin de validité (Enseignants / étudiants)
+        type: date
+        input: 
+            help: Obligatoire pour les enseignants / étudiants
         
 fields_tables: 
     identity:
         rows: 
+            type_educ_fin_validite:
+              field: type_educ
+              edit: 1
+            type_educ_fin_validite:
+              field: type_educ_fin_validite
+              edit: 1
             entrepot_spare:
                 field: entrepot_spare
                 
 forms:
     default:
         rows:
-            - field: entrepot_spare
+            entrepot_spare:
+                field: entrepot_spare
+            type_educ: 
+                field: type_educ
+            type_educ_fin_validite: 
+                field: type_educ_fin_validite
+                display_if: 
+                    field_name: type_educ
+                    show_values: E4
+    edit_type_educ:
+        rows: 
+            - field: type_educ
+            - field: type_educ_fin_validite
+              display_if: 
+                    field_name: type_educ
+                    show_values: E4
         

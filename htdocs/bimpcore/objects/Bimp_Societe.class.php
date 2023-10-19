@@ -2646,6 +2646,17 @@ class Bimp_Societe extends BimpDolObject
 
         return $errors;
     }
+    
+    public function useCreditSafe(){
+        return BimpTools::isModuleDoliActif('BIMPCREDITSAFE');
+    }
+    
+    public function useEncours(){
+        return BimpCore::getConf('useEncours');
+    }
+    public function useAtradius(){
+        return ($this->useEncours() && BimpCore::getConf('useAtradius'));
+    }
 
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {

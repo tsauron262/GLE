@@ -31,6 +31,9 @@ class ErpAPI extends BimpAPI
         ),
         'deleteObject'   => array(
             'label' => 'Supprimer un objet'
+        ),
+        'findClient'     => array(
+            'label' => 'Obtenir les données d\'un client'
         )
     );
 
@@ -199,15 +202,30 @@ class ErpAPI extends BimpAPI
         return false;
     }
 
+    public function findClient($code_client, &$errors = array(), &$warnings = array())
+    {
+        $params = array(
+            'fields' => array(
+                'code' => $code_client,
+            )
+        );
+
+        $response = $this->execCurl('findClient', $params, $errors);
+
+        if (!count($errors)) {
+            if (!empty($response)) {
+                return $response;
+            } else {
+                $errors[] = 'Aucune réponse reçue';
+            }
+        }
+
+        return null;
+    }
+
     public function testRequest(&$errors = array(), &$warnings = array())
     {
-//        return $this->getObjectData('bimpcore', 'Bimp_Client', 454033, null, array('contacts'), $errors, $warnings);
-        return $this->getObjectsList('bimpcore', 'Bimp_Client', array(
-                    'nom' => array(
-                        'part_type' => 'middle',
-                        'part'      => 'TEST'
-                    )
-                        ), '', '', $errors, $warnings);
+        return $this->findClient('CLGLE040220', $errors, $warnings);
     }
 
     // Overrides: 

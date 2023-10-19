@@ -160,6 +160,15 @@ forms:
             - field: type_dest
             - field: fk_user_dest
             - field: fk_group_dest
+            - custom: 1
+              label: Destinataire
+              input_name: mail_dest
+              input:
+                type: text
+              edit: 0
+              display_if: 
+                field_name: type_dest
+                show_values: 2
             - field: content
             
     edit: 

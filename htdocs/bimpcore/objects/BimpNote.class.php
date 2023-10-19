@@ -823,7 +823,8 @@ class BimpNote extends BimpObject
                 $sep = "<br/>---------------------<br/>";
                 $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>'. $sep . '<br/><br/>';
 
-                $html .= 'Réponse à votre message : <br/>';
+                if($this->getData('id_parent_note') > 0)
+                    $html .= 'Réponse à votre message : <br/>';
                 $html .= $content;
                 if($this->getData('id_parent_note') > 0){
                     $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));

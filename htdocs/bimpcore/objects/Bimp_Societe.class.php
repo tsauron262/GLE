@@ -118,6 +118,9 @@ class Bimp_Societe extends BimpDolObject
 
     public function canEditField($field_name)
     {
+        global $user;
+        if($field_name == 'datec' && $user->id != 62)
+            return 0;
         if ($this->isLoaded() && $this->isAnonymised()) {
             // Champs anonymisés non éditables par user: doit utiliser action "Annuler anonymisation" (revertAnonymization).
             if (in_array($field_name, self::$anonymization_fields)) {

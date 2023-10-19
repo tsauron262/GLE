@@ -23,7 +23,7 @@ fields:
 fields_tables: 
     identity:
         rows: 
-            type_educ_fin_validite:
+            type_educ:
               field: type_educ
               edit: 1
             type_educ_fin_validite:

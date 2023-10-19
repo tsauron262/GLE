@@ -642,7 +642,13 @@ class BimpNote extends BimpObject
     }
     
     public function repMail($dst, $src, $subj, $txt){
+        $errors = array();
         $data = array();
+        $data['obj_type'] = $this->getData('obj_type');
+        $data['obj_module'] = $this->getData('obj_module');
+        $data['obj_name'] = $this->getData('obj_name');
+        $data['id_obj'] = $this->getData('id_obj');
+        $data['id_parent_note'] = $this->id;
         $data['type_author'] = self::BN_AUTHOR_SOC;
         $data['email'] = $src;
         $data['content'] = $txt;
@@ -665,6 +671,7 @@ class BimpNote extends BimpObject
             else
                 BimpCore::addlog('Création reponse mail impossible', 1, 'bimpcore', $this, $errors);
         }
+        return 0;
     }
 
     // Actions: 

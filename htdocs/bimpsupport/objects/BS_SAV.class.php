@@ -6422,7 +6422,7 @@ ORDER BY a.val_max DESC");
     
     public function addMailMsg($dst, $src, $subj, $txt){
         $idGroup = $this->getIdUserGroup();
-        $errors = $this->addNote('Message de : '.$src.'<br/>'.'Sujet : '.$subj.'<br/>'.$txt, null, 0, 1, $src, 2, 4, $idGroup,0,0,$this->getData('id_client'));
+        $errors = $this->addNote('Message de : '.$src.'<br/>'.'Sujet : '.$subj.'<br/>'.$txt, 20, 0, 1, $src, 2, 4, $idGroup,0,0,$this->getData('id_client'));
         if(count($errors))
             BimpCore::addlog ('Erreur création mailMsg sav', 1, 'sav', $this, $errors);
         else

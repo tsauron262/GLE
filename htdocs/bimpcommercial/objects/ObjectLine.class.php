@@ -2635,11 +2635,11 @@ class ObjectLine extends BimpObject
                 }
             } else {
                 $this->fetch($id);
-                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
-                    'Context'                  => 'createFromDolLine()',
-                    'ID ' . $this->object_name => $id,
-                    'ID ligne dolibarr'        => (int) $line->id
-                ));
+//                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
+//                    'Context'                  => 'createFromDolLine()',
+//                    'ID ' . $this->object_name => $id,
+//                    'ID ligne dolibarr'        => (int) $line->id
+//                ));
             }
         }
 

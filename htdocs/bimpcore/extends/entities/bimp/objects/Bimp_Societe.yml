@@ -35,8 +35,6 @@ fields_tables:
 forms:
     default:
         rows:
-            datec:
-                field: datec
             entrepot_spare:
                 field: entrepot_spare
             type_educ: 

@@ -10,6 +10,9 @@
 }*/
 define("NOLOGIN", 1); 
 $errors = array();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 require_once '../bimpcore/main.php';
 
@@ -32,7 +35,13 @@ if(stripos($subj, 'Réponse automatique') === 0){//on ne traite pas
     die;
 }
 
-traiteTask($dst, $src, $subj, $txt);
+$traiter = false;
+
+if(stripos($dst, 'SAV') === 0){
+    $traiter = traiteMsgSav($dst, $src, $subj, $txt);
+}
+if(!$traiter)
+    traiteTask($dst, $src, $subj, $txt);
 
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
@@ -104,6 +113,10 @@ function traiteTask($dst, $src, $subj, $txt) {
             $tab['type_manuel'] = 'dev';
             $tab['dst'] = '';
         }
+        if(stripos($dst, 'SAV') === 0){
+            $tab['type_manuel'] = 'sav';
+            $tab['subj'] .= 'Mail client sans SAV trouvée';
+        }
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $task->create());
     } else {
@@ -134,4 +147,18 @@ function traiteTask($dst, $src, $subj, $txt) {
         }
     }
     return 1;
+}
+
+function traiteMsgSav($dst, $src, $subj, $txt){
+    $matches = array();
+    if(!preg_match('(SAV[2]*[A-Z]{1,4}[0-9]{5})', $subj, $matches)){
+        preg_match('(SAV[2]*[A-Z]{1,3}[0-9]{5})', $txt, $matches);
+    }
+    if(count($matches)){
+        $obj = BimpObject::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ref' => $matches[0]));
+        if($obj->isLoaded()){
+            return $obj->addMailMsg($dst, $src, $subj, $txt);
+        }
+    }
+    return 0;
 }

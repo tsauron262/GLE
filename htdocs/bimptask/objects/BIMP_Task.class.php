@@ -7,7 +7,8 @@ class BIMP_Task extends BimpObject
     public static $types_manuel = array(
         'dev'        => 'Développement',
         'adminVente' => 'Administration des Ventes',
-        'dispatch' => 'Dispatch'
+        'dispatch' => 'Dispatch',
+        'sav' => 'SAV'
     );
     public static $srcNotAttribute = array(/* 'sms-apple@bimp-groupe.net' */);
     public static $nbNonLu = 0;
@@ -32,10 +33,15 @@ class BIMP_Task extends BimpObject
         'dispatch' => array(
             'disp1' => array('label' => 'Disp1'),
             'disp2' => array('label' => 'Disp2')
+        ),
+        'sav' => array(
+            'autre' => array('label' => 'Autre')
         )
     );
     private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
 
+    
+    
     // Droits users: 
 
     public function getUserRight($right)
@@ -1039,7 +1045,7 @@ class BIMP_Task extends BimpObject
         $msg = str_replace("<br>", "<br/>", $msg);
 
         $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . '<br/>';
-        $html .= '<b>Attention ne pas inclure votre signature animée qui est beaucoup beaucoup trop lourde</b>' . $sep . '<br/><br/>';
+        $html .= '' . $sep . '<br/><br/>';
 
         $html .= '<h3>' . $this->getLink(array('syntaxe' => 'Tâche "<subj>"')) . '</h3>';
 
@@ -1450,5 +1456,15 @@ class BIMP_Task extends BimpObject
             $errors = array_merge($errors, $task->createIfNotActif());
         }
         return $errors;
+    }
+}
+
+
+
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+global $tabCentre;
+if(is_array($tabCentre)){
+    foreach($tabCentre as $code => $centre){
+        BIMP_Task::$sous_types['sav'][$code] = array('label' => 'SAV'.$code);
     }
 }

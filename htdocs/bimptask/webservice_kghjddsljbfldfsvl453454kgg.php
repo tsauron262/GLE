@@ -41,6 +41,8 @@ if(stripos($dst, 'SAV') === 0){
     $traiter = traiteMsgSav($dst, $src, $subj, $txt);
 }
 if(!$traiter)
+    $traiter = traiteNote($dst, $src, $subj, $txt);
+if(!$traiter)
     traiteTask($dst, $src, $subj, $txt);
 
 function traiteTask($dst, $src, $subj, $txt) {
@@ -115,8 +117,9 @@ function traiteTask($dst, $src, $subj, $txt) {
         }
         if(stripos($dst, 'SAV') === 0){
             $tab['type_manuel'] = 'sav';
-            $tab['subj'] .= 'Mail client sans SAV trouvée';
+            $tab['subj'] = 'Mail client sans SAV trouvée : '.$tab['subj'];
         }
+        
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $task->create());
     } else {
@@ -147,6 +150,20 @@ function traiteTask($dst, $src, $subj, $txt) {
         }
     }
     return 1;
+}
+
+function traiteNote($dst, $src, $subj, $txt){
+    $const = BimpCore::getConf('marqueur_mail_note');
+    preg_match("/" . $const . "[0-9]*/", $txt, $matches);
+    if (isset($matches[0])) {
+        $idNote = str_replace($const, "", $matches[0]);
+    }
+    if(isset($idNote) && $idNote > 0){
+        $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', $idNote);
+        if($note && $note->isLoaded()){
+            $note->repMail($dst, $src, $subj, $txt);
+        }
+    }
 }
 
 function traiteMsgSav($dst, $src, $subj, $txt){

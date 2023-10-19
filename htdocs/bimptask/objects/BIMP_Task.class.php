@@ -1041,11 +1041,9 @@ class BIMP_Task extends BimpObject
         $errors = array();
         $sep = "<br/>---------------------<br/>";
 
-        $idTask = BimpCore::getConf('marqueur_mail', null, 'bimptask') . $this->id;
         $msg = str_replace("<br>", "<br/>", $msg);
 
-        $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . '<br/>';
-        $html .= '' . $sep . '<br/><br/>';
+        $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail', null, 'bimptask') . $this->id . '<br/>'. $sep . '<br/><br/>';
 
         $html .= '<h3>' . $this->getLink(array('syntaxe' => 'Tâche "<subj>"')) . '</h3>';
 

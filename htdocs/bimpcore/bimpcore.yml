@@ -364,4 +364,9 @@ params:
         label: Activer le cache des callback YML
         type: bool
         default: 0
-        
+    useEncours:
+        label: Utiliser les encours
+        type: bool
+    useAtradius:
+        label: Utiliser atradius
+        type: bool

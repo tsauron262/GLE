@@ -8,8 +8,8 @@ class BimpFile extends BimpObject
     // Chemins des fichier : DOL_DATA_ROOT/nom_module/nom_objet/id_objet/nom_fichier.ext
     private $dontRemove = false;
     public static $visibilities = array(
-        1 => 'Membres Bimp et client',
-        2 => 'Membres BIMP',
+        1 => 'Membres et client',
+        2 => 'Membres',
     );
     public $htmlName = 'file';
 

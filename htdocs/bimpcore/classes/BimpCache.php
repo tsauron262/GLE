@@ -267,6 +267,7 @@ class BimpCache
                 $elem = 'contrat';
             if($elem == 'action'){
                 $elem = 'agenda';
+                $feature2 = 'myactions';
             }
             if($elem == 'bank_account'){
                 $elem = 'societe';

@@ -2002,7 +2002,7 @@ class BimpComm extends BimpDolObject
 
                 if (BimpObject::objectLoaded($client)) {
                     if (!$client->getData('type_educ')) {
-                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation pour le client "' . $client->getName() . '"', array(), '', '', 1);
+                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation pour le client "' . addslashes($client->getName()) . '"', array(), '', '', 1);
 
                         $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                         $msg .= '<b>ATTENTION : ' . $this->getLabel('this') . ' contient une remise CRT, or le type éducation du client ';

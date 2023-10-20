@@ -1450,6 +1450,31 @@ class BS_SAV extends BimpObject
         }
         return $extra;
     }
+    
+    public static function getMailFrom(){
+        $mail = BimpCore::getConf('mail_from_sav', null, 'bimpsupport');
+        if($mail != ''){
+            return array($mail, 'SAV '.BimpCore::getConf('default_name', null, 'bimpsupport'));
+        }
+    }
+    
+    public function getMailTo(){
+        $to = '';
+        $contact = $this->getChildObject('contact');
+
+        if (BimpObject::objectLoaded($contact)) {
+            $to = $contact->getData('email');
+        }
+
+        if (!$to) {
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                $to = $client->getData('email');
+            }
+        }
+        return $to;
+    }
 
     public function getCentreData($centre_repa = false)
     {
@@ -4390,19 +4415,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if (!$to) {
-            $contact = $this->getChildObject('contact');
-
-            if (BimpObject::objectLoaded($contact)) {
-                $to = $contact->getData('email');
-            }
-
-            if (!$to) {
-                $client = $this->getChildObject('client');
-
-                if (BimpObject::objectLoaded($client)) {
-                    $to = $client->getData('email');
-                }
-            }
+            $to = $this->getMailTo();
         }
 
         if (!$to) {

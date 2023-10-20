@@ -46,3 +46,7 @@ params:
     id_prod_refus:
         label: Id du produit devis refusé
         required: 1
+        
+    mail_from_sav:
+        label: Expediteur SAV
+        required: 1

@@ -643,7 +643,7 @@ class BimpNote extends BimpObject
     
     public function repMail($dst, $src, $subj, $txt){
         $matches = array();
-        preg_match('(^.*sav@bimp-groupe.net)', $txt);
+        preg_match('(^.*@bimp-groupe.net)', $txt);
         if(isset($matches[0])){
             $tabTxt = explode($matches[0], $txt);
             $txt = $tabTxt[0];

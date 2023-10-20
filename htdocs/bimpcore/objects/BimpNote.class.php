@@ -643,11 +643,13 @@ class BimpNote extends BimpObject
     
     public function repMail($dst, $src, $subj, $txt){
         $matches = array();
-        preg_match('(^.*@bimp-groupe.net)', $txt, $matches);
+        preg_match('(.*@bimp-groupe.net)', $txt, $matches);
         if(isset($matches[0])){
             $tabTxt = explode($matches[0], $txt);
             $txt = $tabTxt[0];
         }
+//        print_r($matches);
+//        die($txt);
         
         $errors = array();
         $data = array();
@@ -669,12 +671,26 @@ class BimpNote extends BimpObject
             $data['id_societe'] = $parent->getData('id_soc');
         elseif($parent->getData('fk_soc') > 0)
             $data['id_societe'] = $parent->getData('fk_soc');
+        
+        
+        //gestion des PJ
+        $dir = $parent->getFilesDir()."/";
+        if(!is_dir($dir))
+            mkdir($dir);
+        foreach($_FILES as $fileT){
+            $nameFile = $fileT['name'];
+            $file = BimpTools::cleanStringForUrl(str_replace('.'.pathinfo($nameFile, PATHINFO_EXTENSION), '', $nameFile)) . '.' . pathinfo($nameFile, PATHINFO_EXTENSION);
+            $data['content'] .= '<br/>Ajout de la PJ '.$file;
+
+            move_uploaded_file($fileT['tmp_name'], $dir.$file);
+        }
                 
                 
         if(!count($errors)){
             $obj = BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
-            if(!count($errors))
+            if(!count($errors)){
                 return 1;
+            }
             else
                 BimpCore::addlog('Création reponse mail impossible', 1, 'bimpcore', $this, $errors);
         }

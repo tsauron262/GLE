@@ -1552,7 +1552,10 @@ class BimpCache
                 $obj_memory = $newMem - $curMem;
 
                 if (method_exists($instance, 'fetch')) {
-                    $instance->fetch($id_object);
+                    if(get_class($instance) == 'UserGroup')
+                        $instance->fetch($id_object, '', false);
+                    else
+                        $instance->fetch($id_object);
                 }
 
                 $is_fetched = true;

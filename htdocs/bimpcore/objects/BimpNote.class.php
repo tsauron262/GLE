@@ -803,6 +803,39 @@ class BimpNote extends BimpObject
 
         return $errors;
     }
+    
+    public function getMailFrom($withName = true){
+        $parent = $this->getParentInstance();
+        if(method_exists($parent, 'getMailFrom')){
+            $infoMail = $parent->getMailFrom();
+            if(is_array($infoMail) && isset($infoMail[1]) && $withName)
+                return $infoMail[1].'<'.$infoMail[0].'>';
+            elseif(is_array($infoMail))
+                return $infoMail[0];
+            else
+                return $infoMail;
+        }
+        return BimpCore::getConf('mailReponse', null, 'bimptask');
+    }
+    
+    public function getMailTo(){
+        $parent = $this->getParentInstance();
+        if($parent && $parent->isLoaded()){
+            if(method_exists($parent, 'getMailTo')){
+                return $parent->getMailTo();
+            }
+            elseif($parent->getData('email') != ''){
+                return $parent->getData('email');
+            }
+            else{
+                $client = $parent->getChildObject('client');
+                if($client && $client->isLoaded()){
+                    return $client->getData('email');
+                }
+            }
+        }
+        return '';
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -832,8 +865,11 @@ class BimpNote extends BimpObject
                     $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));
                     $html .= '<br/><br/>Rappel du message initial : <br/>'.$oldNote->getData('content');
                 }
+                $parent = $this->getParentInstance();
+                $sujet = 'Message '.$parent->getRef();
+                die($sujet);
 
-                $bimpMail = new BimpMail($this->getParentInstance(), 'Nouveau message', $mail, BimpCore::getConf('mailReponse', null, 'bimptask'), $html);
+                $bimpMail = new BimpMail($this->getParentInstance(), 'Nouveau message', $mail, $this->getMailFrom(), $html);
                 $bimpMail->send($errors);
             }
 

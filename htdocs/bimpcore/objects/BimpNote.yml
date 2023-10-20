@@ -165,6 +165,8 @@ forms:
               input_name: mail_dest
               input:
                 type: text
+              value:
+                  callback: getMailTo
               edit: 0
               display_if: 
                 field_name: type_dest
@@ -226,6 +228,8 @@ forms:
               input_name: mail_dest
               input:
                 type: text
+              default_value:
+                  callback: getMailTo
               edit: 0
               display_if: 
                 field_name: type_dest

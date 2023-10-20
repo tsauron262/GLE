@@ -414,7 +414,7 @@ class BimpObject extends BimpCache
     //            type: select_cond_reglement
     //        default_value: 
     //            callback: getCondReglementBySociete
-                        'editable' => 0
+                        'editable' => 1
                     )
                         ), 'initial');
         }
@@ -6536,6 +6536,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientEdit();
+        }
+        
+        if($field_name == 'entity'){
+            global $user;
+            return $user->admin;
         }
 
         return (int) $this->canEdit();

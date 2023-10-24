@@ -879,7 +879,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
 
                     // Créer un contrat
-                    if ($this->isActionAllowed('createContrat') && $this->canSetAction('createContrat')) {
+                    if (1) {
                         $buttons[] = array(
                             'label'   => 'Créer un contrat',
                             'icon'    => 'fas_file-signature',
@@ -1746,6 +1746,15 @@ class Bimp_Propal extends Bimp_PropalTemp
             'warnings'         => $warnings,
             'success_callback' => 'window.location = \'' . $url . '\''
         );
+    }
+    
+    public function isFieldContratEditable(){
+        if(BimpTools::getPostFieldValue('field_name') == 'duree_mois'){
+            $fields = BimpTools::getPostFieldValue('fields');
+            if($fields['objet_contrat'] == 'ASMX')
+                return 1;
+            return 0;
+        }
     }
 
     public function actionCreateContrat($data, &$success = '')

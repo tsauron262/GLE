@@ -8953,7 +8953,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } elseif ($isFemale) {
                 $labels['to'] = 'à la ' . $labels['name'];
             } else {
-                $labels['this'] = 'au ' . $labels['name'];
+                $labels['to'] = 'au ' . $labels['name'];
             }
         }
 

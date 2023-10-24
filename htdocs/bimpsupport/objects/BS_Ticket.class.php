@@ -1,6 +1,8 @@
 <?php
 
-class BS_Ticket extends BimpObject
+include_once DOL_DOCUMENT_ROOT.'/bimpcore/objects/BimpAbstractFollow.class.php';
+
+class BS_Ticket extends BimpAbstractFollow
 {
 
     const BS_TICKET_EN_COURS = 1;
@@ -791,6 +793,18 @@ class BS_Ticket extends BimpObject
             'warnings' => $warnings
         );
     }
+    
+    public function getEmailFollow($mode = 0){
+        $mails = parent::getEmailFollow($mode);
+        if($mode != 1){
+            $userClient = $this->getChildObject('user_client');
+            if (BimpObject::objectLoaded($userClient)) {
+                $mails[] = $userClient->getData('email');
+                $mails = BimpTools::merge_array($mails, $userClient->get_dest('admin'));
+            }
+        }
+        return $mails;
+    }
 
     public function actionPrendre_en_compte($data, &$success)
     {
@@ -806,35 +820,22 @@ class BS_Ticket extends BimpObject
         $success = 'Ticket bien pris en compte';
 
         if (!count($errors)) {
-            if ($this->getData('id_user_client') > 0) {
-                $userClient = $this->getChildObject('user_client');
-                if (BimpObject::objectLoaded($userClient)) {
-                    $to = $userClient->getData('email');
-                    $cc = implode(',', $userClient->get_dest('admin'));
+            foreach($this->getEmailFollow() as $to){
+                $subject = 'Prise en compte du ticket ' . $this->getData('ticket_number');
+                $msg = 'Bonjour,<br/><br/>';
+                $msg .= 'Nous vous confirmons que votre ticket support n° ' . $this->getData('ticket_number') . ' a été pris en compte par nos équipes.<br/>';
+                $msg .= '<b>Responsable de votre demande : </b>' . $user->firstname . ' ' . $user->lastname . '<br/><br/>';
+                $url = $this->getPublicUrl(false);
 
-                    if (!$to && $cc) {
-                        $to = $cc;
-                        $cc = '';
-                    }
+                if ($url) {
+                    $msg .= '<a href="' . $url . '">Cliquez ici</a> pour accéder au détail de ce ticket depuis notre site.';
+                }
 
-                    if ($to) {
-                        $subject = 'Prise en compte du ticket ' . $this->getData('ticket_number');
-                        $msg = 'Bonjour,<br/><br/>';
-                        $msg .= 'Nous vous confirmons que votre ticket support n° ' . $this->getData('ticket_number') . ' a été pris en compte par nos équipes.<br/>';
-                        $msg .= '<b>Responsable de votre demande : </b>' . $user->firstname . ' ' . $user->lastname . '<br/><br/>';
-                        $url = $this->getPublicUrl(false);
-
-                        if ($url) {
-                            $msg .= '<a href="' . $url . '">Cliquez ici</a> pour accéder au détail de ce ticket depuis notre site www.bimp.fr';
-                        }
-
-                        $bimpMail = new BimpMail($this, $subject, $to, '', $msg, '', $cc);
-                        $mail_errors = array();
-                        $bimpMail->send($mail_errors);
-                        if (count($mail_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification au client');
-                        }
-                    }
+                $bimpMail = new BimpMail($this, $subject, $to, '', $msg, '');
+                $mail_errors = array();
+                $bimpMail->send($mail_errors);
+                if (count($mail_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification au client');
                 }
             }
         }
@@ -1078,15 +1079,13 @@ class BS_Ticket extends BimpObject
                 }
 
                 if ($init_status !== (int) $this->getData('status')) {
-                    $to = $userClient->getData('email');
-
-                    if ($to) {
+                    foreach($this->getEmailFollow() as $to){
                         $subject = 'Mise à jour de votre ticket support n°' . $this->getData('ticket_number');
                         $msg = 'Bonjour,<br/><br/>';
                         $msg .= 'Votre ticket support n°<b>' . $this->getData('ticket_number') . '</b> est passé au statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '".<br/><br/>';
                         $public_url = $this->getPublicUrl(false);
                         if ($public_url) {
-                            $msg .= '<a href="' . $public_url . '">Cliquez ici</a> pour accéder au détail de votre ticket support sur notre site www.bimp.fr';
+                            $msg .= '<a href="' . $public_url . '">Cliquez ici</a> pour accéder au détail de votre ticket support sur notre site.';
                         }
 
                         $bimpMail = new BimpMail($this, $subject, $to, '', $msg);

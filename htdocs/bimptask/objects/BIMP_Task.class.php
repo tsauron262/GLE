@@ -1069,9 +1069,7 @@ class BIMP_Task extends BimpAbstractFollow
 
             if ((int) BimpTools::getArrayValueFromPath($data, 'notify', 0)) {
                 $user = BimpCore::getBimpUser();
-                $msg = 'Bonjour, <br/><br/>La tâche "' . $this->getLink(array(
-                            'syntaxe' => '<subj>'
-                        )) . '" a été marquée terminée' . (BimpObject::objectLoaded($user) ? ' par ' . $user->getName() : '');
+                $msg = 'Bonjour, <br/><br/>La tâche "' . $this->getData('subj') . '" a été marquée terminée' . (BimpObject::objectLoaded($user) ? ' par ' . $user->getName() : '');
 
                 if ($comment) {
                     $msg .= '<br/><br/><b>Commentaire : </b><br/>';

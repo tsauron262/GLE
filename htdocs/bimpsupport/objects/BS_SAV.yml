@@ -407,6 +407,7 @@ fields:
         values: 
             array: etats_materiel
         user_edit: 1
+        default_value: 3
     etat_materiel_desc: 
         label: Description état matériel
         type: text

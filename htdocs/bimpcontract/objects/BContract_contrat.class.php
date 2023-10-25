@@ -697,7 +697,7 @@ class BContract_contrat extends BimpDolObject
                 )));
             }
 
-            if ($status == self::CONTRAT_STATUS_BROUILLON || $user->id == 460 || $user->admin) {
+            if ($status == self::CONTRAT_STATUS_BROUILLON || $user->rights->synopsiscontrat->generate || $user->admin) {
                 $buttons[] = array(
                     'label'   => 'Générer le PDF du contrat',
                     'icon'    => 'fas_file-pdf',

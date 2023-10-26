@@ -81,13 +81,13 @@ class BimpCore
             }
 
             if (self::isContextPrivate()) {
-                if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BIMP_EXTENDS_ENTITY . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BIMP_EXTENDS_ENTITY . '.css';
+                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css';
                 }
                 self::$files['js'][] = '/bimpcore/views/js/notification.js';
             } else {
-                if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BIMP_EXTENDS_ENTITY . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BIMP_EXTENDS_ENTITY . '.css';
+                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css';
                 } else {
                     self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
                 }
@@ -445,7 +445,7 @@ class BimpCore
                         echo '<br/>';
 
                         if ($new_version) {
-                            BimpCore::setConf('module_version_' . $module, $new_version);
+                            BimpCore::setConf('module_version_' . $module, $new_version, 0);
                         }
                     }
                 }
@@ -488,8 +488,8 @@ class BimpCore
                             }
                         }
 
-                        if (defined('BIMP_EXTENDS_ENTITY') && isset($extends_updates['entity'])) {
-                            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql/';
+                        if (BimpCore::getExtendsEntity() != '' && isset($extends_updates['entity'])) {
+                            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/sql/';
                             if (!file_exists($dir) || !is_dir($dir)) {
                                 continue;
                             }
@@ -510,7 +510,7 @@ class BimpCore
                                     echo 'FICHIER ABSENT: ' . $dir . $extend_version . '.sql <br/>';
                                     continue;
                                 }
-                                echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de l\'entité "' . BIMP_EXTENDS_ENTITY . '"';
+                                echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de l\'entité "' . BimpCore::getExtendsEntity() . '"';
                                 if ($bdb->executeFile($dir . $extend_version . '.sql', $file_errors)) {
                                     echo ' [OK]<br/>';
                                 } else {
@@ -520,7 +520,7 @@ class BimpCore
                             echo '<br/>';
 
                             if ($new_version) {
-                                BimpCore::setConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, $new_version);
+                                BimpCore::setConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), $new_version);
                             }
                         }
                     }
@@ -541,8 +541,8 @@ class BimpCore
 
         $cache = self::getConfCache();
 
-        if (isset($cache['bimpcore'])) {
-            foreach ($cache['bimpcore'] as $name => $value) {
+        if (isset($cache[0]['bimpcore'])) {
+            foreach ($cache[0]['bimpcore'] as $name => $value) {
                 if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
                     $module = $matches[1];
 
@@ -574,7 +574,7 @@ class BimpCore
 
     public static function getModulesExtendsUpdates()
     {
-        if (!defined('BIMP_EXTENDS_VERSION') && !defined('BIMP_EXTENDS_ENTITY')) {
+        if (!defined('BIMP_EXTENDS_VERSION') && BimpCore::getExtendsEntity() == '') {
             return array();
         }
 
@@ -582,10 +582,10 @@ class BimpCore
 
         $cache = self::getConfCache();
 
-        if (isset($cache['bimpcore'])) {
+        if (isset($cache[0]['bimpcore'])) {
             $modules = array('bimpcore');
 
-            foreach ($cache['bimpcore'] as $name => $value) {
+            foreach ($cache[0]['bimpcore'] as $name => $value) {
                 if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
                     if (!in_array($matches[1], $modules)) {
                         $modules[] = $matches[1];
@@ -621,11 +621,11 @@ class BimpCore
                     }
                 }
 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql';
+                if (BimpCore::getExtendsEntity() != '') {
+                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/sql';
                     if (file_exists($dir) && is_dir($dir)) {
 
-                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
+                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), 0);
                         $files = scandir($dir);
 
                         foreach ($files as $f) {
@@ -704,7 +704,7 @@ class BimpCore
                 $bdb->update('bimpcore_conf', array(
                     'value' => json_encode($versions)
                         ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
-                self::$conf_cache['bimpcore']['bimpcore_version'] = json_encode($versions);
+                self::$conf_cache[0]['bimpcore']['bimpcore_version'] = json_encode($versions);
             }
         }
 
@@ -744,18 +744,17 @@ class BimpCore
                     $module = 'bimpcore';
                 }
 
-                if (!isset(self::$conf_cache[$module])) {
-                    self::$conf_cache[$module] = array();
-                }
-
-                self::$conf_cache[$module][$r->name] = $r->value;
+                if (isset($r->entity))
+                    self::$conf_cache[$r->entity][$module][$r->name] = $r->value;
+                else
+                    self::$conf_cache[0][$module][$r->name] = $r->value;
             }
         }
 
         return self::$conf_cache;
     }
 
-    public static function getConf($name, $default = null, $module = 'bimpcore')
+    public static function getConf($name, $default = null, $module = 'bimpcore', &$source = '', $entity = null)
     {
         // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
         // passée en argument de la fonction. 
@@ -770,24 +769,40 @@ class BimpCore
 
         $cache = self::getConfCache();
 
-        if (isset($cache[$module][$name])) {
-//            echo '<br/>OK: ' . $name . ': ' . $cache[$module][$name];
-            return $cache[$module][$name];
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if (is_null($entity)) {
+                $entity = getEntity('bimp_conf', 0);
+            }
+
+            if (isset($cache[$entity][$module][$name])) {
+                $source = ($entity ? 'entity_' . $entity : 'global');
+                return $cache[$entity][$module][$name];
+            }
+        } elseif (is_null($entity)) {
+            $entity = 0;
         }
-//        else {
-//            echo '<br/>FAIL: ' . $name;
-//        }
+
+        if (isset($cache[0][$module][$name])) {
+            $source = 'global';
+            return $cache[0][$module][$name];
+        }
+
         // Check éventuelle erreur sur le module: 
-        foreach ($cache as $module_name => $params) {
-            if (isset($params[$name])) {
-                BimpCore::addlog('BimpCore::getConf() - Erreur module possible', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-                    'Paramètre'                                  => $name,
-                    'Module demandé'                             => $module,
-                    'Module trouvé (tel que enregistré en base)' => $module_name
-                        ), true);
-                break;
+        if (isset($cache[(int) $entity])) {
+            foreach ($cache[(int) $entity] as $module_name => $params) {
+                if (isset($params[$name])) {
+                    BimpCore::addlog('BimpCore::getConf() - Erreur module possible', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                        'Paramètre'                                  => $name,
+                        'Entité'                                     => $entity,
+                        'Module demandé'                             => $module,
+                        'Module trouvé (tel que enregistré en base)' => $module_name
+                            ), true);
+                    break;
+                }
             }
         }
+
+        $source = 'val_def';
 
         if (!is_null($default)) {
             return $default;
@@ -800,7 +815,7 @@ class BimpCore
         return self::$conf_cache_def_values[$module][$name];
     }
 
-    public static function setConf($name, $value, $module = 'bimpcore')
+    public static function setConf($name, $value, $module = 'bimpcore', $entity = -1)
     {
         if (!$module) {
             $module = 'bimpcore';
@@ -808,7 +823,20 @@ class BimpCore
 
         $errors = array();
 
-        $current_val = (isset(self::$conf_cache[$module][$name]) ? self::$conf_cache[$module][$name] : null);
+        if ($value == "++") {
+            $value = BimpCore::getConf($name, 0, $module) + 1;
+        }
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if ($entity == -1) {
+                $bimp_conf_entity = getEntity('bimp_conf', 0);
+                $entity = (isset(self::$conf_cache[$bimp_conf_entity][$module][$name]) ? $bimp_conf_entity : 0);
+            }
+        } else {
+            $entity = 0;
+        }
+
+        $current_val = (isset(self::$conf_cache[$entity][$module][$name]) ? self::$conf_cache[$entity][$module][$name] : null);
 
         $bdb = BimpCache::getBdb();
 
@@ -816,19 +844,60 @@ class BimpCore
             if ($bdb->insert('bimpcore_conf', array(
                         'name'   => $name,
                         'value'  => $value,
-                        'module' => $module
+                        'module' => $module,
+                        'entity' => $entity
                     )) <= 0) {
-                $errors[] = 'Echec de l\'insertion du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
+                $errors[] = 'Echec de l\'insertion du paramètre "' . $name . '" (Module ' . $module . ' - ID entité : ' . $entity . ') - ' . $bdb->err();
             }
         } else {
             if ($bdb->update('bimpcore_conf', array(
                         'value' => $value
-                            ), '`name` = \'' . $name . '\' AND `module` = \'' . $module . '\'') <= 0) {
+                            ), '`name` = \'' . $name . '\' AND `module` = \'' . $module . '\' AND entity = ' . $entity) <= 0) {
                 $errors[] = 'Echec de la mise à jour du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
             }
         }
 
-        self::$conf_cache[$module][$name] = $value;
+        self::$conf_cache[$entity][$module][$name] = $value;
+
+        return $errors;
+    }
+
+    public static function RemoveConf($name, $module = 'bimpcore', $entity = -1)
+    {
+        if (!$module) {
+            $module = 'bimpcore';
+        }
+
+        $errors = array();
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if ($entity == -1) {
+                $bimp_conf_entity = getEntity('bimp_conf', 0);
+                $entity = (isset(self::$conf_cache[$bimp_conf_entity][$module][$name]) ? $bimp_conf_entity : 0);
+            }
+        } else {
+            $entity = 0;
+        }
+
+        $bdb = BimpCache::getBdb();
+
+        $id_conf = (int) $bdb->getValue('bimpcore_conf', 'id', 'module = \'' . $module . '\' AND name = \'' . $name . '\' AND entity = ' . $entity);
+        if ($id_conf) {
+            if ($bdb->delete('bimpcore_conf', 'id = ' . $id_conf) <= 0) {
+                $errors[] = 'Echec suppr. param "' . $name . '" - ' . $this->db->err();
+            }
+        }
+
+        if (!count($errors)) {
+            if (isset(self::$conf_cache[$entity][$module][$name])) {
+                unset(self::$conf_cache[$entity][$module][$name]);
+            }
+
+            if (isset(self::$conf_cache_def_values[$module][$name])) {
+                unset(self::$conf_cache_def_values[$module][$name]);
+            }
+        }
+
 
         return $errors;
     }
@@ -884,7 +953,7 @@ class BimpCore
         if (isset($conf->global->$name) && $conf->global->$name)
             return 1;
 
-        return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
+//        return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
     }
 
     public static function isModeDev()
@@ -932,13 +1001,15 @@ class BimpCore
 
     // Gestion extends: 
 
-    public static function getEntity()
+    public static function getExtendsEntity()
     {
-        if (defined('BIMP_EXTENDS_ENTITY')) {
+        $entity = BimpCore::getConf('extends_entity', '');
+        
+        if ($entity == '' && defined('BIMP_EXTENDS_ENTITY')) {
             return BIMP_EXTENDS_ENTITY;
         }
 
-        return '';
+        return $entity;
     }
 
     public static function getVersion()
@@ -952,13 +1023,13 @@ class BimpCore
 
     public static function isEntity($entity)
     {
-        if (defined('BIMP_EXTENDS_ENTITY')) {
+        if (BimpCore::getExtendsEntity() != '') {
             if (is_array($entity)) {
-                if (in_array(BIMP_EXTENDS_ENTITY, $entity)) {
+                if (in_array(BimpCore::getExtendsEntity(), $entity)) {
                     return 1;
                 }
             } else {
-                if (BIMP_EXTENDS_ENTITY == $entity) {
+                if (BimpCore::getExtendsEntity() == $entity) {
                     return 1;
                 }
             }
@@ -994,7 +1065,7 @@ class BimpCore
 
         $dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
         $final_file_path = '';
-        $entity = self::getEntity();
+        $entity = self::getExtendsEntity();
         $version = self::getVersion();
 
         if ($entity && file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
@@ -1014,7 +1085,7 @@ class BimpCore
             require_once $final_file_path;
             return true;
         }
-        
+
         return false;
     }
 
@@ -1221,7 +1292,7 @@ class BimpCore
     {
         // On retourne un message d'erreur si blocage nécessaire. false sinon.
 
-        if (!(int) self::getConf('use_objects_locks')) {
+        if (!(int) self::getConf('use_objects_locks') || static::isModeDev()) {
             return false;
         }
 
@@ -1342,7 +1413,7 @@ class BimpCore
 
     public static function unlockObject($module, $object_name, $id_object, $token = '')
     {
-        if (!(int) self::getConf('use_objects_locks')) {
+        if (!(int) self::getConf('use_objects_locks') || static::isModeDev()) {
             return array();
         }
 

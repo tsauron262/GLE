@@ -60,6 +60,7 @@ class ActionsBimpcore
 
     var $bimp_fixe_tabs = null;
     var $resprints = '';
+    var $priority = 1;
 
     function bimpcoreInit($parameters, &$object, &$action, $hookmanager)
     {
@@ -97,7 +98,7 @@ class ActionsBimpcore
         if(stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false){
             if(stripos($url, '/commande/') !== false)
                     $tabObj = array("bimpcommercial", "Bimp_Commande");
-            if(stripos($url, '/compta/facture/') !== false)
+            if(stripos($url, '/compta/facture/') !== false && stripos($url, 'action=create&origin=') === false)
                     $tabObj = array("bimpcommercial", "Bimp_Facture");
             if(stripos($url, '/contrat/') !== false)
                     $tabObj = array("bimpcontract", "BContract_contrat");
@@ -220,6 +221,31 @@ class ActionsBimpcore
         }
         
         return 0;
+    }
+    
+    function getLoginPageOptions(&$parameters = false){
+        $tabs = json_decode(BimpCore::getConf('entity_url'), true);
+        if(is_array($tabs)){
+            foreach($tabs as $entity => $urls){
+                foreach($urls as $url){
+                    if(stripos($_SERVER['HTTP_HOST'], $url) !== false ||
+                            stripos($_SERVER['REQUEST_URI'], $url) !== false)
+                        $parameters['entity'] = $entity;
+                }
+            }
+        }
+    }
+    
+    function afterLogin(&$parameters = false){
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+            global $mc,$conf;
+            $mc->dao->getEntities(false, false, true, true, true);
+            if(!in_array($conf->entity, $mc->dao->entities)){
+//                print_r($mc->dao->entities);die;
+                if(count($mc->dao->entities) > 0)
+                    $mc->switchEntity($mc->dao->entities[0]);
+            }
+        }
     }
 
     function printLeftBlock($parameters, &$object, &$action, $hookmanager)

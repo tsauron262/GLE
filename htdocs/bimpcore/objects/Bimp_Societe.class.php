@@ -118,6 +118,9 @@ class Bimp_Societe extends BimpDolObject
 
     public function canEditField($field_name)
     {
+        global $user;
+//        if($field_name == 'datec' && $user->id != 62)
+//            return 0;
         if ($this->isLoaded() && $this->isAnonymised()) {
             // Champs anonymisés non éditables par user: doit utiliser action "Annuler anonymisation" (revertAnonymization).
             if (in_array($field_name, self::$anonymization_fields)) {
@@ -1856,18 +1859,17 @@ class Bimp_Societe extends BimpDolObject
     {
         $html = '';
 
-        $users = $this->getCommerciauxArray(false);
+        $users = $this->getCommerciauxArray(false, false);
         $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
 
         $edit = $this->canEditField('commerciaux');
 
-        foreach ($users as $id_user => $label) {
-            if ((int) $id_user) {
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-                if (BimpObject::objectLoaded($user)) {
-                    $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
-
-                    if ((int) $user->id !== $default_id_commercial) {
+        if(count($users)){
+            foreach ($users as $id_user => $label) {
+                if ((int) $id_user) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+                    if (BimpObject::objectLoaded($user)) {
+                        $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
                         if ($edit && $with_button) {
                             $onclick = $this->getJsActionOnclick('removeCommercial', array(
                                 'id_commercial' => (int) $user->id
@@ -1877,11 +1879,20 @@ class Bimp_Societe extends BimpDolObject
                             $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
                         }
                     } else {
+                        $html .= '<span class="danger">L\'utilisatuer #' . $id_user . ' n\'existe plus</span>';
+                    }
+                }
+            }
+        }
+        else{
+            $users = $this->getCommerciauxArray(false, true);
+            foreach ($users as $id_user => $label) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+                    if (BimpObject::objectLoaded($user)) {
+                        $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
                         $html .= '&nbsp;<span class="small">(commercial par défaut)</span>';
                     }
-                } else {
-                    $html .= '<span class="danger">L\'utilisatuer #' . $id_user . ' n\'existe plus</span>';
-                }
+                
             }
         }
 
@@ -2645,6 +2656,17 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $errors;
+    }
+    
+    public function useCreditSafe(){
+        return BimpTools::isModuleDoliActif('BIMPCREDITSAFE');
+    }
+    
+    public function useEncours(){
+        return BimpCore::getConf('useEncours');
+    }
+    public function useAtradius(){
+        return ($this->useEncours() && BimpCore::getConf('useAtradius'));
     }
 
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())

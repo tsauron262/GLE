@@ -32,12 +32,6 @@ fields:
         
     mode_reglement_supplier: unset
     cond_reglement_supplier: unset
-    status_atradius:
-        label: Statut Atradius
-        type: int
-        values: 
-            array: status_atradius
-        default_value: 0
                     
 fields_tables: 
     public_infos: 
@@ -92,6 +86,8 @@ fields_tables:
               input_name: send_emails
               input: 
                   type: file_upload
+              show: 
+                callback: useAtradius
               value:
                 callback: displayAtradiusFile
             - field: date_depot_icba
@@ -102,6 +98,8 @@ fields_tables:
             - label: Mettre à jour assurance Atradius
               value: 
                   callback: displayFormAtradius
+              show: 
+                callback: useAtradius
             - field: id_atradius
             - field: status_atradius
       

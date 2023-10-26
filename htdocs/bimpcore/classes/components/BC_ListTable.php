@@ -2760,10 +2760,14 @@ class BC_ListTable extends BC_List
                                                 }
                                             }
                                         }
-
-                                        $value = forward_static_call_array(array(
-                                            $bc_field['class'], $method
-                                                ), array($needed));
+                                        if(BimpCore::getConf('enabled_callback_cache', 0)){
+                                            $value = BimpCache::getCallFunctionCache($bc_field['class'], $method, array($needed),1);
+                                        }
+                                        else{
+                                            $value = forward_static_call_array(array(
+                                                $bc_field['class'], $method
+                                                    ), array($needed));
+                                        }
                                     }
                                 }
 

@@ -52,7 +52,7 @@ class PropalSavPDF extends PropalPDF
                     // Chargement CGV : 
                     
                     $cgv_file = '';
-                    switch (BimpCore::getEntity()) {
+                    switch (BimpCore::getExtendsEntity()) {
                         case 'bimp':
                             $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
                             break;

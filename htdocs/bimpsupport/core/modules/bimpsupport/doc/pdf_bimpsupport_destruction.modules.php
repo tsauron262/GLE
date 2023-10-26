@@ -224,6 +224,22 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
 
                 $pdf->SetXY('32', '148.3');
                 $pdf->MultiCell(100, 6, $contact, 0, 'L');
+                
+                
+            // Logo
+            $logo = false;
+            if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
+                $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png";
+            } else {
+                $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
+            }
+            $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png", ".png"), "_SAV.png", $logo);
+            if (is_file($testFile))
+                $logo = $testFile;
+
+    //        $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
+            if ($logo && is_readable($logo))
+                    $pdf->Image($logo, 7, 10, 0, 23);
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
@@ -233,6 +249,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
                 $pdf->Output($file, 'F');
 //
 ////                ////$langs->setPhpLang();    // On restaure langue session
+                
 
 
                 return 1;   // Pas d'erreur

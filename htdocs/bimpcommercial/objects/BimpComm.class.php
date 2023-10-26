@@ -2003,7 +2003,7 @@ class BimpComm extends BimpDolObject
 
                 if (BimpObject::objectLoaded($client)) {
                     if (!$client->getData('type_educ')) {
-                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation pour le client "' . $client->getName() . '"', array(), '', '', 1);
+                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation pour le client "' . addslashes($client->getName()) . '"', array(), '', '', 1);
 
                         $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                         $msg .= '<b>ATTENTION : ' . $this->getLabel('this') . ' contient une remise CRT, or le type éducation du client ';
@@ -4678,6 +4678,7 @@ class BimpComm extends BimpDolObject
 
         $req = 'SELECT count(*) as nb, SUM(' . $fieldTotal . ') as total_ht, ' . $dateStr . ' as timestamp FROM ' . MAIN_DB_PREFIX . $this->params['table'] . ' a ';
         $filter = array();
+        $filter['entity'] = getEntity('bimp_conf', 0);
         foreach (json_decode(BimpTools::getPostFieldValue('param_list_filters'), true) as $filterT) {
             if (isset($filterT['filter']) && is_array($filterT['filter']))
                 $filter[] = $filterT['filter'];

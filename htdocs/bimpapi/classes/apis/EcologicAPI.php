@@ -142,7 +142,7 @@ class EcologicAPI extends BimpAPI
             $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
             $return = $this->execCurl('createsupportrequest', $params, $errors);
             
-            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId'])){
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && isset($return['ResponseData']['IsValid']) && $return['ResponseData']['IsValid']){
                 $warnings = BimpTools::merge_array($warnings, $errors);
                 $errors = array();
                 $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];
@@ -178,10 +178,16 @@ class EcologicAPI extends BimpAPI
         $sav->updateField('ecologic_data', $ecologicData);
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
-            
+            $tabExt = array('jpeg', 'jpg', 'png');
             $filesOk = true;
-            foreach($tabFile as $fileT){
+            foreach($tabFile as $i => $fileT){
                 if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
+                    foreach($tabExt as $ext){
+                        if(is_file($fileT[0] . $fileT[1].'.'.$ext)){
+                            $tabFile[$i][2] = $ext;
+                            continue(2);
+                        }
+                    }
                     $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
                     BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
                     $filesOk = false;

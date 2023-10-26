@@ -81,7 +81,7 @@ if (!defined('BIMP_LIB')) {
     BimpObject::loadClass('bimpcore', 'BimpObjectLog');
     BimpObject::loadClass('bimpcore', 'Bimp_User');
 
-    if (!defined('BIMP_EXTENDS_ENTITY') && defined('PATH_EXTENDS')) {
+    if (BimpCore::getExtendsEntity() == '' && defined('PATH_EXTENDS')) {
         if (preg_match('/^.*\/([a-zA-Z0-1\-_]+)\/?$/', PATH_EXTENDS, $matches)) {
             if ($matches[1]) {
                 define('BIMP_EXTENDS_ENTITY', $matches[1]);
@@ -105,8 +105,8 @@ if (!defined('BIMP_LIB')) {
         }
     }
 
-    if (defined('BIMP_EXTENDS_ENTITY')) {
-        $dir_entity = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/' . BIMP_EXTENDS_ENTITY . '/';
+    if (BimpCore::getExtendsEntity() != '') {
+        $dir_entity = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/' . BimpCore::getExtendsEntity() . '/';
         if (file_exists($dir_entity . 'classes/BimpMail.php')) {
             require_once $dir_entity . 'classes/BimpMail.php';
         }

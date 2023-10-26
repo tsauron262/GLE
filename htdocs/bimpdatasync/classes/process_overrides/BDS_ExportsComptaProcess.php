@@ -19,28 +19,6 @@ class BDS_ExportsComptaProcess extends BDSImportProcess
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($process)) {
-
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'ftp_host',
-                'label'      => 'Hôte',
-                'value'      => 'ftp-edi.groupe-ldlc.com'
-                    ), true, $warnings, $warnings);
-
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'ftp_login',
-                'label'      => 'Login',
-                'value'      => 'bimp-erp'
-                    ), true, $warnings, $warnings);
-
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'ftp_pwd',
-                'label'      => 'MDP',
-                'value'      => 'Yu5pTR?(3q99Aa'
-                    ), true, $warnings, $warnings);
-
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_dir',
@@ -182,9 +160,9 @@ class BDS_ExportsComptaProcess extends BDSImportProcess
         $errors = [];
         BimpObject::loadClass('bimpdatasync', 'BDS_Report');
 
-        $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
-        $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
-        $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
+        $host = BimpCore::getConf('exports_ldlc_ftp_serv');// BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
+        $login = BimpCore::getConf('exports_ldlc_ftp_user');// BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
+        $pword = BimpCore::getConf('exports_ldlc_ftp_mdp');// BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
         $port = BimpTools::getArrayValueFromPath($this->params, 'ftp_port', 21);
         $passive = (int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 0);
         ;

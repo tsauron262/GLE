@@ -2071,7 +2071,7 @@ function updateGraph(list_id, idGraph, list_name) {
             }, 'getGraphData', extra_data, null, null, {
                 no_triggers: true,
                 display_processing: false,
-                
+
             });
         }
     }

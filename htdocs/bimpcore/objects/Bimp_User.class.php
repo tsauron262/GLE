@@ -28,6 +28,13 @@ class Bimp_User extends BimpObject
         13 => 'Samedi (sem. paires)'
     );
 
+    public function __construct($module, $object_name)
+    {
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY'))
+            $this->redirectMode = 5;
+        return parent::__construct($module, $object_name);
+    }
+
     // Gestion des droits: 
 
     public function canView()
@@ -884,7 +891,7 @@ class Bimp_User extends BimpObject
             'content' => $list->renderHtml()
         );
 
-        // Liste mes tâches créées
+//        // Liste mes tâches créées
         $list = new BC_ListTable($task, 'default', 1, null, 'Mes tâches créées');
         $list->addIdentifierSuffix('by_me');
         $list->addFieldFilterValue('user_create', (int) $this->id);
@@ -1500,6 +1507,7 @@ class Bimp_User extends BimpObject
             // Onglet "Liste des configurations de listes": 
             case 'lists_configs':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'ListTableConfig'), 'default', 1, null, 'Liste des configurations de listes de "' . $user_label . '"', 'fas_cog');
+                $list->addIdentifierSuffix('user_' . $this->id);
                 $list->addFieldFilterValue('owner_type', ListTableConfig::OWNER_TYPE_USER);
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
@@ -1507,12 +1515,14 @@ class Bimp_User extends BimpObject
             // Onglet "'Liste des configuration de filtres":
             case 'filters_configs':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'FiltersConfig'), 'default', 1, null, 'Liste des configuration de filtres de "' . $user_label . '"', 'fas_cog');
+                $list->addIdentifierSuffix('user_' . $this->id);
                 $list->addFieldFilterValue('owner_type', ListTableConfig::OWNER_TYPE_USER);
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
 
             case 'lists_filters':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'ListFilters'), 'default', 1, null, 'Filtres enregistrés de "' . $user_label . '"', 'fas_cog');
+                $list->addIdentifierSuffix('user_' . $this->id);
                 $list->addFieldFilterValue('owner_type', ListFilters::OWNER_TYPE_USER);
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;

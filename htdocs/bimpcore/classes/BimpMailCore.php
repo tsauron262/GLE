@@ -271,7 +271,6 @@ class BimpMailCore
             if (!count($log_errors)) {
                 $log_errors = $instance->create($warnings, true);
             }
-
             if (count($log_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($log_errors, 'Echec de la création du log pour cet envoi d\'email');
             }

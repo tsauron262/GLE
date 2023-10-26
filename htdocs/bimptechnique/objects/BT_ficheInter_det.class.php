@@ -20,11 +20,11 @@ class BT_ficheInter_det extends BimpDolObject
     CONST TYPE_DEPLA_OFFERT = 15;
     
     public static $servicesForFacturation = Array(
-        self::TYPE_PLUS_ATELIER         => 'SERV19-FPR-ATE',
-        self::TYPE_PLUS_SUR_SITE        => 'SERV19-FPR-1',
-        self::TYPE_PLUS_TELEMAINTENANCE => 'SERV19-FPR-TELE',
-        self::TYPE_DEPLA                => 'SERV19-FD01',
-        self::TYPE_DEPLA_OFFERT         => 'SERV19-FD01'
+        self::TYPE_PLUS_ATELIER         => 'SERV23-GEN-PRATE1',
+        self::TYPE_PLUS_SUR_SITE        => 'SERV23-FPR-1',
+        self::TYPE_PLUS_TELEMAINTENANCE => 'SERV23-GEN-PRATE1',
+        self::TYPE_DEPLA                => 'SERV23-GEN-FD02',
+        self::TYPE_DEPLA_OFFERT         => 'SERV23-GEN-FD02'
     );
 
     public static $types = [
@@ -158,6 +158,12 @@ class BT_ficheInter_det extends BimpDolObject
         }
 
         return 1;
+    }
+    
+    public function isDep(){
+        if(in_array($this->getData('type'), array(BT_ficheInter_det::TYPE_DEPLA, BT_ficheInter_det::TYPE_DEPLACEMENT_CONTRAT, BT_ficheInter_det::TYPE_DEPLACEMENT_VENDU, BT_ficheInter_det::TYPE_DEPLA_OFFERT)))
+            return 1;
+        return 0;
     }
 
     // Getters params:

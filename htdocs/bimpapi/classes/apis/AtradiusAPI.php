@@ -60,6 +60,10 @@ class AtradiusAPI extends BimpAPI
         'decisions'    => array(
             'label' => 'Vérification des décisions',
             'url'   => '/credit-insurance/cover-management/v1/covers'
+        ),
+        'policies'    => array(
+            'label' => 'Récupérations des polices',
+            'url'   => '/credit-insurance/policy-management/v1/policies'
         )
     );
     public static $tokens_types = array(
@@ -548,16 +552,16 @@ class AtradiusAPI extends BimpAPI
     public function testRequest(&$errors = array(), &$warnings = array())
     {
 
-        $from = new DateTime();
-//        $from->sub(new DateInterval('PT1H')); TODO
-        $from->sub(new DateInterval('P5D'));
+//        $from = new DateTime();
+////        $from->sub(new DateInterval('PT1H')); TODO
+//        $from->sub(new DateInterval('P5D'));
+//
+//        $filters = array(
+//            'fromDate' => $from->format('Y-m-d\TH:i:s')
+//        );
 
-        $filters = array(
-            'fromDate' => $from->format('Y-m-d\TH:i:s')
-        );
-
-        $data = $this->execCurlCustom('decisions', array(
-            'url_params' => $filters
+        $data = $this->execCurlCustom('policies', array(
+            'url_params' => array()
                 ), $errors);
 
         return $data;

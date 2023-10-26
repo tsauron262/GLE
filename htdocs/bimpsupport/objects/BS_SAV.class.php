@@ -1450,6 +1450,31 @@ class BS_SAV extends BimpObject
         }
         return $extra;
     }
+    
+    public static function getMailFrom(){
+        $mail = BimpCore::getConf('mail_from_sav', null, 'bimpsupport');
+        if($mail != ''){
+            return array($mail, 'SAV '.BimpCore::getConf('default_name', null, 'bimpsupport'));
+        }
+    }
+    
+    public function getMailTo(){
+        $to = '';
+        $contact = $this->getChildObject('contact');
+
+        if (BimpObject::objectLoaded($contact)) {
+            $to = $contact->getData('email');
+        }
+
+        if (!$to) {
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                $to = $client->getData('email');
+            }
+        }
+        return $to;
+    }
 
     public function getCentreData($centre_repa = false)
     {
@@ -4390,19 +4415,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if (!$to) {
-            $contact = $this->getChildObject('contact');
-
-            if (BimpObject::objectLoaded($contact)) {
-                $to = $contact->getData('email');
-            }
-
-            if (!$to) {
-                $client = $this->getChildObject('client');
-
-                if (BimpObject::objectLoaded($client)) {
-                    $to = $client->getData('email');
-                }
-            }
+            $to = $this->getMailTo();
         }
 
         if (!$to) {
@@ -5039,17 +5052,22 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return $errors;
     }
+    
+    public function getCodeCentre(){
+        $code_centre = $this->getData('code_centre_repa');
+
+        if (!$code_centre) {
+            $code_centre = $this->getData('code_centre');
+        }
+        return $code_centre;
+    }
 
     public function decreasePartsStock($parts_stock_data, $code_mvt, $desc)
     {
         BimpObject::loadClass('bimpapple', 'InternalStock');
         BimpObject::loadClass('bimpapple', 'ConsignedStock');
 
-        $code_centre = $this->getData('code_centre_repa');
-
-        if (!$code_centre) {
-            $code_centre = $this->getData('code_centre');
-        }
+        $code_centre = $this->getCodeCentre();
 
         $warnings = array();
         foreach ($parts_stock_data as $part_number => $stock_data) {
@@ -6393,6 +6411,36 @@ ORDER BY a.val_max DESC");
             'warnings'         => array(),
             'success_callback' => $success_callback
         );
+    }
+    
+    public function getIdUserGroup(){
+        $codeCentre = $this->getCodeCentre();
+        
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+        global $tabCentre;
+        if(isset($tabCentre[$codeCentre])){
+            if(isset($tabCentre[$codeCentre]['idGroup'])){
+                return $tabCentre[$codeCentre]['idGroup'];
+            }
+            else{
+                BimpCore::addlog('Pas de groupe dans centre.inc pour '.$codeCentre);
+            }
+        }
+        else{
+            BimpCore::addlog('Pas de centre dans centre.inc pour '.$codeCentre);
+        }
+        
+        return 0;
+    }
+    
+    public function addMailMsg($dst, $src, $subj, $txt){
+        $idGroup = $this->getIdUserGroup();
+        $errors = $this->addNote('Message de : '.$src.'<br/>'.'Sujet : '.$subj.'<br/>'.$txt, 20, 0, 1, $src, 2, 4, $idGroup,0,0,$this->getData('id_client'));
+        if(count($errors))
+            BimpCore::addlog ('Erreur création mailMsg sav', 1, 'sav', $this, $errors);
+        else
+            return 1;
+        return 0;
     }
 
     public function actionAddAcompte($data, &$success)
@@ -7762,11 +7810,11 @@ ORDER BY a.val_max DESC");
             }
 
             $cgv .= "- Les frais de prise en charge diagnotic de <b>" . $prixRefus . "€ TTC</b> sont à régler pour tout matériel  hors garantie. En cas d’acceptation du devis ces frais seront déduits.<br/><br/>";
-            $cgv .= "- Les problèmes logiciels, la récupération de données ou la réparation matériel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de <b>" . $prixRefus . "€ TTC</b> seront facturés en cas de refus de celui-ci." . "<br/><br/>";
-            $cgv .= "- Des frais de <b>" . $prixRefus . "€ TTC</b> seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.<br/><br/>";
+            $cgv .= "- Les problèmes logiciels, la récupération de données ou la réparation matériel liés à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de <b>" . $prixRefus . "€ TTC</b> seront facturés en cas de refus de celui-ci." . "<br/><br/>";
+            $cgv .= "- Des frais de <b>" . $prixRefus . "€ TTC</b> seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contrefaçon ont été installées.<br/><br/>";
             $cgv .= "- Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de <b>4€ par jour</b>.<br/><br/>";
-            $cgv .= "- Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruit, après accord du tribunal.<br/><br/>";
-            $cgv .= "- BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximun de 1000 €), en carte bleue.<br/><br/>";
+            $cgv .= "- Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruits, après accord du tribunal.<br/><br/>";
+            $cgv .= "- BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximum de 1000 €), en carte bleue.<br/><br/>";
 
             if ($prioritaire && $isIphone) {
                 $cgv .= '- J\'accepte les frais de 96 TTC de prise en charge urgente';

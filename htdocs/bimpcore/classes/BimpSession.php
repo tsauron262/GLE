@@ -23,9 +23,11 @@ class Session {
             array($this, "session_nettoyage")
         );
         // Démarrage des sessions
-        session_start();
-        
-        $this->alimentSession();
+        if(!defined('NOREQUIREDB')){
+            session_start();
+
+            $this->alimentSession();
+        }
 //        echo '<pre>';print_r($_SESSION);
     }
     

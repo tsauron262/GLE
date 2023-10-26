@@ -8,9 +8,9 @@ if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION) {
     }
 }
 
-if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY) {
-    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php')) {
-        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php';
+if (BimpCore::getExtendsEntity() != '' && BimpCore::getExtendsEntity()) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/BimpComm.class.php';
     }
 }
 
@@ -82,6 +82,14 @@ class Bimp_Propal extends Bimp_PropalTemp
     public function canEdit()
     {
         return $this->canCreate();
+    }
+
+    public function canView()
+    {
+        global $user;
+        if (isset($user->rights->propal->lire)) {
+            return (int) $user->rights->propal->lire;
+        }
     }
 
     public function canSetAction($action)
@@ -460,7 +468,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $child = $this->getChildObject("lines", $id_child);
                     $dol_line = $child->getChildObject('dol_line');
                     if ($dol_line->getData('fk_product') > 0) {
-                        $service = $this->getInstance('bimpcore', 'Bimp_Product', $dol_line->getData('fk_product'));
+                        $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $dol_line->getData('fk_product'));
                         if (!$service->isInContrat() && $dol_line->getData('total_ht') != 0) {
                             $id_services[] = $service->getData('ref');
                         }
@@ -541,7 +549,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         global $conf;
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && is_null($this->id_sav)) {
             if ($this->isLoaded()) {
-                $this->id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $this->id);
+                $this->id_sav = BimpCache::getIdSavFromIdPropal($this->id);
             } else {
                 return 0;
             }
@@ -864,7 +872,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
 
                     // Créer un contrat
-                    if ($this->isActionAllowed('createContrat') && $this->canSetAction('createContrat')) {
+                    if (1) {
                         $buttons[] = array(
                             'label'   => 'Créer un contrat',
                             'icon'    => 'fas_file-signature',
@@ -1862,6 +1870,15 @@ class Bimp_Propal extends Bimp_PropalTemp
             'warnings'         => $warnings,
             'success_callback' => 'window.location = \'' . $url . '\''
         );
+    }
+    
+    public function isFieldContratEditable(){
+        if(BimpTools::getPostFieldValue('field_name') == 'duree_mois'){
+            $fields = BimpTools::getPostFieldValue('fields');
+            if($fields['objet_contrat'] == 'ASMX')
+                return 1;
+            return 0;
+        }
     }
 
     public function actionCreateContrat($data, &$success = '')

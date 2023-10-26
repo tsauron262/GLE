@@ -1,0 +1,13 @@
+A gérer :
+
+
+Export Apple du lundi matin
+Export CEGID de piéce commune (client rib mandat) a exporté pour chaque entité
+
+Gestion droit + groupe. (actullement desactivé la new ersion)
+
+
+
+
+A l'install :
+ajouter hook login a bimpcore (ou redemarrer le module)

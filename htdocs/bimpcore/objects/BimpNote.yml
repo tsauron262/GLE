@@ -160,6 +160,17 @@ forms:
             - field: type_dest
             - field: fk_user_dest
             - field: fk_group_dest
+            - custom: 1
+              label: Destinataire
+              input_name: mail_dest
+              input:
+                type: text
+              value:
+                  callback: getMailTo
+              edit: 0
+              display_if: 
+                field_name: type_dest
+                show_values: 2
             - field: content
             
     edit: 
@@ -212,6 +223,17 @@ forms:
 #              edit: 0
             - field: fk_user_dest
               edit: 0
+            - custom: 1
+              label: Destinataire
+              input_name: mail_dest
+              input:
+                type: text
+              default_value:
+                  callback: getMailTo
+              edit: 0
+              display_if: 
+                field_name: type_dest
+                show_values: 2
 #            - field: content
             - custom: 1
               label: Texte

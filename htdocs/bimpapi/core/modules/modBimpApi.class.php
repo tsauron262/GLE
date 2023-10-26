@@ -289,7 +289,7 @@ class modBimpApi extends DolibarrModules
                 $name = 'module_version_'.strtolower($this->name);
                 // Se fait que lors de l'installation du module
                 if(BimpCore::getConf($name, '') == "") {
-                    BimpCore::setConf($name, floatval($this->version));
+                    BimpCore::setConf($name, floatval($this->version), 0);
                     $this->_load_tables('/'.strtolower($this->name).'/sql/');
                 }
 		return $this->_init($sql, $options);

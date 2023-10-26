@@ -566,7 +566,7 @@ class BL_CommandeShipment extends BimpObject
         return $qties;
     }
 
-    public function getTotalHT()
+    public function getTotalHT($withAcompte = true)
     {
         if (!$this->isLoaded()) {
             return 0;
@@ -581,10 +581,20 @@ class BL_CommandeShipment extends BimpObject
         $total_ht = 0;
 
         foreach ($commande->getLines('not_text') as $line) {
-            $total_ht += (float) $line->getShipmentTotalHT($this->id);
+            $dolLine = $line->getChildObject('line');
+            if(stripos($dolLine->desc, 'Acompte') === false)
+                $total_ht += (float) $line->getShipmentTotalHT($this->id);
         }
 
         return $total_ht;
+    }
+    
+    public function displayTotalWithNonAcompte(){
+        global $modeCSV;
+        if ($modeCSV)
+            return $this->getTotalHT(false);
+        else
+            return BimpTools::displayMoneyValue($this->getTotalHT(false));
     }
 
     public function getTotalTTC()

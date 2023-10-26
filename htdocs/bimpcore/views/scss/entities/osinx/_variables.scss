@@ -1,0 +1,62 @@
+/* Entité prolease */
+
+// **************
+// ENTITE : prolease
+// **************
+
+/* Couleurs principales */
+
+$gray-base:              #000 !default;
+$gray-darker:            #282828 !default;
+$gray-dark:              #636363 !default;
+$gray:                   #B4B4B4 !default;
+$gray-light:             #DCDCDC !default;
+$gray-lighter:           #F5F5F5 !default; // #eee
+
+$brand-primary:         #BA434D !default;
+$brand-secondary:       #272D36 !default;
+$brand-success:         #348C41 !default;
+$brand-info:            #3B6EA0 !default;
+$brand-warning:         #E69900 !default;
+$brand-danger:          #A00000 !default;
+
+$primary: $brand-primary;
+$secondary: $brand-secondary;
+$success: $brand-success;
+$info: $brand-info;
+$warning: $brand-warning;
+$danger: $brand-danger;
+$important: #963E96 !default;
+$selection: #5897FB !default;
+
+$bimp_bk_light: #c8c8c8;
+$bimp_bk_dark: $secondary;
+
+// Styles en-têtes généraux: 
+/*$bimp_headers_color: #fff;
+$bimp_headers_bk_color: $primary;*/
+$bimp_headers_color: $primary;
+$bimp_headers_bk_color: #E9EAED;
+
+// Syles listes: 
+/*$bimp_list_header_color: #fff;
+$bimp_list_header_bk_color: $primary;
+$bimp_list_header_border: none;
+$bimp_list_header_icons_color: #fff;
+$bimp_list_header_icons_hover_color: $primary;
+$bimp_list_header_icons_hover_bk_color: #fff;*/
+$bimp_list_header_color: $primary;
+$bimp_list_header_bk_color: #E6E5E5;
+$bimp_list_header_border: 2px solid $primary;
+$bimp_list_header_icons_color: #333333;
+$bimp_list_header_icons_hover_color: $primary;
+$bimp_list_header_icons_hover_bk_color: transparent;
+
+// Panels: 
+$bimp_panel_padding: 8px;
+$bimp_panel_v_margin: 8px;
+$bimp_panel_h_margin: 8px;
+
+// Menu BimpTheme: 
+$bimp_theme_menu_bk_color: #663849;
+$bimp_theme_menu_active_color: $primary;

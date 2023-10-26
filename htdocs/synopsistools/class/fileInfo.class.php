@@ -31,27 +31,29 @@ unset($_REQUEST['appli']);
 
         if ($this->ok) {
             $Directory = $this->pathFileInfo;
-            $MyDirectory = opendir($Directory);
-            if($MyDirectory){
-                while ($Entry = @readdir($MyDirectory)) {
-                    if ($Entry != '.' && $Entry != '..' && stripos($Entry, "hide") === false) {
-                        if (is_dir($Directory . '/' . $Entry)) {
-                            //Dossier
-                        } else { //if (!in_array($Entry, $this->fileVue)) {
-                            $vue = false;
-                            foreach ($this->fileVue as $file)
-                                if ($file['nom'] == $Entry)
-                                    $vue = true;
-                            if ($vue == false) {
-    //                            $this->marquFileVue($Entry);
-                                $this->showFile($Entry);
-                            } else {
-                                //Cest un fichier deja vue;
+            if(is_dir($Directory)){
+                $MyDirectory = opendir($Directory);
+                if($MyDirectory){
+                    while ($Entry = @readdir($MyDirectory)) {
+                        if ($Entry != '.' && $Entry != '..' && stripos($Entry, "hide") === false) {
+                            if (is_dir($Directory . '/' . $Entry)) {
+                                //Dossier
+                            } else { //if (!in_array($Entry, $this->fileVue)) {
+                                $vue = false;
+                                foreach ($this->fileVue as $file)
+                                    if ($file['nom'] == $Entry)
+                                        $vue = true;
+                                if ($vue == false) {
+        //                            $this->marquFileVue($Entry);
+                                    $this->showFile($Entry);
+                                } else {
+                                    //Cest un fichier deja vue;
+                                }
                             }
                         }
                     }
+                    closedir($MyDirectory);
                 }
-                closedir($MyDirectory);
             }
         }
     }

@@ -16,11 +16,11 @@
         protected $filesNotFtp   = [];
         protected $rapport       = [];
         protected $files_for_ftp = [];
-        protected $entitie       = null;
+        protected $extendsEntity       = null;
         protected $version_tra   = null;
-        protected $ldlc_ftp_host = 'ftp-edi.groupe-ldlc.com';
-        protected $ldlc_ftp_user = 'bimp-erp';
-        protected $ldlc_ftp_pass = 'Yu5pTR?(3q99Aa';
+        protected $ldlc_ftp_host = '';
+        protected $ldlc_ftp_user = '';
+        protected $ldlc_ftp_pass = '';
         protected $ldlc_ftp_path = ''; 
         protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
         protected $size_vide_tra = 149;
@@ -48,6 +48,9 @@
         
         public function __construct() {// Bien penssé a changer pour les test à /accountingtest/
             $this->ldlc_ftp_path = "/".BimpCore::getConf('exports_ldlc_ftp_dir').'/accounting';
+            $this->ldlc_ftp_host = BimpCore::getConf('exports_ldlc_ftp_serv');
+            $this->ldlc_ftp_user = BimpCore::getConf('exports_ldlc_ftp_user');
+            $this->ldlc_ftp_pass = BimpCore::getConf('exports_ldlc_ftp_mdp');
             
             if($this->modeTest) {
                 $this->ldlc_ftp_path .= 'test/';
@@ -61,7 +64,7 @@
             $errors = $warnings = Array();
             
             $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
-            $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+            $this->extendsEntity = BimpCore::getExtendsEntity();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();
             
             if(!count($errors)) {
@@ -90,7 +93,7 @@
                     $db->begin(); //Ouvre la transaction
 
                     $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
-                    $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+                    $this->extendsEntity = BimpCore::getExtendsEntity();
                     
                     $this->export_class->create_daily_files();
                     $this->files_for_ftp = $this->getFilesArrayForTranfert();
@@ -475,18 +478,18 @@
         protected function getFilesArrayForTranfert():array {
             $files = [];
                         
-            if($this->auto_tiers)       $files[] = "0_" . $this->entitie . '_(TIERS)_' . '*'   . $this->version_tra . '.tra';
-            if($this->auto_ventes)      $files[] = "1_" . $this->entitie . '_(VENTES)_' . '*' .  $this->version_tra . '.tra';
-            if($this->auto_paiements)   $files[] = "2_" . $this->entitie . '_(PAIEMENTS)_' . '*' .  $this->version_tra . '.tra';
-            if($this->auto_achats)      $files[] = "3_" . $this->entitie . '_(ACHATS)_' . '*' .  $this->version_tra . '.tra';
+            if($this->auto_tiers)       $files[] = "0_" . $this->extendsEntity . '_(TIERS)_' . '*'   . $this->version_tra . '.tra';
+            if($this->auto_ventes)      $files[] = "1_" . $this->extendsEntity . '_(VENTES)_' . '*' .  $this->version_tra . '.tra';
+            if($this->auto_paiements)   $files[] = "2_" . $this->extendsEntity . '_(PAIEMENTS)_' . '*' .  $this->version_tra . '.tra';
+            if($this->auto_achats)      $files[] = "3_" . $this->extendsEntity . '_(ACHATS)_' . '*' .  $this->version_tra . '.tra';
             if($this->auto_rib_mandats) {
-                $files[] = "4_" . $this->entitie . '_(RIBS)_' . '*'  . $this->version_tra . '.tra';
-                $files[] = "5_" . $this->entitie . '_(MANDATS)_' . '*'  . $this->version_tra . '.tra';
+                $files[] = "4_" . $this->extendsEntity . '_(RIBS)_' . '*'  . $this->version_tra . '.tra';
+                $files[] = "5_" . $this->extendsEntity . '_(MANDATS)_' . '*'  . $this->version_tra . '.tra';
             }
-            if($this->auto_payni)                                                   $files[] = "6_" . $this->entitie . '_(PAYNI)_' . '*'  . $this->version_tra . '.tra';
+            if($this->auto_payni)                                                   $files[] = "6_" . $this->extendsEntity . '_(PAYNI)_' . '*'  . $this->version_tra . '.tra';
             if($this->auto_importPaiement)                                          $files[] = 'IP*.tra';
-            if($this->auto_deplacementPay)                                          $files[] = "7_" . $this->entitie . '_(DEPLACEMENTPAIEMENTS)' . '*' .  $this->version_tra . '.tra';
-            if($this->auto_bordereauCHK)                                            $files[] = "8_" . $this->entitie . '_(BORDEREAUXCHK)' . '*'  . $this->version_tra . '.tra';
+            if($this->auto_deplacementPay)                                          $files[] = "7_" . $this->extendsEntity . '_(DEPLACEMENTPAIEMENTS)' . '*' .  $this->version_tra . '.tra';
+            if($this->auto_bordereauCHK)                                            $files[] = "8_" . $this->extendsEntity . '_(BORDEREAUXCHK)' . '*'  . $this->version_tra . '.tra';
             
             $this->rapport['FILES_FTP'] = 'Liste des fichiers transférés automatiquement sur le FTP de LDLC' . "\n"
                     . implode("\n", $files) . "\n";

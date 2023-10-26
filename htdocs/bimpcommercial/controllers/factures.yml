@@ -101,6 +101,12 @@ sections:
                       object: paiement_facture
         paiements_inc:
             label: Paiements non identifiés
+            show: 
+                callback:
+                    method: isModuleActif
+                    object: facture
+                    params:
+                        - bimpfinanc
             icon: fas_ambulance
             sections:
                 - type: list
@@ -114,6 +120,12 @@ sections:
                 - type: list
                   list: 
                       object: commission
+            show: 
+                callback:
+                    method: isModuleActif
+                    object: facture
+                    params:
+                        - bimpfinanc
         revals:
             label: Revalorisations
             icon: fas_search-dollar
@@ -121,5 +133,11 @@ sections:
                 - type: list
                   list: 
                       object: revalorisation
+            show: 
+                callback:
+                    method: isModuleActif
+                    object: facture
+                    params:
+                        - bimpfinanc
         
             

@@ -828,12 +828,22 @@ class BC_Form extends BC_Panel
             if ($this->object->config->isDefined($row_path . '/values')) {
                 $field_params['values'] = $this->object->config->get($row_path . '/values', array(), false, 'array');
             }
-            $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $row_path . '/input', $params['value'], $field_params);
-            $input->display_card_mode = 'visible';
-            $input->setNamePrefix($this->fields_prefix);
-            $input->extraClasses[] = 'customField';
-            $input->extraData['form_row'] = $row;
-            $html .= $input->renderHtml();
+            if (isset($params['edit']) && !(int) $params['edit']) {
+                $content = BimpInput::renderInput('hidden', $params['input_name'], $params['value']);
+                $content .= $params['value'];
+                
+                $extra_data = array();
+                $extra_data['form_row'] = $row;
+                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], $params['multiple'], 'customField', $extra_data);
+            }
+            else{
+                $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $row_path . '/input', $params['value'], $field_params);
+                $input->display_card_mode = 'visible';
+                $input->setNamePrefix($this->fields_prefix);
+                $input->extraClasses[] = 'customField';
+                $input->extraData['form_row'] = $row;
+                $html .= $input->renderHtml();
+            }
             unset($input);
         } elseif ($this->object->config->isDefined($this->config_path . '/rows/' . $row . '/content')) {
             $content = str_replace('name="' . $params['input_name'] . '"', 'name="' . $this->fields_prefix . $params['input_name'] . '"', $this->object->getConf($row_path . '/content', '', true));

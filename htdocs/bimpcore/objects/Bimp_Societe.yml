@@ -472,6 +472,8 @@ fields:
         label: Limite recommandée par Crédit SAFE
         type: money
         edit: 0
+        show: 
+            callback: useCreditSafe
         
     outstanding_limit_credit_check:    
         label: Limite Crédit Check
@@ -480,17 +482,23 @@ fields:
         default_value: -1
         input:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
+        show: 
+            callback: useCreditSafe
             
     outstanding_limit_manuel:    
         label: Limite Crédit Manuelle
         type: money
         history: 1
         default_value: 0
+        show: 
+            callback: useEncours
         
     date_check_credit_safe:
         label: Date de verification Crédit SAFE
         type: datetime
         dol_extra_field: 1
+        show: 
+            callback: useCreditSafe
             
     outstanding_limit_atradius: 
         label: Limite de crédit Atradius
@@ -499,18 +507,35 @@ fields:
         default_value: -1
         input:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
+        show: 
+            callback: useAtradius
 
     date_atradius: 
         label: Date d'expiration de la couverture Atradius
         type: datetime
+        show: 
+            callback: useAtradius
 
     date_rappel_atradius: 
         label: Date rappel expiration de la couverture Atradius
         type: datetime
+        show: 
+            callback: useAtradius
         
     date_demande_atradius: 
         label: Date de demande de couverture Atradius
         type: datetime
+        show: 
+            callback: useAtradius
+            
+    status_atradius:
+        label: Statut Atradius
+        type: int
+        values: 
+            array: status_atradius
+        default_value: 0
+        show: 
+            callback: useAtradius
         
     outstanding_limit_icba:
         label: Limite de crédit ICBA 
@@ -519,10 +544,14 @@ fields:
         default_value: -1
         input:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
+        show: 
+            callback: useAtradius
         
     date_depot_icba:
         label: Date de dépôt du Rapport
         type: datetime
+        show: 
+            callback: useAtradius
         
     fk_account: 
         label: Compte bancaire
@@ -719,6 +748,8 @@ fields:
     id_atradius:
         label: Identifiant Atradius
         type: int   
+        show: 
+            callback: useAtradius
         
     msg_fact:
         label: Message Facturation
@@ -728,16 +759,6 @@ fields:
         label: Consigne référence externe
         type: text
         
-    type_educ: 
-        label: Type éducation
-        values: 
-            array: types_educ
-            
-    type_educ_fin_validite: 
-        label: Date de fin de validité (Enseignants / étudiants)
-        type: date
-        input: 
-            help: Obligatoire pour les enseignants / étudiants
 
 fields_tables: 
     identity:
@@ -755,10 +776,6 @@ fields_tables:
             - field: nom
             - field: name_alias
             - field: fk_typent
-            - field: type_educ
-              edit: 1
-            - field: type_educ_fin_validite
-              edit: 1
             - field: client
               show: 
                   callback: isClient
@@ -1006,6 +1023,9 @@ forms:
     light: 
         title: Ajout d'une société
         rows: 
+            datec:
+                field: datec
+                
             client: 
                 field: client
             fournisseur: 
@@ -1038,13 +1058,6 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
-            type_educ: 
-                field: type_educ
-            type_educ_fin_validite: 
-                field: type_educ_fin_validite
-                display_if: 
-                    field_name: type_educ
-                    show_values: E4
             mode_reglement: 
                 field: mode_reglement
             cond_reglement: 
@@ -1399,13 +1412,6 @@ forms:
               input: 
                   type: date
                   
-    edit_type_educ:
-        rows: 
-            - field: type_educ
-            - field: type_educ_fin_validite
-              display_if: 
-                    field_name: type_educ
-                    show_values: E4
              
 filters: 
     accounting_account:

@@ -1,6 +1,7 @@
 function BimpModuleConf() {
     var bmc = this;
     this.$container = null;
+    this.$entity_select = null;
     this.$module_params = null;
     this.$module_select = null;
     this.$modules_search = null;
@@ -12,6 +13,7 @@ function BimpModuleConf() {
 
         if (bmc.$container.length) {
             if (!parseInt(bmc.$container.data('events_init'))) {
+                bmc.$entity_select = bmc.$container.find('select[name="entity_select"]');
                 bmc.$module_select = bmc.$container.find('select[name="module_select"]');
                 bmc.$modules_search = bmc.$container.find('input[name="all_modules_search"]');
                 bmc.$module_params = bmc.$container.find('div.module_params_container');
@@ -24,10 +26,19 @@ function BimpModuleConf() {
                         }
                     });
                 }
-                if (bmc.$module_select.length && bmc.$module_params.length) {
-                    bmc.$module_select.change(function () {
-                        BimpModuleConf.loadModuleConfForm($(this).val());
-                    });
+
+                if (bmc.$module_params.length) {
+                    if (bmc.$entity_select.length) {
+                        bmc.$entity_select.change(function () {
+                            BimpModuleConf.loadModuleConfForm();
+                        });
+                    }
+
+                    if (bmc.$module_select.length) {
+                        bmc.$module_select.change(function () {
+                            BimpModuleConf.loadModuleConfForm($(this).val());
+                        });
+                    }
                 }
 
                 bmc.onModuleConfFormLoaded();
@@ -41,12 +52,25 @@ function BimpModuleConf() {
             return;
         }
 
+        if (typeof (module_name) === 'undefined') {
+            if (bmc.$module_select.length) {
+                module_name = bmc.$module_select.val();
+            }
+        }
+
         if (!module_name) {
             return;
         }
 
+        var entity_type = 'all';
+
+        if (bmc.$entity_select.length) {
+            entity_type = bmc.$entity_select.val();
+        }
+
         BimpAjax('loadModuleConfForm', {
-            module_name: module_name
+            module_name: module_name,
+            entity_type: entity_type
         }, bmc.$module_params, {
             display_success: false,
             display_processing: true,
@@ -82,6 +106,8 @@ function BimpModuleConf() {
                         });
                         $form.data('module_params_form_events_init', 1);
                     }
+
+                    bmc.checkAllSubParamsDisplay(bmc.$module_select.val(), $curForm);
                 });
             });
         }
@@ -106,55 +132,168 @@ function BimpModuleConf() {
 
         var param_name = $input.attr('name');
         var value = $input.val();
+        var id_entity = parseInt($input.data('id_entity'));
+
+        if (typeof (id_entity) === 'undefined' || isNaN(id_entity)) {
+            bimp_msg('Entité absente ou invalide - impossible d\'enregistrer le paramètre');
+            return;
+        }
 
         if (typeof (module_name) === 'undefined' || !module_name) {
             bimp_msg('Nom du module absent - impossible d\'enregistrer le paramètre');
-        } else {
-            // Save: 
-            bmc.saveParam(module_name, param_name, value);
+            return;
         }
 
-        // Check displays:
-        $form.find('tr.sub_params_row[data-parent_param="' + param_name + '"]').each(function () {
-            var $tr = $(this);
-            var if_values = $(this).data('if');
+        // Save: 
+        bmc.saveParam(module_name, param_name, value, id_entity);
+    };
 
-            if (typeof (if_values) !== 'undefined') {
-                if (typeof (if_values) === 'string') {
-                    if_values = if_values.split(',');
-                } else {
-                    if_values = [if_values];
-                }
+    this.checkAllSubParamsDisplay = function (module, $container) {
+        $container.find('tr.sub_params_row').each(function () {
+            var param_name = $(this).data('parent_param');
 
-                var check = false;
-                for (var i in if_values) {
-                    if (!check) {
-                        if (value == if_values[i]) {
-                            check = true;
-                            $tr.show().children('td').children('.sub_params_container').stop().slideDown(250);
-                        }
-                    }
-                }
-
-                if (!check) {
-                    $tr.children('td').children('.sub_params_container').stop().slideUp(250, function () {
-                        $tr.hide();
-                    });
-                }
+            if (param_name) {
+                bmc.checkSubParamsDisplay(module, param_name);
             }
         });
     };
 
-    this.saveParam = function (module, param_name, value) {
+    this.checkSubParamsDisplay = function (module, param_name) {
+        var $form = bmc.$container.find('.module_params_form');
+
+        if ($form.length) {
+            var show_container = false;
+            $form.find('tr.sub_params_row[data-parent_param="' + param_name + '"]').each(function () {
+                var $tr = $(this);
+                var if_values = $(this).data('if');
+
+                if (typeof (if_values) !== 'undefined') {
+                    if (typeof (if_values) === 'string') {
+                        if_values = if_values.split(',');
+                    } else {
+                        if_values = [if_values];
+                    }
+
+                    var $inputs = $form.find('input.module_conf_input[data-module="' + module + '"][name="' + param_name + '"]');
+                    if ($inputs.length) {
+                        $inputs.each(function () {
+                            var check = false;
+                            var id_entity = parseInt($(this).data('id_entity'));
+                            if (typeof (id_entity) !== 'undefined' && !isNaN(id_entity)) {
+                                var value = $(this).val();
+                                for (var i in if_values) {
+                                    if (!check) {
+                                        if (value == if_values[i]) {
+                                            check = true;
+                                            $tr.show().children('td').children('.sub_params_container').stop().slideDown(250);
+                                        }
+                                    }
+                                }
+
+                                if (check) {
+                                    show_container = true;
+                                    $tr.find('tr.entity_param_row[data-id_entity="' + id_entity + '"]').stop().slideDown(250);
+                                } else {
+                                    $tr.find('tr.entity_param_row[data-id_entity="' + id_entity + '"]').stop().slideUp(250);
+                                }
+                            }
+                        });
+                    }
+
+                    if (!show_container) {
+                        $tr.children('td').children('.sub_params_container').stop().slideUp(250, function () {
+                            $tr.hide();
+                        });
+                    }
+                }
+            });
+        }
+    };
+
+    this.saveParam = function (module, param_name, value, id_entity) {
+        if (typeof (id_entity) === 'undefined') {
+            id_entity = 0;
+        }
+
+        var entity_type = 'all';
+        if (bmc.$entity_select.length) {
+            entity_type = bmc.$entity_select.val();
+        }
+
         BimpAjax('saveModuleConfParam', {
             module: module,
             param_name: param_name,
-            value: value
+            value: value,
+            id_entity: id_entity,
+            entity_type: entity_type
         }, null, {
+            module: module,
+            param_name: param_name,
             display_errors_in_popup_only: true,
             success_msg: 'Paramètre enregistré',
-            error_msg: 'Echec enregistrement du paramètre - l\'opération n\'a pas aboutie'
+            error_msg: 'Echec enregistrement du paramètre - l\'opération n\'a pas aboutie',
+            success: function (result, BimpAjax) {
+                if (result.param_row) {
+                    bmc.setParamHtml(BimpAjax.module, BimpAjax.param_name, result.param_row, result.has_errors);
+                }
+
+                bmc.checkSubParamsDisplay(BimpAjax.module, BimpAjax.param_name);
+            }
         });
+    };
+
+    this.removeParam = function (module, param_name, id_entity) {
+        if (typeof (id_entity) === 'undefined') {
+            id_entity = 0;
+        }
+
+        var entity_type = 'all';
+        if (bmc.$entity_select.length) {
+            entity_type = bmc.$entity_select.val();
+        }
+
+        BimpAjax('removeModuleConfParam', {
+            module: module,
+            param_name: param_name,
+            id_entity: id_entity,
+            entity_type: entity_type
+        }, null, {
+            module: module,
+            param_name: param_name,
+            display_errors_in_popup_only: true,
+            success_msg: 'Paramètre supprimé',
+            error_msg: 'Echec suppression du paramètre - l\'opération n\'a pas aboutie',
+            success: function (result, bimpAjax) {
+                if (result.param_row) {
+                    bmc.setParamHtml(bimpAjax.module, bimpAjax.param_name, result.param_row, result.has_errors);
+                }
+
+                bmc.checkSubParamsDisplay(bimpAjax.module, bimpAjax.param_name);
+            }
+        });
+    };
+
+    this.setParamHtml = function (module, param_name, html, has_errors) {
+        var $tr = bmc.$container.find('tr.param_row[data-param_name="' + param_name + '"][data-module="' + module + '"]');
+
+        if ($tr.length) {
+            if (has_errors) {
+                $tr.addClass('has_errors');
+            } else {
+                $tr.removeClass('has_errors');
+            }
+
+            $tr.html(html);
+
+            setCommonEvents($tr);
+            setInputsEvents($tr);
+
+            $tr.find('.module_conf_input').each(function () {
+                $(this).change(function () {
+                    bmc.onParamChange($(this));
+                });
+            });
+        }
     };
 
     this.searchInCurModule = function () {
@@ -296,6 +435,12 @@ function BimpModuleConf() {
                 return;
             }
 
+            var entity_type = 'all';
+
+            if (bmc.$entity_select.length) {
+                entity_type = bmc.$entity_select.val();
+            }
+
             bmc.lock_params_load = true;
 
             bmc.$module_params.stop().slideUp(250, function () {
@@ -305,7 +450,8 @@ function BimpModuleConf() {
             bmc.$modules_search_result.stop().slideDown(250);
 
             BimpAjax('searchModulesConfParams', {
-                'search': search
+                search: search,
+                entity_type: entity_type
             }, bmc.$modules_search_result.children('.all_modules_search_result_content'), {
                 display_success: false,
                 display_processing: true,

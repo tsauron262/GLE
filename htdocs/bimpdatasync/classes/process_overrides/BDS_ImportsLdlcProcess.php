@@ -168,6 +168,19 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
         return $result;
     }
+    
+    public function getFtpParams($params){
+        if($params == 'ftp_host')
+            return BimpCore::getConf('exports_ldlc_ftp_serv');
+        if($params == 'ftp_login')//a virer quand catalogue deverssé sur actimac
+            return 'bimp-erp';
+        if($params == 'ftp_pwd')//a virer quand catalogue deverssé sur actimac
+            return 'Yu5pTR?(3q99Aa';
+        if($params == 'ftp_login')
+            return BimpCore::getConf('exports_ldlc_ftp_user');
+        if($params == 'ftp_pwd')
+            return BimpCore::getConf('exports_ldlc_ftp_mdp');
+    }
 
     // Install: 
 
@@ -186,27 +199,6 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         if (BimpObject::objectLoaded($process)) {
 
             // Params: 
-
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'ftp_host',
-                'label'      => 'Hôte',
-                'value'      => 'ftp-edi.groupe-ldlc.com'
-                    ), true, $warnings, $warnings);
-
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'ftp_login',
-                'label'      => 'Login',
-                'value'      => 'bimp-erp'
-                    ), true, $warnings, $warnings);
-
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'ftp_pwd',
-                'label'      => 'MDP',
-                'value'      => 'Yu5pTR?(3q99Aa'
-                    ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,

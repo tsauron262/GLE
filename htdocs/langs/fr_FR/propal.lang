@@ -1,10 +1,10 @@
 # Dolibarr language file - Source file is en_US - propal
 Proposals=Propositions commerciales
-Proposal=Proposition commerciale
+Proposal=Devis
 ProposalShort=Proposition
 ProposalsDraft=Propositions commerciales brouillons
 ProposalsOpened=Propositions commerciales ouvertes
-CommercialProposal=Proposition commerciale
+CommercialProposal=Devis
 PdfCommercialProposalTitle=Proposition
 ProposalCard=Fiche proposition
 NewProp=Nouvelle proposition commerciale

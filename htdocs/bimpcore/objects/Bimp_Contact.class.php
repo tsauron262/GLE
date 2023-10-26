@@ -270,7 +270,7 @@ class Bimp_Contact extends BimpObject
         return $html;
     }
 
-    public function getNomCompletCsvValue($needed_fields = array())
+    public static function getNomCompletCsvValue($needed_fields = array())
     {
         $return = $needed_fields['firstname'];
         if ($needed_fields['lastname'] != '' && $needed_fields['firstname'] != '')

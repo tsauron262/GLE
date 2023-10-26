@@ -146,7 +146,12 @@ class favoriCli
         if (isset($element_id) && isset($element_type) && $element_type != '' && $element_id > 0) {
             $obj = self::getObj($element_type);
             if ($obj) {
-                $obj->fetch($element_id);
+                if(is_a($obj, 'BimpObject')){
+                    $obj = BimpCache::getBimpObjectInstance($obj->module, $obj->object_name, $element_id);
+                }
+                else{
+                    $obj->fetch($element_id);
+                }
                 $ref = $obj->ref;
                 global $user, $db;
 

@@ -19,6 +19,7 @@ list_page_url:
 header_btn: 
     callback: getActionsButtons
 header_edit_form: edit_contrat
+header_list_name: default
 
 public_header_btn: 
     callback: getPublicActionsButtons

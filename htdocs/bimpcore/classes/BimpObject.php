@@ -137,8 +137,8 @@ class BimpObject extends BimpCache
                 }
 
                 // Surcharge entité: 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $object_name . '.class.php';
+                if (BimpCore::getExtendsEntity() != '') {
+                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $object_name . '.class.php';
                     if (file_exists($entity_file)) {
                         $className = $object_name . '_ExtEntity';
                         if (!class_exists($className)) {
@@ -197,8 +197,8 @@ class BimpObject extends BimpCache
                             }
 
                             // Surcharge entité: 
-                            if (defined('BIMP_EXTENDS_ENTITY')) {
-                                $ext_entity_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $ext_object_name . '.class.php';
+                            if (BimpCore::getExtendsEntity() != '') {
+                                $ext_entity_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $ext_object_name . '.class.php';
                                 if (file_exists($ext_entity_file)) {
                                     $ext_className = $ext_object_name . '_ExtEntity';
                                     if (!class_exists($ext_className)) {
@@ -293,8 +293,8 @@ class BimpObject extends BimpCache
                 }
 
                 // Entité: 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $object_name . '.class.php';
+                if (BimpCore::getExtendsEntity() != '') {
+                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $object_name . '.class.php';
                     if (file_exists($entity_file)) {
                         $final_class_name = $object_name . '_ExtEntity';
                         if (!class_exists($final_class_name)) {
@@ -403,25 +403,24 @@ class BimpObject extends BimpCache
     {
         return $this->config->isDefined('dol_object');
     }
-
-    protected function addEntityFieldConfig()
-    {
-        if ($this->getEntity_name()) {
+    
+    protected function addEntityFieldConfig(){
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY') && $this->getEntity_name()){
             $this->config->addParams('fields', array(
-                'entity' => array(
-                    'label'    => 'Entité',
-                    'type'     => 'id',
-                    'values'   => array(
-                        'array' => 'entitiesCache'
-                    ),
-                    //            array: condReglements
-                    //        input: 
-                    //            type: select_cond_reglement
-                    //        default_value: 
-                    //            callback: getCondReglementBySociete
-                    'editable' => 0
-                )
-                    ), 'initial');
+                    'entity' => array(
+                        'label'    => 'Entité',
+                        'type'     => 'id',
+                        'values'  => array(
+                            'array' => 'entitiesCache'
+                        ), 
+    //            array: condReglements
+    //        input: 
+    //            type: select_cond_reglement
+    //        default_value: 
+    //            callback: getCondReglementBySociete
+                        'editable' => 1
+                    )
+                        ), 'initial');
         }
     }
 
@@ -6416,9 +6415,18 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Gestion des droits users: 
+    
 
     public function can($right)
     {
+//        echo '<pre>'. get_class($this);
+        if(isset($this->dol_object)){//peut être un peut lourd, mais plus safe...
+            $return = BimpCache::dol_can($this->dol_object);
+            if(!$return)
+                return 0;
+        }
+//        print_r($this->dol_object);
+//        echo('rrr');
         switch ($right) {
             case "view" :
                 if (BimpCore::isContextPublic()) {
@@ -6533,6 +6541,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientEdit();
+        }
+        
+        if($field_name == 'entity'){
+            global $user;
+            return $user->admin;
         }
 
         return (int) $this->canEdit();
@@ -6920,7 +6933,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0, $id_societe = 0)
     {
         $errors = array();
 
@@ -6957,7 +6970,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'type_dest'      => $type_dest,
             'fk_group_dest'  => $fk_group_dest,
             'fk_user_dest'   => $fk_user_dest,
-            'delete_on_view' => $delete_on_view
+            'delete_on_view' => $delete_on_view,
+            'id_societe'     => $id_societe
         ));
 
         if (!count($errors)) {
@@ -8944,7 +8958,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } elseif ($isFemale) {
                 $labels['to'] = 'à la ' . $labels['name'];
             } else {
-                $labels['this'] = 'au ' . $labels['name'];
+                $labels['to'] = 'au ' . $labels['name'];
             }
         }
 
@@ -10867,34 +10881,63 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
         $redirectMode = $this->redirectMode;
+        
         $texteBtn = "";
-        if (BimpTools::getValue("redirectForce_oldVersion"))
-            $_SESSION['oldVersion'] = true;
+        $btn = false;
         if ($this->iAmAdminRedirect()) {
-            if ($redirectMode == 4 && (isset($_SESSION['oldVersion']) || !$newVersion)) {//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
-                $redirectMode = 1;
-                $texteBtn = "ADMIN (N) : ";
-            } elseif ($redirectMode == 5) {
-                $redirectMode = 1;
-                $texteBtn = "ADMIN (A) : ";
+            $btn = true;
+            if ($redirectMode == 4){//auto old vers new
+                $texteBtn = "ADMIN (Normalement nouvelle) : ";
+                if($newVersion){//on est sur l'ancienne
+                    if ($redirect)
+                        unset($_SESSION['oldVersion']);
+                    elseif(!isset($_SESSION['oldVersion']))
+                        $redirect = true;
+                }
+                else{//on est deja sur la nouvelle mais si $_SESSION['oldVersion']
+                    if ($redirect)
+                        $_SESSION['oldVersion'] = true;
+                    elseif(isset($_SESSION['oldVersion']))
+                        $redirect = true;
+                }
+            }
+            if($redirectMode == 5){//auto new vers old
+                $texteBtn = "ADMIN (Normalement Ancienne) : ";
+                if(!$newVersion){//on est sur la nouvelle
+                    if ($redirect)
+                        unset($_SESSION['newVersion']);
+                    if(!isset($_SESSION['newVersion']))
+                        $redirect = true;
+                }
+                else{//on est deja sur l'ancienne mais si $_SESSION['newVersion']
+                    if ($redirect)
+                        $_SESSION['newVersion'] = true;
+                    elseif(isset($_SESSION['newVersion']))
+                        $redirect = true;
+                }
             }
         }
-        $btn = false;
+        else{
+            if($redirectMode == 4 && $newVersion)
+                $redirect = true;
+            elseif($redirectMode == 5 && !$newVersion)
+                $redirect = true;
+        }
+        
+        if($redirectMode == 1 ||
+                ($redirectMode == 2 && $newVersion) ||
+                ($redirectMode == 3 && !$newVersion))
+            $btn = true;
+        
+        
+        
         if ($newVersion) {
-            if ($redirect)
-                unset($_SESSION['oldVersion']);
             if ($this->id > 0) {
                 if ($this->getConf('controller', null))
                     $url = $this->getUrl();
             } elseif ($this->getConf('list_page_url', null))
                 $url = $this->getListUrl();
             $texteBtn .= "Nouvelle version";
-            if ($redirectMode == 4)
-                $redirect = true;
-            elseif (in_array($redirectMode, array(3, 5)))
-                $redirect = false;
-            elseif ($redirectMode != 0)
-                $btn = true;
 
             $search = null;
             if (BimpTools::getValue("sall") != "") {
@@ -10933,20 +10976,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if (BimpTools::getValue("leftmenu") != "") {
                 $url .= "&leftmenu=" . BimpTools::getValue("leftmenu");
             }
-
-//            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         } else {
-            if ($redirect)
-                $_SESSION['oldVersion'] = true;
-
             $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
             $texteBtn .= "Ancienne version";
-            if ($redirectMode == 5)
-                $redirect = true;
-            elseif (in_array($redirectMode, array(2, 4)))
-                $redirect = false;
-            elseif ($redirectMode != 0)
-                $btn = true;
         }
         if ($redirect && $url != "") {
             $ob = ob_get_contents();

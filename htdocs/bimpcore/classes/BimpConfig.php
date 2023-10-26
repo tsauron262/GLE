@@ -271,8 +271,8 @@ class BimpConfig
                 }
 
                 // Surcharge entité: 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $entity_module_dir = 'extends/entities/' . BIMP_EXTENDS_ENTITY . ($module_dir ? '/' . $module_dir : '');
+                if (BimpCore::getExtendsEntity() != '') {
+                    $entity_module_dir = 'extends/entities/' . BimpCore::getExtendsEntity() . ($module_dir ? '/' . $module_dir : '');
                     $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $entity_module_dir . '/' . $file_name . '.yml';
                     if (file_exists($entity_file)) {
                         $entity_params = $this->getParamsFromFile($module, $entity_module_dir, $file_name, $errors, false);
@@ -1169,19 +1169,24 @@ class BimpConfig
             } elseif (!method_exists($instance, $method)) {
                 $this->logConfigError('Méthode "' . $method . '" inexistante dans la classe ' . get_class($instance));
             } else {
-                if ($is_static) {
-                    return forward_static_call_array(array(
-                        $instance, $method
-                            ), $params);
-                } else {
-                    // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
-                    $args = array();
-                    foreach ($params as $key => $value) {
-                        $args[] = $value;
+                if(BimpCore::getConf('enabled_callback_cache', 0) || (GETPOST('testCallback') == 1)){
+                    return BimpCache::getCallFunctionCache($instance, $method, $params, $is_static);
+                }
+                else{
+                    if ($is_static) {
+                        return forward_static_call_array(array(
+                            $instance, $method
+                                ), $params);
+                    } else {
+                        // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
+                        $args = array();
+                        foreach ($params as $key => $value) {
+                            $args[] = $value;
+                        }
+                        return call_user_func_array(array(
+                            $instance, $method
+                                ), $args);
                     }
-                    return call_user_func_array(array(
-                        $instance, $method
-                            ), $args);
                 }
             }
         }

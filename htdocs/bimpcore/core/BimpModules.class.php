@@ -52,7 +52,7 @@ class BimpModules extends DolibarrModules {
         $name = 'module_version_'.strtolower($this->name);
         // Se fais que lors de l'installation du module
         if(BimpCore::getConf($name, '') == "") {
-            BimpCore::setConf($name, floatval($this->version));
+            BimpCore::setConf($name, floatval($this->version), 0);
             $this->_load_tables('/'.strtolower($this->name).'/sql/');
         }
         

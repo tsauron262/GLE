@@ -936,7 +936,7 @@ class Bimp_Paiement extends BimpObject
                                 if ($this->getData('exported')) {
 
                                     if($facFrom->getData('fk_soc') != $facTo->getData('fk_soc')) {
-                                        if($this->db->insert('mvt_paiement', ['datas' => json_encode($for_mvt), 'date' => date('Y-m-d')]) <= 0) {
+                                        if($this->db->insert('mvt_paiement', ['datas' => json_encode($for_mvt), 'date' => date('Y-m-d'), 'entity' => getEntity('mvt_paiement', 0)]) <= 0) {
                                             $errors[] = 'Echec de l\'enregistrement du changement de facture du paiement dans la table d\'export';
                                         }
                                     }

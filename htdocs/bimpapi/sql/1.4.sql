@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpapi_api` ADD `entity` INT NOT NULL DEFAULT 1;

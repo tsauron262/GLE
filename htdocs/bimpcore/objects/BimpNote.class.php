@@ -35,12 +35,14 @@ class BimpNote extends BimpObject
 
     const BN_DEST_NO = 0;
     const BN_DEST_USER = 1;
+    const BN_DEST_SOC = 2;
     const BN_DEST_GROUP = 4;
 
     public static $types_dest = array(
         self::BN_DEST_NO    => 'Aucun',
         self::BN_DEST_USER  => 'Utilisateur',
-        self::BN_DEST_GROUP => 'Groupe'
+        self::BN_DEST_GROUP => 'Groupe',
+        self::BN_DEST_SOC   => 'Tiers (par mail)'
     );
     # Pas d'ID en dur dans le code : utiliser des variables de conf. 
     # Les ID sont à mettre dans config module bimpcore onglet "Groupes" => /bimpcore/index.php?fc=dev&tab=modules_conf
@@ -427,6 +429,11 @@ class BimpNote extends BimpObject
     {
         $filtre = array(
             "content" => "",
+            "id"      => "",
+            "type_dest"      => "",
+            "fk_group_dest"      => "",
+            "fk_user_dest"      => "",
+            "type_dest"      => "",
             "id"      => ""
         );
         $filtre['fk_user_dest'] = $this->getData("user_create");
@@ -435,6 +442,9 @@ class BimpNote extends BimpObject
         } elseif ($this->getData('type_author') == self::BN_AUTHOR_GROUP) {
             $filtre['type_dest'] = self::BN_DEST_GROUP;
             $filtre['fk_group_dest'] = $this->getData("fk_group_author");
+        } elseif ($this->getData('type_author') == self::BN_AUTHOR_SOC) {
+            $filtre['type_dest'] = self::BN_DEST_SOC;
+            $filtre['mail_dest'] = $this->getData("email");
         }
         return $this->getJsActionOnclick('repondre', $filtre, array(
                     'form_name' => 'rep'
@@ -553,6 +563,9 @@ class BimpNote extends BimpObject
 
             case self::BN_DEST_GROUP:
                 return $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
+                
+            case self::BN_DEST_SOC:
+                return 'Tier (par mail)';
         }
 
         return '';
@@ -627,6 +640,62 @@ class BimpNote extends BimpObject
 //        die('<textarea>'.$note.'</textarea>');
         $this->set('content', $note);
     }
+    
+    public function repMail($dst, $src, $subj, $txt){
+        $matches = array();
+        preg_match('(.*@bimp-groupe.net)', $txt, $matches);
+        if(isset($matches[0])){
+            $tabTxt = explode($matches[0], $txt);
+            $txt = $tabTxt[0];
+        }
+//        print_r($matches);
+//        die($txt);
+        
+        $errors = array();
+        $data = array();
+        $data['obj_type'] = $this->getData('obj_type');
+        $data['obj_module'] = $this->getData('obj_module');
+        $data['obj_name'] = $this->getData('obj_name');
+        $data['id_obj'] = $this->getData('id_obj');
+        $data['id_parent_note'] = $this->id;
+        $data['type_author'] = self::BN_AUTHOR_SOC;
+        $data['email'] = $src;
+        $data['content'] = $txt;
+        $data['type_dest'] = $this->getData('type_author');
+        $data['fk_group_dest'] = $this->getData('fk_group_author');
+        $data['fk_user_dest'] = $this->getData('user_create');
+        $parent = $this->getParentInstance();
+        if($parent->getData('id_client') > 0)
+            $data['id_societe'] = $parent->getData('id_client');
+        elseif($parent->getData('id_soc') > 0)
+            $data['id_societe'] = $parent->getData('id_soc');
+        elseif($parent->getData('fk_soc') > 0)
+            $data['id_societe'] = $parent->getData('fk_soc');
+        
+        
+        //gestion des PJ
+        $dir = $parent->getFilesDir()."/";
+        if(!is_dir($dir))
+            mkdir($dir);
+        foreach($_FILES as $fileT){
+            $nameFile = $fileT['name'];
+            $file = BimpTools::cleanStringForUrl(str_replace('.'.pathinfo($nameFile, PATHINFO_EXTENSION), '', $nameFile)) . '.' . pathinfo($nameFile, PATHINFO_EXTENSION);
+            $data['content'] .= '<br/>Ajout de la PJ '.$file;
+
+            move_uploaded_file($fileT['tmp_name'], $dir.$file);
+        }
+                
+                
+        if(!count($errors)){
+            $obj = BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
+            if(!count($errors)){
+                return 1;
+            }
+            else
+                BimpCore::addlog('Création reponse mail impossible', 1, 'bimpcore', $this, $errors);
+        }
+        return 0;
+    }
 
     // Actions: 
 
@@ -644,13 +713,18 @@ class BimpNote extends BimpObject
 //        $data["type_author"] = self::BN_AUTHOR_USER;
         $data["user_create"] = $user->id;
         $data["viewed"] = 0;
+        $data['id_parent_note'] = $this->id;
+        
 
         if ((int) $this->getData('visibility') === self::BN_PARTNERS) {
             $data['visibility'] = self::BN_PARTNERS;
             $data['type_author'] = self::BN_AUTHOR_USER;
         }
+        
 
-        BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
+        if(!count($errors)){
+            BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
+        }
 
         return array(
             'errors'           => $errors,
@@ -752,18 +826,85 @@ class BimpNote extends BimpObject
 
         return $errors;
     }
+    
+    public function getMailFrom($withName = true){
+        $parent = $this->getParentInstance();
+        if(method_exists($parent, 'getMailFrom')){
+            $infoMail = $parent->getMailFrom();
+            if(is_array($infoMail) && isset($infoMail[1]) && $withName)
+                return $infoMail[1].'<'.$infoMail[0].'>';
+            elseif(is_array($infoMail))
+                return $infoMail[0];
+            else
+                return $infoMail;
+        }
+        return BimpCore::getConf('mailReponse', null, 'bimptask');
+    }
+    
+    public function getMailTo(){
+        $parent = $this->getParentInstance();
+        if($parent && $parent->isLoaded()){
+            if(method_exists($parent, 'getMailTo')){
+                return $parent->getMailTo();
+            }
+            elseif($parent->getData('email') != ''){
+                return $parent->getData('email');
+            }
+            else{
+                $client = $parent->getChildObject('client');
+                if($client && $client->isLoaded()){
+                    return $client->getData('email');
+                }
+            }
+        }
+        return '';
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $return = parent::create($warnings, $force_create);
-
-        if (!count($return)) {
-            $obj = $this->getParentInstance();
-            if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote')) {
-                $obj->afterCreateNote($this);
+        $errors = array();
+        if($this->getData('type_dest') == self::BN_DEST_SOC){
+            $this->set('visiblity',self::BN_ALL);
+            $mail = BimpTools::getPostFieldValue('mail_dest');
+            $content = $this->getData('content');
+            if($mail == ''){
+                BimpTools::displayBacktrace();
+                $errors[] = 'Email vide : '.$mail;
             }
+            $this->set('content','Envoyée a '.$mail.'<br/>'.$this->getData('content'));
         }
-        return $return;
+        
+        if(!count($errors)){
+            $errors = parent::create($warnings, $force_create);
+
+            if($this->getData('type_dest') == self::BN_DEST_SOC){
+                $sep = "<br/>---------------------<br/>";
+                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>'. $sep . '<br/><br/>';
+
+                if($this->getData('id_parent_note') > 0)
+                    $html .= 'Réponse à votre message : <br/>';
+                $html .= $content;
+                if($this->getData('id_parent_note') > 0){
+                    $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));
+                    $html .= '<br/><br/>Rappel du message initial : <br/>'.$oldNote->getData('content');
+                }
+                $parent = $this->getParentInstance();
+                $sujet = 'Message '.$parent->getRef();
+                die($sujet);
+
+                $bimpMail = new BimpMail($this->getParentInstance(), 'Nouveau message', $mail, $this->getMailFrom(), $html);
+                $bimpMail->send($errors);
+            }
+
+            if (!count($errors)) {
+                $obj = $this->getParentInstance();
+                if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote')) {
+                    $obj->afterCreateNote($this);
+                }
+            }
+            return $errors;
+        }
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)
@@ -785,13 +926,6 @@ class BimpNote extends BimpObject
 
                 case 4:
                     $this->set('visibility', self::BN_ALL);
-                    break;
-            }
-        }
-        if (in_array($this->getData('type_dest'), array(2))) {
-            switch ($this->getData('type_dest')) {
-                case 2:
-                    $this->updateField('type_dest', 4);
                     break;
             }
         }

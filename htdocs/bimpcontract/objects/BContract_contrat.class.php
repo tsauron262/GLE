@@ -697,7 +697,7 @@ class BContract_contrat extends BimpDolObject
                 )));
             }
 
-            if ($status == self::CONTRAT_STATUS_BROUILLON || $user->id == 460 || $user->admin) {
+            if ($status == self::CONTRAT_STATUS_BROUILLON || $user->rights->synopsiscontrat->generate || $user->admin) {
                 $buttons[] = array(
                     'label'   => 'Générer le PDF du contrat',
                     'icon'    => 'fas_file-pdf',
@@ -853,61 +853,65 @@ class BContract_contrat extends BimpDolObject
 
     public function getHeuresRestantesDelegation()
     {
-        $reste = 0;
-        $totalHeuresVendues = 0;
-        $totalHeuresFaites = 0;
-
-        $arrayHeuresVendues = $this->getTotalHeureDelegation(true);
-
-        $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
-        $debug = false;
-        if (count($arrayHeuresVendues) > 0) {
-            foreach ($arrayHeuresVendues as $code => $time) {
-
-                $infoLigne = explode(':::::', $code);
-
-                $list = $instanceFiDet->getList(array('id_line_contrat' => $infoLigne[1]));
-                if (count($list) > 0) {
-                    if ($debug)
-                        echo '<h2>Services</h2>';
-
-                    foreach ($list as $det) {
-                        if ($debug) {
-//                            print_r($det);
-                            $instanceFiDetDebug = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det', $det['rowid']);
-                            $fi = $instanceFiDetDebug->getParentInstance();
-                            echo '<br/>' . $fi->getNomUrl() . ' ' . ($det['duree'] / 3600) . '<br/>';
-                        }
-                        $totalHeuresFaites += $det['duree'] / 3600;
-                    }
-                }
-
-                $totalHeuresVendues += $time;
-            }
-
-            $list = $instanceFiDet->getList(array('parent:fk_contrat' => $this->id, 'type' => 5));
-            if (count($list) > 0) {
-                if ($debug)
-                    echo '<h2>Déplacements</h2>';
-                foreach ($list as $det) {
-
-                    if ($debug) {
-                        $fi = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $det['fk_fichinter']);
-                        echo '<br/>' . $fi->getNomUrl() . ' ' . ($det['duree'] / 3600) . '<br/>';
-                    }
-                    $totalHeuresFaites += $det['duree'] / 3600;
-                }
-            }
-        }
-
-        if ($debug) {
-            echo '<br/>Heure délégation vendue : ' . $totalHeuresVendues . '<br/>';
-            echo '<br/>Heure délégation faite : ' . $totalHeuresFaites . '<br/>';
-        }
-
-        $reste = $totalHeuresVendues - $totalHeuresFaites;
-
-        return $reste;
+        $duree_vendu = $this->getDurreeVendu();
+        $dureeFi = $this->getInfosDureeFi();
+        return $duree_vendu - $dureeFi['contrat']['tot'];
+        
+//        $reste = 0;
+//        $totalHeuresVendues = 0;
+//        $totalHeuresFaites = 0;
+//
+//        $arrayHeuresVendues = $this->getTotalHeureDelegation(true);
+//
+//        $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
+//        $debug = false;
+//        if (count($arrayHeuresVendues) > 0) {
+//            foreach ($arrayHeuresVendues as $code => $time) {
+//
+//                $infoLigne = explode(':::::', $code);
+//
+//                $list = $instanceFiDet->getList(array('id_line_contrat' => $infoLigne[1]));
+//                if (count($list) > 0) {
+//                    if ($debug)
+//                        echo '<h2>Services</h2>';
+//
+//                    foreach ($list as $det) {
+//                        if ($debug) {
+////                            print_r($det);
+//                            $instanceFiDetDebug = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det', $det['rowid']);
+//                            $fi = $instanceFiDetDebug->getParentInstance();
+//                            echo '<br/>' . $fi->getNomUrl() . ' ' . ($det['duree'] / 3600) . '<br/>';
+//                        }
+//                        $totalHeuresFaites += $det['duree'] / 3600;
+//                    }
+//                }
+//
+//                $totalHeuresVendues += $time;
+//            }
+//
+//            $list = $instanceFiDet->getList(array('parent:fk_contrat' => $this->id, 'type' => 5));
+//            if (count($list) > 0) {
+//                if ($debug)
+//                    echo '<h2>Déplacements</h2>';
+//                foreach ($list as $det) {
+//
+//                    if ($debug) {
+//                        $fi = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $det['fk_fichinter']);
+//                        echo '<br/>' . $fi->getNomUrl() . ' ' . ($det['duree'] / 3600) . '<br/>';
+//                    }
+//                    $totalHeuresFaites += $det['duree'] / 3600;
+//                }
+//            }
+//        }
+//
+//        if ($debug) {
+//            echo '<br/>Heure délégation vendue : ' . $totalHeuresVendues . '<br/>';
+//            echo '<br/>Heure délégation faite : ' . $totalHeuresFaites . '<br/>';
+//        }
+//
+//        $reste = $totalHeuresVendues - $totalHeuresFaites;
+//
+//        return $reste;
     }
 
     public function getTotalHeureDelegation($justActif = false): array
@@ -999,13 +1003,20 @@ class BContract_contrat extends BimpDolObject
         return (in_array($type, array('E', 'CTE')) ? 'CTE' : 'CTC');
     }
 
-    public function getTotalPa($line_type = -1)
+    public function getTotalPa($line_type = -1)//-1 tous 3 que les lignes avec duree 4 que les lignes sans duree
     {
         $total_PA = 0;
-        $children_list = $this->getChildrenList('lines');
-        foreach ($children_list as $nb => $id) {
-            $child = $this->getChildObject('lines', $id);
-            $total_PA += $child->getData('buy_price_ht') * $child->getData('qty');
+//        $children_list = $this->getChildrenList('lines');
+//        foreach ($children_list as $nb => $id) {
+//            $child = $this->getChildObject('lines', $id);
+//            $total_PA += $child->getData('buy_price_ht') * $child->getData('qty');
+//        }
+        
+        $lines = $this->getChildrenObjects('lines');
+        foreach ($lines as $line) {
+            $prod = $line->getChildObject('produit');
+            if($line_type == -1 || ($line_type == 3 && $prod->getData('duree_i') > 0) || ($line_type == 4 && $prod->getData('duree_i') < 1))
+                $total_PA += $line->getData('buy_price_ht') * $line->getData('qty');
         }
         return $total_PA;
     }
@@ -1051,12 +1062,6 @@ class BContract_contrat extends BimpDolObject
         return $this->getData('tacite') + $this->getData('current_renouvellement');
     }
 
-    public function getTotalFi($tms)
-    {
-        $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
-        return $ficheInter->time_to_qty($ficheInter->timestamp_to_time($tms)) * BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
-    }
-
     public function getMargePrevisionnel($total_fis)
     {
         return $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourTotal();
@@ -1066,8 +1071,9 @@ class BContract_contrat extends BimpDolObject
     {
         if ($this->isLoaded()) {
             $total_contrat = $this->getTotalContrat();
-            $in_out_tms = $this->getTmsArray();
-            $total_fis = $this->getTotalFi($in_out_tms->in);
+            $infos = $this->getInfosDureeFi();
+            BimpObject::loadClass('bimptechnique', 'BT_ficheInter');
+            $total_fis = BT_ficheInter::dureeToPrice($infos->contrat->tot);
 
             return $total_contrat - $total_fis;
         }
@@ -1875,8 +1881,13 @@ class BContract_contrat extends BimpDolObject
         return $return;
     }
 
-    public function getTmsArray()
+    public function getInfosDureeFi()
     {
+        $infos = array(
+            'contrat' => array('tot' => 0, 'dep' => 0),
+            'hors_contrat' => array('tot' => 0, 'dep' => 0),
+        );
+        
         $tms_in_contrat = 0;
         $tms_out_contrat = 0;
 
@@ -1886,12 +1897,13 @@ class BContract_contrat extends BimpDolObject
                         'alias' => 'p'
         )));
         foreach ($lines as $child) {
-            $duration = $child->getData('duree');
-            if ($child->getData('id_line_contrat') || $child->getData('type') == 5) {
-                $tms_in_contrat += $duration;
-            } else {
-                $tms_out_contrat += $duration;
-            }
+            $tab1 = 'hors_contrat';
+            if ($child->getData('id_line_contrat') || $child->getData('type') == 5)
+                $tab1 = 'contrat';
+            
+            $infos[$tab1]['tot'] += $child->getData('duree');
+            if($child->isDep())
+                $infos[$tab1]['dep'] += $child->getData('duree');
         }
 
 //        foreach ($this->getListFi() as $ficheInter) {
@@ -1907,10 +1919,7 @@ class BContract_contrat extends BimpDolObject
 //            }
 //        }
 
-        return (object) Array(
-                    'in'  => $tms_in_contrat,
-                    'out' => $tms_out_contrat
-        );
+        return $infos;
     }
 
     public static function getSearchRenouvellementInputArray()
@@ -2393,26 +2402,59 @@ class BContract_contrat extends BimpDolObject
     public function renderThisStatsFi($display = true, $in_contrat = true)
     {
         $html = "";
+        $total_contrat = $this->getTotalContrat();  
+        $cout = $coutPrevi = 0;
 
-//        $fis = $this->getListFi();
-        $fis = BimpCache::getBimpObjectList('bimptechnique', 'BT_ficheInter', ['fk_contrat' => $this->id]);
-        $in_out_tms = $this->getTmsArray();
-        $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
-        $total_fis = 0;
-        $total_tms = $in_out_tms->in;
-        $total_tms_not_contrat = $in_out_tms->out;
-        $total_fis = $this->getTotalFi($total_tms);
-        $previsionelle = 0;
+        $duree_vendu = $this->getDurreeVendu();
+        if($duree_vendu){
+    //        $fis = $this->getListFi();
+            $fis = BimpCache::getBimpObjectList('bimptechnique', 'BT_ficheInter', ['fk_contrat' => $this->id]);
+            $dureeFi = $this->getInfosDureeFi();
+            $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
+            $cout_previsionelle = 0;
 
-        if ($this->getJourTotal() > 0 && $this->getJourTotal() > $this->getJourRestant())
-            $previsionelle = $this->getMargePrevisionnel($total_fis);
+            if ($this->getJourTotal() > 0 && $this->getJourTotal() > $this->getJourRestant())
+                $cout_previsionelle = $this->getMargePrevisionnel(BT_ficheInter::dureeToPrice($dureeFi['contrat']['tot']));
 
-        $marge = $this->getMargeInter();
-        $marge_previsionelle = ($this->getTotalContrat() - $previsionelle);
 
-        $class = 'warning';
-        $icone = 'arrow-right';
+            $class = 'warning';
+            $icone = 'arrow-right';
+            $htmlT = '';
+            $htmlT .= "<strong>";
+            $htmlT .= "Nombre de FI: " . count($fis) . '<br />';
+            $htmlT .= "Nombre d'heures vendue : " . $ficheInter->timestamp_to_time($duree_vendu) . '<br/>';
+//            $html .= "Nombre d'heures de délégation vendue : ".print_r($this->getTotalHeureDelegation(true),true).'<br/>';
+            $htmlT .= "Nombre d'heures FI dans le contrat : " . $ficheInter->timestamp_to_time($dureeFi['contrat']['tot']) . '<br />';
+            $htmlT .= "Dont : " . $ficheInter->timestamp_to_time($dureeFi['contrat']['dep']) . ' h de déplacement<br />';
+            if($dureeFi['hors_contrat']['tot'] > 0){
+                $htmlT .= "Nombre d'heures FI hors du contrat : " . $ficheInter->timestamp_to_time($dureeFi['hors_contrat']['tot']) . ' (non pris en compte)<br />';
+                $htmlT .= "Dont : " . $ficheInter->timestamp_to_time($dureeFi['hors_contrat']['dep']) . ' h de déplacement<br />';
+            }
+            $htmlT .= "Nombre d'heures restante : " . $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot'])  . '<br/>';
+            $htmlT .= "Coût technique: " . BimpTools::displayMoneyValue(BT_ficheInter::dureeToPrice($dureeFi['contrat']['tot'])) . " (" . BT_ficheInter::dureeToPrice(3600) . " €/h * " . $ficheInter->timestamp_to_time($dureeFi['contrat']['tot']) . ")<br />";
+            $htmlT .= "Coût prévisionel: " . BimpTools::displayMoneyValue($cout_previsionelle) . "<br />";
+            $htmlT .= '</strong>';
+            $html .= BimpRender::renderPanel('Interventions', $htmlT);
 
+
+            $cout += BT_ficheInter::dureeToPrice($dureeFi['contrat']['tot']);
+            $coutPrevi += $cout_previsionelle;
+        }
+
+        $pa = $this->getTotalPa(4);
+        if($pa > 0){
+            $htmlT = "<strong>";
+            $htmlT .= 'Prix d\'achat : '. BimpTools::displayMoneyValue($pa);
+            $htmlT .= '</strong>';
+            $html .= BimpRender::renderPanel('Prix de reviens', $htmlT);
+            $cout += $pa;
+            $coutPrevi += $pa;
+        }
+
+
+
+        $marge = $total_contrat - $cout;
+        $marge_previsionelle = $total_contrat - $coutPrevi;
         if ($marge > 0) {
             $class = 'success';
             $icone = 'arrow-up';
@@ -2420,32 +2462,22 @@ class BContract_contrat extends BimpDolObject
             $class = 'danger';
             $icone = 'arrow-down';
         }
-        if ($marge_previsionelle > 0) {
-            $class2 = 'success';
-            $icone2 = 'arrow-up';
-        } elseif ($marge_previsionelle < 0) {
-            $class2 = 'danger';
-            $icone2 = 'arrow-down';
-        }
-
-        $html .= "<strong>";
-        if ($in_contrat) {
-
-            $html .= "Nombre de FI: " . count($fis) . '<br />';
-            $html .= "Nombre d'heures vendue : " . $ficheInter->timestamp_to_time($this->getDurreeVendu()) . '<br/>';
-//            $html .= "Nombre d'heures de délégation vendue : ".print_r($this->getTotalHeureDelegation(true),true).'<br/>';
-            $html .= "Nombre d'heures FI dans le contrat : " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
-            $html .= "Nombre d'heures FI hors du contrat : " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
-            $html .= "Nombre d'heures de délégations restante : " . $this->getHeuresRestantesDelegation() . '<br/>';
-            $html .= "Coût technique: " . BimpTools::displayMoneyValue($total_fis) . " (" . BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique') . " €/h * " . $ficheInter->timestamp_to_time($total_tms) . ")<br />";
-            $html .= "Coût prévisionel: " . BimpTools::displayMoneyValue($previsionelle) . "<br />";
-            $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
-            $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
+        $html .= "Vendu: " . "<strong class='warning'>" . BimpTools::displayMoneyValue($this->getTotalContrat()) . "</strong><br />";
+        $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . BimpTools::displayMoneyValue($marge) . "</strong><br />";
+        if($marge != $marge_previsionelle){
+            if ($marge_previsionelle > 0) {
+                $class2 = 'success';
+                $icone2 = 'arrow-up';
+            } elseif ($marge_previsionelle < 0) {
+                $class2 = 'danger';
+                $icone2 = 'arrow-down';
+            }
             $html .= "Marge Prévisionelle: " . "<strong class='$class2'>" . BimpRender::renderIcon($icone2) . " " . BimpTools::displayMoneyValue($marge_previsionelle) . "</strong><br />";
-        } else {
-            $html .= "Contrat: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . BimpTools::displayMoneyValue($marge) . "</strong><br />";
         }
-        $html .= '</strong>';
+            
+        if (!$in_contrat) {
+            $html = "Contrat: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . BimpTools::displayMoneyValue($marge) . "</strong><br />";
+        }
 
         if ($display)
             return $html;

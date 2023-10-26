@@ -1,6 +1,10 @@
 table: bs_ticket
 controller: ticket
 
+extends: 
+    module: bimpcore
+    object_name: BimpAbstractFollow
+
 icon: fas_headset
 public_icon: pe_headphones
 
@@ -245,7 +249,8 @@ fields:
             array: priorities
         displays: 
             icon:
-                icon_only: 1
+                label: Icône
+                type: array_value
     impact:
         label: Impact
         type: int
@@ -254,7 +259,8 @@ fields:
         default_value: 1
         displays: 
             icon:
-                icon_only: 1    
+                label: Icône
+                type: array_value
     impact_demande_client:
         label: Impact lors de la demande client
         type: int
@@ -564,6 +570,9 @@ fields_tables:
             - field: sujetInterne
               help: remplace celui du client en vue liste
               edit: 1
+            - label: Notifier
+              value: 
+                  callback: displayFollower
               
     objects:
         title: Elements liés

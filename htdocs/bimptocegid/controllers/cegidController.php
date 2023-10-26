@@ -9,7 +9,7 @@ require_once DOL_DOCUMENT_ROOT . 'bimpcore/classes/BimpDocumentation.php';
 class cegidController extends BimpController {
     
     protected $version_tra;
-    protected $entitie;
+    protected $extendsEntity;
     protected $local_path;
     protected $traClass;
     protected $exportClass;
@@ -19,7 +19,7 @@ class cegidController extends BimpController {
         global $db;
         
         $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
-        $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+        $this->extendsEntity = BimpCore::getExtendsEntity();
         $this->traClass = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA');
         $this->exportClass = new export($db);
         
@@ -218,7 +218,7 @@ class cegidController extends BimpController {
             if($typeFile == 'ip') {
                 $pattern = 'IP' . '*' . '.tra';
             } else {
-                $pattern = $number . '_' . $this->entitie . '_(' . strtoupper($typeFile) . ')_' . '*' . '_' . $this->version_tra . '.tra';
+                $pattern = $number . '_' . $this->extendsEntity . '_(' . strtoupper($typeFile) . ')_' . '*' . '_' . $this->version_tra . '.tra';
             }
         } else {
             $open = true;

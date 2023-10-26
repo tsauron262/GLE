@@ -1,1 +1,1 @@
-ALTER TABLE `llx_propal` ADD `signature_params` TEXT NOT NULL DEFAULT ''; 
+ALTER TABLE `llx_propal` ADD `signature_params` TEXT NOT NULL; 

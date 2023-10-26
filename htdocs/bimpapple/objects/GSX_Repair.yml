@@ -8,6 +8,10 @@ labels:
     name: réparation GSX
     name_plur: réparations GSX
     is_female: 1
+    
+parent_module: bimpsupport
+parent_object: BS_SAV
+parent_id_property: id_sav
                 
 fields: 
     serial: 
@@ -212,3 +216,16 @@ searches:
             - a.serial
             - a.repair_number
         label_syntaxe: 'Réparation n°<a.repair_number> - N° de série: <a.serial>'
+        
+        
+lists: 
+    default: 
+        title: Liste des Repa GSX
+        configurable: 1
+        cols:
+            id_sav:
+            repair_number:
+            closed:
+            date_closed:
+            ready_for_pick_up:
+            repair_complete:

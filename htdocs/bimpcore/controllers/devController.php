@@ -83,8 +83,8 @@ class devController extends BimpController
             $html .= '<span class="danger">Aucune</span>';
         }
         $html .= ' - Entité: ';
-        if (defined('BIMP_EXTENDS_ENTITY')) {
-            $html .= '<b>' . BIMP_EXTENDS_ENTITY . '</b>';
+        if (BimpCore::getExtendsEntity() != '') {
+            $html .= '<b>' . BimpCore::getExtendsEntity() . '</b>';
         } else {
             $html .= '<span class="danger">Aucune</span>';
         }
@@ -211,7 +211,21 @@ class devController extends BimpController
             $html .= BimpRender::renderAlerts('Aucun module installé');
         } else {
             $html .= '<div class="module_select_container">';
-            $html .= '<div style="display: inline-block; vertical-align: middle">';
+
+            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                $html .= '<div style="display: inline-block; vertical-align: middle">';
+                $html .= '<b>Entité : </b>';
+                $html .= BimpInput::renderInput('select', 'entity_select', 'bimpcore', array(
+                            'options' => array(
+                                'all'     => 'Toutes',
+                                'current' => 'Courante',
+                                'global'  => 'Globale'
+                            )
+                ));
+                $html .= '</div>';
+            }
+
+            $html .= '<div style="display: inline-block; vertical-align: middle; margin-left: 15px">';
             $html .= '<b>Module : </b>';
             $html .= BimpInput::renderInput('select', 'module_select', 'bimpcore', array(
                         'options' => $modules
@@ -246,8 +260,10 @@ class devController extends BimpController
             $html .= '</div>';
 
             $html .= '<div class="module_params_container">';
+
             $bimpModuleConf = new BimpModuleConf('bimpcore');
             $html .= $bimpModuleConf->renderFormHtml();
+
             $html .= '</div>';
         }
         $html .= '</div>';
@@ -270,8 +286,8 @@ class devController extends BimpController
             $html .= '<span class="danger">Aucune</span>';
         }
         $html .= ' - Entité: ';
-        if (defined('BIMP_EXTENDS_ENTITY')) {
-            $html .= '<b>' . BIMP_EXTENDS_ENTITY . '</b>';
+        if (BimpCore::getExtendsEntity() != '') {
+            $html .= '<b>' . BimpCore::getExtendsEntity() . '</b>';
         } else {
             $html .= '<span class="danger">Aucune</span>';
         }
@@ -359,12 +375,13 @@ class devController extends BimpController
         $html = '';
 
         $module_name = BimpTools::getValue('module_name', '');
+        $entity_type = BimpTools::getValue('entity_type', 'all');
 
         if (!$module_name) {
             $errors[] = 'Nom du module non spécifié';
         } else {
             $bimpModuleConf = BimpModuleConf::getInstance($module_name);
-            $html .= $bimpModuleConf->renderFormHtml();
+            $html .= $bimpModuleConf->renderFormHtml($entity_type);
         }
 
         return array(
@@ -379,10 +396,18 @@ class devController extends BimpController
     {
         $errors = array();
         $warnings = array();
+        $param_row = '';
+        $n_errors = 0;
 
         $module = BimpTools::getValue('module', '');
         $param_name = BimpTools::getValue('param_name', '');
         $value = BimpTools::getValue('value', '');
+        $id_entity = (int) BimpTools::getValue('id_entity', null);
+        $entity_type = BimpTools::getValue('entity_type', 'all');
+
+        if (is_null($id_entity)) {
+            $errors[] = 'Entité absente ou invalide';
+        }
 
         if (!$module) {
             $errors[] = 'Nom du module absent';
@@ -393,14 +418,59 @@ class devController extends BimpController
         }
 
         if (!count($errors)) {
-            $errors = BimpCore::setConf($param_name, $value, $module);
+            $errors = BimpCore::setConf($param_name, $value, $module, $id_entity);
+
+            if (!count($errors)) {
+                $param_row = BimpModuleConf::renderParamRow($entity_type, $module, $param_name, null, $n_errors, true);
+            }
         }
 
         return array(
             'errors'     => $errors,
             'warnings'   => $warnings,
+            'param_row'  => $param_row,
+            'has_errors' => ($n_errors > 0),
             'request_id' => BimpTools::getValue('request_id', 0)
         );
+    }
+
+    protected function ajaxProcessRemoveModuleConfParam()
+    {
+        $errors = array();
+        $param_row = '';
+        $n_errors = 0;
+
+        $module = BimpTools::getValue('module', '');
+        $param_name = BimpTools::getValue('param_name', '');
+        $id_entity = (int) BimpTools::getValue('id_entity', null);
+        $entity_type = BimpTools::getValue('entity_type', 'all');
+
+        if (is_null($id_entity)) {
+            $errors[] = 'Entité absente ou invalide';
+        }
+
+        if (!$module) {
+            $errors[] = 'Nom du module absent';
+        }
+
+        if (!$param_name) {
+            $errors[] = 'Nom du paramètre absent';
+        }
+
+        if (!count($errors)) {
+            $errors = BimpCore::RemoveConf($param_name, $module, $id_entity);
+
+            if (!count($errors)) {
+                $param_row = BimpModuleConf::renderParamRow($entity_type, $module, $param_name, null, $n_errors, true);
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'param_row'  => $param_row,
+            'has_errors' => ($n_errors > 0),
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
     }
 
     public function ajaxProcessSearchModulesConfParams()
@@ -408,7 +478,7 @@ class devController extends BimpController
         return array(
             'errors'     => array(),
             'warnings'   => array(),
-            'html'       => BimpModuleConf::renderSearchParamsResults(BimpTools::getValue('search', '')),
+            'html'       => BimpModuleConf::renderSearchParamsResults(BimpTools::getValue('search', ''), BimpTools::getValue('entity_type', 'all')),
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }

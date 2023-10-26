@@ -333,6 +333,18 @@ forms:
               show:
                   callback: isServiceAutorisedInContrat
             - custom: 1
+              label: Objet du contrat
+              input_name: objet_contrat
+              show: 
+                  callback: isNotRenouvellementContrat
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: contrat
+                          name: objet_contrat
+                          is_static: 1
+            - custom: 1
               label: Durée en mois
               input_name: duree_mois
               show: 
@@ -340,6 +352,9 @@ forms:
               input:
                   type: qty
               value: 12
+              depends_on: objet_contrat
+              edit:
+                  callback: isFieldContratEditable
             - custom: 1
               label: Périodicitée de facturation
               input_name: periodicity
@@ -352,18 +367,6 @@ forms:
                       prop:
                           object: contrat
                           name: period
-                          is_static: 1
-            - custom: 1
-              label: Objet du contrat
-              input_name: objet_contrat
-              show: 
-                  callback: isNotRenouvellementContrat
-              input:
-                  type: select
-                  options:
-                      prop:
-                          object: contrat
-                          name: objet_contrat
                           is_static: 1
             - custom: 1
               show: 

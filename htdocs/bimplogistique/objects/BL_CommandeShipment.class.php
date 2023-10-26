@@ -2075,7 +2075,7 @@ class BL_CommandeShipment extends BimpObject
             return $errors;
         }
 
-        if (!(int) $this->getData('id_entrepot')) {
+        if (!(int) $this->getData('id_entrepot') && (int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore')) {
             $errors[] = 'ID de l\'entrepôt absent';
             return $errors;
         }

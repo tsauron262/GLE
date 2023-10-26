@@ -329,7 +329,7 @@ div.alert {
     font-weight: bold;
     color: $gray;
     cursor: pointer;
-    
+
     &:hover {
         color: $danger;
     }
@@ -1449,8 +1449,21 @@ i.iconRight {
     }
 }
 
-
 body.modal-open ul.ui-autocomplete{
     overflow: auto;
     max-height: 400px;
+}
+
+/*Drop Files*/
+
+.bimp_drop_files_container.allPage .bimp_drop_files_area {
+    padding: 0;
+    margin: 0;
+}
+.bimp_drop_files_container.allPage .bimp_drop_files_area .drop_files  {
+    padding: 0;
+    min-height: 0;
+}
+.bimp_drop_files_container.allPage .bimp_drop_files_area{
+    border: 0;
 }

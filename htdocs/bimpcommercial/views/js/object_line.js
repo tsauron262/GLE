@@ -192,6 +192,10 @@ function setAbonnementLineQties($form, $input) {
         nb_fac_periods = duration / fac_periodicity;
     }
 
+    if (!prod_duration) {
+        prod_duration = 1;
+    }
+    
     if (duration && prod_duration) {
         nb_prod_periods = duration / prod_duration;
     } else {

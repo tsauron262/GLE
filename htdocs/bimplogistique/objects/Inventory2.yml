@@ -322,7 +322,7 @@ forms:
                       callback: 
                           method: renderWarehouseAndType
                   multiple: 1
-              edit: 0
+              edit: 1
               
             filter_inventory:
               custom: 1

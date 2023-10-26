@@ -131,5 +131,6 @@ class BDS_ProcessOption extends BimpObject
                 $cronOption->delete($w, true);
             }
         }
+        return $delete;
     }
 }

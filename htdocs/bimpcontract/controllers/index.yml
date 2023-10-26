@@ -67,7 +67,7 @@ sections:
                   list:
                       panel: 1
                       object: facturation
-        contrats_abo: 
-            label: Contrats d'abonnement
-            module: bimpcontrat
-            controller: index
+#        contrats_abo: 
+#            label: Contrats d'abonnement
+#            module: bimpcontrat
+#            controller: index

@@ -1007,6 +1007,17 @@ class Bimp_Product extends BimpObject
                 )
             );
             $actions[] = array(
+                'label'      => 'Editer Entité',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'entity',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
                 'label'      => 'Editer en Achat',
                 'icon'       => 'fas_pen',
                 'action'     => 'bulkEditField',
@@ -4133,12 +4144,12 @@ class Bimp_Product extends BimpObject
             'warnings' => $warnings
         );
     }
-    
-    public function validateValue($field, $value) {
-        if($field == 'cost_price_percent'){
-            if($value > 0 && $value != $this->getData('cost_price_percent')
-                    || $this->getData('cost_price_percent') > 0){
-                if($value != '')
+
+    public function validateValue($field, $value)
+    {
+        if ($field == 'cost_price_percent') {
+            if ($value > 0 && $value != $this->getData('cost_price_percent') || $this->getData('cost_price_percent') > 0) {
+                if ($value != '')
                     $this->updateField('cost_price', $this->getData('price') * $value / 100);
             }
         } elseif ($field == 'cost_price') {
@@ -4562,70 +4573,6 @@ class Bimp_Product extends BimpObject
                 );
             }
         }
-    }
-
-    public function getFilteredListActions()
-    {
-        $actions = array();
-
-        if ($this->canSetAction('bulkEditField')) {
-            $actions[] = array(
-                'label'      => 'Editer pourcentage du prix de reviens',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'cost_price_percent',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-            $actions[] = array(
-                'label'      => 'Editer durée',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'duree',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-            $actions[] = array(
-                'label'      => 'Editer en Vente',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'tosell',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-            $actions[] = array(
-                'label'      => 'Editer Entité',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'entity',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-            $actions[] = array(
-                'label'      => 'Editer en Achat',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'tobuy',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-        }
-        return $actions;
     }
 
     public static function correctAllProductCurPa($echo = false, $echo_errors_only = true)

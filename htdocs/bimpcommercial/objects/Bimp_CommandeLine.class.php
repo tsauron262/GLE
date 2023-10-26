@@ -6673,7 +6673,7 @@ class Bimp_CommandeLine extends ObjectLine
             return array('ID de la commande client absent ou invalide');
         }
 
-        if (!$id_entrepot) {
+        if (!$id_entrepot && (int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore')) {
             return array('ID de l\'entrepôt absent pour cette expédition');
         }
 

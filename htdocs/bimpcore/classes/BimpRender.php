@@ -237,8 +237,9 @@ class BimpRender
             $html .= ' dropup';
         }
         if (isset($params['class']) && (string) $params['class']) {
-            
-        }$html .= ' ' . $params['class'];
+            $html .= ' ' . $params['class'];
+        }
+
         $html .= '">';
         $html .= '<button type="button" class="btn btn-' . $params['type'] . ' dropdown-toggle"';
         $html .= ' aria-haspopup="true" data-toggle="dropdown" aria-expanded="false" role="button">';

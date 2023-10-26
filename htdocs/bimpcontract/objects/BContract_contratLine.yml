@@ -116,12 +116,12 @@ fields:
     # Anciens Champs Bimp: 
         
     # Nouveaux Champs Bimp: 
-    type: 
-        label: Type
-        type: int
-        values: 
-            types
-        required: 1
+#    type: 
+#        label: Type
+#        type: int
+#        values: 
+#            types
+#        required: 1
         
 lists: 
     default: 

@@ -264,6 +264,8 @@ class Bimp_PropalLine extends ObjectLine
             $parent->dol_object->statut = $parent->getInitData('statut');
         } else
             $return = parent::delete($warnings, $force_delete);
+        
+        
         return $return;
     }
 }

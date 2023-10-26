@@ -78,48 +78,50 @@ class Bimp_CommandeLine extends ObjectLine
             return 0;
         }
 
-        $ready_qty = abs((float) $this->getReadyToShipQty($id_shipment));
-        if ($ready_qty < abs((float) $shipments[(int) $id_shipment]['qty'])) {
-            if ((float) $this->getFullQty() >= 0) {
-                $diff = (float) $shipments[(int) $id_shipment]['qty'] - $ready_qty;
-
-                if ($auto_reserve_units) {
-                    if ($this->autoReserveUnits($diff, $errors)) {
-                        return 1;
-                    }
-
-                    $ready_qty = abs((float) $this->getReadyToShipQty($id_shipment));
+        if(BimpTools::isModuleDoliActif('bimpreservation')){
+            $ready_qty = abs((float) $this->getReadyToShipQty($id_shipment));
+            if ($ready_qty < abs((float) $shipments[(int) $id_shipment]['qty'])) {
+                if ((float) $this->getFullQty() >= 0) {
                     $diff = (float) $shipments[(int) $id_shipment]['qty'] - $ready_qty;
-                }
 
-                $msg = 'Il manque ';
-                if ($diff > 1) {
-                    $msg .= $diff . ' unités prêtes à être expédiées ';
-                } else {
-                    $msg .= '1 unité prête à être expédiée ';
-                }
-                $errors[] = $msg;
-                return 0;
-            } else {
-                $diff = abs((float) $shipments[(int) $id_shipment]['qty']) - $ready_qty;
+                    if ($auto_reserve_units) {
+                        if ($this->autoReserveUnits($diff, $errors)) {
+                            return 1;
+                        }
 
-                if ($auto_reserve_units) {
-                    if ($this->autoReserveUnits($diff, $errors)) {
-                        return 1;
+                        $ready_qty = abs((float) $this->getReadyToShipQty($id_shipment));
+                        $diff = (float) $shipments[(int) $id_shipment]['qty'] - $ready_qty;
                     }
 
-                    $ready_qty = abs((float) $this->getReadyToShipQty($id_shipment));
-                    $diff = abs((float) $shipments[(int) $id_shipment]['qty']) - $ready_qty;
-                }
-
-                $msg = 'Il manque ';
-                if ($diff > 1) {
-                    $msg .= $diff . ' unités prêtes à être retournée ';
+                    $msg = 'Il manque ';
+                    if ($diff > 1) {
+                        $msg .= $diff . ' unités prêtes à être expédiées ';
+                    } else {
+                        $msg .= '1 unité prête à être expédiée ';
+                    }
+                    $errors[] = $msg;
+                    return 0;
                 } else {
-                    $msg .= '1 unité prête à être retournée ';
+                    $diff = abs((float) $shipments[(int) $id_shipment]['qty']) - $ready_qty;
+
+                    if ($auto_reserve_units) {
+                        if ($this->autoReserveUnits($diff, $errors)) {
+                            return 1;
+                        }
+
+                        $ready_qty = abs((float) $this->getReadyToShipQty($id_shipment));
+                        $diff = abs((float) $shipments[(int) $id_shipment]['qty']) - $ready_qty;
+                    }
+
+                    $msg = 'Il manque ';
+                    if ($diff > 1) {
+                        $msg .= $diff . ' unités prêtes à être retournée ';
+                    } else {
+                        $msg .= '1 unité prête à être retournée ';
+                    }
+                    $errors[] = $msg;
+                    return 0;
                 }
-                $errors[] = $msg;
-                return 0;
             }
         }
         return 1;

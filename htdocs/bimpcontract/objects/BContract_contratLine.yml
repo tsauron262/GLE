@@ -33,6 +33,7 @@ objects:
         relation: hasOne
 
 fields:
+    # Champs Dolibarr: 
     rowid:
         label: N°
         type: int
@@ -112,6 +113,16 @@ fields:
         label: Appartenance
         type: int
         
+    # Anciens Champs Bimp: 
+        
+    # Nouveaux Champs Bimp: 
+    type: 
+        label: Type
+        type: int
+        values: 
+            types
+        required: 1
+        
 lists: 
     default: 
         title: Lignes du contrat
@@ -148,7 +159,7 @@ lists:
 #            date_ouverture_prevue:
     
     global: 
-        title: Lignes du contrat
+        title: Toutes les lignes de contrat
         filters_panel: default
         configurable: 1
         total_row: 1
@@ -158,6 +169,14 @@ lists:
         checkbox: 1
         page_btn: 1
         modal_view: default
+        list_filters: 
+            - name: parent.version
+              filter: 1
+        joins: 
+            parent: 
+                alias: parent
+                table: contrat
+                on: parent.rowid = a.fk_contrat
         cols: 
             parent:fk_soc:
             fk_contrat:

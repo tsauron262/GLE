@@ -588,12 +588,12 @@ class Bimp_Menu extends BimpObject
             'fk_menu'      => 0
                 ), null, null, 'position', 'ASC', 'array', array('rowid'));
 
-        if (empty(active)) {
+        if (empty($rows)) {
             $errors[] = 'Aucune ligne de menu trouvée pour bimptheme';
         } else {
             foreach ($rows as $r) {
                 $menu = BimpCache::getBimpObjectInstance('bimptheme', 'Bimp_Menu', (int) $r['rowid']);
-
+                
                 if (BimpObject::objectLoaded($menu)) {
                     $html .= $menu->renderTree();
                 } else {

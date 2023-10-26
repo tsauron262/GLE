@@ -593,14 +593,14 @@ select.switch {
     margin: 10px 0;
 }
 
-.texarea_values {
+.input_possible_values {
     padding-left: 10px;
     max-height: 60px;
     overflow-y: auto;
     background-color: #F5F5F5;
     list-style: none;
 
-    .textarea_value {
+    .input_possible_value {
         cursor: pointer;
 
         &:hover {

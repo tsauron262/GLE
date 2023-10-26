@@ -627,6 +627,7 @@ class BimpComm extends BimpDolObject
         // Message Achat:
         $id_group = BimpCore::getUserGroupId('achat');
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
+        
         if ($id_group) {
             $buttons[] = array(
                 'label'   => 'Message achat',

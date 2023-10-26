@@ -6,6 +6,8 @@ dol_object:
             
 table: contrat
 primary: rowid
+entity_name: contract
+
 controller: contrat
 icon: fas_file-signature
 public_icon: pe_news-paper
@@ -22,7 +24,8 @@ public_header_btn:
     callback: getPublicActionsButtons
     
 labels: 
-    name: contrat
+    name: contrat d'abonnement
+    name_plur: contrats d'abonnement
                 
 objects:
     client:
@@ -36,11 +39,11 @@ objects:
         instance:
             bimp_object: BCT_ContratLine
     
-    avenant:
-        relation: hasMany
-        delete: 1
-        instance:
-            bimp_object: Bimp_ContratAvenant
+#    avenant:
+#        relation: hasMany
+#        delete: 1
+#        instance:
+#            bimp_object: Bimp_ContratAvenant
     
     files:
         relation: hasMany
@@ -73,6 +76,13 @@ objects:
             id_object:
                 field_value: fk_user_modif
                 
+    user_validate: 
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_user_validate
+                
+        
     commercial_suivi:
         extends: user
         instance:
@@ -123,6 +133,7 @@ objects:
 
 fields:
     # Champs objet Dolibarr:
+        
     statut:
         label: Statut
         type: int
@@ -142,6 +153,14 @@ fields:
             card: default
         create_form: light
         
+    fk_soc_facturation: 
+        label: Client facturation
+        type: id_object
+        object: client_facturation
+        input:
+            card: default
+            help: Laissez vide si même client
+        
     ref_customer:
         label: Réf. client
         
@@ -157,9 +176,18 @@ fields:
         label: Créé le
         type: datetime
         
+    date_validate: 
+        label: Validé le
+        type: datetime
+        
     date_contrat:
         label: Date de signature
         type: date
+        
+    date_start:
+        label: Date d'effet
+        type: date
+        dol_extra_field: 1
     
     fk_user_author:
         label: Créé par
@@ -175,6 +203,14 @@ fields:
         object: user_modif
         input: 
             type: search_user
+            
+    fk_user_validate: 
+        label: Validé par
+        type: id_object
+        object: user_validate
+        input: 
+            type: search_user
+        default_value: 0
             
     fk_commercial_signature:
         label: Commercial signataire
@@ -230,7 +266,7 @@ fields:
     secteur:
         label: Secteur
         values:
-            array: contratSecteurs
+            array: secteurs
             
     expertise:
         label: Expertise
@@ -238,13 +274,6 @@ fields:
         type: int
         values: 
             array: expertise
-            
-    fk_soc_facturation: 
-        label: Client facturation
-        type: id_object
-        object: client_facturation
-        input:
-            card: default
             
     rib_client: 
         label: RIB client (pour prélèvements)
@@ -256,21 +285,8 @@ fields:
             options:
                 callback: getClientRibsArray
         default_value: 0
-                
-    date_start:
-        label: Date d'effet
-        type: date
-        dol_extra_field: 1
-        required: 1
         
-    duree_mois:
-        label: Durée en mois
-        type: qty
-        dol_extra_field: 1
-        default_value: 12
-        required: 1
-        
-    fk_mode_reglement:
+    moderegl:
         label: Mode de règlement
         type: int
         dol_extra_field: 1
@@ -278,7 +294,8 @@ fields:
             callback: getModeReglementClient
         values:
             array: modeReglements
-            
+        depends_on: fk_soc,fk_soc_facturation
+        
     condregl:
         label: Conditions de règlement
         type: int
@@ -287,6 +304,7 @@ fields:
             callback: getConditionReglementClient
         values:
             array: condReglements
+        depends_on: fk_soc,fk_soc_facturation
         
     fk_user_cloture:
         label: Clos par
@@ -305,40 +323,133 @@ fields:
         label: Version
         type: int
         values: 
-            1: Ancienne version
-            2: Nouvelle version
-       
+            1: Contrats standards
+            2: Contrats d'abonnement
+        default_value: 2
+              
+forms: 
+    default: 
+        rows: 
+            - field: label
+            - field: fk_soc
+            - field: fk_soc_facturation
+            - field: ref_customer
+            - field: condregl
+            - field: moderegl
+            - field: entrepot
+            - field: secteur
+            - field: expertise
+            - field: note_public
+            - field: note_private
+            
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+#            - field: date_contrat
+#            - field: date_start
+            - field: entrepot
+            - field: secteur
+            - field: expertise
+            - field: note_public
+            - field: note_private
+            
+    client: 
+        title: Client
+        icon: fas_user-circle
+        rows: 
+            - field: fk_soc
+              display: card
+            - field: fk_soc_facturation
+              display: card
+              
+    reglement: 
+        title: Paiement
+        icon: fas_euro-sign
+        rows: 
+            - field: moderegl
+              edit: 1
+            - field: condregl
+              edit: 1
+            - field: rib_client
+              edit: 1
+              
 views: 
     default: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                  
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: client
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: reglement
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderLinkedObjectsTable
+            - cols: 
+                - type: list
+                  list:
+                      name: contrat
+                      children: lines
+    full: 
         rows:
           - cols: 
               - type: object_header
+          - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                  
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: client
               
 lists: 
     default:
-        title: Tous les contrats
+        title: Tous les contrats d'abonnement
         configurable: 1
         checkboxes: 1
+        list_filters: 
+            - name: version
+              filter: 2
         bulk_actions:
-            callback: getBulkActions
+            - label: supprimer les contrats sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: datec
         sort_way: desc
         n: 20
         add_form_name: default
         edit_btn: 1
-        edit_form: edit
+        edit_form: default
         delete_btn: 0
-        modal_view: full
         page_btn: 1
         cols: 
             ref:
-            objet_contrat:
-            signed:
             statut:
             fk_soc:
-            date_start:
             fk_commercial_suivi:
-            commercialclient:
 
 searches:
     default:

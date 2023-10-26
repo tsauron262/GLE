@@ -30,7 +30,162 @@ objects:
         instance: 
             bimp_object: 
                 name: PropalDolLine
-                
+            
+fields: 
+    abo_fac_periodicity: 
+        label: Périodicité de facturation
+        type: int
+        values: 
+            array: periodicities
+        default_value: 0
+        depends_on: id_product        
+        
+    abo_duration: 
+        label: Durée totale abonnement (en mois)
+        type: int
+        default_value: 0
+        depends_on: id_product
+        input: 
+            type: custom
+            content: 
+                callback: renderAboDurationInput
+        
+    abo_fac_term: 
+        label: Terme de facturation
+        type: int
+        default_value: 1
+        depends_on: id_product
+        values: 
+            0: A terme échu
+            1: A terme à échoir
+        depends_on: id_product
+            
+    abo_nb_renouv: 
+        label: Nb renouvellements tacites
+        type: int
+        values: 
+            array: nbRenouvellements
+            
+forms: 
+    default: 
+        rows: 
+            is_abo: 
+                show: 1
+                custom: 1
+                hidden: 1
+                label: Abonnement
+                input_name: is_abonnement
+                input: 
+                    type: hidden
+                depends_on: id_product
+                value: 
+                    callback: 
+                        method: getValueByProduct
+                        params: 
+                            - is_abonnement
+            abo_infos: 
+                show: 1
+                custom: 1
+                label: Informations abonnement
+                input_name: abo_infos
+                input: 
+                    type: custom
+                    content: 
+                        callback: renderAboInfos
+                display_if: 
+                    field_name: is_abonnement
+                    show_values: 1
+            abo_fac_periodicity: 
+                show: 1
+                field: abo_fac_periodicity
+                display_if: 
+                    field_name: is_abonnement
+                    show_values: 1
+            abo_duration: 
+                show: 1
+                field: abo_duration
+                display_if: 
+                    field_name: is_abonnement
+                    show_values: 1
+            abo_qty: 
+                show: 1
+                custom: 1
+                label: Quantité
+                input_name: abo_qties
+                input: 
+                   type: custom
+                   content: 
+                       callback: renderAboQtyInput
+                display_if: 
+                    fields_names: is_abonnement,abo_fac_periodicity,abo_duration
+                    is_abonnement: 
+                        show_values: 1
+                    abo_fac_periodicity: 
+                        hide_values: 0
+                    abo_duration: 
+                        hide_values: 0
+                depends_on: id_product
+            abo_fac_term: 
+                show: 1
+                field: abo_fac_term
+                display_if: 
+                    field_name: is_abonnement
+                    show_values: 1
+            abo_nb_renouv:
+                show: 1
+                field: abo_nb_renouv
+                display_if: 
+                    field_name: is_abonnement
+                    show_values: 1            
+            qty: 
+                display_if: 
+                    unextends: 1
+                    fields_names: type,is_abonnement
+                    type: 
+                        show_values: 1,3
+                    is_abonnement: 
+                        hide_values: 1
+            limited: 
+                display_if: 
+                    unextends: 1
+                    fields_names: type,is_abonnement
+                    type: 
+                        show_values: 1,3
+                    is_abonnement: 
+                        hide_values: 1
+    
+    abonnement: 
+        title: Options d'abonnement
+        rows: 
+            - field: abo_fac_periodicity
+              display_if: 
+                  field_name: is_abonnement
+                  show_values: 1
+            - field: abo_duration
+              display_if: 
+                  field_name: is_abonnement
+                  show_values: 1
+            - custom: 1
+              label: Quantité
+              input_name: abo_qty
+              input: 
+                  type: custom
+                  content: 
+                      callback: renderAboQtyInput
+              display_if: 
+                  field_name: is_abonnement
+                  show_values: 1
+              depends_on: id_product
+            - field: abo_fac_term
+              display_if: 
+                  field_name: is_abonnement
+                  show_values: 1
+                  
+            - field: abo_nb_renouv
+              display_if: 
+                  field_name: is_abonnement
+                  show_values: 1
+            
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Propal

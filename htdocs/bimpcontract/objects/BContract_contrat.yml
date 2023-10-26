@@ -412,6 +412,13 @@ fields:
             options:
                 callback: getClientRibsArray
         default_value: 0
+    version: 
+        label: Version
+        type: int
+        values: 
+            1: Contrats standards
+            2: Contrats d'abonnement
+        default_value: 1
         
 forms:
     redefineEcheancier:
@@ -1572,6 +1579,9 @@ lists:
         filters_panel: default
         bulk_actions:
             callback: getBulkActions
+        list_filters: 
+            - name: version
+              filter: 1
         sort_field: datec
         sort_way: desc
         n: 20

@@ -142,13 +142,13 @@ function quickAddObjectLine($button) {
         bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
         return;
     }
-    
+
     var data = {};
     $container.find('.inputContainer').each(function () {
         var field = $(this).data('field_name').replace(/^quick_add_(.*)$/, '$1');
         data[field] = getInputValue($(this));
     });
-    
+
     data.module = $container.data('module');
     data.object_name = $container.data('object_name');
     data.id_obj = $container.data('id_obj');
@@ -171,6 +171,67 @@ function quickAddObjectLine($button) {
             }));
         }
     });
+}
+
+// Traitements: 
+
+function setAbonnementLineQties($form, $input) {
+    var prod_duration = parseInt($form.find('input[name="prod_duration"').val());
+    var duration = parseInt($form.find('input[name="abo_duration"').val());
+    var fac_periodicity = parseInt($form.find('select[name="abo_fac_periodicity"').val());
+
+    var nb_fac_periods = 0
+    var nb_prod_periods = 0;
+
+    var qty_per_month = 0;
+    var qty_per_fac_period = 0;
+    var qty_per_prod_period = parseFloat($form.find('input[name="abo_qty_per_product_period"').val());
+
+
+    if (duration && fac_periodicity) {
+        nb_fac_periods = duration / fac_periodicity;
+    }
+
+    if (duration && prod_duration) {
+        nb_prod_periods = duration / prod_duration;
+    } else {
+        nb_prod_periods = 1;
+    }
+
+    var total_qty = qty_per_prod_period * nb_prod_periods;
+
+    switch ($input.attr('name')) {
+        case 'qty':
+            total_qty = parseFloat($form.find('input[name="qty"').val());
+            break;
+
+        case 'abo_total_qty':
+            total_qty = parseFloat($form.find('input[name="abo_total_qty"').val());
+            break;
+
+        case 'abo_qty_per_fac_period':
+            total_qty = parseFloat($form.find('input[name="abo_qty_per_fac_period"').val()) * nb_fac_periods;
+            break;
+
+        case 'abo_qty_per_product_period':
+            total_qty = parseFloat($form.find('input[name="abo_qty_per_product_period"').val()) * nb_prod_periods;
+            break;
+    }
+
+    var diff = total_qty - Math.round(total_qty);
+    if (diff >= -0.01 && diff <= 0.01) {
+        total_qty = Math.round(total_qty);
+    }
+
+    if (total_qty && duration) {
+        qty_per_month = total_qty / duration;
+        qty_per_fac_period = qty_per_month * fac_periodicity;
+        qty_per_prod_period = qty_per_month * prod_duration;
+    }
+
+    $form.find('input[name="qty"],input[name="abo_total_qty"]').val(total_qty);
+    $form.find('input[name="abo_qty_per_fac_period"]').val(qty_per_fac_period);
+    $form.find('input[name="abo_qty_per_product_period"]').val(qty_per_prod_period);
 }
 
 // Events: 
@@ -268,6 +329,19 @@ function onObjectLineFormLoaded($form) {
 
             $form.data('form_margins_events_init', 1);
         }
+
+        var sel = 'input[name="qty"]';
+        sel += ',input[name="abo_total_qty"]';
+        sel += ',input[name="abo_qty_per_product_period"]';
+        sel += ',input[name="abo_qty_per_fac_period"]';
+        sel += ',select[name="abo_fac_periodicity"]';
+        sel += ',input[name="abo_duration"]';
+        var $inputs = $form.find(sel);
+        if ($inputs.length) {
+            $inputs.change(function () {
+                setAbonnementLineQties($form, $(this));
+            });
+        }
     }
 }
 
@@ -309,6 +383,29 @@ $(document).ready(function () {
             } else if (e.$form.hasClass('ObjectLineRemise_form')) {
                 onObjectLineRemiseFormLoaded(e.$form);
             }
+        }
+    });
+
+    $('body').on('inputReloaded', function (e) {
+        switch (e.input_name) {
+            case 'abo_qties':
+                var sel = 'input[name="abo_total_qty"]';
+                sel += ',input[name="abo_qty_per_fac_period"]';
+                sel += ',input[name="abo_qty_per_product_period"]';
+                var $inputs = e.$form.find(sel);
+                $inputs.change(function () {
+                    setAbonnementLineQties(e.$form, $(this));
+                });
+                break;
+
+            case 'abo_fac_periodicity':
+            case 'abo_duration':
+            case 'qty':
+                var $input = e.$form.find('[name="' + e.input_name + '"]');
+                $input.change(function () {
+                    setAbonnementLineQties(e.$form, $(this));
+                });
+                break;
         }
     });
 });

@@ -580,13 +580,13 @@ fields:
             array: type_compta
             
     duree: 
-        label: Durée limitée (en mois)
+        label: Durée unitaire (en mois)
         type: int
         min: 0
         default_value: 0
         input: 
             type: text
-            help: Uniquement pour les prestations réalisées au fil du temps
+            help: A définir pour les abonnements / prestations
             
     lock_admin:
         label: Blocage Admin
@@ -639,23 +639,28 @@ fields:
         type: int
         values: 
             array: fac_periodicities
-        display_if: 
-            field_name: variable_qty
-            show_values: 1
+    
+    fac_def_terme: 
+        label: Terme facturation par défaut
+        type: int
+        default_value: 1
+        values: 
+            0: A terme échu
+            1: A terme à échoir
             
     variable_qty: 
-        label: Abonnement à qté variable
+        label: Abonnement à conso variable
         type: bool
         default_value: 0        
         
     variable_qty_unit: 
-        label: Type d\'unité pour les qtés variables
+        label: Type d'unité pour les consos variables
         display_if: 
             field_name: variable_qty
             show_values: 1
         
     variable_qty_decimals: 
-        label: Nombre de décimales autorisées pour les qtés variables
+        label: Nb décimales autorisées pour les consos variables
         type: qty
         decimals: 0
         min: 0
@@ -863,7 +868,7 @@ forms:
                   type: search_entrepot
               default_value: 
                   callback: getDefaultEntrepot
-        
+            
 fields_tables: 
     infos: 
         title: Informations
@@ -995,6 +1000,10 @@ fields_tables:
         show: 
             callback: isAbonnement
         rows: 
+            - field: fac_def_periodicity
+              edit: 1
+            - field: fac_def_terme
+              edit: 1
             - field: variable_qty
               edit: 1
             - field: variable_qty_unit
@@ -1004,8 +1013,6 @@ fields_tables:
             - field: achat_def_periodicity
               edit: 1
             - field: achat_def_id_fourn
-              edit: 1
-            - field: fac_def_periodicity
               edit: 1
 
 views: 

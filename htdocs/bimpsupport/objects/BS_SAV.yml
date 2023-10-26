@@ -413,7 +413,7 @@ fields:
         input:
             auto_expand: 1
             rows: 1
-            values: 
+            possible_values: 
                 array: list_etats_materiel
         user_edit: 1
     accessoires: 
@@ -422,7 +422,7 @@ fields:
         input:
             auto_expand: 1
             rows: 2
-            values: 
+            possible_values: 
                 array: list_accessoires
         user_edit: 1
     symptomes: 
@@ -432,7 +432,7 @@ fields:
             hashtags: 1
             auto_expand: 1
             rows: 4
-            values: 
+            possible_values: 
                 array: list_symptomes
         required: 1
         user_edit: 1

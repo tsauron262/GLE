@@ -6,6 +6,11 @@ dol_object:
             class: ContratLigne
             
 table: contratdet
+primary: rowid
+    
+positions: 1
+position_insert: after
+position_field: rang
 
 labels: 
     name: ligne de contrat
@@ -60,18 +65,30 @@ fields:
         label: Produit / service
         type: id_object
         object: product
+            
+    line_type: 
+        label: Type
+        type: int
+        values:
+            array: types
+        required: 1
         
     statut: 
         label: Statut
         type: int
         values: 
             array: status_list
+            
     label: 
         label: Libellé
         
     description: 
         label: Description
         type: html
+        
+    commentaire: 
+        label: Commentaire
+        type: text
     
     product_type: 
         label: Type produit
@@ -81,41 +98,61 @@ fields:
             1: Service
             
     qty: 
-        label: Qté
+        label: Qté totale
         type: float
         decimals: 8
+        default_value: 0
+        input: 
+            type: qty
+            help: Pour les abonnements à quantité variable, la quantité correspond à une estimation de consommation par période de facturation
+        displays: 
+            details: 
+                label: Affichage détaillé
+                type: callback
+                method: displayQties
         
     price_ht: 
         label: Prix unitaire HT
         type: money
+        depends_on: fk_product
         
     subprice: 
         label: PU HT remisé
         type: money
+        depends_on: fk_product
         
     tva_tx: 
         label: Tx TVA
         tpe: float
         default_value: 
             callback: getDefaultTva
+        depends_on: fk_product
             
     remise_percent: 
         label: Remise (%)
         type: percent
         default_value: 0
         
-    remise: 
-        label: Montant remise
-        type: money
-        
-    buy_price_ht: 
-        label: Prix d'achat HT
-        type: money
-        
     fk_product_fournisseur_price: 
         label: Prix d'achat fournisseur
         type: id_object
         object: fourn_price
+        depends_on: line_type,fk_product
+        input: 
+            type: custom
+            content: 
+                callback: renderFournPriceInput
+        display_if: 
+            field_name: achat_periodicity
+            hide_values: 0
+            
+    buy_price_ht: 
+        label: Prix d'achat HT
+        type: money
+        depends_on: fk_product,fk_product_fournisseur_price
+        display_if: 
+            field_name: achat_periodicity
+            hide_values: 0    
     
     total_ht: 
         label: Total HT
@@ -129,6 +166,55 @@ fields:
         label: Total TTC
         type: money
         
+    fac_periodicity: 
+        label: Périodicité de facturation
+        values: 
+            array: periodicities
+        default_value: 0
+        depends_on: fk_product
+        
+    fac_term: 
+        label: Terme de facturation
+        type: int
+        default_value: 1
+        depends_on: id_product
+        values: 
+            0: A terme échu
+            1: A terme à échoir
+        depends_on: fk_product
+        display_if: 
+            field_name: fac_periodicity
+            hide_values: 0    
+        
+    achat_periodicity: 
+        label: Périodicité d'achat
+        values: 
+            array: periodicities
+        default_value: 0
+        depends_on: fk_product
+        
+    duration: 
+        label: Durée (en mois)
+        type: int
+        decimals: 0
+        default_value: 0
+        input: 
+            type: qty
+            possible_values: 
+                array: 6,12,24,36,48,60
+        
+    nb_renouv: 
+        label: Nb renouvellements tacites
+        type: int
+        values: 
+            array: nbRenouvellements
+            
+    variable_qty: 
+        label: Abonnement à quantité variable
+        type: bool
+        default_value: 0
+        depends_on: fk_product
+        
     date_commande: 
         label: Date commande
         type: datetime
@@ -140,6 +226,8 @@ fields:
     date_ouverture: 
         label: Date ouverture
         type: datetime
+        input: 
+            display_now: 1
         
     date_fin_validite: 
         label: Date fin validité
@@ -148,6 +236,26 @@ fields:
     date_cloture: 
         label: Date cloture
         type: datetime
+        
+    date_next_facture: 
+        label: Date de prochaine facturation
+        type: date
+        displays: 
+            with_color: 
+                type: callback
+                method: displayNextFacDate
+                params: 
+                    - 1
+        
+    date_next_achat: 
+        label: Date de prochain achat
+        type: date
+        displays: 
+            with_color: 
+                type: callback
+                method: displayNextAchatDate
+                params: 
+                    - 1
         
     fk_user_author: 
         label: Créé par
@@ -163,4 +271,447 @@ fields:
         label: Clos par
         type: id_object
         object: user_cloture
+
+forms: 
+    text: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Type
+              input_name: line_type
+              input: 
+                  type: hidden
+              value: 1
+            - field: description
+            
+    abonnement: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Type
+              input_name: line_type
+              input: 
+                  type: hidden
+              value: 2
+            - custom: 1
+              label: Produit
+              input_name: fk_product
+              required: 1
+              input: 
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderProductInput
+                          params: 
+                              - 6
+            - field: description
+            - field: date_ouverture_prevue
+            
+            - title: vente
+            - field: fac_periodicity
+            - field: fac_term
+            - field: variable_qty
+            - field: duration
+            - custom: 1
+              label: Quantité par facturation
+              input_name: qty_per_period
+              input: 
+                  type: qty
+                  help: Pour les abonnements à quantité variable, indiquez une estimation de la consommation par période facturée
+              value: 0
+            - custom: 1
+              label: Quantité totale
+              input_name: total_qty
+              input: 
+                  type: custom
+                  content: 
+                      callback: displayAboTotalQty
+              depends_on: fac_periodicity,qty_per_period,duration
+            - field: nb_renouv
+            - field: price_ht
+            - field: tva_tx
+            - field: remise_percent
+            
+            - title: Achat
+            - field: achat_periodicity
+#            - custom: 1
+#              label: Type de prix d'achat
+#              input_name: type_pa
+#              data_type: int
+#              input: 
+#                  type: select
+#                  options: 
+#                      pa_fourn: Prix fournisseur
+#                      custom: Personnalisé
+            - field: fk_product_fournisseur_price
+#              display_if: 
+#                  field_name: type_pa
+#                  hide_values: custom
+#            - field: achat_id_fourn
+            - field: buy_price_ht    
+            
+    activate: 
+        rows: 
+            - field: date_ouverture
+              label: Date d'ouverture
+              value: 
+                  field_value: date_ouverture_prevue
         
+    periodic_process: 
+        modal_format: large
+        rows: 
+            client: 
+                custom: 1
+                hidden: 1
+                label: Client
+                input_name: id_client
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            client_name: 
+                custom: 1
+                label: Client
+                input_name: client_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayClientNameInput
+                depends_on: id_client
+                display_if: 
+                    field_name: id_client
+                    hide_values: 0
+            fourn: 
+                custom: 1
+                hidden: 1
+                label: Fournisseur
+                input_name: id_fourn
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            fourn_name: 
+                custom: 1
+                label: Fournisseur
+                input_name: fourn_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayFournNameInput
+                depends_on: id_fourn
+                display_if: 
+                    field_name: id_fourn
+                    hide_values: 0
+            product: 
+                custom: 1
+                hidden: 1
+                label: Produit
+                input_name: id_product
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            prod_name: 
+                custom: 1
+                label: Produit
+                input_name: prod_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayProductNameInput
+                depends_on: id_product
+                display_if: 
+                    field_name: id_product
+                    hide_values: 0
+            contrat: 
+                custom: 1
+                hidden: 1
+                label: Contrat
+                input_name: id_contrat
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            contrat_name: 
+                custom: 1
+                label: Contrat
+                input_name: Contrat_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayContratNameInput
+                depends_on: id_product
+                display_if: 
+                    field_name: id_product
+                    hide_values: 0
+            type: 
+                custom: 1
+                label: Type opération
+                input_name: operation_type
+                hidden: 1
+                input: 
+                    type: hidden
+                required: 1
+                value: achat
+            products: 
+                custom: 1
+                label: Produits à traiter
+                input_name: products
+#                depends_on: operation_type
+                input: 
+                    type: custom
+                    content: 
+                        callback: renderPeriodicProcessInputs
+            
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: line_type
+            - field: statut
+            - field: fk_contrat
+            - field: fk_product
+              display: card
+            - field: description
+            - field: commentaire       
+            - field: date_commande
+            - field: date_ouverture_prevue
+            - field: date_fin_validite
+            
+    amounts: 
+        title: Qté et montants
+        icon: fas_euro-sign
+        rows: 
+            - field: qty
+            - field: price_ht
+            - field: tva_tx
+            - field: remise_percent
+            - field: subprice
+            - field: total_ht
+            - field: total_tva
+            - field: total_ttc
+            
+    facturation: 
+        title: Facturation
+        icon: fas_file-invoice-dollar
+        rows: 
+            - field: fac_periodicity
+            - field: duration
+            - label: nombre total de périodes
+              value: 
+                  callback: getFacNbPeriods
+            - field: variable_qty
+            - label: Qté par période
+              value: 
+                  callback: getFacQtyPerPeriod
+                  
+    achat: 
+        title: Achat
+        icon: fas_cart-arrow-down
+        rows: 
+            - field: fk_product_fournisseur_price
+            - field: buy_price_ht
+            - field: achat_periodicity
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            
+    abonnement: 
+        extends: default
+        rows: 
+            1: 
+                cols: 
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      fields_table: 
+                          name: infos
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      fields_table: 
+                          name: amounts
+            2: 
+                cols: 
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      fields_table: 
+                          name: facturation
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      fields_table: 
+                          name: achat            
+        
+filters:
+    periodic_facs_to_process: 
+        label: Facturation périodiques à traiter aujourd'hui
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+            
+    periodic_achats_to_process: 
+        label: Achats périodiques à traiter aujourd'hui
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+            
+filters_panels: 
+    default: 
+        filters: 
+            fk_contrat: 
+            statut: 
+            fk_product:
+            
+    periods: 
+        filters: 
+            parent:ref:
+                label: Ref. Commande
+            parent:statut:
+                label: Statut contrat
+                
+    fac_periods: 
+        extends: periods
+        filters: 
+            periodic_facs_to_process:
+            date_next_facture: 
+            fac_periodicity:
+                
+    achat_periods: 
+        extends: periods
+        filters: 
+            periodic_achats_to_process:
+            date_next_achat: 
+            achat_periodicity:
+                
+lists_cols: 
+    desc: 
+        label: Désignation
+        value: 
+            callback: displayDesc
+            
+    achat_infos: 
+        label: Infos achat
+        value: 
+            callback: displayAchatInfos
+            
+    nb_facs: 
+        label: Facturation a effectuer à date
+        value: 
+            callback: displayNbFacsToProcess
+            
+    nb_achats: 
+        label: Achats a effectuer à date
+        value: 
+            callback: displayNbAchatsToProcess
+            
+    date_next_facture:
+        display: with_color
+    date_next_achat:
+        display: with_color
+            
+lists: 
+    default: 
+        configurable: 1
+        checkboxes: 0
+        positions: 1
+        positions_open: 1
+        filters_panel: default
+        sort_field: rowid
+        sort_way: desc
+        n: 10
+        edit_btn: 1
+        edit_form: 
+            callback: getEditForm
+        delete_btn: 1
+        modal_view: 
+            callback: getModalView
+        extra_btn: 
+            callback: getListExtraBtn
+        single_cell:
+            filters:
+                line_type: 1
+            col: desc
+        bulk_actions: 
+            callback: 
+                method: getListsBulkActions
+                params: 
+                    - default
+        cols: 
+            fk_contrat:
+            desc:
+            qty:
+                display: details
+            price_ht: 
+            tva_tx: 
+            remise_percent: 
+            total_ttc: 
+            achat_infos:
+            statut: 
+                
+    contrat: 
+        extends: default
+        checkboxes: 1
+        filters_panel: unset
+        header_buttons: 
+            callback: 
+                method: getListHeaderButtons
+                params: 
+                    - contrat
+        bulk_actions: 
+            callback: 
+                params: 
+                    - contrat
+        cols: 
+            fk_contrat: unset
+            
+    facturation: 
+        extends: default
+        filters_panel: fac_periods
+        checkboxes: 
+            callback: 
+                method: canSetAction
+                params: 
+                    - periodicFacProcess
+        bulk_actions: 
+            callback: 
+                method: getListsBulkActions
+                params: 
+                    - facturation
+        header_buttons: 
+            callback: 
+                method: getListHeaderButtons
+                params: 
+                    - facturation
+        cols: 
+            unextends: 1
+            fk_contrat:
+            desc:
+            qty:
+                display: details
+            total_ttc:
+            statut:
+            nb_facs: 
+            date_next_facture:
+                
+    achat: 
+        extends: default
+        filters_panel: achat_periods
+        cols: 
+            unextends: 1
+            fk_contrat:
+            desc:
+            qty:
+                display: details
+            total_ttc:
+            statut:
+            nb_achats: 
+            date_next_achat:
+            

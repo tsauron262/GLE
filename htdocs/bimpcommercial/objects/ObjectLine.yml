@@ -239,6 +239,20 @@ forms:
                     hide_values: 2,3,4
                 show:
                     callback: isProductEditable
+            is_abo: 
+                show: 0
+            abo_infos: 
+                show: 0
+            abo_fac_periodicity: 
+                show: 0
+            abo_duration: 
+                show: 0
+            abo_qty: 
+                show: 0
+            abo_fac_term: 
+                show: 0
+            abo_nb_renouv: 
+                show: 0
             pu_ht: 
                 custom: 1
                 label: Prix unitaire HT

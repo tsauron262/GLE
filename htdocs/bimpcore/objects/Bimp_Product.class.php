@@ -11,8 +11,9 @@ class Bimp_Product extends BimpObject
         3 => 'Déplacement inter',
         4 => 'Déplacement contrat',
         5 => 'Logiciel (licence unique)',
-        6 => 'Licence avec abonnement'
+        6 => 'Abonnement'
     );
+    public static $abonnements_sous_types = array(6);
     public static $sousTypeDep = array(3, 4);
     public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
@@ -542,7 +543,35 @@ class Bimp_Product extends BimpObject
 
     public function isAbonnement()
     {
-        return (int) ((int) $this->getData('type2') === 6);
+        // en prévision d'ajout d'autres types d'abonnements
+        return (int) (in_array((int) $this->getData('type2'), self::$abonnements_sous_types));
+    }
+
+    // Getters array: 
+
+    public function getProductsArrayByType2($type2, $include_empty = true, $with_price = true)
+    {
+        $products = array();
+
+        if ($include_empty) {
+            $products[0] = '';
+        }
+
+        $rows = $this->getList(array(
+            'type2'    => $type2,
+            'validate' => 1,
+            'tobuy'    => 1
+                ), null, null, 'rowid', 'desc', 'array', array('rowid', 'ref', 'label', 'price'));
+
+        if (!empty($rows)) {
+            foreach ($rows as $r) {
+                if (!isset($products[(int) $r['rowid']])) {
+                    $products[(int) $r['rowid']] = $r['ref'] . ' - ' . $r['label'] . ($with_price ? ' (' . BimpTools::displayMoneyValue($r['price'], 'EUR', 0, 0, 1, 2, 0, ',', 1) . ')' : '');
+                }
+            }
+        }
+
+        return $products;
     }
 
     // Getters codes comptables: 
@@ -938,7 +967,7 @@ class Bimp_Product extends BimpObject
 
         return '';
     }
-    
+
     public function getFilteredListActions()
     {
         $actions = array();
@@ -1545,14 +1574,14 @@ class Bimp_Product extends BimpObject
 
     public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true, $empty_label = '')
     {
-        if (!(int) $id_product) {
-            return array();
-        }
-
         $prices = array();
 
         if ($include_empty) {
             $prices[0] = $empty_label;
+        }
+
+        if (!(int) $id_product) {
+            return $prices;
         }
 
         $filters = array(
@@ -1737,7 +1766,7 @@ class Bimp_Product extends BimpObject
             $sql = 'SELECT rowid as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price';
             $sql .= ' WHERE fk_product = ' . (int) $this->id;
 
-            if (!is_null($id_fourn) && (int) $id_fourn) {
+            if ((int) $id_fourn) {
                 $sql .= ' AND `fk_soc` = ' . (int) $id_fourn;
             }
 
@@ -1848,7 +1877,7 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded()) {
             $where1 = '`fk_product` = ' . (int) $this->id . ' AND `price` = ' . (float) $pa_ht;
 
-            if (!is_null($id_fourn)) {
+            if ((int) $id_fourn) {
                 $where1 .= ' AND `fk_soc` = ' . (int) $id_fourn;
             }
 

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contrat` ADD `version` int (11) NOT NULL DEFAULT 1;

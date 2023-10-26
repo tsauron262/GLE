@@ -552,6 +552,19 @@ forms:
                     sign_dist:
                         hide_values: 0
                 depends_on: init_docusign,open_public_access
+                
+    contrat_abo: 
+        rows: 
+            - custom: 1
+              label: Contrat
+              data_type: id
+              input_name: id_contrat
+              input: 
+                  type: select
+                  options:
+                      array: clientContratsAbo
+              value: 
+                   callback: getDefaultContratAbo
                   
 fields_tables: 
     infos: 

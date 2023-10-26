@@ -1,0 +1,37 @@
+
+bootstrap: 1
+title: Contrats
+
+objects: 
+    contrat: 
+        instance:
+            bimp_object: BCT_Contrat
+            
+    contrat_lines:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: BCT_ContratLine
+            
+sections: 
+    - type: tabs
+      tabs: 
+        default:
+            label: Contrats d'abonnement
+            sections:
+                - type: list
+                  list: 
+                      object: contrat
+                      name: default
+                      
+#        abonnements: 
+#            label: Tous les abonnements
+#            sections: 
+#                - type: custom
+#                  custom: 
+#                      callback: renderAbonnementsTab
+                
+                            
+        
+        
+            

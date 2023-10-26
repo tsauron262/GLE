@@ -23,6 +23,8 @@ objects:
             id_object:
                 request: id
         
+main_object: sav
+
 sections:
     - type: object_header
       object_header:

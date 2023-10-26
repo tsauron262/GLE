@@ -17,6 +17,7 @@ class ObjectLine extends BimpObject
     const LINE_TEXT = 2;
     const LINE_FREE = 3;
     const LINE_SUB_TOTAL = 4;
+//    const LINE_ABO = 5;
 
     public $desc = null;
     public $id_product = null;
@@ -551,6 +552,10 @@ class ObjectLine extends BimpObject
         if ((int) BimpCore::getConf('use_free_objectline', null, 'bimpcommercial')) {
             $types[self::LINE_FREE] = 'Ligne libre';
         }
+
+//        if (is_a($this, 'Bimp_PropalLine')) {
+//            $types[self::LINE_ABO] = 'Abonnement';
+//        }
 
         return $types;
     }
@@ -1709,7 +1714,6 @@ class ObjectLine extends BimpObject
             }
         }
 
-
         return 6;
     }
 
@@ -1959,7 +1963,7 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'qty':
-                    $html .= (float) $this->qty;
+                    $html .= BimpTools::displayFloatValue((float) $this->qty, 8, ',', 0, 0, 0, 0, 1, 1);
                     if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
                         $html .= '<br/>';
                         $msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';

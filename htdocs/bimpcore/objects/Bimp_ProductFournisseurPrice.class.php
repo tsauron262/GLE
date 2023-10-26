@@ -69,6 +69,28 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         return 'ref_fourn';
     }
 
+    public function getName($withGeneric = true)
+    {
+        if ($this->isLoaded()) {
+            $name = 'PA fournisseur';
+            $fourn = $this->getChildObject('fournisseur');
+            if (BimpObject::objectLoaded($fourn)) {
+                $name .= ' ' . $fourn->getRef() . ' ' . $fourn->getName();
+            }
+
+            $ref_fourn = $this->getData('ref_fourn');
+            if ($ref_fourn) {
+                $name .= ' (ref : ' . $ref_fourn . ')';
+            } elseif (!BimpObject::objectLoaded($fourn)) {
+                $name .= ' #' . $this->id;
+            }
+
+            return $name;
+        }
+
+        return '';
+    }
+
     public function displayLabel()
     {
         $html = '';
@@ -165,7 +187,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 }
                 $errors[] = $msg;
             } else {
-                if($this->getInitData('price') != $this->getData('price'))
+                if ($this->getInitData('price') != $this->getData('price'))
                     $this->history['price'] = $this->getData('price');
                 $this->saveHistory();
                 if ((int) BimpTools::getPostFieldValue('is_cur_pa', 0)) {

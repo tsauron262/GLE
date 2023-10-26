@@ -305,6 +305,7 @@ class modBimpLogistique extends DolibarrModules
 	 */
 	public function init($options='')
 	{
+            global $conf;
 		$sql = array();
                 
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
@@ -315,8 +316,8 @@ class modBimpLogistique extends DolibarrModules
                 }
                 
 
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpprod1', 1, 'product', 'Etiquette stock', NULL);";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpprod2', 1, 'product', 'Etiquette magasin', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpprod1', ".$conf->entity.", 'product', 'Etiquette stock', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpprod2', ".$conf->entity.", 'product', 'Etiquette magasin', NULL);";
                 
                 
 		//$this->_load_tables('/bimpcommercial/sql/');

@@ -9430,10 +9430,25 @@ i.iconRight {
   margin: 10px 5px;
   padding-left: 10px; }
 
-/* line 1453, ../scss/bimpcore/_styles.scss */
+/* line 1452, ../scss/bimpcore/_styles.scss */
 body.modal-open ul.ui-autocomplete {
   overflow: auto;
   max-height: 400px; }
+
+/*Drop Files*/
+/* line 1459, ../scss/bimpcore/_styles.scss */
+.bimp_drop_files_container.allPage .bimp_drop_files_area {
+  padding: 0;
+  margin: 0; }
+
+/* line 1463, ../scss/bimpcore/_styles.scss */
+.bimp_drop_files_container.allPage .bimp_drop_files_area .drop_files {
+  padding: 0;
+  min-height: 0; }
+
+/* line 1467, ../scss/bimpcore/_styles.scss */
+.bimp_drop_files_container.allPage .bimp_drop_files_area {
+  border: 0; }
 
 /* line 1, ../scss/bimpcore/_form.scss */
 *::-moz-placeholder {

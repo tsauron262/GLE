@@ -89,6 +89,11 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return 'sav';
     }
 
+    public function isAbonnement()
+    {
+        return 0;
+    }
+
     // Traitements:
 
     public function updateSav()
@@ -347,10 +352,10 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
         if (!is_a($propal, 'BS_SavPropal')) {
             BimpCore::addlog('ERREUR INSTANCE PROPAL', 4, 'sav', $this, array(
-                'TYPE instance'       => get_class($propal),
-                'data line'           => $this->getDataArray(true),
-                '$this->parent class' => get_class($this->parent),
-                'Classe propal en cache'     => get_class(BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj')))
+                'TYPE instance'          => get_class($propal),
+                'data line'              => $this->getDataArray(true),
+                '$this->parent class'    => get_class($this->parent),
+                'Classe propal en cache' => get_class(BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj')))
                     ), true);
 
 //            $propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj'));

@@ -32,6 +32,8 @@ objects:
                 name: PropalDolLine
             
 fields: 
+    # /!\ ATTENTION : en cas d'ajout de field, penser à gérer dans BS_SavPropalLine !
+    
     abo_fac_periodicity: 
         label: Périodicité de facturation
         type: int

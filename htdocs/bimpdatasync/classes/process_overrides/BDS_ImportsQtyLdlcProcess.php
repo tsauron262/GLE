@@ -219,7 +219,7 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
                 BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessCron', array(
                     'id_process'   => (int) $process->id,
                     'id_operation' => (int) $op->id,
-                    'title'        => 'Màj Prix/Stocks LDLC',
+                    'title'        => 'Màj Qty LDLC',
                     'active'       => 0,
                     'freq_val'     => '1',
                     'freq_type'    => 'week',

@@ -3017,8 +3017,9 @@ class BL_CommandeShipment extends BimpObject
                 return $errors;
             }
 
+            
             $id_entrepot = (int) $commande->getData('entrepot');
-            if (!$id_entrepot) {
+            if (!$id_entrepot && (int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore')) {
                 $errors[] = 'ID de l\'entrepot absent';
             }
 

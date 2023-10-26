@@ -32,6 +32,7 @@ class BimpObject extends BimpCache
     public static $secteur_properties = array('ef_type', 'secteur');
     public $use_commom_fields = false;
     public $use_positions = false;
+    public $position_field = '';
     public $params_defs = array(
         'entity_name'              => array('default' => 0),
         'abstract'                 => array('data_type' => 'bool', 'default' => 0),
@@ -353,6 +354,9 @@ class BimpObject extends BimpCache
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
+        if ($this->use_positions) {
+            $this->position_field = $this->getConf('position_field', 'position');
+        }
 
         if ($this->config->isDefined('dol_object')) {
             $this->dol_object = $this->config->getObject('dol_object');
@@ -364,7 +368,7 @@ class BimpObject extends BimpCache
         }
 
         $this->addCommonFieldsConfig();
-        
+
         $this->addEntityFieldConfig();
 
         $errors = array();
@@ -548,7 +552,7 @@ class BimpObject extends BimpCache
 
         if ($this->use_positions) {
             $this->config->addParams('fields', array(
-                'position' => array(
+                $this->position_field => array(
                     'label'    => 'Position',
                     'type'     => 'int',
                     'input'    => array(
@@ -1715,6 +1719,7 @@ class BimpObject extends BimpCache
 
     public function getDbData($fields = null)
     {
+        global $conf;
         $data = array();
 
         $primary = $this->getPrimary();
@@ -1741,9 +1746,9 @@ class BimpObject extends BimpCache
             }
         }
 
-        global $conf;
-        if ($this->getEntity_name())
+        if ($this->getEntity_name()) {
             $data['entity'] = $conf->entity;
+        }
 
         return $data;
     }
@@ -2780,7 +2785,7 @@ class BimpObject extends BimpCache
                     $type = 'datetime';
                     break;
 
-                case 'position':
+                case $this->position_field:
                     $type = 'int';
                     break;
             }
@@ -2929,11 +2934,11 @@ class BimpObject extends BimpCache
         if (!$no_transactions_db && $this->db->db->noTransaction) {
             $no_transactions_db = true;
         }
-        
+
         if ($this->isLoaded($errors)) {
             global $user;
             $w = array();
-            
+
             BimpObject::createBimpObject('bimpcore', 'BimpObjectLog', array(
                 'obj_module' => $this->module,
                 'obj_name'   => $this->object_name,
@@ -4448,7 +4453,7 @@ class BimpObject extends BimpCache
                 $search_type = 'datetime_range';
                 break;
 
-            case 'position':
+            case $this->position_field:
                 $input_type = 'values_range';
                 $search_type = 'values_range';
         }
@@ -5038,7 +5043,7 @@ class BimpObject extends BimpCache
                 }
 
                 if ($this->params['positions'] && $this->params['position_insert'] === 'after') {
-                    $this->set('position', $this->getNextPosition());
+                    $this->set($this->position_field, $this->getNextPosition());
                 }
 
                 if (!is_null($this->dol_object)) {
@@ -6632,7 +6637,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function resetPositions()
     {
-        if ($this->getConf('positions', false, false, 'bool')) {
+        if ($this->use_positions) {
             $parent = $this->getParentInstance();
 
             if (is_a($parent, 'BimpObject')) {
@@ -6661,12 +6666,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $table = $this->getTable();
             $primary = $this->getPrimary();
 
-            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+            $items = $this->getList($filters, null, null, $this->position_field, 'asc', 'array', array($primary, $this->position_field));
             $i = 1;
             foreach ($items as $item) {
-                if ((int) $item['position'] !== (int) $i) {
+                if ((int) $item[$this->position_field] !== (int) $i) {
                     $this->db->update($table, array(
-                        'position' => (int) $i
+                        $this->position_field => (int) $i
                             ), '`' . $primary . '` = ' . (int) $item[$primary]);
                 }
                 $i++;
@@ -6680,8 +6685,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             return false;
         }
 
-        if ($this->params['positions']) {
-            $old_position = (int) $this->getInitData('position');
+        if ($this->use_positions) {
+            $old_position = (int) $this->getInitData($this->position_field);
             if ($old_position === $new_position) {
                 return true;
             }
@@ -6709,15 +6714,15 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $check = true;
 
             if (!in_array($this->object_name, array('Bimp_Menu'))) {
-                $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'), array(), $primary, ($this->params['position_insert'] === 'before' ? 'DESC' : 'ASC'));
+                $items = $this->getList($filters, null, null, $this->position_field, 'asc', 'array', array($primary, $this->position_field), array(), $primary, ($this->params['position_insert'] === 'before' ? 'DESC' : 'ASC'));
                 if ($this->db->update($table, array(
-                            'position' => (int) $new_position
+                            $this->position_field => (int) $new_position
                                 ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
                     $check = false;
                 }
 
                 if ($check) {
-                    $this->set('position', (int) $new_position);
+                    $this->set($this->position_field, (int) $new_position);
                     $i = 1;
                     foreach ($items as $item) {
                         if ($i === (int) $new_position) {
@@ -6728,9 +6733,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             continue;
                         }
 
-                        if ((int) $item['position'] !== (int) $i) {
+                        if ((int) $item[$this->position_field] !== (int) $i) {
                             if ($this->db->update($table, array(
-                                        'position' => (int) $i
+                                        $this->position_field => (int) $i
                                             ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
                                 $check = false;
                             }
@@ -6744,7 +6749,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                 // On attribue temporairement la position suivante à l'élément déplacé pour libérer sa position actuelle.
                 if ($this->db->update($table, array(
-                            'position' => (int) $this->getNextPosition()
+                            $this->position_field => (int) $this->getNextPosition()
                                 ), '`' . $primary . '` = ' . $this->id) <= 0) {
                     $errors[] = $this->db->err();
                     $check = false;
@@ -6754,7 +6759,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     // On décale une par une les positions des éléments affectés: 
                     $items_filters = $filters;
                     if ($new_position > $old_position) {
-                        $items_filters['position'] = array(
+                        $items_filters[$this->position_field] = array(
                             'and' => array(
                                 array(
                                     'operator' => '>',
@@ -6766,11 +6771,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                                 )
                             )
                         );
-                        $items = $this->getList($items_filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+                        $items = $this->getList($items_filters, null, null, $this->position_field, 'asc', 'array', array($primary, $this->position_field));
                         foreach ($items as $item) {
                             if ($check) {
                                 if ($this->db->update($table, array(
-                                            'position' => ((int) $item['position'] - 1)
+                                            $this->position_field => ((int) $item[$this->position_field] - 1)
                                                 ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
                                     $errors[] = $this->db->err();
                                     $check = false;
@@ -6778,7 +6783,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
                     } else {
-                        $items_filters['position'] = array(
+                        $items_filters[$this->position_field] = array(
                             'and' => array(
                                 array(
                                     'operator' => '>=',
@@ -6790,11 +6795,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                                 )
                             )
                         );
-                        $items = $this->getList($items_filters, null, null, 'position', 'desc', 'array', array($primary, 'position'));
+                        $items = $this->getList($items_filters, null, null, $this->position_field, 'desc', 'array', array($primary, $this->position_field));
                         foreach ($items as $item) {
                             if ($check) {
                                 if ($this->db->update($table, array(
-                                            'position' => ((int) $item['position'] + 1)
+                                            $this->position_field => ((int) $item[$this->position_field] + 1)
                                                 ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
                                     $errors[] = $this->db->err();
                                     $check = false;
@@ -6806,7 +6811,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     if ($check) {
                         // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée)
                         if ($this->db->update($table, array(
-                                    'position' => $new_position
+                                    $this->position_field => $new_position
                                         ), '`' . $primary . '` = ' . $this->id) <= 0) {
                             $errors[] = $this->db->err();
                             $check = false;
@@ -6829,7 +6834,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function getNextPosition()
     {
-        if ($this->getConf('positions', false, false, 'bool')) {
+        if ($this->use_positions) {
             if (method_exists($this, 'getPositionsFilters')) {
                 $filters = $this->getPositionsFilters();
                 if (is_null($filters)) {
@@ -6848,7 +6853,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $filters[$parent_id_property] = $id_parent;
             }
 
-            $sql = 'SELECT MAX(`position`) as max_pos';
+            $sql = 'SELECT MAX(`' . $this->position_field . '`) as max_pos';
             $sql .= BimpTools::getSqlFrom($this->getTable());
             $sql .= BimpTools::getSqlWhere($filters);
 
@@ -6907,13 +6912,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                                 $items = $instance->getList(array(
                                     $parent_id_prop => (int) $this->id
-                                        ), null, null, 'position', 'asc', 'array', array($primary, 'position'));
+                                        ), null, null, $instance->position_field, 'asc', 'array', array($primary, $instance->position_field));
 
                                 $i = 1;
                                 foreach ($items as $item) {
-                                    if ((int) $item['position'] !== (int) $i) {
-                                        $this->db->update($table, array(
-                                            'position' => (int) $i
+                                    if ((int) $item[$instance->position_field] !== (int) $i) {
+                                        $instance->db->update($table, array(
+                                            $instance->position_field => (int) $i
                                                 ), '`' . $primary . '` = ' . (int) $item[$primary]);
                                     }
                                     $i++;
@@ -7159,16 +7164,16 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $html .= $this->renderHeaderExtraLeft();
                 $html .= '</div>';
             }
-            
-            if($this->isDolObject()&& isset($this->dol_object)){
+
+            if ($this->isDolObject() && isset($this->dol_object)) {
                 global $hookmanager;
-                $hookmanager->initHooks(array($this->dol_object->element.'card', 'globalcard'));
+                $hookmanager->initHooks(array($this->dol_object->element . 'card', 'globalcard'));
                 $parameters = array();
                 $reshook = $hookmanager->executeHooks('moreHtmlRef', $parameters, $this->dol_object); // Note that $action and $object may have been modified by hook
                 if (empty($reshook)) {
-                        $html .= $hookmanager->resPrint;
+                    $html .= $hookmanager->resPrint;
                 } elseif ($reshook > 0) {
-                        $html .= $hookmanager->resPrint;
+                    $html .= $hookmanager->resPrint;
                 }
             }
 
@@ -9998,7 +10003,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             global $conf;
             $dir = $conf->bimpcore->multidir_output[$conf->entity];
-            $dir_error = BimpTools::makeDirectories(array(  
+            $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(
                                 $this->object_name => $list_name
@@ -10250,7 +10255,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             if (!BimpObject::objectLoaded($instance)) {
                                 $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe plus';
                             } else {
-                                
+
                                 $mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'udpate_object');
                                 $force_update = BimpTools::getArrayValueFromPath($data, 'force_update', false);
                                 $not_validate = BimpTools::getArrayValueFromPath($data, 'validate', false);

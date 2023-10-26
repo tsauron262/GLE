@@ -9966,17 +9966,17 @@ select.switch {
   margin: 10px 0; }
 
 /* line 596, ../scss/bimpcore/_form.scss */
-.texarea_values {
+.input_possible_values {
   padding-left: 10px;
   max-height: 60px;
   overflow-y: auto;
   background-color: #F5F5F5;
   list-style: none; }
   /* line 603, ../scss/bimpcore/_form.scss */
-  .texarea_values .textarea_value {
+  .input_possible_values .input_possible_value {
     cursor: pointer; }
     /* line 606, ../scss/bimpcore/_form.scss */
-    .texarea_values .textarea_value:hover {
+    .input_possible_values .input_possible_value:hover {
       background-color: #EBEBEB; }
 
 /* line 612, ../scss/bimpcore/_form.scss */

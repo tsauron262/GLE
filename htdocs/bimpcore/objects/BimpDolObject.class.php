@@ -8,11 +8,12 @@ if (BimpCore::isModuleActive('bimpvalidation') && !defined('BV_LIB')) {
     require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
 }
 
-if (BimpCore::isModuleActive('bimptocegid')){
-	require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
+if (BimpCore::isModuleActive('bimptocegid')) {
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
 }
 
-class BimpDolObject extends BimpObject{
+class BimpDolObject extends BimpObject
+{
 
     public static $element_name = '';
     public static $dol_module = '';
@@ -411,7 +412,7 @@ class BimpDolObject extends BimpObject{
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity='.$this->dol_object->entity.'&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity=' . $this->dol_object->entity . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
             }
         }
 
@@ -476,23 +477,23 @@ class BimpDolObject extends BimpObject{
         foreach ($list as $id => $inut)
             return $id;
     }
-    
+
     public function getContactsByCodes($source = 'external')
     {
         $contacts = array();
-        
+
         if ($this->isLoaded()) {
             $items = $this->dol_object->liste_contact(-1, $source);
-            
+
             foreach ($items as $item) {
                 if (!isset($contacts[$item['code']])) {
                     $contacts[$item['code']] = array();
                 }
-                
+
                 $contacts[$item['code']][] = $item['id'];
             }
         }
-        
+
         return $contacts;
     }
 
@@ -724,6 +725,20 @@ class BimpDolObject extends BimpObject{
                                             'ref'      => $contrat_instance->getNomUrl(0, true, true, 'fiche_contrat'),
                                             'date'     => $contrat_instance->displayData('date_start'),
                                             'total_ht' => $contrat_instance->getTotalContrat() . "€",
+                                            'status'   => $contrat_instance->displayData('statut')
+                                        );
+                                    }
+                                    break;
+
+                                case 'bimp_contrat':
+                                    $contrat_instance = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $item['id_object']);
+                                    if (BimpObject::objectLoaded($contrat_instance)) {
+                                        $icon = $contrat_instance->params['icon'];
+                                        $objects[] = array(
+                                            'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($contrat_instance->getLabel()),
+                                            'ref'      => $contrat_instance->getNomUrl(0, true, true, 'full'),
+                                            'date'     => $contrat_instance->displayData('datec'),
+                                            'total_ht' => (isset($contrat_instance->dol_object->total_ht) ? BimpTools::displayMoneyValue($contrat_instance->dol_object->total_ht) : ''),
                                             'status'   => $contrat_instance->displayData('statut')
                                         );
                                     }
@@ -1283,11 +1298,11 @@ class BimpDolObject extends BimpObject{
     {
         if ($this->isLoaded() && BimpObject::objectLoaded($origin) && is_a($origin, 'BimpDolObject')) {
             BimpTools::resetDolObjectErrors($this->dol_object);
-            
+
             if ($this->dol_object->copy_linked_contact($origin->dol_object, 'internal') < 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts internes');
             }
-            
+
             if ((int) $this->getData('fk_soc') === (int) $origin->getData('fk_soc')) {
                 BimpTools::resetDolObjectErrors($this->dol_object);
                 if ($this->dol_object->copy_linked_contact($origin->dol_object, 'external') < 0) {

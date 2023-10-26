@@ -135,6 +135,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return $commande->can("create") /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */;
 
             case 'createContract':
+            case 'createContratAbo':
                 if ($user->rights->contrat->creer) {
                     return 1;
                 }
@@ -183,9 +184,9 @@ class Bimp_Propal extends Bimp_PropalTemp
         global $conf;
         $status = $this->getData('fk_statut');
 
-        if (in_array($action, array('validate', 'modify', 'review', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'classifyBilled', 'createContrat', 'createSignature'))) {
+        if (in_array($action, array('validate', 'modify', 'review', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'createContratAbo', 'classifyBilled', 'createContrat', 'createSignature'))) {
             if (!$this->isLoaded()) {
-                $errors[] = '(456) ID ' . $this->getLabel('of_the') . ' absent';
+                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                 return 0;
             }
             if (is_null($status)) {
@@ -210,7 +211,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 if (!count($lines)) {
                     $errors[] = 'Aucune ligne enregistrée pour ' . $this->getLabel('this') . ' (Hors text)';
                 }
-                
+
                 if (!parent::canSetAction('validate', $errors)) { // test important dans BimpComm
                     return 0;
                 }
@@ -288,6 +289,30 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
                 if (empty($conf->facture->enabled)) {
                     $errors[] = 'Création des factures désactivée';
+                    return 0;
+                }
+                return 1;
+
+            case 'createContratAbo':
+                return 0;
+                if ($status != Propal::STATUS_SIGNED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
+
+                if (!BimpCore::isModuleActive('bimpcontrat')) {
+                    $errors[] = 'Création des contrats d\'abonnement désactivée';
+                    return 0;
+                }
+
+                if (!(int) $this->getNbAbonnements()) {
+                    $errors[] = 'Aucune ligne d\'abonnement dans ce devis';
+                    return 0;
+                }
+
+                $items = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('bimp_contrat'));
+                if (!empty($items)) {
+                    $errors[] = 'Contrat d\'abonnement déjà créé';
                     return 0;
                 }
                 return 1;
@@ -517,7 +542,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return 1;
     }
 
-    // Getters: 
+    // Getters données : 
 
     public function getIdSav()
     {
@@ -564,38 +589,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         return $help;
     }
-
-    public function displayIfMessageFormContrat()
-    {
-        $array = $this->isServiceAutorisedInContrat(true);
-        $msgs = [];
-        if (count($array) > 0 && BimpCore::getConf('use_autorised_service', 1, 'bimpcontract')) {
-
-            $content = "<h4><b>Vous ne pouvez pas créer de contrat à partir de ce devis car certains services ne sont pas autorisés dans un contrat<br /><br />";
-            if (count($array) > 1) {
-                $content .= "<i><u>Liste des services en cause</u></i>";
-            } else {
-                $content .= "<i><u>Liste du service en cause</u></i><br />";
-            }
-
-            $content .= "<p>";
-
-            foreach ($array as $ref_service) {
-                $content .= "- " . $ref_service . "<br />";
-            }
-
-            $content .= "</p>";
-
-            $msgs[] = Array(
-                'type'    => 'warning',
-                'content' => $content
-            );
-        }
-
-        return $msgs;
-    }
-
-    // Getters - overrides BimpComm
 
     public function getModelPdf()
     {
@@ -1011,7 +1004,119 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $conf->propal->dir_output;
     }
 
-    // Rendus HTML - overrides BimpObject
+    public function getAbonnementsLinesIds()
+    {
+        $lines = array();
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpcore', 'Bimp_Product');
+            $where = 'pdet.fk_propal = ' . $this->id . ' AND pef.type2 IN(' . implode(',', Bimp_Product::$abonnements_sous_types) . ')';
+
+            $rows = $this->db->getRows('bimp_propal_line a', $where, null, 'array', array('DISTINCT a.id'), null, null, array(
+                'pdet' => array(
+                    'table' => 'propaldet',
+                    'on'    => 'pdet.rowid = a.id_line'
+                ),
+                'pef'  => array(
+                    'table' => 'product_extrafields',
+                    'on'    => 'pef.fk_object = pdet.fk_product'
+                )
+            ));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $lines[] = $r['id'];
+                }
+            }
+        }
+
+        return $lines;
+    }
+
+    public function getNbAbonnements()
+    {
+        return count($this->getAbonnementsLinesIds());
+    }
+
+    public function getAbonnementLines()
+    {
+        $lines = array();
+        $items = $this->getAbonnementsLinesIds();
+
+        foreach ($items as $id_line) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', $id_line);
+            if (BimpObject::objectLoaded($line)) {
+                $lines[$id_line] = $line;
+            }
+        }
+
+        return $lines;
+    }
+
+    public function getClientContratsAboArray()
+    {
+        $contrats = array(
+            0 => 'Nouveau contrat'
+        );
+
+        if ((int) $this->getData('fk_soc')) {
+            foreach (BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_Contrat', array(
+                'fk_soc'  => (int) $this->getData('fk_soc'),
+                'statut'  => array(0, 1),
+                'version' => 2
+            )) as $contrat) {
+                $contrats[$contrat->id] = $contrat->getRef();
+            }
+        }
+
+
+        return $contrats;
+    }
+
+    public function getDefaultContratAbo()
+    {
+        if ($this->getData('fk_soc')) {
+            $where = 'fk_soc = ' . (int) $this->getData('fk_soc');
+            $where .= ' AND statut IN (0,1)';
+            $where .= ' AND version = 2';
+            return (int) $this->db->getValue('contrat', 'rowid', $where, 'rowid', 'DESC');
+        }
+
+        return 0;
+    }
+
+    // Affichages : 
+
+    public function displayIfMessageFormContrat()
+    {
+        $array = $this->isServiceAutorisedInContrat(true);
+        $msgs = [];
+        if (count($array) > 0 && BimpCore::getConf('use_autorised_service', 1, 'bimpcontract')) {
+
+            $content = "<h4><b>Vous ne pouvez pas créer de contrat à partir de ce devis car certains services ne sont pas autorisés dans un contrat<br /><br />";
+            if (count($array) > 1) {
+                $content .= "<i><u>Liste des services en cause</u></i>";
+            } else {
+                $content .= "<i><u>Liste du service en cause</u></i><br />";
+            }
+
+            $content .= "<p>";
+
+            foreach ($array as $ref_service) {
+                $content .= "- " . $ref_service . "<br />";
+            }
+
+            $content .= "</p>";
+
+            $msgs[] = Array(
+                'type'    => 'warning',
+                'content' => $content
+            );
+        }
+
+        return $msgs;
+    }
+
+    // Rendus HTML : 
 
     public function renderHeaderStatusExtra()
     {
@@ -1101,6 +1206,25 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                     $html .= '</div>';
                 }
+            }
+
+            $nb_abos = $this->getNbAbonnements();
+            if ($nb_abos > 0) {
+                $s = ($nb_abos > 1 ? 's' : '');
+                $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
+
+                if ($this->isActionAllowed('createContratAbo') && $this->canSetAction('createContratAbo')) {
+                    $msg .= '<div class="buttonsContainer" style="text-align: right">';
+                    $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
+                        'form_name' => 'contrat_abo'
+                    ));
+
+                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer un contrat d\'abonnement';
+                    $msg .= '</span>';
+                    $msg .= '</div>';
+                }
+                $html .= BimpRender::renderAlerts($msg, 'warning');
             }
         }
 
@@ -1824,6 +1948,105 @@ class Bimp_Propal extends Bimp_PropalTemp
             'warnings'         => $warnings,
             'errors'           => $errors
         ];
+    }
+
+    public function actionCreateContratAbo($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Contrat créé avec succès';
+        $sc = '';
+
+        $id_contrat = (int) BimpTools::getArrayValueFromPath($data, 'id_contrat', 0);
+        if ($id_contrat) {
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
+            if (!BimpObject::objectLoaded($contrat)) {
+                $errors[] = 'Le contrat #' . $id_contrat . ' n\'existe plus';
+            }
+        } else {
+            $contrat = BimpObject::createBimpObject('bimpcontrat', 'BCT_Contrat', array(
+                        'fk_soc'   => (int) $this->getData('fk_soc'),
+                        'entrepot' => (int) $this->getData('entrepot'),
+                        'secteur'  => $this->getData('ef_type'),
+                        'moderegl' => BimpTools::getArrayValueFromPath($data, 'fk_mode_reglement', $this->getData('fk_mode_reglement')),
+                        'condregl' => BimpTools::getArrayValueFromPath($data, 'fk_cond_reglement', $this->getData('fk_cond_reglement'))
+                            ), true, $errors, $warnings);
+
+            if (!count($errors)) {
+                $success = 'Contrat ' . $contrat->getRef() . ' créé avec succès';
+            }
+        }
+
+        if (!count($errors)) {
+            addElementElement('propal', 'bimp_contrat', $this->id, $contrat->id);
+            $nOk = 0;
+            BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
+            $lines = $this->getAbonnementLines();
+
+            foreach ($lines as $line) {
+                $line_errors = array();
+                $line_warnings = array();
+
+                $prod = $line->getProduct();
+
+                if (!BimpObject::objectLoaded($prod)) {
+                    $line_errors[] = 'Produit absent';
+                }
+
+                if (!count($line_errors)) {
+                    BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
+                        'fk_contrat'                   => $contrat->id,
+                        'fk_product'                   => $line->id_product,
+                        'line_type'                    => BCT_ContratLine::TYPE_ABO,
+                        'description'                  => $line->desc,
+                        'product_type'                 => $line->product_type,
+                        'qty'                          => $line->qty,
+                        'price_ht'                     => $line->pu_ht,
+                        'tva_tx'                       => $line->tva_tx,
+                        'remise_percent'               => $line->remise,
+                        'fk_product_fournisseur_price' => $line->id_fourn_price,
+                        'buy_price_ht'                 => $line->pa_ht,
+                        'fac_periodicity'              => $line->getData('abo_fac_periodicity'),
+                        'duration'                     => $line->getData('abo_duration'),
+                        'fac_term'                     => $line->getData('abo_fac_term'),
+                        'nb_renouv'                    => $line->getData('abo_nb_renouv'),
+                        'achat_periodicity'            => $prod->getData('achat_def_periodicity'),
+                        'variable_qty'                 => $prod->getData('variable_qty')
+                            ), true, $line_errors, $line_warnings);
+                }
+
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreur lors l\'ajout de la ligne n° ' . $line->getData('position') . ' au contrat d\'abonnement');
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne n° ' . $line->getData('position') . ' au contrat d\'abonnement');
+                } else {
+                    $nOk++;
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if ($nOk) {
+                $success .= ($success ? '<br/>' : '') . $nOk . ' ligne(s) ajoutée(s) au contrat ' . $contrat->getRef();
+            } else {
+                $warnings[] = 'Aucun ligne ajoutée au contrat ' . $contrat->getRef();
+            }
+
+            $url = $contrat->getUrl();
+
+            if ($url) {
+                $sc = 'window.open(\'' . $url . '\');';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
     }
 
     public function actionCreateSignature($data, &$success)

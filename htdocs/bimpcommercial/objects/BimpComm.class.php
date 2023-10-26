@@ -627,6 +627,7 @@ class BimpComm extends BimpDolObject
         // Message Achat:
         $id_group = BimpCore::getUserGroupId('achat');
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
+        
         if ($id_group) {
             $buttons[] = array(
                 'label'   => 'Message achat',
@@ -2889,6 +2890,11 @@ class BimpComm extends BimpDolObject
         $lines_new = array();
 
         foreach ($lines as $line) {
+            if (is_a($this, 'Bimp_Commande') && is_a($line, 'Bimp_PropalLine')) {
+                if ($line->isAbonnement()) {
+                    continue;
+                }
+            }
             $i++;
 
             // Lignes à ne pas copier en cas de clonage: 

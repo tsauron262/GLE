@@ -113,12 +113,12 @@ class BimpInput
 
                 if (isset($options['min_label']) && $options['min_label']) {
                     $html .= '<div style="display: inline-block">';
-                    $html .= '&nbsp;&nbsp;<span class="small min_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                    $html .= '&nbsp;&nbsp;<span class="small min_label">' . ((isset($options['data']['min']) && $options['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
                     $html .= '</div>';
                 }
                 if (isset($options['max_label']) && $options['max_label']) {
                     $html .= '<div style="display: inline-block">';
-                    $html .= '&nbsp;&nbsp;<span class="small max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                    $html .= '&nbsp;&nbsp;<span class="small max_label">' . ((isset($options['data']['max']) && $options['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
                     $html .= '</div>';
                 }
 
@@ -178,10 +178,10 @@ class BimpInput
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
                     if (isset($options['min_label']) && $options['min_label']) {
-                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['min']) && $options['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
                     }
                     if (isset($options['max_label']) && $options['max_label']) {
-                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['max']) && $options['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
                     }
                     $html .= '</div>';
 
@@ -213,12 +213,12 @@ class BimpInput
                     $html .= '</span>';
                     if (isset($options['min_label']) && $options['min_label']) {
                         $html .= '<div style="display: inline-block">';
-                        $html .= '<span class="small min_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                        $html .= '<span class="small min_label">' . ((isset($options['data']['min']) && $options['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
                         $html .= '</div>';
                     }
                     if (isset($options['max_label']) && $options['max_label']) {
                         $html .= '<div style="display: inline-block">';
-                        $html .= '<span class="small max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                        $html .= '<span class="small max_label">' . ((isset($options['data']['max']) && $options['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
                         $html .= '</div>';
                     }
                     $html .= '</div>';
@@ -291,14 +291,6 @@ class BimpInput
                 }
 
                 $html .= $data . '>' . $value . '</textarea>';
-
-                if (isset($options['values']) && is_array($options['values']) && count($options['values'])) {
-                    $html .= '<ul class="texarea_values" data-input_id="' . $input_id . '" data-field_name="' . $field_name . '">';
-                    foreach ($options['values'] as $val) {
-                        $html .= '<li class="textarea_value">' . $val . '</li>';
-                    }
-                    $html .= '</ul>';
-                }
                 break;
 
             case 'html':
@@ -374,15 +366,15 @@ class BimpInput
                         $extra_class .= ($extra_class ? ' ' : '') . 'searchable_select';
                     }
                     $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '"' . $data . '>';
-                    foreach ($options['options'] as $option_value => $option) {
-                        $html .= self::renderSelectOption($option_value, $option, $value);
+                    foreach ($options['options'] as $option_value => $opt) {
+                        $html .= self::renderSelectOption($option_value, $opt, $value);
                     }
                     $html .= '</select>';
 
-                    foreach ($options['options'] as $option_value => $option) {
-                        if (isset($option['help'])) {
+                    foreach ($options['options'] as $option_value => $opt) {
+                        if (isset($opt['help'])) {
                             $html .= '<div class="selectOptionHelp ' . $field_name . '_help" data-option_value="' . htmlentities($option_value) . '">';
-                            $html .= BimpRender::renderAlerts($option['help'], 'info');
+                            $html .= BimpRender::renderAlerts($opt['help'], 'info');
                             $html .= '</div>';
                         }
                     }
@@ -408,7 +400,7 @@ class BimpInput
 
             case 'select_payment':
                 if (!isset($options['value_type'])) {
-                    $option['value_type'] = 'id';
+                    $options['value_type'] = 'id';
                 }
                 if (!isset($options['active_only'])) {
                     $options['active_only'] = 1;
@@ -433,7 +425,7 @@ class BimpInput
                     }
                     $html .= '</option>';
                 }
-                
+
                 foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
                     if (!(int) $options['active_only'] || ((int) $options['active_only'] && (int) $payment_data['active'])) {
                         if (in_array($payment_data['code'], static::$paiementRestrictive) && !self::canUseRestrictedPaiement()) {
@@ -989,6 +981,27 @@ class BimpInput
                 $html .= '<p class="alert alert-danger">Erreur technique: type d\'input invalide pour le champ "' . $field_name . '"</p>';
                 break;
         }
+
+        if (in_array($type, array('text', 'textarea', 'qty', 'html'))) {
+            if (isset($options['possible_values']) && is_array($options['possible_values']) && !empty($options['possible_values'])) {
+                if ($type == 'qty') {
+                    $html .= '<div class="input_possible_values buttonsContainer" data-input_id="' . $input_id . '" data-field_name="' . $field_name . '" data-replace_cur_value="1">';
+                    $html .= '<span class="small">Remplir automatiquement avec une des valeurs ci-dessous : </span><br/>';
+                    foreach ($options['possible_values'] as $val) {
+                        $html .= '<span class="btn btn-small btn-default input_possible_value">' . $val . '</span>';
+                    }
+                    $html .= '</div>';
+                } else {
+                    $html .= '<ul class="input_possible_values" data-input_id="' . $input_id . '" data-field_name="' . $field_name . '" data-replace_cur_value="0">';
+                    foreach ($options['possible_values'] as $val) {
+                        $html .= '<li class="input_possible_value">' . $val . '</li>';
+                    }
+                    $html .= '</ul>';
+                }
+            }
+        }
+
+
         return $html;
     }
 

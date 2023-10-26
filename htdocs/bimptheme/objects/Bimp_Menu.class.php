@@ -593,7 +593,7 @@ class Bimp_Menu extends BimpObject
         } else {
             foreach ($rows as $r) {
                 $menu = BimpCache::getBimpObjectInstance('bimptheme', 'Bimp_Menu', (int) $r['rowid']);
-
+                
                 if (BimpObject::objectLoaded($menu)) {
                     $html .= $menu->renderTree();
                 } else {

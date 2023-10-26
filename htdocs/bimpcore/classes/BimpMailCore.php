@@ -37,7 +37,7 @@ class BimpMailCore
                     $parent = $obj;
                 }
             }
-            
+
             $this->parent = $parent;
         } elseif ($parent !== 'none') {
             BimpCore::addlog('Pas d\'objet parent pour BimpMail');

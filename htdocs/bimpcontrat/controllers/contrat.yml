@@ -1,0 +1,35 @@
+
+title: 
+    callback: 
+        object: contrat
+        method: getPageTitle
+        
+bootstrap: 1
+
+objects: 
+    contrat: 
+        instance: 
+            bimp_object: 
+                module: bimpcontrat
+                name: BCT_Contrat
+            id_object: 
+                request: id
+                
+sections: 
+    - type: object_header
+      object_header: 
+          object: contrat
+    - type: nav_tabs
+      nav_tabs: 
+          - id: card
+            title: Fiche
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view: 
+                              panel: 1
+                              object: contrat
+                              name: default
+            

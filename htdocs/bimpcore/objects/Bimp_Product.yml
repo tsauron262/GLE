@@ -102,6 +102,14 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_ProductRA
+                
+    child_products:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductProduct
             
 fields: 
     ref: 
@@ -1095,6 +1103,8 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: prices_buy
+                  show: 
+                      callback: isNotBundle
                       
                 - type: list
                   col_lg: 6
@@ -1105,6 +1115,8 @@ views:
                   list: 
                       children: cur_prix_achats
                       name: product
+                  show: 
+                      callback: isNotBundle
                       
                 - type: list
                   col_lg: 6
@@ -1113,15 +1125,21 @@ views:
                   list: 
                       children: remises_arrieres
                       name: product
+                  show: 
+                      callback: isNotBundle
                       
             - cols: 
                 - type: list
                   list: 
                       children: fourn_prices
                       name: default
+                  show: 
+                      callback: isNotBundle
                 - type: custom
                   custom: 
                       callback: renderFournPricesReports
+                  show: 
+                      callback: isNotBundle
                       
     product_note:
         rows:

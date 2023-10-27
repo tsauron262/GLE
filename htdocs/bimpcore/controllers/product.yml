@@ -33,6 +33,23 @@ sections:
                     callback: 
                         method: renderCardView
                         object: product
+          - id: bundle
+            title: Bundle
+            struct: 
+                type: rows
+                rows:                                                   
+                    - cols: 
+                        - type: list
+                          list: 
+                              title: Produits composé
+                              name: parent
+                              panel: 1
+                              object: product
+                              children: child_products
+            show:
+                callback:
+                    object: product
+                    method: isBundle
           - id: price
             title: Prix (Vente/Achat)
             struct:
@@ -49,6 +66,10 @@ sections:
                 view:
                     object: product
                     name: stock
+            show: 
+                callback: 
+                    object: product
+                    method: isNotBundle
           - id: commercial
             title: Commercial
             show: 

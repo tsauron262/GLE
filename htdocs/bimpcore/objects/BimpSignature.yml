@@ -131,7 +131,9 @@ forms:
               label: Fichier
               input_name: file_signed
               input: 
-                  type: file_upload
+#                  type: file_upload
+                    type: drop_files
+                    max_items: 1
               required: 1
             
     sign_no_scan: 

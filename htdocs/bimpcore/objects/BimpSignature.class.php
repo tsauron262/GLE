@@ -1995,7 +1995,8 @@ class BimpSignature extends BimpObject
                     $date = date('Y-m-d H:i:s');
                 }
 
-                if (!isset($_FILES['file_signed']) || !isset($_FILES['file_signed']['name']) || empty($_FILES['file_signed']['name'])) {
+                $files = BimpTools::getPostFieldValue('file_signed', array());
+                if (!count($files) && (!isset($_FILES['file_signed']) || !isset($_FILES['file_signed']['name']) || empty($_FILES['file_signed']['name']))) {
                     $errors[] = 'Fichier du document signé absent';
                 } else {
                     $file_name = $this->getDocumentFileName(true);
@@ -2010,22 +2011,30 @@ class BimpSignature extends BimpObject
                         } else {
                             require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-                            $file_ext = pathinfo($_FILES['file_signed']['name'], PATHINFO_EXTENSION);
-                            $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
-                            $this->set('signed_doc_ext', strtolower($file_ext));
+                            if(!count($files)){
+                                $file_ext = pathinfo($_FILES['file_signed']['name'], PATHINFO_EXTENSION);
+                                $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
+                                $this->set('signed_doc_ext', strtolower($file_ext));
 
-                            $_FILES['file_signed']['name'] = $file_name;
+                                $_FILES['file_signed']['name'] = $file_name;
 
-                            $ret = dol_add_file_process($dir, 0, 0, 'file_signed');
-                            if ($ret <= 0) {
-                                $errors = BimpTools::getDolEventsMsgs(array('errors', 'warnings'));
-                                if (!count($errors)) {
-                                    $errors[] = 'Echec de l\'enregistrement du fichier pour une raison inconnue';
+                                $ret = dol_add_file_process($dir, 0, 0, 'file_signed');
+                                if ($ret <= 0) {
+                                    $errors = BimpTools::getDolEventsMsgs(array('errors', 'warnings'));
+                                    if (!count($errors)) {
+                                        $errors[] = 'Echec de l\'enregistrement du fichier pour une raison inconnue';
+                                    }
+                                } else {
+                                    $success .= 'Téléchargement du fichier effectué avec succès';
                                 }
-                            } else {
-                                $success .= 'Téléchargement du fichier effectué avec succès';
+                                BimpTools::cleanDolEventsMsgs();
                             }
-                            BimpTools::cleanDolEventsMsgs();
+                            else{
+                                $file_ext = pathinfo($files[0], PATHINFO_EXTENSION);
+                                $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
+                                $this->set('signed_doc_ext', strtolower($file_ext));
+                                BimpTools::moveTmpFiles($errors, $files, $dir,$file_name);
+                            }
 
                             if (!count($errors)) {
                                 foreach ($signataires as $id_signataire) {

@@ -50,6 +50,7 @@ fields:
     qty:
         label: Quantité
         type: int
+        default_value: 1
     rang:
         label: Position
         type: int

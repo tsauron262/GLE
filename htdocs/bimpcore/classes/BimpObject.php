@@ -10887,6 +10887,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function processRedirect($newVersion = true)
     {
+        if (BimpTools::getValue("redirectForce_oldVersion"))
+            $_SESSION['oldVersion'] = true;
         if(!BimpTools::getValue('redirectForce_oldVersion', 0)){
             $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
             $redirectMode = $this->redirectMode;

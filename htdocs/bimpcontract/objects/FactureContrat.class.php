@@ -8,8 +8,11 @@ class FactureContrat extends BimpObject
         if ($this->isLoaded()) {
             $contrat = $this->getChildObject('contrat');
             $renouvellement = $contrat->getRenouvellementNumberFromDate($this->getData('datef'));
-            if ($renouvellement == $this->getData('renouvellement'))
-                return BimpTools::displayMoneyValue($this->getData('totalLn') / $contrat->getTotal($renouvellement) * $this->getData('totalFact'));
+            if ($renouvellement == $this->getData('renouvellement')){
+                $totalCt = $contrat->getTotal($renouvellement);
+                if($totalCt)
+                    return BimpTools::displayMoneyValue($this->getData('totalLn') / $totalCt * $this->getData('totalFact'));
+            }
         }
         return 0;
     }

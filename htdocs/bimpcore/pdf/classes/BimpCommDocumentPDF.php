@@ -786,7 +786,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                 $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
                 
-                if($bimpLine->getData('linked_object_name') == 'bundleCorrect' || $bimpLine->getData('linked_object_name') == 'bundle')
+                if(BimpObject::objectLoaded($bimpLine) && ($bimpLine->getData('linked_object_name') == 'bundleCorrect' || $bimpLine->getData('linked_object_name') == 'bundle'))
                     continue;
 
                 if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && !in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0 || stripos($line->desc, 'Trop per') === 0)) {

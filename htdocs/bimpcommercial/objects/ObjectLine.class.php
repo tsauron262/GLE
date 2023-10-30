@@ -279,7 +279,7 @@ class ObjectLine extends BimpObject
 
     public function isRemiseEditable()
     {
-        return (int) $this->isParentEditable();
+        return (int) $this->isParentEditable() && $this->getData('editable');
     }
 
     public function isLineProduct()
@@ -3481,6 +3481,22 @@ class ObjectLine extends BimpObject
     }
 
     // Gestion remises: 
+    
+    /*
+     * attention supprime les autres remise ne gére que le type 1 en pourcent   
+     */
+    public function setRemise($value, $label = '', &$warnings = array(), $force_create = false){//attention supprime les éventuelle autre remise
+        $filters = array(
+            'id_object_line' => (int) $this->id,
+            'object_type'    => static::$parent_comm_type
+        );
+        $remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', $filters, true, true);
+        if(is_object($remise) && $remise->isLoaded()){
+            $remise->updateField('percent', $value);
+        }
+        else
+            $this->addRemise ($value, $label, 1, 0, $warnings, $force_create);
+    }
 
     public function addRemise($value, $label = '', $type = 1, $per_unit = 0, &$warnings = array(), $force_create = false)
     {
@@ -5668,6 +5684,7 @@ class ObjectLine extends BimpObject
                         }
                     }
                 }
+                
             }
         }
 
@@ -5676,7 +5693,103 @@ class ObjectLine extends BimpObject
             $parent->dol_object->brouillon = 0;
         }
 
+        //gestion bundle
+        BimpTools::addPostTraitement($this, 'majBundle', array(), true);
+//        $this->majBundle();
+                
         return $errors;
+    }
+    
+    public function deleteSousLigne(&$errors = array(), &$warnings = array()){
+        $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line'=>$this->id));
+        foreach($childs as $child){
+            $errors = BimpTools::merge_array($errors, $child->delete($warnings, true));
+        }
+    }
+    
+    public function majBundle(&$errors = array(), &$warnings = array()){
+        if ((int) $this->id_product) {
+            $product = $this->getProduct();
+            if($product->getData('type2') == 20){
+                //on supprime toutes les ous lignes
+//                $errors = BimpTools::merge_array($errors, $this->deleteSousLigne($errors, $warnings));
+                /*
+                 * todo, pas de suppr , plutot recherche avec linked_id_object et linked_object_name
+                 */
+                //on ajoute les sous lignes et calcule le tot
+                $dol_object = $this->getChildObject('dol_line');
+                $thisTot = $dol_object->getData('total_ht');
+                $totPa = 0;
+                if($thisTot > 0){
+                    $totHt = 0;
+                    $totHtSansRemise = 0;
+                    $child_prods = $product->getChildrenObjects('child_products');
+                    foreach($child_prods as $child_prod){
+                        $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array('id_parent_line' => $this->id, 'linked_id_object' => $child_prod->id, 'linked_object_name' => 'bundle'), true, true, true);
+                        if(is_null($newLn))
+                            $newLn = BimpObject::getInstance($this->module, $this->object_name);
+                        $newLn->qty = $child_prod->getData('qty') * $this->qty;
+                        $newLn->id_product = $child_prod->getData('fk_product_fils');
+                        $newLn->set('editable', 0);
+                        $newLn->set('deletable', 0);
+                        $newLn->set('id_parent_line', $this->id);
+                        $newLn->set('linked_id_object', $child_prod->id);
+                        $newLn->set('linked_object_name', 'bundle');
+                        $newLn->set('id_obj', $this->getData('id_obj'));
+                        if(!$newLn->isLoaded())
+                            $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
+                        else
+                            $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
+                        $dol_child = $newLn->getChildObject('dol_line');
+    //                    echo '<pre>';
+    //                    print_r($child);
+                        $totHt += $dol_child->getData('total_ht');
+                        $totHtSansRemise += $newLn->getTotalHT(true);
+                        $totPa += $newLn->getTotalPA(true);
+                    }
+                    
+                    $pourcent = 100 - ($thisTot / $totHt * 100);
+                    $pourcent2 = 100 - ($totHtSansRemise / $totHt * 100);
+                    if(abs($pourcent) > 0.01){
+                        $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line'=>$this->id));
+                        foreach($childs as $child){
+                            $errors = BimpTools::merge_array($errors, $child->setRemise($pourcent2, 'Remise bundle '.$product->getData('ref')));
+                        }
+                    }
+                    //ajout de la ligne de compensation
+                    $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array('id_parent_line' => $this->id, 'linked_object_name' => 'bundleCorrect'), true, true, true);
+                    if(is_null($newLn))
+                        $newLn = BimpObject::getInstance($this->module, $this->object_name);
+                    $newLn->qty = $this->qty;
+                    $newLn->id_product = 0;
+                    $newLn->pu_ht = -$totHtSansRemise/$this->qty;
+                    $newLn->tva_tx = $this->tva_tx;
+                    $newLn->desc = 'Annulation double prix Bundle';
+                    $newLn->pa_ht = -$totPa;
+                        $newLn->set('linked_object_name', 'bundleCorrect');
+                    $newLn->set('type', static::LINE_FREE);
+                    $newLn->set('editable', 0);
+                    $newLn->set('deletable', 0);
+                    $newLn->set('id_parent_line', $this->id);
+                    $newLn->set('id_obj', $this->getData('id_obj'));
+                    if(!$newLn->isLoaded())
+                        $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
+                    else
+                        $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
+                    if(abs($pourcent) > 0.01){
+                        $errors = BimpTools::merge_array($errors, $newLn->setRemise($pourcent2, 'Remise bundle '.$product->getData('ref')));
+                    }
+                    
+                    //gestion pa 
+                    $this->pa_ht = $totPa;
+                    $this->update($warnings);
+//                    die($thisTot.'rr'.$totHt.' '.$pourcent);
+                }
+                else
+                    die('pas de prix');
+                
+            }
+        }
     }
 
     public function update(&$warnings = array(), $force_update = false)
@@ -5821,6 +5934,9 @@ class ObjectLine extends BimpObject
                 }
             }
         }
+        
+        BimpTools::addPostTraitement($this, 'majBundle', array(), true);
+//        $this->majBundle($errors);
 
         return $errors;
     }
@@ -5885,6 +6001,13 @@ class ObjectLine extends BimpObject
 
         if (!$this->bimp_line_only) {
             $errors = $this->deleteLine();
+        }
+        
+        if ((int) $this->id_product) {
+            $product = $this->getProduct();
+            if($product->getData('type2') == 20){
+                $this->deleteSousLigne($errors, $warnings);
+            }
         }
 
         if (!count($errors)) {

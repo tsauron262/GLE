@@ -29,6 +29,15 @@ objects:
                     prop: object_name
             id_object: 
                 field_value: id_parent_line
+    child_line: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: 
+                    prop: module
+                name: 
+                    prop: object_name
                 
     product: 
         instance: 

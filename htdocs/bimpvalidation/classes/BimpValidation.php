@@ -250,7 +250,7 @@ class BimpValidation
                 'open' => true
             ));
         }
-
+        $debug .= implode('<br/>', $infos);
         if ($debug && is_a($object, 'BimpObject')) {
             $object->addObjectLog($debug, 'DEBUG_VALIDATION', true);
         }

@@ -265,30 +265,30 @@ class BimpValidation
                 continue;
             }
 
-            $linked_obj = null;
-            $is_valid = false;
-            switch ($item['type']) {
-                case 'propal':
-                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
-                    if (BimpObject::objectLoaded($linked_obj)) {
-                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2, 4));
-                    }
-                    break;
-
-                case 'commande':
-                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
-                    if (BimpObject::objectLoaded($linked_obj)) {
-                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2, 3));
-                    }
-                    break;
-
-                case 'facture':
-                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
-                    if (BimpObject::objectLoaded($linked_obj)) {
-                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2));
-                    }
-                    break;
-            }
+//            $linked_obj = null;
+//            $is_valid = false;
+//            switch ($item['type']) {
+//                case 'propal':
+//                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
+//                    if (BimpObject::objectLoaded($linked_obj)) {
+//                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2, 4));
+//                    }
+//                    break;
+//
+//                case 'commande':
+//                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
+//                    if (BimpObject::objectLoaded($linked_obj)) {
+//                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2, 3));
+//                    }
+//                    break;
+//
+//                case 'facture':
+//                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
+//                    if (BimpObject::objectLoaded($linked_obj)) {
+//                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2));
+//                    }
+//                    break;
+//            }
 
             if (!BimpObject::objectLoaded($linked_obj)) {
                 continue;

@@ -20,6 +20,7 @@ class BimpTools
     );
     public static $sql_operators = array('>', '<', '>=', '<=', '!=');
     public static $bloquages = array();
+    public static $postTraitment = array();
 
     // Gestion GET / POST
 
@@ -1689,6 +1690,22 @@ class BimpTools
         $sql .= self::getSqlLimit($params['n'], $params['p']);
 
         return $sql;
+    }
+    
+    public static function addPostTraitement($object, $method, $params = array(), $firstParamsError = false){
+        static::$postTraitment[] = array('object'=>$object, 'method'=>$method, 'params'=>&$params, 'firstParamsError' => $firstParamsError);
+    }
+    
+    public static function traitePostTraitement(&$errors = array()){
+        foreach(static::$postTraitment as $traitement){
+            if($traitement['firstParamsError']){
+                $traitement['params'] = BimpTools::merge_array (array(&$errors), $traitement['params']);
+            }
+            call_user_func_array(array(
+                    $traitement['object'], $traitement['method']
+                        ), $traitement['params']);
+            
+        }
     }
 
     public static function addSqlFilterEntity(&$filters, $object, $alias = '', $entity_field = 'entity')

@@ -265,6 +265,9 @@ class BimpValidation
                 continue;
             }
 
+            /*
+             * TOdo a regarder de toute urgence, la toutes les commandes avec un devis validée passe.....
+             */
 //            $linked_obj = null;
 //            $is_valid = false;
 //            switch ($item['type']) {

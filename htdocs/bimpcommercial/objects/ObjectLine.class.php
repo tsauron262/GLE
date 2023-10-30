@@ -5748,42 +5748,44 @@ class ObjectLine extends BimpObject
                         $totPa += $newLn->getTotalPA(true);
                     }
                     
-                    $pourcent = 100 - ($thisTot / $totHt * 100);
-                    $pourcent2 = 100 - ($thisTot / $totHtSansRemise * 100);
-                    if(abs($pourcent) > 0.01){
-                        $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line'=>$this->id));
-                        foreach($childs as $child){
-                            $errors = BimpTools::merge_array($errors, $child->setRemise($pourcent2, 'Remise bundle '.$product->getData('ref')));
+                    if($totHt != 0){
+                        $pourcent = 100 - ($thisTot / $totHt * 100);
+                        $pourcent2 = 100 - ($thisTot / $totHtSansRemise * 100);
+                        if(abs($pourcent) > 0.01){
+                            $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line'=>$this->id));
+                            foreach($childs as $child){
+                                $errors = BimpTools::merge_array($errors, $child->setRemise($pourcent2, 'Remise bundle '.$product->getData('ref')));
+                            }
                         }
+                        //ajout de la ligne de compensation
+                        $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array('id_parent_line' => $this->id, 'linked_object_name' => 'bundleCorrect'), true, true, true);
+                        if(is_null($newLn))
+                            $newLn = BimpObject::getInstance($this->module, $this->object_name);
+                        $newLn->qty = $this->qty;
+                        $newLn->id_product = 0;
+                        $newLn->pu_ht = -$totHtSansRemise/$this->qty;
+                        $newLn->tva_tx = $this->tva_tx;
+                        $newLn->desc = 'Annulation double prix Bundle';
+                        $newLn->pa_ht = -$totPa;
+                            $newLn->set('linked_object_name', 'bundleCorrect');
+                        $newLn->set('type', static::LINE_FREE);
+                        $newLn->set('editable', 0);
+                        $newLn->set('deletable', 0);
+                        $newLn->set('id_parent_line', $this->id);
+                        $newLn->set('id_obj', $this->getData('id_obj'));
+                        if(!$newLn->isLoaded())
+                            $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
+                        else
+                            $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
+                        if(abs($pourcent) > 0.01){
+                            $errors = BimpTools::merge_array($errors, $newLn->setRemise($pourcent2, 'Remise bundle '.$product->getData('ref')));
+                        }
+
+                        //gestion pa 
+                        $this->pa_ht = $totPa;
+                        $this->update($warnings);
+    //                    die($thisTot.'rr'.$totHt.' '.$pourcent);
                     }
-                    //ajout de la ligne de compensation
-                    $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array('id_parent_line' => $this->id, 'linked_object_name' => 'bundleCorrect'), true, true, true);
-                    if(is_null($newLn))
-                        $newLn = BimpObject::getInstance($this->module, $this->object_name);
-                    $newLn->qty = $this->qty;
-                    $newLn->id_product = 0;
-                    $newLn->pu_ht = -$totHtSansRemise/$this->qty;
-                    $newLn->tva_tx = $this->tva_tx;
-                    $newLn->desc = 'Annulation double prix Bundle';
-                    $newLn->pa_ht = -$totPa;
-                        $newLn->set('linked_object_name', 'bundleCorrect');
-                    $newLn->set('type', static::LINE_FREE);
-                    $newLn->set('editable', 0);
-                    $newLn->set('deletable', 0);
-                    $newLn->set('id_parent_line', $this->id);
-                    $newLn->set('id_obj', $this->getData('id_obj'));
-                    if(!$newLn->isLoaded())
-                        $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
-                    else
-                        $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
-                    if(abs($pourcent) > 0.01){
-                        $errors = BimpTools::merge_array($errors, $newLn->setRemise($pourcent2, 'Remise bundle '.$product->getData('ref')));
-                    }
-                    
-                    //gestion pa 
-                    $this->pa_ht = $totPa;
-                    $this->update($warnings);
-//                    die($thisTot.'rr'.$totHt.' '.$pourcent);
                 }
                 else
                     die('pas de prix');

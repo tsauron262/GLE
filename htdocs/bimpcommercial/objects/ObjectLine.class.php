@@ -5749,7 +5749,7 @@ class ObjectLine extends BimpObject
                     }
                     
                     $pourcent = 100 - ($thisTot / $totHt * 100);
-                    $pourcent2 = 100 - ($totHtSansRemise / $totHt * 100);
+                    $pourcent2 = 100 - ($thisTot / $totHtSansRemise * 100);
                     if(abs($pourcent) > 0.01){
                         $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line'=>$this->id));
                         foreach($childs as $child){

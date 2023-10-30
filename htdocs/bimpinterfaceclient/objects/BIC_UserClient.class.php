@@ -661,7 +661,7 @@ class BIC_UserClient extends BimpObject
         $this->set('renew_required', 1);
 
         $errors = $this->update($warnings, true);
-        $nom_escace_client = (string) BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
+        $nom_escace_client = (string) $this->getPublicEntityName();
 
         if (!count($errors)) {
             $url = BimpObject::getPublicBaseUrl(false, $this->getPublicEntity());

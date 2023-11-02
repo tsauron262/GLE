@@ -2386,7 +2386,8 @@ class BimpCache
         if (!isset(self::$cache['comptes_bancaires'])) {
             self::$cache['comptes_bancaires'] = array();
 
-            $rows = self::getBdb()->getRows('bank_account');
+            $entity = getEntity('bank_account');
+            $rows = self::getBdb()->getRows('bank_account', 'entity IN ('.$entity.')');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     self::$cache['comptes_bancaires'][(int) $r->rowid] = $r->label;

@@ -122,6 +122,8 @@ forms:
                 input_name: file
                 input:
                     type: file_upload
+#                    type: drop_files
+#                    max_items: 1
                 required: 1
             file_name: 
                 field: file_name

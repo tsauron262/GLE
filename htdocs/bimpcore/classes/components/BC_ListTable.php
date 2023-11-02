@@ -1922,7 +1922,7 @@ class BC_ListTable extends BC_List
 
         // Pagination: 
         if ($this->params['pagination']) {
-            $n_values = array(10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50', 70 => '70');
+            $n_values = array(10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50', 70 => '70', 120 => '120');
 
             if ($this->params['allow_large_n']) {
                 $n_values[100] = '100';

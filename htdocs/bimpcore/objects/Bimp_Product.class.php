@@ -11,7 +11,8 @@ class Bimp_Product extends BimpObject
         3 => 'Déplacement inter',
         4 => 'Déplacement contrat',
         5 => 'Logiciel (licence unique)',
-        6 => 'Abonnement'
+        6 => 'Abonnement',
+        20 => 'Bundle'
     );
     public static $abonnements_sous_types = array(6);
     public static $sousTypeDep = array(3, 4);
@@ -545,6 +546,18 @@ class Bimp_Product extends BimpObject
     {
         // en prévision d'ajout d'autres types d'abonnements
         return (int) (in_array((int) $this->getData('type2'), self::$abonnements_sous_types));
+    }
+
+    public function isBundle()
+    {
+        // en prévision d'ajout d'autres types d'abonnements
+        return (int) ((int) $this->getData('type2') == 20);
+    }
+
+    public function isNotBundle()
+    {
+        // en prévision d'ajout d'autres types d'abonnements
+        return !$this->isBundle();
     }
 
     // Getters array: 

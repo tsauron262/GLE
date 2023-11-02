@@ -2892,7 +2892,7 @@ class BimpComm extends BimpDolObject
         foreach ($lines as $line) {
             if (is_a($this, 'Bimp_Commande') && is_a($line, 'Bimp_PropalLine')) {
                 if ($line->isAbonnement()) {
-                    continue;
+//                    continue;
                 }
             }
             $i++;
@@ -2924,7 +2924,7 @@ class BimpComm extends BimpDolObject
             unset($data['id_line']);
             unset($data['id_parent_line']);
 
-            if (!$params['is_review']) {
+            if (!$params['is_review'] && !in_array($line->getData('linked_object_name'), array('bundle', 'bundleCorrect'))) {//si c'est des lignes liée mais pas a un bundle
                 unset($data['linked_object_name']);
                 unset($data['linked_id_object']);
 

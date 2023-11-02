@@ -677,23 +677,39 @@ class BimpFile extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
+        
+        $name = (string) $this->getData('file_name');
+        $files = BimpTools::getPostFieldValue($this->htmlName, array());
 
-        if (!isset($_FILES[$this->htmlName]) || empty($_FILES[$this->htmlName])) {
-            $errors[] = 'Aucun fichier transféré';
-        } else {
-            $name = (string) $this->getData('file_name');
+        if (!$name) {
+            $name = BimpTools::cleanStringForUrl(pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_FILENAME));
+            if(!$name)
+                $name = $files[0];
 
             if (!$name) {
-                $name = BimpTools::cleanStringForUrl(pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_FILENAME));
-
-                if (!$name) {
-                    $errors[] = 'Nom du fichier invalide';
-                }
-            } else {
-                $name = BimpTools::cleanStringForUrl($name);
+                $errors[] = 'Nom du fichier invalide';
             }
+        } else {
+            $name = BimpTools::cleanStringForUrl($name);
+        }
 
-            $this->set('file_name', $name);
+        $this->set('file_name', $name);
+        
+        if (!isset($_FILES[$this->htmlName]) || empty($_FILES[$this->htmlName])) {
+            /* nouvelle méthod */
+            if (empty($files)) {
+                $errors[] = 'Aucun fichier ajouté';
+            } else {
+                $files_dir = $this->getFileDir();
+                $ext = pathinfo($files[0], PATHINFO_EXTENSION);
+                $this->set('file_ext', $ext);
+                BimpTools::moveTmpFiles($warnings, $files, $files_dir,$name.'.'.$ext);
+                $this->set('file_size', filesize($files_dir.'/'.$name.'.'.$ext));
+                if (!count($errors)) {
+                    $errors = parent::create($warnings, $force_create);
+                }
+            }
+        } else {
 
             if (!count($errors)) {
                 $ext = pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_EXTENSION);

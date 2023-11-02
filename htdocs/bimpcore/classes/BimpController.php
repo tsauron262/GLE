@@ -453,7 +453,7 @@ class BimpController
         echo '<div class="bimp_controller_content">' . "\n";
         
         $dropZoneFile = false;
-        if(BimpCore::getConf('use_drag_upload') && $this->main_object && $this->main_object->isLoaded() && $this->main_object->getFilesDir() != ''){
+        if(BimpCore::getConf('use_drag_upload') && $this->main_object && is_a($this->main_object, 'BimpObject') && $this->main_object->isLoaded() && $this->main_object->getFilesDir() != ''){
             $dropZoneFile = true;
             $fil_dir = str_replace(DOL_DATA_ROOT, '', $this->main_object->getFilesDir());
             $html = '<div class="bimp_drop_files_container allPage"';

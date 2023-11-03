@@ -93,7 +93,7 @@ function BimpContrat() {
             return false;
         }
 
-        console.log(clients);
+//        console.log(clients);
 
         extra_data['clients'] = clients;
         return extra_data;

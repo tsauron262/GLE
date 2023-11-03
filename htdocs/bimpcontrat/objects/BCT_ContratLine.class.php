@@ -2108,6 +2108,35 @@ class BCT_ContratLine extends BimpObject
         return BimpRender::renderNavTabs($tabs);
     }
 
+    public function renderPeriodsReportsList($type)
+    {
+        if (!in_array($type, array('exp', 'fac', 'achat'))) {
+            return BimpRender::renderAlerts('Type d\'opération invalide');
+        }
+
+        $report = BimpObject::getInstance('bimpdatasync', 'BDS_Report');
+
+        $title = 'Contrats d\'abonnement - Rapports des ';
+
+        switch ($type) {
+            case 'fac':
+                $code = '';
+                $title .= 'facturations';
+                break;
+
+            case 'achat':
+                $code = 'CONTRATS_LINES_ACHATS';
+                $title .= 'achats';
+                break;
+        }
+
+        $list = new BC_ListTable($report, 'operation', 1, null, $title);
+        $list->addIdentifierSuffix($type);
+        $list->addFieldFilterValue('code', $code);
+
+        return $list->renderHtml();
+    }
+
     // Traitements:
 
     public function onSave(&$errors = [], &$warnings = [])
@@ -2270,7 +2299,7 @@ class BCT_ContratLine extends BimpObject
         }
 
         $action_data['operation_title'] = 'Traitement des facturations des contrats d\'abonnement';
-        $action_data['report_code'] = ' CONTRATS_LINES_FATURATION';
+        $action_data['report_code'] = 'CONTRATS_LINES_FATURATION';
         $facs_lines = array();
 
         // Check des factures:

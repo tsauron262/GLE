@@ -2128,6 +2128,17 @@ class Bimp_Product extends BimpObject
         $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
     }
+    
+    public function getPaBundle(){
+        $pa = 0;
+        
+        $child_prods = $this->getChildrenObjects('child_products');
+        foreach($child_prods as $child_prod){
+            $prod = $child_prod->getChildObject('product_fils');
+            $pa += $child_prod->getData('qty') * $prod->getData('cur_pa_ht');
+        }
+        return BimpTools::displayMoneyValue($pa);
+    }
 
     public function displayCurrentPaHt()
     {

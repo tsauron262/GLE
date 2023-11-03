@@ -18,6 +18,8 @@ class ObjectsDef
         'Contrat'              => array('icon' => 'fas_file-signature', 'def' => 'BO/bimpcontract/BContract_contrat'),
         'Avenant contrat'      => array('icon' => 'fas_file-medical', 'def' => 'BO/bimpcontract/BContract_avenant'),
         'Echéancier contrat'   => array('icon' => 'fas_clipboard-list', 'def' => 'BO/bimpcontract/BContract_echeancier'),
+        // BimpContrat: 
+        'Contrat2'             => array('icon' => 'fas_file-signature', 'def' => 'BO/bimpcontrat/BCT_Contrat'),
         // BimpCore: 
         'Hashtag'              => array('icon' => 'fas_hashtag', 'def' => 'BO/bimpcore/BimpHashtag'),
         'Utilisateur'          => array('icon' => 'fas_user', 'def' => 'BO/bimpcore/Bimp_User'),

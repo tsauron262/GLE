@@ -342,9 +342,20 @@ class BimpDb
         return 0;
     }
 
-    public function getCount($table, $where = '1', $primary = 'id')
+    public function getCount($table, $where = '1', $primary = 'id', $joins = array())
     {
         $sql = 'SELECT COUNT(DISTINCT `' . $primary . '`) as nb_rows FROM ' . MAIN_DB_PREFIX . $table;
+
+        if (!empty($joins)) {
+            foreach ($joins as $key => $join) {
+                $table = (isset($join['table']) ? $join['table'] : '');
+                $on = (isset($join['on']) ? $join['on'] : '');
+
+                if ($table && $on) {
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $table . ' ' . (isset($join['alias']) ? $join['alias'] : $key) . ' ON ' . $on;
+                }
+            }
+        }
         $sql .= ' WHERE ' . $where;
 
         $result = $this->executeS($sql, 'array');

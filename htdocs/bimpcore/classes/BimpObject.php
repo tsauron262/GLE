@@ -86,7 +86,7 @@ class BimpObject extends BimpCache
     public $parent = null;
     public $dol_object = null;
     public $extends = array();
-    public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old // 0 : aucune redirection
     public $noFetchOnTrigger = false;
     public $fieldsWithAddNoteOnUpdate = array();
     public $isDeleting = false;
@@ -403,24 +403,25 @@ class BimpObject extends BimpCache
     {
         return $this->config->isDefined('dol_object');
     }
-    
-    protected function addEntityFieldConfig(){
-        if (BimpTools::isModuleDoliActif('MULTICOMPANY') && $this->getEntity_name()){
+
+    protected function addEntityFieldConfig()
+    {
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY') && $this->getEntity_name()) {
             $this->config->addParams('fields', array(
-                    'entity' => array(
-                        'label'    => 'Entité',
-                        'type'     => 'id',
-                        'values'  => array(
-                            'array' => 'entitiesCache'
-                        ), 
-    //            array: condReglements
-    //        input: 
-    //            type: select_cond_reglement
-    //        default_value: 
-    //            callback: getCondReglementBySociete
-                        'editable' => 1
-                    )
-                        ), 'initial');
+                'entity' => array(
+                    'label'    => 'Entité',
+                    'type'     => 'id',
+                    'values'   => array(
+                        'array' => 'entitiesCache'
+                    ),
+                    //            array: condReglements
+                    //        input: 
+                    //            type: select_cond_reglement
+                    //        default_value: 
+                    //            callback: getCondReglementBySociete
+                    'editable' => 1
+                )
+                    ), 'initial');
         }
     }
 
@@ -2366,8 +2367,8 @@ class BimpObject extends BimpCache
         }
 
         $result['errors'] = BimpTools::merge_array($result['errors'], BimpTools::getDolEventsMsgs(array('errors')));
-        
-        if(!count($result['errors'])){
+
+        if (!count($result['errors'])) {
             BimpTools::traitePostTraitement($result['errors']);
         }
 
@@ -4827,8 +4828,8 @@ class BimpObject extends BimpCache
                     }
                 }
             }
-            
-            if(!count($errors)){
+
+            if (!count($errors)) {
                 BimpTools::traitePostTraitement($errors);
             }
 
@@ -6423,14 +6424,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Gestion des droits users: 
-    
+
 
     public function can($right)
     {
 //        echo '<pre>'. get_class($this);
-        if(!BimpCore::isContextPublic() && isset($this->dol_object)){//peut être un peut lourd, mais plus safe...
+        if (!BimpCore::isContextPublic() && isset($this->dol_object)) {//peut être un peut lourd, mais plus safe...
             $return = BimpCache::dol_can($this->dol_object);
-            if(!$return)
+            if (!$return)
                 return 0;
         }
 //        print_r($this->dol_object);
@@ -6550,8 +6551,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if (BimpCore::isContextPublic()) {
             return $this->canClientEdit();
         }
-        
-        if($field_name == 'entity'){
+
+        if ($field_name == 'entity') {
             global $user;
             return $user->admin;
         }
@@ -10887,9 +10888,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function processRedirect($newVersion = true)
     {
+        if (!(int) $this->redirectMode) {
+            return '';
+        }
+        
         if (BimpTools::getValue("redirectForce_oldVersion"))
             $_SESSION['oldVersion'] = true;
-        if(!BimpTools::getValue('redirectForce_oldVersion', 0)){
+
+        if (!BimpTools::getValue('redirectForce_oldVersion', 0)) {
             $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
             $redirectMode = $this->redirectMode;
 
@@ -10897,45 +10903,42 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $btn = false;
             if ($this->iAmAdminRedirect()) {
                 $btn = true;
-                if ($redirectMode == 4){//auto old vers new
+                if ($redirectMode == 4) {//auto old vers new
                     $texteBtn = "ADMIN (Normalement nouvelle) : ";
-                    if($newVersion){//on est sur l'ancienne
+                    if ($newVersion) {//on est sur l'ancienne
                         if ($redirect)
                             unset($_SESSION['oldVersion']);
-                        elseif(!isset($_SESSION['oldVersion']))
+                        elseif (!isset($_SESSION['oldVersion']))
                             $redirect = true;
-                    }
-                    else{//on est deja sur la nouvelle mais si $_SESSION['oldVersion']
+                    } else {//on est deja sur la nouvelle mais si $_SESSION['oldVersion']
                         if ($redirect)
                             $_SESSION['oldVersion'] = true;
-                        elseif(isset($_SESSION['oldVersion']))
+                        elseif (isset($_SESSION['oldVersion']))
                             $redirect = true;
                     }
                 }
-                if($redirectMode == 5){//auto new vers old
+                if ($redirectMode == 5) {//auto new vers old
                     $texteBtn = "ADMIN (Normalement Ancienne) : ";
-                    if(!$newVersion){//on est sur la nouvelle
+                    if (!$newVersion) {//on est sur la nouvelle
                         if ($redirect)
                             unset($_SESSION['newVersion']);
-                        if(!isset($_SESSION['newVersion']))
+                        if (!isset($_SESSION['newVersion']))
                             $redirect = true;
-                    }
-                    else{//on est deja sur l'ancienne mais si $_SESSION['newVersion']
+                    } else {//on est deja sur l'ancienne mais si $_SESSION['newVersion']
                         if ($redirect)
                             $_SESSION['newVersion'] = true;
-                        elseif(isset($_SESSION['newVersion']))
+                        elseif (isset($_SESSION['newVersion']))
                             $redirect = true;
                     }
                 }
-            }
-            else{
-                if($redirectMode == 4 && $newVersion)
+            } else {
+                if ($redirectMode == 4 && $newVersion)
                     $redirect = true;
-                elseif($redirectMode == 5 && !$newVersion)
+                elseif ($redirectMode == 5 && !$newVersion)
                     $redirect = true;
             }
 
-            if($redirectMode == 1 ||
+            if ($redirectMode == 1 ||
                     ($redirectMode == 2 && $newVersion) ||
                     ($redirectMode == 3 && !$newVersion))
                 $btn = true;

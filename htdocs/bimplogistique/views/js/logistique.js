@@ -1617,7 +1617,7 @@ function onPeriodicFacMassProcessFormSubmit($form, extra_data) {
         return false;
     }
 
-    console.log(clients);
+//    console.log(clients);
 
     extra_data['clients'] = clients;
     return extra_data;

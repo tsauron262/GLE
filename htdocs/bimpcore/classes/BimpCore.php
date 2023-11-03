@@ -1152,7 +1152,7 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
-            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs') && !defined('NO_BIMPLOG_PRINTS')) {
+            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs') && !defined('NO_BIMPLOG_PRINTS') && $level != Bimp_Log::BIMP_LOG_NOTIF) {
                 $bt = debug_backtrace(null, 30);
 
                 $html = '<div style="margin-top: 100px">';

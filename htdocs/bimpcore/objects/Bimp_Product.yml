@@ -976,6 +976,15 @@ fields_tables:
             - field: rpcp
             - field: type_remise_arr
             
+    prices_bundle:
+        title: Prix d'achat
+        icon: fas_euro-sign
+        rows:  
+            - label: Prix d'achat
+              value: 
+                  callback: getPaBundle
+        
+            
     prices_buy: 
         title: Prix d'achat
         icon: fas_euro-sign
@@ -1076,6 +1085,17 @@ views:
                   col_md: 5
                   fields_table:
                       name: abonnement
+                      
+    product_price_bundle:
+        objects_change_reload: Bimp_ProductProduct
+        rows:
+            - cols:
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices_bundle
     
     product_price:
         objects_change_reload: Bimp_ProductPrice,BimpProductCurPa,Bimp_ProductFournisseurPrice
@@ -1104,7 +1124,15 @@ views:
                   fields_table: 
                       name: prices_buy
                   show: 
-                      callback: isNotBundle
+                      callback: isNotBundle  
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices_bundle  
+                  show: 
+                      callback: isBundle              
                       
                 - type: list
                   col_lg: 6

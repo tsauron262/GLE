@@ -39,6 +39,10 @@ sections:
                 type: rows
                 rows:                                                   
                     - cols: 
+                        - type: view
+                          view:
+                            object: product
+                            name: product_price_bundle
                         - type: list
                           list: 
                               title: Produits composé

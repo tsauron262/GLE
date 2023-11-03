@@ -5766,7 +5766,7 @@ class ObjectLine extends BimpObject
                         $newLn->pu_ht = -$totHtSansRemise/$this->qty;
                         $newLn->tva_tx = $this->tva_tx;
                         $newLn->desc = 'Annulation double prix Bundle';
-                        $newLn->pa_ht = -$totPa;
+                        $newLn->pa_ht = -$totPa / $this->qty;
                             $newLn->set('linked_object_name', 'bundleCorrect');
                         $newLn->set('type', static::LINE_FREE);
                         $newLn->set('editable', 0);
@@ -5782,7 +5782,7 @@ class ObjectLine extends BimpObject
                         }
 
                         //gestion pa 
-                        $this->pa_ht = $totPa;
+                        $this->pa_ht = $totPa / $this->qty;
                         $this->update($warnings);
     //                    die($thisTot.'rr'.$totHt.' '.$pourcent);
                     }

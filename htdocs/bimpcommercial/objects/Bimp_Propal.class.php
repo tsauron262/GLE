@@ -136,6 +136,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createContract':
             case 'createContratAbo':
+                return 1;
                 if ($user->admin || $user->rights->contrat->creer) {
                     return 1;
                 }
@@ -1212,7 +1213,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $s = ($nb_abos > 1 ? 's' : '');
                 $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
-                if ($this->isActionAllowed('createContratAbo') && $this->canSetAction('createContratAbo')) {
+                $err = array();
+                if ($this->isActionAllowed('createContratAbo', $err) && $this->canSetAction('createContratAbo')) {
                     $msg .= '<div class="buttonsContainer" style="text-align: right">';
                     $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
                         'form_name' => 'contrat_abo'
@@ -1222,7 +1224,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer un contrat d\'abonnement';
                     $msg .= '</span>';
                     $msg .= '</div>';
-                }
+                } else {
+                    $msg .= '<pre>';
+                    $msg .= print_r($err, 1);
+                    $msg .= '</pre>';
+                                }
                 $html .= BimpRender::renderAlerts($msg, 'warning');
             }
         }
@@ -1870,11 +1876,12 @@ class Bimp_Propal extends Bimp_PropalTemp
             'success_callback' => 'window.location = \'' . $url . '\''
         );
     }
-    
-    public function isFieldContratEditable(){
-        if(BimpTools::getPostFieldValue('field_name') == 'duree_mois'){
+
+    public function isFieldContratEditable()
+    {
+        if (BimpTools::getPostFieldValue('field_name') == 'duree_mois') {
             $fields = BimpTools::getPostFieldValue('fields');
-            if($fields['objet_contrat'] == 'ASMX')
+            if ($fields['objet_contrat'] == 'ASMX')
                 return 1;
             return 0;
         }

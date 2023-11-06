@@ -418,11 +418,13 @@ class BCT_ContratLine extends BimpObject
             case 'price_ht':
             case 'tva_tx':
             case 'fk_product_fournisseur_price':
-            case 'buy_price_ht':
+            case 'buy_price_ht': 
             case 'fac_periodicity':
             case 'achat_periodicity':
             case 'variable_qty':
-                if ((int) $this->getData('fk_product') !== (int) $this->getInitData('fk_product')) {
+                if ((int) $this->getData('fk_product') !== (int) $this->getInitData('fk_product') ||
+                        ($field_name == 'buy_price_ht' &&
+                        (int) $this->getData('fk_product_fournisseur_price') !== (int) $this->getInitData('fk_product_fournisseur_price'))) {
                     return $this->getValueForProduct($field_name);
                 }
                 break;
@@ -767,7 +769,7 @@ class BCT_ContratLine extends BimpObject
             if ($id_facture) {
                 $where .= ' AND id_obj = ' . $id_facture;
             }
-            
+
             $rows = $this->db->getRows('bimp_facture_line', $where, null, 'array', array('DISTINCT id'), 'id', 'asc');
 
             if (is_array($rows)) {

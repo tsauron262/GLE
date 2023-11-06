@@ -2839,7 +2839,7 @@ class BimpComm extends BimpDolObject
             if (isset($new_data['inverse_qty']))
                 $params['inverse_qty'] = $new_data['inverse_qty'];
 
-            $lines_errors = $new_object->createLinesFromOrigin($this, $params);
+            $lines_errors = $new_object->createLinesFromOrigin($this, $params, $warnings);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
@@ -2863,7 +2863,7 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    public function createLinesFromOrigin($origin, $params = array())
+    public function createLinesFromOrigin($origin, $params = array(), &$warnings = array())
     {
         $errors = array();
 
@@ -2883,7 +2883,6 @@ class BimpComm extends BimpDolObject
 
         $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
 
-        $warnings = array();
         $i = 0;
 
         // Création des lignes: 
@@ -4940,7 +4939,11 @@ class BimpComm extends BimpDolObject
             $url = $_SERVER['php_self'] . '?fc=' . $this->getController() . '&id=' . $this->id;
         }
 
-        $success_callback = 'window.location = \'' . $url . '\'';
+        if(!count($warnings))
+            $success_callback = 'window.location = \'' . $url . '\'';
+        else{
+            $success = '<a href="'.$url.'">'.$success.'</a>';
+        }
 
         return array(
             'errors'           => $errors,
@@ -5318,7 +5321,7 @@ class BimpComm extends BimpDolObject
             $this->checkLines(); // Des lignes ont pu être créées via un trigger.
 
             if ($origin && $origin_id) {
-                $warnings = BimpTools::merge_array($warnings, $this->createLinesFromOrigin($origin_object));
+                $errors = BimpTools::merge_array($errors, $this->createLinesFromOrigin($origin_object, array(), $warnings));
                 if (is_a($origin_object, 'BimpComm') && static::$remise_globale_allowed && $origin_object::$remise_globale_allowed) {
                     $remises_globales = $origin_object->getRemisesGlobales();
 

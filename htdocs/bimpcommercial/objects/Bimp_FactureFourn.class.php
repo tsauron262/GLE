@@ -1314,7 +1314,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         return parent::getDbData($final_fields);
     }
 
-    public function createLinesFromOrigin($origin, $params = array())
+    public function createLinesFromOrigin($origin, $params = array(), $warnings = array())
     {
         $errors = array();
 
@@ -1332,7 +1332,6 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
 
-        $warnings = array();
         $i = 0;
 
         // Création des lignes: 

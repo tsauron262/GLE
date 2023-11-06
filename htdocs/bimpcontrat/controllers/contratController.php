@@ -9,9 +9,8 @@ class contratController extends BimpController
             $contrat = $this->config->getObject('', 'contrat');
             if (BimpObject::objectLoaded($contrat)) {
                 if ((int) $contrat->getData('version') !== 2) {
-                    die('VER CONT : '. (int) $contrat->getData('version'));
-//                    header("Location: " . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $contrat->id);
-//                    exit();
+                    header("Location: " . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $contrat->id);
+                    exit();
                 }
             }
         }

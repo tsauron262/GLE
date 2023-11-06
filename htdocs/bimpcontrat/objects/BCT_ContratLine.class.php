@@ -102,8 +102,6 @@ class BCT_ContratLine extends BimpObject
             }
         }
 
-
-
         $status = (int) $this->getData('statut');
 
         switch ($action) {
@@ -219,6 +217,17 @@ class BCT_ContratLine extends BimpObject
                 ))
             );
         }
+
+        if ((int) $this->getData('statut') > 0) {
+            $prod = $this->getChildObject('product');
+
+            $buttons[] = array(
+                'label'   => 'Facturations',
+                'icon'    => 'fas_file-invoice-dollar',
+                'onclick' => $this->getJsLoadModalCustomContent('renderFacturesTable', 'Facturations' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
+            );
+        }
+
         return $buttons;
     }
 
@@ -746,6 +755,34 @@ class BCT_ContratLine extends BimpObject
         }
 
         return $data;
+    }
+
+    public function getFacturesLines($id_facture = 0, &$errors = array())
+    {
+        $lines = array();
+
+        if ($this->isLoaded($errors)) {
+            $where = 'linked_object_name = \'contrat_line\' AND linked_id_object = ' . $this->id;
+
+            if ($id_facture) {
+                $where .= ' AND id_obj = ' . $id_facture;
+            }
+            
+            $rows = $this->db->getRows('bimp_facture_line', $where, null, 'array', array('DISTINCT id'), 'id', 'asc');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $r['id']);
+                    if (BimpObject::objectLoaded($line)) {
+                        $lines[] = $line;
+                    }
+                }
+            } else {
+                $errors[] = 'Echec de la récupération des lignes de factures liées - ' . $this->db->err();
+            }
+        }
+
+        return $lines;
     }
 
     // Getters statiques : 
@@ -1595,7 +1632,7 @@ class BCT_ContratLine extends BimpObject
                                             'extra_class' => 'line_nb_periods',
                                             'max_label'   => true,
                                             'data'        => array(
-                                                'max'      => $periods_data['nb_periods_tobill_today'],
+                                                'max'      => $periods_data['nb_periods_tobill_max'],
                                                 'min'      => 0,
                                                 'decimals' => 0
                                             )
@@ -2135,6 +2172,90 @@ class BCT_ContratLine extends BimpObject
         $list->addFieldFilterValue('code', $code);
 
         return $list->renderHtml();
+    }
+
+    public function renderFacturesTable($id_facture = 0, $with_totals = true)
+    {
+        $html = '';
+
+        $errors = array();
+        $fac_lines = $this->getFacturesLines($id_facture, $errors);
+
+        if (!empty($errors)) {
+            $html .= BimpRender::renderAlerts($errors, 'danger');
+        } elseif (empty($fac_lines)) {
+            $html .= BimpRender::renderAlerts('Aucune facturation', 'warning');
+        } else {
+            $headers = array(
+                'period'      => 'Période',
+                'facture'     => 'Facture',
+                'qty'         => 'Qté',
+                'total_ht'    => 'Total HT',
+                'total_ttc'   => 'Total TTC',
+                'date_create' => 'Créée le',
+                'user_create' => 'Créée par'
+            );
+
+            $rows = array();
+
+            $total_ht = 0;
+            $total_ttc = 0;
+
+            foreach ($fac_lines as $fac_line) {
+                $facture = $fac_line->getParentInstance();
+
+                if (BimpObject::objectLoaded($facture)) {
+                    $period = 'Du ';
+                    if ($fac_line->date_from) {
+                        $period .= '<b>' . date('d / m / Y', strtotime($fac_line->date_from)) . '</b>';
+                    } else {
+                        $period .= '<span class="danger">Date de début non définie</span>';
+                    }
+
+                    $period .= ' au ';
+                    if ($fac_line->date_to) {
+                        $period .= '<b>' . date('d / m / Y', strtotime($fac_line->date_to)) . '</b>';
+                    } else {
+                        $period .= '<span class="danger">Date de fin non définie</span>';
+                    }
+
+                    $user_author = $facture->getChildObject('user_author');
+
+                    $total_ht += $fac_line->getTotalHT();
+                    $total_ttc += $fac_line->getTotalTTC();
+
+                    $rows[] = array(
+                        'period'      => $period,
+                        'facture'     => $facture->getLink() . '&nbsp;&nbsp;' . $facture->displayDataDefault('fk_statut'),
+                        'qty'         => $fac_line->displayLineData('qty'),
+                        'total_ht'    => $fac_line->displayLineData('total_ht'),
+                        'total_ttc'   => $fac_line->displayLineData('total_ttc'),
+                        'date_create' => $facture->displayDataDefault('datec'),
+                        'user_create' => (BimpObject::objectLoaded($user_author) ? $user_author->getLink() : '')
+                    );
+                }
+            }
+
+            $html .= BimpRender::renderBimpListTable($rows, $headers);
+
+            if ($with_totals) {
+                $html .= '<table style="margin-top: 30px; width: 300px;" class="bimp_list_table">';
+                $html .= '<tbody class="headers_col">';
+                $html .= '<tr>';
+                $html .= '<th>Total HT Facturé</th>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_ht) . '</td>';
+                $html .= '</tr>';
+
+                $html .= '<tr>';
+                $html .= '<th>Total TTC Facturé</th>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc) . '</td>';
+                $html .= '</tr>';
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
+        }
+
+        return $html;
     }
 
     // Traitements:

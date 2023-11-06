@@ -270,6 +270,83 @@ class BCT_Contrat extends BimpDolObject
         return (int) BimpCore::getConf('societe_id_default_mode_reglement', 0);
     }
 
+    public function getLines($types = null, $ids_only = false)
+    {
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
+
+            $filters = array();
+            if (!is_null($types)) {
+                if (is_string($types)) {
+                    $type_code = $types;
+                    $types = array();
+                    switch ($type_code) {
+                        case 'text':
+                            $types[] = BCT_ContratLine::TYPE_TEXT;
+                            break;
+
+                        case 'abo':
+                        case 'not_text':
+                            $types[] = BCT_ContratLine::TYPE_ABO;
+                            break;
+                    }
+                }
+
+                if (is_array($types) && !empty($types)) {
+                    $filters = array(
+                        'line_type' => array(
+                            'in' => $types
+                        )
+                    );
+                }
+            }
+
+            if ($ids_only) {
+                return $this->getChildrenList('lines', $filters, 'rang', 'asc');
+            }
+
+            return $this->getChildrenObjects('lines', $filters, 'rang', 'asc');
+        }
+
+        return array();
+    }
+
+    public function getFacturesList(&$errors = array())
+    {
+        $factures = array();
+
+        if ($this->isLoaded($errors)) {
+            $this->dol_object->element = 'bimp_contrat';
+            $items = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('facture'));
+            $this->dol_object->element = 'contrat';
+
+            foreach ($items as $item) {
+                if (!in_array((int) $item['id_object'], $factures)) {
+                    $factures[] = (int) $item['id_object'];
+                }
+            }
+        }
+
+        return $factures;
+    }
+
+    public function getFactures(&$errors = array())
+    {
+        $factures = array();
+        $list = $this->getFacturesList($errors);
+
+        if (!empty($list)) {
+            foreach ($list as $id_facture) {
+                $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                if (BimpObject::objectLoaded($fac)) {
+                    $factures[] = $fac;
+                }
+            }
+        }
+
+        return $factures;
+    }
+
     // Getters Array: 
 
     public function getClientRibsArray()
@@ -320,6 +397,121 @@ class BCT_Contrat extends BimpDolObject
         $this->dol_object->element = 'bimp_contrat';
 
         return parent::renderLinkedObjectsTable($htmlP);
+    }
+
+    public function renderFacturesTab()
+    {
+        $html = '';
+
+        $errors = array();
+        $factures = $this->getFactures($errors);
+
+        if (!empty($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        } elseif (empty($factures)) {
+            $html .= BimpRender::renderAlerts('Aucune facture liée à ce contrat', 'warning');
+        } else {
+            $headers = array(
+                'facture'     => 'Facture',
+                'status'      => 'Statut',
+                'total_ht'    => 'Total HT',
+                'total_ttc'   => 'Total TTC',
+                'date_create' => 'Créée le',
+                'user_create' => 'Créée par',
+                'detail'      => ''
+            );
+
+            $lines_headers = array(
+                'desc'      => 'Description',
+                'qty'       => 'Qté',
+                'pu_ht'     => 'PU HT',
+                'total_ht'  => 'Total HT',
+                'total_ttc' => 'Total TTC'
+            );
+
+            $rows = array();
+
+            $total_ht = 0;
+            $total_ttc = 0;
+
+            foreach ($factures as $facture) {
+                if (BimpObject::objectLoaded($facture)) {
+                    $user_author = $facture->getChildObject('user_author');
+
+                    $total_ht += $facture->getTotalHt();
+                    $total_ttc += $facture->getTotalTtc();
+
+                    $detail_btn = '<span class="openCloseButton open-content" data-parent_level="3" data-content_extra_class="fac_' . $facture->id . '_detail">';
+                    $detail_btn .= 'Détail';
+                    $detail_btn .= '</span>';
+
+                    $rows[] = array(
+                        'facture'     => $facture->getLink(),
+                        'status'      => $facture->displayDataDefault('fk_statut'),
+                        'total_ht'    => BimpTools::displayMoneyValue($facture->getTotalHt()),
+                        'total_ttc'   => BimpTools::displayMoneyValue($facture->getTotalTtc()),
+                        'date_create' => $facture->displayDataDefault('datec'),
+                        'user_create' => (BimpObject::objectLoaded($user_author) ? $user_author->getLink() : ''),
+                        'detail'      => $detail_btn
+                    );
+
+                    $lines_content = '';
+
+                    $contrat_lines = $this->getLines('not_text', true);
+
+                    $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
+                                'id_obj'             => $facture->id,
+                                'linked_object_name' => 'contrat_line',
+                                'linked_id_object'   => $contrat_lines
+                                    ), 'position', 'asc');
+
+                    if (empty($fac_lines)) {
+                        $lines_content .= BimpRender::renderAlerts('Aucune ligne liée à ce contrat dans cette facture');
+                    } else {
+                        $lines_rows = array();
+                        foreach ($fac_lines as $fac_line) {
+                            $lines_rows[] = array(
+                                'desc'      => $fac_line->displayLineData('desc_light'),
+                                'qty'       => $fac_line->displayLineData('qty'),
+                                'pu_ht'     => $fac_line->displayLineData('pu_ht'),
+                                'total_ht'  => $fac_line->displayLineData('total_ht'),
+                                'total_ttc' => $fac_line->displayLineData('total_ttc'),
+                            );
+                        }
+                        
+                        $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                        $lines_content .= BimpRender::renderBimpListTable($lines_rows, $lines_headers, array(
+                            'is_sublist' => true
+                        ));
+                        $lines_content .= '</div>';
+                    }
+
+                    $rows[] = array(
+                        'tr_style'         => 'display: none',
+                        'row_extra_class'  => 'openCloseContent fac_' . $facture->id . '_detail',
+                        'full_row_content' => $lines_content
+                    );
+                }
+            }
+
+            $html .= BimpRender::renderBimpListTable($rows, $headers);
+
+            $html .= '<table style="margin-top: 30px; width: 300px;" class="bimp_list_table">';
+            $html .= '<tbody class="headers_col">';
+            $html .= '<tr>';
+            $html .= '<th>Total HT Facturé</th>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_ht) . '</td>';
+            $html .= '</tr>';
+
+            $html .= '<tr>';
+            $html .= '<th>Total TTC Facturé</th>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc) . '</td>';
+            $html .= '</tr>';
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        return $html;
     }
 
     public static function renderAbonnementsTabs($params)
@@ -584,7 +776,7 @@ class BCT_Contrat extends BimpDolObject
                                 $line_errors[] = BimpTools::getMsgFromArray($remises_errors, 'Echec de l\'ajout de la remise (Ligne de contrat #' . $line->id . ')');
                             }
                         }
-                        
+
                         $fac_line->updateField('deletable', 0);
                     }
                 } else {
@@ -664,7 +856,7 @@ class BCT_Contrat extends BimpDolObject
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la validation');
         } else {
             $this->hydrateFromDolObject();
-            
+
             $this->set('date_validate', date('Y-m-d H:i:s'));
             $this->set('fk_user_validate', $user->id);
 

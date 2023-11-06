@@ -2892,7 +2892,7 @@ class BimpComm extends BimpDolObject
         foreach ($lines as $line) {
             if (is_a($this, 'Bimp_Commande') && is_a($line, 'Bimp_PropalLine')) {
                 if ($line->isAbonnement()) {
-//                    continue;
+                    continue;
                 }
             }
             $i++;

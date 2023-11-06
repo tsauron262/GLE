@@ -1212,7 +1212,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $s = ($nb_abos > 1 ? 's' : '');
                 $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
-                if ($this->isActionAllowed('createContratAbo') && $this->canSetAction('createContratAbo')) {
+                $err = array();
+                if ($this->isActionAllowed('createContratAbo', $err) && $this->canSetAction('createContratAbo')) {
                     $msg .= '<div class="buttonsContainer" style="text-align: right">';
                     $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
                         'form_name' => 'contrat_abo'
@@ -1222,6 +1223,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer un contrat d\'abonnement';
                     $msg .= '</span>';
                     $msg .= '</div>';
+                } elseif (BimpCore::isUserDev()) {
+                    $msg .= '<pre>';
+                    $msg .= print_r($err, 1);
+                    $msg .= '</pre>';
                 }
                 $html .= BimpRender::renderAlerts($msg, 'warning');
             }
@@ -1870,11 +1875,12 @@ class Bimp_Propal extends Bimp_PropalTemp
             'success_callback' => 'window.location = \'' . $url . '\''
         );
     }
-    
-    public function isFieldContratEditable(){
-        if(BimpTools::getPostFieldValue('field_name') == 'duree_mois'){
+
+    public function isFieldContratEditable()
+    {
+        if (BimpTools::getPostFieldValue('field_name') == 'duree_mois') {
             $fields = BimpTools::getPostFieldValue('fields');
-            if($fields['objet_contrat'] == 'ASMX')
+            if ($fields['objet_contrat'] == 'ASMX')
                 return 1;
             return 0;
         }
@@ -1993,6 +1999,14 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
 
                 if (!count($line_errors)) {
+                    $id_pfp = (int) $line->id_fourn_price;
+                    if (!$id_pfp) {
+                        $id_fourn = (int) $prod->getData('achat_def_id_fourn');
+                        if ($id_fourn) {
+                            $id_pfp = (int) $prod->getLastFournPriceId($id_fourn);
+                        }
+                    }
+
                     BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
                         'fk_contrat'                   => $contrat->id,
                         'fk_product'                   => $line->id_product,
@@ -2003,7 +2017,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         'price_ht'                     => $line->pu_ht,
                         'tva_tx'                       => $line->tva_tx,
                         'remise_percent'               => $line->remise,
-                        'fk_product_fournisseur_price' => $line->id_fourn_price,
+                        'fk_product_fournisseur_price' => $id_pfp,
                         'buy_price_ht'                 => $line->pa_ht,
                         'fac_periodicity'              => $line->getData('abo_fac_periodicity'),
                         'duration'                     => $line->getData('abo_duration'),

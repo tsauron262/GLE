@@ -2933,7 +2933,7 @@ class BimpComm extends BimpDolObject
                 }
             }
 
-            if (($params['is_clone'])) {
+            if ($params['is_clone']) {
                 switch ($origin->object_name) {
                     case 'BS_SavPropal':
                         unset($data['id_reservation']);

@@ -529,6 +529,7 @@ function setCommonEvents($container) {
                 }
 
                 if ($.isOk($parent)) {
+                    console.log('parent : ' + $parent.tagName() + ' - ' + $parent.attr('class'));
                     var extra_class = $(this).data('content_extra_class');
 
                     if (typeof (extra_class) === 'undefined') {
@@ -550,7 +551,11 @@ function setCommonEvents($container) {
                             $content.stop().slideUp(250);
                             $(this).removeClass('close-content').addClass('open-content');
                         }
+                    } else {
+                        console.error('openCloseButton : $content absent (' + sel + ')');
                     }
+                } else {
+                    console.error('openCloseButton : $parent absent');
                 }
             });
         }

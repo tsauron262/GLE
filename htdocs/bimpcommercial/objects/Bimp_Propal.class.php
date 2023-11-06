@@ -136,7 +136,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createContract':
             case 'createContratAbo':
-                if ($user->rights->contrat->creer) {
+                if ($user->admin || $user->rights->contrat->creer) {
                     return 1;
                 }
                 return 0;
@@ -294,7 +294,6 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createContratAbo':
-                return 0;
                 if ($status != Propal::STATUS_SIGNED) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;

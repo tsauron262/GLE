@@ -884,7 +884,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderDebugInfo($info, $title = '', $icon = 'fas_info-circle')
+    public static function renderDebugInfo($info, $title = '', $icon = 'fas_info-circle', $add_backtrace = false)
     {
         $html = '';
 
@@ -910,6 +910,14 @@ class BimpRender
                 $html .= '<div>' . $info . ' </div>';
             }
 
+            $html .= '</div>';
+        }
+
+        if ($add_backtrace) {
+            $html .= '<div style="margin: 10px; padding: 10px; border: 1px dotted #777">';
+            $html .= BimpRender::renderFoldableContainer('Backtrace', BimpTools::displayBacktrace(), array(
+                        'open' => false
+            ));
             $html .= '</div>';
         }
 
@@ -1246,7 +1254,8 @@ class BimpRender
                     'sortable'    => false,
                     'sort_col'    => '',
                     'sort_way'    => 'asc', // asc / desc
-                    'checkboxes'  => false
+                    'checkboxes'  => false,
+                    'is_sublist'  => false
                         ), $params);
 
         $params['data']['searchable'] = (int) $params['searchable'];
@@ -1279,7 +1288,7 @@ class BimpRender
         $html = '';
 
         $html .= '<table' . ($params['main_id'] ? ' id="' . $params['main_id'] . '"' : '');
-        $html .= ' class="bimp_list_table' . ($params['main_class'] ? ' ' . $params['main_class'] : '') . '"';
+        $html .= ' class="' . ($params['is_sublist'] ? 'bimp_sub_list_table' : 'bimp_list_table') . ($params['main_class'] ? ' ' . $params['main_class'] : '') . '"';
         $html .= BimpRender::renderTagData($params['data']);
         $html .= '>';
 
@@ -1347,7 +1356,8 @@ class BimpRender
 
         // Lignes: 
         foreach ($rows as $row) {
-            $html .= '<tr class="bimp_list_table_row"';
+            $html .= '<tr class="bimp_list_table_row' . (isset($row['row_extra_class']) ? ' ' . $row['row_extra_class'] : '') . '"';
+            $html .= (isset($row['tr_style']) ? ' style="' . $row['tr_style'] . '"' : '');
             $html .= (isset($row['row_data']) ? BimpRender::renderTagData($row['row_data']) : '');
             $html .= '>';
 
@@ -1414,17 +1424,17 @@ class BimpRender
 
         foreach ($main_kw as $word) {
             $sql = str_replace($word, '<span class="danger">' . $word . '</span>', $sql);
-            $sql = str_replace(strtolower($word), '<span class="danger">' . strtolower($word) . '</span>', $sql);
+            $sql = str_replace(strtolower($word), '<span class="danger">' . $word . '</span>', $sql);
         }
 
         foreach ($sec_kw as $word) {
             $sql = str_replace($word, '<br/><span class="info">' . $word . '</span>', $sql);
-            $sql = str_replace(strtolower($word), '<br/><span class="info">' . strtolower($word) . '</span>', $sql);
+            $sql = str_replace(strtolower($word), '<br/><span class="info">' . $word . '</span>', $sql);
         }
 
         foreach ($kw as $word) {
             $sql = str_replace($word, '<b>' . $word . '</b>', $sql);
-            $sql = str_replace(strtolower($word), '<b>' . strtolower($word) . '</b>', $sql);
+            $sql = str_replace(strtolower($word), '<b>' . $word . '</b>', $sql);
         }
 
         return $sql;

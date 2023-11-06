@@ -8,7 +8,7 @@ table.objectlistTable {
     border: none;
     box-shadow: none;
     width: 100%;
-    
+
     & > thead > tr > th {
         padding: 10px 6px;
         margin-bottom: 8px;
@@ -272,7 +272,8 @@ table.objectlistTable {
     }
 }
 
-table.objectSubList {
+table.objectSubList,
+table.bimp_sub_list_table {
     width: 100%;
     & > thead > tr > th {
         padding: 4px 10px;

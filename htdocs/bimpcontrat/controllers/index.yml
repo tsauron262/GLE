@@ -1,6 +1,8 @@
-
 bootstrap: 1
-title: Contrats
+title: Contrats d'abonnement
+
+js: 
+    - /bimpcontrat/views/js/bimp_contrat.js
 
 objects: 
     contrat: 
@@ -24,12 +26,12 @@ sections:
                       object: contrat
                       name: default
                       
-#        abonnements: 
-#            label: Tous les abonnements
-#            sections: 
-#                - type: custom
-#                  custom: 
-#                      callback: renderAbonnementsTab
+        abonnements: 
+            label: Tous les abonnements
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderAbonnementsTab
                 
                             
         

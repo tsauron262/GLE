@@ -1,4 +1,3 @@
-
 title: 
     callback: 
         object: contrat
@@ -6,6 +5,9 @@ title:
         
 bootstrap: 1
 
+js: 
+    - /bimpcontrat/views/js/bimp_contrat.js
+    
 objects: 
     contrat: 
         instance: 
@@ -23,6 +25,7 @@ sections:
       nav_tabs: 
           - id: card
             title: Fiche
+            icon: fas_file
             struct: 
                 type: rows
                 rows: 
@@ -32,4 +35,10 @@ sections:
                               panel: 1
                               object: contrat
                               name: default
+          - id: factures
+            title: Factures
+            icon: fas_file-invoice-dollar
+            ajax_render_method: 
+                object: contrat
+                method: renderFacturesTab
             

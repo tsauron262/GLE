@@ -5275,11 +5275,11 @@ class Bimp_CommandeLine extends ObjectLine
                 $title .= 'livraisons';
                 break;
 
-            case 'exp':
+            case 'fac':
                 $title .= 'facturations';
                 break;
 
-            case 'exp':
+            case 'achat':
                 $title .= 'achats';
                 break;
         }

@@ -136,7 +136,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createContract':
             case 'createContratAbo':
-                return 1;
                 if ($user->admin || $user->rights->contrat->creer) {
                     return 1;
                 }
@@ -1224,7 +1223,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer un contrat d\'abonnement';
                     $msg .= '</span>';
                     $msg .= '</div>';
-                } else {
+                } elseif (BimpCore::isUserDev()) {
                     $msg .= '<pre>';
                     $msg .= print_r($err, 1);
                     $msg .= '</pre>';

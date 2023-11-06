@@ -1314,7 +1314,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         return parent::getDbData($final_fields);
     }
 
-    public function createLinesFromOrigin($origin, $params = array(), $warnings = array())
+    public function createLinesFromOrigin($origin, $params = array(), &$warnings = array())
     {
         $errors = array();
 

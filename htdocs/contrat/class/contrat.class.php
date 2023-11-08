@@ -1,4 +1,4 @@
-<?php
+ echo<?php
 /* Copyright (C) 2003		Rodolphe Quiedeville	<rodolphe@quiedeville.org>
  * Copyright (C) 2004-2012	Destailleur Laurent		<eldy@users.sourceforge.net>
  * Copyright (C) 2005-2014	Regis Houssin			<regis.houssin@inodbox.com>
@@ -578,7 +578,6 @@ class Contrat extends CommonObject
 		}
 
 		if (!$error) {
-                    echo 'OK';
 			$this->db->commit();
 			return 1;
 		} else {

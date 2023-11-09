@@ -959,7 +959,7 @@ class BimpCore
     public static function isModeDev()
     {
         if (defined('MOD_DEV') && MOD_DEV) {
-            return 1;
+//            return 1;
         }
 
         return 0;

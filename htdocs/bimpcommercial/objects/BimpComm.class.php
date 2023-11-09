@@ -518,32 +518,6 @@ class BimpComm extends BimpDolObject
         return ($include_empty ? array(0 => '') : array());
     }
 
-    public function getClientContactsArray()
-    {
-        global $db;
-
-        $id_client = $this->getAddContactIdClient();
-        if ($id_client > 0) {
-            $contacts = self::getSocieteContactsArray($id_client, false);
-            $soc = new Societe($db);
-            $soc->fetch_optionals($id_client);
-            $contact_default = $soc->array_options['options_contact_default'];
-
-            // Remove empty option
-            unset($contacts['']);
-
-            // If there is a default contact
-            if (0 < (int) $contact_default) {
-                $label_default = $contacts[$contact_default];
-                unset($contacts[$contact_default]);
-                $contacts = array($contact_default => $label_default . ' (Contact facturation email par défaut)') + $contacts;
-            }
-        }
-
-
-        return $contacts;
-    }
-
     public function getSocAvailableDiscountsArray()
     {
         if ((int) $this->getData('fk_soc')) {

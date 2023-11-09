@@ -35,6 +35,15 @@ sections:
                               panel: 1
                               object: contrat
                               name: default
+          - id: contacts
+            title: Contacts / Adresses
+            icon: fas_id-card
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderContacts
+                        object: contrat
           - id: factures
             title: Factures
             icon: fas_file-invoice-dollar
@@ -47,4 +56,16 @@ sections:
             ajax_render_method: 
                 object: contrat
                 method: renderAchatsTab
-            
+          - id: files
+            title: Fichiers
+            icon: fas_folder-open
+            ajax_render_method:
+                method: renderExtraFile
+                object: contrat
+    - type: custom
+      custom: 
+          callback: 
+              method: renderNotesList
+              object: contrat
+              params:
+                  - 1

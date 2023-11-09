@@ -6,6 +6,11 @@ class BCT_Contrat extends BimpDolObject
 {
 
     public $redirectMode = 0;
+    public static $email_type = 'contract';
+    public static $element_name = "contrat";
+    public static $dol_module = 'contrat';
+    public static $files_module_part = 'contract';
+    public static $modulepart = 'contract';
 
     const STATUS_DRAFT = 0;
     const STATUS_VALIDATED = 1;
@@ -208,7 +213,7 @@ class BCT_Contrat extends BimpDolObject
         return $buttons;
     }
 
-    public function getFilesDir()
+    public function getDirOutput()
     {
         global $conf;
         return $conf->contract->dir_output;
@@ -486,6 +491,65 @@ class BCT_Contrat extends BimpDolObject
         $this->dol_object->element = 'bimp_contrat';
 
         return parent::renderLinkedObjectsTable($htmlP);
+    }
+
+    public function renderContacts($type = 0, $code = '', $input_name = '')
+    {
+        $html = '';
+        if ($input_name != '') {
+            $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'' . $input_name . '\');">';
+            $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+            $html .= '</span>';
+        }
+
+        $html .= '<table class="bimp_list_table">';
+
+        $html .= '<thead>';
+        $html .= '<tr>';
+        if ($type == 0)
+            $html .= '<th>Nature</th>';
+        $html .= '<th>Tiers</th>';
+        $html .= '<th>Utilisateur / Contact</th>';
+        if ($code == '')
+            $html .= '<th>Type de contact</th>';
+        $html .= '<th></th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list' . $type . '_' . $code;
+        $html .= '<tbody id="' . $list_id . '">';
+        $html .= $this->renderContactsList($type, $code);
+
+        $html .= '</tbody>';
+
+        $html .= '</table>';
+
+        $filtre = array('id_client' => (int) $this->getData('fk_soc'));
+        if ($type && $code != '') {
+            if ($type == 'internal') {
+                $filtre['user_type_contact'] = $this->getIdTypeContact($type, $code);
+            } elseif ($type == 'external') {
+                $filtre['tiers_type_contact'] = $this->getIdTypeContact($type, $code);
+            }
+        }
+
+        return BimpRender::renderPanel('Liste des contacts', $html, '', array(
+                    'type'           => 'secondary',
+                    'icon'           => 'user-circle',
+                    'header_buttons' => array(
+                        array(
+                            'label'       => 'Ajouter un contact',
+                            'icon_before' => 'plus-circle',
+                            'classes'     => array('btn', 'btn-default'),
+                            'attr'        => array(
+                                'onclick' => $this->getJsActionOnclick('addContact', $filtre, array(
+                                    'form_name'        => 'contact',
+                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
+                                ))
+                            )
+                        )
+                    )
+        ));
     }
 
     public function renderFacturesTab()

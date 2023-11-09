@@ -318,6 +318,10 @@ params:
         label: ID Groupe Atradius
         cat: groups
         def: 0
+    id_user_group_console: 
+        label: ID Groupe Console
+        cat: groups
+        def: 0
         
     # Logs: 
     print_bimp_logs: 

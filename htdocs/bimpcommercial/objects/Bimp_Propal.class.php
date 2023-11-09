@@ -2010,11 +2010,12 @@ class Bimp_Propal extends Bimp_PropalTemp
 //            }
         } else {
             $contrat = BimpObject::createBimpObject('bimpcontrat', 'BCT_Contrat', array(
-                        'fk_soc'   => (int) $this->getData('fk_soc'),
-                        'entrepot' => (int) $this->getData('entrepot'),
-                        'secteur'  => $this->getData('ef_type'),
-                        'moderegl' => BimpTools::getArrayValueFromPath($data, 'fk_mode_reglement', $this->getData('fk_mode_reglement')),
-                        'condregl' => BimpTools::getArrayValueFromPath($data, 'fk_cond_reglement', $this->getData('fk_cond_reglement'))
+                        'fk_soc'    => (int) $this->getData('fk_soc'),
+                        'entrepot'  => (int) $this->getData('entrepot'),
+                        'secteur'   => $this->getData('ef_type'),
+                        'expertise' => $this->getData('expertise'),
+                        'moderegl'  => BimpTools::getArrayValueFromPath($data, 'fk_mode_reglement', $this->getData('fk_mode_reglement')),
+                        'condregl'  => BimpTools::getArrayValueFromPath($data, 'fk_cond_reglement', $this->getData('fk_cond_reglement'))
                             ), true, $errors, $warnings);
 
             if (!count($errors)) {

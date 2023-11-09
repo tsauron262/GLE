@@ -131,11 +131,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return $this->can("edit");
 
             case 'createOrder':
+            case 'createContratAbo':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 return $commande->can("create") /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */;
 
             case 'createContract':
-            case 'createContratAbo':
                 if ($user->admin || $user->rights->contrat->creer) {
                     return 1;
                 }
@@ -1229,9 +1229,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
             }
 
-            if ($this->isActionAllowed('createContratAbo')) {
+            $err = array();
+            if ($this->isActionAllowed('createContratAbo', $err)) {
                 $nb_abos = $this->getNbAbonnements();
                 if ($nb_abos > 0) {
+                    $msg .= 'NB abos : ' . $nb_abos . '<br/>';
                     $s = ($nb_abos > 1 ? 's' : '');
                     $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
@@ -1253,6 +1255,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
             }
+//            else {
+//                $html .= '<pre>';
+//                $html .= print_r($err, 1);
+//                $html .= '</pre>';
+//            }
         }
 
         return $html;
@@ -1992,7 +1999,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
             if (!BimpObject::objectLoaded($contrat)) {
                 $errors[] = 'Le contrat #' . $id_contrat . ' n\'existe plus';
-            } 
+            }
 //            elseif ($id_linked_contrat_line) {
 //                $linked_contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_contrat_line);
 //                if (!BimpObject::objectLoaded($linked_contrat_line)) {

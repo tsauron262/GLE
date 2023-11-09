@@ -568,7 +568,18 @@ forms:
                       array: clientContratsAbo
               value: 
                    callback: getDefaultContratAbo
-                  
+#            - custom: 1
+#              label: Ajuster les périodes sur un abonnement existant
+#              input_name: id_linked_contrat_line
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: contratAboLines
+#              display_if: 
+#                  field_name: id_contrat
+#                  hide_values: 0
+#              depends_on: id_contrat
+                                
 fields_tables: 
     infos: 
         rows: 

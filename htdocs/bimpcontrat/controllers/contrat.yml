@@ -41,4 +41,10 @@ sections:
             ajax_render_method: 
                 object: contrat
                 method: renderFacturesTab
+          - id: achats
+            title: Achats
+            icon: fas_cart-arrow-down
+            ajax_render_method: 
+                object: contrat
+                method: renderAchatsTab
             

@@ -1260,7 +1260,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
-            } else {
+            } elseif ($user->admin) {
                 $html .= '<pre>';
                 $html .= print_r($err, 1);
                 $html .= '</pre>';

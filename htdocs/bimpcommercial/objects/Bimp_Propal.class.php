@@ -131,9 +131,15 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return $this->can("edit");
 
             case 'createOrder':
-            case 'createContratAbo':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 return $commande->can("create") /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */;
+
+            case 'createContratAbo':
+                if ($user->admin || $user->rights->contrat->creer) {
+                    return 1;
+                }
+                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+                return $commande->can("create");
 
             case 'createContract':
                 if ($user->admin || $user->rights->contrat->creer) {

@@ -1258,8 +1258,6 @@ class Bimp_Propal extends Bimp_PropalTemp
                         $msg .= '</span>';
                     }
                     $html .= BimpRender::renderAlerts($msg, 'warning');
-                } elseif ($user->admin) {
-                    $html .= '<span class="warning">Aucun abonnement</span>';
                 }
             } else {
                 global $user;

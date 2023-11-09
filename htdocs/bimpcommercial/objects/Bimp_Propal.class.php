@@ -1239,7 +1239,6 @@ class Bimp_Propal extends Bimp_PropalTemp
             if ($this->isActionAllowed('createContratAbo', $err)) {
                 $nb_abos = $this->getNbAbonnements();
                 if ($nb_abos > 0) {
-                    $msg .= 'NB abos : ' . $nb_abos . '<br/>';
                     $s = ($nb_abos > 1 ? 's' : '');
                     $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
@@ -1259,11 +1258,16 @@ class Bimp_Propal extends Bimp_PropalTemp
                         $msg .= '</span>';
                     }
                     $html .= BimpRender::renderAlerts($msg, 'warning');
+                } elseif ($user->admin) {
+                    $html .= '<span class="warning">Aucun abonnement</span>';
                 }
-            } elseif ($user->admin) {
-                $html .= '<pre>';
-                $html .= print_r($err, 1);
-                $html .= '</pre>';
+            } else {
+                global $user;
+                if ($user->admin) {
+                    $html .= '<pre>';
+                    $html .= print_r($err, 1);
+                    $html .= '</pre>';
+                }
             }
         }
 

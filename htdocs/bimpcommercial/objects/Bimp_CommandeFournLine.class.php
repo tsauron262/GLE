@@ -2591,18 +2591,24 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public function delete(&$warnings = [], $force_delete = false)
     {
-        $line = null;
+        $linked_line = null;
         if ($this->getData('linked_object_name') == 'commande_line') {
-            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+            $linked_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+        } elseif ($this->getData('linked_object_name') == 'contrat_line') {
+            $linked_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('linked_id_object'));
         }
 
-        $qty = $this->qty;
+//        $qty = $this->qty;
 
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
-            if (BimpObject::objectLoaded($line)) {
-                $line->onLinkedCommandeFournLineChange($this);
+            if (BimpObject::objectLoaded($linked_line)) {
+                if (method_exists($linked_line, 'onLinkedCommandeFournLineChange')) {
+                    $linked_line->onLinkedCommandeFournLineChange($this);
+                } elseif (method_exists($linked_line, 'onLinkedCommandeFournLineDelete')) {
+                    $linked_line->onLinkedCommandeFournLineDelete();
+                }
 //                $line->removeToReceiveQty($qty);
             }
         }

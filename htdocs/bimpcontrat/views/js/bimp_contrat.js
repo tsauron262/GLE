@@ -100,6 +100,58 @@ function BimpContrat() {
     };
 
     this.onPeriodicAchatProcessFormSubmit = function ($form, extra_data) {
+        var has_errors = false;
+        var fourns = {};
+
+        $form.find('tr.commande_line_row').removeClass('has_errors').each(function () {
+            var $line_row = $(this);
+
+            if ($line_row.find('.line_check').prop('checked')) {
+                var id_fourn = parseInt($line_row.data('id_fourn'));
+                var id_entrepot = parseInt($line_row.data('id_entrepot'));
+                var id_line = parseInt($line_row.data('id_line'));
+                var nb_periods = parseInt($line_row.find($('input.line_nb_periods')).val());
+                var real_qty = 0;
+
+                if (isNaN(nb_periods)) {
+                    $line_row.addClass('has_errors');
+                    bimp_msg('Ligne #' + id_line + ' : Qté invalide', 'danger');
+                    has_errors = true;
+                } else if (nb_periods > 0) {
+                    var pa_ht = parseFloat($line_row.find($('input.line_pa_ht')).val());
+
+                    if (typeof (fourns[id_fourn]) === 'undefined') {
+                        fourns[id_fourn] = {};
+                    }
+
+                    if (typeof (fourns[id_fourn][id_entrepot]) === 'undefined') {
+                        fourns[id_fourn][id_entrepot] = {
+                            'id_commande_fourn': $form.find('[name="fourn_' + id_fourn + '_entrepot_' + id_entrepot + '_commande_fourn"]').val(),
+                            'lines': []
+                        };
+                    }
+
+
+                    fourns[id_fourn][id_entrepot]['lines'].push({
+                        'id_line': id_line,
+                        'nb_periods': nb_periods,
+                        'real_qty': real_qty,
+                        'pa_ht': pa_ht
+
+                    });
+                }
+            }
+        });
+
+        if (has_errors) {
+            return false;
+        }
+        
+        console.log(fourns);
+
+        extra_data['fourns'] = fourns;
+
+        return extra_data;
     };
 }
 

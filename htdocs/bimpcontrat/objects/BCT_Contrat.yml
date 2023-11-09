@@ -12,8 +12,9 @@ controller: contrat
 icon: fas_file-signature
 public_icon: pe_news-paper
 
+header_list_name: default
 list_page_url: 
-    controller: index  
+    controller: index
     
 header_btn: 
     callback: getActionsButtons
@@ -130,6 +131,25 @@ objects:
                 name: Bimp_SocBankAccount
             id_object:
                 field_value: rib_client
+                
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcontrat
+                parent_object_name: BCT_Contrat
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpcontrat
+                    parent_object_name: BCT_Contrat
 
 fields:
     # Champs objet Dolibarr:
@@ -342,6 +362,83 @@ forms:
             - field: note_public
             - field: note_private
             
+    contact:
+        title: Ajouter un contact
+        rows: 
+            - custom: 1
+              label: Type
+              input_name: type
+              input: 
+                  type: select
+                  options: 
+                      1: Contact tiers
+                      2: Utilisateur
+            - custom: 1
+              label: Tiers
+              input_name: id_client
+              input: 
+                  type: search_societe
+#                  societe_type: customer
+              value: 
+                  field_value: fk_soc
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              data_type: id_object
+              object: contact
+              edit_form: default
+              create_form: default
+              create_form_values:
+                  fields: 
+                      fk_soc: 
+                          callback: getAddContactIdClient
+              value: 
+                  request: fields/id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: clientContacts
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              depends_on: id_client
+            - custom: 1
+              label: Utilisateur
+              input_name: id_user
+              input: 
+                  type: search_user
+              value: 
+                  prop:
+                      object: 
+                          global: user
+                      name: id
+              display_if: 
+                  field_name: type
+                  show_values: 2
+            - custom: 1
+              label: Type de contact
+              input_name: tiers_type_contact
+              input: 
+                  type: select
+                  options: 
+                      array: externalContactTypes
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Type de contact
+              input_name: user_type_contact
+              input: 
+                  type: select
+                  options: 
+                      array: internalContactTypes
+              display_if: 
+                  field_name: type
+                  show_values: 2 
+            
 fields_tables: 
     infos: 
         title: Informations
@@ -352,6 +449,7 @@ fields_tables:
             - field: entrepot
             - field: secteur
             - field: expertise
+              edit: 1
             - field: note_public
             - field: note_private
             

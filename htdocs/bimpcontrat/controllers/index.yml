@@ -26,8 +26,8 @@ sections:
                       object: contrat
                       name: default
                       
-        abonnements: 
-            label: Tous les abonnements
+        fac_achats: 
+            label: Facturation / achats
             sections: 
                 - type: custom
                   custom: 

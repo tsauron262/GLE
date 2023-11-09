@@ -1440,8 +1440,19 @@ class BimpTools
                     } else {
                         return '';
                     }
-                } elseif (isset($filter['operator']) && isset($filter['value'])) {
-                    $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
+                } elseif (isset($filter['operator']) && (isset($filter['value']) || isset($filter['field']))) {
+                    $sql .= ' ' . $filter['operator'] .= ' ';
+                    if (isset($filter['value'])) {
+                        $sql .= (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
+                    } elseif (isset($filter['field'])) {
+                        if (preg_match('/\./', $filter['field'])) {
+                            $sql .= $filter['field'];
+                        } elseif (!is_null($default_alias) && $default_alias) {
+                            $sql .= $default_alias . '.' . $filter['field'];
+                        } else {
+                            $sql .= '`' . $filter['field'] . '`';
+                        }
+                    }
                 } elseif (isset($filter['part_type']) && isset($filter['part'])) {
                     $escape_char = '';
                     foreach (array('$', '|', '&', '@') as $char) {
@@ -1691,20 +1702,21 @@ class BimpTools
 
         return $sql;
     }
-    
-    public static function addPostTraitement($object, $method, $params = array(), $firstParamsError = false){
-        static::$postTraitment[] = array('object'=>$object, 'method'=>$method, 'params'=>&$params, 'firstParamsError' => $firstParamsError);
+
+    public static function addPostTraitement($object, $method, $params = array(), $firstParamsError = false)
+    {
+        static::$postTraitment[] = array('object' => $object, 'method' => $method, 'params' => &$params, 'firstParamsError' => $firstParamsError);
     }
-    
-    public static function traitePostTraitement(&$errors = array()){
-        foreach(static::$postTraitment as $traitement){
-            if($traitement['firstParamsError']){
-                $traitement['params'] = BimpTools::merge_array (array(&$errors), $traitement['params']);
+
+    public static function traitePostTraitement(&$errors = array())
+    {
+        foreach (static::$postTraitment as $traitement) {
+            if ($traitement['firstParamsError']) {
+                $traitement['params'] = BimpTools::merge_array(array(&$errors), $traitement['params']);
             }
             call_user_func_array(array(
-                    $traitement['object'], $traitement['method']
-                        ), $traitement['params']);
-            
+                $traitement['object'], $traitement['method']
+                    ), $traitement['params']);
         }
     }
 

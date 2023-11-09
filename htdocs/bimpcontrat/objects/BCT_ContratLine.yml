@@ -55,6 +55,16 @@ objects:
             id_object: 
                 field_value: fk_user_cloture
                 
+    linked_line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcontrat
+                name: BCT_ContratLine
+            id_object: 
+                field_value: id_linked_line                  
+                
 fields: 
     fk_contrat: 
         label: Contrat
@@ -237,6 +247,12 @@ fields:
         label: Date cloture
         type: datetime
         
+    date_fac_start: 
+        label: Date de début de facturation
+        type: date
+        input: 
+            display_now: 1
+        
     date_next_facture: 
         label: Date de prochaine facturation
         type: date
@@ -246,6 +262,12 @@ fields:
                 method: displayNextFacDate
                 params: 
                     - 1
+        
+    date_achat_start: 
+        label: Date de début d'achat
+        type: date
+        input: 
+            display_now: 1
         
     date_next_achat: 
         label: Date de prochain achat
@@ -271,6 +293,16 @@ fields:
         label: Clos par
         type: id_object
         object: user_cloture
+        
+#    id_linked_line: 
+#        label: Ligne de contrat liée
+#        type: id_object
+#        object: linked_line
+#        default_value: 0
+#        input: 
+#            type: select
+#            options: 
+#                array: linkableContratLines
 
 forms: 
     text: 
@@ -305,6 +337,7 @@ forms:
                           params: 
                               - 6
             - field: description
+            - field: id_linked_line
             - field: date_ouverture_prevue
             
             - title: vente
@@ -348,14 +381,11 @@ forms:
 #                  field_name: type_pa
 #                  hide_values: custom
 #            - field: achat_id_fourn
-            - field: buy_price_ht    
+            - field: buy_price_ht
             
     activate: 
         rows: 
             - field: date_ouverture
-              label: Date d'ouverture
-              value: 
-                  field_value: date_ouverture_prevue
         
     periodic_process: 
         modal_format: large
@@ -496,6 +526,7 @@ fields_tables:
         title: Facturation
         icon: fas_file-invoice-dollar
         rows: 
+            - field: date_fac_start
             - field: fac_periodicity
             - field: duration
             - label: nombre total de périodes
@@ -510,6 +541,7 @@ fields_tables:
         title: Achat
         icon: fas_cart-arrow-down
         rows: 
+            - field: date_achat_start
             - field: fk_product_fournisseur_price
             - field: buy_price_ht
             - field: achat_periodicity
@@ -592,28 +624,35 @@ filters_panels:
             achat_periodicity:
                 
 lists_cols: 
+    qty: 
+        min_width: 200
     desc: 
         label: Désignation
         value: 
             callback: displayDesc
+            
+    fac_infos: 
+        label: Infos facturation
+        value: 
+            callback: displayFacInfos
             
     achat_infos: 
         label: Infos achat
         value: 
             callback: displayAchatInfos
             
-    nb_facs: 
+    nb_facs_todo: 
         label: Facturation a effectuer à date
         value: 
             callback: displayNbFacsToProcess
-            
-    nb_achats: 
+    nb_achats_todo: 
         label: Achats a effectuer à date
         value: 
             callback: displayNbAchatsToProcess
-            
+        
     date_next_facture:
         display: with_color
+        
     date_next_achat:
         display: with_color
             
@@ -621,8 +660,6 @@ lists:
     default: 
         configurable: 1
         checkboxes: 0
-        positions: 1
-        positions_open: 1
         filters_panel: default
         sort_field: rowid
         sort_way: desc
@@ -653,11 +690,14 @@ lists:
             tva_tx: 
             remise_percent: 
             total_ttc: 
+            fac_infos: 
             achat_infos:
             statut: 
                 
     contrat: 
         extends: default
+        positions: 1
+        positions_open: 1
         checkboxes: 1
         filters_panel: unset
         header_buttons: 
@@ -675,6 +715,8 @@ lists:
     facturation: 
         extends: default
         filters_panel: fac_periods
+        sort_field: date_next_facture
+        sort_way: asc
         checkboxes: 
             callback: 
                 method: canSetAction
@@ -698,12 +740,30 @@ lists:
                 display: details
             total_ttc:
             statut:
-            nb_facs: 
+            fac_infos: 
+            nb_facs_todo: 
             date_next_facture:
                 
     achat: 
         extends: default
         filters_panel: achat_periods
+        sort_field: date_next_achat
+        sort_way: asc
+        checkboxes:
+            callback: 
+                method: canSetAction
+                params: 
+                    - periodicAchatProcess
+        bulk_actions: 
+            callback: 
+                method: getListsBulkActions
+                params: 
+                    - achat
+        header_buttons: 
+            callback: 
+                method: getListHeaderButtons
+                params: 
+                    - achat
         cols: 
             unextends: 1
             fk_contrat:
@@ -712,6 +772,7 @@ lists:
                 display: details
             total_ttc:
             statut:
-            nb_achats: 
+            achat_infos: 
+            nb_achats_todo: 
             date_next_achat:
             

@@ -535,7 +535,7 @@ forms:
               input_name: close_propal
               input: 
                   type: hidden
-              value: 
+              value:
                   request: param_values/fields/close_propal
 
     duplicate:

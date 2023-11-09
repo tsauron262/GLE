@@ -228,6 +228,32 @@ class BimpDolObject extends BimpObject
         return $emails;
     }
 
+    public function getClientContactsArray()
+    {
+        global $db;
+
+        $id_client = $this->getAddContactIdClient();
+        if ($id_client > 0) {
+            $contacts = self::getSocieteContactsArray($id_client, false);
+            $soc = new Societe($db);
+            $soc->fetch_optionals($id_client);
+            $contact_default = $soc->array_options['options_contact_default'];
+
+            // Remove empty option
+            unset($contacts['']);
+
+            // If there is a default contact
+            if (0 < (int) $contact_default) {
+                $label_default = $contacts[$contact_default];
+                unset($contacts[$contact_default]);
+                $contacts = array($contact_default => $label_default . ' (Contact facturation email par défaut)') + $contacts;
+            }
+        }
+
+
+        return $contacts;
+    }
+
     // Getters données: 
 
     public function getModelPdf()
@@ -495,6 +521,16 @@ class BimpDolObject extends BimpObject
         }
 
         return $contacts;
+    }
+
+    public function getAddContactIdClient()
+    {
+        $id_client = (int) BimpTools::getPostFieldValue('id_client');
+        if (!$id_client) {
+            $id_client = (int) $this->getData('fk_soc');
+        }
+
+        return $id_client;
     }
 
     // Affichages: 

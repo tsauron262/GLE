@@ -1032,6 +1032,7 @@ class BCT_ContratLine extends BimpObject
                     'c.fk_soc_facturation as id_client_facture',
                     'cef.entrepot as id_entrepot',
                     'c.secteur',
+                    'cef.expertise',
                     'cef.moderegl as id_mode_reglement',
                     'cef.condregl as id_cond_reglement'
                 );
@@ -1074,7 +1075,8 @@ class BCT_ContratLine extends BimpObject
                             'id_entrepot'       => (int) $r['id_entrepot'],
                             'secteur'           => $r['secteur'],
                             'id_mode_reglement' => $r['id_mode_reglement'],
-                            'id_cond_reglement' => $r['id_cond_reglement']
+                            'id_cond_reglement' => $r['id_cond_reglement'],
+                            'expertise'         => $r['expertise']
                         );
                     }
                     break;
@@ -1747,7 +1749,7 @@ class BCT_ContratLine extends BimpObject
                     $check = false;
 
                     foreach ($clients_factures[$id_client] as $idx => $cf_data) {
-                        if ($cf_data['id_entrepot'] == $line_data['id_entrepot'] && $cf_data['secteur'] == $line_data['secteur'] &&
+                        if ($cf_data['id_entrepot'] == $line_data['id_entrepot'] && $cf_data['secteur'] == $line_data['secteur'] && $cf_data['expertise'] == $line_data['expertise'] &&
                                 $cf_data['id_mode_reglement'] == $line_data['id_mode_reglement'] && $cf_data['id_cond_reglement'] == $line_data['id_cond_reglement']) {
                             $clients_factures[$id_client][$idx]['lines'][] = $id_line;
                             $check = true;
@@ -1759,6 +1761,7 @@ class BCT_ContratLine extends BimpObject
                         $clients_factures[$id_client][] = array(
                             'id_entrepot'       => $line_data['id_entrepot'],
                             'secteur'           => $line_data['secteur'],
+                            'expertise'         => $line_data['expertise'],
                             'id_mode_reglement' => $line_data['id_mode_reglement'],
                             'id_cond_reglement' => $line_data['id_cond_reglement'],
                             'lines'             => array($id_line)
@@ -1815,11 +1818,13 @@ class BCT_ContratLine extends BimpObject
                     $html .= ' data-secteur="' . $facture_data['secteur'] . '"';
                     $html .= ' data-id_mode_reglement="' . $facture_data['id_mode_reglement'] . '"';
                     $html .= ' data-id_cond_reglement="' . $facture_data['id_cond_reglement'] . '"';
+                    $html .= ' data-expertise="' . $facture_data['expertise'] . '"';
                     $html .= '>';
                     $html .= '<td colspan="99" style="font-size: 12px; padding: 10px; background-color: #DCDCDC">';
                     $html .= '<div style="display: inline-block">';
                     $html .= 'Entrepôt : ' . $entrepot->getLink() . '<br/>';
                     $html .= 'Secteur : <b>' . (isset($secteurs[$facture_data['secteur']]) ? $secteurs[$facture_data['secteur']] : '<span class="danger">' . ($facture_data['secteur'] ? 'inconnu (' . $facture_data['secteur'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
+                    $html .= 'Expertise : <b>' . (isset($secteurs[$facture_data['expertise']]) ? $secteurs[$facture_data['expertise']] : '<span class="danger">' . ($facture_data['expertise'] ? 'inconnu (' . $facture_data['expertise'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
                     $html .= 'Mode de réglement : <b>' . (isset($modes_reglement[$facture_data['id_mode_reglement']]) ? $modes_reglement[$facture_data['id_mode_reglement']] : '<span class="danger">' . ($facture_data['id_mode_reglement'] ? 'inconnu (' . $facture_data['id_mode_reglement'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
                     $html .= 'Conditions de réglement : <b>' . (isset($conds_reglement[$facture_data['id_cond_reglement']]) ? $conds_reglement[$facture_data['id_cond_reglement']] : '<span class="danger">' . ($facture_data['id_cond_reglement'] ? 'inconnu (' . $facture_data['id_cond_reglement'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
                     $html .= '</div>';
@@ -1832,6 +1837,7 @@ class BCT_ContratLine extends BimpObject
                         'a.type'              => 0,
                         'a.fk_mode_reglement' => (int) $facture_data['id_mode_reglement'],
                         'a.fk_cond_reglement' => (int) $facture_data['id_cond_reglement'],
+                        'fef.expertise'       => $facture_data['expertise'],
                         'fef.entrepot'        => $facture_data['id_entrepot'],
                         'fef.type'            => $facture_data['secteur']
                             ), 'rowid', 'asc', array(
@@ -2852,6 +2858,7 @@ class BCT_ContratLine extends BimpObject
                             $fac_errors = array();
                             $id_entrepot = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_entrepot', 0, $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': entrepôt absent');
                             $secteur = BimpTools::getArrayValueFromPath($fac_data, 'secteur', '', $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': secteur absent');
+                            $expertise = BimpTools::getArrayValueFromPath($fac_data, 'expertise', '', $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': expertise absente');
                             $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_mode_reglement', 0, $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': mode de réglement absent');
                             $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_cond_reglement', 0, $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': conditions de réglement absentes');
                             $libelle = BimpTools::getArrayValueFromPath($fac_data, 'libelle', 'Facturation périodique');
@@ -2861,6 +2868,7 @@ class BCT_ContratLine extends BimpObject
                                             'fk_soc'            => $id_client,
                                             'entrepot'          => $id_entrepot,
                                             'ef_type'           => $secteur,
+                                            'expertise'         => $expertise,
                                             'libelle'           => $libelle,
                                             'fk_mode_reglement' => $id_mode_reglement,
                                             'fk_cond_reglement' => $id_cond_reglement,

@@ -73,6 +73,7 @@ function BimpContrat() {
                             'libelle': $form.find('[name="client_' + id_client + '_fac_' + fac_idx + '_libelle"]').val(),
                             'id_entrepot': $client_fac_row.data('id_entrepot'),
                             'secteur': $client_fac_row.data('secteur'),
+                            'expertise': $client_fac_row.data('expertise'),
                             'id_mode_reglement': $client_fac_row.data('id_mode_reglement'),
                             'id_cond_reglement': $client_fac_row.data('id_cond_reglement'),
                             'lines': []
@@ -146,7 +147,7 @@ function BimpContrat() {
         if (has_errors) {
             return false;
         }
-        
+
         console.log(fourns);
 
         extra_data['fourns'] = fourns;

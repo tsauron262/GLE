@@ -181,13 +181,13 @@ fields:
         values: 
             array: periodicities
         default_value: 0
-        depends_on: fk_product
+        depends_on: fk_product,id_linked_line
         
     fac_term: 
         label: Terme de facturation
         type: int
         default_value: 1
-        depends_on: id_product
+        depends_on: id_product,id_linked_line
         values: 
             0: A terme échu
             1: A terme à échoir
@@ -201,7 +201,7 @@ fields:
         values: 
             array: periodicities
         default_value: 0
-        depends_on: fk_product
+        depends_on: fk_product,id_linked_line
         
     duration: 
         label: Durée (en mois)
@@ -212,6 +212,7 @@ fields:
             type: qty
             possible_values: 
                 array: 6,12,24,36,48,60
+        depends_on: id_linked_line
         
     nb_renouv: 
         label: Nb renouvellements tacites
@@ -294,15 +295,16 @@ fields:
         type: id_object
         object: user_cloture
         
-#    id_linked_line: 
-#        label: Ligne de contrat liée
-#        type: id_object
-#        object: linked_line
-#        default_value: 0
-#        input: 
-#            type: select
-#            options: 
-#                array: linkableContratLines
+    id_linked_line: 
+        label: Ligne de contrat liée
+        type: id_object
+        object: linked_line
+        default_value: 0
+        input: 
+            type: select
+            options: 
+                array: linkableContratLines
+        depends_on: fk_product
 
 forms: 
     text: 
@@ -339,7 +341,6 @@ forms:
             - field: description
             - field: id_linked_line
             - field: date_ouverture_prevue
-            
             - title: vente
             - field: fac_periodicity
             - field: fac_term
@@ -630,21 +631,25 @@ lists_cols:
         label: Désignation
         value: 
             callback: displayDesc
+        min_width: 250
             
     fac_infos: 
         label: Infos facturation
         value: 
             callback: displayFacInfos
+        min_width: 250
             
     achat_infos: 
         label: Infos achat
         value: 
             callback: displayAchatInfos
+        min_width: 250
             
     nb_facs_todo: 
         label: Facturation a effectuer à date
         value: 
             callback: displayNbFacsToProcess
+            
     nb_achats_todo: 
         label: Achats a effectuer à date
         value: 

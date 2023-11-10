@@ -99,7 +99,7 @@ class BCT_Contrat extends BimpDolObject
         return parent::isDeletable();
     }
 
-    public function isActionAllowed($action, &$errors = []): int
+    public function isActionAllowed($action, &$errors = [])
     {
         $status = (int) $this->getData('statut');
 
@@ -208,6 +208,26 @@ class BCT_Contrat extends BimpDolObject
                     ))
                 );
             }
+
+            $id_group = BimpCore::getUserGroupId('console');
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            if ($id_group) {
+                $buttons[] = array(
+                    'label'   => 'Message achat',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array(
+                        "obj_type"      => "bimp_object",
+                        "obj_module"    => $this->module,
+                        "obj_name"      => $this->object_name,
+                        "id_obj"        => $this->id,
+                        "type_dest"     => $note::BN_DEST_GROUP,
+                        "fk_group_dest" => $id_group,
+                        "content"       => ""
+                            ), array(
+                        'form_name' => 'rep'
+                    ))
+                );
+            }
         }
 
         return $buttons;
@@ -275,12 +295,11 @@ class BCT_Contrat extends BimpDolObject
         return (int) BimpCore::getConf('societe_id_default_mode_reglement', 0);
     }
 
-    public function getLines($types = null, $ids_only = false)
+    public function getLines($types = null, $ids_only = false, $filters = array())
     {
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
 
-            $filters = array();
             if (!is_null($types)) {
                 if (is_string($types)) {
                     $type_code = $types;
@@ -298,14 +317,9 @@ class BCT_Contrat extends BimpDolObject
                 }
 
                 if (is_array($types) && !empty($types)) {
-                    $filters = array(
-                        'line_type' => array(
-                            'in' => $types
-                        )
-                    );
+                    $filters['line_type'] = $types;
                 }
             }
-
             if ($ids_only) {
                 return $this->getChildrenList('lines', $filters, 'rang', 'asc');
             }
@@ -406,7 +420,8 @@ class BCT_Contrat extends BimpDolObject
                     'include_empty' => false,
                     'empty_label'   => '',
                     'active_only'   => false,
-                    'with_periods'  => false
+                    'with_periods'  => false,
+                    'id_product'    => 0
                         ), $options);
 
         if ($this->isLoaded()) {
@@ -423,7 +438,12 @@ class BCT_Contrat extends BimpDolObject
             if (!isset(self::$cache[$key])) {
                 self::$cache[$key] = array();
 
-                $lines = $this->getLines('abo');
+                $filters = array();
+
+                if ($options['id_product']) {
+                    $filters['fk_product'] = $options['id_product'];
+                }
+                $lines = $this->getLines('abo', false, $filters);
 
                 foreach ($lines as $line) {
                     if ($options['active_only']) {

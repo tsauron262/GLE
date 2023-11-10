@@ -5,13 +5,13 @@ class Bimp_Product extends BimpObject
 
     public $stocks = null;
     public static $sousTypes = array(
-        0 => '',
-        1 => 'Service inter',
-        2 => 'Service contrat',
-        3 => 'Déplacement inter',
-        4 => 'Déplacement contrat',
-        5 => 'Logiciel (licence unique)',
-        6 => 'Abonnement',
+        0  => '',
+        1  => 'Service inter',
+        2  => 'Service contrat',
+        3  => 'Déplacement inter',
+        4  => 'Déplacement contrat',
+        5  => 'Logiciel (licence unique)',
+        6  => 'Abonnement',
         20 => 'Bundle'
     );
     public static $abonnements_sous_types = array(6);
@@ -2128,12 +2128,13 @@ class Bimp_Product extends BimpObject
         $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
     }
-    
-    public function getPaBundle(){
+
+    public function getPaBundle()
+    {
         $pa = 0;
-        
+
         $child_prods = $this->getChildrenObjects('child_products');
-        foreach($child_prods as $child_prod){
+        foreach ($child_prods as $child_prod) {
             $prod = $child_prod->getChildObject('product_fils');
             $pa += $child_prod->getData('qty') * $prod->getData('cur_pa_ht');
         }
@@ -4232,6 +4233,22 @@ class Bimp_Product extends BimpObject
             $this->mailValidation();
 
         return parent::validatePost();
+    }
+
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if ($this->isAbonnement()) {
+            $fac_per = (int) $this->getData('fac_periodicity');
+            $achat_per = (int) $this->getData('achat_periodicity');
+            
+            if ($fac_per && $achat_per && $fac_per < $achat_per) {
+                $errors[] = 'La périodicité de facturation ne peut pas être inférieure à la périodicité d\'achat';
+            }
+        }
+
+        return $errors;
     }
 
     public function create(&$warnings = array(), $force_create = false)

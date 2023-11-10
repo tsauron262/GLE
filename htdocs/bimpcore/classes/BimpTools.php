@@ -2236,15 +2236,17 @@ class BimpTools
     public static function getDatesIntervalData($date_from, $date_to, $debug_echo = false)
     {
         $data = array(
-            'full_years'     => 0, // Nombre d'années complètes
-            'full_monthes'   => 0, // Nombre de mois complets
-            'full_days'      => 0, // Nombre de jours complets
-            'remain_monthes' => 0, // Nombre de mois restants (sur 1 année incomplète)
-            'remain_days'    => 0 // Nombre de jours restants (sur 1 mois incomplet)
+            'full_years'         => 0, // Nombre d'années complètes
+            'full_monthes'       => 0, // Nombre de mois complets
+            'full_days'          => 0, // Nombre de jours complets
+            'remain_monthes'     => 0, // Nombre de mois restants (sur dernière année incomplète)
+            'remain_days'        => 0, // Nombre de jours restants (sur dernier mois incomplet),
+            'nb_monthes_decimal' => 0
         );
 
-        $dt_from = new DateTime(date('Y-m-d', strtotime($date_from)));
-        $dt_to = new DateTime(date('Y-m-d', strtotime($date_to)));
+        $dt_from = new DateTime(date('Y-m-d', strtotime($date_from)) . ' 00:00:00');
+        $dt_to = new DateTime(date('Y-m-d', strtotime($date_to)) . ' 00:00:00');
+        $dt_to->add(new DateInterval('P1D')); // Pour avoir le dernier jour complet
 
         if ($debug_echo) {
             echo '<br/><br/>';
@@ -2262,6 +2264,12 @@ class BimpTools
         $data['remain_days'] = (int) $interval->format('%r%d');
 
         $data['full_monthes'] = ($data['full_years'] * 12) + $data['remain_monthes'];
+
+        $data['nb_monthes_decimal'] = $data['full_monthes'];
+
+        if ($data['remain_days'] > 0) {
+            $data['nb_monthes_decimal'] += $data['remain_days'] / cal_days_in_month(CAL_GREGORIAN, (int) $dt_to->format('n'), (int) $dt_to->format('Y'));
+        }
 
         if ($debug_echo) {
             echo 'DATA<pre>';

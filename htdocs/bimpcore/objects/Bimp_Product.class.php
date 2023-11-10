@@ -573,7 +573,7 @@ class Bimp_Product extends BimpObject
         $rows = $this->getList(array(
             'type2'    => $type2,
             'validate' => 1,
-            'tobuy'    => 1
+//            'tobuy'    => 1
                 ), null, null, 'rowid', 'desc', 'array', array('rowid', 'ref', 'label', 'price'));
 
         if (!empty($rows)) {

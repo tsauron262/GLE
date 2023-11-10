@@ -241,7 +241,7 @@ class BCT_Contrat extends BimpDolObject
 
     // Getters données : 
 
-    public function getBimpObjectsLinked()
+    public function getBimpObjectsLinked($not_for = '')
     {
         $this->dol_object->element = 'bimp_contrat';
         $result = parent::getBimpObjectsLinked($not_for = '');

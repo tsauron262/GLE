@@ -1700,6 +1700,7 @@ class BCT_ContratLine extends BimpObject
     {
         $html = '';
 
+        BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
         $id_lines = BimpTools::getPostFieldValue('id_objects', array());
         $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
         $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
@@ -1793,6 +1794,7 @@ class BCT_ContratLine extends BimpObject
             $html .= '<tbody>';
 
             $secteurs = BimpCache::getSecteursArray(false);
+            $expertises = BimpDolObject::$expertise;
             $modes_reglement = BimpCache::getModeReglements();
             $conds_reglement = BimpCache::getCondReglementsArray(false);
 
@@ -1824,7 +1826,7 @@ class BCT_ContratLine extends BimpObject
                     $html .= '<div style="display: inline-block">';
                     $html .= 'Entrepôt : ' . $entrepot->getLink() . '<br/>';
                     $html .= 'Secteur : <b>' . (isset($secteurs[$facture_data['secteur']]) ? $secteurs[$facture_data['secteur']] : '<span class="danger">' . ($facture_data['secteur'] ? 'inconnu (' . $facture_data['secteur'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
-                    $html .= 'Expertise : <b>' . (isset($secteurs[$facture_data['expertise']]) ? $secteurs[$facture_data['expertise']] : '<span class="danger">' . ($facture_data['expertise'] ? 'inconnu (' . $facture_data['expertise'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
+                    $html .= 'Expertise : <b>' . (isset($expertises[$facture_data['expertise']]) ? $expertises[$facture_data['expertise']] : '<span class="danger">' . ($facture_data['expertise'] ? 'inconnu (' . $facture_data['expertise'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
                     $html .= 'Mode de réglement : <b>' . (isset($modes_reglement[$facture_data['id_mode_reglement']]) ? $modes_reglement[$facture_data['id_mode_reglement']] : '<span class="danger">' . ($facture_data['id_mode_reglement'] ? 'inconnu (' . $facture_data['id_mode_reglement'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
                     $html .= 'Conditions de réglement : <b>' . (isset($conds_reglement[$facture_data['id_cond_reglement']]) ? $conds_reglement[$facture_data['id_cond_reglement']] : '<span class="danger">' . ($facture_data['id_cond_reglement'] ? 'inconnu (' . $facture_data['id_cond_reglement'] . ')' : 'non spécifié') . '</span>') . '</b><br/>';
                     $html .= '</div>';

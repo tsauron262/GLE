@@ -241,6 +241,15 @@ class BCT_Contrat extends BimpDolObject
 
     // Getters données : 
 
+    public function getBimpObjectsLinked()
+    {
+        $this->dol_object->element = 'bimp_contrat';
+        $result = parent::getBimpObjectsLinked($not_for = '');
+        $this->dol_object->element = 'contrat';
+        
+        return $result;
+    }
+
     public function getConditionReglementClient()
     {
         if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0)) {
@@ -510,7 +519,11 @@ class BCT_Contrat extends BimpDolObject
     {
         $this->dol_object->element = 'bimp_contrat';
 
-        return parent::renderLinkedObjectsTable($htmlP);
+        $html = parent::renderLinkedObjectsTable($htmlP);
+
+        $this->dol_object->element = 'contrat';
+
+        return $html;
     }
 
     public function renderContacts($type = 0, $code = '', $input_name = '')

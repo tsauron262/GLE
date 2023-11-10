@@ -42,6 +42,19 @@ class Bimp_PropalLine extends ObjectLine
             return $prod->isAbonnement();
         }
     }
+    
+    
+    
+    public function isFieldEditable($field, $force_edit = false){
+//        die('ffffff');
+//        $parent = $this->getParentInstance();
+//        if(!$parent->getNbAbonnements()){
+            $tabOk = array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv');
+            if(in_array($field, $tabOk))
+                    return true;
+//        }
+        return parent::isFieldEditable($field, $force_edit);
+    }
 
     public function showMarginsInForms()
     {

@@ -5,13 +5,13 @@ class Bimp_ImportPaiement extends BimpObject
 
     var $id_mode_paiement = 'VIR';
     
-    function getFiltreWithBanque(){
+    function getFiltreWithBanque($type = '04'){
         $bdb = BimpCache::getBdb();
         $row = $bdb->getRow('bank_account', 'rowid = '.$this->getData('banque'));
 //        print_r($row);
         $inc = '....';
 //        $inc = 'RLV ';
-        return '04'.$row->code_banque.$inc.$row->code_guichet.'EUR2E'.$row->number;
+        return $type.$row->code_banque.$inc.$row->code_guichet.'EUR2E'.$row->number;
     }
 
     function create(&$warnings = array(), $force_create = false)
@@ -175,15 +175,15 @@ class Bimp_ImportPaiement extends BimpObject
     function traiteData($datas, &$errors)
     {
         $separateurecriture = '
-';
+04';
 
         $tabLn = explode($separateurecriture, $datas);
 
         unset($tabLn[0]);
         foreach ($tabLn as $ln) {
-            if(stripos($ln, '04') !== 0)
-                    continue;
-//            $ln = $ln;
+//            if(stripos($ln, '04') !== 0)
+//                    continue;
+            $ln = '04'.$ln;
 
             $line = BimpCache::getBimpObjectInstance($this->module, 'Bimp_ImportPaiementLine');
             $line->set('id_import', $this->id);

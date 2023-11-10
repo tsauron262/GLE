@@ -3728,6 +3728,10 @@ class BimpObject extends BimpCache
                             $module = 'bimpcontract';
                             $class = 'BContract_contrat';
                             break;
+                        case 'bimp_contrat': 
+                            $module = 'bimpcontrat';
+                            $class = 'BCT_Contrat';
+                            break;
 //                        case 'fichinter':
 //                            $class = 'BimpFi_fiche';
 //                            $module = "bimpfi";

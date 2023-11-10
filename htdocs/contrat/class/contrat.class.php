@@ -3473,4 +3473,59 @@ class ContratLigne extends CommonObjectLine
 			return -1;
 		}
 	}
+        
+        
+        /*mod drsi*/
+        
+	public function delete()
+	{
+		global $conf, $langs, $user;
+
+		$error = 0;
+
+		if ($this->statut >= 0) {
+			// Call trigger
+			$result = $this->call_trigger('LINECONTRACT_DELETE', $user);
+			if ($result < 0) {
+				return -1;
+			}
+			// End call triggers
+
+			$this->db->begin();
+
+			$sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
+			$sql .= " WHERE rowid = ".((int) $this->id);
+
+			dol_syslog(get_class($this)."::deleteline", LOG_DEBUG);
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				$this->error = "Error ".$this->db->lasterror();
+				$error++;
+			}
+
+			if (!$error) {
+				// Remove extrafields
+				$contractline = new ContratLigne($this->db);
+				$contractline->id = $this->id;
+				$result = $contractline->deleteExtraFields();
+				if ($result < 0) {
+					$error++;
+					$this->error = "Error ".get_class($this)."::deleteline deleteExtraFields error -4 ".$contractline->error;
+				}
+			}
+
+			if (empty($error)) {
+				$this->db->commit();
+				return 1;
+			} else {
+				dol_syslog(get_class($this)."::deleteline ERROR:".$this->error, LOG_ERR);
+				$this->db->rollback();
+				return -1;
+			}
+		} else {
+			$this->error = 'ErrorDeleteLineNotAllowedByObjectStatus';
+			return -2;
+		}
+	}
+        /*fmoddrsi*/
 }

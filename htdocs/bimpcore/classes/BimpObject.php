@@ -8606,7 +8606,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $js .= '{}, ';
         }
-        $js .= '\'' . htmlentities($title) . '\', ';
+        $js .= '\'' . htmlentities(addslashes($title)) . '\', ';
         $js .= $success_callback . ', ';
         $js .= '\'' . $modal_format . '\'';
 

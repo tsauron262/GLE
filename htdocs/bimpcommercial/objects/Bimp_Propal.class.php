@@ -316,10 +316,16 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
 
                 $items = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('bimp_contrat'));
-                if (!empty($items)) {
-                    $errors[] = 'Contrat d\'abonnement déjà créé';
-                    return 0;
+//                print_r($items);
+                foreach($items as $id){
+                    $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'Bimp_Contrat', $id['id_object']);
+                    if($obj->isLoaded()){
+                        $errors[] = 'Contrat d\'abonnement déjà créé';
+                        return 0;
+                    }
                 }
+            if (!empty($items)) {
+            }
                 return 1;
 
             case 'classifyBilled':
@@ -1030,6 +1036,14 @@ class Bimp_Propal extends Bimp_PropalTemp
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     $lines[] = $r['id'];
+                }
+            }
+            
+            $rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN ('.implode(',', $lines).')', null, 'array', array('DISTINCT a.id'), null, null, array());
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if(!in_array($r['id'], $lines))
+                        $lines[] = $r['id'];
                 }
             }
         }
@@ -2042,13 +2056,13 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                 $prod = $line->getProduct();
 
-                if (!BimpObject::objectLoaded($prod)) {
-                    $line_errors[] = 'Produit absent';
-                }
+//                if (!BimpObject::objectLoaded($prod)) {
+//                    $line_errors[] = 'Produit absent';
+//                }
 
                 if (!count($line_errors)) {
                     $id_pfp = (int) $line->id_fourn_price;
-                    if (!$id_pfp) {
+                    if (!$id_pfp && BimpObject::objectLoaded($prod)) {
                         $id_fourn = (int) $prod->getData('achat_def_id_fourn');
                         if ($id_fourn) {
                             $id_pfp = (int) $prod->getLastFournPriceId($id_fourn);
@@ -2071,8 +2085,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                         'duration'                     => $line->getData('abo_duration'),
                         'fac_term'                     => $line->getData('abo_fac_term'),
                         'nb_renouv'                    => $line->getData('abo_nb_renouv'),
-                        'achat_periodicity'            => $prod->getData('achat_def_periodicity'),
-                        'variable_qty'                 => $prod->getData('variable_qty'),
+                        'linked_id_object'             => $line->getData('linked_id_object'),
+                        'linked_object_name'           => $line->getData('linked_object_name'),
+                        'achat_periodicity'            => (BimpObject::objectLoaded($prod)? $prod->getData('achat_def_periodicity') : 0),
+                        'variable_qty'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
 //                        'id_linked_line'               => $id_linked_contrat_line,
                             ), true, $line_errors, $line_warnings);
                 }

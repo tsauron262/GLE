@@ -41,6 +41,19 @@ class Bimp_PropalLine extends ObjectLine
         if (BimpObject::objectLoaded($prod)) {
             return $prod->isAbonnement();
         }
+        else{
+            $parentLine = $this->getParentLine();
+            if($parentLine){
+                return $parentLine->isAbonnement();
+            }
+        }
+    }
+    
+    public function getParentLine(){
+        if($this->getData('id_parent_line')){
+            return BimpObject::getInstance($this->module, $this->object_name, $this->getData('id_parent_line'));
+        }
+        return null;
     }
     
     
@@ -112,6 +125,12 @@ class Bimp_PropalLine extends ObjectLine
     public function getAboQties()
     {
         $prod = $this->getProduct();
+        if(!BimpObject::objectLoaded($prod)){
+            $parentLine = $this->getParentLine();
+            if($parentLine){
+                $prod = $parentLine->getProduct();
+            }
+        }
         $qties = array(
             'total'           => $this->getFullQty(),
             'fac_periodicity' => (int) $this->getData('abo_fac_periodicity'),

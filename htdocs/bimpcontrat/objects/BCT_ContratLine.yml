@@ -304,6 +304,23 @@ fields:
 #            options: 
 #                array: linkableContratLines
 
+    id_parent_line:
+        label: Ligne parente
+        type: id
+        default_value: 0
+        viewable: 0
+        filterable: 1
+        input: 
+            type: hidden
+        
+    linked_id_object: 
+        label: Objet lié
+        type: int
+        default_value: 0
+        
+    linked_object_name:
+        label: Type d\'objet lié
+
 forms: 
     text: 
         rows: 

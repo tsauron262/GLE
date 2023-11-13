@@ -3004,10 +3004,11 @@ class BCT_ContratLine extends BimpObject
                                     $process->incIgnored();
                                     if ((int) $line->id_product) {
                                         $process->Error('Le produit #' . $line->id_product . ' n\'existe plus', $facture, $line_ref);
-                                    } else {
+                                        continue;
+                                    } /*else {
                                         $process->Error('Aucun produit', $facture, $line_ref);
                                     }
-                                    continue;
+                                    continue;*/
                                 }
 
                                 $line_ref .= ' - Produit ' . $product->getRef();
@@ -3602,7 +3603,7 @@ class BCT_ContratLine extends BimpObject
                             }
                         }
                     } else {
-                        $errors[] = 'Aucun produit sélectionné';
+//                        $errors[] = 'Aucun produit sélectionné';
                     }
 
                     $periodicity = (int) $this->getData('fac_periodicity');

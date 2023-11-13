@@ -4,15 +4,17 @@ class Bimp_Product extends BimpObject
 {
 
     public $stocks = null;
-    public static $sousTypes = array(
-        0 => '',
-        1 => 'Service inter',
-        2 => 'Service contrat',
-        3 => 'Déplacement inter',
-        4 => 'Déplacement contrat',
-        5 => 'Logiciel (licence unique)',
-        6 => 'Abonnement',
-        20 => 'Bundle'
+    public static $sousTypes = array(//-1 commun, 0 produit, 1 services
+        -1 => array(
+            0 => '',
+            1 => 'Service inter',
+            2 => 'Service contrat',
+            3 => 'Déplacement inter',
+            4 => 'Déplacement contrat',
+            5 => 'Logiciel (licence unique)',
+            6 => 'Abonnement',
+            20 => 'Bundle'
+        )
     );
     public static $abonnements_sous_types = array(6);
     public static $sousTypeDep = array(3, 4);
@@ -1672,6 +1674,16 @@ class Bimp_Product extends BimpObject
         if (isset($result[0]->id)) {
             return (int) $result[0]->id;
         }
+    }
+    
+    public function getSousTypesArray(){
+        $result = array();
+        foreach(static::$sousTypes as $type => $values){
+            if($type == -1 || !$this->isLoaded() || $type == $this->getData('fk_product_type')){
+                $result = BimpTools::merge_array($result, $values);
+            }
+        }
+        return $result;
     }
 
     public function getFournisseursArray($include_empty = true, $empty_label = '')

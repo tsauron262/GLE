@@ -32,8 +32,10 @@ class BIMP_Task extends BimpAbstractFollow
             'dev' => array('label' => 'Développement')
         ),
         'dispatch' => array(
-            'disp1' => array('label' => 'Disp1'),
-            'disp2' => array('label' => 'Disp2')
+            'hotline' => array('label' => 'Hot-Line'),
+            'commande' => array('label' => 'Commande'),
+            'commerc' => array('label' => 'Service Commercial'),
+            'tech' => array('label' => 'Service Technique')
         ),
         'sav' => array(
             'autre' => array('label' => 'Autre')

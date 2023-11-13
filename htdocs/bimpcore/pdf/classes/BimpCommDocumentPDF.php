@@ -785,7 +785,10 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         if (is_array($this->object->lines) && !empty($this->object->lines)) {
             foreach ($this->object->lines as $line) {
                 $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
-                if($bimpLine->getData('hide_in_pdf'))
+                if(BimpObject::objectLoaded($bimpLine) && (
+                        $bimpLine->getData('hide_in_pdf') ||
+                        $bimpLine->getData('linked_object_name') == 'bundleCorrect' || 
+                        $bimpLine->getData('linked_object_name') == 'bundle'))
                     $montantTotLineHide += $line->total_ttc;
             }
         }
@@ -798,7 +801,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                 $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
                 
-                if(BimpObject::objectLoaded($bimpLine) && ($bimpLine->getData('linked_object_name') == 'bundleCorrect' || $bimpLine->getData('linked_object_name') == 'bundle'))
+                if(BimpObject::objectLoaded($bimpLine) && $montantTotLineHide == 0 && ($bimpLine->getData('linked_object_name') == 'bundleCorrect' || $bimpLine->getData('linked_object_name') == 'bundle'))
                     continue;
 
                 if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && !in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0 || stripos($line->desc, 'Trop per') === 0)) {

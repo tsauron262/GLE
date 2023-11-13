@@ -175,9 +175,9 @@ class BimpDebug
 
     public static function renderDebug($identifier = 'main_debug')
     {
-//        if (!self::isActive()) {
+        if (!self::isActive()) {
             return '';
-//        }
+        }
 
         $html = '';
 

@@ -209,11 +209,12 @@ class BCT_Contrat extends BimpDolObject
                 );
             }
 
+        }
             $id_group = BimpCore::getUserGroupId('console');
             $note = BimpObject::getInstance("bimpcore", "BimpNote");
             if ($id_group) {
                 $buttons[] = array(
-                    'label'   => 'Message achat',
+                    'label'   => 'Message console',
                     'icon'    => 'far_paper-plane',
                     'onclick' => $note->getJsActionOnclick('repondre', array(
                         "obj_type"      => "bimp_object",
@@ -228,7 +229,6 @@ class BCT_Contrat extends BimpDolObject
                     ))
                 );
             }
-        }
 
         return $buttons;
     }

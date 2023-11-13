@@ -804,6 +804,8 @@ class BC_ListTable extends BC_List
                 if ($this->params['positions']) {
                     $row['params']['position'] = (int) $object->getData($object->position_field);
                 }
+                if($object->getData('id_parent_line') > 0)
+                    $row['id_parent_line'] = $object->getData('id_parent_line');
                 foreach ($this->cols as $col_name => $col_params) {
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
@@ -2168,6 +2170,8 @@ class BC_ListTable extends BC_List
 
                 $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow' . ($modified ? ' modified' : '') . ($selected ? ' selected' : '');
                 $html .= '" id="' . $this->object->object_name . '_row_' . $id_object . '"';
+                if(isset($row['id_parent_line']))
+                    $html .= ' data-id_parent_line="'. $row['id_parent_line'] .'"';
                 $html .= ' data-id_object="' . $id_object . '"';
                 if ($this->params['positions']) {
                     $html .= ' data-position="' . $row['params']['position'] . '"';

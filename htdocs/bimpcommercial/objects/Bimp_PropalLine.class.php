@@ -169,7 +169,8 @@ class Bimp_PropalLine extends ObjectLine
             $qties = $this->getAboQties();
 
             if ($qties['fac_periodicity'] && $qties['duration']) {
-                $html .= '<b>' . BimpTools::displayFloatValue((float) $qties['per_prod_period'], 8, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $qties['prod_duration'] . ' mois</b><br/>';
+                $nbPeriode = $qties['duration'] / $qties['prod_duration'];
+                $html .= '<b>' . BimpTools::displayFloatValue((float) $qties['per_prod_period'], 8, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $qties['prod_duration'] . ' mois'.($nbPeriode != 1 ? ' X '.($nbPeriode) : '') .'</b><br/>';
             } else {
                 if (!$qties['fac_periodicity']) {
                     $html .= ($html ? '<br/>' : '') . '<span class="danger">Périodicité de facturation non définie</span>';

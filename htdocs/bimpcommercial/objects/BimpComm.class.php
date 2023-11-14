@@ -2909,6 +2909,10 @@ class BimpComm extends BimpDolObject
 
             if ($params['is_clone']) {
                 switch ($origin->object_name) {
+                    case 'Bimp_Propal': 
+                        unset($data['id_linked_contrat_line']);
+                        break;
+                    
                     case 'BS_SavPropal':
                         unset($data['id_reservation']);
                         break;

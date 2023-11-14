@@ -1725,6 +1725,9 @@ class ObjectLine extends BimpObject
             $product = $this->getProduct();
 
             if (BimpObject::objectLoaded($product)) {
+                if ($product->isAbonnement()) {
+                    return 6;
+                }
                 if ($product->getData('fk_product_type') === 0) {
                     return 1;
                 }
@@ -4388,7 +4391,8 @@ class ObjectLine extends BimpObject
                             $min = 'none';
                         }
 
-                        $html = BimpInput::renderInput('qty', $prefixe . 'qty', (int) $value, array(
+                        $value = round($value, $decimals);
+                        $html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => $min,

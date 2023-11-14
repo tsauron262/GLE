@@ -52,6 +52,7 @@ fields:
     abo_duration: unset
     abo_fac_term: unset
     abo_nb_renouv: unset
+    id_linked_contrat_line: unset
         
 forms: 
     sav: 

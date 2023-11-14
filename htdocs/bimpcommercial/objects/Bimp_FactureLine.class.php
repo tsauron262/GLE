@@ -23,7 +23,6 @@ class Bimp_FactureLine extends ObjectLine
         return 0;
     }
     
-    
     public function getTotalMarge(){
         $margin = (float) $this->getMargin();
         $total_reval = 0;

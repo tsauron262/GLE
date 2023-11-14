@@ -296,7 +296,7 @@ fields:
         object: user_cloture
         
     id_linked_line: 
-        label: Ligne de contrat liée
+        label: Abonnement lié
         type: id_object
         object: linked_line
         default_value: 0
@@ -304,7 +304,26 @@ fields:
             type: select
             options: 
                 array: linkableContratLines
+            help: 'Si un abonnement est sélectionné, les unités seront facturées au prorata de la durée restante de cet abonnement.<br/>Toutes les unités pourront ainsi être renouvellées simultanément'
         depends_on: fk_product
+        
+    linked_object_name:
+        label: Type d\'objet lié
+        
+    linked_id_object: 
+        label: Objet lié
+        type: int
+        default_value: 0
+    
+    line_origin_type: 
+        label: Type de ligne d\'origine
+        
+    id_line_origin: 
+        label: ID Ligne d\'origine
+        type: id
+        default_value: 0
+    
+    
 
 forms: 
     text: 
@@ -387,6 +406,12 @@ forms:
     activate: 
         rows: 
             - field: date_ouverture
+            - field: id_linked_line
+            
+    bulk_activate: 
+        rows: 
+            - field: date_ouverture
+            - field: id_linked_line
         
     periodic_process: 
         modal_format: large

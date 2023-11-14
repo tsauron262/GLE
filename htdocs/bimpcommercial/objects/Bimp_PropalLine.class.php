@@ -42,17 +42,17 @@ class Bimp_PropalLine extends ObjectLine
             return $prod->isAbonnement();
         }
     }
-    
-    
-    
-    public function isFieldEditable($field, $force_edit = false){
-//        die('ffffff');
-//        $parent = $this->getParentInstance();
-//        if(!$parent->getNbAbonnements()){
-            $tabOk = array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv');
-            if(in_array($field, $tabOk))
-                    return true;
-//        }
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        if (in_array($field, array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv'))) {
+            if ((int) BimpTools::getPostFieldValue('id_linked_contrat_line', $this->getData('id_linked_contrat_line'))) {
+                return 0;
+            }
+
+            return 1;
+        }
+
         return parent::isFieldEditable($field, $force_edit);
     }
 
@@ -100,6 +100,17 @@ class Bimp_PropalLine extends ObjectLine
 
     public function getInputValue($field_name)
     {
+        if (in_array($field_name, array('abo_duration', 'abo_fac_periodicity', 'abo_fac_term'))) {
+            $id_linked_contrat_line = (int) BimpTools::getPostFieldValue('id_linked_contrat_line', $this->getData('id_linked_contrat_line'));
+
+            if ($id_linked_contrat_line) {
+                $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_contrat_line);
+                if (BimpObject::objectLoaded($contrat_line)) {
+                    return $contrat_line->getDataAtDate(str_replace('abo_', '', $field_name));
+                }
+            }
+        }
+
         if (in_array($field_name, array('abo_fac_periodicity', 'abo_fac_term'))) {
             if (!$this->isLoaded() || $this->id_product != (int) BimpTools::getPostFieldValue('id_product', $this->id_product)) {
                 return $this->getValueByProduct($field_name);
@@ -149,6 +160,17 @@ class Bimp_PropalLine extends ObjectLine
         if ($this->isAbonnement()) {
             $qties = $this->getAboQties();
 
+            $id_contrat_line = (int) $this->getData('id_linked_contrat_line');
+            if ($id_contrat_line) {
+                $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
+                if (BimpObject::objectLoaded($contrat_line)) {
+                    $contrat = $contrat_line->getParentInstance();
+                    if (BimpObject::objectLoaded($contrat)) {
+                        $html .= 'Ajout à un abonnement en cours du contrat ' . $contrat->getLink() . '<br/><br/>';
+                    }
+                }
+            }
+
             if ($qties['fac_periodicity'] && $qties['duration']) {
                 $html .= '<b>' . BimpTools::displayFloatValue((float) $qties['per_prod_period'], 8, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $qties['prod_duration'] . ' mois</b><br/>';
             } else {
@@ -167,7 +189,36 @@ class Bimp_PropalLine extends ObjectLine
             }
             $html .= '<br/><b>- Qté totale : </b>' . parent::displayLineData('qty');
             $html .= '<br/>- Facturation à terme ' . ((int) $this->getData('abo_fac_term') ? 'à échoir' : 'échu');
-            $html .= '<br/>- Renouvellement(s) tacite(s) : ' . $this->displayDataDefault('abo_nb_renouv');
+//            $html .= '<br/>- Renouvellement(s) tacite(s) : ' . $this->displayDataDefault('abo_nb_renouv');
+        }
+
+        return $html;
+    }
+
+    public function displayLinkedContratLineInfos()
+    {
+        $html = '';
+
+        $id_linked_contrat_line = (int) BimpTools::getPostFieldValue('id_linked_contrat_line', $this->getData('id_linked_contrat_line'));
+
+        if ($id_linked_contrat_line) {
+            $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_contrat_line);
+            if (BimpObject::objectLoaded($contrat_line)) {
+                $html .= 'Dates : ';
+                if ($contrat_line->getData('statut') <= 0) {
+                    $html .= '<span class="warning">Abonnement inactif</span><br/>';
+                } else {
+                    $html .= '<b>' . $contrat_line->displayPeriods() . '</b>';
+                }
+                $html .= '<br/>';
+                $date_next_fac = $contrat_line->getData('date_next_facture');
+                if ($date_next_fac) {
+                    $html .= 'Prochaine facture : <b>Le ' . date('d / m / Y', strtotime($date_next_fac)) . '</b><br/>';
+                }
+
+                $html .= 'Durée : <b>' . $contrat_line->displayDataDefault('duration') . ' mois</b><br/>';
+                $html .= 'Facturation : <b>' . $contrat_line->displayDataDefault('fac_periodicity') . ' / ' . $contrat_line->displayDataDefault('fac_term') . '</b><br/>';
+            }
         }
 
         return $html;
@@ -220,7 +271,6 @@ class Bimp_PropalLine extends ObjectLine
             $html .= '</div>';
         }
 
-        $html .= '<input type="hidden" name="prod_duration" value="' . $duree_unitaire . '"/>';
         return $html;
     }
 
@@ -237,8 +287,6 @@ class Bimp_PropalLine extends ObjectLine
                     'unsigned'  => 1
                 )
             );
-
-//            $html .= '<span class="small">Veuillez renseigner l\'une des quantités suivantes</span>';
 
             $html .= '<span class="bold">Nombre d\'unités :</span><br/>';
             $html .= BimpInput::renderInput('qty', 'abo_qty_per_product_period', $qties['per_prod_period'], $options);
@@ -259,6 +307,8 @@ class Bimp_PropalLine extends ObjectLine
                         'open'        => 0
             ));
             $html .= '</div>';
+
+            $html .= '<input type="hidden" name="prod_duration" value="' . $qties['prod_duration'] . '"/>';
         } else {
             $html .= $this->displayAboQty();
         }
@@ -266,7 +316,115 @@ class Bimp_PropalLine extends ObjectLine
         return $html;
     }
 
-    // Overrides: 
+    public function renderLinkedContratLineInput()
+    {
+        $html = '';
+
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product) && $product->isAbonnement()) {
+            if (!(int) $product->getData('achats_partiels_allowed')) {
+                $html .= BimpRender::renderAlerts('Ce produit ne peut pas être acheté partiellement, l\'ajout à un abonnement existant n\'est pas possible', 'warning');
+            } else {
+                BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
+                $id_client = (int) $this->db->getValue('propal', 'fk_soc', 'rowid = ' . (int) $this->getData('id_obj'));
+
+                if ($id_client) {
+                    $lines = BCT_Contrat::getClientAbosLinesArray((int) $id_client, $product->id, true, 'NON (Ajouter en tant que nouvel abonnement)');
+
+                    if (count($lines) > 1) {
+                        $html .= BimpInput::renderInput('select', 'id_linked_contrat_line', (int) $this->getData('id_linked_contrat_line'), array(
+                                    'options' => $lines
+                        ));
+
+                        $msg = 'Si un abonnement en cours est sélectionné, les unités ajoutées seront facturées au prorata de la durée restante de cet abonnement.<br/>';
+                        $msg .= 'Toutes les unités pourront ainsi être renouvellées simultanément';
+                        $html .= BimpRender::renderAlerts($msg, 'info');
+                        return $html;
+                    } else {
+                        $html .= BimpRender::renderAlerts('Le client ne dispose pas d\'abonnement en cours pour ce produit', 'warning');
+                    }
+                } else {
+                    $html .= BimpRender::renderAlerts('Client non renseigné');
+                }
+            }
+        } else {
+            return 'KO - ' . $product->id;
+        }
+
+        $html .= '<input type="hidden" value="0" name="id_linked_contrat_line"/>';
+
+        return $html;
+    }
+
+    // Traitements :
+
+    public function checkLinkedContratLine(&$errors = array())
+    {
+        $check = true;
+        $id_contrat_line = (int) $this->getData('id_linked_contrat_line');
+        if ($id_contrat_line) {
+            $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
+
+            if (BimpObject::objectLoaded($contrat_line)) {
+                $propal = $this->getParentInstance();
+                $contrat = $contrat_line->getParentInstance();
+
+                if (!BimpObject::objectLoaded($propal)) {
+                    $errors[] = 'Devis absent';
+                    $check = false;
+                }
+                if (!BimpObject::objectLoaded($contrat)) {
+                    $errors[] = 'Le contrat pour l\'abonnement en cours #' . $id_contrat_line . ' n\'existe plus';
+                    $check = false;
+                }
+
+                if (!count($errors)) {
+                    if ((int) $contrat->getData('fk_soc') !== (int) $propal->getData('fk_soc')) {
+                        $errors[] = 'Le client du contrat sélectionné pour l\'ajout à un abonnement en cours n\'est pas le même que celui du devis';
+                        $check = false;
+                    }
+
+                    if ((int) $contrat_line->getData('fk_product') !== (int) $this->id_product) {
+                        $errors[] = 'Ajout à un abonnement en cours : le produit ne correspond pas';
+                        $check = false;
+                    }
+                }
+            } else {
+                $errors[] = 'La ligne de contrat d\'abonnement liée #' . $id_contrat_line . ' n\'existe plus';
+                $check = false;
+            }
+        }
+
+        return $check;
+    }
+
+    // Overrides : 
+
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if ($this->isAbonnement()) {
+            $id_contrat_line = (int) $this->getData('id_linked_contrat_line');
+            if ($id_contrat_line) {
+                if ($this->checkLinkedContratLine($errors)) {
+                    $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
+                    $this->set('abo_fac_periodicity', $contrat_line->getDataAtDate('fac_periodicity'));
+                    $this->set('abo_duration', $contrat_line->getDataAtDate('duration'));
+                    $this->set('abo_fac_term', $contrat_line->getDataAtDate('fac_term'));
+                    $this->set('abo_nb_renouv', $contrat_line->getDataAtDate('nb_renouv'));
+                }
+            }
+        } else {
+            $this->set('abo_fac_periodicity', 0);
+            $this->set('abo_duration', 0);
+            $this->set('abo_fac_term', 0);
+            $this->set('abo_nb_renouv', 0);
+            $this->set('id_linked_contrat_line', 0);
+        }
+
+        return $errors;
+    }
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
@@ -277,8 +435,8 @@ class Bimp_PropalLine extends ObjectLine
             $parent->dol_object->statut = $parent->getInitData('statut');
         } else
             $return = parent::delete($warnings, $force_delete);
-        
-        
+
+
         return $return;
     }
 }

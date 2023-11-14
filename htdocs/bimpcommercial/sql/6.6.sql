@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_propal_line` ADD `id_linked_contrat_line` int(11) NOT NULL DEFAULT 0;

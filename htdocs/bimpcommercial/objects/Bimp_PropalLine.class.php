@@ -40,31 +40,30 @@ class Bimp_PropalLine extends ObjectLine
         $prod = $this->getProduct();
         if (BimpObject::objectLoaded($prod)) {
             return $prod->isAbonnement();
-        }
-        else{
+        } else {
             $parentLine = $this->getParentLine();
-            if($parentLine){
+            if ($parentLine) {
                 return $parentLine->isAbonnement();
             }
         }
     }
-    
-    public function getParentLine(){
-        if($this->getData('id_parent_line')){
+
+    public function getParentLine()
+    {
+        if ($this->getData('id_parent_line')) {
             return BimpObject::getInstance($this->module, $this->object_name, $this->getData('id_parent_line'));
         }
         return null;
     }
-    
-    
-    
-    public function isFieldEditable($field, $force_edit = false){
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
 //        die('ffffff');
 //        $parent = $this->getParentInstance();
 //        if(!$parent->getNbAbonnements()){
-            $tabOk = array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv');
-            if(in_array($field, $tabOk))
-                    return true;
+        $tabOk = array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv');
+        if (in_array($field, $tabOk))
+            return true;
 //        }
         return parent::isFieldEditable($field, $force_edit);
     }
@@ -125,9 +124,9 @@ class Bimp_PropalLine extends ObjectLine
     public function getAboQties()
     {
         $prod = $this->getProduct();
-        if(!BimpObject::objectLoaded($prod)){
+        if (!BimpObject::objectLoaded($prod)) {
             $parentLine = $this->getParentLine();
-            if($parentLine){
+            if ($parentLine) {
                 $prod = $parentLine->getProduct();
             }
         }
@@ -169,8 +168,11 @@ class Bimp_PropalLine extends ObjectLine
             $qties = $this->getAboQties();
 
             if ($qties['fac_periodicity'] && $qties['duration']) {
-                $nbPeriode = $qties['duration'] / $qties['prod_duration'];
-                $html .= '<b>' . BimpTools::displayFloatValue((float) $qties['per_prod_period'], 8, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $qties['prod_duration'] . ' mois'.($nbPeriode != 1 ? ' X '.($nbPeriode) : '') .'</b><br/>';
+                $nb_prod_periodes = 0;
+                if ((int) $qties['prod_duration'] > 0) {
+                    $nb_prod_periodes = $qties['duration'] / $qties['prod_duration'];
+                }
+                $html .= '<b>' . BimpTools::displayFloatValue((float) $qties['per_prod_period'], 8, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $qties['prod_duration'] . ' mois' . ($nb_prod_periodes > 0 && $nb_prod_periodes != 1 ? ' x ' . ($nb_prod_periodes) : '') . '</b><br/>';
             } else {
                 if (!$qties['fac_periodicity']) {
                     $html .= ($html ? '<br/>' : '') . '<span class="danger">Périodicité de facturation non définie</span>';
@@ -297,8 +299,8 @@ class Bimp_PropalLine extends ObjectLine
             $parent->dol_object->statut = $parent->getInitData('statut');
         } else
             $return = parent::delete($warnings, $force_delete);
-        
-        
+
+
         return $return;
     }
 }

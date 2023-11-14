@@ -413,9 +413,9 @@ class Bimp_Menu extends BimpObject
             $this->checkCodePath($code_path, true);
 
             if (!count($errors)) {
-                $sql = 'INSERT INTO `llx_menu` (`menu_handler`, `fk_menu`, `position`, `url`, `titre`, `perms`, `enabled`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`)';
+                $sql = 'INSERT INTO `llx_menu` (`menu_handler`, `entity`, `fk_menu`, `position`, `url`, `titre`, `perms`, `enabled`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`)';
                 $sql .= ' VALUES (';
-                $sql .= '\'' . $this->getData('menu_handler') . '\',';
+                $sql .= '\'' . $this->getData('menu_handler') . '\',0,';
 
                 if ($parent_code_path) {
                     $sql .= '(SELECT m2.rowid FROM llx_menu m2 WHERE m2.code_path = \'' . $parent_code_path . '\' AND m2.menu_handler = \'' . $this->getData('menu_handler') . '\'), ';

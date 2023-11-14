@@ -40,7 +40,14 @@ class Bimp_PropalLine extends ObjectLine
         $prod = $this->getProduct();
         if (BimpObject::objectLoaded($prod)) {
             return $prod->isAbonnement();
+        } else {
+            $parentLine = $this->getParentLine();
+            if (BimpObject::objectLoaded($parentLine)) {
+                return $parentLine->isAbonnement();
+            }
         }
+
+        return 0;
     }
 
     public function isFieldEditable($field, $force_edit = false)
@@ -75,8 +82,6 @@ class Bimp_PropalLine extends ObjectLine
         }
         return $n;
     }
-
-    // Getters données: 
 
     public function getValueByProduct($field)
     {
@@ -123,6 +128,12 @@ class Bimp_PropalLine extends ObjectLine
     public function getAboQties()
     {
         $prod = $this->getProduct();
+        if (!BimpObject::objectLoaded($prod)) {
+            $parentLine = $this->getParentLine();
+            if (BimpObject::objectLoaded($parentLine)) {
+                $prod = $parentLine->getProduct();
+            }
+        }
         $qties = array(
             'total'           => $this->getFullQty(),
             'fac_periodicity' => (int) $this->getData('abo_fac_periodicity'),
@@ -172,7 +183,11 @@ class Bimp_PropalLine extends ObjectLine
             }
 
             if ($qties['fac_periodicity'] && $qties['duration']) {
-                $html .= '<b>' . BimpTools::displayFloatValue((float) $qties['per_prod_period'], 8, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $qties['prod_duration'] . ' mois</b><br/>';
+                $nb_prod_periodes = 0;
+                if ((int) $qties['prod_duration'] > 0) {
+                    $nb_prod_periodes = $qties['duration'] / $qties['prod_duration'];
+                }
+                $html .= '<b>' . BimpTools::displayFloatValue((float) $qties['per_prod_period'], 8, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $qties['prod_duration'] . ' mois' . ($nb_prod_periodes > 0 && $nb_prod_periodes != 1 ? ' x ' . ($nb_prod_periodes) : '') . '</b><br/>';
             } else {
                 if (!$qties['fac_periodicity']) {
                     $html .= ($html ? '<br/>' : '') . '<span class="danger">Périodicité de facturation non définie</span>';

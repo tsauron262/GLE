@@ -983,6 +983,15 @@ class ObjectLine extends BimpObject
     }
 
     // Getters valeurs:
+    
+    public function getParentLine()
+    {
+        if ($this->field_exists('id_parent_line') && (int) $this->getData('id_parent_line')) {
+            return BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $this->getData('id_parent_line'));
+        }
+        
+        return null;
+    }
 
     public function getFullQty()
     {
@@ -2804,6 +2813,10 @@ class ObjectLine extends BimpObject
                 $object->fetch_lines();
                 $object->update_price();
                 $this->hydrateFromDolObject();
+                
+                global $user;
+                $line = $this->getChildObject('line');
+		$result = $line->call_trigger($line->element.'_CREATE', $user);
             }
 
             if ($force_create) {
@@ -5486,11 +5499,12 @@ class ObjectLine extends BimpObject
                         }
                     }
 
+                    /* gestion directmeent dans le PDF
                     if ($this->field_exists('hide_in_pdf')) {
                         if ($this->pu_ht * $this->getFullQty() != 0) {
                             $this->set('hide_in_pdf', 0);
                         }
-                    }
+                    }*/
                     break;
             }
 
@@ -5732,7 +5746,9 @@ class ObjectLine extends BimpObject
     {
         if ((int) $this->id_product) {
             $product = $this->getProduct();
-            if ($product->getData('type2') == 20) {
+            if ($product->isBundle()) {
+                $fieldsCopy = array('id_obj', 'abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv');
+                $isAbonnement = $product->isAbonnement();
                 //on supprime toutes les ous lignes
 //                $errors = BimpTools::merge_array($errors, $this->deleteSousLigne($errors, $warnings));
                 /*
@@ -5757,7 +5773,10 @@ class ObjectLine extends BimpObject
                         $newLn->set('id_parent_line', $this->id);
                         $newLn->set('linked_id_object', $child_prod->id);
                         $newLn->set('linked_object_name', 'bundle');
-                        $newLn->set('id_obj', $this->getData('id_obj'));
+//                        $newLn->set('id_obj', $this->getData('id_obj'));
+                        foreach($fieldsCopy as $field){
+                            $newLn->set($field, $this->getData($field));
+                        }
                         if (!$newLn->isLoaded())
                             $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
                         else
@@ -5768,6 +5787,8 @@ class ObjectLine extends BimpObject
                         $totHt += $dol_child->getData('total_ht');
                         $totHtSansRemise += $newLn->getTotalHT(true);
                         $totPa += $newLn->getTotalPA(true);
+                        if($isAbonnement && !$newLn->isAbonnement())
+                            BimpCore::addlog ('Attention, composant d\'un bundle abonnement pas abonnement LN : '.$newLn->id);
                     }
 
                     if ($totHt != 0) {
@@ -5794,7 +5815,10 @@ class ObjectLine extends BimpObject
                         $newLn->set('editable', 0);
                         $newLn->set('deletable', 0);
                         $newLn->set('id_parent_line', $this->id);
-                        $newLn->set('id_obj', $this->getData('id_obj'));
+//                        $newLn->set('id_obj', $this->getData('id_obj'));
+                        foreach($fieldsCopy as $field){
+                            $newLn->set($field, $this->getData($field));
+                        }
                         if (!$newLn->isLoaded())
                             $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
                         else

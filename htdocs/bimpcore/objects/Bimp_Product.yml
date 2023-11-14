@@ -382,9 +382,10 @@ fields:
         label: Sous-type
         type: int
         values: 
-            array: sousTypes
+            callback: getSousTypesArray
         dol_extra_field: 1
         default_value: 0
+        depends_on: fk_product_type  
         
     accountancy_code_sell:
         label: Code comptable Vente (Spécifique)

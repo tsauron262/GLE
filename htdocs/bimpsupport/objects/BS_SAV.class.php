@@ -2118,6 +2118,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
             }
         }
+        
+        if($this->getData('info_importante') != ''){
+            $html .= BimpRender::renderAlerts($this->getData('info_importante'));
+        }
 
         return $html;
     }

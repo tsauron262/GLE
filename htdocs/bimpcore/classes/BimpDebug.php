@@ -830,7 +830,7 @@ class BimpDebug
             $diff_label = '<span class="' . $class . '">' . $diff_label . '</span>';
         }
 
-        $content = BimpRender::renderDebugInfo(BimpRender::renderSql($sql), '', '', true);
+        $content = BimpRender::renderDebugInfo(BimpRender::renderSql($sql), '', ''/*, true*/);
         $title = '<span class="' . ($num_transaction < 0 ? 'danger">[HORS TRANSAC]' : 'info">[TRANSAC #' . $num_transaction . '] ') . '</span>';
         $title .= ' - Requête #' . $num_request . ' - ' . $diff_label;
 

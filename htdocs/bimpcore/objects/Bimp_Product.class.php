@@ -14,7 +14,8 @@ class Bimp_Product extends BimpObject
         6  => 'Abonnement',
         20 => 'Bundle'
     );
-    public static $abonnements_sous_types = array(6);
+    public static $abonnements_sous_types = array(6,20);
+    public static $bundle_sous_types = array(20,21);
     public static $sousTypeDep = array(3, 4);
     public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
@@ -550,8 +551,8 @@ class Bimp_Product extends BimpObject
 
     public function isBundle()
     {
-        // en prévision d'ajout d'autres types d'abonnements
-        return (int) ((int) $this->getData('type2') == 20);
+        // en prévision d'ajout d'autres types de bunddle
+        return (int) (in_array((int) $this->getData('type2'), self::$bundle_sous_types));
     }
 
     public function isNotBundle()
@@ -1672,6 +1673,16 @@ class Bimp_Product extends BimpObject
         if (isset($result[0]->id)) {
             return (int) $result[0]->id;
         }
+    }
+    
+    public function getSousTypesArray(){
+        $result = array();
+        foreach(static::$sousTypes as $type => $values){
+            if($type == -1 || !$this->isLoaded() || $type == $this->getData('fk_product_type')){
+                $result = BimpTools::merge_array($result, $values, true);
+            }
+        }
+        return $result;
     }
 
     public function getFournisseursArray($include_empty = true, $empty_label = '')

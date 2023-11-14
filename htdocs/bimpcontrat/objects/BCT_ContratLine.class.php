@@ -48,6 +48,7 @@ class BCT_ContratLine extends BimpObject
     {
         global $user;
         switch ($action) {
+            case 'facturationAvance':
             case 'activate':
                 return (int) !empty($user->rights->bimpcontract->to_validate);
 
@@ -1172,12 +1173,12 @@ class BCT_ContratLine extends BimpObject
             $filters['a.rowid'] = $params['id_lines'];
         } else {
             $filters = array(
-                'a.statut'            => 4,
-                'a.fac_periodicity'   => array(
+                'a.statut'          => 4,
+                'a.fac_periodicity' => array(
                     'operator' => '>',
                     'value'    => 0
                 ),
-                'a.date_next_facture' => array(
+                'date_next_facture' => array(
                     'operator' => '<=',
                     'value'    => date('Y-m-d')
                 )
@@ -2102,9 +2103,11 @@ class BCT_ContratLine extends BimpObject
                         if (BimpObject::objectLoaded($line)) {
                             $line_errors = array();
                             $periods_data = $line->getPeriodsToBillData($line_errors, true);
+                            $canFactAvance = $this->canSetAction('facturationAvance');
 
                             $row_html .= '<td style="min-width: 30px; max-width: 30px; text-align: center">';
-                            if (empty($line_errors) && $periods_data['nb_periods_tobill_max'] > 0) {
+                            if (empty($line_errors) && 
+                                    ($periods_data['nb_periods_tobill_today'] > 0 || ($canFactAvance && $periods_data['nb_periods_tobill_max'] > 0))) {
                                 $tr_class = '';
                                 if ($periods_data['nb_periods_tobill_today'] > 0) {
                                     $tr_class = 'selected';
@@ -2150,7 +2153,7 @@ class BCT_ContratLine extends BimpObject
 
                             if (!empty($line_errors)) {
                                 $row_html .= BimpRender::renderAlerts($line_errors);
-                            } elseif ($periods_data['nb_periods_tobill_max'] > 0) {
+                            } elseif ($periods_data['nb_periods_tobill_today'] > 0 || ($canFactAvance && $periods_data['nb_periods_tobill_max'] > 0)) {
                                 $is_first_period = ($periods_data['date_next_period_tobill'] == $periods_data['date_first_period_start']);
                                 if ($is_first_period && $periods_data['first_period_prorata'] < 1 && $periods_data['first_period_prorata'] > 0) {
                                     $msg .= BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
@@ -3358,10 +3361,11 @@ class BCT_ContratLine extends BimpObject
                                     $process->incIgnored();
                                     if ((int) $line->id_product) {
                                         $process->Error('Le produit #' . $line->id_product . ' n\'existe plus', $facture, $line_ref);
-                                    } else {
-                                        $process->Error('Aucun produit', $facture, $line_ref);
-                                    }
-                                    continue;
+                                        continue;
+                                    } /* else {
+                                      $process->Error('Aucun produit', $facture, $line_ref);
+                                      }
+                                      continue; */
                                 }
 
                                 $line_ref .= ' - Produit ' . $product->getRef();

@@ -316,10 +316,16 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
 
                 $items = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('bimp_contrat'));
-                if (!empty($items)) {
-                    $errors[] = 'Contrat d\'abonnement déjà créé';
-                    return 0;
+//                print_r($items);
+                foreach($items as $id){
+                    $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id['id_object']);
+                    if($obj->isLoaded()){
+                        $errors[] = 'Contrat d\'abonnement déjà créé';
+                        return 0;
+                    }
                 }
+            if (!empty($items)) {
+            }
                 return 1;
 
             case 'classifyBilled':
@@ -1033,6 +1039,14 @@ class Bimp_Propal extends Bimp_PropalTemp
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     $lines[] = $r['id'];
+                }
+            }
+            
+            $rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN ('.implode(',', $lines).')', null, 'array', array('DISTINCT a.id'), null, null, array());
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if(!in_array($r['id'], $lines))
+                        $lines[] = $r['id'];
                 }
             }
         }

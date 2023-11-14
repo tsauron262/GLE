@@ -620,7 +620,7 @@ class InvoicePDF extends BimpCommDocumentPDF
         $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
         $html .= $this->langs->transnoentities("Payment");
         $html .= '</td>';
-        $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
+        $html .= '<td style="background-color: #DCDCDC; font-size: 7px; width: 70px">';
         $html .= $this->langs->transnoentities("Amount");
         $html .= '</td>';
         $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
@@ -646,13 +646,15 @@ class InvoicePDF extends BimpCommDocumentPDF
                     $text = '';
 
                 $invoice->fetch($obj->fk_facture_source);
-
+                
                 $html .= '<tr>';
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= dol_print_date($this->db->jdate($obj->datef), 'day', false, $this->langs, true);
                 $html .= '</td>';
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= price(($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $obj->multicurrency_amount_ttc : $obj->amount_ttc, 0, $this->langs);
+                if($obj->amount_tva != 0)
+                    $html .= '<span style="font-size: 6px;"> (TVA '.price($obj->amount_tva).')</span>';
                 $html .= '</td>';
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= $text;

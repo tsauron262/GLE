@@ -2371,6 +2371,10 @@ class BimpObject extends BimpCache
         if (!count($result['errors'])) {
             BimpTools::traitePostTraitement($result['errors']);
         }
+        BimpObject::loadClass('bimpalert', 'AlertProduit');
+        if(class_exists('AlertProduit')){
+            AlertProduit::getAlertes($result['errors'], $result['warnings']);
+        }
 
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
         global $dont_rollback;
@@ -4835,6 +4839,10 @@ class BimpObject extends BimpCache
 
             if (!count($errors)) {
                 BimpTools::traitePostTraitement($errors);
+            }
+            BimpObject::loadClass('bimpalert', 'AlertProduit');
+            if(class_exists('AlertProduit')){
+                AlertProduit::getAlertes($errors, $warnings);
             }
 
             if ($use_db_transactions) {

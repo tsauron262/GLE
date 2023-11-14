@@ -62,6 +62,18 @@ sections:
             ajax_render_method:
                 method: renderExtraFile
                 object: contrat
+          - id: divers
+            title: Divers (admin)
+            show: 
+               callback:
+                  method: iAmAdmin
+                  object: contrat
+            struct: 
+                  type: custom
+                  custom: 
+                      callback: 
+                          method: renderBimpOjectDivers
+                          object: contrat
     - type: custom
       custom: 
           callback: 

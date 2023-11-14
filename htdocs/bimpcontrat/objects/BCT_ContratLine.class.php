@@ -47,6 +47,7 @@ class BCT_ContratLine extends BimpObject
     {
         global $user;
         switch ($action) {
+            case 'facturationAvance':
             case 'activate':
                 return (int) !empty($user->rights->bimpcontract->to_validate);
 
@@ -983,8 +984,10 @@ class BCT_ContratLine extends BimpObject
                 'a.fac_periodicity'   => array(
                     'operator' => '>',
                     'value'    => 0
-                ),
-                'a.date_next_facture' => array(
+                )
+            );
+            if(0 /*TODO !$this->canSetAction('facturationAvance')*/){
+                $filters['a.date_next_facture'] = array(
                     'operator' => '<=',
                     'value'    => date('Y-m-d')
 //                    'and' => array(
@@ -997,8 +1000,8 @@ class BCT_ContratLine extends BimpObject
 //                            'field'    => 'a.date_fin_validite'
 //                        )
 //                    )
-                )
-            );
+                );
+            }
 
             $id_lines = BimpTools::getPostFieldValue('id_objects', array());
             if (!empty($id_lines)) {
@@ -1896,9 +1899,10 @@ class BCT_ContratLine extends BimpObject
                         if (BimpObject::objectLoaded($line)) {
                             $line_errors = array();
                             $periods_data = $line->getPeriodsToBillData($line_errors, true);
+                            $canFactAvance = true;
 
                             $row_html .= '<td style="min-width: 30px; max-width: 30px; text-align: center">';
-                            if (empty($line_errors) && $periods_data['nb_periods_tobill_today'] > 0) {
+                            if (empty($line_errors) && ($periods_data['nb_periods_tobill_today'] > 0 || $this->canSetAction('facturationAvance'))) {
                                 $tr_class = 'selected';
                                 $row_html .= '<input type="checkbox" name="line_' . $line->id . '_check" class="line_check" checked="1"/>';
                             } else {
@@ -1934,7 +1938,7 @@ class BCT_ContratLine extends BimpObject
 
                             if (!empty($line_errors)) {
                                 $row_html .= BimpRender::renderAlerts($line_errors);
-                            } elseif ($periods_data['nb_periods_tobill_today'] > 0) {
+                            } elseif ($this->canSetAction('facturationAvance') || $periods_data['nb_periods_tobill_today'] > 0) {
                                 $row_html .= '<br/>';
                                 $row_html .= '<b>Nb périodes à facturer: </b><br/>';
                                 $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_nb_periods', $periods_data['nb_periods_tobill_today'], array(

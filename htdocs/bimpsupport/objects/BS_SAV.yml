@@ -453,7 +453,7 @@ fields:
         user_edit: 1
         hashtags: 1
     info_importante:
-        label: Info Importante
+        label: Communication interne importante
         type: text
         input:
             auto_expand: 1

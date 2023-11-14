@@ -2801,6 +2801,10 @@ class ObjectLine extends BimpObject
                 $object->fetch_lines();
                 $object->update_price();
                 $this->hydrateFromDolObject();
+                
+                global $user;
+                $line = $this->getChildObject('line');
+		$result = $line->call_trigger($line->element.'_CREATE', $user);
             }
 
             if ($force_create) {

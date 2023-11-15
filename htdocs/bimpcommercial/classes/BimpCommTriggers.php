@@ -49,9 +49,9 @@ abstract class BimpCommTriggers extends DolibarrTriggers
                 }
             } else {
                 if (is_object($bimpObject)) {
-                    $errors[] = BimpTools::ucfirst($bimpObject->getLabel('the')) . ' d\'ID ' . $object->id . ' n\'existe plus (triggers'.$action.')';
+                    $errors[] = BimpTools::ucfirst($bimpObject->getLabel('the')) . ' d\'ID ' . $object->id . ' n\'existe plus (triggers '.$action.')';
                 } else {
-                    $errors[] = 'L\'objet de type "' . BimpTools::ucfirst($object_name) . '" d\'ID ' . $object->id . ' n\'existe plus (triggers'.$action.')';
+                    $errors[] = 'L\'objet de type "' . BimpTools::ucfirst($object_name) . '" d\'ID ' . $object->id . ' n\'existe plus (triggers '.$action.')';
                 }
             }
         }

@@ -463,7 +463,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
                 global $user;
                 if (BimpCore::isModuleActive('bimpvalidation') && $client_facture->getData('outstanding_limit') < 1 && $this->getData('ef_type') != 'S' /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->asPreuvePaiment()) {
-                    if (!in_array($user->id, array(232, 97, 1566, 512, 40))) {
+                    if (!in_array($user->id, array(232, 97, 1566, 512, 40, 242))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
                         if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
                             $errors[] = "Les clients sans encours autorisé doivent régler à la commande";

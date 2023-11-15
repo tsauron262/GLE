@@ -159,6 +159,12 @@ class BT_ficheInter_det extends BimpDolObject
 
         return 1;
     }
+    
+    public function isDep(){
+        if(in_array($this->getData('type'), array(BT_ficheInter_det::TYPE_DEPLA, BT_ficheInter_det::TYPE_DEPLACEMENT_CONTRAT, BT_ficheInter_det::TYPE_DEPLACEMENT_VENDU, BT_ficheInter_det::TYPE_DEPLA_OFFERT)))
+            return 1;
+        return 0;
+    }
 
     // Getters params:
 

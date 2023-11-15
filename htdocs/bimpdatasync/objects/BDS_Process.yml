@@ -5,6 +5,8 @@ icon: fas_cogs
 
 list_page_url: 
     controller: index
+
+entity_name: bimpdatasync
     
 header_list_name: default
 header_edit_form: default

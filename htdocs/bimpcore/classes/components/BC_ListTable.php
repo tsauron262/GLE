@@ -142,7 +142,7 @@ class BC_ListTable extends BC_List
             $this->colspan = 2 + count($this->cols);
 
             if ($this->params['positions_open']) {
-                $this->params['sort_field'] = 'position';
+                $this->params['sort_field'] = $this->object->position_field;
                 $this->params['sort_way'] = 'asc';
                 $this->colspan++;
             }
@@ -380,8 +380,8 @@ class BC_ListTable extends BC_List
         if ($sort_field == 'id') {
             return 'a.' . $this->object->getPrimary();
         }
-        if ($sort_field == 'position') {
-            return 'a.position';
+        if ($sort_field == $this->object->position_field) {
+            return 'a.' . $this->object->position_field;
         }
 
         if ($sort_option == 'default') {
@@ -802,8 +802,10 @@ class BC_ListTable extends BC_List
                 }
                 $new_values = isset($this->new_values[(int) $item[$primary]]) ? $this->new_values[(int) $item[$primary]] : array();
                 if ($this->params['positions']) {
-                    $row['params']['position'] = (int) $object->getData('position');
+                    $row['params']['position'] = (int) $object->getData($object->position_field);
                 }
+                if($object->getData('id_parent_line') > 0)
+                    $row['id_parent_line'] = $object->getData('id_parent_line');
                 foreach ($this->cols as $col_name => $col_params) {
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
@@ -1208,10 +1210,13 @@ class BC_ListTable extends BC_List
         $html .= '<tr class="listFooterButtons">';
         $html .= '<td colspan="' . $this->colspan . '" class="fullrow">';
         $html .= '<div style="text-align: right">';
-        foreach ($this->getHeaderButtons() as $button) {
+
+        $header_buttons = $this->getHeaderButtons();
+        foreach ($header_buttons as $button) {
             $button['classes'][] = 'headerBtn';
             $html .= BimpRender::renderButton($button);
         }
+
         $html .= '</div>';
         $html .= '</td>';
         $html .= '</tr>';
@@ -1919,14 +1924,14 @@ class BC_ListTable extends BC_List
 
         // Pagination: 
         if ($this->params['pagination']) {
-            $n_values = array(10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50', 70 => '70');
+            $n_values = array(10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50', 70 => '70', 120 => '120');
 
             if ($this->params['allow_large_n']) {
                 $n_values[100] = '100';
                 $n_values[150] = '150';
                 $n_values[200] = '200';
             }
-            
+
             $content .= '<div class="title">';
             $content .= 'Nombre d\'items par page';
             $content .= '</div>';
@@ -2165,6 +2170,8 @@ class BC_ListTable extends BC_List
 
                 $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow' . ($modified ? ' modified' : '') . ($selected ? ' selected' : '');
                 $html .= '" id="' . $this->object->object_name . '_row_' . $id_object . '"';
+                if(isset($row['id_parent_line']))
+                    $html .= ' data-id_parent_line="'. $row['id_parent_line'] .'"';
                 $html .= ' data-id_object="' . $id_object . '"';
                 if ($this->params['positions']) {
                     $html .= ' data-position="' . $row['params']['position'] . '"';

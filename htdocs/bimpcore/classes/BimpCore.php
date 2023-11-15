@@ -959,7 +959,7 @@ class BimpCore
     public static function isModeDev()
     {
         if (defined('MOD_DEV') && MOD_DEV) {
-            return 1;
+//            return 1;
         }
 
         return 0;
@@ -1003,11 +1003,11 @@ class BimpCore
 
     public static function getExtendsEntity()
     {
-        $entity = BimpCore::getConf('extends_entity', '');
-        
-        if ($entity == '' && defined('BIMP_EXTENDS_ENTITY')) {
+        if (defined('BIMP_EXTENDS_ENTITY')) {
             return BIMP_EXTENDS_ENTITY;
         }
+        $entity = BimpCore::getConf('extends_entity', '');
+        
 
         return $entity;
     }
@@ -1152,7 +1152,7 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
-            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs') && !defined('NO_BIMPLOG_PRINTS')) {
+            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs') && !defined('NO_BIMPLOG_PRINTS') && $level != Bimp_Log::BIMP_LOG_NOTIF) {
                 $bt = debug_backtrace(null, 30);
 
                 $html = '<div style="margin-top: 100px">';
@@ -1292,7 +1292,7 @@ class BimpCore
     {
         // On retourne un message d'erreur si blocage nécessaire. false sinon.
 
-        if (!(int) self::getConf('use_objects_locks')) {
+        if (!(int) self::getConf('use_objects_locks') || static::isModeDev()) {
             return false;
         }
 
@@ -1413,7 +1413,7 @@ class BimpCore
 
     public static function unlockObject($module, $object_name, $id_object, $token = '')
     {
-        if (!(int) self::getConf('use_objects_locks')) {
+        if (!(int) self::getConf('use_objects_locks') || static::isModeDev()) {
             return array();
         }
 

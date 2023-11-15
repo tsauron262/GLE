@@ -18,6 +18,26 @@ objects:
                 name: DolLine
             id_object: 
                 field_value: id_line
+    parent_line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: 
+                    prop: module
+                name: 
+                    prop: object_name
+            id_object: 
+                field_value: id_parent_line
+    child_line: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: 
+                    prop: module
+                name: 
+                    prop: object_name
                 
     product: 
         instance: 
@@ -81,7 +101,7 @@ fields:
         type: id
         default_value: 0
         viewable: 0
-        filterable: 0
+        filterable: 1
         input: 
             type: hidden
             
@@ -239,6 +259,20 @@ forms:
                     hide_values: 2,3,4
                 show:
                     callback: isProductEditable
+            is_abo: 
+                show: 0
+            abo_infos: 
+                show: 0
+            abo_fac_periodicity: 
+                show: 0
+            abo_duration: 
+                show: 0
+            abo_qty: 
+                show: 0
+            abo_fac_term: 
+                show: 0
+            abo_nb_renouv: 
+                show: 0
             pu_ht: 
                 custom: 1
                 label: Prix unitaire HT

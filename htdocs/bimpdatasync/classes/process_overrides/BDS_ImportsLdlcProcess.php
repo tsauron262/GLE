@@ -204,7 +204,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_dir',
                 'label'      => 'Dossier FTP',
-                'value'      => '/FTP-BIMP-ERP/catalogue/'
+                'value'      => '/'.BimpCore::getConf('exports_ldlc_ftp_dir').'/catalogue/'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(

@@ -269,8 +269,11 @@ class BimpCache
                 $elem = 'agenda';
                 $feature2 = 'myactions';
             }
+            if($elem == 'bank_account'){
+                $elem = 'societe';
+            }
             self::$cache[$cache_key] = restrictedArea($user, $elem, null, $dol_object->table_element.'&'.$dol_object->table_element, $feature2, 'fk_soc', 'rowid', 0, 1);
-//            echo 'ici_'.$elem."_".$dol_object->table_element.'_'.self::$cache[$cache_key].'<br/>';
+//            echo 'ici_'.$elem."_".$dol_object->table_element.'_'.self::$cache[$cache_key].'_'.get_class($dol_object).'<br/>';
         }
         return self::$cache[$cache_key];
     }
@@ -1549,7 +1552,10 @@ class BimpCache
                 $obj_memory = $newMem - $curMem;
 
                 if (method_exists($instance, 'fetch')) {
-                    $instance->fetch($id_object);
+                    if(get_class($instance) == 'UserGroup')
+                        $instance->fetch($id_object, '', false);
+                    else
+                        $instance->fetch($id_object);
                 }
 
                 $is_fetched = true;
@@ -2142,7 +2148,7 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    public static function getUserUserGroupsArray($id_user = null, $include_empty = 0, $nom_url = 0)
+    public static function getUserUserGroupsArray($id_user = null, $include_empty = 1, $nom_url = 0)
     {
         if (is_null($id_user)) {
             global $user;
@@ -2380,7 +2386,8 @@ class BimpCache
         if (!isset(self::$cache['comptes_bancaires'])) {
             self::$cache['comptes_bancaires'] = array();
 
-            $rows = self::getBdb()->getRows('bank_account');
+            $entity = getEntity('bank_account');
+            $rows = self::getBdb()->getRows('bank_account', 'entity IN ('.$entity.')');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     self::$cache['comptes_bancaires'][(int) $r->rowid] = $r->label;

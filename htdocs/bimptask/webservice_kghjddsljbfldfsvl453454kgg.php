@@ -32,8 +32,17 @@ if(stripos($subj, 'Réponse automatique') === 0){//on ne traite pas
     die;
 }
 
-traiteTask($dst, $src, $subj, $txt);
+$traiter = false;
 
+if(stripos($dst, 'SAV') === 0){
+    $traiter = traiteMsgSav($dst, $src, $subj, $txt);
+}
+if(!$traiter)
+    $traiter = traiteNote($dst, $src, $subj, $txt);
+if(!$traiter)
+    traiteTask($dst, $src, $subj, $txt);
+
+die('ok fin');
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
     
@@ -104,6 +113,11 @@ function traiteTask($dst, $src, $subj, $txt) {
             $tab['type_manuel'] = 'dev';
             $tab['dst'] = '';
         }
+        if(stripos($dst, 'SAV') === 0){
+            $tab['type_manuel'] = 'sav';
+            $tab['subj'] = 'Mail client sans SAV trouvée : '.$tab['subj'];
+        }
+        
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $task->create());
     } else {
@@ -134,4 +148,34 @@ function traiteTask($dst, $src, $subj, $txt) {
         }
     }
     return 1;
+}
+
+function traiteNote($dst, $src, $subj, $txt){
+    $const = BimpCore::getConf('marqueur_mail_note');
+    $matches = array();
+    preg_match("/" . $const . "[0-9]*/", $txt, $matches);
+    if (isset($matches[0])) {
+        $idNote = str_replace($const, "", $matches[0]);
+    }
+    if(isset($idNote) && $idNote > 0){
+        $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', $idNote);
+        if($note && $note->isLoaded()){
+            return $note->repMail($dst, $src, $subj, $txt);
+        }
+    }
+    return 0;
+}
+
+function traiteMsgSav($dst, $src, $subj, $txt){
+    $matches = array();
+    if(!preg_match('(SAV[2]*[A-Z]{1,4}[0-9]{5})', $subj, $matches)){
+        preg_match('(SAV[2]*[A-Z]{1,3}[0-9]{5})', $txt, $matches);
+    }
+    if(count($matches)){
+        $obj = BimpObject::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ref' => $matches[0]));
+        if($obj->isLoaded()){
+            return $obj->addMailMsg($dst, $src, $subj, $txt);
+        }
+    }
+    return 0;
 }

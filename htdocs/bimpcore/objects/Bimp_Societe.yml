@@ -1023,6 +1023,9 @@ forms:
     light: 
         title: Ajout d'une société
         rows: 
+            datec:
+                field: datec
+                
             client: 
                 field: client
             fournisseur: 

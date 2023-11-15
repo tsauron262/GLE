@@ -318,6 +318,10 @@ params:
         label: ID Groupe Atradius
         cat: groups
         def: 0
+    id_user_group_console: 
+        label: ID Groupe Console
+        cat: groups
+        def: 0
         
     # Logs: 
     print_bimp_logs: 
@@ -363,10 +367,17 @@ params:
     enabled_callback_cache:
         label: Activer le cache des callback YML
         type: bool
-        default: 0
+        def: 0
     useEncours:
         label: Utiliser les encours
         type: bool
     useAtradius:
         label: Utiliser atradius
+        type: bool
+    marqueur_mail_note:
+        label: Marquer pour les mails des notes
+        def: 659874
+    use_drag_upload:
+        label: Ajouter drag zone sur objet
+        def: 0
         type: bool

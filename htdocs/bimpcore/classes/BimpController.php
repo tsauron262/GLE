@@ -4,6 +4,7 @@ class BimpController
 {
 
     public $times = array();
+    public $main_object = null;
     public $module = '';
     public $controller = '';
     public $current_tab = '';
@@ -126,6 +127,15 @@ class BimpController
         $cssFiles = $this->getConf('css', array(), false, 'array');
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);
+        }
+        
+        $main_object = $this->config->get('main_object', '');
+        $objects = $this->config->getCompiledParams('objects');
+        foreach($objects as $name => $obj){
+            if($name == $main_object || !$main_object){
+                $this->main_object = $obj;
+                break;
+            }
         }
     }
 
@@ -441,6 +451,24 @@ class BimpController
         }
 
         echo '<div class="bimp_controller_content">' . "\n";
+        
+        $dropZoneFile = false;
+        if(BimpCore::getConf('use_drag_upload') && $this->main_object && is_a($this->main_object, 'BimpObject') && $this->main_object->isLoaded() && $this->main_object->getFilesDir() != ''){
+            $dropZoneFile = true;
+            $fil_dir = str_replace(DOL_DATA_ROOT, '', $this->main_object->getFilesDir());
+            $html = '<div class="bimp_drop_files_container allPage"';
+            $html .= ' data-max_items="' . (int) BimpTools::getArrayValueFromPath($options, 'max_items', 0) . '"';
+            $html .= ' data-files_dir="' . $fil_dir . '"';
+            $html .= ' data-allowed_ext="' . BimpTools::getArrayValueFromPath($options, 'allowed_ext', '') . '"';
+            $html .= ' data-allowed_types="' . BimpTools::getArrayValueFromPath($options, 'allowed_types', '') . '"';
+            $html .= '>';
+            $html .= '<input type="file" class="add_file_input" id="object_file_input"/>';
+
+            $html .= '<div class="bimp_drop_files_area">';
+            $html .= '<div class="drop_files"></div>';
+    //        $html .= BimpRender::rendercontentLoading('Envoi des fichiers en cours');
+            echo $html;
+        }
 
         if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
             global $mc, $conf;
@@ -494,6 +522,10 @@ class BimpController
 
         if ($display_footer) {
             $this->displayFooter();
+        }
+        
+        if($dropZoneFile){
+            echo '</div></div>';
         }
     }
 
@@ -2150,7 +2182,9 @@ class BimpController
         $field_name = BimpTools::getValue('field_name', '');
 
         $files_dir = BimpTools::getValue('files_dir', '');
+        $specifiquePath = true;
         if (!$files_dir) {
+            $specifiquePath = false;
             $files_dir = BimpTools::getTmpFilesDir();
         } elseif (strpos($files_dir, '/') === 0) {
             substr($files_dir, 1);
@@ -2166,8 +2200,10 @@ class BimpController
             $file_name = $file['name'];
             $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
 
-            // Ajout d'un tms pour éviter un potentiel conflit de nom
-            $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '_tms' . time() . '.' . $file_ext;
+            if(!$specifiquePath)// Ajout d'un tms pour éviter un potentiel conflit de nom
+                $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '_tms' . time() . '.' . $file_ext;
+            else
+            $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
 
             if (!move_uploaded_file($file['tmp_name'], DOL_DATA_ROOT . '/' . $files_dir . '/' . $new_file_name)) {
                 $warnings[] = 'Echec de l\'enregistrement du fichier "' . $file_name . '"';

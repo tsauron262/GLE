@@ -1881,7 +1881,9 @@ AND i.id=' . (int) $this->id;
         if (isset($this->getInitData($field)[0]))
             return array_values(unserialize($this->getInitData($field)[0]));
 
-        return array_values($this->getData($field));
+        if(is_array($this->getData($field)))
+            return array_values($this->getData($field));
+        return array();
     }
 
     public function displayCats($field, $type)

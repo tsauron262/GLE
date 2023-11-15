@@ -102,6 +102,14 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_ProductRA
+                
+    child_products:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductProduct
             
 fields: 
     ref: 
@@ -374,9 +382,10 @@ fields:
         label: Sous-type
         type: int
         values: 
-            array: sousTypes
+            callback: getSousTypesArray
         dol_extra_field: 1
         default_value: 0
+        depends_on: fk_product_type  
         
     accountancy_code_sell:
         label: Code comptable Vente (Spécifique)
@@ -580,13 +589,13 @@ fields:
             array: type_compta
             
     duree: 
-        label: Durée limitée (en mois)
+        label: Durée unitaire (en mois)
         type: int
         min: 0
         default_value: 0
         input: 
             type: text
-            help: Uniquement pour les prestations réalisées au fil du temps
+            help: A définir pour les abonnements / prestations
             
     lock_admin:
         label: Blocage Admin
@@ -606,7 +615,6 @@ fields:
 #            help: En secondes (1h = 3600s - 7h = 25200s)
         dol_extra_field: 1
         
-        
     renta_service:
         label: Rentabilitée €/h
         type: money
@@ -617,6 +625,59 @@ fields:
         label: Activer les alertes de stock
         type: bool
         default_value: 1
+        
+    achat_def_periodicity: 
+        label: Périodicité d'achat par défaut
+        type: int
+        values: 
+            array: achat_periodicities
+        default_value: 0
+        
+    achat_def_id_fourn: 
+        label: Fournisseur par défaut
+        type: id_object
+        object: achat_def_fourn
+        values: 
+            array: fournisseurs
+        display_if: 
+            field_name: achat_def_periodicity
+            hide_values: 0
+        
+    fac_def_periodicity: 
+        label: Périodicité de facturation par défaut
+        type: int
+        values: 
+            array: fac_periodicities
+    
+    fac_def_terme: 
+        label: Terme facturation par défaut
+        type: int
+        default_value: 1
+        values: 
+            0: A terme échu
+            1: A terme à échoir
+            
+    variable_qty: 
+        label: Abonnement à conso variable
+        type: bool
+        default_value: 0        
+        
+    variable_qty_unit: 
+        label: Type d'unité pour les consos variables
+        display_if: 
+            field_name: variable_qty
+            show_values: 1
+        
+    variable_qty_decimals: 
+        label: Nb décimales autorisées pour les consos variables
+        type: qty
+        decimals: 0
+        min: 0
+        max: 8
+        default_value: 0
+        display_if: 
+            field_name: variable_qty
+            show_values: 1
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -816,7 +877,7 @@ forms:
                   type: search_entrepot
               default_value: 
                   callback: getDefaultEntrepot
-        
+            
 fields_tables: 
     infos: 
         title: Informations
@@ -916,6 +977,15 @@ fields_tables:
             - field: rpcp
             - field: type_remise_arr
             
+    prices_bundle:
+        title: Prix d'achat
+        icon: fas_euro-sign
+        rows:  
+            - label: Prix d'achat
+              value: 
+                  callback: getPaBundle
+        
+            
     prices_buy: 
         title: Prix d'achat
         icon: fas_euro-sign
@@ -940,6 +1010,27 @@ fields_tables:
             - field: seuil_stock_alerte
               edit: 1
             - field: desiredstock
+              edit: 1
+              
+    abonnement: 
+        title: Options abonnements
+        icon: fas_calendar-alt
+        show: 
+            callback: isAbonnement
+        rows: 
+            - field: fac_def_periodicity
+              edit: 1
+            - field: fac_def_terme
+              edit: 1
+            - field: variable_qty
+              edit: 1
+            - field: variable_qty_unit
+              edit: 1
+            - field: variable_qty_decimals
+              edit: 1
+            - field: achat_def_periodicity
+              edit: 1
+            - field: achat_def_id_fourn
               edit: 1
 
 views: 
@@ -994,7 +1085,18 @@ views:
                   col_lg: 5
                   col_md: 5
                   fields_table:
-                      name: measures
+                      name: abonnement
+                      
+    product_price_bundle:
+        objects_change_reload: Bimp_ProductProduct
+        rows:
+            - cols:
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices_bundle
     
     product_price:
         objects_change_reload: Bimp_ProductPrice,BimpProductCurPa,Bimp_ProductFournisseurPrice
@@ -1022,6 +1124,16 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: prices_buy
+                  show: 
+                      callback: isNotBundle  
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices_bundle  
+                  show: 
+                      callback: isBundle              
                       
                 - type: list
                   col_lg: 6
@@ -1032,6 +1144,8 @@ views:
                   list: 
                       children: cur_prix_achats
                       name: product
+                  show: 
+                      callback: isNotBundle
                       
                 - type: list
                   col_lg: 6
@@ -1040,15 +1154,21 @@ views:
                   list: 
                       children: remises_arrieres
                       name: product
+                  show: 
+                      callback: isNotBundle
                       
             - cols: 
                 - type: list
                   list: 
                       children: fourn_prices
                       name: default
+                  show: 
+                      callback: isNotBundle
                 - type: custom
                   custom: 
                       callback: renderFournPricesReports
+                  show: 
+                      callback: isNotBundle
                       
     product_note:
         rows:

@@ -4,18 +4,24 @@ class Bimp_Product extends BimpObject
 {
 
     public $stocks = null;
-    public static $sousTypes = array(
-        0 => '',
-        1 => 'Service inter',
-        2 => 'Service contrat',
-        3 => 'Déplacement inter',
-        4 => 'Déplacement contrat',
-        5 => 'Logiciel'
+    public static $sousTypes = array(//-1 commun, 0 produit, 1 services
+        -1 => array(
+            0 => '',
+            1 => 'Service inter',
+            2 => 'Service contrat',
+            3 => 'Déplacement inter',
+            4 => 'Déplacement contrat',
+            5 => 'Logiciel (licence unique)',
+            6 => 'Abonnement',
+            20 => 'Bundle abonnement',
+            21 => 'Bundle materiel'
+        )
     );
+    public static $abonnements_sous_types = array(6,20);
+    public static $bundle_sous_types = array(20,21);
     public static $sousTypeDep = array(3, 4);
     public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
-//        "" => '',
         0 => array('label' => 'Produit', 'icon' => 'fas_box'),
         1 => array('label' => 'Service', 'icon' => 'fas_hand-holding')
     );
@@ -45,6 +51,25 @@ class Bimp_Product extends BimpObject
         self::TYPE_COMPTA_PORT    => "Considéré comme frais de port",
         self::TYPE_COMPTA_COMM    => "Considéré comme commission"
     ];
+    public static $achat_periodicities = array(
+        0  => 'Aucun achat',
+        -1 => 'Identique à la facturation',
+        1  => 'Mensuelle',
+        2  => 'Bimensuelle',
+        3  => 'Trimestrielle',
+        4  => 'Quadrimestrielle',
+        6  => 'Semestrielle',
+        12 => 'Annuelle'
+    );
+    public static $fac_periodicities = array(
+        0  => 'Non définie',
+        1  => 'Mensuelle',
+        2  => 'Bimensuelle',
+        3  => 'Trimestrielle',
+        4  => 'Quadrimestrielle',
+        6  => 'Semestrielle',
+        12 => 'Annuelle'
+    );
     public static $units_weight = array();
     public static $units_length = array();
     public static $units_surface = array();
@@ -521,6 +546,51 @@ class Bimp_Product extends BimpObject
         return (isset($conf->global->MAIN_MODULE_BIMPPRODUCTBROWSER) ? 1 : 0);
     }
 
+    public function isAbonnement()
+    {
+        // en prévision d'ajout d'autres types d'abonnements
+        return (int) (in_array((int) $this->getData('type2'), self::$abonnements_sous_types));
+    }
+
+    public function isBundle()
+    {
+        // en prévision d'ajout d'autres types de bunddle
+        return (int) (in_array((int) $this->getData('type2'), self::$bundle_sous_types));
+    }
+
+    public function isNotBundle()
+    {
+        // en prévision d'ajout d'autres types d'abonnements
+        return !$this->isBundle();
+    }
+
+    // Getters array: 
+
+    public function getProductsArrayByType2($type2, $include_empty = true, $with_price = true)
+    {
+        $products = array();
+
+        if ($include_empty) {
+            $products[0] = '';
+        }
+
+        $rows = $this->getList(array(
+            'type2'    => $type2,
+            'validate' => 1,
+//            'tobuy'    => 1
+                ), null, null, 'rowid', 'desc', 'array', array('rowid', 'ref', 'label', 'price'));
+
+        if (!empty($rows)) {
+            foreach ($rows as $r) {
+                if (!isset($products[(int) $r['rowid']])) {
+                    $products[(int) $r['rowid']] = $r['ref'] . ' - ' . $r['label'] . ($with_price ? ' (' . BimpTools::displayMoneyValue($r['price'], 'EUR', 0, 0, 1, 2, 0, ',', 1) . ')' : '');
+                }
+            }
+        }
+
+        return $products;
+    }
+
     // Getters codes comptables: 
 
     public function getProductTypeCompta()
@@ -764,7 +834,7 @@ class Bimp_Product extends BimpObject
     public function getFilesDir()
     {
         global $conf;
-        return $conf->product->multidir_output[$this->dol_object->entity].'/' . dol_sanitizeFileName($this->getRef()) . '/';
+        return $conf->product->multidir_output[$this->dol_object->entity] . '/' . dol_sanitizeFileName($this->getRef()) . '/';
     }
 
     public function getFileUrl($file_name, $page = 'document')
@@ -772,7 +842,7 @@ class Bimp_Product extends BimpObject
         $dir = $this->getFilesDir();
         if ($dir) {
             if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&entity='.$this->dol_object->entity.'&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&entity=' . $this->dol_object->entity . '&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
         }
 
@@ -913,6 +983,70 @@ class Bimp_Product extends BimpObject
         }
 
         return '';
+    }
+
+    public function getFilteredListActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('bulkEditField')) {
+            $actions[] = array(
+                'label'      => 'Editer pourcentage du prix de reviens',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'cost_price_percent',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
+                'label'      => 'Editer durée',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'duree',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
+                'label'      => 'Editer en Vente',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'tosell',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
+                'label'      => 'Editer Entité',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'entity',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
+                'label'      => 'Editer en Achat',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'tobuy',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+        }
+        return $actions;
     }
 
     // Getters données: 
@@ -1297,7 +1431,7 @@ class Bimp_Product extends BimpObject
 
             if (in_array($type, array('dispo', 'virtuel'))) {
 
-                if(BimpCore::isModuleActive('bimpreservation')){
+                if (BimpCore::isModuleActive('bimpreservation')) {
                     BimpObject::loadClass('bimpreservation', 'BR_Reservation');
                     $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
                     $stocks['total_reserves'] = $reserved['total'];
@@ -1468,14 +1602,14 @@ class Bimp_Product extends BimpObject
 
     public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true, $empty_label = '')
     {
-        if (!(int) $id_product) {
-            return array();
-        }
-
         $prices = array();
 
         if ($include_empty) {
             $prices[0] = $empty_label;
+        }
+
+        if (!(int) $id_product) {
+            return $prices;
         }
 
         $filters = array(
@@ -1542,6 +1676,25 @@ class Bimp_Product extends BimpObject
         if (isset($result[0]->id)) {
             return (int) $result[0]->id;
         }
+    }
+    
+    public function getSousTypesArray(){
+        $result = array();
+        foreach(static::$sousTypes as $type => $values){
+            if($type == -1 || !$this->isLoaded() || $type == $this->getData('fk_product_type')){
+                $result = BimpTools::merge_array($result, $values, true);
+            }
+        }
+        return $result;
+    }
+
+    public function getFournisseursArray($include_empty = true, $empty_label = '')
+    {
+        if (!$this->isLoaded()) {
+            return ($include_empty ? array(0 => $empty_label) : array());
+        }
+
+        return self::getProductFournisseursArray($this->id, $include_empty, $empty_label);
     }
 
     // Gestion Prix d'achat courant: 
@@ -1651,7 +1804,7 @@ class Bimp_Product extends BimpObject
             $sql = 'SELECT rowid as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price';
             $sql .= ' WHERE fk_product = ' . (int) $this->id;
 
-            if (!is_null($id_fourn) && (int) $id_fourn) {
+            if ((int) $id_fourn) {
                 $sql .= ' AND `fk_soc` = ' . (int) $id_fourn;
             }
 
@@ -1762,7 +1915,7 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded()) {
             $where1 = '`fk_product` = ' . (int) $this->id . ' AND `price` = ' . (float) $pa_ht;
 
-            if (!is_null($id_fourn)) {
+            if ((int) $id_fourn) {
                 $where1 .= ' AND `fk_soc` = ' . (int) $id_fourn;
             }
 
@@ -1988,6 +2141,17 @@ class Bimp_Product extends BimpObject
         $id_inventory = BimpTools::getValue('id');
         $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
+    }
+    
+    public function getPaBundle(){
+        $pa = 0;
+        
+        $child_prods = $this->getChildrenObjects('child_products');
+        foreach($child_prods as $child_prod){
+            $prod = $child_prod->getChildObject('product_fils');
+            $pa += $child_prod->getData('qty') * $prod->getData('cur_pa_ht');
+        }
+        return BimpTools::displayMoneyValue($pa);
     }
 
     public function displayCurrentPaHt()
@@ -2855,12 +3019,13 @@ class Bimp_Product extends BimpObject
         if (!$this->isLoaded($errors)) {
             return BimpRender::renderAlerts($errors);
         }
-        
+
         $commandeController = BimpController::getInstance('bimpcommercial', 'commandes');
         return $commandeController->renderPeriodsTab(array(
-            'id_product' => $this->id
+                    'id_product' => $this->id
         ));
     }
+
     // Traitements: 
 
     public function addConfigExtraParams()
@@ -2925,7 +3090,7 @@ class Bimp_Product extends BimpObject
             $errors[] = "Ce produit est déjà validé";
         }
 
-        if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true) && !$this->getData('no_fixe_prices')) {
+        if (!$this->isBundle() && $this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true) && !$this->getData('no_fixe_prices')) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
         }
 
@@ -4008,9 +4173,8 @@ class Bimp_Product extends BimpObject
         }
 
         $this->hydrateFromDolObject();
-        
-        
-        if($this->getData('cost_price_percent') > 0)
+
+        if ($this->getData('cost_price_percent') > 0)
             $this->updateField('cost_price', $this->getData('price') * $this->getData('cost_price_percent') / 100);
 
         return array(
@@ -4018,29 +4182,27 @@ class Bimp_Product extends BimpObject
             'warnings' => $warnings
         );
     }
-    
-    public function validateValue($field, $value) {
-        if($field == 'cost_price_percent'){
-            if($value > 0 && $value != $this->getData('cost_price_percent')
-                    || $this->getData('cost_price_percent') > 0){
-                if($value != '')
+
+    public function validateValue($field, $value)
+    {
+        if ($field == 'cost_price_percent') {
+            if ($value > 0 && $value != $this->getData('cost_price_percent') || $this->getData('cost_price_percent') > 0) {
+                if ($value != '')
                     $this->updateField('cost_price', $this->getData('price') * $value / 100);
             }
-        }
-        elseif($field == 'cost_price'){
-            if($value > 0)
-                $this->setCurrentPaHt ($value,0, 'cost_price');
-            elseif($this->getInitData('cost_price') > 0){//repassser a zero si pa actuel = prix de reviens
+        } elseif ($field == 'cost_price') {
+            if ($value > 0)
+                $this->setCurrentPaHt($value, 0, 'cost_price');
+            elseif ($this->getInitData('cost_price') > 0) {//repassser a zero si pa actuel = prix de reviens
                 $paO = $this->getCurrentPaObject();
-                if($paO && $paO->getData('origin') == 'cost_price'){
-                    $this->setCurrentPaHt ($value,0, 'cost_price');
+                if ($paO && $paO->getData('origin') == 'cost_price') {
+                    $this->setCurrentPaHt($value, 0, 'cost_price');
                 }
             }
         }
-        
+
         return parent::validateValue($field, $value);
     }
-  
 
     public function actionDuplicate($data, &$success)
     {
@@ -4449,59 +4611,6 @@ class Bimp_Product extends BimpObject
                 );
             }
         }
-    }
-
-    public function getFilteredListActions()
-    {
-        $actions = array();
-
-        if ($this->canSetAction('bulkEditField')) {
-            $actions[] = array(
-                'label'      => 'Editer pourcentage du prix de reviens',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'cost_price_percent',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-            $actions[] = array(
-                'label'      => 'Editer durée',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'duree',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-            $actions[] = array(
-                'label'      => 'Editer en Vente',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'tosell',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-            $actions[] = array(
-                'label'      => 'Editer en Achat',
-                'icon'       => 'fas_pen',
-                'action'     => 'bulkEditField',
-                'form_name'  => 'bulk_edit_field',
-                'extra_data' => array(
-                    'field_name'   => 'tobuy',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
-                )
-            );
-        }
-        return $actions;
     }
 
     public static function correctAllProductCurPa($echo = false, $echo_errors_only = true)

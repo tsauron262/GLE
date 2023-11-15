@@ -48,8 +48,8 @@ class InterfacePostProcess extends BimpCommTriggers
                         break;
                 }
                 
-                
-                $bimpObject->hydrateDolObject();
+                if(isset($bimpObject->dol_object))
+                    $bimpObject->hydrateDolObject();
 
                 if (count($warnings)) {
                     setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');

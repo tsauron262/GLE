@@ -840,11 +840,15 @@ class Bimp_FactureLine extends ObjectLine
     public function delete(&$warnings = array(), $force_delete = false)
     {
         $commLine = null;
+        $contratLine = null;
         $id_facture = (int) $this->getData('id_obj');
 
         if ($this->isLoaded()) {
             if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
                 $commLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+            }
+            if ($this->getData('linked_object_name') === 'contrat_line' && (int) $this->getData('linked_id_object')) {
+                $contratLine = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('linked_id_object'));
             }
         }
 
@@ -857,7 +861,11 @@ class Bimp_FactureLine extends ObjectLine
             if (BimpObject::objectLoaded($commLine)) {
                 $commLine->onFactureDelete($id_facture);
             }
-
+            
+            if (BimpObject::objectLoaded($contratLine)) {
+                $contratLine->onFactureDelete($id_facture);
+            }
+            
             $this->isDeleting = $prevDeleting;
         }
 

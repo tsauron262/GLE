@@ -48,6 +48,11 @@ fields:
         type: int
         default_value: 0
         
+    abo_fac_periodicity: unset
+    abo_duration: unset
+    abo_fac_term: unset
+    abo_nb_renouv: unset
+        
 forms: 
     sav: 
         values: 

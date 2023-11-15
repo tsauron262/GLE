@@ -1421,13 +1421,44 @@ function resetListSearchInputs(list_id, reload_list) {
 
 // Gestion des événements:
 
+function gestionParentLine($list){
+    var idsParent = new Object();
+    $list.find('.objectListItemRow').each(function(){
+        if($(this).data('id_parent_line') > 0){
+            $(this).hide();
+            idsParent[$(this).data('id_parent_line')] = $(this).data('id_parent_line');
+        }
+    });
+//        console.log(idsParent);
+    for (const id_parent_line in idsParent) {
+        var $parentLineTd = $list.find('[data-id_object='+id_parent_line+']').children('td').first();
+        console.log($parentLineTd);
+        $parentLineTd.append('<a class="button detail_'+id_parent_line+'">Detail</a><a class="button cache_detail_'+id_parent_line+'">-</a>');
+        $list.find('.cache_detail_'+id_parent_line+'').hide();
+        $list.find('.detail_'+id_parent_line+'').click(function(){
+            $list.find('[data-id_parent_line='+id_parent_line+']').show();
+            $list.find('.detail_'+id_parent_line+'').hide();
+            $list.find('.cache_detail_'+id_parent_line+'').show();
+        });
+        $list.find('.cache_detail_'+id_parent_line+'').click(function(){
+            $list.find('[data-id_parent_line='+id_parent_line+']').hide();
+            $list.find('.detail_'+id_parent_line+'').show();
+            $list.find('.cache_detail_'+id_parent_line+'').hide();
+        });
+//        console.log(id_parent_line);
+    }
+}
+
 function onListLoaded($list) {
     if (!$list.length) {
         return;
     }
+    
 
     if (!parseInt($list.data('loaded_event_processed'))) {
         $list.data('loaded_event_processed', 1);
+        
+        gestionParentLine($list);
 
         var $table = $list.find('table.objectlistTable');
         var $tbody = $list.find('tbody.listRows');
@@ -1656,6 +1687,8 @@ function onListRefeshed($list) {
 //        $(this).attr('target', '_blank');
 //    });
 
+    gestionParentLine($list);
+    
     var list_id = $list.attr('id');
 
     var $tbody = $list.find('tbody.listRows');

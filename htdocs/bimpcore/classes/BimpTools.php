@@ -20,6 +20,7 @@ class BimpTools
     );
     public static $sql_operators = array('>', '<', '>=', '<=', '!=');
     public static $bloquages = array();
+    public static $postTraitment = array();
 
     // Gestion GET / POST
 
@@ -1439,8 +1440,19 @@ class BimpTools
                     } else {
                         return '';
                     }
-                } elseif (isset($filter['operator']) && isset($filter['value'])) {
-                    $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
+                } elseif (isset($filter['operator']) && (isset($filter['value']) || isset($filter['field']))) {
+                    $sql .= ' ' . $filter['operator'] .= ' ';
+                    if (isset($filter['value'])) {
+                        $sql .= (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
+                    } elseif (isset($filter['field'])) {
+                        if (preg_match('/\./', $filter['field'])) {
+                            $sql .= $filter['field'];
+                        } elseif (!is_null($default_alias) && $default_alias) {
+                            $sql .= $default_alias . '.' . $filter['field'];
+                        } else {
+                            $sql .= '`' . $filter['field'] . '`';
+                        }
+                    }
                 } elseif (isset($filter['part_type']) && isset($filter['part'])) {
                     $escape_char = '';
                     foreach (array('$', '|', '&', '@') as $char) {
@@ -1689,6 +1701,23 @@ class BimpTools
         $sql .= self::getSqlLimit($params['n'], $params['p']);
 
         return $sql;
+    }
+
+    public static function addPostTraitement($object, $method, $params = array(), $firstParamsError = false)
+    {
+        static::$postTraitment[] = array('object' => $object, 'method' => $method, 'params' => &$params, 'firstParamsError' => $firstParamsError);
+    }
+
+    public static function traitePostTraitement(&$errors = array())
+    {
+        foreach (static::$postTraitment as $traitement) {
+            if ($traitement['firstParamsError']) {
+                $traitement['params'] = BimpTools::merge_array(array(&$errors), $traitement['params']);
+            }
+            call_user_func_array(array(
+                $traitement['object'], $traitement['method']
+                    ), $traitement['params']);
+        }
     }
 
     public static function addSqlFilterEntity(&$filters, $object, $alias = '', $entity_field = 'entity')
@@ -2202,6 +2231,44 @@ class BimpTools
         }
 
         return $dt->format('Y-m-d');
+    }
+
+    public static function getDatesIntervalData($date_from, $date_to, $debug_echo = false)
+    {
+        $data = array(
+            'full_years'     => 0, // Nombre d'années complètes
+            'full_monthes'   => 0, // Nombre de mois complets
+            'full_days'      => 0, // Nombre de jours complets
+            'remain_monthes' => 0, // Nombre de mois restants (sur 1 année incomplète)
+            'remain_days'    => 0 // Nombre de jours restants (sur 1 mois incomplet)
+        );
+
+        $dt_from = new DateTime(date('Y-m-d', strtotime($date_from)));
+        $dt_to = new DateTime(date('Y-m-d', strtotime($date_to)));
+
+        if ($debug_echo) {
+            echo '<br/><br/>';
+            echo 'FROM : ' . $dt_from->format('d / m / Y') . '<br/>';
+            echo 'TO : ' . $dt_to->format('d / m / Y') . '<br/>';
+        }
+
+
+        $interval = $dt_from->diff($dt_to);
+
+        $data['full_years'] = (int) $interval->format('%r%y');
+        $data['full_days'] = (int) $interval->format('%r%a');
+
+        $data['remain_monthes'] = (int) $interval->format('%r%m');
+        $data['remain_days'] = (int) $interval->format('%r%d');
+
+        $data['full_monthes'] = ($data['full_years'] * 12) + $data['remain_monthes'];
+
+        if ($debug_echo) {
+            echo 'DATA<pre>';
+            print_r($data);
+            echo '</pre>';
+        }
+        return $data;
     }
 
     // Devises / prix: 

@@ -1,6 +1,10 @@
 table: bimp_task
 controller: task
 
+extends: 
+    module: bimpcore
+    object_name: BimpAbstractFollow
+
 icon: fas_tasks
 header_list_name: default
 header_edit_form: default
@@ -140,23 +144,7 @@ fields:
                 type: callback
                 method: displayPageLink
                 
-    users_follow: 
-        label: Suivie par
-        type: items_list
-        items_data_type: id_object
-        items_braces: 1
-        object: user
-        input: 
-            type: search_user
-            
-    users_no_follow: 
-        label: Suivi refusé par
-        type: items_list
-        items_data_type: id_object
-        items_braces: 1
-        object: user
-        input: 
-            type: search_user
+        
  
 fields_tables:
     default: 
@@ -183,7 +171,7 @@ fields_tables:
               edit: 1
             - label: Notifier
               value: 
-                  callback: displayUserNotif
+                  callback: displayFollower
         
 forms:
     default: 
@@ -333,16 +321,6 @@ forms:
                   rows: 3
                   auto_expand: 1
               hashtags: 1
-              
-    add_user_follow: 
-        rows: 
-            - custom: 1
-              label: Utilisateur à notifier
-              input_name: id_user
-              data_type: id
-              input: 
-                  type: search_user
-                  active_only: 1
            
 lists_cols: 
     typeTache:

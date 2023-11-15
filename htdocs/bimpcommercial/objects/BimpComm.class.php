@@ -518,32 +518,6 @@ class BimpComm extends BimpDolObject
         return ($include_empty ? array(0 => '') : array());
     }
 
-    public function getClientContactsArray()
-    {
-        global $db;
-
-        $id_client = $this->getAddContactIdClient();
-        if ($id_client > 0) {
-            $contacts = self::getSocieteContactsArray($id_client, false);
-            $soc = new Societe($db);
-            $soc->fetch_optionals($id_client);
-            $contact_default = $soc->array_options['options_contact_default'];
-
-            // Remove empty option
-            unset($contacts['']);
-
-            // If there is a default contact
-            if (0 < (int) $contact_default) {
-                $label_default = $contacts[$contact_default];
-                unset($contacts[$contact_default]);
-                $contacts = array($contact_default => $label_default . ' (Contact facturation email par défaut)') + $contacts;
-            }
-        }
-
-
-        return $contacts;
-    }
-
     public function getSocAvailableDiscountsArray()
     {
         if ((int) $this->getData('fk_soc')) {
@@ -627,6 +601,7 @@ class BimpComm extends BimpDolObject
         // Message Achat:
         $id_group = BimpCore::getUserGroupId('achat');
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
+        
         if ($id_group) {
             $buttons[] = array(
                 'label'   => 'Message achat',
@@ -2002,7 +1977,7 @@ class BimpComm extends BimpDolObject
 
                 if (BimpObject::objectLoaded($client)) {
                     if (!$client->getData('type_educ')) {
-                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation pour le client "' . $client->getName() . '"', array(), '', '', 1);
+                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation pour le client "' . addslashes($client->getName()) . '"', array(), '', '', 1);
 
                         $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                         $msg .= '<b>ATTENTION : ' . $this->getLabel('this') . ' contient une remise CRT, or le type éducation du client ';
@@ -2838,7 +2813,7 @@ class BimpComm extends BimpDolObject
             if (isset($new_data['inverse_qty']))
                 $params['inverse_qty'] = $new_data['inverse_qty'];
 
-            $lines_errors = $new_object->createLinesFromOrigin($this, $params);
+            $lines_errors = $new_object->createLinesFromOrigin($this, $params, $warnings);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
@@ -2862,7 +2837,7 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    public function createLinesFromOrigin($origin, $params = array())
+    public function createLinesFromOrigin($origin, $params = array(), &$warnings = array())
     {
         $errors = array();
 
@@ -2882,13 +2857,17 @@ class BimpComm extends BimpDolObject
 
         $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
 
-        $warnings = array();
         $i = 0;
 
         // Création des lignes: 
         $lines_new = array();
 
         foreach ($lines as $line) {
+            if (is_a($this, 'Bimp_Commande') && is_a($line, 'Bimp_PropalLine')) {
+                if ($line->isAbonnement()) {
+                    continue;
+                }
+            }
             $i++;
 
             // Lignes à ne pas copier en cas de clonage: 
@@ -2918,7 +2897,7 @@ class BimpComm extends BimpDolObject
             unset($data['id_line']);
             unset($data['id_parent_line']);
 
-            if (!$params['is_review']) {
+            if (!$params['is_review'] && !in_array($line->getData('linked_object_name'), array('bundle', 'bundleCorrect'))) {//si c'est des lignes liée mais pas a un bundle
                 unset($data['linked_object_name']);
                 unset($data['linked_id_object']);
 
@@ -2928,7 +2907,7 @@ class BimpComm extends BimpDolObject
                 }
             }
 
-            if (($params['is_clone'])) {
+            if ($params['is_clone']) {
                 switch ($origin->object_name) {
                     case 'BS_SavPropal':
                         unset($data['id_reservation']);
@@ -4934,7 +4913,11 @@ class BimpComm extends BimpDolObject
             $url = $_SERVER['php_self'] . '?fc=' . $this->getController() . '&id=' . $this->id;
         }
 
-        $success_callback = 'window.location = \'' . $url . '\'';
+        if(!count($warnings))
+            $success_callback = 'window.location = \'' . $url . '\'';
+        else{
+            $success = '<a href="'.$url.'">'.$success.'</a>';
+        }
 
         return array(
             'errors'           => $errors,
@@ -5312,7 +5295,7 @@ class BimpComm extends BimpDolObject
             $this->checkLines(); // Des lignes ont pu être créées via un trigger.
 
             if ($origin && $origin_id) {
-                $warnings = BimpTools::merge_array($warnings, $this->createLinesFromOrigin($origin_object));
+                $errors = BimpTools::merge_array($errors, $this->createLinesFromOrigin($origin_object, array(), $warnings));
                 if (is_a($origin_object, 'BimpComm') && static::$remise_globale_allowed && $origin_object::$remise_globale_allowed) {
                     $remises_globales = $origin_object->getRemisesGlobales();
 

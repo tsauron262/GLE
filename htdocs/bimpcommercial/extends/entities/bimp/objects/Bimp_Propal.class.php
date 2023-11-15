@@ -113,7 +113,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                 }
                 return 1;
         }
-        
+
         return parent::isActionAllowed($action, $errors);
     }
 

@@ -1,0 +1,574 @@
+dol_object: 
+    instance: 
+        dol_object: 
+            module: contrat
+            file: contrat
+            
+table: contrat
+primary: rowid
+entity_name: contract
+
+controller: contrat
+icon: fas_file-signature
+public_icon: pe_news-paper
+
+header_list_name: default
+list_page_url: 
+    controller: index
+    
+header_btn: 
+    callback: getActionsButtons
+    
+header_edit_form: edit
+
+public_header_btn: 
+    callback: getPublicActionsButtons
+    
+labels: 
+    name: contrat d'abonnement
+    name_plur: contrats d'abonnement
+                
+objects:
+    client:
+        instance:
+            id_object:
+                field_value: fk_soc
+    
+    lines:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BCT_ContratLine
+    
+#    avenant:
+#        relation: hasMany
+#        delete: 1
+#        instance:
+#            bimp_object: Bimp_ContratAvenant
+    
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcontract
+                parent_object_name: BContract_contrat
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpcontract
+                    parent_object_name: BContract_contrat
+    
+    user_create:
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_user_author
+                
+    user_modif: 
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_user_modif
+                
+    user_validate: 
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_user_validate
+                
+        
+    commercial_suivi:
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_commercial_suivi
+                
+    commercial_signature:
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_commercial_signature
+    
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+                
+    bimp_entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+    
+    client_facturation:
+        extends: client
+        instance:
+            id_object:
+                field_value: fk_soc_facturation
+                
+    signature: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
+                
+    rib_client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_SocBankAccount
+            id_object:
+                field_value: rib_client
+                
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcontrat
+                parent_object_name: BCT_Contrat
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpcontrat
+                    parent_object_name: BCT_Contrat
+
+fields:
+    # Champs objet Dolibarr:
+        
+    statut:
+        label: Statut
+        type: int
+        values:
+            array: status_list
+            
+    ref: 
+        label: Référence
+        
+    fk_soc:
+        label: Client
+        type: id_object
+        object: client
+        dol_prop: socid
+        required: 1
+        input: 
+            card: default
+        create_form: light
+        
+    fk_soc_facturation: 
+        label: Client facturation
+        type: id_object
+        object: client_facturation
+        input:
+            card: default
+            help: Laissez vide si même client
+        
+    ref_customer:
+        label: Réf. client
+        
+    ref_supplier: 
+        label: Réf. fournisseur
+        
+    ref_ext:
+        label: Annule et remplace
+        input:
+            help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+            
+    datec:
+        label: Créé le
+        type: datetime
+        
+    date_validate: 
+        label: Validé le
+        type: datetime
+        
+    date_contrat:
+        label: Date de signature
+        type: date
+        
+    date_start:
+        label: Date d'effet
+        type: date
+        dol_extra_field: 1
+    
+    fk_user_author:
+        label: Créé par
+        type: id_object
+        object: user_create
+        dol_prop: user_author_id
+        input: 
+            type: search_user
+            
+    fk_user_modif: 
+        label: Modifié par
+        type: id_object
+        object: user_modif
+        input: 
+            type: search_user
+            
+    fk_user_validate: 
+        label: Validé par
+        type: id_object
+        object: user_validate
+        input: 
+            type: search_user
+        default_value: 0
+            
+    fk_commercial_signature:
+        label: Commercial signataire
+        dol_prop: commercial_signature_id
+        type: id_object
+        object: commercial_signature
+        input: 
+            type: search_user
+            help: Choisir le commercial responsable de la signature du contrat
+        default_value: 
+           prop:
+               name: id
+               object:
+                   global: user
+                   
+    fk_commercial_suivi:
+        label: Commercial suivi
+        dol_prop: commercial_suivi_id
+        type: id_object
+        object: commercial_suivi
+        input: 
+            type: search_user
+            help: Choisir le commercial responsable du suivi du contrat
+        default_value: 
+           prop:
+               name: id
+               object:
+                   global: user
+                   
+    note_public:
+        label: Note particulière au contrat
+        type: html
+        hashtags: 1
+        
+    note_private:
+        label: Note privée
+        type: html
+        hashtags: 1
+        
+    # Champs Dolibarr non gérés : ref_supplier, entity, fk_projet, model_pdf, extraparams
+            
+    label:
+        label: Libellé
+        
+    entrepot:
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: bimp_entrepot
+        input: 
+            type: search_entrepot
+        
+    secteur:
+        label: Secteur
+        values:
+            array: secteurs
+            
+    expertise:
+        label: Expertise
+        dol_extra_field: 1
+        type: int
+        values: 
+            array: expertise
+            
+    rib_client: 
+        label: RIB client (pour prélèvements)
+        type: id_object
+        object: rib_client
+        depends_on: fk_soc,fk_soc_facturation
+        input:
+            type: select
+            options:
+                callback: getClientRibsArray
+        default_value: 0
+        
+    moderegl:
+        label: Mode de règlement
+        type: int
+        dol_extra_field: 1
+        default_value: 
+            callback: getModeReglementClient
+        values:
+            array: modeReglements
+        depends_on: fk_soc,fk_soc_facturation
+        
+    condregl:
+        label: Conditions de règlement
+        type: int
+        dol_extra_field: 1
+        default_value: 
+            callback: getConditionReglementClient
+        values:
+            array: condReglements
+        depends_on: fk_soc,fk_soc_facturation
+        
+    fk_user_cloture:
+        label: Clos par
+        type: int
+        
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature
+        
+    signature_params: 
+        label: Paramètres incrustation signature
+        type: json
+        
+    version: 
+        label: Version
+        type: int
+        values: 
+            1: Contrats standards
+            2: Contrats d'abonnement
+        default_value: 2
+              
+forms: 
+    default: 
+        rows: 
+            - field: label
+            - field: fk_soc
+            - field: fk_soc_facturation
+            - field: ref_customer
+            - field: condregl
+            - field: moderegl
+            - field: entrepot
+            - field: secteur
+            - field: expertise
+            - field: note_public
+            - field: note_private
+            
+    contact:
+        title: Ajouter un contact
+        rows: 
+            - custom: 1
+              label: Type
+              input_name: type
+              input: 
+                  type: select
+                  options: 
+                      1: Contact tiers
+                      2: Utilisateur
+            - custom: 1
+              label: Tiers
+              input_name: id_client
+              input: 
+                  type: search_societe
+#                  societe_type: customer
+              value: 
+                  field_value: fk_soc
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              data_type: id_object
+              object: contact
+              edit_form: default
+              create_form: default
+              create_form_values:
+                  fields: 
+                      fk_soc: 
+                          callback: getAddContactIdClient
+              value: 
+                  request: fields/id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: clientContacts
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              depends_on: id_client
+            - custom: 1
+              label: Utilisateur
+              input_name: id_user
+              input: 
+                  type: search_user
+              value: 
+                  prop:
+                      object: 
+                          global: user
+                      name: id
+              display_if: 
+                  field_name: type
+                  show_values: 2
+            - custom: 1
+              label: Type de contact
+              input_name: tiers_type_contact
+              input: 
+                  type: select
+                  options: 
+                      array: externalContactTypes
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Type de contact
+              input_name: user_type_contact
+              input: 
+                  type: select
+                  options: 
+                      array: internalContactTypes
+              display_if: 
+                  field_name: type
+                  show_values: 2 
+            
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+#            - field: date_contrat
+#            - field: date_start
+            - field: entrepot
+            - field: secteur
+            - field: expertise
+              edit: 1
+            - field: note_public
+            - field: note_private
+            
+    client: 
+        title: Client
+        icon: fas_user-circle
+        rows: 
+            - field: fk_soc
+              display: card
+            - field: fk_soc_facturation
+              display: card
+              
+    reglement: 
+        title: Paiement
+        icon: fas_euro-sign
+        rows: 
+            - field: moderegl
+              edit: 1
+            - field: condregl
+              edit: 1
+            - field: rib_client
+              edit: 1
+              
+views: 
+    default: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                  
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: client
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: reglement
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderLinkedObjectsTable
+            - cols: 
+                - type: list
+                  list:
+                      name: contrat
+                      children: lines
+    full: 
+        rows:
+          - cols: 
+              - type: object_header
+          - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                  
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: client
+              
+lists: 
+    default:
+        title: Tous les contrats d'abonnement
+        configurable: 1
+        checkboxes: 1
+        list_filters: 
+            - name: version
+              filter: 2
+        bulk_actions:
+            - label: supprimer les contrats sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: datec
+        sort_way: desc
+        n: 20
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 0
+        page_btn: 1
+        cols: 
+            ref:
+            statut:
+            fk_soc:
+            fk_commercial_suivi:
+
+searches:
+    default:
+        fields_search: 
+            - a.ref
+            - s.nom
+        joins:
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: '<a.ref> (<s.nom>)'
+        
+cards:
+    default:
+        title: 
+            field_value: ref
+        status: statut
+        fields: 
+            - field: fk_soc
+        view_btn: 1

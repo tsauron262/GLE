@@ -327,9 +327,11 @@ if (!empty($_COOKIE[$sessiontimeout])) {
 // Init the 5 global objects, this include will make the 'new Xxx()' and set properties for: $conf, $db, $langs, $user, $mysoc
 require_once 'master.inc.php';
 /* Mod drsi */
-include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
-$synopsisHook = new synopsisHook();
-global $synopsisHook; //Pour vision global de l'objet
+if(!defined('NOREQUIREDB')){
+    include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
+    $synopsisHook = new synopsisHook();
+    global $synopsisHook; //Pour vision global de l'objet
+}
 /* FMod Drsi */
 
 // If software has been locked. Only login $conf->global->MAIN_ONLY_LOGIN_ALLOWED is allowed.

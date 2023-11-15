@@ -333,6 +333,18 @@ forms:
               show:
                   callback: isServiceAutorisedInContrat
             - custom: 1
+              label: Objet du contrat
+              input_name: objet_contrat
+              show: 
+                  callback: isNotRenouvellementContrat
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: contrat
+                          name: objet_contrat
+                          is_static: 1
+            - custom: 1
               label: Durée en mois
               input_name: duree_mois
               show: 
@@ -340,6 +352,9 @@ forms:
               input:
                   type: qty
               value: 12
+              depends_on: objet_contrat
+              edit:
+                  callback: isFieldContratEditable
             - custom: 1
               label: Périodicitée de facturation
               input_name: periodicity
@@ -352,18 +367,6 @@ forms:
                       prop:
                           object: contrat
                           name: period
-                          is_static: 1
-            - custom: 1
-              label: Objet du contrat
-              input_name: objet_contrat
-              show: 
-                  callback: isNotRenouvellementContrat
-              input:
-                  type: select
-                  options:
-                      prop:
-                          object: contrat
-                          name: objet_contrat
                           is_static: 1
             - custom: 1
               show: 
@@ -552,7 +555,31 @@ forms:
                     sign_dist:
                         hide_values: 0
                 depends_on: init_docusign,open_public_access
-                  
+                
+    contrat_abo: 
+        rows: 
+            - custom: 1
+              label: Contrat
+              data_type: id
+              input_name: id_contrat
+              input: 
+                  type: select
+                  options:
+                      array: clientContratsAbo
+              value: 
+                   callback: getDefaultContratAbo
+#            - custom: 1
+#              label: Ajuster les périodes sur un abonnement existant
+#              input_name: id_linked_contrat_line
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: contratAboLines
+#              display_if: 
+#                  field_name: id_contrat
+#                  hide_values: 0
+#              depends_on: id_contrat
+                                
 fields_tables: 
     infos: 
         rows: 

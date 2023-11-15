@@ -32,6 +32,7 @@ class BimpObject extends BimpCache
     public static $secteur_properties = array('ef_type', 'secteur');
     public $use_commom_fields = false;
     public $use_positions = false;
+    public $position_field = '';
     public $params_defs = array(
         'entity_name'              => array('default' => 0),
         'abstract'                 => array('data_type' => 'bool', 'default' => 0),
@@ -85,7 +86,7 @@ class BimpObject extends BimpCache
     public $parent = null;
     public $dol_object = null;
     public $extends = array();
-    public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old // 0 : aucune redirection
     public $noFetchOnTrigger = false;
     public $fieldsWithAddNoteOnUpdate = array();
     public $isDeleting = false;
@@ -353,6 +354,9 @@ class BimpObject extends BimpCache
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
+        if ($this->use_positions) {
+            $this->position_field = $this->getConf('position_field', 'position');
+        }
 
         if ($this->config->isDefined('dol_object')) {
             $this->dol_object = $this->config->getObject('dol_object');
@@ -364,7 +368,7 @@ class BimpObject extends BimpCache
         }
 
         $this->addCommonFieldsConfig();
-        
+
         $this->addEntityFieldConfig();
 
         $errors = array();
@@ -399,24 +403,25 @@ class BimpObject extends BimpCache
     {
         return $this->config->isDefined('dol_object');
     }
-    
-    protected function addEntityFieldConfig(){
-        if (BimpTools::isModuleDoliActif('MULTICOMPANY') && $this->getEntity_name()){
+
+    protected function addEntityFieldConfig()
+    {
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY') && $this->getEntity_name()) {
             $this->config->addParams('fields', array(
-                    'entity' => array(
-                        'label'    => 'Entité',
-                        'type'     => 'id',
-                        'values'  => array(
-                            'array' => 'entitiesCache'
-                        ), 
-    //            array: condReglements
-    //        input: 
-    //            type: select_cond_reglement
-    //        default_value: 
-    //            callback: getCondReglementBySociete
-                        'editable' => 0
-                    )
-                        ), 'initial');
+                'entity' => array(
+                    'label'    => 'Entité',
+                    'type'     => 'id',
+                    'values'   => array(
+                        'array' => 'entitiesCache'
+                    ),
+                    //            array: condReglements
+                    //        input: 
+                    //            type: select_cond_reglement
+                    //        default_value: 
+                    //            callback: getCondReglementBySociete
+                    'editable' => 1
+                )
+                    ), 'initial');
         }
     }
 
@@ -548,7 +553,7 @@ class BimpObject extends BimpCache
 
         if ($this->use_positions) {
             $this->config->addParams('fields', array(
-                'position' => array(
+                $this->position_field => array(
                     'label'    => 'Position',
                     'type'     => 'int',
                     'input'    => array(
@@ -1715,6 +1720,7 @@ class BimpObject extends BimpCache
 
     public function getDbData($fields = null)
     {
+        global $conf;
         $data = array();
 
         $primary = $this->getPrimary();
@@ -1741,9 +1747,9 @@ class BimpObject extends BimpCache
             }
         }
 
-        global $conf;
-        if ($this->getEntity_name())
+        if ($this->getEntity_name()) {
             $data['entity'] = $conf->entity;
+        }
 
         return $data;
     }
@@ -2362,6 +2368,14 @@ class BimpObject extends BimpCache
 
         $result['errors'] = BimpTools::merge_array($result['errors'], BimpTools::getDolEventsMsgs(array('errors')));
 
+        if (!count($result['errors'])) {
+            BimpTools::traitePostTraitement($result['errors']);
+        }
+        BimpObject::loadClass('bimpalert', 'AlertProduit');
+        if(class_exists('AlertProduit')){
+            AlertProduit::getAlertes($result['errors'], $result['warnings']);
+        }
+
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
         global $dont_rollback;
         if ($use_db_transactions) {
@@ -2780,7 +2794,7 @@ class BimpObject extends BimpCache
                     $type = 'datetime';
                     break;
 
-                case 'position':
+                case $this->position_field:
                     $type = 'int';
                     break;
             }
@@ -2929,11 +2943,11 @@ class BimpObject extends BimpCache
         if (!$no_transactions_db && $this->db->db->noTransaction) {
             $no_transactions_db = true;
         }
-        
+
         if ($this->isLoaded($errors)) {
             global $user;
             $w = array();
-            
+
             BimpObject::createBimpObject('bimpcore', 'BimpObjectLog', array(
                 'obj_module' => $this->module,
                 'obj_name'   => $this->object_name,
@@ -3718,6 +3732,10 @@ class BimpObject extends BimpCache
                             $module = 'bimpcontract';
                             $class = 'BContract_contrat';
                             break;
+                        case 'bimp_contrat': 
+                            $module = 'bimpcontrat';
+                            $class = 'BCT_Contrat';
+                            break;
 //                        case 'fichinter':
 //                            $class = 'BimpFi_fiche';
 //                            $module = "bimpfi";
@@ -4448,7 +4466,7 @@ class BimpObject extends BimpCache
                 $search_type = 'datetime_range';
                 break;
 
-            case 'position':
+            case $this->position_field:
                 $input_type = 'values_range';
                 $search_type = 'values_range';
         }
@@ -4819,6 +4837,14 @@ class BimpObject extends BimpCache
                 }
             }
 
+            if (!count($errors)) {
+                BimpTools::traitePostTraitement($errors);
+            }
+            BimpObject::loadClass('bimpalert', 'AlertProduit');
+            if(class_exists('AlertProduit')){
+                AlertProduit::getAlertes($errors, $warnings);
+            }
+
             if ($use_db_transactions) {
                 if (count($errors)) {
                     $this->db->db->rollback();
@@ -5038,7 +5064,7 @@ class BimpObject extends BimpCache
                 }
 
                 if ($this->params['positions'] && $this->params['position_insert'] === 'after') {
-                    $this->set('position', $this->getNextPosition());
+                    $this->set($this->position_field, $this->getNextPosition());
                 }
 
                 if (!is_null($this->dol_object)) {
@@ -6410,14 +6436,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Gestion des droits users: 
-    
+
 
     public function can($right)
     {
 //        echo '<pre>'. get_class($this);
-        if(isset($this->dol_object)){//peut être un peut lourd, mais plus safe...
+        if (!BimpCore::isContextPublic() && isset($this->dol_object)) {//peut être un peut lourd, mais plus safe...
             $return = BimpCache::dol_can($this->dol_object);
-            if(!$return)
+            if (!$return)
                 return 0;
         }
 //        print_r($this->dol_object);
@@ -6538,6 +6564,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             return $this->canClientEdit();
         }
 
+        if ($field_name == 'entity') {
+            global $user;
+            return $user->admin;
+        }
+
         return (int) $this->canEdit();
     }
 
@@ -6627,7 +6658,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function resetPositions()
     {
-        if ($this->getConf('positions', false, false, 'bool')) {
+        if ($this->use_positions) {
             $parent = $this->getParentInstance();
 
             if (is_a($parent, 'BimpObject')) {
@@ -6656,12 +6687,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $table = $this->getTable();
             $primary = $this->getPrimary();
 
-            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+            $items = $this->getList($filters, null, null, $this->position_field, 'asc', 'array', array($primary, $this->position_field));
             $i = 1;
             foreach ($items as $item) {
-                if ((int) $item['position'] !== (int) $i) {
+                if ((int) $item[$this->position_field] !== (int) $i) {
                     $this->db->update($table, array(
-                        'position' => (int) $i
+                        $this->position_field => (int) $i
                             ), '`' . $primary . '` = ' . (int) $item[$primary]);
                 }
                 $i++;
@@ -6675,8 +6706,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             return false;
         }
 
-        if ($this->params['positions']) {
-            $old_position = (int) $this->getInitData('position');
+        if ($this->use_positions) {
+            $old_position = (int) $this->getInitData($this->position_field);
             if ($old_position === $new_position) {
                 return true;
             }
@@ -6704,15 +6735,15 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $check = true;
 
             if (!in_array($this->object_name, array('Bimp_Menu'))) {
-                $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'), array(), $primary, ($this->params['position_insert'] === 'before' ? 'DESC' : 'ASC'));
+                $items = $this->getList($filters, null, null, $this->position_field, 'asc', 'array', array($primary, $this->position_field), array(), $primary, ($this->params['position_insert'] === 'before' ? 'DESC' : 'ASC'));
                 if ($this->db->update($table, array(
-                            'position' => (int) $new_position
+                            $this->position_field => (int) $new_position
                                 ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
                     $check = false;
                 }
 
                 if ($check) {
-                    $this->set('position', (int) $new_position);
+                    $this->set($this->position_field, (int) $new_position);
                     $i = 1;
                     foreach ($items as $item) {
                         if ($i === (int) $new_position) {
@@ -6723,9 +6754,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             continue;
                         }
 
-                        if ((int) $item['position'] !== (int) $i) {
+                        if ((int) $item[$this->position_field] !== (int) $i) {
                             if ($this->db->update($table, array(
-                                        'position' => (int) $i
+                                        $this->position_field => (int) $i
                                             ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
                                 $check = false;
                             }
@@ -6739,7 +6770,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                 // On attribue temporairement la position suivante à l'élément déplacé pour libérer sa position actuelle.
                 if ($this->db->update($table, array(
-                            'position' => (int) $this->getNextPosition()
+                            $this->position_field => (int) $this->getNextPosition()
                                 ), '`' . $primary . '` = ' . $this->id) <= 0) {
                     $errors[] = $this->db->err();
                     $check = false;
@@ -6749,7 +6780,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     // On décale une par une les positions des éléments affectés: 
                     $items_filters = $filters;
                     if ($new_position > $old_position) {
-                        $items_filters['position'] = array(
+                        $items_filters[$this->position_field] = array(
                             'and' => array(
                                 array(
                                     'operator' => '>',
@@ -6761,11 +6792,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                                 )
                             )
                         );
-                        $items = $this->getList($items_filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+                        $items = $this->getList($items_filters, null, null, $this->position_field, 'asc', 'array', array($primary, $this->position_field));
                         foreach ($items as $item) {
                             if ($check) {
                                 if ($this->db->update($table, array(
-                                            'position' => ((int) $item['position'] - 1)
+                                            $this->position_field => ((int) $item[$this->position_field] - 1)
                                                 ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
                                     $errors[] = $this->db->err();
                                     $check = false;
@@ -6773,7 +6804,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
                     } else {
-                        $items_filters['position'] = array(
+                        $items_filters[$this->position_field] = array(
                             'and' => array(
                                 array(
                                     'operator' => '>=',
@@ -6785,11 +6816,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                                 )
                             )
                         );
-                        $items = $this->getList($items_filters, null, null, 'position', 'desc', 'array', array($primary, 'position'));
+                        $items = $this->getList($items_filters, null, null, $this->position_field, 'desc', 'array', array($primary, $this->position_field));
                         foreach ($items as $item) {
                             if ($check) {
                                 if ($this->db->update($table, array(
-                                            'position' => ((int) $item['position'] + 1)
+                                            $this->position_field => ((int) $item[$this->position_field] + 1)
                                                 ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
                                     $errors[] = $this->db->err();
                                     $check = false;
@@ -6801,7 +6832,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     if ($check) {
                         // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée)
                         if ($this->db->update($table, array(
-                                    'position' => $new_position
+                                    $this->position_field => $new_position
                                         ), '`' . $primary . '` = ' . $this->id) <= 0) {
                             $errors[] = $this->db->err();
                             $check = false;
@@ -6824,7 +6855,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function getNextPosition()
     {
-        if ($this->getConf('positions', false, false, 'bool')) {
+        if ($this->use_positions) {
             if (method_exists($this, 'getPositionsFilters')) {
                 $filters = $this->getPositionsFilters();
                 if (is_null($filters)) {
@@ -6843,7 +6874,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $filters[$parent_id_property] = $id_parent;
             }
 
-            $sql = 'SELECT MAX(`position`) as max_pos';
+            $sql = 'SELECT MAX(`' . $this->position_field . '`) as max_pos';
             $sql .= BimpTools::getSqlFrom($this->getTable());
             $sql .= BimpTools::getSqlWhere($filters);
 
@@ -6902,13 +6933,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                                 $items = $instance->getList(array(
                                     $parent_id_prop => (int) $this->id
-                                        ), null, null, 'position', 'asc', 'array', array($primary, 'position'));
+                                        ), null, null, $instance->position_field, 'asc', 'array', array($primary, $instance->position_field));
 
                                 $i = 1;
                                 foreach ($items as $item) {
-                                    if ((int) $item['position'] !== (int) $i) {
-                                        $this->db->update($table, array(
-                                            'position' => (int) $i
+                                    if ((int) $item[$instance->position_field] !== (int) $i) {
+                                        $instance->db->update($table, array(
+                                            $instance->position_field => (int) $i
                                                 ), '`' . $primary . '` = ' . (int) $item[$primary]);
                                     }
                                     $i++;
@@ -6923,7 +6954,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0, $id_societe = 0)
     {
         $errors = array();
 
@@ -6960,7 +6991,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'type_dest'      => $type_dest,
             'fk_group_dest'  => $fk_group_dest,
             'fk_user_dest'   => $fk_user_dest,
-            'delete_on_view' => $delete_on_view
+            'delete_on_view' => $delete_on_view,
+            'id_societe'     => $id_societe
         ));
 
         if (!count($errors)) {
@@ -7153,16 +7185,16 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $html .= $this->renderHeaderExtraLeft();
                 $html .= '</div>';
             }
-            
-            if($this->isDolObject()&& isset($this->dol_object)){
+
+            if ($this->isDolObject() && isset($this->dol_object)) {
                 global $hookmanager;
-                $hookmanager->initHooks(array($this->dol_object->element.'card', 'globalcard'));
+                $hookmanager->initHooks(array($this->dol_object->element . 'card', 'globalcard'));
                 $parameters = array();
                 $reshook = $hookmanager->executeHooks('moreHtmlRef', $parameters, $this->dol_object); // Note that $action and $object may have been modified by hook
                 if (empty($reshook)) {
-                        $html .= $hookmanager->resPrint;
+                    $html .= $hookmanager->resPrint;
                 } elseif ($reshook > 0) {
-                        $html .= $hookmanager->resPrint;
+                    $html .= $hookmanager->resPrint;
                 }
             }
 
@@ -8586,7 +8618,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $js .= '{}, ';
         }
-        $js .= '\'' . htmlentities($title) . '\', ';
+        $js .= '\'' . htmlentities(addslashes($title)) . '\', ';
         $js .= $success_callback . ', ';
         $js .= '\'' . $modal_format . '\'';
 
@@ -8947,7 +8979,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } elseif ($isFemale) {
                 $labels['to'] = 'à la ' . $labels['name'];
             } else {
-                $labels['this'] = 'au ' . $labels['name'];
+                $labels['to'] = 'au ' . $labels['name'];
             }
         }
 
@@ -9992,7 +10024,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             global $conf;
             $dir = $conf->bimpcore->multidir_output[$conf->entity];
-            $dir_error = BimpTools::makeDirectories(array(  
+            $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(
                                 $this->object_name => $list_name
@@ -10244,7 +10276,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             if (!BimpObject::objectLoaded($instance)) {
                                 $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe plus';
                             } else {
-                                
+
                                 $mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'udpate_object');
                                 $force_update = BimpTools::getArrayValueFromPath($data, 'force_update', false);
                                 $not_validate = BimpTools::getArrayValueFromPath($data, 'validate', false);
@@ -10868,119 +10900,125 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function processRedirect($newVersion = true)
     {
-        $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
-        $redirectMode = $this->redirectMode;
-        
-        $texteBtn = "";
-        $btn = false;
-        if ($this->iAmAdminRedirect()) {
-            $btn = true;
-            if ($redirectMode == 4){//auto old vers new
-                $texteBtn = "ADMIN (Normalement nouvelle) : ";
-                if($newVersion){//on est sur l'ancienne
-                    if ($redirect)
-                        unset($_SESSION['oldVersion']);
-                    elseif(!isset($_SESSION['oldVersion']))
-                        $redirect = true;
-                }
-                else{//on est deja sur la nouvelle mais si $_SESSION['oldVersion']
-                    if ($redirect)
-                        $_SESSION['oldVersion'] = true;
-                    elseif(isset($_SESSION['oldVersion']))
-                        $redirect = true;
-                }
-            }
-            if($redirectMode == 5){//auto new vers old
-                $texteBtn = "ADMIN (Normalement Ancienne) : ";
-                if(!$newVersion){//on est sur la nouvelle
-                    if ($redirect)
-                        unset($_SESSION['newVersion']);
-                    if(!isset($_SESSION['newVersion']))
-                        $redirect = true;
-                }
-                else{//on est deja sur l'ancienne mais si $_SESSION['newVersion']
-                    if ($redirect)
-                        $_SESSION['newVersion'] = true;
-                    elseif(isset($_SESSION['newVersion']))
-                        $redirect = true;
-                }
-            }
-        }
-        else{
-            if($redirectMode == 4 && $newVersion)
-                $redirect = true;
-            elseif($redirectMode == 5 && !$newVersion)
-                $redirect = true;
+        if (!(int) $this->redirectMode) {
+            return '';
         }
         
-        if($redirectMode == 1 ||
-                ($redirectMode == 2 && $newVersion) ||
-                ($redirectMode == 3 && !$newVersion))
-            $btn = true;
-        
-        
-        
-        if ($newVersion) {
-            if ($this->id > 0) {
-                if ($this->getConf('controller', null))
-                    $url = $this->getUrl();
-            } elseif ($this->getConf('list_page_url', null))
-                $url = $this->getListUrl();
-            $texteBtn .= "Nouvelle version";
+        if (BimpTools::getValue("redirectForce_oldVersion"))
+            $_SESSION['oldVersion'] = true;
 
-            $search = null;
-            if (BimpTools::getValue("sall") != "") {
-                $search = BimpTools::getValue("sall");
-            } elseif (BimpTools::getValue("search_all") != "") {
-                $search = BimpTools::getValue("search_all");
-            }
-            if ($search) {
-                $objName = "";
-                if (isset($this->dol_object) && isset($this->dol_object->element))
-                    $objName = $this->dol_object->element;
-                if ($objName == "order_supplier")
-                    $objName = "commande_fourn";
-                if ($objName == "invoice_supplier")
-                    $objName = "facture_fourn";
-                $url .= "&search=1&object=" . $objName . "&sall=" . $search;
-            }
-            if (BimpTools::getValue("socid") != "") {
-                $objName = "";
-                if (isset($this->dol_object) && isset($this->dol_object->element))
-                    $objName = $this->dol_object->element;
-                $url .= "&socid=" . BimpTools::getValue("socid");
-            }
-            if (BimpTools::getValue("viewstatut") != "") {
-                $url .= "&fk_statut=" . BimpTools::getValue("viewstatut");
-            }
-            if (BimpTools::getValue("statut") != "") {
-                $url .= "&fk_statut=" . BimpTools::getValue("statut");
-            }
-            if (BimpTools::getValue("search_status") != "") {
-                $url .= "&fk_statut=" . BimpTools::getValue("search_status");
-            }
-            if (BimpTools::getValue("mainmenu") != "") {
-                $url .= "&mainmenu=" . BimpTools::getValue("mainmenu");
-            }
-            if (BimpTools::getValue("leftmenu") != "") {
-                $url .= "&leftmenu=" . BimpTools::getValue("leftmenu");
-            }
-        } else {
-            $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
-            $texteBtn .= "Ancienne version";
-        }
-        if ($redirect && $url != "") {
-            $ob = ob_get_contents();
-            if ($ob != "")
-                die("<script>window.location = '" . $url . "';</script>");
-            else {
-                header("location: " . $url);
-                die("<script>window.location = '" . $url . "';</script>");
-            }
-        } elseif ($btn && $url != "")
-            return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";
+        if (!BimpTools::getValue('redirectForce_oldVersion', 0)) {
+            $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
+            $redirectMode = $this->redirectMode;
 
-        return '';
+            $texteBtn = "";
+            $btn = false;
+            if ($this->iAmAdminRedirect()) {
+                $btn = true;
+                if ($redirectMode == 4) {//auto old vers new
+                    $texteBtn = "ADMIN (Normalement nouvelle) : ";
+                    if ($newVersion) {//on est sur l'ancienne
+                        if ($redirect)
+                            unset($_SESSION['oldVersion']);
+                        elseif (!isset($_SESSION['oldVersion']))
+                            $redirect = true;
+                    } else {//on est deja sur la nouvelle mais si $_SESSION['oldVersion']
+                        if ($redirect)
+                            $_SESSION['oldVersion'] = true;
+                        elseif (isset($_SESSION['oldVersion']))
+                            $redirect = true;
+                    }
+                }
+                if ($redirectMode == 5) {//auto new vers old
+                    $texteBtn = "ADMIN (Normalement Ancienne) : ";
+                    if (!$newVersion) {//on est sur la nouvelle
+                        if ($redirect)
+                            unset($_SESSION['newVersion']);
+                        if (!isset($_SESSION['newVersion']))
+                            $redirect = true;
+                    } else {//on est deja sur l'ancienne mais si $_SESSION['newVersion']
+                        if ($redirect)
+                            $_SESSION['newVersion'] = true;
+                        elseif (isset($_SESSION['newVersion']))
+                            $redirect = true;
+                    }
+                }
+            } else {
+                if ($redirectMode == 4 && $newVersion)
+                    $redirect = true;
+                elseif ($redirectMode == 5 && !$newVersion)
+                    $redirect = true;
+            }
+
+            if ($redirectMode == 1 ||
+                    ($redirectMode == 2 && $newVersion) ||
+                    ($redirectMode == 3 && !$newVersion))
+                $btn = true;
+
+
+
+            if ($newVersion) {
+                if ($this->id > 0) {
+                    if ($this->getConf('controller', null))
+                        $url = $this->getUrl();
+                } elseif ($this->getConf('list_page_url', null))
+                    $url = $this->getListUrl();
+                $texteBtn .= "Nouvelle version";
+
+                $search = null;
+                if (BimpTools::getValue("sall") != "") {
+                    $search = BimpTools::getValue("sall");
+                } elseif (BimpTools::getValue("search_all") != "") {
+                    $search = BimpTools::getValue("search_all");
+                }
+                if ($search) {
+                    $objName = "";
+                    if (isset($this->dol_object) && isset($this->dol_object->element))
+                        $objName = $this->dol_object->element;
+                    if ($objName == "order_supplier")
+                        $objName = "commande_fourn";
+                    if ($objName == "invoice_supplier")
+                        $objName = "facture_fourn";
+                    $url .= "&search=1&object=" . $objName . "&sall=" . $search;
+                }
+                if (BimpTools::getValue("socid") != "") {
+                    $objName = "";
+                    if (isset($this->dol_object) && isset($this->dol_object->element))
+                        $objName = $this->dol_object->element;
+                    $url .= "&socid=" . BimpTools::getValue("socid");
+                }
+                if (BimpTools::getValue("viewstatut") != "") {
+                    $url .= "&fk_statut=" . BimpTools::getValue("viewstatut");
+                }
+                if (BimpTools::getValue("statut") != "") {
+                    $url .= "&fk_statut=" . BimpTools::getValue("statut");
+                }
+                if (BimpTools::getValue("search_status") != "") {
+                    $url .= "&fk_statut=" . BimpTools::getValue("search_status");
+                }
+                if (BimpTools::getValue("mainmenu") != "") {
+                    $url .= "&mainmenu=" . BimpTools::getValue("mainmenu");
+                }
+                if (BimpTools::getValue("leftmenu") != "") {
+                    $url .= "&leftmenu=" . BimpTools::getValue("leftmenu");
+                }
+            } else {
+                $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
+                $texteBtn .= "Ancienne version";
+            }
+            if ($redirect && $url != "") {
+                $ob = ob_get_contents();
+                if ($ob != "")
+                    die("<script>window.location = '" . $url . "';</script>");
+                else {
+                    header("location: " . $url);
+                    die("<script>window.location = '" . $url . "';</script>");
+                }
+            } elseif ($btn && $url != "")
+                return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";
+
+            return '';
+        }
     }
 
     public function iAmAdminRedirect()

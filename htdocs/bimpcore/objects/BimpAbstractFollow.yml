@@ -1,0 +1,44 @@
+
+forms:    
+    add_user_follow: 
+        rows: 
+            - custom: 1
+              label: Utilisateur à notifier
+              input_name: id_user
+              data_type: id
+              input: 
+                  type: search_user
+                  active_only: 1
+    add_email_follow: 
+        rows: 
+            - custom: 1
+              label: Email à notifier
+              input_name: email
+              data_type: text
+              input: 
+                  type: text
+                  
+fields:
+    users_follow: 
+        label: Suivie par
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: user
+        input: 
+            type: search_user
+            
+    users_no_follow: 
+        label: Suivi refusé par
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: user
+        input: 
+            type: search_user
+            
+    emails_follow:
+        label: Suivie par emails
+        type: items_list
+        items_data_type: text
+        items_braces: 1

@@ -21,16 +21,18 @@ class BC_Input extends BimpComponent
     protected $input_extra_data = array();
     public static $type_params_def = array(
         'text'                        => array(
-            'values'         => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-            'allow_custom'   => array('data_type' => 'bool', 'default' => 1),
-            'hashtags'       => array('data_type' => 'bool', 'default' => 0),
-            'scanner'        => array('data_type' => 'bool', 'default' => 0),
-            'no_autocorrect' => array('data_type' => 'bool', 'default' => 0)
+            'values'          => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+            'allow_custom'    => array('data_type' => 'bool', 'default' => 1),
+            'hashtags'        => array('data_type' => 'bool', 'default' => 0),
+            'scanner'         => array('data_type' => 'bool', 'default' => 0),
+            'no_autocorrect'  => array('data_type' => 'bool', 'default' => 0),
+            'possible_values' => array('data_type' => 'array', 'default' => array())
         ),
         'qty'                         => array(
-            'step'      => array('data_type' => 'float', 'default' => 1),
-            'min_label' => array('data_type' => 'bool', 'default' => 0),
-            'max_label' => array('data_type' => 'bool', 'default' => 0),
+            'step'            => array('data_type' => 'float', 'default' => 1),
+            'min_label'       => array('data_type' => 'bool', 'default' => 0),
+            'max_label'       => array('data_type' => 'bool', 'default' => 0),
+            'possible_values' => array('data_type' => 'array', 'default' => array())
         ),
         'time'                        => array(
             'display_now'   => array('data_type' => 'bool', 'default' => 0),
@@ -55,12 +57,13 @@ class BC_Input extends BimpComponent
             'note'             => array('data_type' => 'bool', 'default' => 0),
             'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
             'maxlength'        => array('data_type' => 'int'),
-            'values'           => array('data_type' => 'array', 'default' => array()),
+            'possible_values'  => array('data_type' => 'array', 'default' => array()),
             'hashtags'         => array('data_type' => 'bool', 'default' => 0),
             'scanner'          => array('data_type' => 'bool', 'default' => 0)
         ),
         'html'                        => array(
-            'hashtags' => array('data_type' => 'bool', 'default' => 0),
+            'hashtags'        => array('data_type' => 'bool', 'default' => 0),
+            'possible_values' => array('data_type' => 'array', 'default' => array())
 //            'scanner'  => array('data_type' => 'bool', 'default' => 0) // A implémenter
         ),
         'select'                      => array(
@@ -280,7 +283,7 @@ class BC_Input extends BimpComponent
         $this->input_id .= '_' . $input_name;
 
         if (is_a($this->object, 'BimpObject') &&
-                method_exists($this->object, 'getInputValue') && is_null($this->value)) {//TODO && is_null($this->value) a verifier, mais sinon la valeur envoyé ce fait écraser
+                method_exists($this->object, 'getInputValue') /*&& is_null($this->value)*/) {//TODO && is_null($this->value) a verifier, mais sinon la valeur envoyé ce fait écraser
             $input_value = $this->object->getInputValue($this->input_name);
             if (!is_null($input_value)) {
                 $this->value = $input_value;
@@ -341,13 +344,15 @@ class BC_Input extends BimpComponent
                 $options['hashtags'] = ((isset($this->params['hashtags']) && (int) $this->params['hashtags']) ? (int) $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? (int) $this->field_params['hashtags'] : 0));
                 $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
                 $options['no_autocorrect'] = ((isset($this->params['no_autocorrect'])) ? (int) $this->params['no_autocorrect'] : 0);
+                $options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
 
             case 'qty':
                 $options['data'] = array();
                 $options['step'] = isset($this->params['step']) ? $this->params['step'] : 1;
                 $options['min_label'] = isset($this->params['min_label']) ? $this->params['min_label'] : 0;
                 $options['max_label'] = isset($this->params['max_label']) ? $this->params['max_label'] : 0;
-
+                $options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
+                
                 $min = 'none';
                 $max = 'none';
                 $decimals = 0;
@@ -414,7 +419,7 @@ class BC_Input extends BimpComponent
                 $options['note'] = isset($this->params['note']) ? $this->params['note'] : 0;
                 $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
                 $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
-                $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
+                $options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
                 $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
 //                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
                 break;

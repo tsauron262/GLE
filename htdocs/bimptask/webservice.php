@@ -1,4 +1,16 @@
 <?php
+
+
+
+
+
+/*
+ * ATTENTION PLUS AJOUR ..........
+ */
+
+
+
+
 if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" || $_SERVER['PHP_AUTH_PW'] != "9DDrvuNcWRdKClhTe2LGh0mbKVIV33I3") {
     header('WWW-Authenticate: Basic realm="My Realm"');
     header('HTTP/1.0 401 Unauthorized');

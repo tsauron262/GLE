@@ -385,8 +385,9 @@ lists:
     in_fiche:
         title: Liste des interventions
         objects_change_reload: BT_ficheInter
-        sort_field: rowid
+        sort_field: date
         sort_way: asc
+        configurable: 1
         n: 0
         add_btn: 1
         add_form_name: default

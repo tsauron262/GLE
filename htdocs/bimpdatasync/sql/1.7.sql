@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bds_process` ADD `entity` INT NOT NULL DEFAULT 1;

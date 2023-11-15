@@ -1450,6 +1450,31 @@ class BS_SAV extends BimpObject
         }
         return $extra;
     }
+    
+    public static function getMailFrom(){
+        $mail = BimpCore::getConf('mail_from_sav', null, 'bimpsupport');
+        if($mail != ''){
+            return array($mail, 'SAV '.BimpCore::getConf('default_name', null, 'bimpsupport'));
+        }
+    }
+    
+    public function getMailTo(){
+        $to = '';
+        $contact = $this->getChildObject('contact');
+
+        if (BimpObject::objectLoaded($contact)) {
+            $to = $contact->getData('email');
+        }
+
+        if (!$to) {
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                $to = $client->getData('email');
+            }
+        }
+        return $to;
+    }
 
     public function getCentreData($centre_repa = false)
     {
@@ -2092,6 +2117,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     }
                 }
             }
+        }
+        
+        if($this->getData('info_importante') != ''){
+            $html .= BimpRender::renderAlerts($this->getData('info_importante'));
         }
 
         return $html;
@@ -4390,19 +4419,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if (!$to) {
-            $contact = $this->getChildObject('contact');
-
-            if (BimpObject::objectLoaded($contact)) {
-                $to = $contact->getData('email');
-            }
-
-            if (!$to) {
-                $client = $this->getChildObject('client');
-
-                if (BimpObject::objectLoaded($client)) {
-                    $to = $client->getData('email');
-                }
-            }
+            $to = $this->getMailTo();
         }
 
         if (!$to) {
@@ -5039,17 +5056,22 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return $errors;
     }
+    
+    public function getCodeCentre(){
+        $code_centre = $this->getData('code_centre_repa');
+
+        if (!$code_centre) {
+            $code_centre = $this->getData('code_centre');
+        }
+        return $code_centre;
+    }
 
     public function decreasePartsStock($parts_stock_data, $code_mvt, $desc)
     {
         BimpObject::loadClass('bimpapple', 'InternalStock');
         BimpObject::loadClass('bimpapple', 'ConsignedStock');
 
-        $code_centre = $this->getData('code_centre_repa');
-
-        if (!$code_centre) {
-            $code_centre = $this->getData('code_centre');
-        }
+        $code_centre = $this->getCodeCentre();
 
         $warnings = array();
         foreach ($parts_stock_data as $part_number => $stock_data) {
@@ -6393,6 +6415,36 @@ ORDER BY a.val_max DESC");
             'warnings'         => array(),
             'success_callback' => $success_callback
         );
+    }
+    
+    public function getIdUserGroup(){
+        $codeCentre = $this->getCodeCentre();
+        
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+        global $tabCentre;
+        if(isset($tabCentre[$codeCentre])){
+            if(isset($tabCentre[$codeCentre]['idGroup'])){
+                return $tabCentre[$codeCentre]['idGroup'];
+            }
+            else{
+                BimpCore::addlog('Pas de groupe dans centre.inc pour '.$codeCentre);
+            }
+        }
+        else{
+            BimpCore::addlog('Pas de centre dans centre.inc pour '.$codeCentre);
+        }
+        
+        return 0;
+    }
+    
+    public function addMailMsg($dst, $src, $subj, $txt){
+        $idGroup = $this->getIdUserGroup();
+        $errors = $this->addNote('Message de : '.$src.'<br/>'.'Sujet : '.$subj.'<br/>'.$txt, 20, 0, 1, $src, 2, 4, $idGroup,0,0,$this->getData('id_client'));
+        if(count($errors))
+            BimpCore::addlog ('Erreur création mailMsg sav', 1, 'sav', $this, $errors);
+        else
+            return 1;
+        return 0;
     }
 
     public function actionAddAcompte($data, &$success)

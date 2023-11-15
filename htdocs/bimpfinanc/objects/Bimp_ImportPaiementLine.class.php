@@ -19,80 +19,118 @@ class Bimp_ImportPaiementLine extends BimpObject
     {
         $errors = parent::create($warnings, $force_create);
 
-        $result = $this->actionInit();
+        $success = '';
+        $result = $this->actionInit(array(), $success);
         $errors = BimpTools::merge_array($errors, $result['errors']);
 
         return $errors;
     }
 
-    function actionInit()
+    function actionInit($data, &$success)
     {
+        $success = 'ok';
         $errors = $warnings = array();
 
         $price = 0;
-        if (preg_match('/MMOEUR2[0]*([0-9\.,]+)/', $this->getData('data'), $matches)) {
-            $price = $matches[1] / 100;
-        }
-
-        $type = '';
-
-        $codes = array(array('0517806000000669EUR2E0416135704405'), array('0417806000000669EUR2E04161357044C2', array('price' => 'methode2')), array('0417806001600669EUR2E041613570444', array('price' => 'methode2'))/* virement trés peut d'info (surement virement instentannée) */);
-
-        foreach ($codes as $data) {
-            $code = $data[0];
-
-            if (stripos($this->getData('data'), $code) !== false) {
+        
+        $parent = $this->getParentInstance();
+        
+        
+        
+        if(preg_match('/'.$parent->getFiltreWithBanque().'([0-9A-Z]{2})([0-9]{2})([0-9]{2})([0-9]{2})  ([0-9]{2})([0-9]{2})([0-9]{2})(.{4})(.{5})(.{24})(.{9})(.{14})'.'/', $this->getData('data'), $matches)){
+//            print_r($matches);
+            $date = '20' . $matches[4] . '-' . $matches[3] . '-' . $matches[2];
+            $date2 = '20' . $matches[7] . '-' . $matches[6] . '-' . $matches[5];
+//            $type = strtolower(trim($matches[8]));
+            $type2 = $matches[9];
+            $name = $matches[10];
+            $price = $this->traitePrice($matches[12]);
+            $type = '';
+            
+            
+            //recherche du nom
+            if(preg_match('/'.$parent->getFiltreWithBanque('05').'[0-9A-Z]{2}[0-9]{2}[0-9]{2}[0-9]{2}     NPY(.*)'.'/', $this->getData('data'), $matches)){
+                $name = $matches[1];
                 $type = 'vir';
-                if (isset($data[1]['price'])) {
-                    if ($data[1]['price'] == 'methode2') {
-                        if (preg_match('/0417806000000669EUR2E04161357044C2[0-9 A-Z\.-]*(00000)([0-9\.,}{]+)([A-Z]{1,1})/', $this->getData('data'), $matches)) {
-                            $price = $matches[2];
-                            $lettre = $matches[3];
-                            $price .= $this->lettreToChiffre($lettre);
-                            $price = $price / 100;
-//die('un');
-                        } elseif (preg_match('/0417806000000669EUR2E04161357044C2[0-9 .A-Z()\.-]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)) {
-//                            print_r($matches);
-                            $price = $matches[2];
-                            $lettre = substr($price, -1, 1);
-                            $price = intval(str_replace($lettre, $this->lettreToChiffre(str_replace('{', '}', $lettre)), $price)) / 100;
-//                            die('deux');
-                        } elseif (preg_match('/0417806001600669EUR2E041613570444[0-9 .A-Z()\.-\/]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)) {
-//                            print_r($matches);
-//                            die('rrr');
-                            $price = $matches[2];
-                            $lettre = substr($price, -1, 1);
-                            $price = intval(str_replace($lettre, $this->lettreToChiffre(str_replace('{', '}', $lettre)), $price)) / 100;
-//                            die('deux');
-                        } else {
-                            $price = (substr(trim($this->getData('data')), -10, 10));
-                            $lettre = substr($price, -1, 1);
-                            $price = intval(str_replace($lettre, $this->lettreToChiffre($lettre), $price)) / 100;
-//                            die('trois');
-                        }
-                    }
-                }
-
-
-
-
-                if (preg_match('/' . str_replace("", "", $code) . '([0-9]{2})([0-9]{2})([0-9]{2})(.+)/', $this->getData('data'), $matches)) {
-                    $date = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
-                    $datebrut = $matches[1] . $matches[2] . $matches[3];
-                }
-
-                $name = '';
-                if (preg_match('/' . $code . '[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
-                    if (stripos($matches[1], '0000000100000') !== false) {
-                        $tmp = explode('0000000100000', $matches[1]);
-                        $matches[1] = $tmp[0];
-                    }
-
-
-                    $name = trim(str_replace(array('NPY', 'VIR'), '', str_replace($datebrut, '', trim($matches[1]))));
-                }
             }
+            
+            
+            
+//echo '<br/>';
+//echo $date.'<br/>';
+//echo $date2.'<br/>';
+//echo $type.'<br/>';
+//echo $type2.'<br/>';
+//echo $name.'<br/>';
+//echo $price.'<br/>';
         }
+//die;
+//        $type = '';
+//        
+//        if (preg_match('/MMOEUR2[0]*([0-9\.,]+)/', $this->getData('data'), $matches)) {
+//            $price = $matches[1] / 100;
+//        }
+//
+//        $codes = array(array('0517806000000669EUR2E0416135704405'), array('0417806000000669EUR2E04161357044C2', array('price' => 'methode2')), array('0417806001600669EUR2E041613570444', array('price' => 'methode2'))/* virement trés peut d'info (surement virement instentannée) */);
+//
+//        foreach ($codes as $data) {
+//            $code = $data[0];
+//            
+//            
+//            
+//
+//            if (stripos($this->getData('data'), $code) !== false) {
+//                $type = 'vir';
+//                if (isset($data[1]['price'])) {
+//                    if ($data[1]['price'] == 'methode2') {
+//                        if (preg_match('/0417806000000669EUR2E04161357044C2[0-9 A-Z\.-]*(00000)([0-9\.,}{]+)([A-Z]{1,1})/', $this->getData('data'), $matches)) {
+//                            $price = $matches[2];
+//                            $lettre = $matches[3];
+//                            $price .= $this->lettreToChiffre($lettre);
+//                            $price = $price / 100;
+////die('un');
+//                        } elseif (preg_match('/0417806000000669EUR2E04161357044C2[0-9 .A-Z()\.-]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)) {
+////                            print_r($matches);
+//                            $price = $matches[2];
+//                            $lettre = substr($price, -1, 1);
+//                            $price = intval(str_replace($lettre, $this->lettreToChiffre(str_replace('{', '}', $lettre)), $price)) / 100;
+////                            die('deux');
+//                        } elseif (preg_match('/0417806001600669EUR2E041613570444[0-9 .A-Z()\.-\/]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)) {
+////                            print_r($matches);
+////                            die('rrr');
+//                            $price = $matches[2];
+//                            $lettre = substr($price, -1, 1);
+//                            $price = intval(str_replace($lettre, $this->lettreToChiffre(str_replace('{', '}', $lettre)), $price)) / 100;
+////                            die('deux');
+//                        } else {
+//                            $price = (substr(trim($this->getData('data')), -10, 10));
+//                            $lettre = substr($price, -1, 1);
+//                            $price = intval(str_replace($lettre, $this->lettreToChiffre($lettre), $price)) / 100;
+////                            die('trois');
+//                        }
+//                    }
+//                }
+//
+//
+//
+//
+//                if (preg_match('/' . str_replace("", "", $code) . '([0-9]{2})([0-9]{2})([0-9]{2})(.+)/', $this->getData('data'), $matches)) {
+//                    $date = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+//                    $datebrut = $matches[1] . $matches[2] . $matches[3];
+//                }
+//
+//                $name = '';
+//                if (preg_match('/' . $code . '[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
+//                    if (stripos($matches[1], '0000000100000') !== false) {
+//                        $tmp = explode('0000000100000', $matches[1]);
+//                        $matches[1] = $tmp[0];
+//                    }
+//
+//
+//                    $name = trim(str_replace(array('NPY', 'VIR'), '', str_replace($datebrut, '', trim($matches[1]))));
+//                }
+//            }
+//        }
 
         if (preg_match('/(DV)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(FV)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(TK)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(CV)[0-9]{14}/', $this->getData('data'), $matches)) {//C2BO
             $this->set('traite', 1);
@@ -130,6 +168,14 @@ class Bimp_ImportPaiementLine extends BimpObject
             if ($lettre == $find)
                 return $chiffre;
         return 0;
+    }
+    
+    private function traitePrice($price){
+        $price = str_replace('{', '}', $price);
+        $array = array('}', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I');
+        foreach ($array as $chiffre => $lettre)
+            $price = str_replace($lettre, $chiffre, $price);
+        return $price / 100;
     }
 
     public function getListExtraButtons()

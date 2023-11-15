@@ -7,14 +7,15 @@ class BC_FieldsTable extends BC_Panel
     public static $type = 'fields_table';
     protected $new_values = array();
     public $row_params = array(
-        'show'        => array('data_type' => 'bool', 'default' => 1),
-        'field'       => array('default' => ''),
-        'association' => array('default' => ''),
-        'label'       => array('default' => ''),
-        'value'       => array('data_type' => 'any'),
-        'display'     => array('default' => 'default'),
-        'edit'        => array('data_type' => 'bool', 'default' => 0),
-        'history'     => array('data_type' => 'bool', 'default' => 0)
+        'show'          => array('data_type' => 'bool', 'default' => 1),
+        'field'         => array('default' => ''),
+        'association'   => array('default' => ''),
+        'label'         => array('default' => ''),
+        'value'         => array('data_type' => 'any'),
+        'display'       => array('default' => 'default'),
+        'edit'          => array('data_type' => 'bool', 'default' => 0),
+        'history'       => array('data_type' => 'bool', 'default' => 0),
+        'extra_content' => array()
     );
 
     public function __construct(BimpObject $object, $name, $content_only = false, $title = null, $icon = null)
@@ -102,6 +103,7 @@ class BC_FieldsTable extends BC_Panel
 
             $label = $row_params['label'];
             $content = '';
+
             if ($row_params['field']) {
                 $field_errors = array();
                 $field_name = $row_params['field'];

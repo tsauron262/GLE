@@ -106,11 +106,13 @@ forms:
               input:
                   type: toggle
             - field: status
-              show: 
-                  callback: isLoaded
+              display_if: 
+                  field_name: start_timer
+                  hide_values: 1
             - field: timer
-              show: 
-                  callback: isLoaded
+              display_if: 
+                  field_name: start_timer
+                  hide_values: 1
                   
     resolution: 
         rows: 

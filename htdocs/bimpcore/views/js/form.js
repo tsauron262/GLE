@@ -3135,19 +3135,28 @@ function setInputsEvents($container) {
             $(this).data('check_event_init', 1);
         }
     });
-    $container.find('.texarea_values').each(function () {
-        if (!parseInt($(this).data('textarea_values_event_init'))) {
+    $container.find('.input_possible_values').each(function () {
+        if (!parseInt($(this).data('input_possible_values_event_init'))) {
             var field_name = $(this).data('field_name');
-            var $textarea = $(this).parent().find('textarea[name="' + field_name + '"]');
-            $(this).find('.textarea_value').click(function () {
-                var text = $textarea.val();
-                if (text) {
-                    text += ', ';
+            var $input = $(this).parent().find('textarea[name="' + field_name + '"],input[name="' + field_name + '"]');
+            var replace_cur_value = parseInt($(this).data('replace_cur_value'));
+            
+            if (isNaN(replace_cur_value)) {
+                replace_cur_value = 0;
+            }
+
+            $(this).find('.input_possible_value').click(function () {
+                var text = '';
+                if (!replace_cur_value) {
+                    text = $input.val();
+                    if (text) {
+                        text += ', ';
+                    }
                 }
                 text += $(this).text();
-                $textarea.val(text).change();
+                $input.val(text).change();
             });
-            $(this).data('textarea_values_event_init', 1);
+            $(this).data('input_possible_values_event_init', 1);
         }
     });
     $container.find('.input_values').each(function () {

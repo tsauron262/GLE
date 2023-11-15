@@ -67,33 +67,7 @@ sections:
                   list:
                       panel: 1
                       object: facturation
-#        deux:
-#    - type: nav_tabs
-#      nav_tabs: 
-#          - id: liste
-#            title: Liste complète des contrats
-#            struct: 
-#                type: list
-#                list: 
-#                    panel: 1
-#                    object: contrat
-#          - id: recap_contrat_echeancier
-#            title: Récapitulatif des échéanciers contrat
-#            struct:
-#        recap_contrat_echeancier:
-#            label: Récapitulatif des échéanciers contrat
-#            sections:
-#                - type: list
-#                  list:
-#                    panel: 1
-#                    object: echeancier
-#                    name: default
-        config:
-            show: 0
-            label: Configuration
-            sections:
-                - type: list
-                  title: Configuration
-                  list: 
-                    panel: 1
-                    object: assistance_contrat
+        contrats_abo: 
+            label: Contrats d'abonnement
+            module: bimpcontrat
+            controller: index

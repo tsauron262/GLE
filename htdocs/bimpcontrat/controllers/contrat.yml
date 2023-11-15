@@ -1,0 +1,83 @@
+title: 
+    callback: 
+        object: contrat
+        method: getPageTitle
+        
+bootstrap: 1
+
+js: 
+    - /bimpcontrat/views/js/bimp_contrat.js
+    
+objects: 
+    contrat: 
+        instance: 
+            bimp_object: 
+                module: bimpcontrat
+                name: BCT_Contrat
+            id_object: 
+                request: id
+                
+sections: 
+    - type: object_header
+      object_header: 
+          object: contrat
+    - type: nav_tabs
+      nav_tabs: 
+          - id: card
+            title: Fiche
+            icon: fas_file
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view: 
+                              panel: 1
+                              object: contrat
+                              name: default
+          - id: contacts
+            title: Contacts / Adresses
+            icon: fas_id-card
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderContacts
+                        object: contrat
+          - id: factures
+            title: Factures
+            icon: fas_file-invoice-dollar
+            ajax_render_method: 
+                object: contrat
+                method: renderFacturesTab
+          - id: achats
+            title: Achats
+            icon: fas_cart-arrow-down
+            ajax_render_method: 
+                object: contrat
+                method: renderAchatsTab
+          - id: files
+            title: Fichiers
+            icon: fas_folder-open
+            ajax_render_method:
+                method: renderExtraFile
+                object: contrat
+          - id: divers
+            title: Divers (admin)
+            show: 
+               callback:
+                  method: iAmAdmin
+                  object: contrat
+            struct: 
+                  type: custom
+                  custom: 
+                      callback: 
+                          method: renderBimpOjectDivers
+                          object: contrat
+    - type: custom
+      custom: 
+          callback: 
+              method: renderNotesList
+              object: contrat
+              params:
+                  - 1

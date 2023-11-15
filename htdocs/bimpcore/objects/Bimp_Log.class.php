@@ -7,8 +7,8 @@ class Bimp_Log extends BimpObject
     const BIMP_LOG_ALERTE = 2;
     const BIMP_LOG_ERREUR = 3;
     const BIMP_LOG_URGENT = 4;
-    public $arrondirEnMinuteGraph = 60;
 
+    public $arrondirEnMinuteGraph = 60;
     public static $types = array(
         'php'           => 'PHP',
         'bimpcore'      => 'BimpCore',
@@ -16,6 +16,7 @@ class Bimp_Log extends BimpObject
         'sql'           => 'Erreurs SQL',
         'logistique'    => 'Logistique',
         'bimpcomm'      => 'Commercial',
+        'contrat'       => 'Contrat',
         'stocks'        => 'Stocks',
         'email'         => 'E-mails',
         'divers'        => 'Divers',
@@ -40,54 +41,51 @@ class Bimp_Log extends BimpObject
         'filesize()',
         'getimagesize(',
     );
-    
-    
+
     public function getInfoGraph($graphName = '')
     {
         $data = parent::getInfoGraph($graphName);
-        if($graphName == '15M')
+        if ($graphName == '15M')
             $arrondirEnMinuteGraph = 15;
-        elseif($graphName == '3H')
-            $arrondirEnMinuteGraph = 60*3;
-        elseif($graphName == '6H')
-            $arrondirEnMinuteGraph = 60*6;
-        elseif($graphName == '12H')
-            $arrondirEnMinuteGraph = 60*12;
+        elseif ($graphName == '3H')
+            $arrondirEnMinuteGraph = 60 * 3;
+        elseif ($graphName == '6H')
+            $arrondirEnMinuteGraph = 60 * 6;
+        elseif ($graphName == '12H')
+            $arrondirEnMinuteGraph = 60 * 12;
         else
             $arrondirEnMinuteGraph = 60;
-        $data["data1"] = array("name"=>'Nb Logs', "type" => "column");
+        $data["data1"] = array("name" => 'Nb Logs', "type" => "column");
         $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM, YYYY HH:mm');
         $data["axeY"] = array("title" => 'Nb');
-        $data["params"] = array('minutes'=>$arrondirEnMinuteGraph);
+        $data["params"] = array('minutes' => $arrondirEnMinuteGraph);
         $unite = 'minute';
-        if($arrondirEnMinuteGraph >= 60){
+        if ($arrondirEnMinuteGraph >= 60) {
             $unite = 'heure';
-            $arrondirEnMinuteGraph = $arrondirEnMinuteGraph/60;
+            $arrondirEnMinuteGraph = $arrondirEnMinuteGraph / 60;
         }
-        if($arrondirEnMinuteGraph != 1)
-            $unite .='s';
+        if ($arrondirEnMinuteGraph != 1)
+            $unite .= 's';
         else
             $arrondirEnMinuteGraph = '';
-        $data["title"] = 'Log par '.$arrondirEnMinuteGraph.' '.$unite;
+        $data["title"] = 'Log par ' . $arrondirEnMinuteGraph . ' ' . $unite;
 
         return $data;
     }
-    
+
     public function getGraphDatasPoints($params, $numero_data = 1)
     {
-        $result = array(1=>array());
-        
+        $result = array(1 => array());
+
         $arrondirEnMinuteGraph = $params['minutes'];
         $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($arrondirEnMinuteGraph*60))*$arrondirEnMinuteGraph*60";
-        $sql = $this->db->db->query('SELECT count(*) as nb, '.$dateStr.' as timestamp FROM '.MAIN_DB_PREFIX.'bimpcore_log GROUP BY '.$dateStr);
-        while($ln = $this->db->db->fetch_object($sql)){
-            $result[1][] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->nb);
+        $sql = $this->db->db->query('SELECT count(*) as nb, ' . $dateStr . ' as timestamp FROM ' . MAIN_DB_PREFIX . 'bimpcore_log GROUP BY ' . $dateStr);
+        while ($ln = $this->db->db->fetch_object($sql)) {
+            $result[1][] = array("x" => "new Date(" . $ln->timestamp * 1000 . ")", "y" => (int) $ln->nb);
         }
 
         return $result;
     }
-    
-
 
     // Droits user: 
 

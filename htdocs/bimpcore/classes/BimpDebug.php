@@ -804,8 +804,10 @@ class BimpDebug
 
     // SQL: 
 
-    public static function addSqlDebug($sql, $noTransaction = false)
+    public static function addSqlDebug($sql, $num_request, $num_transaction, $duration_sec)
     {
+//        $num_transaction : -1 si hors transac
+
         $time = self::getTime();
 
         foreach (self::$sql_count as $idx => $data) {
@@ -816,11 +818,38 @@ class BimpDebug
         }
 
         self::$sql_count[] = array(
-            'sql'   => ($noTransaction ? '(noTransaction) ' : '') . $sql,
+            'sql'   => ($num_transaction < 0 ? '(noTransaction) ' : '') . $sql,
             'times' => array(
                 $time
             )
         );
+
+        $class = ($duration_sec > 10 ? 'important' : ($duration_sec > 5 ? 'danger' : ($duration_sec > 1 ? 'warning' : '')));
+        $diff_label = BimpTools::displayFloatValue($duration_sec, 4, ',', 0, 0, 1, 0, 1, 1) . ' sec.';
+        if ($class) {
+            $diff_label = '<span class="' . $class . '">' . $diff_label . '</span>';
+        }
+
+        $content = BimpRender::renderDebugInfo(BimpRender::renderSql($sql), '', ''/*, true*/);
+        $title = '<span class="' . ($num_transaction < 0 ? 'danger">[HORS TRANSAC]' : 'info">[TRANSAC #' . $num_transaction . '] ') . '</span>';
+        $title .= ' - Requête #' . $num_request . ' - ' . $diff_label;
+
+        foreach (array('SELECT ' => 'bold', 'UPDATE ' => 'warning', 'INSERT INTO ' => 'info', 'DELETE ' => 'danger') as $req_type => $type_class) {
+            if (strpos($sql, $req_type) === 0) {
+                $title .= ' - <span class="' . $type_class . '">' . $req_type;
+
+                if (preg_match('/^.*`?([^`]' . MAIN_DB_PREFIX . '([^ \(,`]+)).*$/', $sql, $matches)) {
+                    $title .= ' ' . $matches[1];
+                }
+
+                $title .= '</span>';
+                break;
+            }
+        }
+
+        self::addDebug('sql', $title, $content, array(
+            'open' => false
+        ));
     }
 
     public static function renderSqlDebug()

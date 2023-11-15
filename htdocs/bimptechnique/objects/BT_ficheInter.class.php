@@ -1268,6 +1268,10 @@ class BT_ficheInter extends BimpDolObject
 
         return $html;
     }
+    
+    public static function dureeToPrice($duree){
+        return static::time_to_qty(static::timestamp_to_time($duree)) * BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
+    }
 
     public function displayRatioTotal($display = true, $want = "")
     {
@@ -3375,7 +3379,7 @@ class BT_ficheInter extends BimpDolObject
 
     // Outils : 
 
-    public function time_to_qty($time)
+    public static function time_to_qty($time)
     {
         $timeArr = explode(':', $time);
         if (count($timeArr) == 3) {
@@ -3396,14 +3400,13 @@ class BT_ficheInter extends BimpDolObject
         return $decTime;
     }
 
-    public function timestamp_to_time($timestamp)
+    public static function timestamp_to_time($timestamp)
     {
-        $heures = floor($timestamp / 3600);
-        $minutes = 0;
-        if (($timestamp % 3600) >= 60) {
-            $minutes = floor(($timestamp % 3600) / 60);
-        }
-        return str_pad($heures, 2, "0", STR_PAD_LEFT) . ":" . str_pad($minutes, 2, "0", STR_PAD_LEFT);
+        $neg = ($timestamp < 0);
+        $timestamp = abs($timestamp/60);
+        $heures = floor($timestamp / 60);
+        $minutes = floor($timestamp % 60);
+        return ($neg ? '-' : '').str_pad($heures, 2, "0", STR_PAD_LEFT) . ":" . str_pad($minutes, 2, "0", STR_PAD_LEFT);
     }
 
     // Méthodes statiques: 

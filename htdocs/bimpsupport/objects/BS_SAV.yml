@@ -407,13 +407,14 @@ fields:
         values: 
             array: etats_materiel
         user_edit: 1
+        default_value: 3
     etat_materiel_desc: 
         label: Description état matériel
         type: text
         input:
             auto_expand: 1
             rows: 1
-            values: 
+            possible_values: 
                 array: list_etats_materiel
         user_edit: 1
     accessoires: 
@@ -422,7 +423,7 @@ fields:
         input:
             auto_expand: 1
             rows: 2
-            values: 
+            possible_values: 
                 array: list_accessoires
         user_edit: 1
     symptomes: 
@@ -432,7 +433,7 @@ fields:
             hashtags: 1
             auto_expand: 1
             rows: 4
-            values: 
+            possible_values: 
                 array: list_symptomes
         required: 1
         user_edit: 1
@@ -445,6 +446,14 @@ fields:
         user_edit: 1
     resolution: 
         label: Résolution
+        type: text
+        input:
+            auto_expand: 1
+            rows: 4
+        user_edit: 1
+        hashtags: 1
+    info_importante:
+        label: Communication interne importante
         type: text
         input:
             auto_expand: 1
@@ -1514,6 +1523,8 @@ fields_tables:
             - field: resolution
               edit: 1
             - field: extra_infos
+              edit: 1
+            - field: info_importante
               edit: 1
               
     public_infos: 

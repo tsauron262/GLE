@@ -1,7 +1,7 @@
 if (!ajaxRequestsUrl) {
     var ajaxRequestsUrl = dol_url_root + '/bimpcore/index.php';
 }
-ajaxRequestsUrl = ajaxRequestsUrl.replace('//', '/', ajaxRequestsUrl);
+//ajaxRequestsUrl = ajaxRequestsUrl.replace('//', '/', ajaxRequestsUrl);
 var bimp_requests = [];
 var bimp_nologged_requests = [];
 var bimp_is_logged = true;

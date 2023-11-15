@@ -131,9 +131,9 @@ class BimpCore
 
     public static function getJsVars()
     {
-        global $user, $conf;
+        global $user, $conf, $dolibarr_main_url_root;
         $vars = array(
-            'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : "'/'",
+            'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\''.$dolibarr_main_url_root.'\'',
             'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
             'bimp_context'    => '\'' . self::getContext() . '\'',
             'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',

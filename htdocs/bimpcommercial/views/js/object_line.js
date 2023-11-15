@@ -177,7 +177,6 @@ function quickAddObjectLine($button) {
 
 function setAbonnementLineQties($form, $input) {
     if (!$.isOk($form)) {
-        bimp_msg('KO');
         return;
     }
 
@@ -350,7 +349,7 @@ function onObjectLineFormLoaded($form) {
             $inputs.change(function () {
                 setAbonnementLineQties($form, $(this));
             });
-            setAbonnementLineQties($form, $form.find('input[name="abo_total_qty"]'));
+            setAbonnementLineQties($form, $form.find('input[name="abo_qty_per_product_period"]'));
         }
     }
 }
@@ -406,7 +405,7 @@ $(document).ready(function () {
                 $inputs.change(function () {
                     setAbonnementLineQties(e.$form, $(this));
                 });
-                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_total_qty"]'));
+                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_qty_per_product_period"]'));
                 break;
 
             case 'abo_fac_periodicity':
@@ -416,7 +415,7 @@ $(document).ready(function () {
                 $input.change(function () {
                     setAbonnementLineQties(e.$form, $(this));
                 });
-                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_total_qty"]'));
+                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_qty_per_product_period"]'));
                 break;
         }
     });

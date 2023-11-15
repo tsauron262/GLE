@@ -682,12 +682,12 @@ fields:
     achats_partiels_allowed: 
         label: Achats partiels autorisés
         type: bool
-        default_value: 1
+        default_value: 0
         
     renouv_tacites_allowed: 
         label: Renouvellements tacites autorisés
         type: bool
-        default_value: 1
+        default_value: 0
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 

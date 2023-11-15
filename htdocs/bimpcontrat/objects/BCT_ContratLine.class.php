@@ -641,7 +641,7 @@ class BCT_ContratLine extends BimpObject
             }
 
             if ($new_date && $new_date != $date) {
-                $check_errors = $this->updateField('date_next_facture', $new_date);
+                $check_errors = $this->updateField('date_next_facture', date('Y-m-d', strtotime($new_date)));
 
                 if (!count($check_errors)) {
                     BimpCore::addlog('Correction automatique de la date de prochaine facturation d\'un abonnement', Bimp_Log::BIMP_LOG_NOTIF, 'contrat', $this, array(
@@ -1021,7 +1021,7 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 if ($date_next_achat > $date_fin) {
-                    $errors[] = 'Abonnement terminé';
+                    $errors[] = 'Tous les achats ont déjà été effectués';
                     return $data;
                 }
 

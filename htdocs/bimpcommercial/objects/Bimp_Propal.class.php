@@ -1054,7 +1054,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $lines;
     }
 
-    public function getNbAbonnements($not_added_to_contrat)
+    public function getNbAbonnements($not_added_to_contrat = false)
     {
         return count($this->getAbonnementsLinesIds($not_added_to_contrat));
     }

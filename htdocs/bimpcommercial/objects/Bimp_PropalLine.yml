@@ -121,11 +121,17 @@ forms:
                     show_values: 1
             id_linked_contrat_line: 
                 show: 1
-                field: id_linked_contrat_line
-                label: Ajouter les unités à un abonnement en cours
-                display_if: 
-                    field_name: is_abonnement
-                    show_values: 1
+                custom: 1
+                hidden: 1
+                input_name: id_linked_contrat_line
+                input: 
+                    type: hidden
+                value: 0
+#                field: id_linked_contrat_line
+#                label: Ajouter les unités à un abonnement en cours
+#                display_if: 
+#                    field_name: is_abonnement
+#                    show_values: 1
             abo_linked_contrat_line_infos: 
                 show: 1
                 custom: 1
@@ -136,8 +142,11 @@ forms:
                     content: 
                         callback: displayLinkedContratLineInfos
                 display_if: 
-                    field_name: id_linked_contrat_line
-                    hide_values: 0
+                    fields_names: is_abonnement,id_linked_contrat_line
+                    is_abonnement: 
+                        show_values: 1
+                    id_linked_contrat_line: 
+                        hide_values: 0
                 depends_on: id_linked_contrat_line
             abo_fac_periodicity: 
                 show: 1

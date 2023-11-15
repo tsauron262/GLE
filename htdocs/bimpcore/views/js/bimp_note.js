@@ -26,7 +26,7 @@ class bimp_note extends AbstractNotification {
             html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id + '">';
             html += '<h4 class="header">';
             html += 'Messages' + this.getBoutonReload(this.dropdown_id);
-            html += '<a style="float:right" href="' + DOL_URL_ROOT + '/bimpmsg/index.php?fc=bal"><i class="fas fa5-envelope-open-text iconLeft"></i>Ma messagerie</a>';
+            html += '<a style="float:right" href="' + dol_url_root + '/bimpmsg/index.php?fc=bal"><i class="fas fa5-envelope-open-text iconLeft"></i>Ma messagerie</a>';
             html += '</h4>';
             html += '<div class="notifications-wrap list_notification ' + this.nom + '">';
             html += '</div>';

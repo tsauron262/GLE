@@ -99,7 +99,7 @@ class BCT_Contrat extends BimpDolObject
         return parent::isDeletable();
     }
 
-    public function isActionAllowed($action, &$errors = []): int
+    public function isActionAllowed($action, &$errors = [])
     {
         $status = (int) $this->getData('statut');
 
@@ -246,7 +246,7 @@ class BCT_Contrat extends BimpDolObject
         $this->dol_object->element = 'bimp_contrat';
         $result = parent::getBimpObjectsLinked($not_for = '');
         $this->dol_object->element = 'contrat';
-        
+
         return $result;
     }
 
@@ -304,12 +304,11 @@ class BCT_Contrat extends BimpDolObject
         return (int) BimpCore::getConf('societe_id_default_mode_reglement', 0);
     }
 
-    public function getLines($types = null, $ids_only = false)
+    public function getLines($types = null, $ids_only = false, $filters = array())
     {
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
 
-            $filters = array();
             if (!is_null($types)) {
                 if (is_string($types)) {
                     $type_code = $types;
@@ -327,14 +326,9 @@ class BCT_Contrat extends BimpDolObject
                 }
 
                 if (is_array($types) && !empty($types)) {
-                    $filters = array(
-                        'line_type' => array(
-                            'in' => $types
-                        )
-                    );
+                    $filters['line_type'] = $types;
                 }
             }
-
             if ($ids_only) {
                 return $this->getChildrenList('lines', $filters, 'rang', 'asc');
             }
@@ -435,7 +429,8 @@ class BCT_Contrat extends BimpDolObject
                     'include_empty' => false,
                     'empty_label'   => '',
                     'active_only'   => false,
-                    'with_periods'  => false
+                    'with_periods'  => false,
+                    'id_product'    => 0
                         ), $options);
 
         if ($this->isLoaded()) {
@@ -452,7 +447,12 @@ class BCT_Contrat extends BimpDolObject
             if (!isset(self::$cache[$key])) {
                 self::$cache[$key] = array();
 
-                $lines = $this->getLines('abo');
+                $filters = array();
+
+                if ($options['id_product']) {
+                    $filters['fk_product'] = $options['id_product'];
+                }
+                $lines = $this->getLines('abo', false, $filters);
 
                 foreach ($lines as $line) {
                     if ($options['active_only']) {
@@ -480,6 +480,43 @@ class BCT_Contrat extends BimpDolObject
         }
 
         return array();
+    }
+
+    public static function getClientAbosLinesArray($id_client, $id_product, $include_empty = true, $empty_label = '')
+    {
+        $lines = array();
+
+        if ($include_empty) {
+            $lines[0] = $empty_label;
+        }
+
+        BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
+        $sql = BimpTools::getSqlFullSelectQuery('contratdet', array('a.rowid as id_line', 'c.ref'), array(
+                    'c.fk_soc'         => $id_client,
+                    'c.version'        => 2,
+                    'a.line_type'      => BCT_ContratLine::TYPE_ABO,
+                    'a.fk_product'     => $id_product,
+                    'a.id_linked_line' => 0,
+                    'a.statut'         => 4,
+                        ), array(
+                    'c' => array(
+                        'table' => 'contrat',
+                        'on'    => 'c.rowid = a.fk_contrat'
+                    )
+        ));
+
+        $rows = self::getBdb()->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $r['id_line']);
+                if (BimpObject::objectLoaded($line)) {
+                    $lines[$line->id] = 'Contrat ' . $r['ref'] . ' - ' . $line->displayProduct('ref_nom') . ' (' . $line->displayPeriods() . ')';
+                }
+            }
+        }
+
+        return $lines;
     }
 
     // Rendus HTML : 
@@ -941,7 +978,7 @@ class BCT_Contrat extends BimpDolObject
             $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $id_contrat);
 
             if (BimpObject::objectLoaded($contrat)) {
-                // Création de la ligne de l'intitulé de la commande d'origine si nécessaire: 
+                // Création de la ligne de l'intitulé du contrat d'origine si nécessaire: 
                 $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
                             'id_obj'             => (int) $facture->id,
                             'linked_object_name' => 'contrat_origin_label',
@@ -1029,10 +1066,19 @@ class BCT_Contrat extends BimpDolObject
 
                 $periodicity = (int) $line->getData('fac_periodicity');
                 if ((int) $line_data['nb_periods'] && $periodicity) {
-                    $date_next_facture = $line->getDateNextFacture(true, $line_errors);
+                    $periods_data = $line->getPeriodsToBillData();
+                    if ($periods_data['date_first_period_start'] == $periods_data['date_next_period_tobill'] &&
+                            $periods_data['date_fac_start'] != $periods_data['date_first_period_start']) {
+                        // Première période partielle : 
+                        $date_from = date('Y-m-d 00:00:00', strtotime($periods_data['date_fac_start']));
+                        $dt = new DateTime($periods_data['date_first_period_end']);
 
-                    if ($date_next_facture) {
-                        $dt = new DateTime($date_next_facture);
+                        if ((int) $line_data['nb_periods'] > 1) {
+                            $dt->add(new DateInterval('P' . (((int) $line_data['nb_periods'] - 1) * $periodicity) . 'M'));
+                        }
+                        $date_to = $dt->format('Y-m-d 23:59:59');
+                    } else {
+                        $dt = new DateTime($periods_data['date_next_period_tobill']);
                         $date_from = $dt->format('Y-m-d 00:00:00');
                         $dt->add(new DateInterval('P' . ((int) $line_data['nb_periods'] * $periodicity) . 'M'));
                         $new_date_next_facture = $dt->format('Y-m-d');
@@ -1208,14 +1254,23 @@ class BCT_Contrat extends BimpDolObject
                 $date_to = null;
                 $new_date_next_achat = null;
 
-                $periodicity = (int) $line->getData('fac_periodicity');
+                $periodicity = (int) $line->getData('achat_periodicity');
                 $nb_periods = (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0);
-
+                
                 if ($nb_periods && $periodicity) {
-                    $new_date_next_achat = $line->getDateNextAchat(true, $line_errors);
+                    $periods_data = $line->getPeriodsToBuyData();
+                    if ($periods_data['date_next_achat'] == $periods_data['date_achat_start'] &&
+                            $periods_data['date_achat_start'] != $periods_data['date_first_period_start']) {
+                        // Première période partielle : 
+                        $date_from = date('Y-m-d 00:00:00', strtotime($periods_data['date_achat_start']));
+                        $dt = new DateTime($periods_data['date_first_period_end']);
 
-                    if ($new_date_next_achat) {
-                        $dt = new DateTime($new_date_next_achat);
+                        if ($nb_periods > 1) {
+                            $dt->add(new DateInterval('P' . (($nb_periods - 1) * $periodicity) . 'M'));
+                        }
+                        $date_to = $dt->format('Y-m-d 23:59:59');
+                    } else {
+                        $dt = new DateTime($periods_data['date_next_achat']);
                         $date_from = $dt->format('Y-m-d 00:00:00');
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
                         $new_date_next_achat = $dt->format('Y-m-d');

@@ -30,6 +30,16 @@ objects:
         instance: 
             bimp_object: 
                 name: PropalDolLine
+                
+    linked_contrat_line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcontrat
+                name: BCT_ContratLine
+            id_object: 
+                field_value: id_linked_contrat_line
             
 fields: 
     # /!\ ATTENTION : en cas d'ajout de field, penser à gérer dans BS_SavPropalLine !
@@ -40,13 +50,13 @@ fields:
         values: 
             array: periodicities
         default_value: 0
-        depends_on: id_product        
+        depends_on: id_product,id_linked_contrat_line    
         
     abo_duration: 
         label: Durée totale abonnement (en mois)
         type: int
         default_value: 0
-        depends_on: id_product
+        depends_on: id_product,id_linked_contrat_line
         input: 
             type: custom
             content: 
@@ -60,13 +70,25 @@ fields:
         values: 
             0: A terme échu
             1: A terme à échoir
-        depends_on: id_product
-            
+        depends_on: id_product,id_linked_contrat_line
+        
     abo_nb_renouv: 
         label: Nb renouvellements tacites
         type: int
         values: 
             array: nbRenouvellements
+        default_value: 0
+            
+    id_linked_contrat_line: 
+        label: Abonnement lié
+        type: id_object
+        object: linked_contrat_line
+        default_value: 0
+        depends_on: id_product
+        input: 
+            type: custom
+            content: 
+                callback: renderLinkedContratLineInput
             
 forms: 
     default: 
@@ -97,18 +119,53 @@ forms:
                 display_if: 
                     field_name: is_abonnement
                     show_values: 1
+            id_linked_contrat_line: 
+                show: 1
+                custom: 1
+                hidden: 1
+                input_name: id_linked_contrat_line
+                input: 
+                    type: hidden
+                value: 0
+#                field: id_linked_contrat_line
+#                label: Ajouter les unités à un abonnement en cours
+#                display_if: 
+#                    field_name: is_abonnement
+#                    show_values: 1
+            abo_linked_contrat_line_infos: 
+                show: 1
+                custom: 1
+                input_name: abo_linked_contrat_line_infos
+                label: Infos abonnement en cours
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayLinkedContratLineInfos
+                display_if: 
+                    fields_names: is_abonnement,id_linked_contrat_line
+                    is_abonnement: 
+                        show_values: 1
+                    id_linked_contrat_line: 
+                        hide_values: 0
+                depends_on: id_linked_contrat_line
             abo_fac_periodicity: 
                 show: 1
                 field: abo_fac_periodicity
                 display_if: 
-                    field_name: is_abonnement
-                    show_values: 1
+                    fields_names: is_abonnement,id_linked_contrat_line
+                    is_abonnement: 
+                        show_values: 1
+                    id_linked_contrat_line: 
+                        show_values: 0
             abo_duration: 
                 show: 1
                 field: abo_duration
                 display_if: 
-                    field_name: is_abonnement
-                    show_values: 1
+                    fields_names: is_abonnement,id_linked_contrat_line
+                    is_abonnement: 
+                        show_values: 1
+                    id_linked_contrat_line: 
+                        show_values: 0
             abo_qty: 
                 show: 1
                 custom: 1
@@ -131,14 +188,20 @@ forms:
                 show: 1
                 field: abo_fac_term
                 display_if: 
-                    field_name: is_abonnement
-                    show_values: 1
-            abo_nb_renouv:
-                show: 1
-                field: abo_nb_renouv
-                display_if: 
-                    field_name: is_abonnement
-                    show_values: 1            
+                    fields_names: is_abonnement,id_linked_contrat_line
+                    is_abonnement: 
+                        show_values: 1
+                    id_linked_contrat_line: 
+                        show_values: 0
+#            abo_nb_renouv:
+#                show: 1
+#                field: abo_nb_renouv
+#                display_if: 
+#                    fields_names: is_abonnement,id_linked_contrat_line
+#                    is_abonnement: 
+#                        show_values: 1            
+#                    id_linked_contrat_line: 
+#                        show_values: 0
             qty: 
                 display_if: 
                     unextends: 1

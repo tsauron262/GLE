@@ -1015,13 +1015,16 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $conf->propal->dir_output;
     }
 
-    public function getAbonnementsLinesIds()
+    public function getAbonnementsLinesIds($not_added_to_contrat = false)
     {
         $lines = array();
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpcore', 'Bimp_Product');
             $where = 'pdet.fk_propal = ' . $this->id . ' AND pef.type2 IN(' . implode(',', Bimp_Product::$abonnements_sous_types) . ')';
 
+            if ($not_added_to_contrat) {
+                $where .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX.'contratdet cdet WHERE cdet.line_origin_type = \'propal_line\' AND cdet.id_line_origin = a.id_line) = 0';
+            }
             $rows = $this->db->getRows('bimp_propal_line a', $where, null, 'array', array('DISTINCT a.id'), null, null, array(
                 'pdet' => array(
                     'table' => 'propaldet',
@@ -1051,12 +1054,12 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $lines;
     }
 
-    public function getNbAbonnements()
+    public function getNbAbonnements($not_added_to_contrat = false)
     {
-        return count($this->getAbonnementsLinesIds());
+        return count($this->getAbonnementsLinesIds($not_added_to_contrat));
     }
 
-    public function getAbonnementLines()
+    public function getAbonnementLines($by_linked_contrat = false, &$errors = array())
     {
         $lines = array();
         $items = $this->getAbonnementsLinesIds();
@@ -1064,7 +1067,32 @@ class Bimp_Propal extends Bimp_PropalTemp
         foreach ($items as $id_line) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', $id_line);
             if (BimpObject::objectLoaded($line)) {
-                $lines[$id_line] = $line;
+                if ($by_linked_contrat) {
+                    $line_errors = array();
+                    $id_contrat_line = (int) $line->getData('id_linked_contrat_line');
+                    if ($id_contrat_line) {
+                        $id_contrat = (int) $this->db->getValue('contratdet', 'fk_contrat', 'rowid = ' . $id_contrat_line);
+
+                        if (!$id_contrat) {
+                            $line_errors[] = 'Ajout à un abonnement en cours : le contrat n\'existe plus. Veuillez corriger';
+                        } else {
+                            if (!isset($lines[$id_contrat])) {
+                                $lines[$id_contrat] = array();
+                            }
+
+                            $lines[$id_contrat][$id_line] = $line;
+                            continue;
+                        }
+                    }
+
+                    if (count($line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('position'));
+                    } else {
+                        $lines[0][$id_line] = $line;
+                    }
+                } else {
+                    $lines[$id_line] = $line;
+                }
             }
         }
 
@@ -1101,28 +1129,6 @@ class Bimp_Propal extends Bimp_PropalTemp
         }
 
         return 0;
-    }
-
-    public function getContratAboLinesArray()
-    {
-        $id_contrat = (int) BimpTools::getPostFieldValue('id_contrat', 0);
-
-        if ($id_contrat) {
-            $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
-
-            if (BimpObject::objectLoaded($contrat)) {
-                return $contrat->getAboLinesArray(array(
-                            'include_empty' => true,
-                            'empty_label'   => 'NON',
-                            'active_only'   => true,
-                            'with_periods'  => true
-                ));
-            }
-        }
-
-        return array(
-            0 => 'NON'
-        );
     }
 
     // Affichages : 
@@ -1369,6 +1375,109 @@ class Bimp_Propal extends Bimp_PropalTemp
             $html .= '<input type="hidden" value="0" name="open_public_access"/>';
         } else {
             $html .= BimpInput::renderInput('toggle', 'open_public_access', 1);
+        }
+
+        return $html;
+    }
+
+    public function renderContratAboInput()
+    {
+        $html = '';
+
+        $errors = array();
+        $contrats = $this->getAbonnementLines(true, $errors);
+
+        if (empty($contrats)) {
+            $errors[] = 'Il n\'y a aucune ligne à ajouter à un contrat d\'abonnement';
+        } else {
+            $has_linked_lines = false;
+            $id_def_contrat = 0;
+
+            foreach ($contrats as $id_contrat => $lines) {
+                if (!$id_contrat || empty($lines)) {
+                    continue;
+                }
+
+                $has_linked_lines = true;
+                if ($id_def_contrat < $id_contrat) {
+                    $id_def_contrat = $id_contrat;
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        } else {
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th>Ligne</th>';
+            $html .= '<th>Contrat</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+
+            if (isset($contrats[0]) && count($contrats[0])) {
+                if (!$id_def_contrat) {
+                    $id_def_contrat = (int) $this->getDefaultContratAbo();
+                }
+
+                $html .= '<tr>';
+                $html .= '<td colspan="2"><b>Lignes non assignées à un abonnement en cours</b></td>';
+                $html .= '</tr>';
+
+                $html .= '<tr>';
+                $html .= '<td><ul>';
+                foreach ($contrats[0] as $line) {
+                    $html .= '<li>' . $line->displayLineData('desc_light') . '</li>';
+                }
+
+                $html .= '</ul></td>';
+                $html .= '<td>';
+
+                $client_contrats = $this->getClientContratsAboArray();
+                $html .= BimpInput::renderInput('select', 'id_contrat', $id_def_contrat, array(
+                            'options' => $client_contrats
+                ));
+
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+
+            if ($has_linked_lines) {
+                $html .= '<tr>';
+                $html .= '<td colspan="2"><b>Lignes à ajouter à un abonnement en cours</b></td>';
+                $html .= '</tr>';
+
+                foreach ($contrats as $id_contrat => $lines) {
+                    if (!$id_contrat || empty($lines)) {
+                        continue;
+                    }
+
+                    $html .= '<tr>';
+                    $html .= '<td>';
+
+                    foreach ($lines as $line) {
+                        $html .= '<li>' . $line->displayLineData('desc_light') . '</li>';
+                    }
+
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
+                    if (BimpObject::objectLoaded($contrat)) {
+                        $html .= $contrat->getLink();
+                    } else {
+                        $html .= BimpRender::renderAlerts('Le contrat #' . $id_contrat . ' n\'existe plus');
+                    }
+                    $html .= '</td>';
+
+                    $html .= '</tr>';
+                }
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
         }
 
         return $html;
@@ -2010,115 +2119,116 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
         $errors = array();
         $warnings = array();
-        $success = 'Contrat créé avec succès';
+        $success = '';
         $sc = '';
 
-        $id_contrat = (int) BimpTools::getArrayValueFromPath($data, 'id_contrat', 0);
-//        $id_linked_contrat_line = (int) BimpTools::getArrayValueFromPath($data, 'id_linked_contrat_line', 0);
+        $contrats = $this->getAbonnementLines(true, $errors);
 
-        if ($id_contrat) {
-            $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
-            if (!BimpObject::objectLoaded($contrat)) {
-                $errors[] = 'Le contrat #' . $id_contrat . ' n\'existe plus';
-            }
-//            elseif ($id_linked_contrat_line) {
-//                $linked_contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_contrat_line);
-//                if (!BimpObject::objectLoaded($linked_contrat_line)) {
-//                    $errors[] = 'La ligne de contrat #' . $id_linked_contrat_line . ' sur laquelle ajuster les périodes n\'existe plus';
-//                } elseif ((int) $linked_contrat_line->getData('') !== $id_contrat) {
-//                    $errors[] = 'La ligne de contrat #' . $id_linked_contrat_line . ' sur laquelle ajuster les périodes n\'appartient pas au contrat ' . $contrat->getLink();
-//                }
-//            }
-        } else {
-            $contrat = BimpObject::createBimpObject('bimpcontrat', 'BCT_Contrat', array(
-                        'fk_soc'    => (int) $this->getData('fk_soc'),
-                        'entrepot'  => (int) $this->getData('entrepot'),
-                        'secteur'   => $this->getData('ef_type'),
-                        'expertise' => $this->getData('expertise'),
-                        'moderegl'  => BimpTools::getArrayValueFromPath($data, 'fk_mode_reglement', $this->getData('fk_mode_reglement')),
-                        'condregl'  => BimpTools::getArrayValueFromPath($data, 'fk_cond_reglement', $this->getData('fk_cond_reglement'))
-                            ), true, $errors, $warnings);
-
-            if (!count($errors)) {
-                $success = 'Contrat ' . $contrat->getRef() . ' créé avec succès';
-            }
+        if (!count($errors) && empty($contrats)) {
+            $errors[] = 'Il n\'y a aucune ligne à ajouter à un contrat d\'abonnement';
         }
 
         if (!count($errors)) {
-            addElementElement('propal', 'bimp_contrat', $this->id, $contrat->id);
-            $nOk = 0;
-            BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
-            $lines = $this->getAbonnementLines();
+            foreach ($contrats as $id_contrat => $lines) {
+                if (!(int) $id_contrat) {
+                    $id_contrat = (int) BimpTools::getArrayValueFromPath($data, 'id_contrat', 0);
+                }
 
-            foreach ($lines as $line) {
-                $line_errors = array();
-                $line_warnings = array();
+                if ($id_contrat) {
+                    $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
+                    if (!BimpObject::objectLoaded($contrat)) {
+                        $errors[] = 'Le contrat #' . $id_contrat . ' n\'existe plus';
+                    }
+                } else {
+                    $contrat = BimpObject::createBimpObject('bimpcontrat', 'BCT_Contrat', array(
+                                'fk_soc'    => (int) $this->getData('fk_soc'),
+                                'entrepot'  => (int) $this->getData('entrepot'),
+                                'secteur'   => $this->getData('ef_type'),
+                                'expertise' => $this->getData('expertise'),
+                                'moderegl'  => BimpTools::getArrayValueFromPath($data, 'fk_mode_reglement', $this->getData('fk_mode_reglement')),
+                                'condregl'  => BimpTools::getArrayValueFromPath($data, 'fk_cond_reglement', $this->getData('fk_cond_reglement'))
+                                    ), true, $errors, $warnings);
 
-                $prod = $line->getProduct();
+                    if (!count($errors)) {
+                        $success = 'Contrat ' . $contrat->getRef() . ' créé avec succès';
+                    }
+                }
 
-//                if (!BimpObject::objectLoaded($prod)) {
-//                    $line_errors[] = 'Produit absent';
-//                }
+                if (!count($errors)) {
+                    addElementElement('propal', 'bimp_contrat', $this->id, $contrat->id);
+                    $nOk = 0;
+                    BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
+                    $lines = $this->getAbonnementLines();
 
-                if (!count($line_errors)) {
-                    $id_pfp = (int) $line->id_fourn_price;
-                    if (!$id_pfp && BimpObject::objectLoaded($prod)) {
-                        $id_fourn = (int) $prod->getData('achat_def_id_fourn');
-                        if ($id_fourn) {
-                            $id_pfp = (int) $prod->getLastFournPriceId($id_fourn);
+                    foreach ($lines as $line) {
+                        $line_errors = array();
+                        $line_warnings = array();
+
+                        $prod = $line->getProduct();
+
+                        if (!BimpObject::objectLoaded($prod)) {
+                            $line_errors[] = 'Produit absent';
+                        }
+
+                        if (!count($line_errors)) {
+                            $id_pfp = (int) $line->id_fourn_price;
+                            if (!$id_pfp) {
+                                $id_fourn = (int) $prod->getData('achat_def_id_fourn');
+                                if ($id_fourn) {
+                                    $id_pfp = (int) $prod->getLastFournPriceId($id_fourn);
+                                }
+                            }
+
+                            BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
+                                'fk_contrat'                   => $contrat->id,
+                                'fk_product'                   => $line->id_product,
+                                'line_type'                    => BCT_ContratLine::TYPE_ABO,
+                                'description'                  => $line->desc,
+                                'product_type'                 => $line->product_type,
+                                'qty'                          => $line->qty,
+                                'price_ht'                     => $line->pu_ht,
+                                'tva_tx'                       => $line->tva_tx,
+                                'remise_percent'               => $line->remise,
+                                'fk_product_fournisseur_price' => $id_pfp,
+                                'buy_price_ht'                 => $line->pa_ht,
+                                'fac_periodicity'              => $line->getData('abo_fac_periodicity'),
+                                'duration'                     => $line->getData('abo_duration'),
+                                'fac_term'                     => $line->getData('abo_fac_term'),
+                                'nb_renouv'                    => $line->getData('abo_nb_renouv'),
+                                'achat_periodicity'            => $prod->getData('achat_def_periodicity'),
+                                'variable_qty'                 => $prod->getData('variable_qty'),
+                                'id_linked_line'               => (int) $line->getData('id_linked_contrat_line'),
+                                'id_line_origin'                             => $line->id,
+                                'line_origin_type'                             => 'propal_line'
+                                    ), true, $line_errors, $line_warnings);
+                        }
+
+                        if (count($line_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreur lors l\'ajout de la ligne n° ' . $line->getData('position') . ' au contrat d\'abonnement');
+                        }
+
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne n° ' . $line->getData('position') . ' au contrat d\'abonnement');
+                        } else {
+                            $nOk++;
                         }
                     }
 
-                    BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
-                        'fk_contrat'                   => $contrat->id,
-                        'fk_product'                   => $line->id_product,
-                        'line_type'                    => BCT_ContratLine::TYPE_ABO,
-                        'description'                  => $line->desc,
-                        'product_type'                 => $line->product_type,
-                        'qty'                          => $line->qty,
-                        'price_ht'                     => $line->pu_ht,
-                        'tva_tx'                       => $line->tva_tx,
-                        'remise_percent'               => $line->remise,
-                        'fk_product_fournisseur_price' => $id_pfp,
-                        'buy_price_ht'                 => $line->pa_ht,
-                        'fac_periodicity'              => $line->getData('abo_fac_periodicity'),
-                        'duration'                     => $line->getData('abo_duration'),
-                        'fac_term'                     => $line->getData('abo_fac_term'),
-                        'nb_renouv'                    => $line->getData('abo_nb_renouv'),
-                        'linked_id_object'             => $line->getData('linked_id_object'),
-                        'linked_object_name'           => $line->getData('linked_object_name'),
-                        'achat_periodicity'            => (BimpObject::objectLoaded($prod)? $prod->getData('achat_def_periodicity') : 0),
-                        'variable_qty'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
-//                        'id_linked_line'               => $id_linked_contrat_line,
-                            ), true, $line_errors, $line_warnings);
-                }
+                    if ($nOk) {
+                        $success .= ($success ? '<br/>' : '') . $nOk . ' ligne(s) ajoutée(s) au contrat ' . $contrat->getRef();
+                    } else {
+                        $warnings[] = 'Aucun ligne ajoutée au contrat ' . $contrat->getRef();
+                    }
 
-
-                if (count($line_warnings)) {
-                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreur lors l\'ajout de la ligne n° ' . $line->getData('position') . ' au contrat d\'abonnement');
-                }
-
-                if (count($line_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne n° ' . $line->getData('position') . ' au contrat d\'abonnement');
-                } else {
-                    $nOk++;
+                    $url = $contrat->getUrl();
+                    if ($url) {
+                        $sc .= 'window.open(\'' . $url . '\');';
+                    }
                 }
             }
         }
 
-        if (!count($errors)) {
-            if ($nOk) {
-                $success .= ($success ? '<br/>' : '') . $nOk . ' ligne(s) ajoutée(s) au contrat ' . $contrat->getRef();
-            } else {
-                $warnings[] = 'Aucun ligne ajoutée au contrat ' . $contrat->getRef();
-            }
 
-            $url = $contrat->getUrl();
-
-            if ($url) {
-                $sc = 'window.open(\'' . $url . '\');';
-            }
-        }
 
         return array(
             'errors'           => $errors,

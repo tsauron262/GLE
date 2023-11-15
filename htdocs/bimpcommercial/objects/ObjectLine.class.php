@@ -983,6 +983,15 @@ class ObjectLine extends BimpObject
     }
 
     // Getters valeurs:
+    
+    public function getParentLine()
+    {
+        if ($this->field_exists('id_parent_line') && (int) $this->getData('id_parent_line')) {
+            return BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $this->getData('id_parent_line'));
+        }
+        
+        return null;
+    }
 
     public function getFullQty()
     {
@@ -1725,6 +1734,9 @@ class ObjectLine extends BimpObject
             $product = $this->getProduct();
 
             if (BimpObject::objectLoaded($product)) {
+                if ($product->isAbonnement()) {
+                    return 6;
+                }
                 if ($product->getData('fk_product_type') === 0) {
                     return 1;
                 }
@@ -4394,7 +4406,8 @@ class ObjectLine extends BimpObject
                             $min = 'none';
                         }
 
-                        $html = BimpInput::renderInput('qty', $prefixe . 'qty', (int) $value, array(
+                        $value = round($value, $decimals);
+                        $html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => $min,

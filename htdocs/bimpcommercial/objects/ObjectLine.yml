@@ -263,11 +263,15 @@ forms:
                 show: 0
             abo_infos: 
                 show: 0
-            abo_fac_periodicity: 
+            id_linked_contrat_line: 
+                show: 0
+            abo_linked_contrat_line_infos: 
+                show: 0
+            abo_qty: 
                 show: 0
             abo_duration: 
                 show: 0
-            abo_qty: 
+            abo_fac_periodicity: 
                 show: 0
             abo_fac_term: 
                 show: 0

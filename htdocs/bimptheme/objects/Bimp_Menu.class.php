@@ -96,7 +96,7 @@ class Bimp_Menu extends BimpObject
         $buttons[] = array(
             'label'   => 'Sous-lignes',
             'icon'    => 'fas_bars',
-            'onclick' => $this->getJsLoadModalCustomContent('renderItemsList', $title, 'array', 'large')
+            'onclick' => $this->getJsLoadModalCustomContent('renderItemsList', $title, array(), 'large')
         );
 
         return $buttons;

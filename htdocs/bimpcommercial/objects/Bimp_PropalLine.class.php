@@ -245,7 +245,8 @@ class Bimp_PropalLine extends ObjectLine
     {
         $html = '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
         $html .= 'Ce produit doit être inclus dans un contrat d\'abonnement. Veuillez renseigner les champs "Périodicité de facturation", ';
-        $html .= '"Durée de l\'abonnement", "Terme de facturation" et "Nombre de renouvellements tacites"';
+        $html .= '"Durée de l\'abonnement" et "Terme de facturation"';
+//        $html .= '"Durée de l\'abonnement", "Terme de facturation" et "Nombre de renouvellements tacites"';
         $html .= '</span>';
 
         return $html;

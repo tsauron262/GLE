@@ -7124,7 +7124,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($this->params['icon']) {
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
-            $html .= BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+            $html .= BimpTools::ucfirst($this->getLabel()) . ' <span style="font-size: 0.5em">#' . $this->id.'</span>';
             $html .= '</h1>';
 
             $ref = $this->getRef(false);

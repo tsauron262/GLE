@@ -864,7 +864,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             'note_private'      => htmlentities(addslashes($this->getData('note_private'))),
                         ), array(
                             'form_name'      => 'invoice',
-//                            'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
+                            'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
                             'modal_format'   => 'large'
                         ))
                     );

@@ -305,3 +305,8 @@ params:
         cat: rappels
         info: Laisser vide pour désactiver l\'envoi des rappels
         def: ''
+        
+    use_multi_onglet:
+        label: Utiliser les multi onglet dans les fiches commercial
+        def: 1
+        type: bool

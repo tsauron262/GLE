@@ -53,6 +53,15 @@ objects:
             id_object: 
                 field_value: fk_soc
                 
+    
+    projet:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: projet
+            id_object: 
+                field_value: fk_project
+                
 fields: 
     label: 
         label: Libellé
@@ -174,6 +183,10 @@ fields:
         label: Projet
         type: id
         default_value: 0
+        object: projet
+        input: 
+            type: search_projet
+            include_empty: 1
         
     fk_element: 
         label: ID élément
@@ -323,6 +336,8 @@ forms:
                     hide_values: 0,
                 value:
                     callback: getContactsAssigned
+            fk_project:
+                field: fk_project
             note: 
                 label: Description
                 field: note

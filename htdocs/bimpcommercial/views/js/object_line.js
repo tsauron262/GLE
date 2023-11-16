@@ -180,6 +180,12 @@ function setAbonnementLineQties($form, $input) {
         return;
     }
 
+    if (!$form.find('input[name="prod_duration"').length ||
+            !$form.find('input[name="abo_duration"').length || 
+            !$form.find('[name="abo_fac_periodicity"').length) {
+        return;
+    }
+
     var prod_duration = parseInt($form.find('input[name="prod_duration"').val());
     var duration = parseInt($form.find('input[name="abo_duration"').val());
     var fac_periodicity = parseInt($form.find('[name="abo_fac_periodicity"').val());

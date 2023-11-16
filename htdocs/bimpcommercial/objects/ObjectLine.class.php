@@ -280,7 +280,7 @@ class ObjectLine extends BimpObject
 
     public function isRemiseEditable()
     {
-        return (int) $this->isParentEditable() && $this->getData('editable');
+        return (int) $this->isParentEditable() && $this->isRemisable();
     }
 
     public function isLineProduct()
@@ -5771,6 +5771,7 @@ class ObjectLine extends BimpObject
                         $newLn->qty = $child_prod->getData('qty') * $this->qty;
                         $newLn->id_product = $child_prod->getData('fk_product_fils');
                         $newLn->set('editable', 0);
+                        $newLn->set('remisable', 0);
                         $newLn->set('deletable', 0);
                         $newLn->set('id_parent_line', $this->id);
                         $newLn->set('linked_id_object', $child_prod->id);
@@ -5815,6 +5816,7 @@ class ObjectLine extends BimpObject
                         $newLn->set('linked_object_name', 'bundleCorrect');
                         $newLn->set('type', static::LINE_FREE);
                         $newLn->set('editable', 0);
+                        $newLn->set('remisable', 0);
                         $newLn->set('deletable', 0);
                         $newLn->set('id_parent_line', $this->id);
 //                        $newLn->set('id_obj', $this->getData('id_obj'));

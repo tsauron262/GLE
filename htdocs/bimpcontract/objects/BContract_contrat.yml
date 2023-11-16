@@ -1582,7 +1582,7 @@ lists:
             callback: getBulkActions
         list_filters: 
             - name: version
-              filter: 1
+#              filter: 1
         sort_field: datec
         sort_way: desc
         n: 20

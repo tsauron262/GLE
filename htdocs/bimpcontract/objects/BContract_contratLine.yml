@@ -171,7 +171,7 @@ lists:
         modal_view: default
         list_filters: 
             - name: parent.version
-              filter: 1
+#              filter: 1
         joins: 
             parent: 
                 alias: parent

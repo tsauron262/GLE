@@ -7,14 +7,15 @@ class BDS_ConvertProcess extends BDSProcess
 
     public static $current_version = 2;
     public static $methods = array(
-        ''                           => '',
-        'SignaturesToConvert'        => 'Conversion des signatures',
-        'ProductRemisesCrtToConvert' => 'Conversion des remises CRT des produits',
-        'PropalesCrtToConvert'       => 'Conversion des remises CRT des lignes de propales',
-        'CommandesCrtToConvert'      => 'Conversion des remises CRT des lignes de commandes',
-        'FacturesCrtToConvert'       => 'Conversion des remises CRT des lignes de factures',
-        'ShipmentsToConvert'         => 'Conversion des lignes d\'expédition',
-        'ReceptionsToConvert'        => 'Conversion des lignes de réception'
+        ''              => '',
+//        'SignaturesToConvert'        => 'Conversion des signatures',
+//        'ProductRemisesCrtToConvert' => 'Conversion des remises CRT des produits',
+//        'PropalesCrtToConvert'       => 'Conversion des remises CRT des lignes de propales',
+//        'CommandesCrtToConvert'      => 'Conversion des remises CRT des lignes de commandes',
+//        'FacturesCrtToConvert'       => 'Conversion des remises CRT des lignes de factures',
+//        'ShipmentsToConvert'         => 'Conversion des lignes d\'expédition',
+//        'ReceptionsToConvert'        => 'Conversion des lignes de réception',
+        'abosToConvert' => 'Conversion des Abonnements'
     );
     public static $default_public_title = 'Scripts de conversions des données';
 
@@ -60,6 +61,8 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findSignaturesToConvert(&$errors = array())
     {
+        $errors[] = 'Script Désactivé';
+        return array();
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimpcore_signature');
         $sql .= ' WHERE (SELECT COUNT(bss.id) FROM ' . MAIN_DB_PREFIX . 'bimpcore_signature_signataire bss WHERE bss.id_signature = a.id) = 0';
@@ -132,6 +135,8 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findProductRemisesCrtToConvert(&$errors = array())
     {
+        $errors[] = 'Script Désactivé';
+        return array();
         $sql = BimpTools::getSqlSelect(array('a.fk_object'));
         $sql .= BimpTools::getSqlFrom('product_extrafields');
         $sql .= ' WHERE a.crt > 0';
@@ -189,6 +194,8 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findPropalesCrtToConvert(&$errors = array())
     {
+        $errors[] = 'Script Désactivé';
+        return array();
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_propal_line');
         $sql .= ' WHERE a.remise_crt > 0 AND a.remise_crt_percent != 0';
@@ -246,6 +253,8 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findCommandesCrtToConvert(&$errors = array())
     {
+        $errors[] = 'Script Désactivé';
+        return array();
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line');
         $sql .= ' WHERE a.remise_crt > 0 AND a.remise_crt_percent != 0';
@@ -303,6 +312,8 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findFacturesCrtToConvert(&$errors = array())
     {
+        $errors[] = 'Script Désactivé';
+        return array();
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_facture_line');
         $sql .= ' WHERE a.remise_crt > 0 AND a.remise_crt_percent != 0';
@@ -362,6 +373,9 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findShipmentsToConvert(&$errors = array())
     {
+        $errors[] = 'Script Désactivé';
+        return array();
+
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line');
         $sql .= ' WHERE a.shipments != \'\' AND a.shipments != \'{}\' > 0';
@@ -466,6 +480,9 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findReceptionsToConvert(&$errors = array())
     {
+        $errors[] = 'Script Désactivé';
+        return array();
+
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_fourn_line');
         $sql .= ' WHERE a.receptions != \'\' AND a.receptions != \'{}\' > 0';
@@ -577,6 +594,383 @@ class BDS_ConvertProcess extends BDSProcess
         }
 
         return array();
+    }
+
+    // Abonnements: 
+
+    public function findAbosToConvert(&$errors = array())
+    {
+        $elems = array();
+
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+        BimpObject::loadClass('bimpcore', 'Bimp_Product');
+
+        $fields = array('DISTINCT a.id as id_line', 'a.id_obj as id_commande');
+
+        $joins = array(
+            'c'    => array(
+                'table' => 'commande',
+                'on'    => 'c.rowid = a.id_obj'
+            ),
+            'cdet' => array(
+                'table' => 'commandedet',
+                'on'    => 'cdet.rowid = a.id_line'
+            ),
+            'pef'  => array(
+                'table' => 'product_extrafields',
+                'on'    => 'pef.fk_object = cdet.fk_product'
+            )
+        );
+
+        $filters = array(
+            'c.fk_statut'    => 1,
+            'or_periodicity' => array(
+                'or' => array(
+                    'a.fac_periodicity'   => array(
+                        'operator' => '>',
+                        'value'    => 0
+                    ),
+                    'a.achat_periodicity' => array(
+                        'operator' => '>',
+                        'value'    => 0
+                    )
+                )
+            ),
+            'pef.type2'      => Bimp_Product::$abonnements_sous_types
+        );
+
+        BimpTools::addSqlFilterEntity($filters, BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'c');
+
+        $sql = BimpTools::getSqlFullSelectQuery('bimp_commande_line', $fields, $filters, $joins, array(
+                    'order_by'  => 'a.id',
+                    'order_way' => 'asc'
+        ));
+
+        if ((int) $this->getOption('test_one', 0)) {
+            $sql .= ' LIMIT 1';
+        }
+
+        $rows = $this->db->executeS($sql, 'array');
+        
+        if (is_array($rows)) {
+            $commandes = array();
+
+            foreach ($rows as $r) {
+                if (!isset($commandes[$r['id_commande']])) {
+                    $commandes[$r['id_commande']] = array();
+                }
+
+                $commandes[$r['id_commande']][] = $r['id_line'];
+            }
+
+            foreach ($commandes as $id_commande => $lines) {
+                $elems[] = json_encode(array('id_commande' => $id_commande, 'lines' => $lines));
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+
+        echo '<pre>';
+        print_r($errors);
+        echo '</pre>';
+        echo '<pre>';
+        print_r($elems);
+        exit;
+        
+        return $elems;
+    }
+
+    public function execAbosToConvert(&$errors = array())
+    {
+        $this->db->db->commitAll();
+
+        $one_day_interval = new DateInterval('P1D');
+
+        foreach ($this->references as $data) {
+            $this->setCurrentObjectData('bimpcommercial', 'Bimp_Commande');
+            $this->incProcessed();
+            $data = json_decode($data, 1);
+
+            $id_commande = $data['id_commande'];
+            $lines = $data['lines'];
+
+            if ($id_commande) {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommerical', 'Bimp_Commande', $id_commande);
+                if (!BimpObject::objectLoaded($commande)) {
+                    $this->Error('Commande non trouvée', null, '#' . $id_commande);
+                    $this->incIgnored();
+                } else {
+                    if ((int) $commande->getData('id_client_facture') && (int) $commande->getData('id_client_facture') !== (int) $commande->getData('fk_soc')) {
+                        $this->Alert('Client facturation différent du client final (Commande non traitée)', $commande, $commande->getRef());
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $contrat_lines = array();
+                    $this->setCurrentObject('bimpcommercial', 'Bimp_CommandeLine');
+                    $has_line_errors = false;
+
+                    foreach ($lines as $id_line) {
+                        $this->incProcessed();
+                        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+                        if (!BimpObject::objectLoaded($line)) {
+                            $this->Error('Ligne #' . $id_line . ' absente', $commande);
+                            $this->incIgnored();
+                            $has_line_errors = true;
+                            continue;
+                        }
+
+                        $product = $line->getProduct();
+                        $line_ref = 'Ligne #' . $line->id . ' (n° ' . $line->getData('position') . ')';
+
+                        if (!BimpObject::objectLoaded($product)) {
+                            $this->Error('Produit absent', $commande, $line_ref);
+                            $this->incIgnored();
+                            $has_line_errors = true;
+                            continue;
+                        }
+
+                        $qty = (float) $line->getFullQty();
+                        if (!$qty) {
+                            $this->Error('Qté nulle', $commande, $line_ref);
+                            $this->incIgnored();
+                            $has_line_errors = true;
+                            continue;
+                        }
+
+                        $fac_periodicity = (int) $line->getData('fac_periodicity');
+                        $achat_periodicity = (int) $line->getData('achat_periodicity');
+                        $date_from = '';
+                        $date_to = '';
+
+                        $duration = 0;
+                        if ($fac_periodicity && $achat_periodicity) {
+                            if (((int) $line->getData('fac_nb_periods') * $fac_periodicity) != ((int) $line->getData('achat_nb_periods') * $achat_periodicity)) {
+                                $this->Error('La durée de facturation ne correspond pas à la durée d\'achat', $commande, $line_ref);
+                                $this->incIgnored();
+                                $has_line_errors = true;
+                                continue;
+                            }
+                            if ($line->getData('fac_periods_start') != $line->getData('achat_periods_start')) {
+                                $this->Error('Les dates de début de facturation et d\'achat ne correspondent pas', $commande, $line_ref);
+                                $this->incIgnored();
+                                $has_line_errors = true;
+                                continue;
+                            }
+                        }
+
+                        if ($fac_periodicity) {
+                            $duration = (int) $line->getData('fac_nb_periods') * $fac_periodicity;
+                            $date_from = $line->getData('fac_periods_start');
+                        } elseif ($achat_periodicity) {
+                            $duration = (int) $line->getData('achat_nb_periods') * $achat_periodicity;
+                            $date_from = $line->getData('achat_periods_start');
+                        }
+
+                        if (!$duration) {
+                            $this->Error('Durée abonnement non définie', $commande, $line_ref);
+                            $this->incIgnored();
+                            $has_line_errors = true;
+                            continue;
+                        }
+
+                        if (!$date_from) {
+                            $this->Error('Date début abonnement non définie', $commande, $line_ref);
+                            $this->incIgnored();
+                            $has_line_errors = true;
+                            continue;
+                        }
+
+                        $dt = new DateTime($date_from);
+                        $date_from = $dt->format('Y-m-d 00:00:00');
+                        $dt->add(new DateInterval('P' . $duration . 'M'));
+                        $dt->sub($one_day_interval);
+                        $date_to = $dt->format('Y-m-d 23:59:59');
+
+                        $date_fac_start = null;
+                        $date_next_fac = null;
+                        $date_achat_start = null;
+                        $date_next_achat = null;
+
+                        $to_bill = 0;
+                        $to_buy = 0;
+
+                        if ($fac_periodicity) {
+                            $fac_data = $line->getNbPeriodsToBillData();
+
+                            $to_bill = (int) $fac_data['nb_periods_max'];
+                            if (!$to_bill) {
+                                $dt = new DateTime($date_to);
+                                $dt->add($one_day_interval);
+                                $date_fac_start = $date_next_fac = $dt->format('Y-m-d');
+                            } else {
+                                $dt = new DateTime($date_from);
+                                if ((int) $fac_data['nb_periods_billed']) {
+                                    $dt->add(new DateInterval('P' . $fac_data['nb_periods_billed'] * $fac_periodicity . 'M'));
+                                }
+                                $date_fac_start = $dt->format('Y-m-d');
+                                if ((int) $line->getData('fact_echue')) {
+                                    $dt->add(new DateInterval('P' . $fac_periodicity . 'M'));
+                                }
+                                $date_next_fac = $dt->format('Y-m-d');
+                            }
+                        }
+
+                        if ($achat_periodicity) {
+                            $achat_data = $line->getNbPeriodesToBuyData();
+
+                            $to_buy = (int) $achat_data['nb_periods_max'];
+                            if (!$to_buy) {
+                                $dt = new DateTime($date_to);
+                                $dt->add($one_day_interval);
+                                $date_achat_start = $date_next_achat = $dt->format('Y-m-d');
+                            } else {
+                                $dt = new DateTime($date_from);
+                                if ((int) $achat_data['nb_periods_bought']) {
+                                    $dt->add(new DateInterval('P' . $achat_data['nb_periods_bought'] * $achat_periodicity . 'M'));
+                                }
+                                $date_achat_start = $date_next_achat = $dt->format('Y-m-d');
+                            }
+                        }
+
+                        if (!$to_bill && !$to_buy) {
+                            $this->Alert('Il ne reste aucune période à facturer ni à acheter', $commande, $line_ref);
+                            $this->incIgnored();
+                            continue;
+                        }
+
+                        $pfp = null;
+                        if ($line->id_fourn_price) {
+                            $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $line->id_fourn_price);
+                        }
+
+                        $id_fourn = (int) $product->getData('achat_def_id_fourn');
+
+                        if ($id_fourn) {
+                            if (!BimpObject::objectLoaded($pfp) || (int) $pfp->getData('fk_soc') !== $id_fourn) {
+                                $new_pfp = $product->getLastFournPrice($id_fourn);
+                                if (BimpObject::objectLoaded($new_pfp)) {
+                                    $pfp = $new_pfp;
+                                }
+                            }
+                        }
+
+                        if (!BimpObject::objectLoaded($pfp)) {
+                            $pfp = $product->getLastFournPrice();
+                        }
+
+                        $contrat_lines[] = array(
+                            'line_type'                    => 2,
+                            'id_product'                   => $product->id,
+                            'product_type'                 => $line->product_type,
+                            'description'                  => $line->desc,
+                            'qty'                          => $qty,
+                            'price_ht'                     => $line->pu_ht,
+                            'tva_tx'                       => $line->tva_tx,
+                            'remise_percent'               => $line->remise,
+                            'fac_periodicity'              => $fac_periodicity,
+                            'fac_term'                     => !(int) $line->getData('fact_echue'),
+                            'achat_periodicity'            => $achat_periodicity,
+                            'duration'                     => $duration,
+                            'variable_qty'                 => (int) $product->getData('variable_qty'),
+                            'date_ouverture'               => $date_from,
+                            'date_fin_validite'            => $date_to,
+                            'date_fac_start'               => $date_fac_start,
+                            'date_next_facture'            => $date_next_fac,
+                            'date_achat_start'             => $date_achat_start,
+                            'date_next_achat'              => $date_next_achat,
+                            'fk_user_author'               => (int) $commande->getData('fk_user_author'),
+                            'fk_user_ouverture'            => (int) $commande->getData('id_user_resp'),
+                            'line_origin_type'             => 'commande_line',
+                            'id_line_origin'               => $line->id,
+                            'fk_product_fournisseur_price' => (BimpObject::objectLoaded($pfp) ? $pfp->id : 0),
+                            'buy_price_ht'                 => (BimpObject::objectLoaded($pfp) ? $pfp->getData('price') : $line->pa_ht)
+                        );
+                    }
+
+                    if (!empty($contrat_lines) && !$has_line_errors) {
+                        $this->db->db->begin();
+
+                        $new_contrat = false;
+                        $contrat = BimpCache::findBimpObjectInstance('bimpcontrat', 'BCT_Contrat', array(
+                                    'fk_soc'  => (int) $commande->getData('fk_soc'),
+                                    'version' => 2
+                                        ), true);
+
+                        if (!BimpObject::objectLoaded($contrat)) {
+                            $new_contrat = true;
+                            $contrat_errors = $contrat_warnings = array();
+                            $contrat = BimpObject::createBimpObject('bimpcontrat', 'BCT_Contrat', array(
+                                        'fk_soc'    => (int) $commande->getData('fk_soc'),
+                                        'entrepot'  => (int) $commande->getData('entrepot'),
+                                        'secteur'   => $commande->getData('ef_type'),
+                                        'expertise' => $commande->getData('expertise'),
+                                        'moderegl'  => $commande->getData('fk_mode_reglement'),
+                                        'condregl'  => $commande->getData('fk_cond_reglement')
+                                            ), true, $contrat_errors, $contrat_warnings);
+
+                            if (count($contrat_warnings)) {
+                                $this->Alert(BimpTools::getMsgFromArray($contrat_warnings, 'Erreurs lors de la création du contrat'), $commande);
+                            }
+
+                            if (count($contrat_errors)) {
+                                $this->Error(BimpTools::getMsgFromArray($contrat_errors, 'Echec création du contrat'), $commande);
+                                $this->db->db->rollback();
+                                continue;
+                            }
+                        }
+
+                        if (BimpObject::objectLoaded($contrat)) {
+                            $nOk = 0;
+                            foreach ($contrat_lines as $contrat_line_data) {
+                                $contrat_line_data['fk_contrat'] = $contrat->id;
+
+                                $line_errors = $line_warnings = array();
+                                BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', $contrat_line_data, true, $line_errors, $line_warnings);
+
+                                if (count($line_errors)) {
+                                    $this->Error($line_errors, $commande);
+                                    $this->db->db->rollback();
+                                    continue 2;
+                                } else {
+                                    $nOk++;
+                                    if (count($line_warnings)) {
+                                        $this->Alert($line_warnings, $contrat);
+                                    }
+
+                                    // solde ligne de commande : 
+                                    $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $contrat_line_data['id_line_origin']);
+                                    if (BimpObject::objectLoaded($commande_line)) {
+                                        if ((int) $commande_line->getData('fac_periodicity')) {
+                                            
+                                        }
+                                    }
+                                }
+                            }
+
+                            if ($nOk > 0) {
+                                if ($new_contrat) {
+                                    $this->setCurrentObjectData('bimpcontrat', 'BCT_Contrat');
+                                    $this->Success('Contrat {{Contrat2:' . $contrat->id . '}} créé avec succès', $commande);
+                                    $this->incCreated();
+                                }
+
+                                $this->Success($nOk . ' ligne(s) de contrat créée(s) avec succès', $contrat);
+                                $this->setCurrentObjectData('bimpcontrat', 'BCT_ContratLine');
+                                $this->incCreated('current', $nOk);
+
+                                $this->db->db->commi();
+                            } else {
+                                $this->db->db->rollback();
+                            }
+                        }
+                    }
+                }
+            } else {
+                $this->Error('ID commande absent (Lignes : ' . explode(', ', $lines));
+                $this->incIgnored();
+            }
+        }
     }
 
     // install : 

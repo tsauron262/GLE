@@ -322,8 +322,6 @@ fields:
         label: ID Ligne d\'origine
         type: id
         default_value: 0
-    
-    
 
     id_parent_line:
         label: Ligne parente

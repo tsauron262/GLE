@@ -14,8 +14,8 @@ class Bimp_Product extends BimpObject
         6  => 'Abonnement',
         20 => 'Bundle'
     );
-    public static $abonnements_sous_types = array(6,20);
-    public static $bundle_sous_types = array(20,21);
+    public static $abonnements_sous_types = array(6, 20);
+    public static $bundle_sous_types = array(20, 21);
     public static $sousTypeDep = array(3, 4);
     public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
@@ -586,6 +586,18 @@ class Bimp_Product extends BimpObject
         }
 
         return $products;
+    }
+
+    public function getSousTypesArray()
+    {
+        $result = array();
+        foreach (static::$sousTypes as $type => $values) {
+            if ($type == -1 || !$this->isLoaded() || $type == $this->getData('fk_product_type')) {
+                $result = BimpTools::merge_array($result, $values, true);
+            }
+        }
+        
+        return $result;
     }
 
     // Getters codes comptables: 
@@ -1673,16 +1685,6 @@ class Bimp_Product extends BimpObject
         if (isset($result[0]->id)) {
             return (int) $result[0]->id;
         }
-    }
-    
-    public function getSousTypesArray(){
-        $result = array();
-        foreach(static::$sousTypes as $type => $values){
-            if($type == -1 || !$this->isLoaded() || $type == $this->getData('fk_product_type')){
-                $result = BimpTools::merge_array($result, $values, true);
-            }
-        }
-        return $result;
     }
 
     public function getFournisseursArray($include_empty = true, $empty_label = '')
@@ -4253,7 +4255,7 @@ class Bimp_Product extends BimpObject
         if ($this->isAbonnement()) {
             $fac_per = (int) $this->getData('fac_periodicity');
             $achat_per = (int) $this->getData('achat_periodicity');
-            
+
             if ($fac_per && $achat_per && $fac_per < $achat_per) {
                 $errors[] = 'La périodicité de facturation ne peut pas être inférieure à la périodicité d\'achat';
             }

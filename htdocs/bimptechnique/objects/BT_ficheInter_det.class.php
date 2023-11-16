@@ -260,6 +260,39 @@ class BT_ficheInter_det extends BimpDolObject
         return $array;
     }
 
+    public function getContratWithDeplacementArray()
+    {
+        $array = [];
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            $contrat = $parent->getChildObject('contrat');
+            if (BimpObject::objectLoaded($contrat)) {
+                $lines = $contrat->getChildrenObjects("lines");
+                foreach ($lines as $line) {
+//                    echo '<pre>';
+//                    echo $line->printData();
+                    if (!(int) $line->getData('fk_product')) {
+                        continue;
+                    }
+
+                    $product = $line->getChildObject('produit');
+//print_r($product);
+                    if (BimpObject::objectLoaded($product)) {
+                        if ($product->isDep()) {
+                            $line_inters = $this->getChildrenList("inters", ['id_line_contrat' => (int) $line->id]);
+                            if (!count($line_inters)) {
+                                $array[$line->id] = $contrat->getRef() . " - " .$product->getRef(). " - " . $line->getData('description');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $array;
+    }
+
     public function getServicesArray()
     {
         $fi = $this->getParentInstance();
@@ -905,6 +938,9 @@ class BT_ficheInter_det extends BimpDolObject
                             }
                         }
                     }
+                }
+                elseif($type == 5){
+                    $id_contrat_line = BimpTools::getValue('id_contrat_depl', 0);
                 }
             }
 

@@ -260,7 +260,7 @@ class ObjectLine extends BimpObject
 
     public function isRemisable()
     {
-        return $this->isProductRemisable() && (int) $this->getData('remisable');
+        return /*$this->isProductRemisable() && */(int) $this->getData('remisable');
     }
 
     public function isParentEditable()
@@ -5415,7 +5415,7 @@ class ObjectLine extends BimpObject
 
                             $product = $this->getProduct();
 
-                            if ((int) $this->getData('remisable')) {
+                            if ((int) $this->getData('remisable') && $this->isFieldEditable('remisable')) {
                                 if (!(int) $product->getData('remisable')) {
                                     $this->set('remisable', 0);
                                 }

@@ -210,7 +210,7 @@ class Bimp_ImportPaiement extends BimpObject
             }
         }
         if (count($dataMsg))
-            mailSyn2('Paiements non identifiés', 'CommerciauxBimp@bimp.fr, boutiquesbimp@bimp.fr, Gestionrecouvrement@bimp.fr, techsav@bimp.fr', null, 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés automatiquement par le système :<br/><br/>' . implode('<br/>', $dataMsg) . '<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer @Reglements Olys et @Recouvrement Olys<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées');
+            mailSyn2('Paiements non identifiés', BimpCore::getConf('email_paync', '', 'bimpfinanc'), null, 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés automatiquement par le système :<br/><br/>' . implode('<br/>', $dataMsg) . '<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer @Reglements Olys et @Recouvrement Olys<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées');
 
         return $return;
     }

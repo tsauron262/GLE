@@ -20,6 +20,14 @@ class BimpCommController extends BimpController
 
         parent::display();
     }
+    
+    public function useMultiOnglet(){
+        return BimpCore::getConf('use_multi_onglet', null, 'bimpcommercial');
+    }
+    
+    public function notUseMultiOnglet(){
+        return !$this->useMultiOnglet();
+    }
 
     // Traitements ajax: 
 

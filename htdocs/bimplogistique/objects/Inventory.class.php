@@ -19,6 +19,15 @@ class Inventory extends BimpDolObject
         self::STATUS_CLOSED           => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
     );
 
+    public function isDeletable($force_delete = false, &$errors = [])
+    {
+        if ((int) $this->getData('status') === self::STATUS_DRAFT) {
+            return 1;
+        }
+
+        return 0;
+    }
+
     public function getAllInventories()
     {
         if ($this->hasChildrenInventory()) // prevent multiple parent
@@ -358,7 +367,6 @@ class Inventory extends BimpDolObject
         $list->addJoin('product_stock', 'a.rowid = ps.fk_product AND ps.fk_entrepot = ' . $this->getData('fk_warehouse'), 'ps');
         $html .= $list->renderHtml();
 
-
         return $html;
     }
 
@@ -401,13 +409,11 @@ class Inventory extends BimpDolObject
             $list->addFieldFilterValue('id = 0 AND 1', $filters);
         $html .= $list->renderHtml();
 
-
 //        $equipment = BimpObject::getInstance('bimplogistique', 'InventoryEquipment');
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         $list = new BC_ListTable($equipment, 'inventaire', 1, null, 'Équipements deplacé dans vols');
         $list->addFieldFilterValue('id IN (SELECT id_equipment FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p WHERE id_entrepot=' . $this->getData('fk_warehouse') . ' AND infos LIKE "%INV' . $this->id . '%" AND  p.position=1 AND p.type=6) AND 1', $filters);
         $html .= $list->renderHtml();
-
 
         return $html;
     }
@@ -448,14 +454,12 @@ class Inventory extends BimpDolObject
         $ids_scanned = array();
         $ids_stock = array();
 
-
         $sql2 = 'SELECT SUM(qty) as sum, fk_product';
         $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det';
         $sql2 .= ' WHERE fk_inventory=' . $this->getData('id');
         if (!$with_serialisable)
             $sql2 .= ' AND fk_equipment=0';
         $sql2 .= ' GROUP BY (fk_product)';
-
 
         $result2 = $this->db->db->query($sql2);
         if ($result2 and mysqli_num_rows($result2) > 0) {
@@ -692,7 +696,6 @@ class Inventory extends BimpDolObject
 
         $qty_missing = -$this->qtyMissing($id_product, 0);
 
-
         $diff = $qty_missing - $qty_input;
         if ($qty_missing > 0) { // On en met le plus possible dans l'entrepôt de cet inventaire
             if ($diff > 0) // On en attends plus que ce qui est scanné
@@ -830,10 +833,10 @@ class Inventory extends BimpDolObject
         $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine');
 
         $errors = BimpTools::merge_array($errors, $inventory_line->validateArray(array(
-                    'fk_inventory' => (int) $this->getData('id'),
-                    'fk_product'   => (int) $id_product,
-                    'fk_equipment' => (int) $id_equipment,
-                    'qty'          => $qty
+                            'fk_inventory' => (int) $this->getData('id'),
+                            'fk_product'   => (int) $id_product,
+                            'fk_equipment' => (int) $id_equipment,
+                            'qty'          => $qty
         )));
 
         if (!count($errors)) {

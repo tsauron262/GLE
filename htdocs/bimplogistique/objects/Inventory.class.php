@@ -297,7 +297,7 @@ class Inventory extends BimpDolObject
     public function isAdmin()
     {
         global $user;
-        if ($user->rights->bimpequipment->inventory->close)
+        if ($user->admin || $user->rights->bimpequipment->inventory->close)
             return 1;
         return 0;
     }

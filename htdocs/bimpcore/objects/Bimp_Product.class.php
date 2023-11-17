@@ -4,17 +4,16 @@ class Bimp_Product extends BimpObject
 {
 
     public $stocks = null;
-    public static $sousTypes = array(//-1 commun, 0 produit, 1 services
+    public static $sousTypes = array(
         -1 => array(
-            0 => '',
-            1 => 'Service inter',
-            2 => 'Service contrat',
-            3 => 'Déplacement inter',
-            4 => 'Déplacement contrat',
-            5 => 'Logiciel (licence unique)',
-            6 => 'Abonnement',
-            20 => 'Bundle abonnement',
-            21 => 'Bundle materiel'
+            0  => '',
+            1  => 'Service inter',
+            2  => 'Service contrat',
+            3  => 'Déplacement inter',
+            4  => 'Déplacement contrat',
+            5  => 'Logiciel (licence unique)',
+            6  => 'Abonnement',
+            20 => 'Bundle'
         )
     );
     public static $abonnements_sous_types = array(6,20);
@@ -2142,12 +2141,13 @@ class Bimp_Product extends BimpObject
         $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
     }
-    
-    public function getPaBundle(){
+
+    public function getPaBundle()
+    {
         $pa = 0;
-        
+
         $child_prods = $this->getChildrenObjects('child_products');
-        foreach($child_prods as $child_prod){
+        foreach ($child_prods as $child_prod) {
             $prod = $child_prod->getChildObject('product_fils');
             $pa += $child_prod->getData('qty') * $prod->getData('cur_pa_ht');
         }
@@ -4248,6 +4248,22 @@ class Bimp_Product extends BimpObject
         return parent::validatePost();
     }
 
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if ($this->isAbonnement()) {
+            $fac_per = (int) $this->getData('fac_periodicity');
+            $achat_per = (int) $this->getData('achat_periodicity');
+            
+            if ($fac_per && $achat_per && $fac_per < $achat_per) {
+                $errors[] = 'La périodicité de facturation ne peut pas être inférieure à la périodicité d\'achat';
+            }
+        }
+
+        return $errors;
+    }
+
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = parent::create($warnings, $force_create);
@@ -4529,9 +4545,17 @@ class Bimp_Product extends BimpObject
             $cache_key .= '_with_factures';
         }
 
-        $query = "SELECT l.rowid as id_line, l.fk_facture, l.rang, l.subprice, f.fk_soc, l.fk_product, e.entrepot, l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
-        $query .= " FROM " . MAIN_DB_PREFIX . "facturedet l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
-        $query .= " WHERE l.fk_facture = f.rowid AND e.fk_object = f.rowid AND l.fk_product > 0";
+        $query = "SELECT l.rowid as id_line, l.fk_facture, l.rang, l.subprice, f.fk_soc, l.fk_product";
+        if(BimpCore::getConf("USE_ENTREPOT"))
+            $query .= ", e.entrepot";
+        $query .= ", l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
+        $query .= " FROM " . MAIN_DB_PREFIX . "facturedet l";
+//        if(BimpCore::getConf("USE_ENTREPOT"))
+            $query .= ", " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
+        $query .= " WHERE l.fk_facture = f.rowid";
+//        if(BimpCore::getConf("USE_ENTREPOT"))
+            $query .= " AND e.fk_object = f.rowid";
+        $query .= " AND l.fk_product > 0";
 
         if ($exlure_retour) {
             $query .= " AND l.qty > 0";
@@ -4550,7 +4574,7 @@ class Bimp_Product extends BimpObject
         if (count($tab_secteur) > 0) {
             $query .= " AND e.type IN ('" . implode("','", $tab_secteur) . "')";
         }
-
+        
         $sql = $db->query($query);
 
         // Facturés: 
@@ -4562,29 +4586,31 @@ class Bimp_Product extends BimpObject
                 $qty *= -1;
             }
 
-            // Ventes produit / entrepôt
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot] = array(
-                    'qty'       => 0,
-                    'total_ht'  => 0,
-                    'total_ttc' => 0
-                );
+            if(BimpCore::getConf("USE_ENTREPOT")){
+                // Ventes produit / entrepôt
+                if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
+                    self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot] = array(
+                        'qty'       => 0,
+                        'total_ht'  => 0,
+                        'total_ttc' => 0
+                    );
 
-                if ($with_factures) {
-                    self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['factures'] = array();
+                    if ($with_factures) {
+                        self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['factures'] = array();
+                    }
                 }
-            }
 
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] += $ln->qty;
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] += $ln->qty;
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
 
-            if ($with_factures && $ln->qty != 0) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['factures'][$ln->fk_facture][$ln->id_line] = array(
-                    'position' => $ln->rang,
-                    'qty'      => $ln->qty,
-                    'subprice' => $ln->total_ht / $ln->qty
-                );
+                if ($with_factures && $ln->qty != 0) {
+                    self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['factures'][$ln->fk_facture][$ln->id_line] = array(
+                        'position' => $ln->rang,
+                        'qty'      => $ln->qty,
+                        'subprice' => $ln->total_ht / $ln->qty
+                    );
+                }
             }
 
 

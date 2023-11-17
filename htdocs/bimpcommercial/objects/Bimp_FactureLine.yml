@@ -162,6 +162,7 @@ lists_cols:
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Facture,BimpRevalorisation
+        
     global: 
         objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Facture,BimpRevalorisation
         list_actions: 

@@ -278,16 +278,18 @@ class Bimp_Societe extends BimpDolObject
                     }
             }
         }
-        if ($this->getData('zip') == '' || $this->getData('town') == '' || $this->getData('address') == '')
-            $errors[] = "Merci de renseigner l'adresse complète du client";
+        if(BimpCore::getConf('validation_strict')){
+            if ($this->getData('zip') == '' || $this->getData('town') == '' || $this->getData('address') == '')
+                $errors[] = "Merci de renseigner l'adresse complète du client";
 
 
-        if (self::$types_ent_list_code[$this->getData("fk_typent")] != "TE_PRIVATE") {
-            if ($this->getData("mode_reglement") < 1) {
-                $errors[] = "Mode réglement fiche client invalide ";
-            }
-            if ($this->getData("cond_reglement") < 1) {
-                $errors[] = "Condition réglement fiche client invalide ";
+            if (self::$types_ent_list_code[$this->getData("fk_typent")] != "TE_PRIVATE") {
+                if ($this->getData("mode_reglement") < 1) {
+                    $errors[] = "Mode réglement fiche client invalide ";
+                }
+                if ($this->getData("cond_reglement") < 1) {
+                    $errors[] = "Condition réglement fiche client invalide ";
+                }
             }
         }
 

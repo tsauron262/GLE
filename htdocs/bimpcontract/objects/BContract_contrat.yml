@@ -1580,9 +1580,9 @@ lists:
         filters_panel: default
         bulk_actions:
             callback: getBulkActions
-        list_filters: 
-            - name: version
-              filter: 1
+#        list_filters: 
+#            - name: version
+#              filter: 1
         sort_field: datec
         sort_way: desc
         n: 20

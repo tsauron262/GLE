@@ -381,3 +381,7 @@ params:
         label: Ajouter drag zone sur objet
         def: 0
         type: bool
+    validation_strict:
+        label: Validation strict (adresse, condition de reg...)
+        type: bool
+        def: 0

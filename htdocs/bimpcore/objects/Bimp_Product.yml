@@ -678,6 +678,16 @@ fields:
         display_if: 
             field_name: variable_qty
             show_values: 1
+            
+    achats_partiels_allowed: 
+        label: Achats partiels autorisés
+        type: bool
+        default_value: 0
+        
+    renouv_tacites_allowed: 
+        label: Renouvellements tacites autorisés
+        type: bool
+        default_value: 0
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -1031,6 +1041,10 @@ fields_tables:
             - field: achat_def_periodicity
               edit: 1
             - field: achat_def_id_fourn
+              edit: 1
+            - field: achats_partiels_allowed
+              edit: 1
+            - field: renouv_tacites_allowed
               edit: 1
 
 views: 

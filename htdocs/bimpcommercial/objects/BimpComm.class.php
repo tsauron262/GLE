@@ -2702,11 +2702,13 @@ class BimpComm extends BimpDolObject
                     if ((int) $bimp_lines[(int) $id_dol_line]['position'] !== (int) $dol_line->rang) {
                         $bimp_line->updateField('position', (int) $dol_line->rang, $bimp_lines[(int) $id_dol_line]['id']);
                     }
-                    if ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $dol_line->remise_percent) {
-                        if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
-                            $remises_errors = $bimp_line->checkRemises();
-                            if (count($remises_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Des erreurs sont survenues lors de la synchronisation des remises pour la ligne n° ' . $i);
+                    if(!is_a($this, 'Bimp_Facture') || $this->getData('fk_statut') < 1){//ne surtout pas modifier une facture validé
+                        if ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $dol_line->remise_percent) {
+                            if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
+                                $remises_errors = $bimp_line->checkRemises();
+                                if (count($remises_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Des erreurs sont survenues lors de la synchronisation des remises pour la ligne n° ' . $i);
+                                }
                             }
                         }
                     }
@@ -2909,6 +2911,10 @@ class BimpComm extends BimpDolObject
 
             if ($params['is_clone']) {
                 switch ($origin->object_name) {
+                    case 'Bimp_Propal': 
+                        unset($data['id_linked_contrat_line']);
+                        break;
+                    
                     case 'BS_SavPropal':
                         unset($data['id_reservation']);
                         break;

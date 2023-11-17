@@ -176,9 +176,19 @@ function quickAddObjectLine($button) {
 // Traitements: 
 
 function setAbonnementLineQties($form, $input) {
+    if (!$.isOk($form)) {
+        return;
+    }
+
+    if (!$form.find('input[name="prod_duration"').length ||
+            !$form.find('input[name="abo_duration"').length || 
+            !$form.find('[name="abo_fac_periodicity"').length) {
+        return;
+    }
+
     var prod_duration = parseInt($form.find('input[name="prod_duration"').val());
     var duration = parseInt($form.find('input[name="abo_duration"').val());
-    var fac_periodicity = parseInt($form.find('select[name="abo_fac_periodicity"').val());
+    var fac_periodicity = parseInt($form.find('[name="abo_fac_periodicity"').val());
 
     var nb_fac_periods = 0
     var nb_prod_periods = 0;
@@ -195,7 +205,7 @@ function setAbonnementLineQties($form, $input) {
     if (!prod_duration) {
         prod_duration = 1;
     }
-    
+
     if (duration && prod_duration) {
         nb_prod_periods = duration / prod_duration;
     } else {
@@ -345,6 +355,7 @@ function onObjectLineFormLoaded($form) {
             $inputs.change(function () {
                 setAbonnementLineQties($form, $(this));
             });
+            setAbonnementLineQties($form, $form.find('input[name="abo_qty_per_product_period"]'));
         }
     }
 }
@@ -400,6 +411,7 @@ $(document).ready(function () {
                 $inputs.change(function () {
                     setAbonnementLineQties(e.$form, $(this));
                 });
+                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_qty_per_product_period"]'));
                 break;
 
             case 'abo_fac_periodicity':
@@ -409,6 +421,7 @@ $(document).ready(function () {
                 $input.change(function () {
                     setAbonnementLineQties(e.$form, $(this));
                 });
+                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_qty_per_product_period"]'));
                 break;
         }
     });

@@ -2371,6 +2371,10 @@ class BimpObject extends BimpCache
         if (!count($result['errors'])) {
             BimpTools::traitePostTraitement($result['errors']);
         }
+        BimpObject::loadClass('bimpalert', 'AlertProduit');
+        if(class_exists('AlertProduit')){
+            AlertProduit::getAlertes($result['errors'], $result['warnings']);
+        }
 
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
         global $dont_rollback;
@@ -4836,6 +4840,10 @@ class BimpObject extends BimpCache
             if (!count($errors)) {
                 BimpTools::traitePostTraitement($errors);
             }
+            BimpObject::loadClass('bimpalert', 'AlertProduit');
+            if(class_exists('AlertProduit')){
+                AlertProduit::getAlertes($errors, $warnings);
+            }
 
             if ($use_db_transactions) {
                 if (count($errors)) {
@@ -7116,7 +7124,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($this->params['icon']) {
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
-            $html .= BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+            $html .= BimpTools::ucfirst($this->getLabel()) . ' <span style="font-size: 0.5em">#' . $this->id.'</span>';
             $html .= '</h1>';
 
             $ref = $this->getRef(false);

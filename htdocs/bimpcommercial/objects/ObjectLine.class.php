@@ -260,7 +260,7 @@ class ObjectLine extends BimpObject
 
     public function isRemisable()
     {
-        return $this->isProductRemisable() && (int) $this->getData('remisable');
+        return /*$this->isProductRemisable() && */(int) $this->getData('remisable');
     }
 
     public function isParentEditable()
@@ -280,7 +280,11 @@ class ObjectLine extends BimpObject
 
     public function isRemiseEditable()
     {
-        return (int) $this->isParentEditable() && $this->getData('editable');
+        if(in_array($this->getData('linked_object_name'), array('bundle', 'bundleCorrect')))
+            return 0;
+        
+        
+        return (int) $this->isParentEditable() && $this->isRemisable();
     }
 
     public function isLineProduct()
@@ -983,6 +987,15 @@ class ObjectLine extends BimpObject
     }
 
     // Getters valeurs:
+    
+    public function getParentLine()
+    {
+        if ($this->field_exists('id_parent_line') && (int) $this->getData('id_parent_line')) {
+            return BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $this->getData('id_parent_line'));
+        }
+        
+        return null;
+    }
 
     public function getFullQty()
     {
@@ -1725,6 +1738,9 @@ class ObjectLine extends BimpObject
             $product = $this->getProduct();
 
             if (BimpObject::objectLoaded($product)) {
+                if ($product->isAbonnement()) {
+                    return 6;
+                }
                 if ($product->getData('fk_product_type') === 0) {
                     return 1;
                 }
@@ -2801,6 +2817,12 @@ class ObjectLine extends BimpObject
                 $object->fetch_lines();
                 $object->update_price();
                 $this->hydrateFromDolObject();
+                
+                if(!is_a($this, 'BS_SavPropalLine')){
+                    global $user;
+                    $line = $this->getChildObject('line');
+                    $result = $line->call_trigger($line->element.'_CREATE', $user);
+                }
             }
 
             if ($force_create) {
@@ -4388,7 +4410,8 @@ class ObjectLine extends BimpObject
                             $min = 'none';
                         }
 
-                        $html = BimpInput::renderInput('qty', $prefixe . 'qty', (int) $value, array(
+                        $value = round($value, $decimals);
+                        $html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => $min,
@@ -5396,7 +5419,9 @@ class ObjectLine extends BimpObject
 
                             $product = $this->getProduct();
 
-                            if ((int) $this->getData('remisable')) {
+                            
+                            $parent = $this->getParentInstance();
+                            if ((int) $this->getData('remisable') && $parent->areLinesEditable() /*&& $this->isFieldEditable('remisable')*/) {
                                 if (!(int) $product->getData('remisable')) {
                                     $this->set('remisable', 0);
                                 }
@@ -5752,6 +5777,7 @@ class ObjectLine extends BimpObject
                         $newLn->qty = $child_prod->getData('qty') * $this->qty;
                         $newLn->id_product = $child_prod->getData('fk_product_fils');
                         $newLn->set('editable', 0);
+//                        $newLn->set('remisable', 0);
                         $newLn->set('deletable', 0);
                         $newLn->set('id_parent_line', $this->id);
                         $newLn->set('linked_id_object', $child_prod->id);
@@ -5796,6 +5822,7 @@ class ObjectLine extends BimpObject
                         $newLn->set('linked_object_name', 'bundleCorrect');
                         $newLn->set('type', static::LINE_FREE);
                         $newLn->set('editable', 0);
+//                        $newLn->set('remisable', 0);
                         $newLn->set('deletable', 0);
                         $newLn->set('id_parent_line', $this->id);
 //                        $newLn->set('id_obj', $this->getData('id_obj'));

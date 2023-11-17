@@ -22,9 +22,9 @@ class Bimp_FactureLine extends ObjectLine
 
         return 0;
     }
-    
-    
-    public function getTotalMarge(){
+
+    public function getTotalMarge()
+    {
         $margin = (float) $this->getMargin();
         $total_reval = 0;
 
@@ -410,7 +410,7 @@ class Bimp_FactureLine extends ObjectLine
                     if (BimpObject::objectLoaded($commande)) {
                         $commande->processFacturesRemisesGlobales();
                     }
-                    
+
                     if ((int) $commLine->getData('fac_periodicity') > 0) {
                         $commLine->checkPeriodicityData('fac');
                     }
@@ -861,11 +861,11 @@ class Bimp_FactureLine extends ObjectLine
             if (BimpObject::objectLoaded($commLine)) {
                 $commLine->onFactureDelete($id_facture);
             }
-            
+
             if (BimpObject::objectLoaded($contratLine)) {
                 $contratLine->onFactureDelete($id_facture);
             }
-            
+
             $this->isDeleting = $prevDeleting;
         }
 

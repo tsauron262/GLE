@@ -272,6 +272,23 @@ class BIMP_Task extends BimpAbstractFollow
                 'onclick' => $this->getJsActionOnclick('reopen', array(), array())
             );
         }
+        
+        
+        $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            $buttons[] = array(
+                'label'   => 'Message autheur',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array(
+                    "obj_type"      => "bimp_object",
+                    "obj_module"    => $this->module,
+                    "obj_name"      => $this->object_name,
+                    "id_obj"        => $this->id,
+                    "type_dest"     => $note::BN_DEST_USER,
+                    "fk_user_dest" => $this->getData('user_create')
+                        ), array(
+                    'form_name' => 'rep'
+                ))
+            );
         return $buttons;
     }
 

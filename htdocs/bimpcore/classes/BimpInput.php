@@ -618,6 +618,11 @@ class BimpInput
                 $html .= self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
                 break;
 
+            case 'search_projet':
+                $socid = -1;
+                $html .= $form->selectProjects($value, $field_name, '', 0, 1, '', 0, array(), $socid, '1', 0, '', null, 1);
+                break;
+
             case 'search_country':
                 $options['options'] = BimpCache::getCountriesArray((isset($options['active_only']) ? (int) $options['active_only'] : 1), (isset($options['key_field']) ? $options['key_field'] : 'rowid'));
                 return self::renderInput('select', $field_name, $value, $options);

@@ -27,6 +27,9 @@ public_header_btn:
 labels: 
     name: contrat d'abonnement
     name_plur: contrats d'abonnement
+    
+nom_url: 
+    syntaxe: <ref>
                 
 objects:
     client:

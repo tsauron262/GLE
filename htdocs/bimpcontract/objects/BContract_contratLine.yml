@@ -169,9 +169,9 @@ lists:
         checkbox: 1
         page_btn: 1
         modal_view: default
-        list_filters: 
-            - name: parent.version
-              filter: 1
+#        list_filters: 
+#            - name: parent.version
+#              filter: 1
         joins: 
             parent: 
                 alias: parent

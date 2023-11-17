@@ -109,7 +109,7 @@ fields:
         input: 
             type: hidden
     exported:
-        label: Exporté en  compta
+        label: Exporté en compta
         type: bool
         
 fields_table: 
@@ -118,7 +118,10 @@ fields_table:
         rows: 
             - field: fk_soc
               display: nom_url
-            - field: exported
+#            - field: exported
+            - label: Exporté en compta
+              value:
+                  callback: renderExportedField
             - field: default_rib
             - field: type
             - field: label

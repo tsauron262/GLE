@@ -173,6 +173,8 @@ class BimpCache
 
     public static function getCacheServeur($key)
     {
+        global $conf;
+        $key = $conf->entity.$key;
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
@@ -192,6 +194,8 @@ class BimpCache
 
     public static function setCacheServeur($key, $value, $ttl = null)
     {
+        global $conf;
+        $key = $conf->entity.$key;
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }

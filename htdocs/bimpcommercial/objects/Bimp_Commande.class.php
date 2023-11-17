@@ -864,7 +864,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             'note_private'      => htmlentities(addslashes($this->getData('note_private'))),
                         ), array(
                             'form_name'      => 'invoice',
-//                            'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
+                            'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
                             'modal_format'   => 'large'
                         ))
                     );
@@ -1374,6 +1374,21 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $html .= '<strong>Client: </strong>';
                 $html .= $client->getLink();
                 $html .= '</div>';
+            }
+        }
+        
+        $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
+        if(isset($items['propal'])){
+            foreach($items['propal'] as $id){
+                $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id);
+                $items = BimpTools::getDolObjectLinkedObjectsList($propal->dol_object, $this->db, array('bimp_contrat'));
+//                print_r($items);
+                foreach($items as $id){
+                    $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id['id_object']);
+                    if($obj->isLoaded()){
+                        $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à un abonnement '.$obj->getLink());
+                    }
+                }
             }
         }
 

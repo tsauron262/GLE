@@ -10,12 +10,17 @@ class AlertProduit extends BimpObject
     const TYPE_FACTURE = 1;
     const TYPE_COMMANDE = 2;
     const TYPE_CONTRAT = 3;
+    static $warnings = array();
+    static $errors = array();
+    
+    const TYPE_DEVIS_LIGNE = 101;
 
     public static $type_piece = Array(
-        self::TYPE_DEVIS    => Array('label' => 'Devis',   'icon' => 'fas_file-invoice',        'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Propal',       'table' => 'propal'),
-        self::TYPE_FACTURE  => Array('label' => 'Facture', 'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Facture',      'table' => 'facture'),
-        self::TYPE_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly',              'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Commande',     'table' => 'commande'),
-        self::TYPE_CONTRAT  => Array('label' => 'Contrat',  'icon' => 'fas_retweet',            'module' => 'bimpcontract',   'obj_name' => 'BContract_contrat', 'table' => 'contrat'),
+        self::TYPE_DEVIS       => Array('label' => 'Devis',   'icon' => 'fas_file-invoice',        'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Propal',       'table' => 'propal'),
+        self::TYPE_DEVIS_LIGNE => Array('label' => 'Ligne de Devis',   'icon' => 'fas_file-invoice',        'module' => 'bimpcommercial', 'obj_name' => 'Bimp_PropalLine',       'table' => 'propaldet'),
+        self::TYPE_FACTURE     => Array('label' => 'Facture', 'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Facture',      'table' => 'facture'),
+        self::TYPE_COMMANDE    => Array('label' => 'Commande', 'icon' => 'fas_dolly',              'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Commande',     'table' => 'commande'),
+        self::TYPE_CONTRAT     => Array('label' => 'Contrat',  'icon' => 'fas_retweet',            'module' => 'bimpcontract',   'obj_name' => 'BContract_contrat', 'table' => 'contrat'),
     );
     
 
@@ -30,6 +35,12 @@ class AlertProduit extends BimpObject
         self::ACTION_VALIDATE   => Array('label' => 'Validation',   'classes' => array('success'), 'icon' => 'fas_check'),
         self::ACTION_UNVALIDATE => Array('label' => 'Dévalidation', 'classes' => array('danger'),  'icon' => 'fas_undo'),
         self::ACTION_DELETE     => Array('label' => 'Suppression',  'classes' => array('danger'),  'icon' => 'fas_trash'),
+    );
+    
+    public static $type_notif = array(
+        0   => 'Message',
+        1   => 'Warnings',
+        2   => 'Erreur'
     );
     
     // charge toutes les alerte active de ce type d'objet et ce type de trigger
@@ -59,8 +70,14 @@ class AlertProduit extends BimpObject
     // Appel isObjectQualified($object) si oui créer un note sur l'objet en question
     public function traiteAlerte($object, &$errors = array(), &$warnings = array()) {
         
-        if($this->isObjectQualified($object))
-            $this->sendMessage($object, $errors, $warnings);
+        if($this->isObjectQualified($object)){
+            if($this->getData('type_notif') == 0){
+                $this->sendMessage($object, $errors, $warnings);
+            }
+            else{
+                $this->sendAlert($errors, $warnings);
+            }
+        }
         
     }
     
@@ -69,15 +86,16 @@ class AlertProduit extends BimpObject
         
         $filtre = $this->getData('filtre_piece');
         
-        if(!isset($filtre['rowid']['values'])) {
-            $filtre['rowid']['values'] = array();
+        if(!isset($filtre[$object->getPrimary()]['values'])) {
+            $filtre[$object->getPrimary()]['values'] = array();
         }
         
-        $filtre['rowid']['values'][] = array(
+        $filtre[$object->getPrimary()]['values'][] = array(
             'value' => $object->id,
             'part_type' => 'full'
         );
-        
+//        echo get_class($object).'<pre>';
+//        print_r($filtre);die;
         return count(BC_FiltersPanel::getObjectListIdsFromFilters($object, $filtre));
     }
     
@@ -109,5 +127,20 @@ class AlertProduit extends BimpObject
                                BimpNote::BN_DEST_GROUP, (int) $id_group, 0);
         }
         
+    }
+    
+    public function sendAlert(&$errors = array(), &$warnings = array()) {
+        BimpObject::loadClass('bimpcore', 'BimpNote');
+
+        if($this->getData('type_notif') == 1)
+            static::$warnings[] = $this->getData('message_notif');
+        elseif($this->getData('type_notif') == 2)
+            static::$errors[] = $this->getData('message_notif');
+        
+    }
+    
+    public static function getAlertes(&$errors, &$warnings){
+        $errors = BimpTools::merge_array($errors, static::$errors);
+        $warnings = BimpTools::merge_array($warnings, static::$warnings);
     }
 }

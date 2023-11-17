@@ -32,6 +32,12 @@ fields:
         type: string
         values:
             array: type_action
+            
+    type_notif:
+        label: Type de notification
+        type: string
+        values:
+            array: type_notif
 
     filtre_piece:
         label: Filtre pièce
@@ -54,6 +60,9 @@ fields:
         items_braces: 1
         items_data_type: id_object
         object: user
+        display_if:
+            field_name: type_notif
+            show_values: 0
         
     notified_group:
         label: Groupes notifiés
@@ -65,6 +74,9 @@ fields:
             type: search_group
         values:
             array: userGroups
+        display_if:
+            field_name: type_notif
+            show_values: 0
             
     message_notif:
         label: Message
@@ -81,6 +93,7 @@ lists:
         delete_btn: 1
         cols:
             type_piece:
+            type_notif:
             type_action:
             notified_user:
             notified_group:

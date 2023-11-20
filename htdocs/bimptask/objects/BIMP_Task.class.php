@@ -1035,7 +1035,8 @@ class BIMP_Task extends BimpAbstractFollow
     }
     
     public function actionMajRight(){
-        return static::majRight();
+        static::majRight();
+        array('errors' => array(), 'warnings' => array());
     }
 
     public static function majRight()

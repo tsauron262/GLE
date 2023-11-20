@@ -929,6 +929,7 @@ HAVING scan_exp != scan_det";
     {
 
         $return = array();
+        $qty_input = (int) $qty_input;
 
         $diff = $this->getDiffProduct();
 //        

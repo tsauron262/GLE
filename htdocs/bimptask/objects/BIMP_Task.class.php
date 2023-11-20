@@ -8,7 +8,7 @@ class BIMP_Task extends BimpAbstractFollow
     public static $types_manuel = array(
         'dev'        => 'Développement',
         'adminVente' => 'Administration des Ventes',
-        'dispatch' => 'Dispatch',
+        'dispatchMan' => 'Dispatch Manuel',
         'sav' => 'SAV'
     );
     public static $srcNotAttribute = array(/* 'sms-apple@bimp-groupe.net' */);
@@ -31,7 +31,7 @@ class BIMP_Task extends BimpAbstractFollow
             'bug' => array('label' => 'Bug'),
             'dev' => array('label' => 'Développement')
         ),
-        'dispatch' => array(
+        'dispatchMan' => array(
             'hotline' => array('label' => 'Hot-Line'),
             'commande' => array('label' => 'Commande'),
             'commerc' => array('label' => 'Service Commercial'),

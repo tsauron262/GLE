@@ -365,6 +365,9 @@ lists:
         update_btn: 1
         extra_btn: 
             callback: getButtons
+        header_buttons:
+            callback: 
+                method: getListHeaderExtraBtn
         cols:
             date_create:
             prio: 

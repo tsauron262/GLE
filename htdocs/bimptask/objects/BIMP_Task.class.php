@@ -155,6 +155,12 @@ class BIMP_Task extends BimpAbstractFollow
 
     public function isActionAllowed($action, &$errors = array())
     {
+        if($action == 'majRight'){
+            global $user;
+            if($user->admin)
+                return 1;
+        }
+        
         if (!$this->isLoaded($errors)) {
             return 0;
         }
@@ -194,6 +200,20 @@ class BIMP_Task extends BimpAbstractFollow
     }
 
     // Getters params: 
+    
+   public function getListHeaderExtraBtn()
+   {
+       $buttons = array();
+       global $user;
+       if($user->admin){
+            $buttons[] = array(
+                'label'   => 'Maj droits',
+                'icon'    => 'fas_bars',
+                'onclick' => $this->getJsActionOnclick('majRight')
+            );
+       }
+        return $buttons;
+   }
 
     public function getButtons()
     {
@@ -1012,6 +1032,10 @@ class BIMP_Task extends BimpAbstractFollow
         foreach ($this->getUsersFollow(true) as $userT) {
             $this->addNote($txt, null, 0, 0, $src, ($user->id == $id_user_def ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), BimpNote::BN_DEST_USER, null, (int) $userT->id, 1);
         }
+    }
+    
+    public function actionMajRight(){
+        return static::majRight();
     }
 
     public static function majRight()

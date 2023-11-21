@@ -5839,7 +5839,7 @@ class ObjectLine extends BimpObject
                         //                    die($thisTot.'rr'.$totHt.' '.$pourcent);
                     }
                 } else
-                    die('pas de prix');
+                    die('pas de prix. Ln : '.$this->id);
             }
         }
     }

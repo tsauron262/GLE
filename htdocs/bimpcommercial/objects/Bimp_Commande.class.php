@@ -1375,6 +1375,21 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $html .= '</div>';
             }
         }
+        
+        $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
+        if(isset($items['propal'])){
+            foreach($items['propal'] as $id){
+                $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id);
+                $items = BimpTools::getDolObjectLinkedObjectsList($propal->dol_object, $this->db, array('bimp_contrat'));
+//                print_r($items);
+                foreach($items as $id){
+                    $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id['id_object']);
+                    if($obj->isLoaded()){
+                        $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à un abonnement '.$obj->getLink());
+                    }
+                }
+            }
+        }
 
         return $html;
     }

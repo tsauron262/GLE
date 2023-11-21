@@ -64,7 +64,7 @@ class BTC_exportRibAndMandat extends BTC_export {
         return $this->sizing($val, $size);
     }
     
-    private function printRIBtra(Bimp_SocBankAccount $rib, Bimp_Societe $client):string {
+    public function printRIBtra(Bimp_SocBankAccount $rib, Bimp_Societe $client):string {
         $this->structure_rib = Array(
             "FIXE" => $this->champTra("***", 3),
             "IDENTIFIANT" => $this->champTra("RIB", 3),
@@ -100,7 +100,7 @@ class BTC_exportRibAndMandat extends BTC_export {
      * @return string
      */
     
-    private function printMANDATtra(Bimp_SocBankAccount $rib, Bimp_Societe $client, Bimp_Facture $facture = null, $force_ef_type = "C"):string {
+    public function printMANDATtra(Bimp_SocBankAccount $rib, Bimp_Societe $client, Bimp_Facture $facture = null, $force_ef_type = "C"):string {
         
         $ef_type = (is_object($facture)) ? $facture->getData('ef_type') : $force_ef_type;
         

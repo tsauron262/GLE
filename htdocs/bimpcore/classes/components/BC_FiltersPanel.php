@@ -45,7 +45,8 @@ class BC_FiltersPanel extends BC_Panel
             $this->id_list_filters = (int) BimpTools::getValue('id_current_list_filters', 0);
         }
 
-        $this->addIdentifierSuffix($list_type . '_' . $list_name);
+//        $this->addIdentifierSuffix($list_type . '_' . $list_name);
+        $this->addIdentifierSuffix($this->list_identifier);
 
         $this->fetchFilters();
         $current_bc = $prev_bc;

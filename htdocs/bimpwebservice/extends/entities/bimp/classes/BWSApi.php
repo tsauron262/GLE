@@ -61,7 +61,8 @@ BWSApi::$requests['reopenDemandeFinancement'] = array(
 
 BWSApi::$requests['getContractInfo'] = array(
     'date_valid'   => array('label' => 'Date ou le contrat doit être actif', 'required' => 0), 
-    'ref_cli'      => array('label' => 'Code client', 'required' => 0),
+    'ref_cli'      => array('label' => 'Code client', 'required' => 0), 
+    'prod'      => array('label' => 'Ref produit', 'required' => 0),
 );
 
 class BWSApi_ExtEntity extends BWSApi
@@ -309,6 +310,7 @@ class BWSApi_ExtEntity extends BWSApi
         $return = array();
         $dateV = $this->getParam('date_valid', '');
         $refCli = $this->getParam('ref_cli', '');
+        $refProd = $this->getParam('prod', '');
         $filters = array();
         if ($dateV) {
             if ($dateV == 'today')
@@ -326,6 +328,8 @@ class BWSApi_ExtEntity extends BWSApi
         if ($refCli) {
             $filters['client:code_client'] = $refCli;
         }
+        if($refProd)
+            $filters['lines:produit:ref'] = $refProd;
 
         if (!count($filters)) {
             $this->addError('FAIL', 'Merci de filtrer les résultat');

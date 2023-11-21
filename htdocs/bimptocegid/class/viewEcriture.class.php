@@ -36,6 +36,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
                 $html .= 'Cette pièce n\'est pas exportée en compta';
             }
 
+            $field = null;
             switch(self::$bimpObject->object_name) {
                 case 'Bimp_Facture':
                     $function   = 'getEcriturePieceClient';
@@ -45,11 +46,14 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
                     $function   = 'getEcriturePieceClient';
                     $field      = 'code_compta_fournisseur'; 
                     break;
+                case 'Bimp_SocBankAccount':
+                    $function   = 'getEcritureRib';
+                    break;
             }
 
             $html .= '<br /><br />' . '<pre><b class=\'danger\'>Facture</b><br />' . self::$function() . '<br /><br />';
             
-            if($client->getData($field)) {
+            if($field && $client->getData($field)) {
                 
                 $html .= '<b class=\'danger\'>Tiers</b><br />' . self::getEcritureTiers($client, $field) . '<br /><br />';
                 
@@ -66,6 +70,15 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
             $tra->tier      = $tiers;
             $tra->justView  = true;
             return $tra->constructTra($field);
+        }
+        
+        static function getEcritureRib(){
+            $ribANDmandat = BimpCache::getBimpObjectInstance('bimptocegid', "BTC_exportRibAndMandat");
+            $societe = self::$bimpObject->getParentInstance();
+            $html = $ribANDmandat->printRIBtra(self::$bimpObject, $societe);
+            $html .= '<br/><br/>';
+            $html .= $ribANDmandat->printMANDATtra(self::$bimpObject, $societe);
+            return $html;
         }
         
         static function getEcriturePieceClient() {

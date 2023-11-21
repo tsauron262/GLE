@@ -1003,11 +1003,11 @@ class BimpCore
 
     public static function getExtendsEntity()
     {
-//        if (defined('BIMP_EXTENDS_ENTITY')) {
-//            return BIMP_EXTENDS_ENTITY;
-//        }
         $entity = BimpCore::getConf('extends_entity', '');
-        
+     
+        if (!$entity && defined('BIMP_EXTENDS_ENTITY')) {
+            return BIMP_EXTENDS_ENTITY;
+        }
 
         return $entity;
     }

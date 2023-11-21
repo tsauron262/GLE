@@ -224,10 +224,6 @@ class ObjectLine extends BimpObject
                                 return 0;
                             }
                         }
-
-//                        if ((float) $this->getTotalHT() < 0) {
-//                            return 0;
-//                        }
                         return 1;
                 }
             }
@@ -983,13 +979,13 @@ class ObjectLine extends BimpObject
     }
 
     // Getters valeurs:
-    
+
     public function getParentLine()
     {
         if ($this->field_exists('id_parent_line') && (int) $this->getData('id_parent_line')) {
             return BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $this->getData('id_parent_line'));
         }
-        
+
         return null;
     }
 
@@ -2813,11 +2809,11 @@ class ObjectLine extends BimpObject
                 $object->fetch_lines();
                 $object->update_price();
                 $this->hydrateFromDolObject();
-                
-                if(!is_a($this, 'BS_SavPropalLine')){
+
+                if (!is_a($this, 'BS_SavPropalLine')) {
                     global $user;
                     $line = $this->getChildObject('line');
-                    $result = $line->call_trigger($line->element.'_CREATE', $user);
+                    $result = $line->call_trigger($line->element . '_CREATE', $user);
                 }
             }
 
@@ -5415,9 +5411,11 @@ class ObjectLine extends BimpObject
 
                             $product = $this->getProduct();
 
-                            if ((int) $this->getData('remisable')) {
-                                if (!(int) $product->getData('remisable')) {
-                                    $this->set('remisable', 0);
+                            if ($this->isFieldEditable('remisable')) {
+                                if ((int) $this->getData('remisable')) {
+                                    if (!(int) $product->getData('remisable')) {
+                                        $this->set('remisable', 0);
+                                    }
                                 }
                             }
                         }
@@ -5502,11 +5500,11 @@ class ObjectLine extends BimpObject
                     }
 
                     /* gestion directmeent dans le PDF
-                    if ($this->field_exists('hide_in_pdf')) {
-                        if ($this->pu_ht * $this->getFullQty() != 0) {
-                            $this->set('hide_in_pdf', 0);
-                        }
-                    }*/
+                      if ($this->field_exists('hide_in_pdf')) {
+                      if ($this->pu_ht * $this->getFullQty() != 0) {
+                      $this->set('hide_in_pdf', 0);
+                      }
+                      } */
                     break;
             }
 
@@ -5776,7 +5774,7 @@ class ObjectLine extends BimpObject
                         $newLn->set('linked_id_object', $child_prod->id);
                         $newLn->set('linked_object_name', 'bundle');
 //                        $newLn->set('id_obj', $this->getData('id_obj'));
-                        foreach($fieldsCopy as $field){
+                        foreach ($fieldsCopy as $field) {
                             $newLn->set($field, $this->getData($field));
                         }
                         if (!$newLn->isLoaded())
@@ -5789,8 +5787,8 @@ class ObjectLine extends BimpObject
                         $totHt += $dol_child->getData('total_ht');
                         $totHtSansRemise += $newLn->getTotalHT(true);
                         $totPa += $newLn->getTotalPA(true);
-                        if($isAbonnement && !$newLn->isAbonnement())
-                            BimpCore::addlog ('Attention, composant d\'un bundle abonnement pas abonnement LN : '.$newLn->id);
+                        if ($isAbonnement && !$newLn->isAbonnement())
+                            BimpCore::addlog('Attention, composant d\'un bundle abonnement pas abonnement LN : ' . $newLn->id);
                     }
 
                     if ($totHt != 0) {
@@ -5818,7 +5816,7 @@ class ObjectLine extends BimpObject
                         $newLn->set('deletable', 0);
                         $newLn->set('id_parent_line', $this->id);
 //                        $newLn->set('id_obj', $this->getData('id_obj'));
-                        foreach($fieldsCopy as $field){
+                        foreach ($fieldsCopy as $field) {
                             $newLn->set($field, $this->getData($field));
                         }
                         if (!$newLn->isLoaded())

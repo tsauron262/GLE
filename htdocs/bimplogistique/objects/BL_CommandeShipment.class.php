@@ -1095,6 +1095,10 @@ class BL_CommandeShipment extends BimpObject
 
                 $html .= '<tbody class="receptions_rows">';
                 foreach ($lines as $line) {
+                    if (!$this->isLoaded() && (int) $line->getData('id_contrat_line_export')) {
+                        continue;
+                    }
+                    
                     $is_return = ((float) $line->getFullQty() < 0);
                     $qty_input_name = 'line_' . $line->id . '_qty';
                     $include_input_name = 'line_' . $line->id . '_include';

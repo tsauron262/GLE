@@ -503,7 +503,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function isLogistiqueActive()
     {
-        if(BimpCore::isModuleActive('bimplogistique')){
+        if (BimpCore::isModuleActive('bimplogistique')) {
             $forced = $this->getData('status_forced');
             if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) &&
                     (!in_array((int) $this->getData('logistique_status'), array(0, 6)) || (isset($forced['logistique']) && (int) $forced['logistique']))) {
@@ -828,7 +828,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 //            }
 //
             // Prendre en charge logistique:
-            if(BimpCore::isModuleActive('bimplogistique')){
+            if (BimpCore::isModuleActive('bimplogistique')) {
                 if ($this->isActionAllowed('processLogitique')) {
                     if ($this->canSetAction('processLogitique')) {
                         $buttons[] = array(
@@ -848,8 +848,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         );
                     }
                 }
-            }
-            else{
+            } else {
                 if (1) {
                     $client_facture = $this->getClientFacture();
                     $buttons[] = array(
@@ -862,7 +861,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                             'note_public'       => htmlentities(addslashes($this->getData('note_public'))),
                             'note_private'      => htmlentities(addslashes($this->getData('note_private'))),
-                        ), array(
+                                ), array(
                             'form_name'      => 'invoice',
                             'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
                             'modal_format'   => 'large'
@@ -1487,7 +1486,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 continue;
             }
             if ($line->isLoaded()) {
-                $available_qty = (float) $line->getShipmentsQty() - (float) $line->getShippedQty();
+                if ((int) $line->getData('id_contrat_line_export')) {
+                    $available_qty = 0;
+                } else {
+                    $available_qty = (float) $line->getShipmentsQty() - (float) $line->getShippedQty();
+                }
 
                 if ($id_shipment) {
                     $shipment_data = $line->getShipmentData($id_shipment);
@@ -1705,6 +1708,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
             if (BimpObject::objectLoaded($line)) {
+                if ((int) $line->getData('id_contrat_line_export')) {
+                    continue;
+                }
+                
                 if ($line->getData('type') === ObjectLine::LINE_TEXT) {
                     $body_html .= '<tr class="facture_line text_line" data-id_line="' . $line->id . '">';
                     $body_html .= '<td>';
@@ -2224,7 +2231,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $db = $this->db->db;
 
         if ($this->isLoaded()) {
-            if($this->isModuleActif('bimptechnique') && 0){//di plus actif
+            if ($this->isModuleActif('bimptechnique') && 0) {//di plus actif
                 $sql = $db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);
                 if ($sql) {
                     while ($ln = $db->fetch_object($sql)) {
@@ -2241,7 +2248,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 } else
                     $htmlP .= BimpRender::renderAlerts('Probléme avec les DI');
             }
-            if($this->isModuleActif('bimptechnique') && 0){
+            if ($this->isModuleActif('bimptechnique') && 0) {
                 $sql = $db->query("SELECT rowid FROM `llx_synopsis_fichinter` WHERE `fk_commande` = " . $this->id);
                 if ($sql) {
                     while ($ln = $db->fetch_object($sql)) {
@@ -3395,6 +3402,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $hasToProcess = false;
                 $isCompleted = true;
                 foreach ($lines as $line) {
+                    if ((int) $line->getData('id_contrat_line_export')) {
+                        continue;
+                    }
+
                     $qties = $line->getReservedQties();
 
                     if (isset($qties['status'][0]) && (float) $qties['status'][0] > 0) {
@@ -3486,6 +3497,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         $hasOnlyPeriodicity = 0;
                     }
 
+                    if ((int) $line->getData('id_contrat_line_export')) {
+                        continue;
+                    }
+
                     if (abs($shipped_qty) < abs(round((float) $line->getShipmentsQty(), 6))) {
                         $isFullyShipped = 0;
 
@@ -3550,6 +3565,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             $hasInvoice = 1;
                         } else {
                             $hasOnlyPeriodicity = 0;
+                        }
+
+                        if ((int) $line->getData('id_contrat_line_export')) {
+                            continue;
                         }
 
                         if ($billed_qty < $full_qty) {

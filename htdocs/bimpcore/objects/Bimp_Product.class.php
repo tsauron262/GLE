@@ -4089,7 +4089,7 @@ class Bimp_Product extends BimpObject
         $success = 'Correction stocks ok';
 
         global $user;
-        return array('errors' => $this->correctStocks($data['id_entrepot'], $data['qty'], $data['sens'], 'mouvement_manuel', 'Mouvement manuel', 'user', $user->id));
+        return array('errors' => $this->correctStocks($data['id_entrepot'], $data['qty'], $data['sens'], 'mouvement_manuel', 'Mouvement manuel '.$data['comment'], 'user', $user->id));
     }
 
     public function actionMerge($data, &$success)

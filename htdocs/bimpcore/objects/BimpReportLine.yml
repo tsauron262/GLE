@@ -32,6 +32,7 @@ fields:
     msg: 
         label: Message
         type: text
+        hashtags: 1
         displays: 
             alert: 
                 type: callback

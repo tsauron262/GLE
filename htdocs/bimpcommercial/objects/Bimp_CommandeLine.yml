@@ -54,6 +54,16 @@ objects:
             id_object: 
                 field_value: achat_id_fourn
                 
+    contrat_line_export: 
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcontrat
+                name: BCT_ContratLine
+            id_object: 
+                field_value: id_contrat_line_export
+                
 fields: 
     id_obj: 
         label: Commande
@@ -300,6 +310,11 @@ fields:
         default_value: 0
         user_edit: 1
         
+    id_contrat_line_export: 
+        label: Exporté vers l'abonnement
+        type: id_object
+        object: contrat_line_export
+        default_value: 0
 forms: 
     commande_fourn:
         title: Ajouter à une commande fournisseur

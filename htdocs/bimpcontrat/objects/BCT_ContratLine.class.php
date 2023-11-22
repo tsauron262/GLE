@@ -2106,7 +2106,7 @@ class BCT_ContratLine extends BimpObject
                             $canFactAvance = $this->canSetAction('facturationAvance');
 
                             $row_html .= '<td style="min-width: 30px; max-width: 30px; text-align: center">';
-                            if (empty($line_errors) && 
+                            if (empty($line_errors) &&
                                     ($periods_data['nb_periods_tobill_today'] > 0 || ($canFactAvance && $periods_data['nb_periods_tobill_max'] > 0))) {
                                 $tr_class = '';
                                 if ($periods_data['nb_periods_tobill_today'] > 0) {
@@ -3065,6 +3065,51 @@ class BCT_ContratLine extends BimpObject
                     $msg .= 'Date d\'ouverture effective : ' . date('d / m / Y', strtotime($this->getData('date_ouverture'))) . '.<br/>';
                     $msg .= 'Durée: ' . $this->getData('duration') . ' mois';
                     $contrat->addObjectLog($msg);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function onFactureValidate($facture, $fac_line)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $qty = $fac_line->qty;
+
+            if ($qty) {
+                $product = $this->getChildObject('product');
+                if (BimpObject::objectLoaded($product) && $product->isTypeProduct()) {
+                    $contrat = $this->getParentInstance();
+                    if (!BimpObject::objectLoaded($contrat)) {
+                        $errors[] = 'Contrat absent';
+                    } elseif ((int) $contrat->getData('version') !== 2) {
+                        return array();
+                    }
+
+                    $id_entrepot = (int) $contrat->getData('entrepot');
+                    if (!$id_entrepot) {
+                        $errors[] = 'Aucun entrepôt défini pour le contrat ' . $contrat->getLink();
+                    } else {
+                        $label = 'Facturation contrat ' . $contrat->getRef() . ' - Ligne #' . $this->id;
+                        $code_mvt = 'BCT' . $contrat->id . '_LN' . $this->id . '_FAC' . $facture->id;
+//                        $done_qty = (float) $this->getData('remain_stock_done');
+//
+//                        if ($done_qty > 0) {
+//                            $diff = $done_qty - $qty;
+//
+//                            if ($diff >= 0) {
+//                                $this->updateField('remain_stock_done', $diff);
+//                            } else {
+//                                $this->updateField('remain_stock_done', 0);
+//                                $errors = $product->correctStocks($id_entrepot, abs($diff), 1, $label, $code_mvt, 'contrat_line', $this->id);
+//                            }
+//                        } else {
+                            $errors = $product->correctStocks($id_entrepot, $qty, 1, $label, $code_mvt, 'contrat_line', $this->id);
+//                        }
+                    }
                 }
             }
         }

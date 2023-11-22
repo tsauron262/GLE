@@ -32,7 +32,7 @@ class Bimp_Product extends BimpObject
         0 => array('label' => 'Non validé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Validé', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-    public static $bimp_stock_origins = array('vente_caisse', 'transfert', 'sav', 'package', 'inventory', 'pret');
+    public static $bimp_stock_origins = array('vente_caisse', 'transfert', 'sav', 'package', 'inventory', 'pret', 'contrat_line');
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     CONST STOCK_IN = 0;

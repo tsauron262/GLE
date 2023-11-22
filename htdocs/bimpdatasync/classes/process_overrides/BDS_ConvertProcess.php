@@ -628,18 +628,18 @@ class BDS_ConvertProcess extends BDSProcess
 //                'not_in' => array(242102, 244285, 247393, 249512, 251356, 251365, 253349, 253569, 253573, 253611, 253819, 256339, 256959, 258031, 258489, 258594, 258878, 258978, 259617, 270548, 265263, 262477, 262612, 264878, 259471, 259726, 259793, 259907, 260774, 262079, 256259, 256725, 258973, 253960, 254421, 254803, 237622, 241172, 242222, 150296, 156248, 185523, 173892, 187315, 187613, 180787, 176264, 177399, 175384, 166617, 165207, 165477, 163893, 190608, 1601103, 207407, 207401, 198753, 202046, 197604, 193248, 196127, 195135, 192524, 191376, 212882, 213978, 221129, 229650, 231707, 232659, 234192, 236104, 234007, 236987, 249927, 251125, 251290, 251330, 251370, 252831, 253565)
 //            ),
             'a.id_contrat_line_export' => 0,
-            'or_periodicity'           => array(
-                'or' => array(
-                    'a.fac_periodicity'   => array(
-                        'operator' => '>',
-                        'value'    => 0
-                    ),
-                    'a.achat_periodicity' => array(
-                        'operator' => '>',
-                        'value'    => 0
-                    )
-                )
-            ),
+//            'or_periodicity'           => array(
+//                'or' => array(
+//                    'a.fac_periodicity'   => array(
+//                        'operator' => '>',
+//                        'value'    => 0
+//                    ),
+//                    'a.achat_periodicity' => array(
+//                        'operator' => '>',
+//                        'value'    => 0
+//                    )
+//                )
+//            ),
             'pef.type2'                => Bimp_Product::$abonnements_sous_types
         );
 
@@ -679,12 +679,13 @@ class BDS_ConvertProcess extends BDSProcess
         $validated = array();
 
         if ($conf->db->name == 'ERP_PROD_BIMP') {
-            $validated = array(1993675, 1993626, 2177715, 2163842, 2163839, 2162417, 2162393, 2156007, 2153705, 2151131, 2151125, 2149378, 2125545, 2125542, 2124733, 2123471, 2120946, 2120940, 2115490, 2112678, 2112675, 2112672, 2109522, 2105810, 2105807, 2103706, 2089323, 2087491, 2083851, 2079608, 2075215, 2071152, 2071149, 2070797, 2064480, 2061360, 2061180, 2049177, 2045090, 2062118, 2044158, 2044150, 2042346, 2041641, 2011860, 2011243, 2011239, 2009879, 2009649, 2009633, 2007873, 1993675, 1979870);
+            $validated = array(1993675, 1993626, 2177715, 2163842, 2163839, 2162417, 2162393, 2156007, 2153705, 2151131, 2151125, 2149378, 2125545, 2125542, 2124733, 2123471, 2120946, 2120940, 2115490, 2112678, 2112675, 2112672, 2109522, 2105810, 2105807, 2103706, 2089323, 2087491, 2083851, 2079608, 2075215, 2071152, 2071149, 2070797, 2064480, 2061360, 2061180, 2049177, 2045090, 2062118, 2044158, 2044150, 2042346, 2041641, 2011860, 2011243, 2011239, 2009879, 2009649, 2009633, 2007873, 1993675, 1979870, 2163343, 2163340, 2161821, 2139235, 2135673, 2135670, 2129531, 2129525, 2111663, 2098281, 2086707, 2086704, 2086245, 2085567, 2050325);
             $not_validated = array(
-                2086245 => 'Pourquoi rien acheté à date alors que 5 mois facturés ?', // Commande #265263 - Ligne n°4
-                2085567 => 'Pourquoi un seul achat effectué ? confusion nbre unités / nbre mois ?', // Commande #265173 - Ligne n°4
-                2050325 => 'Aucun achat depuis le 1er Mars?', // Commande # 259793 - Ligne #2050325 (n° 2)
-                1925047 => 'A traiter manuellement' // Commande # 242102 - Ligne #1925047 (n° 1)
+                1925047 => 'A traiter manuellement', // Commande # 242102 - Ligne #1925047 (n° 1)
+                2094835 => 'A traiter manuellement', // Commande # 266485 - Ligne #2094835 (n° 7)
+                2087485 => 'A traiter manuellement', // Commande # 265444 - Ligne #2087485 (n° 14)
+                2083433 => 'A traiter manuellement', // Commande # 264878 - Ligne #2083433 (n° 2)
+                2068234 => 'A traiter manuellement', // Commande # 262612 - Ligne #2068234 (n° 2)
             );
         }
         $this->db->db->commitAll();
@@ -713,6 +714,7 @@ class BDS_ConvertProcess extends BDSProcess
                     }
 
                     $contrat_lines = array();
+                    $regul_stocks = array();
                     $this->setCurrentObjectData('bimpcommercial', 'Bimp_CommandeLine');
                     $has_line_errors = false;
 
@@ -758,15 +760,21 @@ class BDS_ConvertProcess extends BDSProcess
 
                         $bought_qty = round((float) $line->getBoughtQty(), 6);
 
-                        if ($qty_shipped !== $bought_qty) {
-                            $line_errors[] = 'Qté expédiée (' . $qty_shipped . ') différente de la qté achetée (' . $bought_qty . ')';
-                        }
-
                         $billed_qty = (float) $line->getBilledQty();
+                        $billed_qty_valid = (float) $line->getBilledQty(null, true);
+                        if ($billed_qty !== $billed_qty_valid) {
+                            $line_errors[] = 'Factures non validées';
+                        }
 
                         $line_infos['shipped_qty'] = $qty_shipped;
                         $line_infos['bought_qty'] = $bought_qty;
                         $line_infos['billed_qty'] = $billed_qty;
+
+                        $stock_regul = round($qty_shipped - $billed_qty, 6);
+                        $line_infos['stock_regul'] = $stock_regul;
+                        if ($stock_regul) {
+                            $regul_stocks[$line->id] = $stock_regul;
+                        }
 
                         $fac_periodicity = (int) $line->getData('fac_periodicity');
                         $achat_periodicity = (int) $line->getData('achat_periodicity');
@@ -906,11 +914,17 @@ class BDS_ConvertProcess extends BDSProcess
                                 }
                             } else {
                                 if (!$billed_qty) {
-                                    $line_errors[] = 'Aucune périodicité de factuation définie';
+                                    $fac_periodicity = $duration;
+                                    $dt = new DateTime($date_from);
+                                    $date_fac_start = $dt->format('Y-m-d');
+                                    if ((int) $line->getData('fact_echue')) {
+                                        $dt->add(new DateInterval('P' . $fac_periodicity . 'M'));
+                                    }
+                                    $date_next_fac = $dt->format('Y-m-d');
                                 } elseif ($billed_qty != $qty) {
                                     $line_errors[] = 'Ligne facturée partiellement (' . $billed_qty . ' / ' . $qty . ') sans périodicité de facturation définie';
                                 } else {
-                                    $fac_periodicity = $duration;
+
                                     $dt = new DateTime($date_to);
                                     $dt->add($one_day_interval);
                                     $date_fac_start = $date_next_fac = $dt->format('Y-m-d');
@@ -958,6 +972,7 @@ class BDS_ConvertProcess extends BDSProcess
                         }
 
                         $infos .= 'Qty : ' . $line_infos['qty'] . ' - exp: ' . $line_infos['shipped_qty'] . ' - achats: ' . $line_infos['bought_qty'] . ' - fac : ' . $line_infos['billed_qty'] . '<br/>';
+                        $infos .= 'Stock régul : ' . $line_infos['stock_regul'] . '<br/>';
                         $infos .= '<b>Fac : </b>';
                         if ((int) $line_infos['fac_periodicity']) {
                             $infos .= '<br/> - Périodicité : ' . $line_infos['fac_periodicity'];
@@ -1157,6 +1172,21 @@ class BDS_ConvertProcess extends BDSProcess
 
                                                 if (count($res_errors)) {
                                                     $this->Error(BimpTools::getMsgFromArray($res_errors, 'Echec annulation réservation #' . $res->id), $commande, $line_ref);
+                                                    $this->db->db->rollback();
+                                                    continue 2;
+                                                }
+                                            }
+
+                                            // Régul stock : 
+                                            if (isset($regul_stocks[$commande_line->id])) {
+                                                $product = $commande_line->getProduct();
+                                                $mvt = ($regul_stocks[$commande_line->id] < 0 ? 1 : 0);
+                                                $code_mvt = 'REGUL_COMMANDE_LINE_' . $commande_line->id;
+                                                $mvt_label = 'Régularisation - Transfert ligne de commmande #' . $commande_line->id . ' vers ligne de contrat #' . $contrat_line->id;
+                                                $stock_errors = $product->correctStocks($commande->getData('entrepot'), abs($regul_stocks[$commande_line->id]), $mvt, $code_mvt, $mvt_label, 'commande', (int) $commande->id);
+
+                                                if (count($res_errors)) {
+                                                    $this->Error(BimpTools::getMsgFromArray($stock_errors, 'Echec régule stock'), $commande, $line_ref);
                                                     $this->db->db->rollback();
                                                     continue 2;
                                                 }

@@ -1171,6 +1171,10 @@ class BCT_Contrat extends BimpDolObject
 
     public function addLinesToCommandeFourn($id_cf, $lines_data = null, $commit_each_line = false, $new_qties = true, &$nOk = 0)
     {
+//        echo '<pre>';
+//        print_r($lines_data);
+//        exit;
+//        
         // $commit_each_line : nécessaire pour le traitement des achats périodiques.
         $errors = array();
 

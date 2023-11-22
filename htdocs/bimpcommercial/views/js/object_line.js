@@ -179,6 +179,15 @@ function setAbonnementLineQties($form, $input) {
     if (!$.isOk($form)) {
         return;
     }
+    
+    var $input = $form.find('input[name="is_abonnement"]');
+    if (!$input.length) {
+        return;
+    }
+    
+    if (!parseInt($input.val())) {
+        return;
+    }
 
     if (!$form.find('input[name="prod_duration"').length ||
             !$form.find('input[name="abo_duration"').length || 
@@ -187,10 +196,11 @@ function setAbonnementLineQties($form, $input) {
     }
 
     var prod_duration = parseInt($form.find('input[name="prod_duration"').val());
+    
     var duration = parseInt($form.find('input[name="abo_duration"').val());
     var fac_periodicity = parseInt($form.find('[name="abo_fac_periodicity"').val());
 
-    var nb_fac_periods = 0
+    var nb_fac_periods = 0;
     var nb_prod_periods = 0;
 
     var qty_per_month = 0;

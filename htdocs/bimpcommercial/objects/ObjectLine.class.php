@@ -5838,8 +5838,8 @@ class ObjectLine extends BimpObject
                         $this->update($warnings);
                         //                    die($thisTot.'rr'.$totHt.' '.$pourcent);
                     }
-                } else
-                    die('pas de prix');
+                } /*else
+                    die('pas de prix. Ln : '.$this->id);*/
             }
         }
     }

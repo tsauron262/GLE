@@ -315,6 +315,13 @@ fields:
         type: id_object
         object: contrat_line_export
         default_value: 0
+        
+    # Chamo à suppr. une fois conversions terminées
+    no_abos_convert: 
+        label: Non convertissable en abonnement
+        type: bool
+        default_value: 0
+        
 forms: 
     commande_fourn:
         title: Ajouter à une commande fournisseur

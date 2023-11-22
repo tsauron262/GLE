@@ -1999,17 +1999,29 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function getExpQtyFor1Periode()
     {
-        return $this->getFullQty() / ($this->getData('exp_nb_periods'));
+        if ((int) $this->getData('exp_nb_periods')) {
+            return $this->getFullQty() / $this->getData('exp_nb_periods');
+        }
+
+        return $this->getFullQty();
     }
 
     public function getFacQtyFor1Periode()
     {
-        return $this->getFullQty() / ($this->getData('fac_nb_periods'));
+        if ((int) $this->getData('fac_nb_periods')) {
+            return $this->getFullQty() / $this->getData('fac_nb_periods');
+        }
+
+        return $this->getFullQty();
     }
 
     public function getAchatQtyFor1Periode()
     {
-        return $this->getFullQty() / ($this->getData('achat_nb_periods'));
+        if ((int) $this->getData('achat_nb_periods')) {
+            return $this->getFullQty() / $this->getData('achat_nb_periods');
+        }
+
+        return $this->getFullQty();
     }
 
     public function getExpQtyFromNbPeriods($nb_periods, $id_shipment = 0)

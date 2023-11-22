@@ -3074,6 +3074,9 @@ class BCT_ContratLine extends BimpObject
 
     public function onFactureValidate($facture, $fac_line)
     {
+        return array(); // todo : à activer quand le rattrapage des factures déjà faites sera en place. 
+        
+        
         $errors = array();
 
         if ($this->isLoaded($errors)) {

@@ -208,27 +208,26 @@ class BCT_Contrat extends BimpDolObject
                     ))
                 );
             }
-
         }
-            $id_group = BimpCore::getUserGroupId('console');
-            $note = BimpObject::getInstance("bimpcore", "BimpNote");
-            if ($id_group) {
-                $buttons[] = array(
-                    'label'   => 'Message console',
-                    'icon'    => 'far_paper-plane',
-                    'onclick' => $note->getJsActionOnclick('repondre', array(
-                        "obj_type"      => "bimp_object",
-                        "obj_module"    => $this->module,
-                        "obj_name"      => $this->object_name,
-                        "id_obj"        => $this->id,
-                        "type_dest"     => $note::BN_DEST_GROUP,
-                        "fk_group_dest" => $id_group,
-                        "content"       => ""
-                            ), array(
-                        'form_name' => 'rep'
-                    ))
-                );
-            }
+        $id_group = BimpCore::getUserGroupId('console');
+        $note = BimpObject::getInstance("bimpcore", "BimpNote");
+        if ($id_group) {
+            $buttons[] = array(
+                'label'   => 'Message console',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array(
+                    "obj_type"      => "bimp_object",
+                    "obj_module"    => $this->module,
+                    "obj_name"      => $this->object_name,
+                    "id_obj"        => $this->id,
+                    "type_dest"     => $note::BN_DEST_GROUP,
+                    "fk_group_dest" => $id_group,
+                    "content"       => ""
+                        ), array(
+                    'form_name' => 'rep'
+                ))
+            );
+        }
 
         return $buttons;
     }
@@ -547,20 +546,20 @@ class BCT_Contrat extends BimpDolObject
 
                 $html .= '</div>';
             }
-            
-        
+
+
             $this->dol_object->element = 'bimp_contrat';
             $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
             $this->dol_object->element = 'contrat';
-            if(isset($items['propal'])){
-                foreach($items['propal'] as $id){
+            if (isset($items['propal'])) {
+                foreach ($items['propal'] as $id) {
                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id);
                     $items = BimpTools::getDolObjectLinkedObjectsList($propal->dol_object, $this->db, array('commande'));
-    //                print_r($items);
-                    foreach($items as $id){
+                    //                print_r($items);
+                    foreach ($items as $id) {
                         $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id['id_object']);
-                        if($obj->isLoaded()){
-                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande '.$obj->getLink());
+                        if ($obj->isLoaded()) {
+                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $obj->getLink());
                         }
                     }
                 }
@@ -1075,7 +1074,7 @@ class BCT_Contrat extends BimpDolObject
                     'remisable'          => 1,
                     'linked_id_object'   => (int) $line->id,
                     'linked_object_name' => 'contrat_line',
-                    'hide_in_pdf' => ($line->getData('linked_object_name') == 'bundle' || $line->getData('linked_object_name') == 'bundleCorrect')? 1 : 0
+                    'hide_in_pdf'        => ($line->getData('linked_object_name') == 'bundle' || $line->getData('linked_object_name') == 'bundleCorrect') ? 1 : 0
                 ));
 
                 $date_from = null;
@@ -1171,10 +1170,6 @@ class BCT_Contrat extends BimpDolObject
 
     public function addLinesToCommandeFourn($id_cf, $lines_data = null, $commit_each_line = false, $new_qties = true, &$nOk = 0)
     {
-//        echo '<pre>';
-//        print_r($lines_data);
-//        exit;
-//        
         // $commit_each_line : nécessaire pour le traitement des achats périodiques.
         $errors = array();
 
@@ -1278,7 +1273,7 @@ class BCT_Contrat extends BimpDolObject
 
                 $periodicity = (int) $line->getData('achat_periodicity');
                 $nb_periods = (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0);
-                
+
                 if ($nb_periods && $periodicity) {
                     $periods_data = $line->getPeriodsToBuyData();
                     if ($periods_data['date_next_achat'] == $periods_data['date_achat_start'] &&

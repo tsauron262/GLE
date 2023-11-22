@@ -2496,7 +2496,7 @@ class BCT_ContratLine extends BimpObject
                                     $pa_label = 'PA HT enregistré pour cette ligne de contrat';
                                 }
 
-                                if ($id_fourn && $periods_data['nb_periods_tobuy_today'] > 0) {
+                                if ($id_fourn && $periods_data['nb_periods_tobuy_max'] > 0) {
                                     $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $id_fourn);
                                     if (BimpObject::objectLoaded($fourn)) {
                                         $row_html .= 'Fournisseur : ' . $fourn->getLink() . '<br/>';

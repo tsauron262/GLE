@@ -688,7 +688,7 @@ class BDS_ConvertProcess extends BDSProcess
                 2083433 => 'A traiter manuellement', // Commande # 264878 - Ligne #2083433 (n° 2)
                 2068234 => 'A traiter manuellement', // Commande # 262612 - Ligne #2068234 (n° 2)
             );
-            
+
             // Exemple de commande sans aucun achat depuis 2021 : 197604
         }
         $this->db->db->commitAll();
@@ -711,11 +711,11 @@ class BDS_ConvertProcess extends BDSProcess
                     $this->Error('Commande non trouvée', null, '#' . $id_commande);
                     $this->incIgnored();
                 } else {
-                    if ((int) $commande->getData('id_client_facture') && (int) $commande->getData('id_client_facture') !== (int) $commande->getData('fk_soc')) {
-                        $this->Error('Client facturation différent du client final (Commande non traitée)', $commande, '#' . $id_commande . ' - ' . $commande->getRef());
-                        $this->incIgnored();
-                        continue;
-                    }
+//                    if ((int) $commande->getData('id_client_facture') && (int) $commande->getData('id_client_facture') !== (int) $commande->getData('fk_soc')) {
+//                        $this->Error('Client facturation différent du client final (Commande non traitée)', $commande, '#' . $id_commande . ' - ' . $commande->getRef());
+//                        $this->incIgnored();
+//                        continue;
+//                    }
 
                     $contrat_lines = array();
                     $regul_stocks = array();
@@ -1115,12 +1115,13 @@ class BDS_ConvertProcess extends BDSProcess
                                 $new_contrat = true;
                                 $contrat_errors = $contrat_warnings = array();
                                 $contrat = BimpObject::createBimpObject('bimpcontrat', 'BCT_Contrat', array(
-                                            'fk_soc'    => (int) $commande->getData('fk_soc'),
-                                            'entrepot'  => (int) $commande->getData('entrepot'),
-                                            'secteur'   => $commande->getData('ef_type'),
-                                            'expertise' => $commande->getData('expertise'),
-                                            'moderegl'  => $commande->getData('fk_mode_reglement'),
-                                            'condregl'  => $commande->getData('fk_cond_reglement')
+                                            'fk_soc'             => (int) $commande->getData('fk_soc'),
+                                            'fk_soc_facturation' => (int) $commande->getData('id_client_facture'),
+                                            'entrepot'           => (int) $commande->getData('entrepot'),
+                                            'secteur'            => $commande->getData('ef_type'),
+                                            'expertise'          => $commande->getData('expertise'),
+                                            'moderegl'           => $commande->getData('fk_mode_reglement'),
+                                            'condregl'           => $commande->getData('fk_cond_reglement')
                                                 ), true, $contrat_errors, $contrat_warnings);
 
                                 if (count($contrat_warnings)) {

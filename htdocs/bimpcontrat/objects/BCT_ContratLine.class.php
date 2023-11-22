@@ -1235,7 +1235,7 @@ class BCT_ContratLine extends BimpObject
 
         $sql = BimpTools::getSqlFullSelectQuery('contratdet', $fields, $filters, $joins, array(
                     'order_by'  => 'a.rowid',
-                    'order_way' => 'desc'
+                    'order_way' => 'asc'
         ));
 
         $bdb = BimpCache::getBdb();
@@ -1379,7 +1379,7 @@ class BCT_ContratLine extends BimpObject
 
         $sql = BimpTools::getSqlFullSelectQuery('contratdet', $fields, $filters, $joins, array(
                     'order_by'  => 'rowid',
-                    'order_way' => 'desc'
+                    'order_way' => 'asc'
         ));
 
         $bdb = BimpCache::getBdb();

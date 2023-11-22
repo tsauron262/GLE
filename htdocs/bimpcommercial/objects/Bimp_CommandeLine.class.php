@@ -6195,6 +6195,66 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function renderAchatsList()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $cf_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                        'a.linked_object_name' => 'commande_line',
+                        'a.linked_id_object'   => $this->id,
+                        'cf.fk_statut'         => array(
+                            'not_in' => array(6, 7, 9)
+                        )
+                            ), 'cf.rowid', 'ASC', array(
+                        'cf' => array(
+                            'table' => 'commande_fournisseur',
+                            'on'    => 'cf.rowid = a.id_obj'
+                        )
+            ));
+
+            if (!empty($cf_lines)) {
+                $html .= '<table class="bimp_sub_list_table">';
+                $html .= '<thead>';
+                $html .= '<th>Commande fourn.</th>';
+                $html .= '<th>Qté</th>';
+                $html .= '<th>PA HT</th>';
+                $html .= '<th>Total HT</th>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+
+                $total_qty = 0;
+                $total_ht = 0;
+                foreach ($cf_lines as $line) {
+                    $cf = $line->getParentInstance();
+                    $html .= '<tr>';
+                    $html .= '<td>' . (BimpObject::objectLoaded($cf) ? $cf->getLink() : '#' . $line->getData('fk_commande')) . '</td>';
+                    $html .= '<td>' . $line->getFullQty() . '</td>';
+                    $html .= '<td>' . $line->displayLineData('pu_ht') . '</td>';
+                    $html .= '<td>' . $line->displayLineData('total_ht') . '</td>';
+                    $html .= '</tr>';
+
+                    $total_qty += (float) $line->getFullQty();
+                    $total_ht += (float) $line->getTotalHt();
+                }
+
+                $html .= '<tr>';
+                $html .= '<td style="font-weight: bold; border-top: 1px solid #777">Total : </td>';
+                $html .= '<td style="font-weight: bold; border-top: 1px solid #777">' . $total_qty . '</td>';
+                $html .= '<td style="font-weight: bold; border-top: 1px solid #777"></td>';
+                $html .= '<td style="font-weight: bold; border-top: 1px solid #777">' . BimpTools::displayMoneyValue($total_ht) . '</td>';
+                $html .= '</tr>';
+                $html .= '</tbody>';
+                $html .= '</table>';
+            } else {
+                $html .= '<span class="danger">Aucun achat effectué</span>';
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements réservations:
 
     public function checkReservations()

@@ -133,7 +133,7 @@ class BimpCore
     {
         global $user, $conf, $dolibarr_main_url_root;
         $vars = array(
-            'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\''.$dolibarr_main_url_root.'\'',
+            'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
             'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
             'bimp_context'    => '\'' . self::getContext() . '\'',
             'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
@@ -953,7 +953,7 @@ class BimpCore
         if (isset($conf->global->$name) && $conf->global->$name)
             return 1;
 
-//        return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
+        return 0;
     }
 
     public static function isModeDev()

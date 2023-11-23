@@ -9360,7 +9360,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
             }
         } else {
-            $url = BimpCore::getConf('base_url', '/bimpinterfaceclient/client.php?', 'bimpinterfaceclient');
+            $url = BimpCore::getConf('base_url', DOL_URL_ROOT .'/bimpinterfaceclient/client.php?', 'bimpinterfaceclient');
         }
 
 

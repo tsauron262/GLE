@@ -1,6 +1,9 @@
 <?php
 define("NOLOGIN", 1);
-require_once('../main.inc.php');
+if(is_file('../main.inc.php'))
+    require_once('../main.inc.php');
+else
+    require_once('../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 BimpObject::getInstance('bimpsupport', 'BS_SAV');
 

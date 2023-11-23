@@ -4034,7 +4034,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 if (!in_array($msg_type, array('debDiago', 'debut', 'localise'))) {
-                    $fileProp = DOL_DATA_ROOT . "/propale/" . $ref_propal . "/" . $ref_propal . ".pdf";
+                    $fileProp = $propal->getFilesDir() . "/" . $ref_propal . ".pdf";
                     if (is_file($fileProp)) {
                         $files[] = array($fileProp, 'application/pdf', $ref_propal . '.pdf');
                     } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {

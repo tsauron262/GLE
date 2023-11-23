@@ -5312,7 +5312,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     global $user;
                     $propal->dol_object->update($user);
                 }
-                if ($propal->dol_object->cond_reglement_id != $this->id_cond_reglement_def || $propal->dol_object->mode_reglement_id != $this->id_mode_reglement_def) {
+                if ($propal->dol_object->cond_reglement_id != BimpCore::getConf('sav_cond_reglement',null, 'bimpsupport') || $propal->dol_object->mode_reglement_id != BimpCore::getConf('sav_mode_reglement',null, 'bimpsupport')) {
                     //exception pour les virement bencaire a la commande 
                     if ($propal->dol_object->cond_reglement_id != 20 || $propal->dol_object->mode_reglement_id != 2) {
                         //on vérifie encours

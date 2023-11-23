@@ -36,14 +36,15 @@ class BC_Input extends BimpComponent
         ),
         'time'                        => array(
             'display_now'   => array('data_type' => 'bool', 'default' => 0),
-            'with_secondes' => array('data_type' => 'bool', 'default' => 1)
+            'with_secondes' => array('data_type' => 'bool', 'default' => 0)
         ),
         'date'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
         'datetime'                    => array(
             'display_now'   => array('data_type' => 'bool', 'default' => 0),
-            'with_secondes' => array('data_type' => 'bool', 'default' => 1)
+            'with_hours'    => array('data_type' => 'bool', 'default' => 1),
+            'with_secondes' => array('data_type' => 'bool', 'default' => 0)
         ),
         'timer'                       => array(
             'with_days'     => array('data_type' => 'bool', 'default' => 1), // A implémenter
@@ -283,7 +284,7 @@ class BC_Input extends BimpComponent
         $this->input_id .= '_' . $input_name;
 
         if (is_a($this->object, 'BimpObject') &&
-                method_exists($this->object, 'getInputValue') /*&& is_null($this->value)*/) {//TODO && is_null($this->value) a verifier, mais sinon la valeur envoyé ce fait écraser
+                method_exists($this->object, 'getInputValue') /* && is_null($this->value) */) {//TODO && is_null($this->value) a verifier, mais sinon la valeur envoyé ce fait écraser
             $input_value = $this->object->getInputValue($this->input_name);
             if (!is_null($input_value)) {
                 $this->value = $input_value;
@@ -352,7 +353,7 @@ class BC_Input extends BimpComponent
                 $options['min_label'] = isset($this->params['min_label']) ? $this->params['min_label'] : 0;
                 $options['max_label'] = isset($this->params['max_label']) ? $this->params['max_label'] : 0;
                 $options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
-                
+
                 $min = 'none';
                 $max = 'none';
                 $decimals = 0;
@@ -398,9 +399,10 @@ class BC_Input extends BimpComponent
                 }
                 break;
 
-            case 'time':
             case 'datetime':
-                $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 1;
+                $options['with_hours'] = isset($this->params['with_hours']) ? $this->params['with_hours'] : 1;
+            case 'time':
+                $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 0;
             case 'date':
                 $options['display_now'] = isset($this->params['display_now']) ? $this->params['display_now'] : 0;
                 break;

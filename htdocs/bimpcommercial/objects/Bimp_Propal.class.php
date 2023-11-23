@@ -2126,6 +2126,10 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         if (!count($errors)) {
             foreach ($contrats as $id_contrat => $lines) {
+                if (empty($lines)) {
+                    continue;
+                }
+                
                 if (!(int) $id_contrat) {
                     $id_contrat = (int) BimpTools::getArrayValueFromPath($data, 'id_contrat', 0);
                 }
@@ -2154,7 +2158,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     addElementElement('propal', 'bimp_contrat', $this->id, $contrat->id);
                     $nOk = 0;
                     BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
-                    $lines = $this->getAbonnementLines();
+                    $date_ouv = BimpTools::getArrayValueFromPath($data, 'date_ouverture_prevue', null);
 
                     foreach ($lines as $line) {
                         $line_errors = array();
@@ -2195,7 +2199,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 'variable_qty'                 => $prod->getData('variable_qty'),
                                 'id_linked_line'               => (int) $line->getData('id_linked_contrat_line'),
                                 'id_line_origin'               => $line->id,
-                                'line_origin_type'             => 'propal_line'
+                                'line_origin_type'             => 'propal_line',
+                                'date_ouverture_prevue'        => $date_ouv
                                     ), true, $line_errors, $line_warnings);
                         }
 

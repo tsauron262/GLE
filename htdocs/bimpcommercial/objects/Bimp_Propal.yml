@@ -559,6 +559,14 @@ forms:
     contrat_abo: 
         rows: 
             - custom: 1
+              label: Date d'ouverture prévue du (des) abonnement(s)
+              data_type: date
+              input_name: date_ouverture_prevue
+              input: 
+                  type: date
+                  display_now: 1
+                  help: Champ facultatif. Laisser vide si cette date n'est pas encore connue
+            - custom: 1
               label: Contrat(s) d'abonnement
               data_type: id
               input_name: id_contrat

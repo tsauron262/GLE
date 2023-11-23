@@ -47,4 +47,4 @@ TRANSFERT ENTREPOT RESERVATION COMMANDE:
 - RES{id_reservation}_CMD{id_commande}_LN{id_commande_line}_TRANSFERT
 
 FACTURATION CONTRATS V2: 
-- BCT{id_contrat}_LN{id_contrat_line}_FAC{id_facture}
+- BCT{id_contrat}_LN{id_contrat_line}_FACLN{id_facture_line} (id_facture_line = ID Bimp_FactureLine)

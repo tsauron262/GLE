@@ -361,6 +361,14 @@ class BimpProductMouvement extends BimpObject
                 $labelReverse = 'Ret Achat';
                 $modal_view = 'full';
                 break;
+            
+            case 'bimp_contrat': 
+                $objet = 'BCT_Contrat';
+                $module = 'bimpcontrat';
+                $label = 'Contrat';
+                $labelReverse = 'Ret Contrat';
+                $modal_view = 'full';
+                break;
 
             case 'user':
                 if (stripos($this->getData('label'), "Emplacement") !== false) {

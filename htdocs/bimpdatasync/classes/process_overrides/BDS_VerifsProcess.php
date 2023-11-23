@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 4;
+    public static $current_version = 5;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -956,6 +956,99 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
+    // Vérifs et correction des stocks contrats d'abonnement : 
+
+    public function initCheckContratsStocks(&$data, &$errors = array())
+    {
+        $filters = array(
+            'f.fk_statut'          => array(1, 2),
+            'f.type'               => array(0, 1, 2),
+            'a.linked_object_name' => 'contrat_line',
+            'p.fk_product_type'    => 0
+        );
+
+//        $key = 'SELECT (COUNT(sm.rowid) FROM ' . MAIN_DB_PREFIX . 'stock_mouvement sm WHERE inventorycode LIKE CONCAT(\'BCT%$_LN%$_FACLN\', a.id) ESCAPE \'$\')';
+//        $filters[$key] = 0;
+
+        $joins = array(
+            'f'  => array(
+                'table' => 'facture',
+                'on'    => 'f.rowid = a.id_obj'
+            ),
+            'fl' => array(
+                'table' => 'facturedet',
+                'on'    => 'fl.rowid = a.id_line'
+            ),
+            'p'  => array(
+                'table' => 'product',
+                'on'    => 'p.rowid = fl.fk_product'
+            )
+        );
+
+        $sql = BimpTools::getSqlFullSelectQuery('bimp_facture_line', array('a.id as id_line'), $filters, $joins);
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            
+            foreach ($rows as $r) {
+                $elements = array();
+
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['id_line'];
+                }
+
+                $data['steps']['process'] = array(
+                    'label'                  => 'Correction des stocks',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 100
+                );
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCheckContratsStocks($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcore', 'Bimp_FactureLine');
+            if (!empty($this->references)) {
+                foreach ($this->references as $id_fac_line) {
+                    $this->incProcessed();
+                    $fac_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', $id_fac_line);
+
+                    if (!BimpObject::objectLoaded($fac_line)) {
+                        $this->Error('Ligne de facture #' . $id_fac_line . ' inexistante');
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $fac_line->getData('linked_id_object'));
+                    if (!BimpObject::objectLoaded($contrat_line)) {
+                        $this->Error('Ligne de contrat liée #' . $fac_line->getData('linked_id_object') . ' inexistante', $fac_line);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $success = '';
+                    $line_errors = $contrat_line->onFactureValidate($fac_line, $success, true);
+
+                    if (count($line_errors)) {
+                        $this->Error($line_errors, $contrat_line, 'Ligne de facture #' . $fac_line->id);
+                        $this->incIgnored();
+                    } elseif ($success) {
+                        $this->incUpdated();
+                        $this->Success($success, $contrat_line, 'Ligne de facture #' . $fac_line->id);
+                    } else {
+                        $this->incIgnored();
+                    }
+                }
+            }
+        }
+    }
+
     // Install: 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -1156,6 +1249,21 @@ class BDS_VerifsProcess extends BDSProcess
                         'reports_delay' => 365
                             ), true, $errors, $warnings);
         }
+
+        if ($cur_version < 5) {
+            // Opération "Désactivation des produits sans mouvements depuis 2 ans": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Vérif des stocks des facturations des contrats d\'abonnement',
+                        'name'          => 'checkContratsStocks',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 365
+                            ), true, $errors, $warnings);
+        }
+
         return $errors;
     }
 }

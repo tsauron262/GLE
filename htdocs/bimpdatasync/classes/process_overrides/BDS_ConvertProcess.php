@@ -629,6 +629,10 @@ class BDS_ConvertProcess extends BDSProcess
 //            ),
             'a.id_contrat_line_export' => 0,
             'a.no_abos_convert'        => 0,
+            '(a.qty_modif + cdet.qty)' => array(
+                'operator' => '>',
+                'value'    => 0
+            ),
 //            'or_periodicity'           => array(
 //                'or' => array(
 //                    'a.fac_periodicity'   => array(

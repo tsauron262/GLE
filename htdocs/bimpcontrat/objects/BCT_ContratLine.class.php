@@ -3072,11 +3072,8 @@ class BCT_ContratLine extends BimpObject
         return $errors;
     }
 
-    public function onFactureValidate($facture, $fac_line)
+    public function onFactureValidate($fac_line, &$success = '')
     {
-        return array(); // todo : à activer quand le rattrapage des factures déjà faites sera en place. 
-        
-        
         $errors = array();
 
         if ($this->isLoaded($errors)) {
@@ -3097,7 +3094,11 @@ class BCT_ContratLine extends BimpObject
                         $errors[] = 'Aucun entrepôt défini pour le contrat ' . $contrat->getLink();
                     } else {
                         $label = 'Facturation contrat ' . $contrat->getRef() . ' - Ligne #' . $this->id;
-                        $code_mvt = 'BCT' . $contrat->id . '_LN' . $this->id . '_FAC' . $facture->id;
+                        $code_mvt = 'BCT' . $contrat->id . '_LN' . $this->id . '_FACLN' . $fac_line->id;
+
+                        if ((int) $this->db->getCount('stock_mouvement', 'inventorycode = \'' . $code_mvt . '\'', 'rowid') > 0) {
+                            $errors[] = 'Stock déjà traité';
+                        } else {
 //                        $done_qty = (float) $this->getData('remain_stock_done');
 //
 //                        if ($done_qty > 0) {
@@ -3110,8 +3111,13 @@ class BCT_ContratLine extends BimpObject
 //                                $errors = $product->correctStocks($id_entrepot, abs($diff), 1, $label, $code_mvt, 'contrat_line', $this->id);
 //                            }
 //                        } else {
-                            $errors = $product->correctStocks($id_entrepot, $qty, 1, $label, $code_mvt, 'contrat_line', $this->id);
-//                        }
+                            $errors = $product->correctStocks($id_entrepot, $qty, 1, $code_mvt, $label, 'bimp_contrat', $contrat->id);
+
+                            if (!count($errors)) {
+                                $success = 'Retrait de ' . $qty . ' unité(s) du stock effectué';
+                            }
+//                        }                            
+                        }
                     }
                 }
             }

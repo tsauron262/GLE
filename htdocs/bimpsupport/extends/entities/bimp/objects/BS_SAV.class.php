@@ -349,7 +349,6 @@ class BS_SAV_ExtEntity extends BS_SAV
 
     public function actionEcologicPaye($data, &$success)
     {
-        global $db;
         $success = 'Ok';
         $errors = $warnings = array();
 
@@ -359,6 +358,8 @@ class BS_SAV_ExtEntity extends BS_SAV
         else {
             $tmp = str_replace(' ', ',', $tmp);
             $nums = explode(',', $tmp);
+            $bdb = BimpObject::getBdb(true);
+            $db = $bdb->db;
             foreach ($nums as $num) {
                 $sql = $db->query("SELECT a.id
 FROM llx_bs_sav a

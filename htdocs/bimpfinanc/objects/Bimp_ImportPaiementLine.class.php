@@ -42,7 +42,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             $date = '20' . $matches[4] . '-' . $matches[3] . '-' . $matches[2];
             $date2 = '20' . $matches[7] . '-' . $matches[6] . '-' . $matches[5];
 //            $type = strtolower(trim($matches[8]));
-            $type = $matches[1] == '05' ? 'vir' : '';
+            $type = $matches[1] == '05' || $matches[1] == 'C2' ? 'vir' : '';
             $type2 = $matches[9];
             $name = $matches[10];
             $price = $this->traitePrice($matches[12]);

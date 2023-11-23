@@ -1133,6 +1133,29 @@ class BCT_ContratLine extends BimpObject
         return $lines;
     }
 
+    public function getBulkActivationOpenDate()
+    {
+        $date = '';
+
+        $id_lines = BimpTools::getPostFieldValue('id_objects');
+
+        if (!empty($id_lines)) {
+            $where = 'rowid IN (' . implode(',', $id_lines) . ')';
+            $where .= ' AND date_ouverture_prevue IS NOT NULL AND date_ouverture_prevue != \'\'';
+            $date = $this->db->getMin('contratdet', 'date_ouverture_prevue', $where);
+            
+            if ($date) {
+                $date = date('Y-m-d', strtotime($date));
+            }
+        }
+        
+        if (!$date) {
+            $date = date('Y-m-d');
+        }
+
+        return $date;
+    }
+
     // Getters statiques:
 
     public static function getPeriodicFacLinesToProcess($params = array(), &$errors = array())
@@ -3031,17 +3054,6 @@ class BCT_ContratLine extends BimpObject
                         $dt->sub(new DateInterval('P1D'));
                         $this->set('date_fin_validite', $dt->format('Y-m-d 23:59:59'));
                     }
-
-                    $dt = new DateTime($this->getData('date_fac_start'));
-                    if (!(int) $this->getData('fac_term')) { // A terme échu
-                        $dt->add('P' . (int) $this->getData('fac_periodicity') . 'M');
-                    }
-                    $this->set('date_next_facture', $dt->format('Y-m-d'));
-
-                    if ((int) $this->getData('achat_periodicity')) {
-                        $dt = new DateTime($this->getData('date_achat_start'));
-                        $this->set('date_next_achat', $dt->format('Y-m-d'));
-                    }
                 }
                 break;
 
@@ -3146,7 +3158,7 @@ class BCT_ContratLine extends BimpObject
         $warnings = array();
         $success = '';
 
-        $date_ouverture = BimpTools::getArrayValueFromPath($data, 'date_ouverture', '');
+        $date_ouverture = BimpTools::getArrayValueFromPath($data, 'date_ouverture_prevue', '');
 
         if (!$date_ouverture) {
             $errors[] = 'Veuillez renseigner la date d\'ouverture';
@@ -4060,14 +4072,6 @@ class BCT_ContratLine extends BimpObject
                                 $errors[] = 'Durée de l\'abonnement non définie';
                             } elseif ($duration % $periodicity != 0) {
                                 $errors[] = 'La durée totale doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $periodicity . ' mois)';
-                            } else {
-                                $date_ouverture = $this->getData('date_ouverture_prevue');
-                                if ($date_ouverture) {
-                                    $dt = new DateTime($date_ouverture);
-
-                                    $dt->add(new DateInterval('P' . $duration . 'M'));
-                                    $this->set('date_fin_validite', $dt->format('Y-m-d H:i:s'));
-                                }
                             }
                         }
 

@@ -1064,7 +1064,10 @@ class BimpInput
                 break;
 
             case 'datetime':
-                if (BimpTools::getArrayValueFromPath($options, 'with_secondes', 1)) {
+                if (!BimpTools::getArrayValueFromPath($options, 'with_hours', 1)) {
+                    $display_js_format = 'Do MMMM YYYY';
+                    $js_format = 'YYYY-MM-DD';
+                } elseif (!BimpTools::getArrayValueFromPath($options, 'with_secondes', 0)) {
                     $display_js_format = 'Do MMMM YYYY HH:mm';
                     $js_format = 'YYYY-MM-DD HH:mm';
                 } else {

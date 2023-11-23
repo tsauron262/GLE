@@ -142,7 +142,7 @@ class EcologicAPI extends BimpAPI
             $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
             $return = $this->execCurl('createsupportrequest', $params, $errors);
             
-            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && isset($return['ResponseData']['IsValid']) && $return['ResponseData']['IsValid']){
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && isset($return/*['ResponseData']*/['IsValid']) && $return/*['ResponseData']*/['IsValid']){
                 $warnings = BimpTools::merge_array($warnings, $errors);
                 $errors = array();
                 $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];

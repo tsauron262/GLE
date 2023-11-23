@@ -11117,6 +11117,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
         }
+        global $tabCentre;
+        if(count($tabCentre) == 1){
+            foreach ($tabCentre as $code_centre => $centre) {
+                return $code_centre;
+            }
+        }
 
         return '';
     }

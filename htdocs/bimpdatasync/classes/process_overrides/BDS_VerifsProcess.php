@@ -1033,7 +1033,7 @@ class BDS_VerifsProcess extends BDSProcess
                     }
 
                     $success = '';
-                    $line_errors = $contrat_line->onFactureValidate($fac_line, $success, true);
+                    $line_errors = $contrat_line->onFactureValidate($fac_line, $success);
 
                     if (count($line_errors)) {
                         $this->Error($line_errors, $contrat_line, 'Ligne de facture #' . $fac_line->id);

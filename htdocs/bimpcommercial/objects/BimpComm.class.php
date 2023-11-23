@@ -4874,37 +4874,6 @@ class BimpComm extends BimpDolObject
         );
     }
 
-    public function actionRemoveContact($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Suppression du contact effectué avec succès';
-
-        if (!$this->isLoaded()) {
-            $errors[] = '(104) ID ' . $this->getLabel('of_the') . ' absent';
-        } else {
-            if (!isset($data['id_contact']) || !(int) $data['id_contact']) {
-                $errors[] = 'Contact à supprimer non spécifié';
-            } else {
-                $id_type_contact = (int) $this->db->getValue('element_contact', 'fk_c_type_contact', 'rowid = ' . $data['id_contact']);
-                $id_type_commercial = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'' . $this->dol_object->element . '\' AND code = \'SALESREPFOLL\'');
-                if ($id_type_contact == $id_type_commercial && !$this->canEditCommercial()) {
-                    $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
-                } else {
-                    if ($this->dol_object->delete_contact((int) $data['id_contact']) <= 0) {
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la suppression du contact');
-                    }
-                }
-            }
-        }
-
-        return array(
-            'errors'            => $errors,
-            'warnings'          => $warnings,
-            'contact_list_html' => $this->renderContactsList()
-        );
-    }
-
     public function actionDuplicate($data, &$success)
     {
         $errors = array();

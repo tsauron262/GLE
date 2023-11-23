@@ -1375,17 +1375,17 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $html .= '</div>';
             }
         }
-        
+
         $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
-        if(isset($items['propal'])){
-            foreach($items['propal'] as $id){
+        if (isset($items['propal'])) {
+            foreach ($items['propal'] as $id) {
                 $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id);
                 $items = BimpTools::getDolObjectLinkedObjectsList($propal->dol_object, $this->db, array('bimp_contrat'));
 //                print_r($items);
-                foreach($items as $id){
+                foreach ($items as $id) {
                     $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id['id_object']);
-                    if($obj->isLoaded()){
-                        $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à un abonnement '.$obj->getLink());
+                    if ($obj->isLoaded()) {
+                        $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à un abonnement ' . $obj->getLink());
                     }
                 }
             }
@@ -1726,7 +1726,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 if ((int) $line->getData('id_contrat_line_export')) {
                     continue;
                 }
-                
+
                 if ($line->getData('type') === ObjectLine::LINE_TEXT) {
                     $body_html .= '<tr class="facture_line text_line" data-id_line="' . $line->id . '">';
                     $body_html .= '<td>';
@@ -3552,6 +3552,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function checkInvoiceStatus($log_change = false)
     {
+        $log_change = true; // temporaire, debug en cours
         if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
             $isFullyInvoiced = 0;
@@ -3631,6 +3632,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         $infoClient = " du client " . $client->getLink();
                     }
 
+//                    global $user;
+//                    if ($user->login == 'f.martinez') {
+//                        $mail = 'f.martinez@bimp.fr';
+//                    }
 
                     if (isset($mail) && $mail != "")
                         mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status'));

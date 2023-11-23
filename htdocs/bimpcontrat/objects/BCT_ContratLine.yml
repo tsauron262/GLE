@@ -339,6 +339,11 @@ fields:
         
     linked_object_name:
         label: Type d\'objet lié
+        
+#    remain_stock_done: 
+#        label: Qté restante stock déjà traité
+#        type: float
+#        default_value: 0
 
 forms: 
     text: 

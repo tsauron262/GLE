@@ -470,7 +470,7 @@ class BimpController
             echo $html;
         }
 
-        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY') && !BimpCore::isContextPublic()) {
             global $mc, $conf;
             if ($mc->checkRight($user->id, $conf->entity) != 1) {
                 $this->errors[] = 'Vous n\'avez pas accés a cette entité';

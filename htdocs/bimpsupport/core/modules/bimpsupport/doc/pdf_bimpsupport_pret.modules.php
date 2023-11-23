@@ -123,7 +123,8 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             $ref = ''; //$pret->getRef();
         }
 
-        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . (!is_null($sav) ? $sav->id : 'no') . '/';
+//        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . (!is_null($sav) ? $sav->id : 'no') . '/';
+        $dir = $sav->getFilesDir();
 
         if (!file_exists($dir)) {
             if (dol_mkdir($dir) < 0) {

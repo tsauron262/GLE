@@ -105,7 +105,7 @@ if ($serial && $userName) {
         $savs = array($serial);
     else
     $savs = getSavsBySerial($serial);
-    if (!count($savs)) {
+    if (!is_array($savs) || !count($savs)) {
         $errors[] = 'Aucun suivi SAV trouvé pour ce numéro de série.';
     }/* else if (count($savs) == 1) {
         $sav = new BS_SAV($db);

@@ -9360,7 +9360,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
             }
         } else {
-            $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+            $url = BimpCore::getConf('base_url', DOL_URL_ROOT .'/bimpinterfaceclient/client.php?', 'bimpinterfaceclient');
         }
 
 
@@ -11115,6 +11115,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         return $code_centre;
                     }
                 }
+            }
+        }
+        global $tabCentre;
+        if(count($tabCentre) == 1){
+            foreach ($tabCentre as $code_centre => $centre) {
+                return $code_centre;
             }
         }
 

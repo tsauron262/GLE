@@ -1283,7 +1283,11 @@ class BS_SAV extends BimpObject
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
-            return DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/';
+            global $conf;
+            if($conf->entity == 1)
+                return DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/';
+            else
+                return DOL_DATA_ROOT .'/'.$conf->entity. '/bimpcore/sav/' . $this->id . '/';
         }
 
         return '';

@@ -262,10 +262,10 @@ if ($id_sav) {
                         echo "<h2>".$sav->ref . "</h2>";
                         echo '<div class="pull-right">';
                         if ($savStr && $serial) {
-                            echo '<a class="butAction" href="./' . $page . '?savs=' . $savStr . '&serial=' . $serial . '">';
+                            echo '<a class="butAction" href="' . $page . '?savs=' . $savStr . '&serial=' . $serial . '">';
                             echo '<i class="fa fa-arrow-circle-left left"></i>Retour à la liste des suivis SAV</a>';
                         }
-                        echo '<a class="butAction" href="./' . $page . '">';
+                        echo '<a class="butAction" href="' . $page . '">';
                         echo '<i class="fa fa-search left"></i>Nouvelle recherche</a>';
                         echo '</div></div>';
                         echo '<div class="row">';
@@ -296,7 +296,7 @@ if ($id_sav) {
                     }
                     else if (count($savsList)) {
                         echo '<div class="pull-right">';
-                        echo '<a class="butAction" href="./' . $page . '"><i class="fa fa-search left"></i>Nouvelle recheche</a>';
+                        echo '<a class="butAction" href="' . $page . '"><i class="fa fa-search left"></i>Nouvelle recheche</a>';
                         echo '</div></div>';
                         echo '<div class="row">';
 
@@ -319,7 +319,7 @@ if ($id_sav) {
                                 echo $tabTextEtat[$etat];
                              echo "</td>";
 //                            echo '<td>' . $savInfos['symptom'] . '</td>';
-                            echo '<td><a class="butAction" href="./' . $page . '?id_sav=' . $savInfos['id_sav'];
+                            echo '<td><a class="butAction" href="' . $page . '?id_sav=' . $savInfos['id_sav'];
                             if (!empty($savStr) && $serial) {
                                 echo '&savs_str=' . $savStr . '&serial=' . $serial;
                             }
@@ -333,7 +333,7 @@ if ($id_sav) {
                     if (!count($savRows) && !count($savsList)) {
                         echo '</div>';
                         echo '<div class="row">';
-                        echo '<form method="POST" action="./' . $page . '" class="well">';
+                        echo '<form method="POST" action="' . $page . '" class="well">';
                         echo '<div class="form-group row">';
                         echo '<label class="col-lg-10 col-lg-offset-1" for="serial">Numéro de série du matériel: </label>';
                         echo '<input class="col-lg-10 col-lg-offset-1" id="serial" name="serial" type="text" value="' . $serial . '"/>';

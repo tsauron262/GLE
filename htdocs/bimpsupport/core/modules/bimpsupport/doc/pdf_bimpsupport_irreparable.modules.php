@@ -83,7 +83,7 @@ Le Service Après-Vente</p>";
 
     public function getFilePath()
     {
-        return DOL_DATA_ROOT . "/bimpcore/sav/" . $this->object->id . "/";
+        return $this->object->getFilesDir();
     }
 
     public function getFileName()

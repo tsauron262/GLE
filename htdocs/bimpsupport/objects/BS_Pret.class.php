@@ -221,7 +221,8 @@ class BS_Pret extends BimpObject
         if ($this->isLoaded()) {
             if ($this->getData('id_sav')) {
                 $sav = $this->getChildObject('sav');
-                $id = $sav->id;
+                return $sav->getFilesDir();
+//                $id = $sav->id;
             } else {
                 $id = "no";
             }

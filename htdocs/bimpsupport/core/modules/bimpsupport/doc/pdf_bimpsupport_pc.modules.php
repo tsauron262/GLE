@@ -105,7 +105,8 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 //        } else {
 
         $ref = sanitize_string($sav->getData('ref'));
-        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . $sav->id . '/';
+        $dir = $sav->getFilesDir();
+//        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . $sav->id . '/';
         $file = $dir . "/PC-" . $ref . ".pdf";
 //        }
         $this->sav = $sav;

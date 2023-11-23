@@ -9,7 +9,7 @@ ini_set('display_errors', 1);
 $savRows = array();
 $savsList = array();
 
-$page = basename(__FILE__);
+$page = DOL_URL_ROOT.'/bimpsupport/public/'.basename(__FILE__);
 $errors = array();
 
 $id_sav = 0;

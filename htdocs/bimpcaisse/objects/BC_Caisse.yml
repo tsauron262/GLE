@@ -81,7 +81,13 @@ forms:
             
     user_connect: 
         rows: 
-            - field: id_entrepot
+            - custom: 1
+              label: Entrepot
+              input_name: id_entrepot
+              data_type: int
+              input: 
+                  type: search_entrepot
+                  with_caisse_open: 1
             - custom: 1
               label: Caisse
               input_name: id_caisse

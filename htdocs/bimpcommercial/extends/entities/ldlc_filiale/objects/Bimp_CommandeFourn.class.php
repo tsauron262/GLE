@@ -142,7 +142,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                             if (!count($errorLn)) {
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
                             } else{
-                                mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '').', debugerp@bimp.fr', null, 'Commande '.$this->getLink().'<br/>'.print_r($errorLn,1));
+                                mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '').', debugerp@bimp.fr', null, 'Commande '.$commFourn->getLink().'<br/>'.print_r($errorLn,1));
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
                             }
                         }

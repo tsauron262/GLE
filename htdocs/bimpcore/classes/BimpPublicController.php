@@ -55,6 +55,12 @@ class BimpPublicController extends BimpController
             BimpTools::setContext('private');
             accessforbidden();
         }
+        
+        if(isset($_GET['entity'])){
+            global $conf;
+            $conf->entity = $_GET['entity'];
+            $_SESSION['dol_entity'] = $_GET['entity'];
+        }
 
         $this->initUserClient();
 

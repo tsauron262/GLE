@@ -504,8 +504,8 @@ class Bimp_Product extends BimpObject
                     $null[] = $type;
                 }
             }
-            if (count($null) > 2) {
-                mailSyn2("Prod non catagorisé", "l.gay@bimp.fr", null, "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
+            if (count($null) > 2 && BimpCore::getConf('mail_achat', '') != '') {
+                mailSyn2("Prod non catagorisé", BimpCore::getConf('mail_achat'), null, "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
             }
         }
 

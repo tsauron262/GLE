@@ -2826,7 +2826,7 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
-    public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false, $ref_only = false)
+    public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false, $ref_only = false, $with_caisse_close = false, $with_caisse_open = false)
     {
         $cache_key = 'entrepots';
         if ($has_commissions_only) {
@@ -2836,8 +2836,11 @@ class BimpCache
         if ($ref_only) {
             $cache_key .= '_ref_only';
         }
+        
+        if($with_caisse_close || $with_caisse_open)
+            $cache_key .= '_jamisEnCache';
 
-        if (!isset(self::$cache[$cache_key])) {
+        if (!isset(self::$cache[$cache_key]) || $with_caisse_close) {
             self::$cache[$cache_key] = array();
 
             $where = '';
@@ -2846,6 +2849,12 @@ class BimpCache
                 $where .= '`has_entrepot_commissions` = 1';
             } else {
                 $where .= '1';
+            }
+            if($with_caisse_close){
+                $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `'.MAIN_DB_PREFIX.'bc_caisse` WHERE status = 0)';
+            }
+            if($with_caisse_open){
+                $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `'.MAIN_DB_PREFIX.'bc_caisse` WHERE status = 1)';
             }
 
             $rows = self::getBdb()->getRows('entrepot', $where, null, 'object', array('rowid', 'ref', 'lieu'), 'ref', 'asc');

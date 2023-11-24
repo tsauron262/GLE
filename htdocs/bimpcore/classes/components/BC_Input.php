@@ -149,7 +149,9 @@ class BC_Input extends BimpComponent
         ),
         'search_entrepot'             => array(
             'include_empty'        => array('data_type' => 'bool', 'default' => 0),
-            'has_commissions_only' => array('data_type' => 'bool', 'default' => 0)
+            'has_commissions_only' => array('data_type' => 'bool', 'default' => 0),
+            'with_caisse_close'    => array('data_type' => 'bool', 'default' => 0),
+            'with_caisse_open'    => array('data_type' => 'bool', 'default' => 0)
         ),
         'search_object'               => array(
             'object'          => array('default' => ''),
@@ -562,6 +564,8 @@ class BC_Input extends BimpComponent
             case 'search_entrepot':
                 $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
                 $options['has_commissions_only'] = isset($this->params['has_commissions_only']) ? $this->params['has_commissions_only'] : 0;
+                $options['with_caisse_close'] = isset($this->params['with_caisse_close']) ? $this->params['with_caisse_close'] : 0;
+                $options['with_caisse_open'] = isset($this->params['with_caisse_open']) ? $this->params['with_caisse_open'] : 0;
                 break;
 
             case 'object_filters':

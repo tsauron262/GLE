@@ -188,7 +188,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
             }
             if (!$ok) {
                 $errors[] = "Fichier " . $newName . ' introuvable';
-                mailSyn2('fichier pdf introuvable', 'dev@bimp.fr', null, "Fichier " . $newName . ' introuvable');
+//                mailSyn2('fichier pdf introuvable', 'dev@bimp.fr', null, "Fichier " . $newName . ' introuvable');
             }
         }
         return $errors;

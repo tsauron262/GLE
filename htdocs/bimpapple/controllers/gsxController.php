@@ -1936,7 +1936,7 @@ class gsxController extends BimpController
                     );
 
                     if (isset($q['questionPhrase']) && (string) $q['questionPhrase']) {
-                        $response['questionPhrase'] = $q['questionPhrase'];
+//                        $response['questionPhrase'] = $q['questionPhrase'];
                     }
 
                     if (isset($q['optional']) && (int) $q['optional']) {

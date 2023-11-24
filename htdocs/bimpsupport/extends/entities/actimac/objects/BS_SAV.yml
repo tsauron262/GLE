@@ -4,6 +4,8 @@ fields:
     replaced_ref: unset
     id_contrat: unset
     id_ticket: unset
+    code_kar:
+        label: Code KAR
     
 forms: 
     default: 
@@ -11,21 +13,29 @@ forms:
             replaced_ref: unset
             id_contrat: unset
             id_ticket: unset
+            code_kar:
+                field: code_kar
             
     prise_en_charge: 
         rows: 
             id_contrat: unset
+            code_kar:
+                field: code_kar
             
     edit: 
         rows: 
             replaced_ref: unset
             id_contrat: unset
+            code_kar:
+                field: code_kar
             
 fields_tables: 
     infos: 
         rows: 
             replaced_ref: unset
             id_ticket: unset
+            code_kar: 
+                field: code_kar
             # temporaire : 
 #            public_link: unset 
             

@@ -237,7 +237,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     $ref = str_replace(' ', '', $ref);
 
                     if (strpos($ref, "AR") !== 0 || strlen($ref) > 14)
-                        $errors[] = "La référence " . $ref . "ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
+                        $errors[] = "La référence '" . $ref . "' ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
                     elseif ($diference > 0.08)
                         $errors[] = "Prix de l'article " . $prod->getLink() . " différent du prix LDLC. Différence de " . price($diference) . " € vous ne pourrez pas passer la commande par cette méthode.";
                     else

@@ -3,6 +3,8 @@ table: bc_caisse
 labels: 
     name: Caisse
     is_female: 1
+    
+entity_name: caisse
 
 objects: 
     current_session: 

@@ -333,8 +333,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     $dom->Load($localFile);
                     libxml_use_internal_errors(true);
                     if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT . '/bimpcommercial/ldlc.orders.valid.xsd')) {
-                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : ' . $localFile;
-
+                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : <a href="'.DOL_URL_ROOT.'/docuemnt.php?modulepart=bimpcore&file=tmpUpload.xml">' . $localFile.'</a>';
                         BimpCore::addlog('Probléme CML LDLC', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
                             'LIBXML Errors' => libxml_get_errors()
                         ));

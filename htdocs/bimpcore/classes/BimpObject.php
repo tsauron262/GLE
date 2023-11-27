@@ -3892,6 +3892,12 @@ class BimpObject extends BimpCache
 
         // Vérification des filtres: 
         $filters = $this->checkSqlFilters($filters, $joins, 'a');
+        
+        
+        /*todo a ajouter de maniere gnérique dans les yml d'un objet*/
+        if(is_a($this, 'BimpFi_Fiche')){
+            $filters['new_fi'] = 0;
+        }
 
         // Vérification du champ "order_by": 
         if ($order_by === 'id') {
@@ -7071,7 +7077,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     }
                     $nb = count($filterLinked['linked']['or']);
                     if ($nb > 180)
-                        BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
+                        BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')', 2, 'bimpcore', $this, $filterLinked['linked']);
 
                     $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
                     $list2->addIdentifierSuffix($suffixe . '_linked');

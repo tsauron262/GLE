@@ -4059,7 +4059,7 @@ class BCT_ContratLine extends BimpObject
                                 }
                             }
                         } else {
-                            $errors[] = 'Aucun produit sélectionné';
+//                            $errors[] = 'Aucun produit sélectionné';
                         }
 
                         $periodicity = (int) $this->getData('fac_periodicity');

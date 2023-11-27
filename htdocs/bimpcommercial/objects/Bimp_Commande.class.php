@@ -3636,10 +3636,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
 //                    if ($user->login == 'f.martinez') {
 //                        $mail = 'f.martinez@bimp.fr';
 //                    }
-                    $mail = "tommy@bimp.fr";
 
                     if (isset($mail) && $mail != "")
-                        mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status').BimpTools::displayBacktrace());
+                        mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status'));
+                    $mail = "tommy@bimp.fr";
+                    mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status').BimpTools::displayBacktrace());
                 }
             }
 

@@ -3554,7 +3554,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function checkInvoiceStatus($log_change = false)
     {
-        $log_change = true; // temporaire, debug en cours
         if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
             $isFullyInvoiced = 0;
@@ -3641,8 +3640,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                     if (isset($mail) && $mail != "")
                         mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status'));
-                    $mail = "tommy@bimp.fr";
-                    mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status').BimpTools::displayBacktrace());
                 }
             }
 

@@ -349,7 +349,6 @@ class BimpCache
             if (!is_a(self::$cache[$cache_key], $object_name) || !self::$cache[$cache_key]->isLoaded() ||
                     (int) self::$cache[$cache_key]->id !== (int) $id_object) {
                 // L'instance ne correspond pas à celle attendue, on la supprime du cache.
-                die('suppr obj'.$cache_key.' : '.self::$cache[$cache_key]->isLoaded());
                 self::$cache[$cache_key] = null;
                 unset(self::$cache[$cache_key]);
             } else {

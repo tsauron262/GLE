@@ -3200,6 +3200,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
             }
         }
+        
+        $this->checkInvoiceStatus();
 
         return $errors;
     }

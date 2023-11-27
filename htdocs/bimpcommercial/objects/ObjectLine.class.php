@@ -5793,7 +5793,7 @@ class ObjectLine extends BimpObject
                         $totHtSansRemise += $newLn->getTotalHT(true);
                         $totPa += $newLn->getTotalPA(true);
                         if ($isAbonnement && !$newLn->isAbonnement())
-                            BimpCore::addlog('Attention, composant d\'un bundle abonnement pas abonnement LN : ' . $newLn->id);
+                            BimpCore::addlog('Attention, composant d\'un bundle abonnement pas abonnement LN : ' . $newLn->id.' prod : '.$product->getLink());
                     }
 
                     if ($totHt != 0) {

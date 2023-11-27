@@ -14,7 +14,7 @@ class Bimp_Product extends BimpObject
             5  => 'Logiciel (licence unique)',
             6  => 'Abonnement',
             20 => 'Bundle abonnement',
-            20 => 'Bundle materiel'
+            21 => 'Bundle materiel'
         )
     );
     public static $abonnements_sous_types = array(6, 20);

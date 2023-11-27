@@ -3613,7 +3613,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $new_status = 0;
                 }
 
-                $current_status = (int) $this->getInitData('invoice_status');
+                $current_status = (int) $this->getData('invoice_status');
                 if ($new_status !== $current_status) {
                     if ($log_change) {
                         BimpCore::addlog('Correction auto du statut Facturation', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(

@@ -2166,13 +2166,13 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                         $prod = $line->getProduct();
 
-                        if (!BimpObject::objectLoaded($prod)) {
-                            $line_errors[] = 'Produit absent';
-                        }
+//                        if (!BimpObject::objectLoaded($prod)) {
+//                            $line_errors[] = 'Produit absent';
+//                        }
 
                         if (!count($line_errors)) {
                             $id_pfp = (int) $line->id_fourn_price;
-                            if (!$id_pfp) {
+                            if (!$id_pfp && BimpObject::objectLoaded($prod)) {
                                 $id_fourn = (int) $prod->getData('achat_def_id_fourn');
                                 if ($id_fourn) {
                                     $id_pfp = (int) $prod->getLastFournPriceId($id_fourn);
@@ -2195,11 +2195,15 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 'duration'                     => $line->getData('abo_duration'),
                                 'fac_term'                     => $line->getData('abo_fac_term'),
                                 'nb_renouv'                    => $line->getData('abo_nb_renouv'),
-                                'achat_periodicity'            => $prod->getData('achat_def_periodicity'),
-                                'variable_qty'                 => $prod->getData('variable_qty'),
+//                                'achat_periodicity'            => $prod->getData('achat_def_periodicity'),
+//                                'variable_qty'                 => $prod->getData('variable_qty'),
                                 'id_linked_line'               => (int) $line->getData('id_linked_contrat_line'),
                                 'id_line_origin'               => $line->id,
                                 'line_origin_type'             => 'propal_line',
+                                'linked_id_object'             => $line->getData('linked_id_object'),
+                                'linked_object_name'           => $line->getData('linked_object_name'),
+                                'achat_periodicity'            => (BimpObject::objectLoaded($prod)? $prod->getData('achat_def_periodicity') : 0),
+                                'variable_qty'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
                                 'date_ouverture_prevue'        => $date_ouv
                                     ), true, $line_errors, $line_warnings);
                         }

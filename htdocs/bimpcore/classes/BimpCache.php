@@ -349,6 +349,7 @@ class BimpCache
             if (!is_a(self::$cache[$cache_key], $object_name) || !self::$cache[$cache_key]->isLoaded() ||
                     (int) self::$cache[$cache_key]->id !== (int) $id_object) {
                 // L'instance ne correspond pas à celle attendue, on la supprime du cache.
+                die('suppr obj'.$cache_key.' : '.self::$cache[$cache_key]->isLoaded());
                 self::$cache[$cache_key] = null;
                 unset(self::$cache[$cache_key]);
             } else {
@@ -2839,6 +2840,8 @@ class BimpCache
         
         if($with_caisse_close || $with_caisse_open)
             $cache_key .= '_jamisEnCache';
+        $entitys = getEntity('cond_regl', 0);
+        $cacheKey .= '_' . $entitys;
 
         if (!isset(self::$cache[$cache_key]) || $with_caisse_close) {
             self::$cache[$cache_key] = array();
@@ -2856,6 +2859,8 @@ class BimpCache
             if($with_caisse_open){
                 $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `'.MAIN_DB_PREFIX.'bc_caisse` WHERE status = 1)';
             }
+            if ($entitys)
+                $where .= ' AND entity IN (0,' . $entitys . ')';
 
             $rows = self::getBdb()->getRows('entrepot', $where, null, 'object', array('rowid', 'ref', 'lieu'), 'ref', 'asc');
             if (!is_null($rows)) {

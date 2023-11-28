@@ -250,13 +250,13 @@ class BCT_ContratLine extends BimpObject
             $prod = $this->getChildObject('product');
 
             $buttons[] = array(
-                'label'   => 'Facturations',
+                'label'   => 'Liste des facturations effectuées',
                 'icon'    => 'fas_file-invoice-dollar',
                 'onclick' => $this->getJsLoadModalCustomContent('renderFacturesTable', 'Facturations' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
             );
 
             $buttons[] = array(
-                'label'   => 'Achats',
+                'label'   => 'Liste des achats effectués',
                 'icon'    => 'fas_cart-arrow-down',
                 'onclick' => $this->getJsLoadModalCustomContent('renderAchatsTable', 'Achats ' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
             );

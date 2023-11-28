@@ -25,7 +25,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
     public function __construct(BDS_Process $process, $options = array(), $references = array())
     {
         parent::__construct($process, $options, $references);
-        $this->nameFile = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
+        $this->nameFile = str_replace("Ymd", date('Ymd'), $this->params['file_name']);
     }
 
     public function initUpdateFromFile(&$data, &$errors = array())
@@ -206,6 +206,17 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 'label'      => 'Dossier FTP',
                 'value'      => '/'.BimpCore::getConf('exports_ldlc_ftp_dir').'/catalogue/'
                     ), true, $warnings, $warnings);
+            
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'file_name',
+                'label'      => 'Nom fichier FTP',
+                'value'      => 'Ymd_catalog_ldlc_to_bimp.csv',
+                    ), true, $warnings, $warnings);
+            
+            
+            
+            
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,

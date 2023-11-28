@@ -409,6 +409,9 @@ forms:
                 required: 1
     
     releverFacturation:
+        msgs:
+            - content: Attention, s’il y a plus de 100 factures, les adresses de livraison ne seront pas affichées
+              type: info
         rows:
             - custom: 1
               label: Date début du relevé

@@ -55,10 +55,10 @@ fields:
         type: id_object
         object: produit
         required: 1
-        input: 
-            type: search_product
-            help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
-            card: default
+#        input: 
+#            type: search_product
+#            help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
+#            card: default
     qty:
         label: Qté
         type: qty

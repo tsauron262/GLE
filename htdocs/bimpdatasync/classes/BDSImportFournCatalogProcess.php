@@ -508,7 +508,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 }
 
                 if (!$check) {
-                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '" dans "' . $this->local_dir . $fileName . '"';
+                    $errors[] = 'Echec du téléchargement du fichier "' . $this->ftp_dir . $fileName . '" dans "' . $this->local_dir . $fileName . '"';
                 }
             }
         }

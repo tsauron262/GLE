@@ -20,6 +20,7 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
     public $total_rap = 0;
     public $discounts = 0;
     public $signature_bloc = true;
+    private $cache = array();
 
     public function __construct($db)
     {
@@ -190,7 +191,9 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
                             $BL = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $id_BL);
                             $id_contact = $BL->getcontact();
                             if($id_contact){
-                                $socp = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
+                                if(!isset($cache['contact'.$id_contact]))
+                                    $cache['contact'.$id_contact] = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
+                                $socp = $cache['contact'.$id_contact];
                                 if (!is_null($socp)) {
                                     $row['livraison'] .= ' - ' . $socp->lastname . ' ' . $socp->firstname;
                                 } else {

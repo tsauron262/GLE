@@ -297,12 +297,6 @@ foreach ($paths as $tmppath) {	// We check to find (B+start of C)=A
 if (!$found) {
 	$tmp = $dolibarr_main_url_root; // If autodetect fails (Ie: when using apache alias that point outside default DOCUMENT_ROOT).
 } else {
-    if($_GET['test'] == 'yes'){
-        print_r($_SERVER);
-        die('test en cours');
-    }
-    
-    
 	$tmp = 'http'.((((empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] != 'on') && (empty($_SERVER["SERVER_PORT"]) || $_SERVER["SERVER_PORT"] != 443)) && $_SERVER["HTTP_X_FORWARDED_PROTO"] != 'https') ? '' : 's').'://'.$_SERVER["SERVER_NAME"].((empty($_SERVER["SERVER_PORT"]) || $_SERVER["SERVER_PORT"] == 80 || $_SERVER["SERVER_PORT"] == 443) ? '' : ':'.$_SERVER["SERVER_PORT"]).($tmp3 ? (preg_match('/^\//', $tmp3) ? '' : '/').$tmp3 : '');
 }
 //print "tmp1=".$tmp1." tmp2=".$tmp2." tmp3=".$tmp3." tmp=".$tmp."\n";

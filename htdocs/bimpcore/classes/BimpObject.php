@@ -9363,7 +9363,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $url = BimpCore::getConf('public_base_url', '');
 
             if (!$url) {
-                $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
+                $url = DOL_MAIN_URL_ROOT . '/bimpinterfaceclient/client.php?';
             }
         } else {
             global $conf;

@@ -9367,7 +9367,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         } else {
             global $conf;
-            $url = BimpCore::getConf('base_url', DOL_URL_ROOT .'/bimpcore/url_light.php?'.($conf->entity > 1 ? 'entity='.$conf->entity.'&' : ''), 'bimpinterfaceclient');
+            $url = BimpCore::getConf('base_url', DOL_MAIN_URL_ROOT .'/bimpcore/url_light.php?'.($conf->entity > 1 ? 'entity='.$conf->entity.'&' : ''), 'bimpinterfaceclient');
         }
 
 

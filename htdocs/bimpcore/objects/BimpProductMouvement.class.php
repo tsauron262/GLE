@@ -474,6 +474,16 @@ class BimpProductMouvement extends BimpObject
                 else
                     return '<span class="danger">' . BimpTools::ucfirst($instance->getLabel('the')) . ' n\'existe plus</span>';
             }
+            
+            $dolObj = null;
+            if($this->getData('origintype') == 'reception'){
+                require_once(DOL_DOCUMENT_ROOT.'/reception/class/reception.class.php');
+                $dolObj = new Reception($this->db->db);
+            }
+            if($dolObj){
+                $dolObj->fetch($this->getData('fk_origin'));
+                return $dolObj->getNomUrl(1);
+            }
 
             return '<span class="warning">Object inconnnu</span>';
         }
@@ -534,6 +544,17 @@ class BimpProductMouvement extends BimpObject
     public function displayTypeMateriel()
     {
         return ''; // C'est quoi Type matériel ??
+    }
+    
+    public function displayDateRecep(){
+        if($this->getData('origintype') == 'reception'){
+            $sql = $this->db->db->query("SELECT date_delivery FROM ".MAIN_DB_PREFIX.'reception WHERE rowid = '.$this->getData('fk_origin'));
+            while($ln = $this->db->db->fetch_object($sql)){
+                if($ln->date_delivery)
+                    return date('d / m / Y', strtotime($ln->date_delivery));
+            }
+        }
+        return '';
     }
     // Traitements: 
 

@@ -38,18 +38,20 @@ class Bimp_Entrepot extends BimpObject
 
     public function getMail()
     {
-        $domaine = 'bimp.fr';
-        $nbCaracdeps = array(3, 2);
-        foreach ($nbCaracdeps as $nbCaracdep) {
-            $dep = substr($this->getData('zip'), 0, $nbCaracdep);
-            $name = 'boutique' . $dep;
-            $sql = $this->db->db->query('SELECT mail FROM `llx_usergroup` u, llx_usergroup_extrafields ue WHERE ue.fk_object = u.rowid AND u.nom LIKE "' . $name . '"');
-            while ($ln = $this->db->db->fetch_object($sql)) {
-                if ($ln->mail && $ln->mail != '' && stripos($ln->mail, "@") !== false)
-                    return $ln->mail;
-                else {
-                    require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-                    return str_replace(",", "", traiteCarac($name) . "@" . $domaine);
+        if(BimpCore::getExtendsEntity() == 'bimp'){
+            $domaine = 'bimp.fr';
+            $nbCaracdeps = array(3, 2);
+            foreach ($nbCaracdeps as $nbCaracdep) {
+                $dep = substr($this->getData('zip'), 0, $nbCaracdep);
+                $name = 'boutique' . $dep;
+                $sql = $this->db->db->query('SELECT mail FROM `llx_usergroup` u, llx_usergroup_extrafields ue WHERE ue.fk_object = u.rowid AND u.nom LIKE "' . $name . '"');
+                while ($ln = $this->db->db->fetch_object($sql)) {
+                    if ($ln->mail && $ln->mail != '' && stripos($ln->mail, "@") !== false)
+                        return $ln->mail;
+                    else {
+                        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
+                        return str_replace(",", "", traiteCarac($name) . "@" . $domaine);
+                    }
                 }
             }
         }

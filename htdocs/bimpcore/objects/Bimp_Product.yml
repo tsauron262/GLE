@@ -887,6 +887,12 @@ forms:
                   type: search_entrepot
               default_value: 
                   callback: getDefaultEntrepot
+                  
+            - custom: 1
+              input_name: comment
+              label: Infos
+              input: 
+                  type: text
             
 fields_tables: 
     infos: 

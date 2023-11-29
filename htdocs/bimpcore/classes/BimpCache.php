@@ -173,6 +173,8 @@ class BimpCache
 
     public static function getCacheServeur($key)
     {
+        global $conf;
+        $key = $conf->entity.$key;
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
@@ -192,6 +194,8 @@ class BimpCache
 
     public static function setCacheServeur($key, $value, $ttl = null)
     {
+        global $conf;
+        $key = $conf->entity.$key;
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
@@ -2822,7 +2826,7 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
-    public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false, $ref_only = false)
+    public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false, $ref_only = false, $with_caisse_close = false, $with_caisse_open = false)
     {
         $cache_key = 'entrepots';
         if ($has_commissions_only) {
@@ -2832,8 +2836,13 @@ class BimpCache
         if ($ref_only) {
             $cache_key .= '_ref_only';
         }
+        
+        if($with_caisse_close || $with_caisse_open)
+            $cache_key .= '_jamisEnCache';
+        $entitys = getEntity('cond_regl', 0);
+        $cacheKey .= '_' . $entitys;
 
-        if (!isset(self::$cache[$cache_key])) {
+        if (!isset(self::$cache[$cache_key]) || $with_caisse_close) {
             self::$cache[$cache_key] = array();
 
             $where = '';
@@ -2843,6 +2852,14 @@ class BimpCache
             } else {
                 $where .= '1';
             }
+            if($with_caisse_close){
+                $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `'.MAIN_DB_PREFIX.'bc_caisse` WHERE status = 0)';
+            }
+            if($with_caisse_open){
+                $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `'.MAIN_DB_PREFIX.'bc_caisse` WHERE status = 1)';
+            }
+            if ($entitys)
+                $where .= ' AND entity IN (0,' . $entitys . ')';
 
             $rows = self::getBdb()->getRows('entrepot', $where, null, 'object', array('rowid', 'ref', 'lieu'), 'ref', 'asc');
             if (!is_null($rows)) {

@@ -8,7 +8,7 @@ class BIMP_Task extends BimpAbstractFollow
     public static $types_manuel = array(
         'dev'        => 'Développement',
         'adminVente' => 'Administration des Ventes',
-        'dispatch' => 'Dispatch',
+        'dispatchMan' => 'Dispatch Manuel',
         'sav' => 'SAV'
     );
     public static $srcNotAttribute = array(/* 'sms-apple@bimp-groupe.net' */);
@@ -31,7 +31,7 @@ class BIMP_Task extends BimpAbstractFollow
             'bug' => array('label' => 'Bug'),
             'dev' => array('label' => 'Développement')
         ),
-        'dispatch' => array(
+        'dispatchMan' => array(
             'hotline' => array('label' => 'Hot-Line'),
             'commande' => array('label' => 'Commande'),
             'commerc' => array('label' => 'Service Commercial'),
@@ -155,6 +155,12 @@ class BIMP_Task extends BimpAbstractFollow
 
     public function isActionAllowed($action, &$errors = array())
     {
+        if($action == 'majRight'){
+            global $user;
+            if($user->admin)
+                return 1;
+        }
+        
         if (!$this->isLoaded($errors)) {
             return 0;
         }
@@ -194,6 +200,20 @@ class BIMP_Task extends BimpAbstractFollow
     }
 
     // Getters params: 
+    
+   public function getListHeaderExtraBtn()
+   {
+       $buttons = array();
+       global $user;
+       if($user->admin){
+            $buttons[] = array(
+                'label'   => 'Maj droits',
+                'icon'    => 'fas_bars',
+                'onclick' => $this->getJsActionOnclick('majRight')
+            );
+       }
+        return $buttons;
+   }
 
     public function getButtons()
     {
@@ -272,6 +292,23 @@ class BIMP_Task extends BimpAbstractFollow
                 'onclick' => $this->getJsActionOnclick('reopen', array(), array())
             );
         }
+        
+        
+        $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            $buttons[] = array(
+                'label'   => 'Message autheur',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array(
+                    "obj_type"      => "bimp_object",
+                    "obj_module"    => $this->module,
+                    "obj_name"      => $this->object_name,
+                    "id_obj"        => $this->id,
+                    "type_dest"     => $note::BN_DEST_USER,
+                    "fk_user_dest" => $this->getData('user_create')
+                        ), array(
+                    'form_name' => 'rep'
+                ))
+            );
         return $buttons;
     }
 
@@ -995,6 +1032,11 @@ class BIMP_Task extends BimpAbstractFollow
         foreach ($this->getUsersFollow(true) as $userT) {
             $this->addNote($txt, null, 0, 0, $src, ($user->id == $id_user_def ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), BimpNote::BN_DEST_USER, null, (int) $userT->id, 1);
         }
+    }
+    
+    public function actionMajRight(){
+        static::majRight();
+        array('errors' => array(), 'warnings' => array());
     }
 
     public static function majRight()

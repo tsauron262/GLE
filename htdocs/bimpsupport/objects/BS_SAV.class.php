@@ -1283,7 +1283,11 @@ class BS_SAV extends BimpObject
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
-            return DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/';
+            global $conf;
+            if($conf->entity == 1)
+                return DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/';
+            else
+                return DOL_DATA_ROOT .'/'.$conf->entity. '/bimpcore/sav/' . $this->id . '/';
         }
 
         return '';
@@ -1450,15 +1454,17 @@ class BS_SAV extends BimpObject
         }
         return $extra;
     }
-    
-    public static function getMailFrom(){
+
+    public static function getMailFrom()
+    {
         $mail = BimpCore::getConf('mail_from_sav', null, 'bimpsupport');
-        if($mail != ''){
-            return array($mail, 'SAV '.BimpCore::getConf('default_name', null, 'bimpsupport'));
+        if ($mail != '') {
+            return array($mail, 'SAV ' . BimpCore::getConf('default_name', null, 'bimpsupport'));
         }
     }
-    
-    public function getMailTo(){
+
+    public function getMailTo()
+    {
         $to = '';
         $contact = $this->getChildObject('contact');
 
@@ -2118,8 +2124,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
             }
         }
-        
-        if($this->getData('info_importante') != ''){
+
+        if ($this->getData('info_importante') != '') {
             $html .= BimpRender::renderAlerts($this->getData('info_importante'));
         }
 
@@ -4028,7 +4034,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 if (!in_array($msg_type, array('debDiago', 'debut', 'localise'))) {
-                    $fileProp = DOL_DATA_ROOT . "/propale/" . $ref_propal . "/" . $ref_propal . ".pdf";
+                    $fileProp = $propal->getFilesDir() . "/" . $ref_propal . ".pdf";
                     if (is_file($fileProp)) {
                         $files[] = array($fileProp, 'application/pdf', $ref_propal . '.pdf');
                     } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
@@ -4072,6 +4078,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $nomMachine = 'matériel';
         }
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
+        $nomCentre = str_replace(' boutique', '', $nomCentre);
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
 
         global $conf;
@@ -4207,7 +4214,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $subject = "Prise en charge " . $this->getData('ref') . " terminée";
                 $mail_msg = "la réparation de votre \"$nomMachine\" est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . "\n";
                 $mail_msg .= "Si vous souhaitez plus de renseignements, contactez le " . $tel;
-                $sms = "Bonjour, la réparation de votre \"$nomMachine\"  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delaiSms . ".\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
+                $sms = "Bonjour, la réparation de votre produit est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delaiSms . ".\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
                 break;
 
             case 'pieceOk':
@@ -5056,8 +5063,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return $errors;
     }
-    
-    public function getCodeCentre(){
+
+    public function getCodeCentre()
+    {
         $code_centre = $this->getData('code_centre_repa');
 
         if (!$code_centre) {
@@ -5309,7 +5317,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     global $user;
                     $propal->dol_object->update($user);
                 }
-                if ($propal->dol_object->cond_reglement_id != $this->id_cond_reglement_def || $propal->dol_object->mode_reglement_id != $this->id_mode_reglement_def) {
+                if ($propal->dol_object->cond_reglement_id != BimpCore::getConf('sav_cond_reglement',null, 'bimpsupport') || $propal->dol_object->mode_reglement_id != BimpCore::getConf('sav_mode_reglement',null, 'bimpsupport')) {
                     //exception pour les virement bencaire a la commande 
                     if ($propal->dol_object->cond_reglement_id != 20 || $propal->dol_object->mode_reglement_id != 2) {
                         //on vérifie encours
@@ -5351,6 +5359,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                         if (count($signature_warnings)) {
                             $this->addObjectLog(BimpTools::getMsgFromArray($signature_warnings, 'Erreurs lors de la création de la fiche signature'));
+                            $warnings = BimpTools::merge_array($warnings, $signature_warnings);
                         }
                         if (count($signature_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
@@ -6416,32 +6425,32 @@ ORDER BY a.val_max DESC");
             'success_callback' => $success_callback
         );
     }
-    
-    public function getIdUserGroup(){
+
+    public function getIdUserGroup()
+    {
         $codeCentre = $this->getCodeCentre();
-        
+
         BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
         global $tabCentre;
-        if(isset($tabCentre[$codeCentre])){
-            if(isset($tabCentre[$codeCentre]['idGroup'])){
+        if (isset($tabCentre[$codeCentre])) {
+            if (isset($tabCentre[$codeCentre]['idGroup'])) {
                 return $tabCentre[$codeCentre]['idGroup'];
+            } else {
+                BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
             }
-            else{
-                BimpCore::addlog('Pas de groupe dans centre.inc pour '.$codeCentre);
-            }
+        } else {
+            BimpCore::addlog('Pas de centre dans centre.inc pour ' . $codeCentre);
         }
-        else{
-            BimpCore::addlog('Pas de centre dans centre.inc pour '.$codeCentre);
-        }
-        
+
         return 0;
     }
-    
-    public function addMailMsg($dst, $src, $subj, $txt){
+
+    public function addMailMsg($dst, $src, $subj, $txt)
+    {
         $idGroup = $this->getIdUserGroup();
-        $errors = $this->addNote('Message de : '.$src.'<br/>'.'Sujet : '.$subj.'<br/>'.$txt, 20, 0, 1, $src, 2, 4, $idGroup,0,0,$this->getData('id_client'));
-        if(count($errors))
-            BimpCore::addlog ('Erreur création mailMsg sav', 1, 'sav', $this, $errors);
+        $errors = $this->addNote('Message de : ' . $src . '<br/>' . 'Sujet : ' . $subj . '<br/>' . $txt, 20, 0, 1, $src, 2, 4, $idGroup, 0, 0, $this->getData('id_client'));
+        if (count($errors))
+            BimpCore::addlog('Erreur création mailMsg sav', 1, 'sav', $this, $errors);
         else
             return 1;
         return 0;
@@ -7794,7 +7803,7 @@ ORDER BY a.val_max DESC");
             }
 
             $cgv = "";
-            $cgv .= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
+            $cgv .= "-La société ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')." ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
             $prixRefus = "49";
 
@@ -7818,7 +7827,7 @@ ORDER BY a.val_max DESC");
             $cgv .= "- Des frais de <b>" . $prixRefus . "€ TTC</b> seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contrefaçon ont été installées.<br/><br/>";
             $cgv .= "- Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de <b>4€ par jour</b>.<br/><br/>";
             $cgv .= "- Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruits, après accord du tribunal.<br/><br/>";
-            $cgv .= "- BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximum de 1000 €), en carte bleue.<br/><br/>";
+            $cgv .= "- ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')." n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximum de 1000 €), en carte bleue.<br/><br/>";
 
             if ($prioritaire && $isIphone) {
                 $cgv .= '- J\'accepte les frais de 96 TTC de prise en charge urgente';

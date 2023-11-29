@@ -1,0 +1,1 @@
+ALTER TABLE llx_bimp_commande_line ADD no_abos_convert tinyint(1) NOT NULL DEFAULT 0;

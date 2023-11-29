@@ -3620,6 +3620,13 @@ class Bimp_Facture extends BimpComm
                 }
             }
         }
+        
+        if(1){
+            $result = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('fk_soc'=>$this->getData('fk_soc'), 'datec' => array('custom' => 'datec < DATE_ADD("'.$this->getData('datec').'", INTERVAL 2 MINUTE) AND datec > DATE_ADD("'.$this->getData('datec').'", INTERVAL -2 MINUTE)')));
+            foreach($result as $obj)
+                if($obj->id != $this->id)
+                    $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Il semble que deux factures est été créer en même temp. Voir : '.$obj->getLink().'<br/>ATTENTION !!!!!!!!!!!!');
+        }
 
         return $html;
     }
@@ -4358,6 +4365,14 @@ class Bimp_Facture extends BimpComm
                                 if (count($reval_errors)) {
                                     $warnings[] = BimpTools::getMsgFromArray($reval_errors, 'Echec création de la revalorisation pour la remise arrière "' . $remise_arriere->getData('label') . '"');
                                 }
+                            }
+                        }
+
+                        // Mouvements de stocks : 
+                        if ($line->getData('linked_object_name') == 'contrat_line' && (int) $this->getData('linked_id_object')) {
+                            $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('linked_id_object'));
+                            if (BimpObject::objectLoaded($contrat_line)) {
+                                $contrat_line->onFactureValidated($line);
                             }
                         }
                     }

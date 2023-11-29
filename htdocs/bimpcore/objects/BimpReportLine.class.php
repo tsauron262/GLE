@@ -14,6 +14,8 @@ class BimpReportLine extends BimpObject
     {
         $msg = (string) $this->getData('msg');
 
+        $msg = $this->replaceHastags($msg);
+        
         if ($msg) {
             return BimpRender::renderAlerts($msg, $this->getData('type'));
         }

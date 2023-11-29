@@ -54,6 +54,16 @@ objects:
             id_object: 
                 field_value: achat_id_fourn
                 
+    contrat_line_export: 
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcontrat
+                name: BCT_ContratLine
+            id_object: 
+                field_value: id_contrat_line_export
+                
 fields: 
     id_obj: 
         label: Commande
@@ -299,6 +309,18 @@ fields:
         type: bool
         default_value: 0
         user_edit: 1
+        
+    id_contrat_line_export: 
+        label: Exporté vers l'abonnement
+        type: id_object
+        object: contrat_line_export
+        default_value: 0
+        
+    # Chamo à suppr. une fois conversions terminées
+    no_abos_convert: 
+        label: Non convertissable en abonnement
+        type: bool
+        default_value: 0
         
 forms: 
     commande_fourn:
@@ -1082,6 +1104,12 @@ lists_cols:
                 method: displayDureeReliquat
                 params: 
                     - ttc
+    achats: 
+        label: Achats
+        value:
+            callback: 
+                method: renderAchatsList
+        min_width: 400
         
 lists: 
     default: 

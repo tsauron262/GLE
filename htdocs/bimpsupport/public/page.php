@@ -1,6 +1,9 @@
 <?php
 define("NOLOGIN", 1);
-require_once('../main.inc.php');
+if(is_file('../main.inc.php'))
+    require_once('../main.inc.php');
+else
+    require_once('../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 BimpObject::getInstance('bimpsupport', 'BS_SAV');
 
@@ -9,7 +12,7 @@ ini_set('display_errors', 1);
 $savRows = array();
 $savsList = array();
 
-$page = basename(__FILE__);
+$page = DOL_URL_ROOT.'/bimpsupport/public/'.basename(__FILE__);
 $errors = array();
 
 $id_sav = 0;
@@ -105,7 +108,7 @@ if ($serial && $userName) {
         $savs = array($serial);
     else
     $savs = getSavsBySerial($serial);
-    if (!count($savs)) {
+    if (!is_array($savs) || !count($savs)) {
         $errors[] = 'Aucun suivi SAV trouvé pour ce numéro de série.';
     }/* else if (count($savs) == 1) {
         $sav = new BS_SAV($db);
@@ -262,10 +265,10 @@ if ($id_sav) {
                         echo "<h2>".$sav->ref . "</h2>";
                         echo '<div class="pull-right">';
                         if ($savStr && $serial) {
-                            echo '<a class="butAction" href="./' . $page . '?savs=' . $savStr . '&serial=' . $serial . '">';
+                            echo '<a class="butAction" href="' . $page . '?savs=' . $savStr . '&serial=' . $serial . '">';
                             echo '<i class="fa fa-arrow-circle-left left"></i>Retour à la liste des suivis SAV</a>';
                         }
-                        echo '<a class="butAction" href="./' . $page . '">';
+                        echo '<a class="butAction" href="' . $page . '">';
                         echo '<i class="fa fa-search left"></i>Nouvelle recherche</a>';
                         echo '</div></div>';
                         echo '<div class="row">';
@@ -296,7 +299,7 @@ if ($id_sav) {
                     }
                     else if (count($savsList)) {
                         echo '<div class="pull-right">';
-                        echo '<a class="butAction" href="./' . $page . '"><i class="fa fa-search left"></i>Nouvelle recheche</a>';
+                        echo '<a class="butAction" href="' . $page . '"><i class="fa fa-search left"></i>Nouvelle recheche</a>';
                         echo '</div></div>';
                         echo '<div class="row">';
 
@@ -319,7 +322,7 @@ if ($id_sav) {
                                 echo $tabTextEtat[$etat];
                              echo "</td>";
 //                            echo '<td>' . $savInfos['symptom'] . '</td>';
-                            echo '<td><a class="butAction" href="./' . $page . '?id_sav=' . $savInfos['id_sav'];
+                            echo '<td><a class="butAction" href="' . $page . '?id_sav=' . $savInfos['id_sav'];
                             if (!empty($savStr) && $serial) {
                                 echo '&savs_str=' . $savStr . '&serial=' . $serial;
                             }
@@ -333,7 +336,7 @@ if ($id_sav) {
                     if (!count($savRows) && !count($savsList)) {
                         echo '</div>';
                         echo '<div class="row">';
-                        echo '<form method="POST" action="./' . $page . '" class="well">';
+                        echo '<form method="POST" action="' . $page . '" class="well">';
                         echo '<div class="form-group row">';
                         echo '<label class="col-lg-10 col-lg-offset-1" for="serial">Numéro de série du matériel: </label>';
                         echo '<input class="col-lg-10 col-lg-offset-1" id="serial" name="serial" type="text" value="' . $serial . '"/>';

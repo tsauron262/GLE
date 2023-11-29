@@ -15,8 +15,8 @@ header_btn:
     callback: getActionsButton
     
 labels:
-    name: Fiche d'intervention
-    name_plur: Fiches d'interventions
+    name: Fiche d'intervention (ancienne version)
+    name_plur: Fiches d'interventions (ancienne version)
     is_female: 1
     
 objects:
@@ -175,6 +175,9 @@ lists_cols:
 lists:
     default:
         delete_btn: 1
+        list_filters: 
+            - name: new_fi
+              filter: 0
         edit_btn: 1
         page_btn: 1
         add_form_name: add

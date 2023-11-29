@@ -7,6 +7,7 @@ header_btn:
 
 header_list_name: default
 header_edit_form: default
+header_delete_btn: 1
 
 list_page_url: 
     controller: index

@@ -1882,10 +1882,10 @@ class gsxController extends BimpController
                                 if (!empty($responses)) {
                                     $ok = true;
                                     $tree['questions'] = $responses;
+                                    $trees[] = $tree;
                                 }
                             }
 
-                            $trees[] = $tree;
                         }
                     }
                     if (!empty($trees)) {

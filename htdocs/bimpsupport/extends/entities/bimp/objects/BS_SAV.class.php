@@ -358,13 +358,29 @@ class BS_SAV_ExtEntity extends BS_SAV
         else {
             $tmp = str_replace(' ', ',', $tmp);
             $nums = explode(',', $tmp);
+            $bdb = BimpObject::getBdb(true);
+            $db = $bdb->db;
             foreach ($nums as $num) {
-                $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ecologic_data' => array('operator' => 'LIKE', 'value' => '%"ClaimId":' . trim($num) . '%')));
-                if (!$sav || !$sav->isLoaded())
+                $sql = $db->query("SELECT a.id
+FROM llx_bs_sav a
+WHERE a.ecologic_data LIKE '%\"ClaimId\":".trim($num)."%'");
+                if($db->num_rows($sql) < 1){
                     $errors[] = 'Code : ' . $num . ' introuvable';
-                else {
-                    $sav->updateField('status_ecologic', 1000);
                 }
+                elseif($db->num_rows($sql) > 1){
+                    $errors[] = 'Code : ' . $num . ' trouvé plusieurs fois';
+                }
+                else{
+                    $ln = $db->fetch_object($sql);
+                    $db->query('UPDATE llx_bs_sav SET `status_ecologic` = "1000"
+WHERE `id` = '.$ln->id);
+                }
+//                $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ecologic_data' => array('operator' => 'LIKE', 'value' => '%"ClaimId":' . trim($num) . '%')));
+//                if (!$sav || !$sav->isLoaded())
+//                    $errors[] = 'Code : ' . $num . ' introuvable';
+//                else {
+//                    $sav->updateField('status_ecologic', 1000);
+//                }
             }
         }
 

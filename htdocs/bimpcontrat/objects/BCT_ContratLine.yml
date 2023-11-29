@@ -233,12 +233,15 @@ fields:
     date_ouverture_prevue: 
         label: Date ouverture prévue
         type: datetime
+        input: 
+            with_hours: 0
         
     date_ouverture: 
         label: Date ouverture
         type: datetime
         input: 
             display_now: 1
+            with_hours: 0
         
     date_fin_validite: 
         label: Date fin validité
@@ -322,8 +325,6 @@ fields:
         label: ID Ligne d\'origine
         type: id
         default_value: 0
-    
-    
 
     id_parent_line:
         label: Ligne parente
@@ -341,6 +342,11 @@ fields:
         
     linked_object_name:
         label: Type d\'objet lié
+        
+#    remain_stock_done: 
+#        label: Qté restante stock déjà traité
+#        type: float
+#        default_value: 0
 
 forms: 
     text: 
@@ -422,12 +428,19 @@ forms:
             
     activate: 
         rows: 
-            - field: date_ouverture
+            - field: date_ouverture_prevue
             - field: id_linked_line
             
     bulk_activate: 
         rows: 
-            - field: date_ouverture
+            - custom: 1
+              label: Date d'ouverture
+              input_name: date_ouverture_prevue
+              data_type: date
+              input: 
+                  type: date
+              value: 
+                  callback: getBulkActivationOpenDate
             - field: id_linked_line
         
     periodic_process: 

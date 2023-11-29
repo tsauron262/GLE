@@ -141,8 +141,10 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                             }
                             if (!count($errorLn)) {
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
-                            } else
+                            } else{
+                                mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '').', debugerp@bimp.fr', null, 'Commande '.$commFourn->getLink().'<br/>'.print_r($errorLn,1));
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
+                            }
                         }
                         $errors = BimpTools::merge_array($errors, $errorLn);
                     }
@@ -186,7 +188,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
             }
             if (!$ok) {
                 $errors[] = "Fichier " . $newName . ' introuvable';
-                mailSyn2('fichier pdf introuvable', 'dev@bimp.fr', null, "Fichier " . $newName . ' introuvable');
+//                mailSyn2('fichier pdf introuvable', 'dev@bimp.fr', null, "Fichier " . $newName . ' introuvable');
             }
         }
         return $errors;
@@ -234,8 +236,8 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
 
                     $ref = str_replace(' ', '', $ref);
 
-                    if (strpos($ref, "AR") !== 0)
-                        $errors[] = "La référence " . $ref . "ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
+                    if (strpos($ref, "AR") !== 0 || strlen($ref) > 14)
+                        $errors[] = "La référence '" . $ref . "' ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
                     elseif ($diference > 0.08)
                         $errors[] = "Prix de l'article " . $prod->getLink() . " différent du prix LDLC. Différence de " . price($diference) . " € vous ne pourrez pas passer la commande par cette méthode.";
                     else
@@ -331,8 +333,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     $dom->Load($localFile);
                     libxml_use_internal_errors(true);
                     if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT . '/bimpcommercial/ldlc.orders.valid.xsd')) {
-                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : ' . $localFile;
-
+                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : <a href="'.DOL_URL_ROOT.'/document.php?modulepart=bimpcore&file=tmpUpload.xml">Fichier</a>';
                         BimpCore::addlog('Probléme CML LDLC', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
                             'LIBXML Errors' => libxml_get_errors()
                         ));

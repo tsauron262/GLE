@@ -181,6 +181,23 @@ forms:
                 display_if:
                   field_name: type
                   show_values: 6
+                    
+            contrat_depl: 
+                custom: 1
+                label: Déplacement figurant sur le contrat
+                input_name: id_contrat_depl
+                input:
+                    type: select
+                    options:
+                          array: contratWithDeplacement
+                value: 
+                    callback:
+                        method: getData
+                        params:
+                            - id_line_contrat
+                display_if:
+                  field_name: type
+                  show_values: 5
                   
             service: 
                 custom: 1

@@ -48,6 +48,26 @@ class Bimp_SocBankAccount extends BimpObject
 
         return $html;
     }
+    
+    
+    public function renderExportedField()
+    {
+        $html = $this->displayData('exported');
+        $html .= ' <i class="far fa5-eye rowButton bs-popover" onClick="' . $this->getJsLoadModalCustomContent('renderEcritureTra', 'Ecriture TRA de ' . $this->getRef()) . '" ></i>';
+        return $html;
+    }
+    
+    public function renderEcritureTra()
+    {
+        $html = '';
+
+            viewEcriture::setCurrentObject($this);
+            $html .= viewEcriture::display();
+        
+
+        return $html;
+    }
+
 
     public function displayRum()
     {

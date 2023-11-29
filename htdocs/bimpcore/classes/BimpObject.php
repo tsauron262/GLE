@@ -11,6 +11,7 @@ class BimpObject extends BimpCache
     public $id = null;
     public $alias = 'a';
     public $ref = "";
+    public $object_for_collection = false;
     public static $status_list = array();
     public static $modeDateGraph = 'day';
     public static $common_fields = array(
@@ -3892,6 +3893,12 @@ class BimpObject extends BimpCache
 
         // Vérification des filtres: 
         $filters = $this->checkSqlFilters($filters, $joins, 'a');
+        
+        
+        /*todo a ajouter de maniere gnérique dans les yml d'un objet*/
+        if(is_a($this, 'BimpFi_Fiche')){
+            $filters['new_fi'] = 0;
+        }
 
         // Vérification du champ "order_by": 
         if ($order_by === 'id') {
@@ -4073,6 +4080,26 @@ class BimpObject extends BimpCache
         }
 
         return $objects;
+    }
+
+    public function getListObjectsCollection($fields, $filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC')
+    {
+        $primary = $this->getPrimary();
+
+        $rows = $this->getList($filters, $n, $p, $order_by, $order_way, 'array', array($primary));
+
+
+        $ids = array();
+        foreach ($rows as $r) {
+            $ids[] = (int) $r[$primary];
+        }
+        $objects = array();
+        
+        $collection = BimpCollection::getInstance($this->module, $this->object_name);
+        $collection->addFields($fields);
+        $collection->addItems($ids);
+
+        return $collection;
     }
 
     public function getListTotals($return_fields = array(), $filters = array(), $joins = array())
@@ -7071,7 +7098,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     }
                     $nb = count($filterLinked['linked']['or']);
                     if ($nb > 180)
-                        BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
+                        BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')', 2, 'bimpcore', $this, $filterLinked['linked']);
 
                     $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
                     $list2->addIdentifierSuffix($suffixe . '_linked');
@@ -9357,10 +9384,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $url = BimpCore::getConf('public_base_url', '');
 
             if (!$url) {
-                $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
+                $url = DOL_MAIN_URL_ROOT . '/bimpinterfaceclient/client.php?';
             }
         } else {
-            $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+            global $conf;
+            $url = BimpCore::getConf('base_url', DOL_MAIN_URL_ROOT .'/bimpcore/url_light.php?'.($conf->entity > 1 ? 'entity='.$conf->entity.'&' : ''), 'bimpinterfaceclient');
         }
 
 
@@ -11115,6 +11143,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         return $code_centre;
                     }
                 }
+            }
+        }
+        global $tabCentre;
+        if(count($tabCentre) == 1){
+            foreach ($tabCentre as $code_centre => $centre) {
+                return $code_centre;
             }
         }
 

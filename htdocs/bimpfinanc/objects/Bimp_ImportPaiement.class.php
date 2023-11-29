@@ -209,8 +209,17 @@ class Bimp_ImportPaiement extends BimpObject
                 $dataMsg[] = $payin->getData('date') . ' ' . $payin->getData('name') . ' - ' . $payin->getData('price') . ' €';
             }
         }
-        if (count($dataMsg))
-            mailSyn2('Paiements non identifiés', 'CommerciauxBimp@bimp.fr, boutiquesbimp@bimp.fr, Gestionrecouvrement@bimp.fr, techsav@bimp.fr', null, 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés automatiquement par le système :<br/><br/>' . implode('<br/>', $dataMsg) . '<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer @Reglements Olys et @Recouvrement Olys<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées');
+        if (count($dataMsg)){
+            $mailRep = [];
+            if(BimpCore::getConf('email_compta') != '')
+                $mailRep[BimpCore::getConf('email_compta')] = BimpCore::getConf('email_compta');
+            if(BimpCore::getConf('emails_notify_solvabilite_client_change') != '')
+                $mailRep[BimpCore::getConf('emails_notify_solvabilite_client_change')] = BimpCore::getConf('emails_notify_solvabilite_client_change');
+            $msg = 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés automatiquement par le système :<br/><br/>' . implode('<br/>', $dataMsg);
+            if(count($mailRep))
+                $msg .= '<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer '.explode(' ou ', $mailRep).'<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées';
+            mailSyn2('Paiements non identifiés', BimpCore::getConf('email_paync', '', 'bimpfinanc'), null,  $msg);
+        }
 
         return $return;
     }

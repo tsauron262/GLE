@@ -228,7 +228,7 @@ class indexController extends BimpController
             $html .= '<div class="freeFormRow">';
             $html .= '<div class="freeFormLabel">Centre: </div>';
             $html .= '<div class="freeFormInput">';
-            $html .= BimpInput::renderInput('search_entrepot', 'id_entrepot', $id_entrepot);
+            $html .= BimpInput::renderInput('search_entrepot', 'id_entrepot', $id_entrepot, array('with_caisse_close'=> true, 'include_empty'=> true));
             $html .= '</div>';
             $html .= '</div>';
 

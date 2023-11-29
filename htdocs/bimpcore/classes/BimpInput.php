@@ -614,7 +614,9 @@ class BimpInput
             case 'search_entrepot':
                 $include_empty = (isset($options['include_empty']) ? (int) $options['include_empty'] : 0);
                 $has_commissions_only = (isset($options['has_commissions_only']) ? (int) $options['has_commissions_only'] : 0);
-                $options['options'] = BimpCache::getEntrepotsArray($include_empty, $has_commissions_only);
+                $with_caisse_close = (isset($options['with_caisse_close']) ? (int) $options['with_caisse_close'] : 0);
+                $with_caisse_open = (isset($options['with_caisse_open']) ? (int) $options['with_caisse_open'] : 0);
+                $options['options'] = BimpCache::getEntrepotsArray($include_empty, $has_commissions_only, false, $with_caisse_close, $with_caisse_open);
                 $html .= self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
                 break;
 
@@ -1064,7 +1066,10 @@ class BimpInput
                 break;
 
             case 'datetime':
-                if (BimpTools::getArrayValueFromPath($options, 'with_secondes', 1)) {
+                if (!BimpTools::getArrayValueFromPath($options, 'with_hours', 1)) {
+                    $display_js_format = 'Do MMMM YYYY';
+                    $js_format = 'YYYY-MM-DD';
+                } elseif (!BimpTools::getArrayValueFromPath($options, 'with_secondes', 0)) {
                     $display_js_format = 'Do MMMM YYYY HH:mm';
                     $js_format = 'YYYY-MM-DD HH:mm';
                 } else {

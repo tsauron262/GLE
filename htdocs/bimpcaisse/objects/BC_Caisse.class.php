@@ -5,7 +5,8 @@ class BC_Caisse extends BimpObject
     public static $useYounited = true;
 
     public static $states = array(
-        0 => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger')),
+        10 => array('label' => 'Désactivé', 'icon' => 'times', 'classes' => array('danger')),
+        0 => array('label' => 'Fermée', 'icon' => 'coffee', 'classes' => array('danger')),
         1 => array('label' => 'Ouverte', 'icon' => 'check', 'classes' => array('success'))
     );
     public static $printer_dpis = array(

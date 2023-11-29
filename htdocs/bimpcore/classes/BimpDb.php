@@ -327,6 +327,19 @@ class BimpDb
 
         return null;
     }
+    
+    public function getMin($table, $field, $where = '1')
+    {
+        $sql = 'SELECT MIN(`' . $field . '`) as min FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
+
+        $result = $this->executeS($sql, 'array');
+
+        if (isset($result[0]['min'])) {
+            return $result[0]['min'];
+        }
+
+        return null;
+    }
 
     public function getSum($table, $field, $where = '1')
     {
@@ -356,9 +369,15 @@ class BimpDb
                 }
             }
         }
-        $sql .= ' WHERE ' . $where;
 
+
+        $sql .= ' WHERE ' . $where;
+//        echo $sql;
         $result = $this->executeS($sql, 'array');
+
+//        echo '<pre>';
+//        print_r($result);
+//        exit;
 
         if (isset($result[0]['nb_rows'])) {
             return (int) $result[0]['nb_rows'];

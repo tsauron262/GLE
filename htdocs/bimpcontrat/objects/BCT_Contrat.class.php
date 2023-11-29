@@ -1379,7 +1379,7 @@ class BCT_Contrat extends BimpDolObject
 
     // Actions : 
 
-    public function actionValidate($data, &$success)
+    public function actionValidate($data, &$success = '')
     {
         $errors = array();
         $warnings = array();

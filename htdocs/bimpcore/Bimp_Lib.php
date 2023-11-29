@@ -76,8 +76,8 @@ if (!defined('BIMP_LIB')) {
     BimpCore::setMaxExecutionTime(600);
     BimpCore::setMemoryLimit(1024);
 
-    BimpObject::loadClass('bimpcore', 'BimpNote');
     BimpObject::loadClass('bimpcore', 'Bimp_Log');
+    BimpObject::loadClass('bimpcore', 'BimpNote');
     BimpObject::loadClass('bimpcore', 'BimpObjectLog');
     BimpObject::loadClass('bimpcore', 'Bimp_User');
 

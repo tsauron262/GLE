@@ -14,7 +14,7 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
     public $date_debut = null;
     public $date_fin = null;
     private $bimpDb;
-    public $factures = array();
+    public $collection = null;
     public static $use_cgv = false;
     public $total_ttc = 0;
     public $total_rap = 0;
@@ -50,8 +50,16 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
                     'min' => $this->object->borne_debut,
                     'max' => $this->object->borne_fin
             ));
+            $filters2 = $filters;
+            $filters2['paye'] = 0;
 
-            $this->factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters, 'datec', 'desc');
+            //pour avoir de vrais instance des factures impayées
+            BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters2, 'datec', 'desc');
+            $fact = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+            $fields = array("total_ttc", "ref", "libelle", "datef", "date_lim_reglement", "paiement_status", "type");
+            //pour avoir une collection de toutes les factures (les impayé seront loadé récupéré du cache)
+            $this->collection = $fact->getListObjectsCollection($fields, $filters, null, null, 'datec', 'desc', 'array', array('rowid'));
+//            echo '<pre>';print_r($idsFacture);die;
 
             $sql = 'SELECT SUM(r.amount_ttc) as amount';
             $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe_remise_except r';
@@ -134,7 +142,7 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
     public function renderLines()
     {
 
-        if (empty($this->factures)) {
+        if (count($this->collection->getIds()) == 0) {
             $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune facture</p>');
         } else {
             $table = new BimpPDF_Table($this->pdf);
@@ -148,7 +156,14 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
             $table->addCol('paiement', 'Paiement', 18, 'text-align: center;', '', 'text-align: center;');
             $table->addCol('remain', 'Reste à payer', 23, 'text-align: center;', '', 'text-align: center;');
 
-            foreach ($this->factures as $facture) {
+            
+            foreach($this->collection->getIds() as $id){
+                $facture = $this->collection->getObjectInstance($id);
+//            }
+//        foreach ($rows as $r) {
+//            $objects[] = clone $collection->getObjectInstance($r[$primary]);
+//        }
+//            foreach ($this->factures as $facture) {
                 //                if(stripos($facture->getData('ref'), 'ACC') !== false){
                 //                echo $facture->printData();die;}
                 if ($facture->getData('type') == 3) {
@@ -157,8 +172,10 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
                     $this->total_ttc += round((float) $facture->getData('total_ttc'), 2);
                 }
 
-
-                $rap = $facture->getRemainToPay();
+                $rap = 0;
+                if($facture->isLoaded() && !$facture->object_for_collection){
+                    $rap = $facture->getRemainToPay();
+                }
                 $this->total_rap += $rap;
 
                 $row = array(
@@ -176,34 +193,36 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
                     $row['paiement'] = Bimp_Facture::$paiement_status[(int) $facture->getData('paiement_status')]['label'];
                 }
 
-                $id_BLS = $this->bimpDb->getValues('bl_commande_shipment', 'id', 'id_facture = ' . $facture->id);
+                if(count($this->collection->getIds()) < 100){
+                    $id_BLS = $this->bimpDb->getValues('bl_commande_shipment', 'id', 'id_facture = ' . $facture->id);
 
-                if (is_array($id_BLS) && count($id_BLS) > 0) {
-                    $fl = true;
-                    foreach ($id_BLS as $id_BL) {
-                        if ($id_BL > 0) {
-                            if (!$fl) {
-                                $row['livraison'] .= '<br/>';
-                            } else {
-                                $fl = false;
-                            }
-                            
-                            $BL = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $id_BL);
-                            $id_contact = $BL->getcontact();
-                            if($id_contact){
-                                if(!isset($cache['contact'.$id_contact]))
-                                    $cache['contact'.$id_contact] = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
-                                $socp = $cache['contact'.$id_contact];
-                                if (!is_null($socp)) {
-                                    $row['livraison'] .= ' - ' . $socp->lastname . ' ' . $socp->firstname;
+                    if (is_array($id_BLS) && count($id_BLS) > 0) {
+                        $fl = true;
+                        foreach ($id_BLS as $id_BL) {
+                            if ($id_BL > 0) {
+                                if (!$fl) {
+                                    $row['livraison'] .= '<br/>';
                                 } else {
-                                    $row['livraison'] .= ' - Contact #' . $id_contact . ' supprimé';
+                                    $fl = false;
+                                }
+
+                                $BL = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $id_BL);
+                                $id_contact = $BL->getcontact();
+                                if($id_contact){
+                                    if(!isset($cache['contact'.$id_contact]))
+                                        $cache['contact'.$id_contact] = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
+                                    $socp = $cache['contact'.$id_contact];
+                                    if (!is_null($socp)) {
+                                        $row['livraison'] .= ' - ' . $socp->lastname . ' ' . $socp->firstname;
+                                    } else {
+                                        $row['livraison'] .= ' - Contact #' . $id_contact . ' supprimé';
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        $row['livraison'] = $this->object->nom;
                     }
-                } else {
-                    $row['livraison'] = $this->object->nom;
                 }
 
                 $table->rows[] = $row;

@@ -7,6 +7,7 @@ class BimpCollection
     public $data = array();
     public $active = true;
     private $fields_sup = array();
+    private $ids = array();
 
     // Construction: 
 
@@ -30,6 +31,10 @@ class BimpCollection
     {
         return BimpCache::isBimpObjectInCache($this->object->module, $this->object->object_name, $id_object);
     }
+    
+    public function getIds(){
+        return $this->ids;
+    }
 
     public function getObjectInstance($id_object, &$is_in_cache = false)
     {
@@ -48,6 +53,7 @@ class BimpCollection
 
         if (isset($this->data[$id_object])) {
             $this->object->setPreloadedData($id_object, $this->data[$id_object]['data']);
+            $this->object->object_for_collection = true;
             $is_in_cache = false;
             return $this->object;
         }
@@ -95,6 +101,7 @@ class BimpCollection
         $ids = array();
 
         foreach ($ids_list as $id) {
+            $this->ids[$id] = $id;
             if ($this->isObjectInCache($id)) {
                 continue;
             }

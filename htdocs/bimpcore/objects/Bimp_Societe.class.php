@@ -2106,7 +2106,13 @@ class Bimp_Societe extends BimpDolObject
             }
 
             $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
-            $liste = $contrat->getList(['statut' => 11, 'fk_soc' => $this->id]);
+            $liste = $contrat->getList(array(
+                'fk_soc' => $this->id,
+                'or_version' => array('or' => array(
+                    'or1' => array('and_fields' => array('version' => 1, 'statut' => 11)),
+                    'or2' => array('and_fields' => array('version' => 2, 'statut' => 1))
+                ))
+            ));
 
             if (count($liste)) {
                 $s = (count($liste) > 1) ? 's' : '';

@@ -11,6 +11,7 @@ class BimpObject extends BimpCache
     public $id = null;
     public $alias = 'a';
     public $ref = "";
+    public $object_for_collection = false;
     public static $status_list = array();
     public static $modeDateGraph = 'day';
     public static $common_fields = array(
@@ -4079,6 +4080,26 @@ class BimpObject extends BimpCache
         }
 
         return $objects;
+    }
+
+    public function getListObjectsCollection($fields, $filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC')
+    {
+        $primary = $this->getPrimary();
+
+        $rows = $this->getList($filters, $n, $p, $order_by, $order_way, 'array', array($primary));
+
+
+        $ids = array();
+        foreach ($rows as $r) {
+            $ids[] = (int) $r[$primary];
+        }
+        $objects = array();
+        
+        $collection = BimpCollection::getInstance($this->module, $this->object_name);
+        $collection->addFields($fields);
+        $collection->addItems($ids);
+
+        return $collection;
     }
 
     public function getListTotals($return_fields = array(), $filters = array(), $joins = array())

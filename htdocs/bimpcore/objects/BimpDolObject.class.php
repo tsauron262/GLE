@@ -753,16 +753,18 @@ class BimpDolObject extends BimpObject
                                     }
                                     break;
                                 case 'contrat':
-                                    $contrat_instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', (int) $item['id_object']);
-                                    if (BimpObject::objectLoaded($contrat_instance)) {
-                                        $icon = $contrat_instance->params['icon'];
-                                        $objects[] = array(
-                                            'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($contrat_instance->getLabel()),
-                                            'ref'      => $contrat_instance->getNomUrl(0, true, true, 'fiche_contrat'),
-                                            'date'     => $contrat_instance->displayData('date_start'),
-                                            'total_ht' => $contrat_instance->getTotalContrat() . "€",
-                                            'status'   => $contrat_instance->displayData('statut')
-                                        );
+                                    if(BimpCore::isModuleActive('bimpcontract')){
+                                        $contrat_instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', (int) $item['id_object']);
+                                        if (BimpObject::objectLoaded($contrat_instance)) {
+                                            $icon = $contrat_instance->params['icon'];
+                                            $objects[] = array(
+                                                'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($contrat_instance->getLabel()),
+                                                'ref'      => $contrat_instance->getNomUrl(0, true, true, 'fiche_contrat'),
+                                                'date'     => $contrat_instance->displayData('date_start'),
+                                                'total_ht' => $contrat_instance->getTotalContrat() . "€",
+                                                'status'   => $contrat_instance->displayData('statut')
+                                            );
+                                        }
                                     }
                                     break;
 

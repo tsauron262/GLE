@@ -619,6 +619,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     // Getters:
 
+    public function getExtraObjectIcons()
+    {
+        if ($this->isLoaded() && $this->isLogistiqueActive()) {
+            $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
+            $html = '<span class="objectIcon bs-popover" onclick="window.open(\'' . $url . '\')" ' . BimpRender::renderPopoverData('Logistique') . '>';
+            $html .= BimpRender::renderIcon('fas_truck-loading');
+            $html .= '</span>';
+
+            return $html;
+        }
+
+        return '';
+    }
+
     public function getData($field, $withDefault = true)
     {
         // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
@@ -3200,7 +3214,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
             }
         }
-        
+
         $this->checkInvoiceStatus();
 
         return $errors;

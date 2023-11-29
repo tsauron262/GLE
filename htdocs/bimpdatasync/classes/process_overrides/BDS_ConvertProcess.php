@@ -628,7 +628,7 @@ class BDS_ConvertProcess extends BDSProcess
 //                'not_in' => array(242102, 244285, 247393, 249512, 251356, 251365, 253349, 253569, 253573, 253611, 253819, 256339, 256959, 258031, 258489, 258594, 258878, 258978, 259617, 270548, 265263, 262477, 262612, 264878, 259471, 259726, 259793, 259907, 260774, 262079, 256259, 256725, 258973, 253960, 254421, 254803, 237622, 241172, 242222, 150296, 156248, 185523, 173892, 187315, 187613, 180787, 176264, 177399, 175384, 166617, 165207, 165477, 163893, 190608, 1601103, 207407, 207401, 198753, 202046, 197604, 193248, 196127, 195135, 192524, 191376, 212882, 213978, 221129, 229650, 231707, 232659, 234192, 236104, 234007, 236987, 249927, 251125, 251290, 251330, 251370, 252831, 253565)
 //            ),
             'a.id_contrat_line_export' => 0,
-            'a.no_abos_convert'        => 0,
+//            'a.no_abos_convert'        => 0,
             '(a.qty_modif + cdet.qty)' => array(
                 'operator' => '>',
                 'value'    => 0
@@ -758,6 +758,7 @@ class BDS_ConvertProcess extends BDSProcess
                         $line_errors = array();
 
                         $line_infos['qty'] = $qty;
+                        $line_infos['id_product'] = $product->id;
 
                         $qty_shipped = round((float) $line->getShippedQty(), 6);
                         $qty_shipped_valid = round((float) $line->getShippedQty(null, true), 6);
@@ -790,16 +791,9 @@ class BDS_ConvertProcess extends BDSProcess
                         $line_infos['fac_periodicity'] = $fac_periodicity;
                         $line_infos['achat_periodicity'] = $achat_periodicity;
 
-//                        if (!(int) $line->getData('fac_nb_periods')) {
-//                            $fac_periodicity = 0;
-//                        }
-//
-//                        if (!(int) $line->getData('achat_nb_periods')) {
-//                            $achat_periodicity = 0;
-//                        }
-
                         $line_infos['fac_nb_perdiods'] = (int) $line->getData('fac_nb_periods');
                         $line_infos['achat_nb_perdiods'] = (int) $line->getData('achat_nb_periods');
+                        $line_infos['alerts'] = array();
 
                         $date_from = '';
                         $date_to = '';
@@ -818,48 +812,40 @@ class BDS_ConvertProcess extends BDSProcess
                         if ($date_from && $date_to) {
                             $interval = BimpTools::getDatesIntervalData($date_from, $date_to);
                             if ($interval['remain_days'] > 1) {
-                                $line_errors[] = 'Durée invalide selon les dates de début et fin enregistrées (' . $date_from . ' => ' . $date_to . ' - Jours restants: ' . $interval['remain_days'] . ')';
-                            } else {
+                                if (!$duration) {
+                                    $duration = ($interval['full_years'] + 1) * 12;
+                                }
+                                $dt = new DateTime($date_to);
+                                $dt->sub(new DateInterval('P' . $duration . 'M'));
+                                $dt->add($one_day_interval);
+                                $date_from = $dt->format('Y-m-d');
+                                $line_infos['alerts'][] = 'Début ajusté à l\'année entière la plus proche';
+                            } elseif (!$duration) {
                                 $duration = $interval['full_monthes'];
-
-                                if ($fac_periodicity && (int) $line->getData('fac_nb_periods')) {
-                                    $fac_duration = $line->getData('fac_nb_periods') * $fac_periodicity;
-                                    if ($fac_duration != $duration) {
-                                        $line_errors[] = 'La durée de facturation (' . $fac_duration . ') ne correspond pas à la durée de la ligne de commande (' . $duration . ')))';
-                                    }
-                                }
-
-                                if ($achat_periodicity && (int) $line->getData('achat_nb_periods')) {
-                                    $achat_duration = $line->getData('achat_nb_periods') * $achat_periodicity;
-                                    if ($achat_duration != $duration) {
-                                        $line_errors[] = 'La durée d\'achat (' . $achat_duration . ') ne correspond pas à la durée de la ligne de commande (' . $duration . ')';
-                                    }
-                                }
+                                $line_infos['alerts'][] = 'Durée basée sur les dates';
                             }
                         } else {
                             if ($fac_periodicity && $achat_periodicity) {
-                                if (($line->getData('fac_nb_periods') * $fac_periodicity) != ($line->getData('achat_nb_periods') * $achat_periodicity)) {
-                                    $line_errors[] = 'La durée de facturation (' . $line->getData('fac_nb_periods') * $fac_periodicity . ') ne correspond pas à la durée d\'achat (' . $line->getData('achat_nb_periods') * $achat_periodicity . ')';
-                                } elseif ($line->getData('fac_periods_start') != $line->getData('achat_periods_start')) {
+//                                if (($line->getData('fac_nb_periods') * $fac_periodicity) != ($line->getData('achat_nb_periods') * $achat_periodicity)) {
+//                                    $line_errors[] = 'La durée de facturation (' . $line->getData('fac_nb_periods') * $fac_periodicity . ') ne correspond pas à la durée d\'achat (' . $line->getData('achat_nb_periods') * $achat_periodicity . ')';
+//                                } else
+                                if ($line->getData('fac_periods_start') != $line->getData('achat_periods_start')) {
                                     $line_errors[] = 'Les dates de début de facturation (' . $line->getData('fac_periods_start') . ') et d\'achat (' . $line->getData('achat_periods_start') . ') ne correspondent pas';
                                 }
                             }
                         }
 
                         if (!count($line_errors)) {
-                            if ($fac_periodicity) {
-                                if (!$date_from) {
-                                    $date_from = $line->getData('fac_periods_start');
-                                }
-                                if (!$duration) {
-                                    $duration = (int) $line->getData('fac_nb_periods') * $fac_periodicity;
-                                }
-                            } elseif ($achat_periodicity) {
-                                if (!$date_from) {
-                                    $date_from = $line->getData('achat_periods_start');
-                                }
-                                if (!$duration) {
-                                    $duration = (int) $line->getData('achat_nb_periods') * $achat_periodicity;
+                            if (!$duration) {
+                                if ($fac_periodicity && (int) $line->getData('fac_nb_periods')) {
+                                    $duration = $line->getData('fac_nb_periods') * $fac_periodicity;
+                                    $line_infos['alerts'][] = 'Durée basée sur la facturation';
+                                } elseif ($achat_periodicity && (int) $line->getData('achat_nb_periods')) {
+                                    $duration = $line->getData('achat_nb_periods') * $achat_periodicity;
+                                    $line_infos['alerts'][] = 'Durée basée sur les achats';
+                                } elseif ((int) $line->getData('exp_periodicity') && (int) $line->getData('exp_nb_periods')) {
+                                    $duration = (int) $line->getData('exp_periodicity') * (int) $line->getData('exp_nb_periods');
+                                    $line_infos['alerts'][] = 'Durée basée sur les livraisons';
                                 }
                             }
 
@@ -868,6 +854,14 @@ class BDS_ConvertProcess extends BDSProcess
                                 $this->incIgnored();
                                 $has_line_errors = true;
                                 continue;
+                            }
+
+                            if (!$date_from) {
+                                if ($fac_periodicity && $line->getData('fac_periods_start')) {
+                                    $date_from = $line->getData('fac_periods_start');
+                                } elseif ($achat_periodicity && $line->getData('achat_periods_start')) {
+                                    $date_from = $line->getData('achat_periods_start');
+                                }
                             }
 
                             if (!$date_from) {
@@ -968,6 +962,14 @@ class BDS_ConvertProcess extends BDSProcess
                         }
 
                         $infos = '';
+                        if ((int) $line_infos['id_product']) {
+                            $infos .= '{{Produit:' . $line_infos['id_product'] . '}}<br/>';
+                        }
+
+                        if (!empty($line_infos['alerts'])) {
+                            $infos .= BimpRender::renderAlerts($line_infos['alerts'], 'warning');
+                        }
+
                         if ($line_infos['date_from']) {
                             $infos .= 'Du  <b>' . date('d / m / Y', strtotime($line_infos['date_from'])) . '</b> ';
                         }
@@ -979,7 +981,11 @@ class BDS_ConvertProcess extends BDSProcess
                             $infos .= '<br/>';
                         }
 
-                        $infos .= 'Qty : ' . $line_infos['qty'] . ' - exp: ' . $line_infos['shipped_qty'] . ' - achats: ' . $line_infos['bought_qty'] . ' - fac : ' . $line_infos['billed_qty'] . '<br/>';
+                        $infos .= '<b>Qty : ' . $line_infos['qty'] . '</b>';
+                        $infos .= '<span class="' . (!$line_infos['shipped_qty'] ? 'danger' : ($line_infos['shipped_qty'] == $line_infos['qty'] ? 'success' : 'warning')) . '"> - exp: ' . $line_infos['shipped_qty'] . '</span>';
+                        $infos .= '<span class="' . (!$line_infos['bought_qty'] ? 'danger' : ($line_infos['bought_qty'] == $line_infos['qty'] ? 'success' : 'warning')) . '"> - achats: ' . $line_infos['bought_qty'] . '</span>';
+                        $infos .= '<span class="' . (!$line_infos['billed_qty'] ? 'danger' : ($line_infos['billed_qty'] == $line_infos['qty'] ? 'success' : 'warning')) . '"> - fac : ' . $line_infos['billed_qty'] . '</span><br/>';
+
                         $infos .= 'Stock régul : ' . $line_infos['stock_regul'] . '<br/>';
                         $infos .= '<b>Fac : </b>';
                         if ((int) $line_infos['fac_periodicity']) {
@@ -987,7 +993,7 @@ class BDS_ConvertProcess extends BDSProcess
                             $infos .= ' - Nb périodes facturée(s) : ' . $line_infos['fac_data']['nb_periods_billed'] . ' sur ' . $line_infos['fac_data']['nb_total_periods'] . ' (restantes : ' . $line_infos['fac_data']['nb_periods_max'] . ')<br/>';
                             $infos .= ' - Début : ' . date('d / m / Y', strtotime($line_infos['fac_data']['start_date'])) . '<br/>';
                         } else {
-                            $infos .= 'Aucune périodicité.<br/>';
+                            $infos .= '<span class="danger">Aucune</span><br/>';
                         }
                         if (isset($line_infos['first_fac_days_supp'])) {
                             $infos .= 'Décalage début facturation : ' . (int) $line_infos['first_fac_days_supp'] . ' jours <br/>';
@@ -999,28 +1005,28 @@ class BDS_ConvertProcess extends BDSProcess
                             $infos .= ' - Nb périodes achetée(s) : ' . $line_infos['achat_data']['nb_periods_bought'] . ' sur ' . $line_infos['achat_data']['nb_total_periods'] . ' (restantes : ' . $line_infos['achat_data']['nb_periods_max'] . ')<br/>';
                             $infos .= ' - Début : ' . date('d / m / Y', strtotime($line_infos['achat_data']['start_date'])) . '<br/>';
                         } else {
-                            $infos .= 'Aucune périodicité.<br/>';
+                            $infos .= '<span class="danger">Aucune</span><br/>';
                         }
                         if (isset($line_infos['first_achat_days_supp'])) {
-                            $infos .= 'Décalage début achat : ' . (int) $line_infos['first_achat_days_supp'] . ' jours <br/>';
+                            $infos .= '<b>Décalage début achat : ' . (int) $line_infos['first_achat_days_supp'] . ' jours</b><br/>';
                         }
 
                         if (count($line_errors)) {
-                            $msg = BimpRender::renderFoldableContainer('Infos ligne', $infos, array('open' => false));
+                            $msg = BimpRender::renderFoldableContainer('Infos ligne', $infos, array('open' => true));
                             $msg .= BimpTools::getMsgFromArray($line_errors, 'Erreur(s)');
                             $this->Error($msg, $commande, $line_ref);
                             $this->incIgnored();
                             $has_line_errors = true;
                             continue;
                         } else {
-                            if (!$to_bill && (!$achat_periodicity || !$to_buy)) {
-                                $this->Alert('Il ne reste aucune période à facturer ni à acheter', $commande, $line_ref);
-                                $no_transac_db->update('bimp_commande_line', array(
-                                    'no_abos_convert' => 1
-                                        ), 'id = ' . $line->id);
-                                $this->incIgnored();
-                                continue;
-                            }
+//                            if (!$to_bill && (!$achat_periodicity || !$to_buy)) {
+//                                $this->Alert('Il ne reste aucune période à facturer ni à acheter', $commande, $line_ref);
+//                                $no_transac_db->update('bimp_commande_line', array(
+//                                    'no_abos_convert' => 1
+//                                        ), 'id = ' . $line->id);
+//                                $this->incIgnored();
+//                                continue;
+//                            }
 
                             $pfp = null;
                             if ($line->id_fourn_price) {
@@ -1070,30 +1076,28 @@ class BDS_ConvertProcess extends BDSProcess
                                 'buy_price_ht'                 => (BimpObject::objectLoaded($pfp) ? $pfp->getData('price') : $line->pa_ht)
                             );
 
-                            $infos = 'LIGNE DE COMMANDE : <br/>' . $infos . '<br/>LIGNE DE CONTRAT : <br/>';
-                            $infos .= 'Du  <b>' . date('d / m / Y', strtotime($contrat_line['date_ouverture'])) . '</b> ';
-                            $infos .= 'au  <b>' . date('d / m / Y', strtotime($contrat_line['date_fin_validite'])) . '</b>';
-                            $infos .= ' (durée : ' . $contrat_line['duration'] . ' mois)<br/>';
-                            $infos .= '<b>Fac : </b><br/>';
-                            $infos .= ' - Périodicité : <b>' . $contrat_line['fac_periodicity'] . '</b>';
-                            $infos .= ' / Début : <b>' . date('d / m / Y', strtotime($contrat_line['date_fac_start'])) . '</b>';
-                            $infos .= ' / Prochaine Fac : <b>' . date('d / m / Y', strtotime($contrat_line['date_next_facture'])) . '</b><br/>';
-                            $infos .= '<b>Achat : </b><br/>';
-                            $infos .= ' - Périodicité : <b>' . $contrat_line['achat_periodicity'] . '</b>';
-                            $infos .= ' / Début : <b>' . date('d / m / Y', strtotime($contrat_line['date_achat_start'])) . '</b>';
-                            $infos .= ' / Prochain achat : <b>' . date('d / m / Y', strtotime($contrat_line['date_next_achat'])) . '</b><br/>';
-
-                            $msg = 'Ajout d\'une ligne de contrat <br/>';
+                            $msg = '';
                             if (in_array($line->id, $validated)) {
                                 $msg .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Validée</span><br/>';
                             } elseif (isset($not_validated[$line->id])) {
                                 $msg .= '<span class="danger">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Invalide</span><br/>';
                                 $msg .= '<span class="danger">' . $not_validated[$line->id] . '</span><br/>';
                             }
-                            $msg .= BimpRender::renderFoldableContainer('Infos', $infos, array('open' => false));
 
-                            $this->Info($msg, $commande, $line_ref);
+                            $infos = 'LIGNE DE COMMANDE : <br/>' . $infos . '<br/>LIGNE DE CONTRAT : <br/>';
+                            $infos .= 'Du  <b>' . date('d / m / Y', strtotime($contrat_line['date_ouverture'])) . '</b> ';
+                            $infos .= 'au  <b>' . date('d / m / Y', strtotime($contrat_line['date_fin_validite'])) . '</b>';
+                            $infos .= '  - <span class="' . (!in_array($contrat_line['duration'], array(1, 3, 6, 12, 24, 36)) ? 'danger' : 'bold') . '">' . $contrat_line['duration'] . ' mois</span><br/>';
+                            $infos .= '<b>Fac : </b><span class="' . (in_array($contrat_line['fac_periodicity'], array(1, 3, 6, 12, 24, 36)) ? 'bold' : 'danger') . '">' . $contrat_line['fac_periodicity'] . '</span>';
+                            $infos .= ' - <span class="' . ($contrat_line['date_fac_start'] > $date_to ? 'danger' : ($contrat_line['date_fac_start'] > $date_from ? 'warning' : 'bold')) . '">' . date('d / m / Y', strtotime($contrat_line['date_fac_start'])) . '</span><br/>';
+//                            $infos .= ' / <b>' . date('d / m / Y', strtotime($contrat_line['date_next_facture'])) . '</b><br/>';
+                            $infos .= '<b>Achat : </b><span class="' . (in_array($contrat_line['achat_periodicity'], array(1, 3, 6, 12, 24, 36)) ? 'bold' : 'danger') . '">' . $contrat_line['achat_periodicity'] . '</span>';
+                            if ((int) $contrat_line['achat_periodicity']) {
+                                $infos .= ' - <span class="' . ($contrat_line['date_achat_start'] > $date_to ? 'danger' : ($contrat_line['date_achat_start'] > $date_from ? 'warning' : 'bold')) . '">' . date('d / m / Y', strtotime($contrat_line['date_achat_start'])) . '</span><br/>';
+//                            $infos .= ' / Prochain achat : <b>' . date('d / m / Y', strtotime($contrat_line['date_next_achat'])) . '</b><br/>';
+                            }
 
+                            $this->Info($msg . $infos, $commande, $line_ref);
                             $contrat_lines[] = $contrat_line;
                         }
                     }
@@ -1103,6 +1107,7 @@ class BDS_ConvertProcess extends BDSProcess
                         if (empty($contrat_lines) || $has_line_errors) {
                             $this->incIgnored();
                         } else {
+                            $this->Info('Commmande ok', $commande);
                             $this->incUpdated();
                         }
                     } else {
@@ -1111,8 +1116,10 @@ class BDS_ConvertProcess extends BDSProcess
 
                             $new_contrat = false;
                             $contrat = BimpCache::findBimpObjectInstance('bimpcontrat', 'BCT_Contrat', array(
-                                        'fk_soc'  => (int) $commande->getData('fk_soc'),
-                                        'version' => 2
+                                        'fk_soc'             => (int) $commande->getData('fk_soc'),
+                                        'fk_soc_facturation' => (int) $commande->getData('id_client_facture'),
+                                        'entrepot'           => (int) $commande->getData('entrepot'),
+                                        'version'            => 2
                                             ), true);
 
                             if (!BimpObject::objectLoaded($contrat)) {

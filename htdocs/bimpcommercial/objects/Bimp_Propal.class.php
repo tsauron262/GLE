@@ -2129,7 +2129,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 if (empty($lines)) {
                     continue;
                 }
-                
+
                 if (!(int) $id_contrat) {
                     $id_contrat = (int) BimpTools::getArrayValueFromPath($data, 'id_contrat', 0);
                 }
@@ -2179,6 +2179,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 }
                             }
 
+                            $line_date_ouv = $date_ouv . ' 00:00:00';
+                            if ($line->date_from) {
+                                $line_date_ouv = date('Y-m-d', strtotime($line->date_from)) . ' 00:00:00';
+                            }
+
                             BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
                                 'fk_contrat'                   => $contrat->id,
                                 'fk_product'                   => $line->id_product,
@@ -2202,9 +2207,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 'line_origin_type'             => 'propal_line',
                                 'linked_id_object'             => $line->getData('linked_id_object'),
                                 'linked_object_name'           => $line->getData('linked_object_name'),
-                                'achat_periodicity'            => (BimpObject::objectLoaded($prod)? $prod->getData('achat_def_periodicity') : 0),
+                                'achat_periodicity'            => (BimpObject::objectLoaded($prod) ? $prod->getData('achat_def_periodicity') : 0),
                                 'variable_qty'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
-                                'date_ouverture_prevue'        => $date_ouv
+                                'date_ouverture_prevue'        => $line_date_ouv
                                     ), true, $line_errors, $line_warnings);
                         }
 

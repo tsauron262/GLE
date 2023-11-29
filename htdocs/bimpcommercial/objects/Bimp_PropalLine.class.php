@@ -418,7 +418,7 @@ class Bimp_PropalLine extends ObjectLine
 
     public function validate()
     {
-        $errors = parent::validate();
+        $errors = array();
 
         if ($this->isAbonnement()) {
             $id_contrat_line = (int) $this->getData('id_linked_contrat_line');
@@ -431,6 +431,13 @@ class Bimp_PropalLine extends ObjectLine
                     $this->set('abo_nb_renouv', $contrat_line->getDataAtDate('nb_renouv'));
                 }
             }
+
+            if ($this->date_from && (int) $this->getData('abo_duration')) {
+                $dt = new DateTime($this->date_from);
+                $dt->add(new DateInterval('P' . (int) $this->getData('abo_duration') . 'M'));
+                $dt->sub(new DateInterval('P1D'));
+                $this->date_to = $dt->format('Y-m-d');
+            }
         } else {
             $this->set('abo_fac_periodicity', 0);
             $this->set('abo_duration', 0);
@@ -438,6 +445,8 @@ class Bimp_PropalLine extends ObjectLine
             $this->set('abo_nb_renouv', 0);
             $this->set('id_linked_contrat_line', 0);
         }
+
+        $errors = BimpTools::merge_array($errors, parent::validate());
 
         return $errors;
     }

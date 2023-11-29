@@ -565,7 +565,7 @@ forms:
               input: 
                   type: date
                   display_now: 1
-                  help: Champ facultatif. Laisser vide si cette date n'est pas encore connue
+                  help: "Champ facultatif. Laisser vide si cette date n'est pas encore connue.<br/><b>Attention : cette date sera appliquée uniquement pour les abonnements dont la date de début n'est pas déjà renseignée dans le devis</b>"
             - custom: 1
               label: Contrat(s) d'abonnement
               data_type: id

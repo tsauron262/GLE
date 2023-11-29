@@ -2152,6 +2152,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if (!count($errors)) {
                         $success = 'Contrat ' . $contrat->getRef() . ' créé avec succès';
                     }
+                    
+                    $contrat->copyContactsFromOrigin($this);
                 }
 
                 if (!count($errors)) {

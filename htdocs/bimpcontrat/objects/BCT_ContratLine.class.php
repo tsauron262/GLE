@@ -42,7 +42,7 @@ class BCT_ContratLine extends BimpObject
     public static $dol_fields = array('fk_contrat', 'fk_product', 'label', 'description', 'commentaire', 'statut', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'remise', 'fk_product_fournisseur_price', 'buy_price_ht', 'total_ht', 'total_tva', 'total_ttc', 'date_commande', 'date_ouverture_prevue', 'date_fin_validite', 'date_cloture', 'fk_user_author', 'fk_user_ouverture', 'fk_user_cloture');
     protected $data_at_date = null;
 
-    // Droits User : 
+    // Droits User:
 
     public function canSetAction($action)
     {
@@ -1143,12 +1143,12 @@ class BCT_ContratLine extends BimpObject
             $where = 'rowid IN (' . implode(',', $id_lines) . ')';
             $where .= ' AND date_ouverture_prevue IS NOT NULL AND date_ouverture_prevue != \'\'';
             $date = $this->db->getMin('contratdet', 'date_ouverture_prevue', $where);
-            
+
             if ($date) {
                 $date = date('Y-m-d', strtotime($date));
             }
         }
-        
+
         if (!$date) {
             $date = date('Y-m-d');
         }
@@ -1589,9 +1589,22 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
-    public function displayPeriodicity()
+    public function displayPeriodicity($type)
     {
         $html = '';
+
+        if ($this->field_exists($type . '_periodicity')) {
+            $val = (int) $this->getData($type . '_periodicity');
+
+            if (!$val) {
+                $html .= '<span class="danger">Aucune</span>';
+            } elseif (isset(self::$periodicities[$val])) {
+                $html .= self::$periodicities[$val];
+            } else {
+                $html .= 'Tous les ' . $val . ' mois';
+            }
+        }
+
         return $html;
     }
 
@@ -1672,13 +1685,23 @@ class BCT_ContratLine extends BimpObject
     {
         $html = '';
 
-        if ((int) $this->getData('fac_periodicity')) {
-            $is_variable = (int) $this->getData('variable_qty');
+        $fac_periodicity = (int) $this->getData('fac_periodicity');
+        if ($fac_periodicity) {
+            $html .= '<b>Facturation ';
+            if (isset(self::$periodicities[$fac_periodicity])) {
+                $html .= self::$periodicities[$fac_periodicity] . ' ';
+            } else {
+                $html .= 'tous les ' . $fac_periodicity . ' mois ';
+            }
+
             $date_start = $this->getData('date_fac_start');
             if ($date_start) {
-                $html .= 'Début facturation : <b>' . date('d / m / Y', strtotime($date_start)) . '</b><br/>';
+                $html .= 'à partir du ' . date('d / m / Y', strtotime($date_start));
             }
-            $html .= 'Périodicité de facturation: <b>' . $this->displayDataDefault('fac_periodicity') . '</b><br/>';
+
+            $html .= '</b><br/><br/>';
+
+            $is_variable = (int) $this->getData('variable_qty');
             $html .= 'Nombre de périodes : <b>' . $this->getFacNbPeriods() . '</b><br/>';
             $html .= 'Qté par période ' . ($is_variable ? '(estimée) ' : '') . ': <b>' . $this->getFacQtyPerPeriod() . '</b>';
         } else {
@@ -1692,32 +1715,40 @@ class BCT_ContratLine extends BimpObject
     {
         $html = '';
 
-        if ((int) $this->getData('fk_product_fournisseur_price')) {
-            $pfp = $this->getChildObject('fourn_price');
-            if (BimpObject::objectLoaded($pfp)) {
-                $html .= '<b>Prix d\'achat HT actuel: </b>' . BimpTools::displayMoneyValue($pfp->getData('price'));
-                $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $pfp->getData('fk_soc'));
+        $achat_periodicity = (int) $this->getData('achat_periodicity');
 
-                if (BimpObject::objectLoaded($fourn)) {
-                    $html .= '<br/><b>Fournisseur : </b>' . $fourn->getLink();
+        if ($achat_periodicity) {
+            $html .= '<b>Achats ';
+            if (isset(self::$periodicities_masc[$achat_periodicity])) {
+                self::$periodicities_masc[$achat_periodicity] . 's';
+            } else {
+                $html = ' tous les ' . $achat_periodicity . ' mois';
+            }
+            $date_start = $this->getData('date_achat_start');
+            if ($date_start) {
+                $html .= 'à partir du : <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
+            }
+            $html .= '</b>';
+            $html .= '<br/><br/>';
+
+            if ((int) $this->getData('fk_product_fournisseur_price')) {
+
+                $pfp = $this->getChildObject('fourn_price');
+                if (BimpObject::objectLoaded($pfp)) {
+                    $html .= '<b>Prix d\'achat HT actuel: </b>' . BimpTools::displayMoneyValue($pfp->getData('price'));
+                    $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $pfp->getData('fk_soc'));
+
+                    if (BimpObject::objectLoaded($fourn)) {
+                        $html .= '<br/><b>Fournisseur : </b>' . $fourn->getLink();
+                    }
+                } else {
+                    $html .= '<span class="danger">Le prix d\'achat fournisseur #' . $this->getData('fk_product_fournisseur_price') . ' n\'existe plus</span>';
                 }
             } else {
-                $html .= '<span class="danger">Le prix d\'achat fournisseur #' . $this->getData('fk_product_fournisseur_price') . ' n\'existe plus</span>';
+                $html .= '<span class="danger">Aucun prix d\'achat fournisseur spécifié</span>';
             }
         } else {
-            $html .= '<span class="danger">Aucun prix d\'achat fournisseur spécifié</span>';
-        }
-
-        $achat_periodicity = (int) $this->getData('achat_periodicity');
-        if ($achat_periodicity) {
-            $date_start = $this->getData('date_achat_start');
-
-            if ($date_start) {
-                $html .= '<br/>Début des achats : <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
-            }
-            $html .= '<br/>Périodicité d\'achat : <b>' . $this->displayDataDefault('achat_periodicity') . '</b>';
-        } else {
-            $html .= '<br/><span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Périodicité d\'achat non définie</span>';
+            $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Pas d\'achats périodiques</span>';
         }
 
         return $html;

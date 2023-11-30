@@ -52,7 +52,7 @@ class BS_SAV_ExtEntity extends BS_SAV
                 $dolLine = $line->getChildObject('line');
                 if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
 //                    print_r($dolLine);die;
-                    return -$dolLine->total_ttc /** 1.2*/;
+                    return -$dolLine->subprice /** 1.2*/;
                 }
             }
         }

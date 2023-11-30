@@ -1695,7 +1695,9 @@ class BCT_ContratLine extends BimpObject
             }
 
             $date_start = $this->getData('date_fac_start');
-            if ($date_start) {
+            $date_fin = $this->getData('date_fin_validite');
+
+            if ($date_start && (!$date_fin || $date_start < $date_fin)) {
                 $html .= 'à partir du ' . date('d / m / Y', strtotime($date_start));
             }
 
@@ -1720,12 +1722,14 @@ class BCT_ContratLine extends BimpObject
         if ($achat_periodicity) {
             $html .= '<b>Achats ';
             if (isset(self::$periodicities_masc[$achat_periodicity])) {
-                self::$periodicities_masc[$achat_periodicity] . 's';
+                $html .= self::$periodicities_masc[$achat_periodicity] . 's';
             } else {
-                $html = ' tous les ' . $achat_periodicity . ' mois';
+                $html .= ' tous les ' . $achat_periodicity . ' mois';
             }
             $date_start = $this->getData('date_achat_start');
-            if ($date_start) {
+            $date_fin = $this->getData('date_fin_validite');
+
+            if ($date_start && (!$date_fin || $date_start < $date_fin)) {
                 $html .= 'à partir du : <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
             }
             $html .= '</b>';

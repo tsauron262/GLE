@@ -26,6 +26,42 @@ if (!$user->admin) {
     exit;
 }
 
+$bdb = BimpCache::getBdb();
+
+//$sql = 'SELECT DISTINCT a.fk_contrat as id FROM llx_contratdet a LEFT JOIN llx_contrat c ON c.rowid = a.fk_contrat WHERE a.line_origin_type = \'commande_line\' AND c.fk_commercial_suivi = 270 GROUP BY a.fk_contrat';
+//
+//$rows = $bdb->executeS($sql, 'array');
+
+// Emetteur : 10
+// Commercial : 11
+//foreach ($rows as $r) {
+//    echo 'Contrat #' . $r['id'];
+//    $fk_soc = (int) $bdb->getValue('contrat', 'fk_soc', 'rowid = ' . $r['id']);
+//
+//    if ($fk_soc) {
+//        $id_comm = (int) $bdb->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $fk_soc, 'rowid');
+//
+//        if ($id_comm) {
+//            echo ' OK';
+//            $bdb->update('contrat', array(
+//                'fk_commercial_suivi' => $id_comm
+//                    ), 'rowid = ' . $r['id'] . ' AND fk_commercial_suivi = 270');
+//
+//            $bdb->update('element_contact', array(
+//                'fk_socpeople' => $id_comm
+//                    ), 'element_id = ' . $r['id'] . ' AND fk_c_type_contact = ' . 11);
+//            
+////            break;
+//        } else {
+//            echo 'Comm KO';
+//        }
+//    } else {
+//        echo 'SOC KO';
+//    }
+//    
+//    echo '<br/>';
+//}
+
 echo '<br/>FIN';
 echo '</body></html>';
 

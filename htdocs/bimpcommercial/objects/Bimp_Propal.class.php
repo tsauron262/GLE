@@ -1024,7 +1024,8 @@ class Bimp_Propal extends Bimp_PropalTemp
             if ($not_added_to_contrat) {
                 $where .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.line_origin_type = \'propal_line\' AND cdet.id_line_origin = a.id_line) = 0';
             }
-            $rows = $this->db->getRows('bimp_propal_line a', $where, null, 'array', array('DISTINCT a.id'), null, null, array(
+            
+            $rows = $this->db->getRows('bimp_propal_line a', $where, null, 'array', array('DISTINCT a.id'), 'position', 'asc', array(
                 'pdet' => array(
                     'table' => 'propaldet',
                     'on'    => 'pdet.rowid = a.id_line'

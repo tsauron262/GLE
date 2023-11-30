@@ -57,7 +57,7 @@ if (!$action) {
         'checkLinesEcheances'                       => 'Vérifier échéances produits limités',
         'maj_id_atradius'                           => 'Vérifier id atradius',
         'repare_id_contrat_note'                    => 'Reparé id contat dans note',
-        'maj_marge'                                 => 'Mise a jour des marge liste id facutures'
+        'maj_marge'                                 => 'Mise a jour des marge liste id facutures',
     );
 
     $path = pathinfo(__FILE__);

@@ -2898,7 +2898,7 @@ class BimpCache
     {
         global $langs;
         $langs->load('bills');
-        $entitys = getEntity('cond_regl', 0);
+        $entitys = getEntity('c_payment_term');
         $cacheKey = 'cond_reglements_array' . $entitys;
         if (!isset(self::$cache[$cacheKey])) {
             $where = '';

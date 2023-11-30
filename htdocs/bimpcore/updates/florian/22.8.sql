@@ -1,3 +1,5 @@
+ALTER TABLE `llx_societe` ADD `date_last_active` DATE default NULL;
+
 ALTER TABLE `llx_societe` CHANGE `date_last_active` `date_last_activity` DATE default NULL;
 ALTER TABLE `llx_societe` ADD `last_activity_origin` TEXT NOT NULL;
 

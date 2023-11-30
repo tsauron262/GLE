@@ -558,6 +558,7 @@ class modBimpCommercial extends DolibarrModules
                     $this->_load_tables('/'.strtolower($this->name).'/sql/');
                     $extrafields = new ExtraFields($this->db);//a:1:{s:7:"options";a:1:{s:37:"socpeople:lastname:rowid::fk_soc=$ID$";N;}}
                     $extrafields->addExtraField('contact_default', 'Contact email facturation par défaut', 'sellist', 100, '', 'societe', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:37:"socpeople:lastname:rowid::fk_soc=$ID$";N;}}', 1, '', 1);
+                    $extrafields->addExtraField('remisable', 'Remisable', 'boolean', null, '', 'product', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:0:"";N;}}', 1, '', 1);
                 }
                 
                 //contact commercial

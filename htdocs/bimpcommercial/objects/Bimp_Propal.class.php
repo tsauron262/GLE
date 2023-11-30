@@ -2055,6 +2055,9 @@ class Bimp_Propal extends Bimp_PropalTemp
             foreach ($this->dol_object->lines as $line) {
                 if ($line->fk_product) {
                     $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    if ($product->isAbonnement()) {
+                        continue;
+                    }
                     if (in_array($product->getRef(), $arrayServiceDelegation)) {
                         $errors[] = 'Vous ne pouvez pas mettre le code service ' . $product->getRef() . ' dans un autre contrat que dans un contrat de délégation.';
                     }
@@ -2152,7 +2155,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if (!count($errors)) {
                         $success = 'Contrat ' . $contrat->getRef() . ' créé avec succès';
                     }
-                    
+
                     $contrat->copyContactsFromOrigin($this);
                 }
 

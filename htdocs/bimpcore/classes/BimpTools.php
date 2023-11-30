@@ -2233,7 +2233,7 @@ class BimpTools
         return $dt->format('Y-m-d');
     }
 
-    public static function getDatesIntervalData($date_from, $date_to, $debug_echo = false)
+    public static function getDatesIntervalData($date_from, $date_to, $debug_echo = false, $full_days = true)
     {
         $data = array(
             'full_years'         => 0, // Nombre d'années complètes
@@ -2244,9 +2244,14 @@ class BimpTools
             'nb_monthes_decimal' => 0
         );
 
-        $dt_from = new DateTime(date('Y-m-d', strtotime($date_from)) . ' 00:00:00');
-        $dt_to = new DateTime(date('Y-m-d', strtotime($date_to)) . ' 00:00:00');
-        $dt_to->add(new DateInterval('P1D')); // Pour avoir le dernier jour complet
+        if ($full_days) {
+            $dt_from = new DateTime(date('Y-m-d', strtotime($date_from)) . ' 00:00:00');
+            $dt_to = new DateTime(date('Y-m-d', strtotime($date_to)) . ' 00:00:00');
+            $dt_to->add(new DateInterval('P1D')); // Pour avoir le dernier jour complet
+        } else {
+            $dt_from = new DateTime($date_from);
+            $dt_to = new DateTime($date_to);
+        }
 
         if ($debug_echo) {
             echo '<br/><br/>';

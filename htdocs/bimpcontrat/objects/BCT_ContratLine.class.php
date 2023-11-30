@@ -1698,7 +1698,7 @@ class BCT_ContratLine extends BimpObject
             $date_fin = $this->getData('date_fin_validite');
 
             if ($date_start && (!$date_fin || $date_start < $date_fin)) {
-                $html .= 'à partir du ' . date('d / m / Y', strtotime($date_start));
+                $html .= 'à partir du ' . date('d / m / Y', strtotime($date_start)) . ' (' . $date_fin . ')';
             }
 
             $html .= '</b><br/><br/>';

@@ -326,7 +326,7 @@ fields:
         default_value: 0
     
     line_origin_type: 
-        label: Type de ligne d\'origine
+        label: Type de ligne d'origine
         
     id_line_origin: 
         label: ID Ligne d\'origine

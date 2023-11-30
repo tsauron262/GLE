@@ -665,7 +665,7 @@ class BCT_Contrat extends BimpDolObject
 
             if (!empty($prods)) {
                 $headers = array(
-                    'prods'   => 'Produit',
+                    'prod'    => 'Produit',
                     'units'   => 'Unités',
                     'qty'     => 'Qté totale',
                     'buttons' => ''
@@ -677,6 +677,8 @@ class BCT_Contrat extends BimpDolObject
                     'dates'  => 'Dates',
                     'fac'    => 'Facturation',
                     'achats' => 'Achats',
+                    'units'  => 'Unités',
+                    'qty'    => 'Qté totale',
                     'pu_ht'  => 'PU HT'
                 );
 
@@ -708,6 +710,7 @@ class BCT_Contrat extends BimpDolObject
                     }
 
                     $lines_content = '';
+                    $lines_rows = array();
 
                     foreach ($prod_lines as $line) {
                         $duration = (int) $line->getData('duration');
@@ -735,7 +738,73 @@ class BCT_Contrat extends BimpDolObject
                                 $qties['closed'] += $qty;
                                 break;
                         }
+
+                        $dates = '';
+
+                        if ((int) $line->getData('statut') > 0) {
+                            $dates .= 'Du ' . date('d / m / Y', strtotime($line->getData('date_ouverture')));
+                            $dates .= ' au ' . date('d / m / Y', strtotime($line->getData('date_fin_validite')));
+                        } else {
+                            $dates .= 'Ouverture prévue : ';
+                            $date_ouverture_prevue = $line->getData('date_ouverture_prevue');
+                            if ($date_ouverture_prevue) {
+                                $dates .= date('d / m / Y', strtotime($date_ouverture_prevue));
+                            } else {
+                                $dates .= 'non définie';
+                            }
+                        }
+
+                        $lines_rows[] = array(
+                            'n'      => $line->getData('rang'),
+                            'statut' => $line->displayDataDefault('statut'),
+                            'dates'  => $dates,
+                            'fac'    => $line->displayFacInfos(),
+                            'achats' => $line->displayAchatInfos(false),
+                            'units'  => $nb_units,
+                            'qty'    => $qty,
+                            'pu_ht'  => $line->displayDataDefault('price_ht')
+                        );
                     }
+
+                    $units_html = '';
+
+                    if ($units['active'] > 0) {
+                        $units_html .= '<span class="success">Actives : ' . $units['active'] . '</span><br/>';
+                    }
+                    if ($units['inactive'] > 0) {
+                        $units_html .= '<span class="warning">Inactives : ' . $units['inactive'] . '</span><br/>';
+                    }
+                    if ($units['closed'] > 0) {
+                        $units_html .= '<span class="danger">Fermées : ' . $units['closed'] . '</span>';
+                    }
+
+                    $qties_html = '';
+                    if ($qties['active'] > 0) {
+                        $qties_html .= '<span class="success">Actives : ' . $qties['active'] . '</span><br/>';
+                    }
+                    if ($qties['inactive'] > 0) {
+                        $qties_html .= '<span class="warning">Inactives : ' . $qties['inactive'] . '</span><br/>';
+                    }
+                    if ($qties['closed'] > 0) {
+                        $qties_html .= '<span class="danger">Fermées : ' . $qties['closed'] . '</span>';
+                    }
+
+                    $detail_btn = '<span class="openCloseButton open-content" data-parent_level="3" data-content_extra_class="prod_' . $id_prod . '_detail">';
+                    $detail_btn .= 'Détail';
+                    $detail_btn .= '</span>';
+
+                    $rows[] = array(
+                        'prod'    => $desc,
+                        'units'   => $units_html,
+                        'qty'     => $qties_html,
+                        'buttons' => $detail_btn
+                    );
+
+                    $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= BimpRender::renderBimpListTable($lines_rows, $lines_headers, array(
+                                'is_sublist' => true
+                    ));
+                    $lines_content .= '</div>';
 
                     $rows[] = array(
                         'tr_style'         => 'display: none',

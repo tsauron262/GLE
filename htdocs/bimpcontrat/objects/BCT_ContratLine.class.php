@@ -1713,7 +1713,7 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
-    public function displayAchatInfos()
+    public function displayAchatInfos($with_pa_infos = true)
     {
         $html = '';
 
@@ -1733,23 +1733,26 @@ class BCT_ContratLine extends BimpObject
                 $html .= 'à partir du : <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
             }
             $html .= '</b>';
-            $html .= '<br/><br/>';
 
-            if ((int) $this->getData('fk_product_fournisseur_price')) {
+            if ($with_pa_infos) {
+                $html .= '<br/><br/>';
 
-                $pfp = $this->getChildObject('fourn_price');
-                if (BimpObject::objectLoaded($pfp)) {
-                    $html .= '<b>Prix d\'achat HT actuel: </b>' . BimpTools::displayMoneyValue($pfp->getData('price'));
-                    $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $pfp->getData('fk_soc'));
+                if ((int) $this->getData('fk_product_fournisseur_price')) {
 
-                    if (BimpObject::objectLoaded($fourn)) {
-                        $html .= '<br/><b>Fournisseur : </b>' . $fourn->getLink();
+                    $pfp = $this->getChildObject('fourn_price');
+                    if (BimpObject::objectLoaded($pfp)) {
+                        $html .= '<b>Prix d\'achat HT actuel: </b>' . BimpTools::displayMoneyValue($pfp->getData('price'));
+                        $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $pfp->getData('fk_soc'));
+
+                        if (BimpObject::objectLoaded($fourn)) {
+                            $html .= '<br/><b>Fournisseur : </b>' . $fourn->getLink();
+                        }
+                    } else {
+                        $html .= '<span class="danger">Le prix d\'achat fournisseur #' . $this->getData('fk_product_fournisseur_price') . ' n\'existe plus</span>';
                     }
                 } else {
-                    $html .= '<span class="danger">Le prix d\'achat fournisseur #' . $this->getData('fk_product_fournisseur_price') . ' n\'existe plus</span>';
+                    $html .= '<span class="danger">Aucun prix d\'achat fournisseur spécifié</span>';
                 }
-            } else {
-                $html .= '<span class="danger">Aucun prix d\'achat fournisseur spécifié</span>';
             }
         } else {
             $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Pas d\'achats périodiques</span>';

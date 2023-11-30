@@ -77,10 +77,11 @@ class BimpCollection
     }
 
     // Gestion des données: 
-    
-    public function addFields($fields){
-        if(is_array($fields))
-            $this->fields_sup = BimpTools::merge_array ($this->fields_sup, $fields);
+
+    public function addFields($fields)
+    {
+        if (is_array($fields))
+            $this->fields_sup = BimpTools::merge_array($this->fields_sup, $fields);
         else
             $this->fields_sup[] = $fields;
     }
@@ -104,16 +105,14 @@ class BimpCollection
             if ($this->isObjectInCache($id)) {
                 continue;
             }
-            
-            if(!$id){
+
+            if (!$id) {
                 continue;
-            }
-            elseif(!isset($this->data[$id])) {
+            } elseif (!isset($this->data[$id])) {
                 $ids[] = $id;
-            }
-            else{
-                foreach($this->fields_sup as $field){//objet deja dans collection mais avec chmp  en plus
-                    if(!isset($this->data[$id][$field])){
+            } else {
+                foreach ($this->fields_sup as $field) {//objet deja dans collection mais avec chmp  en plus
+                    if (!isset($this->data[$id][$field])) {
                         $ids[] = $id;
                         $this->object->id = 0;
                         break;
@@ -144,7 +143,7 @@ class BimpCollection
             if (!is_array($return_fields)) {
                 $return_fields = array();
             }
-            
+
             $return_fields = BimpTools::merge_array($return_fields, $this->fields_sup);
 
             $ref_prop = $this->object->getRefProperty();

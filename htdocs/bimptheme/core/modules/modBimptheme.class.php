@@ -163,7 +163,7 @@ class modBimptheme extends DolibarrModules
     function remove($options = '')
     {
         global $conf;
-        return $this->_remove($sql, $options);
+        return $this->_remove(array(), $options);
     }
 }
 

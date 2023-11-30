@@ -3,6 +3,11 @@ primary: rowid
 icon: fas_exchange-alt
 common_fields: 0
 
+list_page_url: 
+    controller: stocks
+    url_params:
+        tab: mouvement
+
 labels: 
     name: Mouvement de stock
     name_plur: Mouvements de stock
@@ -192,6 +197,10 @@ lists_cols:
         field: type_mouvement
         display: icon
         min_width: 45
+    date_reception:
+        label: Date prévue de réception
+        value:
+            callback: displayDateRecep
     
 lists: 
     default: 

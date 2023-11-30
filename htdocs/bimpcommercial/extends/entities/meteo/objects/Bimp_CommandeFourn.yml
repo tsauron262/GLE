@@ -1,0 +1,21 @@
+       
+fields:
+    numero_lot:
+        dol_extra_field: 1
+        label: Lien entrepot
+        
+    
+        
+forms: 
+    default: 
+        rows:
+            numero_lot:
+                field: numero_lot
+#            - field: ref
+            
+         
+fields_tables: 
+    infos: 
+        rows: 
+            numero_lot:
+                field: numero_lot

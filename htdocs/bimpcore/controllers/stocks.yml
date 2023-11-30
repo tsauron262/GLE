@@ -18,12 +18,12 @@ objects:
 sections: 
     - type: tabs
       tabs: 
-          default:
-              label: Stock Entrepots
-              sections: 
-                  - type: custom
-                    custom: 
-                        callback: renderProductEntrepot
+#          default:
+#              label: Stock Entrepots
+#              sections: 
+#                  - type: custom
+#                    custom: 
+#                        callback: renderProductEntrepot
 
           mouvement:
               label: Mouvements de stock
@@ -33,11 +33,11 @@ sections:
                         panel: 1
                         object: BimpProductMouvement  
                         
-          inventory:
-              label: Inventaires
-              sections:
-                  - type: list
-                    list: 
-                        object: inventory
+#          inventory:
+#              label: Inventaires
+#              sections:
+#                  - type: list
+#                    list: 
+#                        object: inventory
                         
           

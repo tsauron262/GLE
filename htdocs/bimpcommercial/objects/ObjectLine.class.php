@@ -4281,8 +4281,6 @@ class ObjectLine extends BimpObject
             }
         }
 
-
-
         switch ($field) {
             case 'id_product':
                 $html = BimpInput::renderInput('search_object', $prefixe . 'id_product', (int) $value, array(
@@ -4523,6 +4521,7 @@ class ObjectLine extends BimpObject
 
             case 'date_to':
                 $html = BimpInput::renderInput('date', $prefixe . 'date_to', (string) $value);
+                $html .= '<p class="inputHelp">Pour les abonnements, ce champ est automatiquement ajusté en fonction de la date de début et de la durée</p>';
                 break;
 
             case 'force_qty_1':

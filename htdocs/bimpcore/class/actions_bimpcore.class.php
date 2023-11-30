@@ -100,7 +100,7 @@ class ActionsBimpcore
                     $tabObj = array("bimpcommercial", "Bimp_Commande");
             if(stripos($url, '/compta/facture/') !== false && stripos($url, 'action=create&origin=') === false)
                     $tabObj = array("bimpcommercial", "Bimp_Facture");
-            if(stripos($url, '/contrat/') !== false)
+            if(stripos($url, '/contrat/') !== false && BimpTools::isModuleDoliActif('bimpcontract'))
                     $tabObj = array("bimpcontract", "BContract_contrat");
             if(stripos($url, '/comm/action') === false && stripos($url, '/comm/index.php') === false && stripos($url, '/comm/rem') === false && stripos($url, 'admin') === false && (stripos($url, '/comm/') !== false || stripos($url, '/societe/') !== false)){
                 if(BimpTools::getValue('type', 's') == 'f')
@@ -119,8 +119,9 @@ class ActionsBimpcore
             elseif(stripos($url, '/fourn/') !== false)
                     $tabObj = array("bimpcore", "Bimp_Fournisseur");
 
-
-            if(stripos($url, '/product/') !== false){
+            if(stripos($url, 'product/stock/movement_list.php') !== false)
+                    $tabObj = array("bimpcore", "BimpProductMouvement");
+            elseif(stripos($url, '/product/') !== false){
                 if(stripos($url, '/stock/') !== false)
                     $tabObj = array("bimpcore", "Bimp_Entrepot");
                 elseif(stripos($url, '/reassort.php'))

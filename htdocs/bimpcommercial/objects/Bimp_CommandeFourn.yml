@@ -244,7 +244,7 @@ fields:
 forms: 
     default: 
         rows: 
-            - field: ref
+#            - field: ref
             - field: entrepot
 #            - field: type_entrepot
             - field: libelle

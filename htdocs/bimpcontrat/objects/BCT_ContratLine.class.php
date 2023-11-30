@@ -1896,6 +1896,33 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
+    public function displayLineOrigin()
+    {
+        $html = '';
+        $id_line_origin = (int) $this->getData('id_line_origin');
+        if ($id_line_origin) {
+            switch ($this->getData('line_origin_type')) {
+                case 'propal_line':
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', $id_line_origin);
+                    if (BimpObject::objectLoaded($line)) {
+                        $propal = $line->getParentInstance();
+                        $html .= 'Ligne n°' . $line->getData('position') . ' - Devis : ' . $propal->getLink();
+                    }
+                    break;
+
+                case 'commande_line':
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line_origin);
+                    if (BimpObject::objectLoaded($line)) {
+                        $commande = $line->getParentInstance();
+                        $html .= 'Ligne n°' . $line->getData('position') . ' - Commande : ' . $commande->getLink();
+                    }
+                    break;
+            }
+        }
+
+        return $html;
+    }
+
     // Rendus HTML:
 
     public function renderProductInput($sub_type_filters = null)

@@ -722,6 +722,11 @@ lists_cols:
         
     date_next_achat:
         display: with_color
+        
+    origine: 
+        label: Origine
+        value: 
+            callback: displayLineOrigin
             
 lists: 
     default: 

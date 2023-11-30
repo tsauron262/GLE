@@ -639,6 +639,118 @@ class BCT_Contrat extends BimpDolObject
         ));
     }
 
+    public function renderSyntheseTab()
+    {
+        $html = '';
+
+        $lines = $this->getLines('abo');
+
+        if (empty($lines)) {
+            $html .= BimpRender::renderAlerts('Aucune ligne d\'abonnement enregistrée', 'warning');
+        } else {
+            $prods = array();
+
+            foreach ($lines as $line) {
+                $id_product = (int) $line->getData('fk_product');
+                if (!$id_product) {
+                    continue;
+                }
+
+                if (!isset($prods[$id_product])) {
+                    $prods[$id_product] = array();
+                }
+
+                $prods[$id_product][] = $line;
+            }
+
+            if (!empty($prods)) {
+                $headers = array(
+                    'prods'   => 'Produit',
+                    'units'   => 'Unités',
+                    'qty'     => 'Qté totale',
+                    'buttons' => ''
+                );
+
+                $lines_headers = array(
+                    'n'      => 'Ligne n°',
+                    'statut' => 'statut',
+                    'dates'  => 'Dates',
+                    'fac'    => 'Facturation',
+                    'achats' => 'Achats',
+                    'pu_ht'  => 'PU HT'
+                );
+
+                $rows = array();
+
+                foreach ($prods as $id_prod => $prod_lines) {
+                    $units = array(
+                        'active'   => 0,
+                        'inactive' => 0,
+                        'closed'   => 0
+                    );
+
+                    $qties = array(
+                        'active'   => 0,
+                        'inactive' => 0,
+                        'closed'   => 0
+                    );
+
+                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+                    $desc = '';
+                    $prod_duration = 0;
+                    if (BimpObject::objectLoaded($prod)) {
+                        $prod_duration = (int) $prod->getData('duree');
+                        $desc .= $prod->getLink();
+                        $desc .= '<br/>Durée unitaire du produit : <b>' . $prod->getData('duree') . 'mois</b>';
+                    } else {
+                        $prod_duration = 1;
+                        $desc .= '<span class="danger">Le pprduit #' . $id_prod . ' n\'existe plus</span>';
+                    }
+
+                    $lines_content = '';
+
+                    foreach ($prod_lines as $line) {
+                        $duration = (int) $line->getData('duration');
+                        if (!$duration) {
+                            $duration = 1;
+                        }
+
+                        $qty = $line->getData('qty');
+                        $nb_units = ($qty / $duration) * $prod_duration;
+
+                        switch ((int) $line->getData('statut')) {
+                            case -1:
+                            case 0:
+                                $units['inactive'] += $nb_units;
+                                $qties['inactive'] += $qty;
+                                break;
+
+                            case 4:
+                                $units['active'] += $nb_units;
+                                $qties['active'] += $qty;
+                                break;
+
+                            case 5:
+                                $units['closed'] += $nb_units;
+                                $qties['closed'] += $qty;
+                                break;
+                        }
+                    }
+
+                    $rows[] = array(
+                        'tr_style'         => 'display: none',
+                        'row_extra_class'  => 'openCloseContent prod_' . $id_prod . '_detail',
+                        'full_row_content' => $lines_content
+                    );
+                }
+
+                $html .= BimpRender::renderBimpListTable($rows, $headers, array());
+            }
+        }
+
+        return $html;
+    }
+
     public function renderFacturesTab()
     {
         $html = '';

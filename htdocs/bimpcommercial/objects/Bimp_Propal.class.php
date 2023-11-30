@@ -1138,7 +1138,7 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
         $array = $this->isServiceAutorisedInContrat(true);
         $msgs = [];
-        if (count($array) > 0 && BimpCore::getConf('use_autorised_service', 1, 'bimpcontract')) {
+        if (is_array($array) && count($array) > 0 && BimpCore::getConf('use_autorised_service', 1, 'bimpcontract')) {
 
             $content = "<h4><b>Vous ne pouvez pas créer de contrat à partir de ce devis car certains services ne sont pas autorisés dans un contrat<br /><br />";
             if (count($array) > 1) {
@@ -2065,7 +2065,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         if (!count($errors)) {
             if (count($data) == 0) {
                 $autre_erreurs = false;
-                $errors[] = "La création du contrat  est impossible en l'état. Si cela est une erreur merci d'envoyer un mail à debugerp@bimp.fr. Cordialement.";
+                $errors[] = "La création du contrat est impossible en l'état. Si cela est une erreur merci d'envoyer un mail à debugerp@bimp.fr. Cordialement.";
             }
 
             $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));

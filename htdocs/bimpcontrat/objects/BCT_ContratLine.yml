@@ -402,6 +402,11 @@ forms:
                   type: qty
                   help: Pour les abonnements à quantité variable, indiquez une estimation de la consommation par période facturée
               value: 0
+              edit: 
+                  callback: 
+                      method: isFieldEditable
+                      params: 
+                          - qty
             - custom: 1
               label: Quantité totale
               input_name: total_qty

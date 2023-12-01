@@ -60,12 +60,15 @@ class BCT_ContratLine extends BimpObject
         }
         return parent::canSetAction($action);
     }
-    
+
     public function canEditField($field_name)
     {
-        if (in_array($field_name, array('', ''))) {
-            
-        }
+//        $status = (int) $this->getData('statut');
+//        if (in_array($field_name, array(''))) {
+//            
+//        }
+
+        return 1;
     }
 
     // Getters booléens: 
@@ -97,7 +100,7 @@ class BCT_ContratLine extends BimpObject
 
         $status = (int) $this->getData('statut');
 
-        if ($status > 0 && in_array($field, array('qty', 'price_ht', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty'))) {
+        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty'))) {
             return 0;
         }
 

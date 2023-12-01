@@ -60,6 +60,13 @@ class BCT_ContratLine extends BimpObject
         }
         return parent::canSetAction($action);
     }
+    
+    public function canEditField($field_name)
+    {
+        if (in_array($field_name, array('', ''))) {
+            
+        }
+    }
 
     // Getters booléens: 
 
@@ -718,7 +725,7 @@ class BCT_ContratLine extends BimpObject
 
             if ($new_date) {
                 if ($new_date < $date_achat_start) {
-                    $new_date = $date_achat_start;
+                    $new_date = date('Y-m-d', strtotime($date_achat_start));
                 }
 
                 if ($new_date != $date) {

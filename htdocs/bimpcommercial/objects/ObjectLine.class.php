@@ -5764,6 +5764,7 @@ class ObjectLine extends BimpObject
                 if ($thisTot > 0) {
                     $totHt = 0;
                     $totHtSansRemise = 0;
+                    $totHtSansRemiseRemisable = 0;
                     $child_prods = $product->getChildrenObjects('child_products');
                     foreach ($child_prods as $child_prod) {
                         $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array('id_parent_line' => $this->id, 'linked_id_object' => $child_prod->id, 'linked_object_name' => 'bundle'), true, true, true);
@@ -5790,6 +5791,8 @@ class ObjectLine extends BimpObject
                         //                    print_r($child);
                         $totHt += $dol_child->getData('total_ht');
                         $totHtSansRemise += $newLn->getTotalHT(true);
+                        if($newLn->getData('remisable'))
+                            $totHtSansRemiseRemisable += $newLn->getTotalHT(true);
                         $totPa += $newLn->getTotalPA(true);
                         if ($isAbonnement && !$newLn->isAbonnement())
                             BimpCore::addlog('Attention, composant d\'un bundle abonnement pas abonnement LN : ' . $newLn->id.' prod : '.$product->getLink());
@@ -5798,10 +5801,12 @@ class ObjectLine extends BimpObject
                     if ($totHt != 0) {
                         $pourcent = 100 - ($thisTot / $totHt * 100);
                         $pourcent2 = 100 - ($thisTot / $totHtSansRemise * 100);
+                        $pourcent3 = 100 - (($thisTot+$totHtSansRemiseRemisable-$totHtSansRemise) / $totHtSansRemiseRemisable * 100);
+                        
                         if (abs($pourcent) > 0.01) {
                             $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line' => $this->id));
                             foreach ($childs as $child) {
-                                $errors = BimpTools::merge_array($errors, $child->setRemise($pourcent2, 'Remise bundle ' . $product->getData('ref')));
+                                $errors = BimpTools::merge_array($errors, $child->setRemise($pourcent3, 'Remise bundle ' . $product->getData('ref')));
                             }
                         }
                         //ajout de la ligne de compensation
@@ -5828,7 +5833,7 @@ class ObjectLine extends BimpObject
                             $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
                         else
                             $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
-                        if (abs($pourcent) > 0.01) {
+                        if (abs($pourcent) > 0.01 || abs($pourcent) < 0.01) {
                             $errors = BimpTools::merge_array($errors, $newLn->setRemise($pourcent2, 'Remise bundle ' . $product->getData('ref')));
                         }
 

@@ -2,6 +2,10 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_SAV.class.php';
 
+/*
+ * https://www.data.gouv.fr/fr/datasets/base-officielle-des-codes-postaux/
+ */
+
 class BS_SAV_ExtEntity extends BS_SAV
 {
 

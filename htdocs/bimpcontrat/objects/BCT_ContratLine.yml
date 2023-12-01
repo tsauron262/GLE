@@ -736,7 +736,6 @@ lists_cols:
 lists: 
     default: 
         configurable: 1
-        checkboxes: 0
         filters_panel: default
         sort_field: rowid
         sort_way: desc
@@ -771,13 +770,23 @@ lists:
             achat_infos:
             statut: 
                 
+    global:
+        extends: default
+        list_filters: 
+            - name: parent.version
+              filter: 2
+        joins: 
+            parent: 
+                table: contrat
+                on: parent.rowid = a.fk_contrat
+                alias: parent
+        
     contrat: 
         extends: default
+        sort_field: position
+        sort_way: asc
         positions: 1
-        positions_open: 1
         n: 0
-        checkboxes: 1
-        filters_panel: unset
         header_buttons: 
             callback: 
                 method: getListHeaderButtons

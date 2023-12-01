@@ -18,6 +18,7 @@ fields:
         
     ref: 
         label: Référence
+        hashtags: 1
         
     type: 
         label: Type

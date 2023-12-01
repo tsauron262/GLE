@@ -510,7 +510,7 @@ class BCT_Contrat extends BimpDolObject
             foreach ($rows as $r) {
                 $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $r['id_line']);
                 if (BimpObject::objectLoaded($line)) {
-                    $lines[$line->id] = 'Contrat ' . $r['ref'] . ' - ' . $line->displayProduct('ref_nom') . ' (' . $line->displayPeriods() . ')';
+                    $lines[$line->id] = 'Contrat ' . $r['ref'] . ' - ' . $line->displayPeriods();
                 }
             }
         }

@@ -50,14 +50,14 @@ function BimpContrat() {
                     bimp_msg('Ligne #' + id_line + ' : Nombre de périodes à facturer invalide', 'danger');
                     has_errors = true;
                 } else if (nb_periods > 0) {
-                    var real_qty = 0;
-                    var $input = $line_row.find($('input.line_real_qty'));
+                    var qty_per_period = 0;
+                    var $input = $line_row.find($('input.line_qty_per_period'));
                     if ($input.length) {
-                        real_qty = parseFloat($input.val());
-                        if (isNaN(nb_periods)) {
+                        qty_per_period = parseFloat($input.val());
+                        if (isNaN(qty_per_period)) {
                             $line_row.addClass('has_errors');
-                            real_qty = 0;
-                            bimp_msg('Ligne #' + id_line + ' : Quantité réelle à facturer invalide', 'danger');
+                            qty_per_period = 0;
+                            bimp_msg('Ligne #' + id_line + ' : Quantité à facturer par période invalide', 'danger');
                             has_errors = true;
                         }
                     }
@@ -80,11 +80,10 @@ function BimpContrat() {
                         };
                     }
 
-
                     clients[id_client][fac_idx]['lines'].push({
                         'id_line': id_line,
                         'nb_periods': nb_periods,
-                        'real_qty': real_qty
+                        'qty_per_period': qty_per_period
                     });
                 }
             }
@@ -112,7 +111,7 @@ function BimpContrat() {
                 var id_entrepot = parseInt($line_row.data('id_entrepot'));
                 var id_line = parseInt($line_row.data('id_line'));
                 var nb_periods = parseInt($line_row.find($('input.line_nb_periods')).val());
-                var real_qty = 0;
+                var qty_per_period = 0;
 
                 if (isNaN(nb_periods)) {
                     $line_row.addClass('has_errors');
@@ -132,11 +131,21 @@ function BimpContrat() {
                         };
                     }
 
+                    var $input = $line_row.find($('input.line_qty_per_period'));
+                    if ($input.length) {
+                        qty_per_period = parseFloat($input.val());
+                        if (isNaN(qty_per_period)) {
+                            $line_row.addClass('has_errors');
+                            qty_per_period = 0;
+                            bimp_msg('Ligne #' + id_line + ' : Quantité à acheter par période invalide', 'danger');
+                            has_errors = true;
+                        }
+                    }
 
                     fourns[id_fourn][id_entrepot]['lines'].push({
                         'id_line': id_line,
                         'nb_periods': nb_periods,
-                        'real_qty': real_qty,
+                        'qty_per_period': qty_per_period,
                         'pa_ht': pa_ht
 
                     });

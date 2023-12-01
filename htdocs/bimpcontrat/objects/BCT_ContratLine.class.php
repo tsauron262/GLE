@@ -2640,7 +2640,7 @@ class BCT_ContratLine extends BimpObject
                             $row_html .= '</td>';
                         }
 
-                        $html .= '<tr class="commande_line_row' . ($tr_class ? ' ' . $tr_class : '') . '" data-id_fourn="' . $id_fourn . '" data-id_entrepot="' . $id_entrepot . '" data-id_line="' . $id_line . '">';
+                        $html .= '<tr class="contrat_line_row' . ($tr_class ? ' ' . $tr_class : '') . '" data-id_fourn="' . $id_fourn . '" data-id_entrepot="' . $id_entrepot . '" data-id_line="' . $id_line . '">';
                         $html .= $row_html;
                         $html .= '</tr>';
                     }

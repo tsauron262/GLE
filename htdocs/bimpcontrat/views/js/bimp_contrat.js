@@ -119,7 +119,7 @@ function BimpContrat() {
         var has_errors = false;
         var fourns = {};
 
-        $form.find('tr.commande_line_row').removeClass('has_errors').each(function () {
+        $form.find('tr.contrat_line_row').removeClass('has_errors').each(function () {
             var $line_row = $(this);
 
             if ($line_row.find('.line_check').prop('checked')) {

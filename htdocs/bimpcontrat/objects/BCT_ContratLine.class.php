@@ -3189,6 +3189,9 @@ class BCT_ContratLine extends BimpObject
 
             $warnings = array();
             $errors = $this->update($warnings, true);
+            
+            $this->getDateNextFacture(true);
+            $this->getDateNextAchat(true);
 
             if (!count($errors)) {
                 $contrat = $this->getParentInstance();

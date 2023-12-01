@@ -29,6 +29,18 @@ function BimpContrat() {
                 $(this).prop('checked', false).change();
             });
         });
+
+        $form.find('input.line_nb_periods').change(function () {
+            var val = parseFloat($(this).val());
+
+            var $row = $(this).findParentByClass('contrat_line_row');
+
+            if (isNaN(val) || !val) {
+                $row.find('.line_check').prop('checked', false).change();
+            } else {
+                $row.find('.line_check').prop('checked', true).change();
+            }
+        });
     };
 
     // Traitements formulaires : 
@@ -58,6 +70,10 @@ function BimpContrat() {
                             $line_row.addClass('has_errors');
                             qty_per_period = 0;
                             bimp_msg('Ligne #' + id_line + ' : Quantité à facturer par période invalide', 'danger');
+                            has_errors = true;
+                        } else if (!qty_per_period) {
+                            $line_row.addClass('has_errors');
+                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité à facturer par période supérieure à 0', 'danger');
                             has_errors = true;
                         }
                     }
@@ -138,6 +154,10 @@ function BimpContrat() {
                             $line_row.addClass('has_errors');
                             qty_per_period = 0;
                             bimp_msg('Ligne #' + id_line + ' : Quantité à acheter par période invalide', 'danger');
+                            has_errors = true;
+                        } else if (!qty_per_period) {
+                            $line_row.addClass('has_errors');
+                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité à facturer par période supérieure à 0', 'danger');
                             has_errors = true;
                         }
                     }

@@ -189,7 +189,6 @@ fields:
                 method: displayPeriodicity
                 params: 
                     - fac
-                
         
     fac_term: 
         label: Terme de facturation
@@ -327,7 +326,7 @@ fields:
         default_value: 0
     
     line_origin_type: 
-        label: Type de ligne d\'origine
+        label: Type de ligne d'origine
         
     id_line_origin: 
         label: ID Ligne d\'origine
@@ -403,6 +402,11 @@ forms:
                   type: qty
                   help: Pour les abonnements à quantité variable, indiquez une estimation de la consommation par période facturée
               value: 0
+              edit: 
+                  callback: 
+                      method: isFieldEditable
+                      params: 
+                          - qty
             - custom: 1
               label: Quantité totale
               input_name: total_qty
@@ -723,6 +727,11 @@ lists_cols:
         
     date_next_achat:
         display: with_color
+        
+    origine: 
+        label: Origine
+        value: 
+            callback: displayLineOrigin
             
 lists: 
     default: 
@@ -766,6 +775,7 @@ lists:
         extends: default
         positions: 1
         positions_open: 1
+        n: 0
         checkboxes: 1
         filters_panel: unset
         header_buttons: 

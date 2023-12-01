@@ -162,13 +162,13 @@ class BimpFile extends BimpObject
 
             $url = $this->getFileUrl();
             if ($this->isDownloadable()) {
-//                if ($url) {
+                if ($url) {
                     $buttons[] = array(
                         'label'   => 'Télécharger',
                         'icon'    => 'download',
                         'onclick' => 'window.open(\'' . $url . '\', \'_blank\')'
                     );
-//                }
+                }
             }
             switch (BimpTools::getFileTypeCode('x.' . $this->getData('file_ext'))) {
                 case 'img':

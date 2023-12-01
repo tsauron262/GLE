@@ -623,9 +623,10 @@ class BDS_ConvertProcess extends BDSProcess
         );
 
         $filters = array(
-            'c.rowid'                  => '',
+//            'c.rowid'                  => 272169,
             'c.fk_statut'              => 1,
 //            'c.rowid'                  => array(
+//                'not_in' => array(33460, 150926, )
 //                'not_in' => array(242102, 244285, 247393, 249512, 251356, 251365, 253349, 253569, 253573, 253611, 253819, 256339, 256959, 258031, 258489, 258594, 258878, 258978, 259617, 270548, 265263, 262477, 262612, 264878, 259471, 259726, 259793, 259907, 260774, 262079, 256259, 256725, 258973, 253960, 254421, 254803, 237622, 241172, 242222, 150296, 156248, 185523, 173892, 187315, 187613, 180787, 176264, 177399, 175384, 166617, 165207, 165477, 163893, 190608, 1601103, 207407, 207401, 198753, 202046, 197604, 193248, 196127, 195135, 192524, 191376, 212882, 213978, 221129, 229650, 231707, 232659, 234192, 236104, 234007, 236987, 249927, 251125, 251290, 251330, 251370, 252831, 253565)
 //            ),
             'a.id_contrat_line_export' => 0,
@@ -1218,7 +1219,7 @@ class BDS_ConvertProcess extends BDSProcess
                                             $mvt_label = 'Régularisation - Transfert ligne de commmande #' . $commande_line->id . ' vers ligne de contrat #' . $contrat_line->id;
                                             $stock_errors = $product->correctStocks($commande->getData('entrepot'), abs($regul_stocks[$commande_line->id]), $mvt, $code_mvt, $mvt_label, 'commande', (int) $commande->id);
 
-                                            if (count($res_errors)) {
+                                            if (count($stock_errors)) {
                                                 $this->Error(BimpTools::getMsgFromArray($stock_errors, 'Echec régule stock'), $commande, $line_ref);
                                                 $this->db->db->rollback();
                                                 continue 2;
@@ -1249,9 +1250,9 @@ class BDS_ConvertProcess extends BDSProcess
                                 $commande->checkInvoiceStatus();
 
                                 $this->db->db->commit();
-//                                    if ((int) $this->getOption('test_one', 0)) {
-                                break;
-//                                    }
+                                if ((int) $this->getOption('test_one', 0)) {
+                                    break;
+                                }
                             } else {
                                 $this->db->db->rollback();
                             }

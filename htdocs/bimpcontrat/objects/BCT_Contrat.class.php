@@ -639,6 +639,187 @@ class BCT_Contrat extends BimpDolObject
         ));
     }
 
+    public function renderSyntheseTab()
+    {
+        $html = '';
+
+        $lines = $this->getLines('abo');
+
+        if (empty($lines)) {
+            $html .= BimpRender::renderAlerts('Aucune ligne d\'abonnement enregistrée', 'warning');
+        } else {
+            $prods = array();
+
+            foreach ($lines as $line) {
+                $id_product = (int) $line->getData('fk_product');
+                if (!$id_product) {
+                    continue;
+                }
+
+                if (!isset($prods[$id_product])) {
+                    $prods[$id_product] = array();
+                }
+
+                $prods[$id_product][] = $line;
+            }
+
+            if (!empty($prods)) {
+                $headers = array(
+                    'prod'    => 'Produit',
+                    'units'   => 'Unités',
+                    'qty'     => 'Qté totale',
+                    'buttons' => ''
+                );
+
+                $lines_headers = array(
+                    'n'      => 'Ligne n°',
+                    'statut' => 'statut',
+                    'dates'  => 'Dates',
+                    'fac'    => 'Facturation',
+                    'achats' => 'Achats',
+                    'units'  => 'Unités',
+                    'qty'    => 'Qté totale',
+                    'pu_ht'  => 'PU HT'
+                );
+
+                $rows = array();
+
+                foreach ($prods as $id_prod => $prod_lines) {
+                    $units = array(
+                        'active'   => 0,
+                        'inactive' => 0,
+                        'closed'   => 0
+                    );
+
+                    $qties = array(
+                        'active'   => 0,
+                        'inactive' => 0,
+                        'closed'   => 0
+                    );
+
+                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+                    $desc = '';
+                    $prod_duration = 0;
+                    if (BimpObject::objectLoaded($prod)) {
+                        $prod_duration = (int) $prod->getData('duree');
+                        $desc .= $prod->getLink();
+                        $desc .= '<br/>Durée unitaire du produit : <b>' . $prod->getData('duree') . 'mois</b>';
+                    } else {
+                        $prod_duration = 1;
+                        $desc .= '<span class="danger">Le pprduit #' . $id_prod . ' n\'existe plus</span>';
+                    }
+
+                    $lines_content = '';
+                    $lines_rows = array();
+
+                    foreach ($prod_lines as $line) {
+                        $duration = (int) $line->getData('duration');
+                        if (!$duration) {
+                            $duration = 1;
+                        }
+
+                        $qty = $line->getData('qty');
+                        $nb_units = ($qty / $duration) * $prod_duration;
+
+                        switch ((int) $line->getData('statut')) {
+                            case -1:
+                            case 0:
+                                $units['inactive'] += $nb_units;
+                                $qties['inactive'] += $qty;
+                                break;
+
+                            case 4:
+                                $units['active'] += $nb_units;
+                                $qties['active'] += $qty;
+                                break;
+
+                            case 5:
+                                $units['closed'] += $nb_units;
+                                $qties['closed'] += $qty;
+                                break;
+                        }
+
+                        $dates = '';
+
+                        if ((int) $line->getData('statut') > 0) {
+                            $dates .= 'Du ' . date('d / m / Y', strtotime($line->getData('date_ouverture')));
+                            $dates .= ' au ' . date('d / m / Y', strtotime($line->getData('date_fin_validite')));
+                        } else {
+                            $dates .= 'Ouverture prévue : ';
+                            $date_ouverture_prevue = $line->getData('date_ouverture_prevue');
+                            if ($date_ouverture_prevue) {
+                                $dates .= date('d / m / Y', strtotime($date_ouverture_prevue));
+                            } else {
+                                $dates .= 'non définie';
+                            }
+                        }
+
+                        $lines_rows[] = array(
+                            'n'      => $line->getData('rang'),
+                            'statut' => $line->displayDataDefault('statut'),
+                            'dates'  => $dates,
+                            'fac'    => $line->displayFacInfos(),
+                            'achats' => $line->displayAchatInfos(false),
+                            'units'  => $nb_units,
+                            'qty'    => $qty,
+                            'pu_ht'  => $line->displayDataDefault('price_ht')
+                        );
+                    }
+
+                    $units_html = '';
+
+                    if ($units['active'] > 0) {
+                        $units_html .= '<span class="success">Actives : ' . $units['active'] . '</span><br/>';
+                    }
+                    if ($units['inactive'] > 0) {
+                        $units_html .= '<span class="warning">Inactives : ' . $units['inactive'] . '</span><br/>';
+                    }
+                    if ($units['closed'] > 0) {
+                        $units_html .= '<span class="danger">Fermées : ' . $units['closed'] . '</span>';
+                    }
+
+                    $qties_html = '';
+                    if ($qties['active'] > 0) {
+                        $qties_html .= '<span class="success">Actives : ' . $qties['active'] . '</span><br/>';
+                    }
+                    if ($qties['inactive'] > 0) {
+                        $qties_html .= '<span class="warning">Inactives : ' . $qties['inactive'] . '</span><br/>';
+                    }
+                    if ($qties['closed'] > 0) {
+                        $qties_html .= '<span class="danger">Fermées : ' . $qties['closed'] . '</span>';
+                    }
+
+                    $detail_btn = '<span class="openCloseButton open-content" data-parent_level="3" data-content_extra_class="prod_' . $id_prod . '_detail">';
+                    $detail_btn .= 'Détail';
+                    $detail_btn .= '</span>';
+
+                    $rows[] = array(
+                        'prod'    => $desc,
+                        'units'   => $units_html,
+                        'qty'     => $qties_html,
+                        'buttons' => $detail_btn
+                    );
+
+                    $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= BimpRender::renderBimpListTable($lines_rows, $lines_headers, array(
+                                'is_sublist' => true
+                    ));
+                    $lines_content .= '</div>';
+
+                    $rows[] = array(
+                        'tr_style'         => 'display: none',
+                        'row_extra_class'  => 'openCloseContent prod_' . $id_prod . '_detail',
+                        'full_row_content' => $lines_content
+                    );
+                }
+
+                $html .= BimpRender::renderBimpListTable($rows, $headers, array());
+            }
+        }
+
+        return $html;
+    }
+
     public function renderFacturesTab()
     {
         $html = '';

@@ -35,6 +35,12 @@ sections:
                               panel: 1
                               object: contrat
                               name: default
+          - id: synthese
+            title: Synthèse
+            icon: fas_list-alt
+            ajax_render_method: 
+                object: contrat
+                method: renderSyntheseTab
           - id: contacts
             title: Contacts / Adresses
             icon: fas_id-card

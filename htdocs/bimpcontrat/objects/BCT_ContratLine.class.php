@@ -61,6 +61,16 @@ class BCT_ContratLine extends BimpObject
         return parent::canSetAction($action);
     }
 
+    public function canEditField($field_name)
+    {
+//        $status = (int) $this->getData('statut');
+//        if (in_array($field_name, array(''))) {
+//            
+//        }
+
+        return 1;
+    }
+
     // Getters booléens: 
 
     public function isValide(&$errors = array())
@@ -90,7 +100,7 @@ class BCT_ContratLine extends BimpObject
 
         $status = (int) $this->getData('statut');
 
-        if ($status > 0 && in_array($field, array('qty', 'price_ht', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty'))) {
+        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty'))) {
             return 0;
         }
 
@@ -718,7 +728,7 @@ class BCT_ContratLine extends BimpObject
 
             if ($new_date) {
                 if ($new_date < $date_achat_start) {
-                    $new_date = $date_achat_start;
+                    $new_date = date('Y-m-d', strtotime($date_achat_start));
                 }
 
                 if ($new_date != $date) {
@@ -1695,7 +1705,9 @@ class BCT_ContratLine extends BimpObject
             }
 
             $date_start = $this->getData('date_fac_start');
-            if ($date_start) {
+            $date_fin = $this->getData('date_fin_validite');
+
+            if ($date_start && (!$date_fin || $date_start < $date_fin)) {
                 $html .= 'à partir du ' . date('d / m / Y', strtotime($date_start));
             }
 
@@ -1711,7 +1723,7 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
-    public function displayAchatInfos()
+    public function displayAchatInfos($with_pa_infos = true)
     {
         $html = '';
 
@@ -1720,32 +1732,37 @@ class BCT_ContratLine extends BimpObject
         if ($achat_periodicity) {
             $html .= '<b>Achats ';
             if (isset(self::$periodicities_masc[$achat_periodicity])) {
-                self::$periodicities_masc[$achat_periodicity] . 's';
+                $html .= self::$periodicities_masc[$achat_periodicity] . 's';
             } else {
-                $html = ' tous les ' . $achat_periodicity . ' mois';
+                $html .= ' tous les ' . $achat_periodicity . ' mois';
             }
             $date_start = $this->getData('date_achat_start');
-            if ($date_start) {
+            $date_fin = $this->getData('date_fin_validite');
+
+            if ($date_start && (!$date_fin || $date_start < $date_fin)) {
                 $html .= 'à partir du : <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
             }
             $html .= '</b>';
-            $html .= '<br/><br/>';
 
-            if ((int) $this->getData('fk_product_fournisseur_price')) {
+            if ($with_pa_infos) {
+                $html .= '<br/><br/>';
 
-                $pfp = $this->getChildObject('fourn_price');
-                if (BimpObject::objectLoaded($pfp)) {
-                    $html .= '<b>Prix d\'achat HT actuel: </b>' . BimpTools::displayMoneyValue($pfp->getData('price'));
-                    $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $pfp->getData('fk_soc'));
+                if ((int) $this->getData('fk_product_fournisseur_price')) {
 
-                    if (BimpObject::objectLoaded($fourn)) {
-                        $html .= '<br/><b>Fournisseur : </b>' . $fourn->getLink();
+                    $pfp = $this->getChildObject('fourn_price');
+                    if (BimpObject::objectLoaded($pfp)) {
+                        $html .= '<b>Prix d\'achat HT actuel: </b>' . BimpTools::displayMoneyValue($pfp->getData('price'));
+                        $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $pfp->getData('fk_soc'));
+
+                        if (BimpObject::objectLoaded($fourn)) {
+                            $html .= '<br/><b>Fournisseur : </b>' . $fourn->getLink();
+                        }
+                    } else {
+                        $html .= '<span class="danger">Le prix d\'achat fournisseur #' . $this->getData('fk_product_fournisseur_price') . ' n\'existe plus</span>';
                     }
                 } else {
-                    $html .= '<span class="danger">Le prix d\'achat fournisseur #' . $this->getData('fk_product_fournisseur_price') . ' n\'existe plus</span>';
+                    $html .= '<span class="danger">Aucun prix d\'achat fournisseur spécifié</span>';
                 }
-            } else {
-                $html .= '<span class="danger">Aucun prix d\'achat fournisseur spécifié</span>';
             }
         } else {
             $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Pas d\'achats périodiques</span>';
@@ -1890,6 +1907,33 @@ class BCT_ContratLine extends BimpObject
                 } else {
                     $html .= '<span class="danger">' . $this->displayData('date_next_achat') . '</span>';
                 }
+            }
+        }
+
+        return $html;
+    }
+
+    public function displayLineOrigin()
+    {
+        $html = '';
+        $id_line_origin = (int) $this->getData('id_line_origin');
+        if ($id_line_origin) {
+            switch ($this->getData('line_origin_type')) {
+                case 'propal_line':
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', $id_line_origin);
+                    if (BimpObject::objectLoaded($line)) {
+                        $propal = $line->getParentInstance();
+                        $html .= 'Ligne n°' . $line->getData('position') . ' - Devis : ' . $propal->getLink();
+                    }
+                    break;
+
+                case 'commande_line':
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line_origin);
+                    if (BimpObject::objectLoaded($line)) {
+                        $commande = $line->getParentInstance();
+                        $html .= 'Ligne n°' . $line->getData('position') . ' - Commande : ' . $commande->getLink();
+                    }
+                    break;
             }
         }
 

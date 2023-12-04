@@ -395,6 +395,7 @@ forms:
             - field: id_linked_line
             - field: date_ouverture_prevue
             - title: vente
+            - field: date_fac_start
             - field: fac_periodicity
             - field: fac_term
             - field: variable_qty
@@ -425,6 +426,7 @@ forms:
             - field: remise_percent
             
             - title: Achat
+            - field: date_achat_start
             - field: achat_periodicity
 #            - custom: 1
 #              label: Type de prix d'achat

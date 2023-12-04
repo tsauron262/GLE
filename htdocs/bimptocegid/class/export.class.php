@@ -211,7 +211,7 @@
                         $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', $pay->rowid);
                         $liste_transactions = $this->bdb->getRows('paiement_facture', 'fk_paiement = ' . $pay->rowid);
                         foreach($liste_transactions as $transaction) {
-                            $ecriture .= $this->TRA_paiement->constructTra($transaction, $paiement, $pay);
+                            $ecriture = $this->TRA_paiement->constructTra($transaction, $paiement, $pay);
                             if($this->write_tra($ecriture, $file)) {
                                 $this->good['PAY'][$pay->ref] = "Ok dans le fichier " . $file;
                                 $paiement->updateField('exported', 1);

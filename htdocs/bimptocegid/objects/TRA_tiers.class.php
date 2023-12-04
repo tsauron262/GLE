@@ -71,8 +71,12 @@
             switch($first) {
                 case 'P':
                     $arrayOfName = explode(' ', $name);
-                    $auxName  = substr($arrayOfName[0],0,7);
-                    $auxName .= substr($arrayOfName[1],0,3);
+                    if(isset($arrayOfName[1])){
+                        $auxName  = substr($arrayOfName[0],0,7);
+                        $auxName .= substr($arrayOfName[1],0,3);
+                    }
+                    else
+                        $auxName = substr(str_replace(' ', '', $name),0,10);
                     break;
                 default:
                     $auxName = substr(str_replace(' ', '', $name),0,10);

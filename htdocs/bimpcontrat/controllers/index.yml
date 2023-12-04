@@ -11,9 +11,7 @@ objects:
             
     contrat_lines:
         instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: BCT_ContratLine
+            bimp_object: BCT_ContratLine
             
 sections: 
     - type: tabs
@@ -26,6 +24,13 @@ sections:
                       object: contrat
                       name: default
                       
+        all_lines: 
+            label: Tous les abonnements
+            sections: 
+                - type: list
+                  list: 
+                      object: contrat_lines
+                      name: global
         fac_achats: 
             label: Facturation / achats
             sections: 

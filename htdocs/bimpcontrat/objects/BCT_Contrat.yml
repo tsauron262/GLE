@@ -504,11 +504,7 @@ views:
                   col_md: 6
                   custom: 
                       callback: renderLinkedObjectsTable
-            - cols: 
-                - type: list
-                  list:
-                      name: contrat
-                      children: lines
+                      
     full: 
         rows:
           - cols: 
@@ -525,10 +521,39 @@ views:
                   col_md: 6
                   fields_table: 
                       name: client
-              
+                      
+          - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderLinkedObjectsTable
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: reglement
+                      
+          - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderSyntheseTab
+       
+filters_panels: 
+    default: 
+        filters: 
+            statut: 
+            ref: 
+            fk_soc: 
+            fk_commercial_suivi: 
+            datec: 
+            entrepot: 
+            secteur: 
 lists: 
     default:
         title: Tous les contrats d'abonnement
+        filters_panel: default
         configurable: 1
         checkboxes: 1
         list_filters: 

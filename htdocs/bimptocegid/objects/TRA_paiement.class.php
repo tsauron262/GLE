@@ -26,7 +26,7 @@
         }
         
         public function constructTra($transaction, Bimp_Paiement $parent_paiement, $pay) {
-            
+            $ecriture = '';
             $facture        = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $transaction->fk_facture);
             $client         = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', /*(!$this->isVenteTicket($parent_paiement->id) ? $this->vente->getData('id_client') :*/ $facture->getData('fk_soc')/*)*/);
             $datec          = new DateTime($parent_paiement->getData('datec'));

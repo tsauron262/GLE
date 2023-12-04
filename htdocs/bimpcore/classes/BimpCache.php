@@ -2840,7 +2840,7 @@ class BimpCache
         if($with_caisse_close || $with_caisse_open)
             $cache_key .= '_jamisEnCache';
         $entitys = getEntity('cond_regl', 0);
-        $cacheKey .= '_' . $entitys;
+        $cache_key .= '_' . $entitys;
 
         if (!isset(self::$cache[$cache_key]) || $with_caisse_close) {
             self::$cache[$cache_key] = array();

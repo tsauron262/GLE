@@ -57,6 +57,9 @@ class BCT_ContratLine extends BimpObject
 
             case 'periodicAchatProcess':
                 return 1;
+
+            case 'deactivate':
+                return ($user->admin ? 1 : 0);
         }
         return parent::canSetAction($action);
     }
@@ -143,6 +146,13 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 if (!$this->isValide($errors)) {
+                    return 0;
+                }
+                return 1;
+
+            case 'deactivate':
+                if ($status == 0) {
+                    $errors[] = 'Cette ligne de contrat est déjà désactivée';
                     return 0;
                 }
                 return 1;
@@ -270,6 +280,16 @@ class BCT_ContratLine extends BimpObject
                 'icon'    => 'fas_cart-arrow-down',
                 'onclick' => $this->getJsLoadModalCustomContent('renderAchatsTable', 'Achats ' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
             );
+
+            if ($this->isActionAllowed('deactivate') && $this->canSetAction('deactivate')) {
+                $buttons[] = array(
+                    'label'   => 'Désactiver',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('deactivate', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer'
+                    ))
+                );
+            }
         }
 
         return $buttons;
@@ -3189,7 +3209,7 @@ class BCT_ContratLine extends BimpObject
 
             $warnings = array();
             $errors = $this->update($warnings, true);
-            
+
             $this->getDateNextFacture(true);
             $this->getDateNextAchat(true);
 
@@ -3347,6 +3367,21 @@ class BCT_ContratLine extends BimpObject
                 $success = $nOk . ' ligne' . $s . ' activée' . $s . ' avec succès';
             }
         }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionDeactivate($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Désactivation effectuée';
+
+        $this->set('statut', 0);
+        $errors = $this->update($warnings, true);
 
         return array(
             'errors'   => $errors,

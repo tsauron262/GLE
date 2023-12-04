@@ -4162,7 +4162,9 @@ class BCT_ContratLine extends BimpObject
 
                     if (!$qty_per_period) {
                         $errors[] = 'Veuillez définir une quantité par période';
-                    } else {
+                    }
+
+                    if (!count($errors)) {
                         $duration = (int) $this->getData('duration');
 
                         if ($duration % $fac_periodicity != 0) {

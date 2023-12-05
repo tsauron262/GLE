@@ -421,7 +421,7 @@ forms:
                       callback: displayAboTotalQty
               depends_on: fac_periodicity,qty_per_period,duration
             - field: nb_renouv
-            - field: price_ht
+            - field: subprice
             - field: tva_tx
             - field: remise_percent
             
@@ -589,10 +589,10 @@ fields_tables:
         icon: fas_euro-sign
         rows: 
             - field: qty
-            - field: price_ht
+            - field: subprice
             - field: tva_tx
             - field: remise_percent
-            - field: subprice
+            - field: price_ht
             - field: total_ht
             - field: total_tva
             - field: total_ttc
@@ -770,7 +770,7 @@ lists:
             desc:
             qty:
                 display: details
-            price_ht: 
+            subprice: 
             tva_tx: 
             remise_percent: 
             total_ttc: 

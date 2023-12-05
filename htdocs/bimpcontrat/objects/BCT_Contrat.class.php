@@ -762,7 +762,7 @@ class BCT_Contrat extends BimpDolObject
                             'achats' => $line->displayAchatInfos(false),
                             'units'  => $nb_units,
                             'qty'    => $qty,
-                            'pu_ht'  => $line->displayDataDefault('price_ht')
+                            'pu_ht'  => $line->displayDataDefault('subprice')
                         );
                     }
 

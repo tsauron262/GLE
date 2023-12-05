@@ -103,7 +103,7 @@ class BCT_ContratLine extends BimpObject
 
         $status = (int) $this->getData('statut');
 
-        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_fac_start', 'date_achat_start'))) {
+        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_fac_start', 'date_achat_start'))) {
             return 0;
         }
 
@@ -456,7 +456,7 @@ class BCT_ContratLine extends BimpObject
 
         if (BimpObject::objectLoaded($prod)) {
             switch ($field_name) {
-                case 'price_ht':
+                case 'subprice':
                     return (float) $prod->getData('price');
 
                 case 'tva_tx':
@@ -514,7 +514,7 @@ class BCT_ContratLine extends BimpObject
         }
 
         switch ($field_name) {
-            case 'price_ht':
+            case 'subprice':
             case 'tva_tx':
             case 'fk_product_fournisseur_price':
             case 'buy_price_ht':
@@ -4289,7 +4289,7 @@ class BCT_ContratLine extends BimpObject
 
         if (!count($errors)) {
             $desc = $this->getData('description');
-            $pu_ht = (float) $this->getData('price_ht');
+            $pu_ht = (float) $this->getData('subprice');
             $qty = (float) $this->getData('qty');
             $txtva = (float) $this->getData('tva_tx');
             $fk_product = (int) $this->getData('fk_product');

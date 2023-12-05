@@ -1038,7 +1038,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    $lines[] = $r['id'];
+                    $lines[$r['id']] = $r['id'];
                 }
             }
 
@@ -1047,12 +1047,12 @@ class Bimp_Propal extends Bimp_PropalTemp
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
                         if (!in_array($r['id'], $lines))
-                            $lines[] = $r['id'];
+                            $lines[$r['id']] = $r['id'];
                     }
                 }
             }
         }
-
+        ksort($lines);
         return $lines;
     }
 

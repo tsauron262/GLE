@@ -2446,7 +2446,7 @@ class BContract_contrat extends BimpDolObject
             $htmlT = "<strong>";
             $htmlT .= 'Prix d\'achat : '. BimpTools::displayMoneyValue($pa);
             $htmlT .= '</strong>';
-            $html .= BimpRender::renderPanel('Prix de reviens', $htmlT);
+            $html .= BimpRender::renderPanel('Prix de revient', $htmlT);
             $cout += $pa;
             $coutPrevi += $pa;
         }

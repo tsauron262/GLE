@@ -601,7 +601,7 @@ class BimpComm extends BimpDolObject
         // Message Achat:
         $id_group = BimpCore::getUserGroupId('achat');
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
-        
+
         if ($id_group) {
             $buttons[] = array(
                 'label'   => 'Message achat',
@@ -2702,7 +2702,7 @@ class BimpComm extends BimpDolObject
                     if ((int) $bimp_lines[(int) $id_dol_line]['position'] !== (int) $dol_line->rang) {
                         $bimp_line->updateField('position', (int) $dol_line->rang, $bimp_lines[(int) $id_dol_line]['id']);
                     }
-                    if(!is_a($this, 'Bimp_Facture') || $this->getData('fk_statut') < 1){//ne surtout pas modifier une facture validé
+                    if (!is_a($this, 'Bimp_Facture') || $this->getData('fk_statut') < 1) {//ne surtout pas modifier une facture validé
                         if ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $dol_line->remise_percent) {
                             if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
                                 $remises_errors = $bimp_line->checkRemises();
@@ -2850,7 +2850,9 @@ class BimpComm extends BimpDolObject
                     'is_clone'                  => false,
                     'is_review'                 => false,
                     'copy_remises_globales'     => false,
-                    'qty_to_zero_sauf_acomptes' => false
+                    'qty_to_zero_sauf_acomptes' => false,
+                    'keep_links'                => false,
+                    'check_product'             => true
                         ), $params);
 
         if (!BimpObject::objectLoaded($origin) || !is_a($origin, 'BimpComm')) {
@@ -2880,14 +2882,22 @@ class BimpComm extends BimpDolObject
             }
 
             // Lignes à ne pas copier si produit plus à la vente :
-            if ($params['is_clone'] || $params['is_review']) {
+            if ($params['is_clone'] || $params['is_review'] || $params['check_product']) {
                 $product = $line->getProduct();
                 if (BimpObject::objectLoaded($product)) {
-                    if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande', 'Bimp_Facture'))) {
-                        if (!(int) $product->getData('tosell')) {
-                            $warnings[] = 'Ligne n°' . $line->getData('position') . ' non incluse car le produit ' . $product->getLink() . ' n\'est plus disponible à la vente';
-                            continue;
+                    $msg = '';
+                    if (!static::$achat && !$product->getData('tosell')) {
+                        $msg = 'Ligne n°' . $line->getData('position') . ' : le produit ' . $product->getRef() . ' n\'est plus en vente';
+                    } elseif (static::$achat && !$product->getData('tobuy')) {
+                        $msg = 'Ligne n°' . $line->getData('position') . ' : le produit ' . $product->getRef() . ' n\'est plus en achat';
+                    }
+                    if ($msg) {
+                        if ($params['is_clone'] || $params['is_review']) {
+                            $warnings[] = $msg; // Ne dois pas être blocant pour les révisions et les clonages
+                        } else {
+                            $errors[] = $msg;
                         }
+                        continue;
                     }
                 }
             }
@@ -2899,7 +2909,7 @@ class BimpComm extends BimpDolObject
             unset($data['id_line']);
             unset($data['id_parent_line']);
 
-            if (!$params['is_review'] && !in_array($line->getData('linked_object_name'), array('bundle', 'bundleCorrect'))) {//si c'est des lignes liée mais pas a un bundle
+            if (!$params['is_review'] && !$params['keep_links'] && !in_array($line->getData('linked_object_name'), array('bundle', 'bundleCorrect'))) {//si c'est des lignes liée mais pas a un bundle
                 unset($data['linked_object_name']);
                 unset($data['linked_id_object']);
 
@@ -2911,10 +2921,10 @@ class BimpComm extends BimpDolObject
 
             if ($params['is_clone']) {
                 switch ($origin->object_name) {
-                    case 'Bimp_Propal': 
+                    case 'Bimp_Propal':
                         unset($data['id_linked_contrat_line']);
                         break;
-                    
+
                     case 'BS_SavPropal':
                         unset($data['id_reservation']);
                         break;
@@ -2986,14 +2996,6 @@ class BimpComm extends BimpDolObject
                 }
             }
 
-            if ($line->id_product) {
-                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->id_product);
-                if (!static::$achat && !$prod->getData('tosell'))
-                    $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est plus en vente';
-                elseif (static::$achat && !$prod->getData('tobuy'))
-                    $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est plus en achat';
-            }
-
             $new_line->validateArray($data);
 
             $new_line->desc = $line->desc;
@@ -3032,7 +3034,7 @@ class BimpComm extends BimpDolObject
                 }
                 continue;
             } else {
-                if ($params['is_review'] && ((int) $line->getData('linked_id_object') || (string) $line->getData('linked_object_name'))) {
+                if ($params['is_review'] && !$params['keep_links'] && ((int) $line->getData('linked_id_object') || (string) $line->getData('linked_object_name'))) {
                     // On  désassocie l'objet lié de l'ancienne ligne dans le cas d'une révision: 
                     $this->db->update($line->getTable(), array(
                         'linked_id_object'   => 0,
@@ -4888,10 +4890,10 @@ class BimpComm extends BimpDolObject
             $url = $_SERVER['php_self'] . '?fc=' . $this->getController() . '&id=' . $this->id;
         }
 
-        if(!count($warnings))
+        if (!count($warnings))
             $success_callback = 'window.location = \'' . $url . '\'';
-        else{
-            $success = '<a href="'.$url.'">'.$success.'</a>';
+        else {
+            $success = '<a href="' . $url . '">' . $success . '</a>';
         }
 
         return array(

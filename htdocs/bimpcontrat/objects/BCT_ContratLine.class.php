@@ -103,7 +103,7 @@ class BCT_ContratLine extends BimpObject
 
         $status = (int) $this->getData('statut');
 
-        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty'))) {
+        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_fac_start', 'date_achat_start'))) {
             return 0;
         }
 
@@ -3170,8 +3170,8 @@ class BCT_ContratLine extends BimpObject
                             }
                         }
                     } else {
+                        $date_debut = $date_ouverture;
                         $this->set('date_ouverture', date('Y-m-d 00:00:00', strtotime($date_ouverture)));
-                        $this->set('date_debut_validite', date('Y-m-d', strtotime($date_ouverture)));
 
                         if (!(int) $this->getData('duration')) {
                             $errors[] = 'Durée de l\'abonnement non définie';
@@ -3184,6 +3184,8 @@ class BCT_ContratLine extends BimpObject
 
                         if (!$this->getData('date_fac_start')) {
                             $this->set('date_fac_start', $dt->format('Y-m-d'));
+                        } else {
+                            $date_debut = $this->getData('date_fac_start');
                         }
 
                         if (!$this->getData('date_achat_start')) {
@@ -3193,6 +3195,8 @@ class BCT_ContratLine extends BimpObject
                         $dt->add(new DateInterval('P' . $this->getData('duration') . 'M'));
                         $dt->sub(new DateInterval('P1D'));
                         $this->set('date_fin_validite', $dt->format('Y-m-d 23:59:59'));
+
+                        $this->set('date_debut_validite', date('Y-m-d', strtotime($date_debut)));
                     }
                 }
                 break;

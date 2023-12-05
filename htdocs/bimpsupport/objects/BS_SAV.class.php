@@ -6010,7 +6010,9 @@ ORDER BY a.val_max DESC");
                                         }
 
                                         // Création des lignes: 
-                                        $lines_errors = $bimpFacture->createLinesFromOrigin($propal);
+                                        $lines_errors = $bimpFacture->createLinesFromOrigin($propal, array(
+                                            'check_product' => false
+                                        ));
 
                                         if (count($lines_errors)) {
                                             $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de l\'ajout des lignes à la facture');
@@ -6036,7 +6038,7 @@ ORDER BY a.val_max DESC");
 
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                                 $validate_errors = BimpTools::getErrorsFromDolObject($bimpFacture->dol_object);
-                                                $validate_errors = BimpTools::merge_array($validate_errors, BimpTools::getErrorsFromDolObject($bimpFacture->dol_object));
+//                                                $validate_errors = BimpTools::merge_array($validate_errors, BimpTools::getErrorsFromDolObject($bimpFacture->dol_object));
 
                                                 if (empty($validate_errors)) {
                                                     $validate_errors[] = 'Erreur inconnue';

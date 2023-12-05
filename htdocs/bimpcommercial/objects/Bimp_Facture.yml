@@ -704,14 +704,28 @@ forms:
               
     lines_to_facture: 
         rows: 
-            - custom: 1
-              label: Facture
-              input_name: id_facture
-              data_type: id
-              input: 
-                  type: select
-                  options: 
-                      array: draftFacturesForRefacture
+            facture: 
+                custom: 1
+                label: Facture
+                input_name: id_facture
+                data_type: id
+                input: 
+                    type: select
+                    options: 
+                        array: draftFacturesForRefacture
+                        
+    cancel_refacture: 
+        extends: lines_to_facture
+        rows: 
+            facture: 
+                label: Refacturer vers
+                input: 
+                    options: 
+                        callback: 
+                            method: getDraftFacturesForRefactureArray
+                            params: 
+                                - 1
+            
                       
     export_to_chorus: 
         rows: 

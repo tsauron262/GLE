@@ -137,6 +137,26 @@ class BV_Demande extends BimpObject
         return 0;
     }
 
+    public static function objectHasDemandeAccepted($object, $type_validation)
+    {
+        if (!BimpObject::objectLoaded($object)) {
+            return 0;
+        }
+
+        $type_obj = self::getObjectType($object);
+        if ($type_obj) {
+            $where = 'type_object = \'' . $type_obj . '\' AND id_object = ' . $object->id . ' AND status > 0';
+            $where .= ' AND type_validation = \'' . $type_validation . '\'';
+            $nb_accepted = (int) self::getBdb()->getCount('bv_demande', $where);
+
+            if ($nb_accepted > 0) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     // Getters params: 
 
     public function getClientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')

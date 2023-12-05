@@ -791,7 +791,7 @@ lists:
         
     contrat: 
         extends: default
-        sort_field: position
+        sort_field: rang
         sort_way: asc
         positions: 1
         n: 0

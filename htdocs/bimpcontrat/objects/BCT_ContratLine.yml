@@ -122,12 +122,12 @@ fields:
                 method: displayQties
         
     price_ht: 
-        label: Prix unitaire HT
+        label: PU HT remisé
         type: money
         depends_on: fk_product
         
     subprice: 
-        label: PU HT remisé
+        label: Prix unitaire HT
         type: money
         depends_on: fk_product
         

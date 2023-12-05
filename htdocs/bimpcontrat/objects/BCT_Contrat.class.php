@@ -1288,7 +1288,7 @@ class BCT_Contrat extends BimpDolObject
                 $fac_line->qty = $line_qty;
                 $fac_line->desc = $line->getData('description');
                 $fac_line->id_product = (int) $line->getData('fk_product');
-                $fac_line->pu_ht = $line->getData('price_ht');
+                $fac_line->pu_ht = $line->getData('subprice');
                 $fac_line->tva_tx = $line->getData('tva_tx');
                 $fac_line->pa_ht = $line->getData('buy_price_ht');
                 $fac_line->id_fourn_price = $line->getData('fk_product_fournisseur_price');

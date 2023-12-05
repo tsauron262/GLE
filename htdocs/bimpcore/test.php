@@ -26,8 +26,6 @@ if (!$user->admin) {
     exit;
 }
 
-$bdb = BimpCache::getBdb();
-
 //$sql = 'SELECT a.rowid, a.duration, a.date_ouverture, a.date_fin_validite FROM llx_contratdet a';
 //$sql .= ' LEFT JOIN llx_contrat c ON c.rowid = a.fk_contrat WHERE c.version = 2 AND a.statut > 0';
 //

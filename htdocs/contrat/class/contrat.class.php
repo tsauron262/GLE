@@ -3111,7 +3111,7 @@ class ContratLigne extends CommonObjectLine
 		// la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
 		$localtaxes_type = getLocalTaxesFromRate($this->txtva, 0, $this->societe, $mysoc);
 
-		$tabprice = calcul_price_total($this->qty, $this->price_ht, $this->remise_percent, $this->tva_tx, $this->localtax1_tx, $this->localtax2_tx, 0, 'HT', 0, 1, $mysoc, $localtaxes_type);
+		$tabprice = calcul_price_total($this->qty, $this->subprice, $this->remise_percent, $this->tva_tx, $this->localtax1_tx, $this->localtax2_tx, 0, 'HT', 0, 1, $mysoc, $localtaxes_type);
 		$this->total_ht  = $tabprice[0];
 		$this->total_tva = $tabprice[1];
 		$this->total_ttc = $tabprice[2];

@@ -3758,60 +3758,68 @@ class BCT_ContratLine extends BimpObject
                                     $ct_contacts = $contrat->getContactsByCodes('external');
                                     $ct_users = $contrat->getContactsByCodes('internal');
 
-                                    foreach ($ct_contacts as $contact) {
-                                        if (!isset($contacts[$contact['code']])) {
-                                            $contacts[$contact['code']] = array();
+                                    foreach ($ct_contacts as $code => $contact_ids) {
+                                        if (!isset($contacts[$code])) {
+                                            $contacts[$code] = array();
                                         }
 
-                                        $contacts[$contact['code']][] = $contact['id'];
+                                        foreach ($contact_ids as $id_contact) {
+                                            if (!in_array($id_contact, $contacts[$code])) {
+                                                $contacts[$code][] = $id_contact;
+                                            }
+                                        }
                                     }
 
-                                    foreach ($ct_users as $u) {
-                                        if (!isset($users[$u['code']])) {
-                                            $users[$u['code']] = array();
+                                    foreach ($ct_users as $code => $users_ids) {
+                                        if (!isset($users[$code])) {
+                                            $users[$code] = array();
                                         }
 
-                                        $users[$u['code']][] = $u['id'];
+                                        foreach ($users_ids as $id_user) {
+                                            if (!in_array($id_user, $users[$code])) {
+                                                $users[$code][] = $id_user;
+                                            }
+                                        }
                                     }
                                 }
                             }
+                        }
 
-                            if (BimpObject::objectLoaded($client)) {
-                                if (!isset($contacts['BILLING2']) || empty($contacts['BILLING2']) || count($contacts['BILLING2']) > 1) {
-                                    // On récupère le contact e-mail facturation par défaut de la fiche client : 
-                                    $id_def_contact = (int) $client->getData('contact_default');
-                                    if ($id_def_contact) {
-                                        $contacts['BILLING2'] = array($id_def_contact);
-                                    }
-                                }
-
-                                if (!isset($users['SALESREPFOLL']) || empty($users['SALESREPFOLL'])) {
-                                    // On récupère le commerical du client : 
-                                    $id_def_commercial = (int) $client->getCommercial(false);
-                                    if ($id_def_commercial) {
-                                        $users['SALESREPFOLL'] = array($id_def_commercial);
-                                    }
+                        if (BimpObject::objectLoaded($client)) {
+                            if (!isset($contacts['BILLING2']) || empty($contacts['BILLING2'])) {
+                                // On récupère le contact e-mail facturation par défaut de la fiche client : 
+                                $id_def_contact = (int) $client->getData('contact_default');
+                                if ($id_def_contact) {
+                                    $contacts['BILLING2'] = array($id_def_contact);
                                 }
                             }
 
-                            $fac_contacts = $fac->getContactsByCodes('external');
-                            $fac_users = $fac->getContactsByCodes('internal');
-
-                            foreach ($contacts as $code => $contacts_ids) {
-                                foreach ($contacts_ids as $id_contact) {
-                                    if (!isset($fac_contacts[$code]) || !in_array($id_contact, $fac_contacts[$code])) {
-                                        $fac->dol_object->add_contact($id_contact, $code, 'external');
-                                        $fac_contacts[$code][] = $id_contact;
-                                    }
+                            if (!isset($users['SALESREPFOLL']) || empty($users['SALESREPFOLL'])) {
+                                // On récupère le commerical du client : 
+                                $id_def_commercial = (int) $client->getCommercial(false);
+                                if ($id_def_commercial) {
+                                    $users['SALESREPFOLL'] = array($id_def_commercial);
                                 }
                             }
+                        }
 
-                            foreach ($users as $code => $users_ids) {
-                                foreach ($users_ids as $id_user) {
-                                    if (!isset($fac_users[$code]) || !in_array($id_user, $fac_users[$code])) {
-                                        $fac->dol_object->add_contact($id_user, $code, 'internal');
-                                        $fac_users[$code][] = $id_user;
-                                    }
+                        $fac_contacts = $fac->getContactsByCodes('external');
+                        $fac_users = $fac->getContactsByCodes('internal');
+
+                        foreach ($contacts as $code => $contacts_ids) {
+                            foreach ($contacts_ids as $id_contact) {
+                                if (!isset($fac_contacts[$code]) || !in_array($id_contact, $fac_contacts[$code])) {
+                                    $fac->dol_object->add_contact($id_contact, $code, 'external');
+                                    $fac_contacts[$code][] = $id_contact;
+                                }
+                            }
+                        }
+
+                        foreach ($users as $code => $users_ids) {
+                            foreach ($users_ids as $id_user) {
+                                if (!isset($fac_users[$code]) || !in_array($id_user, $fac_users[$code])) {
+                                    $fac->dol_object->add_contact($id_user, $code, 'internal');
+                                    $fac_users[$code][] = $id_user;
                                 }
                             }
                         }

@@ -299,7 +299,18 @@ class BCT_ContratLine extends BimpObject
     {
         $actions = array();
 
-        if ($list_name == 'contrat') {
+        if ($this->canEdit()) {
+            $actions[] = array(
+                'label'   => 'Editer les dates d\'activation des lignes sélectionnées',
+                'icon'    => 'fas_calendar-alt',
+                'onclick' => $this->getJsBulkActionOnclick('bulkEdit', array(), array(
+                    'form_name'     => 'bulk_edit',
+                    'single_action' => true
+                ))
+            );
+        }
+
+        if (in_array($list_name, array('global', 'contrat'))) {
             if ($this->canDelete()) {
                 $actions[] = array(
                     'label'   => 'supprimer les lignes sélectionnées',
@@ -3386,6 +3397,68 @@ class BCT_ContratLine extends BimpObject
 
         $this->set('statut', 0);
         $errors = $this->update($warnings, true);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionBulkEdit($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $lines = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (!count($lines)) {
+            $errors[] = 'Aucune ligne sélectionnée';
+        }
+
+        $date_ouv = BimpTools::getArrayValueFromPath($data, 'date_ouverture_prevue');
+        $date_fac_start = BimpTools::getArrayValueFromPath($data, 'date_fac_start');
+        $date_achat_start = BimpTools::getArrayValueFromPath($data, 'date_achat_start');
+
+        $nOk = 0;
+        foreach ($lines as $id_line) {
+            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+
+            if (!BimpObject::objectLoaded($line)) {
+                $warnings[] = 'La ligne de contrat #' . $id_line . ' n\'existe plus';
+                continue;
+            }
+
+            $contrat = $line->getParentInstance();
+            if ((int) $line->getData('statut') > 0) {
+                $warnings[] = 'La ligne n° ' . $line->getData('rang') . (BimpObject::objectLoaded($contrat) ? ' (Contrat ' . $contrat->getRef() . ')' : '') . ' a déjà été activée';
+                continue;
+            }
+
+            if ($date_ouv) {
+                $line->set('date_ouverture_prevue', $date_ouv);
+            }
+            if ($date_fac_start) {
+                $line->set('date_fac_start', $date_fac_start);
+            }
+            if ($date_achat_start) {
+                $line->set('date_achat_start', $date_achat_start);
+            }
+
+            $line_warnings = array();
+            $line_errors = $line->update($line_warnings);
+
+            if (count($line_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Echec de la mise à jour de la ligne n°' . $line->getData('rang') . (BimpObject::objectLoaded($contrat) ? ' (Contrat ' . $contrat->getRef() . ')' : ''));
+            } else {
+                $nOk++;
+            }
+        }
+
+        if ($nOk) {
+            $s = ($nOk > 1 ? 's' : '');
+            $success = $nOk . ' ligne' . $s . ' mise' . $s . ' à jours avec succès';
+        }
 
         return array(
             'errors'   => $errors,

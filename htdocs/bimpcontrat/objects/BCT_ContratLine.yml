@@ -449,19 +449,40 @@ forms:
             - field: date_ouverture_prevue
             - field: id_linked_line
             
-#    bulk_activate: 
-#        rows: 
-#            - custom: 1
-#              label: Date d'ouverture
-#              input_name: date_ouverture_prevue
-#              data_type: date
-#              input: 
-#                  type: date
-#                  help: 
-#              value: 
-#                  callback: getBulkActivationOpenDate
-#            - field: id_linked_line
+    bulk_activate: 
+        rows: 
+            - custom: 1
+              label: Date d'ouverture
+              input_name: date_ouverture_prevue
+              data_type: date
+              input: 
+                  type: date
+            - field: id_linked_line
         
+    bulk_edit: 
+        msgs: 
+            - type: warning 
+              content: Seules les lignes inactives seront éditées
+        rows: 
+            - custom: 1
+              label: Date d'ouverture prévue
+              input_name: date_ouverture_prevue
+              data_type: date
+              input: 
+                  type: date
+            - custom: 1
+              label: Date de début des facturations
+              input_name: date_fac_start
+              data_type: date
+              input: 
+                  type: date
+            - custom: 1
+              label: Date de début des achats
+              input_name: date_achat_start
+              data_type: date
+              input: 
+                  type: date
+            
     periodic_process: 
         modal_format: large
         rows: 
@@ -788,6 +809,10 @@ lists:
                 table: contrat
                 on: parent.rowid = a.fk_contrat
                 alias: parent
+        bulk_actions: 
+            callback: 
+                params: 
+                    - global
         
     contrat: 
         extends: default

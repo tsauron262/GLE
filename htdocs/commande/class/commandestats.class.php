@@ -245,7 +245,7 @@ class CommandeStats extends Stats
 		global $user;
 
 		$sql = "SELECT product.ref, COUNT(product.ref) as nb, SUM(tl.".$this->field_line.") as total, AVG(tl.".$this->field_line.") as avg";
-		$sql .= " FROM ".$this->from.", ".$this->from_line.", ".MAIN_DB_PREFIX."product as product";
+		$sql .= " FROM ".$this->from_line.", ".MAIN_DB_PREFIX."product as product, ".$this->from;
 		if (empty($user->rights->societe->client->voir) && !$user->socid) {
 			$sql .= "  INNER JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON c.fk_soc = sc.fk_soc AND sc.fk_user = ".((int) $user->id);
 		}

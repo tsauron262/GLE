@@ -139,7 +139,7 @@ class BC_ListTable extends BC_List
 
         if (!count($this->errors)) {
             $this->fetchCols();
-            $this->colspan = 2 + count($this->cols);
+            $this->colspan = 3 + count($this->cols);
 
             if ($this->params['positions_open']) {
                 $this->params['sort_field'] = $this->object->position_field;
@@ -804,7 +804,7 @@ class BC_ListTable extends BC_List
                 if ($this->params['positions']) {
                     $row['params']['position'] = (int) $object->getData($object->position_field);
                 }
-                if($object->getData('id_parent_line') > 0)
+                if ($object->getData('id_parent_line') > 0)
                     $row['id_parent_line'] = $object->getData('id_parent_line');
                 foreach ($this->cols as $col_name => $col_params) {
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
@@ -1294,7 +1294,7 @@ class BC_ListTable extends BC_List
 
                 $html .= '<tr class="headerRow">';
 
-                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">';
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center" colspan="2">';
                 if ($this->params['checkboxes']) {
                     $html .= '<input type="checkbox" id="' . $this->identifier . '_checkall" onchange="toggleCheckAll(\'' . $this->identifier . '\', $(this));"/>';
                 }
@@ -1475,7 +1475,7 @@ class BC_ListTable extends BC_List
         }
         $html .= '>';
 
-        $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
+        $html .= '<td style="text-align: center" colspan="2"><i class="fa fa-search"></i></td>';
 
         if ($this->params['total_row']) {
             $html .= '<td style="width: 45px; min-width: 45px"></td>';
@@ -1540,7 +1540,7 @@ class BC_ListTable extends BC_List
             $html .= '<tr class="total_row">';
 
             // Checkboxes: 
-            $html .= '<th></th>';
+            $html .= '<th colspan="2"></th>';
             $html .= '<th>Total</th>';
 
             // Positions: 
@@ -1609,7 +1609,7 @@ class BC_ListTable extends BC_List
 
         if ((int) $this->params['add_object_row'] && !is_null($this->config_path)) {
             $html .= '<tr id="' . $this->identifier . '_addObjectRow" class="addObjectRow inputsRow" style="' . ($this->params['add_object_row_open'] ? '' : 'display: none;') . '">';
-            $html .= '<td><i class="fa fa-plus-circle"></i></td>';
+            $html .= '<td colspan="2"><i class="fa fa-plus-circle"></i></td>';
 
             if ($this->params['total_row']) {
                 $html .= '<td style="width: 45px; min-width: 45px"></td>';
@@ -2167,11 +2167,16 @@ class BC_ListTable extends BC_List
 
                 $selected = in_array((int) $id_object, $this->selected_rows);
                 $modified = (isset($this->new_values[$id_object]) && !empty($this->new_values[$id_object]));
+                $is_sub_row = (isset($row['id_parent_line']) && (int) $row['id_parent_line']);
 
                 $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow' . ($modified ? ' modified' : '') . ($selected ? ' selected' : '');
+                if ($is_sub_row) {
+                    $html .= ' subRow';
+                }
                 $html .= '" id="' . $this->object->object_name . '_row_' . $id_object . '"';
-                if(isset($row['id_parent_line']))
-                    $html .= ' data-id_parent_line="'. $row['id_parent_line'] .'"';
+                if ($is_sub_row) {
+                    $html .= ' data-id_parent_line="' . $row['id_parent_line'] . '"';
+                }
                 $html .= ' data-id_object="' . $id_object . '"';
                 if ($this->params['positions']) {
                     $html .= ' data-position="' . $row['params']['position'] . '"';
@@ -2181,12 +2186,16 @@ class BC_ListTable extends BC_List
                 }
                 $html .= '>';
 
+                if ($is_sub_row) {
+                    $html .= '<td class="sub_row_margin">' . BimpRender::renderIcon('fas_level-up-alt') . '</td>';
+                }
+
                 if (!(int) $row['params']['canView']) {
-                    $html .= '<td colspan="' . $this->colspan . '" class="fullrow">';
+                    $html .= '<td colspan="' . ($this->colspan - ($is_sub_row ? 1 : 0)) . '" class="fullrow">';
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this'), 'warning');
                     $html .= '</td>';
                 } else {
-                    $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '">';
+                    $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '"' . (!$is_sub_row ? ' colspan="2"' : '') . '>';
                     if ($this->params['checkboxes']) {
                         if ((int) $item_params['item_checkbox']) {
                             $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
@@ -2764,10 +2773,9 @@ class BC_ListTable extends BC_List
                                                 }
                                             }
                                         }
-                                        if(BimpCore::getConf('enabled_callback_cache', 0)){
-                                            $value = BimpCache::getCallFunctionCache($bc_field['class'], $method, array($needed),1);
-                                        }
-                                        else{
+                                        if (BimpCore::getConf('enabled_callback_cache', 0)) {
+                                            $value = BimpCache::getCallFunctionCache($bc_field['class'], $method, array($needed), 1);
+                                        } else {
                                             $value = forward_static_call_array(array(
                                                 $bc_field['class'], $method
                                                     ), array($needed));

@@ -114,6 +114,17 @@ table.objectlistTable {
             .addValueInputContainer button.addValueBtn {
                 float: right;
             }
+
+            &.sub_row_margin {
+                border-left: 4px solid $primary;
+                text-align: center;
+
+                i {
+                    transform: rotate(90deg);
+                    font-size: 22px;    
+                    color: $gray-darker;
+                }
+            }
         }
 
         &.deactivated {

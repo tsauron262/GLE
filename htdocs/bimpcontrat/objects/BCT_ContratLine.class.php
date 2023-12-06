@@ -4243,22 +4243,25 @@ class BCT_ContratLine extends BimpObject
                         $errors[] = 'Veuillez sélectionner la périodicité de facturation';
                     }
 
-                    $qty_per_period = (float) BimpTools::getPostFieldValue('qty_per_period', 0);
+                    if (BimpTools::isPostFieldSubmit('qty_per_period')) {
+                        $qty_per_period = (float) BimpTools::getPostFieldValue('qty_per_period', 0);
 
-                    if (!$qty_per_period) {
-                        $errors[] = 'Veuillez définir une quantité par période';
-                    }
+                        if (!$qty_per_period) {
+                            $errors[] = 'Veuillez définir une quantité par période';
+                        }
 
-                    if (!count($errors)) {
-                        $duration = (int) $this->getData('duration');
+                        if (!count($errors)) {
+                            $duration = (int) $this->getData('duration');
 
-                        if ($duration % $fac_periodicity != 0) {
-                            $errors[] = 'La durée totale doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $fac_periodicity . ' mois)';
-                        } else {
-                            $nb_periods = $duration / $fac_periodicity;
-                            $this->set('qty', $qty_per_period * $nb_periods);
+                            if ($duration % $fac_periodicity != 0) {
+                                $errors[] = 'La durée totale doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $fac_periodicity . ' mois)';
+                            } else {
+                                $nb_periods = $duration / $fac_periodicity;
+                                $this->set('qty', $qty_per_period * $nb_periods);
+                            }
                         }
                     }
+                    break;
             }
         }
 

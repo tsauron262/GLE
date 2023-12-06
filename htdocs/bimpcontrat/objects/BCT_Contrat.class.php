@@ -410,6 +410,21 @@ class BCT_Contrat extends BimpDolObject
         return $commandes;
     }
 
+    public function getPropalesOriginList()
+    {
+        if ($this->isLoaded()) {
+            $this->dol_object->element = 'bimp_contrat';
+            $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
+            $this->dol_object->element = 'contrat';
+
+            if (isset($items['propal'])) {
+                return $items['propal'];
+            }
+        }
+
+        return array();
+    }
+
     // Getters Array: 
 
     public function getClientRibsArray()

@@ -266,7 +266,7 @@ fields:
         label: Date de début de facturation
         type: date
         input: 
-            display_now: 1
+            help: Laisser vide pour utiliser la date d'ouverture
         
     date_next_facture: 
         label: Date de prochaine facturation
@@ -282,7 +282,7 @@ fields:
         label: Date de début d'achat
         type: date
         input: 
-            display_now: 1
+            help: Laisser vide pour utiliser la date d'ouverture
         
     date_next_achat: 
         label: Date de prochain achat
@@ -406,7 +406,8 @@ forms:
               input: 
                   type: qty
                   help: Pour les abonnements à quantité variable, indiquez une estimation de la consommation par période facturée
-              value: 0
+              value: 
+                  callback: getFacQtyPerPeriod
               edit: 
                   callback: 
                       method: isFieldEditable

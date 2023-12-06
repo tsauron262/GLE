@@ -691,7 +691,6 @@ forms:
               content: 
                   callback: renderCheckPaForm
 #              depends_on: type_check
-
     date_next_relance: 
         rows: 
             - field: date_next_relance
@@ -725,8 +724,7 @@ forms:
                             method: getDraftFacturesForRefactureArray
                             params: 
                                 - 1
-            
-                      
+                   
     export_to_chorus: 
         rows: 
             - custom: 1
@@ -833,8 +831,7 @@ forms:
                           prop: object_name
                       id_parent: 
                           prop: id
-
-                        
+ 
     validation_avoir:
         rows:
 

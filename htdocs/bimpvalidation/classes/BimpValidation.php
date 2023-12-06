@@ -785,7 +785,7 @@ class BimpValidation
             }
 
             if (!is_null($type_filter)) {
-                $filters['type'] = $type_filter;
+                $filters['type_validation'] = $type_filter;
             }
 
             return BimpCache::getBimpObjectObjects('bimpvalidation', 'BV_Demande', $filters);

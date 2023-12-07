@@ -3338,7 +3338,7 @@ class BCT_ContratLine extends BimpObject
         $this->checkStatus();
     }
 
-    public function checkStatus()
+    public function checkStatus(&$infos = '')
     {
         if ($this->isLoaded()) {
             $status = (int) $this->getData('statut');
@@ -3370,7 +3370,14 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 if ($new_status != $status) {
-                    $this->updateField('statut', $new_status);
+                    $errors = $this->updateField('statut', $new_status);
+
+                    $infos .= ($infos ? '<br/>' : '') . 'Contrat #' . $this->getData('fk_contrat') . ' - ligne n°' . $this->getData('rang') . ' : ';
+                    if (count($errors)) {
+                        $infos .= 'échec màj statut (' . $new_status . ') - <pre>' . print_r($errors, 1) . '</pre>';
+                    } else {
+                        $infos .= 'Màj statut (' . $new_status . ')';
+                    }
                 }
             }
         }

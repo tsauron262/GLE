@@ -20,13 +20,15 @@ class BimpContratCronProcess extends BimpCron
                         ), 'rowid', 'asc', array(
                     'c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')
         ));
-        
+
         if (!empty($lines)) {
+            $infos = '';
             foreach ($lines as $line) {
-                $line->checkStatus();
+                $line->checkStatus($infos);
             }
 
-            $this->output .= 'Statut vérifié pour ' . count($lines) . ' ligne(s)';
+            $this->output .= 'Statut vérifié pour ' . count($lines) . ' ligne(s)<br/><br/>';
+            $this->output .= $infos;
         }
 
         return 0;

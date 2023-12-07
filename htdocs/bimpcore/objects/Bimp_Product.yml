@@ -207,7 +207,7 @@ fields:
         default_value: 0
         
     cost_price_percent:
-        label: Pourcentage du coût de reviens
+        label: Pourcentage du coût de revient
         type: percent
         default_value: 0
         input:

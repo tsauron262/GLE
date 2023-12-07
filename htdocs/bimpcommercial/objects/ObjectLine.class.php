@@ -5800,12 +5800,15 @@ class ObjectLine extends BimpObject
 
                     if ($totHt != 0) {
                         $pourcent = 100 - ($thisTot / $totHt * 100);
-                        $pourcent2 = 100 - ($thisTot / $totHtSansRemise * 100);
-                        $pourcent3 = 0;
-                        if($totHtSansRemiseRemisable == 0)
+                        if($totHtSansRemiseRemisable == 0 || $totHtSansRemise == 0){
                             BimpCore::addlog('Aucune ligne remisable pour calcul du prix bundle', 3, 'bimpcommercial', $this);
-                        else
+                            $pourcent2 = 0;
+                            $pourcent3 = 0;
+                        }
+                        else{
+                            $pourcent2 = 100 - ($thisTot / $totHtSansRemise * 100);
                             $pourcent3 = 100 - (($thisTot+$totHtSansRemiseRemisable-$totHtSansRemise) / $totHtSansRemiseRemisable * 100);
+                        }
                         
                         if (abs($pourcent) > 0.01) {
                             $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line' => $this->id));

@@ -1341,6 +1341,8 @@ class BCT_Contrat extends BimpDolObject
                         $line->updateField('date_next_facture', $new_date_next_facture);
                     }
 
+                    $line->checkStatus();
+
                     $has_line_ok = true;
                     if ($use_db_transactions && $commit_each_line) {
                         $nOk++;
@@ -1549,6 +1551,8 @@ class BCT_Contrat extends BimpDolObject
                     if ($new_date_next_achat) {
                         $line->updateField('date_next_achat', $new_date_next_achat);
                     }
+
+                    $line->checkStatus();
 
                     $has_line_ok = true;
                     if ($use_db_transactions && $commit_each_line) {

@@ -434,7 +434,7 @@ class BCT_ContratLine extends BimpObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getDataAtDate($field_name, $date = null)
     {
@@ -620,7 +620,7 @@ class BCT_ContratLine extends BimpObject
 
     public function getDateNextFacture($check_date = false, &$errors = array())
     {
-        if (!$this->isLoaded() || (int) $this->getData('statut') !== self::STATUS_ACTIVE) {
+        if (!$this->isLoaded() || (int) $this->getData('statut') <= 0) {
             return '';
         }
 
@@ -735,7 +735,7 @@ class BCT_ContratLine extends BimpObject
 
     public function getDateNextAchat($check_date = false, &$errors = array())
     {
-        if (!$this->isLoaded() || (int) $this->getData('statut') !== self::STATUS_ACTIVE) {
+        if (!$this->isLoaded() || (int) $this->getData('statut') <= 0) {
             return '';
         }
 
@@ -998,7 +998,7 @@ class BCT_ContratLine extends BimpObject
                 return $data;
             }
 
-            $periodicity = (int) $this->getData('fac_periodicity');
+            $periodicity = (int) $this->getData('achat_periodicity');
             $duration = (int) $this->getData('duration');
 
             if ($periodicity && $duration) {
@@ -1491,7 +1491,7 @@ class BCT_ContratLine extends BimpObject
         return $lines;
     }
 
-    // Getters array : 
+    // Getters array:
 
     public function getNbRenouvellementsArray($max = 10)
     {
@@ -1637,11 +1637,10 @@ class BCT_ContratLine extends BimpObject
                 if ($is_variable) {
                     $html .= '<div style="display: inline-block" class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Abonnement à qté variable</div><br/>';
                 }
-                $html .= '<b>Qté totale ' . ($is_variable ? 'estimée ' : '') . ': </b>' . BimpTools::displayFloatValue($this->getData('qty'), 8, ',', 0, 0, 0, 0, 1, 1) . '<br/>';
-                $html .= '<b>Durée abonnement : </b>' . $this->getData('duration') . ' mois<br/>';
-//                $html .= '<b>Périodicité : </b>' . $this->displayDataDefault('fac_periodicity') . '<br/>';
-//                $html .= '<b>Nombre de périodes : </b>' . $this->getFacNbPeriods() . '<br/>';
-//                $html .= '<b>Qté par période ' . ($is_variable ? 'estimée ' : '') . ': </b>' . $this->getFacQtyPerPeriod() . '<br/>';
+                $html .= 'Qté totale ' . ($is_variable ? 'estimée ' : '') . ': <b>' . BimpTools::displayFloatValue($this->getData('qty'), 8, ',', 0, 0, 0, 0, 1, 1) . '</b><br/>';
+                $html .= 'Durée abonnement : <b>' . $this->getData('duration') . ' mois</b><br/>';
+                $html .= 'Qté par période facturée ' . ($is_variable ? '(estimée) ' : '') . ': <b>' . $this->getFacQtyPerPeriod() . '</b><br/>';
+                $html .= 'Qté par période d\'achat ' . ($is_variable ? '(estimée) ' : '') . ': <b>' . $this->getAchatQtyPerPeriod() . '</b>';
         }
 
         return $html;
@@ -1755,15 +1754,28 @@ class BCT_ContratLine extends BimpObject
             $date_start = $this->getData('date_fac_start');
             $date_fin = $this->getData('date_fin_validite');
 
+            $html .= '</b>';
+
             if ($date_start && (!$date_fin || $date_start < $date_fin)) {
-                $html .= 'à partir du ' . date('d / m / Y', strtotime($date_start));
+                $html .= '<br/>A partir du <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
             }
 
-            $html .= '</b><br/><br/>';
+            $html .= '<br/><br/>';
 
-            $is_variable = (int) $this->getData('variable_qty');
-            $html .= 'Nombre de périodes : <b>' . $this->getFacNbPeriods() . '</b><br/>';
-            $html .= 'Qté par période ' . ($is_variable ? '(estimée) ' : '') . ': <b>' . $this->getFacQtyPerPeriod() . '</b>';
+            $err = array();
+            $periods_data = $this->getPeriodsToBillData($err, false);
+            $nb_periods_billed = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobill_max'];
+            $class = ($nb_periods_billed > 0 ? ($nb_periods_billed < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
+
+            $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $nb_periods_billed . ' sur ' . $periods_data['nb_total_periods'] . '</span>';
+
+            if ($nb_periods_billed < $periods_data['nb_total_periods']) {
+                $html .= '<br/>Prochaine facturation : ' . $this->displayNextFacDate(true);
+            }
+
+            if (BimpCore::isUserDev()) {
+                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
+            }
         } else {
             $html .= '<span class="warning">Pas de facturation périodique</span>';
         }
@@ -1787,14 +1799,15 @@ class BCT_ContratLine extends BimpObject
             $date_start = $this->getData('date_achat_start');
             $date_fin = $this->getData('date_fin_validite');
 
-            if ($date_start && (!$date_fin || $date_start < $date_fin)) {
-                $html .= ' à partir du : <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
-            }
             $html .= '</b>';
 
-            if ($with_pa_infos) {
-                $html .= '<br/><br/>';
+            if ($date_start && (!$date_fin || $date_start < $date_fin)) {
+                $html .= '<br/>A partir du : <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
+            }
 
+            $html .= '<br/><br/>';
+
+            if ($with_pa_infos) {
                 if ((int) $this->getData('fk_product_fournisseur_price')) {
 
                     $pfp = $this->getChildObject('fourn_price');
@@ -1811,6 +1824,24 @@ class BCT_ContratLine extends BimpObject
                 } else {
                     $html .= '<span class="danger">Aucun prix d\'achat fournisseur spécifié</span>';
                 }
+
+                $html .= '<br/><br/>';
+            }
+
+            $err = array();
+
+            $periods_data = $this->getPeriodsToBuyData($err, false);
+            $nb_periods_bought = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobuy_max'];
+            $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
+
+            $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $periods_data['nb_total_periods'] . '</span>';
+
+            if ($nb_periods_bought < $periods_data['nb_total_periods']) {
+                $html .= '<br/>Prochaine achat : ' . $this->displayNextAchatDate(true);
+            }
+
+            if (BimpCore::isUserDev()) {
+                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
             }
         } else {
             $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Pas d\'achats périodiques</span>';
@@ -3298,14 +3329,54 @@ class BCT_ContratLine extends BimpObject
 
     public function onFactureDelete($id_facture)
     {
-        // Vérif date next facture : 
+        // Vérif date next facture et statut: 
         $this->getDateNextFacture(true);
+        $this->checkStatus();
     }
 
     public function onLinkedCommandeFournLineDelete()
     {
-        // Vérif date next achat : 
+        // Vérif date next achat et statut: 
         $this->getDateNextAchat(true);
+        $this->checkStatus();
+    }
+
+    public function checkStatus()
+    {
+        if ($this->isLoaded()) {
+            $status = (int) $this->getData('statut');
+
+            if ($status > 0) {
+                $new_status = 4;
+                $date_fin_validite = $this->getData('date_fin_validite');
+                if ($date_fin_validite && $date_fin_validite < date('Y-m-d') . ' 00:00:00') {
+                    // Vérif facturation terminée: 
+                    $fac_ended = true;
+                    if ((int) $this->getData('fac_periodicity')) {
+                        $fac_data = $this->getPeriodsToBillData();
+                        if ($fac_data['date_next_period_tobill'] <= $date_fin_validite) {
+                            $fac_ended = false;
+                        }
+                    }
+
+                    $achat_ended = true;
+                    if ((int) $this->getData('achat_periodicity')) {
+                        $fac_data = $this->getPeriodsToBuyData();
+                        if ($fac_data['date_next_achat'] <= $date_fin_validite) {
+                            $achat_ended = false;
+                        }
+                    }
+
+                    if ($fac_ended && $achat_ended) {
+                        $new_status = 5;
+                    }
+                }
+
+                if ($new_status != $status) {
+                    $this->updateField('statut', $new_status);
+                }
+            }
+        }
     }
 
     // Actions:

@@ -11,13 +11,16 @@ class BimpContratCronProcess extends BimpCron
 
         // Vérif abonnemens fermés: 
         $lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
-                    'statut'            => 4,
-                    'date_fin_validite' => array(
+                    'c.version'           => 2,
+                    'a.statut'            => 4,
+                    'a.date_fin_validite' => array(
                         'operator' => '<',
                         'value'    => date('Y-m-d') . ' 00:00:00'
                     )
+                        ), 'rowid', 'asc', array(
+                    'c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')
         ));
-
+        
         if (!empty($lines)) {
             foreach ($lines as $line) {
                 $line->checkStatus();

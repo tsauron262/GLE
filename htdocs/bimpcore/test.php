@@ -26,6 +26,12 @@ if (!$user->admin) {
     exit;
 }
 
+require_once DOL_DOCUMENT_ROOT.'/bimpcontrat/class/BimpContratCronProcess.php';
+
+//$cron = new BimpContratCronProcess($db);
+//$cron->dailyChecks();
+//echo $cron->output;
+
 echo '<br/>FIN';
 echo '</body></html>';
 

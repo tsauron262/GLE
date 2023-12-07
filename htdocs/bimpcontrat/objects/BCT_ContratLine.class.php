@@ -1762,8 +1762,7 @@ class BCT_ContratLine extends BimpObject
 
             $html .= '<br/><br/>';
 
-            $err = array();
-            $periods_data = $this->getPeriodsToBillData($err, false);
+            $periods_data = $this->getPeriodsToBillData();
             $nb_periods_billed = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobill_max'];
             $class = ($nb_periods_billed > 0 ? ($nb_periods_billed < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
 
@@ -1828,9 +1827,7 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<br/><br/>';
             }
 
-            $err = array();
-
-            $periods_data = $this->getPeriodsToBuyData($err, false);
+            $periods_data = $this->getPeriodsToBuyData();
             $nb_periods_bought = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobuy_max'];
             $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
 

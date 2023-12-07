@@ -5802,8 +5802,8 @@ class ObjectLine extends BimpObject
                         $pourcent = 100 - ($thisTot / $totHt * 100);
                         if($totHtSansRemiseRemisable == 0 || $totHtSansRemise == 0){
                             BimpCore::addlog('Aucune ligne remisable pour calcul du prix bundle', 3, 'bimpcommercial', $this);
-                            $pourcent2 = 0;
-                            $pourcent3 = 0;
+                            $pourcent2 = 0; // remise sur ligne annulation double prix Bundle
+                            $pourcent3 = 0; // remise sur ligne prod
                         }
                         else{
                             $pourcent2 = 100 - ($thisTot / $totHtSansRemise * 100);

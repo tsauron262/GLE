@@ -1337,7 +1337,7 @@ class BimpDolObject extends BimpObject
         $success = 'Suppression du contact effectué avec succès';
 
         if (!$this->isLoaded()) {
-            $errors[] = '(104) ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         } else {
             if (!isset($data['id_contact']) || !(int) $data['id_contact']) {
                 $errors[] = 'Contact à supprimer non spécifié';

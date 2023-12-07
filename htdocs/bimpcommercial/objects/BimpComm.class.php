@@ -1452,16 +1452,35 @@ class BimpComm extends BimpDolObject
         $allowed = array();
         if ($this->isLoaded()) {
             if (is_a($this, 'Bimp_Facture')) {
+                $allowed['propales'] = array();
+                $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal', 'commande', 'bimp_contrat'));
                 $commandes = $this->getCommandesOriginList();
 
-                if (!empty($commandes)) {
-                    $allowed['commandes'] = $commandes;
-                    $allowed['propales'] = array();
+                if (isset($items['propal']) && !empty($items['propal'])) {
+                    $allowed['propales'] = $items['propal'];
+                }
 
-                    foreach ($commandes as $id_commande) {
+                if (isset($items['commande']) && !empty($items['commande'])) {
+                    $allowed['commandes'] = $commandes;
+
+                    foreach ($items['commande'] as $id_commande) {
                         $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
                         if (BimpObject::objectLoaded($commande)) {
                             $propales = $commande->getPropalesOriginList();
+                            foreach ($propales as $id_propal) {
+                                if (!in_array((int) $id_propal, $allowed['propales'])) {
+                                    $allowed['propales'][] = (int) $id_propal;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isset($items['bimp_contrat']) && !empty($items['bimp_contrat'])) {
+                    foreach ($items['bimp_contrat'] as $id_contrat) {
+                        $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
+                        if (BimpObject::objectLoaded($contrat)) {
+                            $propales = $contrat->getPropalesOriginList();
                             foreach ($propales as $id_propal) {
                                 if (!in_array((int) $id_propal, $allowed['propales'])) {
                                     $allowed['propales'][] = (int) $id_propal;

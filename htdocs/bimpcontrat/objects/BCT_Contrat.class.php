@@ -658,8 +658,16 @@ class BCT_Contrat extends BimpDolObject
     {
         $html = '';
 
-        $lines = $this->getLines('abo');
+        $onclick = $this->getJsLoadCustomContent('renderSyntheseTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
+        $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
+        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+        $html .= '</span>';
+        $html .= '</div>';
+
+        $lines = $this->getLines('abo');
+        
         if (empty($lines)) {
             $html .= BimpRender::renderAlerts('Aucune ligne d\'abonnement enregistrée', 'warning');
         } else {
@@ -839,6 +847,14 @@ class BCT_Contrat extends BimpDolObject
     {
         $html = '';
 
+        $onclick = $this->getJsLoadCustomContent('renderFacturesTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
+
+        $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
+        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+        $html .= '</span>';
+        $html .= '</div>';
+        
         $errors = array();
         $factures = $this->getFactures($errors);
 
@@ -954,6 +970,14 @@ class BCT_Contrat extends BimpDolObject
     {
         $html = '';
 
+        $onclick = $this->getJsLoadCustomContent('renderAchatsTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
+
+        $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
+        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+        $html .= '</span>';
+        $html .= '</div>';
+        
         $errors = array();
         $commandes = $this->getCommandesFourn();
 

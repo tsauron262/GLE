@@ -112,7 +112,8 @@ class InternalStock extends PartStock
                     $i++;
                     $line_errors = $line_warnings = array();
                     $line_data = str_getcsv($line, ';');
-
+                    echo '<pre>';
+print_r($line_data);die;
                     $part_number = trim(BimpTools::getArrayValueFromPath($line_data, $keys['part_number'], ''));
                     $desc = trim(BimpTools::getArrayValueFromPath($line_data, $keys['desc'], ''));
                     $prod_label = trim(BimpTools::getArrayValueFromPath($line_data, $keys['prod'], ''));

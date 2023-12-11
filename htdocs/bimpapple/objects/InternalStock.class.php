@@ -157,12 +157,14 @@ class InternalStock extends PartStock
                         $stock = BimpObject::createBimpObject('bimpapple', 'InternalStock', array(
                                     'code_centre'   => $code_centre,
                                     'part_number'   => $part_number,
-                                    'qty'           => $qty,
+                                    'qty'           => 0,
                                     'description'   => $desc,
                                     'product_label' => $prod_label,
                                     'code_eee'      => $eee,
                                     'last_pa'       => $pa_ht
                                         ), true, $line_errors, $line_wanings);
+                        if(!count($line_errors))
+                            $line_errors = $stock->correctStock($qty, '', 'IMPORT_CSV', 'Import CSV');
                     }
 
                     if (count($line_errors)) {

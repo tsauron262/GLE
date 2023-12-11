@@ -85,11 +85,14 @@ class InternalStock extends PartStock
                 'qty'         => 5
             );
 
+            ini_set("auto_detect_line_endings", true);
             $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
             // Checks: 
             $i = 0;
             foreach ($lines as $line) {
+                if(stripos($line, 'Composant') !== false && stripos($line, 'Description') !== false && stripos($line, 'Prix') !== false)//semble être la ligne de titre
+                        continue;
                 $i++;
                 $line_errors = array();
                 $line_data = str_getcsv($line, ';');
@@ -109,6 +112,8 @@ class InternalStock extends PartStock
             if (!count($errors)) {
                 $i = 0;
                 foreach ($lines as $line) {
+                    if(stripos($line, 'Composant') !== false && stripos($line, 'Description') !== false && stripos($line, 'Prix') !== false)//semble être la ligne de titre
+                            continue;
                     $i++;
                     $line_errors = $line_warnings = array();
                     $line_data = str_getcsv($line, ';');

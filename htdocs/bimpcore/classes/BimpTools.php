@@ -3860,7 +3860,7 @@ class BimpTools
         global $conf;
 
         if (stripos($module, 'MAIN_MODULE_') === false)
-            $module = 'MAIN_MODULE_' . $module;
+            $module = 'MAIN_MODULE_' . strtoupper($module);
 
         if (isset($conf->global->$module) && $conf->global->$module)
             return 1;

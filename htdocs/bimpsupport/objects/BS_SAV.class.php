@@ -4296,6 +4296,28 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $mail_msg .= 'Merci de votre compréhension. <br/><br/>';
                 }
                 break;
+            case 'restitution':
+                    $contact_pref = 1; // On force l'envoi par e-mail
+
+                    $subject = " Bon de restitution ".$this->getRef();
+
+                    $mail_msg = 'Bonjour, ' . "\n\n";
+                    $mail_msg .= 'Vous trouverez ci-joint votre bon de restitution ' . $this->getLink(array(), 'public') . " \n\n";
+                    $mail_msg .= 'Merci d\'avoir choisi ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n";
+                    $mail_msg .= 'Cordialement';
+                    
+                    $files = array();
+                    
+                    $dir = $this->getFilesDir();
+                    $file_name = 'Restitution_' . dol_sanitizeFileName($this->getRef()) . '.pdf';
+                    $fileRest = $dir . $file_name;
+                    if (is_file($fileRest)) {
+                        $files[] = array($fileRest, 'application/pdf', $file_name);
+                    }
+                    if(!count($files))
+                        $errors[] = 'Bon de restitution inexistant ';
+                
+                break;
         }
 
         if (count($errors)) {

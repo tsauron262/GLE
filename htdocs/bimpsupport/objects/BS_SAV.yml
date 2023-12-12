@@ -1018,6 +1018,7 @@ forms:
                       revPropRefu: Devis refusé
                       pieceOk: Piéce reçue
                       localise: Localisé
+                      restitution: Bon de restitution
                       
     validate_propal: 
         rows: 

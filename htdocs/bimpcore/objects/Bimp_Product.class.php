@@ -1006,7 +1006,7 @@ class Bimp_Product extends BimpObject
 
         if ($this->canSetAction('bulkEditField')) {
             $actions[] = array(
-                'label'      => 'Editer pourcentage du prix de reviens',
+                'label'      => 'Editer pourcentage du prix de revient',
                 'icon'       => 'fas_pen',
                 'action'     => 'bulkEditField',
                 'form_name'  => 'bulk_edit_field',
@@ -4249,7 +4249,7 @@ class Bimp_Product extends BimpObject
         } elseif ($field == 'cost_price') {
             if ($value > 0)
                 $this->setCurrentPaHt($value, 0, 'cost_price');
-            elseif ($this->getInitData('cost_price') > 0) {//repassser a zero si pa actuel = prix de reviens
+            elseif ($this->getInitData('cost_price') > 0) {//repassser a zero si pa actuel = prix de revient
                 $paO = $this->getCurrentPaObject();
                 if ($paO && $paO->getData('origin') == 'cost_price') {
                     $this->setCurrentPaHt($value, 0, 'cost_price');

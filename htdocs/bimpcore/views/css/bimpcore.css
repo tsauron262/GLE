@@ -10633,8 +10633,8 @@ table.objectlistTable {
         border-left: 4px solid #335899;
         text-align: center; }
         /* line 122, ../scss/bimpcore/_list.scss */
-        table.bimp_list_table > tbody > tr > td.sub_row_margin i,
-        table.objectlistTable > tbody > tr > td.sub_row_margin i {
+        table.bimp_list_table > tbody > tr > td.sub_row_margin > i,
+        table.objectlistTable > tbody > tr > td.sub_row_margin > i {
           transform: rotate(90deg);
           font-size: 22px;
           color: #282828; }

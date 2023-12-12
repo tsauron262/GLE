@@ -174,7 +174,7 @@ class BimpCache
     public static function getCacheServeur($key)
     {
         global $conf;
-        $key = $conf->entity.$key;
+        $key = $conf->entity . $key;
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
@@ -195,7 +195,7 @@ class BimpCache
     public static function setCacheServeur($key, $value, $ttl = null)
     {
         global $conf;
-        $key = $conf->entity.$key;
+        $key = $conf->entity . $key;
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
@@ -245,53 +245,46 @@ class BimpCache
         $coll = BimpCollection::getInstance($module, $object_name);
         return $coll->getLink($id_object, $params);
     }
-    
-    public static function getIdSavFromIdPropal($id_propal){
-        $cache_key = 'id_sav_propal'.$id_propal;
-        if (!isset(self::$cache[$cache_key]))
-            self::$cache[$cache_key] = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_propal);
 
-        return self::$cache[$cache_key];
-    }
-    
-    
-    public static function dol_can($dol_object){
-        $cache_key = 'dol_can_'.$dol_object->element;
-        if(!isset(self::$cache[$cache_key])){
+    public static function dol_can($dol_object)
+    {
+        $cache_key = 'dol_can_' . $dol_object->element;
+        if (!isset(self::$cache[$cache_key])) {
             global $user;
             $elem = $dol_object->element;
             $feature2 = '';
-            if($elem == 'fichinter' || $elem == 'fichinterdet')
+            if ($elem == 'fichinter' || $elem == 'fichinterdet')
                 $elem = 'ficheinter';
-            if($elem == 'order_supplier')
+            if ($elem == 'order_supplier')
                 $elem = 'fournisseur';
-            if($elem == 'invoice_supplier')
+            if ($elem == 'invoice_supplier')
                 $elem = 'fournisseur';
-            if($elem == 'contratdet')
+            if ($elem == 'contratdet')
                 $elem = 'contrat';
-            if($elem == 'action'){
+            if ($elem == 'action') {
                 $elem = 'agenda';
                 $feature2 = 'myactions';
             }
-            if($elem == 'bank_account'){
+            if ($elem == 'bank_account') {
                 $elem = 'societe';
             }
-            self::$cache[$cache_key] = restrictedArea($user, $elem, null, $dol_object->table_element.'&'.$dol_object->table_element, $feature2, 'fk_soc', 'rowid', 0, 1);
+            self::$cache[$cache_key] = restrictedArea($user, $elem, null, $dol_object->table_element . '&' . $dol_object->table_element, $feature2, 'fk_soc', 'rowid', 0, 1);
 //            echo 'ici_'.$elem."_".$dol_object->table_element.'_'.self::$cache[$cache_key].'_'.get_class($dol_object).'<br/>';
         }
         return self::$cache[$cache_key];
     }
-    
-    public static function getCallFunctionCache($instance, $method, $params, $static = false){
-        $cache_key = 'callFunction_'. $instance->module . '_' . $instance->object_name . '_'.$method. '_'. json_encode($params).'_'.$static;
-        if(!$static) 
+
+    public static function getCallFunctionCache($instance, $method, $params, $static = false)
+    {
+        $cache_key = 'callFunction_' . $instance->module . '_' . $instance->object_name . '_' . $method . '_' . json_encode($params) . '_' . $static;
+        if (!$static)
             $cache_key .= $instance->id;
-        if (!isset(self::$cache[$cache_key])){
-            if($static)
+        if (!isset(self::$cache[$cache_key])) {
+            if ($static)
                 self::$cache[$cache_key] = forward_static_call_array(array(
-                        $instance, $method
-                            ), $params);
-            else{
+                    $instance, $method
+                        ), $params);
+            else {
                 // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
                 $args = array();
                 foreach ($params as $key => $value) {
@@ -1302,7 +1295,7 @@ class BimpCache
         }
 
         $use_cache_serveur = $instance->getConf('in_cache_serveur', 0, false, 'bool');
-        $cacheKey = 'BimpObjectObjects_' . $module . '_' . $object_name . '_' . json_encode($filters) . '_' . $n . '_' . $order_by . '_' . $sortorder.'_'. getEntity('', 0);
+        $cacheKey = 'BimpObjectObjects_' . $module . '_' . $object_name . '_' . json_encode($filters) . '_' . $n . '_' . $order_by . '_' . $sortorder . '_' . getEntity('', 0);
         if ($use_cache_serveur && static::cacheServerExists($cacheKey)) {
             $rows = static::getCacheServeur($cacheKey);
         } else {
@@ -1556,7 +1549,7 @@ class BimpCache
                 $obj_memory = $newMem - $curMem;
 
                 if (method_exists($instance, 'fetch')) {
-                    if(get_class($instance) == 'UserGroup')
+                    if (get_class($instance) == 'UserGroup')
                         $instance->fetch($id_object, '', false);
                     else
                         $instance->fetch($id_object);
@@ -2169,6 +2162,9 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
 
             $groups = self::getUserGroupsArray($include_empty, $nom_url);
+
+//            $where = 
+
             $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
@@ -2182,16 +2178,30 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    public static function getUserUserGroupsList($id_user)
+    public static function getUserUserGroupsList($id_user, $with_entities = false)
     {
         $cache_key = 'user_' . $id_user . '_usergroups_list';
 
         if (!isset(self::$cache[$cache_key])) {
+            global $conf;
             self::$cache[$cache_key] = array();
-            $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    self::$cache[$cache_key][] = (int) $r['fk_usergroup'];
+
+            if ($with_entities && $conf->multicompany->enabled) {
+                $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup as id_group', 'entity'));
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        if (!isset(self::$cache[$cache_key][(int) $r['id_group']])) {
+                            self::$cache[$cache_key][(int) $r['id_group']] = array();
+                        }
+                        self::$cache[$cache_key][(int) $r['id_group']][] = (int) $r['entity'];
+                    }
+                }
+            } else {
+                $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('DISTINCT fk_usergroup'));
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        self::$cache[$cache_key][] = (int) $r['fk_usergroup'];
+                    }
                 }
             }
         }
@@ -2391,7 +2401,7 @@ class BimpCache
             self::$cache['comptes_bancaires'] = array();
 
             $entity = getEntity('bank_account');
-            $rows = self::getBdb()->getRows('bank_account', 'entity IN ('.$entity.')');
+            $rows = self::getBdb()->getRows('bank_account', 'entity IN (' . $entity . ')');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     self::$cache['comptes_bancaires'][(int) $r->rowid] = $r->label;
@@ -2836,8 +2846,8 @@ class BimpCache
         if ($ref_only) {
             $cache_key .= '_ref_only';
         }
-        
-        if($with_caisse_close || $with_caisse_open)
+
+        if ($with_caisse_close || $with_caisse_open)
             $cache_key .= '_jamisEnCache';
         $entitys = getEntity('cond_regl', 0);
         $cache_key .= '_' . $entitys;
@@ -2852,11 +2862,11 @@ class BimpCache
             } else {
                 $where .= '1';
             }
-            if($with_caisse_close){
-                $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `'.MAIN_DB_PREFIX.'bc_caisse` WHERE status = 0)';
+            if ($with_caisse_close) {
+                $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `' . MAIN_DB_PREFIX . 'bc_caisse` WHERE status = 0)';
             }
-            if($with_caisse_open){
-                $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `'.MAIN_DB_PREFIX.'bc_caisse` WHERE status = 1)';
+            if ($with_caisse_open) {
+                $where .= ' AND rowid IN (SELECT DISTINCT(id_entrepot) FROM `' . MAIN_DB_PREFIX . 'bc_caisse` WHERE status = 1)';
             }
             if ($entitys)
                 $where .= ' AND entity IN (0,' . $entitys . ')';
@@ -3277,6 +3287,15 @@ class BimpCache
                 return null;
         }
         return $cache;
+    }
+
+    public static function getIdSavFromIdPropal($id_propal)
+    {
+        $cache_key = 'id_sav_propal' . $id_propal;
+        if (!isset(self::$cache[$cache_key]))
+            self::$cache[$cache_key] = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_propal);
+
+        return self::$cache[$cache_key];
     }
 
     // Comme getSecteursArray avec l'option "Tous" en plus

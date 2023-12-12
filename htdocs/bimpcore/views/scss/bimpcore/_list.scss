@@ -119,7 +119,7 @@ table.objectlistTable {
                 border-left: 4px solid $primary;
                 text-align: center;
 
-                i > sub_row_icon {
+                & > i {
                     transform: rotate(90deg);
                     font-size: 22px;    
                     color: $gray-darker;

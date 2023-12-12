@@ -1006,7 +1006,7 @@ class Bimp_Product extends BimpObject
 
         if ($this->canSetAction('bulkEditField')) {
             $actions[] = array(
-                'label'      => 'Editer pourcentage du prix de reviens',
+                'label'      => 'Editer pourcentage du prix de revient',
                 'icon'       => 'fas_pen',
                 'action'     => 'bulkEditField',
                 'form_name'  => 'bulk_edit_field',
@@ -2148,19 +2148,62 @@ class Bimp_Product extends BimpObject
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
     }
 
-    public function getPaBundle()
+    public function getPaBundle($display = true)
     {
         $pa = 0;
 
         $child_prods = $this->getChildrenObjects('child_products');
         foreach ($child_prods as $child_prod) {
             $prod = $child_prod->getChildObject('product_fils');
-            $pa += $child_prod->getData('qty') * $prod->getData('cur_pa_ht');
+            $pa += $child_prod->getData('qty') * $prod->getCurrentPaHt();
         }
-        return BimpTools::displayMoneyValue($pa);
+        if($display)
+            return BimpTools::displayMoneyValue($pa);
+        else
+            return $pa;
     }
 
-    public function displayCurrentPaHt()
+    public function getTotComposantBundle($display = true)
+    {
+        $tot = 0;
+
+        $child_prods = $this->getChildrenObjects('child_products');
+        foreach ($child_prods as $child_prod) {
+            $prod = $child_prod->getChildObject('product_fils');
+            $tot += $child_prod->getData('qty') * $prod->getData('price');
+        }
+        if($display)
+            return BimpTools::displayMoneyValue($tot);
+        else
+            return $tot;
+    }
+    
+    public function getMargeBundle($display = true)
+    {
+        $pa = $this->getPaBundle(false);
+        $marge = 100;
+        if($pa > 0 && $this->getData('price')){
+            $marge = round(($this->getData('price') - $pa) / $this->getData('price') * 100, 2);
+        }
+        if($display)
+            return $marge.' %';
+        return $marge;
+    }
+
+    
+    public function getRemiseBundle($display = true)
+    {
+        $tot = $this->getTotComposantBundle(false);
+        $marge = 100;
+        if($tot > 0 && $this->getData('price') > 0){
+            $marge = round(100 - ($this->getData('price') / ($tot) * 100),2);
+        }
+        if($display)
+            return $marge.' %';
+        return $marge;
+    }
+
+    public function displayCurrentPaHt($detail = true)
     {
         $html = '';
 
@@ -2168,16 +2211,23 @@ class Bimp_Product extends BimpObject
             if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 $curPa = $this->getCurrentPaObject();
                 if (BimpObject::objectLoaded($curPa)) {
-                    $html .= '<span style="font-size: 16px; font-style: bold">' . BimpTools::displayMoneyValue((float) $curPa->getData('amount')) . '</span><br/>';
-                    $html .= 'Appliqué depuis le ' . $curPa->displayData('date_from') . '<br/>';
-                    $html .= 'Origine: <strong>' . $curPa->displayOrigine() . '</strong>';
+                    if($detail)
+                        $html .= '<span style="font-size: 16px; font-style: bold">';
+                    $html .= BimpTools::displayMoneyValue((float) $curPa->getData('amount'));
+                    if($detail){
+                        $html .= '</span><br/>';
+                        $html .= 'Appliqué depuis le ' . $curPa->displayData('date_from') . '<br/>';
+                        $html .= 'Origine: <strong>' . $curPa->displayOrigine() . '</strong>';
+                    }
                 } else {
                     $html .= '<span class="danger">Aucun</span>';
                 }
             } else {
-                $html .= '<span style="font-size: 16px; font-style: bold">';
+                if($detail)
+                    $html .= '<span style="font-size: 16px; font-style: bold">';
                 $html .= BimpTools::displayMoneyValue((float) $this->getData('cur_pa_ht'));
-                $html .= '</span><br/>';
+                if($detail)
+                    $html .= '</span><br/>';
             }
         }
 
@@ -4199,7 +4249,7 @@ class Bimp_Product extends BimpObject
         } elseif ($field == 'cost_price') {
             if ($value > 0)
                 $this->setCurrentPaHt($value, 0, 'cost_price');
-            elseif ($this->getInitData('cost_price') > 0) {//repassser a zero si pa actuel = prix de reviens
+            elseif ($this->getInitData('cost_price') > 0) {//repassser a zero si pa actuel = prix de revient
                 $paO = $this->getCurrentPaObject();
                 if ($paO && $paO->getData('origin') == 'cost_price') {
                     $this->setCurrentPaHt($value, 0, 'cost_price');

@@ -22,6 +22,8 @@ class commandeController extends BimpCommController
 
     public function asSupport()
     {
+        if(!BimpCore::getConf('use_tickets', 0, 'bimpsupport'))
+                return 0;
         $tickets = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
         $commande = $this->config->getObject('', 'commande');
         $lines = $commande->getChildrenList('lines');

@@ -539,7 +539,7 @@ class BimpInput
 
             case 'search_product':
                 global $conf;
-                $filter_type = 0;
+                $filter_type = '';
                 if (isset($options['filter_type'])) {
                     switch ($options['filter_type']) {
                         case 'both':

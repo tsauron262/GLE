@@ -455,16 +455,16 @@ Preferred Field
                                         $customer_code = $soc_data['type_educ'];
                                     } else {
                                         $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
-                                        if ($secteur == 'BP') {
-                                            $customer_code = 'BB';
-                                        } else {
+//                                        if ($secteur == 'BP') {
+//                                            $customer_code = 'BB';
+//                                        } else {
                                             $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
                                             if (!$id_soc_type) {
                                                 $customer_code = 'EN';
                                             } else {
                                                 $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
                                             }
-                                        }
+//                                        }
                                     }
 
                                     if (isset($soc_data['fk_pays']) && array_key_exists((int) $soc_data['fk_pays'], $countries)) {

@@ -1000,6 +1000,12 @@ fields_tables:
             - label: Prix d'achat
               value: 
                   callback: getPaBundle
+            - label: Marge
+              value: 
+                  callback: getMargeBundle
+            - label: Remise Bundle
+              value: 
+                  callback: getRemiseBundle
         
             
     prices_buy: 
@@ -1302,6 +1308,14 @@ lists_cols:
                 method: getCodeComptableAchat
                 params:
                     - 3
+    cur_pa_ht2:
+        label: Prix d'achat actuel calc
+        value:
+            callback: 
+                method: displayCurrentPaHt
+                params:
+                    - 0
+        
                     
 lists: 
     default: 

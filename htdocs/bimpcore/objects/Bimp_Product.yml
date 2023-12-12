@@ -197,7 +197,7 @@ fields:
         default_value: 0
         
     cur_pa_ht: 
-        label: Prix d'achat actuel
+        label: Prix d'achat actuel (old)
         type: money
         default_value: 0
         
@@ -1309,7 +1309,7 @@ lists_cols:
                 params:
                     - 3
     cur_pa_ht2:
-        label: Prix d'achat actuel calc
+        label: Prix d'achat actuel
         value:
             callback: 
                 method: displayCurrentPaHt

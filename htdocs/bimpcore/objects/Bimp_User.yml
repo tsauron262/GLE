@@ -364,11 +364,7 @@ forms:
             - custom: 1
               show: 
                   callback: 
-                      class_name: BimpTools
-                      method: isModuleDoliActif
-                      is_static: 1
-                      params: 
-                          - MULTICOMPANY
+                      is_module_active: MULTICOMPANY
               label: Entités
               input_name: entities
               data_type: id

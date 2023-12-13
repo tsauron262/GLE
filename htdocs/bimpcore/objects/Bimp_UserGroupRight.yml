@@ -23,11 +23,22 @@ fields:
         object: usergroup
         input: 
             type: search_group
+            
+    entity: 
+        label: Entité
+        type: int
+        values: 
+            callback: getEntitiesCacheArray
+        default_value: 1
         
 forms: 
     default: 
         rows: 
             - field: fk_usergroup
+            - field: entity
+              required: 1
+              show: 
+                  is_module_active: MULTICOMPANY
             - custom: 1
               label: Module
               input_name: right_module
@@ -54,6 +65,9 @@ forms:
 filters_panels: 
     default: 
         filters: 
+            entity: 
+                show: 
+                    is_module_active: MULTICOMPANY
             fk_usergroup: 
             fk_id:
             right_module:
@@ -67,6 +81,10 @@ lists:
             right_module:
             libelle: 
             code:
+            entity: 
+                show:
+                    is_module_active: MULTICOMPANY
+                
             
     group:
         extends: default

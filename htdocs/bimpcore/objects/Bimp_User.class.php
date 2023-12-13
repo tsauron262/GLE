@@ -291,29 +291,29 @@ class Bimp_User extends BimpObject
         return array('statut');
     }
 
-    public function getGroupsRights()
+    public function getGroupsRights($id_entity = 0)
     {
         if ($this->isLoaded()) {
-            return self::getUserGroupsRights($this->id);
+            return self::getUserGroupsRights($this->id, $id_entity);
         }
 
         return array();
     }
 
-    public function getRights()
+    public function getRights($id_entity = 0)
     {
         if ($this->isLoaded()) {
-            return self::getUserRights($this->id);
+            return self::getUserRights($this->id, $id_entity);
         }
 
         return array();
     }
 
-    public function getAllRights()
+    public function getAllRights($id_entity = 0)
     {
         return array(
-            'rights'        => $this->getRights(),
-            'groups_rights' => $this->getGroupsRights()
+            'rights'        => $this->getRights($id_entity),
+            'groups_rights' => $this->getGroupsRights($id_entity)
         );
     }
 
@@ -378,10 +378,14 @@ class Bimp_User extends BimpObject
 
     // Getters Statics: 
 
-    public static function getUserGroupsRights($id_user)
+    public static function getUserGroupsRights($id_user, $id_entity = 0)
     {
         if ((int) $id_user) {
             $cache_key = 'user_' . $id_user . '_groups_rights';
+
+            if ($id_entity) {
+                $cache_key .= '_entity_' . $id_entity;
+            }
 
             if (!isset(self::$cache[$cache_key])) {
                 self::$cache[$cache_key] = array();
@@ -389,7 +393,13 @@ class Bimp_User extends BimpObject
                 $groups = BimpCache::getUserUserGroupsList($id_user);
 
                 if (!empty($groups)) {
-                    $rows = self::getBdb()->getRows('usergroup_rights', 'fk_usergroup IN (' . implode(',', $groups) . ')', null, 'array', array('fk_usergroup', 'fk_id'));
+                    $where = 'fk_usergroup IN (' . implode(',', $groups) . ')';
+
+                    if ($id_entity) {
+                        $where .= ' AND entity = ' . $id_entity;
+                    }
+
+                    $rows = self::getBdb()->getRows('usergroup_rights', $where, null, 'array', array('fk_usergroup', 'fk_id'));
 
                     foreach ($rows as $r) {
                         if (!isset(self::$cache[$cache_key][(int) $r['fk_id']])) {
@@ -407,15 +417,25 @@ class Bimp_User extends BimpObject
         return array();
     }
 
-    public static function getUserRights($id_user)
+    public static function getUserRights($id_user, $id_entity = 0)
     {
         if ((int) $id_user) {
             $cache_key = 'user_' . $id_user . '_rights';
 
+            if ($id_entity) {
+                $cache_key .= '_entity_' . $id_entity;
+            }
+
             if (!isset(self::$cache[$cache_key])) {
                 self::$cache[$cache_key] = array();
 
-                $rows = self::getBdb()->getRows('user_rights', 'fk_user = ' . $id_user, null, 'array', array('fk_id'));
+                $where = 'fk_user = ' . $id_user;
+
+                if ($id_entity) {
+                    $where .= ' AND entity = ' . $id_entity;
+                }
+
+                $rows = self::getBdb()->getRows('user_rights', $where, null, 'array', array('fk_id'));
 
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
@@ -1013,9 +1033,14 @@ class Bimp_User extends BimpObject
         global $langs;
         $langs->loadLangs(array('users', 'admin'));
 
-        $html = '';
+        $entities = array();
+        $tabs = array();
 
-        $rows = array();
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            $entities = BimpCache::getEntitiesCacheArray(false);
+        } else {
+            $entities[1] = '';
+        }
 
         $headers = array(
             'module'  => array('label' => 'Module', 'search_values' => array()),
@@ -1034,138 +1059,183 @@ class Bimp_User extends BimpObject
             'libelle' => 'Libellé',
         );
 
-        $rights = BimpCache::getRightsDefDataByModules();
-        $user_rights = $this->getAllRights();
         $user_groups = BimpCache::getUserUserGroupsList($this->id);
-
-        $modules_list = array();
-
+        $rights = BimpCache::getRightsDefDataByModules();
         $add_allowed = ($this->isActionAllowed('addRight') && $this->canSetAction('addRight'));
         $remove_allowed = ($this->isActionAllowed('removeRight') && $this->canSetAction('removeRight'));
 
-        foreach ($rights as $module => $module_rights) {
-            $modules_list[$module] = $module;
-            foreach ($module_rights as $id_right => $data) {
-                $has_groups_right = false;
-                $active = '';
-                $groups = '';
-                $actions = '';
+        foreach ($entities as $id_entity => $entity_name) {
+            $html = '';
 
-                if (isset($user_rights['groups_rights'][(int) $id_right])) {
-                    foreach ($user_groups as $id_group) {
-                        if (in_array((int) $id_group, $user_rights['groups_rights'][(int) $id_right])) {
-                            $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
+            $rows = array();
 
-                            if (BimpObject::objectLoaded($group)) {
-                                $groups .= ($groups ? '<br/>' : '') . $group->getLink();
-                                $has_groups_right = true;
+            $modules_list = array();
+
+            foreach ($rights as $module => $module_rights) {
+                $modules_list[$module] = $module;
+                foreach ($module_rights as $id_right => $data) {
+                    $has_groups_right = false;
+                    $active = '';
+                    $groups = '';
+                    $actions = '';
+                    
+                    $user_rights = $this->getAllRights($id_entity);
+
+                    if (isset($user_rights['groups_rights'][(int) $id_right])) {
+                        foreach ($user_groups as $id_group) {
+                            if (in_array((int) $id_group, $user_rights['groups_rights'][(int) $id_right])) {
+                                $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
+
+                                if (BimpObject::objectLoaded($group)) {
+                                    $groups .= ($groups ? '<br/>' : '') . $group->getLink();
+                                    $has_groups_right = true;
+                                }
                             }
                         }
                     }
-                }
 
-                if (in_array($id_right, $user_rights['rights'])) {
-                    if ($add_allowed) {
-                        $onclick = 'BimpUserRightsTable.addUserRights($(this), ' . $this->id . ', [' . $id_right . '])';
-                        $actions .= BimpRender::renderRowButton('Ajouter', 'fas_plus', $onclick, 'add_right_button', array(
-                                    'styles' => array('display' => 'none')
-                        ));
-                    }
+                    if (in_array($id_right, $user_rights['rights'])) {
+                        if ($add_allowed) {
+                            $onclick = 'BimpUserRightsTable.addUserRights($(this), ' . $this->id . ', [' . $id_right . ']';
+                            if ($id_entity) {
+                                $onclick .= ', [' . $id_entity . ']';
+                            }
+                            $onclick .= ')';
+                            $actions .= BimpRender::renderRowButton('Ajouter', 'fas_plus', $onclick, 'add_right_button', array(
+                                        'styles' => array('display' => 'none')
+                            ));
+                        }
 
-                    if ($remove_allowed) {
-                        $onclick = 'BimpUserRightsTable.removeUserRights($(this), ' . $this->id . ', [' . $id_right . '])';
-                        $actions .= BimpRender::renderRowButton('Retirer', 'fas_minus', $onclick, 'remove_right_button');
-                    }
+                        if ($remove_allowed) {
+                            $onclick = 'BimpUserRightsTable.removeUserRights($(this), ' . $this->id . ', [' . $id_right . ']';
+                            if ($id_entity) {
+                                $onclick .= ', [' . $id_entity . ']';
+                            }
+                            $onclick .= ')';
+                            $actions .= BimpRender::renderRowButton('Retirer', 'fas_minus', $onclick, 'remove_right_button');
+                        }
 
-                    $active = array(
-                        'content' => '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'OUI</span>',
-                        'value'   => 'yes'
-                    );
-                } else {
-                    if ($add_allowed) {
-                        $onclick = 'BimpUserRightsTable.addUserRights($(this), ' . $this->id . ', [' . $id_right . '])';
-                        $actions .= BimpRender::renderRowButton('Ajouter', 'fas_plus', $onclick, 'add_right_button');
-                    }
-
-                    if ($remove_allowed) {
-                        $onclick = 'BimpUserRightsTable.removeUserRights($(this), ' . $this->id . ', [' . $id_right . '])';
-                        $actions .= BimpRender::renderRowButton('Retirer', 'fas_minus', $onclick, 'remove_right_button', array(
-                                    'styles' => array('display' => 'none')
-                        ));
-                    }
-
-                    if ($has_groups_right) {
                         $active = array(
-                            'content' => '<span class="info">' . BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Hérité</span>',
-                            'value'   => 'inherit'
+                            'content' => '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'OUI</span>',
+                            'value'   => 'yes'
                         );
                     } else {
-                        $active = array(
-                            'content' => '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'NON</span>',
-                            'value'   => 'no'
-                        );
+                        if ($add_allowed) {
+                            $onclick = 'BimpUserRightsTable.addUserRights($(this), ' . $this->id . ', [' . $id_right . ']';
+                            if ($id_entity) {
+                                $onclick .= ', [' . $id_entity . ']';
+                            }
+                            $onclick .= ')';
+                            $actions .= BimpRender::renderRowButton('Ajouter', 'fas_plus', $onclick, 'add_right_button');
+                        }
+
+                        if ($remove_allowed) {
+                            $onclick = 'BimpUserRightsTable.removeUserRights($(this), ' . $this->id . ', [' . $id_right . ']';
+                            if ($id_entity) {
+                                $onclick .= ', [' . $id_entity . ']';
+                            }
+                            $onclick .= ')';
+                            $actions .= BimpRender::renderRowButton('Retirer', 'fas_minus', $onclick, 'remove_right_button', array(
+                                        'styles' => array('display' => 'none')
+                            ));
+                        }
+
+                        if ($has_groups_right) {
+                            $active = array(
+                                'content' => '<span class="info">' . BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Hérité</span>',
+                                'value'   => 'inherit'
+                            );
+                        } else {
+                            $active = array(
+                                'content' => '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'NON</span>',
+                                'value'   => 'no'
+                            );
+                        }
                     }
-                }
 
-                $right = '';
-                $is_lire = (in_array($data['perms'], array('lire', 'read')) || in_array($data['subperms'], array('lire', 'read')));
+                    $right = '';
+                    $is_lire = (in_array($data['perms'], array('lire', 'read')) || in_array($data['subperms'], array('lire', 'read')));
 
-                if ($is_lire) {
-                    $right .= '<b>';
-                }
-                $right .= ($data['perms'] . (!empty($data['subperms']) ? '->' . $data['subperms'] : ''));
-                if ($is_lire) {
-                    $right .= '</b>';
-                }
+                    if ($is_lire) {
+                        $right .= '<b>';
+                    }
+                    $right .= ($data['perms'] . (!empty($data['subperms']) ? '->' . $data['subperms'] : ''));
+                    if ($is_lire) {
+                        $right .= '</b>';
+                    }
 
-                $rows[] = array(
-                    'row_data' => array(
-                        'id_right' => $id_right
-                    ),
-                    'module'   => array('value' => $module),
-                    'right'    => $right,
-                    'libelle'  => $langs->trans($data['libelle']),
-                    'active'   => $active,
-                    'groups'   => $groups,
-                    'actions'  => $actions
-                );
+                    $rows[] = array(
+                        'row_data' => array(
+                            'id_right'  => $id_right,
+                            'id_entity' => $id_entity
+                        ),
+                        'module'   => array('value' => $module),
+                        'right'    => $right,
+                        'libelle'  => $langs->trans($data['libelle']),
+                        'active'   => $active,
+                        'groups'   => $groups,
+                        'actions'  => $actions
+                    );
+                }
             }
+
+            $headers['module']['search_values'] = $modules_list;
+
+            $buttons = '';
+
+            if ($add_allowed || $remove_allowed) {
+                $buttons .= '<div class="buttonsContainer">';
+                if ($add_allowed) {
+                    $buttons .= '<span class="btn btn-default" onclick="BimpUserRightsTable.addSelectedRights($(this), ' . $this->id;
+                    if ($id_entity) {
+                        $buttons .= ', [' . $id_entity . ']';
+                    }
+                    $buttons .= ')">';
+                    $buttons .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter les droits sélectionnés';
+                    $buttons .= '</span>';
+                }
+                if ($remove_allowed) {
+                    $buttons .= '<span class="btn btn-default" onclick="BimpUserRightsTable.removeSelectedRights($(this), ' . $this->id;
+                    if ($id_entity) {
+                        $buttons .= ', [' . $id_entity . ']';
+                    }
+                    $buttons .= ')">';
+                    $buttons .= BimpRender::renderIcon('fas_minus-circle', 'iconLeft') . 'Retirer les droits sélectionnés';
+                    $buttons .= '</span>';
+                }
+                $buttons .= '</div>';
+            }
+
+            $html .= $buttons;
+
+            $html .= BimpRender::renderBimpListTable($rows, $headers, array(
+                        'main_class' => 'bimp_user_rights_table',
+                        'searchable' => true,
+                        'sortable'   => true,
+                        'checkboxes' => true
+            ));
+
+            $html .= $buttons;
+
+            if (count($entities) === 1) {
+                return BimpRender::renderPanel('Liste des droits', $html, '', array(
+                            'foldable' => true,
+                            'type'     => 'secondary'
+                ));
+            }
+
+            $tabs[] = array(
+                'id'      => 'entity_' . $id_entity,
+                'title'   => $entity_name,
+                'content' => $html
+            );
         }
 
-        $headers['module']['search_values'] = $modules_list;
-
-        $buttons = '';
-
-        if ($add_allowed || $remove_allowed) {
-            $buttons .= '<div class="buttonsContainer">';
-            if ($add_allowed) {
-                $buttons .= '<span class="btn btn-default" onclick="BimpUserRightsTable.addSelectedRights($(this), ' . $this->id . ')">';
-                $buttons .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter les droits sélectionnés';
-                $buttons .= '</span>';
-            }
-            if ($remove_allowed) {
-                $buttons .= '<span class="btn btn-default" onclick="BimpUserRightsTable.removeSelectedRights($(this), ' . $this->id . ')">';
-                $buttons .= BimpRender::renderIcon('fas_minus-circle', 'iconLeft') . 'Retirer les droits sélectionnés';
-                $buttons .= '</span>';
-            }
-            $buttons .= '</div>';
+        if (!empty($tabs)) {
+            return BimpRender::renderNavTabs($tabs, 'entities_perms');
         }
 
-        $html .= $buttons;
-
-        $html .= BimpRender::renderBimpListTable($rows, $headers, array(
-                    'main_class' => 'bimp_user_rights_table',
-                    'searchable' => true,
-                    'sortable'   => true,
-                    'checkboxes' => true
-        ));
-
-        $html .= $buttons;
-
-        return BimpRender::renderPanel('Liste des droits', $html, '', array(
-                    'foldable' => true,
-                    'type'     => 'secondary'
-        ));
+        return '';
     }
 
     public function renderUserTheme($object, $edit = 0, $foruserprofile = false)
@@ -1794,7 +1864,7 @@ class Bimp_User extends BimpObject
             $entities_names = BimpCache::getEntitiesCacheArray(false);
 
             ksort($groups);
-            
+
             foreach ($groups as $id_group => $ids_entities) {
                 $ent = '';
 
@@ -2091,6 +2161,7 @@ class Bimp_User extends BimpObject
         $success = '';
 
         $id_rights = BimpTools::getArrayValueFromPath($data, 'id_rights', array());
+        $id_entities = BimpTools::getArrayValueFromPath($data, 'id_entities', array());
         $results = array();
 
         if (empty($id_rights)) {
@@ -2098,65 +2169,84 @@ class Bimp_User extends BimpObject
         } else {
             $nOk = 0;
 
+            if (empty($id_entities)) {
+                $id_entities = array(1);
+            }
+
             foreach ($id_rights as $id_right) {
                 $right_def = $this->db->getRow('rights_def', 'id = ' . $id_right, null, 'array');
 
                 if (is_null($right_def)) {
                     $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
                 } else {
-                    if (!(int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
-                        if ($this->db->insert('user_rights', array(
-                                    'entity'  => 1,
-                                    'fk_user' => $this->id,
-                                    'fk_id'   => $id_right
-                                )) > 0) {
-                            $nOk++;
-                            $results[$id_right] = 1;
+                    foreach ($id_entities as $id_entity) {
+                        if (!(int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right . ' AND entity = ' . $id_entity)) {
+                            if ($this->db->insert('user_rights', array(
+                                        'entity'  => $id_entity,
+                                        'fk_user' => $this->id,
+                                        'fk_id'   => $id_right
+                                    )) > 0) {
+                                $nOk++;
 
-                            // Ajout du droit lire si nécessaire: 
-                            if (!in_array($right_def['perms'], array('lire', 'read')) && !in_array($right_def['subperms'], array('lire', 'read'))) {
-                                $where = 'module = \'' . $right_def['module'] . '\'';
-                                if ($right_def['subperms']) {
-                                    $where .= ' AND perms = \'' . $right_def['perms'] . '\' AND subperms IN (\'lire\', \'read\')';
-                                } else {
-                                    $where .= ' AND perms IN (\'lire\', \'read\')';
+                                if (!isset($results[$id_right])) {
+                                    $results[$id_right] = array();
                                 }
-                                $id_right_lire = (int) $this->db->getValue('rights_def', 'id', $where);
+                                $results[$id_right][$id_entity] = 1;
 
-                                if ($id_right_lire) {
-                                    if (!(int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right_lire)) {
-                                        if ($this->db->insert('user_rights', array(
-                                                    'entity'  => 1,
-                                                    'fk_user' => $this->id,
-                                                    'fk_id'   => $id_right_lire
-                                                )) > 0) {
-                                            $nOk++;
-                                            $results[$id_right_lire] = 1;
-                                        } else {
-                                            $sql_err = $this->db->err();
-                                            $right_lire_def = $this->db->getRow('rights_def', 'id = ' . $id_right_lire, null, 'array');
-                                            $label = $right_def['module'] . '->' . $right_lire_def['perms'] . (!empty($right_lire_def['subperms']) ? '->' . $right_lire_def['subperms'] : '');
-                                            $warnings[] = 'Echec de l\'ajout du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+                                // Ajout du droit lire si nécessaire: 
+                                if (!in_array($right_def['perms'], array('lire', 'read')) && !in_array($right_def['subperms'], array('lire', 'read'))) {
+                                    $where = 'module = \'' . $right_def['module'] . '\'';
+                                    if ($right_def['subperms']) {
+                                        $where .= ' AND perms = \'' . $right_def['perms'] . '\' AND subperms IN (\'lire\', \'read\')';
+                                    } else {
+                                        $where .= ' AND perms IN (\'lire\', \'read\')';
+                                    }
+
+                                    $id_right_lire = (int) $this->db->getValue('rights_def', 'id', $where);
+
+                                    if ($id_right_lire) {
+                                        if (!(int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right_lire . ' AND entity = ' . $id_entity)) {
+                                            if ($this->db->insert('user_rights', array(
+                                                        'entity'  => $id_entity,
+                                                        'fk_user' => $this->id,
+                                                        'fk_id'   => $id_right_lire
+                                                    )) > 0) {
+                                                $nOk++;
+
+                                                if (!isset($results[$id_right_lire])) {
+                                                    $results[$id_right_lire] = array();
+                                                }
+                                                $results[$id_right_lire][$id_entity] = 1;
+                                            } else {
+                                                $sql_err = $this->db->err();
+                                                $right_lire_def = $this->db->getRow('rights_def', 'id = ' . $id_right_lire, null, 'array');
+                                                $label = $right_def['module'] . '->' . $right_lire_def['perms'] . (!empty($right_lire_def['subperms']) ? '->' . $right_lire_def['subperms'] : '');
+                                                $warnings[] = 'Echec de l\'ajout du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+                                            }
                                         }
                                     }
                                 }
+                            } else {
+                                $sql_err = $this->db->err();
+                                $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
+                                $warnings[] = 'Echec de l\'ajout du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+
+                                if (!isset($results[$id_right])) {
+                                    $results[$id_right] = array();
+                                }
+
+                                $results[$id_right][$id_entity] = 0;
                             }
                         } else {
-                            $sql_err = $this->db->err();
                             $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
-                            $warnings[] = 'Echec de l\'ajout du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
-
-                            $results[$id_right] = 0;
+                            $warnings[] = 'l\'utilisateur possède déjà le droit "' . $label . '"';
                         }
-                    } else {
-                        $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
-                        $warnings[] = 'l\'utilisateur possède déjà le droit "' . $label . '"';
-                    }
 
-                    if ($nOk === 1) {
-                        $success = 'Droit ajouté avec succès';
-                    } elseif ($nOk > 1) {
-                        $success = $nOk . ' droits ont été ajoutés avec succès';
+                        if ($nOk === 1) {
+                            $success = 'Droit ajouté avec succès';
+                        } elseif ($nOk > 1) {
+                            $success = $nOk . ' droits ont été ajoutés avec succès';
+                        }
                     }
                 }
             }
@@ -2177,6 +2267,8 @@ class Bimp_User extends BimpObject
         $success = '';
 
         $id_rights = BimpTools::getArrayValueFromPath($data, 'id_rights', array());
+        $id_entities = BimpTools::getArrayValueFromPath($data, 'id_entities', array());
+
         $results = array();
 
         if (empty($id_rights)) {
@@ -2184,7 +2276,15 @@ class Bimp_User extends BimpObject
         } else {
             $nOk = 0;
 
-            $groupsRights = $this->getGroupsRights();
+            if (empty($id_entities)) {
+                $id_entities = array(1);
+            }
+
+            $groupsRights = array();
+
+            foreach ($id_entities as $id_entity) {
+                $groupsRights[$id_entity] = $this->getGroupsRights($id_entity);
+            }
 
             foreach ($id_rights as $id_right) {
                 $right_def = $this->db->getRow('rights_def', 'id = ' . $id_right, null, 'array');
@@ -2192,74 +2292,90 @@ class Bimp_User extends BimpObject
                 if (is_null($right_def)) {
                     $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
                 } else {
-                    if ((int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
-                        $module = BimpTools::getArrayValueFromPath($right_def, 'module', '');
-                        $subperms = BimpTools::getArrayValueFromPath($right_def, 'subperms', '');
-                        $perms = BimpTools::getArrayValueFromPath($right_def, 'perms', '');
+                    foreach ($id_entities as $id_entity) {
+                        if ((int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right . ' AND entity = ' . $id_entity)) {
+                            $module = BimpTools::getArrayValueFromPath($right_def, 'module', '');
+                            $subperms = BimpTools::getArrayValueFromPath($right_def, 'subperms', '');
+                            $perms = BimpTools::getArrayValueFromPath($right_def, 'perms', '');
 
-                        if ($this->db->delete('user_rights', "entity = 1 AND fk_user = " . $this->id . " AND fk_id = " . $id_right)) {
-                            $nOk++;
+                            if ($this->db->delete('user_rights', "fk_user = " . $this->id . " AND fk_id = " . $id_right . ' AND entity = ' . $id_entity)) {
+                                $nOk++;
 
-                            $results[$id_right] = array(
-                                'ok'     => 1,
-                                'active' => (isset($groupsRights[$id_right]) ? 'inherit' : 'no')
-                            );
+                                if (!isset($results[$id_right])) {
+                                    $results[$id_right] = array();
+                                }
 
-                            if ($module) {
-                                // Si droit lire, suppr des droits du même ensemble: 
-                                if (in_array($subperms, array('lire', 'read')) || in_array($perms, array('lire', 'read'))) {
-                                    $filters = array(
-                                        'a.fk_user' => $this->id,
-                                        'r.module'  => $module,
-                                    );
+                                $results[$id_right][$id_entity] = array(
+                                    'ok'     => 1,
+                                    'active' => (isset($groupsRights[$id_entity][$id_right]) ? 'inherit' : 'no')
+                                );
 
-                                    if (in_array($subperms, array('lire', 'read'))) {
-                                        $filters['r.perms'] = $perms;
-                                        $filters['r.subperms'] = 'IS_NOT_NULL';
-                                    }
+                                if ($module) {
+                                    // Si droit lire, suppr des droits du même ensemble: 
+                                    if (in_array($subperms, array('lire', 'read')) || in_array($perms, array('lire', 'read'))) {
+                                        $filters = array(
+                                            'a.fk_user' => $this->id,
+                                            'a.entity'  => $id_entity,
+                                            'r.module'  => $module,
+                                        );
 
-                                    $sql = BimpTools::getSqlFullSelectQuery('user_rights', array('a.rowid, r.id as id_right'), $filters, array(
-                                                'r' => array(
-                                                    'table' => 'rights_def',
-                                                    'on'    => 'r.id = a.fk_id',
-                                                    'alias' => 'r'
-                                                )
-                                    ));
+                                        if (in_array($subperms, array('lire', 'read'))) {
+                                            $filters['r.perms'] = $perms;
+                                            $filters['r.subperms'] = 'IS_NOT_NULL';
+                                        }
 
-                                    $extra_rights = $this->db->executeS($sql, 'array');
+                                        $sql = BimpTools::getSqlFullSelectQuery('user_rights', array('a.rowid, r.id as id_right'), $filters, array(
+                                                    'r' => array(
+                                                        'table' => 'rights_def',
+                                                        'on'    => 'r.id = a.fk_id',
+                                                        'alias' => 'r'
+                                                    )
+                                        ));
 
-                                    if (is_array($extra_rights)) {
-                                        foreach ($extra_rights as $er) {
-                                            if (!in_array((int) $er['id_right'], $id_rights)) {
-                                                if ($this->db->delete('user_rights', 'rowid = ' . (int) $er['rowid']) <= 0) {
-                                                    $sql_err = $this->db->err();
-                                                    $extra_right_def = $this->db->getRow('rights_def', 'id = ' . (int) $er['id_right'], null, 'array');
-                                                    $label = $extra_right_def['module'] . '->' . $extra_right_def['perms'] . (!empty($extra_right_def['subperms']) ? '->' . $extra_right_def['subperms'] : '');
-                                                    $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
-                                                } else {
-                                                    $nOk++;
-                                                    $results[$er['id_right']] = array(
-                                                        'ok'     => 1,
-                                                        'active' => (isset($groupsRights[$id_right]) ? 'inherit' : 'no')
-                                                    );
+                                        $extra_rights = $this->db->executeS($sql, 'array');
+
+                                        if (is_array($extra_rights)) {
+                                            foreach ($extra_rights as $er) {
+                                                if (!in_array((int) $er['id_right'], $id_rights)) {
+                                                    if ($this->db->delete('user_rights', 'rowid = ' . (int) $er['rowid']) <= 0) {
+                                                        $sql_err = $this->db->err();
+                                                        $extra_right_def = $this->db->getRow('rights_def', 'id = ' . (int) $er['id_right'], null, 'array');
+                                                        $label = $extra_right_def['module'] . '->' . $extra_right_def['perms'] . (!empty($extra_right_def['subperms']) ? '->' . $extra_right_def['subperms'] : '');
+                                                        $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+                                                    } else {
+                                                        $nOk++;
+
+                                                        if (!isset($results[$er['id_right']])) {
+                                                            $results[$er['id_right']] = array();
+                                                        }
+
+                                                        $results[$er['id_right']][$id_entity] = array(
+                                                            'ok'     => 1,
+                                                            'active' => (isset($groupsRights[$id_entity][$er['id_right']]) ? 'inherit' : 'no')
+                                                        );
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            } else {
+                                $sql_err = $this->db->err();
+                                $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
+                                $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+
+                                if (!isset($results[$id_right])) {
+                                    $results[$id_right] = array();
+                                }
+
+                                $results[$id_right][$id_entity] = array(
+                                    'ok' => 0
+                                );
                             }
                         } else {
-                            $sql_err = $this->db->err();
                             $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
-                            $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
-
-                            $results[$id_right] = array(
-                                'ok' => 0
-                            );
+                            $warnings[] = 'L\'utilisteur ne possède déjà pas le droit "' . $label . '"';
                         }
-                    } else {
-                        $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
-                        $warnings[] = 'L\'utilisteur ne possède déjà pas le droit "' . $label . '"';
                     }
                 }
             }
@@ -2352,8 +2468,8 @@ class Bimp_User extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => '$(\'.reloadUserGroupsTableBtn\').click();'
         );
     }
@@ -2380,8 +2496,8 @@ class Bimp_User extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => '$(\'.reloadUserGroupsTableBtn\').click();'
         );
     }
@@ -2408,7 +2524,7 @@ class Bimp_User extends BimpObject
         );
     }
 
-    // Overrides
+    // Overrides: 
 
     public function onSave(&$errors = array(), &$warnings = array())
     {

@@ -503,9 +503,6 @@ class BimpRender
 
     public static function renderNavTabs($tabs, $tabs_id = 'maintabs', $params = array())
     {
-//        echo '<pre>';
-//        print_r($tabs);
-//        echo '</pre>';
         $params = BimpTools::overrideArray(array(
                     'content_only'        => false,
                     'nav_only'            => false,

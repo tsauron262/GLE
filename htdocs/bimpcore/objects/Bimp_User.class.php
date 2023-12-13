@@ -106,6 +106,7 @@ class Bimp_User extends BimpObject
             case 'addRight':
             case 'removeRight':
             case 'addToGroup':
+            case 'removeFromGroup':
                 if ((int) $user->rights->user->user->creer || $user->admin) {
                     return 1;
                 }
@@ -1500,6 +1501,10 @@ class Bimp_User extends BimpObject
         switch ($list_type) {
             // Onglet "Groupes": 
             case 'user_groups':
+                if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                    return $this->renderUserGroupsTable();
+                }
+
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_UserGroup'), 'user', 1, null, 'Liste des groupes de "' . $user_label . '"', 'fas_users');
                 $list->addFieldFilterValue('ugu.fk_user', $this->id);
                 break;
@@ -1757,6 +1762,90 @@ class Bimp_User extends BimpObject
             $html .= '</tbody>';
             $html .= '</table>';
         }
+
+        return $html;
+    }
+
+    public function renderUserGroupsTable()
+    {
+        if (!BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            return $this->renderLinkedObjectsList('user_groups');
+        }
+
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID de l\'utilisateur absent');
+        }
+
+        $groups = self::getUserUserGroupsList($this->id, true);
+
+        $html = '';
+        $content = '';
+
+        if (empty($groups)) {
+            $content = BimpRender::renderAlerts('Aucun groupe');
+        } else {
+            $headers = array(
+                'group'    => 'Groupe',
+                'entities' => 'Entités'
+            );
+
+            $rows = array();
+            $groups_links = BimpCache::getUserGroupsArray(false, true);
+            $entities_names = BimpCache::getEntitiesCacheArray(false);
+
+            ksort($groups);
+            
+            foreach ($groups as $id_group => $ids_entities) {
+                $ent = '';
+
+                foreach ($ids_entities as $id_entity) {
+                    $ent .= ($ent ? '<br/>' : '') . (isset($entities_names[$id_entity]) ? $entities_names[$id_entity] : 'Entité #' . $id_entity);
+
+                    if ($this->isActionAllowed('removeFromGroup') && $this->canSetAction('removeFromGroup')) {
+//                    $onclick = 'BimpUserGroupsTable.unlinkUserGroupEntity(' . $this->id . ', ' . $id_group . ', ' . $id_entity . ')';
+                        $onclick = $this->getJsActionOnclick('removeFromGroup', array(
+                            'id_group'  => $id_group,
+                            'id_entity' => $id_entity
+                                ), array());
+
+                        $ent .= '&nbsp;<span class="btn btn-light-danger iconBtn" onclick="' . $onclick . '">';
+                        $ent .= BimpRender::renderIcon('fas_unlink');
+                        $ent .= '</span>';
+                    }
+                }
+
+                $rows[] = array(
+                    'group'    => (isset($groups_links[$id_group]) ? $groups_links[$id_group] : 'Group #' . $id_group),
+                    'entities' => $ent
+                );
+            }
+
+            $content .= BimpRender::renderBimpListTable($rows, $headers, array());
+        }
+
+        $html .= '<div class="col-sm-12 col-md-6">';
+        $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
+
+        if ($this->isActionAllowed('addToGroup') && $this->canSetAction('addToGroup')) {
+            $onclick = $this->getJsActionOnclick('addToGroup', array(), array(
+                'form_name' => 'add_to_groupe'
+            ));
+
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter un groupe / entité(s)';
+            $html .= '</span>';
+        }
+
+        $onclick = $this->getJsLoadCustomContent('renderUserGroupsTable', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
+        $html .= '<span class="btn btn-default reloadUserGroupsTableBtn" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+        $html .= '</span>';
+
+        $html .= '</div>';
+
+        $html .= $content;
+
+        $html .= '</div>';
 
         return $html;
     }
@@ -2236,9 +2325,25 @@ class Bimp_User extends BimpObject
             $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
 
             if (BimpObject::objectLoaded($group)) {
-                if ($this->dol_object->SetInGroup($id_group, 1) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout de l\'utilisateur ' . $this->getName());
+                if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                    $entities = BimpTools::getArrayValueFromPath($data, 'entities', array());
+
+                    if (empty($entities)) {
+                        $errors[] = 'Aucune entité sélectionnée';
+                    } else {
+                        foreach ($entities as $id_entity) {
+                            if ($this->dol_object->SetInGroup($id_group, $id_entity) <= 0) {
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout de l\'utilisateur ' . $this->getName() . ' (entité #' . $id_entity . ')');
+                            }
+                        }
+                    }
                 } else {
+                    if ($this->dol_object->SetInGroup($id_group, 1) <= 0) {
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout de l\'utilisateur ' . $this->getName());
+                    }
+                }
+
+                if (empty($errors)) {
                     $success = 'Ajout de l\'utilisateur ' . $this->getName() . ' au groupe ' . $group->getName() . ' effectué avec succès';
                 }
             } else {
@@ -2248,7 +2353,36 @@ class Bimp_User extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => '$(\'.reloadUserGroupsTableBtn\').click();'
+        );
+    }
+
+    public function actionRemoveFromGroup($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Retrait du groupe effectué avec succès';
+
+        $id_group = (int) BimpTools::getArrayValueFromPath($data, 'id_group', 0, $errors, true, 'Groupe absent');
+        if ($this->isLoaded($errors)) {
+            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                $entity = BimpTools::getArrayValueFromPath($data, 'id_entity', 0, $errors, true, 'Entité absente');
+            } else {
+                $entity = 1;
+            }
+
+            if (!count($errors)) {
+                if ($this->dol_object->RemoveFromGroup($id_group, $entity) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la suppression du groupe (Entité #' . $entity . ')');
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success_callback' => '$(\'.reloadUserGroupsTableBtn\').click();'
         );
     }
 

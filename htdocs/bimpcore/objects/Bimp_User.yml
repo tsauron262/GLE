@@ -361,7 +361,25 @@ forms:
                   type: select
                   options: 
                       callback: getUserGroupsArray
-                      
+            - custom: 1
+              show: 
+                  callback: 
+                      class_name: BimpTools
+                      method: isModuleDoliActif
+                      is_static: 1
+                      params: 
+                          - MULTICOMPANY
+              label: Entités
+              input_name: entities
+              data_type: id
+              input: 
+                  type: check_list
+                  items: 
+                      callback: 
+                          method: getEntitiesCacheArray
+                          params: 
+                              - 0
+                              
     disponibilities: 
         rows: 
             - custom: 1

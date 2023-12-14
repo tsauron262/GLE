@@ -105,7 +105,7 @@ class BCT_ContratLine extends BimpObject
 
         $status = (int) $this->getData('statut');
 
-        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_fac_start', 'date_achat_start'))) {
+        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start'))) {
             return 0;
         }
 

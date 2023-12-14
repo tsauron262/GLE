@@ -21,7 +21,7 @@ class BT_ficheInter_det extends BimpDolObject
     
     public static $servicesForFacturation = Array(
         self::TYPE_PLUS_ATELIER         => 'SERV23-GEN-PRATE1',
-        self::TYPE_PLUS_SUR_SITE        => 'SERV23-FPR-1',
+        self::TYPE_PLUS_SUR_SITE        => 'SERV23-GEN-PR1',
         self::TYPE_PLUS_TELEMAINTENANCE => 'SERV23-GEN-PRATE1',
         self::TYPE_DEPLA                => 'SERV23-GEN-FD02',
         self::TYPE_DEPLA_OFFERT         => 'SERV23-GEN-FD02'

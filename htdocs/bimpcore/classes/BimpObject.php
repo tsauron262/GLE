@@ -8782,7 +8782,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 $fl = false;
             }
-            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . $value . '\''));
+            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . htmlentities(addslashes($value)) . '\''));
         }
         $js .= '}, ';
         if (isset($params['result_container'])) {

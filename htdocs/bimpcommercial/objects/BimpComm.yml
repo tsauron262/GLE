@@ -730,6 +730,11 @@ fields_tables:
     totals: 
         title: Montants totaux
         icon: euro
+        rows:
+           100:
+              label: Poids Total
+              value: 
+                  callback: displayTotalWeight
                   
     notes:
         title: Notes
@@ -868,6 +873,11 @@ lists_cols:
         label: Tx marque
         value: 
             callback: displayTxMarque
+            
+    poids_total:
+        label: Poids Total
+        value:
+            callback: getTotalWeight
         
 lists: 
     default: 

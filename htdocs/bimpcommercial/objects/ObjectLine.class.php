@@ -5752,11 +5752,6 @@ class ObjectLine extends BimpObject
             if ($product->isBundle()) {
                 $fieldsCopy = array('id_obj', 'abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv');
                 $isAbonnement = $product->isAbonnement();
-                //on supprime toutes les ous lignes
-//                $errors = BimpTools::merge_array($errors, $this->deleteSousLigne($errors, $warnings));
-                /*
-                 * todo, pas de suppr , plutot recherche avec linked_id_object et linked_object_name
-                 */
                 //on ajoute les sous lignes et calcule le tot
                 $dol_object = $this->getChildObject('dol_line');
                 $thisTot = $dol_object->getData('total_ht');
@@ -5766,29 +5761,24 @@ class ObjectLine extends BimpObject
                     $totHtSansRemise = 0;
                     $totHtSansRemiseRemisable = 0;
                     $child_prods = $product->getChildrenObjects('child_products');
+                    $parent = $this->getParentInstance();
                     foreach ($child_prods as $child_prod) {
-                        $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array('id_parent_line' => $this->id, 'linked_id_object' => $child_prod->id, 'linked_object_name' => 'bundle'), true, true, true);
-                        if (is_null($newLn))
-                            $newLn = BimpObject::getInstance($this->module, $this->object_name);
-                        $newLn->qty = $child_prod->getData('qty') * $this->qty;
-                        $newLn->id_product = $child_prod->getData('fk_product_fils');
-                        $newLn->set('editable', 0);
-//                        $newLn->set('remisable', 0);
-                        $newLn->set('deletable', 0);
-                        $newLn->set('id_parent_line', $this->id);
-                        $newLn->set('linked_id_object', $child_prod->id);
-                        $newLn->set('linked_object_name', 'bundle');
-//                        $newLn->set('id_obj', $this->getData('id_obj'));
-                        foreach ($fieldsCopy as $field) {
-                            $newLn->set($field, $this->getData($field));
-                        }
-                        if (!$newLn->isLoaded())
-                            $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
-                        else
-                            $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
+                        $newLn = null;
+                        $errors = BimpTools::merge_array($errors, $parent->createMajLn(
+                            array(
+                                'id_parent_line' => $this->id, 
+                                'linked_id_object' => $child_prod->id, 
+                                'linked_object_name' => 'bundle'
+                            ), array(
+                                'qty'=> $child_prod->getData('qty') * $this->qty, 
+                                'id_product'=> $child_prod->getData('fk_product_fils'), 
+                            ), BimpTools::merge_array($fieldsCopy, array(
+                                'editable'  => 0,
+                                'deletable' => 0,
+                            ),true),
+                        $newLn));
+                        
                         $dol_child = $newLn->getChildObject('dol_line');
-                        //                    echo '<pre>';
-                        //                    print_r($child);
                         $totHt += $dol_child->getData('total_ht');
                         $totHtSansRemise += $newLn->getTotalHT(true);
                         if($newLn->getData('remisable'))
@@ -5817,29 +5807,24 @@ class ObjectLine extends BimpObject
                             }
                         }
                         //ajout de la ligne de compensation
-                        $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array('id_parent_line' => $this->id, 'linked_object_name' => 'bundleCorrect'), true, true, true);
-                        if (is_null($newLn))
-                            $newLn = BimpObject::getInstance($this->module, $this->object_name);
-                        $newLn->qty = $this->qty;
-                        $newLn->id_product = 0;
-                        $newLn->pu_ht = -$totHtSansRemise / $this->qty;
-                        $newLn->tva_tx = $this->tva_tx;
-                        $newLn->desc = 'Annulation double prix Bundle';
-                        $newLn->pa_ht = -$totPa / $this->qty;
-                        $newLn->set('linked_object_name', 'bundleCorrect');
-                        $newLn->set('type', static::LINE_FREE);
-                        $newLn->set('editable', 0);
-//                        $newLn->set('remisable', 0);
-                        $newLn->set('deletable', 0);
-                        $newLn->set('id_parent_line', $this->id);
-//                        $newLn->set('id_obj', $this->getData('id_obj'));
-                        foreach ($fieldsCopy as $field) {
-                            $newLn->set($field, $this->getData($field));
-                        }
-                        if (!$newLn->isLoaded())
-                            $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
-                        else
-                            $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
+                        $newLn = null;
+                        $errors = BimpTools::merge_array($errors, $parent->createMajLn(
+                            array(
+                                'id_parent_line' => $this->id, 
+                                'linked_object_name' => 'bundleCorrect'
+                            ), array(
+                                'qty'=> $this->qty, 
+                                'id_product'=> 0, 
+                                'pu_ht'=> -$totHtSansRemise / $this->qty,
+                                'tva_tx' => $this->tva_tx,
+                                'desc'   => 'Annulation double prix Bundle',
+                                'pa_ht' => -$totPa / $this->qty
+                            ), BimpTools::merge_array($fieldsCopy, array(
+                                'type'      => static::LINE_FREE,
+                                'editable'  => 0,
+                                'deletable' => 0,
+                            ),true),
+                        $newLn));
                         if (abs($pourcent) > 0.01 || abs($pourcent) < 0.01) {
                             $errors = BimpTools::merge_array($errors, $newLn->setRemise($pourcent2, 'Remise bundle ' . $product->getData('ref')));
                         }

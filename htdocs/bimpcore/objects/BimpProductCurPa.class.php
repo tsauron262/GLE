@@ -8,7 +8,7 @@ class BimpProductCurPa extends BimpObject
         'facture_fourn'  => 'Facture fournisseur',
         'fourn_price'    => 'Prix d\'achat fournisseur',
         'pmp'            => 'Prix moyen pondéré',
-        'cost_price'     => 'Prix de reviens'
+        'cost_price'     => 'Prix de revient'
     );
 
     // Getters Static

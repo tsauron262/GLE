@@ -2857,6 +2857,49 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
+    
+    public function displayTotalWeight(){
+        return $this->getTotalWeight().' kg';
+    }
+    
+    public function getTotalWeight(){
+        $weight = 0;
+        foreach($this->getLines('not_text') as $line){
+            $product = $line->getProduct();
+            if(BimpObject::objectLoaded($product)){
+                $weight += $product->getData('weight') * $line->qty;
+            }
+        }
+        return $weight;
+    }
+    
+    public function createMajLn($dataFiltre, $dataParamsDirect, $data = array(), &$newLn = null){//atention filtre doit être unique, sinon tout sera écrasé
+        $errors = array();
+        if(!count($dataFiltre))
+            $errors[] = 'Pas de filtre createMajLn';
+        else{
+            $dataFiltre['id_obj'] = $this->id;
+            $newLnTmp = $this->getLineInstance();
+            $newLn = BimpCache::findBimpObjectInstance($newLnTmp->module, $newLnTmp->object_name, $dataFiltre, true, true, true);
+            if (is_null($newLn))
+                $newLn = $newLnTmp;//BimpObject::getInstance($newLn->module, $newLn->object_name);
+
+            foreach($dataParamsDirect as $name => $value)
+                $newLn->$name = $value;
+
+            foreach($data as $name => $value)
+                $newLn->set($name, $value);
+
+            foreach($dataFiltre as $name => $value)
+                $newLn->set($name, $value);
+
+            if (!$newLn->isLoaded())
+                $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
+            else
+                $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
+        }
+        return $errors;
+    }
 
     public function createLinesFromOrigin($origin, $params = array(), &$warnings = array())
     {

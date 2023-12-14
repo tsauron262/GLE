@@ -365,6 +365,20 @@ forms:
             - field: note_public
             - field: note_private
             
+    edit: 
+        - field: statut
+        - field: label
+        - field: fk_soc
+        - field: fk_soc_facturation
+        - field: ref_customer
+        - field: condregl
+        - field: moderegl
+        - field: entrepot
+        - field: secteur
+        - field: expertise
+        - field: note_public
+        - field: note_private
+        
     contact:
         title: Ajouter un contact
         rows: 

@@ -1111,6 +1111,12 @@ views:
                   col_lg: 5
                   col_md: 5
                   fields_table:
+                      name: measures
+                      
+                - type: fields_table
+                  col_lg: 5
+                  col_md: 5
+                  fields_table:
                       name: abonnement
                       
     product_price_bundle:

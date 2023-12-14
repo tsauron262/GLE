@@ -91,7 +91,7 @@ class Bimp_PropalLine extends ObjectLine
             if (BimpObject::objectLoaded($prod)) {
                 switch ($field) {
                     case 'is_abonnement':
-                        return $prod->isAbonnement();
+                        return $this->isAbonnement();
                     case 'abo_fac_periodicity':
                         return $prod->getData('fac_def_periodicity');
                     case 'abo_fac_term':

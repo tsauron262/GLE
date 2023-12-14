@@ -283,6 +283,27 @@ fields:
             array: expertise
     
 forms: 
+    port:
+        title: Ajout des frais de port
+        rows:
+            - custom: 1
+              label: Pays
+              input_name: state
+              input: 
+                  type: select
+                  options: 
+                      1: France
+            - custom: 1
+              label: Option
+              input_name: option
+              input: 
+                  type: select
+                  options: 
+                      base: Normal
+                      chrono: Option Chronopost Standard France
+                      chronoEx: Option Chronopost Express France ou livraison soirée
+                      corse: Corse
+    
     contact:
         title: Ajouter un contact
         rows: 

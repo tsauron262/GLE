@@ -41,6 +41,8 @@ class BCT_ContratLine extends BimpObject
     );
     public static $dol_fields = array('fk_contrat', 'fk_product', 'label', 'description', 'commentaire', 'statut', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'remise', 'fk_product_fournisseur_price', 'buy_price_ht', 'total_ht', 'total_tva', 'total_ttc', 'date_commande', 'date_ouverture_prevue', 'date_fin_validite', 'date_cloture', 'fk_user_author', 'fk_user_ouverture', 'fk_user_cloture');
     protected $data_at_date = null;
+    public $process_bundle_lines = true;
+    
 
     // Droits User:
 
@@ -69,8 +71,8 @@ class BCT_ContratLine extends BimpObject
         global $user;
         if (in_array($field_name, array('statut'))) {
             if (!$user->admin) {
-                    return 0;
-                }
+                return 0;
+            }
         }
 
         return 1;
@@ -1207,6 +1209,27 @@ class BCT_ContratLine extends BimpObject
         }
 
         return $date;
+    }
+
+    public function getTotalHT($with_remises = true)
+    {
+        $pu_ht = (float) $this->getData('subprice');
+        $qty = (float) $this->getData('qty');
+
+        if ($pu_ht && $qty) {
+
+            if ($with_remises) {
+                $remise = $this->getData('remise_percent');
+
+                if ($remise) {
+                    $pu_ht -= (float) ($pu_ht * ($remise / 100));
+                }
+            }
+
+            return ($pu_ht * $qty);
+        }
+
+        return 0;
     }
 
     // Getters statiques:
@@ -3141,7 +3164,12 @@ class BCT_ContratLine extends BimpObject
     public function onSave(&$errors = [], &$warnings = [])
     {
         $this->hydrateFromDolObject();
+
         parent::onSave($errors, $warnings);
+
+        if (!count($errors)) {
+            $this->majBundle($errors, $warnings);
+        }
     }
 
     public function activate($date_ouverture = null)
@@ -3380,25 +3408,27 @@ class BCT_ContratLine extends BimpObject
 
     public function majBundle(&$errors = array(), &$warnings = array())
     {
-        if ((int) $this->id_product) {
-            $product = $this->getProduct();
-            if ($product->isBundle()) {
+        global $no_bundle_lines_process;
+        
+        if ($no_bundle_lines_process) {
+            return;
+        }
+        
+        if ((int) $this->getData('fk_product')) {
+            $product = $this->getChildObject('product');
+            if (BimpObject::objectLoaded($product) && $product->isBundle()) {
                 $fieldsCopy = array('fk_contrat', 'line_type', 'fac_periodicity', 'fac_term', 'achat_periodicity', 'duration', 'nb_renouv', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start');
-                $isAbonnement = $product->isAbonnement();
 
                 //on ajoute les sous lignes et calcule le tot
                 $bundle_total_ht = $this->getData('total_ht');
                 $qty = $this->getData('qty');
                 $totPa = 0;
                 if ($bundle_total_ht > 0) {
-                    $lines_total_ht = 0;
+                    $lines_total_ht_sans_remises = 0;
+
                     $child_prods = $product->getChildrenObjects('child_products');
 
                     foreach ($child_prods as $child_prod) {
-                        if (!$child_prod->isAbonnement()) {
-                            continue;
-                        }
-
                         $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array(
                                     'id_parent_line'     => $this->id,
                                     'linked_id_object'   => $child_prod->id,
@@ -3436,59 +3466,74 @@ class BCT_ContratLine extends BimpObject
                         }
 
                         $newLnQty = $newLn->getData('qty');
-                        $lines_total_ht += $newLn->getData('total_ht');
-                        $totPa += $newLn->getData('buy_price_ht') * $newLnQty;
+                        $lines_total_ht_sans_remises += $newLn->getTotalHT(false);
 
-                        if ($isAbonnement && !$newLn->isAbonnement()) {
-                            BimpCore::addlog('Attention, composant d\'un bundle abonnement pas abonnement LN : ' . $newLn->id . ' prod : ' . $product->getLink());
-                        }
+                        $totPa += (float) $newLn->getData('buy_price_ht') * $newLnQty;
                     }
 
-                    if ($lines_total_ht) {
-                        $pourcent = 100 - ($bundle_total_ht / $lines_total_ht * 100);
+                    if ($lines_total_ht_sans_remises) {
+                        $pourcent = 100 - ($bundle_total_ht / $lines_total_ht_sans_remises * 100);
 
                         if (abs($pourcent) > 0.01) {
-                            $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line' => $this->id));
-                            foreach ($childs as $child) {
-                                $errors = BimpTools::merge_array($errors, $child->setRemise($pourcent3, 'Remise bundle ' . $product->getData('ref')));
+                            foreach (BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array('id_parent_line' => $this->id)) as $sub_line) {
+                                $sub_line->set('remise_percent', $pourcent);
+                                $line_warnings = array();
+                                $line_errors = $sub_line->update($line_warnings, true);
+
+                                if (count($line_errors)) {
+                                    $prod = $sub_line->getChildObject('product');
+                                    $errors[] = BimpTools::getMsgFromArray($line_errors, (BimpObject::objectLoaded($prod) ? 'Produit ' . $prod->getRef() : 'Ligne n° ' . $sub_line->getData('rang')) . ' : échec ajout de la remise du bundle');
+                                }
                             }
                         }
 
                         //ajout de la ligne de compensation
-                        $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array('id_parent_line' => $this->id, 'linked_object_name' => 'bundleCorrect'), true, true, true);
-                        if (is_null($newLn))
-                            $newLn = BimpObject::getInstance($this->module, $this->object_name);
-                        $newLn->qty = $this->qty;
-                        $newLn->id_product = 0;
-                        $newLn->pu_ht = -$totHtSansRemise / $this->qty;
-                        $newLn->tva_tx = $this->tva_tx;
-                        $newLn->desc = 'Annulation double prix Bundle';
-                        $newLn->pa_ht = -$totPa / $this->qty;
-                        $newLn->set('linked_object_name', 'bundleCorrect');
-                        $newLn->set('type', static::LINE_FREE);
-                        $newLn->set('editable', 0);
-//                        $newLn->set('remisable', 0);
-                        $newLn->set('deletable', 0);
+                        $newLn = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array(
+                                    'id_parent_line'     => $this->id,
+                                    'linked_object_name' => 'bundleCorrect'
+                                        ), true, true, true);
+
+                        if (!BimpObject::objectLoaded($newLn)) {
+                            $newLn = BimpObject::getInstance('bimpcontrat', 'BCT_ContratLine');
+                        }
+
+                        $newLn->set('description', 'Annulation double prix Bundle');
+                        $newLn->set('qty', (float) $qty);
+                        $newLn->set('fk_product', 0);
                         $newLn->set('id_parent_line', $this->id);
-//                        $newLn->set('id_obj', $this->getData('id_obj'));
+                        $newLn->set('linked_id_object', $child_prod->id);
+                        $newLn->set('linked_object_name', 'bundleCorrect');
+
+                        $newLn->set('subprice', -$lines_total_ht_sans_remises / $qty);
+                        $newLn->set('tva_tx', $this->getData('tva_tx'));
+                        $newLn->set('buy_price_ht', -$totPa / $qty);
+
+                        if (abs($pourcent) > 0.01) {
+                            $newLn->set('remise_percent', $pourcent);
+                        }
+
                         foreach ($fieldsCopy as $field) {
                             $newLn->set($field, $this->getData($field));
                         }
-                        if (!$newLn->isLoaded())
-                            $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));
-                        else
-                            $errors = BimpTools::merge_array($errors, $newLn->update($warnings, true));
-                        if (abs($pourcent) > 0.01 || abs($pourcent) < 0.01) {
-                            $errors = BimpTools::merge_array($errors, $newLn->setRemise($pourcent2, 'Remise bundle ' . $product->getData('ref')));
+
+                        $line_warnings = array();
+                        if (!$newLn->isLoaded()) {
+                            $line_errors = $newLn->create($line_warnings, true);
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec ajout de la ligne d\'annulation du double prix du bundle');
+                            }
+                        } else {
+                            $line_errors = $newLn->update($line_warnings, true);
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec mise à jour de la ligne d\'annulation du double prix du bundle');
+                            }
                         }
 
-                        //gestion pa 
-                        $this->pa_ht = $totPa / $this->qty;
-                        $this->update($warnings);
-                        //                    die($thisTot.'rr'.$totHt.' '.$pourcent);
+                        if ($qty) {
+                            $this->updateField('buy_price_ht', $totPa / $qty);
+                        }
                     }
-                } /* else
-                  die('pas de prix. Ln : '.$this->id); */
+                }
             }
         }
     }
@@ -4458,6 +4503,8 @@ class BCT_ContratLine extends BimpObject
         $errors = parent::validate();
 
         if (!count($errors)) {
+            $prod = $this->getChildObject('product');
+
             switch ($this->getData('line_type')) {
                 case self::TYPE_TEXT:
                     $this->validateArray(array(
@@ -4493,8 +4540,8 @@ class BCT_ContratLine extends BimpObject
                                     $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas de type abonnement';
                                 }
                             }
-                        } else {
-//                            $errors[] = 'Aucun produit sélectionné';
+                        } elseif ($this->getData('linked_object_name') !== 'bundleCorrect') {
+                            $errors[] = 'Aucun produit sélectionné';
                         }
 
                         $periodicity = (int) $this->getData('fac_periodicity');
@@ -4518,6 +4565,23 @@ class BCT_ContratLine extends BimpObject
                         }
                     }
                     break;
+            }
+
+            if ((int) $this->getData('fk_product')) {
+                if (BimpObject::objectLoaded($prod)) {
+                    if (!$this->getData('subprice')) {
+                        $this->set('subprice', $this->getValueForProduct('subprice', $prod));
+                    }
+                    if (!$this->getData('tva_tx')) {
+                        $this->set('tva_tx', $this->getValueForProduct('tva_tx', $prod));
+                    }
+                    if (!$this->getData('fk_product_fournisseur_price')) {
+                        $this->set('fk_product_fournisseur_price', $this->getValueForProduct('fk_product_fournisseur_price', $prod));
+                    }
+                    if (!$this->getData('buy_price_ht')) {
+                        $this->set('buy_price_ht', $this->getValueForProduct('buy_price_ht', $prod));
+                    }
+                }
             }
         }
 

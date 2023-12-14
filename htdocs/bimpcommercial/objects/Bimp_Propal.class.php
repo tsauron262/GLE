@@ -2122,6 +2122,9 @@ class Bimp_Propal extends Bimp_PropalTemp
         $success = '';
         $sc = '';
 
+        global $no_bundle_lines_process;
+        $no_bundle_lines_process = true;
+
         $contrats = $this->getAbonnementLines(true, $errors);
 
         if (!count($errors) && empty($contrats)) {
@@ -2166,15 +2169,12 @@ class Bimp_Propal extends Bimp_PropalTemp
                     BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
                     $date_ouv = BimpTools::getArrayValueFromPath($data, 'date_ouverture_prevue', null);
 
+                    $new_lines = array();
                     foreach ($lines as $line) {
                         $line_errors = array();
                         $line_warnings = array();
 
                         $prod = $line->getProduct();
-
-//                        if (!BimpObject::objectLoaded($prod)) {
-//                            $line_errors[] = 'Produit absent';
-//                        }
 
                         if (!count($line_errors)) {
                             $id_pfp = (int) $line->id_fourn_price;
@@ -2190,33 +2190,31 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 $line_date_ouv = date('Y-m-d', strtotime($line->date_from)) . ' 00:00:00';
                             }
 
-                            BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
-                                'fk_contrat'                   => $contrat->id,
-                                'fk_product'                   => $line->id_product,
-                                'line_type'                    => BCT_ContratLine::TYPE_ABO,
-                                'description'                  => $line->desc,
-                                'product_type'                 => $line->product_type,
-                                'qty'                          => $line->qty,
-                                'subprice'                     => $line->pu_ht,
-                                'tva_tx'                       => $line->tva_tx,
-                                'remise_percent'               => $line->remise,
-                                'fk_product_fournisseur_price' => $id_pfp,
-                                'buy_price_ht'                 => $line->pa_ht,
-                                'fac_periodicity'              => $line->getData('abo_fac_periodicity'),
-                                'duration'                     => $line->getData('abo_duration'),
-                                'fac_term'                     => $line->getData('abo_fac_term'),
-                                'nb_renouv'                    => $line->getData('abo_nb_renouv'),
-//                                'achat_periodicity'            => $prod->getData('achat_def_periodicity'),
-//                                'variable_qty'                 => $prod->getData('variable_qty'),
-                                'id_linked_line'               => (int) $line->getData('id_linked_contrat_line'),
-                                'id_line_origin'               => $line->id,
-                                'line_origin_type'             => 'propal_line',
-                                'linked_id_object'             => $line->getData('linked_id_object'),
-                                'linked_object_name'           => $line->getData('linked_object_name'),
-                                'achat_periodicity'            => (BimpObject::objectLoaded($prod) ? $prod->getData('achat_def_periodicity') : 0),
-                                'variable_qty'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
-                                'date_ouverture_prevue'        => $line_date_ouv
-                                    ), true, $line_errors, $line_warnings);
+                            $new_line = BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
+                                        'fk_contrat'                   => $contrat->id,
+                                        'fk_product'                   => $line->id_product,
+                                        'line_type'                    => BCT_ContratLine::TYPE_ABO,
+                                        'description'                  => $line->desc,
+                                        'product_type'                 => $line->product_type,
+                                        'qty'                          => $line->qty,
+                                        'subprice'                     => $line->pu_ht,
+                                        'tva_tx'                       => $line->tva_tx,
+                                        'remise_percent'               => $line->remise,
+                                        'fk_product_fournisseur_price' => $id_pfp,
+                                        'buy_price_ht'                 => $line->pa_ht,
+                                        'fac_periodicity'              => $line->getData('abo_fac_periodicity'),
+                                        'duration'                     => $line->getData('abo_duration'),
+                                        'fac_term'                     => $line->getData('abo_fac_term'),
+                                        'nb_renouv'                    => $line->getData('abo_nb_renouv'),
+                                        'id_linked_line'               => (int) $line->getData('id_linked_contrat_line'),
+                                        'id_line_origin'               => $line->id,
+                                        'line_origin_type'             => 'propal_line',
+                                        'linked_id_object'             => $line->getData('linked_id_object'),
+                                        'linked_object_name'           => $line->getData('linked_object_name'),
+                                        'achat_periodicity'            => (BimpObject::objectLoaded($prod) ? $prod->getData('achat_def_periodicity') : 0),
+                                        'variable_qty'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
+                                        'date_ouverture_prevue'        => $line_date_ouv
+                                            ), true, $line_errors, $line_warnings);
                         }
 
                         if (count($line_warnings)) {
@@ -2226,12 +2224,23 @@ class Bimp_Propal extends Bimp_PropalTemp
                         if (count($line_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne n° ' . $line->getData('position') . ' au contrat d\'abonnement');
                         } else {
+                            $new_lines[$line->id] = $new_line;
                             $nOk++;
                         }
                     }
 
                     if ($nOk) {
                         $success .= ($success ? '<br/>' : '') . $nOk . ' ligne(s) ajoutée(s) au contrat ' . $contrat->getRef();
+
+                        // Traitement des lignes parentes: 
+                        foreach ($lines as $line) {
+                            if (isset($new_lines[$line->id]) && BimpObject::objectLoaded($new_lines[$line->id])) {
+                                $id_parent_line = (int) $line->getData('id_parent_line');
+                                if ($id_parent_line && isset($new_lines[$id_parent_line]) && BimpObject::objectLoaded($new_lines[$id_parent_line])) {
+                                    $new_lines[$line->id]->updateField('id_parent_line', $new_lines[$id_parent_line]->id);
+                                }
+                            }
+                        }
                     } else {
                         $warnings[] = 'Aucun ligne ajoutée au contrat ' . $contrat->getRef();
                     }
@@ -2243,8 +2252,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
             }
         }
-
-
+        
+        $no_bundle_lines_process = false;
 
         return array(
             'errors'           => $errors,

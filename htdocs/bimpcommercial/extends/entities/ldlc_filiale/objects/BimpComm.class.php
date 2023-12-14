@@ -9,12 +9,43 @@ class BimpComm_LdlcFiliale extends BimpComm
     public function getActionsButtons()
     {
         $buttons = parent::getActionsButtons();
-//        $buttons[] = array(
-//            'label'   => 'Ajouter/Maj port BIMP',
-//            'icon'    => 'fas_hand-holding-usd',
-//            'onclick' => $this->getJsActionOnclick('addPortLdlc', array(), array('form_name'=>'port'))
-//        );
+        if(BimpCore::getConf('prod_fdp_auto', 0, 'bimpcommercial') > 0 && in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))){
+            $buttons[] = array(
+                'label'   => 'Ajouter/Maj port BIMP',
+                'icon'    => 'fas_hand-holding-usd',
+                'onclick' => $this->getJsActionOnclick('addPortLdlc', array(), array('form_name'=>'port'))
+            );
+        }
         return $buttons;
+    }
+    
+    public function actionValidate($data, &$success)
+    {
+        $result = parent::actionValidate($data, $success);
+        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial'))) && (!isset($data['confirm_fdp']) || !$data['confirm_fdp'])) {
+            $lines = $this->getLines('not_text');
+            $ok = false;
+            foreach ($lines as $line) {
+                if($line->id_product == BimpCore::getConf('prod_fdp_auto', 0, 'bimpcommercial'))
+                        $ok = true;
+            }
+            if (!$ok) {
+                $data['confirm_fdp'] = 1;
+                $onclick = $this->getJsActionOnclick('validate', $data, array());
+                
+                $msg = 'Attention il ne semble pas y avoir de frais de port<br/>';
+
+                $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
+                $msg .= '</span><br/>';
+
+                
+
+                $result['errors'][] = $msg;
+            }
+        }
+        
+        return $result;
     }
     
     public function actionAddPortLdlc($dataForm = array(), &$success = ''){
@@ -115,16 +146,16 @@ class BimpComm_LdlcFiliale extends BimpComm
         }
         
         
-        
+        $success .= $info;
         if($price < 1)
             $errors[] = 'Calcul impossible';
         if(!count($errors)){
             $errors = $this->createMajLn(array('linked_object_name' => 'portLdlc'), array(
                 'qty'=>1, 
-                'id_product'=>243901, 
+                'id_product'=>BimpCore::getConf('prod_fdp_auto', 0, 'bimpcommercial'), 
                 'pu_ht'=>$price,
                 'tva_tx' => 20,
-                'desc'   => 'Frais de port BIMP'.$info,
+                'desc'   => 'Frais de port BIMP'/*.$info*/,
                 'pa_ht' => $price*0.5
             ), array(
 //                'type'      => ObjectLine::LINE_FREE,

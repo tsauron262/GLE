@@ -26,4 +26,8 @@ params:
         label: ID client LDLC Pro Lease
         cat: locations
         def: 0
+        
+    prod_fdp_auto: 
+        label: Produit frais de port auto
+        def: 0
 

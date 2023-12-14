@@ -353,11 +353,6 @@ fields:
         
     linked_object_name:
         label: Type d\'objet lié
-        
-#    remain_stock_done: 
-#        label: Qté restante stock déjà traité
-#        type: float
-#        default_value: 0
 
 forms: 
     text: 
@@ -380,17 +375,7 @@ forms:
               input: 
                   type: hidden
               value: 2
-            - custom: 1
-              label: Produit
-              input_name: fk_product
-              required: 1
-              input: 
-                  type: custom
-                  content: 
-                      callback: 
-                          method: renderProductInput
-                          params: 
-                              - 6
+            - field: fk_product
             - field: description
             - field: id_linked_line
             - field: date_ouverture_prevue

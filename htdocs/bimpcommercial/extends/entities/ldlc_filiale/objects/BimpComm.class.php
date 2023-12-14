@@ -9,11 +9,11 @@ class BimpComm_LdlcFiliale extends BimpComm
     public function getActionsButtons()
     {
         $buttons = parent::getActionsButtons();
-        $buttons[] = array(
-            'label'   => 'Ajouter/Maj port BIMP',
-            'icon'    => 'fas_hand-holding-usd',
-            'onclick' => $this->getJsActionOnclick('addPortLdlc', array(), array('form_name'=>'port'))
-        );
+//        $buttons[] = array(
+//            'label'   => 'Ajouter/Maj port BIMP',
+//            'icon'    => 'fas_hand-holding-usd',
+//            'onclick' => $this->getJsActionOnclick('addPortLdlc', array(), array('form_name'=>'port'))
+//        );
         return $buttons;
     }
     

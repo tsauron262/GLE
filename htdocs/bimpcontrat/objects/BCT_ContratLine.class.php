@@ -67,13 +67,10 @@ class BCT_ContratLine extends BimpObject
     public function canEditField($field_name)
     {
         global $user;
-        $status = (int) $this->getData('statut');
         if (in_array($field_name, array('statut'))) {
-            if ($status > 0) {
-                if (!$user->admin) {
+            if (!$user->admin) {
                     return 0;
                 }
-            }
         }
 
         return 1;

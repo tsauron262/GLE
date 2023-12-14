@@ -66,10 +66,12 @@ class BCT_ContratLine extends BimpObject
 
     public function canEditField($field_name)
     {
-//        $status = (int) $this->getData('statut');
-//        if (in_array($field_name, array(''))) {
-//            
-//        }
+        global $user;
+        if (in_array($field_name, array('statut'))) {
+            if (!$user->admin) {
+                    return 0;
+                }
+        }
 
         return 1;
     }
@@ -1760,16 +1762,18 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<br/>A partir du <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
             }
 
-            $html .= '<br/><br/>';
+            if ((int) $this->getData('statut') > 0) {
+                $html .= '<br/><br/>';
 
-            $periods_data = $this->getPeriodsToBillData();
-            $nb_periods_billed = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobill_max'];
-            $class = ($nb_periods_billed > 0 ? ($nb_periods_billed < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
+                $periods_data = $this->getPeriodsToBillData();
+                $nb_periods_billed = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobill_max'];
+                $class = ($nb_periods_billed > 0 ? ($nb_periods_billed < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
 
-            $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $nb_periods_billed . ' sur ' . $periods_data['nb_total_periods'] . '</span>';
+                $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $nb_periods_billed . ' sur ' . $periods_data['nb_total_periods'] . '</span>';
 
-            if ($nb_periods_billed < $periods_data['nb_total_periods']) {
-                $html .= '<br/>Prochaine facturation : ' . $this->displayNextFacDate(true);
+                if ($nb_periods_billed < $periods_data['nb_total_periods']) {
+                    $html .= '<br/>Prochaine facturation : ' . $this->displayNextFacDate(true);
+                }
             }
 
             if (BimpCore::isUserDev()) {
@@ -1827,14 +1831,16 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<br/><br/>';
             }
 
-            $periods_data = $this->getPeriodsToBuyData();
-            $nb_periods_bought = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobuy_max'];
-            $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
+            if ((int) $this->getData('statut') > 0) {
+                $periods_data = $this->getPeriodsToBuyData();
+                $nb_periods_bought = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobuy_max'];
+                $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
 
-            $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $periods_data['nb_total_periods'] . '</span>';
+                $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $periods_data['nb_total_periods'] . '</span>';
 
-            if ($nb_periods_bought < $periods_data['nb_total_periods']) {
-                $html .= '<br/>Prochaine achat : ' . $this->displayNextAchatDate(true);
+                if ($nb_periods_bought < $periods_data['nb_total_periods']) {
+                    $html .= '<br/>Prochaine achat : ' . $this->displayNextAchatDate(true);
+                }
             }
 
             if (BimpCore::isUserDev()) {

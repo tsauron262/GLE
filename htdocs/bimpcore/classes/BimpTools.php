@@ -2537,10 +2537,13 @@ class BimpTools
         return $emails_str;
     }
 
-    public static function displayPhone($phone)
+    public static function displayPhone($phone, $with33 = false)
     {
+        $phone = str_replace('+33', '0', $phone);
         if (strlen($phone) == 10)
-            return implode(' ', str_split($phone, 2));
+            $phone = implode(' ', str_split($phone, 2));
+        if($with33 && stripos($phone, '0') === 0)
+            $phone = "+33 (0)".substr ($phone, 1);
         return $phone;
     }
 

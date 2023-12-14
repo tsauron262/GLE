@@ -3857,6 +3857,7 @@ class BimpTools
 //        if ($module == 'MULTICOMPANY' && BimpCore::isModeDev() && defined('MULTICOMPANY_TEST')) {
 //            return 1;
 //        }
+        
         global $conf;
 
         if (stripos($module, 'MAIN_MODULE_') === false)

@@ -2372,6 +2372,7 @@ class BimpObject extends BimpCache
         if (!count($result['errors'])) {
             BimpTools::traitePostTraitement($result['errors']);
         }
+        
         BimpObject::loadClass('bimpalert', 'AlertProduit');
         if(class_exists('AlertProduit')){
             AlertProduit::getAlertes($result['errors'], $result['warnings']);

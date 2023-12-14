@@ -94,7 +94,6 @@ forms:
                     multiple: 1
                     type: search_user
 
-
 fields_tables:
     infos:
         icon: fas_info-circle

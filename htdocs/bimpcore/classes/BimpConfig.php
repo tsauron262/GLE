@@ -1169,10 +1169,9 @@ class BimpConfig
             } elseif (!method_exists($instance, $method)) {
                 $this->logConfigError('Méthode "' . $method . '" inexistante dans la classe ' . get_class($instance));
             } else {
-                if(BimpCore::getConf('enabled_callback_cache', 0) || (GETPOST('testCallback') == 1)){
+                if (BimpCore::getConf('enabled_callback_cache', 0) || (GETPOST('testCallback') == 1)) {
                     return BimpCache::getCallFunctionCache($instance, $method, $params, $is_static);
-                }
-                else{
+                } else {
                     if ($is_static) {
                         return forward_static_call_array(array(
                             $instance, $method

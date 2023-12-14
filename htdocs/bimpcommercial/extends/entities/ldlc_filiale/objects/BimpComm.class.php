@@ -77,6 +77,7 @@ class BimpComm_LdlcFiliale extends BimpComm
                     }
                 }
                 else{
+                    $info .= ' '.$data.' € HT';
                     $price += $data;
                 }
                 break;
@@ -104,7 +105,7 @@ class BimpComm_LdlcFiliale extends BimpComm
                         }
                     }
                     else{
-                        $info .= 'Option '.$dataForm['option'].' '.$data.' HT';
+                        $info .= 'Option '.$dataForm['option'].' '.$data.' € HT';
                         $price += $data;
                     }
                     break;

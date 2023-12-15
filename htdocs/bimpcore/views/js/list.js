@@ -1267,7 +1267,13 @@ function sortListByPosition(list_id, first_page) {
     var $list = $('#' + list_id);
 
     if ($list.length) {
-        $list.find('input[name=param_sort_field]').val('position');
+        var position_field = $list.data('position_field');
+        bimp_msg('field: ' + position_field);
+        
+        if (!position_field) {
+            position_field = 'position';
+        }
+        $list.find('input[name=param_sort_field]').val(position_field);
         $list.find('input[name=param_sort_way]').val('asc');
         $list.find('input[name=param_sort_option]').val('');
         if (!first_page) {

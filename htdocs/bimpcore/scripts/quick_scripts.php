@@ -367,6 +367,49 @@ switch ($action) {
         Bimp_Commande::checkLinesEcheances();
         break;
 
+    case 'correct_contrat_parent_line':
+        $bdb = new BimpDb($db);
+        $where = 'linked_object_name = \'bundle\' AND id_parent_line = 0';
+        $rows = $bdb->getRows('contratdet', $where, null, 'array', array('rowid', 'fk_contrat', 'line_origin_type', 'id_line_origin'));
+        
+        $parents = array();
+        foreach ($rows as $r) {
+            echo '<br/>Ligne #' . $r['rowid'] . ' - Contrat #' . $r['fk_contrat'] . ' : ';
+
+            if ($r['line_origin_type'] !== 'propal_line' || !(int) $r['id_line_origin']) {
+                echo '<span class="danger">Ligne propale origine absente</span>';
+                continue;
+            }
+
+            $id_parent_propal_line = (int) $bdb->getValue('bimp_propal_line', 'id_parent_line', 'id = ' . (int) $r['id_line_origin']);
+            if (!$id_parent_propal_line) {
+                echo '<span class="danger">Ligne parente propal absente</span>';
+                continue;
+            }
+
+            if (!isset($parents[$id_parent_propal_line])) {
+                $id_parent_contrat_line = (int) $bdb->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $id_parent_propal_line);
+
+                if (!$id_parent_contrat_line) {
+                    echo '<span class="danger">Ligne contrat parente non trouvée (ID LIGNE PROPALE PARENTE : ' . $id_parent_propal_line . ')</span>';
+                    continue;
+                }
+
+                $parents[$id_parent_propal_line] = $id_parent_contrat_line;
+            }
+
+            echo 'MAJ PARENT LINE (' . $parents[$id_parent_propal_line] . ') - ';
+            if ($bdb->update('contratdet', array(
+                        'id_parent_line' => $parents[$id_parent_propal_line]
+                            ), 'rowid = ' . $r['rowid']) <= 0) {
+                echo '<span class="danger">ECHEC - ' . $bdb->err() . '</span>';
+            } else {
+                echo '<span class="success">OK</span>';
+            }
+            break;
+        }
+        break;
+
     default:
         echo 'Action invalide';
         break;

@@ -3922,6 +3922,12 @@ class ObjectLine extends BimpObject
             return;
         }
 
+        if (is_null($parent)) {
+            $errors[] = 'Objet parent non défini';
+        } elseif (!$parent->isLoaded()) {
+            $errors[] = '(225) ID ' . $parent->getLabel('of_the') . ' absent';
+        }
+            
         $table = $this::$dol_line_table;
         $primary = $this::$dol_line_primary;
 
@@ -3931,14 +3937,6 @@ class ObjectLine extends BimpObject
 
         if (!$primary) {
             $errors[] = 'Clé primaire non définie';
-        }
-
-        $parent = $this->getParentInstance();
-
-        if (is_null($parent)) {
-            $errors[] = 'Objet parent non défini';
-        } elseif (!$parent->isLoaded()) {
-            $errors[] = '(225) ID ' . $parent->getLabel('of_the') . ' absent';
         }
 
         if (!count($errors)) {
@@ -5760,7 +5758,7 @@ class ObjectLine extends BimpObject
                 ) as $field) {
                     $fieldsCopy[$field] = $this->getData($field);
                 }
-                
+
                 $isAbonnement = $product->isAbonnement();
                 //on ajoute les sous lignes et calcule le tot
                 $dol_object = $this->getChildObject('dol_line');

@@ -3503,7 +3503,7 @@ class BCT_ContratLine extends BimpObject
                         $newLn->set('qty', (float) $qty);
                         $newLn->set('fk_product', 0);
                         $newLn->set('id_parent_line', $this->id);
-                        $newLn->set('linked_id_object', $child_prod->id);
+                        $newLn->set('linked_id_object', 0);
                         $newLn->set('linked_object_name', 'bundleCorrect');
 
                         $newLn->set('subprice', -$lines_total_ht_sans_remises / $qty);
@@ -3538,6 +3538,269 @@ class BCT_ContratLine extends BimpObject
                 }
             }
         }
+    }
+
+    // Gestion positions : 
+
+    public function checkPosition($position)
+    {
+        $contrat = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($contrat) || (isset($contrat->isDeleting) && $contrat->isDeleting)) {
+            return;
+        }
+
+        $id_parent_line = (int) $this->getData('id_parent_line');
+        if ($id_parent_line) {
+            // Vérification de la nouvelle position de la ligne si elle est enfant d'une autre ligne.
+            $parent_position = (int) $this->db->getValue('contratdet', 'rang', 'rowid = ' . $id_parent_line);
+
+            if ($parent_position) {
+                if ($position <= $parent_position) {
+                    $position = $parent_position + 1;
+                } elseif ($position > ($parent_position + 1)) {
+                    // on vérifie l'existance d'autres lignes enfants pour la même ligne parente: 
+                    $nb_children_lines = (int) $this->db->getCount('contratdet', 'fk_contrat = ' . $contrat->id . ' AND id_parent_line = ' . $id_parent_line);
+                    if ($nb_children_lines) {
+                        $max_pos = $parent_position + $nb_children_lines;
+                        if ($position > $max_pos) {
+                            $position = $max_pos;
+                        }
+                    }
+                }
+            }
+        } else {
+            // Vérification que la nouvelle position ne sépare pas des lignes enfants de leur parent.
+            $rows = $this->getList(array(
+                'fk_contrat'     => (int) $contrat->id,
+                'id_parent_line' => array(
+                    'operator' => '>',
+                    'value'    => 0
+                )
+                    ), null, null, 'rang', 'asc', 'array', array('rowid', 'id_parent_line', 'rang'));
+
+            $init_pos = (int) $this->getInitData('rang');
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    if ((int) $r['rowid'] === (int) $this->id) {
+                        continue;
+                    }
+
+                    $r_pos = (int) $r['rang'];
+
+                    if ($init_pos < $r_pos && $position > $r_pos) {
+                        $r_pos--; // La ligne sera décalée de -1. 
+                    }
+
+                    if ((int) $r_pos === (int) $position && (int) $r['id_parent_line']) {
+                        $position++;
+                    }
+                }
+            }
+        }
+        return $position;
+    }
+
+    public function resetPositions()
+    {
+        if ($this->getConf('positions', false, false, 'bool')) {
+            $id_contrat = (int) $this->getData('fk_contrat');
+            if (!$id_contrat) {
+                return;
+            }
+
+            $items = $this->getList(array(
+                'fk_contrat'     => $id_contrat,
+                'id_parent_line' => 0
+                    ), null, null, 'rang', 'asc', 'array', array('rowid', 'rang'));
+            $i = 1;
+            $done = array();
+            foreach ($items as $item) {
+                if (in_array((int) $item['rowid'], $done)) {
+                    continue;
+                }
+
+                if ((int) $item['rang'] !== $i) {
+                    $this->db->update('contratdet', array(
+                        'rang' => (int) $i
+                            ), '`rowid` = ' . (int) $item['rowid']);
+                }
+
+                $done[] = (int) $item['rowid'];
+                $i++;
+
+                $children = $this->getList(array(
+                    'fk_contrat'     => (int) $id_contrat,
+                    'id_parent_line' => (int) $item['rowid']
+                        ), null, null, 'rang', 'asc', 'array', array('rowid', 'rang'));
+                if (!is_null($children)) {
+                    foreach ($children as $child) {
+                        if ((int) $child['rang'] !== $i) {
+                            $this->db->update('contratdet', array(
+                                'rang' => (int) $i
+                                    ), '`rowid` = ' . (int) $child['rowid']);
+                        }
+                        $done[] = (int) $child['rowid'];
+                        $i++;
+                    }
+                }
+            }
+        }
+    }
+
+    public function setPosition($position, &$errors = array())
+    {
+        $debug = false;
+        $check = true;
+
+        if ($debug)
+            echo 'POS BEF: ' . $position . '<br/>';
+
+        $position = (int) $this->checkPosition($position);
+
+        if ($debug)
+            echo 'POS AFT: ' . $position . '<br/>';
+
+        if (!$this->isLoaded($errors)) {
+            $check = false;
+        } elseif ($this->getConf('positions', false, false, 'bool')) {
+            $id_contrat = (int) $this->getData('fk_contrat');
+            if (!$id_contrat) {
+                $check = false;
+            } else {
+                $id_parent_line = (int) $this->getData('id_parent_line');
+                $lines = $this->getList(array(
+                    'fk_contrat' => $id_contrat
+                        ), null, null, 'rang', 'asc', 'array', array('rowid', 'rang', 'id_parent_line'));
+
+                $i = 1;
+                $done = array();
+
+                foreach ($lines as $line) {
+                    if ($i === $position) {
+                        // Attribution de la nouvelle position: 
+                        if (!in_array($this->id, $done)) {
+                            if ($debug)
+                                echo 'THIS => ' . $position . '<br/>';
+                            $this->db->update('contratdet', array(
+                                'rang' => (int) $position
+                                    ), '`rowid` = ' . (int) $this->id);
+                            $this->set('rang', $position);
+                            $i++;
+                            $done[] = $this->id;
+
+                            // Attribution des positions suivantes aux enfants de cette ligne:
+                            $children = $this->getList(array(
+                                'fk_contrat'     => (int) $id_contrat,
+                                'id_parent_line' => (int) $this->id
+                                    ), null, null, 'rang', 'asc', 'array', array('rowid', 'rang'));
+                            if (!is_null($children)) {
+                                foreach ($children as $child) {
+                                    if ($debug)
+                                        echo 'THIS CHILD #' . $child['rowid'] . ' => ' . $i . '<br/>';
+                                    if ((int) $child['rang'] !== $i) {
+                                        $this->db->update('contratdet', array(
+                                            'rang' => (int) $i
+                                                ), '`rowid` = ' . (int) $child['rowid']);
+                                    }
+                                    $done[] = (int) $child['rowid'];
+                                    $i++;
+                                }
+                            }
+                        }
+                    }
+
+                    if ((int) $line['rowid'] === (int) $this->id) {
+                        continue;
+                    }
+
+                    if (in_array($line['rowid'], $done)) {
+                        continue;
+                    }
+
+                    if ((int) $line['id_parent_line']) {
+                        if ($i < $position) {
+                            $position--;
+                        }
+                        continue;
+                    }
+
+                    // Attribution de la position courante à la ligne courante: 
+                    if ((int) $line['rang'] !== $i) {
+                        if ($debug)
+                            echo 'LINE #' . $line['rowid'] . ' => ' . $i . '<br/>';
+                        $this->db->update('contratdet', array(
+                            'rang' => (int) $i
+                                ), '`rowid` = ' . (int) $line['rowid']);
+                    }
+                    $done[] = $line['rowid'];
+                    $i++;
+
+                    // Attribution des positions suivantes aux enfants de cette ligne:
+                    $children = $this->getList(array(
+                        'fk_contrat'     => (int) $id_contrat,
+                        'id_parent_line' => (int) $line['rowid']
+                            ), null, null, 'rang', 'asc', 'array', array('rowid', 'rang'));
+                    if (!is_null($children)) {
+                        foreach ($children as $child) {
+                            if ($i === $position) {
+                                if ($id_parent_line === (int) $line['rowid']) {
+                                    if ($debug)
+                                        echo 'THIS AS CHILD => ' . $i . '<br/>';
+                                    $this->db->update('contratdet', array(
+                                        'rang' => (int) $position
+                                            ), '`rowid` = ' . (int) $this->id);
+                                    $i++;
+                                    $done[] = $this->id;
+                                } else {
+                                    $position++;
+                                }
+                            }
+                            if (!in_array((int) $child['rowid'], $done) && (int) $child['rowid'] !== $this->id) {
+                                if ($debug)
+                                    echo 'LINE #' . $line['rowid'] . ' CHILD #' . $child['rowid'] . ' => ' . $i . '<br/>';
+                                if ((int) $child['position'] !== $i) {
+                                    $this->db->update('contratdet', array(
+                                        'rang' => (int) $i
+                                            ), '`rowid` = ' . (int) $child['rowid']);
+                                }
+                                $done[] = (int) $child['rowid'];
+                                $i++;
+                            }
+                        }
+                    }
+                }
+
+                if (!in_array($this->id, $done)) {
+                    if ($debug)
+                        echo 'THIS DEF => ' . $position . '<br/>';
+                    $this->db->update('contratdet', array(
+                        'position' => (int) $i
+                            ), '`contratdet` = ' . (int) $this->id);
+                    $this->set('position', $i);
+                }
+            }
+        } else {
+            $check = false;
+        }
+
+        if ($debug)
+            exit;
+        return $check;
+    }
+
+    public function getNextPosition()
+    {
+        if ($this->getConf('positions', false, false, 'bool')) {
+            $id_contrat = (int) $this->getData('fk_contrat');
+
+            if ($id_contrat) {
+                return (int) $this->db->getMax('contratdet', 'rang', 'fk_contrat = ' . $id_contrat) + 1;
+            }
+        }
+
+        return 1;
     }
 
     // Actions:

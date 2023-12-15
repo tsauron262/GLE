@@ -1291,7 +1291,8 @@ class BCT_Contrat extends BimpDolObject
                 $fac_line->validateArray(array(
                     'id_obj'             => (int) $facture->id,
                     'type'               => ($line->getData('fk_product') > 0 ? Bimp_FactureLine::LINE_PRODUCT : Bimp_FactureLine::LINE_FREE),
-                    'remisable'          => 1,
+                    'remisable'          => 2,
+                    'editable'           => 0,
                     'linked_id_object'   => (int) $line->id,
                     'linked_object_name' => 'contrat_line',
                     'hide_in_pdf'        => ($line->getData('linked_object_name') == 'bundle' || $line->getData('linked_object_name') == 'bundleCorrect') ? 1 : 0

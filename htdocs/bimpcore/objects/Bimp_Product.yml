@@ -703,6 +703,7 @@ forms:
             - field: type2
             - field: type_compta
             - field: barcode
+            - field: weight
             - field: customcode
             - field: accountancy_code_buy
             - field: accountancy_code_sell

@@ -130,7 +130,7 @@ fields:
         
     remisable: 
         label: Remisable
-        type: bool
+        type: int
         viewable: 0
         filterable: 0
         filterable: 0

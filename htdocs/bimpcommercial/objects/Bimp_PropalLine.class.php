@@ -35,21 +35,6 @@ class Bimp_PropalLine extends ObjectLine
         return parent::isDeletable($force_delete, $errors);
     }
 
-    public function isAbonnement()
-    {
-        $prod = $this->getProduct();
-        if (BimpObject::objectLoaded($prod)) {
-            return (int) $prod->isAbonnement();
-        } else {
-            $parentLine = $this->getParentLine();
-            if (BimpObject::objectLoaded($parentLine)) {
-                return (int) $parentLine->isAbonnement();
-            }
-        }
-
-        return 0;
-    }
-
     public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv'))) {

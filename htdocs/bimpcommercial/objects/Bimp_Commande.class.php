@@ -3784,6 +3784,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if (count($comm_infos)) {
             $infos[] = BimpTools::getMsgFromArray($comm_infos);
         }
+        
+        
+//        $result = parent::actionValidate($data, $success);
+//        $errors = BimpTools::merge_array($errors, $result['errors']);
+//        $warnings = BimpTools::merge_array($warnings, $result['warnings']);
 
         return array(
             'errors'           => $errors,

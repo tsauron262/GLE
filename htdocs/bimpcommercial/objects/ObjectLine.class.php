@@ -5415,7 +5415,7 @@ class ObjectLine extends BimpObject
                             $product = $this->getProduct();
 
                             $parent = $this->getParentInstance();
-                            if ((int) $this->getData('remisable') && $parent->areLinesEditable() /* && $this->isFieldEditable('remisable') */) {
+                            if ((int) $this->getData('remisable') == 1 && $parent->areLinesEditable() /* && $this->isFieldEditable('remisable') */) {
                                 if (!(int) $product->getData('remisable')) {
                                     $this->set('remisable', 0);
                                 }
@@ -5785,6 +5785,7 @@ class ObjectLine extends BimpObject
                                                 ), BimpTools::merge_array($fieldsCopy, array(
                                                     'editable'  => 0,
                                                     'deletable' => 0,
+                                                    'remisable' => 2,
                                                         ), true),
                                                                           $newLn));
 

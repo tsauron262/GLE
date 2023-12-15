@@ -3786,9 +3786,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
         
         
-        $result = parent::actionValidate($data, $success);
-        $errors = BimpTools::merge_array($errors, $result['errors']);
-        $warnings = BimpTools::merge_array($warnings, $result['warnings']);
+//        $result = parent::actionValidate($data, $success);
+//        $errors = BimpTools::merge_array($errors, $result['errors']);
+//        $warnings = BimpTools::merge_array($warnings, $result['warnings']);
 
         return array(
             'errors'           => $errors,

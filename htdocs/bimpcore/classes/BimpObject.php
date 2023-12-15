@@ -93,6 +93,7 @@ class BimpObject extends BimpCache
     public $isDeleting = false;
     public $thirdparty = null;
     public $force_update = false;
+    public $on_save_processing = false;
 
     // Gestion instance:
 
@@ -2372,9 +2373,9 @@ class BimpObject extends BimpCache
         if (!count($result['errors'])) {
             BimpTools::traitePostTraitement($result['errors']);
         }
-        
+
         BimpObject::loadClass('bimpalert', 'AlertProduit');
-        if(class_exists('AlertProduit')){
+        if (class_exists('AlertProduit')) {
             AlertProduit::getAlertes($result['errors'], $result['warnings']);
         }
 
@@ -3734,7 +3735,7 @@ class BimpObject extends BimpCache
                             $module = 'bimpcontract';
                             $class = 'BContract_contrat';
                             break;
-                        case 'bimp_contrat': 
+                        case 'bimp_contrat':
                             $module = 'bimpcontrat';
                             $class = 'BCT_Contrat';
                             break;
@@ -3894,10 +3895,9 @@ class BimpObject extends BimpCache
 
         // Vérification des filtres: 
         $filters = $this->checkSqlFilters($filters, $joins, 'a');
-        
-        
-        /*todo a ajouter de maniere gnérique dans les yml d'un objet*/
-        if(is_a($this, 'BimpFi_Fiche')){
+
+        /* todo a ajouter de maniere gnérique dans les yml d'un objet */
+        if (is_a($this, 'BimpFi_Fiche')) {
             $filters['new_fi'] = 0;
         }
 
@@ -4089,13 +4089,12 @@ class BimpObject extends BimpCache
 
         $rows = $this->getList($filters, $n, $p, $order_by, $order_way, 'array', array($primary));
 
-
         $ids = array();
         foreach ($rows as $r) {
             $ids[] = (int) $r[$primary];
         }
         $objects = array();
-        
+
         $collection = BimpCollection::getInstance($this->module, $this->object_name);
         $collection->addFields($fields);
         $collection->addItems($ids);
@@ -4869,7 +4868,7 @@ class BimpObject extends BimpCache
                 BimpTools::traitePostTraitement($errors);
             }
             BimpObject::loadClass('bimpalert', 'AlertProduit');
-            if(class_exists('AlertProduit')){
+            if (class_exists('AlertProduit')) {
                 AlertProduit::getAlertes($errors, $warnings);
             }
 
@@ -5140,7 +5139,11 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    $this->onSave($errors, $warnings);
+                    if (!$this->on_save_processing) { // Pour éviter boucles infinies
+                        $this->on_save_processing = true;
+                        $this->onSave($errors, $warnings);
+                        $this->on_save_processing = false;
+                    }
 
                     if (static::$check_on_create) {
                         $this->checkObject('create');
@@ -5316,7 +5319,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
 
-                        $this->onSave($errors, $warnings);
+                        if (!$this->on_save_processing) { // Pour éviter boucles infinies
+                            $this->on_save_processing = true;
+                            $this->onSave($errors, $warnings);
+                            $this->on_save_processing = false;
+                        }
+
                         if (static::$check_on_update) {
                             $this->checkObject('update');
                         }
@@ -5469,7 +5477,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
 
-                        $this->onSave($errors, $warnings);
+                        if (!$this->on_save_processing) { // Pour éviter boucles infinies
+                            $this->on_save_processing = true;
+                            $this->onSave($errors, $warnings);
+                            $this->on_save_processing = false;
+                        }
 
                         if (static::$check_on_update_field) {
                             $this->checkObject('updateField', $field);
@@ -7152,7 +7164,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($this->params['icon']) {
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
-            $html .= BimpTools::ucfirst($this->getLabel()) . ' <span style="font-size: 0.5em">#' . $this->id.'</span>';
+            $html .= BimpTools::ucfirst($this->getLabel()) . ' <span style="font-size: 0.5em">#' . $this->id . '</span>';
             $html .= '</h1>';
 
             $ref = $this->getRef(false);
@@ -9389,7 +9401,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         } else {
             global $conf;
-            $url = BimpCore::getConf('base_url', DOL_MAIN_URL_ROOT .'/bimpcore/url_light.php?'.($conf->entity > 1 ? 'entity='.$conf->entity.'&' : ''), 'bimpinterfaceclient');
+            $url = BimpCore::getConf('base_url', DOL_MAIN_URL_ROOT . '/bimpcore/url_light.php?' . ($conf->entity > 1 ? 'entity=' . $conf->entity . '&' : ''), 'bimpinterfaceclient');
         }
 
 
@@ -10932,7 +10944,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!(int) $this->redirectMode) {
             return '';
         }
-        
+
         if (BimpTools::getValue("redirectForce_oldVersion"))
             $_SESSION['oldVersion'] = true;
 
@@ -11147,7 +11159,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         }
         global $tabCentre;
-        if(count($tabCentre) == 1){
+        if (count($tabCentre) == 1) {
             foreach ($tabCentre as $code_centre => $centre) {
                 return $code_centre;
             }

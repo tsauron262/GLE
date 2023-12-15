@@ -39,11 +39,11 @@ class Bimp_PropalLine extends ObjectLine
     {
         $prod = $this->getProduct();
         if (BimpObject::objectLoaded($prod)) {
-            return $prod->isAbonnement();
+            return (int) $prod->isAbonnement();
         } else {
             $parentLine = $this->getParentLine();
             if (BimpObject::objectLoaded($parentLine)) {
-                return $parentLine->isAbonnement();
+                return (int) $parentLine->isAbonnement();
             }
         }
 
@@ -85,13 +85,15 @@ class Bimp_PropalLine extends ObjectLine
 
     public function getValueByProduct($field)
     {
-        if (in_array($field, array('is_abonnement', 'abo_fac_periodicity', 'abo_fac_term'))) {
+        if ($field == 'is_abonnement') {
+            return $this->isAbonnement();
+        }
+        
+        if (in_array($field, array('abo_fac_periodicity', 'abo_fac_term'))) {
             $prod = $this->getProduct();
 
             if (BimpObject::objectLoaded($prod)) {
                 switch ($field) {
-                    case 'is_abonnement':
-                        return $prod->isAbonnement();
                     case 'abo_fac_periodicity':
                         return $prod->getData('fac_def_periodicity');
                     case 'abo_fac_term':

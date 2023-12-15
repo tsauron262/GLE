@@ -256,7 +256,7 @@ class ObjectLine extends BimpObject
 
     public function isRemisable()
     {
-        return /*$this->isProductRemisable() && */(int) $this->getData('remisable');
+        return /* $this->isProductRemisable() && */(int) $this->getData('remisable');
     }
 
     public function isParentEditable()
@@ -276,10 +276,10 @@ class ObjectLine extends BimpObject
 
     public function isRemiseEditable()
     {
-        if(in_array($this->getData('linked_object_name'), array('bundle', 'bundleCorrect')))
+        if (in_array($this->getData('linked_object_name'), array('bundle', 'bundleCorrect')))
             return 0;
-        
-        
+
+
         return (int) $this->isParentEditable() && $this->isRemisable();
     }
 
@@ -5414,9 +5414,8 @@ class ObjectLine extends BimpObject
 
                             $product = $this->getProduct();
 
-                            
                             $parent = $this->getParentInstance();
-                            if ((int) $this->getData('remisable') && $parent->areLinesEditable() /*&& $this->isFieldEditable('remisable')*/) {
+                            if ((int) $this->getData('remisable') && $parent->areLinesEditable() /* && $this->isFieldEditable('remisable') */) {
                                 if (!(int) $product->getData('remisable')) {
                                     $this->set('remisable', 0);
                                 }
@@ -5750,7 +5749,18 @@ class ObjectLine extends BimpObject
         if ((int) $this->id_product) {
             $product = $this->getProduct();
             if ($product->isBundle()) {
-                $fieldsCopy = array('id_obj', 'abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv');
+                $fieldsCopy = array();
+
+                foreach (array(
+            'id_obj',
+            'abo_fac_periodicity',
+            'abo_duration',
+            'abo_fac_term',
+            'abo_nb_renouv'
+                ) as $field) {
+                    $fieldsCopy[$field] = $this->getData($field);
+                }
+                
                 $isAbonnement = $product->isAbonnement();
                 //on ajoute les sous lignes et calcule le tot
                 $dol_object = $this->getChildObject('dol_line');
@@ -5765,41 +5775,40 @@ class ObjectLine extends BimpObject
                     foreach ($child_prods as $child_prod) {
                         $newLn = null;
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
-                            array(
-                                'id_parent_line' => $this->id, 
-                                'linked_id_object' => $child_prod->id, 
-                                'linked_object_name' => 'bundle'
-                            ), array(
-                                'qty'=> $child_prod->getData('qty') * $this->qty, 
-                                'id_product'=> $child_prod->getData('fk_product_fils'), 
-                            ), BimpTools::merge_array($fieldsCopy, array(
-                                'editable'  => 0,
-                                'deletable' => 0,
-                            ),true),
-                        $newLn));
-                        
+                                                array(
+                                                    'id_parent_line'     => $this->id,
+                                                    'linked_id_object'   => $child_prod->id,
+                                                    'linked_object_name' => 'bundle'
+                                                ), array(
+                                            'qty'        => $child_prod->getData('qty') * $this->qty,
+                                            'id_product' => $child_prod->getData('fk_product_fils'),
+                                                ), BimpTools::merge_array($fieldsCopy, array(
+                                                    'editable'  => 0,
+                                                    'deletable' => 0,
+                                                        ), true),
+                                                                          $newLn));
+
                         $dol_child = $newLn->getChildObject('dol_line');
                         $totHt += $dol_child->getData('total_ht');
                         $totHtSansRemise += $newLn->getTotalHT(true);
-                        if($newLn->getData('remisable'))
+                        if ($newLn->getData('remisable'))
                             $totHtSansRemiseRemisable += $newLn->getTotalHT(true);
                         $totPa += $newLn->getTotalPA(true);
                         if ($isAbonnement && !$newLn->isAbonnement())
-                            BimpCore::addlog('Attention, composant d\'un bundle abonnement pas abonnement LN : ' . $newLn->id.' prod : '.$product->getLink());
+                            BimpCore::addlog('Attention, composant d\'un bundle abonnement pas abonnement LN : ' . $newLn->id . ' prod : ' . $product->getLink());
                     }
 
                     if ($totHt != 0) {
                         $pourcent = 100 - ($thisTot / $totHt * 100);
-                        if($totHtSansRemiseRemisable == 0 || $totHtSansRemise == 0){
+                        if ($totHtSansRemiseRemisable == 0 || $totHtSansRemise == 0) {
                             BimpCore::addlog('Aucune ligne remisable pour calcul du prix bundle', 3, 'bimpcommercial', $this);
                             $pourcent2 = 0; // remise sur ligne annulation double prix Bundle
                             $pourcent3 = 0; // remise sur ligne prod
-                        }
-                        else{
+                        } else {
                             $pourcent2 = 100 - ($thisTot / $totHtSansRemise * 100);
-                            $pourcent3 = 100 - (($thisTot+$totHtSansRemiseRemisable-$totHtSansRemise) / $totHtSansRemiseRemisable * 100);
+                            $pourcent3 = 100 - (($thisTot + $totHtSansRemiseRemisable - $totHtSansRemise) / $totHtSansRemiseRemisable * 100);
                         }
-                        
+
                         if (abs($pourcent) > 0.01) {
                             $childs = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('id_parent_line' => $this->id));
                             foreach ($childs as $child) {
@@ -5809,22 +5818,22 @@ class ObjectLine extends BimpObject
                         //ajout de la ligne de compensation
                         $newLn = null;
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
-                            array(
-                                'id_parent_line' => $this->id, 
-                                'linked_object_name' => 'bundleCorrect'
-                            ), array(
-                                'qty'=> $this->qty, 
-                                'id_product'=> 0, 
-                                'pu_ht'=> -$totHtSansRemise / $this->qty,
-                                'tva_tx' => $this->tva_tx,
-                                'desc'   => 'Annulation double prix Bundle',
-                                'pa_ht' => -$totPa / $this->qty
-                            ), BimpTools::merge_array($fieldsCopy, array(
-                                'type'      => static::LINE_FREE,
-                                'editable'  => 0,
-                                'deletable' => 0,
-                            ),true),
-                        $newLn));
+                                                array(
+                                                    'id_parent_line'     => $this->id,
+                                                    'linked_object_name' => 'bundleCorrect'
+                                                ), array(
+                                            'qty'        => $this->qty,
+                                            'id_product' => 0,
+                                            'pu_ht'      => -$totHtSansRemise / $this->qty,
+                                            'tva_tx'     => $this->tva_tx,
+                                            'desc'       => 'Annulation double prix Bundle',
+                                            'pa_ht'      => -$totPa / $this->qty
+                                                ), BimpTools::merge_array($fieldsCopy, array(
+                                                    'type'      => static::LINE_FREE,
+                                                    'editable'  => 0,
+                                                    'deletable' => 0,
+                                                        ), true),
+                                                                          $newLn));
                         if (abs($pourcent) > 0.01 || abs($pourcent) < 0.01) {
                             $errors = BimpTools::merge_array($errors, $newLn->setRemise($pourcent2, 'Remise bundle ' . $product->getData('ref')));
                         }
@@ -5834,8 +5843,8 @@ class ObjectLine extends BimpObject
                         $this->update($warnings);
                         //                    die($thisTot.'rr'.$totHt.' '.$pourcent);
                     }
-                } /*else
-                    die('pas de prix. Ln : '.$this->id);*/
+                } /* else
+                  die('pas de prix. Ln : '.$this->id); */
             }
         }
     }

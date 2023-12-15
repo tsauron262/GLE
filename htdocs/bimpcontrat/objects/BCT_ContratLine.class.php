@@ -3503,7 +3503,7 @@ class BCT_ContratLine extends BimpObject
                         $newLn->set('qty', (float) $qty);
                         $newLn->set('fk_product', 0);
                         $newLn->set('id_parent_line', $this->id);
-                        $newLn->set('linked_id_object', $child_prod->id);
+                        $newLn->set('linked_id_object', 0);
                         $newLn->set('linked_object_name', 'bundleCorrect');
 
                         $newLn->set('subprice', -$lines_total_ht_sans_remises / $qty);

@@ -3413,10 +3413,6 @@ class BCT_ContratLine extends BimpObject
             return;
         }
 
-        if ($this->getData('line_origin_type') === 'propal_line') {
-            return; // temporaire, bug à résoudre
-        }
-
         if ((int) $this->getData('fk_product')) {
             $product = $this->getChildObject('product');
             if (BimpObject::objectLoaded($product) && $product->isBundle()) {
@@ -3439,6 +3435,9 @@ class BCT_ContratLine extends BimpObject
                                         ), true, true, true);
 
                         if (!BimpObject::objectLoaded($newLn)) {
+                            if ($this->getData('line_origin_type') === 'propal_line') {
+                                continue; // temporaire, bug à résoudre (id_parent_line non alimenté pour contrats créés depuis devis avant le 15/12) 
+                            }
                             $newLn = BimpObject::getInstance('bimpcontrat', 'BCT_ContratLine');
                         }
 

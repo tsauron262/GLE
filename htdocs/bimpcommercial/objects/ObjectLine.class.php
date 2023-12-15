@@ -232,6 +232,21 @@ class ObjectLine extends BimpObject
         return (int) parent::isFieldEditable($field, $force_edit);
     }
 
+    public function isAbonnement()
+    {
+        $prod = $this->getProduct();
+        if (BimpObject::objectLoaded($prod)) {
+            return (int) $prod->isAbonnement();
+        } else {
+            $parentLine = $this->getParentLine();
+            if (BimpObject::objectLoaded($parentLine)) {
+                return (int) $parentLine->isAbonnement();
+            }
+        }
+
+        return 0;
+    }
+
     public function isActionAllowed($action, &$errors = array())
     {
         if (in_array($action, array('attributeEquipment')) && !$this->isLoaded()) {

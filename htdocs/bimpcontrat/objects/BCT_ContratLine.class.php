@@ -42,7 +42,6 @@ class BCT_ContratLine extends BimpObject
     public static $dol_fields = array('fk_contrat', 'fk_product', 'label', 'description', 'commentaire', 'statut', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'remise', 'fk_product_fournisseur_price', 'buy_price_ht', 'total_ht', 'total_tva', 'total_ttc', 'date_commande', 'date_ouverture_prevue', 'date_fin_validite', 'date_cloture', 'fk_user_author', 'fk_user_ouverture', 'fk_user_cloture');
     protected $data_at_date = null;
     public $process_bundle_lines = true;
-    
 
     // Droits User:
 
@@ -3409,11 +3408,15 @@ class BCT_ContratLine extends BimpObject
     public function majBundle(&$errors = array(), &$warnings = array())
     {
         global $no_bundle_lines_process;
-        
+
         if ($no_bundle_lines_process) {
             return;
         }
-        
+
+        if ($this->getData('line_origin_type') === 'propal_line') {
+            return; // temporaire, bug à résoudre
+        }
+
         if ((int) $this->getData('fk_product')) {
             $product = $this->getChildObject('product');
             if (BimpObject::objectLoaded($product) && $product->isBundle()) {

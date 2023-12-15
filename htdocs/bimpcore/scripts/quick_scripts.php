@@ -58,6 +58,7 @@ if (!$action) {
         'maj_id_atradius'                           => 'Vérifier id atradius',
         'repare_id_contrat_note'                    => 'Reparé id contat dans note',
         'maj_marge'                                 => 'Mise a jour des marge liste id facutures',
+        'correct_contrat_parent_line'               => 'Correction ligne parente pour les sous-lignes bundle dans les contrats'
     );
 
     $path = pathinfo(__FILE__);

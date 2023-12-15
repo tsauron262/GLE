@@ -18,7 +18,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         'PriceVatOff'       => 'pu_ht',
         'PriceVatOn'        => 'pu_ttc',
         'BuyingPriceVatOff' => 'pa_ht',
-        'Image01'           => 'url',
+        'Image'           => 'url',
         'GrossWeight'       => 'weight'
     );
     public $nameFile = '';
@@ -140,6 +140,13 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 $file_data = $this->getFileData($this->nameFile, static::$price_keys, $errors, 0, 1, array(
                     'part_file_idx' => $file_idx
                 ));
+                
+                
+                foreach($file_data as $idLn => $line){
+                    if ($line['url'] && '' != $line['url']) {
+                        $file_data[$idLn]['url'] = 'https://media.ldlc.com'.$line['url'];
+                    }
+                }
 
                 $this->DebugData($file_data, 'Données fichier');
 

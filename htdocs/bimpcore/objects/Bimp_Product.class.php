@@ -2239,12 +2239,18 @@ class Bimp_Product extends BimpObject
     public function renderHeaderExtraLeft()
     {
         $html = '';
+        
+        $url = $this->getData('url');
+        if (isset($url) and strlen($url) > 5) {
+            $html .= '<a href="'.$url.'" target="_blank">'.'<img style="max-width:100px; max-height: 100px" src="'.$url.'"/>'.'</a>';
+        }
+        
         $barcode = $this->getData('barcode');
         if (isset($barcode) and strlen($barcode) > 5) {
             $this->dol_object->fetch_barcode();
             $html .= '<img src="';
             $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&generator=' . urlencode($this->dol_object->barcode_type_coder) . '&code=' . urlencode($barcode) . '&encoding=' . urlencode($this->dol_object->barcode_type_code);
-            $html .= '">';
+            $html .= '"/>';
         }
 
 

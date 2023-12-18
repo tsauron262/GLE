@@ -667,7 +667,7 @@ class BCT_Contrat extends BimpDolObject
         $html .= '</div>';
 
         $lines = $this->getLines('abo');
-        
+
         if (empty($lines)) {
             $html .= BimpRender::renderAlerts('Aucune ligne d\'abonnement enregistrée', 'warning');
         } else {
@@ -854,7 +854,7 @@ class BCT_Contrat extends BimpDolObject
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';
-        
+
         $errors = array();
         $factures = $this->getFactures($errors);
 
@@ -977,7 +977,7 @@ class BCT_Contrat extends BimpDolObject
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';
-        
+
         $errors = array();
         $commandes = $this->getCommandesFourn();
 

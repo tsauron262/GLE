@@ -156,6 +156,9 @@ class BC_ListTable extends BC_List
             }
         }
 
+        if ($this->params['positions']) {
+            $this->data['position_field'] = $this->object->position_field;
+        }
         $current_bc = $prev_bc;
     }
 

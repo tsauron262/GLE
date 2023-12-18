@@ -565,6 +565,12 @@ filters_panels:
             datec: 
             entrepot: 
             secteur: 
+                
+    client: 
+        extends: default
+        filters: 
+            fk_soc: unset
+                
 lists: 
     default:
         title: Tous les contrats d'abonnement
@@ -591,6 +597,12 @@ lists:
             statut:
             fk_soc:
             fk_commercial_suivi:
+                
+    client: 
+        extends: default
+        cols: 
+            fk_soc: unset
+        
 
 searches:
     default:

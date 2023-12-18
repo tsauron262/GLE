@@ -33,6 +33,7 @@ function bimp_msg(msg, className, $container, auto_hide) {
         $container.append(html).stop().slideDown(250, function () {
             $(this).css('height', 'auto');
         });
+        setCommonEvents($container);
         setInputsEvents($container);
     } else {
         $container = $('#page_notifications');

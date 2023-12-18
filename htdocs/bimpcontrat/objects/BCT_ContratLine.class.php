@@ -90,7 +90,7 @@ class BCT_ContratLine extends BimpObject
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
-    {        
+    {
         if ((int) $this->getData('statut') <= 0) {
             return 1;
         }
@@ -2046,6 +2046,21 @@ class BCT_ContratLine extends BimpObject
     }
 
     // Rendus HTML:
+
+    public function renderOriginLink()
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            $contrat = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($contrat)) {
+                $html .= '<span class="bold">Contrat d\'abonnement d\'origine: </span><br/>';
+                $html .= $contrat->getLink() . ' - Ligne n°' . $this->getData('rang');
+            }
+        }
+
+        return $html;
+    }
 
     public function renderFournPriceInput()
     {

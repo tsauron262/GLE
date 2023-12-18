@@ -212,8 +212,8 @@ class BS_SAV_ExtEntity extends BS_SAV
             "Zip"            => $client->getData('zip'),
             "City"           => $this->traiteVilleNameEcologic($client->getData('town')),
             "Country"        => "250",
-            "Phone"          => "",
-            "Email"          => "",
+            "Phone"          => $client->getData('phone'),
+            "Email"          => $client->getData('email'),
             "AutoValidation" => true
         );
 

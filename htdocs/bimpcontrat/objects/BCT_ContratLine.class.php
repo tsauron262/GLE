@@ -3292,7 +3292,7 @@ class BCT_ContratLine extends BimpObject
         return $errors;
     }
 
-    public function onFactureValidate($fac_line, &$success = '')
+    public function onFactureValidated($fac_line, &$success = '')
     {
         $errors = array();
 

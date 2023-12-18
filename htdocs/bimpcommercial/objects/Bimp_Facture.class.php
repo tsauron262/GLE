@@ -4406,8 +4406,8 @@ class Bimp_Facture extends BimpComm
                         }
 
                         // Mouvements de stocks : 
-                        if ($line->getData('linked_object_name') == 'contrat_line' && (int) $this->getData('linked_id_object')) {
-                            $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('linked_id_object'));
+                        if ($line->getData('linked_object_name') == 'contrat_line' && (int) $line->getData('linked_id_object')) {
+                            $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $line->getData('linked_id_object'));
                             if (BimpObject::objectLoaded($contrat_line)) {
                                 $contrat_line->onFactureValidated($line);
                             }

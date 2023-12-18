@@ -369,9 +369,9 @@ switch ($action) {
 
     case 'correct_contrat_parent_line':
         $bdb = new BimpDb($db);
-        $where = 'linked_object_name = \'bundle\' AND id_parent_line = 0';
+        $where = '(linked_object_name = \'bundle\' OR linked_object_name = \'bundleCorrect\') AND id_parent_line = 0';
         $rows = $bdb->getRows('contratdet', $where, null, 'array', array('rowid', 'fk_contrat', 'line_origin_type', 'id_line_origin'));
-        
+
         $parents = array();
         foreach ($rows as $r) {
             echo '<br/>Ligne #' . $r['rowid'] . ' - Contrat #' . $r['fk_contrat'] . ' : ';
@@ -406,7 +406,15 @@ switch ($action) {
             } else {
                 echo '<span class="success">OK</span>';
             }
-            break;
+//            break;
+        }
+
+        foreach ($parents as $key => $id_line) {
+            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+            if (BimpObject::objectLoaded($line)) {
+//                echo '<br/>Reset #' . $id_line;
+                $line->resetPositions();
+            }
         }
         break;
 

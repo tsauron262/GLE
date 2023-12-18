@@ -213,7 +213,7 @@ class BS_SAV_ExtEntity extends BS_SAV
             "City"           => $this->traiteVilleNameEcologic($client->getData('town')),
             "Country"        => "250",
             "Phone"          => "",
-            "Email"          => "",
+            "Email"          => $client->getData('email'),
             "AutoValidation" => true
         );
 

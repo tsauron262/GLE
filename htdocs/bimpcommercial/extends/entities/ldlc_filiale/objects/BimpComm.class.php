@@ -19,10 +19,9 @@ class BimpComm_LdlcFiliale extends BimpComm
         return $buttons;
     }
     
-    public function actionValidate($data, &$success)
+    function isValidatable(&$errors = array())
     {
-        $result = parent::actionValidate($data, $success);
-        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial'))) && (!isset($data['confirm_fdp']) || !$data['confirm_fdp'])) {
+        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial'))) && (!BimpTools::getPostFieldValue('confirm_fdp', 0))) {
             $lines = $this->getLines('not_text');
             $ok = false;
             foreach ($lines as $line) {
@@ -30,23 +29,21 @@ class BimpComm_LdlcFiliale extends BimpComm
                         $ok = true;
             }
             if (!$ok) {
-                $data['confirm_fdp'] = 1;
-                $onclick = $this->getJsActionOnclick('validate', $data, array());
-                
                 $msg = 'Attention il ne semble pas y avoir de frais de port<br/>';
+                $msg .= 'Valider quand même '.BimpInput::renderInputContainer('confirm_fdp', 1, BimpInput::renderInput('toggle', 'confirm_fdp',0));
 
-                $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
-                $msg .= '</span><br/>';
-
-                
-
-                $result['errors'][] = $msg;
+                $errors[] = $msg;
             }
         }
-        
-        return $result;
+        return parent::isValidatable($errors);
     }
+    
+//    public function actionValidate($data, &$success)
+//    {
+//        $result = parent::actionValidate($data, $success);
+//        
+//        return $result;
+//    }
     
     public function actionAddPortLdlc($dataForm = array(), &$success = ''){
         $errors = array();

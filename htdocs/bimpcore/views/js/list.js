@@ -1268,7 +1268,6 @@ function sortListByPosition(list_id, first_page) {
 
     if ($list.length) {
         var position_field = $list.data('position_field');
-        bimp_msg('field: ' + position_field);
         
         if (!position_field) {
             position_field = 'position';

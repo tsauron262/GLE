@@ -90,7 +90,7 @@ class BCT_ContratLine extends BimpObject
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
-    {
+    {        
         if ((int) $this->getData('statut') <= 0) {
             return 1;
         }
@@ -2341,7 +2341,7 @@ class BCT_ContratLine extends BimpObject
                             $row_html .= 'A traiter aujoud\'hui : <span class="' . $class . '">' . $periods_data['nb_periods_tobill_today'] . ' période' . $s . ' de facturation</span>';
                             $row_html .= '&nbsp;(';
                             $row_html .= BimpTools::displayFloatValue($qty, 4, ',', 0, 1, 0, 1, 1, 1);
-                            $row_html .= ' unité' . ($qty > 1 ? 's' : '') . ')<br/>';
+                            $row_html .= ' unité' . (abs($qty) > 1 ? 's' : '') . ')<br/>';
 
                             if (!empty($line_errors)) {
                                 $row_html .= BimpRender::renderAlerts($line_errors);
@@ -2389,11 +2389,12 @@ class BCT_ContratLine extends BimpObject
 
                                         $row_html .= '<div style="margin-top: 10px">';
                                         $row_html .= '<b>Quantité à facturer par période:</b><br/>';
+
                                         $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty_per_period', $qty_per_period, array(
                                                     'extra_class' => 'line_qty_per_period',
                                                     'data'        => array(
-//                                                        'qty_per_period' => $qty_per_period,
-                                                        'min'      => 0,
+                                                        'min'      => ($qty_per_period >= 0 ? 0 : 'none'),
+                                                        'max'      => ($qty_per_period < 0 ? 0 : 'none'),
                                                         'decimals' => $nb_decimals
                                                     )
                                         ));
@@ -2683,7 +2684,8 @@ class BCT_ContratLine extends BimpObject
                                         $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty_per_period', $qty_per_period, array(
                                                     'extra_class' => 'line_qty_per_period',
                                                     'data'        => array(
-                                                        'min'      => 0,
+                                                        'min'      => ($qty_per_period >= 0 ? 0 : 'none'),
+                                                        'max'      => ($qty_per_period < 0 ? 0 : 'none'),
                                                         'decimals' => $nb_decimals
                                                     )
                                         ));
@@ -3315,7 +3317,7 @@ class BCT_ContratLine extends BimpObject
                     if (!$id_entrepot) {
                         $id_entrepot = (int) $contrat->getData('entrepot');
                     }
-                    
+
                     if (!$id_entrepot) {
                         $errors[] = 'Aucun entrepôt défini pour le contrat ' . $contrat->getLink();
                     } else {
@@ -3337,10 +3339,18 @@ class BCT_ContratLine extends BimpObject
 //                                $errors = $product->correctStocks($id_entrepot, abs($diff), 1, $label, $code_mvt, 'contrat_line', $this->id);
 //                            }
 //                        } else {
-                            $errors = $product->correctStocks($id_entrepot, $qty, 1, $code_mvt, $label, 'bimp_contrat', $contrat->id);
+                            $mvt = 1;
+                            if ($qty < 0) {
+                                $mvt = 0;
+                            }
+                            $errors = $product->correctStocks($id_entrepot, abs($qty), $mvt, $code_mvt, $label, 'bimp_contrat', $contrat->id);
 
                             if (!count($errors)) {
-                                $success = 'Retrait de ' . $qty . ' unité(s) du stock effectué';
+                                if ($qty > 0) {
+                                    $success = 'Retrait de ' . $qty . ' unité(s) du stock effectué';
+                                } else {
+                                    $success = 'Ajout de ' . abs($qty) . ' unité(s) au stock effectué';
+                                }
                             }
 //                        }                            
                         }
@@ -3514,7 +3524,7 @@ class BCT_ContratLine extends BimpObject
 
                         $newLn->set('subprice', -$lines_total_ht_sans_remises / $qty);
                         $newLn->set('tva_tx', $this->getData('tva_tx'));
-                        $newLn->set('buy_price_ht', -$totPa / $qty);
+                        $newLn->set('buy_price_ht', ($qty ? -$totPa / $qty : 0));
 
                         if (abs($pourcent) > 0.01) {
                             $newLn->set('remise_percent', $pourcent);
@@ -4938,5 +4948,29 @@ class BCT_ContratLine extends BimpObject
 
         $this->noFetchOnTrigger = false;
         return $id;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id = $this->id;
+        $id_contrat = (int) $this->getData('fk_contrat');
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            $sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+                        'fk_contrat'     => $id_contrat,
+                        'id_parent_line' => $id
+            ));
+
+            if (!empty($sub_lines)) {
+                foreach ($sub_lines as $sub_line) {
+                    $line_warnings = array();
+                    $sub_line->delete($line_warnings, true);
+                }
+            }
+        }
+
+        return $errors;
     }
 }

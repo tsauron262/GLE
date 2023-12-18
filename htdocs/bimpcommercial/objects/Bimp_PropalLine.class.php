@@ -286,8 +286,7 @@ class Bimp_PropalLine extends ObjectLine
             $options = array(
                 'data' => array(
                     'data_type' => 'number',
-                    'decimals'  => 8,
-                    'unsigned'  => 1
+                    'decimals'  => 8
                 )
             );
 

@@ -635,9 +635,18 @@ class BimpStorage {
         return value;
     }
     ;
-            set(key, value) {
+            set(key, value, add = false) {
 //        console.log(this.getFullKey(key));
         // Est un object
+        if(add){
+            oldValue = this.get(key);
+            if(Array.isArray(oldValue) && Array.isArray(value)){
+                value = oldValue.prototype.concat(value);
+            }
+                
+        }
+        
+        
         if (typeof value === 'object' && value !== null)
             return localStorage.setItem(this.getFullKey(key), JSON.stringify(value));
 

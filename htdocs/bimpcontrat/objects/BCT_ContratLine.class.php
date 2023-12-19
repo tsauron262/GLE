@@ -1489,7 +1489,7 @@ class BCT_ContratLine extends BimpObject
         } else {
             switch ($params['return']) {
                 case 'data':
-                    $id_stocks_entrepot = (int) BimpCore::getConf('stocks_id_entrepot', null, 'bimpcontrat');
+                    $id_stocks_entrepot = (int) BimpCore::getConf('abos_id_entrepot', null, 'bimpcontrat');
                     foreach ($rows as $r) {
                         if (!isset($lines[(int) $r['id_line']])) {
                             $lines[(int) $r['id_line']] = array('id_entrepot' => ($id_stocks_entrepot ? $id_stocks_entrepot : (int) $r['id_entrepot']));
@@ -3327,7 +3327,7 @@ class BCT_ContratLine extends BimpObject
                         return array();
                     }
 
-                    $id_entrepot = (int) BimpCore::getConf('stocks_id_entrepot', null, 'bimpcontrat');
+                    $id_entrepot = (int) BimpCore::getConf('abos_id_entrepot', null, 'bimpcontrat');
 
                     if (!$id_entrepot) {
                         $id_entrepot = (int) $contrat->getData('entrepot');

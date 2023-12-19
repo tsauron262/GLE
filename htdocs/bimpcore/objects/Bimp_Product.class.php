@@ -225,8 +225,8 @@ class Bimp_Product extends BimpObject
         if ($user->admin) {
             return 1;
         }
-        
-        if(!$this->isLoaded())
+
+        if (!$this->isLoaded())
             return 1;
 
         if ((int) BimpCore::getConf('use_product_prices_perms', null, 'bimpcore')) {
@@ -602,7 +602,7 @@ class Bimp_Product extends BimpObject
                 $result = BimpTools::merge_array($result, $values, true);
             }
         }
-        
+
         return $result;
     }
 
@@ -2157,7 +2157,7 @@ class Bimp_Product extends BimpObject
             $prod = $child_prod->getChildObject('product_fils');
             $pa += $child_prod->getData('qty') * $prod->getCurrentPaHt();
         }
-        if($display)
+        if ($display)
             return BimpTools::displayMoneyValue($pa);
         else
             return $pa;
@@ -2172,34 +2172,33 @@ class Bimp_Product extends BimpObject
             $prod = $child_prod->getChildObject('product_fils');
             $tot += $child_prod->getData('qty') * $prod->getData('price');
         }
-        if($display)
+        if ($display)
             return BimpTools::displayMoneyValue($tot);
         else
             return $tot;
     }
-    
+
     public function getMargeBundle($display = true)
     {
         $pa = $this->getPaBundle(false);
         $marge = 100;
-        if($pa > 0 && $this->getData('price')){
+        if ($pa > 0 && $this->getData('price')) {
             $marge = round(($this->getData('price') - $pa) / $this->getData('price') * 100, 2);
         }
-        if($display)
-            return $marge.' %';
+        if ($display)
+            return $marge . ' %';
         return $marge;
     }
 
-    
     public function getRemiseBundle($display = true)
     {
         $tot = $this->getTotComposantBundle(false);
         $marge = 100;
-        if($tot > 0 && $this->getData('price') > 0){
-            $marge = round(100 - ($this->getData('price') / ($tot) * 100),2);
+        if ($tot > 0 && $this->getData('price') > 0) {
+            $marge = round(100 - ($this->getData('price') / ($tot) * 100), 2);
         }
-        if($display)
-            return $marge.' %';
+        if ($display)
+            return $marge . ' %';
         return $marge;
     }
 
@@ -2211,10 +2210,10 @@ class Bimp_Product extends BimpObject
             if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 $curPa = $this->getCurrentPaObject();
                 if (BimpObject::objectLoaded($curPa)) {
-                    if($detail)
+                    if ($detail)
                         $html .= '<span style="font-size: 16px; font-style: bold">';
                     $html .= BimpTools::displayMoneyValue((float) $curPa->getData('amount'));
-                    if($detail){
+                    if ($detail) {
                         $html .= '</span><br/>';
                         $html .= 'Appliqué depuis le ' . $curPa->displayData('date_from') . '<br/>';
                         $html .= 'Origine: <strong>' . $curPa->displayOrigine() . '</strong>';
@@ -2223,10 +2222,10 @@ class Bimp_Product extends BimpObject
                     $html .= '<span class="danger">Aucun</span>';
                 }
             } else {
-                if($detail)
+                if ($detail)
                     $html .= '<span style="font-size: 16px; font-style: bold">';
                 $html .= BimpTools::displayMoneyValue((float) $this->getData('cur_pa_ht'));
-                if($detail)
+                if ($detail)
                     $html .= '</span><br/>';
             }
         }
@@ -2239,12 +2238,12 @@ class Bimp_Product extends BimpObject
     public function renderHeaderExtraLeft()
     {
         $html = '';
-        
+
         $url = $this->getData('url');
         if (isset($url) and strlen($url) > 5) {
-            $html .= '<a href="'.$url.'" target="_blank">'.'<img style="max-width:100px; max-height: 100px" src="'.$url.'"/>'.'</a>';
+            $html .= '<a href="' . $url . '" target="_blank">' . '<img style="max-width:100px; max-height: 100px" src="' . $url . '"/>' . '</a>';
         }
-        
+
         $barcode = $this->getData('barcode');
         if (isset($barcode) and strlen($barcode) > 5) {
             $this->dol_object->fetch_barcode();
@@ -3733,6 +3732,15 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded($errors)) {
             global $user;
 
+            if (BimpCore::isModuleActive('bimpcontrat')) {
+                if ($this->isAbonnement()) {
+                    $abos_id_entrepot = BimpCore::getConf('abos_id_entrepot', null, 'bimpcontrat');
+                    if ($abos_id_entrepot) {
+                        $id_entrepot = $abos_id_entrepot;
+                    }
+                }
+            }
+
             $isBimpOrigin = in_array($origin, self::$bimp_stock_origins);
             if ($this->dol_object->correct_stock($user, $id_entrepot, $qty, $movement, $label, 0, $code_move, (!$isBimpOrigin ? $origin : ''), (!$isBimpOrigin ? $id_origin : null)) <= 0) {
                 $msg = 'Echec de la mise à jour du stock pour le produit "' . $this->getRef() . ' - ' . $this->getName() . '" (ID: ' . $this->id . ')';
@@ -4149,7 +4157,7 @@ class Bimp_Product extends BimpObject
         $success = 'Correction stocks ok';
 
         global $user;
-        return array('errors' => $this->correctStocks($data['id_entrepot'], $data['qty'], $data['sens'], 'mouvement_manuel', 'Mouvement manuel '.$data['comment'], 'user', $user->id));
+        return array('errors' => $this->correctStocks($data['id_entrepot'], $data['qty'], $data['sens'], 'mouvement_manuel', 'Mouvement manuel ' . $data['comment'], 'user', $user->id));
     }
 
     public function actionMerge($data, &$success)
@@ -4608,15 +4616,15 @@ class Bimp_Product extends BimpObject
         }
 
         $query = "SELECT l.rowid as id_line, l.fk_facture, l.rang, l.subprice, f.fk_soc, l.fk_product";
-        if(BimpCore::getConf("USE_ENTREPOT"))
+        if (BimpCore::getConf("USE_ENTREPOT"))
             $query .= ", e.entrepot";
         $query .= ", l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
         $query .= " FROM " . MAIN_DB_PREFIX . "facturedet l";
 //        if(BimpCore::getConf("USE_ENTREPOT"))
-            $query .= ", " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
+        $query .= ", " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
         $query .= " WHERE l.fk_facture = f.rowid";
 //        if(BimpCore::getConf("USE_ENTREPOT"))
-            $query .= " AND e.fk_object = f.rowid";
+        $query .= " AND e.fk_object = f.rowid";
         $query .= " AND l.fk_product > 0";
 
         if ($exlure_retour) {
@@ -4636,7 +4644,7 @@ class Bimp_Product extends BimpObject
         if (count($tab_secteur) > 0) {
             $query .= " AND e.type IN ('" . implode("','", $tab_secteur) . "')";
         }
-        
+
         $sql = $db->query($query);
 
         // Facturés: 
@@ -4648,7 +4656,7 @@ class Bimp_Product extends BimpObject
                 $qty *= -1;
             }
 
-            if(BimpCore::getConf("USE_ENTREPOT")){
+            if (BimpCore::getConf("USE_ENTREPOT")) {
                 // Ventes produit / entrepôt
                 if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
                     self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot] = array(

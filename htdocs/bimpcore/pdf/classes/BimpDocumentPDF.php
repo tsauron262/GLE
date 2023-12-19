@@ -74,7 +74,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         $logo_file = $testFile;
                 }
                 if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
-                    $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png", ".png"), "_SAV.png", $logo_file);
+                    $testFile = str_replace(array(".jpg"/*, "_RESEAUNANCE.png"*/, ".png"), "_SAV.png", $logo_file);
                     if (is_file($testFile))
                         $logo_file = $testFile;
                 }

@@ -21,6 +21,10 @@ class BCT_Contrat extends BimpDolObject
         self::STATUS_VALIDATED => Array('label' => 'Validé', 'classes' => Array('success'), 'icon' => 'fas_check'),
         self::STATUS_CLOSED    => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
     );
+    public static $fac_modes = array(
+        1 => 'Mois en cours',
+        2 => 'A date'
+    );
 
     // Droits user : 
 
@@ -679,7 +683,7 @@ class BCT_Contrat extends BimpDolObject
         $onclick = $this->getJsLoadCustomContent('renderSyntheseTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
         $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
-        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= '<span class="btn btn-default refreshContratSyntheseButton" onclick="' . $onclick . '">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';
@@ -713,14 +717,15 @@ class BCT_Contrat extends BimpDolObject
                 );
 
                 $lines_headers = array(
-                    'n'      => 'Ligne n°',
-                    'statut' => 'statut',
-                    'dates'  => 'Dates',
-                    'fac'    => 'Facturation',
-                    'achats' => 'Achats',
-                    'units'  => 'Unités',
-                    'qty'    => 'Qté totale',
-                    'pu_ht'  => 'PU HT'
+                    'n'       => 'Ligne n°',
+                    'statut'  => 'statut',
+                    'dates'   => 'Dates',
+                    'fac'     => 'Facturation',
+                    'achats'  => 'Achats',
+                    'units'   => 'Unités',
+                    'qty'     => 'Qté totale',
+                    'pu_ht'   => 'PU HT',
+                    'buttons' => ''
                 );
 
                 $rows = array();
@@ -795,38 +800,45 @@ class BCT_Contrat extends BimpDolObject
                             }
                         }
 
+                        $buttons_html = '';
+
+                        foreach ($line->getListExtraBtn() as $button) {
+                            $buttons_html .= BimpRender::renderRowButton($button['label'], $button['icon'], $button['onclick']);
+                        }
+
                         $lines_rows[] = array(
-                            'n'      => $line->getData('rang'),
-                            'statut' => $line->displayDataDefault('statut'),
-                            'dates'  => $dates,
-                            'fac'    => $line->displayFacInfos(),
-                            'achats' => $line->displayAchatInfos(false),
-                            'units'  => $nb_units,
-                            'qty'    => $qty,
-                            'pu_ht'  => $line->displayDataDefault('subprice')
+                            'n'       => $line->getData('rang'),
+                            'statut'  => $line->displayDataDefault('statut'),
+                            'dates'   => $dates,
+                            'fac'     => $line->displayFacInfos(),
+                            'achats'  => $line->displayAchatInfos(false),
+                            'units'   => $nb_units,
+                            'qty'     => $qty,
+                            'pu_ht'   => $line->displayDataDefault('subprice'),
+                            'buttons' => $buttons_html
                         );
                     }
 
                     $units_html = '';
 
-                    if ($units['active'] > 0) {
+                    if ($units['active'] != 0) {
                         $units_html .= '<span class="success">Actives : ' . $units['active'] . '</span><br/>';
                     }
-                    if ($units['inactive'] > 0) {
+                    if ($units['inactive'] != 0) {
                         $units_html .= '<span class="warning">Inactives : ' . $units['inactive'] . '</span><br/>';
                     }
-                    if ($units['closed'] > 0) {
+                    if ($units['closed'] != 0) {
                         $units_html .= '<span class="danger">Fermées : ' . $units['closed'] . '</span>';
                     }
 
                     $qties_html = '';
-                    if ($qties['active'] > 0) {
+                    if ($qties['active'] != 0) {
                         $qties_html .= '<span class="success">Actives : ' . $qties['active'] . '</span><br/>';
                     }
-                    if ($qties['inactive'] > 0) {
+                    if ($qties['inactive'] != 0) {
                         $qties_html .= '<span class="warning">Inactives : ' . $qties['inactive'] . '</span><br/>';
                     }
-                    if ($qties['closed'] > 0) {
+                    if ($qties['closed'] != 0) {
                         $qties_html .= '<span class="danger">Fermées : ' . $qties['closed'] . '</span>';
                     }
 

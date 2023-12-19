@@ -349,6 +349,13 @@ fields:
             1: Contrats standards
             2: Contrats d'abonnement
         default_value: 2
+        
+    fac_mode: 
+        label: Mode de facturation
+        type: int
+        values: 
+            array: fac_modes
+        default_value: 1
               
 forms: 
     default: 
@@ -362,6 +369,7 @@ forms:
             - field: entrepot
             - field: secteur
             - field: expertise
+#            - field: fac_mode
             - field: note_public
             - field: note_private
             
@@ -468,6 +476,8 @@ fields_tables:
             - field: secteur
             - field: expertise
               edit: 1
+#            - field: fac_mode
+#              edit: 1
             - field: note_public
             - field: note_private
             

@@ -56,9 +56,9 @@ class pdf_fi
         }
         if (is_file($logo)) {
             if (is_object($pdf1)) {
-                $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+                $pdf1->Image($logo, 0, 10, $size, 0, '', '', '', false, 250, 'L');
             } else {
-                $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+                $pdf->Image($logo, 0, 10, $size, 0, '', '', '', false, 250, 'L');
             }
         }
     }
@@ -204,7 +204,7 @@ class pdf_fi
                 $pdf->SetFont('', 'B', 9);
 
                 // Titre
-                $this->addLogo($pdf, 12);
+                $this->addLogo($pdf, 42);
                 $pdf->SetXY($this->marge_gauche, $this->marge_haute - 17);
                 $pdf->SetFont('', 'B', 14);
                 $pdf->setXY(58, 10);

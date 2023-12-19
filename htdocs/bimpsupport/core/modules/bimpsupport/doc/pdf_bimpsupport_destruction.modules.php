@@ -233,7 +233,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
             } else {
                 $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
             }
-            $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png", ".png"), "_SAV.png", $logo);
+            $testFile = str_replace(array(".jpg", /*"_RESEAUNANCE.png"*/, ".png"), "_SAV.png", $logo);
             if (is_file($testFile))
                 $logo = $testFile;
 

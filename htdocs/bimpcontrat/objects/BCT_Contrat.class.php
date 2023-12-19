@@ -79,6 +79,9 @@ class BCT_Contrat extends BimpDolObject
                     return 1;
                 }
                 return 0;
+
+            case 'CorrectAbosStocksAll':
+                return ($user->admin ? 1 : 0);
         }
 
         return parent::canSetAction($action);
@@ -236,6 +239,21 @@ class BCT_Contrat extends BimpDolObject
     {
         global $conf;
         return $conf->contract->dir_output;
+    }
+
+    public function getDefaultListHeaderButtons()
+    {
+        $buttons = array();
+
+        if ($this->isActionAllowed('CorrectAbosStocksAll') && $this->canSetAction('CorrectAbosStocksAll')) {
+            $buttons[] = array(
+                'label'   => 'Corriger stocks abos (Admin)',
+                'icon'    => 'fas_cogs',
+                'onclick' => $this->getJsActionOnclick('CorrectAbosStocksAll', array(), array())
+            );
+        }
+
+        return $buttons;
     }
 
     // Getters données : 
@@ -1621,6 +1639,70 @@ class BCT_Contrat extends BimpDolObject
             $this->set('fk_user_validate', $user->id);
 
             $errors = $this->update($warnings, true);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCorrectAbosStocksAll($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_entrepot = (int) BimpCore::getConf('abos_id_entrepot', null, 'bimpcontrat');
+
+        if (!$id_entrepot) {
+            $errors[] = 'Pas d\'entrepôt défini pour les produit abonnement (param "abos_id_entrepot")';
+        } else {
+            BimpObject::loadClass('bimpcore', 'Bimp_Product');
+            $where = '.a.`fk_entrepot` != ' . $id_entrepot . ' AND pef.type2 IN (' . implode(',', Bimp_Product::$abonnements_sous_types) . ')';
+            $where .= ' AND a.reel != 0';
+            $rows = $this->db->getRows('product_stock a', $where, null, 'array', array('a.*'), null, null, array(
+                'pef' => array(
+                    'table' => 'product_extrafields',
+                    'on'    => 'pef.fk_object = a.fk_product'
+                )
+            ));
+
+            if (is_array($rows) && !empty($rows)) {
+                $this->db->db->commitAll();
+
+                foreach ($rows as $r) {
+                    $qty = (float) $r['reel'];
+                    $id_entrepot_src = (int) $r['fk_entrepot'];
+                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['fk_product']);
+                    $code = 'CORRECTION_ABONNEMENT';
+                    $label = 'Correction entrepôt (Abonnement)';
+
+                    if (BimpObject::objectLoaded($prod)) {
+                        $prod->force_abos_stock_entrepot = true;
+                        $this->db->db->begin();
+                        $prod_errors = array();
+                        $mvt = ($qty > 0 ? 1 : 0);
+                        $prod_errors = $prod->correctStocks($id_entrepot_src, abs($qty), $mvt, $code, $label);
+
+                        if (!count($prod_errors)) {
+                            $mvt = ($qty > 0 ? 0 : 1);
+                            $prod_errors = $prod->correctStocks($id_entrepot, abs($qty), $mvt, $code, $label);
+                        }
+
+                        if (count($prod_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($prod_errors, 'Produit ' . $prod->getLink());
+                            $this->db->db->rollback();
+                        } else {
+                            $success .= ($success ? '<br/>' : '') . $prod->getRef() . ' : transfert de ' . $qty . ' unité(s) ok';
+                            $this->db->db->commit();
+                        }
+                        $prod->force_abos_stock_entrepot = false;
+                    }
+                }
+            } else {
+                $warnings[] = 'Aucun stock à corriger';
+            }
         }
 
         return array(

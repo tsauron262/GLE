@@ -577,6 +577,8 @@ lists:
         filters_panel: default
         configurable: 1
         checkboxes: 1
+        header_buttons: 
+            callback: getDefaultListHeaderButtons
         list_filters: 
             - name: version
               filter: 2
@@ -600,9 +602,9 @@ lists:
                 
     client: 
         extends: default
+        header_buttons: unset
         cols: 
             fk_soc: unset
-        
 
 searches:
     default:

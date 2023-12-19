@@ -353,6 +353,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                             //                        global $user;
                             //                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
                             $this->addObjectLog('Commande passée en EDI');
+                            $this->updateField('edi_status', 0);
                         }
                     }
                 } else

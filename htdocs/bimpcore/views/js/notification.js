@@ -38,8 +38,8 @@ class AbstractNotification {
 //        this.parent_selector = 'div.dropdown.modifDropdown:last';
         this.parent_selector = 'div.login_block_other';
 //        this.display_notification = true;
-        if (bimp_storage.get(this.id_notification) === null)
-            bimp_storage.set(this.id_notification, this.id_max);
+//        if (bimp_storage.get(this.id_notification) === null)
+//            bimp_storage.set(this.id_notification, this.id_max);
         
         this.init();
     }
@@ -159,9 +159,13 @@ class AbstractNotification {
     
     traiteStorage(){
         var content = bimp_storage.get(this.id_notification + "_content");
-        console.log('traite storage', content);
-        if (content !== null)
+//        console.log('traite storage', content);
+        if (content !== null){
+            this.content = [];
+            this.id_max = 0;
+            this.emptyNotifs();
             this.traiteElement(content);
+        }
     }
     
     traiteElement(content){
@@ -169,10 +173,10 @@ class AbstractNotification {
         var id_max_changed = 0;
         var to_display = '';
 
-        if (content !== null && this.isMultiple(content))
-            var is_multiple = true;
-        else
-            var is_multiple = false;
+//        if (content !== null && this.isMultiple(content))
+//            var is_multiple = true;
+//        else
+//            var is_multiple = false;
 
         for (var i in content) {
 
@@ -196,25 +200,25 @@ class AbstractNotification {
             if (is_new === 1) {
 
                 // Affichage dans la notification
-                if (!is_multiple && id_max_changed) {
-                    var global_id_max = parseInt(bimp_storage.get(this.id_notification));
-                    if (global_id_max < this.id_max) {
-                        bimp_storage.set(this.id_notification, this.id_max);
-                        this.displayNotification(content[i]);
-                    }
-                }
+//                if (!is_multiple && id_max_changed) {
+//                    var global_id_max = parseInt(bimp_storage.get(this.id_notification));
+//                    if (global_id_max < this.id_max) {
+//                        bimp_storage.set(this.id_notification, this.id_max);
+//                        this.displayNotification(content[i]);
+//                    }
+//                }
 
                 nb_unread++;
             }
         }
 
-        if (is_multiple && id_max_changed) {
-            var global_id_max = parseInt(bimp_storage.get(this.id_notification));
-            if (global_id_max < this.id_max) {
-                bimp_storage.set(this.id_notification, this.id_max);
-                this.displayMultipleNotification(content);
-            }
-        }
+//        if (is_multiple && id_max_changed) {
+//            var global_id_max = parseInt(bimp_storage.get(this.id_notification));
+//            if (global_id_max < this.id_max) {
+//                bimp_storage.set(this.id_notification, this.id_max);
+//                this.displayMultipleNotification(content);
+//            }
+//        }
 
 
         this.elementAdded(nb_unread);
@@ -360,16 +364,14 @@ class AbstractNotification {
     }
 
     reloadNotif() {
-
-        bimp_notification.notificationActive[this.id_notification].obj.content = [];
-        bimp_notification.notificationActive[this.id_notification].obj.id_max = 0;
+        this.content = [];
+        this.id_max = 0;
 
         this.emptyNotifs();
 
         // TODO check la suite
 //        this.display_notification = false;
         bimp_notification.reload(false, this.id_notification);
-
     }
 
     emptyNotifs(display_loading_spin) {
@@ -447,7 +449,7 @@ function BimpNotification() {
                     if (result.notifications) {
 //                        console.log(result.notifications);
                         for (const [id, value] of Object.entries(result.notifications)) {
-                            eval('bn.notificationActive[' + id + '].obj.addElement(value);');
+                            bn.notificationActive[id].obj.addElement(value);
                         }
 //                        bn.delay = 0;
                     }
@@ -577,21 +579,22 @@ function BimpNotification() {
             var notification = this;
             $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
                 eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '(' + value.id_notification + ');');
-                eval('notification.notificationActive[' + id_notification + '].obj.traiteStorage();');
-                eval('if(notification.notificationActive[' + id_notification + '].obj.id_max > 0) localStorageOk = true');
+                notification.notificationActive[id_notification].obj.traiteStorage();
+                if(notification.notificationActive[id_notification].obj.id_max > 0) 
+                    localStorageOk = true;
             });
 
         }
 
         setTimeout(function(){
             if(localStorageOk){
-                console.log('storage ok');
+//                console.log('storage ok');
                 setTimeout(function(){
                     bn.iterate();
                 }, 60000);
             }
             else{
-                console.log('storage off');
+//                console.log('storage off');
                 bn.iterate();
             }
         }, 4000);
@@ -618,6 +621,10 @@ function BimpNotification() {
                 } else {
                     bn.active = true;
                     bn.updateStorage();
+                    for (const [id_notification, notif] of Object.entries(bn.notificationActive)) {
+                        var notification = this;
+                        notif.obj.traiteStorage();
+                    }
 //                        bn.iterate();
                 }
             });
@@ -657,9 +664,9 @@ class BimpStorage {
         if(add){
             var oldValue = this.get(key);
             if(Array.isArray(oldValue) && Array.isArray(value)){
-                console.log('concat response', oldValue, value);
+//                console.log('concat response', oldValue, value);
                 value = oldValue.concat(value);
-                console.log('result', value);
+//                console.log('result', value);
             }
                 
         }

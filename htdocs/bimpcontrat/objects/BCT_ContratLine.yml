@@ -129,7 +129,9 @@ fields:
     subprice: 
         label: Prix unitaire HT
         type: money
+        decimals: 4
         depends_on: fk_product
+                
         
     tva_tx: 
         label: Tx TVA

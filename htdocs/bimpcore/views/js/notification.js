@@ -146,7 +146,11 @@ class AbstractNotification {
 
             this.content = this.content.concat(element.content);
             
-            bimp_storage.set(this.id_notification + "_content", this.content);
+            if(this.id_max == 0)
+                var add = 0;
+            else
+                var add = 1;
+            bimp_storage.set(this.id_notification + "_content", this.content, add);
             
             this.traiteElement(element.content);
         }
@@ -155,6 +159,7 @@ class AbstractNotification {
     
     traiteStorage(){
         var content = bimp_storage.get(this.id_notification + "_content");
+        console.log('traite storage', content);
         if (content !== null)
             this.traiteElement(content);
     }
@@ -567,18 +572,29 @@ function BimpNotification() {
         // Variable définie coté PHP (actions_bimpcore.class.php)
         this.notificationActive = notificationActive;
 
+        var localStorageOk = false;
         for (const [id_notification, value] of Object.entries(this.notificationActive)) {
             var notification = this;
             $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
                 eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '(' + value.id_notification + ');');
                 eval('notification.notificationActive[' + id_notification + '].obj.traiteStorage();');
+                eval('if(notification.notificationActive[' + id_notification + '].obj.id_max > 0) localStorageOk = true');
             });
 
         }
 
         setTimeout(function(){
-            bn.iterate();
-        }, 60000);
+            if(localStorageOk){
+                console.log('storage ok');
+                setTimeout(function(){
+                    bn.iterate();
+                }, 60000);
+            }
+            else{
+                console.log('storage off');
+                bn.iterate();
+            }
+        }, 4000);
 
         if (!parseInt($(window).data('focus_bimp_notification_event_init'))) {
 
@@ -620,7 +636,7 @@ function BimpNotification() {
 class BimpStorage {
 
     getFullKey(key) {
-        return '_' + key;
+        return dol_url_root+'_' + key;
     }
 
     get(key) {
@@ -639,9 +655,11 @@ class BimpStorage {
 //        console.log(this.getFullKey(key));
         // Est un object
         if(add){
-            oldValue = this.get(key);
+            var oldValue = this.get(key);
             if(Array.isArray(oldValue) && Array.isArray(value)){
-                value = oldValue.prototype.concat(value);
+                console.log('concat response', oldValue, value);
+                value = oldValue.concat(value);
+                console.log('result', value);
             }
                 
         }

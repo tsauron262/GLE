@@ -1,5 +1,5 @@
 params: 
     # Principaux:
-    stocks_id_entrepot: 
-        label: ID entrepôts pour contrats d'abonnement
+    abos_id_entrepot: 
+        label: ID entrepôt pour les produits de type abonnement
         info: laisser vide pour utiliser l'entrepôt spécifié dans chaque contrat

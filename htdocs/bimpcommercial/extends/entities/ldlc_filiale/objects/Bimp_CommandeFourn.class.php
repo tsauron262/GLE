@@ -51,6 +51,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                                 $ref = (string) $data->Stream->Order->attributes()['external_identifier'];
 
                                 $commFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn');
+                                $commFourn->useNoTransactionsDb();
                                 if ($commFourn->find(['ref' => $ref])) {
                                     $statusCode = (isset($data->attributes()['statuscode'])) ? -$data->attributes()['statuscode'] : 0;
                                     if ($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
@@ -142,6 +143,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                             if (!count($errorLn)) {
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
                             } else{
+                                $commFourn->addObjectLog('Erreur EDI : ' . print_r($errorLn,1));
                                 mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '').', debugerp@bimp.fr', null, 'Commande '.$commFourn->getLink().'<br/>'.print_r($errorLn,1));
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
                             }

@@ -716,24 +716,39 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
                 $html .= parent::displayLineData($field, $edit, $display_name, $no_html);
 
-                if (!$no_html && (string) $this->getData('linked_object_name') === 'commande_line') {
-                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
-                    if (BimpObject::objectLoaded($line)) {
-                        $link = $line->renderOriginLink();
+                if (!$no_html) {
+                    switch ((string) $this->getData('linked_object_name')) {
+                        case 'commande_line':
+                            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+                            if (BimpObject::objectLoaded($line)) {
+                                $link = $line->renderOriginLink();
 
-                        if ($link) {
-                            $html .= ($html ? '<br/><br/>' : '') . $link;
+                                if ($link) {
+                                    $html .= ($html ? '<br/><br/>' : '') . $link;
 
-                            $reservations = $line->getReservations();
-                            $nb = 0;
-                            foreach ($reservations as $resa) {
-                                if ($resa->getData('status') < 200) {
-                                    $nb += $resa->getData('qty');
+                                    $reservations = $line->getReservations();
+                                    $nb = 0;
+                                    foreach ($reservations as $resa) {
+                                        if ($resa->getData('status') < 200) {
+                                            $nb += $resa->getData('qty');
+                                        }
+                                    }
+                                    $html .= '<br/>';
+                                    $html .= 'Reste à réserver : ' . $nb;
                                 }
                             }
-                            $html .= '<br/>';
-                            $html .= 'Reste à réserver : ' . $nb;
-                        }
+                            break;
+
+                        case 'contrat_line':
+                            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('linked_id_object'));
+                            if (BimpObject::objectLoaded($line)) {
+                                $link = $line->renderOriginLink();
+
+                                if ($link) {
+                                    $html .= ($html ? '<br/><br/>' : '') . $link;
+                                }
+                            }
+                            break;
                     }
                 }
                 break;

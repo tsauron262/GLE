@@ -278,7 +278,7 @@ class Bimp_Societe extends BimpDolObject
                     }
             }
         }
-        if(BimpCore::getConf('validation_strict')){
+        if (BimpCore::getConf('validation_strict')) {
             if ($this->getData('zip') == '' || $this->getData('town') == '' || $this->getData('address') == '')
                 $errors[] = "Merci de renseigner l'adresse complète du client";
 
@@ -488,13 +488,28 @@ class Bimp_Societe extends BimpDolObject
 //        return 0;
     }
 
+    public function useCreditSafe()
+    {
+        return BimpTools::isModuleDoliActif('BIMPCREDITSAFE');
+    }
+
+    public function useEncours()
+    {
+        return BimpCore::getConf('useEncours');
+    }
+
+    public function useAtradius()
+    {
+        return ($this->useEncours() && BimpCore::getConf('useAtradius'));
+    }
+
     // Getters params: 
 
     public function getFilesDir()
     {
         global $conf;
         if ($this->isLoaded()) {
-            return $conf->societe->multidir_output[$this->dol_object->entity].'/' . $this->id . '/';
+            return $conf->societe->multidir_output[$this->dol_object->entity] . '/' . $this->id . '/';
         } else {
             echo 'NOT LOADED';
             exit;
@@ -513,7 +528,7 @@ class Bimp_Societe extends BimpDolObject
 
         $file = $this->id . '/' . $file_name;
 
-        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&entity='.$this->dol_object->entity.'&file=' . urlencode($file);
+        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&entity=' . $this->dol_object->entity . '&file=' . urlencode($file);
     }
 
     public function getActionsButtons()
@@ -1866,7 +1881,7 @@ class Bimp_Societe extends BimpDolObject
 
         $edit = $this->canEditField('commerciaux');
 
-        if(count($users)){
+        if (count($users)) {
             foreach ($users as $id_user => $label) {
                 if ((int) $id_user) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
@@ -1885,16 +1900,14 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
             }
-        }
-        else{
+        } else {
             $users = $this->getCommerciauxArray(false, true);
             foreach ($users as $id_user => $label) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-                    if (BimpObject::objectLoaded($user)) {
-                        $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
-                        $html .= '&nbsp;<span class="small">(commercial par défaut)</span>';
-                    }
-                
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
+                    $html .= '&nbsp;<span class="small">(commercial par défaut)</span>';
+                }
             }
         }
 
@@ -2107,11 +2120,11 @@ class Bimp_Societe extends BimpDolObject
 
             $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
             $liste = $contrat->getList(array(
-                'fk_soc' => $this->id,
+                'fk_soc'     => $this->id,
                 'or_version' => array('or' => array(
-                    'or1' => array('and_fields' => array('version' => 1, 'statut' => 11)),
-                    'or2' => array('and_fields' => array('version' => 2, 'statut' => 1))
-                ))
+                        'or1' => array('and_fields' => array('version' => 1, 'statut' => 11)),
+                        'or2' => array('and_fields' => array('version' => 2, 'statut' => 1))
+                    ))
             ));
 
             if (count($liste)) {
@@ -2664,17 +2677,6 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $errors;
-    }
-    
-    public function useCreditSafe(){
-        return BimpTools::isModuleDoliActif('BIMPCREDITSAFE');
-    }
-    
-    public function useEncours(){
-        return BimpCore::getConf('useEncours');
-    }
-    public function useAtradius(){
-        return ($this->useEncours() && BimpCore::getConf('useAtradius'));
     }
 
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())

@@ -741,7 +741,7 @@ class BCT_Contrat extends BimpDolObject
                             $duration = 1;
                         }
 
-                        $qty = $line->getData('qty');
+                        $qty = (float) $line->getData('qty');
                         $nb_units = ($qty / $duration) * $prod_duration;
 
                         switch ((int) $line->getData('statut')) {

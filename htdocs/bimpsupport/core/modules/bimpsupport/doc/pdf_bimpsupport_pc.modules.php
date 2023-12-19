@@ -385,10 +385,10 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             } else {
                 $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
             }
-            $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png", ".png"), "_SAV.png", $logo);
+            $testFile = str_replace(array(".jpg", ".png", "_RESEAUNANCE.png", "_RESEAUNANCE_SAV.png"), "_SAV.png", $logo);
             if (is_file($testFile))
                 $logo = $testFile;
-
+            
     //        $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
             if ($logo && is_readable($logo))
                     $pdf->Image($logo, 10, 16, 0, 22);

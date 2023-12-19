@@ -397,7 +397,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
             }
             
             // Commander
-            if ($this->isActionAllowed('makeOrder') && $this->canSetAction('makeOrder')) {
+            if (($this->getData('edi_status') < 0 || $this->isActionAllowed('makeOrder')) && $this->canSetAction('makeOrder')) {
                 if ($this->getData('fk_soc') == $this->idLdlc) {
                     $onclick = $this->getJsActionOnclick('makeOrderEdi', array(), array(
                     ));

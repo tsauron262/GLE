@@ -21,6 +21,10 @@ parent_module: bimpcontrat
 parent_object: BCT_Contrat
 parent_id_property: fk_contrat
 
+nom_url: 
+    modal_view: 
+        callback: getModalView
+        
 objects: 
     product: 
         instance: 
@@ -659,12 +663,28 @@ fields_tables:
             - field: buy_price_ht
             - field: achat_periodicity
             
+    desc: 
+        panel: 0
+        rows: 
+            - field: description
+            
 views: 
     default: 
         rows: 
             - cols: 
                 - type: object_header
-            
+                
+    text: 
+        extends: default
+        rows: 
+            1: 
+                cols: 
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      fields_table: 
+                          name: desc
+                          
     abonnement: 
         extends: default
         rows: 

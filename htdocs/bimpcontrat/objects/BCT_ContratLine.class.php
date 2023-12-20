@@ -182,6 +182,19 @@ class BCT_ContratLine extends BimpObject
 
     // Getters params:
 
+    public function getModalView()
+    {
+        switch ((int) $this->getData('line_type')) {
+            case self::TYPE_TEXT:
+                return 'text';
+
+            case self::TYPE_ABO:
+                return 'abonnement';
+        }
+
+        return 'default';
+    }
+
     public function getListHeaderButtons($list_name = 'default')
     {
         $buttons = array();
@@ -382,16 +395,6 @@ class BCT_ContratLine extends BimpObject
         }
 
         return '';
-    }
-
-    public function getModalView()
-    {
-        switch ((int) $this->getData('line_type')) {
-            case self::TYPE_ABO:
-                return 'abonnement';
-        }
-
-        return null;
     }
 
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)

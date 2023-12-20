@@ -355,6 +355,16 @@ fields:
         
     linked_object_name:
         label: Type d\'objet lié
+        
+    fac_ended: 
+        label: Facturations terminées
+        type: bool
+        default_value: 0
+        
+    achat_ended: 
+        label: Achats terminés
+        type: bool
+        default_value: 0
 
 forms: 
     text: 
@@ -566,12 +576,31 @@ forms:
                 input: 
                     type: hidden
                 required: 1
-                value: achat
+#            fac_mode: 
+#                custom: 1
+#                label: Factuation à traiter
+#                input_name: fac_mode
+#                data_type: int
+#                input: 
+#                    type: select
+#                    options: 
+#                        1: Mois en cours
+#                        2: A date
+#                value: 
+#                    conf: 
+#                        module: bimpcontrat
+#                        name: default_fac_mode
+#                show: 
+#                    conf: 
+#                        module: bimpcontrat
+#                        name: allow_fac_mois_en_cours
+#                display_if: 
+#                    field_name: type
+#                    show_values: fac
             products: 
                 custom: 1
                 label: Produits à traiter
                 input_name: products
-#                depends_on: operation_type
                 input: 
                     type: custom
                     content: 

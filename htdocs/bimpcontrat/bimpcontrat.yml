@@ -3,3 +3,16 @@ params:
     abos_id_entrepot: 
         label: ID entrepôt pour les produits de type abonnement
         info: laisser vide pour utiliser l'entrepôt spécifié dans chaque contrat
+
+    allow_fac_mois_en_cours: 
+        label: Autoriser la facturation des abonnements sur le mois en cours
+        type: bool
+        def: 0
+        
+    default_fac_mode: 
+        label: Mode de facturation des abonnements par défaut
+        type: select
+        values: 
+            1: Mois en cours
+            2: A date
+        def: 2

@@ -369,7 +369,11 @@ forms:
             - field: entrepot
             - field: secteur
             - field: expertise
-#            - field: fac_mode
+            - field: fac_mode
+              show: 
+                  conf: 
+                      module: bimpcontrat
+                      name: allow_fac_mois_en_cours
             - field: note_public
             - field: note_private
             
@@ -385,6 +389,11 @@ forms:
             - field: entrepot
             - field: secteur
             - field: expertise
+            - field: fac_mode
+              show: 
+                  conf: 
+                      module: bimpcontrat
+                      name: allow_fac_mois_en_cours
             - field: note_public
             - field: note_private
         
@@ -470,14 +479,16 @@ fields_tables:
         title: Informations
         icon: fas_info-circle
         rows: 
-#            - field: date_contrat
-#            - field: date_start
             - field: entrepot
             - field: secteur
             - field: expertise
               edit: 1
-#            - field: fac_mode
-#              edit: 1
+            - field: fac_mode
+              edit: 1
+              show: 
+                  conf: 
+                      module: bimpcontrat
+                      name: allow_fac_mois_en_cours
             - field: note_public
             - field: note_private
             

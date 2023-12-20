@@ -192,7 +192,7 @@ class BCT_ContratLine extends BimpObject
                 return 'abonnement';
         }
 
-        return 'default';
+        return 'abonnement';
     }
 
     public function getListHeaderButtons($list_name = 'default')

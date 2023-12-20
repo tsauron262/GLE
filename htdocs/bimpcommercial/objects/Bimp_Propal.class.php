@@ -315,16 +315,16 @@ class Bimp_Propal extends Bimp_PropalTemp
                     return 0;
                 }
 
-                $items = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('bimp_contrat'));
-                if (!empty($items)) {
-                    foreach ($items as $id) {
-                        $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id['id_object']);
-                        if ($obj->isLoaded()) {
-                            $errors[] = 'Contrat d\'abonnement déjà créé';
-                            return 0;
-                        }
-                    }
-                }
+//                $items = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('bimp_contrat'));
+//                if (!empty($items)) {
+//                    foreach ($items as $id) {
+//                        $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id['id_object']);
+//                        if ($obj->isLoaded()) {
+//                            $errors[] = 'Contrat d\'abonnement déjà créé';
+//                            return 0;
+//                        }
+//                    }
+//                }
                 return 1;
 
             case 'classifyBilled':

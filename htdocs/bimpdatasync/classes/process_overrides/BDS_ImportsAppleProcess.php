@@ -5,6 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php');
 class BDS_ImportsAppleProcess extends BDSImportProcess
 {
 
+    public static $current_version = 3;
     public static $default_public_title = 'Imports produits Apple';
     public static $products_keys = array(
         'ArtCode'       => 'ref',
@@ -31,6 +32,24 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         'code art'     => 'fk_product'
     );
 
+    // Getters array: 
+
+    public function getFournisseursArray()
+    {
+        $fourns = array(
+            0 => ''
+        );
+
+        $rows = $this->db->getRows('societe', 'fournisseur = 1 AND status = 1', null, 'array', array('rowid', 'code_fournisseur as ref', 'nom'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $fourns[(int) $r['rowid']] = $r['ref'] . ' - ' . $r['nom'];
+            }
+        }
+        return $fourns;
+    }
+
     // Init opérations:
 
     public function initImportCsv(&$data, &$errors = array())
@@ -52,27 +71,52 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             }
         }
 
-        foreach (array(
-    'pa_apple_file'  => array('import_apple_prices', 'Traitement des prix d\'achat Apple'),
-    'pa_td_file'     => array('import_td_prices', 'Traitement des prix d\'achat TechData'),
-    'pa_ingram_file' => array('import_ingram_prices', 'Traitement des prix d\'achat Ingram'),
-    'pa_prokov_file' => array('import_prokov_prices', 'Traitement des prix d\'achat PROKOV')
-        ) as $opt_name => $step) {
-            if (isset($this->options[$opt_name]) && (string) $this->options[$opt_name]) {
-                $file_errors = array();
-                $file_data = $this->getFileData('prices', $this->options[$opt_name], $file_errors, $this->getOption('delimiteur', "\t"));
-
-                if (count($file_errors)) {
-                    $errors = array_merge($errors, $file_errors);
+        if (isset($this->options['prices_file']) && (string) $this->options['prices_file']) {
+            $id_fourn = (int) $this->getOption('id_fourn', 0);
+            if (!$id_fourn) {
+                $errors[] = 'Aucun fournisseur sélectionné pour l\'import des prix d\'achat';
+            } else {
+                $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $id_fourn);
+                if (!BimpObject::objectLoaded($fourn)) {
+                    $errors[] = 'Le fournisseur #' . $id_fourn . ' n\'existe pas';
                 } else {
-                    $data['steps'][$step[0]] = array(
-                        'label'    => $step[1],
-                        'on_error' => 'continue',
-                        'elements' => $this->getElementsFromData($file_data, 'ref_fourn')
-                    );
+                    $file_errors = array();
+                    $file_data = $this->getFileData('prices', $this->options['prices_file'], $file_errors, $this->getOption('delimiteur', "\t"));
+
+                    if (count($file_errors)) {
+                        $errors = array_merge($errors, $file_errors);
+                    } else {
+                        $data['steps']['import_fourn_prices'] = array(
+                            'label'    => 'Import des prix d\'achat pour le fournisseur "' . $fourn->getName() . '"',
+                            'on_error' => 'continue',
+                            'elements' => $this->getElementsFromData($file_data, 'ref_fourn')
+                        );
+                    }
                 }
             }
         }
+
+//        foreach (array(
+//    'pa_apple_file'  => array('import_apple_prices', 'Traitement des prix d\'achat Apple'),
+//    'pa_td_file'     => array('import_td_prices', 'Traitement des prix d\'achat TechData'),
+//    'pa_ingram_file' => array('import_ingram_prices', 'Traitement des prix d\'achat Ingram'),
+//    'pa_prokov_file' => array('import_prokov_prices', 'Traitement des prix d\'achat PROKOV')
+//        ) as $opt_name => $step) {
+//            if (isset($this->options[$opt_name]) && (string) $this->options[$opt_name]) {
+//                $file_errors = array();
+//                $file_data = $this->getFileData('prices', $this->options[$opt_name], $file_errors, $this->getOption('delimiteur', "\t"));
+//
+//                if (count($file_errors)) {
+//                    $errors = array_merge($errors, $file_errors);
+//                } else {
+//                    $data['steps'][$step[0]] = array(
+//                        'label'    => $step[1],
+//                        'on_error' => 'continue',
+//                        'elements' => $this->getElementsFromData($file_data, 'ref_fourn')
+//                    );
+//                }
+//            }
+//        }
 
         if (isset($data['steps']['import_products'])/* && isset(array_values($file_data)[0]['crt']) */) {
             $data['steps']['crt_products'] = array(
@@ -82,7 +126,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             );
         }
 
-        if (isset($data['steps']['import_products']) && (int) $this->options['validate_products']) {
+        if (isset($data['steps']['import_products']) && (int) $this->getOption('validate_products', 0)) {
             $data['steps']['validate_products'] = array(
                 'label'    => 'Validation des produits',
                 'on_error' => 'continue',
@@ -173,37 +217,48 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                 }
                 break;
 
-            case 'import_apple_prices':
-                $id_fourn = (int) $this->params['id_fourn_apple'];
-                $prices_file = (isset($this->options['pa_apple_file']) ? $this->options['pa_apple_file'] : '');
+            case 'import_fourn_prices':
+                $id_fourn = (int) $this->getOption('id_fourn', 0);
+                if (!$id_fourn) {
+                    $errors[] = 'ID fournisseur absent';
+                }
+                $prices_file = $this->getOption('prices_file', '');
                 if (!$prices_file) {
                     $errors[] = 'Fichier des prix Apple absent';
                 }
                 break;
 
-            case 'import_td_prices':
-                $id_fourn = (int) $this->params['id_fourn_td'];
-                $prices_file = (isset($this->options['pa_td_file']) ? $this->options['pa_td_file'] : '');
-                if (!$prices_file) {
-                    $errors[] = 'Fichier des prix TechData absent';
-                }
-                break;
-
-            case 'import_ingram_prices':
-                $id_fourn = (int) $this->params['id_fourn_ingram'];
-                $prices_file = (isset($this->options['pa_ingram_file']) ? $this->options['pa_ingram_file'] : '');
-                if (!$prices_file) {
-                    $errors[] = 'Fichier des prix Ingram absent';
-                }
-                break;
-
-            case 'import_prokov_prices':
-                $id_fourn = (int) $this->params['id_fourn_prokov'];
-                $prices_file = (isset($this->options['pa_prokov_file']) ? $this->options['pa_prokov_file'] : '');
-                if (!$prices_file) {
-                    $errors[] = 'Fichier des prix PROKOV absent';
-                }
-                break;
+//            case 'import_apple_prices':
+//                $id_fourn = (int) $this->params['id_fourn_apple'];
+//                $prices_file = (isset($this->options['pa_apple_file']) ? $this->options['pa_apple_file'] : '');
+//                if (!$prices_file) {
+//                    $errors[] = 'Fichier des prix Apple absent';
+//                }
+//                break;
+//
+//            case 'import_td_prices':
+//                $id_fourn = (int) $this->params['id_fourn_td'];
+//                $prices_file = (isset($this->options['pa_td_file']) ? $this->options['pa_td_file'] : '');
+//                if (!$prices_file) {
+//                    $errors[] = 'Fichier des prix TechData absent';
+//                }
+//                break;
+//
+//            case 'import_ingram_prices':
+//                $id_fourn = (int) $this->params['id_fourn_ingram'];
+//                $prices_file = (isset($this->options['pa_ingram_file']) ? $this->options['pa_ingram_file'] : '');
+//                if (!$prices_file) {
+//                    $errors[] = 'Fichier des prix Ingram absent';
+//                }
+//                break;
+//
+//            case 'import_prokov_prices':
+//                $id_fourn = (int) $this->params['id_fourn_prokov'];
+//                $prices_file = (isset($this->options['pa_prokov_file']) ? $this->options['pa_prokov_file'] : '');
+//                if (!$prices_file) {
+//                    $errors[] = 'Fichier des prix PROKOV absent';
+//                }
+//                break;
         }
 
         if ($id_fourn && $prices_file) {
@@ -569,5 +624,61 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                 $warnings = array_merge($warnings, $op->addAssociates('options', $options));
             }
         }
+    }
+
+    public static function updateProcess($id_process, $cur_version, &$warnings = array())
+    {
+        $errors = array();
+
+        if ($cur_version < 2) {
+            $bdb = BimpCache::getBdb();
+
+            $operation = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process' => $id_process,
+                        'name'       => 'importCsv'
+                            ), true);
+
+            if (BimpObject::objectLoaded($operation)) {
+                BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                    'id_process'    => $id_process,
+                    'label'         => 'Fichiers des prix d\'achat fournisseur',
+                    'name'          => 'prices_file',
+                    'info'          => '',
+                    'type'          => 'file',
+                    'default_value' => '',
+                    'required'      => 0
+                        ), true, $errors, $warnings);
+
+                BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                    'id_process'    => $id_process,
+                    'label'         => 'Fournisseur',
+                    'name'          => 'id_fourn',
+                    'info'          => 'Obligatoire si le fichier des prix d\'achat fournisseur est fourni',
+                    'type'          => 'select',
+                    'select_values' => 'static::fournisseurs',
+                    'default_value' => 0,
+                    'required'      => 0
+                        ), true, $errors, $warnings);
+
+                $bdb->delete('bds_process_option', 'id_process = ' . $id_process . ' AND name = \'pa_apple_file\'');
+                $bdb->delete('bds_process_option', 'id_process = ' . $id_process . ' AND name = \'pa_td_file\'');
+                $bdb->delete('bds_process_option', 'id_process = ' . $id_process . ' AND name = \'pa_ingram_file\'');
+                $bdb->delete('bds_process_option', 'id_process = ' . $id_process . ' AND name = \'pa_prokov_file\'');
+
+                $errors = $operation->setOptions(array('products_file', 'prices_file', 'id_fourn', 'force_validation', 'validate_products', 'from_format', 'delimiteur'));
+            } else {
+                $errors[] = 'Opération "Import des produits" non trouvée';
+            }
+        }
+
+        if ($cur_version < 3) {
+            $operation = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process' => $id_process,
+                        'name'       => 'importCsv'
+                            ), true);
+            $errors = $operation->setOptions(array('products_file', 'prices_file', 'id_fourn', 'force_validation', 'validate_products', 'from_format'/*, 'delimiteur'*/));
+        }
+
+        return $errors;
     }
 }

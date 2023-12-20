@@ -639,7 +639,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                             ), true);
 
             if (BimpObject::objectLoaded($operation)) {
-                $opt = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOption', array(
+                $opt = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessOption', array(
                             'id_process' => $id_process,
                             'name'       => 'delimiteur'
                                 ), true);

@@ -300,7 +300,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createContratAbo':
-                if (!in_array($status, array(Propal::STATUS_SIGNED))) {
+                if (!in_array($status, array(Propal::STATUS_SIGNED, Propal::STATUS_BILLED))) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
                 }

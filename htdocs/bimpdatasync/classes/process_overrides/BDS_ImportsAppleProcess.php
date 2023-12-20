@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php');
 class BDS_ImportsAppleProcess extends BDSImportProcess
 {
 
-    public static $current_version = 3;
+    public static $current_version = 2;
     public static $default_public_title = 'Imports produits Apple';
     public static $products_keys = array(
         'ArtCode'       => 'ref',
@@ -639,6 +639,23 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                             ), true);
 
             if (BimpObject::objectLoaded($operation)) {
+                $opt = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOption', array(
+                            'id_process' => $id_process,
+                            'name'       => 'delimiteur'
+                                ), true);
+                if (!BimpObject::objectLoaded($opt)) {
+                    BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                                'id_process'    => $id_process,
+                                'label'         => 'Délimiteur',
+                                'name'          => 'delimiteur',
+                                'info'          => 'Délimiteur utilisé dans les fichiers csv',
+                                'type'          => 'text',
+                                'default_value' => 'tab',
+                                'required'      => 0
+                                    ), true, $errors, $warnings);
+                }
+
+
                 BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                     'id_process'    => $id_process,
                     'label'         => 'Fichiers des prix d\'achat fournisseur',
@@ -669,14 +686,6 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             } else {
                 $errors[] = 'Opération "Import des produits" non trouvée';
             }
-        }
-
-        if ($cur_version < 3) {
-            $operation = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', array(
-                        'id_process' => $id_process,
-                        'name'       => 'importCsv'
-                            ), true);
-            $errors = $operation->setOptions(array('products_file', 'prices_file', 'id_fourn', 'force_validation', 'validate_products', 'from_format'/*, 'delimiteur'*/));
         }
 
         return $errors;

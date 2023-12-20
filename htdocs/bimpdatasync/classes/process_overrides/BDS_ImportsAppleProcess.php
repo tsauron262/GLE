@@ -40,7 +40,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             0 => ''
         );
 
-        $rows = $this->db->getRows('societe', 'fournisseur = 1 AND status = 1', null, 'array', array('rowid', 'code_fournisseur as ref', 'nom'));
+        $rows = $this->db->getRows('societe', 'fournisseur = 1 AND status = 1 AND is_anonymized = 0', null, 'array', array('rowid', 'code_fournisseur as ref', 'nom'));
 
         if (is_array($rows)) {
             foreach ($rows as $r) {

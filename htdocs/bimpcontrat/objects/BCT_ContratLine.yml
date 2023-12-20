@@ -666,6 +666,7 @@ fields_tables:
     desc: 
         panel: 0
         rows: 
+            - field: fk_contrat
             - field: description
             
 views: 

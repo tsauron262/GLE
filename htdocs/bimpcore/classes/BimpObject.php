@@ -4887,7 +4887,7 @@ class BimpObject extends BimpCache
 
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
                             'Action' => 'Save From Post',
-                            'Warnings' > $warnings
+                            'Warnings' => $warnings
                                 ), true);
                     }
                 }

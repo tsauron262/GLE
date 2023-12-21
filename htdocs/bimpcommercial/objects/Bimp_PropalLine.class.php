@@ -53,6 +53,38 @@ class Bimp_PropalLine extends ObjectLine
         return 1;
     }
 
+    // Getters params: 
+    public function getListExtraBtn()
+    {
+        $buttons = parent::getListExtraBtn();
+
+        if ($this->isLoaded()) {
+            if ($this->isAbonnement()) {
+                $buttons[] = array(
+                    'label'   => 'Paramètre abonnement',
+                    'icon'    => 'fas_calendar-alt',
+                    'onclick' => $this->getJsLoadModalForm('abonnement', 'Paramètres abonnement'),
+                );
+            }
+        }
+
+
+        return $buttons;
+    }
+
+    public function getCreateJsCallback()
+    {
+        if ($this->isLoaded()) {
+            if ($this->isAbonnement() && (!(int) $this->getData('abo_fac_periodicity') || !(int) $this->getData('abo_duration'))) {
+                $onclick = 'setTimeout(function() {';
+                $onclick .= html_entity_decode($this->getJsLoadModalForm('abonnement', 'Paramètres abonnement'));
+                $onclick .= '}, 500);';
+            }
+        }
+
+        return $onclick;
+    }
+
     // Getters arrays: 
 
     public function getNbRenouvellementsArray($max = 10)
@@ -73,7 +105,7 @@ class Bimp_PropalLine extends ObjectLine
         if ($field == 'is_abonnement') {
             return $this->isAbonnement();
         }
-        
+
         if (in_array($field, array('abo_fac_periodicity', 'abo_fac_term'))) {
             $prod = $this->getProduct();
 
@@ -104,7 +136,7 @@ class Bimp_PropalLine extends ObjectLine
         }
 
         if (in_array($field_name, array('abo_fac_periodicity', 'abo_fac_term'))) {
-            if (!$this->isLoaded() || $this->id_product != (int) BimpTools::getPostFieldValue('id_product', $this->id_product)) {
+            if (!$this->isLoaded() || ($field_name == 'abo_fac_periodicity' && !(int) $this->getData('abo_fac_periodicity')) || $this->id_product != (int) BimpTools::getPostFieldValue('id_product', $this->id_product)) {
                 return $this->getValueByProduct($field_name);
             }
         }

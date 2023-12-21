@@ -51,7 +51,7 @@ class bimp_note extends AbstractNotification {
         var html = '';
 
         // User courant est l'auteur
-        if (id_user == element.author.id)
+        if (typeof element.author !== undefined && id_user == element.author.id)
             var is_user_author = 1;
         else
             var is_user_author = 0;
@@ -131,7 +131,7 @@ class bimp_note extends AbstractNotification {
 
     isNew(element) {
 
-        if (id_user === parseInt(element.author.id) || parseInt(element.is_viewed) === 1)
+        if (typeof element.author === undefined || id_user === parseInt(element.author.id) || parseInt(element.is_viewed) === 1)
             return 0;
 
         return 1;

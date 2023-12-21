@@ -141,25 +141,25 @@ class AbstractNotification {
      * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
      */
     addElement(element) {
-//        console.log(this.content);
-        if (typeof element.content === "object" && element.content.length > 0) {
+//        console.log(element);
+//            console.log(typeof element.content, this.id_notification + "_content", element.content.length);
+        if (typeof element.content === "object" && (element.content.length > 0 || Object.keys(element.content).length > 0)) {
 
-            this.content = this.content.concat(element.content);
+            //this.content = this.content.concat(element.content);
             
             if(this.id_max == 0)
                 var add = 0;
             else
                 var add = 1;
-            bimp_storage.set(this.id_notification + "_content", this.content, add);
-            
-            this.traiteElement(element.content);
+            bimp_storage.set(this.id_notification + "_content", element.content, add);
+            this.traiteStorage();
+//            this.traiteElement(element.content);
         }
 
     }
     
     traiteStorage(){
         var content = bimp_storage.get(this.id_notification + "_content");
-//        console.log('traite storage', content);
         if (content !== null){
             this.content = [];
             this.id_max = 0;
@@ -169,6 +169,26 @@ class AbstractNotification {
     }
     
     traiteElement(content){
+        content = Object.keys(content).map(function(cle) {
+            return content[cle];
+        });
+        var notif = this;
+        
+        
+        content = content.sort(function compare(a, b) {
+            if (notif.isNew(a) < notif.isNew(b))
+               return -1;
+            if (notif.isNew(a) > notif.isNew(b))
+               return 1;
+            if (a.id < b.id)
+               return -1;
+            if (a.id > b.id )
+               return 1;
+            return 0;
+        });
+        
+//        content = Object.fromEntries(content);
+        
         var nb_unread = 0;
         var id_max_changed = 0;
         var to_display = '';
@@ -181,9 +201,17 @@ class AbstractNotification {
         for (var i in content) {
 
             // Redéfinition de id max
-            if (parseInt(content[i].id) > this.id_max) {
-                this.id_max = parseInt(content[i].id);
-                id_max_changed = 1;
+            if (typeof content[i].tms !== 'undefined') {
+                if (parseInt(content[i].tms) > this.id_max) {
+                    this.id_max = parseInt(content[i].tms);
+                    id_max_changed = 1;
+                }
+            }
+            else{
+                if (parseInt(content[i].id) > this.id_max) {
+                    this.id_max = parseInt(content[i].id);
+                    id_max_changed = 1;
+                }
             }
 
             // Si la fonction n'est pas implémenter dans la classe fille: is_new = 1
@@ -591,7 +619,7 @@ function BimpNotification() {
 //                console.log('storage ok');
                 setTimeout(function(){
                     bn.iterate();
-                }, 60000);
+                }, 15000);
             }
             else{
 //                console.log('storage off');
@@ -659,15 +687,19 @@ class BimpStorage {
     }
     ;
             set(key, value, add = false) {
-//        console.log(this.getFullKey(key));
         // Est un object
         if(add){
             var oldValue = this.get(key);
-            if(Array.isArray(oldValue) && Array.isArray(value)){
+            if(typeof oldValue === 'object' && typeof value === 'object'){
 //                console.log('concat response', oldValue, value);
-                value = oldValue.concat(value);
+                value = {
+                    ...oldValue,
+                    ...value
+                };
 //                console.log('result', value);
             }
+            else
+                console.log('oups concat impossible');
                 
         }
         

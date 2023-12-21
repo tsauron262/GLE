@@ -1029,6 +1029,7 @@ class BCT_Contrat extends BimpDolObject
             $lines_headers = array(
                 'desc'      => 'Description',
                 'qty'       => 'Qté',
+                'received'  => 'Qté réceptionnée',
                 'pu_ht'     => 'PU HT',
                 'total_ht'  => 'Total HT',
                 'total_ttc' => 'Total TTC'
@@ -1075,9 +1076,12 @@ class BCT_Contrat extends BimpDolObject
                     } else {
                         $lines_rows = array();
                         foreach ($cf_lines as $cf_line) {
+                            $received_qty = (float) $cf_line->getReceivedQty(null, true);
+                            $received_class = ($received_qty > 0 ? ($received_qty >= $qty ? 'success' : 'warning') : 'danger');
                             $lines_rows[] = array(
                                 'desc'      => $cf_line->displayLineData('desc_light'),
                                 'qty'       => $cf_line->displayLineData('qty'),
+                                'received'  => '<span class="badge badge-' . $received_class . '">' . $received_qty . '</span>',
                                 'pu_ht'     => $cf_line->displayLineData('pu_ht'),
                                 'total_ht'  => $cf_line->displayLineData('total_ht'),
                                 'total_ttc' => $cf_line->displayLineData('total_ttc'),

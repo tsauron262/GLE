@@ -482,12 +482,12 @@ class BimpNote extends BimpObject
                 // Note
                 //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
                 $msg['content'] = $note->displayData('content', 'default', false, false, true);
-                $msg['id'] = (int) $c['idNoteRef'];
-                $msg['id_min'] = (int) (isset($ln)? $ln->id_min : $c['idNoteRef']);
+                $msg['id_ref'] = (int) $c['idNoteRef'];
+                $msg['id'] = (int) $note->id;
+                $msg['id_min'] = (int) (isset($ln)? $ln->id_min : $note->id);
                 $msg['user_create'] = (int) $note->getData('user_create');
                 $msg['date_create'] = $note->getData('date_create');
                 $msg['tms'] = strtotime($note->getData('date_update'));
-                //            $msg['viewed'] = (int) $note->getData('viewed');
                 $msg['is_user_or_grp'] = (int) $note->getData('type_dest') != self::BN_DEST_NO;
                 $msg['is_user'] = (int) $note->getData('type_dest') == self::BN_DEST_USER;
                 $msg['is_grp'] = (int) $note->getData('type_dest') == self::BN_DEST_GROUP;

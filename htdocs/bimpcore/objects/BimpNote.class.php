@@ -987,9 +987,9 @@ class BimpNote extends BimpObject
         $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
-        $where = "(type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
+        $where = "((type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
         if (count($listIdGr) > 0)
-            $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
+            $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "')))";
         $where .= "         ";
 
         $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
@@ -1012,6 +1012,7 @@ class BimpNote extends BimpObject
 //        print_r($tabReq);
 //        die();
         foreach ($tabReq as $rang => $req) {
+//            echo($req.'<br/><br/>');
             $sql = self::getBdb()->db->query($req);
             if ($sql) {
                 while ($ln = self::getBdb()->db->fetch_object($sql)) {

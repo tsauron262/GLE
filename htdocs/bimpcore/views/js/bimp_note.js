@@ -154,6 +154,7 @@ class bimp_note extends AbstractNotification {
             });
 
             n.onclick = function () {
+                window.parent.parent.focus();
                 if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1)
                     $('#' + bn.dropdown_id).trigger('click');
             }
@@ -161,19 +162,21 @@ class bimp_note extends AbstractNotification {
 
     }
 
-    displayMultipleNotification(elements) {
+    displayMultipleNotification(elements, nb_news) {
         var nb_valid = elements.length;
         var bn = this;
 
         if (window.Notification && Notification.permission === "granted") {
 
-            var n = new Notification("Vous avez reçu " + nb_valid + " messages.", {
+            var n = new Notification("Vous avez reçu " + nb_news + " messages non lue(s).", {
                 body: '',
                 icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
             });
 
             n.onclick = function () {
-                $('#' + bn.dropdown_id).trigger('click');
+                window.parent.parent.focus();
+                if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1)
+                    $('#' + bn.dropdown_id).trigger('click');
             }
         }
     }

@@ -196,7 +196,7 @@ class AbstractNotification {
 //        if (content !== null && this.isMultiple(content))
 //            var is_multiple = true;
 //        else
-//            var is_multiple = false;
+            var is_multiple = false;
 
         for (var i in content) {
 
@@ -204,13 +204,11 @@ class AbstractNotification {
             if (typeof content[i].tms !== 'undefined') {
                 if (parseInt(content[i].tms) > this.id_max) {
                     this.id_max = parseInt(content[i].tms);
-                    id_max_changed = 1;
                 }
             }
             else{
                 if (parseInt(content[i].id) > this.id_max) {
                     this.id_max = parseInt(content[i].id);
-                    id_max_changed = 1;
                 }
             }
 
@@ -228,25 +226,26 @@ class AbstractNotification {
             if (is_new === 1) {
 
                 // Affichage dans la notification
-//                if (!is_multiple && id_max_changed) {
-//                    var global_id_max = parseInt(bimp_storage.get(this.id_notification));
-//                    if (global_id_max < this.id_max) {
-//                        bimp_storage.set(this.id_notification, this.id_max);
-//                        this.displayNotification(content[i]);
-//                    }
-//                }
+                if (!is_multiple) {
+                    var id_max_os = parseInt(bimp_storage.get(this.id_notification+'id_max_notif_os'));
+                    if (isNaN(id_max_os) || id_max_os < this.id_max) {
+                        bimp_storage.set(this.id_notification+'id_max_notif_os', this.id_max);
+                        this.displayNotification(content[i]);
+                    }
+                }
 
                 nb_unread++;
             }
         }
 
-//        if (is_multiple && id_max_changed) {
-//            var global_id_max = parseInt(bimp_storage.get(this.id_notification));
-//            if (global_id_max < this.id_max) {
-//                bimp_storage.set(this.id_notification, this.id_max);
-//                this.displayMultipleNotification(content);
-//            }
-//        }
+        if (is_multiple) {
+            var id_max_os = parseInt(bimp_storage.get(this.id_notification+'id_max_notif_os'));
+            if (isNaN(id_max_os) || id_max_os < this.id_max) {
+                console.log('notifiii');
+                bimp_storage.set(this.id_notification+'id_max_notif_os', this.id_max);
+                this.displayMultipleNotification(content, nb_unread);
+            }
+        }
 
 
         this.elementAdded(nb_unread);

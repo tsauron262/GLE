@@ -984,7 +984,7 @@ class BimpNote extends BimpObject
         $date = new DateTime();
         $date->setTimestamp($id_max);
 
-        $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
+        $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, id as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
         $where = "((type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
@@ -992,11 +992,11 @@ class BimpNote extends BimpObject
             $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "')))";
         $where .= "         ";
 
-        $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
+//        $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
 //        if($notViewedInFirst)
 //            $reqFin .= " ORDER by mviewed ASC";
 //        else
-        $reqFin .= " ORDER by mdate_create DESC";
+        $reqFin .= " ORDER by id DESC";
         $reqFin .= " LIMIT 0," . $limit;
         $tabFils = array();
         $tabNoDoublons = array();

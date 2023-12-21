@@ -468,11 +468,11 @@ class BimpNote extends BimpObject
                 $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj_module'] . '"';
                 $sql .= ' AND `obj_name` = "' . $c['obj_name'] . '" AND `id_obj` = ' . $c['id_obj'];
                 $res = $this->db->db->query($sql);
+                $ln = $this->db->db->fetch_object($res);
                 if ($res) {
                     if (!$c['lu'])
                         $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
                     else {
-                        $ln = $this->db->db->fetch_object($res);
                         $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $ln->id_max);
                     }
                 }
@@ -1005,7 +1005,7 @@ class BimpNote extends BimpObject
         if (!$onlyNotViewed){
 //            $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
             $tabReq[1] = $reqDeb . $where . $reqFin;
-//            $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser . $reqFin;
+            $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser . $reqFin;
         }
 
 //        echo '<pre>';

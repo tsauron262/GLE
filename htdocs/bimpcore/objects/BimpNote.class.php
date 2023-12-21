@@ -454,7 +454,6 @@ class BimpNote extends BimpObject
 
     public function getNoteForUser($id_user, $id_max, &$errors = array())
     {
-        return array();
         $messages = array();
         $messages['id_current_user'] = (int) $id_user;
 
@@ -548,9 +547,7 @@ class BimpNote extends BimpObject
                 $messages['content'][$msg['id_min']] = $msg;
         }
 
-        if (!empty($messages['content']))
-            $messages['content'] = array_reverse($messages['content'], true);
-        else
+        if (empty($messages['content']))
             $messages['content'] = array();
 
         return $messages;
@@ -1005,8 +1002,11 @@ class BimpNote extends BimpObject
         $tabNoDoublons = array();
         $tabReq = array();
         $tabReq[0] = $reqDeb . "(" . $where . ") AND viewed = 0 " . $reqFin;
-        if (!$onlyNotViewed)
-            $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
+        if (!$onlyNotViewed){
+//            $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
+            $tabReq[1] = $reqDeb . $where . $reqFin;
+//            $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser . $reqFin;
+        }
 
 //        echo '<pre>';
 //        print_r($tabReq);
@@ -1021,13 +1021,12 @@ class BimpNote extends BimpObject
                         $data = array("lu" => $rang, "idNoteRef" => $ln->idNoteRef);
                         if ($withObject && $ln->obj_type == "bimp_object") {
                             $data['obj'] = BimpCache::getBimpObjectInstance($ln->obj_module, $ln->obj_name, $ln->id_obj);
-                            $tabFils[] = $data;
                         } elseif (!$withObject) {
                             $data['obj_module'] = $ln->obj_module;
                             $data['obj_name'] = $ln->obj_name;
                             $data['id_obj'] = $ln->id_obj;
-                            $tabFils[] = $data;
                         }
+                        $tabFils[$ln->idNoteRef] = $data;
                     }
                 }
             }

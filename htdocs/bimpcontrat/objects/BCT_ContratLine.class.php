@@ -59,6 +59,9 @@ class BCT_ContratLine extends BimpObject
             case 'periodicAchatProcess':
                 return 1;
 
+            case 'renouv':
+                return 1;
+
             case 'deactivate':
                 return ($user->admin ? 1 : 0);
         }
@@ -158,6 +161,24 @@ class BCT_ContratLine extends BimpObject
                     $errors[] = 'Cette ligne de contrat est déjà désactivée';
                     return 0;
                 }
+                return 1;
+
+            case 'renouv':
+                if (!in_array($this->getData('line_type'), array(self::TYPE_ABO))) {
+                    $errors[] = 'Renouvellement non possible pour ce type de ligne de contrat';
+                    return 0;
+                }
+
+                if ((int) $this->getData('statut') <= 0) {
+                    $errors[] = 'Le statut actuel de cette ligne de contrat ne permet pas son renouvellement';
+                    return 0;
+                }
+
+                if ((int) $this->getData('id_line_renouv')) {
+                    $errors[] = 'Cette ligne de contrat a déjà été renouvellée';
+                    return 0;
+                }
+
                 return 1;
         }
         return parent::isActionAllowed($action, $errors);
@@ -281,6 +302,24 @@ class BCT_ContratLine extends BimpObject
                 ))
             );
         }
+
+//        $line = $this;
+//        if ((int) $this->getData('id_linked_line')) {
+//            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('id_linked_line'));
+//        }
+//
+//        if (BimpObject::objectLoaded($line)) {
+//            if ($line->isActionAllowed('renouv') && $line->canSetAction('renouv')) {
+//                $buttons[] = array(
+//                    'label'   => 'Renouveller',
+//                    'icon'    => 'fas_redo',
+//                    'onclick' => $this->getJsActionOnclick('renouv', array(), array(
+//                        'form_name' => 'renouvellement'
+//                    ))
+//                );
+//            }
+//        }
+
 
         if ((int) $this->getData('statut') > 0) {
             $prod = $this->getChildObject('product');
@@ -1584,7 +1623,8 @@ class BCT_ContratLine extends BimpObject
                                 'empty_label'   => 'Aucun',
                                 'active_only'   => true,
                                 'with_periods'  => true,
-                                'id_product'    => $id_prod
+                                'id_product'    => $id_prod,
+                                'no_sub_lines'  => true
                     ));
                 }
             }

@@ -135,7 +135,6 @@ fields:
         type: money
         decimals: 4
         depends_on: fk_product
-                
         
     tva_tx: 
         label: Tx TVA
@@ -327,6 +326,11 @@ fields:
             help: 'Si un abonnement est sélectionné, les unités seront facturées au prorata de la durée restante de cet abonnement.<br/>Toutes les unités pourront ainsi être renouvellées simultanément'
         depends_on: fk_product
         
+    id_line_renouv: 
+        label: Ligne de renouvellement
+        type: id_object
+        object: line_renouv
+        
     linked_object_name:
         label: Type d\'objet lié
         
@@ -485,6 +489,7 @@ forms:
               input: 
                   type: date
             
+            
     periodic_process: 
         modal_format: large
         rows: 
@@ -609,6 +614,24 @@ forms:
                     type: custom
                     content: 
                         callback: renderPeriodicProcessInputs
+                        
+    renouvellement: 
+        title: Renouvellement
+        rows: 
+            - custom: 1
+              label: Lignes liées à fusionner
+              input_name: linked_lines
+              content: 
+                  callback: renderRenouvLinkedLinesInputs
+            - field: subprice
+              value: 
+                  callback: 
+                      method: getValueForProduct
+                      params: subprice
+            - field: fac_periodicity
+            - field: duration
+            - field: fac_term
+            
             
 fields_tables: 
     infos: 

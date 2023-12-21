@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contratdet` ADD `id_line_renouv` int(11) NOT NULL DEFAULT 0;

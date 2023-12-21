@@ -997,7 +997,7 @@ class BimpNote extends BimpObject
 //            $reqFin .= " ORDER by mviewed ASC";
 //        else
         $reqFin .= " ORDER by id DESC";
-        $reqFin .= " LIMIT 0," . $limit;
+        $reqFin .= " LIMIT 0," . $limit*10;
         $tabFils = array();
         $tabNoDoublons = array();
         $tabReq = array();
@@ -1011,13 +1011,17 @@ class BimpNote extends BimpObject
 //        echo '<pre>';
 //        print_r($tabReq);
 //        die();
+        $i=0;
         foreach ($tabReq as $rang => $req) {
 //            echo($req.'<br/><br/>');
             $sql = self::getBdb()->db->query($req);
             if ($sql) {
                 while ($ln = self::getBdb()->db->fetch_object($sql)) {
+                    if($i > $limit)
+                        break 2;
                     $hash = $ln->obj_module . $ln->obj_name . $ln->id_obj;
                     if (!isset($tabNoDoublons[$hash])) {
+                        $i++;
                         $tabNoDoublons[$hash] = true;
                         $data = array("lu" => $rang, "idNoteRef" => $ln->idNoteRef);
                         if ($withObject && $ln->obj_type == "bimp_object") {
@@ -1032,6 +1036,7 @@ class BimpNote extends BimpObject
                 }
             }
         }
+//        print_r($tabFils);
         return $tabFils;
     }
 

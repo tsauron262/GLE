@@ -141,25 +141,25 @@ class AbstractNotification {
      * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
      */
     addElement(element) {
-//        console.log(this.content);
-        if (typeof element.content === "object" && element.content.length > 0) {
+//        console.log(element);
+//            console.log(typeof element.content, this.id_notification + "_content", element.content.length);
+        if (typeof element.content === "object" && (element.content.length > 0 || Object.keys(element.content).length > 0)) {
 
-            this.content = this.content.concat(element.content);
+            //this.content = this.content.concat(element.content);
             
             if(this.id_max == 0)
                 var add = 0;
             else
                 var add = 1;
-            bimp_storage.set(this.id_notification + "_content", this.content, add);
-            
-            this.traiteElement(element.content);
+            bimp_storage.set(this.id_notification + "_content", element.content, add);
+            this.traiteStorage();
+//            this.traiteElement(element.content);
         }
 
     }
     
     traiteStorage(){
         var content = bimp_storage.get(this.id_notification + "_content");
-//        console.log('traite storage', content);
         if (content !== null){
             this.content = [];
             this.id_max = 0;
@@ -169,6 +169,26 @@ class AbstractNotification {
     }
     
     traiteElement(content){
+        content = Object.keys(content).map(function(cle) {
+            return content[cle];
+        });
+        var notif = this;
+        
+        
+        content = content.sort(function compare(a, b) {
+            if (notif.isNew(a) < notif.isNew(b))
+               return -1;
+            if (notif.isNew(a) > notif.isNew(b))
+               return 1;
+            if (a.id < b.id)
+               return -1;
+            if (a.id > b.id )
+               return 1;
+            return 0;
+        });
+        
+//        content = Object.fromEntries(content);
+        
         var nb_unread = 0;
         var id_max_changed = 0;
         var to_display = '';
@@ -176,14 +196,20 @@ class AbstractNotification {
 //        if (content !== null && this.isMultiple(content))
 //            var is_multiple = true;
 //        else
-//            var is_multiple = false;
+            var is_multiple = false;
 
         for (var i in content) {
 
             // Redéfinition de id max
-            if (parseInt(content[i].id) > this.id_max) {
-                this.id_max = parseInt(content[i].id);
-                id_max_changed = 1;
+            if (typeof content[i].tms !== 'undefined') {
+                if (parseInt(content[i].tms) > this.id_max) {
+                    this.id_max = parseInt(content[i].tms);
+                }
+            }
+            else{
+                if (parseInt(content[i].id) > this.id_max) {
+                    this.id_max = parseInt(content[i].id);
+                }
             }
 
             // Si la fonction n'est pas implémenter dans la classe fille: is_new = 1
@@ -200,25 +226,26 @@ class AbstractNotification {
             if (is_new === 1) {
 
                 // Affichage dans la notification
-//                if (!is_multiple && id_max_changed) {
-//                    var global_id_max = parseInt(bimp_storage.get(this.id_notification));
-//                    if (global_id_max < this.id_max) {
-//                        bimp_storage.set(this.id_notification, this.id_max);
-//                        this.displayNotification(content[i]);
-//                    }
-//                }
+                if (!is_multiple) {
+                    var id_max_os = parseInt(bimp_storage.get(this.id_notification+'id_max_notif_os'));
+                    if (isNaN(id_max_os) || id_max_os < this.id_max) {
+                        bimp_storage.set(this.id_notification+'id_max_notif_os', this.id_max);
+                        this.displayNotification(content[i]);
+                    }
+                }
 
                 nb_unread++;
             }
         }
 
-//        if (is_multiple && id_max_changed) {
-//            var global_id_max = parseInt(bimp_storage.get(this.id_notification));
-//            if (global_id_max < this.id_max) {
-//                bimp_storage.set(this.id_notification, this.id_max);
-//                this.displayMultipleNotification(content);
-//            }
-//        }
+        if (is_multiple) {
+            var id_max_os = parseInt(bimp_storage.get(this.id_notification+'id_max_notif_os'));
+            if (isNaN(id_max_os) || id_max_os < this.id_max) {
+                console.log('notifiii');
+                bimp_storage.set(this.id_notification+'id_max_notif_os', this.id_max);
+                this.displayMultipleNotification(content, nb_unread);
+            }
+        }
 
 
         this.elementAdded(nb_unread);
@@ -591,7 +618,7 @@ function BimpNotification() {
 //                console.log('storage ok');
                 setTimeout(function(){
                     bn.iterate();
-                }, 60000);
+                }, 15000);
             }
             else{
 //                console.log('storage off');
@@ -659,15 +686,19 @@ class BimpStorage {
     }
     ;
             set(key, value, add = false) {
-//        console.log(this.getFullKey(key));
         // Est un object
         if(add){
             var oldValue = this.get(key);
-            if(Array.isArray(oldValue) && Array.isArray(value)){
+            if(typeof oldValue === 'object' && typeof value === 'object'){
 //                console.log('concat response', oldValue, value);
-                value = oldValue.concat(value);
+                value = {
+                    ...oldValue,
+                    ...value
+                };
 //                console.log('result', value);
             }
+            else
+                console.log('oups concat impossible');
                 
         }
         

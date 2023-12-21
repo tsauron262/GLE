@@ -18,12 +18,12 @@ objects:
 sections: 
     - type: tabs
       tabs: 
-#          default:
-#              label: Stock Entrepots
-#              sections: 
-#                  - type: custom
-#                    custom: 
-#                        callback: renderProductEntrepot
+          default:
+              label: Stock Entrepots
+              sections: 
+                  - type: custom
+                    custom: 
+                        callback: renderProductEntrepot
 
           mouvement:
               label: Mouvements de stock

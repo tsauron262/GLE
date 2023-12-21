@@ -462,16 +462,16 @@ class BimpNote extends BimpObject
         foreach ($conversations as $c) {
             $note = null;
             $msg = array();
-            if (!$c['lu'])
-                $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
-            else {
-                if ($c['id_obj']) {
-                    $sql = 'SELECT MAX(id) AS id_max';
-                    $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimpcore_note`';
-                    $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj_module'] . '"';
-                    $sql .= ' AND `obj_name` = "' . $c['obj_name'] . '" AND `id_obj` = ' . $c['id_obj'];
-                    $res = $this->db->db->query($sql);
-                    if ($res) {
+            if ($c['id_obj']) {
+                $sql = 'SELECT MAX(id) AS id_max, MIN(id) as id_min';
+                $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimpcore_note`';
+                $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj_module'] . '"';
+                $sql .= ' AND `obj_name` = "' . $c['obj_name'] . '" AND `id_obj` = ' . $c['id_obj'];
+                $res = $this->db->db->query($sql);
+                if ($res) {
+                    if (!$c['lu'])
+                        $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
+                    else {
                         $ln = $this->db->db->fetch_object($res);
                         $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $ln->id_max);
                     }
@@ -483,8 +483,10 @@ class BimpNote extends BimpObject
                 //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
                 $msg['content'] = $note->displayData('content', 'default', false, false, true);
                 $msg['id'] = (int) $c['idNoteRef'];
+                $msg['id_min'] = (int) (isset($ln)? $ln->id_min : $c['idNoteRef']);
                 $msg['user_create'] = (int) $note->getData('user_create');
                 $msg['date_create'] = $note->getData('date_create');
+                $msg['tms'] = strtotime($note->getData('date_update'));
                 //            $msg['viewed'] = (int) $note->getData('viewed');
                 $msg['is_user_or_grp'] = (int) $note->getData('type_dest') != self::BN_DEST_NO;
                 $msg['is_user'] = (int) $note->getData('type_dest') == self::BN_DEST_USER;
@@ -497,7 +499,7 @@ class BimpNote extends BimpObject
                 $msg['obj_module'] = $note->getData('obj_module');
                 $msg['obj_name'] = $note->getData('obj_name');
                 $msg['id_obj'] = (int) $note->getData('id_obj');
-                $msg['is_viewed'] = (int) $c['lu'];
+                $msg['is_viewed'] = (int) $note->getData('viewed');
 
                 // Obj
 //                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
@@ -542,11 +544,11 @@ class BimpNote extends BimpObject
                 $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
             if (count($msg))
-                $messages['content'][] = $msg;
+                $messages['content'][$msg['id_min']] = $msg;
         }
 
         if (!empty($messages['content']))
-            $messages['content'] = array_reverse($messages['content']);
+            $messages['content'] = array_reverse($messages['content'], true);
         else
             $messages['content'] = array();
 
@@ -981,9 +983,12 @@ class BimpNote extends BimpObject
             $idUser = $user->id;
         }
         $listIdGr = self::getUserUserGroupsList($idUser);
-        $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
+        $date = new DateTime();
+        $date->setTimestamp($id_max);
+
+        $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
-                . "WHERE id>" . $id_max . ' AND ';
+                . "WHERE date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
         $where = "(type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
         if (count($listIdGr) > 0)
             $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";

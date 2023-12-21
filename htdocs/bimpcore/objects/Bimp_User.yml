@@ -209,6 +209,7 @@ fields:
     apple_centre: 
         label: Centre SAV
         dol_extra_field: 1
+        help: Séparé par un espace
     object_header_locked: 
         label: Vérouiller les en-têtes
         type: bool

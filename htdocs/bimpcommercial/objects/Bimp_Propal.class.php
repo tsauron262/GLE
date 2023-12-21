@@ -51,7 +51,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
         2 => array('label' => 'Acceptée', 'icon' => 'check', 'classes' => array('success')),
         3 => array('label' => 'Refusée', 'icon' => 'exclamation-circle', 'classes' => array('danger')),
-        4 => array('label' => 'Facturée', 'icon' => 'check', 'classes' => array('success')),
+        4 => array('label' => 'Commande facturée', 'icon' => 'check', 'classes' => array('success')),
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $acomptes_allowed = true;

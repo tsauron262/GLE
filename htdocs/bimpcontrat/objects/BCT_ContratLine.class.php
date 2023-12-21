@@ -3070,6 +3070,7 @@ class BCT_ContratLine extends BimpObject
                 'period'      => 'Période',
                 'facture'     => 'Commande fournisseur',
                 'qty'         => 'Qté',
+                'received'    => 'Qté réceptionnée',
                 'total_ht'    => 'Total HT',
                 'total_ttc'   => 'Total TTC',
                 'date_create' => 'Créée le',
@@ -3104,10 +3105,14 @@ class BCT_ContratLine extends BimpObject
                     $total_ht += $cf_line->getTotalHT();
                     $total_ttc += $cf_line->getTotalTTC();
 
+                    $received_qty = (float) $cf_line->getReceivedQty(null, true);
+                    $received_class = ($received_qty > 0 ? ($received_qty >= $qty ? 'success' : 'warning') : 'danger');
+
                     $rows[] = array(
                         'period'      => $period,
-                        'facture'     => $cf->getLink() . '&nbsp;&nbsp;' . $cf->displayDataDefault('fk_statut'),
+                        'facture'     => $cf->getLink() . '<br/>' . $cf->displayDataDefault('fk_statut'),
                         'qty'         => $cf_line->displayLineData('qty'),
+                        'received'    => '<span class="badge badge-' . $received_class . '">' . $received_qty . '</span>',
                         'total_ht'    => $cf_line->displayLineData('total_ht'),
                         'total_ttc'   => $cf_line->displayLineData('total_ttc'),
                         'date_create' => $cf->displayDataDefault('date_creation'),

@@ -54,13 +54,18 @@ class BDS_ProcessOption extends BimpObject
                     $values_str = $this->getData('select_values');
                     if (preg_match('/^static::(.+)$/', $values_str, $matches)) {
                         $prop = $matches[1];
-                        require_once DOL_DOCUMENT_ROOT.'/bimpdatasync/BDS_Lib.php';
+                        require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
                         $id_process = (int) $this->db->getValue('bds_process_operation', 'id_process', 'id = ' . $id_operation);
                         if ($id_process) {
                             $process = BDSProcess::createProcessById($id_process);
-                            
-                            if (is_object($process) && property_exists($process, $prop) && is_array($process::${$prop})) {
-                                $values = $process::${$prop};
+
+                            if (is_object($process)) {
+                                $method = 'get' . ucfirst($prop) . 'Array';
+                                if (property_exists($process, $prop) && is_array($process::${$prop})) {
+                                    $values = $process::${$prop};
+                                } elseif (method_exists($process, $method)) {
+                                    $values = $process->{$method}();
+                                }
                             }
                         }
                     } else {

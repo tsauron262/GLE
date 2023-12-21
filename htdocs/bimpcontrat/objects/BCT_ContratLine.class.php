@@ -182,6 +182,19 @@ class BCT_ContratLine extends BimpObject
 
     // Getters params:
 
+    public function getModalView()
+    {
+        switch ((int) $this->getData('line_type')) {
+            case self::TYPE_TEXT:
+                return 'text';
+
+            case self::TYPE_ABO:
+                return 'abonnement';
+        }
+
+        return 'abonnement';
+    }
+
     public function getListHeaderButtons($list_name = 'default')
     {
         $buttons = array();
@@ -382,16 +395,6 @@ class BCT_ContratLine extends BimpObject
         }
 
         return '';
-    }
-
-    public function getModalView()
-    {
-        switch ((int) $this->getData('line_type')) {
-            case self::TYPE_ABO:
-                return 'abonnement';
-        }
-
-        return null;
     }
 
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
@@ -1276,6 +1279,7 @@ class BCT_ContratLine extends BimpObject
                     'operator' => '>',
                     'value'    => 0
                 ),
+                'a.fac_ended'       => 0,
                 'date_next_facture' => array(
                     'operator' => '<=',
                     'value'    => date('Y-m-d')
@@ -1423,6 +1427,7 @@ class BCT_ContratLine extends BimpObject
                     'operator' => '>',
                     'value'    => 0
                 ),
+                'a.achat_ended'       => 0,
                 'a.date_next_achat'   => array(
                     'operator' => '<=',
                     'value'    => date('Y-m-d')
@@ -2364,7 +2369,7 @@ class BCT_ContratLine extends BimpObject
                                 $is_first_period = ($periods_data['date_next_period_tobill'] == $periods_data['date_first_period_start']);
                                 if ($is_first_period && $periods_data['first_period_prorata'] < 1 && $periods_data['first_period_prorata'] > 0) {
                                     $msg .= BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
-                                    $msg .= 'Premimère période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
+                                    $msg .= 'Première période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
                                     $msg .= '</b> au <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_end'])) . '</b>';
                                     $msg .= ' facturée à partir du <b>' . date('d / m / Y', strtotime($periods_data['date_fac_start'])) . '</b>';
                                     $msg .= '<br/>Prorata : <b>' . BimpTools::displayFloatValue($periods_data['first_period_prorata'], 4, ',', 0, 1, 0, 1, 1, 1) . '</b>';
@@ -2670,7 +2675,7 @@ class BCT_ContratLine extends BimpObject
                                     $is_first_period = ($periods_data['date_next_achat'] == $periods_data['date_achat_start']);
                                     if ($is_first_period && $periods_data['first_period_prorata'] < 1 && $periods_data['first_period_prorata'] > 0) {
                                         $msg .= BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
-                                        $msg .= 'Premimère période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
+                                        $msg .= 'Première période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
                                         $msg .= '</b> au <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_end'])) . '</b>';
                                         $msg .= ' en achat partiel à partir du <b>' . date('d / m / Y', strtotime($periods_data['date_achat_start'])) . '</b>';
                                         $msg .= '<br/>Prorata : <b>' . BimpTools::displayFloatValue($periods_data['first_period_prorata'], 4, ',', 0, 1, 0, 1, 1, 1) . '</b>';
@@ -3065,6 +3070,7 @@ class BCT_ContratLine extends BimpObject
                 'period'      => 'Période',
                 'facture'     => 'Commande fournisseur',
                 'qty'         => 'Qté',
+                'received'    => 'Qté réceptionnée',
                 'total_ht'    => 'Total HT',
                 'total_ttc'   => 'Total TTC',
                 'date_create' => 'Créée le',
@@ -3099,10 +3105,14 @@ class BCT_ContratLine extends BimpObject
                     $total_ht += $cf_line->getTotalHT();
                     $total_ttc += $cf_line->getTotalTTC();
 
+                    $received_qty = (float) $cf_line->getReceivedQty(null, true);
+                    $received_class = ($received_qty > 0 ? ($received_qty >= $qty ? 'success' : 'warning') : 'danger');
+
                     $rows[] = array(
                         'period'      => $period,
-                        'facture'     => $cf->getLink() . '&nbsp;&nbsp;' . $cf->displayDataDefault('fk_statut'),
+                        'facture'     => $cf->getLink() . '<br/>' . $cf->displayDataDefault('fk_statut'),
                         'qty'         => $cf_line->displayLineData('qty'),
+                        'received'    => '<span class="badge badge-' . $received_class . '">' . $received_qty . '</span>',
                         'total_ht'    => $cf_line->displayLineData('total_ht'),
                         'total_ttc'   => $cf_line->displayLineData('total_ttc'),
                         'date_create' => $cf->displayDataDefault('date_creation'),
@@ -3186,6 +3196,7 @@ class BCT_ContratLine extends BimpObject
 
         if (!count($errors)) {
             $this->majBundle($errors, $warnings);
+            $this->checkStatus();
         }
     }
 
@@ -3391,7 +3402,7 @@ class BCT_ContratLine extends BimpObject
         $this->checkStatus();
     }
 
-    public function checkStatus(&$infos = '')
+    public function checkStatus(&$infos = array())
     {
         if ($this->isLoaded()) {
             $status = (int) $this->getData('statut');
@@ -3399,7 +3410,8 @@ class BCT_ContratLine extends BimpObject
             if ($status > 0) {
                 $new_status = 4;
                 $date_fin_validite = $this->getData('date_fin_validite');
-                if ($date_fin_validite && $date_fin_validite < date('Y-m-d') . ' 00:00:00') {
+
+                if ($date_fin_validite) {
                     // Vérif facturation terminée: 
                     $fac_ended = true;
                     if ((int) $this->getData('fac_periodicity')) {
@@ -3409,6 +3421,12 @@ class BCT_ContratLine extends BimpObject
                         }
                     }
 
+                    if ((int) $fac_ended !== (int) $this->getData('fac_ended')) {
+                        $this->updateField('fac_ended', (int) $fac_ended);
+                        $infos[] = 'Facturations terminées';
+                    }
+
+                    // Vérif achats terminés: 
                     $achat_ended = true;
                     if ((int) $this->getData('achat_periodicity')) {
                         $fac_data = $this->getPeriodsToBuyData();
@@ -3417,19 +3435,23 @@ class BCT_ContratLine extends BimpObject
                         }
                     }
 
-                    if ($fac_ended && $achat_ended) {
+                    if ((int) $achat_ended !== (int) $this->getData('achat_ended')) {
+                        $this->updateField('achat_ended', (int) $achat_ended);
+                        $infos[] = 'Achats terminés';
+                    }
+
+                    if ($fac_ended && $achat_ended && $date_fin_validite < date('Y-m-d') . ' 00:00:00') {
                         $new_status = 5;
                     }
-                }
 
-                if ($new_status != $status) {
-                    $errors = $this->updateField('statut', $new_status);
+                    if ($new_status != $status) {
+                        $errors = $this->updateField('statut', $new_status);
 
-                    $infos .= ($infos ? '<br/>' : '') . 'Contrat #' . $this->getData('fk_contrat') . ' - ligne n°' . $this->getData('rang') . ' : ';
-                    if (count($errors)) {
-                        $infos .= 'échec màj statut (' . $new_status . ') - <pre>' . print_r($errors, 1) . '</pre>';
-                    } else {
-                        $infos .= 'Màj statut (' . $new_status . ')';
+                        if (count($errors)) {
+                            $infos[] = 'Echec màj statut (' . $new_status . ') - <pre>' . print_r($errors, 1) . '</pre>';
+                        } else {
+                            $infos[] = 'Màj statut (' . $new_status . ')';
+                        }
                     }
                 }
             }

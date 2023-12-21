@@ -228,4 +228,22 @@ class BDS_ProcessOperation extends BimpObject
 
         return $errors;
     }
+    
+    public function setOptions($options_names)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+        
+        $asso = new BimpAssociation($this, 'options');
+        $errors = $asso->deleteAllObjectAssociations($this->id);
+        
+        if (!count($errors)) {
+            $errors = $this->addOptions($options_names);
+        }
+        
+        return $errors;
+    }
 }

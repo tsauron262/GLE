@@ -146,7 +146,7 @@ fields:
     stock: 
         label: Stock réel
         dol_prop: stock_reel
-        type: int
+        type: float
         default_value: 0
         
     barcode: 

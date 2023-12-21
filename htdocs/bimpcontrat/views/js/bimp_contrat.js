@@ -195,4 +195,10 @@ $(document).ready(function () {
             }
         }
     });
+
+    $('body').on('objectChange', function (e) {
+        if (e.object_name === 'BCT_ContratLine') {
+            $('.refreshContratSyntheseButton').click();
+        }
+    });
 });

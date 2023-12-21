@@ -55,6 +55,7 @@
     .page-wrap .app-sidebar .sidebar-header { display: -webkit-box; display: -moz-box; display: -ms-flexbox; display: -webkit-flex; display: flex; -webkit-align-items: center; -moz-align-items: center; -ms-align-items: center; align-items: center; -webkit-justify-content: space-between; -moz-justify-content: space-between; -ms-justify-content: space-between; justify-content: space-between; -ms-flex-pack: space-between; padding: 13px 15px; height: 64px; }
     .page-wrap .app-sidebar .sidebar-header .header-brand { display: block; font-size: 22px; font-weight: 700; color: #212529; }
     .page-wrap .app-sidebar .sidebar-header .header-brand .logo-img { display: inline-block; width: 30px; }
+    .page-wrap .app-sidebar .sidebar-header .header-brand .logo-img img { background-color: $bimp_theme_logo_bk_color}
     .page-wrap .app-sidebar .sidebar-header .nav-toggle { border: none; background-color: transparent; color: #ffffff; font-size: 20px; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none; }
     .page-wrap .app-sidebar .sidebar-header .btn-icon { border: none; }
     .page-wrap .app-sidebar .sidebar-header .nav-close { display: none; border: none; background-color: transparent; color: #ffffff; font-size: 20px; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none; }

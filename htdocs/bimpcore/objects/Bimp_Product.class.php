@@ -3732,7 +3732,7 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded($errors)) {
             global $user;
 
-            if (BimpCore::isModuleActive('bimpcontrat')) {
+            if (BimpCore::isModuleActive('bimpcontrat') && (!isset($this->force_abos_stock_entrepot) || !(int) $this->force_abos_stock_entrepot)) {
                 if ($this->isAbonnement()) {
                     $abos_id_entrepot = BimpCore::getConf('abos_id_entrepot', null, 'bimpcontrat');
                     if ($abos_id_entrepot) {

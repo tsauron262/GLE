@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 5;
+    public static $current_version = 6;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -990,7 +990,7 @@ class BDS_VerifsProcess extends BDSProcess
         $rows = $this->db->executeS($sql, 'array');
 
         if (is_array($rows)) {
-            
+
             foreach ($rows as $r) {
                 $elements = array();
 
@@ -1043,6 +1043,71 @@ class BDS_VerifsProcess extends BDSProcess
                         $this->Success($success, $contrat_line, 'Ligne de facture #' . $fac_line->id);
                     } else {
                         $this->incIgnored();
+                    }
+                }
+            }
+        }
+    }
+
+    // Vérifs et correction des statuts des abonnements : 
+
+    public function initCheckAbonnementsStatus(&$data, &$errors = array())
+    {
+        $filters = array(
+            'a.line_type' => 2,
+            'a.statut'    => array('operator' => '>', 'value' => 0),
+            'c.version'   => 2,
+        );
+
+        $joins = array(
+            'c' => array(
+                'table' => 'contrat',
+                'on'    => 'c.rowid = a.fk_contrat'
+            )
+        );
+
+        $sql = BimpTools::getSqlFullSelectQuery('contratdet', array('a.rowid'), $filters, $joins);
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $elements = array();
+
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['rowid'];
+                }
+
+                $data['steps']['process'] = array(
+                    'label'                  => 'Vérifs de statuts des abonnements',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 100
+                );
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCheckAbonnementsStatus($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcontrat', 'BCT_ContratLine');
+            if (!empty($this->references)) {
+                foreach ($this->references as $id_line) {
+                    $this->incProcessed();
+                    $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+
+                    if (!BimpObject::objectLoaded($line)) {
+                        $this->Error('Ligne de contrat #' . $id_line . ' inexistante');
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $infos = array();
+                    $line->checkStatus($infos);
+                    if (!empty($infos)) {
+                        $this->Info($infos, $line);
                     }
                 }
             }
@@ -1251,7 +1316,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 5) {
-            // Opération "Désactivation des produits sans mouvements depuis 2 ans": 
+            // Opération "Vérif des stocks des facturations des contrats d\'abonnement": 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des stocks des facturations des contrats d\'abonnement',
@@ -1261,6 +1326,20 @@ class BDS_VerifsProcess extends BDSProcess
                         'active'        => 1,
                         'use_report'    => 1,
                         'reports_delay' => 365
+                            ), true, $errors, $warnings);
+        }
+        
+        if ($cur_version < 6) {
+            // Opération "Vérif des statuts des abonnements": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Vérif des statuts des abonnements',
+                        'name'          => 'checkAbonnementsStatus',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
                             ), true, $errors, $warnings);
         }
 

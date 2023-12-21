@@ -24,7 +24,12 @@ class BimpContratCronProcess extends BimpCron
         if (!empty($lines)) {
             $infos = '';
             foreach ($lines as $line) {
+                $infos = array();
                 $line->checkStatus($infos);
+
+                if (!empty($infos)) {
+                    $infos .= BimpTools::getMsgFromArray($infos, 'Contrat #' . $line->getData('fk_contrat') . ' - ligne n°' . $line->getData('rang'));
+                }
             }
 
             $this->output .= 'Statut vérifié pour ' . count($lines) . ' ligne(s)<br/><br/>';

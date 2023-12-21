@@ -21,6 +21,10 @@ class BCT_Contrat extends BimpDolObject
         self::STATUS_VALIDATED => Array('label' => 'Validé', 'classes' => Array('success'), 'icon' => 'fas_check'),
         self::STATUS_CLOSED    => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'fas_times')
     );
+    public static $fac_modes = array(
+        1 => 'Mois en cours',
+        2 => 'A date'
+    );
 
     // Droits user : 
 
@@ -79,6 +83,9 @@ class BCT_Contrat extends BimpDolObject
                     return 1;
                 }
                 return 0;
+
+            case 'CorrectAbosStocksAll':
+                return ($user->admin ? 1 : 0);
         }
 
         return parent::canSetAction($action);
@@ -236,6 +243,21 @@ class BCT_Contrat extends BimpDolObject
     {
         global $conf;
         return $conf->contract->dir_output;
+    }
+
+    public function getDefaultListHeaderButtons()
+    {
+        $buttons = array();
+
+        if ($this->isActionAllowed('CorrectAbosStocksAll') && $this->canSetAction('CorrectAbosStocksAll')) {
+            $buttons[] = array(
+                'label'   => 'Corriger stocks abos (Admin)',
+                'icon'    => 'fas_cogs',
+                'onclick' => $this->getJsActionOnclick('CorrectAbosStocksAll', array(), array())
+            );
+        }
+
+        return $buttons;
     }
 
     // Getters données : 
@@ -661,7 +683,7 @@ class BCT_Contrat extends BimpDolObject
         $onclick = $this->getJsLoadCustomContent('renderSyntheseTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
         $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
-        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= '<span class="btn btn-default refreshContratSyntheseButton" onclick="' . $onclick . '">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';
@@ -695,14 +717,15 @@ class BCT_Contrat extends BimpDolObject
                 );
 
                 $lines_headers = array(
-                    'n'      => 'Ligne n°',
-                    'statut' => 'statut',
-                    'dates'  => 'Dates',
-                    'fac'    => 'Facturation',
-                    'achats' => 'Achats',
-                    'units'  => 'Unités',
-                    'qty'    => 'Qté totale',
-                    'pu_ht'  => 'PU HT'
+                    'n'       => 'Ligne n°',
+                    'statut'  => 'statut',
+                    'dates'   => 'Dates',
+                    'fac'     => 'Facturation',
+                    'achats'  => 'Achats',
+                    'units'   => 'Unités',
+                    'qty'     => 'Qté totale',
+                    'pu_ht'   => 'PU HT',
+                    'buttons' => ''
                 );
 
                 $rows = array();
@@ -777,38 +800,45 @@ class BCT_Contrat extends BimpDolObject
                             }
                         }
 
+                        $buttons_html = '';
+
+                        foreach ($line->getListExtraBtn() as $button) {
+                            $buttons_html .= BimpRender::renderRowButton($button['label'], $button['icon'], $button['onclick']);
+                        }
+
                         $lines_rows[] = array(
-                            'n'      => $line->getData('rang'),
-                            'statut' => $line->displayDataDefault('statut'),
-                            'dates'  => $dates,
-                            'fac'    => $line->displayFacInfos(),
-                            'achats' => $line->displayAchatInfos(false),
-                            'units'  => $nb_units,
-                            'qty'    => $qty,
-                            'pu_ht'  => $line->displayDataDefault('subprice')
+                            'n'       => $line->getData('rang'),
+                            'statut'  => $line->displayDataDefault('statut'),
+                            'dates'   => $dates,
+                            'fac'     => $line->displayFacInfos(),
+                            'achats'  => $line->displayAchatInfos(false),
+                            'units'   => $nb_units,
+                            'qty'     => $qty,
+                            'pu_ht'   => $line->displayDataDefault('subprice'),
+                            'buttons' => $buttons_html
                         );
                     }
 
                     $units_html = '';
 
-                    if ($units['active'] > 0) {
+                    if ($units['active'] != 0) {
                         $units_html .= '<span class="success">Actives : ' . $units['active'] . '</span><br/>';
                     }
-                    if ($units['inactive'] > 0) {
+                    if ($units['inactive'] != 0) {
                         $units_html .= '<span class="warning">Inactives : ' . $units['inactive'] . '</span><br/>';
                     }
-                    if ($units['closed'] > 0) {
+                    if ($units['closed'] != 0) {
                         $units_html .= '<span class="danger">Fermées : ' . $units['closed'] . '</span>';
                     }
 
                     $qties_html = '';
-                    if ($qties['active'] > 0) {
+                    if ($qties['active'] != 0) {
                         $qties_html .= '<span class="success">Actives : ' . $qties['active'] . '</span><br/>';
                     }
-                    if ($qties['inactive'] > 0) {
+                    if ($qties['inactive'] != 0) {
                         $qties_html .= '<span class="warning">Inactives : ' . $qties['inactive'] . '</span><br/>';
                     }
-                    if ($qties['closed'] > 0) {
+                    if ($qties['closed'] != 0) {
                         $qties_html .= '<span class="danger">Fermées : ' . $qties['closed'] . '</span>';
                     }
 
@@ -999,6 +1029,7 @@ class BCT_Contrat extends BimpDolObject
             $lines_headers = array(
                 'desc'      => 'Description',
                 'qty'       => 'Qté',
+                'received'  => 'Qté réceptionnée',
                 'pu_ht'     => 'PU HT',
                 'total_ht'  => 'Total HT',
                 'total_ttc' => 'Total TTC'
@@ -1045,9 +1076,12 @@ class BCT_Contrat extends BimpDolObject
                     } else {
                         $lines_rows = array();
                         foreach ($cf_lines as $cf_line) {
+                            $received_qty = (float) $cf_line->getReceivedQty(null, true);
+                            $received_class = ($received_qty > 0 ? ($received_qty >= $qty ? 'success' : 'warning') : 'danger');
                             $lines_rows[] = array(
                                 'desc'      => $cf_line->displayLineData('desc_light'),
                                 'qty'       => $cf_line->displayLineData('qty'),
+                                'received'  => '<span class="badge badge-' . $received_class . '">' . $received_qty . '</span>',
                                 'pu_ht'     => $cf_line->displayLineData('pu_ht'),
                                 'total_ht'  => $cf_line->displayLineData('total_ht'),
                                 'total_ttc' => $cf_line->displayLineData('total_ttc'),
@@ -1621,6 +1655,70 @@ class BCT_Contrat extends BimpDolObject
             $this->set('fk_user_validate', $user->id);
 
             $errors = $this->update($warnings, true);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCorrectAbosStocksAll($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_entrepot = (int) BimpCore::getConf('abos_id_entrepot', null, 'bimpcontrat');
+
+        if (!$id_entrepot) {
+            $errors[] = 'Pas d\'entrepôt défini pour les produit abonnement (param "abos_id_entrepot")';
+        } else {
+            BimpObject::loadClass('bimpcore', 'Bimp_Product');
+            $where = '.a.`fk_entrepot` != ' . $id_entrepot . ' AND pef.type2 IN (' . implode(',', Bimp_Product::$abonnements_sous_types) . ')';
+            $where .= ' AND a.reel != 0';
+            $rows = $this->db->getRows('product_stock a', $where, null, 'array', array('a.*'), null, null, array(
+                'pef' => array(
+                    'table' => 'product_extrafields',
+                    'on'    => 'pef.fk_object = a.fk_product'
+                )
+            ));
+
+            if (is_array($rows) && !empty($rows)) {
+                $this->db->db->commitAll();
+
+                foreach ($rows as $r) {
+                    $qty = (float) $r['reel'];
+                    $id_entrepot_src = (int) $r['fk_entrepot'];
+                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['fk_product']);
+                    $code = 'CORRECTION_ABONNEMENT';
+                    $label = 'Correction entrepôt (Abonnement)';
+
+                    if (BimpObject::objectLoaded($prod)) {
+                        $prod->force_abos_stock_entrepot = true;
+                        $this->db->db->begin();
+                        $prod_errors = array();
+                        $mvt = ($qty > 0 ? 1 : 0);
+                        $prod_errors = $prod->correctStocks($id_entrepot_src, abs($qty), $mvt, $code, $label);
+
+                        if (!count($prod_errors)) {
+                            $mvt = ($qty > 0 ? 0 : 1);
+                            $prod_errors = $prod->correctStocks($id_entrepot, abs($qty), $mvt, $code, $label);
+                        }
+
+                        if (count($prod_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($prod_errors, 'Produit ' . $prod->getLink());
+                            $this->db->db->rollback();
+                        } else {
+                            $success .= ($success ? '<br/>' : '') . $prod->getRef() . ' : transfert de ' . $qty . ' unité(s) ok';
+                            $this->db->db->commit();
+                        }
+                        $prod->force_abos_stock_entrepot = false;
+                    }
+                }
+            } else {
+                $warnings[] = 'Aucun stock à corriger';
+            }
         }
 
         return array(

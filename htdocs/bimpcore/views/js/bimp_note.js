@@ -113,7 +113,7 @@ class bimp_note extends AbstractNotification {
         if (element.is_viewed) {
             html += '<span style="font-size: 11px" class="success"><i class="fas fa5-check iconLeft"></i>Lu</span>';
         } else {
-            if (id_user == element.author.id) {
+            if (!element.is_user_dest) {
                 html += '<span style="font-size: 11px" class="danger"><i class="fas fa5-times iconLeft"></i>Non lu</span>';
             } else {
                 html += '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Marquer Lu" data-html="false" data-viewport="{&quot;selector&quot;: &quot;body&quot;, &quot;padding&quot;: 0}" ';
@@ -132,6 +132,8 @@ class bimp_note extends AbstractNotification {
     isNew(element) {
 
         if (typeof element.author === undefined || id_user === parseInt(element.author.id) || parseInt(element.is_viewed) === 1)
+            return 0;
+        if(!element.is_user_dest)
             return 0;
 
         return 1;

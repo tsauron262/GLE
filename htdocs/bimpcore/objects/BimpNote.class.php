@@ -988,7 +988,9 @@ class BimpNote extends BimpObject
 
         $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, id as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
-                . "WHERE date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
+                . "WHERE ";
+        if($id_max > 0)
+            $reqDeb .= " date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
         $where = "((type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
         if (count($listIdGr) > 0)
             $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "')))";

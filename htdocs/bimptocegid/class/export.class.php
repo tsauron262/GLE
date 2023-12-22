@@ -77,7 +77,7 @@
         public function exportFacture($ref = ""):void {
             global $db;
             $errors = [];
-            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef > "2023-01-01" AND (datef <= "'.$this->lastDateExported->format('Y-m-d').'")'.$this->getEntityFilter());
+            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef > "2023-01-01" AND (datef >= "'.$this->lastDateExported->format('Y-m-d').'")'.$this->getEntityFilter());
                                     
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {

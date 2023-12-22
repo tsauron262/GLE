@@ -454,6 +454,8 @@ class BimpNote extends BimpObject
 
     public function getNoteForUser($id_user, $id_max, &$errors = array())
     {
+        if ((int) BimpCore::getConf('mode_eco'))
+            return array();
         $messages = array();
         $messages['id_current_user'] = (int) $id_user;
 

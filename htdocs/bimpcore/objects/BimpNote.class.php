@@ -454,7 +454,6 @@ class BimpNote extends BimpObject
 
     public function getNoteForUser($id_user, $id_max, &$errors = array())
     {
-        return array();
         $messages = array();
         $messages['id_current_user'] = (int) $id_user;
 

@@ -37,13 +37,15 @@ class Bimp_PropalLine extends ObjectLine
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv', 'id_linked_contrat_line'))) {
+        if (in_array($field, array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv'))) {
             if ((int) BimpTools::getPostFieldValue('id_linked_contrat_line', $this->getData('id_linked_contrat_line'))) {
                 return 0;
             }
 
             return 1;
         }
+        if(in_array($field, array('id_linked_contrat_line')))
+                return 1;
 
         return parent::isFieldEditable($field, $force_edit);
     }

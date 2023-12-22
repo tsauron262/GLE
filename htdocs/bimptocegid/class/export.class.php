@@ -49,7 +49,7 @@
             global $db;
             $errors = Array();
             
-            $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datef   <= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00")'.$this->getEntityFilter());
+            $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datef   >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00")'.$this->getEntityFilter());
             
             $file = PATH_TMP . $this->dir . $this->getMyFile("achats");
             if(count($list) > 0) {
@@ -77,7 +77,7 @@
         public function exportFacture($ref = ""):void {
             global $db;
             $errors = [];
-            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef >= "'.$this->lastDateExported->format('Y-m-d').'")'.$this->getEntityFilter());
+            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef <= "'.$this->lastDateExported->format('Y-m-d').'")'.$this->getEntityFilter());
                                     
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {

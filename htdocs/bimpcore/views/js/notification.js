@@ -670,7 +670,7 @@ function BimpNotification() {
 class BimpStorage {
 
     getFullKey(key) {
-        return dol_url_root+'_' + key;
+        return dol_url_root+'_2_' + key;
     }
 
     get(key) {

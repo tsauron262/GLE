@@ -2447,21 +2447,21 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $html .= '<strong>AppleId</strong>: ' . $gsx->appleId . '<br/>';
         if ($gsx->appleId === GSX_v2::$default_ids['apple_id']) {
             $html .= '<strong>Mot de passe</strong>: ' . GSX_v2::$default_ids['apple_pword'];
-            $html .= '<br/>Utiliser le numéro terminant par <strong>37</strong>';
-
-            $html .= '<script>'
-                    . 'var idMaxMesg = 0;'
-                    . 'var boucle = true;'
-                    . 'function checkCode(){'
-                    . ' if(boucle){'
-                    . '     setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
-                    . ' }'
-                    . '}'
-                    . 'checkCode();'
-                    . 'bimpModal.$modal.on("hidden.bs.modal", function (e) {'
-                    . ' boucle = false;'
-                    . '});'
-                    . '</script>';
+//            $html .= '<br/>Utiliser le numéro terminant par <strong>37</strong>';
+//
+//            $html .= '<script>'
+//                    . 'var idMaxMesg = 0;'
+//                    . 'var boucle = true;'
+//                    . 'function checkCode(){'
+//                    . ' if(boucle){'
+//                    . '     setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+//                    . ' }'
+//                    . '}'
+//                    . 'checkCode();'
+//                    . 'bimpModal.$modal.on("hidden.bs.modal", function (e) {'
+//                    . ' boucle = false;'
+//                    . '});'
+//                    . '</script>';
         }
 
         $html .= '<p class="small" style="text-align: center; margin-top: 15px">';

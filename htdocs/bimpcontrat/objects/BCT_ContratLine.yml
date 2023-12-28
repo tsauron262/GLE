@@ -489,7 +489,6 @@ forms:
               input: 
                   type: date
             
-            
     periodic_process: 
         modal_format: large
         rows: 
@@ -631,7 +630,6 @@ forms:
             - field: fac_periodicity
             - field: duration
             - field: fac_term
-            
             
 fields_tables: 
     infos: 

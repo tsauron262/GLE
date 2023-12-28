@@ -763,7 +763,7 @@ class BCT_Contrat extends BimpDolObject
                         $desc .= '<br/>Durée unitaire du produit : <b>' . $prod->getData('duree') . 'mois</b>';
                     } else {
                         $prod_duration = 1;
-                        $desc .= '<span class="danger">Le pprduit #' . $id_prod . ' n\'existe plus</span>';
+                        $desc .= '<span class="danger">Le produit #' . $id_prod . ' n\'existe plus</span>';
                     }
 
                     $lines_content = '';

@@ -303,23 +303,15 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
-//        $line = $this;
-//        if ((int) $this->getData('id_linked_line')) {
-//            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('id_linked_line'));
+//        if ($this->isActionAllowed('renouv') && $this->canSetAction('renouv')) {
+//            $buttons[] = array(
+//                'label'   => 'Renouveller',
+//                'icon'    => 'fas_redo',
+//                'onclick' => $this->getJsActionOnclick('renouv', array(), array(
+//                    'form_name' => 'renouvellement'
+//                ))
+//            );
 //        }
-//
-//        if (BimpObject::objectLoaded($line)) {
-//            if ($line->isActionAllowed('renouv') && $line->canSetAction('renouv')) {
-//                $buttons[] = array(
-//                    'label'   => 'Renouveller',
-//                    'icon'    => 'fas_redo',
-//                    'onclick' => $this->getJsActionOnclick('renouv', array(), array(
-//                        'form_name' => 'renouvellement'
-//                    ))
-//                );
-//            }
-//        }
-
 
         if ((int) $this->getData('statut') > 0) {
             $prod = $this->getChildObject('product');
@@ -3183,6 +3175,43 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
+    public function renderRenouvLinkedLinesInputs()
+    {
+        $html = '';
+
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th></th>';
+        $html .= '<th>Ligne n°</th>';
+        $html .= '<th>Nombre d\'unités</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
+
+        $html .= '<tr>';
+        $html .= '<td></td>';
+        $html .= '<td>' . $this->getData('rang') . '</td>';
+//        $html .= $this->get
+        $html .= '</tr>';
+
+        $id_linked_line = (int) $this->getData('id_linked_line');
+        if ($id_linked_line) {
+            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_line);
+            if (BimpObject::objectLoaded($line)) {
+                
+            }
+        } else {
+            
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        return $html;
+    }
+
     // Traitements:
 
     public function checkLinkedLine(&$errors = array())
@@ -4652,7 +4681,7 @@ class BCT_ContratLine extends BimpObject
                             foreach ($elements as $element) {
                                 $process->setCurrentObjectData('bimpcommercial', 'Bimp_CommandeFournLine');
                                 $line_data = json_decode($element, 1);
-
+                                
                                 $id_line = BimpTools::getArrayValueFromPath($line_data, 'id_line', 0);
                                 $nb_periods = (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0);
                                 $real_qty_per_period = (float) BimpTools::getArrayValueFromPath($line_data, 'qty_per_period', 0);
@@ -4711,15 +4740,13 @@ class BCT_ContratLine extends BimpObject
                                 if ((int) $line->getData('variable_qty')) {
                                     $qty_per_period = $real_qty_per_period;
                                 } else {
-                                    $qty_per_period = $line->getFacQtyPerPeriod();
+                                    $qty_per_period = $line->getAchatQtyPerPeriod();
                                 }
 
-                                $periods_data = $line->getPeriodsToBillData();
-
                                 $qty = 0;
-                                if ($periods_data['date_next_achat'] == $periods_data['date_achat_start'] &&
-                                        $periods_data['first_period_prorata'] < 1) {
-                                    $qty = $qty_per_period * (float) $periods_data['first_period_prorata'];
+                                if ($line_periods_data['date_next_achat'] == $line_periods_data['date_achat_start'] &&
+                                        $line_periods_data['first_period_prorata'] < 1) {
+                                    $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
 
                                     if ($nb_periods > 1) {
                                         $qty += $qty_per_period * ($nb_periods - 1);

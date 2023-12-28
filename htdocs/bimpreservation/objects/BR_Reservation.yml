@@ -87,7 +87,11 @@ fields:
         label: Centre
         type: id_object
         object: bimp_entrepot
-        required: 1
+        required: 
+            callback: 
+                method: getConf
+                params:
+                    - USE_entrepot
         input: 
             type: search_entrepot
             

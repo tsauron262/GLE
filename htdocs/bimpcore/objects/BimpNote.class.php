@@ -454,6 +454,8 @@ class BimpNote extends BimpObject
 
     public function getNoteForUser($id_user, $id_max, &$errors = array())
     {
+        if ((int) BimpCore::getConf('mode_eco'))
+            return array();
         $messages = array();
         $messages['id_current_user'] = (int) $id_user;
 
@@ -468,11 +470,11 @@ class BimpNote extends BimpObject
                 $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj_module'] . '"';
                 $sql .= ' AND `obj_name` = "' . $c['obj_name'] . '" AND `id_obj` = ' . $c['id_obj'];
                 $res = $this->db->db->query($sql);
+                $ln = $this->db->db->fetch_object($res);
                 if ($res) {
                     if (!$c['lu'])
                         $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
                     else {
-                        $ln = $this->db->db->fetch_object($res);
                         $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $ln->id_max);
                     }
                 }
@@ -482,12 +484,12 @@ class BimpNote extends BimpObject
                 // Note
                 //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
                 $msg['content'] = $note->displayData('content', 'default', false, false, true);
-                $msg['id'] = (int) $c['idNoteRef'];
-                $msg['id_min'] = (int) (isset($ln)? $ln->id_min : $c['idNoteRef']);
+                $msg['id_ref'] = (int) $c['idNoteRef'];
+                $msg['id'] = (int) $note->id;
+                $msg['id_min'] = (int) (isset($ln)? $ln->id_min : $note->id);
                 $msg['user_create'] = (int) $note->getData('user_create');
                 $msg['date_create'] = $note->getData('date_create');
                 $msg['tms'] = strtotime($note->getData('date_update'));
-                //            $msg['viewed'] = (int) $note->getData('viewed');
                 $msg['is_user_or_grp'] = (int) $note->getData('type_dest') != self::BN_DEST_NO;
                 $msg['is_user'] = (int) $note->getData('type_dest') == self::BN_DEST_USER;
                 $msg['is_grp'] = (int) $note->getData('type_dest') == self::BN_DEST_GROUP;
@@ -984,20 +986,22 @@ class BimpNote extends BimpObject
         $date = new DateTime();
         $date->setTimestamp($id_max);
 
-        $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
+        $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, id as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
-                . "WHERE date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
+                . "WHERE ";
+        if($id_max > 0)
+            $reqDeb .= " date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
         $where = "((type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
         if (count($listIdGr) > 0)
             $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "')))";
         $where .= "         ";
 
-        $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
+//        $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
 //        if($notViewedInFirst)
 //            $reqFin .= " ORDER by mviewed ASC";
 //        else
-        $reqFin .= " ORDER by mdate_create DESC";
-        $reqFin .= " LIMIT 0," . $limit;
+        $reqFin .= " ORDER by id DESC";
+        $reqFin .= " LIMIT 0," . $limit*10;
         $tabFils = array();
         $tabNoDoublons = array();
         $tabReq = array();
@@ -1005,19 +1009,23 @@ class BimpNote extends BimpObject
         if (!$onlyNotViewed){
 //            $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
             $tabReq[1] = $reqDeb . $where . $reqFin;
-//            $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser . $reqFin;
+            $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser . $reqFin;
         }
 
 //        echo '<pre>';
 //        print_r($tabReq);
 //        die();
+        $i=0;
         foreach ($tabReq as $rang => $req) {
 //            echo($req.'<br/><br/>');
             $sql = self::getBdb()->db->query($req);
             if ($sql) {
                 while ($ln = self::getBdb()->db->fetch_object($sql)) {
+                    if($i > $limit)
+                        break 2;
                     $hash = $ln->obj_module . $ln->obj_name . $ln->id_obj;
                     if (!isset($tabNoDoublons[$hash])) {
+                        $i++;
                         $tabNoDoublons[$hash] = true;
                         $data = array("lu" => $rang, "idNoteRef" => $ln->idNoteRef);
                         if ($withObject && $ln->obj_type == "bimp_object") {
@@ -1032,6 +1040,7 @@ class BimpNote extends BimpObject
                 }
             }
         }
+//        print_r($tabFils);
         return $tabFils;
     }
 

@@ -44,6 +44,8 @@ class Bimp_PropalLine extends ObjectLine
 
             return 1;
         }
+        if(in_array($field, array('id_linked_contrat_line')))
+                return 1;
 
         return parent::isFieldEditable($field, $force_edit);
     }

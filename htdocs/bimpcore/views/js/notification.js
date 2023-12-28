@@ -497,7 +497,7 @@ function BimpNotification() {
 
     this.iterate = function () {
         if (bn.delay < 20000) {
-            bn.delay += 2000;
+            bn.delay += 4000;
 //            bn.delay += 2000; // valeur d'origine
         }
 
@@ -670,7 +670,7 @@ function BimpNotification() {
 class BimpStorage {
 
     getFullKey(key) {
-        return dol_url_root+'_' + key;
+        return dol_url_root+'_2_' + key;
     }
 
     get(key) {

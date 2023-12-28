@@ -192,7 +192,8 @@
             $structure['VIDE_7']          = sizing('', 156);
             
             if(!$this->justView) {
-                $this->write(implode('', $structure), $structure['AUXILIAIRE']);
+                if($this->file != '')
+                    $this->write(implode('', $structure), $structure['AUXILIAIRE']);
             
                 $this->rapport[$structure['AUXILIAIRE']] = 'Créé dans le fichier ' . $this->file;
                 $this->tier->updateField($field, $structure['AUXILIAIRE']);

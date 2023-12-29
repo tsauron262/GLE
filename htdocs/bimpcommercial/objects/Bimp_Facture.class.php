@@ -7028,10 +7028,9 @@ class Bimp_Facture extends BimpComm
         $date->sub(new DateInterval('P' . $delay . 'D'));
 
         $bdb = BimpCache::getBdb();
-//        $where = 'datec < \'' . $date->format('Y-m-d') . '\' AND fk_statut = 0';
-
-        $where = 'rowid = 1278736' .
-                $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
+        $where = 'datec < \'' . $date->format('Y-m-d') . '\' AND fk_statut = 0';
+        
+        $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
 
         if (!empty($rows)) {
             $factures = array();
@@ -7055,7 +7054,7 @@ class Bimp_Facture extends BimpComm
                     }
 
                     $factures[$id_user][] = array(
-                        'id'  => $facture->id,
+                        'id'   => $facture->id,
                         'link' => $facture->getLink()
                     );
                 } else

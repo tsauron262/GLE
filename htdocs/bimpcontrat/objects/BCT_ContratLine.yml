@@ -616,7 +616,23 @@ forms:
                         
     renouvellement: 
         title: Renouvellement
+        force_edit: 1
         rows: 
+            - custom: 1
+              label: Ajouter le renouvellement à un devis
+              input_name: id_propal
+              input: 
+                  type: select
+                  options: 
+                      callback: getClientPropalesArray
+            - custom: 1
+              label: Libellé nouveau devis
+              input_name: propal_label
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_propal
+                  show_values: 0
             - custom: 1
               label: Lignes liées à fusionner
               input_name: linked_lines
@@ -626,10 +642,12 @@ forms:
               value: 
                   callback: 
                       method: getValueForProduct
-                      params: subprice
+                      params: 
+                        - subprice
             - field: fac_periodicity
             - field: duration
             - field: fac_term
+            - field: achat_periodicity
             
 fields_tables: 
     infos: 

@@ -109,7 +109,7 @@ class BCT_ContratLine extends BimpObject
 
         $status = (int) $this->getData('statut');
 
-        if ($status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start'))) {
+        if (!$force_edit && $status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start'))) {
             return 0;
         }
 
@@ -308,7 +308,8 @@ class BCT_ContratLine extends BimpObject
 //                'label'   => 'Renouveller',
 //                'icon'    => 'fas_redo',
 //                'onclick' => $this->getJsActionOnclick('renouv', array(), array(
-//                    'form_name' => 'renouvellement'
+//                    'form_name'      => 'renouvellement',
+//                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onRenouvAbonnementFormSubmit($form, extra_data); }'
 //                ))
 //            );
 //        }
@@ -1623,6 +1624,31 @@ class BCT_ContratLine extends BimpObject
         }
 
         return array();
+    }
+
+    public function getClientPropalesArray()
+    {
+        $propales = array(
+            -1 => 'NON',
+            0  => 'Nouveau devis'
+        );
+
+        $contrat = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($contrat)) {
+            $id_client = (int) $this->getData('fk_soc');
+
+            if ($id_client) {
+                foreach (BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Propal', array(
+                    'fk_soc'    => $id_client,
+                    'fk_statut' => 0
+                        ), 'rowid', 'desc') as $propal) {
+                    $propales[(int) $propal->id] = $propal->getRef() . ' - ' . $propal->getName();
+                }
+            }
+        }
+
+        return $propales;
     }
 
     // Affichage:
@@ -3179,35 +3205,79 @@ class BCT_ContratLine extends BimpObject
     {
         $html = '';
 
-        $html .= '<table class="bimp_list_table">';
-        $html .= '<thead>';
-        $html .= '<tr>';
-        $html .= '<th></th>';
-        $html .= '<th>Ligne n°</th>';
-        $html .= '<th>Nombre d\'unités</th>';
-        $html .= '</tr>';
-        $html .= '</thead>';
+        $errors = array();
 
-        $html .= '<tbody>';
-
-        $html .= '<tr>';
-        $html .= '<td></td>';
-        $html .= '<td>' . $this->getData('rang') . '</td>';
-//        $html .= $this->get
-        $html .= '</tr>';
-
-        $id_linked_line = (int) $this->getData('id_linked_line');
-        if ($id_linked_line) {
-            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_line);
-            if (BimpObject::objectLoaded($line)) {
-                
+        if ($this->isLoaded($errors)) {
+            $id_linked_line = (int) $this->getData('id_linked_line');
+            if ($id_linked_line) {
+                $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_line);
+                if (!BimpObject::objectLoaded($line)) {
+                    $line = $this;
+                }
+            } else {
+                $line = $this;
             }
-        } else {
-            
+
+            $prod = $line->getChildObject('product');
+            $prod_duration = 0;
+            if (BimpObject::objectLoaded($prod)) {
+                $prod_duration = (int) $prod->getData('duree');
+            }
+            if (!$prod_duration) {
+                $prod_duration = 1;
+            }
+
+            $duration = (int) $line->getData('duration');
+
+            if (!$duration) {
+                $errors[] = 'Durée non définie';
+            }
+
+            if (!count($errors)) {
+                $html .= '<input type="hidden" name="id_main_line" value="' . $line->id . '"/>';
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th style="width: 45px"></th>';
+                $html .= '<th>Ligne n°</th>';
+                $html .= '<th>Nombre d\'unités</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+
+                $html .= '<tr>';
+                $html .= '<td style="width: 45px"><input type="checkbox" name="line_' . $line->id . '_check" class="line_check" checked="1" data-id_line="' . $line->id . '"/></td>';
+                $html .= '<td>' . $line->getData('rang') . ' (principale)</td>';
+
+                $nb_units = ($line->getData('qty') / $duration) * $prod_duration;
+                $html .= '<td>' . $nb_units . '</td>';
+                $html .= '</tr>';
+
+                $sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+                            'fk_contrat'     => $line->getData('fk_contrat'),
+                            'fk_product'     => $line->getData('fk_product'),
+                            'id_linked_line' => $line->id
+                                ), 'rang');
+
+                foreach ($sub_lines as $sub_line) {
+                    $html .= '<tr>';
+                    $html .= '<td style="width: 45px"><input type="checkbox" name="line_' . $sub_line->id . '_check" class="line_check" checked="1" data-id_line="' . $sub_line->id . '"/></td>';
+                    $html .= '<td>' . $sub_line->getData('rang') . '</td>';
+
+                    $nb_units = ($sub_line->getData('qty') / (int) $sub_line->getData('duration')) * $prod_duration;
+                    $html .= '<td>' . $nb_units . '</td>';
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
         }
 
-        $html .= '</tbody>';
-        $html .= '</table>';
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
 
         return $html;
     }
@@ -3302,17 +3372,19 @@ class BCT_ContratLine extends BimpObject
                                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'La ligne d\'abonnement liée contient des erreurs');
                                 } else {
                                     $date_fac_start = date('Y-m-d', strtotime($date_ouverture));
-                                    $date_debut = $linked_line->getData('date_debut_validite');
+                                    $date_debut = $linked_line->getData('date_ouverture');
+
                                     if (!$date_debut) {
-                                        $date_debut = $linked_line->getData('date_ouverture');
+                                        $date_debut = $linked_line->getData('date_debut_validite');
                                     }
+                                    
                                     if ($date_debut) {
                                         $date_debut = date('Y-m-d', strtotime($date_debut));
                                     }
                                     $date_fin = $linked_line->getData('date_fin_validite');
 
                                     if ($date_fac_start < $date_debut) {
-                                        $errors[] = 'La date d\'ouverture ne peut pas être inférieure à la date de début de l\'abonnement lié';
+                                        $errors[] = 'La date de début des facturations (' . date('d / m / Y', strtotime($date_fac_start)) . ') ne peut pas être inférieure à la date de début de l\'abonnement lié (' . date('d / m / Y', strtotime($date_debut)) . ')';
                                     }
                                     if ($date_ouverture > $date_fin) {
                                         $errors[] = 'La date d\'ouverture ne peut pas être supérieure à la date de fin de validité de l\'abonnement lié';
@@ -4083,6 +4155,128 @@ class BCT_ContratLine extends BimpObject
         );
     }
 
+    public function actionRenouv($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_propal = (int) BimpTools::getArrayValueFromPath($data, 'id_propal', -1);
+        $propal_label = '';
+
+        if ($id_propal === 0) {
+            $propal_label = BimpTools::getArrayValueFromPath($data, 'propal_label', '');
+
+            if (!$propal_label) {
+                $errors[] = 'Veuillez saisir le libellé du nouveau devis';
+            }
+        }
+
+        $fac_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'fac_periodicity', 0);
+        $achat_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'achat_periodicity', 0);
+        $subprice = (float) BimpTools::getArrayValueFromPath($data, 'subprice', 0);
+        $duration = (int) BimpTools::getArrayValueFromPath($data, 'duration', 0);
+        $fac_term = (int) BimpTools::getArrayValueFromPath($data, 'fac_term', 1);
+
+        $id_main_line = (int) BimpTools::getArrayValueFromPath($data, 'id_main_line', 0);
+        $lines = BimpTools::getArrayValueFromPath($data, 'lines', array());
+
+        if (!$fac_periodicity) {
+            $errors[] = 'Périodicité de facturation non définie';
+        }
+
+        if (!$achat_periodicity) {
+            $errors[] = 'Périodicité d\'achat non définie';
+        }
+
+        if (!$duration) {
+            $errors[] = 'Durée non définie';
+        }
+
+        if (!$subprice) {
+            $errors[] = 'Prix unitaire HT non défini';
+        }
+
+        if (!$id_main_line) {
+            $errors[] = 'ID ligne principale absent';
+        }
+
+        if (empty($lines)) {
+            $errors[] = 'Aucune ligne à renouveller sélectionnée';
+        }
+
+        if (!count($errors)) {
+            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_main_line);
+            if (!BimpObject::objectLoaded($line)) {
+                $errors[] = 'La ligne principale d\'ID ' . $id_main_line . ' n\'existe plus';
+            } else {
+                $prod = $line->getChildObject('product');
+                $prod_duration = 0;
+                if (BimpObject::objectLoaded($prod)) {
+                    $prod_duration = (int) $prod->getData('duree');
+                }
+                if (!$prod_duration) {
+                    $errors[] = 'Durée unitaire du produit non définie';
+                } else {
+                    if ($duration % $fac_periodicity != 0) {
+                        $errors[] = 'La durée totale de l\'abonnement doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $fac_periodicity . ' mois)';
+                    }
+                    if ($duration % $prod_duration != 0) {
+                        $errors[] = 'La durée totale de l\'abonnement  doit être un multiple de la durée unitaire de produit (' . $prod_duration . ' mois)';
+                    } elseif ($duration < $prod_duration) {
+                        $errors[] = 'La durée totale de l\'abonnement ne peut pas être inférieure à la durée unitaire de produit (' . $prod_duration . ' mois)';
+                    }
+                }
+
+                if (!count($errors)) {
+                    $mult = $duration / $prod_duration;
+                    $qty = 0;
+
+                    foreach ($lines as $id_line) {
+                        $sub_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+
+                        if (!BimpObject::objectLoaded($sub_line)) {
+                            $errors[] = 'La ligne #' . $id_line . ' n\'existe plus';
+                        } else {
+                            $nb_units = ($sub_line->getData('qty') / (int) $sub_line->getData('duration')) * $prod_duration;
+                            if ($nb_units) {
+                                $qty += $nb_units * $mult;
+                            }
+                        }
+                    }
+
+                    if (!count($errors)) {
+                        if (!$qty) {
+                            $errors[] = 'Aucune unité à renouveller';
+                        } else {
+                            $new_line = BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
+                                        'fk_contrat' => $line->getData('fk_contrat'),
+                                        'fk_product' => $line->getData('fk_product'),
+                                            ), true, $errors, $warnings);
+
+                            if (!count($errors)) {
+                                foreach ($lines as $id_line) {
+                                    $sub_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+
+                                    $line_errors = $sub_line->updateField('id_line_renouv', $new_line->id);
+
+                                    if (count($line_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($line_errors, '');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Actions BimpDataSync:
 
     public function initBdsActionPeriodicFacProcess($process, &$action_data = array(), &$errors = array(), $extra_data = array())
@@ -4681,7 +4875,7 @@ class BCT_ContratLine extends BimpObject
                             foreach ($elements as $element) {
                                 $process->setCurrentObjectData('bimpcommercial', 'Bimp_CommandeFournLine');
                                 $line_data = json_decode($element, 1);
-                                
+
                                 $id_line = BimpTools::getArrayValueFromPath($line_data, 'id_line', 0);
                                 $nb_periods = (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0);
                                 $real_qty_per_period = (float) BimpTools::getArrayValueFromPath($line_data, 'qty_per_period', 0);
@@ -4933,12 +5127,26 @@ class BCT_ContratLine extends BimpObject
                         if (!$periodicity) {
                             $errors[] = 'Périodicité de facturation non définie';
                         } else {
+                            $prod_duration = (int) $prod->getData('duree');
                             $duration = (int) $this->getData('duration');
 
-                            if (!$duration) {
-                                $errors[] = 'Durée de l\'abonnement non définie';
-                            } elseif ($duration % $periodicity != 0) {
-                                $errors[] = 'La durée totale doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $periodicity . ' mois)';
+                            if (!$duration || !$prod_duration) {
+                                if (!$duration) {
+                                    $errors[] = 'Durée de l\'abonnement non définie';
+                                }
+                                if (!$prod_duration) {
+                                    $errors[] = 'Durée unitaire du produit non définie';
+                                }
+                            } else {
+                                if ($duration % $periodicity != 0) {
+                                    $errors[] = 'La durée totale de l\'abonnement doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $periodicity . ' mois)';
+                                }
+                                if ($duration % $prod_duration != 0) {
+                                    $errors[] = 'La durée totale de l\'abonnement doit être un multiple de la durée unitaire de produit (' . $prod_duration . ' mois)';
+                                }
+                                if ($duration < $prod_duration) {
+                                    $errors[] = 'La durée totale de l\'abonnement ne peut pas être inférieure à la durée unitaire de produit (' . $prod_duration . ' mois)';
+                                }
                             }
                         }
 

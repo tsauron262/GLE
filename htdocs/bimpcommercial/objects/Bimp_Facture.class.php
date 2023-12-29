@@ -7080,7 +7080,7 @@ class Bimp_Facture extends BimpComm
 
                 $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
 
-                $return .= ' - Mail to ' . $mail . ' : ';
+                $return .= ' - ' . $fac_link . 'Mail to ' . $mail . ' : ';
                 if (mailSyn2('Facture brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
                     $return .= ' [OK]';
                     $i++;

@@ -10064,7 +10064,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $list_data['param_p'] = 1;
 
             global $conf;
-            $dir = $conf->bimpcore->multidir_output[$conf->entity];
+//            $dir = $conf->bimpcore->multidir_output[$conf->entity];
+            $dir = PATH_TMP.'/bimpcore/';
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(

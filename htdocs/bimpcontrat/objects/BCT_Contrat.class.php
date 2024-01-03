@@ -466,7 +466,8 @@ class BCT_Contrat extends BimpDolObject
                     'empty_label'   => '',
                     'active_only'   => false,
                     'with_periods'  => false,
-                    'id_product'    => 0
+                    'id_product'    => 0,
+                    'no_sub_lines'  => false
                         ), $options);
 
         if ($this->isLoaded()) {
@@ -480,6 +481,10 @@ class BCT_Contrat extends BimpDolObject
                 $key .= '_with_periods';
             }
 
+            if ($options['no_sub_lines']) {
+                $key .= '_no_sub_lines';
+            }
+
             if (!isset(self::$cache[$key])) {
                 self::$cache[$key] = array();
 
@@ -488,6 +493,11 @@ class BCT_Contrat extends BimpDolObject
                 if ($options['id_product']) {
                     $filters['fk_product'] = $options['id_product'];
                 }
+
+                if ($options['no_sub_lines']) {
+                    $filters['id_parent_line'] = 0;
+                }
+
                 $lines = $this->getLines('abo', false, $filters);
 
                 foreach ($lines as $line) {
@@ -533,6 +543,7 @@ class BCT_Contrat extends BimpDolObject
                     'a.line_type'      => BCT_ContratLine::TYPE_ABO,
                     'a.fk_product'     => $id_product,
                     'a.id_linked_line' => 0,
+                    'a.id_parent_line' => 0,
                     'a.statut'         => 4,
                         ), array(
                     'c' => array(
@@ -752,7 +763,7 @@ class BCT_Contrat extends BimpDolObject
                         $desc .= '<br/>Durée unitaire du produit : <b>' . $prod->getData('duree') . 'mois</b>';
                     } else {
                         $prod_duration = 1;
-                        $desc .= '<span class="danger">Le pprduit #' . $id_prod . ' n\'existe plus</span>';
+                        $desc .= '<span class="danger">Le produit #' . $id_prod . ' n\'existe plus</span>';
                     }
 
                     $lines_content = '';

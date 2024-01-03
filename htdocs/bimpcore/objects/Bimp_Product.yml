@@ -1322,7 +1322,6 @@ lists_cols:
                 method: displayCurrentPaHt
                 params:
                     - 0
-        
                     
 lists: 
     default: 

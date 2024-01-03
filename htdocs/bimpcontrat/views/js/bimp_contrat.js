@@ -44,6 +44,7 @@ function BimpContrat() {
     };
 
     // Traitements formulaires : 
+
     this.onPeriodicFacProcessFormSubmit = function ($form, extra_data) {
         var has_errors = false;
         var clients = {};
@@ -180,6 +181,25 @@ function BimpContrat() {
         console.log(fourns);
 
         extra_data['fourns'] = fourns;
+
+        return extra_data;
+    };
+
+    this.onRenouvAbonnementFormSubmit = function ($form, extra_data) {
+        var lines = [];
+        
+        extra_data['id_main_line'] = parseInt($form.find('input[name="id_main_line"]').val());
+        
+        $form.find('.line_check:checked').each(function () {
+            lines.push(parseInt($(this).data('id_line')));
+        });
+
+        if (!lines.length) {
+            bimp_msg('Aucune ligne sélectionnée', 'danger');
+            return false;
+        }
+        
+        extra_data['lines'] = lines;
 
         return extra_data;
     };

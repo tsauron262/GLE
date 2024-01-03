@@ -26,10 +26,8 @@ if (!$user->admin) {
     exit;
 }
 
-//require_once DOL_DOCUMENT_ROOT.'/bimpcontrat/class/BimpContratCronProcess.php';
-//$cron = new BimpContratCronProcess($db);
-//$cron->dailyChecks();
-//echo $cron->output;
+//BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+//echo Bimp_Facture::sendRappelFacturesBrouillons();
 
 echo '<br/>FIN';
 echo '</body></html>';

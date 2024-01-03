@@ -7029,6 +7029,7 @@ class Bimp_Facture extends BimpComm
 
         $bdb = BimpCache::getBdb();
         $where = 'datec < \'' . $date->format('Y-m-d') . '\' AND fk_statut = 0';
+        
         $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
 
         if (!empty($rows)) {
@@ -7052,7 +7053,10 @@ class Bimp_Facture extends BimpComm
                         $factures[$id_user] = array();
                     }
 
-                    $factures[$id_user][] = $facture->getLink();
+                    $factures[$id_user][] = array(
+                        'id'   => $facture->id,
+                        'link' => $facture->getLink()
+                    );
                 } else
                     echo 'oups fact inc ' . $r['rowid'];
             }
@@ -7074,13 +7078,15 @@ class Bimp_Facture extends BimpComm
                 $msg .= ' à l\'état de brouillon depuis plus de ' . $delay . ' jours.<br/>';
                 $msg .= 'Merci de bien vouloir ' . (count($facs) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
 
-                foreach ($facs as $fac_link) {
-                    $msg .= '<br/>' . $fac_link;
+                $facs_ids = '';
+                foreach ($facs as $fac_data) {
+                    $msg .= '<br/>' . $fac_data['link'];
+                    $facs_ids .= ($facs_ids ? ', ' : '') . $fac_data['id'];
                 }
 
                 $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
 
-                $return .= ' - Mail to ' . $mail . ' : ';
+                $return .= ' - ' . $facs_ids . ' => Mail to ' . $mail . ' : ';
                 if (mailSyn2('Facture brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
                     $return .= ' [OK]';
                     $i++;

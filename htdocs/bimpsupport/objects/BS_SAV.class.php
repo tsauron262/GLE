@@ -1556,7 +1556,7 @@ class BS_SAV extends BimpObject
                     if (!$imeiPrivilegie && stripos($part, 'Serial : ') !== false)
                         return str_replace('Serial : ', '', $part);
                     if (stripos($part, 'Imei : ') !== false)
-                        return str_replace('Emei : ', '', $part);
+                        return str_replace('Imei : ', '', $part);
                 }
             }
         }

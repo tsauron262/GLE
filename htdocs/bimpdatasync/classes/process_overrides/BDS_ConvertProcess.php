@@ -373,8 +373,8 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findShipmentsToConvert(&$errors = array())
     {
-        $errors[] = 'Script Désactivé';
-        return array();
+//        $errors[] = 'Script Désactivé';
+//        return array();
 
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line');

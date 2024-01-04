@@ -2835,15 +2835,15 @@ class gsxController extends BimpController
                             'foldable' => true
                 ));
 
-                if (BimpCore::isEntity('bimp') && BimpObject::objectLoaded($sav)) {
-                    $sav_dir = $sav->getFilesDir();
-                    if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
-                        require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.php';
-
-                        $pdf = new InfosMateriel($data['productDescription'], $pdf_data_left, $pdf_data_right);
-                        $pdf->render($sav_dir . 'infos_materiel.pdf', 'F');
-                    }
-                }
+//                if (BimpCore::isEntity('bimp') && BimpObject::objectLoaded($sav)) {
+//                    $sav_dir = $sav->getFilesDir();
+//                    if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
+//                        require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.php';
+//
+//                        $pdf = new InfosMateriel($data['productDescription'], $pdf_data_left, $pdf_data_right);
+//                        $pdf->render($sav_dir . 'infos_materiel.pdf', 'F');
+//                    }
+//                }
             } else {
                 $html .= BimpRender::renderAlerts('Aucune données reçues pour le numéro de série "' . $this->serial . '"');
                 $html .= $this->gsx_v2->displayErrors();

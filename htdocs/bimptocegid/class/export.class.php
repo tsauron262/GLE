@@ -43,6 +43,7 @@
             $this->TRA_deplacementPaiement = new TRA_deplacementPaiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_importPaiement = new TRA_importPaiement($this->bdb);
             $this->TRA_bordereauCHK = new TRA_bordereauCHK($this->bdb);
+            die('exported = 0 AND datep >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"'.$this->getEntityFilter());
         }
         
         public function exportFactureFournisseur($ref = ''):void {

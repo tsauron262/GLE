@@ -1562,7 +1562,7 @@ class BS_SAV extends BimpObject
         }
 
         $equipment = $this->getChildObject('equipment');
-        if (BimpObject::objectLoaded($equipment) && $imeiPrivilegie && $equipment->getData('imei') != '') {
+        if (BimpObject::objectLoaded($equipment) && $imeiPrivilegie && $equipment->getData('imei') != '' && $equipment->getData('imei') != 'n/a') {
             return (string) $equipment->getData('imei');
         }
         

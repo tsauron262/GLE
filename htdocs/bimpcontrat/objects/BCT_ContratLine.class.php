@@ -5201,7 +5201,7 @@ class BCT_ContratLine extends BimpObject
                                 if (!$duration) {
                                     $errors[] = 'Durée de l\'abonnement non définie';
                                 }
-                                if (!$prod_duration) {
+                                if (!$prod_duration && $this->getData('linked_object_name') !== 'bundleCorrect') {
                                     $errors[] = 'Durée unitaire du produit non définie';
                                 }
                             } else {

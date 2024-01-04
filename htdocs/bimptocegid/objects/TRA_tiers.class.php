@@ -35,7 +35,7 @@
         
         public function getCodeComptable($tier, $field = 'code_compta', $createTiers = true) {
             if($createTiers) {
-                if($tier->getData('exported') && $tier->getData($field)) {
+                if($tier->getData('exported') && $tier->getData($field) && !BimpTools::isModuleDoliActif('MULTICOMPANY')) {
                     return $tier->getData($field);
                 } else {
                     $this->tier = $tier;
@@ -118,10 +118,17 @@
             $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getCommercialId());
             $country = $this->getCountry();
             
+            $majCodeAux = false;
+            $codeAux = $this->tier->getData($field);
+            if(is_null($codeAux) || $codeAux == ''){
+                $majCodeAux = true;
+                $codeAux = $this->define_code_aux($field);
+            }
+            
             $structure = Array();
             $structure['FIXE']            = sizing('***', 3);
             $structure['JOURNAL']         = sizing('CAE', 3);
-            $structure['AUXILIAIRE']      = sizing($this->define_code_aux($field), 17);
+            $structure['AUXILIAIRE']      = sizing($codeAux, 17);
             $structure['LABEL']           = sizing(strtoupper($this->cleanString($this->tier->getName())), 35);
             $structure['NATURE']          = sizing(($field == 'code_compta') ? 'CLI' : 'FOU', 3);
             $structure['LETTRAGE']        = sizing('X', 1);
@@ -196,7 +203,8 @@
                     $this->write(implode('', $structure), $structure['AUXILIAIRE']);
             
                 $this->rapport[$structure['AUXILIAIRE']] = 'Créé dans le fichier ' . $this->file;
-                $this->tier->updateField($field, $structure['AUXILIAIRE']);
+                if($majCodeAux)
+                    $this->tier->updateField($field, $codeAux);
                 return $structure['AUXILIAIRE'];
             } else {
                 return implode('', $structure);

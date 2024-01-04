@@ -1285,8 +1285,8 @@ class BimpCache
 
         return $list;
     }
-
-    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array(), $n = null)
+    
+    public static function getBimpObjectIds($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array(), $n = null)
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -1302,10 +1302,18 @@ class BimpCache
             $rows = $instance->getList($filters, $n, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
             static::setCacheServeur($cacheKey, $rows);
         }
-        $items = array();
+        $newRows = array();
+        foreach($rows as $r)
+            $newRows[] = $r[$instance->getPrimary()];
+        return $newRows;
+    }
 
+    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array(), $n = null)
+    {
+        $items = array();
+        $rows = self::getBimpObjectIds($module, $object_name, $filters, $order_by, $sortorder, $joins, $n);
         foreach ($rows as $r) {
-            $item = self::getBimpObjectInstance($module, $object_name, (int) $r[$instance->getPrimary()]);
+            $item = self::getBimpObjectInstance($module, $object_name, (int) $r);
             if (BimpObject::objectLoaded($item)) {
                 $items[$item->id] = $item;
             }

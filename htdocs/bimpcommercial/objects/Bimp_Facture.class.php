@@ -3659,7 +3659,7 @@ class Bimp_Facture extends BimpComm
         }
 
         if (1) {
-            $result = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('fk_soc' => $this->getData('fk_soc'), 'datec' => array('custom' => 'datec < DATE_ADD("' . $this->getData('datec') . '", INTERVAL 2 MINUTE) AND datec > DATE_ADD("' . $this->getData('datec') . '", INTERVAL -2 MINUTE)')));
+            $result = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('fk_soc' => $this->getData('fk_soc'), 'type' => $this->getData('type'), 'datec' => array('custom' => 'datec < DATE_ADD("' . $this->getData('datec') . '", INTERVAL 2 MINUTE) AND datec > DATE_ADD("' . $this->getData('datec') . '", INTERVAL -2 MINUTE)')));
             foreach ($result as $obj)
                 if ($obj->id != $this->id)
                     $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Il semble que deux factures est été créer en même temp. Voir : ' . $obj->getLink() . '<br/>ATTENTION !!!!!!!!!!!!');

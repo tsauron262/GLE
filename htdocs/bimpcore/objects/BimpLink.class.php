@@ -412,7 +412,9 @@ class BimpLink extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'if (typeof notifHashtag !== "undefined" && notifHashtag !== null)
+        notifHashtag.reloadNotif();'
         );
     }
 

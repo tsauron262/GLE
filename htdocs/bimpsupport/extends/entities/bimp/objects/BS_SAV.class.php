@@ -204,6 +204,22 @@ class BS_SAV_ExtEntity extends BS_SAV
         }
         return $html;
     }
+    
+
+    public function actionInfoMateriel($data, &$success)
+    {
+        $errors = $warnings = array();
+
+        if (isset($data['file']) && $data['file'] != '')
+            BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'infos_materiel');
+        else
+            $errors[] = 'Aucun fichier uploadé';
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public function actionSendDemandeEcologic($data, &$success)
     {
@@ -348,6 +364,16 @@ class BS_SAV_ExtEntity extends BS_SAV
                         'form_name' => 'ecologic'
                     ))
                 );
+            
+        }
+        if ($this->asProdEcologic()){
+            $btn[] = array(
+                'label'   => 'Télécharger infos matériel',
+                'icon'    => 'upload',
+                'onclick' => $this->getJsActionOnclick('infoMateriel', array(), array(
+                    'form_name' => 'info_materiel'
+                ))
+            );
         }
         return $btn;
     }

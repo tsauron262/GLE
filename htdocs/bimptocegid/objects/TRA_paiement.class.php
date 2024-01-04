@@ -41,6 +41,8 @@
                 $entrepot->code_journal_compta = BimpCore::getConf('default_code_journal', '', 'bimptocegid');
                 $entrepot->compte_comptable = BimpCore::getConf('default_compte_compta', '', 'bimptocegid');
             }
+            print_r($entrepot);
+            die;
             
             if ($client->getData('is_subsidiary')) {
                 $this->compte_general = $client->getData('accounting_account');

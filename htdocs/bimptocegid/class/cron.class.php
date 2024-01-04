@@ -101,7 +101,6 @@
                     
                     if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
                     if(!BimpCore::getConf('export_only_fact', 0, 'bimptocegid')){
-                        echo 'hhhhhhh';
                         if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
                         if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
                         if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();

@@ -189,6 +189,19 @@ class BS_SAV_ExtEntity extends BS_SAV
         if((!isset($tabName[1]) || $tabName[1] == '' || $client->getData('fk_typent') != 8) && $this->asProdEcologic()){
             $html .= BimpRender::renderAlerts('! Attention les PROS ne sont pas concernés par le programme QualiRepair !');
         }
+        
+        if ($this->asProdEcologic()) {
+            $ok = false;
+            $sav_dir = $this->getFilesDir();
+            $file = 'infos_materiel';
+            $tabExt = array('jpeg', 'jpg', 'png', 'pdf');
+            foreach($tabExt as $ext){
+                if(file_exists($sav_dir.$file.'.'.$ext))
+                        $ok = true;
+            }
+            if(!$ok)
+                $html .= BimpRender::renderAlerts('Attention le fichier '.$file.' n\'est pas présent');
+        }
         return $html;
     }
 

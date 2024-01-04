@@ -12,6 +12,10 @@ categories:
 
 params:
     # Les ventes
+    default_code_journal:
+        label: Code journal par default
+    default_compte_compta:
+        label: Code comptable par default
     vente_dee_fr:
         label: Compte vente D3E (France)
         required: 1

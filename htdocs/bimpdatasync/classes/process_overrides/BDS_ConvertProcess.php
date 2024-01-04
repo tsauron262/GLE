@@ -13,7 +13,7 @@ class BDS_ConvertProcess extends BDSProcess
 //        'PropalesCrtToConvert'       => 'Conversion des remises CRT des lignes de propales',
 //        'CommandesCrtToConvert'      => 'Conversion des remises CRT des lignes de commandes',
 //        'FacturesCrtToConvert'       => 'Conversion des remises CRT des lignes de factures',
-//        'ShipmentsToConvert'         => 'Conversion des lignes d\'expédition',
+        'ShipmentsToConvert'         => 'Conversion des lignes d\'expédition',
 //        'ReceptionsToConvert'        => 'Conversion des lignes de réception',
         'abosToConvert' => 'Conversion des Abonnements'
     );

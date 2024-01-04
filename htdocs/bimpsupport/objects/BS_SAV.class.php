@@ -1546,20 +1546,27 @@ class BS_SAV extends BimpObject
         return 0;
     }
 
-    public function getSerial($first = false)
+    public function getSerial($first = false, $imeiPrivilegie = false)
     {
         if ($first) {
             $equip = $this->getChildObject("equipment");
             if ($equip->getData('old_serial') != '') {
                 $tabSerial = explode('<br/>', $equip->getData('old_serial'));
                 foreach ($tabSerial as $part) {
-                    if (stripos($part, 'Serial : ') !== false)
+                    if (!$imeiPrivilegie && stripos($part, 'Serial : ') !== false)
                         return str_replace('Serial : ', '', $part);
+                    if (stripos($part, 'Imei : ') !== false)
+                        return str_replace('Emei : ', '', $part);
                 }
             }
         }
 
         $equipment = $this->getChildObject('equipment');
+        if (BimpObject::objectLoaded($equipment) && $imeiPrivilegie) {
+            return (string) $equipment->getData('imei');
+        }
+        
+        
         if (BimpObject::objectLoaded($equipment)) {
             return (string) $equipment->getData('serial');
         }

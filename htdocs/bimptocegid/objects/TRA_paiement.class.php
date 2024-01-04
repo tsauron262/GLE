@@ -36,6 +36,12 @@
             $compte_bancaire = $this->db->getRow('bank_account', 'rowid = ' . $this->db->getValue('bank', 'fk_account', 'rowid = ' . $parent_paiement->getData('fk_bank')));
             $reglement_mode = $this->db->getRow('c_paiement', 'id = ' . $pay->fk_paiement);
             
+            if(is_null($entrepot)){
+                $entrepot = new stdClass();
+                $entrepot->code_journal_compta = BimpCore::getConf('default_code_journal', '', 'bimptocegid');
+                $entrepot->compte_comptable = BimpCore::getConf('default_compte_compta', '', 'bimptocegid');
+            }
+            
             if ($client->getData('is_subsidiary')) {
                 $this->compte_general = $client->getData('accounting_account');
                 $is_client_interco = true;

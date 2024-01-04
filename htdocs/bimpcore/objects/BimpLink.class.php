@@ -123,8 +123,8 @@ class BimpLink extends BimpObject
                         )),
                 ))
         );
-
-        $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'a.viewed', 'DESC', array(), 15);
+        
+        $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'a.id', 'DESC', array(), 150);
 
         $nb_demandes = 0;
 
@@ -133,6 +133,8 @@ class BimpLink extends BimpObject
 
             if ($bimp_object->isLoaded()) {
                 $nb_demandes++;
+                if($nb_demandes > 15)
+                    break;
                 $new_demande = array(
                     'id'             => $d->id,
                     'is_viewed'      => (int) $d->getData('viewed'),

@@ -203,9 +203,8 @@
             global $db;
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile("paiements");
-            $list = $this->bdb->getRows('paiement', 'exported = 0 AND datef < "2023-12-10" AND datep >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"'.$this->getEntityFilter());
-print_r($list);
-echo 'exported = 0 AND datef < "2023-12-10" AND datep >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"'.$this->getEntityFilter();
+            $list = $this->bdb->getRows('paiement', 'exported = 0 AND datep < "2023-12-10" AND datep >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"'.$this->getEntityFilter());
+
             foreach($list as $pay) {
                 $reglement = $this->bdb->getRow('c_paiement', 'id = ' . $pay->fk_paiement);
                     if($reglement->code != 'NO_COM') {

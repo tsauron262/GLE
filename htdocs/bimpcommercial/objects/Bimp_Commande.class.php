@@ -4456,7 +4456,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         $res_errors = $this->createReservations();
         if (count($res_errors)) {
-            $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
+            $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
         }
 
         if (empty($errors)) {

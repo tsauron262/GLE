@@ -40,6 +40,7 @@
                 $entrepot = new stdClass();
                 $entrepot->code_journal_compta = BimpCore::getConf('default_code_journal', '', 'bimptocegid');
                 $entrepot->compte_comptable = BimpCore::getConf('default_compte_compta', '', 'bimptocegid');
+                $entrepot->compte_comptable_banque = BimpCore::getConf('default_compte_compta', '', 'bimptocegid');
             }
             
             if ($client->getData('is_subsidiary')) {
@@ -85,7 +86,7 @@
             ];
 
             $structure = Array();
-            $structure['JOURNAL']           = sizing((array_key_exists($reglement_mode->code, $compteByModeReglement) ? $codeJournalByModeReglement[$reglement_mode->code] : $entrepot->code_journal_compta), 3);
+            $structure['JOURNAL']           = sizing((array_key_exists($reglement_mode->code, $codeJournalByModeReglement) ? $codeJournalByModeReglement[$reglement_mode->code] : $entrepot->code_journal_compta), 3);
             $structure['DATEP']             = sizing($datep->format('dmY'), 8);
             $structure['TYPE_PIECE']        = sizing('RC', 2);
             $structure['COMPTE']            = sizing((array_key_exists($reglement_mode->code, $compteByModeReglement) ? $compteByModeReglement[$reglement_mode->code] : $entrepot->compte_comptable ), 17);

@@ -344,7 +344,7 @@ class GSX_Request
                                     $applePart = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
                                     $list = $applePart->getList(array(
                                         'id_sav'   => (int) $this->id_sav,
-                                        'no_order' => 0
+//                                        'no_order' => 0
                                     ));
                                     foreach ($list as $part) {
                                         $pricingOption = '';

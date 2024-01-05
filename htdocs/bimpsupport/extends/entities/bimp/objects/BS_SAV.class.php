@@ -55,6 +55,9 @@ class BS_SAV_ExtEntity extends BS_SAV
             foreach ($this->getPropalLines() as $line) {
                 $dolLine = $line->getChildObject('line');
                 if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
+                    
+                    if(- $dolLine->subprice == 45)
+                        return 50;
 //                    print_r($dolLine);die;
                     return -$dolLine->subprice /** 1.2*/;
                 }
@@ -129,8 +132,8 @@ class BS_SAV_ExtEntity extends BS_SAV
         if (stripos($label, 'blabla imprimante scanner') !== false)
             return 'EEE.M6.031';
         if (stripos($label, 'DISPLAY') !== false)
-            return 'EEE.M2.044';
-//            return 'EEE.M2.042';//code display ne fonctionne pas
+//            return 'EEE.M2.044';
+            return 'EEE.M2.042';//code display ne fonctionne pas
 
 
         return '';

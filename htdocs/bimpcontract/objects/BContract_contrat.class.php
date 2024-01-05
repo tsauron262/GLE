@@ -230,7 +230,7 @@ class BContract_contrat extends BimpDolObject
             case 'current_renouvellement':
             case 'tacite':
             case 'date_end_renouvellement':
-                if ($user->admin)
+                if ($user->admin || $user->rights->bimpcontract->to_validate)
                     return 1;
                 break;
             case 'show_fact_line_in_pdf':

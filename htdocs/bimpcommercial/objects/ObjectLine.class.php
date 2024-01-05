@@ -4501,11 +4501,10 @@ class ObjectLine extends BimpObject
                         ));
                     } else {
                         $client = $parent->getChildObject('client');
+                        $tva_rates = BimpCache::getTaxesByRates(1);
                         if (BimpObject::objectLoaded($client)) {
-                            $tva_rates = BimpCache::getTaxesByRates($client->getData('fk_pays'));
+                            $tva_rates = BimpTools::merge_array($tva_rates, BimpCache::getTaxesByRates($client->getData('fk_pays')), true);
                         }
-                        else
-                            $tva_rates = BimpCache::getTaxesByRates(1);
                         if (is_null($value)) {
                             $value = BimpCache::cacheServeurFunction('getDefaultTva');
                         }

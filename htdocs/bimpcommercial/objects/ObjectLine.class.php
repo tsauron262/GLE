@@ -4500,7 +4500,12 @@ class ObjectLine extends BimpObject
                                     'addon_right' => '<i class="fa fa-percent"></i>'
                         ));
                     } else {
-                        $tva_rates = BimpCache::getTaxesByRates(1);
+                        $client = $parent->getChildObject('client');
+                        if (BimpObject::objectLoaded($client)) {
+                            $tva_rates = BimpCache::getTaxesByRates($client->getData('fk_pays'));
+                        }
+                        else
+                            $tva_rates = BimpCache::getTaxesByRates(1);
                         if (is_null($value)) {
                             $value = BimpCache::cacheServeurFunction('getDefaultTva');
                         }

@@ -344,11 +344,11 @@ class GSX_Request
                                     $applePart = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
                                     $list = $applePart->getList(array(
                                         'id_sav'   => (int) $this->id_sav,
-//                                        'no_order' => 0
+                                        'no_order' => 0
                                     ));
                                     foreach ($list as $part) {
                                         $pricingOption = '';
-                                        if (isset($part['price_type']) && !in_array($part['price_type'], array('STOCK', 'EXCHANGE'))) {
+                                        if (isset($part['price_type']) && !in_array($part['price_type'], array(/*'STOCK',*/ 'EXCHANGE'))) {
                                             $pricingOption = $part['price_type'];
                                         }
                                         $orderLines[] = array(

@@ -3747,7 +3747,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         if ((int) $this->getData('type') === self::LINE_PRODUCT) {
             $product = $this->getProduct();
-            if ((int) $product->getData('fk_product_type') === 0) {
+            if ($product && (int) $product->getData('fk_product_type') === 0) {
                 $decimals = 0;
             }
         }

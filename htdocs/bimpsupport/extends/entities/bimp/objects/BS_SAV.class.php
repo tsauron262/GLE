@@ -127,7 +127,7 @@ class BS_SAV_ExtEntity extends BS_SAV
         if (stripos($label, 'blabla imprimante scanner') !== false)
             return 'EEE.M6.031';
         if (stripos($label, 'DISPLAY') !== false)
-            return 'EEE.M6.042';
+            return 'EEE.M2.042';
 
 
         return '';

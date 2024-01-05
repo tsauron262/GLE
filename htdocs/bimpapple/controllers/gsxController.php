@@ -358,7 +358,7 @@ class gsxController extends BimpController
 
                                 foreach ($parts as $part) {
                                     $typePrice = (string) $part->getData('price_type');
-                                    if ($typePrice && !in_array($typePrice, array('STOCK', 'EXCHANGE'))) {
+                                    if ($typePrice && !in_array($typePrice, array(/*'STOCK',*/ 'EXCHANGE'))) {
                                         $pricingOption = $typePrice;
                                     } else {
                                         $pricingOption = '';

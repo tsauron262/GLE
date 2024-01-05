@@ -314,7 +314,8 @@ class Bimp_Paiement extends BimpObject
     public function displayType()
     {
         if ($this->isLoaded()) {
-            return $this->dol_object->type_label;
+            global $langs;
+            return $langs->trans($this->dol_object->type_label);
         }
     }
 

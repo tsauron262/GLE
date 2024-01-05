@@ -114,12 +114,20 @@ class BS_SAV_ExtEntity extends BS_SAV
         if ((int) $equipement->getData('id_product')) {
             $label .= $equipement->displayProduct('nom') . '<br/>';
         }
-        if (stripos($label, 'mac') !== false)
+        if (stripos($label, 'imac') !== false)
             return 'EEE.M2.044';
+        if (stripos($label, 'mac') !== false)
+            return 'EEE.M2.045';
         if (stripos($label, 'ipad') !== false)
             return 'EEE.M2.057';
         if (stripos($label, 'iphone') !== false)
             return 'EEE.M6.060';
+        if (stripos($label, 'blabla tel fixe') !== false)
+            return 'EEE.M6.059';
+        if (stripos($label, 'blabla imprimante scanner') !== false)
+            return 'EEE.M6.031';
+        if (stripos($label, 'DISPLAY') !== false)
+            return 'EEE.M6.042';
 
 
         return '';

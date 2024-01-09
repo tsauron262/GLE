@@ -33,10 +33,10 @@ class BC_CaisseMvt extends BimpObject
         $filters = array();
 
         if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
-            $entity = getEntity('', 0);
+            $entity = getEntity('caisse', 0);
 
             if ($entity) {
-                $filters[] = array('name' => 'caisse', 'filter' => 'IN (SELECT caisse.id FROM ' . MAIN_DB_PREFIX . 'bimp_caisse c WHERE caisse.entity = ' . $entity . ')');
+                $filters[] = array('name' => 'id_caisse', 'filter' => 'IN (SELECT caisse.id FROM ' . MAIN_DB_PREFIX . 'bimp_caisse c WHERE caisse.entity = ' . $entity . ')');
             }
         }
 

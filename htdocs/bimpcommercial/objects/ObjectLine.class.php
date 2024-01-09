@@ -5765,7 +5765,8 @@ class ObjectLine extends BimpObject
     {
         if ((int) $this->id_product) {
             $product = $this->getProduct();
-            if ($product->isBundle() && $this->getData('editable')) {
+            
+            if (BimpObject::objectLoaded($product) && $product->isBundle() && $this->getData('editable')) {
                 $fieldsCopy = array();
 
                 foreach (array(

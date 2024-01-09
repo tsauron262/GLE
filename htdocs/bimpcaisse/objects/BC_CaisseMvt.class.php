@@ -28,6 +28,21 @@ class BC_CaisseMvt extends BimpObject
         return $caisses;
     }
 
+    public function getListFilters()
+    {
+        $filters = array();
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            $entity = getEntity('', 0);
+
+            if ($entity) {
+                $filters[] = array('name' => 'caisse', 'filter' => 'IN (SELECT caisse.id FROM ' . MAIN_DB_PREFIX . 'bimp_caisse c WHERE caisse.entity = ' . $entity . ')');
+            }
+        }
+
+        return $filters;
+    }
+
     // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)

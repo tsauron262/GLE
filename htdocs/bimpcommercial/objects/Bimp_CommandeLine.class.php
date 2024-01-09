@@ -1212,22 +1212,24 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             } else {
                 $product = $this->getProduct();
-                $shippedQty = (float) $this->getShippedQty($id_shipment);
-                if ($fullQty > 0 && $product->getData('fk_product_type') === 0) {
-                    $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-                    $rows = $reservation->getList(array(
-                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
-                        'id_commande_client'      => (int) $commande->id,
-                        'id_commande_client_line' => $this->id,
-                        'status'                  => 200
-                            ), null, null, 'id', 'asc', 'array', array('qty'));
-                    if (!is_null($rows)) {
-                        foreach ($rows as $r) {
-                            $qty += (int) $r['qty'];
+                if (BimpObject::objectLoaded($product)) {
+                    $shippedQty = (float) $this->getShippedQty($id_shipment);
+                    if ($fullQty > 0 && $product->getData('fk_product_type') === 0) {
+                        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+                        $rows = $reservation->getList(array(
+                            'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                            'id_commande_client'      => (int) $commande->id,
+                            'id_commande_client_line' => $this->id,
+                            'status'                  => 200
+                                ), null, null, 'id', 'asc', 'array', array('qty'));
+                        if (!is_null($rows)) {
+                            foreach ($rows as $r) {
+                                $qty += (int) $r['qty'];
+                            }
                         }
+                    } else {
+                        $qty += $shippedQty;
                     }
-                } else {
-                    $qty += $shippedQty;
                 }
             }
 

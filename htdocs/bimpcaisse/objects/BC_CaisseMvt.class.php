@@ -36,7 +36,7 @@ class BC_CaisseMvt extends BimpObject
             $entity = getEntity('caisse', 0);
 
             if ($entity) {
-                $filters[] = array('name' => 'id_caisse', 'filter' => array('in' => 'SELECT caisse.id FROM ' . MAIN_DB_PREFIX . 'bimp_caisse caisse WHERE caisse.entity = ' . $entity));
+                $filters[] = array('name' => 'id_caisse', 'filter' => array('in' => 'SELECT caisse.id FROM ' . MAIN_DB_PREFIX . 'bc_caisse caisse WHERE caisse.entity = ' . $entity));
             }
         }
 

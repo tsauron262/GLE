@@ -6080,7 +6080,7 @@ class ObjectLine extends BimpObject
 
         if ((int) $this->id_product) {
             $product = $this->getProduct();
-            if ($product->getData('type2') == 20) {
+            if (BimpObject::objectLoaded($product) && $product->getData('type2') == 20) {
                 $this->deleteSousLigne($errors, $warnings);
             }
         }

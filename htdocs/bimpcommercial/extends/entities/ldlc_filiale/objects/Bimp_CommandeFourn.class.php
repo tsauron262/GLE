@@ -1,23 +1,22 @@
 <?php
 
-
-
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_CommandeFourn.class.php';
 
 class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
 {
-    public function verifMajLdlc(&$success){
-        $errors = array();
-        
-        $tabConvertionStatut = array("processing" => 95, "shipped" => 100, "billing" => 105, "canceled" => -100, "deleted" => -105);
 
+    public function verifMajLdlc(&$success)
+    {
+        $errors = array();
+
+        $tabConvertionStatut = array("processing" => 95, "shipped" => 100, "billing" => 105, "canceled" => -100, "deleted" => -105);
 
 //            error_reporting(E_ALL);
 //            ini_set('display_errors', 1);
         $url = BimpCore::getConf('exports_ldlc_ftp_serv');
         $login = BimpCore::getConf('exports_ldlc_ftp_user');
         $mdp = BimpCore::getConf('exports_ldlc_ftp_mdp');
-        $folder = "/".BimpCore::getConf('exports_ldlc_ftp_dir')."/tracing/"; 
+        $folder = "/" . BimpCore::getConf('exports_ldlc_ftp_dir') . "/tracing/";
 
 //            $url = "exportftp.techdata.fr";
 //            $login = "bimp";
@@ -142,31 +141,27 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                             }
                             if (!count($errorLn)) {
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
-                            } else{
-                                $commFourn->addObjectLog('Erreur EDI : ' . print_r($errorLn,1));
-                                mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '').', debugerp@bimp.fr', null, 'Commande '.$commFourn->getLink().'<br/>'.print_r($errorLn,1));
+                            } else {
+                                $commFourn->addObjectLog('Erreur EDI : ' . print_r($errorLn, 1));
+                                mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '') . ', debugerp@bimp.fr', null, 'Commande ' . $commFourn->getLink() . '<br/>' . print_r($errorLn, 1));
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
                             }
                         }
                         $errors = BimpTools::merge_array($errors, $errorLn);
                     }
                 }
-            }
-            else
+            } else
                 $errors[] = 'Login impossible';
 
             ftp_close($conn);
-        }
-        else
+        } else
             $errors[] = 'Connexion impossible';;
         return $errors;
     }
-    
-    
 
     public function traitePdfFactureFtp($conn, $facNumber)
     {
-        $folder = "/".BimpCore::getConf('exports_ldlc_ftp_dir')."/invoices";
+        $folder = "/" . BimpCore::getConf('exports_ldlc_ftp_dir') . "/invoices";
         $tab = ftp_nlist($conn, $folder);
         $errors = array();
 
@@ -196,12 +191,10 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
         return $errors;
     }
 
-
     public function actionVerifMajLdlc($data, &$success)
     {
         $success .= '<br/>Commandes MAJ';
         $errors = $this->verifMajLdlc($success);
-
 
         return array(
             'errors'           => $errors,
@@ -209,8 +202,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
             'success_callback' => ''
         );
     }
-    
-    
+
     public function actionMakeOrderEdi($data, &$success)
     {
         $success = "Commande OK";
@@ -237,9 +229,9 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
 
                     $ref = str_replace(' ', '', $ref);
-
-                    if (strpos($ref, "AR") !== 0 || strlen($ref) > 14)
-                        $errors[] = "La référence '" . $ref . "' ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
+                    
+                    if (strpos($ref, "AR") !== 0 || strlen(trim($ref)) > 14)
+                        $errors[] = "La référence '" . $ref . "' ne semble pas être une ref LDLC correcte pour le produit " . $prod->getLink();
                     elseif ($diference > 0.08)
                         $errors[] = "Prix de l'article " . $prod->getLink() . " différent du prix LDLC. Différence de " . price($diference) . " € vous ne pourrez pas passer la commande par cette méthode.";
                     else
@@ -335,7 +327,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     $dom->Load($localFile);
                     libxml_use_internal_errors(true);
                     if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT . '/bimpcommercial/ldlc.orders.valid.xsd')) {
-                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : <a href="'.DOL_URL_ROOT.'/document.php?modulepart=bimpcore&file=tmpUpload.xml">Fichier</a>';
+                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : <a href="' . DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=tmpUpload.xml">Fichier</a>';
                         BimpCore::addlog('Probléme CML LDLC', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
                             'LIBXML Errors' => libxml_get_errors()
                         ));
@@ -347,7 +339,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                         } else {
                             ftp_pasv($conn, 0);
                         }
-                        if (!ftp_put($conn, "/".BimpCore::getConf('exports_ldlc_ftp_dir')."/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
+                        if (!ftp_put($conn, "/" . BimpCore::getConf('exports_ldlc_ftp_dir') . "/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
                             $errors[] = 'Probléme d\'upload du fichier';
                         else {
                             //                        global $user;
@@ -379,8 +371,6 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
             );
     }
 
-    
-    
     public function getActionsButtons()
     {
         $buttons = parent::getActionsButtons();
@@ -396,7 +386,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     );
                 }
             }
-            
+
             // Commander
             if (($this->getData('edi_status') < 0 || $this->isActionAllowed('makeOrder')) && $this->canSetAction('makeOrder')) {
                 if ($this->getData('fk_soc') == $this->idLdlc) {

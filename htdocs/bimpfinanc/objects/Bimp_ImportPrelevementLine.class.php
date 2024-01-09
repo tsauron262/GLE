@@ -2,6 +2,7 @@
 
 class Bimp_ImportPrelevementLine extends BimpObject
 {
+
     var $refs = array();
     var $total_reste_a_paye = 0;
     var $ok = false;
@@ -22,33 +23,32 @@ class Bimp_ImportPrelevementLine extends BimpObject
         $success = 'OK';
         $datas = explode(";", $this->getData('data'));
 
-
         $price = 0;
         $ref = '';
         $date = '';
         $facture = 0;
-        if(isset($datas[7]))
+        if (isset($datas[7]))
             $price = str_replace(array(" ", " "), "", $datas[7]);
-        else{
+        else {
             $errors[] = 'Prix invalide';
         }
-        if(isset($datas[6])){
+        if (isset($datas[6])) {
             $ref = $datas[6];
-        }
-        else{
+        } else {
             $errors[] = 'Facture invalide';
         }
-        if(isset($datas[10])){
+
+        if (isset($datas[10]) && $data[10]) {
             $dateTab = explode("/", $datas[10]);
-            if($dateTab[2] > 2000)
-                $date = new DateTime($dateTab[2].'/'.$dateTab[1].'/'.$dateTab[0]);
+            if ($dateTab[2] > 2000)
+                $date = new DateTime($dateTab[2] . '/' . $dateTab[1] . '/' . $dateTab[0]);
             else
                 $date = new DateTime($datas[10]);
-        }
-        else{
+        } else {
             $errors[] = 'date invalide';
         }
-        if($ref != '') {
+        
+        if ($ref != '') {
             $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('ref' => $ref));
             if ($obj && $obj->isLoaded()) {
                 $facture = $obj->id;
@@ -60,11 +60,8 @@ class Bimp_ImportPrelevementLine extends BimpObject
         $this->set('date', $date->format('Y-m-d'));
         $errors = $this->update($warnings);
 
-
         return array('errors' => $errors, 'warnings' => $warnings);
     }
-    
- 
 
     public function getListExtraButtons()
     {
@@ -80,34 +77,29 @@ class Bimp_ImportPrelevementLine extends BimpObject
         }
         return $buttons;
     }
-    
-
-
-  
 
     function fetch($id, $parent = null)
     {
 //        global $modeCSV; $modeCSV = true;
         $return = parent::fetch($id, $parent);
-        
-        if($this->getData('facture') > 0 && $this->getData('price') > 0)
+
+        if ($this->getData('facture') > 0 && $this->getData('price') > 0)
             $this->ok = true;
-        
+
         return $return;
     }
 
-      function getRowStyle()
+    function getRowStyle()
     {
         if ($this->ok)
             return 'background-color:green!important;opacity: 0.5;';
     }
 
-
     function isEditable($force_edit = false, &$errors = array()): int
     {
         return !$this->getInitData('traite');
-    }    
-    
+    }
+
     function getDataInfo()
     {
         global $modeCSV;
@@ -122,5 +114,4 @@ class Bimp_ImportPrelevementLine extends BimpObject
             return $return;
         }
     }
-
 }

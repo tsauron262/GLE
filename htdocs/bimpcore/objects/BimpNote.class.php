@@ -51,7 +51,6 @@ class BimpNote extends BimpObject
 //    const BN_GROUPID_ATRADIUS = 680; => BimpCore::getUserGroupId('atradius')
 //    const BN_GROUPID_CONTRAT = 686; => BimpCore::getUserGroupId('contrat')
 //    const BN_GROUPID_ACHAT = 8 (remplacé par 120); => BimpCore::getUserGroupId('achat')
-    
     private static $jsReload = '
     if (typeof notifNote !== "undefined" && notifNote !== null)
         notifNote.reloadNotif();
@@ -326,7 +325,7 @@ class BimpNote extends BimpObject
         global $user;
         $listIdGr = self::getUserUserGroupsList($user->id);
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
-                . "WHERE ";//auto = 0 AND ";
+                . "WHERE "; //auto = 0 AND ";
         $where = "(type_dest = 1 AND fk_user_dest = " . $user->id . ") "
                 . "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))"
                 . "         ";
@@ -428,13 +427,13 @@ class BimpNote extends BimpObject
     public function getJsRepondre()
     {
         $filtre = array(
-            "content" => "",
-            "id"      => "",
-            "type_dest"      => "",
-            "fk_group_dest"      => "",
-            "fk_user_dest"      => "",
-            "type_dest"      => "",
-            "id"      => ""
+            "content"       => "",
+            "id"            => "",
+            "type_dest"     => "",
+            "fk_group_dest" => "",
+            "fk_user_dest"  => "",
+            "type_dest"     => "",
+            "id"            => ""
         );
         $filtre['fk_user_dest'] = $this->getData("user_create");
         if ($this->getData('type_author') == self::BN_AUTHOR_USER) {
@@ -486,7 +485,7 @@ class BimpNote extends BimpObject
                 $msg['content'] = $note->displayData('content', 'default', false, false, true);
                 $msg['id_ref'] = (int) $c['idNoteRef'];
                 $msg['id'] = (int) $note->id;
-                $msg['id_min'] = (int) (isset($ln)? $ln->id_min : $note->id);
+                $msg['id_min'] = (int) (isset($ln) ? $ln->id_min : $note->id);
                 $msg['user_create'] = (int) $note->getData('user_create');
                 $msg['date_create'] = $note->getData('date_create');
                 $msg['tms'] = strtotime($note->getData('date_update'));
@@ -565,7 +564,7 @@ class BimpNote extends BimpObject
 
             case self::BN_DEST_GROUP:
                 return $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
-                
+
             case self::BN_DEST_SOC:
                 return 'Tier (par mail)';
         }
@@ -642,17 +641,18 @@ class BimpNote extends BimpObject
 //        die('<textarea>'.$note.'</textarea>');
         $this->set('content', $note);
     }
-    
-    public function repMail($dst, $src, $subj, $txt){
+
+    public function repMail($dst, $src, $subj, $txt)
+    {
         $matches = array();
         preg_match('(.*@bimp-groupe.net)', $txt, $matches);
-        if(isset($matches[0])){
+        if (isset($matches[0])) {
             $tabTxt = explode($matches[0], $txt);
             $txt = $tabTxt[0];
         }
 //        print_r($matches);
 //        die($txt);
-        
+
         $errors = array();
         $data = array();
         $data['obj_type'] = $this->getData('obj_type');
@@ -667,33 +667,32 @@ class BimpNote extends BimpObject
         $data['fk_group_dest'] = $this->getData('fk_group_author');
         $data['fk_user_dest'] = $this->getData('user_create');
         $parent = $this->getParentInstance();
-        if($parent->getData('id_client') > 0)
+        if ($parent->getData('id_client') > 0)
             $data['id_societe'] = $parent->getData('id_client');
-        elseif($parent->getData('id_soc') > 0)
+        elseif ($parent->getData('id_soc') > 0)
             $data['id_societe'] = $parent->getData('id_soc');
-        elseif($parent->getData('fk_soc') > 0)
+        elseif ($parent->getData('fk_soc') > 0)
             $data['id_societe'] = $parent->getData('fk_soc');
-        
-        
-        //gestion des PJ
-        $dir = $parent->getFilesDir()."/";
-        if(!is_dir($dir))
-            mkdir($dir);
-        foreach($_FILES as $fileT){
-            $nameFile = $fileT['name'];
-            $file = BimpTools::cleanStringForUrl(str_replace('.'.pathinfo($nameFile, PATHINFO_EXTENSION), '', $nameFile)) . '.' . pathinfo($nameFile, PATHINFO_EXTENSION);
-            $data['content'] .= '<br/>Ajout de la PJ '.$file;
 
-            move_uploaded_file($fileT['tmp_name'], $dir.$file);
+
+        //gestion des PJ
+        $dir = $parent->getFilesDir() . "/";
+        if (!is_dir($dir))
+            mkdir($dir);
+        foreach ($_FILES as $fileT) {
+            $nameFile = $fileT['name'];
+            $file = BimpTools::cleanStringForUrl(str_replace('.' . pathinfo($nameFile, PATHINFO_EXTENSION), '', $nameFile)) . '.' . pathinfo($nameFile, PATHINFO_EXTENSION);
+            $data['content'] .= '<br/>Ajout de la PJ ' . $file;
+
+            move_uploaded_file($fileT['tmp_name'], $dir . $file);
         }
-                
-                
-        if(!count($errors)){
+
+
+        if (!count($errors)) {
             $obj = BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
-            if(!count($errors)){
+            if (!count($errors)) {
                 return 1;
-            }
-            else
+            } else
                 BimpCore::addlog('Création reponse mail impossible', 1, 'bimpcore', $this, $errors);
         }
         return 0;
@@ -716,15 +715,14 @@ class BimpNote extends BimpObject
         $data["user_create"] = $user->id;
         $data["viewed"] = 0;
         $data['id_parent_note'] = $this->id;
-        
 
         if ((int) $this->getData('visibility') === self::BN_PARTNERS) {
             $data['visibility'] = self::BN_PARTNERS;
             $data['type_author'] = self::BN_AUTHOR_USER;
         }
-        
 
-        if(!count($errors)){
+
+        if (!count($errors)) {
             BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
         }
 
@@ -828,33 +826,33 @@ class BimpNote extends BimpObject
 
         return $errors;
     }
-    
-    public function getMailFrom($withName = true){
+
+    public function getMailFrom($withName = true)
+    {
         $parent = $this->getParentInstance();
-        if(method_exists($parent, 'getMailFrom')){
+        if (method_exists($parent, 'getMailFrom')) {
             $infoMail = $parent->getMailFrom();
-            if(is_array($infoMail) && isset($infoMail[1]) && $withName)
-                return $infoMail[1].'<'.$infoMail[0].'>';
-            elseif(is_array($infoMail))
+            if (is_array($infoMail) && isset($infoMail[1]) && $withName)
+                return $infoMail[1] . '<' . $infoMail[0] . '>';
+            elseif (is_array($infoMail))
                 return $infoMail[0];
             else
                 return $infoMail;
         }
         return BimpCore::getConf('mailReponse', null, 'bimptask');
     }
-    
-    public function getMailTo(){
+
+    public function getMailTo()
+    {
         $parent = $this->getParentInstance();
-        if($parent && $parent->isLoaded()){
-            if(method_exists($parent, 'getMailTo')){
+        if ($parent && $parent->isLoaded()) {
+            if (method_exists($parent, 'getMailTo')) {
                 return $parent->getMailTo();
-            }
-            elseif($parent->getData('email') != ''){
+            } elseif ($parent->getData('email') != '') {
                 return $parent->getData('email');
-            }
-            else{
+            } else {
                 $client = $parent->getChildObject('client');
-                if($client && $client->isLoaded()){
+                if ($client && $client->isLoaded()) {
                     return $client->getData('email');
                 }
             }
@@ -865,33 +863,33 @@ class BimpNote extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
-        if($this->getData('type_dest') == self::BN_DEST_SOC){
-            $this->set('visiblity',self::BN_ALL);
+        if ($this->getData('type_dest') == self::BN_DEST_SOC) {
+            $this->set('visiblity', self::BN_ALL);
             $mail = BimpTools::getPostFieldValue('mail_dest');
             $content = $this->getData('content');
-            if($mail == ''){
+            if ($mail == '') {
                 BimpTools::displayBacktrace();
-                $errors[] = 'Email vide : '.$mail;
+                $errors[] = 'Email vide : ' . $mail;
             }
-            $this->set('content','Envoyée a '.$mail.'<br/>'.$this->getData('content'));
+            $this->set('content', 'Envoyée a ' . $mail . '<br/>' . $this->getData('content'));
         }
-        
-        if(!count($errors)){
+
+        if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
 
-            if($this->getData('type_dest') == self::BN_DEST_SOC){
+            if ($this->getData('type_dest') == self::BN_DEST_SOC) {
                 $sep = "<br/>---------------------<br/>";
-                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>'. $sep . '<br/><br/>';
+                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>' . $sep . '<br/><br/>';
 
-                if($this->getData('id_parent_note') > 0)
+                if ($this->getData('id_parent_note') > 0)
                     $html .= 'Réponse à votre message : <br/>';
                 $html .= $content;
-                if($this->getData('id_parent_note') > 0){
+                if ($this->getData('id_parent_note') > 0) {
                     $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));
-                    $html .= '<br/><br/>Rappel du message initial : <br/>'.$oldNote->getData('content');
+                    $html .= '<br/><br/>Rappel du message initial : <br/>' . $oldNote->getData('content');
                 }
                 $parent = $this->getParentInstance();
-                $sujet = 'Message '.$parent->getRef();
+                $sujet = 'Message ' . $parent->getRef();
                 die($sujet);
 
                 $bimpMail = new BimpMail($this->getParentInstance(), 'Nouveau message', $mail, $this->getMailFrom(), $html);
@@ -989,24 +987,31 @@ class BimpNote extends BimpObject
         $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, id as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE ";
-        if($id_max > 0)
+        
+        if ($id_max > 0)
             $reqDeb .= " date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
+        
         $where = "((type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
-        if (count($listIdGr) > 0)
-            $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "')))";
+
+        if (count($listIdGr) > 0) {
+            $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
+        }
+        
+        $where .= ')';
+
         $where .= "         ";
 
 //        $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
 //        if($notViewedInFirst)
 //            $reqFin .= " ORDER by mviewed ASC";
 //        else
-        $reqFin .= " ORDER by id DESC";
-        $reqFin .= " LIMIT 0," . $limit*10;
+        $reqFin .= " ORDER BY id DESC";
+        $reqFin .= " LIMIT 0," . $limit * 10;
         $tabFils = array();
         $tabNoDoublons = array();
         $tabReq = array();
         $tabReq[0] = $reqDeb . "(" . $where . ") AND viewed = 0 " . $reqFin;
-        if (!$onlyNotViewed){
+        if (!$onlyNotViewed) {
 //            $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
             $tabReq[1] = $reqDeb . $where . $reqFin;
             $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser . $reqFin;
@@ -1015,13 +1020,13 @@ class BimpNote extends BimpObject
 //        echo '<pre>';
 //        print_r($tabReq);
 //        die();
-        $i=0;
+        $i = 0;
         foreach ($tabReq as $rang => $req) {
 //            echo($req.'<br/><br/>');
             $sql = self::getBdb()->db->query($req);
             if ($sql) {
                 while ($ln = self::getBdb()->db->fetch_object($sql)) {
-                    if($i > $limit)
+                    if ($i > $limit)
                         break 2;
                     $hash = $ln->obj_module . $ln->obj_name . $ln->id_obj;
                     if (!isset($tabNoDoublons[$hash])) {

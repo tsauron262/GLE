@@ -861,8 +861,11 @@ class ExtraFields
                         }
                         
                         global $user;
-                        if($user->login == 'f.martinez') {
-                            echo $elementtype . ' : <pre>';
+                        if($elementtype == 'product' && $user->login == 'f.martinez') {
+                            echo '<pre>';
+                            print_r($result);
+                            echo '</pre>';
+                            echo '<pre>';
                             print_r($labels);
                             echo '</pre><br/>';
                         }

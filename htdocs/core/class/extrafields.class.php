@@ -860,15 +860,6 @@ class ExtraFields
                             }
                         }
                         
-                        global $user;
-                        if($elementtype == 'product' && $user->login == 'f.martinez') {
-                            echo '<pre>';
-                            print_r($result);
-                            echo '</pre>';
-                            echo '<pre>';
-                            print_r($labels);
-                            echo '</pre><br/>';
-                        }
                         return $labels;
                     }
                 }

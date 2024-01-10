@@ -4261,6 +4261,12 @@ class BCT_ContratLine extends BimpObject
                         if (!$qty) {
                             $errors[] = 'Aucune unité à renouveller';
                         } else {
+                            $id_fourn = null;
+                            $id_pfp = (int) $line->getData('fk_product_fournisseur_price');
+                            if ($id_pfp) {
+                                $id_fourn = (int) $this->db->getValue('product_fournisseur_price', 'fk_soc', 'rowid = ' . $id_pfp);
+                            }
+                            
                             $date_fin = $line->getData('');
 
                             if (!$date_fin) {
@@ -4281,7 +4287,7 @@ class BCT_ContratLine extends BimpObject
                                             'subprice'                     => $subprice,
                                             'tva_tx'                       => $prod->getData('tva_tx'),
                                             'remise_percent'               => $line->getData('remise_percent'),
-                                            'fk_product_fournisseur_price' => $line->getData('fk_product_fournisseur_price'),
+                                            'fk_product_fournisseur_price' => $id_pfp,
                                             'buy_price_ht'                 => $line->getData('buy_price_ht'),
                                             'fac_periodicity'              => $fac_periodicity,
                                             'duration'                     => $duration,
@@ -4327,8 +4333,22 @@ class BCT_ContratLine extends BimpObject
                                     }
 
                                     if (!count($errors)) {
-//                                        $propal_line = BimpObject::createBimpObject('bimpcommercial', 'Bimp_PropalLine', array(
-//                                                        ), true, $errors, $warnings);
+                                        $propal_line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
+
+                                        $propal_line->id_product = '';
+                                        $propal_line->desc = '';
+                                        $propal_line->pu_ht = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
+                                        $propal_line->qty = '';
                                     }
                                 }
                             }

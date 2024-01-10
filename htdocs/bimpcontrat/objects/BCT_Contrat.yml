@@ -85,8 +85,7 @@ objects:
         instance:
             id_object:
                 field_value: fk_user_validate
-                
-        
+            
     commercial_suivi:
         extends: user
         instance:

@@ -843,7 +843,6 @@ class ExtraFields
                         foreach ($result as $name => $fields) {
                             
                             foreach (array(
-//                                'type', 'label', 'size', 'elementtype', 'default', 'computed', 'unique', 'required', 'param', 'pos', 'alwayseditable', 'perms', 'langfile', 'list', 'entityid', 'entitylabel'
                                 'type', 'label', 'size', 'elementtype', 'default', 'computed', 'unique', 'required', 'param', 'pos', 'alwayseditable', 'perms', 'langfile', 'list', 'entityid', 'printable', 'totalizable', 'enabled', 'help', 'css', 'cssview', 'csslist' // => Maj Dol16
                             ) as $field_name) {
                                 if (isset($fields[$field_name])) {

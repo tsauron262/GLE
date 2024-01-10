@@ -472,6 +472,17 @@ forms:
               display_if: 
                   field_name: type
                   show_values: 2 
+                  
+    merge: 
+        rows: 
+            - custom: 1
+              label: Contrat à importer
+              input_name: id_contrat_to_import
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      callback: getContratsToMergeArray
             
 fields_tables: 
     infos: 

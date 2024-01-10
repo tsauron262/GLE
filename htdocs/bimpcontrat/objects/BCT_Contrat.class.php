@@ -86,6 +86,9 @@ class BCT_Contrat extends BimpDolObject
 
             case 'CorrectAbosStocksAll':
                 return ($user->admin ? 1 : 0);
+
+            case 'mergeContrat':
+                return 0; // seulement admins
         }
 
         return parent::canSetAction($action);
@@ -108,6 +111,10 @@ class BCT_Contrat extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = [])
     {
+        if (in_array($action, array('validate', 'createSignature', 'mergeContrat')) && !$this->isLoaded($errors)) {
+            return 0;
+        }
+
         $status = (int) $this->getData('statut');
 
         switch ($action) {
@@ -232,6 +239,16 @@ class BCT_Contrat extends BimpDolObject
                     "content"       => ""
                         ), array(
                     'form_name' => 'rep'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('mergeContrat') && $this->canSetAction('mergeContrat')) {
+            $buttons[] = array(
+                'label'   => 'Fusioner un contrat',
+                'icon'    => 'fas_object-group',
+                'onclick' => $this->getJsActionOnclick('mergeContrat', array(), array(
+                    'form_name' => 'merge'
                 ))
             );
         }
@@ -526,6 +543,30 @@ class BCT_Contrat extends BimpDolObject
         }
 
         return array();
+    }
+
+    public function getContratsToMergeArray()
+    {
+        $contrats = array();
+
+        if ($this->isLoaded()) {
+            $rows = $this->getList(array(
+                'rowid'              => array('operator' => '!=', 'value' => $this->id),
+                'fk_soc'             => $this->getData('fk_soc'),
+                'fk_soc_facturation' => $this->getData('fk_soc_facturation'),
+                'entrepot'           => $this->getData('entrepot'),
+                'secteur'            => $this->getData('secteur'),
+                'expertise'          => $this->getData('expertise')
+                    ), null, null, 'rowid', 'DESC', 'array', array(
+                'rowid', 'ref'
+            ));
+
+            foreach ($rows as $r) {
+                $contrats[(int) $r['rowid']] = $r['ref'];
+            }
+        }
+
+        return $contrats;
     }
 
     public static function getClientAbosLinesArray($id_client, $id_product, $include_empty = true, $empty_label = '')
@@ -1666,6 +1707,125 @@ class BCT_Contrat extends BimpDolObject
             $this->set('fk_user_validate', $user->id);
 
             $errors = $this->update($warnings, true);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionMergeContrat($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_contrat_to_import = (int) BimpTools::getArrayValueFromPath($data, 'id_contrat_to_import', 0);
+
+        if (!$id_contrat_to_import) {
+            $errors[] = 'Aucun contrat à importer sélectionné';
+        } else {
+            $contrat_to_import = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat_to_import);
+
+            if (!BimpObject::objectLoaded($contrat_to_import)) {
+                $errors[] = 'Le contrat à importer #' . $id_contrat_to_import . ' n\'existe plus';
+            } else {
+                if ((int) $contrat_to_import->getData('version') !== 2) {
+                    $errors[] = 'Le contrat ' . $contrat_to_import->getRef() . ' n\'est pas de type abonnement';
+                }
+
+                if ((int) $contrat_to_import->getData('fk_soc') != (int) $this->getData('fk_soc')) {
+                    $errors[] = 'Les clients ne correspondent pas';
+                }
+
+                if ((int) $contrat_to_import->getData('fk_soc_facturation') != (int) $this->getData('fk_soc_facturation')) {
+                    $errors[] = 'Les clients facturation ne correspondent pas';
+                }
+
+                if ($contrat_to_import->getData('expertise') != $this->getData('expertise')) {
+                    $errors[] = 'Les expertises ne correspondent pas';
+                }
+
+                if ($contrat_to_import->getData('entrepot') != $this->getData('entrepot')) {
+                    $errors[] = 'Les entrepôts ne correspondent pas';
+                }
+
+                if ($contrat_to_import->getData('secteur') != $this->getData('secteur')) {
+                    $errors[] = 'Les secteurs ne correspondent pas';
+                }
+
+                if (!count($errors)) {
+                    // Transefert des lignes:
+                    if ($this->db->update('contratdet', array(
+                                'fk_contrat' => $this->id
+                                    ), 'fk_contrat = ' . $id_contrat_to_import) <= 0) {
+                        $errors[] = 'Echec du transfert des lignes - ' . $this->db->err();
+                    }
+
+                    // Transfert des fichiers: 
+                    if (!count($errors)) {
+                        $files = $contrat_to_import->getChildrenObjects('files');
+
+                        foreach ($files as $file) {
+                            $err = $file->moveToObject($this);
+
+                            if (count($err)) {
+                                $errors[] = BimpTools::getMsgFromArray($err, 'Echec du transfert du fichier "' . $file->getData('file_name') . '.' . $file->getData('file_ext') . '"');
+                            }
+                        }
+                    }
+
+                    // Suppr du contrat importé: 
+                    if (!count($errors)) {
+                        $this->addObjectLog('Import et fusion du contrat ' . $contrat_to_import->getRef());
+                        $del_errors = $contrat_to_import->delete($warnings, true);
+
+                        if (count($del_errors)) {
+                            $errors[] = 'Echec de la suppression du contrat à importer';
+                        }
+                    }
+
+                    // Autres transferts: 
+                    if (!count($errors)) {
+                        $this->db->update('element_element', array(
+                            'fk_source' => $this->id
+                                ), '(sourcetype = \'bimp_contrat\' OR sourcetype = \'contrat\') AND fk_source = ' . $id_contrat_to_import);
+
+                        $this->db->update('element_element', array(
+                            'fk_target' => $this->id
+                                ), '(targettype = \'bimp_contrat\' OR targettype = \'contrat\') AND fk_target = ' . $id_contrat_to_import);
+
+                        $this->db->update('bimpcore_object_log', array(
+                            'id_object' => $this->id
+                                ), 'obj_module = \'bimpcontrat\' AND obj_name = \'BCT_Contrat\' AND id_object = ' . $id_contrat_to_import);
+
+                        $this->db->update('bimpcore_object_log', array(
+                            'id_object' => $this->id
+                                ), 'obj_module = \'bimpcontrat\' AND obj_name = \'BCT_Contrat\' AND id_object = ' . $id_contrat_to_import);
+
+                        $this->db->update('bimpcore_note', array(
+                            'id_obj' => $this->id
+                                ), 'obj_module = \'bimpcontrat\' AND obj_name = \'BCT_Contrat\' AND id_obj = ' . $id_contrat_to_import);
+
+                        $this->db->update('bimpcore_link', array(
+                            'src_id' => $this->id
+                                ), 'src_module = \'bimpcontrat\' AND src_name = \'BCT_Contrat\' AND src_id = ' . $id_contrat_to_import);
+
+                        $this->db->update('bimpcore_link', array(
+                            'linked_id' => $this->id
+                                ), 'linked_module = \'bimpcontrat\' AND linked_name = \'BCT_Contrat\' AND linked_id = ' . $id_contrat_to_import);
+
+                        $this->db->update('bimpcore_history', array(
+                            'id_object' => $this->id
+                                ), 'module = \'bimpcontrat\' AND object = \'BCT_Contrat\' AND id_object = ' . $id_contrat_to_import);
+
+                        $this->db->update('bimpcore_signature', array(
+                            'id_obj' => $this->id
+                                ), 'obj_module = \'bimpcontrat\' AND obj_name = \'BCT_Contrat\' AND id_obj = ' . $id_contrat_to_import);
+                    }
+                }
+            }
         }
 
         return array(

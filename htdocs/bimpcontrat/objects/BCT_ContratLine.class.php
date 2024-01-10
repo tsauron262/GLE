@@ -4266,7 +4266,7 @@ class BCT_ContratLine extends BimpObject
                             if ($id_pfp) {
                                 $id_fourn = (int) $this->db->getValue('product_fournisseur_price', 'fk_soc', 'rowid = ' . $id_pfp);
                             }
-                            
+
                             $date_fin = $line->getData('');
 
                             if (!$date_fin) {

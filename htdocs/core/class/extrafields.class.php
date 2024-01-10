@@ -862,9 +862,9 @@ class ExtraFields
                         
                         global $user;
                         if($user->login == 'f.martinez') {
-                            echo '<pre>';
+                            echo $elementtype . ' : <pre>';
                             print_r($labels);
-                            echo '</pre>';
+                            echo '</pre><br/>';
                         }
                         return $labels;
                     }

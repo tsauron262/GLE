@@ -861,7 +861,7 @@ class ExtraFields
                         }
                         
                         global $user;
-                        if($user->login = 'f.martinez') {
+                        if($user->login == 'f.martinez') {
                             echo '<pre>';
                             print_r($labels);
                             echo '</pre>';

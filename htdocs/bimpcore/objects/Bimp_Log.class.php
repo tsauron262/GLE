@@ -39,7 +39,14 @@ class Bimp_Log extends BimpObject
         'md5_file(',
         'include_once(',
         'filesize()',
-        'getimagesize(',
+        'getimagesize('
+    );
+    public static $exclude_msg_parts = array(
+        'enregistrement token',
+        'Tentative d\'authentificatio',
+        'reauthentification',
+        'signe.pdf introuvable',
+        'API Ecologic'
     );
 
     public function getInfoGraph($graphName = '')

@@ -1193,6 +1193,12 @@ class BimpCore
                     $check = false;
                 }
             }
+            
+            foreach (Bimp_Log::$exclude_msg_parts as $part) {
+                if (strpos($msg, $part) !== false) {
+                    $check = false;
+                }
+            }
 
             if ($check) {
                 // On vérifie qu'on n'a pas déjà un log similaire:

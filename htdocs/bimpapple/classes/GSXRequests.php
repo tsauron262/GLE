@@ -348,7 +348,7 @@ class GSX_Request
                                     ));
                                     foreach ($list as $part) {
                                         $pricingOption = '';
-                                        if (isset($part['price_type']) && !in_array($part['price_type'], array(/*'STOCK',*/ 'EXCHANGE'))) {
+                                        if (isset($part['price_type']) && !in_array($part['price_type'], array('STOCK', 'EXCHANGE'))) {
                                             $pricingOption = $part['price_type'];
                                         }
                                         $orderLines[] = array(

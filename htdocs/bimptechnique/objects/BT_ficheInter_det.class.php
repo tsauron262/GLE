@@ -18,7 +18,7 @@ class BT_ficheInter_det extends BimpDolObject
     CONST TYPE_PLUS_TELEMAINTENANCE = 13;
     CONST TYPE_PLUS_SUR_SITE = 14; // Si ce code service (Automatiquement mettre un deplacement)
     CONST TYPE_DEPLA_OFFERT = 15;
-    
+
     public static $servicesForFacturation = Array(
         self::TYPE_PLUS_ATELIER         => 'SERV23-GEN-PRATE1',
         self::TYPE_PLUS_SUR_SITE        => 'SERV23-GEN-PR1',
@@ -26,7 +26,6 @@ class BT_ficheInter_det extends BimpDolObject
         self::TYPE_DEPLA                => 'SERV23-GEN-FD02',
         self::TYPE_DEPLA_OFFERT         => 'SERV23-GEN-FD02'
     );
-
     public static $types = [
         self::TYPE_INTER                => ['label' => "Intervention vendue", 'icon' => 'fas_check', 'classes' => ['success']],
         self::TYPE_DEPLACEMENT_VENDU    => ['label' => "Déplacement vendu", 'icon' => 'fas_car', 'classes' => ['success']],
@@ -54,11 +53,12 @@ class BT_ficheInter_det extends BimpDolObject
     ];
 
     // Getters booléens: 
-    
-    public function getArrayServiceForBilling() {
+
+    public function getArrayServiceForBilling()
+    {
         return self::$servicesForFacturation;
     }
-    
+
     public function isCreatable($force_create = false, &$errors = [])
     {
         $fi = $this->getParentInstance();
@@ -159,9 +159,10 @@ class BT_ficheInter_det extends BimpDolObject
 
         return 1;
     }
-    
-    public function isDep(){
-        if(in_array($this->getData('type'), array(BT_ficheInter_det::TYPE_DEPLA, BT_ficheInter_det::TYPE_DEPLACEMENT_CONTRAT, BT_ficheInter_det::TYPE_DEPLACEMENT_VENDU, BT_ficheInter_det::TYPE_DEPLA_OFFERT)))
+
+    public function isDep()
+    {
+        if (in_array($this->getData('type'), array(BT_ficheInter_det::TYPE_DEPLA, BT_ficheInter_det::TYPE_DEPLACEMENT_CONTRAT, BT_ficheInter_det::TYPE_DEPLACEMENT_VENDU, BT_ficheInter_det::TYPE_DEPLA_OFFERT)))
             return 1;
         return 0;
     }
@@ -214,8 +215,8 @@ class BT_ficheInter_det extends BimpDolObject
         $types = self::$types;
         unset($types[self::TYPE_INTERNE]);
         unset($types[self::TYPE_PLUS]);
-        
-        if($fi->getData('fk_statut') < 1){
+
+        if ($fi->getData('fk_statut') < 1) {
             unset($types[self::TYPE_OFFERT]);
             unset($types[self::TYPE_DEPLA_OFFERT]);
         }
@@ -282,7 +283,7 @@ class BT_ficheInter_det extends BimpDolObject
                         if ($product->isDep()) {
                             $line_inters = $this->getChildrenList("inters", ['id_line_contrat' => (int) $line->id]);
                             if (!count($line_inters)) {
-                                $array[$line->id] = $contrat->getRef() . " - " .$product->getRef(). " - " . $line->getData('description');
+                                $array[$line->id] = $contrat->getRef() . " - " . $product->getRef() . " - " . $line->getData('description');
                             }
                         }
                     }
@@ -689,7 +690,7 @@ class BT_ficheInter_det extends BimpDolObject
             foreach ($actionCommList as $id_actionComm) {
                 if ($id_actionComm > 0) {
                     $actionCommClass->fetch($id_actionComm);
-                    if($actionCommClass->id > 0)
+                    if ($actionCommClass->id > 0)
                         $actionCommClass->delete();
                 }
             }
@@ -743,6 +744,14 @@ class BT_ficheInter_det extends BimpDolObject
         }
 
         parent::onSave($errors, $warnings);
+    }
+
+    public function convertTime($dec)
+    {
+        $hour = floor($dec);
+        $min = round(60 * ($dec - $hour));
+
+        return $hour . 'h' . $min . 'm';
     }
 
     // Actions: 
@@ -938,8 +947,7 @@ class BT_ficheInter_det extends BimpDolObject
                             }
                         }
                     }
-                }
-                elseif($type == 5){
+                } elseif ($type == 5) {
                     $id_contrat_line = BimpTools::getValue('id_contrat_depl', 0);
                 }
             }
@@ -950,106 +958,92 @@ class BT_ficheInter_det extends BimpDolObject
 
         return $errors;
     }
-    
-    function convertTime($dec):string
-    {
-        $hour = floor($dec);
-        $min = round(60*($dec - $hour));
-        
-        return $hour . 'h' . $min . 'm';
-    }
-
 
     public function validate()
     {
         global $user;
-        
+
         $errors = parent::validate();
-        
+
         $fi = $this->getParentInstance();
-        
+
         if (!BimpObject::objectLoaded($fi)) {
             $errors[] = 'ID de la Fiche Inter absent';
         } else {
-            
-            $contrat = BimpCache::getBimpObjectInstance('bimpcontract','BContract_contrat', (int) $fi->getData('fk_contrat'));
+
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', (int) $fi->getData('fk_contrat'));
             $heuresVendu = $contrat->getTotalHeureDelegation(true);
-            
-            if($contrat->isContratDelegation()) {
-                
+
+            if ($contrat->isContratDelegation()) {
+
                 $typeVerifInter = Array(
-                    self::TYPE_INTER, 
-                    self::TYPE_PLUS_ATELIER, 
-                    self::TYPE_PLUS_SUR_SITE, 
+                    self::TYPE_INTER,
+                    self::TYPE_PLUS_ATELIER,
+                    self::TYPE_PLUS_SUR_SITE,
                     self::TYPE_PLUS_TELEMAINTENANCE,
                     self::TYPE_IMPON
                 );
-                
+
                 $typeVerifDep = Array(
                     self::TYPE_DEPLA,
                     self::TYPE_DEPLACEMENT_CONTRAT,
                     self::TYPE_DEPLACEMENT_VENDU
                 );
-                
+
                 $totalHeuresFaites = 0;
                 $totalHeuresVendue = 0;
-                if(count($heuresVendu)) {
-                    foreach($heuresVendu as $time) {
+                if (count($heuresVendu)) {
+                    foreach ($heuresVendu as $time) {
                         $totalHeuresVendue += $time;
                     }
                 }
-                
+
                 $heuresRestantes = $contrat->getHeuresRestantesDelegation();
-                
-                if(in_array(BimpTools::getPostFieldValue('type'),$typeVerifInter)) {
-                    if(BimpTools::getPostFieldValue('am_pm')) {
-                        $from1  = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_am_time"));
-                        $to1    = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_am_time"));
-                        $from2  = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_pm_time"));
-                        $to2    = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_pm_time"));
-                        
+
+                if (in_array(BimpTools::getPostFieldValue('type'), $typeVerifInter)) {
+                    if (BimpTools::getPostFieldValue('am_pm')) {
+                        $from1 = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_am_time"));
+                        $to1 = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_am_time"));
+                        $from2 = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_pm_time"));
+                        $to2 = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_pm_time"));
+
                         $diff1 = $from1->diff($to1);
                         $diff2 = $from2->diff($to2);
-                        $heuresFaites = ($diff1->h + ($diff1->i / 60)) + ($diff2->h + ($diff2->i / 60)); 
-                        
+                        $heuresFaites = ($diff1->h + ($diff1->i / 60)) + ($diff2->h + ($diff2->i / 60));
                     } else {
                         $from = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_time"));
-                        $to   = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_time"));
+                        $to = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_time"));
                         $diff = $from->diff($to);
-                        $heuresFaites = $diff->h + ($diff->i /60);
+                        $heuresFaites = $diff->h + ($diff->i / 60);
                     }
                 }
-                
-                if(in_array(BimpTools::getPostFieldValue('type'), $typeVerifDep)) {
-                                        
+
+                if (in_array(BimpTools::getPostFieldValue('type'), $typeVerifDep)) {
+
                     $heuresFaites = BimpTools::getPostFieldValue("temps_trajet") / 3600;
-                    
                 }
-                
-                if($heuresFaites > $heuresRestantes) {
+
+                if ($heuresFaites > $heuresRestantes) {
                     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
                     $sujet = 'Dépassement d\'heure contrat de délégation ' . $contrat->getRef() . ' - ' . $client->getName();
                     $commercial = $contrat->getCommercialClient(true);
-                    
-                    $message     = 'Bonjour ' . $commercial->getName() . ',<br />';
-                    $message    .= $user->firstname . ' ' . $user->lastname . ' a renseigné une ligne dans sa fiche d\'intervention qui crée un dépassement des heures prévues dans le contrat.';
-                    $message    .= '<br />Contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />Fiche: ' . $fi->getNomUrl();
-                    $message    .= '<br /><br />Détails:<br />';
-                    
-                    $message    .= 'Heures restantes dans le contrat: ' . $this->convertTime($heuresRestantes);
-                    $message    .= '<br />Heures renseignées dans la ligne de FI: ' . $this->convertTime($heuresFaites);
-                    $message    .= '<br />Type: ' . self::$types[BimpTools::getPostFieldValue('type')]['label'];
+
+                    $message = 'Bonjour ' . $commercial->getName() . ',<br />';
+                    $message .= $user->firstname . ' ' . $user->lastname . ' a renseigné une ligne dans sa fiche d\'intervention qui crée un dépassement des heures prévues dans le contrat.';
+                    $message .= '<br />Contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />Fiche: ' . $fi->getNomUrl();
+                    $message .= '<br /><br />Détails:<br />';
+
+                    $message .= 'Heures restantes dans le contrat: ' . $this->convertTime($heuresRestantes);
+                    $message .= '<br />Heures renseignées dans la ligne de FI: ' . $this->convertTime($heuresFaites);
+                    $message .= '<br />Type: ' . self::$types[BimpTools::getPostFieldValue('type')]['label'];
 
                     mailSyn2($sujet, $commercial->getData('email') . ', contrat@bimp.fr', null, $message);
-                    
                 }
-                
             }
-            
         }
-                
+
         if (!count($errors)) {
-            
+
             if (!BimpObject::objectLoaded($fi)) {
                 $errors[] = 'ID de la Fiche Inter absent';
             } else {
@@ -1074,11 +1068,10 @@ class BT_ficheInter_det extends BimpDolObject
                         $errors[] = 'Aucune ligne de commande sélectionnée pour le déplacement vendu';
                     }
                 } elseif ($type == self::TYPE_PLUS) {
-                    
+
                     //pourquoi ?
                     //  
 //                    $errors[] = 'Il n\'est plus possible de faire ce choix. Merci de voir dans la liste quel est le choix le mieux adapté';
-                    
                 }
 
                 $forfait = 0;

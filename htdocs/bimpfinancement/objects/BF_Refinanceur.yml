@@ -24,8 +24,6 @@ fields:
         label: Société
         type: id_object
         object: societe
-        input: 
-            type: search_societe
         required: 1
         
     id_def_contact_signataire: 

@@ -296,7 +296,9 @@ class BF_DemandeRefinanceur extends BimpObject
                 $filters['active'] = 1;
             }
 
-            foreach ($instance->getList($filters, null, null, 'id', 'asc', 'array', array('id', 'id_societe')) as $item) {
+            $items = $instance->getList($filters, null, null, 'id', 'asc', 'array', array('id', 'id_societe'));
+            
+            foreach ($items as $item) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['id_societe']);
                 if ($soc->isLoaded()) {
                     self::$cache[$cache_key][(int) $item['id']] = $soc->getName();

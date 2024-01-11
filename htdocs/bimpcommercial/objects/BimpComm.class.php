@@ -1618,6 +1618,18 @@ class BimpComm extends BimpDolObject
         return $total_rg;
     }
 
+    public function getTotalWeight()
+    {
+        $weight = 0;
+        foreach ($this->getLines('not_text') as $line) {
+            $product = $line->getProduct();
+            if (BimpObject::objectLoaded($product)) {
+                $weight += $product->getData('weight') * $line->qty;
+            }
+        }
+        return $weight;
+    }
+
     // Getters - Overrides BimpObject
 
     public function getName($with_generic = true)
@@ -1964,6 +1976,11 @@ class BimpComm extends BimpDolObject
         if ($nb > 0 || $hideIfNotNotes == false)
             return '<br/><span class="warning"><span class="badge badge-warning">' . $nb . '</span> Note' . ($nb > 1 ? 's' : '') . '</span>';
         return '';
+    }
+
+    public function displayTotalWeight()
+    {
+        return $this->getTotalWeight() . ' kg';
     }
 
     // Rendus HTML: 
@@ -2857,40 +2874,26 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
-    
-    public function displayTotalWeight(){
-        return $this->getTotalWeight().' kg';
-    }
-    
-    public function getTotalWeight(){
-        $weight = 0;
-        foreach($this->getLines('not_text') as $line){
-            $product = $line->getProduct();
-            if(BimpObject::objectLoaded($product)){
-                $weight += $product->getData('weight') * $line->qty;
-            }
-        }
-        return $weight;
-    }
-    
-    public function createMajLn($dataFiltre, $dataParamsDirect, $data = array(), &$newLn = null){//atention filtre doit être unique, sinon tout sera écrasé
+
+    public function createMajLn($dataFiltre, $dataParamsDirect, $data = array(), &$newLn = null)
+    {//atention filtre doit être unique, sinon tout sera écrasé
         $errors = array();
-        if(!count($dataFiltre))
+        if (!count($dataFiltre))
             $errors[] = 'Pas de filtre createMajLn';
-        else{
+        else {
             $dataFiltre['id_obj'] = $this->id;
             $newLnTmp = $this->getLineInstance();
             $newLn = BimpCache::findBimpObjectInstance($newLnTmp->module, $newLnTmp->object_name, $dataFiltre, true, true, true);
             if (is_null($newLn))
-                $newLn = $newLnTmp;//BimpObject::getInstance($newLn->module, $newLn->object_name);
+                $newLn = $newLnTmp; //BimpObject::getInstance($newLn->module, $newLn->object_name);
 
-            foreach($dataParamsDirect as $name => $value)
+            foreach ($dataParamsDirect as $name => $value)
                 $newLn->$name = $value;
 
-            foreach($data as $name => $value)
+            foreach ($data as $name => $value)
                 $newLn->set($name, $value);
 
-            foreach($dataFiltre as $name => $value)
+            foreach ($dataFiltre as $name => $value)
                 $newLn->set($name, $value);
 
             if (!$newLn->isLoaded())

@@ -44,8 +44,8 @@ class Bimp_PropalLine extends ObjectLine
 
             return 1;
         }
-        if(in_array($field, array('id_linked_contrat_line')))
-                return 1;
+        if (in_array($field, array('id_linked_contrat_line')))
+            return 1;
 
         return parent::isFieldEditable($field, $force_edit);
     }
@@ -467,6 +467,50 @@ class Bimp_PropalLine extends ObjectLine
         }
 
         $errors = BimpTools::merge_array($errors, parent::validate());
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($this->getData('linked_object_name') === 'bimp_contrat_line' && (int) $this->getData('linked_id_object')) {
+                $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('linked_id_object'));
+
+                if (BimpObject::objectLoaded($contrat_line)) {
+                    // Maj de la ligne de contrat d'abo liée : 
+                    $prod = $this->getProduct();
+                    $id_pfp = (int) $this->id_fourn_price;
+                    if (!$id_pfp && BimpObject::objectLoaded($prod)) {
+                        $id_fourn = (int) $prod->getData('achat_def_id_fourn');
+                        if ($id_fourn) {
+                            $id_pfp = (int) $prod->getLastFournPriceId($id_fourn);
+                        }
+                    }
+
+                    $contrat_line->validateArray(array(
+                        'fk_product'                   => $this->id_product,
+                        'description'                  => $this->desc,
+                        'product_type'                 => $this->product_type,
+                        'qty'                          => $this->qty,
+                        'subprice'                     => $this->pu_ht,
+                        'tva_tx'                       => $this->tva_tx,
+                        'remise_percent'               => $this->remise,
+                        'fk_product_fournisseur_price' => $id_pfp,
+                        'buy_price_ht'                 => $this->pa_ht,
+                        'fac_periodicity'              => $this->getData('abo_fac_periodicity'),
+                        'duration'                     => $this->getData('abo_duration'),
+                        'fac_term'                     => $this->getData('abo_fac_term'),
+                        'nb_renouv'                    => $this->getData('abo_nb_renouv'),
+                        'date_ouverture_prevue'        => date('Y-m-d', strtotime($this->date_from)) . ' 00:00:00'
+                    ));
+
+                    $contrat_line->update($w, true);
+                }
+            }
+        }
 
         return $errors;
     }

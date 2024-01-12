@@ -1779,6 +1779,7 @@ class BCT_Contrat extends BimpDolObject
                     // Suppr du contrat importé: 
                     if (!count($errors)) {
                         $this->addObjectLog('Import et fusion du contrat ' . $contrat_to_import->getRef());
+                        
                         $del_errors = $contrat_to_import->delete($warnings, true);
 
                         if (count($del_errors)) {

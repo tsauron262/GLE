@@ -67,7 +67,13 @@ objects:
                 module: bimpcontrat
                 name: BCT_ContratLine
             id_object: 
-                field_value: id_linked_line                  
+                field_value: id_linked_line             
+                
+    line_renouv: 
+        extends: linked_line
+        instance: 
+            id_object: 
+                field_value: id_line_renouv
                 
 fields: 
     fk_contrat: 

@@ -7,15 +7,15 @@ class BDS_ConvertProcess extends BDSProcess
 
     public static $current_version = 2;
     public static $methods = array(
-        ''              => '',
+        ''                    => '',
 //        'SignaturesToConvert'        => 'Conversion des signatures',
 //        'ProductRemisesCrtToConvert' => 'Conversion des remises CRT des produits',
 //        'PropalesCrtToConvert'       => 'Conversion des remises CRT des lignes de propales',
 //        'CommandesCrtToConvert'      => 'Conversion des remises CRT des lignes de commandes',
 //        'FacturesCrtToConvert'       => 'Conversion des remises CRT des lignes de factures',
-        'ShipmentsToConvert'         => 'Conversion des lignes d\'expédition',
-//        'ReceptionsToConvert'        => 'Conversion des lignes de réception',
-        'abosToConvert' => 'Conversion des Abonnements'
+        'ShipmentsToConvert'  => 'Conversion des lignes d\'expédition',
+        'ReceptionsToConvert' => 'Conversion des lignes de réception',
+        'abosToConvert'       => 'Conversion des Abonnements'
     );
     public static $default_public_title = 'Scripts de conversions des données';
 
@@ -480,9 +480,6 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findReceptionsToConvert(&$errors = array())
     {
-        $errors[] = 'Script Désactivé';
-        return array();
-
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_fourn_line');
         $sql .= ' WHERE a.receptions != \'\' AND a.receptions != \'{}\' > 0';

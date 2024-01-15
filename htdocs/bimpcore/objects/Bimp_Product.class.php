@@ -1724,9 +1724,7 @@ class Bimp_Product extends BimpObject
                 if (BimpObject::objectLoaded($curPa)) {
                     $pa_ht = (float) $curPa->getData('amount');
                 }
-            }
-
-            if (is_null($pa_ht)) {
+            } else {
                 // Ancienne méthode: 
                 if ((float) $this->getData('cur_pa_ht')) {
                     $pa_ht = (float) $this->getData('cur_pa_ht');

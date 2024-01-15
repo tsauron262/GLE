@@ -227,14 +227,14 @@ class EcologicAPI extends BimpAPI
             if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S" && isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
                 $sav->updateField('status_ecologic', 99);
         }
-        else{
+//        else{
             if(!isset($ecologicData['ClaimId']))
                 $errors[] = 'Demande non créer';
             elseif(!$filesOk)
                 $errors[] = 'Les fichiers ne sont pas ou partielement envoyées';
-            else
-                $errors[] = 'Erreur inconnue';
-        }
+//            else
+//                $errors[] = 'Erreur inconnue';
+//        }
         
         
         

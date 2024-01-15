@@ -219,7 +219,7 @@ class EcologicAPI extends BimpAPI
         
         
         
-        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) && $filesOk){
+        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) /*&& $filesOk*/){
             $warnings = array();//Tout semble ok, on vire les ancinne erreur de fichier qui sont résolu entre temps
             $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => $dateClose, 'ConsumerInvoiceNumber'=>$facRef, 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref, 'Submit' => 'true');
             $return = $this->execCurl('updateclaim', $params, $errors);

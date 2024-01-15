@@ -467,7 +467,7 @@ class InvoicePDF extends BimpCommDocumentPDF
         }
 
         if (stripos($this->object->mode_reglement_code, 'FIN') === false) {
-            $html .= '<tr><td style="color: #A00000; font-weight: bold">';
+            $html .= '<tr><td style="font-weight: bold">';
             $html .= '<br/>Merci de noter systématiquement le n° de facture sur votre règlement<br/>';
             $html .= '</td></tr>';
 

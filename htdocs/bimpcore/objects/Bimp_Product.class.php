@@ -1706,6 +1706,9 @@ class Bimp_Product extends BimpObject
 
     public function getCurrentPaHt($id_fourn = null, $with_default = true, $date = '')
     {
+        if($this->isBundle())
+                return $this->getPaBundle(false);
+        
         if ((int) $this->getData('no_fixe_prices')) {
             return 0;
         }

@@ -57,8 +57,11 @@ if ($lock_msg) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $secretJson);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-            curl_exec($ch);
+            $result = curl_exec($ch);
+            
+            echo $result;
 
             if (curl_error($ch)) {
                 print_r(curl_error($ch));
@@ -69,6 +72,11 @@ if ($lock_msg) {
             echo '<br/><br/>';
             echo 'Hook : ' . $hook['url'] . ' OK';
             echo '<br/><br/>';
+            
+            $dirLogs = PATH_TMP.'/git_logs/';
+            if(!is_dir($dirLogs))
+                mkdir ($dirLogs);
+            file_put_contents($dirLogs. time().'.logs', $result);
         }
     }
 }

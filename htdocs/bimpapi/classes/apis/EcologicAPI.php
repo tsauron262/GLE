@@ -178,7 +178,7 @@ class EcologicAPI extends BimpAPI
         $sav->updateField('ecologic_data', $ecologicData);
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
-            $tabExt = array('jpeg', 'jpg', 'png');
+            $tabExt = array('jpeg', 'jpg', 'png', 'JPEG', 'JPG', 'PNG', 'PDF');
             $filesOk = true;
             foreach($tabFile as $i => $fileT){
                 if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
@@ -200,7 +200,7 @@ class EcologicAPI extends BimpAPI
                         $paramsFile = array();
                         $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
                         $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
-                        $return = $this->execCurl('AttachFile', $paramsFile, $errors);
+                        $return = $this->execCurl('AttachFile', $paramsFile, $warnings);
                         if(stripos($return, 'Code 200') !== false){
 //                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
                             $ecologicData['files'][] = $fileT[1];
@@ -219,7 +219,7 @@ class EcologicAPI extends BimpAPI
         
         
         
-        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) && $filesOk){
+        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) /*&& $filesOk*/){
             $warnings = array();//Tout semble ok, on vire les ancinne erreur de fichier qui sont résolu entre temps
             $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => $dateClose, 'ConsumerInvoiceNumber'=>$facRef, 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref, 'Submit' => 'true');
             $return = $this->execCurl('updateclaim', $params, $errors);
@@ -227,14 +227,14 @@ class EcologicAPI extends BimpAPI
             if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S" && isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
                 $sav->updateField('status_ecologic', 99);
         }
-        else{
+//        else{
             if(!isset($ecologicData['ClaimId']))
                 $errors[] = 'Demande non créer';
             elseif(!$filesOk)
-                $errors[] = 'Les fichiers ne sont pas ou partielement envoyées';
-            else
-                $errors[] = 'Erreur inconnue';
-        }
+                $warnings[] = 'Les fichiers ne sont pas ou partielement envoyées';
+//            else
+//                $errors[] = 'Erreur inconnue';
+//        }
         
         
         

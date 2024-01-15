@@ -208,15 +208,29 @@ class BS_SAV_ExtEntity extends BS_SAV
             $ok = false;
             $sav_dir = $this->getFilesDir();
             $file = 'infos_materiel';
-            $tabExt = array('jpeg', 'jpg', 'png', 'pdf');
+            $tabExt = array('jpeg', 'jpg', 'png', 'pdf', 'JPEG', 'JPG', 'PNG', 'PDF');
             foreach($tabExt as $ext){
                 if(file_exists($sav_dir.$file.'.'.$ext))
                         $ok = true;
+            }
+            if(!$ok){
+                $ok = $this->convertHeic($sav_dir.$file);
             }
             if(!$ok)
                 $html .= BimpRender::renderAlerts('Attention le fichier '.$file.' n\'est pas présent');
         }
         return $html;
+    }
+    
+    public function convertHeic($fileSansExt){
+        $tab = array('heic', 'HEIC');
+        foreach($tab as $ext){
+            if(file_exists($fileSansExt.'.'.$ext)){
+                exec("/usr/local/sbin/heic2jpg ".$fileSansExt.'.'.$ext." ".$fileSansExt.".jpg");
+                if(file_exists($fileSansExt.".jpg"))
+                   return 1;
+            }
+        }
     }
     
 
@@ -343,6 +357,8 @@ class BS_SAV_ExtEntity extends BS_SAV
 
         $tabFile[] = array($facture->getFilesDir(), $facture->getData('ref'), 'pdf', 'INVOICE');
         $tabFile[] = array($this->getFilesDir(), 'Restitution_' . $this->getData('ref') . '_signe', 'pdf', 'CONSUMERVALIDATION');
+        if(!is_file($this->getFilesDir(). 'infos_materiel.jpg'))
+            $this->convertHeic($this->getFilesDir(). 'infos_materiel');
         $tabFile[] = array($this->getFilesDir(), 'infos_materiel', 'pdf', 'NAMEPLATE');
 
         $api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);

@@ -200,7 +200,7 @@ class EcologicAPI extends BimpAPI
                         $paramsFile = array();
                         $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
                         $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
-                        $return = $this->execCurl('AttachFile', $paramsFile, $errors);
+                        $return = $this->execCurl('AttachFile', $paramsFile, $warnings);
                         if(stripos($return, 'Code 200') !== false){
 //                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
                             $ecologicData['files'][] = $fileT[1];

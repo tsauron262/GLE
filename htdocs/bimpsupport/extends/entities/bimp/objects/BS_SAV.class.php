@@ -208,7 +208,7 @@ class BS_SAV_ExtEntity extends BS_SAV
             $ok = false;
             $sav_dir = $this->getFilesDir();
             $file = 'infos_materiel';
-            $tabExt = array('jpeg', 'jpg', 'png', 'pdf');
+            $tabExt = array('jpeg', 'jpg', 'png', 'pdf', 'JPEG', 'JPG', 'PNG', 'PDF');
             foreach($tabExt as $ext){
                 if(file_exists($sav_dir.$file.'.'.$ext))
                         $ok = true;

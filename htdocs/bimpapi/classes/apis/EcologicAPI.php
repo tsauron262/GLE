@@ -178,7 +178,7 @@ class EcologicAPI extends BimpAPI
         $sav->updateField('ecologic_data', $ecologicData);
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
-            $tabExt = array('jpeg', 'jpg', 'png');
+            $tabExt = array('jpeg', 'jpg', 'png', 'JPEG', 'JPG', 'PNG', 'PDF');
             $filesOk = true;
             foreach($tabFile as $i => $fileT){
                 if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){

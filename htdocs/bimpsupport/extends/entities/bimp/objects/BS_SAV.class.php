@@ -227,7 +227,8 @@ class BS_SAV_ExtEntity extends BS_SAV
         foreach($tab as $ext){
             if(file_exists($fileSansExt.'.'.$ext)){
                 exec("/usr/local/sbin/heic2jpg ".$fileSansExt.'.'.$ext." ".$fileSansExt.".jpg");
-                return 1;
+                if(file_exists($fileSansExt.".jpg"))
+                   return 1;
             }
         }
     }

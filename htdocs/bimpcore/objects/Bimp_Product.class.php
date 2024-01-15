@@ -1716,13 +1716,17 @@ class Bimp_Product extends BimpObject
             if (!$this->hasFixePa()) {
                 return 0;
             }
+
+            $pa_ht = null;
             if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 // Nouvelle méthode: 
                 $curPa = $this->getCurrentPaObject(true, $date);
                 if (BimpObject::objectLoaded($curPa)) {
                     $pa_ht = (float) $curPa->getData('amount');
                 }
-            } else {
+            }
+
+            if (is_null($pa_ht)) {
                 // Ancienne méthode: 
                 if ((float) $this->getData('cur_pa_ht')) {
                     $pa_ht = (float) $this->getData('cur_pa_ht');

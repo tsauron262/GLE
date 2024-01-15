@@ -2237,8 +2237,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                             }
 
                             if (is_null($new_line)) {
-                                $linked_id_object = null;
-                                $linked_object_name = null;
+                                $linked_id_object = 0;
+                                $linked_object_name = '';
 
                                 if ($line->getData('linked_object_name') !== 'bimp_contrat_line') {
                                     $linked_id_object = $line->getData('linked_id_object');

@@ -1560,6 +1560,15 @@ class Equipment extends BimpObject
 
             if ($gsx->logged) {
                 $data = $gsx->productDetailsBySerial($serial);
+                if(!is_array($data) || !count($data)){
+                    $nonApple = false;
+                    if(isset($gsx->errors['curl']))
+                        foreach($gsx->errors['curl'] as $error)
+                            if($error['code'] == 'DEVICE_INFORMATION_INVALID')//req ok mais serial inconnue
+                                $nonApple = true;
+                    if(!$nonApple)
+                    return 0;
+                }
                 if (!is_array($data)) {
                     $identifiers['status_gsx'] = 2;
                 } else {

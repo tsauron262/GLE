@@ -1906,14 +1906,13 @@ class ObjectLine extends BimpObject
 
                 case 'desc':
                 case 'desc_light':
-                    if ((int) $this->getData('id_parent_line')) {
-                        if (!$no_html) {
-                            $html .= '<span style="display: inline-block; margin: 0 0 5px 15px; height: 100%; border-left: 3px solid #787878;"></span>';
-                            $html .= '<div style="display: inline-block">';
-                            $html .= '<span style="margin-right: 15px; color: #787878;font-size: 18px;">' . BimpRender::renderIcon('fas_long-arrow-alt-right') . '</span>';
-                        }
-                    }
-
+//                    if ((int) $this->getData('id_parent_line')) {
+//                        if (!$no_html) {
+//                            $html .= '<span style="display: inline-block; margin: 0 0 5px 15px; height: 100%; border-left: 3px solid #787878;"></span>';
+//                            $html .= '<div style="display: inline-block">';
+//                            $html .= '<span style="margin-right: 15px; color: #787878;font-size: 18px;">' . BimpRender::renderIcon('fas_long-arrow-alt-right') . '</span>';
+//                        }
+//                    }
 
                     $text = '';
                     $desc = '';

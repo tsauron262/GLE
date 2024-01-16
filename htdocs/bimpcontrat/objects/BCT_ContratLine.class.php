@@ -108,7 +108,7 @@ class BCT_ContratLine extends BimpObject
         if (!$force_edit && (int) $this->getData('statut') === (int) self::STATUS_ATT_PROPAL) {
             return 0;
         }
-        
+
         if ($this->isLoaded() && in_array($field, array('line_type'))) {
             return 0;
         }
@@ -116,6 +116,10 @@ class BCT_ContratLine extends BimpObject
         $status = (int) $this->getData('statut');
 
         if (!$force_edit && $status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start'))) {
+            return 0;
+        }
+
+        if ((int) $this->getData('id_parent_line') && in_array($field, array('fac_periodicity', 'duration', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start'))) {
             return 0;
         }
 
@@ -151,7 +155,7 @@ class BCT_ContratLine extends BimpObject
                     $errors[] = 'Cette ligne de contrat a déjà été activée';
                     return 0;
                 }
-                
+
                 if ($status == self::STATUS_ATT_PROPAL) {
                     $errors[] = 'Attente acceptation du devis';
                     return 0;
@@ -159,6 +163,11 @@ class BCT_ContratLine extends BimpObject
 
                 if ((int) $contrat->getData('statut') <= 0) {
                     $errors[] = 'Le contrat n\'est pas validé';
+                    return 0;
+                }
+
+                if ((int) $this->getData('id_parent_line')) {
+                    $errors[] = 'Sous-ligne : veuillez activer la ligne parente';
                     return 0;
                 }
 
@@ -172,6 +181,12 @@ class BCT_ContratLine extends BimpObject
                     $errors[] = 'Cette ligne de contrat est déjà désactivée';
                     return 0;
                 }
+
+                if ((int) $this->getData('id_parent_line')) {
+                    $errors[] = 'Sous-ligne : veuillez désactiver la ligne parente';
+                    return 0;
+                }
+
                 return 1;
 
             case 'renouv':
@@ -1744,7 +1759,7 @@ class BCT_ContratLine extends BimpObject
                         $html .= '<span class="danger">l\'abonnement lié (ligne #' . $this->getData('id_linked_line') . ') n\'existe plus</span><br/><br/>';
                     }
                 }
-                
+
                 $is_variable = (int) $this->getData('variable_qty');
                 if ($is_variable) {
                     $html .= '<div style="display: inline-block" class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Abonnement à qté variable</div><br/>';
@@ -3474,12 +3489,28 @@ class BCT_ContratLine extends BimpObject
             $this->getDateNextAchat(true);
 
             if (!count($errors)) {
-                $contrat = $this->getParentInstance();
-                if (BimpObject::objectLoaded($contrat)) {
-                    $msg = 'Abonnement {{Produit:' . $this->getData('fk_product') . '}} activé.<br/>';
-                    $msg .= 'Date d\'ouverture effective : ' . date('d / m / Y', strtotime($this->getData('date_ouverture'))) . '.<br/>';
-                    $msg .= 'Durée: ' . $this->getData('duration') . ' mois';
-                    $contrat->addObjectLog($msg);
+                $sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+                            'id_parent_line' => $this->id
+                ));
+
+                if (!empty($sub_lines)) {
+                    foreach ($sub_lines as $sub_line) {
+                        $sub_line_errors = $sub_line->activate($date_ouverture);
+
+                        if (count($sub_line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($sub_line_errors, 'Echec de l\'activation de la sous-ligne n° ' . $sub_line->getData('rang'));
+                        }
+                    }
+                }
+
+                if (!count($errors)) {
+                    $contrat = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($contrat)) {
+                        $msg = 'Abonnement {{Produit:' . $this->getData('fk_product') . '}} activé.<br/>';
+                        $msg .= 'Date d\'ouverture effective : ' . date('d / m / Y', strtotime($this->getData('date_ouverture'))) . '.<br/>';
+                        $msg .= 'Durée: ' . $this->getData('duration') . ' mois';
+                        $contrat->addObjectLog($msg);
+                    }
                 }
             }
         }
@@ -4111,6 +4142,23 @@ class BCT_ContratLine extends BimpObject
 
         $this->set('statut', 0);
         $errors = $this->update($warnings, true);
+
+        if (!count($errors)) {
+            $sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+                        'id_parent_line' => $this->id
+            ));
+
+            if (!empty($sub_lines)) {
+                foreach ($sub_lines as $sub_line) {
+                    $sub_line->set('statut', 0);
+                    $sub_line_errors = $this->update($warnings, true);
+
+                    if (count($sub_line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($sub_line_errors, 'Echec de la désactivation de la sous-ligne n° ' . $sub_line->getData('rang'));
+                    }
+                }
+            }
+        }
 
         return array(
             'errors'   => $errors,

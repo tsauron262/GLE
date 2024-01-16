@@ -636,6 +636,12 @@ class BCT_Contrat extends BimpDolObject
                 $html .= '</div>';
             }
 
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $html .= '<div style="margin-top: 10px; font-size: 12px;">';
+                $html .= 'Client : ' . $client->getLink();
+                $html .= '</div>';
+            }
 
             $this->dol_object->element = 'bimp_contrat';
             $items = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
@@ -648,7 +654,7 @@ class BCT_Contrat extends BimpDolObject
                     foreach ($items as $id) {
                         $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id['id_object']);
                         if ($obj->isLoaded()) {
-                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $obj->getLink());
+                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $obj->getLink(), 'warning');
                         }
                     }
                 }
@@ -844,8 +850,10 @@ class BCT_Contrat extends BimpDolObject
                             }
                         }
 
-                        foreach ($linked_lines as $line) {
+                        foreach ($linked_lines as $idx => $line) {
                             $is_sub_line = ((int) $line->id !== (int) $id_line);
+                            $is_last = (($idx + 1) >= count($linked_lines));
+
                             $duration = (int) $line->getData('duration');
                             if (!$duration) {
                                 $duration = 1;
@@ -887,6 +895,16 @@ class BCT_Contrat extends BimpDolObject
                                 }
                             }
 
+                            $id_line_renouv = (int) $line->getData('id_line_renouv');
+                            if ($id_line_renouv) {
+                                $line_renouv = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line_renouv);
+
+                                if (BimpObject::objectLoaded($line_renouv)) {
+                                    $dates .= '<br/><span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft');
+                                    $dates .= 'Renouvellé (ligne n°' . $line_renouv->getData('rang') . ')</span>';
+                                }
+                            }
+
                             $buttons_html = '';
 
                             foreach ($line->getListExtraBtn() as $button) {
@@ -894,20 +912,21 @@ class BCT_Contrat extends BimpDolObject
                             }
 
                             $lines_rows[] = array(
-                                'n'       => array('content' => $line->getData('rang'), 'colspan' => ($is_sub_line ? 1 : 2)),
-                                'linked'  => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
-                                'statut'  => $line->displayDataDefault('statut'),
-                                'dates'   => $dates,
-                                'fac'     => $line->displayFacInfos(),
-                                'achats'  => $line->displayAchatInfos(false),
-                                'units'   => $nb_units,
-                                'qty'     => $qty,
-                                'pu_ht'   => $line->displayDataDefault('subprice'),
-                                'buttons' => $buttons_html
+                                'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc'),
+                                'n'         => array('content' => $line->getData('rang'), 'colspan' => ($is_sub_line ? 1 : 2)),
+                                'linked'    => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
+                                'statut'    => $line->displayDataDefault('statut'),
+                                'dates'     => $dates,
+                                'fac'       => $line->displayFacInfos(),
+                                'achats'    => $line->displayAchatInfos(false),
+                                'units'     => $nb_units,
+                                'qty'       => $qty,
+                                'pu_ht'     => $line->displayDataDefault('subprice'),
+                                'buttons'   => $buttons_html
                             );
                         }
                     }
-                    
+
 //                    return '<pre>' . print_r($lines_rows, 1) . '</pre>';
 
                     $units_html = '';

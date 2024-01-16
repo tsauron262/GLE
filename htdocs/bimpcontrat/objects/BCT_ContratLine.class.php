@@ -1652,7 +1652,7 @@ class BCT_ContratLine extends BimpObject
         $contrat = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($contrat)) {
-            $id_client = (int) $this->getData('fk_soc');
+            $id_client = (int) $contrat->getData('fk_soc');
 
             if ($id_client) {
                 foreach (BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Propal', array(

@@ -120,9 +120,9 @@ class BS_SAV_ExtEntity extends BS_SAV
             $label .= $equipement->displayProduct('nom') . '<br/>';
         }
         if (stripos($label, 'imac') !== false)
-            return 'EEE.M2.044';
-        if (stripos($label, 'mac') !== false)
             return 'EEE.M2.045';
+        if (stripos($label, 'mac') !== false)
+            return 'EEE.M2.044';
         if (stripos($label, 'ipad') !== false)
             return 'EEE.M2.057';
         if (stripos($label, 'iphone') !== false)

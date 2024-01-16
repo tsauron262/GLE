@@ -852,7 +852,7 @@ class BCT_Contrat extends BimpDolObject
 
                         foreach ($linked_lines as $idx => $line) {
                             $is_sub_line = ((int) $line->id !== (int) $id_line);
-//                            $is_last = (($idx + 1) >= count($linked_lines));
+                            $is_last = (($idx + 1) >= count($linked_lines));
 
                             $duration = (int) $line->getData('duration');
                             if (!$duration) {

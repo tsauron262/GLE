@@ -88,7 +88,7 @@ function generatePDFFile($button, id_sav, file_type) {
     });
 }
 
-function loadGSXView($button, id_sav) {
+function loadGSXView($button, id_sav, withpdf = false) {
     var $gsxForm = $('#loadGSXForm');
     var $container = $('#gsxResultContainer');
     var serial = $gsxForm.find('#gsx_equipment_serial').val();
@@ -110,6 +110,7 @@ function loadGSXView($button, id_sav) {
         if (typeof (use_gsx_v2) !== 'undefined' && use_gsx_v2) {
             GsxAjax('gsxLoadSavGsxView', {
                 serial: serial,
+                withpdf: withpdf,
                 id_sav: id_sav
             }, $container, params);
         } else {

@@ -757,7 +757,26 @@ class BCT_Contrat extends BimpDolObject
                     $prods[$id_product] = array();
                 }
 
-                $prods[$id_product][] = $line;
+                $id_linked_line = (int) $line->getData('id_linked_line');
+                if ($id_linked_line) {
+                    if (!isset($prods[$id_product][$id_linked_line])) {
+                        $prods[$id_product][$id_linked_line] = array(
+                            'line'         => null,
+                            'linked_lines' => array()
+                        );
+                    }
+
+                    $prods[$id_product][$id_linked_line]['linked_lines'][] = $line;
+                } else {
+                    if (!isset($prods[$id_product][$line->id])) {
+                        $prods[$id_product][$line->id] = array(
+                            'line'         => $line,
+                            'linked_lines' => array()
+                        );
+                    } else {
+                        $prods[$id_product][$line->id]['line'] = $line;
+                    }
+                }
             }
 
             if (!empty($prods)) {
@@ -769,7 +788,8 @@ class BCT_Contrat extends BimpDolObject
                 );
 
                 $lines_headers = array(
-                    'n'       => 'Ligne n°',
+                    'linked'  => array('label' => '', 'colspan' => 0),
+                    'n'       => array('label' => 'Ligne n°', 'colspan' => 2),
                     'statut'  => 'statut',
                     'dates'   => 'Dates',
                     'fac'     => 'Facturation',
@@ -781,6 +801,7 @@ class BCT_Contrat extends BimpDolObject
                 );
 
                 $rows = array();
+                $linked_icon = BimpRender::renderIcon('fas_level-up-alt', '', 'transform: rotate(90deg);font-size: 22px;');
 
                 foreach ($prods as $id_prod => $prod_lines) {
                     $units = array(
@@ -810,66 +831,84 @@ class BCT_Contrat extends BimpDolObject
                     $lines_content = '';
                     $lines_rows = array();
 
-                    foreach ($prod_lines as $line) {
-                        $duration = (int) $line->getData('duration');
-                        if (!$duration) {
-                            $duration = 1;
+                    foreach ($prod_lines as $id_line => $line_data) {
+                        $linked_lines = array();
+
+                        if (is_object($line_data['line'])) {
+                            $linked_lines[] = $line_data['line'];
                         }
 
-                        $qty = (float) $line->getData('qty');
-                        $nb_units = ($qty / $duration) * $prod_duration;
-
-                        switch ((int) $line->getData('statut')) {
-                            case -1:
-                            case 0:
-                                $units['inactive'] += $nb_units;
-                                $qties['inactive'] += $qty;
-                                break;
-
-                            case 4:
-                                $units['active'] += $nb_units;
-                                $qties['active'] += $qty;
-                                break;
-
-                            case 5:
-                                $units['closed'] += $nb_units;
-                                $qties['closed'] += $qty;
-                                break;
-                        }
-
-                        $dates = '';
-
-                        if ((int) $line->getData('statut') > 0) {
-                            $dates .= 'Du ' . date('d / m / Y', strtotime($line->getData('date_ouverture')));
-                            $dates .= ' au ' . date('d / m / Y', strtotime($line->getData('date_fin_validite')));
-                        } else {
-                            $dates .= 'Ouverture prévue : ';
-                            $date_ouverture_prevue = $line->getData('date_ouverture_prevue');
-                            if ($date_ouverture_prevue) {
-                                $dates .= date('d / m / Y', strtotime($date_ouverture_prevue));
-                            } else {
-                                $dates .= 'non définie';
+                        if (!empty($line_data['linked_lines'])) {
+                            foreach ($line_data['linked_lines'] as $line) {
+                                $linked_lines[] = $line;
                             }
                         }
 
-                        $buttons_html = '';
+                        foreach ($linked_lines as $line) {
+                            $is_sub_line = ((int) $line->id !== (int) $id_line);
+                            $duration = (int) $line->getData('duration');
+                            if (!$duration) {
+                                $duration = 1;
+                            }
 
-                        foreach ($line->getListExtraBtn() as $button) {
-                            $buttons_html .= BimpRender::renderRowButton($button['label'], $button['icon'], $button['onclick']);
+                            $qty = (float) $line->getData('qty');
+                            $nb_units = ($qty / $duration) * $prod_duration;
+
+                            switch ((int) $line->getData('statut')) {
+                                case -1:
+                                case 0:
+                                    $units['inactive'] += $nb_units;
+                                    $qties['inactive'] += $qty;
+                                    break;
+
+                                case 4:
+                                    $units['active'] += $nb_units;
+                                    $qties['active'] += $qty;
+                                    break;
+
+                                case 5:
+                                    $units['closed'] += $nb_units;
+                                    $qties['closed'] += $qty;
+                                    break;
+                            }
+
+                            $dates = '';
+
+                            if ((int) $line->getData('statut') > 0) {
+                                $dates .= 'Du ' . date('d / m / Y', strtotime($line->getData('date_ouverture')));
+                                $dates .= ' au ' . date('d / m / Y', strtotime($line->getData('date_fin_validite')));
+                            } else {
+                                $dates .= 'Ouverture prévue : ';
+                                $date_ouverture_prevue = $line->getData('date_ouverture_prevue');
+                                if ($date_ouverture_prevue) {
+                                    $dates .= date('d / m / Y', strtotime($date_ouverture_prevue));
+                                } else {
+                                    $dates .= 'non définie';
+                                }
+                            }
+
+                            $buttons_html = '';
+
+                            foreach ($line->getListExtraBtn() as $button) {
+                                $buttons_html .= BimpRender::renderRowButton($button['label'], $button['icon'], $button['onclick']);
+                            }
+
+                            $lines_rows[] = array(
+                                'n'       => array('content' => $line->getData('rang'), 'colspan' => ($is_sub_line ? 1 : 2)),
+                                'linked'  => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
+                                'statut'  => $line->displayDataDefault('statut'),
+                                'dates'   => $dates,
+                                'fac'     => $line->displayFacInfos(),
+                                'achats'  => $line->displayAchatInfos(false),
+                                'units'   => $nb_units,
+                                'qty'     => $qty,
+                                'pu_ht'   => $line->displayDataDefault('subprice'),
+                                'buttons' => $buttons_html
+                            );
                         }
-
-                        $lines_rows[] = array(
-                            'n'       => $line->getData('rang'),
-                            'statut'  => $line->displayDataDefault('statut'),
-                            'dates'   => $dates,
-                            'fac'     => $line->displayFacInfos(),
-                            'achats'  => $line->displayAchatInfos(false),
-                            'units'   => $nb_units,
-                            'qty'     => $qty,
-                            'pu_ht'   => $line->displayDataDefault('subprice'),
-                            'buttons' => $buttons_html
-                        );
                     }
+                    
+//                    return '<pre>' . print_r($lines_rows, 1) . '</pre>';
 
                     $units_html = '';
 
@@ -1779,7 +1818,7 @@ class BCT_Contrat extends BimpDolObject
                     // Suppr du contrat importé: 
                     if (!count($errors)) {
                         $this->addObjectLog('Import et fusion du contrat ' . $contrat_to_import->getRef());
-                        
+
                         $del_errors = $contrat_to_import->delete($warnings, true);
 
                         if (count($del_errors)) {

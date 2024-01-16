@@ -2237,6 +2237,14 @@ class Bimp_Propal extends Bimp_PropalTemp
                             }
 
                             if (is_null($new_line)) {
+                                $linked_id_object = 0;
+                                $linked_object_name = '';
+
+                                if ($line->getData('linked_object_name') !== 'bimp_contrat_line') {
+                                    $linked_id_object = $line->getData('linked_id_object');
+                                    $linked_object_name = $line->getData('linked_object_name');
+                                }
+
                                 $new_line = BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
                                             'fk_contrat'                   => $contrat->id,
                                             'fk_product'                   => $line->id_product,
@@ -2256,8 +2264,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                                             'id_linked_line'               => (int) $line->getData('id_linked_contrat_line'),
                                             'id_line_origin'               => $line->id,
                                             'line_origin_type'             => 'propal_line',
-//                                        'linked_id_object'             => $line->getData('linked_id_object'),
-//                                        'linked_object_name'           => $line->getData('linked_object_name'),
+                                            'linked_id_object'             => $linked_id_object,
+                                            'linked_object_name'           => $linked_object_name,
                                             'achat_periodicity'            => (BimpObject::objectLoaded($prod) ? $prod->getData('achat_def_periodicity') : 0),
                                             'variable_qty'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
                                             'date_ouverture_prevue'        => $line_date_ouv

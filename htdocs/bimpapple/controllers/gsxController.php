@@ -1070,8 +1070,9 @@ class gsxController extends BimpController
 
         if ($serial) {
             $data = $equipment->gsxFetchIdentifiers($serial);
-            $data['product_label'] = $data['productDescription'];
-
+            if(is_array($data)){
+                $data['product_label'] = $data['productDescription'];
+            }
 //            $matches = array();
 //            if (preg_match('/^S(.+)$/', $serial, $matches)) {
 //                $serial = $matches[1];

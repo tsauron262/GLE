@@ -199,7 +199,7 @@ fields:
         
     percent: 
         label: Progression
-        default_value: -1
+        default_value: -l
         dol_prop: percentage
         values: 
             array: progressions

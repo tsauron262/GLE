@@ -622,7 +622,14 @@ class BimpInput
 
             case 'search_projet':
                 $socid = -1;
-                $html .= $form->selectProjects($value, $field_name, '', 0, 1, '', 0, array(), $socid, '1', 0, '', null, 1);
+                
+                if (is_null($formproject)) {
+                    require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
+                    global $db;
+                    $formproject = new FormProjets($db);
+                }
+                $html .= $formproject->select_projects(0, $value, 'projectid', $field_name, 0, 1, 0, 1, 0, 0, '', 1);
+//                $html .= $form->selectProjects($value, $field_name, '', 0, 1, '', 0, array(), $socid, '1', 0, '', null, 1);
                 break;
 
             case 'search_country':

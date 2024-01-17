@@ -96,6 +96,10 @@ class BCT_ContratLine extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
+        if (!$force_delete && $this->isSubline()) {
+            return 0;
+        }
+
         if ((int) $this->getData('statut') <= 0) {
             return 1;
         }
@@ -239,6 +243,19 @@ class BCT_ContratLine extends BimpObject
         }
 
         return 1;
+    }
+
+    public function isSubline()
+    {
+        if ((int) $this->getData('id_parent_line')) {
+            $parent_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('id_parent_line'));
+
+            if (BimpObject::objectLoaded($parent_line)) {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     // Getters params:

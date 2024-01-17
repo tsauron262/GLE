@@ -3941,7 +3941,7 @@ class ObjectLine extends BimpObject
         } elseif (!$parent->isLoaded()) {
             $errors[] = '(225) ID ' . $parent->getLabel('of_the') . ' absent';
         }
-            
+
         $table = $this::$dol_line_table;
         $primary = $this::$dol_line_primary;
 
@@ -4584,8 +4584,13 @@ class ObjectLine extends BimpObject
                 if (in_array($type, array(self::LINE_TEXT, self::LINE_SUB_TOTAL)) || ($pu_ht * $qty) == 0) {
                     $html .= BimpInput::renderInput('toggle', $prefixe . 'hide_in_pdf', (int) $this->getData('hide_in_pdf'));
                 } else {
-                    $html .= '<span class="danger">NON</span>';
-                    $html .= '<input type="hidden" value="0" name="' . $prefixe . 'hide_in_pdf' . '"/>';
+                    if ((int) $this->getData('hide_in_pdf')) {
+                        $html .= '<span class="success">OUI</span>';
+                        $html .= '<input type="hidden" value="1" name="' . $prefixe . 'hide_in_pdf' . '"/>';
+                    } else {
+                        $html .= '<span class="danger">NON</span>';
+                        $html .= '<input type="hidden" value="0" name="' . $prefixe . 'hide_in_pdf' . '"/>';
+                    }
                 }
                 break;
         }
@@ -5764,7 +5769,7 @@ class ObjectLine extends BimpObject
     {
         if ((int) $this->id_product) {
             $product = $this->getProduct();
-            
+
             if (BimpObject::objectLoaded($product) && $product->isBundle() && $this->getData('editable')) {
                 $fieldsCopy = array();
 

@@ -1434,10 +1434,10 @@ function gestionParentLine($list) {
             idsParent[$(this).data('id_parent_line')] = $(this).data('id_parent_line');
         }
     });
-//        console.log(idsParent);
+    
     for (const id_parent_line in idsParent) {
         var $parentLineTd = $list.find('[data-id_object=' + id_parent_line + ']').children('td').first();
-        console.log($parentLineTd);
+        
         $parentLineTd.append('<a class="btn btn-info detail_' + id_parent_line + '">Detail<i class="fa fa-plus-circle iconRight"></i></a><a class="btn btn-info cache_detail_' + id_parent_line + '">Détail<i class="fa fa-minus-circle iconRight"></i></a>');
         $list.find('.cache_detail_' + id_parent_line + '').hide();
         $list.find('.detail_' + id_parent_line + '').click(function () {
@@ -1450,7 +1450,6 @@ function gestionParentLine($list) {
             $list.find('.detail_' + id_parent_line + '').show();
             $list.find('.cache_detail_' + id_parent_line + '').hide();
         });
-//        console.log(id_parent_line);
     }
 }
 

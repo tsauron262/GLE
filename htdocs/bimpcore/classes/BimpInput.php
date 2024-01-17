@@ -628,7 +628,7 @@ class BimpInput
                     global $db;
                     $formproject = new FormProjets($db);
                 }
-                $html .= $formproject->select_projects(0, $value, 'projectid', $field_name, 0, 1, 0, 1, 0, 0, '', 1);
+                $html .= $formproject->select_projects(0, $value, $field_name, 30, 0, 1, 0, 0, 0, 0, '', 1);
 //                $html .= $form->selectProjects($value, $field_name, '', 0, 1, '', 0, array(), $socid, '1', 0, '', null, 1);
                 break;
 

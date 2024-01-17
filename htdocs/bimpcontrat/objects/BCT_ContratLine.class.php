@@ -123,6 +123,15 @@ class BCT_ContratLine extends BimpObject
             return 0;
         }
 
+        if (in_array($field, array('achat_periodicity'))) {
+            if ((int) $this->getData('fk_product')) {
+                $product = $this->getChildObject('product');
+                if (BimpObject::objectLoaded($product) && $product->isBundle()) {
+                    return 0;
+                }
+            }
+        }
+
         return parent::isFieldEditable($field, $force_edit);
     }
 
@@ -3666,7 +3675,7 @@ class BCT_ContratLine extends BimpObject
         if ((int) $this->getData('fk_product')) {
             $product = $this->getChildObject('product');
             if (BimpObject::objectLoaded($product) && $product->isBundle()) {
-                $fieldsCopy = array('fk_contrat', 'line_type', 'fac_periodicity', 'fac_term', 'achat_periodicity', 'duration', 'nb_renouv', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start');
+                $fieldsCopy = array('fk_contrat', 'line_type', 'fac_periodicity', 'fac_term', 'duration', 'nb_renouv', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start');
 
                 //on ajoute les sous lignes et calcule le tot
                 $bundle_total_ht = $this->getData('total_ht');

@@ -4,10 +4,20 @@ function BimpContrat() {
         $form.find('.line_check').change(function () {
             var $row = $(this).findParentByClass('contrat_line_row');
 
+            var id_line = parseInt($row.data('id_line'));
+
             if ($(this).prop('checked')) {
                 $row.addClass('selected');
+
+                if (id_line) {
+                    $form.find('tr.line_' + id_line + '_sub_line').addClass('selected');
+                }
             } else {
                 $row.removeClass('selected');
+
+                if (id_line) {
+                    $form.find('tr.line_' + id_line + '_sub_line').removeClass('selected');
+                }
             }
         });
 
@@ -97,10 +107,24 @@ function BimpContrat() {
                         };
                     }
 
+                    var sub_lines = {};
+
+                    $form.find('tr.line_' + id_line + '_sub_line').each(function () {
+                        var $input = $(this).find($('input.line_qty_per_period'));
+
+                        if ($input.length) {
+                            var id_sub_line = parseInt($(this).data('id_line'));
+                            sub_lines[id_sub_line] = {
+                                'qty_per_period': parseFloat($input.val())
+                            };
+                        }
+                    });
+
                     clients[id_client][fac_idx]['lines'].push({
                         'id_line': id_line,
                         'nb_periods': nb_periods,
-                        'qty_per_period': qty_per_period
+                        'qty_per_period': qty_per_period,
+                        'sub_lines': sub_lines
                     });
                 }
             }
@@ -187,9 +211,9 @@ function BimpContrat() {
 
     this.onRenouvAbonnementFormSubmit = function ($form, extra_data) {
         var lines = [];
-        
+
         extra_data['id_main_line'] = parseInt($form.find('input[name="id_main_line"]').val());
-        
+
         $form.find('.line_check:checked').each(function () {
             lines.push(parseInt($(this).data('id_line')));
         });
@@ -198,7 +222,7 @@ function BimpContrat() {
             bimp_msg('Aucune ligne sélectionnée', 'danger');
             return false;
         }
-        
+
         extra_data['lines'] = lines;
 
         return extra_data;

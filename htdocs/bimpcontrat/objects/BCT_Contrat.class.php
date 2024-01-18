@@ -479,12 +479,13 @@ class BCT_Contrat extends BimpDolObject
     public function getAboLinesArray($options = array())
     {
         $options = BimpTools::overrideArray(array(
-                    'include_empty' => false,
-                    'empty_label'   => '',
-                    'active_only'   => false,
-                    'with_periods'  => false,
-                    'id_product'    => 0,
-                    'no_sub_lines'  => false
+                    'include_empty'    => false,
+                    'empty_label'      => '',
+                    'active_only'      => false,
+                    'with_periods'     => false,
+                    'id_product'       => 0,
+                    'no_sub_lines'     => false,
+                    'excluded_id_line' => 0
                         ), $options);
 
         if ($this->isLoaded()) {
@@ -513,6 +514,13 @@ class BCT_Contrat extends BimpDolObject
 
                 if ($options['no_sub_lines']) {
                     $filters['id_parent_line'] = 0;
+                }
+
+                if ($options['excluded_id_line'] > 0) {
+                    $filters['rowid'] = array(
+                        'operator' => '!=',
+                        'value'    => $options['excluded_id_line']
+                    );
                 }
 
                 $lines = $this->getLines('abo', false, $filters);
@@ -1439,7 +1447,7 @@ class BCT_Contrat extends BimpDolObject
                     'editable'           => 0,
                     'linked_id_object'   => (int) $line->id,
                     'linked_object_name' => 'contrat_line',
-                    'hide_in_pdf'        => ($line->getData('linked_object_name') == 'bundle' || $line->getData('linked_object_name') == 'bundleCorrect') ? 1 : 0
+                    'hide_in_pdf'        => (($line->getData('linked_object_name') == 'bundle' || $line->getData('linked_object_name') == 'bundleCorrect') ? 1 : 0)
                 ));
 
                 $date_from = null;
@@ -1466,6 +1474,15 @@ class BCT_Contrat extends BimpDolObject
                         $new_date_next_facture = $dt->format('Y-m-d');
                         $dt->sub(new DateInterval('P1D'));
                         $date_to = $dt->format('Y-m-d 23:59:59');
+                    }
+                }
+
+                $id_parent_line = $line->getData('id_parent_line');
+                if ($id_parent_line) {
+                    $id_fac_parent_line = (int) $this->db->getValue('bimp_facture_line', 'id', 'linked_object_name = \'contrat_line\' AND linked_id_object = ' . $id_parent_line . ' AND id_obj = ' . $facture->id);
+
+                    if ($id_fac_parent_line) {
+                        $fac_line->set('id_parent_line', $id_fac_parent_line);
                     }
                 }
 

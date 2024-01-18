@@ -218,7 +218,7 @@ class EcologicAPI extends BimpAPI
                         }
                         else{
                             $filesOk = false;
-                            $errors[] = 'Envoie fichier '.$fileT[1].' impossible';
+                            $warnings[] = 'Envoie fichier '.$fileT[1].' impossible';
                         }
                     }
                 }

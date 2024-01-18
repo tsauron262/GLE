@@ -188,9 +188,6 @@ class EcologicAPI extends BimpAPI
                             continue(2);
                         }
                     }
-                    $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
-                    BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
-                    $filesOk = false;
                 }
                 $fileT[1] = str_replace("i", "I", $fileT[1]);
                 if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
@@ -200,6 +197,8 @@ class EcologicAPI extends BimpAPI
                             continue(2);
                         }
                     }
+                }
+                if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
                     $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
                     BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
                     $filesOk = false;

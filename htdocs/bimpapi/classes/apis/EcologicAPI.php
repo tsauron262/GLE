@@ -185,20 +185,9 @@ class EcologicAPI extends BimpAPI
                     foreach($tabExt as $ext){
                         if(is_file($fileT[0] . $fileT[1].'.'.$ext)){
                             $tabFile[$i][2] = $ext;
-                            continue 2;
+                            continue(2);
                         }
                     }
-                }
-                $fileT[1] = str_replace("i", "I", $fileT[1]);
-                if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
-                    foreach($tabExt as $ext){
-                        if(is_file($fileT[0] . $fileT[1].'.'.$ext)){
-                            $tabFile[$i][2] = $ext;
-                            continue 2;
-                        }
-                    }
-                }
-                if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
                     $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
                     BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
                     $filesOk = false;

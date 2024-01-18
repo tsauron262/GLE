@@ -205,7 +205,7 @@ class Bimp_ImportPaiement extends BimpObject
             if ($date->format('Y-m-d') <= $yesterday->format('Y-m-d')) {
                 $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYNI{AA}{MM}-', 5);
                 $payin->updateField('num', $num);
-                $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id);
+                $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id, 'banque' => $parent->getData('banque'));
                 $dataMsg[] = $payin->getData('date') . ' ' . $payin->getData('name') . ' - ' . $payin->getData('price') . ' €';
             }
         }

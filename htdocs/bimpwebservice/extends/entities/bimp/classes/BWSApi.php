@@ -348,8 +348,9 @@ class BWSApi_ExtEntity extends BWSApi
                 foreach ($commerciaux as $commercial) {
                     $ln['client']['commerciaux'][] = array("nom" => $commercial->getFullName(), 'mail' => $commercial->getData('email'));
                 }
+                $ln['id'] = $contract->id;
 
-                $return[$contract->id] = $ln;
+                $return[] = $ln;
             }
             return array(
                 'success'        => 1,

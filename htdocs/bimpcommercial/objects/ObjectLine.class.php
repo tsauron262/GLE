@@ -4330,7 +4330,6 @@ class ObjectLine extends BimpObject
         }
 
         if (!$this->isFieldEditable($field, $force_edit)) {
-            return 'LA';
             return $this->displayLineData($field);
         }
 

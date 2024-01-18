@@ -128,7 +128,7 @@ class Bimp_ImportPrelevement extends BimpObject
         unset($tabLn[0]);
 
         foreach ($tabLn as $ln) {
-            if($ln != '' && $ln != ';;;;;;;;;;;;'){
+            if($ln != '' && stripos($ln,';;;;;;;;;;;') === false){
                 $line = BimpCache::getBimpObjectInstance($this->module, 'Bimp_ImportPrelevementLine');
                 $line->set('id_import', $this->id);
                 $line->set('data', $ln);

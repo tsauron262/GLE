@@ -598,8 +598,8 @@ class BCT_ContratLine extends BimpObject
 
                 case 'variable_qty':
                     return (int) $prod->getData('variable_qty');
-                    
-                case 'description': 
+
+                case 'description':
                     return (string) $prod->getData('description');
             }
         }
@@ -630,7 +630,7 @@ class BCT_ContratLine extends BimpObject
             case 'fac_periodicity':
             case 'achat_periodicity':
             case 'variable_qty':
-            case 'description': 
+            case 'description':
                 if ((int) $this->getData('fk_product') !== (int) $this->getInitData('fk_product') ||
                         ($field_name == 'buy_price_ht' &&
                         (int) $this->getData('fk_product_fournisseur_price') !== (int) $this->getInitData('fk_product_fournisseur_price'))) {
@@ -4509,7 +4509,7 @@ class BCT_ContratLine extends BimpObject
                                             } else {
                                                 $new_line->set('line_origin_type', 'propal_line');
                                                 $new_line->set('id_line_origin', $propal_line->id);
-
+                                                
                                                 $new_line->update($w, true);
 
                                                 $success .= ($success ? '<br/>' : '') . 'Ajout de la ligne au devis OK';
@@ -4864,8 +4864,8 @@ class BCT_ContratLine extends BimpObject
 
                                             $sub_line_qty = round($sub_line_qty, 6);
                                             $sub_lines_data[$sub_line->id] = array(
-                                                'nb_periods'     => $nb_periods,
-                                                'qty'            => $sub_line_qty
+                                                'nb_periods' => $nb_periods,
+                                                'qty'        => $sub_line_qty
                                             );
                                         }
                                     }
@@ -5527,7 +5527,6 @@ class BCT_ContratLine extends BimpObject
 
     public function createDolObject(&$errors = array(), &$warnings = array())
     {
-
         $contrat = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($contrat)) {
@@ -5558,6 +5557,7 @@ class BCT_ContratLine extends BimpObject
         }
 
         if (!count($errors)) {
+            $statut = (int) $this->getData('statut');
             $desc = $this->getData('description');
             $pu_ht = (float) $this->getData('subprice');
             $qty = (float) $this->getData('qty');
@@ -5587,6 +5587,11 @@ class BCT_ContratLine extends BimpObject
                 $this->hydrateFromDolObject();
 
                 if (!empty($bimpObjectFields)) {
+                    if ($statut !== self::STATUS_INACTIVE) {
+                        $this->set('statut', $statut);
+                        $this->dol_object->statut = $statut;
+                        $bimpObjectFields['statut'] = $statut;
+                    } 
                     $up_result = $this->db->update('contratdet', $bimpObjectFields, '`rowid` = ' . (int) $id);
 
                     if ($up_result <= 0) {
@@ -5598,6 +5603,10 @@ class BCT_ContratLine extends BimpObject
 
                         $errors[] = $msg;
                     }
+                } elseif ($statut !== self::STATUS_INACTIVE) {
+                    $this->set('statut', $statut);
+                    $this->dol_object->statut = $statut;
+                    $this->db->update('contratdet', array('statut' => $statut), '`rowid` = ' . (int) $id);
                 }
             }
         }

@@ -313,7 +313,7 @@ class BimpFile extends BimpObject
             $size = $size / 1024;
             $unite = "To";
         }
-        return $size . $unite;
+        return round($size,2) .' '. $unite;
     }
 
     public function displayAnonymizedFiles($bc_list)

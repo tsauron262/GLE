@@ -1445,6 +1445,7 @@ class BCT_Contrat extends BimpDolObject
                     'type'               => ($line->getData('fk_product') > 0 ? Bimp_FactureLine::LINE_PRODUCT : Bimp_FactureLine::LINE_FREE),
                     'remisable'          => 2,
                     'editable'           => 0,
+                    'pa_editable'        => 0,
                     'linked_id_object'   => (int) $line->id,
                     'linked_object_name' => 'contrat_line',
                     'hide_in_pdf'        => (($line->getData('linked_object_name') == 'bundle' || $line->getData('linked_object_name') == 'bundleCorrect') ? 1 : 0)
@@ -1486,12 +1487,27 @@ class BCT_Contrat extends BimpDolObject
                     }
                 }
 
+                $id_fourn = 0;
+                $pa_ht_line = (float) $line->getData('buy_price_ht');
+                $pa_ht_fourn = 0;
+
+                $id_pfp = (int) $line->getData('fk_product_fournisseur_price');
+                if ($id_pfp) {
+                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
+                    if (!BimpObject::objectLoaded($pfp)) {
+                        $line_errors[] = 'Le prix d\'achat fournisseur #' . $id_pfp . ' n\'existe plus';
+                    } else {
+                        $id_fourn = $pfp->getData('fk_soc');
+                        $pa_ht_fourn = $pfp->getData('price');
+                    }
+                }
+
                 $fac_line->qty = $line_qty;
                 $fac_line->desc = $line->getData('description');
                 $fac_line->id_product = (int) $line->getData('fk_product');
                 $fac_line->pu_ht = $line->getData('subprice');
                 $fac_line->tva_tx = $line->getData('tva_tx');
-                $fac_line->pa_ht = $line->getData('buy_price_ht');
+                $fac_line->pa_ht = ($pa_ht_fourn ? $pa_ht_fourn : $pa_ht_line);
                 $fac_line->id_fourn_price = $line->getData('fk_product_fournisseur_price');
                 $fac_line->date_from = $date_from;
                 $fac_line->date_to = $date_to;

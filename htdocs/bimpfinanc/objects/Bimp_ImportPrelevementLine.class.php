@@ -38,14 +38,14 @@ class Bimp_ImportPrelevementLine extends BimpObject
             $errors[] = 'Facture invalide';
         }
 
-        if (isset($datas[10]) && $data[10]) {
+        if (isset($datas[10]) && $data[10] != '') {
             $dateTab = explode("/", $datas[10]);
             if ($dateTab[2] > 2000)
                 $date = new DateTime($dateTab[2] . '/' . $dateTab[1] . '/' . $dateTab[0]);
             else
                 $date = new DateTime($datas[10]);
         } else {
-            $errors[] = 'date invalide. Info : '.print_r($datas);
+            $errors[] = 'date invalide. Info : '.print_r($datas,1);
         }
         
         if(!count($errors)){

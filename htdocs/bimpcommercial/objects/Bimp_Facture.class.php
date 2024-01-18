@@ -6498,8 +6498,14 @@ class Bimp_Facture extends BimpComm
                         }
                     }
 
+                    if (!isset($this->dol_object->linked_objects['facture'])) {
+                        $this->dol_object->linked_objects['facture'] = array();
+                    }
+                    
+                    $this->dol_object->linked_objects['facture'][] = $fac_cancel->id;
+                    
                     $errors = $new_fac->create($warnings, true);
-
+                    
                     if (!count($errors)) {
                         $success .= 'Création ' . $new_fac->getLabel('of_the') . ' de correction effectuée avec succès.<br/>';
                     }

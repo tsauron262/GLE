@@ -729,9 +729,17 @@ class BCT_ContratLine extends BimpObject
         if (!$date || $date < $date_fac_start || $check_date) {
             $check_errors = array();
             $new_date = '';
+            $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
             $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('MAX(a.date_end) as max_date'), array(
                         'f.type'                => array(0, 1, 2),
                         'f.fk_statut'           => array(0, 1, 2),
+                        'f.fk_facture_source'   => array(
+                            'or_field' => array(
+                                'IS_NULL',
+                                0
+                            )
+                        ),
+                        $sel_nb_avoirs          => 0,
                         'fl.linked_object_name' => 'contrat_line',
                         'fl.linked_id_object'   => $this->id
                             ), array(
@@ -744,6 +752,8 @@ class BCT_ContratLine extends BimpObject
                             'on'    => 'f.rowid = a.fk_facture'
                         )
             ));
+            
+//            die($sql);
 
             $res = $this->db->executeS($sql, 'array');
 
@@ -4509,7 +4519,7 @@ class BCT_ContratLine extends BimpObject
                                             } else {
                                                 $new_line->set('line_origin_type', 'propal_line');
                                                 $new_line->set('id_line_origin', $propal_line->id);
-                                                
+
                                                 $new_line->update($w, true);
 
                                                 $success .= ($success ? '<br/>' : '') . 'Ajout de la ligne au devis OK';
@@ -5591,7 +5601,7 @@ class BCT_ContratLine extends BimpObject
                         $this->set('statut', $statut);
                         $this->dol_object->statut = $statut;
                         $bimpObjectFields['statut'] = $statut;
-                    } 
+                    }
                     $up_result = $this->db->update('contratdet', $bimpObjectFields, '`rowid` = ' . (int) $id);
 
                     if ($up_result <= 0) {

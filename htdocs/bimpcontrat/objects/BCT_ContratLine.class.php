@@ -752,8 +752,6 @@ class BCT_ContratLine extends BimpObject
                             'on'    => 'f.rowid = a.fk_facture'
                         )
             ));
-            
-//            die($sql);
 
             $res = $this->db->executeS($sql, 'array');
 

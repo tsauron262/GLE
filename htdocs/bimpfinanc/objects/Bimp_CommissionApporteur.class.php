@@ -8,7 +8,8 @@ class Bimp_CommissionApporteur extends BimpObject
 
     public static $status_list = array(
         self::STATUS_DRAFT     => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
-        self::STATUS_VALIDATED => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('success'))
+        self::STATUS_VALIDATED => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('success')),
+        2 => array('label' => 'Regul', 'icon' => 'fas_check', 'classes' => array('success'))
     );
 
     public function create(&$warnings = array(), $force_create = false)

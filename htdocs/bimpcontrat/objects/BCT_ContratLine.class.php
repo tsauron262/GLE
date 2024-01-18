@@ -598,6 +598,9 @@ class BCT_ContratLine extends BimpObject
 
                 case 'variable_qty':
                     return (int) $prod->getData('variable_qty');
+                    
+                case 'description': 
+                    return (string) $prod->getData('description');
             }
         }
 
@@ -627,6 +630,7 @@ class BCT_ContratLine extends BimpObject
             case 'fac_periodicity':
             case 'achat_periodicity':
             case 'variable_qty':
+            case 'description': 
                 if ((int) $this->getData('fk_product') !== (int) $this->getInitData('fk_product') ||
                         ($field_name == 'buy_price_ht' &&
                         (int) $this->getData('fk_product_fournisseur_price') !== (int) $this->getInitData('fk_product_fournisseur_price'))) {

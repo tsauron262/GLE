@@ -105,6 +105,7 @@ fields:
     description: 
         label: Description
         type: html
+        depends_on: fk_product
         
     commentaire: 
         label: Commentaire

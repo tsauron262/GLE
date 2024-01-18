@@ -272,7 +272,7 @@ class FournObjectLine extends ObjectLine
                                 if (preg_match('/.*\..*/', $qty_str)) {
                                     $errors[] = 'Les quantités décimales ne sont pas autorisées pour les produits sérialisés';
                                 }
-                            } elseif ((int) $product->getData('fk_product_type') === 0 && BimpCore::getConf('not_decimal_product', 1, 'bimpcore')) {
+                            } elseif ((int) $product->getData('fk_product_type') === 0 && (int) BimpCore::getConf('not_decimal_product', 1, 'bimpcore')) {
                                 $qty_str = (string) $this->qty;
 
                                 if (preg_match('/.*\..*/', $qty_str)) {

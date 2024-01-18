@@ -5401,7 +5401,7 @@ class ObjectLine extends BimpObject
                             $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
                         } else {
                             // Décimales autorisées dans les factures pour permettre les facturations périodiques
-                            if ((int) $product->getData('fk_product_type') === 0 && $this->object_name !== 'Bimp_FactureLine') {
+                            if ((int) $product->getData('fk_product_type') === 0 && $this->object_name !== 'Bimp_FactureLine' && (int) BimpCore::getConf('not_decimal_product', 1, 'bimpcore')) {
                                 $qty_str = (string) $this->qty;
 
                                 if (preg_match('/.*\..*/', $qty_str)) {

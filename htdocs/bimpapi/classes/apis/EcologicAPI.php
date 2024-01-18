@@ -237,8 +237,8 @@ class EcologicAPI extends BimpAPI
                 $errors[] = 'Demande non créer';
             elseif(!$filesOk)
                 $warnings[] = 'Les fichiers ne sont pas ou partielement envoyées';
-//            else
-//                $errors[] = 'Erreur inconnue';
+            else
+                $errors[] = 'Erreur inconnue';
         }
         
         

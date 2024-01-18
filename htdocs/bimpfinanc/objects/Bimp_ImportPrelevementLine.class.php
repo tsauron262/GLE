@@ -48,17 +48,19 @@ class Bimp_ImportPrelevementLine extends BimpObject
             $errors[] = 'date invalide';
         }
         
-        if ($ref != '') {
-            $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('ref' => $ref));
-            if ($obj && $obj->isLoaded()) {
-                $facture = $obj->id;
+        if(!count($errors)){
+            if ($ref != '') {
+                $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('ref' => $ref));
+                if ($obj && $obj->isLoaded()) {
+                    $facture = $obj->id;
+                }
             }
-        }
 
-        $this->set('facture', $facture);
-        $this->set('price', $price);
-        $this->set('date', $date->format('Y-m-d'));
-        $errors = $this->update($warnings);
+            $this->set('facture', $facture);
+            $this->set('price', $price);
+            $this->set('date', $date->format('Y-m-d'));
+            $errors = $this->update($warnings);
+        }
 
         return array('errors' => $errors, 'warnings' => $warnings);
     }

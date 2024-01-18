@@ -45,7 +45,7 @@ class Bimp_ImportPrelevementLine extends BimpObject
             else
                 $date = new DateTime($datas[10]);
         } else {
-            $errors[] = 'date invalide. Info : '.print_r($datas,1);
+            $errors[] = 'LN '.$this->id.' date invalide. Info : '.print_r($datas,1);
         }
         
         if(!count($errors)){

@@ -276,7 +276,7 @@ class FournObjectLine extends ObjectLine
                                 $qty_str = (string) $this->qty;
 
                                 if (preg_match('/.*\..*/', $qty_str)) {
-                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Serviceee"';
+                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service"';
                                 }
                             }
                         }

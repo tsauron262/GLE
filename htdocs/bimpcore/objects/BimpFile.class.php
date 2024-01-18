@@ -293,6 +293,28 @@ class BimpFile extends BimpObject
 
         return '';
     }
+    
+    public function display_size(){
+        $unite = "o";
+        $size = $this->getData('file_size');
+        if($size > 1024){
+            $size = $size / 1024;
+            $unite = "Ko";
+        }
+        if($size > 1024){
+            $size = $size / 1024;
+            $unite = "Mo";
+        }
+        if($size > 1024){
+            $size = $size / 1024;
+            $unite = "Go";
+        }
+        if($size > 1024){
+            $size = $size / 1024;
+            $unite = "To";
+        }
+        return $size . $unite;
+    }
 
     public function displayAnonymizedFiles($bc_list)
     {

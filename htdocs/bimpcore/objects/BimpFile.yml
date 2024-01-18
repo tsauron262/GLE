@@ -204,6 +204,9 @@ lists_cols:
             callback: getDateModif
     description:
         field: description
+    file_size:
+        label: Taille
+        callback: display_size
         
 lists:
     default:

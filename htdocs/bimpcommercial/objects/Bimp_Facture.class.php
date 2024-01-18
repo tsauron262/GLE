@@ -6497,12 +6497,6 @@ class Bimp_Facture extends BimpComm
                             $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
                         }
                     }
-
-                    if (!isset($this->dol_object->linked_objects['facture'])) {
-                        $this->dol_object->linked_objects['facture'] = array();
-                    }
-                    
-                    $this->dol_object->linked_objects['facture'][] = $fac_cancel->id;
                     
                     $errors = $new_fac->create($warnings, true);
                     

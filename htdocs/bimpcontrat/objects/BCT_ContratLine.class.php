@@ -82,7 +82,7 @@ class BCT_ContratLine extends BimpObject
         return 1;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isValide(&$errors = array())
     {
@@ -360,16 +360,16 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
-//        if ($this->isActionAllowed('renouv') && $this->canSetAction('renouv')) {
-//            $buttons[] = array(
-//                'label'   => 'Renouveller',
-//                'icon'    => 'fas_redo',
-//                'onclick' => $this->getJsActionOnclick('renouv', array(), array(
-//                    'form_name'      => 'renouvellement',
-//                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onRenouvAbonnementFormSubmit($form, extra_data); }'
-//                ))
-//            );
-//        }
+        if ($this->isActionAllowed('renouv') && $this->canSetAction('renouv')) {
+            $buttons[] = array(
+                'label'   => 'Renouveller',
+                'icon'    => 'fas_redo',
+                'onclick' => $this->getJsActionOnclick('renouv', array(), array(
+                    'form_name'      => 'renouvellement',
+                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onRenouvAbonnementFormSubmit($form, extra_data); }'
+                ))
+            );
+        }
 
         if ((int) $this->getData('statut') > 0) {
             $prod = $this->getChildObject('product');

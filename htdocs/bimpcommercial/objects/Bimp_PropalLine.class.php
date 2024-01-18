@@ -132,7 +132,7 @@ class Bimp_PropalLine extends ObjectLine
             if ($id_linked_contrat_line) {
                 $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_contrat_line);
                 if (BimpObject::objectLoaded($contrat_line)) {
-                    return $contrat_line->getDataAtDate(str_replace('abo_', '', $field_name));
+                    return $contrat_line->getData(str_replace('abo_', '', $field_name));
                 }
             }
         }
@@ -445,10 +445,10 @@ class Bimp_PropalLine extends ObjectLine
             if ($id_contrat_line) {
                 if ($this->checkLinkedContratLine($errors)) {
                     $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
-                    $this->set('abo_fac_periodicity', $contrat_line->getDataAtDate('fac_periodicity'));
-                    $this->set('abo_duration', $contrat_line->getDataAtDate('duration'));
-                    $this->set('abo_fac_term', $contrat_line->getDataAtDate('fac_term'));
-                    $this->set('abo_nb_renouv', $contrat_line->getDataAtDate('nb_renouv'));
+                    $this->set('abo_fac_periodicity', $contrat_line->getData('fac_periodicity'));
+                    $this->set('abo_duration', $contrat_line->getData('duration'));
+                    $this->set('abo_fac_term', $contrat_line->getData('fac_term'));
+                    $this->set('abo_nb_renouv', $contrat_line->getData('nb_renouv'));
                 }
             }
 

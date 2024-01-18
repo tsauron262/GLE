@@ -3415,12 +3415,12 @@ class BCT_ContratLine extends BimpObject
                     $errors[] = 'Abonnement lié : le produit ne correspond pas';
                     $check = false;
                 } else {
-                    $this->set('fac_periodicity', $linked_line->getDataAtDate('fac_periodicity'));
-                    $this->set('achat_periodicity', $linked_line->getDataAtDate('achat_periodicity'));
-                    $this->set('duration', $linked_line->getDataAtDate('duration'));
-                    $this->set('variable_qty', $linked_line->getDataAtDate('variable_qty'));
-                    $this->set('nb_renouv', $linked_line->getDataAtDate('nb_renouv'));
-                    $this->set('fac_term', $linked_line->getDataAtDate('fac_term'));
+                    $this->set('fac_periodicity', $linked_line->getData('fac_periodicity'));
+                    $this->set('achat_periodicity', $linked_line->getData('achat_periodicity'));
+                    $this->set('duration', $linked_line->getData('duration'));
+                    $this->set('variable_qty', $linked_line->getData('variable_qty'));
+                    $this->set('nb_renouv', $linked_line->getData('nb_renouv'));
+                    $this->set('fac_term', $linked_line->getData('fac_term'));
                 }
             } else {
                 $errors[] = 'La ligne de contrat d\'abonnement liée #' . $id_linked_line . ' n\'existe plus';
@@ -4422,6 +4422,13 @@ class BCT_ContratLine extends BimpObject
                                 $dt_ouv = new DateTime($date_fin);
                                 $dt_ouv->add(new DateInterval('P1D'));
 
+                                
+                                $nb_renouv = (int) $this->getData('nb_renouv');
+                                
+                                if ($nb_renouv > 0) {
+                                    $nb_renouv--;
+                                }
+                                
                                 $new_line = BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
                                             'fk_contrat'                   => $line->getData('fk_contrat'),
                                             'fk_product'                   => $line->getData('fk_product'),
@@ -4439,7 +4446,7 @@ class BCT_ContratLine extends BimpObject
                                             'fac_periodicity'              => $fac_periodicity,
                                             'duration'                     => $duration,
                                             'fac_term'                     => $fac_term,
-                                            'nb_renouv'                    => $line->getData('nb_renouv') - 1,
+                                            'nb_renouv'                    => $nb_renouv,
                                             'id_line_origin'               => $line->id,
                                             'line_origin_type'             => 'contrat_line',
                                             'achat_periodicity'            => $achat_periodicity,
@@ -4505,7 +4512,7 @@ class BCT_ContratLine extends BimpObject
                                                 'abo_fac_periodicity' => $fac_periodicity,
                                                 'abo_duration'        => $duration,
                                                 'abo_fac_term'        => $fac_term,
-                                                'abo_nb_renouv'       => $line->getData('nb_renouv') - 1
+                                                'abo_nb_renouv'       => $nb_renouv
                                             ));
 
                                             if (!count($err)) {

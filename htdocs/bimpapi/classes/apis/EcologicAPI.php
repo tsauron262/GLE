@@ -188,6 +188,13 @@ class EcologicAPI extends BimpAPI
                             continue(2);
                         }
                     }
+                    foreach($tabExt as $ext){
+                        if(is_file($fileT[0] . ucfirst($fileT[1]).'.'.$ext)){
+                            $tabFile[$i][1] = ucfirst($fileT[1]);
+                            $tabFile[$i][2] = $ext;
+                            continue(2);
+                        }
+                    }
                     $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
                     BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
                     $filesOk = false;
@@ -211,6 +218,7 @@ class EcologicAPI extends BimpAPI
                         }
                         else{
                             $filesOk = false;
+                            $errors[] = 'Envoie fichier '.$fileT[1].' impossible';
                         }
                     }
                 }
@@ -227,14 +235,14 @@ class EcologicAPI extends BimpAPI
             if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S" && isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
                 $sav->updateField('status_ecologic', 99);
         }
-//        else{
+        else{
             if(!isset($ecologicData['ClaimId']))
                 $errors[] = 'Demande non créer';
             elseif(!$filesOk)
                 $warnings[] = 'Les fichiers ne sont pas ou partielement envoyées';
-//            else
-//                $errors[] = 'Erreur inconnue';
-//        }
+            else
+                $errors[] = 'Erreur inconnue';
+        }
         
         
         

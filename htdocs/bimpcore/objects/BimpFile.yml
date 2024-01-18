@@ -204,6 +204,10 @@ lists_cols:
             callback: getDateModif
     description:
         field: description
+    file_size2:
+        label: Taille
+        value:
+            callback: display_size
         
 lists:
     default:
@@ -233,7 +237,7 @@ lists:
         cols:
             type: 
             file_name:
-            file_size: 
+            file_size2: 
             date_create:
             date_modif:
             description:
@@ -268,7 +272,7 @@ lists:
             parent: 
             type: 
             file_name:
-            file_size: 
+            file_size2: 
             date_create:
             description:
             visibility:     
@@ -287,7 +291,7 @@ lists:
         cols:
             type: 
             file_name:
-            file_size: 
+            file_size2: 
             date_create:
             description:     
         
@@ -312,7 +316,7 @@ lists:
             parent:
             type: 
             file_name:
-            file_size: 
+            file_size2: 
             date_create:
             description: 
                 

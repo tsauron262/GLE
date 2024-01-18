@@ -26,9 +26,6 @@ if (!$user->admin) {
     exit;
 }
 
-//BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
-//echo Bimp_Facture::sendRappelFacturesBrouillons();
-
 echo '<br/>FIN';
 echo '</body></html>';
 

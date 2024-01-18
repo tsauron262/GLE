@@ -187,6 +187,8 @@ class EcologicAPI extends BimpAPI
                             $tabFile[$i][2] = $ext;
                             continue(2);
                         }
+                    }
+                    foreach($tabExt as $ext){
                         if(is_file($fileT[0] . ucfirst($fileT[1]).'.'.$ext)){
                             $tabFile[$i][1] = ucfirst($fileT[1]);
                             $tabFile[$i][2] = $ext;

@@ -211,7 +211,14 @@ class ObjectLine extends BimpObject
                         return 0;
                     }
 
-                    if (!(int) $this->getData('editable') || !$parent->areLinesEditable()) {
+                    if (!$parent->areLinesEditable()) {
+                        return 0;
+                    }
+
+                    if (!(int) $this->getData('editable')) {
+                        if ($field == 'pa_ht' && is_a($this, 'Bimp_FactureLine') && $this->getData('linked_object_name') === 'contrat_line' && $this->canEditPrixAchat()) {
+                            return 1;
+                        }
                         return 0;
                     }
                 }
@@ -4323,6 +4330,7 @@ class ObjectLine extends BimpObject
         }
 
         if (!$this->isFieldEditable($field, $force_edit)) {
+            return 'LA';
             return $this->displayLineData($field);
         }
 

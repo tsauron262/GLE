@@ -2285,7 +2285,7 @@ class Bimp_Product extends BimpObject
                 $prod = $child_prod->getChildObject('product_fils');
                 if($prod->getData('duree') * $child_prod->getData('qty') != $this->getData('duree'))
                     $html .= BimpRender::renderAlerts('Attention le bundle est mal configuré : '.$prod->getLink(). ' durée total '.($prod->getData('duree') * $child_prod->getData('qty'). ' mois bundle '.$this->getData('duree')));
-                if($prod->isAbonnement())
+                if(!$prod->isAbonnement())
                     $html .= BimpRender::renderAlerts('Attention le bundle est mal configuré : '.$prod->getLink(). ' n\'est pas un abonnement ');
             } 
         }

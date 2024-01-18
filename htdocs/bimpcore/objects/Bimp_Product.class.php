@@ -2284,7 +2284,7 @@ class Bimp_Product extends BimpObject
             foreach ($child_prods as $child_prod) {
                 $prod = $child_prod->getChildObject('product_fils');
                 if($prod->getData('duree') * $child_prod->getData('qty') != $this->getData('duree'))
-                    $html .= BimpRender::renderAlerts('Attention le bundle est mal configurée : '.$prod->getLink(). ' durée total '.($prod->getData('duree') * $child_prod->getData('qty'). ' mois bundle '.$this->getData('duree')));
+                    $html .= BimpRender::renderAlerts('Attention le bundle est mal configuré : '.$prod->getLink(). ' durée total '.($prod->getData('duree') * $child_prod->getData('qty'). ' mois bundle '.$this->getData('duree')));
             } 
         }
         return $html;

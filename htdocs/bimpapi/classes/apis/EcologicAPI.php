@@ -188,7 +188,7 @@ class EcologicAPI extends BimpAPI
                             continue(2);
                         }
                         if(is_file($fileT[0] . str_replace('I', 'i', $fileT[1]).'.'.$ext)){
-                            $fileT[1] = str_replace('I', 'i', $fileT[1]);
+                            $tabFile[$i][1] = str_replace('I', 'i', $fileT[1]);
                             $tabFile[$i][2] = $ext;
                             continue(2);
                         }

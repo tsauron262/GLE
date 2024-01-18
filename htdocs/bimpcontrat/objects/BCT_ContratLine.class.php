@@ -4327,10 +4327,6 @@ class BCT_ContratLine extends BimpObject
             $errors[] = 'Périodicité de facturation non définie';
         }
 
-        if (!$achat_periodicity) {
-            $errors[] = 'Périodicité d\'achat non définie';
-        }
-
         if (!$duration) {
             $errors[] = 'Durée non définie';
         }

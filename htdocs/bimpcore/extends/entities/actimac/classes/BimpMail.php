@@ -99,7 +99,9 @@ class BimpMail extends BimpMailCore
         
         if ($this->type === 'ldlc' || $this->type === 'actimag') {
             $html .= '<div style="margin-top: 50px">';
+            $html .= '<a href="https://www.ldlc.com/aide/50-la-garantie-ldlc/">';
             $html .= '<img width="150px" height="auto" src="https://media.ldlc.com/cms/LDLC_com/bloc_droit_home/garantie.gif"/>';
+            $html .= '</a>';
             $html .= '</div>';
         }
         

@@ -1323,6 +1323,11 @@ lists_cols:
                 params:
                     - 0
                     
+    alert_bundle:
+        label: Alert bundle
+        value:
+            callback: getAlertBundle
+                    
 lists: 
     default: 
         title: Produits

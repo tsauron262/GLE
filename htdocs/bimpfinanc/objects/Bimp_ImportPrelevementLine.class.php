@@ -38,27 +38,29 @@ class Bimp_ImportPrelevementLine extends BimpObject
             $errors[] = 'Facture invalide';
         }
 
-        if (isset($datas[10]) && $data[10]) {
+        if (isset($datas[10]) && $datas[10]) {
             $dateTab = explode("/", $datas[10]);
             if ($dateTab[2] > 2000)
                 $date = new DateTime($dateTab[2] . '/' . $dateTab[1] . '/' . $dateTab[0]);
             else
                 $date = new DateTime($datas[10]);
         } else {
-            $errors[] = 'date invalide';
+            $errors[] = 'LN '.$this->id.' date invalide. Info : '.print_r($datas,1);
         }
         
-        if ($ref != '') {
-            $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('ref' => $ref));
-            if ($obj && $obj->isLoaded()) {
-                $facture = $obj->id;
+        if(!count($errors)){
+            if ($ref != '') {
+                $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('ref' => $ref));
+                if ($obj && $obj->isLoaded()) {
+                    $facture = $obj->id;
+                }
             }
-        }
 
-        $this->set('facture', $facture);
-        $this->set('price', $price);
-        $this->set('date', $date->format('Y-m-d'));
-        $errors = $this->update($warnings);
+            $this->set('facture', $facture);
+            $this->set('price', $price);
+            $this->set('date', $date->format('Y-m-d'));
+            $errors = $this->update($warnings);
+        }
 
         return array('errors' => $errors, 'warnings' => $warnings);
     }

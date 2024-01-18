@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/functions/suppr_accent.php'
 class TRA_payInc {
     
     protected $ref;
-    protected $db;
+    protected BimpDb $db;
             
     function __construct($bimp_db) { $this->db = $bimp_db;}
     
@@ -28,10 +28,12 @@ class TRA_payInc {
         $ecriture  = "";
         $structure = Array();
         
-        $structure['JOURNAL']           = sizing("CA", 3);
+        $banqueData = $this->db->getRow('bank_account', 'rowid = '.$data['banque']);
+        
+        $structure['JOURNAL']           = sizing($banqueData->cegid_journal, 3);
         $structure['DATE']              = sizing($date->format('dmY'),8);
         $structure['TYPE_PIECE']        = sizing("RC", 2);
-        $structure['COMPTE']            = sizing('51240900', 17);
+        $structure['COMPTE']            = sizing($banqueData->compte_compta, 17);
         $structure['TYPE_COMPTE']       = sizing('X', 1);
         $structure['CODE_COMPTA']       = sizing('', 16);
         $structure['NEXT']              = sizing('',1);

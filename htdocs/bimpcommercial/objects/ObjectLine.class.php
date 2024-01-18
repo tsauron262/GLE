@@ -1752,8 +1752,9 @@ class ObjectLine extends BimpObject
                 if ($product->isAbonnement()) {
                     return 6;
                 }
+
                 if ($product->getData('fk_product_type') === 0) {
-                    return 1;
+                    return 0;
                 }
             }
         }
@@ -2537,17 +2538,75 @@ class ObjectLine extends BimpObject
 
     public function displayLinkedObject()
     {
-        if ($this->getData('linked_object_name') === 'commande_line') {
-            $id_commande_line = (int) $this->getData('linked_id_object');
-            $commandeLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_commande_line);
-            $commande = $commandeLine->getParentInstance();
-            global $modeCSV;
-            if ($modeCSV) {
-                return $commande->getRef() . ' ln ' . $commandeLine->getData('position');
-            } else
-                return $commande->getLink() . "<br/>" . $commandeLine->getLink();
+        $html = '';
+        global $modeCSV;
+
+        $obj = $this->getData('linked_object_name');
+        $id = (int) (int) $this->getData('linked_id_object');
+
+        if ($obj && $id) {
+            switch ($obj) {
+                case 'commande_line':
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id);
+
+                    if (BimpObject::objectLoaded($line)) {
+                        $commande = $line->getParentInstance();
+                        if (BimpObject::objectLoaded($commande)) {
+                            if ($modeCSV) {
+                                $html .= $commande->getRef();
+                            } else {
+                                $html .= $commande->getLink() . '<br/>';
+                            }
+                        }
+
+                        if ($modeCSV) {
+                            $html .= ' - ligne n° ' . $line->getData('position');
+                        } else {
+                            $html .= $line->getLink();
+                        }
+                    }
+                    break;
+
+                case 'contrat_line':
+                    $id_contrat = (int) $this->db->getValue('contratdet', 'fk_contrat', 'rowid = ' . $id);
+
+                    if ($id_contrat) {
+                        $version = (int) $this->db->getValue('contrat', 'version', 'rowid = ' . $id_contrat);
+                        if ($version == 2) {
+                            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id);
+                            $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
+                        } else {
+                            $line = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $id);
+                            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+                        }
+
+                        if (BimpObject::objectLoaded($line)) {
+                            if (BimpObject::objectLoaded($contrat)) {
+                                if ($modeCSV) {
+                                    $html .= $contrat->getRef();
+                                } else {
+                                    $html .= $contrat->getLink() . '<br/>';
+                                }
+                            }
+
+                            if ($modeCSV) {
+                                $html .= ' - ligne n° ' . $line->getData('rang');
+                            } else {
+                                $html .= $line->getLink();
+                            }
+                        }
+                    }
+
+                    break;
+            }
         }
-        return '';
+
+
+        if (!$html && ($obj)) {
+            $html .= $obj . ($id ? ' #' . $id : '');
+        }
+
+        return $html;
     }
 
     public function displayDureeReliquat($type = 'TTC')
@@ -5401,7 +5460,7 @@ class ObjectLine extends BimpObject
                             $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
                         } else {
                             // Décimales autorisées dans les factures pour permettre les facturations périodiques
-                            if ((int) $product->getData('fk_product_type') === 0 && $this->object_name !== 'Bimp_FactureLine' && (int) BimpCore::getConf('not_decimal_product', 1, 'bimpcore')) {
+                            if ((int) $product->getData('fk_product_type') === 0 && $this->object_name !== 'Bimp_FactureLine' && (int) BimpCore::getConf('not_decimal_product', null, 'bimpcore')) {
                                 $qty_str = (string) $this->qty;
 
                                 if (preg_match('/.*\..*/', $qty_str)) {

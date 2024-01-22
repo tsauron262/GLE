@@ -1676,18 +1676,21 @@ class BCT_ContratLine extends BimpObject
     public function getLinkableContratLinesArray()
     {
         $id_prod = (int) BimpTools::getPostFieldValue('fk_product', $this->getData('fk_product'));
+        $other_product = (int) BimpTools::getPostFieldValue('type_linked_line', 0);
         if ($id_prod) {
             $contrat = $this->getParentInstance();
             if (BimpObject::objectLoaded($contrat)) {
-                return $contrat->getAboLinesArray(array(
+                $filter = array(
                             'include_empty'    => true,
                             'empty_label'      => 'Aucun',
                             'active_only'      => true,
                             'with_periods'     => true,
-                            'id_product'       => $id_prod,
                             'no_sub_lines'     => true,
                             'excluded_id_line' => ($this->isLoaded() ? $this->id : 0)
-                ));
+                );
+                if(!$other_product)
+                    $filter['id_product'] = $id_prod;
+                return $contrat->getAboLinesArray($filter);
             }
         }
 
@@ -3411,9 +3414,9 @@ class BCT_ContratLine extends BimpObject
                 if ((int) $this->getData('fk_contrat') !== (int) $linked_line->getData('fk_contrat')) {
                     $errors[] = 'La ligne liée n\'appartient pas au même contrat';
                     $check = false;
-                } elseif ((int) $linked_line->getData('fk_product') !== (int) $this->getData('fk_product')) {
-                    $errors[] = 'Abonnement lié : le produit ne correspond pas';
-                    $check = false;
+//                } elseif ((int) $linked_line->getData('fk_product') !== (int) $this->getData('fk_product')) {
+//                    $errors[] = 'Abonnement lié : le produit ne correspond pas';
+//                    $check = false;
                 } else {
                     $this->set('fac_periodicity', $linked_line->getData('fac_periodicity'));
                     $this->set('achat_periodicity', $linked_line->getData('achat_periodicity'));

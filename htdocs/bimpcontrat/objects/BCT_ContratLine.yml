@@ -331,7 +331,7 @@ fields:
             options: 
                 array: linkableContratLines
             help: 'Si un abonnement est sélectionné, les unités seront facturées au prorata de la durée restante de cet abonnement.<br/>Toutes les unités pourront ainsi être renouvellées simultanément'
-        depends_on: fk_product
+        depends_on: fk_product,type_linked_line
         
     id_line_renouv: 
         label: Ligne de renouvellement
@@ -404,6 +404,12 @@ forms:
               value: 2
             - field: fk_product
             - field: description
+            - custom: 1
+              input_name: type_linked_line
+              type: bool
+              input:
+                  type: toggle
+              label: Liée a une ligne produit différent
             - field: id_linked_line
             - field: date_ouverture_prevue
             - title: vente

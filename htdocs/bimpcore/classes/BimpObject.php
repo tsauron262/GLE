@@ -4150,6 +4150,14 @@ class BimpObject extends BimpCache
         }
 
         $sql .= BimpTools::getSqlFrom($table, $joins);
+        
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            $newJoins = array();
+            if ($this->getEntityFilter($newJoins, $filters)) {
+                $joins = BimpTools::merge_array($joins, $newJoins);
+            }
+        }
+        
         $sql .= BimpTools::getSqlWhere($filters);
 
         $rows = $this->db->executeS($sql, 'array');
@@ -10065,7 +10073,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             global $conf;
             $dir = $conf->bimpcore->multidir_output[$conf->entity];
-//            $dir = PATH_TMP.'/bimpcore/';
+            $dir = PATH_TMP.'/bimpcore/';
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(

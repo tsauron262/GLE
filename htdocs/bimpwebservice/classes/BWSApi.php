@@ -569,19 +569,32 @@ class BWSApi
                 $children_data = array();
                 if (!empty($children)) {
                     foreach ($children as $child_name) {
-                        if (!$object->config->isDefined('objects/' . $child_name) || ($object->config->get('objects/' . $child_name . '/relation', '') !== 'hasMany')) {
+                        if (!$object->config->isDefined('objects/' . $child_name)){
                             $this->addError('INVALID_PARAMETER', 'L\'objet enfant "' . $child_name . '" n\'existe pas pour les ' . $object->getLabel('name_plur'));
                         } else {
-                            $child = $object->getChildObject($child_name);
-                            if (!is_a($child, 'BimpObject')) {
-                                $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
-                            } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
-                                    ($this->check_erp_user_rights && !$child->can('view'))) {
-                                $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
-                            } else {
-                                $children_data[$child_name] = array();
-                                foreach ($object->getChildrenObjects($child_name) as $child_object) {
-                                    $children_data[$child_name][] = $child_object->getDataArray(true, $this->check_erp_user_rights);
+                            if($object->config->get('objects/' . $child_name . '/relation', '') === 'hasMany') {
+                                $child = $object->getChildObject($child_name);
+                                if (!is_a($child, 'BimpObject')) {
+                                    $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
+                                } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
+                                        ($this->check_erp_user_rights && !$child->can('view'))) {
+                                    $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
+                                } else {
+                                    $children_data[$child_name] = array();
+                                    foreach ($object->getChildrenObjects($child_name) as $child_object) {
+                                        $children_data[$child_name][] = $child_object->getDataArray(true, $this->check_erp_user_rights);
+                                    }
+                                }
+                            }
+                            elseif($object->config->get('objects/' . $child_name . '/relation', '') === 'hasOne') {
+                                $child = $object->getChildObject($child_name);
+                                if (!is_a($child, 'BimpObject')) {
+                                    $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
+                                } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
+                                        (0)) {
+                                    $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permissionnnnnnnn d\'obtenir les données des objets enfants "' . $child_name . '"');
+                                } else {
+                                    $children_data[$child_name] = $child->getDataArray(true, $this->check_erp_user_rights);
                                 }
                             }
                         }

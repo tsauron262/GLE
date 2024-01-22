@@ -566,40 +566,12 @@ class BWSApi
                     $children = json_decode($children);
                 }
 
-                $children_data = array();
-                if (!empty($children)) {
-                    foreach ($children as $child_name) {
-                        if (!$object->config->isDefined('objects/' . $child_name)){
-                            $this->addError('INVALID_PARAMETER', 'L\'objet enfant "' . $child_name . '" n\'existe pas pour les ' . $object->getLabel('name_plur'));
-                        } else {
-                            if($object->config->get('objects/' . $child_name . '/relation', '') === 'hasMany') {
-                                $child = $object->getChildObject($child_name);
-                                if (!is_a($child, 'BimpObject')) {
-                                    $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
-                                } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
-                                        ($this->check_erp_user_rights && !$child->can('view'))) {
-                                    $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
-                                } else {
-                                    $children_data[$child_name] = array();
-                                    foreach ($object->getChildrenObjects($child_name) as $child_object) {
-                                        $children_data[$child_name][] = $child_object->getDataArray(true, $this->check_erp_user_rights);
-                                    }
-                                }
-                            }
-                            elseif($object->config->get('objects/' . $child_name . '/relation', '') === 'hasOne') {
-                                $child = $object->getChildObject($child_name);
-                                if (!is_a($child, 'BimpObject')) {
-                                    $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
-                                } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
-                                        (0)) {
-                                    $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permissionnnnnnnn d\'obtenir les données des objets enfants "' . $child_name . '"');
-                                } else {
-                                    $children_data[$child_name] = $child->getDataArray(true, $this->check_erp_user_rights);
-                                }
-                            }
-                        }
-                    }
-                }
+                
+                /*
+                 * Todo implémenter recursivité des child exemple pour contrat array('lines'=>array('produit'))
+                 * curl -s -X POST -H "BWS-LOGIN: cC50a2F0Y2hlbmtvQGJpbXAuZnI=" -H "BWS-TOKEN:RFdVNTJ0WENEcmkwdVByZlM4Z0ZSQXc2" 'https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req=getObjectData' -F module=bimpcontract -F object_name=BContract_contrat -F ref=CDP2401-0003 -F "children={\"lines\":[\"produit\"]}
+                 */
+                $children_data = $this->getChildrenData($object, $children);
 
                 $response = array(
                     'object_data' => $object->getDataArray(true, $this->check_erp_user_rights),
@@ -609,6 +581,51 @@ class BWSApi
         }
 
         return $response;
+    }
+    
+    protected function getChildrenData($object, $children){
+        $children_data = array();
+        if (!empty($children)) {
+            foreach ($children as $child_name => $child_data) {
+                if(!is_array($child_data))
+                    $child_name = $child_data;
+                if (!$object->config->isDefined('objects/' . $child_name)){
+                    $this->addError('INVALID_PARAMETER', 'L\'objet enfant "' . $child_name . '" n\'existe pas pour les ' . $object->getLabel('name_plur'));
+                } else {
+                    if($object->config->get('objects/' . $child_name . '/relation', '') === 'hasMany') {
+                        $child = $object->getChildObject($child_name);
+                        if (!is_a($child, 'BimpObject')) {
+                            $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
+                        } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
+                                ($this->check_erp_user_rights && !$child->can('view'))) {
+                            $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
+                        } else {
+                            $children_data[$child_name] = array();
+                            foreach ($object->getChildrenObjects($child_name) as $child_object) {
+                                $data = $child_object->getDataArray(true, $this->check_erp_user_rights);
+                                $data['children'] = (is_array($child_data) ? $this->getChildrenData($child_object, $child_data) : array());
+                                $children_data[$child_name][] = $data;
+                                
+                            }
+                        }
+                    }
+                    elseif($object->config->get('objects/' . $child_name . '/relation', '') === 'hasOne') {
+                        $child = $object->getChildObject($child_name);
+                        if (!is_a($child, 'BimpObject')) {
+                            $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
+                        } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
+                                (0)) {
+                            $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permissionnnnnnnn d\'obtenir les données des objets enfants "' . $child_name . '"');
+                        } else {
+                            $data = $child->getDataArray(true, $this->check_erp_user_rights);
+                            $data['children'] = (is_array($child_data) ? $this->getChildrenData($child_object, $child_data) : array());
+                            $children_data[$child_name] = $data;
+                        }
+                    }
+                }
+            }
+        }
+        return $children_data;
     }
 
     protected function wsRequest_getObjectValue()

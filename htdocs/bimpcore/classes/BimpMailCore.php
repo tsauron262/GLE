@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
 class BimpMailCore
 {
 
+    public $type = '';
     public $cmail = null;
     public $model = 'default';
     public $primary = '';
@@ -161,7 +162,7 @@ class BimpMailCore
 
     public function setFromType($type)
     {
-        
+        $this->type = $type;
     }
 
     public function send(&$errors = array(), &$warnings = array())

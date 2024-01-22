@@ -6497,9 +6497,9 @@ class Bimp_Facture extends BimpComm
                             $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
                         }
                     }
-
+                    
                     $errors = $new_fac->create($warnings, true);
-
+                    
                     if (!count($errors)) {
                         $success .= 'Création ' . $new_fac->getLabel('of_the') . ' de correction effectuée avec succès.<br/>';
                     }

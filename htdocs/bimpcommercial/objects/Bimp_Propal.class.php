@@ -1281,7 +1281,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         ));
 
                         $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                        $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer un contrat d\'abonnement';
+                        $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter les lignes à un contrat d\'abonnement';
                         $msg .= '</span>';
                         $msg .= '</div>';
                     } else {
@@ -2267,7 +2267,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                             'linked_id_object'             => $linked_id_object,
                                             'linked_object_name'           => $linked_object_name,
                                             'achat_periodicity'            => (BimpObject::objectLoaded($prod) ? $prod->getData('achat_def_periodicity') : 0),
-                                            'variable_qty'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
+                                            'variable_qty'                 => (!(int) $line->getData('id_parent_line') && BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
                                             'date_ouverture_prevue'        => $line_date_ouv
                                                 ), true, $line_errors, $line_warnings);
 

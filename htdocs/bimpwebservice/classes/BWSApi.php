@@ -29,8 +29,8 @@ class BWSApi
             'params' => array(
                 'module'      => array('label' => 'Nom du module', 'require' => 1),
                 'object_name' => array('label' => 'Nom de l\'objet', 'required' => 1),
-//                'id'          => array('label' => 'ID de l\'objet', 'data_type' => 'id', 'require_if_missing' => 'ref'),
-//                'ref'         => array('label' => 'Référence de l\'objet', 'require_if_missing' => 'id'),
+                'id'          => array('label' => 'ID de l\'objet', 'data_type' => 'id', 'require_if_missing' => 'ref'),
+                'ref'         => array('label' => 'Référence de l\'objet', 'require_if_missing' => 'id'),
                 'children'    => array('label' => 'Objets enfants à retourner')
             )
         ),

@@ -693,6 +693,13 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '</p>';
         }
         
+        if (isset($this->bimpCommObject) && $this->bimpCommObject->getData('zone_vente') == 2 && $this->bimpCommObject->getData('total_tva') == 0) {
+            $html .= '<p style="font-size: 6px; font-style: italic">';
+            $html .= '* Exonération de TVA liée à l’article 262 Ter du CGI';
+            $html .= '</p>';
+        }
+        
+        
         if ($html != '')
             $this->writeContent($html);
         

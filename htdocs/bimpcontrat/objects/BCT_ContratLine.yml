@@ -409,6 +409,8 @@ forms:
               type: bool
               input:
                   type: toggle
+              value:
+                  callback: isLinkedToOtherRef
               label: Liée a une ligne produit différent
             - field: id_linked_line
             - field: date_ouverture_prevue

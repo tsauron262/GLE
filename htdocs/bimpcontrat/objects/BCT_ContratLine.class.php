@@ -138,6 +138,17 @@ class BCT_ContratLine extends BimpObject
 
         return parent::isFieldEditable($field, $force_edit);
     }
+    
+    public function isLinkedToOtherRef(){
+        $linked_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $this->getData('id_linked_line'));
+
+        if (BimpObject::objectLoaded($linked_line)) {
+            if ((int) $linked_line->getData('fk_product') !== (int) $this->getData('fk_product')) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public function isActionAllowed($action, &$errors = array())
     {

@@ -65,10 +65,6 @@ BWSApi::$requests['getContractInfo'] = array(
     'prod'      => array('label' => 'Ref produit', 'required' => 0),
 );
 
-BWSApi::$requests['getLineContractInfo'] = array(
-    'ref_contrat'   => array('label' => 'Ref', 'required' => 1), 
-);
-
 class BWSApi_ExtEntity extends BWSApi
 {
 
@@ -353,31 +349,6 @@ class BWSApi_ExtEntity extends BWSApi
                     $ln['client']['commerciaux'][] = array("nom" => $commercial->getFullName(), 'mail' => $commercial->getData('email'));
                 }
                 $ln['id'] = $contract->id;
-
-                $return[] = $ln;
-            }
-            return array(
-                'success'        => 1,
-                'contract_infos' => $return
-            );
-        }
-    }
-
-    protected function wsRequest_getLineContractInfo()
-    {
-        $return = array();
-        $ref = $this->getParam('ref_contrat', '');
-        $filters = array('parent:ref' => $ref);
-
-        if (!count($filters)) {
-            $this->addError('FAIL', 'Merci de filtrer les résultat');
-        } else {
-            $list = BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contratLine', $filters);
-
-            foreach ($list as $contractLine) {
-                $prod = $contratLine->getChildrenObject('product');
-                $ln = array("ref" => $prod->getData("ref"), "status" => $contractLine->getData('statut'), "date_fin_validite" => $contractLine->getData('date_fin_validite'));
-                $ln['id'] = $contractLine->id;
 
                 $return[] = $ln;
             }

@@ -989,6 +989,13 @@ class BT_ficheInter extends BimpDolObject
             $label = $contrat->getData('label');
             $contrats[(int) $contrat->id] = $contrat->getRef() . '&nbsp;&nbsp;' . ($label ? ' - ' . $label : '');
         }
+        
+        $filtres['statut'] = 1;
+        $filtres['version'] = 2;
+        foreach (BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', $filtres, 'rowid', 'desc') as $contrat) {
+            $label = $contrat->getData('label');
+            $contrats[(int) $contrat->id] = 'Abonnement '.$contrat->getRef() . '&nbsp;&nbsp;' . ($label ? ' - ' . $label : '');
+        }
 
         return $contrats;
     }

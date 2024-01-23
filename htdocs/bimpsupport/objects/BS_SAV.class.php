@@ -1142,6 +1142,22 @@ class BS_SAV extends BimpObject
                         'onclick' => $onclick
                     );
                 }
+                
+                
+
+                if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise') && !is_null($propal)) {
+                    if ($this->object_name === 'Bimp_Commande' || $this->object_name === 'Bimp_Propal' || (int) $this->getData('fk_statut') === 0) {
+                        $buttons[] = array(
+                            'label'       => 'Déduire un crédit disponible',
+                            'icon' => 'fas_file-import',
+                            'classes'     => array('btn', 'btn-default'),
+                            'onclick' => $propal->getJsActionOnclick('useRemise', array(), array(
+                                    'form_name' => 'use_remise'
+                            )
+                            )
+                        );
+                    }
+                }
 
                 // Payer facture: 
                 if ((int) $this->getData('id_facture')) {

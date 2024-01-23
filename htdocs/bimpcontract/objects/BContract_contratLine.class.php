@@ -58,7 +58,7 @@ class BContract_contratLine extends BContract_contrat
         
         $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $this->getData('fk_product'));
         if ($produit && $produit->isAbonnement()) {
-            $errors[] = 'Pas possible de mêttre des abonnement dans un contrat';
+            $errors[] = 'Pas possible de mettre des abonnements dans un contrat';
         }
         
         if(count($errors))

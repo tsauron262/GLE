@@ -2606,11 +2606,13 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        if ($id_fourn && $id_entrepot) {
+        if ($id_fourn /*&& $id_entrepot*/) {
             $sql = 'SELECT cf.rowid as id, cf.ref, cf.date_creation as date, s.nom FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur cf';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cfe ON cf.rowid = cfe.fk_object';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON s.rowid = cf.fk_soc';
-            $sql .= ' WHERE cf.fk_soc = ' . (int) $id_fourn . ' AND cf.fk_statut = 0 AND cfe.entrepot = ' . (int) $id_entrepot;
+            $sql .= ' WHERE cf.fk_soc = ' . (int) $id_fourn . ' AND cf.fk_statut = 0';
+            if($id_entrepot)
+                $sql .= ' AND cfe.entrepot = ' . (int) $id_entrepot;
             $sql .= ' ORDER BY cf.rowid DESC';
 
             $rows = $this->db->executeS($sql);

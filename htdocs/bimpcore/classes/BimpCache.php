@@ -2988,6 +2988,10 @@ class BimpCache
 
     public static function getEntitiesCacheArray($include_empty = true, $empty_label = '')
     {
+        
+        if (!BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            return array();
+        }
         $cacheKey = 'entities';
 
         if (!isset(self::$cache[$cacheKey])) {

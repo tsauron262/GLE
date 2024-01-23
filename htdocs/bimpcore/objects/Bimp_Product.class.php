@@ -308,7 +308,7 @@ class Bimp_Product extends BimpObject
                     $errors[] = 'Ce produit est déjà validé';
                     return 0;
                 }
-                if ((int) $this->getData('tosell') != 1) {
+                if ((int) $this->getData('tosell') != 1 && (int) $this->getData('tobuy') != 1) {
                     $errors[] = "Ce produit n'est pas en vente.";
                     return 0;
                 }

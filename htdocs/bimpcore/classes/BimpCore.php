@@ -1434,7 +1434,7 @@ class BimpCore
         }
 
         if (!$id_object) {
-            $errors[] = 'ID objet absent';
+            $errors[] = 'ID objet absent (err 20)';
         }
 
         if (!count($errors)) {

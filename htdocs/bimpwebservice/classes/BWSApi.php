@@ -240,6 +240,7 @@ class BWSApi
         global $user, $db;
         $user = new User($db);
         $user->fetch($id_user);
+        $user->getrights();
         if (!BimpObject::objectLoaded($user)) {
             unset($user);
             BimpCore::addlog('Utilisateur ERP associé invalide', Bimp_Log::BIMP_LOG_URGENT, 'ws', $this->ws_user, array(

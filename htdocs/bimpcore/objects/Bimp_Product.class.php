@@ -177,6 +177,7 @@ class Bimp_Product extends BimpObject
                 }
                 return 0;
             case 'tobuy':
+            case 'tosell':
                 return $this->canValidate();
 
             case 'no_fixe_prices':

@@ -1989,4 +1989,95 @@ class BCT_Contrat extends BimpDolObject
             'warnings' => $warnings
         );
     }
+
+    // Méthodes statiques : 
+
+    public static function RenouvAuto()
+    {
+        $infos = '';
+
+        $bdb = BimpCache::getBdb();
+        BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
+
+        $delay = (int) BimpCore::getConf('abo_renouv_auto_delay', null, 'bimpcontrat');
+        
+        if (!$delay) {
+            return 'Renouvellements auto désactivés';
+        }
+
+        $date = new DateTime();
+        $date->add(new DateInterval('P' . $delay . 'D'));
+
+        $sql = BimpTools::getSqlFullSelectQuery('contratdet', array('a.rowid as id_line', 'c.rowid as id_contrat'), array(
+                    'a.statut'            => array(BCT_ContratLine::STATUS_ACTIVE, BCT_ContratLine::STATUS_CLOSED),
+                    'a.line_type'         => BCT_ContratLine::TYPE_ABO,
+                    'id_linked_line'      => 0,
+                    'id_parent_line'      => 0,
+                    'id_line_renouv'      => 0,
+                    'a.nb_renouv'         => array(
+                        'or_field' => array(
+                            -1,
+                            array('operator' => '>', 'value' => 0)
+                        )
+                    ),
+                    'a.date_fin_validite' => array(
+                        'or_field' => array(
+                            'IS_NOT_NULL',
+                            array('operator' => '<=', 'value' => $date->format('Y-m-d') . ' 00:00:00')
+                        )
+                    ),
+                    'c.version'           => 2,
+                    'c.statut'            => 1,
+                        ), array('c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')));
+
+        echo $sql;
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        echo '<pre>';
+        print_r($rows);
+        exit;
+
+        // Trie par contrats :
+
+        $contrats = array();
+        foreach ($rows as $r) {
+            if (!isset($contrats[(int) $r['id_contrat']])) {
+                $contrats[(int) $r['id_contrat']] = array();
+            }
+
+            $contrats[(int) $r['id_contrat']][] = (int) $r['id_line'];
+        }
+
+        foreach ($contrats as $id_contrat => $lines) {
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
+
+            if (!BimpObject::objectLoaded($contrat)) {
+                continue;
+            }
+
+            $infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
+
+            foreach ($lines as $id_line) {
+                $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+
+                if (BimpObject::objectLoaded($line)) {
+                    echo 'Ligne #' . $id_line . ' : ';
+                    $line_errors = array();
+
+                    $line->renouvAbonnement(array(), $line_errors);
+
+                    if (count($line_errors)) {
+                        echo '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
+                    } else {
+                        echo '<span class="success">OK</span>';
+                    }
+                    echo '<br/>';
+                }
+            }
+        }
+
+
+        return $infos;
+    }
 }

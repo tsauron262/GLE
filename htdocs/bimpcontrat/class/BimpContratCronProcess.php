@@ -22,22 +22,22 @@ class BimpContratCronProcess extends BimpCron
         ));
 
         if (!empty($lines)) {
-            $infos = '';
+            $infos_str = '';
             foreach ($lines as $line) {
                 $infos = array();
                 $line->checkStatus($infos);
 
                 if (!empty($infos)) {
-                    $infos .= BimpTools::getMsgFromArray($infos, 'Contrat #' . $line->getData('fk_contrat') . ' - ligne n°' . $line->getData('rang'));
+                    $infos_str .= BimpTools::getMsgFromArray($infos, 'Contrat #' . $line->getData('fk_contrat') . ' - ligne n°' . $line->getData('rang'));
                 }
             }
 
             $this->output .= 'Statut vérifié pour ' . count($lines) . ' ligne(s)<br/><br/>';
-            $this->output .= $infos;
+            $this->output .= $infos_str;
         }
         
         // Renouvellements auto : 
-        $this->output .'<br/><br/>***** Renouvellements automatiques *****<br/><br/>';
+        $this->output .= '<br/><br/>***** Renouvellements automatiques *****<br/><br/>';
         BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
         $this->ouput .= BCT_Contrat::RenouvAuto();
 

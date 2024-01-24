@@ -21,4 +21,3 @@ params:
         label: Délai de renouvellement auto
         info: Nombre de jours avant la date de fin de validité pour déclencher le renouvellement auto</br>Mettre 0 pour désactiver les renouvellements auto. 
         def: 0
-        

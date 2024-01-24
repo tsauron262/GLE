@@ -754,7 +754,9 @@ class BCT_Contrat extends BimpDolObject
         $html .= '</span>';
         $html .= '</div>';
 
-        $lines = $this->getLines('abo');
+        $lines = $this->getLines('abo', false, array(
+            'id_parent_line' => 0
+        ));
 
         if (empty($lines)) {
             $html .= BimpRender::renderAlerts('Aucune ligne d\'abonnement enregistrée', 'warning');
@@ -2000,7 +2002,7 @@ class BCT_Contrat extends BimpDolObject
         BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
 
         $delay = (int) BimpCore::getConf('abo_renouv_auto_delay', null, 'bimpcontrat');
-        
+
         if (!$delay) {
             return 'Renouvellements auto désactivés';
         }
@@ -2021,7 +2023,7 @@ class BCT_Contrat extends BimpDolObject
                         )
                     ),
                     'a.date_fin_validite' => array(
-                        'or_field' => array(
+                        'and' => array(
                             'IS_NOT_NULL',
                             array('operator' => '<=', 'value' => $date->format('Y-m-d') . ' 00:00:00')
                         )
@@ -2030,13 +2032,13 @@ class BCT_Contrat extends BimpDolObject
                     'c.statut'            => 1,
                         ), array('c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')));
 
-        echo $sql;
+//        echo $sql;
 
         $rows = $bdb->executeS($sql, 'array');
 
-        echo '<pre>';
-        print_r($rows);
-        exit;
+//        echo '<pre>';
+//        print_r($rows);
+//        exit;
 
         // Trie par contrats :
 
@@ -2062,17 +2064,17 @@ class BCT_Contrat extends BimpDolObject
                 $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
 
                 if (BimpObject::objectLoaded($line)) {
-                    echo 'Ligne #' . $id_line . ' : ';
+                    $infos .= 'Ligne #' . $id_line . ' : ';
                     $line_errors = array();
 
                     $line->renouvAbonnement(array(), $line_errors);
 
                     if (count($line_errors)) {
-                        echo '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
+                        $infos .= '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
                     } else {
-                        echo '<span class="success">OK</span>';
+                        $infos .= '<span class="success">OK</span>';
                     }
-                    echo '<br/>';
+                    $infos .= '<br/>';
                 }
             }
         }

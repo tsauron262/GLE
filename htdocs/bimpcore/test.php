@@ -26,6 +26,12 @@ if (!$user->admin) {
     exit;
 }
 
+$output = '<br/><br/>***** Renouvellements automatiques *****<br/><br/>';
+BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
+$output .= BCT_Contrat::RenouvAuto();
+
+echo $output;
+
 echo '<br/>FIN';
 echo '</body></html>';
 

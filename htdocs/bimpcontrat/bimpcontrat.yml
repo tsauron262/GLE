@@ -21,3 +21,8 @@ params:
         label: Délai de renouvellement auto
         info: Nombre de jours avant la date de fin de validité pour déclencher le renouvellement auto</br>Mettre 0 pour désactiver les renouvellements auto. 
         def: 0
+        
+    abo_renouv_task_delay: 
+        label: Délai pour tâches renouvellements manuels.
+        info: Nombre de jours avant la date de fin de validité pour déclencher la création d'une tâche pour renouvellement manuels</br>Mettre 0 pour désactiver ces tâches
+        def: 0

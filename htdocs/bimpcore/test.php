@@ -26,9 +26,9 @@ if (!$user->admin) {
     exit;
 }
 
-$output = '<br/><br/>***** Renouvellements automatiques *****<br/><br/>';
+$output = '<br/><br/>***** Tâches Renouvellements *****<br/><br/>';
 BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
-$output .= BCT_Contrat::RenouvAuto();
+$output .= BCT_Contrat::createRenouvTasks();
 
 echo $output;
 

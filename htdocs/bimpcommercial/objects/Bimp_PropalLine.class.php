@@ -55,7 +55,8 @@ class Bimp_PropalLine extends ObjectLine
         return 1;
     }
 
-    // Getters params: 
+    // Getters params : 
+
     public function getListExtraBtn()
     {
         $buttons = parent::getListExtraBtn();
@@ -87,7 +88,7 @@ class Bimp_PropalLine extends ObjectLine
         return $onclick;
     }
 
-    // Getters arrays: 
+    // Getters arrays : 
 
     public function getNbRenouvellementsArray($max = 10)
     {
@@ -260,7 +261,7 @@ class Bimp_PropalLine extends ObjectLine
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML : 
 
     public function renderAboInfos()
     {
@@ -476,10 +477,11 @@ class Bimp_PropalLine extends ObjectLine
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
-            if ($this->getData('linked_object_name') === 'bimp_contrat_line' && (int) $this->getData('linked_id_object')) {
-                $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('linked_id_object'));
+            $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $this->id);
+            if ($id_contrat_line) {
+                $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
 
-                if (BimpObject::objectLoaded($contrat_line)) {
+                if (BimpObject::objectLoaded($contrat_line) && (int) $contrat_line->getData('statut') === BCT_ContratLine::STATUS_ATT_PROPAL) {
                     // Maj de la ligne de contrat d'abo liée : 
                     $prod = $this->getProduct();
                     $id_pfp = (int) $this->id_fourn_price;

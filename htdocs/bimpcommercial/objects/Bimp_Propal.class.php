@@ -1078,8 +1078,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $line_errors = array();
                     $id_contrat_line = (int) $line->getData('id_linked_contrat_line');
 
-                    if (!$id_contrat_line && $line->getData('linked_object_name') === 'bimp_contrat_line') {
-                        $id_contrat_line = (int) $line->getData('linked_id_object');
+                    if (!$id_contrat_line) {
+                        $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $line->id);
                     }
 
                     if ($id_contrat_line) {
@@ -2197,8 +2197,9 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                             $new_line = null;
 
-                            if ($line->getData('linked_object_name') == 'bimp_contrat_line' && (int) $line->getData('linked_id_object')) {
-                                $new_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $line->getData('linked_id_object'));
+                            $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $line->id);
+                            if ($id_contrat_line) {
+                                $new_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
 
                                 if (BimpObject::objectLoaded($new_line)) {
                                     $new_line->validateArray(array(
@@ -2226,7 +2227,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                     }
 
                                     if (count($line_errors)) {
-                                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('position') . ' - Ecehc de la mise à jour de la ligne de contrat d\'abonnement liée');
+                                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('position') . ' - Echec de la mise à jour de la ligne de contrat d\'abonnement liée');
                                     } else {
                                         $new_lines[$line->id] = $new_line;
                                         $nOk++;
@@ -2237,14 +2238,6 @@ class Bimp_Propal extends Bimp_PropalTemp
                             }
 
                             if (is_null($new_line)) {
-                                $linked_id_object = 0;
-                                $linked_object_name = '';
-
-                                if ($line->getData('linked_object_name') !== 'bimp_contrat_line') {
-                                    $linked_id_object = $line->getData('linked_id_object');
-                                    $linked_object_name = $line->getData('linked_object_name');
-                                }
-
                                 $new_line = BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
                                             'fk_contrat'                   => $contrat->id,
                                             'fk_product'                   => $line->id_product,
@@ -2264,8 +2257,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                                             'id_linked_line'               => (int) $line->getData('id_linked_contrat_line'),
                                             'id_line_origin'               => $line->id,
                                             'line_origin_type'             => 'propal_line',
-                                            'linked_id_object'             => $linked_id_object,
-                                            'linked_object_name'           => $linked_object_name,
+                                            'linked_id_object'             => $line->getData('linked_id_object'),
+                                            'linked_object_name'           => $line->getData('linked_object_name'),
                                             'achat_periodicity'            => (BimpObject::objectLoaded($prod) ? $prod->getData('achat_def_periodicity') : 0),
                                             'variable_qty'                 => (!(int) $line->getData('id_parent_line') && BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
                                             'date_ouverture_prevue'        => $line_date_ouv

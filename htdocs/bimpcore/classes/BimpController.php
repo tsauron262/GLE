@@ -1095,7 +1095,8 @@ class BimpController
                     $errors = $result['errors'];
                 }
 
-                $errors = BimpTools::merge_array($errors, BimpCore::unlockObject($object_module, $object_name, $id_object));
+                if($id_object > 0)
+                    $errors = BimpTools::merge_array($errors, BimpCore::unlockObject($object_module, $object_name, $id_object));
             }
         }
 
@@ -1239,7 +1240,7 @@ class BimpController
             $errors[] = 'Type de l\'objet absent';
         }
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 10)';
         }
         if (is_null($position) || !$position) {
             $errors[] = 'Position absente ou invalide';
@@ -1283,7 +1284,7 @@ class BimpController
         }
 
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 11)';
         }
 
         if (is_null($field) || !$field) {
@@ -1334,7 +1335,7 @@ class BimpController
         }
 
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 12)';
         }
 
         if (is_null($field) || !$field) {
@@ -1554,7 +1555,7 @@ class BimpController
             $errors[] = 'Type d\'objet absent';
         }
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 13)';
         }
 
         if (!count($errors)) {
@@ -1610,7 +1611,7 @@ class BimpController
             $errors[] = 'Type de l\'objet absent';
         }
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 14)';
         }
         if (is_null($field) || !$field) {
             $errors[] = 'Nom du champ absent';
@@ -1654,7 +1655,7 @@ class BimpController
             $errors[] = 'Type d\'object absent';
         }
         if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 15)';
         }
 
         if (!count($errors)) {
@@ -1693,7 +1694,7 @@ class BimpController
         }
 
         if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 16)';
         }
 
         if (!count($errors)) {
@@ -2496,7 +2497,7 @@ class BimpController
         }
 
         if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 17)';
         }
 
         if (!count($errors)) {
@@ -2820,7 +2821,7 @@ class BimpController
         }
 
         if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 18)';
         }
 
         if (is_null($status)) {

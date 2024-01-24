@@ -100,6 +100,10 @@ class Session {
     public function session_ecriture($sessionID, $sessionData) {
         $datetime_actuel = new DateTime("now", new DateTimeZone('Europe/Paris'));
         $time = (hrtime(true)-$this->timeDeb) / 1000000000;
+        if(!isset($_SESSION['time']))
+            $_SESSION['time'] = array();
+        if(!isset($_SESSION['time']['erp'.ID_ERP]))
+                $_SESSION['time']['erp'.ID_ERP] = 0;
         $_SESSION['time']['erp'.ID_ERP] += $time;
         $timeTot = 0;
         for($i=0;$i<10;$i++){

@@ -177,6 +177,7 @@ class Bimp_Product extends BimpObject
                 }
                 return 0;
             case 'tobuy':
+            case 'tosell':
                 return $this->canValidate();
 
             case 'no_fixe_prices':
@@ -308,7 +309,7 @@ class Bimp_Product extends BimpObject
                     $errors[] = 'Ce produit est déjà validé';
                     return 0;
                 }
-                if ((int) $this->getData('tosell') != 1) {
+                if ((int) $this->getData('tosell') != 1 && (int) $this->getData('tobuy') != 1) {
                     $errors[] = "Ce produit n'est pas en vente.";
                     return 0;
                 }

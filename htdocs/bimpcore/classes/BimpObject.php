@@ -1292,7 +1292,7 @@ class BimpObject extends BimpCache
     public function getEntity_name()
     {
         $entity = $this->getConf('entity_name', 0);
-        if ($entity == 0 && isset($this->dol_object) && $this->dol_object->ismultientitymanaged)
+        if ($entity == 0 && isset($this->dol_object) && isset($this->dol_object->ismultientitymanaged) && $this->dol_object->ismultientitymanaged)
             $entity = $this->dol_object->element;
 
         return $entity;

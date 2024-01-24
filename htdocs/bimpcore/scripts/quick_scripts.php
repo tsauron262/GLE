@@ -58,7 +58,8 @@ if (!$action) {
         'maj_id_atradius'                           => 'Vérifier id atradius',
         'repare_id_contrat_note'                    => 'Reparé id contat dans note',
         'maj_marge'                                 => 'Mise a jour des marge liste id facutures',
-        'correct_contrat_parent_line'               => 'Correction ligne parente pour les sous-lignes bundle dans les contrats'
+        'correct_contrat_parent_line'               => 'Correction ligne parente pour les sous-lignes bundle dans les contrats',
+        'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos'
     );
 
     $path = pathinfo(__FILE__);
@@ -414,6 +415,57 @@ switch ($action) {
             if (BimpObject::objectLoaded($line)) {
 //                echo '<br/>Reset #' . $id_line;
                 $line->resetPositions();
+            }
+        }
+        break;
+
+    case 'correct_contrats_commerciaux':
+        $contrats = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_Contrat', array(
+                    'fk_commercial_suivi' => 1,
+                    'version'             => 2
+        ));
+
+        if (!empty($contrats)) {
+            foreach ($contrats as $contrat) {
+                $client = $contrat->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $comm = $client->getCommercial();
+
+                    if (BimpObject::objectLoaded($comm)) {
+                        $contrat->updateField('fk_commercial_suivi', $comm->id);
+
+                        echo $contrat->getLink() . ' : ' . $comm->getName() . '<br/>';
+                    }
+                }
+            }
+        }
+
+        $bdb = BimpCache::getBdb();
+        $id_type_contact = (int) $bdb->getValue('c_type_contact', 'rowid', 'element = \'contrat\' AND  code = \'SALESREPFOLL\'');
+
+        $rows = $bdb->getRows('element_contact a', 'a.fk_c_type_contact = ' . $id_type_contact . ' AND a.fk_socpeople = 1 AND c.version = 2', null, 'array', array(
+            'a.rowid as id_contact',
+            'a.element_id as id_contrat'
+                ), null, null, array(
+            'c' => array('table' => 'contrat', 'on' => 'c.rowid = a.element_id')
+        ));
+        
+        foreach ($rows as $r) {
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $r['id_contrat']);
+
+            if (BimpObject::objectLoaded($contrat)) {
+                $client = $contrat->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $comm = $client->getCommercial();
+
+                    if (BimpObject::objectLoaded($comm)) {
+                        $bdb->update('element_contact', array(
+                            'fk_socpeople' => $comm->id
+                                ), 'rowid = ' . (int) $r['id_contact']);
+
+                        echo $contrat->getLink() . ' : ' . $comm->getName() . '<br/>';
+                    }
+                }
             }
         }
         break;

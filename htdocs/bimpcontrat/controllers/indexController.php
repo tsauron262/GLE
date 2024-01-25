@@ -87,7 +87,7 @@ class indexController extends BimpController
                         $sub_line_units = $sub_line->getNbUnits();
 
                         if ($sub_line_units / $bundle_units != $bundles[$bundle->id][$id_prod]) {
-                            $msg = 'Le nombre d\'unité ne correspond pas.<br/>';
+                            $msg = 'Le nombre d\'unités ne correspond pas.<br/>';
                             $msg .= 'Attendu : ' . ($bundles[$bundle->id][$id_prod] * $bundle_units) . '.<br/>';
                             $msg .= 'Enregistré dans le contrat  : ' . $sub_line_units;
                             $sub_line_errors[] = $msg;

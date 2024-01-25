@@ -5778,7 +5778,11 @@ class BCT_ContratLine extends BimpObject
             if (!empty($sub_lines)) {
                 foreach ($sub_lines as $sub_line) {
                     $line_warnings = array();
-                    $sub_line->delete($line_warnings, true);
+                    $line_err = $sub_line->delete($line_warnings, true);
+
+                    if (count($line_err)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_err, 'Echec de la suppression d\'une sous-ligne du bundle (Ligne n°' . $sub_line->getData('rang') . ')');
+                    }
                 }
             }
         }

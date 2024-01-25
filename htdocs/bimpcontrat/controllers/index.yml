@@ -37,6 +37,17 @@ sections:
                 - type: custom
                   custom: 
                       callback: renderAbonnementsTab
+#        mod_bundles:
+#            show: 
+#                prop: 
+#                    name: admin
+#                    object: 
+#                        global: user
+#            label: Bundles modifiés
+#            sections: 
+#                - type: custom
+#                  custom: 
+#                      callback: renderModifiedBundlesTab
                 
                             
         

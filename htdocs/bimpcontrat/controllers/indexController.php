@@ -17,10 +17,15 @@ class indexController extends BimpController
         $bundles = array();
         $bundles_prods = array();
 
-        $rows = $bdb->getRows('product_association', '1', null, 'array', array(
-            'fk_product_pere as id_bundle',
-            'fk_product_fils as id_product',
-            'qty'
+        $rows = $bdb->getRows('product_association a', 'pef.type2 = 20', null, 'array', array(
+            'a.fk_product_pere as id_bundle',
+            'a.fk_product_fils as id_product',
+            'a.qty'
+                ), null, null, array(
+            'pef' => array(
+                'table' => 'product_extrafields',
+                'on'    => 'pef.fk_object = a.fk_product_pere'
+            )
         ));
 
         if (is_array($rows)) {
@@ -32,6 +37,8 @@ class indexController extends BimpController
 
                 $bundles[(int) $r['id_bundle']][(int) $r['id_product']] = (float) $r['qty'];
             }
+        } else {
+            return BimpRender::renderAlerts($bdb->err());
         }
 
         $html .= '<h3>Bundles contrats modifiés</h3>';
@@ -48,8 +55,11 @@ class indexController extends BimpController
         $html .= '<tbody>';
 
         foreach (BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
-            'statut'     => array(0, 4),
-            'fk_product' => $bundles_prods
+            'a.statut'     => array(0, 4),
+            'a.fk_product' => $bundles_prods,
+            'c.version'    => 2
+                ), null, null, array(
+            'c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')
         )) as $line) {
             $errors = array();
             $bundle_units = $line->getNbUnits();
@@ -110,7 +120,7 @@ class indexController extends BimpController
                 if (!empty($errors)) {
                     $html .= '<tr>';
                     $html .= '<td>' . $contrat->getLink() . '</td>';
-                    $html .= '<td>' . $bundle->getLink() . '<br/>Ligne n° ' . $line->getData('rang') . '</td>';
+                    $html .= '<td>' . $bundle->getLink() . '<br/>Ligne n° ' . $line->getData('rang') . ' ' . $line->displayDataDefault('statut') . '</td>';
                     $html .= '<td>';
                     $html .= BimpRender::renderAlerts($errors);
                     $html .= '</td>';

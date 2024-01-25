@@ -1833,6 +1833,9 @@ class BCT_ContratLine extends BimpObject
                     $html .= '<div style="display: inline-block" class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Abonnement à qté variable</div><br/>';
                 }
 
+                $nb_units = $this->getNbUnits();
+
+                $html .= 'Nb unité(s) : <b>' . $nb_units . '</b><br/>';
                 $html .= 'Qté totale ' . ($is_variable ? 'estimée ' : '') . ': <b>' . BimpTools::displayFloatValue($this->getData('qty'), 8, ',', 0, 0, 0, 0, 1, 1) . '</b><br/>';
                 $html .= 'Durée abonnement : <b>' . $this->getData('duration') . ' mois</b><br/>';
                 $html .= 'Qté par période facturée ' . ($is_variable ? '(estimée) ' : '') . ': <b>' . $this->getFacQtyPerPeriod() . '</b><br/>';

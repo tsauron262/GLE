@@ -59,6 +59,7 @@ if (!$action) {
         'repare_id_contrat_note'                    => 'Reparé id contat dans note',
         'maj_marge'                                 => 'Mise a jour des marge liste id facutures',
         'correct_contrat_parent_line'               => 'Correction ligne parente pour les sous-lignes bundle dans les contrats',
+        'correct_contrats_bundles'                  => 'Correction des bundles dans les contrats',
         'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos'
     );
 
@@ -418,8 +419,58 @@ switch ($action) {
             }
         }
         break;
-        
-    case 'correct_contrats_bundles': 
+
+    case 'correct_contrats_bundles':
+        $bdb = new BimpDb($db);
+        $where = 'a.id_parent_line = 0 AND a.line_origin_type = \'propal_line\' AND a.id_line_origin > 0 AND pl.id_parent_line > 0';
+        $rows = $bdb->getRows('contratdet a', $where, null, 'array', array('a.rowid as id_line', 'a.fk_contrat', 'a.fk_product', 'a.linked_object_name', 'pl.id_parent_line as id_parent_propal_line'), null, null, array(
+            'pl' => array(
+                'table' => 'bimp_propal_line',
+                'on'    => 'pl.id = a.id_line_origin'
+            )
+        ));
+
+        $parents = array();
+        foreach ($rows as $r) {
+            $id_parent_propal_line = (int) $r['id_parent_propal_line'];
+            echo '<br/>Ligne #' . $r['id_line'] . ' - Contrat #' . $r['fk_contrat'] . ' : ';
+
+            if (!isset($parents[$id_parent_propal_line])) {
+                $id_parent_contrat_line = (int) $bdb->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $id_parent_propal_line);
+
+                if (!$id_parent_contrat_line) {
+                    echo '<span class="danger">Ligne contrat parente non trouvée (ID LIGNE PROPALE PARENTE : ' . $id_parent_propal_line . ')</span>';
+                    continue;
+                }
+
+                $parents[$id_parent_propal_line] = $id_parent_contrat_line;
+            }
+
+            echo 'MAJ PARENT LINE (' . $parents[$id_parent_propal_line] . ') - ';
+
+            $data = array(
+                'id_parent_line' => $parents[$id_parent_propal_line]
+            );
+
+            if (!$r['linked_object_name']) {
+                $data['linked_object_name'] = ((int) $r['fk_product'] > 0 ? 'bundle' : 'bundleCorrect');
+            }
+
+            if ($bdb->update('contratdet', $data, 'rowid = ' . (int) $r['id_line']) <= 0) {
+                echo '<span class="danger">ECHEC - ' . $bdb->err() . '</span>';
+            } else {
+                echo '<span class="success">OK</span>';
+            }
+//            break;
+        }
+
+        foreach ($parents as $key => $id_line) {
+            $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+            if (BimpObject::objectLoaded($line)) {
+//                echo '<br/>Reset #' . $id_line;
+                $line->resetPositions();
+            }
+        }
         break;
 
     case 'correct_contrats_commerciaux':
@@ -452,7 +503,7 @@ switch ($action) {
                 ), null, null, array(
             'c' => array('table' => 'contrat', 'on' => 'c.rowid = a.element_id')
         ));
-        
+
         foreach ($rows as $r) {
             $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $r['id_contrat']);
 

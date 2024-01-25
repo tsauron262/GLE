@@ -1351,7 +1351,7 @@ class BCT_ContratLine extends BimpObject
     {
         $prod_duration = 1;
         $prod = $this->getChildObject('product');
-        if (BimpObject::objectLoaded($this)) {
+        if (BimpObject::objectLoaded($prod)) {
             $prod_duration = (int) $prod->getData('duree');
         }
 

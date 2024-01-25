@@ -43,11 +43,11 @@ sections:
                     name: admin
                     object: 
                         global: user
-            label: Bundles modifiés
+            label: Bundles invalides
             sections: 
                 - type: custom
                   custom: 
-                      callback: renderModifiedBundlesTab
+                      callback: renderUnvalidBundlesTab
                 
                             
         

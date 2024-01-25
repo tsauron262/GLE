@@ -9,7 +9,7 @@ class indexController extends BimpController
         return BCT_Contrat::renderAbonnementsTabs($params);
     }
 
-    public function renderModifiedBundlesTab()
+    public function renderUnvalidBundlesTab()
     {
         $html = '';
 

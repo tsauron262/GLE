@@ -418,6 +418,9 @@ switch ($action) {
             }
         }
         break;
+        
+    case 'correct_contrats_bundles': 
+        break;
 
     case 'correct_contrats_commerciaux':
         $contrats = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_Contrat', array(

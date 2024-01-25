@@ -1347,6 +1347,22 @@ class BCT_ContratLine extends BimpObject
         return 0;
     }
 
+    public function getNbUnits()
+    {
+        $prod_duration = 1;
+        $prod = $this->getChildObject('product');
+        if (BimpObject::objectLoaded($this)) {
+            $prod_duration = (int) $prod->getData('duree');
+        }
+
+        $duration = (int) $this->getData('duration');
+        if (!$duration) {
+            $duration = 1;
+        }
+
+        return ((float) $this->getData('qty') / $duration) * $prod_duration;
+    }
+
     // Getters statiques:
 
     public static function getPeriodicFacLinesToProcess($params = array(), &$errors = array())

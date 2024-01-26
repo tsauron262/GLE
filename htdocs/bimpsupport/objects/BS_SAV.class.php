@@ -739,6 +739,17 @@ class BS_SAV extends BimpObject
                     'success_callback' => $callback
                 ))
             );
+
+            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'contrefait\');';
+            $buttons[] = array(
+                'label'   => 'Générer Doc Irreparable contrefait',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'file_type' => 'contrefait'
+                        ), array(
+                    'success_callback' => $callback
+                ))
+            );
         }
 
         return $buttons;
@@ -4500,7 +4511,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     {
         $url = '';
 
-        if (!in_array($file_type, array('pc', 'destruction', 'destruction2', 'pret', 'europe', 'irreparable'))) {
+        if (!in_array($file_type, array('pc', 'destruction', 'destruction2', 'pret', 'europe', 'irreparable', 'contrefait'))) {
             $errors[] = 'Type de fichier PDF invalide';
             return '';
         }
@@ -4537,6 +4548,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     break;
                 case 'irreparable':
                     $ref = 'Obsolete-' . $this->getData('ref');
+                    break;
+                case 'contrefait':
+                    $ref = 'Contrefait-' . $this->getData('ref');
                     break;
             }
 

@@ -739,6 +739,17 @@ class BS_SAV extends BimpObject
                     'success_callback' => $callback
                 ))
             );
+
+            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'irreparable\');';
+            $buttons[] = array(
+                'label'   => 'Générer Doc Irreparable contrefait',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'file_type' => 'contrefait'
+                        ), array(
+                    'success_callback' => $callback
+                ))
+            );
         }
 
         return $buttons;

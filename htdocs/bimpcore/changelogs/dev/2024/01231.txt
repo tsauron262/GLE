@@ -1,2 +1,0 @@
-- ajout recursivite dans appel api
-- ajout contrat d'abonnement dans fi

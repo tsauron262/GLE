@@ -26,6 +26,12 @@ if (!$user->admin) {
     exit;
 }
 
+$output = '<br/><br/>***** Tâches Renouvellements *****<br/><br/>';
+BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
+$output .= BCT_Contrat::createRenouvTasks();
+
+echo $output;
+
 echo '<br/>FIN';
 echo '</body></html>';
 

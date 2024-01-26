@@ -5833,6 +5833,10 @@ class ObjectLine extends BimpObject
 
     public function majBundle(&$errors = array(), &$warnings = array())
     {
+        if (isset($this->no_maj_bundle) && $this->no_maj_bundle) {
+            return;
+        }
+        
         if ((int) $this->id_product) {
             $product = $this->getProduct();
 
@@ -5904,7 +5908,8 @@ class ObjectLine extends BimpObject
                                 $errors = BimpTools::merge_array($errors, $child->setRemise($pourcent3, 'Remise bundle ' . $product->getData('ref')));
                             }
                         }
-                        //ajout de la ligne de compensation
+                        
+                        // Ajout de la ligne de compensation
                         $newLn = null;
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
                                                 array(
@@ -5930,10 +5935,8 @@ class ObjectLine extends BimpObject
                         //gestion pa 
                         $this->pa_ht = $totPa / $this->qty;
                         $this->update($warnings);
-                        //                    die($thisTot.'rr'.$totHt.' '.$pourcent);
                     }
-                } /* else
-                  die('pas de prix. Ln : '.$this->id); */
+                }
             }
         }
     }

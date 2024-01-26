@@ -34,7 +34,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/OrderPDF.php';
 /**
  * 	Class to generate PDF proposal Azur
  */
-class pdf_bimpsupport_irreparable extends BimpCommDocumentPDF
+class pdf_bimpsupport_contrefait extends BimpCommDocumentPDF
 {
 
     public $signature_bloc = true;
@@ -88,6 +88,6 @@ Le Service Après-Vente</p>";
 
     public function getFileName()
     {
-        return "Obsolete-" . parent::getFileName();
+        return "Contrefait-" . parent::getFileName();
     }
 }

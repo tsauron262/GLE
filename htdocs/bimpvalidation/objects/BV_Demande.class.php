@@ -164,7 +164,7 @@ class BV_Demande extends BimpObject
         if ((int) $value) {
             BimpObject::loadClass('bimpvalidation', 'BV_Rule');
             $filtreTab = array();
-            foreach (BV_Rule::$objets as $type_obj => $obj_params) {
+            foreach (BV_Rule::$objects_list as $type_obj => $obj_params) {
                 if (isset($obj_params['table'])) {
                     $joins[$obj_params['table']] = array(
                         'table' => $obj_params['table'],

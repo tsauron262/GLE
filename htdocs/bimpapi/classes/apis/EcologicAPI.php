@@ -181,23 +181,25 @@ class EcologicAPI extends BimpAPI
             $tabExt = array('jpeg', 'jpg', 'png', 'JPEG', 'JPG', 'PNG', 'PDF');
             $filesOk = true;
             foreach($tabFile as $i => $fileT){
-                if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
-                    foreach($tabExt as $ext){
-                        if(is_file($fileT[0] . $fileT[1].'.'.$ext)){
-                            $tabFile[$i][2] = $ext;
-                            continue(2);
+                if(!isset($ecologicData['files']) || !in_array($fileT[1], $ecologicData['files'])){
+                    if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
+                        foreach($tabExt as $ext){
+                            if(is_file($fileT[0] . $fileT[1].'.'.$ext)){
+                                $tabFile[$i][2] = $ext;
+                                continue(2);
+                            }
                         }
-                    }
-                    foreach($tabExt as $ext){
-                        if(is_file($fileT[0] . ucfirst($fileT[1]).'.'.$ext)){
-                            $tabFile[$i][1] = ucfirst($fileT[1]);
-                            $tabFile[$i][2] = $ext;
-                            continue(2);
+                        foreach($tabExt as $ext){
+                            if(is_file($fileT[0] . ucfirst($fileT[1]).'.'.$ext)){
+                                $tabFile[$i][1] = ucfirst($fileT[1]);
+                                $tabFile[$i][2] = $ext;
+                                continue(2);
+                            }
                         }
+                        $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
+                        BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
+                        $filesOk = false;
                     }
-                    $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
-                    BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
-                    $filesOk = false;
                 }
             }
             
@@ -234,6 +236,15 @@ class EcologicAPI extends BimpAPI
             
             if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S" && isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
                 $sav->updateField('status_ecologic', 99);
+            else{
+                foreach($errors as $error){
+                    if(stripos($error, 'OCR Plaque signalétique') !== false && $data['Product']['SerialNumber'] != $data['Product']['SerialNumber2']){
+                        $errors = $warnings = array();
+                        $data['Product']['SerialNumber'] = $data['Product']['SerialNumber2'];
+                        return $this->traiteReq($errors, $warnings, $data, $ecologicData, $siteId, $ref, $tabFile, $dateClose, $facRef, $sav);
+                    }
+                }
+            }
         }
         else{
             if(!isset($ecologicData['ClaimId']))

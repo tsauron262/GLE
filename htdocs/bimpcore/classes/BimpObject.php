@@ -742,7 +742,10 @@ class BimpObject extends BimpCache
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
-            return DOL_DATA_ROOT . '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+            $more = '';
+            if($this->getEntity_name() && $this->getData('entity') > 1)
+                $more .= '/'.$this->getData('entity');
+            return DOL_DATA_ROOT .$more. '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
         }
 
         return '';

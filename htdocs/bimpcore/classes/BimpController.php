@@ -2212,9 +2212,16 @@ class BimpController
                 $url = '';
                 $item = '';
 
+                    $entity = 1;
+                if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $files_dir, $matches) && is_numeric($matches[1])){
+                    $entity = $matches[1];
+                    $files_dir = str_replace('/'.$entity.'/', '', $files_dir);
+                }
                 if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $files_dir, $matches)) {
                     $is_image = in_array($file_ext, array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif'));
-                    $url = DOL_URL_ROOT . '/' . ($is_image ? 'viewimage' : 'document') . '.php?modulepart=' . $matches[1] . '&file=' . urlencode(($matches[2] ? $matches[2] . '/' : '') . $new_file_name);
+                    $module = $matches[1];
+                    $fileName  = urlencode(($matches[2] ? $matches[2] . '/' : '') . $new_file_name);
+                    $url = DOL_URL_ROOT . '/' . ($is_image ? 'viewimage' : 'document') . '.php?'.($entity? 'entity='.$entity.'&' : '').'modulepart=' . $module . '&file=' . $fileName;
 
                     $item = '<div class="file_item" data-file_name="' . $new_file_name . '">';
                     if ($field_name) {

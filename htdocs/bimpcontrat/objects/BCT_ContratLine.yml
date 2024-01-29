@@ -669,6 +669,39 @@ forms:
             - field: fac_term
             - field: achat_periodicity
             
+    fac_regul: 
+        rows: 
+            - custom: 1
+              label: Facture
+              input_name: id_fac_regul
+              content: 
+                  callback: renderRegulFactureSelect
+            - custom: 1
+              label: Libellé facture
+              input_name: fac_libelle
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_fac_regul
+                  show_values: 0
+            - custom: 1
+              label: Période du
+              input_name: period_from
+              content: 
+                  callback: renderFacRegulFromSelect
+            - custom: 1
+              label: Au
+              input_name: period_to
+              content: 
+                  callback: renderFacRegulToSelect
+              depends_on: period_from
+            - custom: 1
+              label: Quantité
+              input_name: regul_qty
+              content: 
+                  callback: renderFacRegulQtyInput
+              depends_on: period_from,period_to
+              
 fields_tables: 
     infos: 
         title: Informations

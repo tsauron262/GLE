@@ -245,6 +245,24 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 return 1;
+
+            case 'facRegul':
+                if ((int) $this->getData('line_type') !== self::TYPE_ABO) {
+                    $errors[] = 'Cette ligne n\'est pas un abonnement';
+                    return 0;
+                }
+
+                if ((int) $this->getData('statut') <= 0) {
+                    $errors[] = 'Le statut actuel de cette ligne de contrat ne permet pas d\'établir une facture de régularisation';
+                    return 0;
+                }
+
+                if (!(int) $this->getData('variable_qty')) {
+                    $errors[] = 'Cette ligne n\'est pas à quantité variable';
+                    return 0;
+                }
+
+                return 1;
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -417,6 +435,16 @@ class BCT_ContratLine extends BimpObject
                 );
             }
         }
+
+//        if ($this->isActionAllowed('facRegul') && $this->canSetAction('facRegul')) {
+//            $buttons[] = array(
+//                'label'   => 'Facture de régularisation',
+//                'icon'    => 'fas_file-medical',
+//                'onclick' => $this->getJsActionOnclick('facRegul', array(), array(
+//                    'form_name' => 'fac_regul'
+//                ))
+//            );
+//        }
 
         return $buttons;
     }
@@ -1370,6 +1398,50 @@ class BCT_ContratLine extends BimpObject
         }
 
         return ((float) $this->getData('qty') / $duration) * $prod_duration;
+    }
+
+    public function getFacturesData()
+    {
+        $data = array();
+
+        $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
+        $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('f.rowid as id_facture', 'a.date_start', 'a.date_end', 'a.qty'), array(
+                    'f.type'                => array(0, 1, 2),
+                    'f.fk_statut'           => array(0, 1, 2),
+                    'f.fk_facture_source'   => array(
+                        'or_field' => array(
+                            'IS_NULL',
+                            0
+                        )
+                    ),
+                    $sel_nb_avoirs          => 0,
+                    'fl.linked_object_name' => 'contrat_line',
+                    'fl.linked_id_object'   => $this->id
+                        ), array(
+                    'fl' => array(
+                        'table' => 'bimp_facture_line',
+                        'on'    => 'fl.id_line = a.rowid'
+                    ),
+                    'f'  => array(
+                        'table' => 'facture',
+                        'on'    => 'f.rowid = a.fk_facture'
+                    )
+                        ), array(
+                    'order_by'  => 'a.date_start',
+                    'order_way' => 'ASC'
+        ));
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            $data[(int) $r['id_facture']] = array(
+                'from' => $r['date_start'],
+                'to'   => $r['date_end'],
+                'qty'  => $r['qty']
+            );
+        }
+
+        return $data;
     }
 
     // Getters statiques:
@@ -3441,6 +3513,144 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
+    public function renderRegulFactureSelect()
+    {
+        $id_fac = 0;
+
+        $factures = array(
+            0 => 'Nouvelle facture'
+        );
+
+        $contrat = $this->getParentInstance();
+
+        $id_client = (int) $contrat->getData('fk_soc_facturation');
+
+        if (!$id_client) {
+            $id_client = (int) $contrat->getData('fk_soc');
+        }
+
+        if (BimpObject::objectLoaded($contrat)) {
+            foreach (BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array(
+                'a.fk_soc'      => $id_client,
+                'a.fk_statut'   => 0,
+                'fef.entrepot'  => (int) $contrat->getData('entrepot'),
+                'fef.expertise' => (int) $contrat->getData('expertise'),
+                'fef.type'      => $contrat->getData('secteur'),
+                    ), 'rowid', 'desc', array(
+                'fef' => array(
+                    'table' => 'facture_extrafields',
+                    'on'    => 'fef.fk_object = a.rowid'
+                )
+            )) as $fac) {
+                if (!$id_fac) {
+                    $id_fac = $fac->id;
+                }
+                $factures[(int) $fac->id] = $fac->getRef() . ' - ' . $fac->getName();
+            }
+        }
+
+        return BimpInput::renderInput('select', 'id_fac_regul', $id_fac, array(
+                    'options' => $factures
+        ));
+    }
+
+    public function renderFacRegulFromSelect()
+    {
+        $from = '';
+        $facs = $this->getFacturesData();
+
+        $options = array();
+
+        foreach ($facs as $id_fac => $data) {
+            if (!$from || $data['from'] < $from) {
+                $from = $data['from'];
+            }
+
+            $options[$data['from']] = date('d / m / Y', strtotime($data['from']));
+        }
+
+        ksort($options);
+
+        return BimpInput::renderInput('select', 'period_from', $from, array(
+                    'options' => $options
+        ));
+    }
+
+    public function renderFacRegulToSelect()
+    {
+        $from_value = BimpTools::getPostFieldValue('period_from', '');
+        $from = $from_value;
+        $to = '';
+        $facs = $this->getFacturesData();
+
+        $options = array();
+
+        foreach ($facs as $id_fac => $data) {
+            if ($data['to'] < $from_value) {
+                continue;
+            }
+
+            if (!$from_value && (!$from || $data['from'] < $from)) {
+                $from = $data['from'];
+            }
+
+            if (!$to || $data['to'] > $to) {
+                $to = $data['to'];
+            }
+
+            $options[$data['to']] = date('d / m / Y', strtotime($data['to']));
+        }
+
+        ksort($options);
+
+        return BimpInput::renderInput('select', 'period_to', $to, array(
+                    'options' => $options
+        ));
+    }
+
+    public function renderFacRegulQtyInput()
+    {
+        $html = '';
+
+        $from = BimpTools::getPostFieldValue('period_from', '');
+        $to = BimpTools::getPostFieldValue('period_to', '');
+
+        $errors = array();
+
+        if (!$from) {
+            $errors[] = 'Veuillez sélectionner un début de période à régulariser';
+        }
+
+        if (!$to) {
+            $errors[] = 'Veuillez sélectionner une fin de période à régulariser';
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        } else {
+            $facs_data = $this->getFacturesData();
+            $qty_fac = 0;
+
+            foreach ($facs_data as $id_fac => $fac_data) {
+                if ($fac_data['from'] >= $from && $fac_data['to'] <= $to) {
+                    $qty_fac += (float) $fac_data['qty'];
+                    $html .= ' - Du ' . date('d / m / Y', strtotime($fac_data['from'])) . ' au ' . date('d / m / Y', strtotime($fac_data['to'])) . ' : ' . BimpTools::displayFloatValue($fac_data['qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '<br/>';
+                }
+            }
+
+            $html .= '<b>Quantité totale déjà facturée sur la période sélectionnée : ' . BimpTools::displayFloatValue($qty_fac, 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+
+            $html .= '<br/><br/>Quantité à régulariser : <br/>';
+            $html .= BimpInput::renderInput('qty', 'regul_qty', 0, array(
+                        'data' => array(
+                            'data_type' => 'number',
+                            'decimals'  => 6
+                        )
+            ));
+        }
+        return $html;
+    }
+
     // Traitements:
 
     public function checkLinkedLine(&$errors = array())
@@ -4698,6 +4908,184 @@ class BCT_ContratLine extends BimpObject
                     'fac_term'          => $fac_term,
                     'lines'             => $lines
                         ), $errors, $warnings, $success, $sc);
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    public function actionFacRegul($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_facture = (int) BimpTools::getArrayValueFromPath($data, 'id_fac_regul', 0);
+        $from = BimpTools::getArrayValueFromPath($data, 'period_from', '');
+        $to = BimpTools::getArrayValueFromPath($data, 'period_to', '');
+        $qty = (float) BimpTools::getArrayValueFromPath($data, 'regul_qty', 0);
+
+        if (!$from) {
+            $errors[] = 'Veuillez sélectionner une date de début de période à régulariser';
+        }
+
+        if (!$to) {
+            $errors[] = 'Veuillez sélectionner une date de fin de période à régulariser';
+        }
+
+        if (!$qty) {
+            $errors[] = 'Veuillez saisir la quantité à régulariser';
+        }
+
+        $contrat = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($contrat)) {
+            $errors[] = 'Contrat absent';
+        }
+
+        if (!count($errors)) {
+            $facture = null;
+
+            if ($id_facture) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+                if (!BimpObject::objectLoaded($facture)) {
+                    $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
+                }
+            } else {
+                // Création de la facture:
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+
+                $id_client = (int) $contrat->getData('fk_soc_facturation');
+
+                if (!$id_client) {
+                    $id_client = (int) $contrat->getData('fk_soc');
+                }
+
+                $fac_errors = array();
+                $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                            'fk_soc'            => $id_client,
+                            'entrepot'          => $contrat->getData('entrepot'),
+                            'ef_type'           => $contrat->getData('secteur'),
+                            'expertise'         => $contrat->getData('expertise'),
+                            'libelle'           => BimpTools::getArrayValueFromPath($data, 'fac_libelle', ''),
+                            'fk_mode_reglement' => $contrat->getData('moderegl'),
+                            'fk_cond_reglement' => $contrat->getData('condregl'),
+                            'datef'             => date('Y-m-d')
+                                ), true, $fac_errors);
+
+                if (count($fac_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                } else {
+                    $success = 'Création de la facture effectuée avec succès';
+                }
+            }
+
+            if (!count($errors)) {
+                addElementElement('bimp_contrat', 'facture', $contrat->id, $facture->id);
+                
+                // Création de la ligne de l'intitulé du contrat d'origine si nécessaire: 
+                $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                            'id_obj'             => (int) $facture->id,
+                            'linked_object_name' => 'contrat_origin_label',
+                            'linked_id_object'   => (int) $contrat->id
+                ));
+
+                if (!BimpObject::objectLoaded($fac_line)) {
+                    $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                    $fac_line->validateArray(array(
+                        'id_obj'             => (int) $facture->id,
+                        'type'               => ObjectLine::LINE_TEXT,
+                        'linked_id_object'   => $contrat->id,
+                        'linked_object_name' => 'contrat_origin_label',
+                    ));
+                    $fac_line->qty = 1;
+                    $fac_line->desc = 'Selon votre contrat ' . $contrat->getRef();
+                    $libelle = $contrat->getData('libelle');
+                    if ($libelle) {
+                        $fac_line->desc .= ' - ' . $libelle;
+                    }
+                    $fac_line_warnings = array();
+                    $fac_line->create($fac_line_warnings, true);
+                }
+
+                // Création de la ligne de facture: 
+                $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                $fac_line->validateArray(array(
+                    'id_obj'             => (int) $facture->id,
+                    'type'               => Bimp_FactureLine::LINE_PRODUCT,
+                    'remisable'          => 2,
+                    'editable'           => 0,
+                    'pa_editable'        => 0,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'contrat_line'
+                ));
+
+                $date_from = date('Y-m-d 00:00:00', strtotime($from));
+                $date_to = date('Y-m-d 23:59:59', strtotime($to));
+
+                $id_fourn = 0;
+                $pa_ht_line = (float) $this->getData('buy_price_ht');
+                $pa_ht_fourn = 0;
+
+                $id_pfp = (int) $this->getData('fk_product_fournisseur_price');
+                if ($id_pfp) {
+                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
+                    if (!BimpObject::objectLoaded($pfp)) {
+                        $line_errors[] = 'Le prix d\'achat fournisseur #' . $id_pfp . ' n\'existe plus';
+                    } else {
+                        $id_fourn = $pfp->getData('fk_soc');
+                        $pa_ht_fourn = $pfp->getData('price');
+                    }
+                }
+
+                $fac_line->qty = $qty;
+                $fac_line->desc = $this->getData('description');
+                $fac_line->id_product = (int) $this->getData('fk_product');
+                $fac_line->pu_ht = $this->getData('subprice');
+                $fac_line->tva_tx = $this->getData('tva_tx');
+                $fac_line->pa_ht = ($pa_ht_fourn ? $pa_ht_fourn : $pa_ht_line);
+                $fac_line->id_fourn_price = $this->getData('fk_product_fournisseur_price');
+                $fac_line->date_from = $date_from;
+                $fac_line->date_to = $date_to;
+                $fac_line->no_remises_arrieres_auto_create = true;
+
+                $line_warnings = array();
+                $line_errors = $fac_line->create($line_warnings, true);
+
+                if (!count($line_errors)) {
+                    // Ajout de la remise: 
+                    $remise_percent = (float) $this->getData('remise_percent');
+                    if ($remise_percent) {
+                        $remises_errors = array();
+                        BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
+                            'id_object_line' => $fac_line->id,
+                            'object_type'    => 'facture',
+                            'type'           => 1,
+                            'percent'        => $remise_percent
+                                ), true, $remises_errors);
+
+                        if (count($remises_errors)) {
+                            $line_errors[] = BimpTools::getMsgFromArray($remises_errors, 'Echec de l\'ajout de la remise à la ligne de facture');
+                        }
+                    }
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
+                } else {
+                    $success .= ($success ? '<br/>' : '') . 'Ajout de la ligne à la facture effectué avec succès';
+                }
+            }
+
+            if (!count($errors)) {
+                $url = $facture->getUrl();
+                if ($url) {
+                    $sc = 'window.open(\'' . $url . '\');';
+                }
             }
         }
 

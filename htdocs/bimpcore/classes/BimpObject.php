@@ -227,6 +227,8 @@ class BimpObject extends BimpCache
                 $instance = clone self::$cache[$cache_key];
             }
         }
+        
+        $instance->reset();
 
         if (is_a($instance, 'BimpObject')) {
             if (!is_null($id_object)) {

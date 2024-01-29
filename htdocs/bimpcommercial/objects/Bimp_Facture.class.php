@@ -6418,7 +6418,7 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if (!in_array((int) $item['id_object'], $fac_cancel->dol_object->linked_objects[$item['type']])) {
-                    $fac_cancel->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
+                    $fac_cancel->dol_object->linked_objects[$item['type']][] = (int) $item['id_object'];
                 }
             }
 
@@ -6481,25 +6481,27 @@ class Bimp_Facture extends BimpComm
                 if (!count($errors)) {
                     $linked_objects = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db);
 
-                    if (!isset($linked_objects['facture'])) {
-                        $linked_objects['facture'][] = $this->id;
-                    }
-                    $linked_objects['facture'] = array($fac_cancel->id);
-
                     foreach ($linked_objects as $item) {
-                        if (!isset($this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = array();
+                        if (!isset($new_fac->dol_object->linked_objects[$item['type']])) {
+                            $new_fac->dol_object->linked_objects[$item['type']] = array();
                         } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = array($this->dol_object->linked_objects[$item['type']]);
+                            $new_fac->dol_object->linked_objects[$item['type']] = array($new_fac->dol_object->linked_objects[$item['type']]);
                         }
 
-                        if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
+                        if (!in_array((int) $item['id_object'], $new_fac->dol_object->linked_objects[$item['type']])) {
+                            $new_fac->dol_object->linked_objects[$item['type']][] = (int) $item['id_object'];
                         }
                     }
-                    
+
+                    if (!isset($new_fac->dol_object->linked_objects['facture'])) {
+                        $new_fac->dol_object->linked_objects['facture'] = array();
+                    }
+
+                    $new_fac->dol_object->linked_objects['facture'][] = $this->id;
+                    $new_fac->dol_object->linked_objects['facture'][] = $fac_cancel->id;
+
                     $errors = $new_fac->create($warnings, true);
-                    
+
                     if (!count($errors)) {
                         $success .= 'Création ' . $new_fac->getLabel('of_the') . ' de correction effectuée avec succès.<br/>';
                     }
@@ -6520,6 +6522,10 @@ class Bimp_Facture extends BimpComm
             if (!count($errors)) {
                 $remises_errors = array();
 
+                // Pour être sûr d'être à jour dans les données: 
+                $fac_cancel->fetch($fac_cancel->id);
+                $new_fac->fetch($new_fac->id);
+
                 $fac_cancel->dol_object->fetch_lines();
                 $new_fac->dol_object->fetch_lines();
 
@@ -6527,12 +6533,10 @@ class Bimp_Facture extends BimpComm
                 $fac_cancel->dol_object->update_price(1);
                 $new_fac->dol_object->update_price(1);
 
-                // Pour être sûr d'être à jour dans les données: 
-                $fac_cancel->fetch($fac_cancel->id);
-                $new_fac->fetch($new_fac->id);
-
                 // Création et applications des remises :
                 $this->checkIsPaid();
+
+//                addElementElement('facture', 'facture', $idS, $idD);
 
                 $cancel_discount = null;
                 if ($fac_cancel->getRemainToPay(true, false) < 0) {
@@ -6585,11 +6589,11 @@ class Bimp_Facture extends BimpComm
 
                 if (count($remises_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($remises_errors);
-                } else {
-                    $this->checkIsPaid();
-                    $fac_cancel->checkIsPaid();
-                    $new_fac->checkIsPaid();
                 }
+
+                $this->checkIsPaid();
+                $fac_cancel->checkIsPaid();
+                $new_fac->checkIsPaid();
             }
         }
 
@@ -7029,7 +7033,7 @@ class Bimp_Facture extends BimpComm
 
         $bdb = BimpCache::getBdb();
         $where = 'datec < \'' . $date->format('Y-m-d') . '\' AND fk_statut = 0';
-        
+
         $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
 
         if (!empty($rows)) {

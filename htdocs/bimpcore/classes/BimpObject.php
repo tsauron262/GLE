@@ -742,7 +742,10 @@ class BimpObject extends BimpCache
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
-            return DOL_DATA_ROOT . '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+            $more = '';
+            if($this->getEntity_name() && $this->getData('entity') > 1)
+                $more .= '/'.$this->getData('entity');
+            return DOL_DATA_ROOT .$more. '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
         }
 
         return '';
@@ -765,7 +768,11 @@ class BimpObject extends BimpCache
 
         $file = $this->module . '/' . $this->object_name . '/' . $this->id . '/' . $file_name;
 
-        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode($file);
+        $more = '';
+        if($this->getEntity_name() && $this->getData('entity'))
+            $more .= 'entity='.$this->getData('entity').'&';
+        
+        return DOL_URL_ROOT . '/' . $page . '.php?'.$more.'modulepart=bimpcore&file=' . urlencode($file);
     }
 
     public function getNameProperties()

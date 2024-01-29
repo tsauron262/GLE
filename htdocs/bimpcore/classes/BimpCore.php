@@ -134,6 +134,7 @@ class BimpCore
         global $user, $conf, $dolibarr_main_url_root;
         $vars = array(
             'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
+            'entity'    => $conf->entity,
             'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
             'bimp_context'    => '\'' . self::getContext() . '\'',
             'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',

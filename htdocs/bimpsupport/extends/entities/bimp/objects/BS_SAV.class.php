@@ -288,6 +288,7 @@ class BS_SAV_ExtEntity extends BS_SAV
             "BrandId"            => "243",
             "CommercialRef"      => $prod->ref,
             "SerialNumber"       => $this->getSerial(false, true),
+            "SerialNumber2"       => $this->getSerial(false, false),
             "PurchaseDate"       => "",
             "IRISCondition"      => "",
             "IRISConditionEX"    => "",

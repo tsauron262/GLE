@@ -11,8 +11,8 @@
         protected $db;
         public $rapport = [];
         protected $compteCheque = '51124000';
-        protected $compteBanque = '51240900';
-        protected $codeJournal  = 'CA';
+//        protected $compteBanque = '51240900';
+//        protected $codeJournal  = 'CA';
         
         function __construct($bimp_db) { 
             $this->db = $bimp_db; 
@@ -20,14 +20,15 @@
         
         public function constructTra($bordereau, $cheques) {
             
+        $banqueData = $this->db->getRow('bank_account', 'rowid = '.$bordereau->fk_bank_account);
             $date = new DateTime($bordereau->date_bordereau);
             $ecriture  = "";
             $structure = Array();
 
-            $structure['JOURNAL']           = sizing($this->codeJournal, 3);
+            $structure['JOURNAL']           = /*sizing($this->codeJournal, 3);*/sizing($banqueData->cegid_journal, 3);
             $structure['DATE']              = sizing($date->format('dmY'),8);
             $structure['TYPE_PIECE']        = sizing("RC", 2);
-            $structure['COMPTE']            = sizing($this->compteBanque, 17);
+            $structure['COMPTE']            = /*sizing($this->compteBanque, 17);*/sizing($banqueData->compte_compta, 17);
             $structure['TYPE_COMPTE']       = sizing('X', 1);
             $structure['CODE_COMPTA']       = sizing('', 16);
             $structure['NEXT']              = sizing('',1);
@@ -83,7 +84,7 @@
             $ecriture .= "\n";
             foreach($cheques as $cheque) {
                 $structure['COMPTE']            = sizing($this->compteCheque, 17);
-                $structure['CONTRE_PARTIE']     = sizing($this->compteBanque, 17);
+                $structure['CONTRE_PARTIE']     = /*sizing($this->compteBanque, 17);*/sizing($banqueData->compte_compta, 17);
                 $structure['SENS']              = sizing('C', 1);
                 
                 $paiement = $this->db->getRow('paiement', 'fk_bank = ' . $cheque->rowid);

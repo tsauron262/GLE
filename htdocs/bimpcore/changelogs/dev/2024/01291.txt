@@ -1,0 +1,1 @@
+- Aj gestion entity for bimpcore, bimptask, bimpfile

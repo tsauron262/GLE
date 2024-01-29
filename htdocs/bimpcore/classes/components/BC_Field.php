@@ -1134,24 +1134,47 @@ class BC_Field extends BimpComponent
         $value = '';
 
         if (isset($this->value)) {
-            if (isset($this->params['values']) && !empty($this->params['values'])) {
-                switch ($option) {
-                    case 'key_label':
-                        $value = $this->value;
+            if ($this->params['type'] === 'items_list' && is_string($this->value)) {
+                if ((int) $this->params['items_braces']) {
+                    $this->value = str_replace('][', ',', $this->value);
+                    $this->value = str_replace('[', '', $this->value);
+                    $this->value = str_replace(']', '', $this->value);
+                    $this->value = explode(',', $this->value);
+                } else {
+                    $this->value = explode($this->getParam('items_delimiter', ','), $this->value);
+                }
+            }
 
-                    default:
-                    case 'label':
-                        if (is_array($this->value)) {
-                            foreach ($this->value as $valTmp) {
+            if (isset($this->params['values']) && !empty($this->params['values'])) {
+                if (is_array($this->value)) {
+                    foreach ($this->value as $valTmp) {
+                        $value .= ($value ? ' - ' : '');
+                        switch ($option) {
+                            case 'key_label':
+                                $value .= $valTmp . ' ';
+
+                            default:
+                            case 'label':
                                 if (isset($this->params['values'][$valTmp])) {
                                     if (isset($this->params['values'][$valTmp]['label'])) {
-                                        $value .= ($value ? ' - ' : '') . $this->params['values'][$valTmp]['label'];
+                                        $value .= $this->params['values'][$valTmp]['label'];
                                     } elseif (is_string($this->params['values'][$valTmp])) {
-                                        $value .= ($value ? ' - ' : '') . $this->params['values'][$valTmp];
+                                        $value .= $this->params['values'][$valTmp];
                                     }
                                 }
-                            }
-                        } else {
+                                break;
+                        }
+                    }
+                    if (!$value) {
+                        $value = implode(' - ', $this->value);
+                    }
+                } else {
+                    switch ($option) {
+                        case 'key_label':
+                            $value = $this->value;
+
+                        default:
+                        case 'label':
                             if (isset($this->params['values'][$this->value])) {
                                 if (isset($this->params['values'][$this->value]['label'])) {
                                     $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value]['label'];
@@ -1159,14 +1182,11 @@ class BC_Field extends BimpComponent
                                     $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value];
                                 }
                             }
-                        }
-                        break;
-                }
-                if (!$value) {
-                    if (is_array($this->value))
-                        $value = implode(' - ', $this->value);
-                    else
+                            break;
+                    }
+                    if (!$value) {
                         $value = $this->value;
+                    }
                 }
             } else {
                 switch ($this->params['type']) {

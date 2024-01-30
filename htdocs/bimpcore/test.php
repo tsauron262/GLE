@@ -27,11 +27,19 @@ if (!$user->admin) {
     exit;
 }
 
-$p = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', 1134161);
-
-if (BimpObject::objectLoaded($p)) {
-    $p->dol_object->generateDocument($p->getModelPdf(), $langs);
+foreach (BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Propal', array(
+    'date_valid' => array(
+        'min' => '2024-01-30 12:50:00',
+        'max' => '2024-01-30 16:41:00',
+    ),
+    'ef_type'    => array('operator' => '!=', 'value' => 'S')
+)) as $p) {
+    if (BimpObject::objectLoaded($p)) {
+        echo '#' . $p->id . '<br/>';
+        $p->dol_object->generateDocument($p->getModelPdf(), $langs);
+    }
 }
+
 
 echo '<br/>FIN';
 echo '</body></html>';

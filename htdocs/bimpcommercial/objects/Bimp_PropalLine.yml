@@ -121,12 +121,6 @@ forms:
                     show_values: 1
             id_linked_contrat_line: 
                 show: 1
-#                custom: 1
-#                hidden: 1
-#                input_name: id_linked_contrat_line
-#                input: 
-#                    type: hidden
-#                value: 0
                 field: id_linked_contrat_line
                 label: Ajouter les unités à un abonnement en cours
                 display_if: 
@@ -193,15 +187,15 @@ forms:
                         show_values: 1
                     id_linked_contrat_line: 
                         show_values: 0
-#            abo_nb_renouv:
-#                show: 1
-#                field: abo_nb_renouv
-#                display_if: 
-#                    fields_names: is_abonnement,id_linked_contrat_line
-#                    is_abonnement: 
-#                        show_values: 1            
-#                    id_linked_contrat_line: 
-#                        show_values: 0
+            abo_nb_renouv:
+                show: 1
+                field: abo_nb_renouv
+                display_if: 
+                    fields_names: is_abonnement,id_linked_contrat_line
+                    is_abonnement: 
+                        show_values: 1            
+                    id_linked_contrat_line: 
+                        show_values: 0
             qty: 
                 display_if: 
                     unextends: 1
@@ -282,6 +276,14 @@ forms:
                         hide_values: 0
                     abo_duration: 
                         hide_values: 0
+            abo_nb_renouv:
+                field: abo_nb_renouv
+                display_if: 
+                    fields_names: is_abonnement,id_linked_contrat_line
+                    is_abonnement: 
+                        show_values: 1            
+                    id_linked_contrat_line: 
+                        show_values: 0
             qty:
                 custom: 1
                 hidden: 1

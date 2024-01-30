@@ -230,7 +230,7 @@ class Bimp_PropalLine extends ObjectLine
             }
             $html .= '<br/><b>- Qté totale : </b>' . parent::displayLineData('qty');
             $html .= '<br/>- Facturation à terme ' . ((int) $this->getData('abo_fac_term') ? 'à échoir' : 'échu');
-//            $html .= '<br/>- Renouvellement(s) tacite(s) : ' . $this->displayDataDefault('abo_nb_renouv');
+            $html .= '<br/>- Renouvellement(s) tacite(s) : ' . $this->displayDataDefault('abo_nb_renouv');
         }
 
         return $html;

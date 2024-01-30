@@ -440,15 +440,15 @@ class BCT_ContratLine extends BimpObject
             }
         }
 
-//        if ($this->isActionAllowed('facRegul') && $this->canSetAction('facRegul')) {
-//            $buttons[] = array(
-//                'label'   => 'Facture de régularisation',
-//                'icon'    => 'fas_file-medical',
-//                'onclick' => $this->getJsActionOnclick('facRegul', array(), array(
-//                    'form_name' => 'fac_regul'
-//                ))
-//            );
-//        }
+        if ($this->isActionAllowed('facRegul') && $this->canSetAction('facRegul')) {
+            $buttons[] = array(
+                'label'   => 'Facture de régularisation',
+                'icon'    => 'fas_file-medical',
+                'onclick' => $this->getJsActionOnclick('facRegul', array(), array(
+                    'form_name' => 'fac_regul'
+                ))
+            );
+        }
 
         return $buttons;
     }
@@ -1404,12 +1404,12 @@ class BCT_ContratLine extends BimpObject
         return ((float) $this->getData('qty') / $duration) * $prod_duration;
     }
 
-    public function getFacturesData()
+    public function getFacturesData($include_reguls = false, $return = 'data')
     {
         $data = array();
 
         $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
-        $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('f.rowid as id_facture', 'a.date_start', 'a.date_end', 'a.qty'), array(
+        $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('f.rowid as id_facture', 'a.date_start', 'a.date_end', 'a.qty', 'fl.linked_object_name'), array(
                     'f.type'                => array(0, 1, 2),
                     'f.fk_statut'           => array(0, 1, 2),
                     'f.fk_facture_source'   => array(
@@ -1419,7 +1419,7 @@ class BCT_ContratLine extends BimpObject
                         )
                     ),
                     $sel_nb_avoirs          => 0,
-                    'fl.linked_object_name' => 'contrat_line',
+                    'fl.linked_object_name' => ($include_reguls ? array('contrat_line', 'contrat_line_regul') : 'contrat_line'),
                     'fl.linked_id_object'   => $this->id
                         ), array(
                     'fl' => array(
@@ -1437,12 +1437,32 @@ class BCT_ContratLine extends BimpObject
 
         $rows = $this->db->executeS($sql, 'array');
 
-        foreach ($rows as $r) {
-            $data[(int) $r['id_facture']] = array(
-                'from' => $r['date_start'],
-                'to'   => $r['date_end'],
-                'qty'  => $r['qty']
-            );
+        switch ($return) {
+            case 'data':
+                foreach ($rows as $r) {
+                    $data[] = array(
+                        'id_facture' => (int) $r['id_facture'],
+                        'from'       => $r['date_start'],
+                        'to'         => $r['date_end'],
+                        'qty'        => $r['qty'],
+                        'is_regul'   => ($r['linked_object_name'] == 'contrat_line_regul' ? 1 : 0)
+                    );
+                }
+                break;
+
+            case 'qties':
+                $data = array(
+                    'fac_qty'   => 0,
+                    'regul_qty' => 0
+                );
+                foreach ($rows as $r) {
+                    if ($r['linked_object_name'] == 'contrat_line_regul') {
+                        $data['regul_qty'] += (float) $r['qty'];
+                    } else {
+                        $data['fac_qty'] += (float) $r['qty'];
+                    }
+                }
+                break;
         }
 
         return $data;
@@ -2055,6 +2075,22 @@ class BCT_ContratLine extends BimpObject
 
                 if ($nb_periods_billed < $periods_data['nb_total_periods']) {
                     $html .= '<br/>Prochaine facturation : ' . $this->displayNextFacDate(true);
+                }
+            }
+
+            if ((int) $this->getData('variable_qty')) {
+                $qties = $this->getFacturesData(true, 'qties');
+
+                if ($qties['fac_qty']) {
+                    $html .= '<div style="padding: 8px; margin-top: 10px; border: 1px solid #DCDCDC">';
+                    $html .= '<b>Qtés facturées: </b><br/>';
+                    $html .= 'Facturations régulières : <b>' . BimpTools::displayFloatValue($qties['fac_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+
+                    if ($qties['regul_qty']) {
+                        $html .= '<br/>Régularisations : <b>' . BimpTools::displayFloatValue($qties['regul_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                        $html .= '<br/>Total : <b>' . BimpTools::displayFloatValue($qties['fac_qty'] + $qties['regul_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                    }
+                    $html .= '</div>';
                 }
             }
 
@@ -3351,25 +3387,57 @@ class BCT_ContratLine extends BimpObject
 
                 if (!empty($rows)) {
                     if ($regul) {
-                        $html .= '<h3>Factures régulières</h3>';
-                    } else {
                         $html .= '<h3>Factures de régularisation</h3>';
+                    } else {
+                        $html .= '<h3>Factures régulières</h3>';
                     }
                     $html .= BimpRender::renderBimpListTable($rows, $headers);
                 }
             }
 
             if ($with_totals) {
-                $html .= '<table style="margin-top: 30px; width: 300px;" class="bimp_list_table">';
+                $html .= '<table style="margin-top: 30px; width: ' . ($total_regul_ht ? '600px' : '300px') . ';" class="bimp_list_table">';
+                if ($total_regul_ht > 0) {
+                    $html .= '<thead>';
+                    $html .= '<tr>';
+                    $html .= '<th></th>';
+                    $html .= '<th>Factures régulières</th>';
+                    $html .= '<th>Régularisations</th>';
+                    $html .= '<th>Total</th>';
+                    $html .= '</tr>';
+                    $html .= '</thead>';
+                }
                 $html .= '<tbody class="headers_col">';
+                $html .= '<tr>';
+                $html .= '<th>Total Qté facturée</th>';
+                $html .= '<td>' . BimpTools::displayFloatValue($total_qty, 6, ',', 0, 0, 0, 0, 1, 1) . '</td>';
+
+                if ($total_regul_ht > 0) {
+                    $html .= '<td>' . BimpTools::displayFloatValue($total_regul_qty, 6, ',', 0, 0, 0, 0, 1, 1) . '</td>';
+                    $html .= '<td>' . BimpTools::displayFloatValue($total_qty + $total_regul_qty, 6, ',', 0, 0, 0, 0, 1, 1) . '</td>';
+                }
+
+                $html .= '</tr>';
+
                 $html .= '<tr>';
                 $html .= '<th>Total HT Facturé</th>';
                 $html .= '<td>' . BimpTools::displayMoneyValue($total_ht) . '</td>';
+
+                if ($total_regul_ht > 0) {
+                    $html .= '<td>' . BimpTools::displayMoneyValue($total_regul_ht) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($total_ht + $total_regul_ht) . '</td>';
+                }
                 $html .= '</tr>';
 
                 $html .= '<tr>';
                 $html .= '<th>Total TTC Facturé</th>';
                 $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc) . '</td>';
+
+                if ($total_regul_ht > 0) {
+                    $html .= '<td>' . BimpTools::displayMoneyValue($total_regul_ttc) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc + $total_regul_ttc) . '</td>';
+                }
+
                 $html .= '</tr>';
                 $html .= '</tbody>';
                 $html .= '</table>';
@@ -3597,7 +3665,7 @@ class BCT_ContratLine extends BimpObject
 
         $options = array();
 
-        foreach ($facs as $id_fac => $data) {
+        foreach ($facs as $data) {
             if (!$from || $data['from'] < $from) {
                 $from = $data['from'];
             }
@@ -3621,7 +3689,7 @@ class BCT_ContratLine extends BimpObject
 
         $options = array();
 
-        foreach ($facs as $id_fac => $data) {
+        foreach ($facs as $data) {
             if ($data['to'] < $from_value) {
                 continue;
             }
@@ -3664,17 +3732,41 @@ class BCT_ContratLine extends BimpObject
         if (count($errors)) {
             $html .= BimpRender::renderAlerts($errors);
         } else {
-            $facs_data = $this->getFacturesData();
+            $facs_data = $this->getFacturesData(true);
             $qty_fac = 0;
 
-            foreach ($facs_data as $id_fac => $fac_data) {
+            $has_regul = false;
+
+            $html .= '<b>Facturations régulières sur la période sélectionnée : </b><br/>';
+            foreach ($facs_data as $fac_data) {
+                if ($fac_data['is_regul']) {
+                    $has_regul = true;
+                    continue;
+                }
                 if ($fac_data['from'] >= $from && $fac_data['to'] <= $to) {
                     $qty_fac += (float) $fac_data['qty'];
                     $html .= ' - Du ' . date('d / m / Y', strtotime($fac_data['from'])) . ' au ' . date('d / m / Y', strtotime($fac_data['to'])) . ' : ' . BimpTools::displayFloatValue($fac_data['qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '<br/>';
                 }
             }
+            $html .= '<b>Quantité totale : ' . BimpTools::displayFloatValue($qty_fac, 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
 
-            $html .= '<b>Quantité totale déjà facturée sur la période sélectionnée : ' . BimpTools::displayFloatValue($qty_fac, 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+            if ($has_regul) {
+                $qty_regul = 0;
+                $html .= '<br/><br/>';
+                $html .= '<div style="padding: 10px; border: 1px solid #DCDCDC">';
+                $html .= '<span class="important">Régularisations déjà effectuées: </span><br/>';
+
+                foreach ($facs_data as $fac_data) {
+                    if (!$fac_data['is_regul']) {
+                        continue;
+                    }
+                    $qty_regul += (float) $fac_data['qty'];
+                    $html .= ' - Du ' . date('d / m / Y', strtotime($fac_data['from'])) . ' au ' . date('d / m / Y', strtotime($fac_data['to'])) . ' : ' . BimpTools::displayFloatValue($fac_data['qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '<br/>';
+                }
+
+                $html .= '<b>Quantité totale régularisations : ' . BimpTools::displayFloatValue($qty_regul, 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                $html .= '</div>';
+            }
 
             $html .= '<br/><br/>Quantité à régulariser : <br/>';
             $html .= BimpInput::renderInput('qty', 'regul_qty', 0, array(

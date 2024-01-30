@@ -1079,7 +1079,7 @@ class BCT_Contrat extends BimpDolObject
 
                     $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
                                 'id_obj'             => $facture->id,
-                                'linked_object_name' => 'contrat_line',
+                                'linked_object_name' => array('contrat_line', 'contrat_line_regul'),
                                 'linked_id_object'   => $contrat_lines
                                     ), 'position', 'asc');
 
@@ -1088,8 +1088,13 @@ class BCT_Contrat extends BimpDolObject
                     } else {
                         $lines_rows = array();
                         foreach ($fac_lines as $fac_line) {
+                            $desc = '';
+                            if ($fac_line->getData('linked_object_name') == 'contrat_line_regul') {
+                                $desc .= '<span class="important">[REGULARISATION]</span><br/>';
+                            }
+                            $desc .= $fac_line->displayLineData('desc_light');
                             $lines_rows[] = array(
-                                'desc'      => $fac_line->displayLineData('desc_light'),
+                                'desc'      => $desc,
                                 'qty'       => $fac_line->displayLineData('qty'),
                                 'pu_ht'     => $fac_line->displayLineData('pu_ht'),
                                 'total_ht'  => $fac_line->displayLineData('total_ht'),

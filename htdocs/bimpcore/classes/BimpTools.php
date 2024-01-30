@@ -1866,7 +1866,7 @@ class BimpTools
 
     public static function isNumericType($value)
     {
-        return (is_int($value) || is_float($value) || is_bool($value) || (is_string($value) && preg_match('/^[0-9]+[.,]*[0-9]*$/', $value)));
+        return (substr($value, -1) != '.' && (is_int($value) || is_float($value) || is_bool($value) || (is_string($value) && preg_match('/^[0-9]+[.,]*[0-9]*$/', $value))));
     }
 
     public static function isString($value)

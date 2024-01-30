@@ -31,7 +31,9 @@ class BCT_ContratLine extends BimpObject
         3  => 'Trimestrielle',
         4  => 'Quadrimestrielle',
         6  => 'Semestrielle',
-        12 => 'Annuelle'
+        12 => 'Annuelle',
+        24 => 'Biannuelle',
+        36 => 'Triannuelle'
     );
     public static $periodicities_masc = array(
         1  => 'Mensuel',
@@ -39,7 +41,9 @@ class BCT_ContratLine extends BimpObject
         3  => 'Trimestriel',
         4  => 'Quadrimestriel',
         6  => 'Semestriel',
-        12 => 'Annuel'
+        12 => 'Annuel',
+        24 => 'Biannuel',
+        36 => 'Triannuel'
     );
     public static $dol_fields = array('fk_contrat', 'fk_product', 'label', 'description', 'commentaire', 'statut', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'remise', 'fk_product_fournisseur_price', 'buy_price_ht', 'total_ht', 'total_tva', 'total_ttc', 'date_commande', 'date_ouverture_prevue', 'date_fin_validite', 'date_cloture', 'fk_user_author', 'fk_user_ouverture', 'fk_user_cloture');
     protected $data_at_date = null;

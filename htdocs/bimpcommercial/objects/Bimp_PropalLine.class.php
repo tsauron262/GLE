@@ -15,7 +15,9 @@ class Bimp_PropalLine extends ObjectLine
         3  => 'Trimestrielle',
         4  => 'Quadrimestrielle',
         6  => 'Semestrielle',
-        12 => 'Annuelle'
+        12 => 'Annuelle',
+        24 => 'Biannuelle',
+        36 => 'Triannuelle'
     );
     public static $periodicities_masc = array(
         1  => 'Mensuel',
@@ -23,7 +25,9 @@ class Bimp_PropalLine extends ObjectLine
         3  => 'Trimestriel',
         4  => 'Quadrimestriel',
         6  => 'Semestriel',
-        12 => 'Annuel'
+        12 => 'Annuel',
+        24 => 'Biannuel',
+        36 => 'Triannuel'
     );
 
     // Getters booléens

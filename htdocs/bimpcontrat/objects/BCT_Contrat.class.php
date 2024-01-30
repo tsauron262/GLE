@@ -1397,7 +1397,7 @@ class BCT_Contrat extends BimpDolObject
                     $fac_line->validateArray(array(
                         'id_obj'             => (int) $facture->id,
                         'type'               => ObjectLine::LINE_TEXT,
-                        'linked_id_object'   => (int) $contrat,
+                        'linked_id_object'   => (int) $id_contrat,
                         'linked_object_name' => 'contrat_origin_label',
                     ));
                     $fac_line->qty = 1;

@@ -27,6 +27,12 @@ if (!$user->admin) {
     exit;
 }
 
+$p = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', 1134161);
+
+if (BimpObject::objectLoaded($p)) {
+    $p->dol_object->generateDocument($p->getModelPdf(), $langs);
+}
+
 echo '<br/>FIN';
 echo '</body></html>';
 

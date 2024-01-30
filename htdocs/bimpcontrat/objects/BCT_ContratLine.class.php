@@ -4173,7 +4173,7 @@ class BCT_ContratLine extends BimpObject
             $lines = $options['lines'];
             if (empty($lines)) {
                 $lines = array($this->id);
-                $rows = $this->db->getRows('contratdet', 'fk_contrat = ' . $contrat->id . ' AND id_linked_line = ' . $this->id, array('rowid'), 'array');
+                $rows = $this->db->getRows('contratdet', 'fk_contrat = ' . $contrat->id . ' AND id_linked_line = ' . $this->id, null, 'array', array('rowid'));
 
                 if (is_array($rows)) {
                     foreach ($rows as $r) {

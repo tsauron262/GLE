@@ -268,12 +268,14 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
         if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('abo_nb_renouv')) {
             $nb_renouv = (int) $bimpLine->getData('abo_nb_renouv');
-            $desc .= ($desc ? '<br/>' : '') . '<span style="font-style: italic; font-size: 8px">';
-            $desc .= 'Cet abonnement sera renouvelé de manière tacite ';
-            if ($nb_renouv > 0) {
-                $desc .= $nb_renouv . ' fois ';
+            if ($nb_renouv) {
+                $desc .= ($desc ? '<br/>' : '') . '<span style="font-style: italic; font-size: 8px">';
+                $desc .= 'Cet abonnement sera renouvelé de manière tacite ';
+                if ($nb_renouv > 0) {
+                    $desc .= $nb_renouv . ' fois ';
+                }
+                $desc .= 'sans dénonciation de votre part.</span>';
             }
-            $desc .= 'sans dénonciation de votre part.</span>';
         }
 
         if (!is_null($line->desc) && $line->desc) {

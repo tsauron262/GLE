@@ -5627,7 +5627,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $where = '`' . $primary . '` = ' . (int) $id;
         if ($this->checkEntity && BimpTools::isModuleDoliActif('MULTICOMPANY')) {
             if ($this->getEntity_name())
-                $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ')';
+                $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ', 0)';
         }
         $row = $this->db->getRow($table, $where);
 
@@ -6235,7 +6235,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $where = '`' . $this->getPrimary() . '` = ' . (int) $id;
             if ($this->checkEntity && BimpTools::isModuleDoliActif('MULTICOMPANY')) {
                 if ($this->getEntity_name())
-                    $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ')';
+                    $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ', 0)';
             }
             $result = $this->db->getRow($this->getTable(), $where, $bimpObjectFields, 'array');
             if (!is_null($result)) {

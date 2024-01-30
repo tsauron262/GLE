@@ -4,6 +4,7 @@ class BimpObject extends BimpCache
 {
 
     public $db = null;
+    public $checkEntity = true;
     public $cache_id = 0;
     public $module = '';
     public $object_name = '';
@@ -97,7 +98,7 @@ class BimpObject extends BimpCache
 
     // Gestion instance:
 
-    public static function getInstance($module, $object_name, $id_object = null, $parent = null)
+    public static function getInstance($module, $object_name, $id_object = null, $parent = null, $checkEntity = true)
     {
         $className = '';
         $instance = null;
@@ -232,6 +233,7 @@ class BimpObject extends BimpCache
 
         if (is_a($instance, 'BimpObject')) {
             if (!is_null($id_object)) {
+                $instance->checkEntity = $checkEntity;
                 $instance->fetch($id_object, $parent);
             } else {
                 $instance->parent = $parent;
@@ -5623,7 +5625,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $where = '`' . $primary . '` = ' . (int) $id;
-        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+        if ($this->checkEntity && BimpTools::isModuleDoliActif('MULTICOMPANY')) {
             if ($this->getEntity_name())
                 $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ')';
         }
@@ -6222,7 +6224,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             return false;
         }
-        if (isset($this->dol_object->entity) && !in_array($this->dol_object->entity, $this->getEntitysArray()))
+        if ($this->checkEntity && isset($this->dol_object->entity) && !in_array($this->dol_object->entity, $this->getEntitysArray()))
             return false;
 
         $bimpObjectFields = array();
@@ -6231,7 +6233,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!empty($bimpObjectFields)) {
             $where = '`' . $this->getPrimary() . '` = ' . (int) $id;
-            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if ($this->checkEntity && BimpTools::isModuleDoliActif('MULTICOMPANY')) {
                 if ($this->getEntity_name())
                     $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ')';
             }
@@ -7440,6 +7442,15 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $url = $this->getListPageUrl();
 
             if ($url) {
+                if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+                    $objectTest = BimpObject::getInstance($this->module, $this->object_name, BimpTools::getValue('id'), null, false);
+                    if($objectTest->isLoaded() && $objectTest->can('view') && $objectTest->getData('entity') > 0){
+                        global $mc;
+                        $ret=$mc->switchEntity($objectTest->getData('entity'));
+                        $html .= BimpRender::renderAlerts('Changement d\'entité.........', "warning");
+                        $html .= '<script>location.reload();</script>';
+                    }
+                }
                 $html .= '<div class="buttonsContainer align-center">';
                 $html .= '<button class="btn btn-large btn-primary" onclick="window.location = \'' . $url . '\'">';
                 $html .= BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur');

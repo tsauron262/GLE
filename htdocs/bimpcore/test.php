@@ -27,6 +27,10 @@ if (!$user->admin) {
     exit;
 }
 
+//BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
+//echo BCT_Contrat::createRenouvTasks();
+//echo BCT_Contrat::RenouvAuto();
+
 
 echo '<br/>FIN';
 echo '</body></html>';

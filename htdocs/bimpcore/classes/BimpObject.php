@@ -7444,11 +7444,20 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($url) {
                 if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
                     $objectTest = BimpObject::getInstance($this->module, $this->object_name, BimpTools::getValue('id'), null, false);
-                    if($objectTest->isLoaded() && $objectTest->can('view') && $objectTest->getData('entity') > 0){
+                    global $conf;
+                    $currentEntity = $conf->entity;
+                    if($objectTest->isLoaded() /*&& $objectTest->can('view')*/ && $objectTest->getData('entity') > 0 && $currentEntity != $objectTest->getData('entity')){
                         global $mc;
                         $ret=$mc->switchEntity($objectTest->getData('entity'));
-                        $html .= BimpRender::renderAlerts('Changement d\'entité.........', "warning");
-                        $html .= '<script>location.reload();</script>';
+                        global $user;
+                        $user->getrights('', true);
+                        if($objectTest->can('view')){
+                            $html .= BimpRender::renderAlerts('Changement d\'entité.........', "warning");
+                            $html .= '<script>location.reload();</script>';
+                        }
+                        else{//ca marche pas, onn reste sur l'entité curent
+                            $ret=$mc->switchEntity($currentEntity);
+                        }
                     }
                 }
                 $html .= '<div class="buttonsContainer align-center">';

@@ -1616,15 +1616,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $errors;
         }
 
-        $entrepotId = 0;
-        if($this->useEntrepot()){
-            $entrepot = $reception->getChildObject('entrepot');
+        $entrepot = $reception->getChildObject('entrepot');
 
-            if (!BimpObject::objectLoaded($entrepot)) {
-                $errors[] = 'Entrepot absent de la réception ou invalide';
-                return $errors;
-            }
-            $entrepotId = $entrepot->id;
+        if (!BimpObject::objectLoaded($entrepot)) {
+            $errors[] = 'Entrepot absent de la réception ou invalide';
+            return $errors;
         }
 
         $commande_fourn = $this->getParentInstance();
@@ -1758,7 +1754,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 'id_equipment' => (int) $equipment->id,
                                 'type'         => BE_Place::BE_PLACE_ENTREPOT,
                                 'date'         => date('Y-m-d H:i:s'),
-                                'id_entrepot'  => (int) $entrepotId,
+                                'id_entrepot'  => (int) $entrepot->id,
                                 'infos'        => $stock_label,
                                 'code_mvt'     => $code_mvt,
                                 'origin'       => 'order_supplier',
@@ -1859,13 +1855,13 @@ class Bimp_CommandeFournLine extends FournObjectLine
         } else {
             // Incrémentation des stocks produit: 
             if (!$isReturn) {
-                $product->correctStocks($entrepotId, (int) $reception_data['qty'], Bimp_Product::STOCK_IN, $code_mvt, $stock_label, 'order_supplier', (int) $commande_fourn->id);
+                $product->correctStocks($entrepot->id, (int) $reception_data['qty'], Bimp_Product::STOCK_IN, $code_mvt, $stock_label, 'order_supplier', (int) $commande_fourn->id);
 
                 if ($stock_out) {
-                    $product->correctStocks($entrepotId, (int) $reception_data['qty'], Bimp_Product::STOCK_OUT, $code_mvt . '_OUT', $stock_label . ' - Déplacement vers stock boutique', 'order_supplier', (int) $commande_fourn->id);
+                    $product->correctStocks($entrepot->id, (int) $reception_data['qty'], Bimp_Product::STOCK_OUT, $code_mvt . '_OUT', $stock_label . ' - Déplacement vers stock boutique', 'order_supplier', (int) $commande_fourn->id);
                 }
             } else {
-                $product->correctStocks($entrepotId, abs((int) $reception_data['qty']), Bimp_Product::STOCK_OUT, $code_mvt, '(Retour au fournisseur) ' . $stock_label, 'order_supplier', (int) $commande_fourn->id);
+                $product->correctStocks($entrepot->id, abs((int) $reception_data['qty']), Bimp_Product::STOCK_OUT, $code_mvt, '(Retour au fournisseur) ' . $stock_label, 'order_supplier', (int) $commande_fourn->id);
             }
         }
 

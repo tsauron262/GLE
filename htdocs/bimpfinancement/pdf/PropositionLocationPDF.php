@@ -15,6 +15,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
 
     # Données: 
     public $title;
+    public $sub_title = '';
     public $montant_materiels;
     public $montant_services;
     public $duration;
@@ -29,11 +30,13 @@ class PropositionLocationPDF extends BimpDocumentPDF
         $this->title = BimpTools::getArrayValueFromPath($data, 'title', '');
 
         if (!$this->title) {
-            $this->title = 'Proposition de location de vos équipements informatiques';
+            $this->title = 'Proposition de location de vos équipements informatiquesss';
         }
-        
+
+        $this->sub_title = '(Proposition non définitive)';
+
         $this->client_data = BimpTools::getArrayValueFromPath($data, 'client_data', array());
-        
+
         $this->montant_materiels = (float) BimpTools::getArrayValueFromPath($data, 'montant_materiels', 0);
         $this->montant_services = (float) BimpTools::getArrayValueFromPath($data, 'montant_services', 0);
 
@@ -107,15 +110,15 @@ class PropositionLocationPDF extends BimpDocumentPDF
     public function getTargetInfosHtml()
     {
         $html = '';
-        
+
         if (isset($this->client_data['nom']) && $this->client_data['nom']) {
             $html .= '<b>' . $this->client_data['nom'] . '</b>';
-            
+
             if (isset($this->client_data['full_address']) && $this->client_data['full_address']) {
                 $html .= '<br/>' . $this->client_data['full_address'];
             }
         }
-        
+
         return $html;
     }
 
@@ -127,8 +130,16 @@ class PropositionLocationPDF extends BimpDocumentPDF
 
         $html = '';
 
-        $html .= '<div style="text-align: center;font-size: 12px; font-weight: bold; color: #' . $this->primary . '">';
+        $html .= '<div style="text-align: center">';
+        $html .= '<span style="font-size: 12px; font-weight: bold; color: #' . $this->primary . '">';
         $html .= $this->title;
+        $html .= '</span>';
+        
+        if ($this->sub_title) {
+            $html .= '<br/><span style="font-size: 8px">';
+            $html .= $this->sub_title;
+            $html .= '</span>';
+        }
         $html .= '</div>';
 
         $html .= '<p style="font-size: 8px">';

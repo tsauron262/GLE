@@ -31,7 +31,9 @@ class BCT_ContratLine extends BimpObject
         3  => 'Trimestrielle',
         4  => 'Quadrimestrielle',
         6  => 'Semestrielle',
-        12 => 'Annuelle'
+        12 => 'Annuelle',
+        24 => 'Biannuelle',
+        36 => 'Triannuelle'
     );
     public static $periodicities_masc = array(
         1  => 'Mensuel',
@@ -39,7 +41,9 @@ class BCT_ContratLine extends BimpObject
         3  => 'Trimestriel',
         4  => 'Quadrimestriel',
         6  => 'Semestriel',
-        12 => 'Annuel'
+        12 => 'Annuel',
+        24 => 'Biannuel',
+        36 => 'Triannuel'
     );
     public static $dol_fields = array('fk_contrat', 'fk_product', 'label', 'description', 'commentaire', 'statut', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'remise', 'fk_product_fournisseur_price', 'buy_price_ht', 'total_ht', 'total_tva', 'total_ttc', 'date_commande', 'date_ouverture_prevue', 'date_fin_validite', 'date_cloture', 'fk_user_author', 'fk_user_ouverture', 'fk_user_cloture');
     protected $data_at_date = null;
@@ -164,6 +168,15 @@ class BCT_ContratLine extends BimpObject
     {
         $contrat = null;
 
+        if (in_array($action, array('deactivate', 'renouv', 'facRegul', 'resiliate')) && !$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        if ((int) $this->getData('id_parent_line') && in_array($action, array('activate', 'deactivate', 'renouv', 'resiliate'))) {
+            $errors[] = 'Action non possible pour les sous-lignes. Veuillez effectuer cette action sur la ligne parente';
+            return 0;
+        }
+
         if (in_array($action, array('activate'))) {
             if (!$this->isLoaded()) {
                 return 1; // pour les bulk actions
@@ -200,42 +213,26 @@ class BCT_ContratLine extends BimpObject
                     return 0;
                 }
 
-                if ((int) $this->getData('id_parent_line')) {
-                    $errors[] = 'Sous-ligne : veuillez activer la ligne parente';
-                    return 0;
-                }
-
                 if (!$this->isValide($errors)) {
                     return 0;
                 }
                 return 1;
 
             case 'deactivate':
-                if ($status == 0) {
+                if ($status !== self::STATUS_ACTIVE) {
                     $errors[] = 'Cette ligne de contrat est déjà désactivée';
                     return 0;
                 }
-
-                if ((int) $this->getData('id_parent_line')) {
-                    $errors[] = 'Sous-ligne : veuillez désactiver la ligne parente';
-                    return 0;
-                }
-
                 return 1;
 
             case 'renouv':
-                if (!in_array($this->getData('line_type'), array(self::TYPE_ABO))) {
-                    $errors[] = 'Renouvellement non possible pour ce type de ligne de contrat';
-                    return 0;
-                }
-
-                if ((int) $this->getData('statut') <= 0) {
+                if ($status <= 0) {
                     $errors[] = 'Le statut actuel de cette ligne de contrat ne permet pas son renouvellement';
                     return 0;
                 }
 
-                if ((int) $this->getData('id_parent_line')) {
-                    $errors[] = 'Revouvellement non possible pour les sous-lignes (utiliser la ligne parente)';
+                if (!in_array($this->getData('line_type'), array(self::TYPE_ABO))) {
+                    $errors[] = 'Renouvellement non possible pour ce type de ligne de contrat';
                     return 0;
                 }
 
@@ -243,8 +240,42 @@ class BCT_ContratLine extends BimpObject
                     $errors[] = 'Cette ligne de contrat a déjà été renouvellée';
                     return 0;
                 }
+                return 1;
+
+            case 'facRegul':
+                if ($status <= 0) {
+                    $errors[] = 'Le statut actuel de cette ligne de contrat ne permet pas d\'établir une facture de régularisation';
+                    return 0;
+                }
+
+                if ((int) $this->getData('line_type') !== self::TYPE_ABO) {
+                    $errors[] = 'Cette ligne n\'est pas un abonnement';
+                    return 0;
+                }
+
+                if (!(int) $this->getData('variable_qty')) {
+                    $errors[] = 'Cette ligne n\'est pas à quantité variable';
+                    return 0;
+                }
 
                 return 1;
+
+            case 'resiliate':
+                if ($status !== self::STATUS_ACTIVE) {
+                    $errors[] = 'Cet abonnement n\'est pas actif';
+                    return 0;
+                }
+
+                if ((int) $this->getData('line_type') !== self::TYPE_ABO) {
+                    $errors[] = 'Cette ligne n\'est pas un abonnement';
+                    return 0;
+                }
+
+                if ((string) $this->getData('date_cloture')) {
+                    $errors[] = 'Cet abonnement a déjà été résilié';
+                    return 0;
+                }
+                break;
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -418,6 +449,25 @@ class BCT_ContratLine extends BimpObject
             }
         }
 
+        if ($this->isActionAllowed('facRegul') && $this->canSetAction('facRegul')) {
+            $buttons[] = array(
+                'label'   => 'Facture de régularisation',
+                'icon'    => 'fas_file-medical',
+                'onclick' => $this->getJsActionOnclick('facRegul', array(), array(
+                    'form_name' => 'fac_regul'
+                ))
+            );
+        }
+
+//        if ($this->isActionAllowed('resiliate') && $this->canSetAction('resiliate')) {
+//            $buttons[] = array(
+//                'label'   => 'Résilier',
+//                'icon'    => 'fas_times-circle',
+//                'onclick' => $this->getJsActionOnclick('resiliate', array(), array(
+//                    'form_name' => 'resiliate'
+//                ))
+//            );
+//        }
         return $buttons;
     }
 
@@ -1006,10 +1056,10 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 // Cas d'une première facturation sur une période partielle
-                if ($date_fac_start > $date_debut) {
+                if ($date_fac_start != $date_debut) {
                     // Calcul du début de la première période facturée partiellement : 
                     $interval = BimpTools::getDatesIntervalData($date_debut, $date_fac_start);
-                    $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période à factuer partiellement
+                    $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période à facturer partiellement
                     $dt = new DateTime($date_debut);
                     if ($nb_periods) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
@@ -1166,7 +1216,7 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 // Cas d'un premier achat sur une période partielle
-                if ($date_achat_start > $date_debut) {
+                if ($date_achat_start != $date_debut) {
                     // Calcul du début de la première période : 
                     $interval = BimpTools::getDatesIntervalData($date_debut, $date_achat_start);
                     $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période partielle
@@ -1256,12 +1306,12 @@ class BCT_ContratLine extends BimpObject
         return $data;
     }
 
-    public function getFacturesLines($id_facture = 0, &$errors = array())
+    public function getFacturesLines($id_facture = 0, &$errors = array(), $regul = false)
     {
         $lines = array();
 
         if ($this->isLoaded($errors)) {
-            $where = 'linked_object_name = \'contrat_line\' AND linked_id_object = ' . $this->id;
+            $where = 'linked_object_name = \'contrat_line' . ($regul ? '_regul' : '') . '\' AND linked_id_object = ' . $this->id;
 
             if ($id_facture) {
                 $where .= ' AND id_obj = ' . $id_facture;
@@ -1370,6 +1420,70 @@ class BCT_ContratLine extends BimpObject
         }
 
         return ((float) $this->getData('qty') / $duration) * $prod_duration;
+    }
+
+    public function getFacturesData($include_reguls = false, $return = 'data')
+    {
+        $data = array();
+
+        $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
+        $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('f.rowid as id_facture', 'a.date_start', 'a.date_end', 'a.qty', 'fl.linked_object_name'), array(
+                    'f.type'                => array(0, 1, 2),
+                    'f.fk_statut'           => array(0, 1, 2),
+                    'f.fk_facture_source'   => array(
+                        'or_field' => array(
+                            'IS_NULL',
+                            0
+                        )
+                    ),
+                    $sel_nb_avoirs          => 0,
+                    'fl.linked_object_name' => ($include_reguls ? array('contrat_line', 'contrat_line_regul') : 'contrat_line'),
+                    'fl.linked_id_object'   => $this->id
+                        ), array(
+                    'fl' => array(
+                        'table' => 'bimp_facture_line',
+                        'on'    => 'fl.id_line = a.rowid'
+                    ),
+                    'f'  => array(
+                        'table' => 'facture',
+                        'on'    => 'f.rowid = a.fk_facture'
+                    )
+                        ), array(
+                    'order_by'  => 'a.date_start',
+                    'order_way' => 'ASC'
+        ));
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        switch ($return) {
+            case 'data':
+                foreach ($rows as $r) {
+                    $data[] = array(
+                        'id_facture' => (int) $r['id_facture'],
+                        'from'       => $r['date_start'],
+                        'to'         => $r['date_end'],
+                        'qty'        => $r['qty'],
+                        'is_regul'   => ($r['linked_object_name'] == 'contrat_line_regul' ? 1 : 0)
+                    );
+                }
+                break;
+
+            case 'qties':
+                $data = array(
+                    'fac_qty'   => 0,
+                    'regul_qty' => 0
+                );
+                foreach ($rows as $r) {
+                    if ($r['linked_object_name'] == 'contrat_line_regul') {
+                        $data['regul_qty'] += (float) $r['qty'];
+                    } else {
+                        $data['fac_qty'] += (float) $r['qty'];
+                    }
+                }
+                break;
+        }
+
+        return $data;
     }
 
     // Getters statiques:
@@ -1982,6 +2096,22 @@ class BCT_ContratLine extends BimpObject
                 }
             }
 
+            if ((int) $this->getData('variable_qty')) {
+                $qties = $this->getFacturesData(true, 'qties');
+
+                if ($qties['fac_qty']) {
+                    $html .= '<div style="padding: 8px; margin-top: 10px; border: 1px solid #DCDCDC">';
+                    $html .= '<b>Qtés facturées: </b><br/>';
+                    $html .= 'Facturations régulières : <b>' . BimpTools::displayFloatValue($qties['fac_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+
+                    if ($qties['regul_qty']) {
+                        $html .= '<br/>Régularisations : <b>' . BimpTools::displayFloatValue($qties['regul_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                        $html .= '<br/>Total : <b>' . BimpTools::displayFloatValue($qties['fac_qty'] + $qties['regul_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                    }
+                    $html .= '</div>';
+                }
+            }
+
             if (BimpCore::isUserDev()) {
                 $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
             }
@@ -2591,7 +2721,7 @@ class BCT_ContratLine extends BimpObject
                                         $row_html .= BimpRender::renderAlerts($line_errors);
                                     } elseif ($periods_data['nb_periods_tobill_today'] > 0 || ($canFactAvance && $periods_data['nb_periods_tobill_max'] > 0)) {
                                         $is_first_period = ($periods_data['date_next_period_tobill'] == $periods_data['date_first_period_start']);
-                                        if ($is_first_period && $periods_data['first_period_prorata'] < 1 && $periods_data['first_period_prorata'] > 0) {
+                                        if ($is_first_period && $periods_data['first_period_prorata'] != 1) {
                                             $msg .= BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
                                             $msg .= 'Première période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
                                             $msg .= '</b> au <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_end'])) . '</b>';
@@ -2890,7 +3020,7 @@ class BCT_ContratLine extends BimpObject
 
                                 if ($id_fourn && $periods_data['nb_periods_tobuy_max'] > 0) {
                                     $is_first_period = ($periods_data['date_next_achat'] == $periods_data['date_achat_start']);
-                                    if ($is_first_period && $periods_data['first_period_prorata'] < 1 && $periods_data['first_period_prorata'] > 0) {
+                                    if ($is_first_period && $periods_data['first_period_prorata'] != 1) {
                                         $msg .= BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
                                         $msg .= 'Première période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
                                         $msg .= '</b> au <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_end'])) . '</b>';
@@ -3192,11 +3322,12 @@ class BCT_ContratLine extends BimpObject
         $html = '';
 
         $errors = array();
-        $fac_lines = $this->getFacturesLines($id_facture, $errors);
+        $fac_lines = $this->getFacturesLines($id_facture, $errors, false);
+        $fac_lines_regul = $this->getFacturesLines($id_facture, $errors, true);
 
         if (!empty($errors)) {
             $html .= BimpRender::renderAlerts($errors, 'danger');
-        } elseif (empty($fac_lines)) {
+        } elseif (empty($fac_lines) && empty($fac_lines_regul)) {
             $html .= BimpRender::renderAlerts('Aucune facturation effectuée', 'warning');
         } else {
             $headers = array(
@@ -3209,59 +3340,122 @@ class BCT_ContratLine extends BimpObject
                 'user_create' => 'Créée par'
             );
 
-            $rows = array();
-
             $total_ht = 0;
             $total_ttc = 0;
+            $total_qty = 0;
 
-            foreach ($fac_lines as $fac_line) {
-                $facture = $fac_line->getParentInstance();
+            $total_regul_ht = 0;
+            $total_regul_ttc = 0;
+            $total_regul_qty = 0;
 
-                if (BimpObject::objectLoaded($facture)) {
-                    $period = 'Du ';
-                    if ($fac_line->date_from) {
-                        $period .= '<b>' . date('d / m / Y', strtotime($fac_line->date_from)) . '</b>';
-                    } else {
-                        $period .= '<span class="danger">Date de début non définie</span>';
+            foreach (array(0, 1) as $regul) {
+                if ($regul) {
+                    $lines = $fac_lines_regul;
+                } else {
+                    $lines = $fac_lines;
+                }
+
+                if (empty($lines)) {
+                    continue;
+                }
+
+                $rows = array();
+
+                foreach ($lines as $fac_line) {
+                    $facture = $fac_line->getParentInstance();
+
+                    if (BimpObject::objectLoaded($facture)) {
+                        $period = 'Du ';
+                        if ($fac_line->date_from) {
+                            $period .= '<b>' . date('d / m / Y', strtotime($fac_line->date_from)) . '</b>';
+                        } else {
+                            $period .= '<span class="danger">Date de début non définie</span>';
+                        }
+
+                        $period .= ' au ';
+                        if ($fac_line->date_to) {
+                            $period .= '<b>' . date('d / m / Y', strtotime($fac_line->date_to)) . '</b>';
+                        } else {
+                            $period .= '<span class="danger">Date de fin non définie</span>';
+                        }
+
+                        $user_author = $facture->getChildObject('user_author');
+
+                        if ($regul) {
+                            $total_regul_ht += $fac_line->getTotalHT();
+                            $total_regul_ttc += $fac_line->getTotalTTC();
+                            $total_regul_qty += $fac_line->getFullQty();
+                        } else {
+                            $total_ht += $fac_line->getTotalHT();
+                            $total_ttc += $fac_line->getTotalTTC();
+                            $total_qty += $fac_line->getFullQty();
+                        }
+
+                        $rows[] = array(
+                            'period'      => $period,
+                            'facture'     => $facture->getLink() . '&nbsp;&nbsp;' . $facture->displayDataDefault('fk_statut'),
+                            'qty'         => $fac_line->displayLineData('qty'),
+                            'total_ht'    => $fac_line->displayLineData('total_ht'),
+                            'total_ttc'   => $fac_line->displayLineData('total_ttc'),
+                            'date_create' => $facture->displayDataDefault('datec'),
+                            'user_create' => (BimpObject::objectLoaded($user_author) ? $user_author->getLink() : '')
+                        );
                     }
+                }
 
-                    $period .= ' au ';
-                    if ($fac_line->date_to) {
-                        $period .= '<b>' . date('d / m / Y', strtotime($fac_line->date_to)) . '</b>';
+                if (!empty($rows)) {
+                    if ($regul) {
+                        $html .= '<h3>Factures de régularisation</h3>';
                     } else {
-                        $period .= '<span class="danger">Date de fin non définie</span>';
+                        $html .= '<h3>Factures régulières</h3>';
                     }
-
-                    $user_author = $facture->getChildObject('user_author');
-
-                    $total_ht += $fac_line->getTotalHT();
-                    $total_ttc += $fac_line->getTotalTTC();
-
-                    $rows[] = array(
-                        'period'      => $period,
-                        'facture'     => $facture->getLink() . '&nbsp;&nbsp;' . $facture->displayDataDefault('fk_statut'),
-                        'qty'         => $fac_line->displayLineData('qty'),
-                        'total_ht'    => $fac_line->displayLineData('total_ht'),
-                        'total_ttc'   => $fac_line->displayLineData('total_ttc'),
-                        'date_create' => $facture->displayDataDefault('datec'),
-                        'user_create' => (BimpObject::objectLoaded($user_author) ? $user_author->getLink() : '')
-                    );
+                    $html .= BimpRender::renderBimpListTable($rows, $headers);
                 }
             }
 
-            $html .= BimpRender::renderBimpListTable($rows, $headers);
-
             if ($with_totals) {
-                $html .= '<table style="margin-top: 30px; width: 300px;" class="bimp_list_table">';
+                $html .= '<table style="margin-top: 30px; width: ' . ($total_regul_ht ? '600px' : '300px') . ';" class="bimp_list_table">';
+                if ($total_regul_ht > 0) {
+                    $html .= '<thead>';
+                    $html .= '<tr>';
+                    $html .= '<th></th>';
+                    $html .= '<th>Factures régulières</th>';
+                    $html .= '<th>Régularisations</th>';
+                    $html .= '<th>Total</th>';
+                    $html .= '</tr>';
+                    $html .= '</thead>';
+                }
                 $html .= '<tbody class="headers_col">';
+                $html .= '<tr>';
+                $html .= '<th>Total Qté facturée</th>';
+                $html .= '<td>' . BimpTools::displayFloatValue($total_qty, 6, ',', 0, 0, 0, 0, 1, 1) . '</td>';
+
+                if ($total_regul_ht > 0) {
+                    $html .= '<td>' . BimpTools::displayFloatValue($total_regul_qty, 6, ',', 0, 0, 0, 0, 1, 1) . '</td>';
+                    $html .= '<td>' . BimpTools::displayFloatValue($total_qty + $total_regul_qty, 6, ',', 0, 0, 0, 0, 1, 1) . '</td>';
+                }
+
+                $html .= '</tr>';
+
                 $html .= '<tr>';
                 $html .= '<th>Total HT Facturé</th>';
                 $html .= '<td>' . BimpTools::displayMoneyValue($total_ht) . '</td>';
+
+                if ($total_regul_ht > 0) {
+                    $html .= '<td>' . BimpTools::displayMoneyValue($total_regul_ht) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($total_ht + $total_regul_ht) . '</td>';
+                }
                 $html .= '</tr>';
 
                 $html .= '<tr>';
                 $html .= '<th>Total TTC Facturé</th>';
                 $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc) . '</td>';
+
+                if ($total_regul_ht > 0) {
+                    $html .= '<td>' . BimpTools::displayMoneyValue($total_regul_ttc) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc + $total_regul_ttc) . '</td>';
+                }
+
                 $html .= '</tr>';
                 $html .= '</tbody>';
                 $html .= '</table>';
@@ -3441,6 +3635,168 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
+    public function renderRegulFactureSelect()
+    {
+        $id_fac = 0;
+
+        $factures = array(
+            0 => 'Nouvelle facture'
+        );
+
+        $contrat = $this->getParentInstance();
+
+        $id_client = (int) $contrat->getData('fk_soc_facturation');
+
+        if (!$id_client) {
+            $id_client = (int) $contrat->getData('fk_soc');
+        }
+
+        if (BimpObject::objectLoaded($contrat)) {
+            foreach (BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array(
+                'a.fk_soc'      => $id_client,
+                'a.fk_statut'   => 0,
+                'fef.entrepot'  => (int) $contrat->getData('entrepot'),
+                'fef.expertise' => (int) $contrat->getData('expertise'),
+                'fef.type'      => $contrat->getData('secteur'),
+                    ), 'rowid', 'desc', array(
+                'fef' => array(
+                    'table' => 'facture_extrafields',
+                    'on'    => 'fef.fk_object = a.rowid'
+                )
+            )) as $fac) {
+                if (!$id_fac) {
+                    $id_fac = $fac->id;
+                }
+                $factures[(int) $fac->id] = $fac->getRef() . ' - ' . $fac->getName();
+            }
+        }
+
+        return BimpInput::renderInput('select', 'id_fac_regul', $id_fac, array(
+                    'options' => $factures
+        ));
+    }
+
+    public function renderFacRegulFromSelect()
+    {
+        $from = '';
+        $facs = $this->getFacturesData();
+
+        $options = array();
+
+        foreach ($facs as $data) {
+            if (!$from || $data['from'] < $from) {
+                $from = $data['from'];
+            }
+
+            $options[$data['from']] = date('d / m / Y', strtotime($data['from']));
+        }
+
+        ksort($options);
+
+        return BimpInput::renderInput('select', 'period_from', $from, array(
+                    'options' => $options
+        ));
+    }
+
+    public function renderFacRegulToSelect()
+    {
+        $from_value = BimpTools::getPostFieldValue('period_from', '');
+        $from = $from_value;
+        $to = '';
+        $facs = $this->getFacturesData();
+
+        $options = array();
+
+        foreach ($facs as $data) {
+            if ($data['to'] < $from_value) {
+                continue;
+            }
+
+            if (!$from_value && (!$from || $data['from'] < $from)) {
+                $from = $data['from'];
+            }
+
+            if (!$to || $data['to'] > $to) {
+                $to = $data['to'];
+            }
+
+            $options[$data['to']] = date('d / m / Y', strtotime($data['to']));
+        }
+
+        ksort($options);
+
+        return BimpInput::renderInput('select', 'period_to', $to, array(
+                    'options' => $options
+        ));
+    }
+
+    public function renderFacRegulQtyInput()
+    {
+        $html = '';
+
+        $from = BimpTools::getPostFieldValue('period_from', '');
+        $to = BimpTools::getPostFieldValue('period_to', '');
+
+        $errors = array();
+
+        if (!$from) {
+            $errors[] = 'Veuillez sélectionner un début de période à régulariser';
+        }
+
+        if (!$to) {
+            $errors[] = 'Veuillez sélectionner une fin de période à régulariser';
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        } else {
+            $facs_data = $this->getFacturesData(true);
+            $qty_fac = 0;
+
+            $has_regul = false;
+
+            $html .= '<b>Facturations régulières sur la période sélectionnée : </b><br/>';
+            foreach ($facs_data as $fac_data) {
+                if ($fac_data['is_regul']) {
+                    $has_regul = true;
+                    continue;
+                }
+                if ($fac_data['from'] >= $from && $fac_data['to'] <= $to) {
+                    $qty_fac += (float) $fac_data['qty'];
+                    $html .= ' - Du ' . date('d / m / Y', strtotime($fac_data['from'])) . ' au ' . date('d / m / Y', strtotime($fac_data['to'])) . ' : ' . BimpTools::displayFloatValue($fac_data['qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '<br/>';
+                }
+            }
+            $html .= '<b>Quantité totale : ' . BimpTools::displayFloatValue($qty_fac, 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+
+            if ($has_regul) {
+                $qty_regul = 0;
+                $html .= '<br/><br/>';
+                $html .= '<div style="padding: 10px; border: 1px solid #DCDCDC">';
+                $html .= '<span class="important">Régularisations déjà effectuées: </span><br/>';
+
+                foreach ($facs_data as $fac_data) {
+                    if (!$fac_data['is_regul']) {
+                        continue;
+                    }
+                    $qty_regul += (float) $fac_data['qty'];
+                    $html .= ' - Du ' . date('d / m / Y', strtotime($fac_data['from'])) . ' au ' . date('d / m / Y', strtotime($fac_data['to'])) . ' : ' . BimpTools::displayFloatValue($fac_data['qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '<br/>';
+                }
+
+                $html .= '<b>Quantité totale régularisations : ' . BimpTools::displayFloatValue($qty_regul, 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                $html .= '</div>';
+            }
+
+            $html .= '<br/><br/>Quantité à régulariser : <br/>';
+            $html .= BimpInput::renderInput('qty', 'regul_qty', 0, array(
+                        'data' => array(
+                            'data_type' => 'number',
+                            'decimals'  => 6
+                        )
+            ));
+        }
+        return $html;
+    }
+
     // Traitements:
 
     public function checkLinkedLine(&$errors = array())
@@ -3542,9 +3898,9 @@ class BCT_ContratLine extends BimpObject
                                     }
                                     $date_fin = $linked_line->getData('date_fin_validite');
 
-                                    if ($date_fac_start < $date_debut) {
-                                        $errors[] = 'La date de début des facturations (' . date('d / m / Y', strtotime($date_fac_start)) . ') ne peut pas être inférieure à la date de début de l\'abonnement lié (' . date('d / m / Y', strtotime($date_debut)) . ')';
-                                    }
+//                                    if ($date_fac_start < $date_debut) {
+//                                        $errors[] = 'La date de début des facturations (' . date('d / m / Y', strtotime($date_fac_start)) . ') ne peut pas être inférieure à la date de début de l\'abonnement lié (' . date('d / m / Y', strtotime($date_debut)) . ')';
+//                                    }
                                     if ($date_ouverture > $date_fin) {
                                         $errors[] = 'La date d\'ouverture ne peut pas être supérieure à la date de fin de validité de l\'abonnement lié';
                                     }
@@ -3572,13 +3928,13 @@ class BCT_ContratLine extends BimpObject
 
                         $dt = new DateTime($date_ouverture);
 
-                        if (!$this->getData('date_fac_start')) {
+                        if (!$this->getData('date_fac_start') || $this->getData('date_fac_start') < $date_ouverture) {
                             $this->set('date_fac_start', $dt->format('Y-m-d'));
                         } else {
                             $date_debut = $this->getData('date_fac_start');
                         }
 
-                        if (!$this->getData('date_achat_start')) {
+                        if (!$this->getData('date_achat_start') || $this->getData('date_achat_start') < $date_ouverture) {
                             $this->set('date_achat_start', $dt->format('Y-m-d'));
                         }
 
@@ -3959,7 +4315,7 @@ class BCT_ContratLine extends BimpObject
             $lines = $options['lines'];
             if (empty($lines)) {
                 $lines = array($this->id);
-                $rows = $this->db->getRows('contratdet', 'fk_contrat = ' . $contrat->id . ' AND id_linked_line = ' . $this->id, array('rowid'), 'array');
+                $rows = $this->db->getRows('contratdet', 'fk_contrat = ' . $contrat->id . ' AND id_linked_line = ' . $this->id, null, 'array', array('rowid'));
 
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
@@ -4708,6 +5064,184 @@ class BCT_ContratLine extends BimpObject
         );
     }
 
+    public function actionFacRegul($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_facture = (int) BimpTools::getArrayValueFromPath($data, 'id_fac_regul', 0);
+        $from = BimpTools::getArrayValueFromPath($data, 'period_from', '');
+        $to = BimpTools::getArrayValueFromPath($data, 'period_to', '');
+        $qty = (float) BimpTools::getArrayValueFromPath($data, 'regul_qty', 0);
+
+        if (!$from) {
+            $errors[] = 'Veuillez sélectionner une date de début de période à régulariser';
+        }
+
+        if (!$to) {
+            $errors[] = 'Veuillez sélectionner une date de fin de période à régulariser';
+        }
+
+        if (!$qty) {
+            $errors[] = 'Veuillez saisir la quantité à régulariser';
+        }
+
+        $contrat = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($contrat)) {
+            $errors[] = 'Contrat absent';
+        }
+
+        if (!count($errors)) {
+            $facture = null;
+
+            if ($id_facture) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+                if (!BimpObject::objectLoaded($facture)) {
+                    $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
+                }
+            } else {
+                // Création de la facture:
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+
+                $id_client = (int) $contrat->getData('fk_soc_facturation');
+
+                if (!$id_client) {
+                    $id_client = (int) $contrat->getData('fk_soc');
+                }
+
+                $fac_errors = array();
+                $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                            'fk_soc'            => $id_client,
+                            'entrepot'          => $contrat->getData('entrepot'),
+                            'ef_type'           => $contrat->getData('secteur'),
+                            'expertise'         => $contrat->getData('expertise'),
+                            'libelle'           => BimpTools::getArrayValueFromPath($data, 'fac_libelle', ''),
+                            'fk_mode_reglement' => $contrat->getData('moderegl'),
+                            'fk_cond_reglement' => $contrat->getData('condregl'),
+                            'datef'             => date('Y-m-d')
+                                ), true, $fac_errors);
+
+                if (count($fac_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                } else {
+                    $success = 'Création de la facture effectuée avec succès';
+                }
+            }
+
+            if (!count($errors)) {
+                addElementElement('bimp_contrat', 'facture', $contrat->id, $facture->id);
+
+                // Création de la ligne de l'intitulé du contrat d'origine si nécessaire: 
+                $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                            'id_obj'             => (int) $facture->id,
+                            'linked_object_name' => 'contrat_origin_label',
+                            'linked_id_object'   => (int) $contrat->id
+                ));
+
+                if (!BimpObject::objectLoaded($fac_line)) {
+                    $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                    $fac_line->validateArray(array(
+                        'id_obj'             => (int) $facture->id,
+                        'type'               => ObjectLine::LINE_TEXT,
+                        'linked_id_object'   => $contrat->id,
+                        'linked_object_name' => 'contrat_origin_label',
+                    ));
+                    $fac_line->qty = 1;
+                    $fac_line->desc = 'Selon votre contrat ' . $contrat->getRef();
+                    $libelle = $contrat->getData('libelle');
+                    if ($libelle) {
+                        $fac_line->desc .= ' - ' . $libelle;
+                    }
+                    $fac_line_warnings = array();
+                    $fac_line->create($fac_line_warnings, true);
+                }
+
+                // Création de la ligne de facture: 
+                $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                $fac_line->validateArray(array(
+                    'id_obj'             => (int) $facture->id,
+                    'type'               => Bimp_FactureLine::LINE_PRODUCT,
+                    'remisable'          => 2,
+                    'editable'           => 0,
+                    'pa_editable'        => 0,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'contrat_line_regul'
+                ));
+
+                $date_from = date('Y-m-d 00:00:00', strtotime($from));
+                $date_to = date('Y-m-d 23:59:59', strtotime($to));
+
+                $id_fourn = 0;
+                $pa_ht_line = (float) $this->getData('buy_price_ht');
+                $pa_ht_fourn = 0;
+
+                $id_pfp = (int) $this->getData('fk_product_fournisseur_price');
+                if ($id_pfp) {
+                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
+                    if (!BimpObject::objectLoaded($pfp)) {
+                        $line_errors[] = 'Le prix d\'achat fournisseur #' . $id_pfp . ' n\'existe plus';
+                    } else {
+                        $id_fourn = $pfp->getData('fk_soc');
+                        $pa_ht_fourn = $pfp->getData('price');
+                    }
+                }
+
+                $fac_line->qty = $qty;
+                $fac_line->desc = $this->getData('description');
+                $fac_line->id_product = (int) $this->getData('fk_product');
+                $fac_line->pu_ht = $this->getData('subprice');
+                $fac_line->tva_tx = $this->getData('tva_tx');
+                $fac_line->pa_ht = ($pa_ht_fourn ? $pa_ht_fourn : $pa_ht_line);
+                $fac_line->id_fourn_price = $this->getData('fk_product_fournisseur_price');
+                $fac_line->date_from = $date_from;
+                $fac_line->date_to = $date_to;
+                $fac_line->no_remises_arrieres_auto_create = true;
+
+                $line_warnings = array();
+                $line_errors = $fac_line->create($line_warnings, true);
+
+                if (!count($line_errors)) {
+                    // Ajout de la remise: 
+                    $remise_percent = (float) $this->getData('remise_percent');
+                    if ($remise_percent) {
+                        $remises_errors = array();
+                        BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
+                            'id_object_line' => $fac_line->id,
+                            'object_type'    => 'facture',
+                            'type'           => 1,
+                            'percent'        => $remise_percent
+                                ), true, $remises_errors);
+
+                        if (count($remises_errors)) {
+                            $line_errors[] = BimpTools::getMsgFromArray($remises_errors, 'Echec de l\'ajout de la remise à la ligne de facture');
+                        }
+                    }
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
+                } else {
+                    $success .= ($success ? '<br/>' : '') . 'Ajout de la ligne à la facture effectué avec succès';
+                }
+            }
+
+            if (!count($errors)) {
+                $url = $facture->getUrl();
+                if ($url) {
+                    $sc = 'window.open(\'' . $url . '\');';
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
     // Actions BimpDataSync:
 
     public function initBdsActionPeriodicFacProcess($process, &$action_data = array(), &$errors = array(), $extra_data = array())
@@ -4937,7 +5471,7 @@ class BCT_ContratLine extends BimpObject
                                 }
 
                                 if ($line_periods_data['date_next_period_tobill'] == $line_periods_data['date_first_period_start'] &&
-                                        $line_periods_data['first_period_prorata'] < 1) {
+                                        $line_periods_data['first_period_prorata'] != 1) {
                                     $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
 
                                     if ($nb_periods > 1) {
@@ -5017,7 +5551,7 @@ class BCT_ContratLine extends BimpObject
                                             }
 
                                             if ($sub_line_periods_data['date_next_period_tobill'] == $sub_line_periods_data['date_first_period_start'] &&
-                                                    $sub_line_periods_data['first_period_prorata'] < 1) {
+                                                    $sub_line_periods_data['first_period_prorata'] != 1) {
                                                 $sub_line_qty = $sub_line_qty_per_period * (float) $sub_line_periods_data['first_period_prorata'];
 
                                                 if ($nb_periods > 1) {
@@ -5446,7 +5980,7 @@ class BCT_ContratLine extends BimpObject
 
                                 $qty = 0;
                                 if ($line_periods_data['date_next_achat'] == $line_periods_data['date_achat_start'] &&
-                                        $line_periods_data['first_period_prorata'] < 1) {
+                                        $line_periods_data['first_period_prorata'] != 1) {
                                     $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
 
                                     if ($nb_periods > 1) {

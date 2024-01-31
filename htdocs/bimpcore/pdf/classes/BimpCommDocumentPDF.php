@@ -236,7 +236,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         return parent::getTargetIdSoc();
     }
 
-    public function getLineDesc($line, Product $product = null, $hide_product_label = false)
+    public function getLineDesc($line, Product $product = null, $hide_product_label = false, $bimpLine = null)
     {
         $desc = '';
         if (!is_null($product)) {
@@ -248,7 +248,6 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 $desc .= ($desc ? ' - ' : '') . '<b>' . $product->label . '</b>';
             }
 
-//            if ($product->type == 1) {
             if ($line->date_start) {
                 if (!$line->date_end) {
                     $desc .= '<br/>A partir du ';
@@ -265,7 +264,18 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 }
                 $desc .= date('d/m/Y', $line->date_end);
             }
-//            }
+        }
+
+        if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('abo_nb_renouv')) {
+            $nb_renouv = (int) $bimpLine->getData('abo_nb_renouv');
+            if ($nb_renouv) {
+                $desc .= ($desc ? '<br/>' : '') . '<span style="font-style: italic; font-size: 8px">';
+                $desc .= 'Cet abonnement sera renouvelé de manière tacite ';
+                if ($nb_renouv > 0) {
+                    $desc .= $nb_renouv . ' fois ';
+                }
+                $desc .= 'sans dénonciation de votre part.</span>';
+            }
         }
 
         if (!is_null($line->desc) && $line->desc) {
@@ -838,9 +848,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     continue;
                 }
 
-                $hide_product_label = isset($bimpLines[(int) $line->id]) ? (int) $bimpLines[(int) $line->id]->getData('hide_product_label') : 0;
+                $hide_product_label = (isset($bimpLines[(int) $line->id]) ? (int) $bimpLines[(int) $line->id]->getData('hide_product_label') : 0);
 
-                $desc = $this->getLineDesc($line, $product, $hide_product_label);
+                $desc = $this->getLineDesc($line, $product, $hide_product_label, (isset($bimpLines[$line->id]) ? $bimpLines[$line->id] : null));
 
                 if (BimpObject::objectLoaded($bimpLine)) {
                     if ($bimpLine->equipment_required && $bimpLine->isProductSerialisable()) {

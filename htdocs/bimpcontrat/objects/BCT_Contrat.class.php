@@ -1079,7 +1079,7 @@ class BCT_Contrat extends BimpDolObject
 
                     $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
                                 'id_obj'             => $facture->id,
-                                'linked_object_name' => 'contrat_line',
+                                'linked_object_name' => array('contrat_line', 'contrat_line_regul'),
                                 'linked_id_object'   => $contrat_lines
                                     ), 'position', 'asc');
 
@@ -1088,8 +1088,13 @@ class BCT_Contrat extends BimpDolObject
                     } else {
                         $lines_rows = array();
                         foreach ($fac_lines as $fac_line) {
+                            $desc = '';
+                            if ($fac_line->getData('linked_object_name') == 'contrat_line_regul') {
+                                $desc .= '<span class="important">[REGULARISATION]</span><br/>';
+                            }
+                            $desc .= $fac_line->displayLineData('desc_light');
                             $lines_rows[] = array(
-                                'desc'      => $fac_line->displayLineData('desc_light'),
+                                'desc'      => $desc,
                                 'qty'       => $fac_line->displayLineData('qty'),
                                 'pu_ht'     => $fac_line->displayLineData('pu_ht'),
                                 'total_ht'  => $fac_line->displayLineData('total_ht'),
@@ -1397,7 +1402,7 @@ class BCT_Contrat extends BimpDolObject
                     $fac_line->validateArray(array(
                         'id_obj'             => (int) $facture->id,
                         'type'               => ObjectLine::LINE_TEXT,
-                        'linked_id_object'   => (int) $contrat,
+                        'linked_id_object'   => (int) $id_contrat,
                         'linked_object_name' => 'contrat_origin_label',
                     ));
                     $fac_line->qty = 1;
@@ -2044,56 +2049,68 @@ class BCT_Contrat extends BimpDolObject
                             array('operator' => '<=', 'value' => $date->format('Y-m-d') . ' 00:00:00')
                         )
                     ),
+                    'a.date_cloture'      => 'IS_NULL',
                     'c.version'           => 2,
                     'c.statut'            => 1,
                         ), array('c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')));
-
-//        echo $sql;
 
         $rows = $bdb->executeS($sql, 'array');
 
 //        echo '<pre>';
 //        print_r($rows);
 //        exit;
+
+//        $infos .= 'Contrats : <pre>';
+//        $infos .= print_r($rows, 1);
+//        $infos .= '</pre>';
+
         // Trie par contrats :
 
-        $contrats = array();
-        foreach ($rows as $r) {
-            if (!isset($contrats[(int) $r['id_contrat']])) {
-                $contrats[(int) $r['id_contrat']] = array();
+        if (!is_array($rows)) {
+            $infos .= '<span class="danger">Erreur SQL - ' . $bdb->err() . '</span>';
+        } else {
+            $contrats = array();
+            foreach ($rows as $r) {
+                if (!isset($contrats[(int) $r['id_contrat']])) {
+                    $contrats[(int) $r['id_contrat']] = array();
+                }
+
+                $contrats[(int) $r['id_contrat']][] = (int) $r['id_line'];
             }
 
-            $contrats[(int) $r['id_contrat']][] = (int) $r['id_line'];
-        }
+            if (empty($contrats)) {
+                $infos .= '<span class="danger">Aucun renouvellement auto à affectuer</span>';
+            } else {
+                foreach ($contrats as $id_contrat => $lines) {
+                    $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
 
-        foreach ($contrats as $id_contrat => $lines) {
-            $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
-
-            if (!BimpObject::objectLoaded($contrat)) {
-                continue;
-            }
-
-            $infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
-
-            foreach ($lines as $id_line) {
-                $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
-
-                if (BimpObject::objectLoaded($line)) {
-                    $infos .= 'Ligne #' . $id_line . ' : ';
-                    $line_errors = array();
-
-                    $line->renouvAbonnement(array(), $line_errors);
-
-                    if (count($line_errors)) {
-                        $infos .= '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
-                    } else {
-                        $infos .= '<span class="success">OK</span>';
+                    if (!BimpObject::objectLoaded($contrat)) {
+                        $infos .= '<br/><br/><span class="danger">Contrat #' . $id_contrat . ' non trouvé</span>';
+                        continue;
                     }
-                    $infos .= '<br/>';
+
+                    $infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
+
+                    foreach ($lines as $id_line) {
+                        $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+
+                        if (BimpObject::objectLoaded($line)) {
+                            $infos .= 'Ligne #' . $id_line . ' : ';
+                            $line_errors = array();
+
+                            $line->renouvAbonnement(array(), $line_errors);
+
+                            if (count($line_errors)) {
+                                $infos .= '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
+                            } else {
+                                $infos .= '<span class="success">OK</span>';
+                            }
+                            $infos .= '<br/>';
+                        }
+                    }
                 }
             }
         }
-
 
         return $infos;
     }
@@ -2125,9 +2142,11 @@ class BCT_Contrat extends BimpDolObject
                     'a.date_fin_validite' => array(
                         'and' => array(
                             'IS_NOT_NULL',
-                            array('operator' => '<=', 'value' => $date->format('Y-m-d') . ' 00:00:00')
+                            array('operator' => '<=', 'value' => $date->format('Y-m-d') . ' 00:00:00'),
+                            array('operator' => '>', 'value' => date('Y-m-d') . ' 00:00:00')
                         )
                     ),
+                    'a.date_cloture'      => 'IS_NULL',
                     'c.version'           => 2,
                     'c.statut'            => 1,
                         ), array('c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')));
@@ -2139,6 +2158,7 @@ class BCT_Contrat extends BimpDolObject
 //        echo '<pre>';
 //        print_r($rows);
 //        exit;
+//        
         // Trie par contrats :
 
         $contrats = array();
@@ -2150,63 +2170,66 @@ class BCT_Contrat extends BimpDolObject
             $contrats[(int) $r['id_contrat']][] = (int) $r['id_line'];
         }
 
-        foreach ($contrats as $id_contrat => $lines) {
-            $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
 
-            if (!BimpObject::objectLoaded($contrat)) {
-                continue;
-            }
+        if (empty($contrats)) {
+            $infos .= '<span class="danger">Aucune tâche de renouvellement à créer</span>';
+        } else {
+            foreach ($contrats as $id_contrat => $lines) {
+                $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
 
-            $client = $contrat->getChildObject('client');
-            $id_commercial = (int) $contrat->getCommercialId(array(
-                        'check_active' => true
-            ));
+                if (!BimpObject::objectLoaded($contrat)) {
+                    continue;
+                }
 
-            $infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
+                $client = $contrat->getChildObject('client');
+                $id_commercial = (int) $contrat->getCommercialId(array(
+                            'check_active' => true
+                ));
 
-            if (!$id_commercial) {
-                BimpCore::addlog('Aucun commercial pour renouvellements manuels', Bimp_Log::BIMP_LOG_URGENT, 'contrat', $contrat);
-                $infos .= '<span class="danger">Aucun commercial</span>';
-                continue;
-            }
+                $infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
 
-            foreach ($lines as $id_line) {
-                $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+                if (!$id_commercial) {
+                    BimpCore::addlog('Aucun commercial pour renouvellements manuels', Bimp_Log::BIMP_LOG_URGENT, 'contrat', $contrat);
+                    $infos .= '<span class="danger">Aucun commercial</span>';
+                    continue;
+                }
 
-                if (BimpObject::objectLoaded($line)) {
-                    $infos .= 'Ligne #' . $id_line . ' : ';
-                    $task_errors = array();
+                foreach ($lines as $id_line) {
+                    $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
 
-                    $desc = 'Contrat {{Contrat2:' . $contrat->id . '}}<br/>';
+                    if (BimpObject::objectLoaded($line)) {
+                        $infos .= 'Ligne #' . $id_line . ' : ';
+                        $task_errors = array();
 
-                    if (BimpObject::objectLoaded($client)) {
-                        $desc .= 'Client {{Client:' . $client->id . '}}<br/>';
+                        $desc = 'Contrat {{Contrat2:' . $contrat->id . '}}<br/>';
+
+                        if (BimpObject::objectLoaded($client)) {
+                            $desc .= 'Client {{Client:' . $client->id . '}}<br/>';
+                        }
+
+                        $desc .= 'Ligne n°' . $line->getData('rang') . ' - {{Produit:' . $line->getData('fk_product') . '}}<br/>';
+                        $desc .= 'Fin de validité : le ' . date('d / m / Y', strtotime($line->getData('date_fin_validite')));
+
+                        BimpObject::createBimpObject('bimptask', 'BIMP_Task', array(
+                            'subj'          => 'Contrat d\'abonnement ' . $contrat->getRef() . ' - Renouvellement abonnement à effectuer',
+                            'txt'           => $desc,
+                            'comment'       => 'Cette tâche sera automatiquement fermée lors du renouvellement',
+                            'id_user_owner' => $id_commercial,
+                            'test_ferme'    => 'contratdet:rowid = ' . $line->id . ' AND id_line_renouv > 0'
+                                ), true, $task_errors);
+
+                        if (count($task_errors)) {
+                            $infos .= '<span class="danger">' . BimpTools::getMsgFromArray($task_errors) . '</span>';
+                        } else {
+                            $infos .= '<span class="success">OK</span>';
+
+                            $line->updateField('renouv_task', 1);
+                        }
+                        $infos .= '<br/>';
                     }
-
-                    $desc .= 'Ligne n°' . $line->getData('rang') . ' - {{Produit:' . $line->getData('fk_product') . '}}<br/>';
-                    $desc .= 'Fin de validité : le ' . date('d / m / Y', strtotime($line->getData('date_fin_validite')));
-
-                    BimpObject::createBimpObject('bimptask', 'BIMP_Task', array(
-                        'subj'          => 'Contrat d\'abonnement ' . $contrat->getRef() . ' - Renouvellement abonnement à effectuer',
-                        'txt'           => $desc,
-                        'comment'       => 'Cette tâche sera automatiquement fermée lors du renouvellement',
-                        'id_user_owner' => $id_commercial,
-                        'test_ferme'    => 'contratdet:rowid = ' . $line->id . ' AND id_line_renouv > 0'
-                            ), true, $task_errors);
-
-                    if (count($task_errors)) {
-                        $infos .= '<span class="danger">' . BimpTools::getMsgFromArray($task_errors) . '</span>';
-                    } else {
-                        $infos .= '<span class="success">OK</span>';
-
-                        $line->updateField('renouv_task', 1);
-                        break 2;
-                    }
-                    $infos .= '<br/>';
                 }
             }
         }
-
 
         return $infos;
     }

@@ -145,7 +145,6 @@ fields:
                 label: Avec lien
                 type: callback
                 method: displayPageLink
-                
         
  
 fields_tables:

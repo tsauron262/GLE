@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/DocFinancementPDF.php';
 class ContratFinancementPDF extends DocFinancementPDF
 {
 
+    public static $nb_cgv_pages = 'quatre';
     public static $doc_type = 'contrat';
     public $type_pdf = '';
     public $signature_bloc = true;
@@ -19,7 +20,7 @@ class ContratFinancementPDF extends DocFinancementPDF
     public $cg_file = DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/cg_contrat.pdf';
     public $cg_page_start = 0;
     public $cg_page_number = 4;
-    public $display_line_amounts = true;
+    public $display_line_amounts = false;
 
     # Params:
     public static $full_blocs = array(
@@ -35,7 +36,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 
         parent::__construct($db, $demande);
 
-        $this->doc_name = 'Contrat de location';
+        $this->doc_name = 'Contrat de locatio^n';
     }
 
     public function initData()
@@ -124,7 +125,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 
         $html .= '<p>';
         $html .= 'Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l’accepte, ';
-        $html .= 'aux Conditions Particulières et aux Conditions Générales composées de deux pages recto.';
+        $html .= 'aux Conditions Particulières et aux Conditions Générales composées de ' . self::$nb_cgv_pages . ' pages recto.';
         $html .= '</p>';
         $html .= '</div>';
 
@@ -242,18 +243,23 @@ class ContratFinancementPDF extends DocFinancementPDF
         $html .= 'Le locataire déclare avoir été parfaitement informé de l’opération lors de la phase précontractuelle, avoir pris connaissance, reçu et accepter toutes les conditions particulières et générales. Il atteste que le contrat est en rapport direct avec son activité professionnelle et souscrit pour les besoins de cette dernière. Le signataire atteste être habilité à l’effet d’engager le locataire au titre du présent contrat. Le locataire reconnait avoir une copie des Conditions Générales, les avoir acceptées sans réserve y compris les clauses attribution de compétence et CNIL.';
         $html .= '</p>';
 
-        $html .= '<p>';
-        $html .= 'Fait en autant d’exemplaires que de parties, un pour chacune des parties';
-        $html .= '</p>';
+//        $html .= '<p>';
+//        $html .= 'Fait en autant d’exemplaires que de parties, un pour chacune des parties';
+//        $html .= '</p>';
+
+        if ($this->type_pdf == 'elec') {
+            $html .= '<p>Document à signer électroniquement par les trois parties</p>';
+        }
 
         $html .= '<p>';
         $html .= '<b>ANNEXES : </b>';
         $html .= '<ul>';
-        $html .= '<li>Conditions générales composées de quatre pages recto</li>';
+        $html .= '<li>Conditions générales composées de ' . self::$nb_cgv_pages . ' pages recto</li>';
         $html .= '</ul>';
         $html .= '</p>';
 
-        $html .= '<p>Fait à Limonest, le ' . date('d / m / Y') . ' </p>';
+//        $html .= '<p>Fait à Limonest, le ' . date('d / m / Y') . ' </p>';
+
         $html .= '</div>';
 
         $this->writeFullBlock($html);

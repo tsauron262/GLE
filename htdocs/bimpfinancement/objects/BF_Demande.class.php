@@ -62,7 +62,8 @@ class BF_Demande extends BimpObject
         1 => 'A terme à échoir'
     );
     public static $modes_paiements = array(
-        1 => 'Prélèvements automatiques'
+        1 => 'Prélèvements automatiques',
+        2 => 'Mandats administratifs'
     );
     public static $marges = array(
         0     => 12,
@@ -3327,7 +3328,7 @@ class BF_Demande extends BimpObject
     public function checkStatus(&$warnings = array())
     {
         $errors = array();
-        
+
         if ($this->isLoaded()) {
             if ((int) $this->getData('closed')) {
                 return;
@@ -3382,7 +3383,7 @@ class BF_Demande extends BimpObject
                 }
             }
         }
-        
+
         return $errors;
     }
 

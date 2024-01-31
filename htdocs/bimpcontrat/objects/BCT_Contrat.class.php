@@ -2049,11 +2049,16 @@ class BCT_Contrat extends BimpDolObject
                             array('operator' => '<=', 'value' => $date->format('Y-m-d') . ' 00:00:00')
                         )
                     ),
+                    'a.date_cloture'      => 'IS_NULL',
                     'c.version'           => 2,
                     'c.statut'            => 1,
                         ), array('c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')));
 
         $rows = $bdb->executeS($sql, 'array');
+
+//        echo '<pre>';
+//        print_r($rows);
+//        exit;
 
         // Trie par contrats :
 
@@ -2132,9 +2137,11 @@ class BCT_Contrat extends BimpDolObject
                     'a.date_fin_validite' => array(
                         'and' => array(
                             'IS_NOT_NULL',
-                            array('operator' => '<=', 'value' => $date->format('Y-m-d') . ' 00:00:00')
+                            array('operator' => '<=', 'value' => $date->format('Y-m-d') . ' 00:00:00'),
+                            array('operator' => '>', 'value' => date('Y-m-d') . ' 00:00:00')
                         )
                     ),
+                    'a.date_cloture'      => 'IS_NULL',
                     'c.version'           => 2,
                     'c.statut'            => 1,
                         ), array('c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')));
@@ -2146,6 +2153,7 @@ class BCT_Contrat extends BimpDolObject
 //        echo '<pre>';
 //        print_r($rows);
 //        exit;
+//        
         // Trie par contrats :
 
         $contrats = array();

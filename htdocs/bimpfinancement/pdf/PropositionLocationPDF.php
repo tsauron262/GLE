@@ -108,10 +108,6 @@ class PropositionLocationPDF extends BimpDocumentPDF
     {
         $html = '';
         
-//        $html .= '<pre>';
-//        $html .= print_r($this->client_data, 1);
-//        $html .= '</pre>';
-        
         if (isset($this->client_data['nom']) && $this->client_data['nom']) {
             $html .= '<b>' . $this->client_data['nom'] . '</b>';
             

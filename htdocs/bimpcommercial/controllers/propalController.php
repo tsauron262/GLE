@@ -18,8 +18,4 @@ class propalController extends BimpCommController
             }
         }
     }
-    
-//    public function renderHtml() {
-//        return 'TEST';
-//    }
 }

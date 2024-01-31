@@ -168,6 +168,15 @@ class BCT_ContratLine extends BimpObject
     {
         $contrat = null;
 
+        if (in_array($action, array('deactivate', 'renouv', 'facRegul', 'resiliate')) && !$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        if ((int) $this->getData('id_parent_line') && in_array($action, array('activate', 'deactivate', 'renouv', 'resiliate'))) {
+            $errors[] = 'Action non possible pour les sous-lignes. Veuillez effectuer cette action sur la ligne parente';
+            return 0;
+        }
+
         if (in_array($action, array('activate'))) {
             if (!$this->isLoaded()) {
                 return 1; // pour les bulk actions
@@ -204,42 +213,26 @@ class BCT_ContratLine extends BimpObject
                     return 0;
                 }
 
-                if ((int) $this->getData('id_parent_line')) {
-                    $errors[] = 'Sous-ligne : veuillez activer la ligne parente';
-                    return 0;
-                }
-
                 if (!$this->isValide($errors)) {
                     return 0;
                 }
                 return 1;
 
             case 'deactivate':
-                if ($status == 0) {
+                if ($status !== self::STATUS_ACTIVE) {
                     $errors[] = 'Cette ligne de contrat est déjà désactivée';
                     return 0;
                 }
-
-                if ((int) $this->getData('id_parent_line')) {
-                    $errors[] = 'Sous-ligne : veuillez désactiver la ligne parente';
-                    return 0;
-                }
-
                 return 1;
 
             case 'renouv':
-                if (!in_array($this->getData('line_type'), array(self::TYPE_ABO))) {
-                    $errors[] = 'Renouvellement non possible pour ce type de ligne de contrat';
-                    return 0;
-                }
-
-                if ((int) $this->getData('statut') <= 0) {
+                if ($status <= 0) {
                     $errors[] = 'Le statut actuel de cette ligne de contrat ne permet pas son renouvellement';
                     return 0;
                 }
 
-                if ((int) $this->getData('id_parent_line')) {
-                    $errors[] = 'Revouvellement non possible pour les sous-lignes (utiliser la ligne parente)';
+                if (!in_array($this->getData('line_type'), array(self::TYPE_ABO))) {
+                    $errors[] = 'Renouvellement non possible pour ce type de ligne de contrat';
                     return 0;
                 }
 
@@ -247,17 +240,16 @@ class BCT_ContratLine extends BimpObject
                     $errors[] = 'Cette ligne de contrat a déjà été renouvellée';
                     return 0;
                 }
-
                 return 1;
 
             case 'facRegul':
-                if ((int) $this->getData('line_type') !== self::TYPE_ABO) {
-                    $errors[] = 'Cette ligne n\'est pas un abonnement';
+                if ($status <= 0) {
+                    $errors[] = 'Le statut actuel de cette ligne de contrat ne permet pas d\'établir une facture de régularisation';
                     return 0;
                 }
 
-                if ((int) $this->getData('statut') <= 0) {
-                    $errors[] = 'Le statut actuel de cette ligne de contrat ne permet pas d\'établir une facture de régularisation';
+                if ((int) $this->getData('line_type') !== self::TYPE_ABO) {
+                    $errors[] = 'Cette ligne n\'est pas un abonnement';
                     return 0;
                 }
 
@@ -267,6 +259,23 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 return 1;
+
+            case 'resiliate':
+                if ($status !== self::STATUS_ACTIVE) {
+                    $errors[] = 'Cet abonnement n\'est pas actif';
+                    return 0;
+                }
+
+                if ((int) $this->getData('line_type') !== self::TYPE_ABO) {
+                    $errors[] = 'Cette ligne n\'est pas un abonnement';
+                    return 0;
+                }
+
+                if ((string) $this->getData('date_cloture')) {
+                    $errors[] = 'Cet abonnement a déjà été résilié';
+                    return 0;
+                }
+                break;
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -450,6 +459,15 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
+//        if ($this->isActionAllowed('resiliate') && $this->canSetAction('resiliate')) {
+//            $buttons[] = array(
+//                'label'   => 'Résilier',
+//                'icon'    => 'fas_times-circle',
+//                'onclick' => $this->getJsActionOnclick('resiliate', array(), array(
+//                    'form_name' => 'resiliate'
+//                ))
+//            );
+//        }
         return $buttons;
     }
 
@@ -1038,10 +1056,10 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 // Cas d'une première facturation sur une période partielle
-                if ($date_fac_start > $date_debut) {
+                if ($date_fac_start != $date_debut) {
                     // Calcul du début de la première période facturée partiellement : 
                     $interval = BimpTools::getDatesIntervalData($date_debut, $date_fac_start);
-                    $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période à factuer partiellement
+                    $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période à facturer partiellement
                     $dt = new DateTime($date_debut);
                     if ($nb_periods) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
@@ -1198,7 +1216,7 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 // Cas d'un premier achat sur une période partielle
-                if ($date_achat_start > $date_debut) {
+                if ($date_achat_start != $date_debut) {
                     // Calcul du début de la première période : 
                     $interval = BimpTools::getDatesIntervalData($date_debut, $date_achat_start);
                     $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période partielle
@@ -2703,7 +2721,7 @@ class BCT_ContratLine extends BimpObject
                                         $row_html .= BimpRender::renderAlerts($line_errors);
                                     } elseif ($periods_data['nb_periods_tobill_today'] > 0 || ($canFactAvance && $periods_data['nb_periods_tobill_max'] > 0)) {
                                         $is_first_period = ($periods_data['date_next_period_tobill'] == $periods_data['date_first_period_start']);
-                                        if ($is_first_period && $periods_data['first_period_prorata'] < 1 && $periods_data['first_period_prorata'] > 0) {
+                                        if ($is_first_period && $periods_data['first_period_prorata'] != 1) {
                                             $msg .= BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
                                             $msg .= 'Première période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
                                             $msg .= '</b> au <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_end'])) . '</b>';
@@ -3002,7 +3020,7 @@ class BCT_ContratLine extends BimpObject
 
                                 if ($id_fourn && $periods_data['nb_periods_tobuy_max'] > 0) {
                                     $is_first_period = ($periods_data['date_next_achat'] == $periods_data['date_achat_start']);
-                                    if ($is_first_period && $periods_data['first_period_prorata'] < 1 && $periods_data['first_period_prorata'] > 0) {
+                                    if ($is_first_period && $periods_data['first_period_prorata'] != 1) {
                                         $msg .= BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
                                         $msg .= 'Première période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
                                         $msg .= '</b> au <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_end'])) . '</b>';
@@ -3880,9 +3898,9 @@ class BCT_ContratLine extends BimpObject
                                     }
                                     $date_fin = $linked_line->getData('date_fin_validite');
 
-                                    if ($date_fac_start < $date_debut) {
-                                        $errors[] = 'La date de début des facturations (' . date('d / m / Y', strtotime($date_fac_start)) . ') ne peut pas être inférieure à la date de début de l\'abonnement lié (' . date('d / m / Y', strtotime($date_debut)) . ')';
-                                    }
+//                                    if ($date_fac_start < $date_debut) {
+//                                        $errors[] = 'La date de début des facturations (' . date('d / m / Y', strtotime($date_fac_start)) . ') ne peut pas être inférieure à la date de début de l\'abonnement lié (' . date('d / m / Y', strtotime($date_debut)) . ')';
+//                                    }
                                     if ($date_ouverture > $date_fin) {
                                         $errors[] = 'La date d\'ouverture ne peut pas être supérieure à la date de fin de validité de l\'abonnement lié';
                                     }
@@ -3910,13 +3928,13 @@ class BCT_ContratLine extends BimpObject
 
                         $dt = new DateTime($date_ouverture);
 
-                        if (!$this->getData('date_fac_start')) {
+                        if (!$this->getData('date_fac_start') || $this->getData('date_fac_start') < $date_ouverture) {
                             $this->set('date_fac_start', $dt->format('Y-m-d'));
                         } else {
                             $date_debut = $this->getData('date_fac_start');
                         }
 
-                        if (!$this->getData('date_achat_start')) {
+                        if (!$this->getData('date_achat_start') || $this->getData('date_achat_start') < $date_ouverture) {
                             $this->set('date_achat_start', $dt->format('Y-m-d'));
                         }
 
@@ -5453,7 +5471,7 @@ class BCT_ContratLine extends BimpObject
                                 }
 
                                 if ($line_periods_data['date_next_period_tobill'] == $line_periods_data['date_first_period_start'] &&
-                                        $line_periods_data['first_period_prorata'] < 1) {
+                                        $line_periods_data['first_period_prorata'] != 1) {
                                     $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
 
                                     if ($nb_periods > 1) {
@@ -5533,7 +5551,7 @@ class BCT_ContratLine extends BimpObject
                                             }
 
                                             if ($sub_line_periods_data['date_next_period_tobill'] == $sub_line_periods_data['date_first_period_start'] &&
-                                                    $sub_line_periods_data['first_period_prorata'] < 1) {
+                                                    $sub_line_periods_data['first_period_prorata'] != 1) {
                                                 $sub_line_qty = $sub_line_qty_per_period * (float) $sub_line_periods_data['first_period_prorata'];
 
                                                 if ($nb_periods > 1) {
@@ -5962,7 +5980,7 @@ class BCT_ContratLine extends BimpObject
 
                                 $qty = 0;
                                 if ($line_periods_data['date_next_achat'] == $line_periods_data['date_achat_start'] &&
-                                        $line_periods_data['first_period_prorata'] < 1) {
+                                        $line_periods_data['first_period_prorata'] != 1) {
                                     $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
 
                                     if ($nb_periods > 1) {

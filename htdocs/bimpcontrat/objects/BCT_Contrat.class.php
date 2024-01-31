@@ -2059,8 +2059,12 @@ class BCT_Contrat extends BimpDolObject
 //        echo '<pre>';
 //        print_r($rows);
 //        exit;
+        
+        $infos .= 'Contrats : <pre>';
+        $infos .= print_r($rows, 1);
+        $infos .= '</pre>';
 
-        // Trie par contrats :
+                // Trie par contrats :
 
         if (!is_array($rows)) {
             $infos .= '<span class="danger">Erreur SQL - ' . $bdb->err() . '</span>';
@@ -2081,6 +2085,7 @@ class BCT_Contrat extends BimpDolObject
                     $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
 
                     if (!BimpObject::objectLoaded($contrat)) {
+                        $infos .= '<br/><br/><span class="danger">Contrat #'.$id_contrat.' non trouvé</span>';
                         continue;
                     }
 
@@ -2215,7 +2220,6 @@ class BCT_Contrat extends BimpDolObject
                         $infos .= '<span class="success">OK</span>';
 
                         $line->updateField('renouv_task', 1);
-                        break 2;
                     }
                     $infos .= '<br/>';
                 }

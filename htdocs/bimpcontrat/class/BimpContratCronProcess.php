@@ -32,6 +32,7 @@ class BimpContratCronProcess extends BimpCron
                 }
             }
 
+            $this->output .= '<br/><br/>***** Vérif statuts *****<br/>';
             $this->output .= 'Statut vérifié pour ' . count($lines) . ' ligne(s)<br/><br/>';
             $this->output .= $infos_str;
         }
@@ -42,7 +43,7 @@ class BimpContratCronProcess extends BimpCron
         $this->ouput .= BCT_Contrat::RenouvAuto();
 
         // Tâches renouvellements manuels: 
-        $this->output .= '<br/><br/>***** Tâches Renouvellements *****<br/><br/>';
+        $this->output .= '<br/><br/>***** Tâches Renouvellements *****<br/>';
         BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
         $this->output .= BCT_Contrat::createRenouvTasks();
 

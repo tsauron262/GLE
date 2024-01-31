@@ -40,7 +40,7 @@ class BimpContratCronProcess extends BimpCron
         // Renouvellements auto : 
         $this->output .= '<br/><br/>***** Renouvellements automatiques *****<br/><br/>';
         BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
-        $this->ouput .= BCT_Contrat::RenouvAuto();
+        $this->output .= BCT_Contrat::RenouvAuto();
 
         // Tâches renouvellements manuels: 
         $this->output .= '<br/><br/>***** Tâches Renouvellements *****<br/>';

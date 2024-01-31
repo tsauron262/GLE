@@ -36,7 +36,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 
         parent::__construct($db, $demande);
 
-        $this->doc_name = 'Contrat de locatio^n';
+        $this->doc_name = 'Contrat de location';
     }
 
     public function initData()

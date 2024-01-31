@@ -1,2 +1,5 @@
 Contrats d'abonnement : 
     - Facturation hors période avec prorata > 1
+
+Contrats de location : 
+    - Modifications PDF contrats

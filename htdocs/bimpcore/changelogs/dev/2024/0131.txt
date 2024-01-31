@@ -3,3 +3,4 @@ Contrats d'abonnement :
 
 Contrats de location : 
     - Modifications PDF contrats
+    - Ajout destinataire dans PDF proposition location

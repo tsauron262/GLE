@@ -49,7 +49,7 @@ sections:
                                               panel: 1
                                               object: bimp_comm
                                               name: extra
-                                                  
+#                                                  
                           - id: content
                             show: 
                                 callback: useMultiOnglet
@@ -60,7 +60,7 @@ sections:
                                     panel: 0
                                     object: bimp_comm
                                     name: content
-                                    
+#                                    
                           - id: full
                             show:
                                 callback: notUseMultiOnglet
@@ -85,7 +85,7 @@ sections:
                                               panel: 1
                                               object: bimp_comm
                                               name: extra
-                                    
+#                                    
                           - id: contacts
                             title: Contacts / Adresses
                             struct: 
@@ -94,6 +94,7 @@ sections:
                                     callback: 
                                         method: renderContacts
                                         object: bimp_comm
+
                           - id: files
                             title: Fichiers
 #                            struct: 
@@ -114,6 +115,7 @@ sections:
                             ajax_render_method:
                                 method: renderExtraFile
                                 object: bimp_comm
+                                
                           - id: divers
                             title: Divers (admin)
                             show: 

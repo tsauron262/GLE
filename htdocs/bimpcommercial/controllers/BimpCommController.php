@@ -6,7 +6,7 @@ class BimpCommController extends BimpController
     // Overrides: 
 
     public function display()
-    {        
+    {
         $object = $this->config->getObject('', 'bimp_comm');
         if (BimpObject::objectLoaded($object) &&
                 method_exists($object, 'checkLines')) {
@@ -20,12 +20,14 @@ class BimpCommController extends BimpController
 
         parent::display();
     }
-    
-    public function useMultiOnglet(){
+
+    public function useMultiOnglet()
+    {
         return BimpCore::getConf('use_multi_onglet', null, 'bimpcommercial');
     }
-    
-    public function notUseMultiOnglet(){
+
+    public function notUseMultiOnglet()
+    {
         return !$this->useMultiOnglet();
     }
 

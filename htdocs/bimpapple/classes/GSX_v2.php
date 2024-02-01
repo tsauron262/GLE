@@ -226,6 +226,7 @@ class GSX_v2 extends GSX_Const
         } else
             static::debug($this->appleId, 'deconnexion GSX de ' . $this->appleId . ' sans reconnexion possible');
 
+        BimpCore::addlog('Echec tentative reauthentification');
         $this->logged = false;
         $this->saveToken('acti', '');
 

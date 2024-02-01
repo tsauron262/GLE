@@ -544,6 +544,7 @@ class GSX_v2 extends GSX_Const
 
                     case 'AUTH_TOKEN_STILL_ACTIVE':
                     default:
+                        BimpCore::addlog('Erreur req GSX code: '.$error['code'].' data : '. print_r($error,1));
                         $msg = $error['message'];
                         $curl_errors[] = $msg . ($error['code'] ? ' (Code: ' . $error['code'] . ')' : '');
                         $this->curlError($request_name, BimpTools::getArrayValueFromPath($error, 'message', 'Erreur inconnue'), BimpTools::getArrayValueFromPath($error, 'code', ''));

@@ -3363,12 +3363,19 @@ class BimpController
         $dir .= $year . '/';
         $files = scandir($dir, SCANDIR_SORT_DESCENDING);
         $logs = '';
+        
+        $days = array();
 
         foreach ($files as $entry) {
             if (is_file($dir . $entry)) {
-                $logs .= '<br/><b>Le ' . substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2) . ' : </b><br/>';
-                $logs .= nl2br(file_get_contents($dir . $entry));
+                $days[substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2)] .= nl2br(file_get_contents($dir . $entry));
+
             }
+        }
+        
+        foreach($days as $date => $log){
+            $logs .= '<br/><b>Le ' . $date . ' : </b><br/>';
+            $logs .= $log;
         }
 
         if (!$logs) {

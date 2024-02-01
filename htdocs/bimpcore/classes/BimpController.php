@@ -128,11 +128,11 @@ class BimpController
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);
         }
-        
+
         $main_object = $this->config->get('main_object', '');
         $objects = $this->config->getCompiledParams('objects');
-        foreach($objects as $name => $obj){
-            if($name == $main_object || !$main_object){
+        foreach ($objects as $name => $obj) {
+            if ($name == $main_object || !$main_object) {
                 $this->main_object = $obj;
                 break;
             }
@@ -451,9 +451,9 @@ class BimpController
         }
 
         echo '<div class="bimp_controller_content">' . "\n";
-        
+
         $dropZoneFile = false;
-        if(BimpCore::getConf('use_drag_upload') && $this->main_object && is_a($this->main_object, 'BimpObject') && $this->main_object->isLoaded() && $this->main_object->getFilesDir() != ''){
+        if (BimpCore::getConf('use_drag_upload') && $this->main_object && is_a($this->main_object, 'BimpObject') && $this->main_object->isLoaded() && $this->main_object->getFilesDir() != '') {
             $dropZoneFile = true;
             $fil_dir = str_replace(DOL_DATA_ROOT, '', $this->main_object->getFilesDir());
             $html = '<div class="bimp_drop_files_container allPage"';
@@ -466,7 +466,7 @@ class BimpController
 
             $html .= '<div class="bimp_drop_files_area">';
             $html .= '<div class="drop_files"></div>';
-    //        $html .= BimpRender::rendercontentLoading('Envoi des fichiers en cours');
+            //        $html .= BimpRender::rendercontentLoading('Envoi des fichiers en cours');
             echo $html;
         }
 
@@ -523,8 +523,8 @@ class BimpController
         if ($display_footer) {
             $this->displayFooter();
         }
-        
-        if($dropZoneFile){
+
+        if ($dropZoneFile) {
             echo '</div></div>';
         }
     }
@@ -1095,7 +1095,7 @@ class BimpController
                     $errors = $result['errors'];
                 }
 
-                if($id_object > 0)
+                if ($id_object > 0)
                     $errors = BimpTools::merge_array($errors, BimpCore::unlockObject($object_module, $object_name, $id_object));
             }
         }
@@ -2201,10 +2201,10 @@ class BimpController
             $file_name = $file['name'];
             $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
 
-            if(!$specifiquePath)// Ajout d'un tms pour éviter un potentiel conflit de nom
+            if (!$specifiquePath)// Ajout d'un tms pour éviter un potentiel conflit de nom
                 $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '_tms' . time() . '.' . $file_ext;
             else
-            $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
+                $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
 
             if (!move_uploaded_file($file['tmp_name'], DOL_DATA_ROOT . '/' . $files_dir . '/' . $new_file_name)) {
                 $warnings[] = 'Echec de l\'enregistrement du fichier "' . $file_name . '"';
@@ -2212,16 +2212,16 @@ class BimpController
                 $url = '';
                 $item = '';
 
-                    $entity = 1;
-                if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $files_dir, $matches) && is_numeric($matches[1])){
+                $entity = 1;
+                if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $files_dir, $matches) && is_numeric($matches[1])) {
                     $entity = $matches[1];
-                    $files_dir = str_replace('/'.$entity.'/', '', $files_dir);
+                    $files_dir = str_replace('/' . $entity . '/', '', $files_dir);
                 }
                 if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $files_dir, $matches)) {
                     $is_image = in_array($file_ext, array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif'));
                     $module = $matches[1];
-                    $fileName  = urlencode(($matches[2] ? $matches[2] . '/' : '') . $new_file_name);
-                    $url = DOL_URL_ROOT . '/' . ($is_image ? 'viewimage' : 'document') . '.php?'.($entity? 'entity='.$entity.'&' : '').'modulepart=' . $module . '&file=' . $fileName;
+                    $fileName = urlencode(($matches[2] ? $matches[2] . '/' : '') . $new_file_name);
+                    $url = DOL_URL_ROOT . '/' . ($is_image ? 'viewimage' : 'document') . '.php?' . ($entity ? 'entity=' . $entity . '&' : '') . 'modulepart=' . $module . '&file=' . $fileName;
 
                     $item = '<div class="file_item" data-file_name="' . $new_file_name . '">';
                     if ($field_name) {

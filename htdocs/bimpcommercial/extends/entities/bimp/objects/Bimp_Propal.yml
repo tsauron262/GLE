@@ -44,6 +44,19 @@ forms:
                   type: text
               value: Proposition de location de vos équipements informatiques
             - custom: 1
+              label: Contact client
+              input_name: id_contact
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: fk_soc
+                              - 1
+                              - Aucun (Utiliser l'adresse de la fiche client)
+                              - 1
+            - custom: 1
               label: Durée totale de la location
               input_name: duration
               input: 

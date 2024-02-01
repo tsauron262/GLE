@@ -59,31 +59,31 @@ class BimpDocumentPDF extends BimpModelPDF
 //            // Temporaire...
 //            $logo_file = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/actimac/logo_actimag_sav.png';
 //        } else {
-            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-            if ($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo)) {
-                $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
-            } else {
-                if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO', 'CTC', 'CTE'))) {
-                    $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
-                    if (is_file($testFile))
-                        $logo_file = $testFile;
-                }
-                if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('BP'))) {
-                    $testFile = str_replace(array(".jpg", ".png"), "_BP.png", $logo_file);
-                    if (is_file($testFile))
-                        $logo_file = $testFile;
-                }
-                if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
-                    $testFile = str_replace(array(".jpg"/*, "_RESEAUNANCE.png"*/, ".png"), "_SAV.png", $logo_file);
-                    if (is_file($testFile))
-                        $logo_file = $testFile;
-                }
-                if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
-                    $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
-                    if (is_file($testFile))
-                        $logo_file = $testFile;
-                }
+        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        if ($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo)) {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
+        } else {
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO', 'CTC', 'CTE'))) {
+                $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
+                if (is_file($testFile))
+                    $logo_file = $testFile;
             }
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('BP'))) {
+                $testFile = str_replace(array(".jpg", ".png"), "_BP.png", $logo_file);
+                if (is_file($testFile))
+                    $logo_file = $testFile;
+            }
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
+                $testFile = str_replace(array(".jpg"/* , "_RESEAUNANCE.png" */, ".png"), "_SAV.png", $logo_file);
+                if (is_file($testFile))
+                    $logo_file = $testFile;
+            }
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
+                $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
+                if (is_file($testFile))
+                    $logo_file = $testFile;
+            }
+        }
 //        }
 
 
@@ -272,10 +272,6 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function renderContent()
     {
-//        if (is_object($this->thirdparty) || is_object($this->contact)) {
-//            $this->renderDocInfos($this->thirdparty, $this->contact);
-//        }
-
         $this->renderDocInfos();
         $this->renderTop();
         $this->renderBeforeLines();
@@ -384,7 +380,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; ">';
             $html .= '<span style="color: #' . $this->primary . '">' . ('Client Final :') . '</span></div>';
             $html .= '';
-            $html .= pdfBuildThirdpartyName($this->contactFinal, $this->langs).'<br/>';
+            $html .= pdfBuildThirdpartyName($this->contactFinal, $this->langs) . '<br/>';
             $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contactFinal, !is_null($this->contactFinal) ? 1 : 0, 'target');
         }
 
@@ -397,14 +393,18 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         $html = '';
 
-        $html .= '<table class="section addresses_section" style="width: 100%" cellspacing="0" cellpadding="3px">';
-        $html .= '<tr>';
-        $html .= '<td style="width: 55%"></td>';
-        $html .= '<td style="width: 5%"></td>';
-        $html .= '<td class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">';
-        $html .= '<span style="color: #' . $this->primary . '">' . strtoupper($this->target_label) . '</span></td>';
-        $html .= '</tr>';
-        $html .= '</table>';
+        $targe_infos_html = $this->getTargetInfosHtml();
+
+        if ($targe_infos_html) {
+            $html .= '<table class="section addresses_section" style="width: 100%" cellspacing="0" cellpadding="3px">';
+            $html .= '<tr>';
+            $html .= '<td style="width: 55%"></td>';
+            $html .= '<td style="width: 5%"></td>';
+            $html .= '<td class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">';
+            $html .= '<span style="color: #' . $this->primary . '">' . strtoupper($this->target_label) . '</span></td>';
+            $html .= '</tr>';
+            $html .= '</table>';
+        }
 
         $html .= '<table class="section addresses_section" style="width: 100%" cellspacing="0" cellpadding="10px">';
         $html .= '<tr>';
@@ -414,7 +414,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<td style="width: 5%"></td>';
         $html .= '<td style="width: 40%">';
 
-        $html .= $this->getTargetInfosHtml();
+        $html .= $targe_infos_html;
 
         $html .= '</td>';
         $html .= '</tr>';

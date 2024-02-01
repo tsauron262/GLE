@@ -342,9 +342,16 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
 
         $target = BimpTools::getArrayValueFromPath($data, 'target', '');
 
+        $client = $this->getChildObject('client');
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Client absent';
+        }
+
         if (!$target) {
             $errors[] = 'Veuillez sélectionner le financeur';
-        } else {
+        }
+
+        if (!count($errors)) {
             unset($data['target']);
 
             $bcdf = BimpObject::getInstance('bimpcommercial', 'BimpCommDemandeFin');
@@ -404,6 +411,18 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                     }
                 }
 
+                $contact = null;
+                $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', 0);
+                if ($id_contact) {
+                    $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                }
+                unset($data['id_contact']);
+
+                $data['client_data'] = json_encode(array(
+                    'nom'         => $client->getName(),
+                    'full_address' => (BimpObject::objectLoaded($contact) ? $contact->displayFullAddress() : $client->displayFullAddress())
+                ));
+                
                 $data['lines'] = json_encode($lines);
                 $data['montant_materiels'] = $montant_materiel;
                 $data['montant_services'] = $montant_services;

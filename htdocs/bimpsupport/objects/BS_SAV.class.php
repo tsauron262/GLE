@@ -5634,9 +5634,43 @@ ORDER BY a.val_max DESC");
                             $new_propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $new_id_propal);
 
                             $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
-                            $new_propal->dol_object->addline(
-                                    "Machine(s) : " . $this->getNomMachine() .
-                                    "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, BimpCore::getConf('id_prod_refus', '', 'bimpsupport'), $client->dol_object->remise_percent, 'HT', null, null, 1);
+                            
+                            
+//                            if (!BimpObject::objectLoaded($line)) {
+                                $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+//                            }
+                            
+                            $line->validateArray(array(
+                                'id_obj'             => (int) $new_id_propal,
+                                'type'               => BS_SavPropalLine::LINE_PRODUCT,
+                                'deletable'          => 0,
+                                'editable'           => 0,
+                                'remisable'          => 0,
+                            ));
+
+                            $line->desc = "Machine(s) : " . $this->getNomMachine() .
+                                    "\n" . "Frais de gestion devis refusé.";
+                            $line->id_product = (int) BimpCore::getConf('id_prod_refus', '', 'bimpsupport');
+                            $line->pu_ht = $frais / 1.20;
+                            $line->pa_ht = (float) 0;
+                            $line->qty = 1;
+                            $line->tva_tx = 20;
+
+                            $line_warnings = array();
+                            $error_label = '';
+                            if (!$line->isLoaded()) {
+                                $error_label = 'création';
+                                $line_errors = $line->create($line_warnings, true);
+                            } else {
+                                $error_label = 'mise à jour';
+                                $line_errors = $line->update($line_warnings, true);
+                            }
+                            
+                            
+                            
+//                            $new_propal->dol_object->addline(
+//                                    "Machine(s) : " . $this->getNomMachine() .
+//                                    "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, BimpCore::getConf('id_prod_refus', '', 'bimpsupport'), $client->dol_object->remise_percent, 'HT', null, null, 1);
 
                             $new_propal->fetch($new_propal->id);
                             $new_propal->dol_object->valid($user);

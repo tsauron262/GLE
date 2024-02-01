@@ -531,6 +531,7 @@ class GSX_v2 extends GSX_Const
                 $msg = '';
                 switch ($error['code']) {
                     case 'SESSION_IDLE_TIMEOUT':
+                    case 'UNAUTHORIZED':
                         // On tente une nouvelle authentification: 
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
@@ -539,11 +540,12 @@ class GSX_v2 extends GSX_Const
                             }
                             return false;
                         } else {
-                            return false;
+//                            return false;ciommme ca on continue et on log
                         }
 
                     case 'AUTH_TOKEN_STILL_ACTIVE':
                     default:
+                        BimpCore::addlog('Erreur req GSX code: '.$error['code'].' data : '. print_r($error,1));
                         $msg = $error['message'];
                         $curl_errors[] = $msg . ($error['code'] ? ' (Code: ' . $error['code'] . ')' : '');
                         $this->curlError($request_name, BimpTools::getArrayValueFromPath($error, 'message', 'Erreur inconnue'), BimpTools::getArrayValueFromPath($error, 'code', ''));

@@ -131,7 +131,7 @@ fields:
     remisable: 
         label: Remisable
         type: int
-        viewable: 0
+        viewable: 1
         filterable: 0
         filterable: 0
         default_value: 1

@@ -657,7 +657,7 @@ forms:
               label: Lignes liées à fusionner
               input_name: linked_lines
               content: 
-                  callback: renderRenouvLinkedLinesInputs
+                  callback: renderLinkedLinesCheckInputs
             - field: subprice
               value: 
                   callback: 
@@ -701,6 +701,19 @@ forms:
               content: 
                   callback: renderFacRegulQtyInput
               depends_on: period_from,period_to
+              
+    resiliate: 
+        rows: 
+            - custom: 1
+              label: Date d'arrêt de l'abonnement
+              input_name: date_cloture
+              content: 
+                  callback: renderClotureDateInput
+            - custom: 1
+              label: Lignes liées à résilier
+              input_name: linked_lines
+              content: 
+                  callback: renderLinkedLinesCheckInputs
               
 fields_tables: 
     infos: 

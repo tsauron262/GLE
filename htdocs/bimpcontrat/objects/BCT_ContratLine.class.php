@@ -459,7 +459,7 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
-//        if ($this->isActionAllowed('resiliate') && $this->canSetAction('resiliate')) {
+//        if ($this->isActionAllowed('resiliate', $err) && $this->canSetAction('resiliate')) {
 //            $buttons[] = array(
 //                'label'   => 'Résilier',
 //                'icon'    => 'fas_times-circle',
@@ -984,7 +984,7 @@ class BCT_ContratLine extends BimpObject
         return $date;
     }
 
-    public function getPeriodsToBillData(&$errors = array(), $check_date = true)
+    public function getPeriodsToBillData(&$errors = array(), $check_date = true, $check_remaining_periods_to_bill = false)
     {
         $data = array(
             'date_next_facture'       => '', // Date prochaine facture
@@ -1096,7 +1096,9 @@ class BCT_ContratLine extends BimpObject
                 $data['date_next_period_tobill'] = $date_next_period_tobill;
 
                 if ($date_next_period_tobill > $date_fin) {
-                    $errors[] = 'Toutes les facturations ont été effectuées';
+                    if ($check_remaining_periods_to_bill) {
+                        $errors[] = 'Toutes les facturations ont été effectuées';
+                    }
                     return $data;
                 }
 
@@ -2655,7 +2657,7 @@ class BCT_ContratLine extends BimpObject
                                 if (BimpObject::objectLoaded($line)) {
                                     $tr_class = '';
                                     $line_errors = array();
-                                    $periods_data = $line->getPeriodsToBillData($line_errors, true);
+                                    $periods_data = $line->getPeriodsToBillData($line_errors, true, true);
                                     $canFactAvance = $this->canSetAction('facturationAvance');
 
                                     $row_html .= '<td style="min-width: 30px; max-width: 30px; text-align: center;' . ($is_sub_line ? 'border-left: 3px solid #' . $primary_color : '') . '">';
@@ -3517,7 +3519,7 @@ class BCT_ContratLine extends BimpObject
                     $total_ttc += $cf_line->getTotalTTC();
 
                     $received_qty = (float) $cf_line->getReceivedQty(null, true);
-                    $received_class = ($received_qty > 0 ? ($received_qty >= $qty ? 'success' : 'warning') : 'danger');
+                    $received_class = ($received_qty > 0 ? ($received_qty >= $cf_line->getFullQty() ? 'success' : 'warning') : 'danger');
 
                     $rows[] = array(
                         'period'      => $period,
@@ -3554,7 +3556,7 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
-    public function renderRenouvLinkedLinesInputs()
+    public function renderLinkedLinesCheckInputs()
     {
         $html = '';
 
@@ -3794,6 +3796,48 @@ class BCT_ContratLine extends BimpObject
                         )
             ));
         }
+        return $html;
+    }
+
+    public function renderClotureDateInput()
+    {
+        $html = '';
+
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $fac_periodicity = (int) $this->getData('fac_periodicity');
+
+            if (!$fac_periodicity) {
+                $errors[] = 'périodicité de facturation absente';
+            } else {
+                $period_data = $this->getPeriodsToBillData($errors);
+
+                if (!count($errors)) {
+                    $dates = array();
+                    $dt = new DateTime($period_data['date_next_period_tobill']);
+                    $dates[$dt->format('Y-m-d')] = $dt->format('d / m / Y') . ' (0 période restant à facturer)';
+                    $value = $dt->format('Y-m-d');
+
+                    if ($period_data['nb_periods_tobill_max'] > 0) {
+                        $interval = new DateInterval('P' . $fac_periodicity . 'M ');
+                        for ($i = 1; $i <= $period_data['nb_periods_tobill_max']; $i++) {
+                            $dt->add($interval);
+                            $dates[$dt->format('Y-m-d')] = $dt->format('d / m / Y') . ' (' . $i . ' période' . ($i > 1 ? 's' : '') . ' restant à facturer)';
+                        }
+                    }
+
+                    $html .= BimpInput::renderInput('select', 'date_cloture', $value, array(
+                                'options' => $dates
+                    ));
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
         return $html;
     }
 
@@ -5455,7 +5499,7 @@ class BCT_ContratLine extends BimpObject
 
                                 // Check des qty:
                                 $line_errors = array();
-                                $line_periods_data = $line->getPeriodsToBillData($line_errors, true);
+                                $line_periods_data = $line->getPeriodsToBillData($line_errors, true, true);
 
                                 if (count($line_errors)) {
                                     $process->incIgnored();
@@ -5516,7 +5560,7 @@ class BCT_ContratLine extends BimpObject
 
                                         if (BimpObject::objectLoaded($sub_line)) {
                                             $sub_line_errors = array();
-                                            $sub_line_periods_data = $line->getPeriodsToBillData($sub_line_errors, true);
+                                            $sub_line_periods_data = $line->getPeriodsToBillData($sub_line_errors, true, true);
 
                                             if (count($sub_line_errors)) {
                                                 $process->incIgnored();

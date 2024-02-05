@@ -546,7 +546,8 @@ class GSX_v2 extends GSX_Const
 //                            return false;ciommme ca on continue et on log
                         }
 
-                    case 'AUTH_TOKEN_STILL_ACTIVE':
+                    case 'AUTH_TOKEN_STILL_ACTIVE'://bizarre, on renvoie le même token
+                        return array('authToken' => $params['authToken']);
                     default:
                         BimpCore::addlog('Erreur req GSX code: '.$error['code'].' data : '. print_r($error,1));
                         $msg = $error['message'];

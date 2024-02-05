@@ -534,7 +534,7 @@ class GSX_v2 extends GSX_Const
                 $msg = '';
                 switch ($error['code']) {
                     case 'SESSION_IDLE_TIMEOUT':
-                    case 'UNAUTHORIZED':
+//                    case 'UNAUTHORIZED':
                         // On tente une nouvelle authentification: 
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');

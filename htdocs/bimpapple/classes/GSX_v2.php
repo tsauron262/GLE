@@ -182,6 +182,8 @@ class GSX_v2 extends GSX_Const
             'userAppleId' => $this->appleId,
             'authToken'   => $this->acti_token
         ));
+        
+        $oldToken = $this->acti_token;
 
         if (isset($result['authToken'])) {
             $this->displayDebug('OK (Auth token ' . $result['authToken'] . ')');
@@ -194,7 +196,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $this->displayDebug('échec');
-        $this->initError('Echec authentification (token ' . $this->acti_token . ')');
+        $this->initError('Echec authentification (oldToken : '.$oldToken.' newToken : ' . $this->acti_token . ')');
 
         if ($this->appleId == self::$default_ids['apple_id']) {
 //            global $gsx_logout_mail_send, $phantomAuthTest;

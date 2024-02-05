@@ -941,6 +941,7 @@ lists:
             fac_infos: 
             achat_infos:
             statut: 
+            origine:
                 
     global:
         extends: default

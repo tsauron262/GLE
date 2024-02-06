@@ -274,7 +274,7 @@ fields:
         type: datetime
         
     date_cloture: 
-        label: Date cloture
+        label: Date de cloture
         type: datetime
         
     date_fac_start: 
@@ -660,7 +660,10 @@ forms:
               label: Lignes liées à fusionner
               input_name: linked_lines
               content: 
-                  callback: renderLinkedLinesCheckInputs
+                  callback: 
+                      method: renderLinkedLinesCheckInputs
+                      params: 
+                          - renouv
             - field: subprice
               value: 
                   callback: 
@@ -716,7 +719,10 @@ forms:
               label: Lignes liées à résilier
               input_name: linked_lines
               content: 
-                  callback: renderLinkedLinesCheckInputs
+                  callback: 
+                      method: renderLinkedLinesCheckInputs
+                      params: 
+                          - resiliate
               
 fields_tables: 
     infos: 

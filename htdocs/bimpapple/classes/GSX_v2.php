@@ -81,6 +81,10 @@ class GSX_v2 extends GSX_Const
             if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
                 $this->acti_token = $user->array_options['options_gsx_acti_token'];
             }
+            
+            if (isset($user->array_options['options_gsx_sold_to_connected']) && (string) $user->array_options['options_gsx_sold_to_connected']) {
+                $this->sold_to_connected = $user->array_options['options_gsx_sold_to_connected'];
+            }
 
             if (isset($_REQUEST['gsx_auth_token']) && $_REQUEST['gsx_auth_token'] != '') {
                 $this->auth_token = $_REQUEST['gsx_auth_token'];
@@ -302,10 +306,12 @@ class GSX_v2 extends GSX_Const
         }
 
         if ($field) {
+            $this->gsx_sold_to_connected = $this->soldTo;
             if (self::$mode === 'prod') {
                 $is_default = ($this->appleId === self::$default_ids['apple_id']);
                 BimpCache::getBdb()->update('user_extrafields', array(
-                    $field => $token
+                    $field => $token,
+                    'gsx_sold_to_connected' => $this->gsx_sold_to_connected
                         ), '`apple_id` = \'' . $this->appleId . '\'' . ($is_default ? ' OR `apple_id` IS NULL OR `apple_id` = \'\'' : ''));
             } else {
                 BimpCache::getBdb()->update('user_extrafields', array(
@@ -534,7 +540,6 @@ class GSX_v2 extends GSX_Const
                 $msg = '';
                 switch ($error['code']) {
                     case 'SESSION_IDLE_TIMEOUT':
-//                    case 'UNAUTHORIZED':
                         // On tente une nouvelle authentification: 
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
@@ -548,6 +553,21 @@ class GSX_v2 extends GSX_Const
 
                     case 'AUTH_TOKEN_STILL_ACTIVE'://bizarre, on renvoie le même token
                         return array('authToken' => $params['authToken']);
+                        
+                    case 'UNAUTHORIZED':
+                        if((int) $this->gsx_sold_to_connected != (int) $this->soldTo){
+                            // On tente une nouvelle authentification: 
+                            if ($request_name !== 'authenticate') {
+                                $this->displayDebug('Non authentifié');
+                                if ($this->reauthenticate()) {
+                                    return $this->exec($request_name, $params, $response_headers);
+                                }
+                                return false;
+                            } else {
+    //                            return false;ciommme ca on continue et on log
+                            }
+                        }
+//                        break;
                     default:
                         BimpCore::addlog('Erreur req GSX code: '.$error['code'].' data : '. print_r($error,1));
                         $msg = $error['message'];

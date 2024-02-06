@@ -229,6 +229,7 @@ $check_access = dol_check_secure_access_document($modulepart, $original_file, $e
 $accessallowed              = $check_access['accessallowed'];
 $sqlprotectagainstexternals = $check_access['sqlprotectagainstexternals'];
 $fullpath_original_file     = $check_access['original_file']; // $fullpath_original_file is now a full path name
+//die('ffff'.$fullpath_original_file);
 //var_dump($fullpath_original_file.' '.$original_file.' '.$refname.' '.$accessallowed);exit;
 
 if (!empty($hashp)) {
@@ -261,6 +262,13 @@ if (!$accessallowed) {
 	accessforbidden();
 }
 
+if(DOL_DATA_ROOT != PATH_TMP){
+    $inTmpPath = str_replace(DOL_DATA_ROOT, PATH_TMP,$fullpath_original_file);
+    if(file_exists($inTmpPath)){
+        $fullpath_original_file = $inTmpPath;
+    }
+}
+
 // Security:
 // We refuse directory transversal change and pipes in file names
 if (preg_match('/\.\./', $fullpath_original_file) || preg_match('/[<>|]/', $fullpath_original_file)) {
@@ -272,12 +280,6 @@ if (preg_match('/\.\./', $fullpath_original_file) || preg_match('/[<>|]/', $full
 
 clearstatcache();
 
-if(DOL_DATA_ROOT != PATH_TMP){
-    $inTmpPath = str_replace(DOL_DATA_ROOT, PATH_TMP,$fullpath_original_file);
-    if(file_exists($inTmpPath)){
-        $fullpath_original_file = $inTmpPath;
-    }
-}
 $filename = basename($fullpath_original_file);
 $filename = preg_replace('/\.noexe$/i', '', $filename);
 

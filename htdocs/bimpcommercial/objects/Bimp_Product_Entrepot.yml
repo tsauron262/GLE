@@ -15,7 +15,7 @@ list_page_url:
     
     
 parent_module: bimpcore
-parent_object: Bimp_Product
+parent_object: Bimp_Entrepot
 parent_id_property: fk_entrepot
     
 objects:   

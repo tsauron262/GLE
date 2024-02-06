@@ -994,8 +994,10 @@ class BCT_ContratLine extends BimpObject
 //            'date_first_fac'          => '', // Date première facture
             'date_fac_start'          => '', // Date début de facturation réelle (cas des facturation partielles / différent de date_first_fac si facturation à terme échu)
             'nb_total_periods'        => 0, // Nombre total de périodes
+            'nb_periods_billed'       => 0, // Nombre de périodes déjà facturées
             'nb_periods_tobill_max'   => 0, // Nombre total de périodes restant à facturer. 
             'nb_periods_tobill_today' => 0, // Nombre de périodes à facturer à date.
+            'nb_periods_never_billed' => 0, // Nombre de périodes non facturées en cas de résiliation
             'qty_for_1_period'        => 0,
             'first_period_prorata'    => 1, // Prorata de facturation de la première période
             'date_first_period_start' => '', // Début de la première période facturée
@@ -1097,30 +1099,59 @@ class BCT_ContratLine extends BimpObject
 
                 $data['date_next_period_tobill'] = $date_next_period_tobill;
 
-                if ($date_next_period_tobill > $date_fin) {
-                    if ($check_remaining_periods_to_bill) {
-                        $errors[] = 'Toutes les facturations ont été effectuées';
-                    }
-                    return $data;
-                }
-
                 if (!count($errors)) {
                     // Calcul du nombre de périodes restant à facturer
-                    $interval = BimpTools::getDatesIntervalData($date_next_period_tobill, $date_fin);
-                    if ($interval['nb_monthes_decimal'] > 0) {
-                        $data['debug']['nb_periods_tobill_max'] = array(
-                            'interval'      => $interval,
-                            'value_decimal' => $interval['nb_monthes_decimal'] / $periodicity
-                        );
-                        $data['nb_periods_tobill_max'] = ceil($interval['nb_monthes_decimal'] / $periodicity);
+                    if ($date_next_period_tobill < $date_fin) {
+                        $interval = BimpTools::getDatesIntervalData($date_next_period_tobill, $date_fin);
+                        if ($interval['nb_monthes_decimal'] > 0) {
+                            $data['debug']['nb_periods_tobill_max'] = array(
+                                'interval'      => $interval,
+                                'value_decimal' => $interval['nb_monthes_decimal'] / $periodicity
+                            );
+                            $data['nb_periods_tobill_max'] = ceil($interval['nb_monthes_decimal'] / $periodicity);
 
-                        if ($data['nb_periods_tobill_max'] < 0) {
-                            $data['nb_periods_tobill_max'] = 0;
-                        }
+                            if ($data['nb_periods_tobill_max'] < 0) {
+                                $data['nb_periods_tobill_max'] = 0;
+                            }
 
-                        if ($data['nb_periods_tobill_max'] > $data['nb_total_periods']) {
-                            $data['nb_periods_tobill_max'] = $data['nb_total_periods'];
+                            if ($data['nb_periods_tobill_max'] > $data['nb_total_periods']) {
+                                $data['nb_periods_tobill_max'] = $data['nb_total_periods'];
+                            }
                         }
+                    }
+
+
+                    $date_fin_reele = $date_fin;
+                    $date_cloture = $this->getData('date_cloture');
+
+                    if ($date_cloture) {
+                        $date_cloture = date('Y-m-d', strtotime($date_cloture));
+
+                        // Si abo résilié: 
+                        if ($date_cloture < $date_fin) {
+                            $interval = BimpTools::getDatesIntervalData($date_cloture, $date_fin);
+                            if ($interval['nb_monthes_decimal'] > 0) {
+                                $data['debug']['nb_periods_never_billed'] = array(
+                                    'interval'      => $interval,
+                                    'value_decimal' => $interval['nb_monthes_decimal'] / $periodicity
+                                );
+                                $data['nb_periods_never_billed'] = ceil($interval['nb_monthes_decimal'] / $periodicity);
+                                $data['nb_periods_tobill_max'] -= $data['nb_periods_never_billed'];
+                            }
+
+                            $dt_fin = new DateTime($date_cloture);
+                            $dt_fin->sub(new DateInterval('P1D'));
+                            $date_fin_reele = $dt_fin->format('Y-m-d');
+                        }
+                    }
+
+                    $data['nb_periods_billed'] = $data['nb_total_periods'] - $data['nb_periods_tobill_max'] - $data['nb_periods_never_billed'];
+
+                    if ($date_next_period_tobill > $date_fin_reele) {
+                        if ($check_remaining_periods_to_bill) {
+                            $errors[] = 'Toutes les facturations ont été effectuées';
+                        }
+                        return $data;
                     }
 
                     // Calcul du nombre de périodes à facturer aujourd'hui : 
@@ -1227,8 +1258,7 @@ class BCT_ContratLine extends BimpObject
                     $dt = new DateTime($date_debut);
                     if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
-                    }
-                    elseif ($nb_periods < 0) {
+                    } elseif ($nb_periods < 0) {
                         $dt->sub(new DateInterval('P' . (-$nb_periods * $periodicity) . 'M'));
                     }
                     $data['date_first_period_start'] = $dt->format('Y-m-d');
@@ -1942,6 +1972,12 @@ class BCT_ContratLine extends BimpObject
                 return $this->getData('qty');
 
             case self::TYPE_ABO:
+                $date_cloture = $this->getData('date_cloture');
+
+                if ($date_cloture && $date_cloture < $this->getData('date_fin_validite')) {
+                    $html .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Résiliation le ' . date('d / m / Y', strtotime($date_cloture)) . '</span><br/><br/>';
+                }
+
                 if ((int) $this->getData('id_line_renouv')) {
                     $line_revouv = $this->getChildObject('line_renouv');
                     if (BimpObject::objectLoaded($line_revouv)) {
@@ -2093,13 +2129,21 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<br/><br/>';
 
                 $periods_data = $this->getPeriodsToBillData();
-                $nb_periods_billed = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobill_max'];
-                $class = ($nb_periods_billed > 0 ? ($nb_periods_billed < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
+                $nb_total_periods_fac = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_billed'];
+                $class = ($periods_data['nb_periods_billed'] > 0 ? ($periods_data['nb_periods_billed'] < $nb_total_periods_fac ? 'warning' : 'success') : 'danger');
 
-                $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $nb_periods_billed . ' sur ' . $periods_data['nb_total_periods'] . '</span>';
+                $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $periods_data['nb_periods_billed'] . ' sur ' . $nb_total_periods_fac . '</span>';
 
-                if ($nb_periods_billed < $periods_data['nb_total_periods']) {
+                if ($periods_data['nb_periods_billed'] < $nb_total_periods_fac) {
                     $html .= '<br/>Prochaine facturation : ' . $this->displayNextFacDate(true);
+                }
+
+                if ($periods_data['nb_periods_never_billed'] > 0) {
+                    $date_cloture = $this->getData('date_cloture');
+
+                    $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+                    $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période(s) ne seront pas facturer</span>';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
             }
 

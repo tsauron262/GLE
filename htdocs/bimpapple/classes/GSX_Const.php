@@ -1,6 +1,9 @@
 <?php
 
-class GSX_Const
+
+BimpCore::requireFileForEntity('bimpapple', '/classes/GSX_Const_entity.php');
+
+class GSX_Const extends GSX_Const_entity
 {
 
     // Toutes les données en dur pour GSX V2 sont à mettre ici: 
@@ -106,13 +109,6 @@ class GSX_Const
 //        'apple_id'    => 'olys_tech_aprvlreqrd@bimp.fr', // New sans droits
 //        'tech_id' => 'ZUGLPGA45B',
         'apple_pword' => 'Apple@214',
-        'sold_to'     => '1442050',
-        'ship_to'     => '1442050'
-    );
-    public static $default_ids = array(
-        'apple_id'    => 'admin.gle@bimp.fr',
-//        'apple_id'    => 't.sauron@ldlc.com',
-        'apple_pword' => '@LdLc.com#69760',
         'sold_to'     => '1442050',
         'ship_to'     => '1442050'
     );

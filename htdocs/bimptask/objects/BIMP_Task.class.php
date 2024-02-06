@@ -46,29 +46,6 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Droits users: 
 
-    public function getUserRight($right)
-    {
-        global $user;
-        if ($user->admin) {
-            return 1;
-        }
-
-        if (!$this->isLoaded()) {
-            $classRight = BimpTools::getPostFieldValue('type_manuel', null);
-            if (is_null($classRight))
-                return 1;
-        } else
-            $classRight = $this->getType();
-
-        if ($this->getData("id_user_owner") == $user->id)
-            return 1;
-
-        if ($this->getData("user_create") == $user->id/* && $right == 'read' */) // => Pourquoi? le créateur devrait pouvoir modifier la tâche
-            return 1;
-
-        return $user->rights->bimptask->$classRight->$right;
-    }
-
     public function canView()
     {
         if ($this->isNotLoaded()) {
@@ -423,6 +400,29 @@ class BIMP_Task extends BimpAbstractFollow
     }
 
     // Getters données: 
+
+    public function getUserRight($right)
+    {
+        global $user;
+        if ($user->admin) {
+            return 1;
+        }
+
+        if (!$this->isLoaded()) {
+            $classRight = BimpTools::getPostFieldValue('type_manuel', null);
+            if (is_null($classRight))
+                return 1;
+        } else
+            $classRight = $this->getType();
+
+        if ($this->getData("id_user_owner") == $user->id)
+            return 1;
+
+        if ($this->getData("user_create") == $user->id/* && $right == 'read' */) // => Pourquoi? le créateur devrait pouvoir modifier la tâche
+            return 1;
+
+        return $user->rights->bimptask->$classRight->$right;
+    }
 
     public function getParentTask()
     {
@@ -1096,7 +1096,7 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Actions: 
 
-    public function actionClose($data, &$success)
+    public function actionClose($data, &$success = '')
     {
         $errors = $warnings = array();
         $success = "Tâche fermée";
@@ -1106,9 +1106,10 @@ class BIMP_Task extends BimpAbstractFollow
         if (!count($errors)) {
             $success_callback = self::$jsReload;
 
+            $close_label = BimpTools::getArrayValueFromPath($data, 'close_label', 'Tâche terminée');
             $comment = BimpTools::getArrayValueFromPath($data, 'comment', '');
 
-            $msg = 'Tâche terminée' . ($comment ? '<br/><b>Commentaire : </b>' . $comment : '');
+            $msg = $close_label . ($comment ? '<br/><b>Commentaire : </b>' . $comment : '');
             $this->addObjectLog($msg);
 
             if ((int) BimpTools::getArrayValueFromPath($data, 'notify', 0)) {
@@ -1241,23 +1242,25 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Overrides: 
 
-    public function fetch($id, $parent = null)
-    {
-        $errors = parent::fetch($id, $parent);
-
-        $test = $this->getData("test_ferme");
-        if ($test != "" && $this->getData("status") != 4) {
-            $tabTest = explode(":", $test);
-            if (count($tabTest) == 2) {
-                $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . $tabTest[0] . " WHERE " . $tabTest[1]);
-                if ($this->db->db->num_rows($sql) > 0) {
-                    $inut = "";
-                    $this->actionClose(array(), $inut);
-                }
-            }
-        }
-        return $errors;
-    }
+//    public function checkObject($context = '', $field = '')
+//    {
+//        if ($context === 'fetch') {
+//            $test = $this->getData("test_ferme");
+//            if ($test != "" && (int) $this->getData("status") != 4) {
+//                $tabTest = explode(":", $test);
+//                if (count($tabTest) == 2) {
+//                    $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . $tabTest[0] . " WHERE " . $tabTest[1]);
+//                    if ($this->db->db->num_rows($sql) > 0) {
+//                        $this->actionClose(array(
+//                            'close_label' => 'Tâche fermée automatiquement'
+//                        ));
+//                    }
+//                }
+//            }
+//        }
+//        
+//        parent::checkObject($context, $field);
+//    }
 
     public function create(&$warnings = array(), $force_create = false)
     {

@@ -229,7 +229,6 @@ $check_access = dol_check_secure_access_document($modulepart, $original_file, $e
 $accessallowed              = $check_access['accessallowed'];
 $sqlprotectagainstexternals = $check_access['sqlprotectagainstexternals'];
 $fullpath_original_file     = $check_access['original_file']; // $fullpath_original_file is now a full path name
-//die('ffff'.$fullpath_original_file);
 //var_dump($fullpath_original_file.' '.$original_file.' '.$refname.' '.$accessallowed);exit;
 
 if (!empty($hashp)) {

@@ -1,5 +1,6 @@
 function BimpContrat() {
-    // Events : 
+    // Events:
+
     this.onPeriodicityMassProcessFormLoaded = function ($form) {
         $form.find('.line_check').change(function () {
             var $row = $(this).findParentByClass('contrat_line_row');
@@ -53,7 +54,7 @@ function BimpContrat() {
         });
     };
 
-    // Traitements formulaires : 
+    // Traitements formulaires:
 
     this.onPeriodicFacProcessFormSubmit = function ($form, extra_data) {
         var has_errors = false;
@@ -213,6 +214,23 @@ function BimpContrat() {
         var lines = [];
 
         extra_data['id_main_line'] = parseInt($form.find('input[name="id_main_line"]').val());
+
+        $form.find('.line_check:checked').each(function () {
+            lines.push(parseInt($(this).data('id_line')));
+        });
+
+        if (!lines.length) {
+            bimp_msg('Aucune ligne sélectionnée', 'danger');
+            return false;
+        }
+
+        extra_data['lines'] = lines;
+
+        return extra_data;
+    };
+
+    this.onResiliateAbonnementFormSubmit = function ($form, extra_data) {
+        var lines = [];
 
         $form.find('.line_check:checked').each(function () {
             lines.push(parseInt($(this).data('id_line')));

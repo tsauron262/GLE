@@ -1242,25 +1242,25 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Overrides: 
 
-//    public function checkObject($context = '', $field = '')
-//    {
-//        if ($context === 'fetch') {
-//            $test = $this->getData("test_ferme");
-//            if ($test != "" && (int) $this->getData("status") != 4) {
-//                $tabTest = explode(":", $test);
-//                if (count($tabTest) == 2) {
-//                    $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . $tabTest[0] . " WHERE " . $tabTest[1]);
-//                    if ($this->db->db->num_rows($sql) > 0) {
-//                        $this->actionClose(array(
-//                            'close_label' => 'Tâche fermée automatiquement'
-//                        ));
-//                    }
-//                }
-//            }
-//        }
-//        
-//        parent::checkObject($context, $field);
-//    }
+    public function checkObject($context = '', $field = '')
+    {
+        if ($context === 'fetch') {
+            $test = $this->getData("test_ferme");
+            if ($test != "" && (int) $this->getData("status") != 4) {
+                $tabTest = explode(":", $test);
+                if (count($tabTest) == 2) {
+                    $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . $tabTest[0] . " WHERE " . $tabTest[1]);
+                    if ($this->db->db->num_rows($sql) > 0) {
+                        $this->actionClose(array(
+                            'close_label' => 'Tâche fermée automatiquement'
+                        ));
+                    }
+                }
+            }
+        }
+        
+        parent::checkObject($context, $field);
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {

@@ -67,15 +67,19 @@ class GSX_v2 extends GSX_Const
         }
         
         
-        if($user->array_options['options_gsx_acti_token'] == "" && BimpCore::getConf('use_gsx_def_id', false, 'bimpapple')){
+        if($user->array_options['options_apple_id'] == "" && BimpCore::getConf('use_gsx_def_id', false, 'bimpapple')){
             //passage sur les id de base
-            $userT = new User(BimpCache::getBdb()->db);
-            $userT->fetch(242);
-            if($userT->array_options['options_gsx_acti_token'] != ''){
-                $this->appleId = self::$default_ids['apple_id'];
-                $this->acti_token = $userT->array_options['options_gsx_acti_token'];
-                $this->auth_token = $userT->array_options['options_gsx_auth_token'];
-            }
+//            $userT = new User(BimpCache::getBdb()->db);
+//            $userT->fetch(242);
+//            if($userT->array_options['options_gsx_acti_token'] != ''){
+//                $this->appleId = self::$default_ids['apple_id'];
+//                $this->acti_token = $userT->array_options['options_gsx_acti_token'];
+//                $this->auth_token = $userT->array_options['options_gsx_auth_token'];
+//            }
+//            else{
+                $this->acti_token = BimpCore::getConf('apple_token', '', 'bimpapple');
+                $this->auth_token = BimpCore::getConf('apple_token', '', 'bimpapple');
+//            }
         }
         else{
             if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
@@ -288,6 +292,13 @@ class GSX_v2 extends GSX_Const
     public function saveToken($type, $token)
     {
 //        static::debug($this->appleId, 'enregistrement token ' . $type . ' : ' . $token); // Génère trop de logs. 
+        $is_default = ($this->appleId === self::$default_ids['apple_id']);
+        if($is_default){
+            global $conf;
+           $this->auth_token = BimpCore::setConf('apple_token', $token, 'bimpapple', $conf->entity);
+           return 1;
+        }
+        
         $field = '';
         switch ($type) {
             case 'acti':
@@ -303,7 +314,6 @@ class GSX_v2 extends GSX_Const
 
         if ($field) {
             if (self::$mode === 'prod') {
-                $is_default = ($this->appleId === self::$default_ids['apple_id']);
                 BimpCache::getBdb()->update('user_extrafields', array(
                     $field => $token
                         ), '`apple_id` = \'' . $this->appleId . '\'' . ($is_default ? ' OR `apple_id` IS NULL OR `apple_id` = \'\'' : ''));
@@ -534,7 +544,6 @@ class GSX_v2 extends GSX_Const
                 $msg = '';
                 switch ($error['code']) {
                     case 'SESSION_IDLE_TIMEOUT':
-//                    case 'UNAUTHORIZED':
                         // On tente une nouvelle authentification: 
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
@@ -548,6 +557,8 @@ class GSX_v2 extends GSX_Const
 
                     case 'AUTH_TOKEN_STILL_ACTIVE'://bizarre, on renvoie le même token
                         return array('authToken' => $params['authToken']);
+                        
+                    case 'UNAUTHORIZED':
                     default:
                         BimpCore::addlog('Erreur req GSX code: '.$error['code'].' data : '. print_r($error,1));
                         $msg = $error['message'];

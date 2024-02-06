@@ -182,6 +182,8 @@ class GSX_v2 extends GSX_Const
             'userAppleId' => $this->appleId,
             'authToken'   => $this->acti_token
         ));
+        
+        $oldToken = $this->acti_token;
 
         if (isset($result['authToken'])) {
             $this->displayDebug('OK (Auth token ' . $result['authToken'] . ')');
@@ -194,7 +196,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $this->displayDebug('échec');
-        $this->initError('Echec authentification (token ' . $this->acti_token . ')');
+        $this->initError('Echec authentification (oldToken : '.$oldToken.' newToken :  ' . $this->acti_token . ')');
 
         if ($this->appleId == self::$default_ids['apple_id']) {
 //            global $gsx_logout_mail_send, $phantomAuthTest;
@@ -226,6 +228,7 @@ class GSX_v2 extends GSX_Const
         } else
             static::debug($this->appleId, 'deconnexion GSX de ' . $this->appleId . ' sans reconnexion possible');
 
+        BimpCore::addlog('Echec tentative reauthentification');
         $this->logged = false;
         $this->saveToken('acti', '');
 
@@ -531,7 +534,7 @@ class GSX_v2 extends GSX_Const
                 $msg = '';
                 switch ($error['code']) {
                     case 'SESSION_IDLE_TIMEOUT':
-                    case 'UNAUTHORIZED':
+//                    case 'UNAUTHORIZED':
                         // On tente une nouvelle authentification: 
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
@@ -543,7 +546,8 @@ class GSX_v2 extends GSX_Const
 //                            return false;ciommme ca on continue et on log
                         }
 
-                    case 'AUTH_TOKEN_STILL_ACTIVE':
+                    case 'AUTH_TOKEN_STILL_ACTIVE'://bizarre, on renvoie le même token
+                        return array('authToken' => $params['authToken']);
                     default:
                         BimpCore::addlog('Erreur req GSX code: '.$error['code'].' data : '. print_r($error,1));
                         $msg = $error['message'];

@@ -1225,8 +1225,11 @@ class BCT_ContratLine extends BimpObject
                     $interval = BimpTools::getDatesIntervalData($date_debut, $date_achat_start);
                     $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période partielle
                     $dt = new DateTime($date_debut);
-                    if ($nb_periods) {
+                    if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
+                    }
+                    elseif ($nb_periods < 0) {
+                        $dt->sub(new DateInterval('P' . (-$nb_periods * $periodicity) . 'M'));
                     }
                     $data['date_first_period_start'] = $dt->format('Y-m-d');
 

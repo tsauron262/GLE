@@ -448,27 +448,27 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
-        if ($this->isActionAllowed('resiliate') && $this->canSetAction('resiliate')) {
-            $buttons[] = array(
-                'label'   => 'Résilier',
-                'icon'    => 'fas_times-circle',
-                'onclick' => $this->getJsActionOnclick('resiliate', array(), array(
-                    'form_name'      => 'resiliate',
-                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onResiliateAbonnementFormSubmit($form, extra_data); }'
-                ))
-            );
-        }
-
-//        if ($this->isActionAllowed('renouv') && $this->canSetAction('renouv')) {
+//        if ($this->isActionAllowed('resiliate') && $this->canSetAction('resiliate')) {
 //            $buttons[] = array(
-//                'label'   => 'Renouveller',
-//                'icon'    => 'fas_redo',
-//                'onclick' => $this->getJsActionOnclick('renouv', array(), array(
-//                    'form_name'      => 'renouvellement',
-//                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onRenouvAbonnementFormSubmit($form, extra_data); }'
+//                'label'   => 'Résilier',
+//                'icon'    => 'fas_times-circle',
+//                'onclick' => $this->getJsActionOnclick('resiliate', array(), array(
+//                    'form_name'      => 'resiliate',
+//                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onResiliateAbonnementFormSubmit($form, extra_data); }'
 //                ))
 //            );
 //        }
+
+        if ($this->isActionAllowed('renouv') && $this->canSetAction('renouv')) {
+            $buttons[] = array(
+                'label'   => 'Renouveller',
+                'icon'    => 'fas_redo',
+                'onclick' => $this->getJsActionOnclick('renouv', array(), array(
+                    'form_name'      => 'renouvellement',
+                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onRenouvAbonnementFormSubmit($form, extra_data); }'
+                ))
+            );
+        }
 
         return $buttons;
     }

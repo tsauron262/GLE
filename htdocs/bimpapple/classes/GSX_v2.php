@@ -295,6 +295,8 @@ class GSX_v2 extends GSX_Const
         $is_default = ($this->appleId === self::$default_ids['apple_id']);
         if($is_default){
             global $conf;
+            $this->acti_token = $token;
+            $this->auth_token = $token;
            $this->auth_token = BimpCore::setConf('apple_token', $token, 'bimpapple', $conf->entity);
            return 1;
         }

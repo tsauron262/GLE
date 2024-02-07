@@ -1017,7 +1017,7 @@ class BCT_Contrat extends BimpDolObject
         $onclick = $this->getJsLoadCustomContent('renderFacturesTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
         $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
-        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= '<span class="btn btn-default refreshContratFacturesButton" onclick="' . $onclick . '">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';
@@ -1145,7 +1145,7 @@ class BCT_Contrat extends BimpDolObject
         $onclick = $this->getJsLoadCustomContent('renderAchatsTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
         $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
-        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= '<span class="btn btn-default refreshContratAchatsButton" onclick="' . $onclick . '">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';

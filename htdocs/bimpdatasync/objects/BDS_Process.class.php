@@ -435,6 +435,10 @@ class BDS_Process extends BimpObject
 
         if (!count($errors)) {
             $this->updateField('version', (int) $process::$current_version);
+        } else {
+            echo '<pre>';
+            print_r($errors);
+            exit;
         }
 
         return array(

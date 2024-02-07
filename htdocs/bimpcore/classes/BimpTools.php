@@ -1876,7 +1876,7 @@ class BimpTools
 
     public static function isNumericType($value)
     {
-        return (is_int($value) || is_float($value) || is_bool($value) || (is_string($value) && preg_match('/^[0-9]+[.,]*[0-9]*$/', $value)));
+        return ((is_int($value) || is_float($value) || is_bool($value) || (is_string($value) && preg_match('/^[0-9]+[.,]*[0-9]*$/', $value) && substr($value, -1) != '.')));
     }
 
     public static function isString($value)
@@ -2243,7 +2243,7 @@ class BimpTools
         return $dt->format('Y-m-d');
     }
 
-    public static function getDatesIntervalData($date_from, $date_to, $debug_echo = false)
+    public static function getDatesIntervalData($date_from, $date_to, $debug_echo = false, $full_days = true)
     {
         $data = array(
             'full_years'         => 0, // Nombre d'années complètes
@@ -2254,9 +2254,14 @@ class BimpTools
             'nb_monthes_decimal' => 0
         );
 
-        $dt_from = new DateTime(date('Y-m-d', strtotime($date_from)) . ' 00:00:00');
-        $dt_to = new DateTime(date('Y-m-d', strtotime($date_to)) . ' 00:00:00');
-        $dt_to->add(new DateInterval('P1D')); // Pour avoir le dernier jour complet
+        if ($full_days) {
+            $dt_from = new DateTime(date('Y-m-d', strtotime($date_from)) . ' 00:00:00');
+            $dt_to = new DateTime(date('Y-m-d', strtotime($date_to)) . ' 00:00:00');
+            $dt_to->add(new DateInterval('P1D')); // Pour avoir le dernier jour complet
+        } else {
+            $dt_from = new DateTime($date_from);
+            $dt_to = new DateTime($date_to);
+        }
 
         if ($debug_echo) {
             echo '<br/><br/>';
@@ -2542,10 +2547,13 @@ class BimpTools
         return $emails_str;
     }
 
-    public static function displayPhone($phone)
+    public static function displayPhone($phone, $with33 = false)
     {
+        $phone = str_replace('+33', '0', $phone);
         if (strlen($phone) == 10)
-            return implode(' ', str_split($phone, 2));
+            $phone = implode(' ', str_split($phone, 2));
+        if($with33 && stripos($phone, '0') === 0)
+            $phone = "+33 (0)".substr ($phone, 1);
         return $phone;
     }
 
@@ -3862,10 +3870,11 @@ class BimpTools
 //        if ($module == 'MULTICOMPANY' && BimpCore::isModeDev() && defined('MULTICOMPANY_TEST')) {
 //            return 1;
 //        }
+        
         global $conf;
 
         if (stripos($module, 'MAIN_MODULE_') === false)
-            $module = 'MAIN_MODULE_' . $module;
+            $module = 'MAIN_MODULE_' . strtoupper($module);
 
         if (isset($conf->global->$module) && $conf->global->$module)
             return 1;

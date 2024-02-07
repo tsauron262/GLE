@@ -739,6 +739,17 @@ class BS_SAV extends BimpObject
                     'success_callback' => $callback
                 ))
             );
+
+            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'contrefait\');';
+            $buttons[] = array(
+                'label'   => 'Générer Doc Irreparable contrefait',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'file_type' => 'contrefait'
+                        ), array(
+                    'success_callback' => $callback
+                ))
+            );
         }
 
         return $buttons;
@@ -1141,6 +1152,22 @@ class BS_SAV extends BimpObject
                         'icon'    => 'fas_hand-holding-usd',
                         'onclick' => $onclick
                     );
+                }
+                
+                
+
+                if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise') && !is_null($propal)) {
+                    if ($this->object_name === 'Bimp_Commande' || $this->object_name === 'Bimp_Propal' || (int) $this->getData('fk_statut') === 0) {
+                        $buttons[] = array(
+                            'label'       => 'Déduire un crédit disponible',
+                            'icon' => 'fas_file-import',
+                            'classes'     => array('btn', 'btn-default'),
+                            'onclick' => $propal->getJsActionOnclick('useRemise', array(), array(
+                                    'form_name' => 'use_remise'
+                            )
+                            )
+                        );
+                    }
                 }
 
                 // Payer facture: 
@@ -1546,20 +1573,27 @@ class BS_SAV extends BimpObject
         return 0;
     }
 
-    public function getSerial($first = false)
+    public function getSerial($first = false, $imeiPrivilegie = false)
     {
         if ($first) {
             $equip = $this->getChildObject("equipment");
             if ($equip->getData('old_serial') != '') {
                 $tabSerial = explode('<br/>', $equip->getData('old_serial'));
                 foreach ($tabSerial as $part) {
-                    if (stripos($part, 'Serial : ') !== false)
+                    if (!$imeiPrivilegie && stripos($part, 'Serial : ') !== false)
                         return str_replace('Serial : ', '', $part);
+                    if (stripos($part, 'Imei : ') !== false)
+                        return str_replace('Imei : ', '', $part);
                 }
             }
         }
 
         $equipment = $this->getChildObject('equipment');
+        if (BimpObject::objectLoaded($equipment) && $imeiPrivilegie && $equipment->getData('imei') != '' && $equipment->getData('imei') != 'n/a') {
+            return (string) $equipment->getData('imei');
+        }
+        
+        
         if (BimpObject::objectLoaded($equipment)) {
             return (string) $equipment->getData('serial');
         }
@@ -2447,21 +2481,21 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $html .= '<strong>AppleId</strong>: ' . $gsx->appleId . '<br/>';
         if ($gsx->appleId === GSX_v2::$default_ids['apple_id']) {
             $html .= '<strong>Mot de passe</strong>: ' . GSX_v2::$default_ids['apple_pword'];
-            $html .= '<br/>Utiliser le numéro terminant par <strong>37</strong>';
-
-            $html .= '<script>'
-                    . 'var idMaxMesg = 0;'
-                    . 'var boucle = true;'
-                    . 'function checkCode(){'
-                    . ' if(boucle){'
-                    . '     setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
-                    . ' }'
-                    . '}'
-                    . 'checkCode();'
-                    . 'bimpModal.$modal.on("hidden.bs.modal", function (e) {'
-                    . ' boucle = false;'
-                    . '});'
-                    . '</script>';
+//            $html .= '<br/>Utiliser le numéro terminant par <strong>37</strong>';
+//
+//            $html .= '<script>'
+//                    . 'var idMaxMesg = 0;'
+//                    . 'var boucle = true;'
+//                    . 'function checkCode(){'
+//                    . ' if(boucle){'
+//                    . '     setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+//                    . ' }'
+//                    . '}'
+//                    . 'checkCode();'
+//                    . 'bimpModal.$modal.on("hidden.bs.modal", function (e) {'
+//                    . ' boucle = false;'
+//                    . '});'
+//                    . '</script>';
         }
 
         $html .= '<p class="small" style="text-align: center; margin-top: 15px">';
@@ -4296,6 +4330,28 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $mail_msg .= 'Merci de votre compréhension. <br/><br/>';
                 }
                 break;
+            case 'restitution':
+                    $contact_pref = 1; // On force l'envoi par e-mail
+
+                    $subject = " Bon de restitution ".$this->getRef();
+
+                    $mail_msg = 'Bonjour, ' . "\n\n";
+                    $mail_msg .= 'Vous trouverez ci-joint votre bon de restitution ' . $this->getLink(array(), 'public') . " \n\n";
+                    $mail_msg .= 'Merci d\'avoir choisi ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n";
+                    $mail_msg .= 'Cordialement';
+                    
+                    $files = array();
+                    
+                    $dir = $this->getFilesDir();
+                    $file_name = 'Restitution_' . dol_sanitizeFileName($this->getRef()) . '.pdf';
+                    $fileRest = $dir . $file_name;
+                    if (is_file($fileRest)) {
+                        $files[] = array($fileRest, 'application/pdf', $file_name);
+                    }
+                    if(!count($files))
+                        $errors[] = 'Bon de restitution inexistant ';
+                
+                break;
         }
 
         if (count($errors)) {
@@ -4455,7 +4511,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     {
         $url = '';
 
-        if (!in_array($file_type, array('pc', 'destruction', 'destruction2', 'pret', 'europe', 'irreparable'))) {
+        if (!in_array($file_type, array('pc', 'destruction', 'destruction2', 'pret', 'europe', 'irreparable', 'contrefait'))) {
             $errors[] = 'Type de fichier PDF invalide';
             return '';
         }
@@ -4492,6 +4548,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     break;
                 case 'irreparable':
                     $ref = 'Obsolete-' . $this->getData('ref');
+                    break;
+                case 'contrefait':
+                    $ref = 'Contrefait-' . $this->getData('ref');
                     break;
             }
 
@@ -5575,9 +5634,43 @@ ORDER BY a.val_max DESC");
                             $new_propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $new_id_propal);
 
                             $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
-                            $new_propal->dol_object->addline(
-                                    "Machine(s) : " . $this->getNomMachine() .
-                                    "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, BimpCore::getConf('id_prod_refus', '', 'bimpsupport'), $client->dol_object->remise_percent, 'HT', null, null, 1);
+                            
+                            
+//                            if (!BimpObject::objectLoaded($line)) {
+                                $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+//                            }
+                            
+                            $line->validateArray(array(
+                                'id_obj'             => (int) $new_id_propal,
+                                'type'               => BS_SavPropalLine::LINE_PRODUCT,
+                                'deletable'          => 0,
+                                'editable'           => 0,
+                                'remisable'          => 0,
+                            ));
+
+                            $line->desc = "Machine(s) : " . $this->getNomMachine() .
+                                    "\n" . "Frais de gestion devis refusé.";
+                            $line->id_product = (int) BimpCore::getConf('id_prod_refus', '', 'bimpsupport');
+                            $line->pu_ht = $frais / 1.20;
+                            $line->pa_ht = (float) 0;
+                            $line->qty = 1;
+                            $line->tva_tx = 20;
+
+                            $line_warnings = array();
+                            $error_label = '';
+                            if (!$line->isLoaded()) {
+                                $error_label = 'création';
+                                $line_errors = $line->create($line_warnings, true);
+                            } else {
+                                $error_label = 'mise à jour';
+                                $line_errors = $line->update($line_warnings, true);
+                            }
+                            
+                            
+                            
+//                            $new_propal->dol_object->addline(
+//                                    "Machine(s) : " . $this->getNomMachine() .
+//                                    "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, BimpCore::getConf('id_prod_refus', '', 'bimpsupport'), $client->dol_object->remise_percent, 'HT', null, null, 1);
 
                             $new_propal->fetch($new_propal->id);
                             $new_propal->dol_object->valid($user);
@@ -6010,7 +6103,9 @@ ORDER BY a.val_max DESC");
                                         }
 
                                         // Création des lignes: 
-                                        $lines_errors = $bimpFacture->createLinesFromOrigin($propal);
+                                        $lines_errors = $bimpFacture->createLinesFromOrigin($propal, array(
+                                            'check_product' => false
+                                        ));
 
                                         if (count($lines_errors)) {
                                             $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de l\'ajout des lignes à la facture');
@@ -6036,7 +6131,7 @@ ORDER BY a.val_max DESC");
 
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                                 $validate_errors = BimpTools::getErrorsFromDolObject($bimpFacture->dol_object);
-                                                $validate_errors = BimpTools::merge_array($validate_errors, BimpTools::getErrorsFromDolObject($bimpFacture->dol_object));
+//                                                $validate_errors = BimpTools::merge_array($validate_errors, BimpTools::getErrorsFromDolObject($bimpFacture->dol_object));
 
                                                 if (empty($validate_errors)) {
                                                     $validate_errors[] = 'Erreur inconnue';

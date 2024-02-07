@@ -15,12 +15,14 @@ class PropositionLocationPDF extends BimpDocumentPDF
 
     # Données: 
     public $title;
+    public $sub_title = '';
     public $montant_materiels;
     public $montant_services;
     public $duration;
     public $periodicity;
     public $mode_calcul;
     public $lines;
+    public $client_data = array();
     public $options = array();
 
     public function __construct($data)
@@ -28,8 +30,13 @@ class PropositionLocationPDF extends BimpDocumentPDF
         $this->title = BimpTools::getArrayValueFromPath($data, 'title', '');
 
         if (!$this->title) {
-            $this->title = 'Proposition de location de vos équipements informatiques';
+            $this->title = 'Proposition de location de vos équipements informatiquesss';
         }
+
+        $this->sub_title = '(Proposition non définitive)';
+
+        $this->client_data = BimpTools::getArrayValueFromPath($data, 'client_data', array());
+
         $this->montant_materiels = (float) BimpTools::getArrayValueFromPath($data, 'montant_materiels', 0);
         $this->montant_services = (float) BimpTools::getArrayValueFromPath($data, 'montant_services', 0);
 
@@ -80,7 +87,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
             $logo_height = $tabTaille[1];
         }
 
-        $this->pdf->topMargin = 44;
+        $this->pdf->topMargin = 30;
 
         $this->header_vars = array(
             'primary_color' => $this->primary,
@@ -102,12 +109,17 @@ class PropositionLocationPDF extends BimpDocumentPDF
 
     public function getTargetInfosHtml()
     {
-        return '';
-    }
+        $html = '';
 
-    public function renderDocInfos()
-    {
-        
+        if (isset($this->client_data['nom']) && $this->client_data['nom']) {
+            $html .= '<b>' . $this->client_data['nom'] . '</b>';
+
+            if (isset($this->client_data['full_address']) && $this->client_data['full_address']) {
+                $html .= '<br/>' . $this->client_data['full_address'];
+            }
+        }
+
+        return $html;
     }
 
     public function renderTop()
@@ -118,8 +130,16 @@ class PropositionLocationPDF extends BimpDocumentPDF
 
         $html = '';
 
-        $html .= '<div style="text-align: center;font-size: 12px; font-weight: bold; color: #' . $this->primary . '">';
+        $html .= '<div style="text-align: center">';
+        $html .= '<span style="font-size: 12px; font-weight: bold; color: #' . $this->primary . '">';
         $html .= $this->title;
+        $html .= '</span>';
+        
+        if ($this->sub_title) {
+            $html .= '<br/><span style="font-size: 8px">';
+            $html .= $this->sub_title;
+            $html .= '</span>';
+        }
         $html .= '</div>';
 
         $html .= '<p style="font-size: 8px">';
@@ -201,10 +221,10 @@ class PropositionLocationPDF extends BimpDocumentPDF
                 $row['desc'] = array(
                     'colspan' => 99,
                     'style'   => ' background-color: #F5F5F5;',
-                    'content' => BimpTools::getArrayValueFromPath($line, 'label', '')
+                    'content' => self::cleanHtml(BimpTools::getArrayValueFromPath($line, 'label', ''))
                 );
             } else {
-                $row['desc'] = BimpTools::getArrayValueFromPath($line, 'label', '');
+                $row['desc'] = self::cleanHtml(BimpTools::getArrayValueFromPath($line, 'label', ''));
                 $row['qte'] = (float) BimpTools::getArrayValueFromPath($line, 'qty', 0);
             }
 
@@ -253,7 +273,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
         $marge = BF_Demande::getDefaultMargePercent($total_demande);
 
         $values = BFTools::getCalcValues($this->montant_materiels, $this->montant_services, $tx_cession, $nb_mois, $marge / 100, $vr_achat, $mode_calcul, $periodicity, $this->errors);
-        
+
         $has_evo = (int) BimpTools::getArrayValueFromPath($this->options, 'formules/evo', 1);
         $has_dyn = (int) BimpTools::getArrayValueFromPath($this->options, 'formules/dyn', 1);
 

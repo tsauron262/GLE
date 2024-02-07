@@ -13,8 +13,8 @@ fields:
         type: bool
         default_value: 0
         
-    categorie: unset
-    collection: unset
-    nature: unset
-    famille: unset
-    gamme: unset
+#    categorie: unset
+#    collection: unset
+#    nature: unset
+#    famille: unset
+#    gamme: unset

@@ -128,11 +128,11 @@ class BimpController
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);
         }
-        
+
         $main_object = $this->config->get('main_object', '');
         $objects = $this->config->getCompiledParams('objects');
-        foreach($objects as $name => $obj){
-            if($name == $main_object || !$main_object){
+        foreach ($objects as $name => $obj) {
+            if ($name == $main_object || !$main_object) {
                 $this->main_object = $obj;
                 break;
             }
@@ -451,9 +451,9 @@ class BimpController
         }
 
         echo '<div class="bimp_controller_content">' . "\n";
-        
+
         $dropZoneFile = false;
-        if(BimpCore::getConf('use_drag_upload') && $this->main_object && is_a($this->main_object, 'BimpObject') && $this->main_object->isLoaded() && $this->main_object->getFilesDir() != ''){
+        if (BimpCore::getConf('use_drag_upload') && $this->main_object && is_a($this->main_object, 'BimpObject') && $this->main_object->isLoaded() && $this->main_object->getFilesDir() != '') {
             $dropZoneFile = true;
             $fil_dir = str_replace(DOL_DATA_ROOT, '', $this->main_object->getFilesDir());
             $html = '<div class="bimp_drop_files_container allPage"';
@@ -466,7 +466,7 @@ class BimpController
 
             $html .= '<div class="bimp_drop_files_area">';
             $html .= '<div class="drop_files"></div>';
-    //        $html .= BimpRender::rendercontentLoading('Envoi des fichiers en cours');
+            //        $html .= BimpRender::rendercontentLoading('Envoi des fichiers en cours');
             echo $html;
         }
 
@@ -523,8 +523,8 @@ class BimpController
         if ($display_footer) {
             $this->displayFooter();
         }
-        
-        if($dropZoneFile){
+
+        if ($dropZoneFile) {
             echo '</div></div>';
         }
     }
@@ -1095,7 +1095,8 @@ class BimpController
                     $errors = $result['errors'];
                 }
 
-                $errors = BimpTools::merge_array($errors, BimpCore::unlockObject($object_module, $object_name, $id_object));
+                if ($id_object > 0)
+                    $errors = BimpTools::merge_array($errors, BimpCore::unlockObject($object_module, $object_name, $id_object));
             }
         }
 
@@ -1239,7 +1240,7 @@ class BimpController
             $errors[] = 'Type de l\'objet absent';
         }
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 10)';
         }
         if (is_null($position) || !$position) {
             $errors[] = 'Position absente ou invalide';
@@ -1283,7 +1284,7 @@ class BimpController
         }
 
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 11)';
         }
 
         if (is_null($field) || !$field) {
@@ -1334,7 +1335,7 @@ class BimpController
         }
 
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 12)';
         }
 
         if (is_null($field) || !$field) {
@@ -1554,7 +1555,7 @@ class BimpController
             $errors[] = 'Type d\'objet absent';
         }
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 13)';
         }
 
         if (!count($errors)) {
@@ -1610,7 +1611,7 @@ class BimpController
             $errors[] = 'Type de l\'objet absent';
         }
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 14)';
         }
         if (is_null($field) || !$field) {
             $errors[] = 'Nom du champ absent';
@@ -1654,7 +1655,7 @@ class BimpController
             $errors[] = 'Type d\'object absent';
         }
         if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 15)';
         }
 
         if (!count($errors)) {
@@ -1693,7 +1694,7 @@ class BimpController
         }
 
         if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 16)';
         }
 
         if (!count($errors)) {
@@ -2200,10 +2201,10 @@ class BimpController
             $file_name = $file['name'];
             $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
 
-            if(!$specifiquePath)// Ajout d'un tms pour éviter un potentiel conflit de nom
+            if (!$specifiquePath)// Ajout d'un tms pour éviter un potentiel conflit de nom
                 $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '_tms' . time() . '.' . $file_ext;
             else
-            $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
+                $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
 
             if (!move_uploaded_file($file['tmp_name'], DOL_DATA_ROOT . '/' . $files_dir . '/' . $new_file_name)) {
                 $warnings[] = 'Echec de l\'enregistrement du fichier "' . $file_name . '"';
@@ -2211,9 +2212,16 @@ class BimpController
                 $url = '';
                 $item = '';
 
+                $entity = 1;
+                if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $files_dir, $matches) && is_numeric($matches[1])) {
+                    $entity = $matches[1];
+                    $files_dir = str_replace('/' . $entity . '/', '', $files_dir);
+                }
                 if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $files_dir, $matches)) {
                     $is_image = in_array($file_ext, array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif'));
-                    $url = DOL_URL_ROOT . '/' . ($is_image ? 'viewimage' : 'document') . '.php?modulepart=' . $matches[1] . '&file=' . urlencode(($matches[2] ? $matches[2] . '/' : '') . $new_file_name);
+                    $module = $matches[1];
+                    $fileName = urlencode(($matches[2] ? $matches[2] . '/' : '') . $new_file_name);
+                    $url = DOL_URL_ROOT . '/' . ($is_image ? 'viewimage' : 'document') . '.php?' . ($entity ? 'entity=' . $entity . '&' : '') . 'modulepart=' . $module . '&file=' . $fileName;
 
                     $item = '<div class="file_item" data-file_name="' . $new_file_name . '">';
                     if ($field_name) {
@@ -2496,7 +2504,7 @@ class BimpController
         }
 
         if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 17)';
         }
 
         if (!count($errors)) {
@@ -2820,7 +2828,7 @@ class BimpController
         }
 
         if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
+            $errors[] = 'ID de l\'objet absent (Err 18)';
         }
 
         if (is_null($status)) {
@@ -3355,12 +3363,19 @@ class BimpController
         $dir .= $year . '/';
         $files = scandir($dir, SCANDIR_SORT_DESCENDING);
         $logs = '';
+        
+        $days = array();
 
         foreach ($files as $entry) {
             if (is_file($dir . $entry)) {
-                $logs .= '<br/><b>Le ' . substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2) . ' : </b><br/>';
-                $logs .= nl2br(file_get_contents($dir . $entry));
+                $days[substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2)] .= nl2br(file_get_contents($dir . $entry));
+
             }
+        }
+        
+        foreach($days as $date => $log){
+            $logs .= '<br/><b>Le ' . $date . ' : </b><br/>';
+            $logs .= $log;
         }
 
         if (!$logs) {

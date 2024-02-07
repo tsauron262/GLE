@@ -23,6 +23,8 @@ class BimpMail extends BimpMailCore
 
     public function setFromType($type)
     {
+        $this->type = $type;
+        
         if ($type == 'actimag' || $type == 'ldlc') {
             $this->title = 'ACTIMAG';
             $this->subtitle = '';
@@ -93,7 +95,17 @@ class BimpMail extends BimpMailCore
 
     function getFooter()
     {
-        $html = '</div>';
+        $html = '';
+        
+        if ($this->type === 'ldlc' || $this->type === 'actimag') {
+            $html .= '<div style="margin-top: 50px">';
+            $html .= '<a href="https://www.ldlc.com/aide/50-la-garantie-ldlc/">';
+            $html .= '<img width="150px" height="auto" src="https://media.ldlc.com/cms/LDLC_com/bloc_droit_home/garantie.gif"/>';
+            $html .= '</a>';
+            $html .= '</div>';
+        }
+        
+        $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
 

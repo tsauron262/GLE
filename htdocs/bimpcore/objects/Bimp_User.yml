@@ -209,6 +209,7 @@ fields:
     apple_centre: 
         label: Centre SAV
         dol_extra_field: 1
+        help: Séparé par un espace
     object_header_locked: 
         label: Vérouiller les en-têtes
         type: bool
@@ -361,7 +362,21 @@ forms:
                   type: select
                   options: 
                       callback: getUserGroupsArray
-                      
+            - custom: 1
+              show: 
+                  callback: 
+                      is_module_active: MULTICOMPANY
+              label: Entités
+              input_name: entities
+              data_type: id
+              input: 
+                  type: check_list
+                  items: 
+                      callback: 
+                          method: getEntitiesCacheArray
+                          params: 
+                              - 0
+                              
     disponibilities: 
         rows: 
             - custom: 1

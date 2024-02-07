@@ -582,19 +582,11 @@ class BL_CommandeShipment extends BimpObject
 
         foreach ($commande->getLines('not_text') as $line) {
             $dolLine = $line->getChildObject('line');
-            if(stripos($dolLine->desc, 'Acompte') === false)
+            if (stripos($dolLine->desc, 'Acompte') === false)
                 $total_ht += (float) $line->getShipmentTotalHT($this->id);
         }
 
         return $total_ht;
-    }
-    
-    public function displayTotalWithNonAcompte(){
-        global $modeCSV;
-        if ($modeCSV)
-            return $this->getTotalHT(false);
-        else
-            return BimpTools::displayMoneyValue($this->getTotalHT(false));
     }
 
     public function getTotalTTC()
@@ -772,6 +764,15 @@ class BL_CommandeShipment extends BimpObject
     }
 
     // Affichages: 
+
+    public function displayTotalWithNonAcompte()
+    {
+        global $modeCSV;
+        if ($modeCSV)
+            return $this->getTotalHT(false);
+        else
+            return BimpTools::displayMoneyValue($this->getTotalHT(false));
+    }
 
     public function displayContact()
     {
@@ -1098,7 +1099,7 @@ class BL_CommandeShipment extends BimpObject
                     if (!$this->isLoaded() && (int) $line->getData('id_contrat_line_export')) {
                         continue;
                     }
-                    
+
                     $is_return = ((float) $line->getFullQty() < 0);
                     $qty_input_name = 'line_' . $line->id . '_qty';
                     $include_input_name = 'line_' . $line->id . '_include';
@@ -2100,7 +2101,7 @@ class BL_CommandeShipment extends BimpObject
                 }
             }
         }
-        
+
         if (count($errors)) {
             return $errors;
         }
@@ -3021,7 +3022,7 @@ class BL_CommandeShipment extends BimpObject
                 return $errors;
             }
 
-            
+
             $id_entrepot = (int) $commande->getData('entrepot');
             if (!$id_entrepot && (int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore')) {
                 $errors[] = 'ID de l\'entrepot absent';

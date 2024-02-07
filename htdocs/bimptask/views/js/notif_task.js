@@ -303,6 +303,7 @@ class notif_task extends AbstractNotification {
             });
 
             n.onclick = function () {
+                window.parent.parent.focus();
                 if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1)
                     $('#' + bn.dropdown_id).trigger('click');
             }
@@ -340,7 +341,9 @@ class notif_task extends AbstractNotification {
             });
 
             n.onclick = function () {
-                $('#' + bn.dropdown_id).trigger('click');
+                window.parent.parent.focus();
+                if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1)
+                    $('#' + bn.dropdown_id).trigger('click');
             };
         }
     }

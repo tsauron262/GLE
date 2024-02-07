@@ -196,7 +196,7 @@ fields:
         label: Status forcés
         type: json
     delivery_type: 
-        label: Addresse de livraison
+        label: Adresse de livraison
         type: int
         values: 
             array: delivery_types

@@ -146,7 +146,7 @@ fields:
     stock: 
         label: Stock réel
         dol_prop: stock_reel
-        type: int
+        type: float
         default_value: 0
         
     barcode: 
@@ -197,7 +197,7 @@ fields:
         default_value: 0
         
     cur_pa_ht: 
-        label: Prix d'achat actuel
+        label: Prix d'achat actuel (old)
         type: money
         default_value: 0
         
@@ -207,7 +207,7 @@ fields:
         default_value: 0
         
     cost_price_percent:
-        label: Pourcentage du coût de reviens
+        label: Pourcentage du coût de revient
         type: percent
         default_value: 0
         input:
@@ -703,6 +703,7 @@ forms:
             - field: type2
             - field: type_compta
             - field: barcode
+            - field: weight
             - field: customcode
             - field: accountancy_code_buy
             - field: accountancy_code_sell
@@ -1000,6 +1001,12 @@ fields_tables:
             - label: Prix d'achat
               value: 
                   callback: getPaBundle
+            - label: Marge
+              value: 
+                  callback: getMargeBundle
+            - label: Remise Bundle
+              value: 
+                  callback: getRemiseBundle
         
             
     prices_buy: 
@@ -1100,6 +1107,12 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: infos_complementaires
+                      
+                - type: fields_table
+                  col_lg: 5
+                  col_md: 5
+                  fields_table:
+                      name: measures
                       
                 - type: fields_table
                   col_lg: 5
@@ -1302,6 +1315,18 @@ lists_cols:
                 method: getCodeComptableAchat
                 params:
                     - 3
+    cur_pa_ht2:
+        label: Prix d'achat actuel
+        value:
+            callback: 
+                method: displayCurrentPaHt
+                params:
+                    - 0
+                    
+    alert_bundle:
+        label: Alert bundle
+        value:
+            callback: getAlertBundle
                     
 lists: 
     default: 

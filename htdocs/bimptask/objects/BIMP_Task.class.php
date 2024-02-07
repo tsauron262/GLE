@@ -1,15 +1,16 @@
 <?php
-include_once DOL_DOCUMENT_ROOT.'/bimpcore/objects/BimpAbstractFollow.class.php';
+
+include_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpAbstractFollow.class.php';
 
 class BIMP_Task extends BimpAbstractFollow
 {
 
     public static $valSrc = array(); // définie dans l'extends entity
     public static $types_manuel = array(
-        'dev'        => 'Développement',
-        'adminVente' => 'Administration des Ventes',
+        'dev'         => 'Développement',
+        'adminVente'  => 'Administration des Ventes',
         'dispatchMan' => 'Dispatch Manuel',
-        'sav' => 'SAV'
+        'sav'         => 'SAV'
     );
     public static $srcNotAttribute = array(/* 'sms-apple@bimp-groupe.net' */);
     public static $nbNonLu = 0;
@@ -27,48 +28,23 @@ class BIMP_Task extends BimpAbstractFollow
         20 => array('label' => "Urgente (Niveau 1)", 'classes' => array('danger'))
     );
     public static $sous_types = array(
-        'dev' => array(
+        'dev'         => array(
             'bug' => array('label' => 'Bug'),
             'dev' => array('label' => 'Développement')
         ),
         'dispatchMan' => array(
-            'hotline' => array('label' => 'Hot-Line'),
+            'hotline'  => array('label' => 'Hot-Line'),
             'commande' => array('label' => 'Commande'),
-            'commerc' => array('label' => 'Service Commercial'),
-            'tech' => array('label' => 'Service Technique')
+            'commerc'  => array('label' => 'Service Commercial'),
+            'tech'     => array('label' => 'Service Technique')
         ),
-        'sav' => array(
+        'sav'         => array(
             'autre' => array('label' => 'Autre')
         )
     );
     private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
 
-    
-    
     // Droits users: 
-
-    public function getUserRight($right)
-    {
-        global $user;
-        if ($user->admin) {
-            return 1;
-        }
-
-        if (!$this->isLoaded()) {
-            $classRight = BimpTools::getPostFieldValue('type_manuel', null);
-            if (is_null($classRight))
-                return 1;
-        } else
-            $classRight = $this->getType();
-
-        if ($this->getData("id_user_owner") == $user->id)
-            return 1;
-
-        if ($this->getData("user_create") == $user->id/* && $right == 'read' */) // => Pourquoi? le créateur devrait pouvoir modifier la tâche
-            return 1;
-
-        return $user->rights->bimptask->$classRight->$right;
-    }
 
     public function canView()
     {
@@ -155,12 +131,12 @@ class BIMP_Task extends BimpAbstractFollow
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if($action == 'majRight'){
+        if ($action == 'majRight') {
             global $user;
-            if($user->admin)
+            if ($user->admin)
                 return 1;
         }
-        
+
         if (!$this->isLoaded($errors)) {
             return 0;
         }
@@ -200,20 +176,20 @@ class BIMP_Task extends BimpAbstractFollow
     }
 
     // Getters params: 
-    
-   public function getListHeaderExtraBtn()
-   {
-       $buttons = array();
-       global $user;
-       if($user->admin){
+
+    public function getListHeaderExtraBtn()
+    {
+        $buttons = array();
+        global $user;
+        if ($user->admin) {
             $buttons[] = array(
                 'label'   => 'Maj droits',
                 'icon'    => 'fas_bars',
                 'onclick' => $this->getJsActionOnclick('majRight')
             );
-       }
+        }
         return $buttons;
-   }
+    }
 
     public function getButtons()
     {
@@ -292,23 +268,23 @@ class BIMP_Task extends BimpAbstractFollow
                 'onclick' => $this->getJsActionOnclick('reopen', array(), array())
             );
         }
-        
-        
+
+
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
-            $buttons[] = array(
-                'label'   => 'Message autheur',
-                'icon'    => 'far_paper-plane',
-                'onclick' => $note->getJsActionOnclick('repondre', array(
-                    "obj_type"      => "bimp_object",
-                    "obj_module"    => $this->module,
-                    "obj_name"      => $this->object_name,
-                    "id_obj"        => $this->id,
-                    "type_dest"     => $note::BN_DEST_USER,
-                    "fk_user_dest" => $this->getData('user_create')
-                        ), array(
-                    'form_name' => 'rep'
-                ))
-            );
+        $buttons[] = array(
+            'label'   => 'Message autheur',
+            'icon'    => 'far_paper-plane',
+            'onclick' => $note->getJsActionOnclick('repondre', array(
+                "obj_type"     => "bimp_object",
+                "obj_module"   => $this->module,
+                "obj_name"     => $this->object_name,
+                "id_obj"       => $this->id,
+                "type_dest"    => $note::BN_DEST_USER,
+                "fk_user_dest" => $this->getData('user_create')
+                    ), array(
+                'form_name' => 'rep'
+            ))
+        );
         return $buttons;
     }
 
@@ -371,7 +347,7 @@ class BIMP_Task extends BimpAbstractFollow
         if (isset($type) && self::$sous_types[$type])
             return self::$sous_types[$type];
 
-        return array('nc'=>'Divers');
+        return array('nc' => 'Divers');
     }
 
     public function getAllSousTypesArray()
@@ -425,6 +401,29 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Getters données: 
 
+    public function getUserRight($right)
+    {
+        global $user;
+        if ($user->admin) {
+            return 1;
+        }
+
+        if (!$this->isLoaded()) {
+            $classRight = BimpTools::getPostFieldValue('type_manuel', null);
+            if (is_null($classRight))
+                return 1;
+        } else
+            $classRight = $this->getType();
+
+        if ($this->getData("id_user_owner") == $user->id)
+            return 1;
+
+        if ($this->getData("user_create") == $user->id/* && $right == 'read' */) // => Pourquoi? le créateur devrait pouvoir modifier la tâche
+            return 1;
+
+        return $user->rights->bimptask->$classRight->$right;
+    }
+
     public function getParentTask()
     {
         if ((int) $this->getData('id_task')) {
@@ -445,7 +444,6 @@ class BIMP_Task extends BimpAbstractFollow
         global $user;
         $users[$this->getData('user_create')] = $this->getChildObject('user_create');
 
-        
         BimpObject::loadClass('bimpcore', 'BimpLink');
         $users = BimpTools::merge_array($users, BimpLink::getUsersLinked($this), true);
 
@@ -575,6 +573,7 @@ class BIMP_Task extends BimpAbstractFollow
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('id', 'ASC', 'a');
+        $sql .= BimpTools::getSqlLimit(30);
 
         $rows = $bdb->executeS($sql, 'array');
 
@@ -950,10 +949,10 @@ class BIMP_Task extends BimpAbstractFollow
             $mails[] = BimpTools::getUserEmailOrSuperiorEmail($userN->id);
         }
         $to = implode(',', $mails);
-        
+
         $this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files);
-        
-        foreach($this->getEmailFollow() as $to){//pour ne pas partager email et lien
+
+        foreach ($this->getEmailFollow() as $to) {//pour ne pas partager email et lien
             $this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files, false);
         }
     }
@@ -965,9 +964,9 @@ class BIMP_Task extends BimpAbstractFollow
 
         $msg = str_replace("<br>", "<br/>", $msg);
 
-        $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail', null, 'bimptask') . $this->id . '<br/>'. $sep . '<br/><br/>';
+        $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail', null, 'bimptask') . $this->id . '<br/>' . $sep . '<br/><br/>';
 
-        if($withLink)
+        if ($withLink)
             $html .= '<h3>' . $this->getLink(array('syntaxe' => 'Tâche "<subj>"')) . '</h3>';
         else
             $html .= '<h3>' . $this->getData('subj') . '</h3>';
@@ -1033,8 +1032,9 @@ class BIMP_Task extends BimpAbstractFollow
             $this->addNote($txt, null, 0, 0, $src, ($user->id == $id_user_def ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), BimpNote::BN_DEST_USER, null, (int) $userT->id, 1);
         }
     }
-    
-    public function actionMajRight(){
+
+    public function actionMajRight()
+    {
         static::majRight();
         array('errors' => array(), 'warnings' => array());
     }
@@ -1096,7 +1096,7 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Actions: 
 
-    public function actionClose($data, &$success)
+    public function actionClose($data, &$success = '')
     {
         $errors = $warnings = array();
         $success = "Tâche fermée";
@@ -1106,9 +1106,10 @@ class BIMP_Task extends BimpAbstractFollow
         if (!count($errors)) {
             $success_callback = self::$jsReload;
 
+            $close_label = BimpTools::getArrayValueFromPath($data, 'close_label', 'Tâche terminée');
             $comment = BimpTools::getArrayValueFromPath($data, 'comment', '');
 
-            $msg = 'Tâche terminée' . ($comment ? '<br/><b>Commentaire : </b>' . $comment : '');
+            $msg = $close_label . ($comment ? '<br/><b>Commentaire : </b>' . $comment : '');
             $this->addObjectLog($msg);
 
             if ((int) BimpTools::getArrayValueFromPath($data, 'notify', 0)) {
@@ -1241,22 +1242,24 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Overrides: 
 
-    public function fetch($id, $parent = null)
+    public function checkObject($context = '', $field = '')
     {
-        $errors = parent::fetch($id, $parent);
-
-        $test = $this->getData("test_ferme");
-        if ($test != "" && $this->getData("status") != 4) {
-            $tabTest = explode(":", $test);
-            if (count($tabTest) == 2) {
-                $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . $tabTest[0] . " WHERE " . $tabTest[1]);
-                if ($this->db->db->num_rows($sql) > 0) {
-                    $inut = "";
-                    $this->actionClose(array(), $inut);
+        if ($context === 'fetch') {
+            $test = $this->getData("test_ferme");
+            if ($test != "" && (int) $this->getData("status") != 4) {
+                $tabTest = explode(":", $test);
+                if (count($tabTest) == 2) {
+                    $sql = $this->db->db->query("SELECT * FROM " . MAIN_DB_PREFIX . $tabTest[0] . " WHERE " . $tabTest[1]);
+                    if ($this->db->db->num_rows($sql) > 0) {
+                        $this->actionClose(array(
+                            'close_label' => 'Tâche fermée automatiquement'
+                        ));
+                    }
                 }
             }
         }
-        return $errors;
+        
+        parent::checkObject($context, $field);
     }
 
     public function create(&$warnings = array(), $force_create = false)
@@ -1316,12 +1319,10 @@ class BIMP_Task extends BimpAbstractFollow
     }
 }
 
-
-
 BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 global $tabCentre;
-if(is_array($tabCentre)){
-    foreach($tabCentre as $code => $centre){
-        BIMP_Task::$sous_types['sav'][$code] = array('label' => 'SAV'.$code);
+if (is_array($tabCentre)) {
+    foreach ($tabCentre as $code => $centre) {
+        BIMP_Task::$sous_types['sav'][$code] = array('label' => 'SAV' . $code);
     }
 }

@@ -38,8 +38,8 @@ class AbstractNotification {
 //        this.parent_selector = 'div.dropdown.modifDropdown:last';
         this.parent_selector = 'div.login_block_other';
 //        this.display_notification = true;
-        if (bimp_storage.get(this.id_notification) === null)
-            bimp_storage.set(this.id_notification, this.id_max);
+//        if (bimp_storage.get(this.id_notification) === null)
+//            bimp_storage.set(this.id_notification, this.id_max);
         
         this.init();
     }
@@ -141,65 +141,114 @@ class AbstractNotification {
      * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
      */
     addElement(element) {
-        var id_max_changed = 0;
-        var to_display = '';
-//        console.log(this.content);
-        if (typeof element.content === "object" && element.content.length > 0) {
+//        console.log(element);
+//            console.log(typeof element.content, this.id_notification + "_content", element.content.length);
+        if (typeof element.content === "object" && (element.content.length > 0 || Object.keys(element.content).length > 0)) {
 
-            this.content = this.content.concat(element.content);
-            var nb_unread = 0;
-
-            if (element.content !== null && this.isMultiple(element.content))
-                var is_multiple = true;
+            //this.content = this.content.concat(element.content);
+            
+            if(this.id_max == 0)
+                var add = 0;
             else
-                var is_multiple = false;
-
-            for (var i in element.content) {
-
-                // Redéfinition de id max
-                if (parseInt(element.content[i].id) > this.id_max) {
-                    this.id_max = parseInt(element.content[i].id);
-                    id_max_changed = 1;
-                }
-
-                // Si la fonction n'est pas implémenter dans la classe fille: is_new = 1
-                var is_new = this.isNew(element.content[i]);
-
-                // Clé utilisé pour identifier les "groupes de message" (ex: conversation)
-                var key = this.getKey(element.content[i]);
-
-                // Affichage dans le topmenu
-                to_display = this.formatElement(element.content[i], key);
-                this.addInList(to_display, element.content[i].url, element.content[i], key, element.content[i].append);
-
-                // Augmentation du nombre dans le span rouge
-                if (is_new === 1) {
-
-                    // Affichage dans la notification
-                    if (!is_multiple && id_max_changed) {
-                        var global_id_max = parseInt(bimp_storage.get(this.id_notification));
-                        if (global_id_max < this.id_max) {
-                            bimp_storage.set(this.id_notification, this.id_max);
-                            this.displayNotification(element.content[i]);
-                        }
-                    }
-
-                    nb_unread++;
-                }
-            }
-
-            if (is_multiple && id_max_changed) {
-                var global_id_max = parseInt(bimp_storage.get(this.id_notification));
-                if (global_id_max < this.id_max) {
-                    bimp_storage.set(this.id_notification, this.id_max);
-                    this.displayMultipleNotification(element.content);
-                }
-            }
-
-
-            this.elementAdded(nb_unread);
+                var add = 1;
+            bimp_storage.set(this.id_notification + "_content", element.content, add);
+            this.traiteStorage();
+//            this.traiteElement(element.content);
         }
 
+    }
+    
+    traiteStorage(){
+        var content = bimp_storage.get(this.id_notification + "_content");
+        if (content !== null){
+            this.content = [];
+            this.id_max = 0;
+            this.emptyNotifs();
+            this.traiteElement(content);
+        }
+    }
+    
+    traiteElement(content){
+        content = Object.keys(content).map(function(cle) {
+            return content[cle];
+        });
+        var notif = this;
+        
+        
+        content = content.sort(function compare(a, b) {
+            if (notif.isNew(a) < notif.isNew(b))
+               return -1;
+            if (notif.isNew(a) > notif.isNew(b))
+               return 1;
+            if (a.id < b.id)
+               return -1;
+            if (a.id > b.id )
+               return 1;
+            return 0;
+        });
+        
+//        content = Object.fromEntries(content);
+        
+        var nb_unread = 0;
+        var id_max_changed = 0;
+        var to_display = '';
+
+//        if (content !== null && this.isMultiple(content))
+//            var is_multiple = true;
+//        else
+            var is_multiple = false;
+
+        for (var i in content) {
+
+            // Redéfinition de id max
+            if (typeof content[i].tms !== 'undefined') {
+                if (parseInt(content[i].tms) > this.id_max) {
+                    this.id_max = parseInt(content[i].tms);
+                }
+            }
+            else{
+                if (parseInt(content[i].id) > this.id_max) {
+                    this.id_max = parseInt(content[i].id);
+                }
+            }
+
+            // Si la fonction n'est pas implémenter dans la classe fille: is_new = 1
+            var is_new = this.isNew(content[i]);
+
+            // Clé utilisé pour identifier les "groupes de message" (ex: conversation)
+            var key = this.getKey(content[i]);
+
+            // Affichage dans le topmenu
+            to_display = this.formatElement(content[i], key);
+            this.addInList(to_display, content[i].url, content[i], key, content[i].append);
+
+            // Augmentation du nombre dans le span rouge
+            if (is_new === 1) {
+
+                // Affichage dans la notification
+                if (!is_multiple) {
+                    var id_max_os = parseInt(bimp_storage.get(this.id_notification+'id_max_notif_os'));
+                    if (isNaN(id_max_os) || id_max_os < this.id_max) {
+                        bimp_storage.set(this.id_notification+'id_max_notif_os', this.id_max);
+                        this.displayNotification(content[i]);
+                    }
+                }
+
+                nb_unread++;
+            }
+        }
+
+        if (is_multiple) {
+            var id_max_os = parseInt(bimp_storage.get(this.id_notification+'id_max_notif_os'));
+            if (isNaN(id_max_os) || id_max_os < this.id_max) {
+                console.log('notifiii');
+                bimp_storage.set(this.id_notification+'id_max_notif_os', this.id_max);
+                this.displayMultipleNotification(content, nb_unread);
+            }
+        }
+
+
+        this.elementAdded(nb_unread);
     }
 
     addInList(to_display, url, element, key, to_append = false) {
@@ -342,16 +391,14 @@ class AbstractNotification {
     }
 
     reloadNotif() {
-
-        bimp_notification.notificationActive[this.id_notification].obj.content = [];
-        bimp_notification.notificationActive[this.id_notification].obj.id_max = 0;
+        this.content = [];
+        this.id_max = 0;
 
         this.emptyNotifs();
 
         // TODO check la suite
 //        this.display_notification = false;
         bimp_notification.reload(false, this.id_notification);
-
     }
 
     emptyNotifs(display_loading_spin) {
@@ -414,6 +461,7 @@ function BimpNotification() {
             }
 
             data.date_start = date_start;
+           
 
             BimpAjax('getNotification', data, null, {
                 display_success: false,
@@ -428,7 +476,7 @@ function BimpNotification() {
                     if (result.notifications) {
 //                        console.log(result.notifications);
                         for (const [id, value] of Object.entries(result.notifications)) {
-                            eval('bn.notificationActive[' + id + '].obj.addElement(value);');
+                            bn.notificationActive[id].obj.addElement(value);
                         }
 //                        bn.delay = 0;
                     }
@@ -443,14 +491,13 @@ function BimpNotification() {
                     if (reiterate)
                         bn.iterate();
                 }
-
             });
-    }
+        }
     };
 
     this.iterate = function () {
         if (bn.delay < 20000) {
-            bn.delay += 2000;
+            bn.delay += 4000;
 //            bn.delay += 2000; // valeur d'origine
         }
 
@@ -554,15 +601,30 @@ function BimpNotification() {
         // Variable définie coté PHP (actions_bimpcore.class.php)
         this.notificationActive = notificationActive;
 
+        var localStorageOk = false;
         for (const [id_notification, value] of Object.entries(this.notificationActive)) {
             var notification = this;
             $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
                 eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '(' + value.id_notification + ');');
+                notification.notificationActive[id_notification].obj.traiteStorage();
+                if(notification.notificationActive[id_notification].obj.id_max > 0) 
+                    localStorageOk = true;
             });
 
         }
 
-        bn.iterate();
+        setTimeout(function(){
+            if(localStorageOk){
+//                console.log('storage ok');
+                setTimeout(function(){
+                    bn.iterate();
+                }, 15000);
+            }
+            else{
+//                console.log('storage off');
+                bn.iterate();
+            }
+        }, 4000);
 
         if (!parseInt($(window).data('focus_bimp_notification_event_init'))) {
 
@@ -586,6 +648,10 @@ function BimpNotification() {
                 } else {
                     bn.active = true;
                     bn.updateStorage();
+                    for (const [id_notification, notif] of Object.entries(bn.notificationActive)) {
+                        var notification = this;
+                        notif.obj.traiteStorage();
+                    }
 //                        bn.iterate();
                 }
             });
@@ -604,7 +670,7 @@ function BimpNotification() {
 class BimpStorage {
 
     getFullKey(key) {
-        return '_' + key;
+        return dol_url_root+'_'+entity+'_' + key;
     }
 
     get(key) {
@@ -619,9 +685,24 @@ class BimpStorage {
         return value;
     }
     ;
-            set(key, value) {
-//        console.log(this.getFullKey(key));
+            set(key, value, add = false) {
         // Est un object
+        if(add){
+            var oldValue = this.get(key);
+            if(typeof oldValue === 'object' && typeof value === 'object'){
+//                console.log('concat response', oldValue, value);
+                value = {
+                    ...oldValue,
+                    ...value
+                };
+//                console.log('result', value);
+            }
+            else
+                console.log('oups concat impossible');
+                
+        }
+        
+        
         if (typeof value === 'object' && value !== null)
             return localStorage.setItem(this.getFullKey(key), JSON.stringify(value));
 

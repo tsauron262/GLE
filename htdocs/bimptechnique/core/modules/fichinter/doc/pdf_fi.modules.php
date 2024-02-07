@@ -38,7 +38,7 @@ class pdf_fi
         $this->marge_basse = 0;
         $this->option_logo = 1;
         $this->emetteur = $mysoc;
-        if (!isset($this->emetteur) || !$this->emetteur->pays_code)
+        if (!isset($this->emetteur) || !isset($this->emetteur->pays_code) || !$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);
     }
 
@@ -56,9 +56,9 @@ class pdf_fi
         }
         if (is_file($logo)) {
             if (is_object($pdf1)) {
-                $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+                $pdf1->Image($logo, 0, 10, $size, 0, '', '', '', false, 250, 'L');
             } else {
-                $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+                $pdf->Image($logo, 0, 10, $size, 0, '', '', '', false, 250, 'L');
             }
         }
     }
@@ -204,7 +204,7 @@ class pdf_fi
                 $pdf->SetFont('', 'B', 9);
 
                 // Titre
-                $this->addLogo($pdf, 12);
+                $this->addLogo($pdf, 42);
                 $pdf->SetXY($this->marge_gauche, $this->marge_haute - 17);
                 $pdf->SetFont('', 'B', 14);
                 $pdf->setXY(58, 10);

@@ -27,7 +27,14 @@ fields_tables:
                     callback: asProdEcologic
                 
                 
-forms:              
+forms:          
+    info_materiel:
+        rows:
+            - custom: 1
+              input_name: file
+              label: Fichier
+              input:
+                  type: file_upload
     resolution: 
         rows: 
             IRISSymtoms:

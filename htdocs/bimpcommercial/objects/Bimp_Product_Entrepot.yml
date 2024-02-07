@@ -13,6 +13,11 @@ list_page_url:
     controller: stocks
     module: bimpcore
     
+    
+parent_module: bimpcore
+parent_object: Bimp_Entrepot
+parent_id_property: fk_entrepot
+    
 objects:   
     product: 
         instance: 

@@ -1267,7 +1267,12 @@ function sortListByPosition(list_id, first_page) {
     var $list = $('#' + list_id);
 
     if ($list.length) {
-        $list.find('input[name=param_sort_field]').val('position');
+        var position_field = $list.data('position_field');
+        
+        if (!position_field) {
+            position_field = 'position';
+        }
+        $list.find('input[name=param_sort_field]').val(position_field);
         $list.find('input[name=param_sort_way]').val('asc');
         $list.find('input[name=param_sort_option]').val('');
         if (!first_page) {
@@ -1421,31 +1426,30 @@ function resetListSearchInputs(list_id, reload_list) {
 
 // Gestion des événements:
 
-function gestionParentLine($list){
+function gestionParentLine($list) {
     var idsParent = new Object();
-    $list.find('.objectListItemRow').each(function(){
-        if($(this).data('id_parent_line') > 0){
+    $list.find('.objectListItemRow').each(function () {
+        if ($(this).data('id_parent_line') > 0) {
             $(this).hide();
             idsParent[$(this).data('id_parent_line')] = $(this).data('id_parent_line');
         }
     });
-//        console.log(idsParent);
+    
     for (const id_parent_line in idsParent) {
-        var $parentLineTd = $list.find('[data-id_object='+id_parent_line+']').children('td').first();
-        console.log($parentLineTd);
-        $parentLineTd.append('<a class="button detail_'+id_parent_line+'">Detail</a><a class="button cache_detail_'+id_parent_line+'">-</a>');
-        $list.find('.cache_detail_'+id_parent_line+'').hide();
-        $list.find('.detail_'+id_parent_line+'').click(function(){
-            $list.find('[data-id_parent_line='+id_parent_line+']').show();
-            $list.find('.detail_'+id_parent_line+'').hide();
-            $list.find('.cache_detail_'+id_parent_line+'').show();
+        var $parentLineTd = $list.find('[data-id_object=' + id_parent_line + ']').children('td').first();
+        
+        $parentLineTd.append('<a class="btn btn-info detail_' + id_parent_line + '">Detail<i class="fa fa-plus-circle iconRight"></i></a><a class="btn btn-info cache_detail_' + id_parent_line + '">Détail<i class="fa fa-minus-circle iconRight"></i></a>');
+        $list.find('.cache_detail_' + id_parent_line + '').hide();
+        $list.find('.detail_' + id_parent_line + '').click(function () {
+            $list.find('[data-id_parent_line=' + id_parent_line + ']').show();
+            $list.find('.detail_' + id_parent_line + '').hide();
+            $list.find('.cache_detail_' + id_parent_line + '').show();
         });
-        $list.find('.cache_detail_'+id_parent_line+'').click(function(){
-            $list.find('[data-id_parent_line='+id_parent_line+']').hide();
-            $list.find('.detail_'+id_parent_line+'').show();
-            $list.find('.cache_detail_'+id_parent_line+'').hide();
+        $list.find('.cache_detail_' + id_parent_line + '').click(function () {
+            $list.find('[data-id_parent_line=' + id_parent_line + ']').hide();
+            $list.find('.detail_' + id_parent_line + '').show();
+            $list.find('.cache_detail_' + id_parent_line + '').hide();
         });
-//        console.log(id_parent_line);
     }
 }
 
@@ -1453,11 +1457,11 @@ function onListLoaded($list) {
     if (!$list.length) {
         return;
     }
-    
+
 
     if (!parseInt($list.data('loaded_event_processed'))) {
         $list.data('loaded_event_processed', 1);
-        
+
         gestionParentLine($list);
 
         var $table = $list.find('table.objectlistTable');
@@ -1688,7 +1692,7 @@ function onListRefeshed($list) {
 //    });
 
     gestionParentLine($list);
-    
+
     var list_id = $list.attr('id');
 
     var $tbody = $list.find('tbody.listRows');

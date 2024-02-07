@@ -242,20 +242,38 @@ function BimpUserRightsTable() {
             return null;
         }
 
-        return $element.findParentByClass('panel-body').find('table.bimp_user_rights_table');
-    };
+        var $container = $element.findParentByClass('panel-body');
 
-    this.getRow = function ($table, id_right) {
-        if ($.isOk($table)) {
-            return $table.find('tr.bimp_list_table_row[data-id_right=' + id_right + ']');
+        if (!$.isOk($container)) {
+            $container = $element.findParentByClass('tab-content');
+        }
+
+        if ($.isOk($container)) {
+            return $container.find('table.bimp_user_rights_table');
         }
 
         return null;
     };
 
-    this.addUserRights = function ($button, id_user, id_rights) {
+    this.getRow = function ($table, id_right, id_entity) {
+        if (typeof (id_entity) === 'undefined') {
+            id_entity = 1;
+        }
+
+        if ($.isOk($table)) {
+            return $table.find('tr.bimp_list_table_row[data-id_right=' + id_right + '][data-id_entity=' + id_entity + ']');
+        }
+
+        return null;
+    };
+
+    this.addUserRights = function ($button, id_user, id_rights, id_entities) {
         if ($button.hasClass('disabled')) {
             return;
+        }
+
+        if (typeof (id_entities) === 'undefined') {
+            id_entities = [];
         }
 
         var $table = ptr.getTable($button);
@@ -263,28 +281,31 @@ function BimpUserRightsTable() {
         setObjectAction($button, {
             module: 'bimpcore',
             object_name: 'Bimp_User',
-            id_object: id_user
+            id_object: id_user,
         }, 'addRight', {
-            id_rights: id_rights
+            id_rights: id_rights,
+            id_entities: id_entities
         }, null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
-                    if (parseInt(result.results[id_right])) {
-                        var $row = ptr.getRow($table, id_right);
-                        if ($.isOk($row)) {
-                            $row.find('.add_right_button').hide();
-                            $row.find('.remove_right_button').show();
+                    for (var id_entity in result.results[id_right]) {
+                        if (parseInt(result.results[id_right][id_entity])) {
+                            var $row = ptr.getRow($table, id_right, id_entity);
+                            if ($.isOk($row)) {
+                                $row.find('.add_right_button').hide();
+                                $row.find('.remove_right_button').show();
 
-                            var $col = $row.find('td.col_active');
+                                var $col = $row.find('td.col_active');
 
-                            if ($col.length) {
-                                $col.data('value', 'yes');
-                                $col.html('<span class="success"><i class="fas fa5-check iconLeft"></i>OUI</span>');
-                            }
+                                if ($col.length) {
+                                    $col.data('value', 'yes');
+                                    $col.html('<span class="success"><i class="fas fa5-check iconLeft"></i>OUI</span>');
+                                }
 
-                            // On déselectionne toutes les lignes: 
-                            if (id_rights.length > 1) {
-                                BimpListTable.uncheckAll($table);
+                                // On déselectionne toutes les lignes: 
+                                if (id_rights.length > 1) {
+                                    BimpListTable.uncheckAll($table);
+                                }
                             }
                         }
                     }
@@ -293,9 +314,13 @@ function BimpUserRightsTable() {
         });
     };
 
-    this.removeUserRights = function ($button, id_user, id_rights) {
+    this.removeUserRights = function ($button, id_user, id_rights, id_entities) {
         if ($button.hasClass('disabled')) {
             return;
+        }
+
+        if (typeof (id_entities) === 'undefined') {
+            id_entities = [];
         }
 
         var $table = ptr.getTable($button);
@@ -305,36 +330,39 @@ function BimpUserRightsTable() {
             object_name: 'Bimp_User',
             id_object: id_user
         }, 'removeRight', {
-            id_rights: id_rights
+            id_rights: id_rights,
+            id_entities: id_entities
         }, null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
-                    if (parseInt(result.results[id_right]['ok'])) {
-                        var $row = ptr.getRow($table, id_right);
-                        if ($.isOk($row)) {
-                            $row.find('.remove_right_button').hide();
-                            $row.find('.add_right_button').show();
+                    for (var id_entity in result.results[id_right]) {
+                        if (parseInt(result.results[id_right][id_entity]['ok'])) {
+                            var $row = ptr.getRow($table, id_right, id_entity);
+                            if ($.isOk($row)) {
 
-                            var $col = $row.find('td.col_active');
+                                $row.find('.remove_right_button').hide();
+                                $row.find('.add_right_button').show();
 
-                            if ($col.length) {
-                                $col.data('value', result.results[id_right]['active']);
+                                var $col = $row.find('td.col_active');
 
-                                switch (result.results[id_right]['active']) {
-                                    case 'inherit':
-                                        $col.html('<span class="info"><i class="fas fa5-arrow-circle-down iconLeft"></i>Hérité</span>');
-                                        break;
+                                if ($col.length) {
+                                    $col.data('value', result.results[id_right][id_entity]['active']);
 
-                                    case 'no':
-                                        $col.html('<span class="danger"><i class="fas fa5-times iconLeft"></i>NON</span>');
-                                        break;
+                                    switch (result.results[id_right][id_entity]['active']) {
+                                        case 'inherit':
+                                            $col.html('<span class="info"><i class="fas fa5-arrow-circle-down iconLeft"></i>Hérité</span>');
+                                            break;
+
+                                        case 'no':
+                                            $col.html('<span class="danger"><i class="fas fa5-times iconLeft"></i>NON</span>');
+                                            break;
+                                    }
                                 }
 
-                            }
-
-                            // On déselectionne toutes les lignes: 
-                            if (id_rights.length > 1) {
-                                BimpListTable.uncheckAll($table);
+                                // On déselectionne toutes les lignes: 
+                                if (id_rights.length > 1) {
+                                    BimpListTable.uncheckAll($table);
+                                }
                             }
                         }
                     }
@@ -344,9 +372,13 @@ function BimpUserRightsTable() {
 
     };
 
-    this.addSelectedRights = function ($button, id_user) {
+    this.addSelectedRights = function ($button, id_user, id_entities) {
         if ($button.hasClass('disabled')) {
             return;
+        }
+
+        if (typeof (id_entities) === 'undefined') {
+            id_entities = [];
         }
 
         $button.addClass('disabled');
@@ -376,13 +408,17 @@ function BimpUserRightsTable() {
             });
 
             $button.removeClass('disabled'); // On doit réactiver le bouton sinon la suite va planter.
-            ptr.addUserRights($button, id_user, id_rights);
+            ptr.addUserRights($button, id_user, id_rights, id_entities);
         }
     };
 
-    this.removeSelectedRights = function ($button, id_user) {
+    this.removeSelectedRights = function ($button, id_user, id_entities) {
         if ($button.hasClass('disabled')) {
             return;
+        }
+
+        if (typeof (id_entities) === 'undefined') {
+            id_entities = [];
         }
 
         $button.addClass('disabled');
@@ -412,7 +448,7 @@ function BimpUserRightsTable() {
             });
 
             $button.removeClass('disabled');
-            ptr.removeUserRights($button, id_user, id_rights);
+            ptr.removeUserRights($button, id_user, id_rights, id_entities);
         }
     };
 }
@@ -442,9 +478,13 @@ function BimpUserGroupRightsTable() {
 
     // Nommer correctemenet les fonctions. Ici, l'objet sur lequel on travail c'est UserGroup, pas User. 
 //    this.addUserRights = function ($button, id_group, id_rights) {
-    this.addUserGroupRights = function ($button, id_group, id_rights) {
+    this.addUserGroupRights = function ($button, id_group, id_rights, id_entities) {
         if ($button.hasClass('disabled')) {
             return;
+        }
+
+        if (typeof (id_entities) === 'undefined') {
+            id_entities = [];
         }
 
         var $table = ptr.getTable($button);
@@ -454,7 +494,8 @@ function BimpUserGroupRightsTable() {
             object_name: 'Bimp_UserGroup',
             id_object: id_group
         }, 'addRight', {
-            id_rights: id_rights
+            id_rights: id_rights,
+            id_entities: id_entities
         }, null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
@@ -482,9 +523,13 @@ function BimpUserGroupRightsTable() {
         });
     };
 
-    this.removeUserGroupRights = function ($button, id_group, id_rights) {
+    this.removeUserGroupRights = function ($button, id_group, id_rights, id_entities) {
         if ($button.hasClass('disabled')) {
             return;
+        }
+
+        if (typeof (id_entities) === 'undefined') {
+            id_entities = [];
         }
 
         var $table = ptr.getTable($button);
@@ -494,7 +539,8 @@ function BimpUserGroupRightsTable() {
             object_name: 'Bimp_UserGroup',
             id_object: id_group
         }, 'removeRight', {
-            id_rights: id_rights
+            id_rights: id_rights,
+            id_entities: id_entities
         }, null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
@@ -523,9 +569,13 @@ function BimpUserGroupRightsTable() {
 
     };
 
-    this.addSelectedRights = function ($button, id_group) {
+    this.addSelectedRights = function ($button, id_group, id_entities) {
         if ($button.hasClass('disabled')) {
             return;
+        }
+
+        if (typeof (id_entities) === 'undefined') {
+            id_entities = [];
         }
 
         $button.addClass('disabled');
@@ -555,13 +605,17 @@ function BimpUserGroupRightsTable() {
             });
 
             $button.removeClass('disabled'); // On doit réactiver le bouton sinon la suite va planter.
-            ptr.addUserGroupRights($button, id_group, id_rights);
+            ptr.addUserGroupRights($button, id_group, id_rights, id_entities);
         }
     };
 
-    this.removeSelectedRights = function ($button, id_group) {
+    this.removeSelectedRights = function ($button, id_group, id_entities) {
         if ($button.hasClass('disabled')) {
             return;
+        }
+
+        if (typeof (id_entities) === 'undefined') {
+            id_entities = [];
         }
 
         $button.addClass('disabled');
@@ -591,7 +645,7 @@ function BimpUserGroupRightsTable() {
             });
 
             $button.removeClass('disabled');
-            ptr.removeUserGroupRights($button, id_group, id_rights);
+            ptr.removeUserGroupRights($button, id_group, id_rights, id_entities);
         }
     };
 }

@@ -1,0 +1,1 @@
+UPDATE llx_bimpcore_conf SET name = 'abos_id_entrepot' WHERE `name` = 'stocks_id_entrepot' AND `module` = 'bimpcontrat';

@@ -64,3 +64,15 @@ BEGIN
 RETURN v_id;
 END$$
 DELIMITER ;
+---
+--- Function get_type_contact_id
+---
+DELIMITER $$
+CREATE DEFINER=`root`@`%` FUNCTION `get_type_contact_id`(elem VARCHAR(30)) RETURNS INT(11)
+    READS SQL DATA
+BEGIN
+DECLARE type_id INT default 0;
+SELECT `rowid` FROM `llx_c_type_contact` WHERE `code` = 'SALESREPFOLL' AND `element` = elem INTO type_id;
+RETURN type_id;
+END$$
+DELIMITER ;

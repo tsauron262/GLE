@@ -4,6 +4,8 @@ controller: task
 extends: 
     module: bimpcore
     object_name: BimpAbstractFollow
+    
+entity_name: bimpcore
 
 icon: fas_tasks
 header_list_name: default
@@ -143,7 +145,6 @@ fields:
                 label: Avec lien
                 type: callback
                 method: displayPageLink
-                
         
  
 fields_tables:

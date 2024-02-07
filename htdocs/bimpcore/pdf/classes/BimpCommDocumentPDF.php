@@ -236,7 +236,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         return parent::getTargetIdSoc();
     }
 
-    public function getLineDesc($line, Product $product = null, $hide_product_label = false)
+    public function getLineDesc($line, Product $product = null, $hide_product_label = false, $bimpLine = null)
     {
         $desc = '';
         if (!is_null($product)) {
@@ -248,7 +248,6 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 $desc .= ($desc ? ' - ' : '') . '<b>' . $product->label . '</b>';
             }
 
-//            if ($product->type == 1) {
             if ($line->date_start) {
                 if (!$line->date_end) {
                     $desc .= '<br/>A partir du ';
@@ -265,7 +264,18 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 }
                 $desc .= date('d/m/Y', $line->date_end);
             }
-//            }
+        }
+
+        if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('abo_nb_renouv')) {
+            $nb_renouv = (int) $bimpLine->getData('abo_nb_renouv');
+            if ($nb_renouv) {
+                $desc .= ($desc ? '<br/>' : '') . '<span style="font-style: italic; font-size: 8px">';
+                $desc .= 'Cet abonnement sera renouvelé de manière tacite ';
+                if ($nb_renouv > 0) {
+                    $desc .= $nb_renouv . ' fois ';
+                }
+                $desc .= 'sans dénonciation de votre part.</span>';
+            }
         }
 
         if (!is_null($line->desc) && $line->desc) {
@@ -676,13 +686,13 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         }
 
         $html .= '</table>';
-        if(is_a($this->bimpCommObject, 'BimpComm')){
-            if($this->bimpCommObject->getData('zone_vente') == 2)
+        if (is_a($this->bimpCommObject, 'BimpComm')) {
+            if ($this->bimpCommObject->getData('zone_vente') == 2)
                 $html .= '* Autoliquidation';
-            elseif($this->bimpCommObject->getData('zone_vente') == 3)
+            elseif ($this->bimpCommObject->getData('zone_vente') == 3)
                 $html .= '* TVA non applicable – art. 259-1 du CGI';
         }
-        
+
         $html .= '<br/>';
 
         return $html . $htmlInfo;
@@ -779,29 +789,28 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
         $sub_total_ht = 0;
         $sub_total_ttc = 0;
-        
-        
+
         $montantTotLineHide = 0;
         if (is_array($this->object->lines) && !empty($this->object->lines)) {
             foreach ($this->object->lines as $line) {
                 $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
-                if(BimpObject::objectLoaded($bimpLine) && (
+                if (BimpObject::objectLoaded($bimpLine) && (
                         $bimpLine->getData('hide_in_pdf') ||
-                        $bimpLine->getData('linked_object_name') == 'bundleCorrect' || 
+                        $bimpLine->getData('linked_object_name') == 'bundleCorrect' ||
                         $bimpLine->getData('linked_object_name') == 'bundle'))
                     $montantTotLineHide += $line->total_ttc;
             }
         }
         $montantTotLineHide = round($montantTotLineHide, 4);
-        
+
         if (is_array($this->object->lines) && !empty($this->object->lines)) {
             foreach ($this->object->lines as $line) {
                 $row = array();
                 $i++;
 
                 $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
-                
-                if(BimpObject::objectLoaded($bimpLine) && $montantTotLineHide == 0 && ($bimpLine->getData('linked_object_name') == 'bundleCorrect' || $bimpLine->getData('linked_object_name') == 'bundle'))
+
+                if (BimpObject::objectLoaded($bimpLine) && $montantTotLineHide == 0 && ($bimpLine->getData('linked_object_name') == 'bundleCorrect' || $bimpLine->getData('linked_object_name') == 'bundle'))
                     continue;
 
                 if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && !in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0 || stripos($line->desc, 'Trop per') === 0)) {
@@ -818,7 +827,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                     continue;
                 }
-                
+
                 if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
                     if ($montantTotLineHide == 0 || in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
                         if ((int) $bimpLine->getData('hide_in_pdf')) {
@@ -839,9 +848,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     continue;
                 }
 
-                $hide_product_label = isset($bimpLines[(int) $line->id]) ? (int) $bimpLines[(int) $line->id]->getData('hide_product_label') : 0;
+                $hide_product_label = (isset($bimpLines[(int) $line->id]) ? (int) $bimpLines[(int) $line->id]->getData('hide_product_label') : 0);
 
-                $desc = $this->getLineDesc($line, $product, $hide_product_label);
+                $desc = $this->getLineDesc($line, $product, $hide_product_label, (isset($bimpLines[$line->id]) ? $bimpLines[$line->id] : null));
 
                 if (BimpObject::objectLoaded($bimpLine)) {
                     if ($bimpLine->equipment_required && $bimpLine->isProductSerialisable()) {
@@ -1153,9 +1162,8 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
             }
 
             $this->writeContent($html);
-        }
-        else{
-            if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv){
+        } else {
+            if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv) {
                 $html = '';
                 $html .= '<p style="font-size: 6px; font-style: italic">';
                 $html .= '<span style="font-weight: bold;">';
@@ -1164,7 +1172,6 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 $html .= "</p>";
                 $this->writeContent($html);
             }
-            
         }
     }
 

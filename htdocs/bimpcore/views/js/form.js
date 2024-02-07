@@ -2356,7 +2356,7 @@ function loadSearchObjectResults($input, idx) {
     }
 }
 
-// Gestion de l'affichage conditionnel des champs: 
+// Gestion de l'affichage conditionnel des champs:
 
 function toggleInputDisplay($container, $input) {
     var input_val = $input.val();
@@ -2478,7 +2478,7 @@ function resetInputDisplay($form) {
     });
 }
 
-// Actions Filters Input: 
+// Actions Filters Input:
 
 function setFiltersInputObjectData($filtersInputContainer, module, object_name) {
     if ($.isOk($filtersInputContainer)) {
@@ -2721,7 +2721,7 @@ function resetFiltersInputInputs($button) {
     }
 }
 
-// Gestion des événements: 
+// Gestion des événements:
 
 function onFormLoaded($form) {
     if (!$form.length) {

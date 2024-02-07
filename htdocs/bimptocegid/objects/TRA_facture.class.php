@@ -51,8 +51,10 @@
             $use_tva             = true;
             $use_d3e             = ($facture->getData('zone_vente') == 1) ? true : false;
             $TTC                 = $facture->getData('multicurrency_total_ttc');
-            $controlle_ttc       = round($TTC, 2);            
-            $code_compta         = $this->TRA_tiers->getCodeComptable($client, 'code_compta', $createTiers);
+            $controlle_ttc       = round($TTC, 2);          
+            $entrepot            = $this->db->getRow('entrepot', 'rowid = ' . ($this->isVenteTicket($facture->id) ? $this->caisse->getData('id_entrepot') : $facture->getData('entrepot')));  
+            $code_compta         = ($this->isVenteTicket($facture->id)) ? $entrepot->compte_aux : $this->TRA_tiers->getCodeComptable($client);
+//            $code_compta         = $this->TRA_tiers->getCodeComptable($client, 'code_compta', $createTiers);
             
             if ($client->getData('is_subsidiary')) {
                 $this->compte_general = $client->getData('accounting_account');
@@ -269,6 +271,19 @@
             
             return ($montant > 0) ? 'C' : 'D';
    
+        }
+        
+        
+        
+        public function isVenteTicket($id):bool {
+            $this->vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente');
+            $this->vente->find(['id_facture' => $id]);
+            if ($this->vente->isLoaded() && $this->vente->getData('id_client') == 0) {
+                $this->caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $this->vente->getData('id_caisse'));
+                return 1;
+            }
+
+            return 0;
         }
         
     }

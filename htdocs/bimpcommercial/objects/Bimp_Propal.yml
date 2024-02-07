@@ -555,7 +555,7 @@ forms:
                     sign_dist:
                         hide_values: 0
                 depends_on: init_docusign,open_public_access
-                
+            
     contrat_abo: 
         rows: 
             - custom: 1

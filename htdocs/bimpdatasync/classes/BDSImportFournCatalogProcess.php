@@ -279,6 +279,10 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     if ($line['url'] && $prod_data['url'] != $line['url']) {
                         $new_prod_data['url'] = $line['url'];
                     }
+                    
+                    if ($line['weight'] && $prod_data['weight'] != $line['weight']/1000) {
+                        $new_prod_data['weight'] = $line['weight']/1000;
+                    }
 
                     if ($line['ean'] && $prod_data['barcode'] != $line['ean']) {
                         $new_prod_data['barcode'] = $line['ean'];

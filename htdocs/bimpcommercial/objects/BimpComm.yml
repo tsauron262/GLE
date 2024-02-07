@@ -283,6 +283,27 @@ fields:
             array: expertise
     
 forms: 
+    port:
+        title: Ajout des frais de port
+        rows:
+            - custom: 1
+              label: Pays
+              input_name: state
+              input: 
+                  type: select
+                  options: 
+                      1: France
+            - custom: 1
+              label: Option
+              input_name: option
+              input: 
+                  type: select
+                  options: 
+                      base: Normal
+                      chrono: Option Chronopost Standard France
+                      chronoEx: Option Chronopost Express France ou livraison soirée
+                      corse: Corse
+    
     contact:
         title: Ajouter un contact
         rows: 
@@ -730,6 +751,11 @@ fields_tables:
     totals: 
         title: Montants totaux
         icon: euro
+        rows:
+           100:
+              label: Poids Total
+              value: 
+                  callback: displayTotalWeight
                   
     notes:
         title: Notes
@@ -868,6 +894,11 @@ lists_cols:
         label: Tx marque
         value: 
             callback: displayTxMarque
+            
+    poids_total:
+        label: Poids Total
+        value:
+            callback: getTotalWeight
         
 lists: 
     default: 

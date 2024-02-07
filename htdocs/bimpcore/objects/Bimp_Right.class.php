@@ -148,4 +148,21 @@ class Bimp_Right extends BimpObject
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
+
+    // Overrides: 
+    
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if (!(int) $this->getData('entity')) {
+            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                $errors[] = 'Aucune entité spécifiée';
+            } else {
+                $this->set('entity', 1);
+            }
+        }
+
+        return $errors;
+    }
 }

@@ -162,7 +162,7 @@ class BimpDebug
             mailSyn2('test', 'tommy@bimp.fr', null, $msg);
         } else {
             if ((microtime(1) - $bimp_start_time) > 40) {
-                $msg .= (microtime(1) - $bimp_start_time) . 'oooooooooo';
+                $msg .= (microtime(1) - $bimp_start_time) . ' sec';
 
                 $msg .= self::renderDebugTimes();
                 mailSyn2('test', 'tommy@bimp.fr', null, $msg);
@@ -342,9 +342,12 @@ class BimpDebug
 
     public static function renderDebugTimes()
     {
+        /*
+         * Toujours actif pour les logs
         if (!self::isActive()) {
             return '';
         }
+         */
 
         if (empty(self::$times)) {
             return '';

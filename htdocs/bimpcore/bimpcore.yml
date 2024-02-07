@@ -227,7 +227,7 @@ params:
         label: Interdire les quantités décimales pour les produits non sérialisés
         cat: products
         type: bool
-        def: 0
+        def: 1
     allow_duplicate_products: 
         label: Autoriser le clonage des produits
         cat: products

@@ -170,7 +170,11 @@ class BC_Panel extends BimpComponent
             $content .= $this->renderHtmlContent();
             $content .= '</div>';
 
-            $content .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result" style="display: none"></div>';
+            if(!is_a($this, 'BC_Form'))
+                $content .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result" style="display: none"></div>';
+            else
+                $content .= '<div class="ajaxResultContainerSousForm" id="' . $this->identifier . '_result" style="display: none"></div>';
+            
             $content .= '</div>';
 
             if ($this->params['after_content']) {

@@ -72,6 +72,8 @@ lists:
     default: 
         title: Mouvements de fonds
         icon: fas_exchange-alt
+        list_filters: 
+            callback: getListFilters
         sort_field: id
         sort_way: desc
         n: 10

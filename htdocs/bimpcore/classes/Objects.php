@@ -47,7 +47,7 @@ class ObjectsDef
         'SAV'                  => array('icon' => 'fas_wrench', 'def' => 'BO/bimpsupport/BS_SAV'),
         'Prêt matériel'        => array('icon' => 'fas_mobile-alt', 'def' => 'BO/bimpsupport/BS_Pret'),
         //BimpTask: 
-        'Tâche'                => array('icon' => 'fas_tasks', 'def' => 'BO/bimptask/Bimp_Task'),
+        'Tâche'                => array('icon' => 'fas_tasks', 'def' => 'BO/bimptask/BIMP_Task'),
         // BimpTechnique: 
         'Fiche inter'          => array('icon' => 'fas_ambulance', 'def' => 'BO/bimptechnique/BT_ficheInter'),
         // BimpTransfer: 

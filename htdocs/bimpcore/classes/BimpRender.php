@@ -22,9 +22,9 @@ class BimpRender
         return $html;
     }
 
-    public static function renderIcon($icon, $class = '')
+    public static function renderIcon($icon, $class = '', $css = '')
     {
-        return '<i class="' . self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
+        return '<i class="' . self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"' . ($css ? ' style="' . $css . '"' : '') . '></i>';
     }
 
     public static function renderInfoIcon($info, $icon = 'fas_question-circle', $placement = 'bottom')
@@ -503,9 +503,6 @@ class BimpRender
 
     public static function renderNavTabs($tabs, $tabs_id = 'maintabs', $params = array())
     {
-//        echo '<pre>';
-//        print_r($tabs);
-//        echo '</pre>';
         $params = BimpTools::overrideArray(array(
                     'content_only'        => false,
                     'nav_only'            => false,
@@ -1281,6 +1278,7 @@ class BimpRender
                         'col_style'  => '',
                         'searchable' => true,
                         'sortable'   => true,
+                        'colspan'    => 1
                             ), $header_params);
         }
 
@@ -1307,7 +1305,14 @@ class BimpRender
             }
 
             foreach ($headers as $col_name => $header) {
-                $html .= '<th class="col_header" data-col_name="' . $col_name . '">';
+                if (!(int) $header['colspan']) {
+                    continue;
+                }
+                $html .= '<th class="col_header" data-col_name="' . $col_name . '"';
+                if ((int) $header['colspan'] > 1) {
+                    $html .= ' colspan="' . $header['colspan'] . '"';
+                }
+                $html .= '>';
                 if ($params['sortable'] && $header['sortable']) {
                     $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
                     if ($params['sort_col'] && $params['sort_col'] === $col_name) {
@@ -1330,7 +1335,15 @@ class BimpRender
                 $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
 
                 foreach ($headers as $col_name => $header) {
-                    $html .= '<td class="col_search">';
+                    if (!(int) $header['colspan']) {
+                        continue;
+                    }
+                    $html .= '<td class="col_search"';
+                    if ((int) $header['colspan'] > 1) {
+                        $html .= ' colspan="' . $header['colspan'] . '"';
+                    }
+                    $html .= '>';
+
                     $html .= '<div class="searchInputContainer">';
                     if ($header['searchable']) {
                         if (isset($header['search_values'])) {
@@ -1379,12 +1392,20 @@ class BimpRender
                 $html .= '</td>';
             } else {
                 foreach ($headers as $col_name => $header) {
+                    if (isset($row[$col_name]['colspan']) && !(int) $row[$col_name]['colspan']) {
+                        continue;
+                    }
                     $html .= '<' . $header['cel_tag'];
                     $html .= ' class="col_' . $col_name . '"';
                     $html .= ' data-col="' . $col_name . '"';
                     if (is_array($row[$col_name]) && isset($row[$col_name]['value'])) {
                         $html .= ' data-value="' . htmlentities($row[$col_name]['value']) . '"';
                     }
+
+                    if (isset($row[$col_name]['colspan'])) {
+                        $html .= ' colspan="' . $row[$col_name]['colspan'] . '"';
+                    }
+
                     $html .= ' style="' . ($header['align'] !== 'left' ? 'text-align: ' . $header['align'] . ';' : '');
                     if ($header['col_style']) {
                         $html .= ' ' . $header['col_style'] . ';';

@@ -2,6 +2,10 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_SAV.class.php';
 
+/*
+ * https://www.data.gouv.fr/fr/datasets/base-officielle-des-codes-postaux/
+ */
+
 class BS_SAV_ExtEntity extends BS_SAV
 {
 
@@ -51,8 +55,11 @@ class BS_SAV_ExtEntity extends BS_SAV
             foreach ($this->getPropalLines() as $line) {
                 $dolLine = $line->getChildObject('line');
                 if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
+                    
+//                    if(- $dolLine->subprice == 45)
+//                        return 50;
 //                    print_r($dolLine);die;
-                    return -$dolLine->total_ttc /** 1.2*/;
+                    return -$dolLine->subprice /** 1.2*/;
                 }
             }
         }
@@ -77,6 +84,8 @@ class BS_SAV_ExtEntity extends BS_SAV
                 }
             }
         }
+        if(!count($resultList))
+            $resultList['XX1'] = 'Autre';
 
         return $resultList;
     }
@@ -110,12 +119,21 @@ class BS_SAV_ExtEntity extends BS_SAV
         if ((int) $equipement->getData('id_product')) {
             $label .= $equipement->displayProduct('nom') . '<br/>';
         }
+        if (stripos($label, 'imac') !== false)
+            return 'EEE.M2.045';
         if (stripos($label, 'mac') !== false)
             return 'EEE.M2.044';
         if (stripos($label, 'ipad') !== false)
             return 'EEE.M2.057';
         if (stripos($label, 'iphone') !== false)
             return 'EEE.M6.060';
+        if (stripos($label, 'blabla tel fixe') !== false)
+            return 'EEE.M6.059';
+        if (stripos($label, 'blabla imprimante scanner') !== false)
+            return 'EEE.M6.031';
+        if (stripos($label, 'DISPLAY') !== false)
+//            return 'EEE.M2.044';
+            return 'EEE.M2.042';//code display ne fonctionne pas
 
 
         return '';
@@ -185,7 +203,50 @@ class BS_SAV_ExtEntity extends BS_SAV
         if((!isset($tabName[1]) || $tabName[1] == '' || $client->getData('fk_typent') != 8) && $this->asProdEcologic()){
             $html .= BimpRender::renderAlerts('! Attention les PROS ne sont pas concernés par le programme QualiRepair !');
         }
+        
+        if ($this->asProdEcologic()) {
+            $ok = false;
+            $sav_dir = $this->getFilesDir();
+            $file = 'infos_materiel';
+            $tabExt = array('jpeg', 'jpg', 'png', 'pdf', 'JPEG', 'JPG', 'PNG', 'PDF');
+            foreach($tabExt as $ext){
+                if(file_exists($sav_dir.$file.'.'.$ext))
+                        $ok = true;
+            }
+            if(!$ok){
+                $ok = $this->convertHeic($sav_dir.$file);
+            }
+            if(!$ok)
+                $html .= BimpRender::renderAlerts('Attention le fichier '.$file.' n\'est pas présent');
+        }
         return $html;
+    }
+    
+    public function convertHeic($fileSansExt){
+        $tab = array('heic', 'HEIC');
+        foreach($tab as $ext){
+            if(file_exists($fileSansExt.'.'.$ext)){
+                exec("/usr/local/sbin/heic2jpg ".$fileSansExt.'.'.$ext." ".$fileSansExt.".jpg");
+                if(file_exists($fileSansExt.".jpg"))
+                   return 1;
+            }
+        }
+    }
+    
+
+    public function actionInfoMateriel($data, &$success)
+    {
+        $errors = $warnings = array();
+
+        if (isset($data['file']) && $data['file'] != '')
+            BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'infos_materiel');
+        else
+            $errors[] = 'Aucun fichier uploadé';
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionSendDemandeEcologic($data, &$success)
@@ -208,8 +269,8 @@ class BS_SAV_ExtEntity extends BS_SAV
             "Zip"            => $client->getData('zip'),
             "City"           => $this->traiteVilleNameEcologic($client->getData('town')),
             "Country"        => "250",
-            "Phone"          => "",
-            "Email"          => "",
+            "Phone"          => $client->getData('phone'),
+            "Email"          => $client->getData('email'),
             "AutoValidation" => true
         );
 
@@ -226,7 +287,8 @@ class BS_SAV_ExtEntity extends BS_SAV
             "ProductId"          => $this->getEcologicProductId(),
             "BrandId"            => "243",
             "CommercialRef"      => $prod->ref,
-            "SerialNumber"       => $this->getSerial(true),
+            "SerialNumber"       => $this->getSerial(false, true),
+            "SerialNumber2"       => $this->getSerial(false, false),
             "PurchaseDate"       => "",
             "IRISCondition"      => "",
             "IRISConditionEX"    => "",
@@ -296,6 +358,8 @@ class BS_SAV_ExtEntity extends BS_SAV
 
         $tabFile[] = array($facture->getFilesDir(), $facture->getData('ref'), 'pdf', 'INVOICE');
         $tabFile[] = array($this->getFilesDir(), 'Restitution_' . $this->getData('ref') . '_signe', 'pdf', 'CONSUMERVALIDATION');
+        if(!is_file($this->getFilesDir(). 'infos_materiel.jpg'))
+            $this->convertHeic($this->getFilesDir(). 'infos_materiel');
         $tabFile[] = array($this->getFilesDir(), 'infos_materiel', 'pdf', 'NAMEPLATE');
 
         $api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);
@@ -331,6 +395,16 @@ class BS_SAV_ExtEntity extends BS_SAV
                         'form_name' => 'ecologic'
                     ))
                 );
+            
+        }
+        if ($this->asProdEcologic()){
+            $btn[] = array(
+                'label'   => 'Télécharger infos matériel',
+                'icon'    => 'upload',
+                'onclick' => $this->getJsActionOnclick('infoMateriel', array(), array(
+                    'form_name' => 'info_materiel'
+                ))
+            );
         }
         return $btn;
     }

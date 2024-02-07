@@ -698,7 +698,7 @@ class BimpCommDemandeFin extends BimpObject
             if (count($req_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de l\'obtention des données de la demande de location');
             } else {
-                if (isset($data['missing_serials']['total']) && (int) $data['missing_serials']['total'] > 0) {
+                if ((int) $this->getData('status') < 20 && isset($data['missing_serials']['total']) && (int) $data['missing_serials']['total'] > 0) {
                     $commande = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Commande', array(
                                 'id_demande_fin' => $this->id
                     ));

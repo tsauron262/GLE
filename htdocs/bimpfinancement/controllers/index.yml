@@ -26,6 +26,16 @@ sections:
                         panel: 1
                         object: demandes
                         
+          lignes:
+              label: Lignes de financements
+              icon: fas_bars
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: lignes
+                        name: global
+                        
           refinanceurs:
               label: Refinanceurs
               icon: fas_university
@@ -34,13 +44,3 @@ sections:
                     list: 
                         panel: 1
                         object: refinanceurs
-                        
-          lignes:
-              label: Lignes de financements
-              icon: fas_university
-              sections: 
-                  - type: list
-                    list: 
-                        panel: 1
-                        object: lignes
-                        name: global

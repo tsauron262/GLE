@@ -317,6 +317,9 @@ class BC_Form extends BC_Panel
         $html .= '<input type="hidden" name="' . $this->fields_prefix . 'sub_objects" value="' . implode(',', $this->sub_objects) . '"/>';
 
         if ($form_tag) {
+            /*todo deux fois ajaxresultcontainer, mais neccessaire dans le form pour que les eventelle champ soit renvoyé en même temp*/
+            $html .= '<div class="ajaxResultContainer" style="display: none"></div>';
+//            $html .= '</div>';
             $html .= '</form>';
         }
 

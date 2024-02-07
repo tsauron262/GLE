@@ -1212,22 +1212,24 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             } else {
                 $product = $this->getProduct();
-                $shippedQty = (float) $this->getShippedQty($id_shipment);
-                if ($fullQty > 0 && $product->getData('fk_product_type') === 0) {
-                    $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-                    $rows = $reservation->getList(array(
-                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
-                        'id_commande_client'      => (int) $commande->id,
-                        'id_commande_client_line' => $this->id,
-                        'status'                  => 200
-                            ), null, null, 'id', 'asc', 'array', array('qty'));
-                    if (!is_null($rows)) {
-                        foreach ($rows as $r) {
-                            $qty += (int) $r['qty'];
+                if (BimpObject::objectLoaded($product)) {
+                    $shippedQty = (float) $this->getShippedQty($id_shipment);
+                    if ($fullQty > 0 && $product->getData('fk_product_type') === 0) {
+                        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+                        $rows = $reservation->getList(array(
+                            'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                            'id_commande_client'      => (int) $commande->id,
+                            'id_commande_client_line' => $this->id,
+                            'status'                  => 200
+                                ), null, null, 'id', 'asc', 'array', array('qty'));
+                        if (!is_null($rows)) {
+                            foreach ($rows as $r) {
+                                $qty += (int) $r['qty'];
+                            }
                         }
+                    } else {
+                        $qty += $shippedQty;
                     }
-                } else {
-                    $qty += $shippedQty;
                 }
             }
 
@@ -2604,11 +2606,13 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        if ($id_fourn && $id_entrepot) {
+        if ($id_fourn /*&& $id_entrepot*/) {
             $sql = 'SELECT cf.rowid as id, cf.ref, cf.date_creation as date, s.nom FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur cf';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cfe ON cf.rowid = cfe.fk_object';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON s.rowid = cf.fk_soc';
-            $sql .= ' WHERE cf.fk_soc = ' . (int) $id_fourn . ' AND cf.fk_statut = 0 AND cfe.entrepot = ' . (int) $id_entrepot;
+            $sql .= ' WHERE cf.fk_soc = ' . (int) $id_fourn . ' AND cf.fk_statut = 0';
+            if($id_entrepot)
+                $sql .= ' AND cfe.entrepot = ' . (int) $id_entrepot;
             $sql .= ' ORDER BY cf.rowid DESC';
 
             $rows = $this->db->executeS($sql);
@@ -3747,7 +3751,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         if ((int) $this->getData('type') === self::LINE_PRODUCT) {
             $product = $this->getProduct();
-            if ((int) $product->getData('fk_product_type') === 0) {
+            if ($product && (int) $product->getData('fk_product_type') === 0) {
                 $decimals = 0;
             }
         }

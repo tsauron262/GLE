@@ -9,7 +9,13 @@ class adminController extends BimpController
         $html = "";
         global $db;
 
-        $sql = $db->query("SELECT * FROM `llx_bc_caisse` c, llx_entrepot e WHERE `id_entrepot` = e.rowid ORDER BY e.ref");
+        $entity = '';
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            $entity = getEntity('caisse', 0);
+        }
+
+        $sql = $db->query("SELECT * FROM `llx_bc_caisse` c, llx_entrepot e WHERE `id_entrepot` = e.rowid " . ($entity !== '' ? ' AND c.entity = ' . $entity : '') . " ORDER BY e.ref");
 
         $tabEntCaisse = array();
         while ($ln = $db->fetch_object($sql)) {

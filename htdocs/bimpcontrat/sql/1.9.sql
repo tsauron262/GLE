@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contratdet` ADD `renouv_task` tinyint(1) NOT NULL DEFAULT 0;

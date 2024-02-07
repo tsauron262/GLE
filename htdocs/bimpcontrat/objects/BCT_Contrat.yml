@@ -85,8 +85,7 @@ objects:
         instance:
             id_object:
                 field_value: fk_user_validate
-                
-        
+            
     commercial_suivi:
         extends: user
         instance:
@@ -349,6 +348,13 @@ fields:
             1: Contrats standards
             2: Contrats d'abonnement
         default_value: 2
+        
+    fac_mode: 
+        label: Mode de facturation
+        type: int
+        values: 
+            array: fac_modes
+        default_value: 1
               
 forms: 
     default: 
@@ -362,9 +368,34 @@ forms:
             - field: entrepot
             - field: secteur
             - field: expertise
+            - field: fac_mode
+              show: 
+                  conf: 
+                      module: bimpcontrat
+                      name: allow_fac_mois_en_cours
             - field: note_public
             - field: note_private
             
+    edit: 
+        rows: 
+            - field: statut
+            - field: label
+            - field: fk_soc
+            - field: fk_soc_facturation
+            - field: ref_customer
+            - field: condregl
+            - field: moderegl
+            - field: entrepot
+            - field: secteur
+            - field: expertise
+            - field: fac_mode
+              show: 
+                  conf: 
+                      module: bimpcontrat
+                      name: allow_fac_mois_en_cours
+            - field: note_public
+            - field: note_private
+        
     contact:
         title: Ajouter un contact
         rows: 
@@ -441,18 +472,33 @@ forms:
               display_if: 
                   field_name: type
                   show_values: 2 
+                  
+    merge: 
+        rows: 
+            - custom: 1
+              label: Contrat à importer
+              input_name: id_contrat_to_import
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      callback: getContratsToMergeArray
             
 fields_tables: 
     infos: 
         title: Informations
         icon: fas_info-circle
         rows: 
-#            - field: date_contrat
-#            - field: date_start
             - field: entrepot
             - field: secteur
             - field: expertise
               edit: 1
+            - field: fac_mode
+              edit: 1
+              show: 
+                  conf: 
+                      module: bimpcontrat
+                      name: allow_fac_mois_en_cours
             - field: note_public
             - field: note_private
             
@@ -504,11 +550,7 @@ views:
                   col_md: 6
                   custom: 
                       callback: renderLinkedObjectsTable
-            - cols: 
-                - type: list
-                  list:
-                      name: contrat
-                      children: lines
+                      
     full: 
         rows:
           - cols: 
@@ -525,12 +567,49 @@ views:
                   col_md: 6
                   fields_table: 
                       name: client
-              
+                      
+          - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderLinkedObjectsTable
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: reglement
+                      
+          - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderSyntheseTab
+       
+filters_panels: 
+    default: 
+        filters: 
+            statut: 
+            ref: 
+            fk_soc: 
+            fk_commercial_suivi: 
+            datec: 
+            entrepot: 
+            secteur: 
+                
+    client: 
+        extends: default
+        filters: 
+            fk_soc: unset
+                
 lists: 
     default:
         title: Tous les contrats d'abonnement
+        filters_panel: default
         configurable: 1
         checkboxes: 1
+        header_buttons: 
+            callback: getDefaultListHeaderButtons
         list_filters: 
             - name: version
               filter: 2
@@ -551,6 +630,12 @@ lists:
             statut:
             fk_soc:
             fk_commercial_suivi:
+                
+    client: 
+        extends: default
+        header_buttons: unset
+        cols: 
+            fk_soc: unset
 
 searches:
     default:

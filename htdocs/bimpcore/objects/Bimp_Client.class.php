@@ -1267,7 +1267,7 @@ class Bimp_Client extends Bimp_Societe
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         if (!is_null($file) && $file) {
             $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
-        } 
+        }
         if (!$only_loaded) {
 //            return BimpInput::renderInput('file_upload', 'atradius_file');
             // Demande encours altriadus
@@ -1496,13 +1496,24 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Contrats
-        if ($this->isModuleActif('bimpcontract'))
+        if ($this->isModuleActif('bimpcontract')) {
             $tabs[] = array(
                 'id'            => 'client_contrats_list_tab',
                 'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
             );
+        }
+
+        // Contrats v2 (Abonnements)
+        if ($this->isModuleActif('bimpcontract')) {
+            $tabs[] = array(
+                'id'            => 'client_contrats_v2_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats d\'abonnement',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_v2_list_tab .nav_tab_ajax_result\')', array('contrats_v2'), array('button' => ''))
+            );
+        }
 
         // Opérations périodiques : 
 
@@ -1753,6 +1764,13 @@ class Bimp_Client extends Bimp_Societe
             case 'contrats':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcontract', 'BContract_contrat'), 'default', 1, null, 'Contrats du client "' . $client_label . '"', 'fas_file-signature');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                $list->addFieldFilterValue('version', 1);
+                break;
+
+            case 'contrats_v2':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcontrat', 'BCT_Contrat'), 'default', 1, null, 'Contrats d\'abonnement du client "' . $client_label . '"', 'fas_file-signature');
+                $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                $list->addFieldFilterValue('version', 2);
                 break;
 
             case 'paiements_inc':
@@ -2467,10 +2485,10 @@ class Bimp_Client extends Bimp_Societe
         if (!$this->isLoaded($err)) {
             return BimpRender::renderAlerts($err);
         }
-        
+
         $commandeController = BimpController::getInstance('bimpcommercial', 'commandes');
         return $commandeController->renderPeriodsTab(array(
-            'id_client' => $this->id
+                    'id_client' => $this->id
         ));
     }
 
@@ -2994,8 +3012,9 @@ class Bimp_Client extends Bimp_Societe
 
         return $errors;
     }
-    
-    public function updateAtradiusValueForClient($field, $value, &$errors, &$warnings){
+
+    public function updateAtradiusValueForClient($field, $value, &$errors, &$warnings)
+    {
         if ($field == 'date_atradius') {
             $errors = BimpTools::merge_array($errors, $this->updateField($field, $value));
         } else {
@@ -3017,13 +3036,12 @@ class Bimp_Client extends Bimp_Societe
         // On est en train de définir une limite de crédit => supression du crédit check
         if ($field == 'outstanding_limit_atradius' and 0 < $value)
             $errors = self::updateAtradiusValue($clientBase, 'outstanding_limit_credit_check', -1);
-        
+
         $siren = $clientBase->getData('siren');
-        
-        if($siren == '' || strlen($siren) < 5){//on mais a jour que ce client
+
+        if ($siren == '' || strlen($siren) < 5) {//on mais a jour que ce client
             $clientBase->updateAtradiusValueForClient($field, $value, $errors, $warnings);
-        }
-        else{
+        } else {
             $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
 
             foreach ($clients as $c) {

@@ -436,6 +436,7 @@ Preferred Field
                             if (preg_match('/^(Z[^\/]+)$/', $prod_ref, $matches)) {
                                 $prod_ref = substr($matches[1], 0, 4);
                             }
+                            
                             if (isset($prod['factures']) && !empty($prod['factures'])) {
                                 foreach ($prod['factures'] as $id_fac => $fac_lines) {
                                     $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'ref', 'datef', 'id_client_final'), 'array');
@@ -454,17 +455,17 @@ Preferred Field
                                         $is_educ = true;
                                         $customer_code = $soc_data['type_educ'];
                                     } else {
-                                        $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
-                                        if ($secteur == 'BP') {
-                                            $customer_code = 'BB';
-                                        } else {
+//                                        $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
+//                                        if ($secteur == 'BP') {
+//                                            $customer_code = 'BB';
+//                                        } else {
                                             $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
                                             if (!$id_soc_type) {
                                                 $customer_code = 'EN';
                                             } else {
                                                 $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
                                             }
-                                        }
+//                                        }
                                     }
 
                                     if (isset($soc_data['fk_pays']) && array_key_exists((int) $soc_data['fk_pays'], $countries)) {
@@ -480,6 +481,33 @@ Preferred Field
                                     $dt_fac = new DateTime($fac_data['datef']);
 
                                     foreach ($fac_lines as $id_line => $line_data) {
+                                        // Ligne pour correction
+//                                        if ($secteur == 'BP') {
+//                                            $file_str .= '"' . implode('";"', array(
+//                                                    $shipTo, // A
+//                                                    substr($prod_ref, 0, 15), // B
+//                                                    '',
+//                                                    '',
+//                                                    0, // E
+//                                                    0, // F
+//                                                    '',
+//                                                    $line_data['subprice'],
+//                                                    $fac_data['ref'], // I
+//                                                    $line_data['position'], // J
+//                                                    $dt_fac->format('Ymd'),
+//                                                    '',
+//                                                    ($is_educ ? str_replace('"', '', substr($soc_data['nom'], 0, 70)) : (!in_array($customer_code, array('EN', 'E4')) ? 'XXX' : '')), // M
+//                                                    ($is_educ ? str_replace(array('"', "
+//", '
+//', "\n", "\r", 'Hotel'), '', substr($soc_data['address'], 0, 70)) : ($customer_code != 'EN' ? 'XXX' : '')), // N
+//                                                    ($is_educ ? str_replace('"', '', substr($soc_data['town'], 0, 19)) : (!in_array($customer_code, array('EN', 'E4')) ? 'XXX' : '')), // O
+//                                                    '',
+//                                                    ($is_educ ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q
+//                                                    $country_code, // R
+//                                                    'BB' // S
+//                                                )) . '"' . "\n";
+//                                        }
+                                        
                                         $file_str .= '"' . implode('";"', array(
                                                     $shipTo, // A
                                                     substr($prod_ref, 0, 15), // B

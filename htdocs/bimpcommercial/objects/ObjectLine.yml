@@ -130,8 +130,8 @@ fields:
         
     remisable: 
         label: Remisable
-        type: bool
-        viewable: 0
+        type: int
+        viewable: 1
         filterable: 0
         filterable: 0
         default_value: 1

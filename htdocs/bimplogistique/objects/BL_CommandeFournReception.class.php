@@ -2103,7 +2103,11 @@ class BL_CommandeFournReception extends BimpObject
                     foreach ($elements as $id_line) {
                         $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
                         if (BimpObject::objectLoaded($line)) {
-                            $line->validateReception($this->id, false, $stock_out, false, false, null);
+                            $line_errors = $line->validateReception($this->id, false, $stock_out, false, false, null);
+
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                            }
                         }
                     }
                 }
@@ -2130,7 +2134,11 @@ class BL_CommandeFournReception extends BimpObject
                     foreach ($lines as $id_line => $serials) {
                         $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
                         if (BimpObject::objectLoaded($line)) {
-                            $line->validateReception($this->id, false, $stock_out, false, false, $serials);
+                            $line_errors = $line->validateReception($this->id, false, $stock_out, false, false, $serials);
+
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                            }
                         }
                     }
                 }
@@ -2157,7 +2165,11 @@ class BL_CommandeFournReception extends BimpObject
                     foreach ($lines as $id_line => $equipments) {
                         $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
                         if (BimpObject::objectLoaded($line)) {
-                            $line->validateReception($this->id, false, $stock_out, false, false, $equipments);
+                            $line_errors = $line->validateReception($this->id, false, $stock_out, false, false, $equipments);
+
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                            }
                         }
                     }
                 }

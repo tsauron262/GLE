@@ -26,7 +26,7 @@
         }
         
         public function constructTra($transaction, Bimp_Paiement $parent_paiement, $pay) {
-            
+            $ecriture = '';
             $facture        = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $transaction->fk_facture);
             $client         = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', /*(!$this->isVenteTicket($parent_paiement->id) ? $this->vente->getData('id_client') :*/ $facture->getData('fk_soc')/*)*/);
             $datec          = new DateTime($parent_paiement->getData('datec'));
@@ -35,6 +35,13 @@
             $code_compta    = ($this->isVenteTicket($parent_paiement->id)) ? $entrepot->compte_aux : $this->TRA_tiers->getCodeComptable($client);
             $compte_bancaire = $this->db->getRow('bank_account', 'rowid = ' . $this->db->getValue('bank', 'fk_account', 'rowid = ' . $parent_paiement->getData('fk_bank')));
             $reglement_mode = $this->db->getRow('c_paiement', 'id = ' . $pay->fk_paiement);
+            
+            if(is_null($entrepot)){
+                $entrepot = new stdClass();
+                $entrepot->code_journal_compta = BimpCore::getConf('default_code_journal', '', 'bimptocegid');
+                $entrepot->compte_comptable = BimpCore::getConf('default_compte_compta', '', 'bimptocegid');
+                $entrepot->compte_comptable_banque = BimpCore::getConf('default_compte_compta', '', 'bimptocegid');
+            }
             
             if ($client->getData('is_subsidiary')) {
                 $this->compte_general = $client->getData('accounting_account');
@@ -79,7 +86,7 @@
             ];
 
             $structure = Array();
-            $structure['JOURNAL']           = sizing((array_key_exists($reglement_mode->code, $compteByModeReglement) ? $codeJournalByModeReglement[$reglement_mode->code] : $entrepot->code_journal_compta), 3);
+            $structure['JOURNAL']           = sizing((array_key_exists($reglement_mode->code, $codeJournalByModeReglement) ? $codeJournalByModeReglement[$reglement_mode->code] : $entrepot->code_journal_compta), 3);
             $structure['DATEP']             = sizing($datep->format('dmY'), 8);
             $structure['TYPE_PIECE']        = sizing('RC', 2);
             $structure['COMPTE']            = sizing((array_key_exists($reglement_mode->code, $compteByModeReglement) ? $compteByModeReglement[$reglement_mode->code] : $entrepot->compte_comptable ), 17);

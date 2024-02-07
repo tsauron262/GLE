@@ -4,6 +4,7 @@ class BimpObject extends BimpCache
 {
 
     public $db = null;
+    public $checkEntity = true;
     public $cache_id = 0;
     public $module = '';
     public $object_name = '';
@@ -93,10 +94,11 @@ class BimpObject extends BimpCache
     public $isDeleting = false;
     public $thirdparty = null;
     public $force_update = false;
+    public $on_save_processing = false;
 
     // Gestion instance:
 
-    public static function getInstance($module, $object_name, $id_object = null, $parent = null)
+    public static function getInstance($module, $object_name, $id_object = null, $parent = null, $checkEntity = true)
     {
         $className = '';
         $instance = null;
@@ -226,9 +228,12 @@ class BimpObject extends BimpCache
                 $instance = clone self::$cache[$cache_key];
             }
         }
+        
+        $instance->reset();
 
         if (is_a($instance, 'BimpObject')) {
             if (!is_null($id_object)) {
+                $instance->checkEntity = $checkEntity;
                 $instance->fetch($id_object, $parent);
             } else {
                 $instance->parent = $parent;
@@ -739,7 +744,10 @@ class BimpObject extends BimpCache
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
-            return DOL_DATA_ROOT . '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+            $more = '';
+            if($this->getEntity_name() && $this->getData('entity') > 1)
+                $more .= '/'.$this->getData('entity');
+            return DOL_DATA_ROOT .$more. '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
         }
 
         return '';
@@ -762,7 +770,11 @@ class BimpObject extends BimpCache
 
         $file = $this->module . '/' . $this->object_name . '/' . $this->id . '/' . $file_name;
 
-        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode($file);
+        $more = '';
+        if($this->getEntity_name() && $this->getData('entity'))
+            $more .= 'entity='.$this->getData('entity').'&';
+        
+        return DOL_URL_ROOT . '/' . $page . '.php?'.$more.'modulepart=bimpcore&file=' . urlencode($file);
     }
 
     public function getNameProperties()
@@ -1298,7 +1310,7 @@ class BimpObject extends BimpCache
     public function getEntity_name()
     {
         $entity = $this->getConf('entity_name', 0);
-        if ($entity == 0 && isset($this->dol_object) && $this->dol_object->ismultientitymanaged)
+        if ($entity == 0 && isset($this->dol_object) && isset($this->dol_object->ismultientitymanaged) && $this->dol_object->ismultientitymanaged)
             $entity = $this->dol_object->element;
 
         return $entity;
@@ -2379,8 +2391,9 @@ class BimpObject extends BimpCache
         if (!count($result['errors'])) {
             BimpTools::traitePostTraitement($result['errors']);
         }
+
         BimpObject::loadClass('bimpalert', 'AlertProduit');
-        if(class_exists('AlertProduit')){
+        if (class_exists('AlertProduit')) {
             AlertProduit::getAlertes($result['errors'], $result['warnings']);
         }
 
@@ -3740,7 +3753,7 @@ class BimpObject extends BimpCache
                             $module = 'bimpcontract';
                             $class = 'BContract_contrat';
                             break;
-                        case 'bimp_contrat': 
+                        case 'bimp_contrat':
                             $module = 'bimpcontrat';
                             $class = 'BCT_Contrat';
                             break;
@@ -3900,10 +3913,9 @@ class BimpObject extends BimpCache
 
         // Vérification des filtres: 
         $filters = $this->checkSqlFilters($filters, $joins, 'a');
-        
-        
-        /*todo a ajouter de maniere gnérique dans les yml d'un objet*/
-        if(is_a($this, 'BimpFi_Fiche')){
+
+        /* todo a ajouter de maniere gnérique dans les yml d'un objet */
+        if (is_a($this, 'BimpFi_Fiche')) {
             $filters['new_fi'] = 0;
         }
 
@@ -4095,13 +4107,12 @@ class BimpObject extends BimpCache
 
         $rows = $this->getList($filters, $n, $p, $order_by, $order_way, 'array', array($primary));
 
-
         $ids = array();
         foreach ($rows as $r) {
             $ids[] = (int) $r[$primary];
         }
         $objects = array();
-        
+
         $collection = BimpCollection::getInstance($this->module, $this->object_name);
         $collection->addFields($fields);
         $collection->addItems($ids);
@@ -4157,6 +4168,14 @@ class BimpObject extends BimpCache
         }
 
         $sql .= BimpTools::getSqlFrom($table, $joins);
+        
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            $newJoins = array();
+            if ($this->getEntityFilter($newJoins, $filters)) {
+                $joins = BimpTools::merge_array($joins, $newJoins);
+            }
+        }
+        
         $sql .= BimpTools::getSqlWhere($filters);
 
         $rows = $this->db->executeS($sql, 'array');
@@ -4875,7 +4894,7 @@ class BimpObject extends BimpCache
                 BimpTools::traitePostTraitement($errors);
             }
             BimpObject::loadClass('bimpalert', 'AlertProduit');
-            if(class_exists('AlertProduit')){
+            if (class_exists('AlertProduit')) {
                 AlertProduit::getAlertes($errors, $warnings);
             }
 
@@ -4894,7 +4913,7 @@ class BimpObject extends BimpCache
 
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
                             'Action' => 'Save From Post',
-                            'Warnings' > $warnings
+                            'Warnings' => $warnings
                                 ), true);
                     }
                 }
@@ -5146,7 +5165,11 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    $this->onSave($errors, $warnings);
+                    if (!$this->on_save_processing) { // Pour éviter boucles infinies
+                        $this->on_save_processing = true;
+                        $this->onSave($errors, $warnings);
+                        $this->on_save_processing = false;
+                    }
 
                     if (static::$check_on_create) {
                         $this->checkObject('create');
@@ -5322,7 +5345,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
 
-                        $this->onSave($errors, $warnings);
+                        if (!$this->on_save_processing) { // Pour éviter boucles infinies
+                            $this->on_save_processing = true;
+                            $this->onSave($errors, $warnings);
+                            $this->on_save_processing = false;
+                        }
+
                         if (static::$check_on_update) {
                             $this->checkObject('update');
                         }
@@ -5475,7 +5503,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
 
-                        $this->onSave($errors, $warnings);
+                        if (!$this->on_save_processing) { // Pour éviter boucles infinies
+                            $this->on_save_processing = true;
+                            $this->onSave($errors, $warnings);
+                            $this->on_save_processing = false;
+                        }
 
                         if (static::$check_on_update_field) {
                             $this->checkObject('updateField', $field);
@@ -5600,9 +5632,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $where = '`' . $primary . '` = ' . (int) $id;
-        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+        if ($this->checkEntity && BimpTools::isModuleDoliActif('MULTICOMPANY')) {
             if ($this->getEntity_name())
-                $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ')';
+                $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ', 0)';
         }
         $row = $this->db->getRow($table, $where);
 
@@ -6199,7 +6231,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             return false;
         }
-        if (isset($this->dol_object->entity) && !in_array($this->dol_object->entity, $this->getEntitysArray()))
+        if ($this->checkEntity && isset($this->dol_object->entity) && !in_array($this->dol_object->entity, $this->getEntitysArray()))
             return false;
 
         $bimpObjectFields = array();
@@ -6208,9 +6240,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!empty($bimpObjectFields)) {
             $where = '`' . $this->getPrimary() . '` = ' . (int) $id;
-            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if ($this->checkEntity && BimpTools::isModuleDoliActif('MULTICOMPANY')) {
                 if ($this->getEntity_name())
-                    $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ')';
+                    $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ', 0)';
             }
             $result = $this->db->getRow($this->getTable(), $where, $bimpObjectFields, 'array');
             if (!is_null($result)) {
@@ -7158,7 +7190,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($this->params['icon']) {
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
-            $html .= BimpTools::ucfirst($this->getLabel()) . ' <span style="font-size: 0.5em">#' . $this->id.'</span>';
+            $html .= BimpTools::ucfirst($this->getLabel()) . ' <span style="font-size: 0.5em">#' . $this->id . '</span>';
             $html .= '</h1>';
 
             $ref = $this->getRef(false);
@@ -7417,6 +7449,24 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $url = $this->getListPageUrl();
 
             if ($url) {
+                if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+                    $objectTest = BimpObject::getInstance($this->module, $this->object_name, BimpTools::getValue('id'), null, false);
+                    global $conf;
+                    $currentEntity = $conf->entity;
+                    if($objectTest->isLoaded() /*&& $objectTest->can('view')*/ && $objectTest->getData('entity') > 0 && $currentEntity != $objectTest->getData('entity')){
+                        global $mc;
+                        $ret=$mc->switchEntity($objectTest->getData('entity'));
+                        global $user;
+                        $user->getrights('', true);
+                        if($objectTest->can('view')){
+                            $html .= BimpRender::renderAlerts('Changement d\'entité.........', "warning");
+                            $html .= '<script>location.reload();</script>';
+                        }
+                        else{//ca marche pas, onn reste sur l'entité curent
+                            $ret=$mc->switchEntity($currentEntity);
+                        }
+                    }
+                }
                 $html .= '<div class="buttonsContainer align-center">';
                 $html .= '<button class="btn btn-large btn-primary" onclick="window.location = \'' . $url . '\'">';
                 $html .= BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur');
@@ -8788,7 +8838,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 $fl = false;
             }
-            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . $value . '\''));
+            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /*htmlentities(addslashes(**/$value/*))*/ . '\''));
         }
         $js .= '}, ';
         if (isset($params['result_container'])) {
@@ -9395,7 +9445,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         } else {
             global $conf;
-            $url = BimpCore::getConf('base_url', DOL_MAIN_URL_ROOT .'/bimpcore/url_light.php?'.($conf->entity > 1 ? 'entity='.$conf->entity.'&' : ''), 'bimpinterfaceclient');
+            $url = BimpCore::getConf('base_url', DOL_MAIN_URL_ROOT . '/bimpcore/url_light.php?' . ($conf->entity > 1 ? 'entity=' . $conf->entity . '&' : ''), 'bimpinterfaceclient');
         }
 
 
@@ -10059,6 +10109,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             global $conf;
             $dir = $conf->bimpcore->multidir_output[$conf->entity];
+            $dir = str_replace(DOL_DATA_ROOT, PATH_TMP, $dir);
+//            $dir = PATH_TMP.'/bimpcore/';
+            $dir_error = BimpTools::makeDirectories(array($conf->entity => array('bimpcore')), PATH_TMP);
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(
@@ -10938,7 +10991,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!(int) $this->redirectMode) {
             return '';
         }
-        
+
         if (BimpTools::getValue("redirectForce_oldVersion"))
             $_SESSION['oldVersion'] = true;
 
@@ -11153,7 +11206,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         }
         global $tabCentre;
-        if(count($tabCentre) == 1){
+        if (count($tabCentre) == 1) {
             foreach ($tabCentre as $code_centre => $centre) {
                 return $code_centre;
             }

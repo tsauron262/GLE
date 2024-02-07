@@ -126,7 +126,7 @@ class BimpFile extends BimpObject
     public function getFileUrl($file_name = '', $page = '')
     {
         $file = (string) $this->getData('file_name');
-        $ext = (string) strtolower($this->getData('file_ext'));
+        $ext = (string) $this->getData('file_ext');
 
         if (!$file || !$ext) {
             return '';
@@ -292,6 +292,28 @@ class BimpFile extends BimpObject
         }
 
         return '';
+    }
+    
+    public function display_size(){
+        $unite = "o";
+        $size = $this->getData('file_size');
+        if($size > 1024){
+            $size = $size / 1024;
+            $unite = "Ko";
+        }
+        if($size > 1024){
+            $size = $size / 1024;
+            $unite = "Mo";
+        }
+        if($size > 1024){
+            $size = $size / 1024;
+            $unite = "Go";
+        }
+        if($size > 1024){
+            $size = $size / 1024;
+            $unite = "To";
+        }
+        return round($size,2) .' '. $unite;
     }
 
     public function displayAnonymizedFiles($bc_list)

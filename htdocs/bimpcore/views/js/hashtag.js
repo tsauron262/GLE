@@ -1,4 +1,4 @@
-
+notifHashtag = null;
 class hashtag extends AbstractNotification {
 
     /**
@@ -7,6 +7,7 @@ class hashtag extends AbstractNotification {
 
     constructor(nom, id_notification) {
         super(nom, id_notification);
+        notifHashtag = this;
     }
 
     init() {

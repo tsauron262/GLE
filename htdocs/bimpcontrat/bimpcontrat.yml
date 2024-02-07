@@ -1,0 +1,28 @@
+params: 
+    # Principaux:
+    abos_id_entrepot: 
+        label: ID entrepôt pour les produits de type abonnement
+        info: laisser vide pour utiliser l'entrepôt spécifié dans chaque contrat
+
+    allow_fac_mois_en_cours: 
+        label: Autoriser la facturation des abonnements sur le mois en cours
+        type: bool
+        def: 0
+        
+    default_fac_mode: 
+        label: Mode de facturation des abonnements par défaut
+        type: select
+        values: 
+            1: Mois en cours
+            2: A date
+        def: 2
+        
+    abo_renouv_auto_delay: 
+        label: Délai de renouvellement auto
+        info: Nombre de jours avant la date de fin de validité pour déclencher le renouvellement auto</br>Mettre 0 pour désactiver les renouvellements auto. 
+        def: 0
+        
+    abo_renouv_task_delay: 
+        label: Délai pour tâches renouvellements manuels.
+        info: Nombre de jours avant la date de fin de validité pour déclencher la création d'une tâche pour renouvellement manuels</br>Mettre 0 pour désactiver ces tâches
+        def: 0

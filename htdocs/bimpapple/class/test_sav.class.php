@@ -139,6 +139,9 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
             $req .= " AND (s.status = 999 || (DATEDIFF(now(), s.date_terminer) > 5) && s.status >= 9)";
         } else
             $req .= " AND s.status = 9";
+        
+        global $conf;
+        $req .= " AND s.entity = ".$conf->entity;
 
 
         $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";

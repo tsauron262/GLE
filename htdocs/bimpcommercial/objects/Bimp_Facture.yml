@@ -691,7 +691,6 @@ forms:
               content: 
                   callback: renderCheckPaForm
 #              depends_on: type_check
-
     date_next_relance: 
         rows: 
             - field: date_next_relance
@@ -704,15 +703,28 @@ forms:
               
     lines_to_facture: 
         rows: 
-            - custom: 1
-              label: Facture
-              input_name: id_facture
-              data_type: id
-              input: 
-                  type: select
-                  options: 
-                      array: draftFacturesForRefacture
-                      
+            facture: 
+                custom: 1
+                label: Facture
+                input_name: id_facture
+                data_type: id
+                input: 
+                    type: select
+                    options: 
+                        array: draftFacturesForRefacture
+                        
+    cancel_refacture: 
+        extends: lines_to_facture
+        rows: 
+            facture: 
+                label: Refacturer vers
+                input: 
+                    options: 
+                        callback: 
+                            method: getDraftFacturesForRefactureArray
+                            params: 
+                                - 1
+                   
     export_to_chorus: 
         rows: 
             - custom: 1
@@ -819,8 +831,7 @@ forms:
                           prop: object_name
                       id_parent: 
                           prop: id
-
-                        
+ 
     validation_avoir:
         rows:
 

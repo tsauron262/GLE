@@ -28,11 +28,22 @@ fields:
         type: int
         values:
             callback: getRightsDefArray
+            
+    entity: 
+        label: Entité
+        type: int
+        values: 
+            callback: getEntitiesCacheArray
+        default_value: 1
         
 forms: 
     default: 
         rows: 
             - field: fk_user
+            - field: entity
+              required: 1
+              show: 
+                  is_module_active: MULTICOMPANY
             - custom: 1
               label: Module
               input_name: right_module
@@ -54,11 +65,14 @@ forms:
               depends_on: right_module
               display_if: 
                   field_name: right_module
-                  hide_values: ''
+                  hide_values: ''              
                   
 filters_panels: 
     default: 
         filters: 
+            entity: 
+                show: 
+                    is_module_active: MULTICOMPANY
             fk_user: 
             fk_id: 
             right_module: 
@@ -76,6 +90,9 @@ lists:
             right_module:
             libelle: 
             code:
+            entity: 
+                show: 
+                  is_module_active: MULTICOMPANY
             
     user: 
         extends: default

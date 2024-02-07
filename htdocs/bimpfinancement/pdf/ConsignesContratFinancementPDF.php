@@ -82,7 +82,7 @@ class ConsignesContratFinancementPDF extends DocFinancementPDF
 
         $html .= '<table>';
         $html .= '<tr>';
-        $html .= '<td><b>Valérie ROMAGNY / Gaëlle MARECHAL</b><br/><a href="mailto: financement@ldlc.pro">financement@ldlc.pro</a><br/>Tél : 04 26 68 17 94</td>';
+        $html .= '<td><b>Gaëlle MARECHAL</b><br/><a href="mailto: financement@ldlc.pro">financement@ldlc.pro</a><br/>Tél : 04 26 68 17 94</td>';
         $html .= '<td><b>Alain GAILLARD</b><br/><a href="mailto: a.gaillard@ldlc.pro">a.gaillard@ldlc.pro</a><br/>Tél : 06 22 47 00 09</td>';
         $html .= '</tr>';
         $html .= '</table>';

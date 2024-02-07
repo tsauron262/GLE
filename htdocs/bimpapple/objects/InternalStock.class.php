@@ -85,11 +85,14 @@ class InternalStock extends PartStock
                 'qty'         => 5
             );
 
+            ini_set("auto_detect_line_endings", true);
             $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
             // Checks: 
             $i = 0;
             foreach ($lines as $line) {
+                if(stripos($line, 'Composant') !== false && stripos($line, 'Description') !== false && stripos($line, 'Prix') !== false)//semble être la ligne de titre
+                        continue;
                 $i++;
                 $line_errors = array();
                 $line_data = str_getcsv($line, ';');
@@ -109,10 +112,11 @@ class InternalStock extends PartStock
             if (!count($errors)) {
                 $i = 0;
                 foreach ($lines as $line) {
+                    if(stripos($line, 'Composant') !== false && stripos($line, 'Description') !== false && stripos($line, 'Prix') !== false)//semble être la ligne de titre
+                            continue;
                     $i++;
                     $line_errors = $line_warnings = array();
                     $line_data = str_getcsv($line, ';');
-
                     $part_number = trim(BimpTools::getArrayValueFromPath($line_data, $keys['part_number'], ''));
                     $desc = trim(BimpTools::getArrayValueFromPath($line_data, $keys['desc'], ''));
                     $prod_label = trim(BimpTools::getArrayValueFromPath($line_data, $keys['prod'], ''));
@@ -157,12 +161,14 @@ class InternalStock extends PartStock
                         $stock = BimpObject::createBimpObject('bimpapple', 'InternalStock', array(
                                     'code_centre'   => $code_centre,
                                     'part_number'   => $part_number,
-                                    'qty'           => $qty,
+                                    'qty'           => 0,
                                     'description'   => $desc,
                                     'product_label' => $prod_label,
                                     'code_eee'      => $eee,
                                     'last_pa'       => $pa_ht
                                         ), true, $line_errors, $line_wanings);
+                        if(!count($line_errors))
+                            $line_errors = $stock->correctStock($qty, '', 'IMPORT_CSV', 'Import CSV');
                     }
 
                     if (count($line_errors)) {

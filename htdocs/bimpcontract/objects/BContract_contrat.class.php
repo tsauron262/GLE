@@ -230,7 +230,7 @@ class BContract_contrat extends BimpDolObject
             case 'current_renouvellement':
             case 'tacite':
             case 'date_end_renouvellement':
-                if ($user->admin)
+                if ($user->admin || $user->rights->bimpcontract->to_validate)
                     return 1;
                 break;
             case 'show_fact_line_in_pdf':
@@ -2446,7 +2446,7 @@ class BContract_contrat extends BimpDolObject
             $htmlT = "<strong>";
             $htmlT .= 'Prix d\'achat : '. BimpTools::displayMoneyValue($pa);
             $htmlT .= '</strong>';
-            $html .= BimpRender::renderPanel('Prix de reviens', $htmlT);
+            $html .= BimpRender::renderPanel('Prix de revient', $htmlT);
             $cout += $pa;
             $coutPrevi += $pa;
         }
@@ -2859,6 +2859,9 @@ class BContract_contrat extends BimpDolObject
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                if ($produit->isAbonnement()) {
+                    continue;
+                }
                 if ($produit->getData('fk_product_type') == 1 || !BimpCore::getConf('just_code_service', null, 'bimpcontract') || $line->pa_ht == 0) {
                     $description = ($line->desc && $line->desc != '<br>') ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);

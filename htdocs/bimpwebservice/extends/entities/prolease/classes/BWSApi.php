@@ -136,6 +136,11 @@ BWSApi::$requests['addDemandeFinancementNote'] = array(
 BWSApi::$requests['getPropositionLocation'] = array(
     'desc'   => 'Obtenir une proposition de location',
     'params' => array(
+        'client_data'       => array('label'      => 'Données client', 'data_type'  => 'json', 'sub_params' => array(
+                'nom'          => array('label' => 'Nom'),
+                'full_address' => array('label' => 'Adresse complète')
+            )
+        ),
         'title'             => array('lable' => 'Titre du document', 'default' => ''),
         'montant_materiels' => array('label' => 'Total matériels HT', 'data_type' => 'money', 'default' => 0),
         'montant_services'  => array('label' => 'Total services HT', 'data_type' => 'money', 'default' => 0),

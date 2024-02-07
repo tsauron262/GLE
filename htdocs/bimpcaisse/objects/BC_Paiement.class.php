@@ -45,6 +45,21 @@ class BC_Paiement extends BimpObject
 
     // Getters: 
 
+    public function getListFilters()
+    {
+        $filters = array();
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            $entity = getEntity('caisse', 0);
+
+            if ($entity) {
+                $filters[] = array('name' => 'id_caisse', 'filter' => array('in' => 'SELECT caisse.id FROM ' . MAIN_DB_PREFIX . 'bc_caisse caisse WHERE caisse.entity = ' . $entity));
+            }
+        }
+
+        return $filters;
+    }
+    
     public function getAmount()
     {
         $paiement = $this->getChildObject('paiement');

@@ -194,8 +194,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                     } elseif (!in_array($secteur, array('S', 'M'))) {
                         $this->fromCompany->name = "OLYS BIMP.PRO";
                     }
-                }
-                elseif(BimpCore::isEntity('actimac') && $secteur != 'S'){
+                } elseif (BimpCore::isEntity('actimac') && $secteur != 'S') {
                     $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
 
                     if ($cgv_file && file_exists($cgv_file)) {
@@ -408,7 +407,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                             $contact = null;
                         }
 
-                        $html .= str_replace("\n", "<br/>",  $client->dol_object->nom . '<br/>' .  pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (BimpObject::objectLoaded($contact) ? $contact->dol_object : ''), !is_null($contact) ? 1 : 0, 'target'));
+                        $html .= str_replace("\n", "<br/>", $client->dol_object->nom . '<br/>' . pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (BimpObject::objectLoaded($contact) ? $contact->dol_object : ''), !is_null($contact) ? 1 : 0, 'target'));
                         break 2;
                     }
                 }
@@ -467,7 +466,7 @@ class InvoicePDF extends BimpCommDocumentPDF
         }
 
         if (stripos($this->object->mode_reglement_code, 'FIN') === false) {
-            $html .= '<tr><td style="color: #A00000; font-weight: bold">';
+            $html .= '<tr><td style="font-weight: bold">';
             $html .= '<br/>Merci de noter systématiquement le n° de facture sur votre règlement<br/>';
             $html .= '</td></tr>';
 
@@ -555,19 +554,6 @@ class InvoicePDF extends BimpCommDocumentPDF
 
         return $html;
     }
-    
-    public function renderAfterLines(){
-        global $conf;
-        $html = '';
-        if(isset($conf->global->INVOICE_FREE_TEXT) && $conf->global->INVOICE_FREE_TEXT != ''){
-            $html .= '<p style="font-size: 6px; font-style: italic">';
-            $html .= $conf->global->INVOICE_FREE_TEXT;
-            $html .= '</p>';
-        }
-        if($html != '')
-            $this->writeContent($html);
-        parent::renderAfterLines();
-    }
 
     public function getPaymentsHtml()
     {
@@ -646,15 +632,15 @@ class InvoicePDF extends BimpCommDocumentPDF
                     $text = '';
 
                 $invoice->fetch($obj->fk_facture_source);
-                
+
                 $html .= '<tr>';
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= dol_print_date($this->db->jdate($obj->datef), 'day', false, $this->langs, true);
                 $html .= '</td>';
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= price(($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $obj->multicurrency_amount_ttc : $obj->amount_ttc, 0, $this->langs);
-                if($obj->amount_tva != 0)
-                    $html .= '<span style="font-size: 6px;"> (TVA '.price($obj->amount_tva).')</span>';
+                if ($obj->amount_tva != 0)
+                    $html .= '<span style="font-size: 6px;"> (TVA ' . price($obj->amount_tva) . ')</span>';
                 $html .= '</td>';
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= $text;
@@ -695,6 +681,29 @@ class InvoicePDF extends BimpCommDocumentPDF
         $html .= '<br/><br/><br/>';
 
         return $html;
+    }
+
+    public function renderAfterLines()
+    {
+        global $conf;
+        $html = '';
+        if (isset($conf->global->INVOICE_FREE_TEXT) && $conf->global->INVOICE_FREE_TEXT != '') {
+            $html .= '<p style="font-size: 6px; font-style: italic">';
+            $html .= $conf->global->INVOICE_FREE_TEXT;
+            $html .= '</p>';
+        }
+        
+        if (isset($this->bimpCommObject) && $this->bimpCommObject->getData('zone_vente') == 2 && $this->bimpCommObject->getData('total_tva') == 0) {
+            $html .= '<p style="font-size: 6px; font-style: italic">';
+            $html .= '* Exonération de TVA liée à l’article 262 Ter du CGI';
+            $html .= '</p>';
+        }
+        
+        
+        if ($html != '')
+            $this->writeContent($html);
+        
+        parent::renderAfterLines();
     }
 
     public function renderAnnexes()

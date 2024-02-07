@@ -15,7 +15,9 @@ class Bimp_PropalLine extends ObjectLine
         3  => 'Trimestrielle',
         4  => 'Quadrimestrielle',
         6  => 'Semestrielle',
-        12 => 'Annuelle'
+        12 => 'Annuelle',
+        24 => 'Biannuelle',
+        36 => 'Triannuelle'
     );
     public static $periodicities_masc = array(
         1  => 'Mensuel',
@@ -23,7 +25,9 @@ class Bimp_PropalLine extends ObjectLine
         3  => 'Trimestriel',
         4  => 'Quadrimestriel',
         6  => 'Semestriel',
-        12 => 'Annuel'
+        12 => 'Annuel',
+        24 => 'Biannuel',
+        36 => 'Triannuel'
     );
 
     // Getters booléens
@@ -35,21 +39,6 @@ class Bimp_PropalLine extends ObjectLine
         return parent::isDeletable($force_delete, $errors);
     }
 
-    public function isAbonnement()
-    {
-        $prod = $this->getProduct();
-        if (BimpObject::objectLoaded($prod)) {
-            return $prod->isAbonnement();
-        } else {
-            $parentLine = $this->getParentLine();
-            if (BimpObject::objectLoaded($parentLine)) {
-                return $parentLine->isAbonnement();
-            }
-        }
-
-        return 0;
-    }
-
     public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv'))) {
@@ -59,6 +48,8 @@ class Bimp_PropalLine extends ObjectLine
 
             return 1;
         }
+        if (in_array($field, array('id_linked_contrat_line')))
+            return 1;
 
         return parent::isFieldEditable($field, $force_edit);
     }
@@ -68,7 +59,40 @@ class Bimp_PropalLine extends ObjectLine
         return 1;
     }
 
-    // Getters arrays: 
+    // Getters params : 
+
+    public function getListExtraBtn()
+    {
+        $buttons = parent::getListExtraBtn();
+
+        if ($this->isLoaded()) {
+            if ($this->isAbonnement()) {
+                $buttons[] = array(
+                    'label'   => 'Paramètre abonnement',
+                    'icon'    => 'fas_calendar-alt',
+                    'onclick' => $this->getJsLoadModalForm('abonnement', 'Paramètres abonnement'),
+                );
+            }
+        }
+
+
+        return $buttons;
+    }
+
+    public function getCreateJsCallback()
+    {
+        if ($this->isLoaded()) {
+            if ($this->isAbonnement() && (!(int) $this->getData('abo_fac_periodicity') || !(int) $this->getData('abo_duration'))) {
+                $onclick = 'setTimeout(function() {';
+                $onclick .= html_entity_decode($this->getJsLoadModalForm('abonnement', 'Paramètres abonnement'));
+                $onclick .= '}, 500);';
+            }
+        }
+
+        return $onclick;
+    }
+
+    // Getters arrays : 
 
     public function getNbRenouvellementsArray($max = 10)
     {
@@ -85,13 +109,15 @@ class Bimp_PropalLine extends ObjectLine
 
     public function getValueByProduct($field)
     {
-        if (in_array($field, array('is_abonnement', 'abo_fac_periodicity', 'abo_fac_term'))) {
+        if ($field == 'is_abonnement') {
+            return $this->isAbonnement();
+        }
+
+        if (in_array($field, array('abo_fac_periodicity', 'abo_fac_term'))) {
             $prod = $this->getProduct();
 
             if (BimpObject::objectLoaded($prod)) {
                 switch ($field) {
-                    case 'is_abonnement':
-                        return $prod->isAbonnement();
                     case 'abo_fac_periodicity':
                         return $prod->getData('fac_def_periodicity');
                     case 'abo_fac_term':
@@ -111,13 +137,13 @@ class Bimp_PropalLine extends ObjectLine
             if ($id_linked_contrat_line) {
                 $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_contrat_line);
                 if (BimpObject::objectLoaded($contrat_line)) {
-                    return $contrat_line->getDataAtDate(str_replace('abo_', '', $field_name));
+                    return $contrat_line->getData(str_replace('abo_', '', $field_name));
                 }
             }
         }
 
         if (in_array($field_name, array('abo_fac_periodicity', 'abo_fac_term'))) {
-            if (!$this->isLoaded() || $this->id_product != (int) BimpTools::getPostFieldValue('id_product', $this->id_product)) {
+            if (!$this->isLoaded() || ($field_name == 'abo_fac_periodicity' && !(int) $this->getData('abo_fac_periodicity')) || $this->id_product != (int) BimpTools::getPostFieldValue('id_product', $this->id_product)) {
                 return $this->getValueByProduct($field_name);
             }
         }
@@ -204,7 +230,7 @@ class Bimp_PropalLine extends ObjectLine
             }
             $html .= '<br/><b>- Qté totale : </b>' . parent::displayLineData('qty');
             $html .= '<br/>- Facturation à terme ' . ((int) $this->getData('abo_fac_term') ? 'à échoir' : 'échu');
-//            $html .= '<br/>- Renouvellement(s) tacite(s) : ' . $this->displayDataDefault('abo_nb_renouv');
+            $html .= '<br/>- Renouvellement(s) tacite(s) : ' . $this->displayDataDefault('abo_nb_renouv');
         }
 
         return $html;
@@ -239,7 +265,7 @@ class Bimp_PropalLine extends ObjectLine
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML : 
 
     public function renderAboInfos()
     {
@@ -299,8 +325,7 @@ class Bimp_PropalLine extends ObjectLine
             $options = array(
                 'data' => array(
                     'data_type' => 'number',
-                    'decimals'  => 8,
-                    'unsigned'  => 1
+                    'decimals'  => 8
                 )
             );
 
@@ -425,10 +450,10 @@ class Bimp_PropalLine extends ObjectLine
             if ($id_contrat_line) {
                 if ($this->checkLinkedContratLine($errors)) {
                     $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
-                    $this->set('abo_fac_periodicity', $contrat_line->getDataAtDate('fac_periodicity'));
-                    $this->set('abo_duration', $contrat_line->getDataAtDate('duration'));
-                    $this->set('abo_fac_term', $contrat_line->getDataAtDate('fac_term'));
-                    $this->set('abo_nb_renouv', $contrat_line->getDataAtDate('nb_renouv'));
+                    $this->set('abo_fac_periodicity', $contrat_line->getData('fac_periodicity'));
+                    $this->set('abo_duration', $contrat_line->getData('duration'));
+                    $this->set('abo_fac_term', $contrat_line->getData('fac_term'));
+                    $this->set('abo_nb_renouv', $contrat_line->getData('nb_renouv'));
                 }
             }
 
@@ -447,6 +472,51 @@ class Bimp_PropalLine extends ObjectLine
         }
 
         $errors = BimpTools::merge_array($errors, parent::validate());
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $this->id);
+            if ($id_contrat_line) {
+                $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
+
+                if (BimpObject::objectLoaded($contrat_line) && (int) $contrat_line->getData('statut') === BCT_ContratLine::STATUS_ATT_PROPAL) {
+                    // Maj de la ligne de contrat d'abo liée : 
+                    $prod = $this->getProduct();
+                    $id_pfp = (int) $this->id_fourn_price;
+                    if (!$id_pfp && BimpObject::objectLoaded($prod)) {
+                        $id_fourn = (int) $prod->getData('achat_def_id_fourn');
+                        if ($id_fourn) {
+                            $id_pfp = (int) $prod->getLastFournPriceId($id_fourn);
+                        }
+                    }
+
+                    $contrat_line->validateArray(array(
+                        'fk_product'                   => $this->id_product,
+                        'description'                  => $this->desc,
+                        'product_type'                 => $this->product_type,
+                        'qty'                          => $this->qty,
+                        'subprice'                     => $this->pu_ht,
+                        'tva_tx'                       => $this->tva_tx,
+                        'remise_percent'               => $this->remise,
+                        'fk_product_fournisseur_price' => $id_pfp,
+                        'buy_price_ht'                 => $this->pa_ht,
+                        'fac_periodicity'              => $this->getData('abo_fac_periodicity'),
+                        'duration'                     => $this->getData('abo_duration'),
+                        'fac_term'                     => $this->getData('abo_fac_term'),
+                        'nb_renouv'                    => $this->getData('abo_nb_renouv'),
+                        'date_ouverture_prevue'        => date('Y-m-d', strtotime($this->date_from)) . ' 00:00:00'
+                    ));
+
+                    $contrat_line->update($w, true);
+                }
+            }
+        }
 
         return $errors;
     }

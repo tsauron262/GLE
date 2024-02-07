@@ -50,10 +50,19 @@ class BContract_contratLine extends BContract_contrat
 
     public function validate()
     {
+        $errors = array();
         if (is_null($this->getData('description')) || empty($this->getData('description'))) {
             $produit = $this->getChildObject('produit');
             $this->set('description', $produit->getData('description'));
         }
+        
+        $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $this->getData('fk_product'));
+        if ($produit && $produit->isAbonnement()) {
+            $errors[] = 'Impossible de mettre des abonnements dans un contrat';
+        }
+        
+        if(count($errors))
+            return $errors;
 
         return parent::validate();
     }

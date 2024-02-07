@@ -121,18 +121,24 @@ class BimpLink extends BimpObject
                             'linked_name' => 'Bimp_UserGroup',
                             'linked_id'   => self::getUserUserGroupsList($id_user),
                         )),
-                ))
+                )),
+            'viewed' => 0
         );
-
-        $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'a.viewed', 'DESC', array(), 15);
+        
+        $ids = BimpCache::getBimpObjectIds($this->module, $this->object_name, $filters, 'a.id', 'DESC', array(), 150);
+        $filters['viewed'] = 1;
+        $ids = BimpTools::merge_array($ids, BimpCache::getBimpObjectIds($this->module, $this->object_name, $filters, 'a.id', 'DESC', array(), 150));
 
         $nb_demandes = 0;
 
-        foreach ($links as $d) {
+        foreach ($ids as $id) {
+            $d = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
             $bimp_object = $d->getSourceObject();
 
             if ($bimp_object->isLoaded()) {
                 $nb_demandes++;
+                if($nb_demandes > 15)
+                    break;
                 $new_demande = array(
                     'id'             => $d->id,
                     'is_viewed'      => (int) $d->getData('viewed'),
@@ -412,7 +418,9 @@ class BimpLink extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'if (typeof notifHashtag !== "undefined" && notifHashtag !== null)
+        notifHashtag.reloadNotif();'
         );
     }
 

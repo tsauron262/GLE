@@ -261,6 +261,13 @@ if (!$accessallowed) {
 	accessforbidden();
 }
 
+if(DOL_DATA_ROOT != PATH_TMP){
+    $inTmpPath = str_replace(DOL_DATA_ROOT, PATH_TMP,$fullpath_original_file);
+    if(file_exists($inTmpPath)){
+        $fullpath_original_file = $inTmpPath;
+    }
+}
+
 // Security:
 // We refuse directory transversal change and pipes in file names
 if (preg_match('/\.\./', $fullpath_original_file) || preg_match('/[<>|]/', $fullpath_original_file)) {
@@ -272,12 +279,6 @@ if (preg_match('/\.\./', $fullpath_original_file) || preg_match('/[<>|]/', $full
 
 clearstatcache();
 
-if(DOL_DATA_ROOT != PATH_TMP){
-    $inTmpPath = str_replace(DOL_DATA_ROOT, PATH_TMP,$fullpath_original_file);
-    if(file_exists($inTmpPath)){
-        $fullpath_original_file = $inTmpPath;
-    }
-}
 $filename = basename($fullpath_original_file);
 $filename = preg_replace('/\.noexe$/i', '', $filename);
 

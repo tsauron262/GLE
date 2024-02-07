@@ -1070,8 +1070,9 @@ class gsxController extends BimpController
 
         if ($serial) {
             $data = $equipment->gsxFetchIdentifiers($serial);
-            $data['product_label'] = $data['productDescription'];
-
+            if(is_array($data)){
+                $data['product_label'] = $data['productDescription'];
+            }
 //            $matches = array();
 //            if (preg_match('/^S(.+)$/', $serial, $matches)) {
 //                $serial = $matches[1];
@@ -2708,6 +2709,9 @@ class gsxController extends BimpController
             $html .= '<button type="button" class="btn btn-default" onclick="loadGSXView($(this), ' . (int) $sav->id . ')">';
             $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser toutes les données GSX';
             $html .= '</button>';
+            $html .= '<button type="button" class="btn btn-default" onclick="loadGSXView($(this), ' . (int) $sav->id . ', true)">';
+            $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser toutes les données GSX avec PDF';
+            $html .= '</button>';
             $html .= '</div>';
             $lookUpContent = '';
             $data = $this->gsx_v2->productDetailsBySerial($serial);
@@ -2834,8 +2838,7 @@ class gsxController extends BimpController
                             'type'     => 'secondary',
                             'foldable' => true
                 ));
-
-                if (BimpCore::isEntity('bimp') && BimpObject::objectLoaded($sav)) {
+                if (BimpCore::isEntity('bimp') && BimpObject::objectLoaded($sav) && BimpTools::getValue('gsx_params/withpdf', 'false') == 'true') {
                     $sav_dir = $sav->getFilesDir();
                     if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
                         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.php';

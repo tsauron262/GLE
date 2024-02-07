@@ -32,7 +32,7 @@ class OrderFournPDF extends BimpCommDocumentPDF
         $this->hideReduc = true;
     }
 
-    public function getLineDesc($line, \Product $product = null, $hide_product_label = false)
+    public function getLineDesc($line, \Product $product = null, $hide_product_label = false, $bimpLine = null)
     {
 
         $BProd = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $product->id);
@@ -42,7 +42,7 @@ class OrderFournPDF extends BimpCommDocumentPDF
         }
         if ($ref != '')
             $sup = $ref . " ";
-        return $sup . parent::getLineDesc($line, $product, $hide_product_label);
+        return $sup . parent::getLineDesc($line, $product, $hide_product_label, $bimpLine);
     }
 
     protected function initData()

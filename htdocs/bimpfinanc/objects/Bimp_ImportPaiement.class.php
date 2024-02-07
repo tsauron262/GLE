@@ -205,7 +205,7 @@ class Bimp_ImportPaiement extends BimpObject
             if ($date->format('Y-m-d') <= $yesterday->format('Y-m-d')) {
                 $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYNI{AA}{MM}-', 5);
                 $payin->updateField('num', $num);
-                $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id);
+                $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id, 'banque' => $parent->getData('banque'));
                 $dataMsg[] = $payin->getData('date') . ' ' . $payin->getData('name') . ' - ' . $payin->getData('price') . ' €';
             }
         }
@@ -217,7 +217,7 @@ class Bimp_ImportPaiement extends BimpObject
                 $mailRep[BimpCore::getConf('emails_notify_solvabilite_client_change')] = BimpCore::getConf('emails_notify_solvabilite_client_change');
             $msg = 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés automatiquement par le système :<br/><br/>' . implode('<br/>', $dataMsg);
             if(count($mailRep))
-                $msg .= '<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer '.explode(' ou ', $mailRep).'<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées';
+                $msg .= '<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer '.implode(' ou ', $mailRep).'<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées';
             mailSyn2('Paiements non identifiés', BimpCore::getConf('email_paync', '', 'bimpfinanc'), null,  $msg);
         }
 

@@ -1138,7 +1138,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $commande = $this->dol_object;
 
         $contacts = array(
-            0 => 'Addresse de livraison de la commande'
+            0 => 'Adresse de livraison de la commande'
         );
 
         if (!is_null($commande->socid) && $commande->socid) {
@@ -4456,7 +4456,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         $res_errors = $this->createReservations();
         if (count($res_errors)) {
-            $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
+            $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
         }
 
         if (empty($errors)) {

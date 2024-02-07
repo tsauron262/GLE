@@ -2,9 +2,9 @@
 
 // Entité : bimp
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/ldlc_filiale/objects/BimpComm.class.php';
 
-class BimpComm_ExtEntity extends BimpComm
+class BimpComm_ExtEntity extends BimpComm_LdlcFiliale
 {
 
     // Getters booléens: 
@@ -166,7 +166,7 @@ class BimpComm_ExtEntity extends BimpComm
                 $html .= $df->renderSignaturesAlertes();
             }
 
-            if (is_a($this, 'Bimp_Commande') && !(int) $df->getData('serials_ok') && (int) $this->getData('shipment_status') === 2) {
+            if (is_a($this, 'Bimp_Commande') && !(int) $df->getData('serials_ok') && (int) $this->getData('shipment_status') === 2 && (int) $df->getData('status') < 20) {
                 $data = $df->fetchDemandeFinData();
 
                 if (isset($data['missing_serials']['total']) && (int) $data['missing_serials']['total'] > 0) {

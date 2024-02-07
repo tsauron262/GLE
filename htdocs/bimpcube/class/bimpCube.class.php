@@ -15,7 +15,7 @@ class BimpCube{
     public function callTrigerRefresh(){
         $result = 1;
         $result = $result && $this->reqPlusLog("CALL refresh_".MAIN_DB_PREFIX."mat_view_societe();");
-        $result = $result && $this->reqPlusLog("CALL refresh_".MAIN_DB_PREFIX."mat_view_categorie();");
+//        $result = $result && $this->reqPlusLog("CALL refresh_".MAIN_DB_PREFIX."mat_view_categorie();");
 //        $result = $result && $this->reqPlusLog("CALL refresh_".MAIN_DB_PREFIX."mat_view_product_cat();");
 //        $result = $result && $this->reqPlusLog("CALL set_product_cat_flat();");
 //        $result = $result && $this->reqPlusLog("CALL set_types_product_cat_flat();");

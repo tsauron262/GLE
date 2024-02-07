@@ -272,7 +272,7 @@ class BIMP_Task extends BimpAbstractFollow
 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
-            'label'   => 'Message autheur',
+            'label'   => 'Message auteur',
             'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array(
                 "obj_type"     => "bimp_object",

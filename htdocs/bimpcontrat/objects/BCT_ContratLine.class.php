@@ -1225,8 +1225,7 @@ class BCT_ContratLine extends BimpObject
                     $dt = new DateTime($date_debut);
                     if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
-                    }
-                    elseif ($nb_periods < 0) {
+                    } elseif ($nb_periods < 0) {
                         $dt->sub(new DateInterval('P' . (-$nb_periods * $periodicity) . 'M'));
                     }
                     $data['date_first_period_start'] = $dt->format('Y-m-d');
@@ -6262,16 +6261,16 @@ class BCT_ContratLine extends BimpObject
 
             if ((int) $this->getData('fk_product')) {
                 if (BimpObject::objectLoaded($prod)) {
-                    if (!$this->getData('subprice')) {
+                    if (is_null($this->getData('subprice'))) {
                         $this->set('subprice', $this->getValueForProduct('subprice', $prod));
                     }
-                    if (!$this->getData('tva_tx')) {
+                    if (is_null($this->getData('tva_tx'))) {
                         $this->set('tva_tx', $this->getValueForProduct('tva_tx', $prod));
                     }
-                    if (!$this->getData('fk_product_fournisseur_price')) {
+                    if (is_null($this->getData('fk_product_fournisseur_price'))) {
                         $this->set('fk_product_fournisseur_price', $this->getValueForProduct('fk_product_fournisseur_price', $prod));
                     }
-                    if (!$this->getData('buy_price_ht')) {
+                    if (is_null($this->getData('buy_price_ht'))) {
                         $this->set('buy_price_ht', $this->getValueForProduct('buy_price_ht', $prod));
                     }
                 }

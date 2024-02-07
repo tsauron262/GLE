@@ -209,6 +209,8 @@ class BimpCache
 
     public static function cacheServerExists($key)
     {
+        global $conf;
+        $key = $conf->entity . $key;
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }

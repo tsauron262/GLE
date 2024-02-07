@@ -10102,7 +10102,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             global $conf;
             $dir = $conf->bimpcore->multidir_output[$conf->entity];
-            $dir = PATH_TMP.'/bimpcore/';
+            $dir = str_replace(DOL_DATA_ROOT, PATH_TMP, $dir);
+//            $dir = PATH_TMP.'/bimpcore/';
+            $dir_error = BimpTools::makeDirectories(array($conf->entity => array('bimpcore')), PATH_TMP);
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(

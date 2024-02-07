@@ -508,7 +508,11 @@ class BimpStatsFacture {
             $sortie .= $sautLn;
         }
         
-        $folder = DOL_DATA_ROOT . "/bimpstatsfacture/";
+        global $conf;
+        if($conf->entity > 1)
+            $folder = PATH_TMP .'/'.$conf->entity. "/bimpstatsfacture/";
+        else
+            $folder = PATH_TMP . "/bimpstatsfacture/";
         if(!is_dir($folder))
             mkdir ($folder);
         $folder .= "/export_fact/";

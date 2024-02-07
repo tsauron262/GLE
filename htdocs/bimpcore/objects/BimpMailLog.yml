@@ -33,9 +33,15 @@ fields:
     mail_to:
         label: To
         type: string
+        displays: 
+            default: 
+                type: mail
     mail_from:
         label: From
         type: string
+        displays: 
+            default: 
+                type: mail
     mail_cc:
         label: CC
         type: string

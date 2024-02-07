@@ -7516,7 +7516,7 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public static function checkMarginAll($from = '2019-07-01 00:00:00')
+    public static function checkMarginAll($from = '2023-04-01 00:00:00')
     {
         ini_set('max_execution_time', 3600);
 

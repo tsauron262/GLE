@@ -455,16 +455,16 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
-        if ($this->isActionAllowed('setResiliateDate') && $this->canSetAction('setResiliateDate')) {
-            $buttons[] = array(
-                'label'   => ($this->getData('date_cloture') ? 'Annuler / modifier la résiliation' : 'Résilier'),
-                'icon'    => 'fas_times-circle',
-                'onclick' => $this->getJsActionOnclick('setResiliateDate', array(), array(
-                    'form_name'      => 'date_cloture',
-                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onResiliateAbonnementFormSubmit($form, extra_data); }'
-                ))
-            );
-        }
+//        if ($this->isActionAllowed('setResiliateDate') && $this->canSetAction('setResiliateDate')) {
+//            $buttons[] = array(
+//                'label'   => ($this->getData('date_cloture') ? 'Annuler / modifier la résiliation' : 'Résilier'),
+//                'icon'    => 'fas_times-circle',
+//                'onclick' => $this->getJsActionOnclick('setResiliateDate', array(), array(
+//                    'form_name'      => 'date_cloture',
+//                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onResiliateAbonnementFormSubmit($form, extra_data); }'
+//                ))
+//            );
+//        }
 
         if ($this->isActionAllowed('renouv') && $this->canSetAction('renouv')) {
             $buttons[] = array(

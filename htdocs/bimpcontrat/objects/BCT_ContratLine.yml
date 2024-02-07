@@ -969,6 +969,7 @@ lists:
         
     contrat: 
         extends: default
+        objects_change_reload: BCT_Contrat
         sort_field: rang
         sort_way: asc
         positions: 1

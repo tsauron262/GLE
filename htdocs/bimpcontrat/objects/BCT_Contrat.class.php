@@ -530,6 +530,7 @@ class BCT_Contrat extends BimpDolObject
 
                 if ($options['no_sub_lines']) {
                     $filters['id_parent_line'] = 0;
+                    $filters['id_linked_line'] = 0;
                 }
 
                 if ($options['excluded_id_line'] > 0) {
@@ -624,7 +625,7 @@ class BCT_Contrat extends BimpDolObject
             foreach ($rows as $r) {
                 $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $r['id_line']);
                 if (BimpObject::objectLoaded($line)) {
-                    $lines[$line->id] = 'Contrat ' . $r['ref'] . ' - ' . $line->displayPeriods(true);
+                    $lines[$line->id] = 'Contrat ' . $r['ref'] . ' - ligne n° ' . $line->getData('rang') . ' - ' . $line->displayPeriods(true);
                 }
             }
         }

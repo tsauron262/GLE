@@ -3704,11 +3704,17 @@ class BCT_ContratLine extends BimpObject
             $errors[] = 'Type d\'action invalide';
         } else {
             if ($this->isLoaded($errors)) {
+                $linked_lines_filter = array($this->id);
                 $id_linked_line = (int) $this->getData('id_linked_line');
                 if ($id_linked_line) {
                     $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_line);
                     if (!BimpObject::objectLoaded($line)) {
                         $line = $this;
+                    } else {
+                        $linked_lines_filter[] = $id_linked_line;
+                        if ((int) $line->getData('fk_product') !== (int) $this->getData('fk_product')) {
+                            $line = $this;
+                        }
                     }
                 } else {
                     $line = $this;
@@ -3763,13 +3769,13 @@ class BCT_ContratLine extends BimpObject
                         $html .= BimpRender::renderAlerts($action_err, 'warning');
                     }
                     $html .= '</td>';
-
                     $html .= '</tr>';
 
                     $sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
                                 'fk_contrat'     => $line->getData('fk_contrat'),
                                 'fk_product'     => $line->getData('fk_product'),
-                                'id_linked_line' => $line->id
+                                'id_linked_line' => $linked_lines_filter,
+                                'rowid'          => array('operator' => '!=', 'value' => $line->id)
                                     ), 'rang');
 
                     foreach ($sub_lines as $sub_line) {
@@ -6665,6 +6671,10 @@ class BCT_ContratLine extends BimpObject
                     }
                 }
             }
+
+            $this->db->update('contratdet', array(
+                'id_line_renouv' => 0
+                    ), 'id_line_renouv = ' . $id);
         }
 
         return $errors;

@@ -2236,6 +2236,8 @@ class BimpTools
     public static function getDatesIntervalData($date_from, $date_to, $debug_echo = false, $full_days = true)
     {
         $data = array(
+            'from'               => $date_from,
+            'to'                 => $date_to,
             'full_years'         => 0, // Nombre d'années complètes
             'full_monthes'       => 0, // Nombre de mois complets
             'full_days'          => 0, // Nombre de jours complets
@@ -2248,6 +2250,9 @@ class BimpTools
             $dt_from = new DateTime(date('Y-m-d', strtotime($date_from)) . ' 00:00:00');
             $dt_to = new DateTime(date('Y-m-d', strtotime($date_to)) . ' 00:00:00');
             $dt_to->add(new DateInterval('P1D')); // Pour avoir le dernier jour complet
+
+            $data['from'] = $dt_from->format('Y-m-d H:i:s');
+            $data['to'] = $dt_to->format('Y-m-d H:i:s');
         } else {
             $dt_from = new DateTime($date_from);
             $dt_to = new DateTime($date_to);
@@ -2542,8 +2547,8 @@ class BimpTools
         $phone = str_replace('+33', '0', $phone);
         if (strlen($phone) == 10)
             $phone = implode(' ', str_split($phone, 2));
-        if($with33 && stripos($phone, '0') === 0)
-            $phone = "+33 (0)".substr ($phone, 1);
+        if ($with33 && stripos($phone, '0') === 0)
+            $phone = "+33 (0)" . substr($phone, 1);
         return $phone;
     }
 
@@ -3860,7 +3865,7 @@ class BimpTools
 //        if ($module == 'MULTICOMPANY' && BimpCore::isModeDev() && defined('MULTICOMPANY_TEST')) {
 //            return 1;
 //        }
-        
+
         global $conf;
 
         if (stripos($module, 'MAIN_MODULE_') === false)

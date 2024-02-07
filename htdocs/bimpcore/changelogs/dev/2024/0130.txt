@@ -1,2 +1,6 @@
-
-- test deu change log
+- test du change log
+- Switch entité auto dans piéces
+- Gestion des reception sans entrepot
+- Contrats abonnement : 
+    - activation renouvellement tacites depuis les devis
+    - Mise à jour affichage des facturation de régularisation

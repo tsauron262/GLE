@@ -145,7 +145,7 @@ fields:
         
     tva_tx: 
         label: Tx TVA
-        tpe: float
+        type: float
         default_value: 
             callback: getDefaultTva
         depends_on: fk_product
@@ -705,7 +705,7 @@ forms:
                   callback: renderFacRegulQtyInput
               depends_on: period_from,period_to
               
-    resiliate: 
+    date_cloture: 
         rows: 
             - custom: 1
               label: Date d'arrêt de l'abonnement
@@ -713,13 +713,13 @@ forms:
               content: 
                   callback: renderClotureDateInput
             - custom: 1
-              label: Lignes liées à résilier
+              label: Lignes liées concernées
               input_name: linked_lines
-              content: 
+              content:  
                   callback: 
                       method: renderLinkedLinesCheckInputs
                       params: 
-                          - resiliate
+                          - setResiliateDate
               
 fields_tables: 
     infos: 

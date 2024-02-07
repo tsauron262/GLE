@@ -3886,7 +3886,7 @@ class Bimp_Societe extends BimpDolObject
         if (!count($errors)) {
             if (BimpTools::isSubmit('is_company')) {
                 if ((int) BimpTools::getValue('is_company')) {
-                    if (!(int) $this->getData('fk_typent')) {
+                    if (!(int) $this->getData('fk_typent') && BimpCore::getConf('siren_required')) {
                         $errors[] = 'Veuillez sélectionner le type de tiers';
                     } elseif ((int) $this->getData('fk_typent') == 8) {
                         $errors[] = 'Il n\'est pas possible de sélectionner le type "particulier" pour les entreprises';

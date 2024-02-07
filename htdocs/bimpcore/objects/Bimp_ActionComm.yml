@@ -58,7 +58,10 @@ objects:
         relation: hasOne
         delete: 0
         instance: 
-            dol_object: projet
+            dol_object: 
+                module: projet
+                file: project
+                class: Project
             id_object: 
                 field_value: fk_project
                 
@@ -99,6 +102,12 @@ fields:
                     method: renderDateInput
                     params: 
                         - datep
+                        
+    durationp:
+        label: Durée
+        type: timer
+        input: 
+            type: timer
         
     datep2: 
         label: Date de fin
@@ -181,7 +190,16 @@ fields:
         
     fk_project: 
         label: Projet
-        type: id
+        type: id_object
+        default_value: 0
+        object: projet
+        input: 
+            type: search_projet
+            include_empty: 1
+            
+    fk_project: 
+        label: Projet
+        type: id_object
         default_value: 0
         object: projet
         input: 
@@ -199,7 +217,7 @@ fields:
         
     percent: 
         label: Progression
-        default_value: 0
+        default_value: -1
         dol_prop: percentage
         values: 
             array: progressions
@@ -273,7 +291,7 @@ forms:
                 content: 
                     callback: displayElement
                 label: Objet liée
-                input_name: dfsd
+                edit: 0
             label: 
                 field: label
             fullday: 

@@ -42,7 +42,8 @@ class BC_Display extends BimpComponent
         'card'           => 'Mini-fiche objet',
         'color'          => 'color',
         'json'           => 'Ensemble de sous-données',
-        'object_filters' => 'Filtres objet'
+        'object_filters' => 'Filtres objet',
+        'mail'           => 'Mail'
     );
     public static $types_per_data_types = array(
         'values'     => array('array_value'/* , 'syntaxe' */),
@@ -65,7 +66,8 @@ class BC_Display extends BimpComponent
         'date'       => array('value', 'date'),
         'time'       => array('value', 'time'),
         'datetime'   => array('value', 'datetime'),
-        'timer'      => array('value', 'timer')
+        'timer'      => array('value', 'timer'),
+        'mail'       => array('value')
     );
     public static $syntaxe_allowed_data_types = array('string', 'text', 'html', 'password', 'int', 'float', 'bool', 'qty', 'money', 'percent', 'color', 'date', 'time', 'datetime');
     public static $type_params_def = array(
@@ -291,6 +293,7 @@ class BC_Display extends BimpComponent
                             case 'items_list':
                             case 'object_filters':
                             case 'timer':
+                            case 'mail':
                                 $type = $bc_field->params['type'];
                                 break;
                         }
@@ -1248,6 +1251,9 @@ class BC_Display extends BimpComponent
                             $html .= '</div>';
                         }
                     }
+                    break;
+                case 'mail':
+                    $html .= htmlentities($this->value);
                     break;
             }
         }

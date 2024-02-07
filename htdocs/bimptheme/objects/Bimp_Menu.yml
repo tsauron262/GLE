@@ -7,7 +7,7 @@ positions: 1
 position_insert: after
 
 
-entity_name: agenda
+entity_name: menu
 
 labels: 
     name: ligne de menu

@@ -791,6 +791,16 @@ class BimpTools
 
             case 'fichinter':
                 return BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $id_object);
+
+            case 'user':
+                return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_object);
+                
+            case 'task':
+                require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
+                global $db;
+                $task = new Task($db);
+                $task->fetch($id_object);
+                return $task;
         }
 
         return null;

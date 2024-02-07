@@ -147,7 +147,10 @@ fields:
         label: Tx TVA
         type: float
         default_value: 
-            callback: getDefaultTva
+            callback: 
+                method: cacheServeurFunction
+                params:
+                    - getDefaultTva
         depends_on: fk_product
             
     remise_percent: 

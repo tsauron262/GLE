@@ -65,6 +65,12 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             $soc->fetch($ligne->fk_soc);
             $text .= "<br/><br/>" . $soc->getNomUrl(1);
         }
+        if ($ligne->fk_project > 0) {
+            require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
+            $soc = new Project($db);
+            $soc->fetch($ligne->fk_project);
+            $text .= "<br/><br/>" . $soc->getNomUrl(1);
+        }
         $text .= "<br/><br/>" . substr($ligne->note, 0, 40);
         $text = str_replace(array("<br />\r\n", "\r\n", "\r", "\n"), "<br/>", $text);
         

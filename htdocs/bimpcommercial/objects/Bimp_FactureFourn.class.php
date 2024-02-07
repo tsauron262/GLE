@@ -470,7 +470,11 @@ class Bimp_FactureFourn extends BimpCommAchat
         global $conf;
         $ref = dol_sanitizeFileName($this->dol_object->ref);
         $subdir = get_exdir($this->id, 2, 0, 0, $this->dol_object, 'invoice_supplier') . $ref;
-        return $conf->fournisseur->facture->dir_output . '/' . $subdir;
+        if($this->isLoaded() && $this->dol_object->entity > 0)
+//            die($conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/' . $subdir);
+            return $conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/' . $subdir;
+        else
+            return $conf->fournisseur->facture->dir_output . '/' . $subdir;
     }
 
     public function getTotalPaid()

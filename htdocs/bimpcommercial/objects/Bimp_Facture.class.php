@@ -2134,10 +2134,12 @@ class Bimp_Facture extends BimpComm
     public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null)
     {
         $tot = $this->getData('total_ht') - $this->getData('marge');
-        $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
-        if (is_null($statut_reval)) {
-            foreach ($tabReval as $reval)
-                $tot -= $reval;
+        if(BimpCore::isModuleActive('bimpfinanc')){
+            $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
+            if (is_null($statut_reval)) {
+                foreach ($tabReval as $reval)
+                    $tot -= $reval;
+            }
         }
         return $tot;
     }
@@ -7516,7 +7518,7 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public static function checkMarginAll($from = '2019-07-01 00:00:00')
+    public static function checkMarginAll($from = '2023-04-01 00:00:00')
     {
         ini_set('max_execution_time', 3600);
 

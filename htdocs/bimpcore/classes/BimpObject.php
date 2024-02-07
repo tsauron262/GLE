@@ -1034,6 +1034,13 @@ class BimpObject extends BimpCache
                     $or_sql = '';
 
                     foreach ($params['fields_search'] as $field) {
+                        if(stripos($field, 'ef.') !== false){
+                            if(!$this->dol_field_exists(str_replace('ef.', '', $field)))
+                                continue;
+//                        if($field == 'ef.libelle')
+//                            continue;
+                        }
+//                        
                         $or_sql .= ($or_sql ? ' OR ' : '') . '' . $field . ' LIKE \'%' . $search . '%\'';
                     }
 
@@ -10102,7 +10109,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             global $conf;
             $dir = $conf->bimpcore->multidir_output[$conf->entity];
-            $dir = PATH_TMP.'/bimpcore/';
+            $dir = str_replace(DOL_DATA_ROOT, PATH_TMP, $dir);
+//            $dir = PATH_TMP.'/bimpcore/';
+            $dir_error = BimpTools::makeDirectories(array($conf->entity => array('bimpcore')), PATH_TMP);
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(

@@ -144,6 +144,9 @@ class BimpComm extends BimpDolObject
 
     public function hasDemandsValidations($exclude_user_affected = true)
     {
+        if(!BimpCore::isModuleActive('bimpvalidateorder'))
+            return false;
+        
         global $user;
 
         if (BimpCore::isModuleActive('bimpvalidation')) {

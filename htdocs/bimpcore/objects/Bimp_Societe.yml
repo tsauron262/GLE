@@ -7,6 +7,9 @@ primary: rowid
 icon: fas_building
 common_fields: 1
 
+list_page_url: 
+    controller: tiers
+
 nom_url: 
     syntaxe: <ref> - <name>
     card: default

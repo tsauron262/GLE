@@ -2097,10 +2097,12 @@ class Bimp_Facture extends BimpComm
     public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null)
     {
         $tot = $this->getData('total_ht') - $this->getData('marge');
-        $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
-        if (is_null($statut_reval)) {
-            foreach ($tabReval as $reval)
-                $tot -= $reval;
+        if(BimpCore::isModuleActive('bimpfinanc')){
+            $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
+            if (is_null($statut_reval)) {
+                foreach ($tabReval as $reval)
+                    $tot -= $reval;
+            }
         }
         return $tot;
     }

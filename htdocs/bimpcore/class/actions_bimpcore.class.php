@@ -102,8 +102,11 @@ class ActionsBimpcore
                     $tabObj = array("bimpcommercial", "Bimp_Facture");
             if(stripos($url, '/contrat/') !== false && BimpTools::isModuleDoliActif('bimpcontract'))
                     $tabObj = array("bimpcontract", "BContract_contrat");
-            if(stripos($url, '/comm/action') === false && stripos($url, '/comm/index.php') === false && stripos($url, '/comm/rem') === false && stripos($url, 'admin') === false && (stripos($url, '/comm/') !== false || stripos($url, '/societe/') !== false)){
-                if(BimpTools::getValue('type', 's') == 'f')
+            if(stripos($url, '/comm/action') === false && stripos($url, '/comm/index.php') === false && stripos($url, '/comm/rem') === false && stripos($url, 'admin') === false 
+                    && (stripos($url, '/comm/') !== false || stripos($url, '/societe/') !== false)){
+                if(stripos($url, 'societe/list.php?leftmenu=thirdparties') || stripos($url, 'societe/index.php?mainmenu=companies&leftmenu='))
+                    $tabObj = array("bimpcore", "Bimp_Societe");
+                elseif(BimpTools::getValue('type', 's') == 'f')
                     $tabObj = array("bimpcore", "Bimp_Fournisseur");
                 else
                     $tabObj = array("bimpcore", "Bimp_Client");

@@ -259,8 +259,10 @@ $(document).ready(function () {
     });
 
     $('body').on('objectChange', function (e) {
-        if (e.object_name === 'BCT_ContratLine') {
+        if (e.object_name === 'BCT_ContratLine' || e.object_name === 'BCT_Contrat') {
             $('.refreshContratSyntheseButton').click();
+            $('.refreshContratFacturesButton').click();
+            $('.refreshContratAchatsButton').click();
         }
     });
 });

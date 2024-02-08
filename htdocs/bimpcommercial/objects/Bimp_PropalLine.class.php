@@ -203,7 +203,7 @@ class Bimp_PropalLine extends ObjectLine
                 if (BimpObject::objectLoaded($contrat_line)) {
                     $contrat = $contrat_line->getParentInstance();
                     if (BimpObject::objectLoaded($contrat)) {
-                        $html .= 'Ajout à un abonnement en cours du contrat ' . $contrat->getLink() . '<br/><br/>';
+                        $html .= 'Ajout à un abonnement en cours du contrat ' . $contrat->getLink() . ' (ligne n° ' . $contrat_line->getData('rang') . ') <br/><br/>';
                     }
                 }
             }

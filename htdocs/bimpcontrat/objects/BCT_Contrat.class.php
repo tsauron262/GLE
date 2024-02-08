@@ -171,7 +171,7 @@ class BCT_Contrat extends BimpDolObject
         return 1;
     }
 
-    // Getters params: 
+    // Getters params : 
 
     public function getActionsButtons()
     {
@@ -480,7 +480,7 @@ class BCT_Contrat extends BimpDolObject
         return parent::getCommercialId($params, $is_superior, $is_default);
     }
 
-    // Getters Array: 
+    // Getters Array :
 
     public function getClientRibsArray()
     {
@@ -530,6 +530,7 @@ class BCT_Contrat extends BimpDolObject
 
                 if ($options['no_sub_lines']) {
                     $filters['id_parent_line'] = 0;
+                    $filters['id_linked_line'] = 0;
                 }
 
                 if ($options['excluded_id_line'] > 0) {
@@ -543,7 +544,7 @@ class BCT_Contrat extends BimpDolObject
 
                 foreach ($lines as $line) {
                     if ($options['active_only']) {
-                        if (!$line->isActive()) {
+                        if (!$line->isActive() || $line->isResiliated()) {
                             continue;
                         }
                     }
@@ -551,7 +552,7 @@ class BCT_Contrat extends BimpDolObject
                     $line_label = $line->displayProduct('ref_nom');
 
                     if ($options['with_periods']) {
-                        $line_label .= ' (' . $line->displayPeriods() . ')';
+                        $line_label .= ' (' . $line->displayPeriods(true) . ')';
                     }
                     self::$cache[$key][$line->id] = $line_label;
                 }
@@ -610,6 +611,7 @@ class BCT_Contrat extends BimpDolObject
                     'a.id_linked_line' => 0,
                     'a.id_parent_line' => 0,
                     'a.statut'         => 4,
+                    'a.date_cloture'   => 'IS_NULL'
                         ), array(
                     'c' => array(
                         'table' => 'contrat',
@@ -623,7 +625,7 @@ class BCT_Contrat extends BimpDolObject
             foreach ($rows as $r) {
                 $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $r['id_line']);
                 if (BimpObject::objectLoaded($line)) {
-                    $lines[$line->id] = 'Contrat ' . $r['ref'] . ' - ' . $line->displayPeriods();
+                    $lines[$line->id] = 'Contrat ' . $r['ref'] . ' - ligne n° ' . $line->getData('rang') . ' - ' . $line->displayPeriods(true);
                 }
             }
         }
@@ -1016,7 +1018,7 @@ class BCT_Contrat extends BimpDolObject
         $onclick = $this->getJsLoadCustomContent('renderFacturesTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
         $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
-        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= '<span class="btn btn-default refreshContratFacturesButton" onclick="' . $onclick . '">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';
@@ -1144,7 +1146,7 @@ class BCT_Contrat extends BimpDolObject
         $onclick = $this->getJsLoadCustomContent('renderAchatsTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
         $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
-        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= '<span class="btn btn-default refreshContratAchatsButton" onclick="' . $onclick . '">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
         $html .= '</div>';
@@ -2056,14 +2058,6 @@ class BCT_Contrat extends BimpDolObject
 
         $rows = $bdb->executeS($sql, 'array');
 
-//        echo '<pre>';
-//        print_r($rows);
-//        exit;
-
-//        $infos .= 'Contrats : <pre>';
-//        $infos .= print_r($rows, 1);
-//        $infos .= '</pre>';
-
         // Trie par contrats :
 
         if (!is_array($rows)) {
@@ -2151,14 +2145,8 @@ class BCT_Contrat extends BimpDolObject
                     'c.statut'            => 1,
                         ), array('c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')));
 
-//        echo $sql;
-
         $rows = $bdb->executeS($sql, 'array');
 
-//        echo '<pre>';
-//        print_r($rows);
-//        exit;
-//        
         // Trie par contrats :
 
         $contrats = array();

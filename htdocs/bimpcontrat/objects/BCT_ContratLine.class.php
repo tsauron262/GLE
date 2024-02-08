@@ -168,11 +168,11 @@ class BCT_ContratLine extends BimpObject
     {
         $contrat = null;
 
-        if (in_array($action, array('deactivate', 'renouv', 'facRegul', 'resiliate')) && !$this->isLoaded($errors)) {
+        if (in_array($action, array('deactivate', 'renouv', 'facRegul', 'setResiliateDate')) && !$this->isLoaded($errors)) {
             return 0;
         }
 
-        if ((int) $this->getData('id_parent_line') && in_array($action, array('activate', 'deactivate', 'renouv', 'resiliate'))) {
+        if ((int) $this->getData('id_parent_line') && in_array($action, array('activate', 'deactivate', 'renouv', 'setResiliateDate'))) {
             $errors[] = 'Action non possible pour les sous-lignes. Veuillez effectuer cette action sur la ligne parente';
             return 0;
         }
@@ -260,7 +260,7 @@ class BCT_ContratLine extends BimpObject
 
                 return 1;
 
-            case 'resiliate':
+            case 'setResiliateDate':
                 if ($status !== self::STATUS_ACTIVE) {
                     $errors[] = 'Cet abonnement n\'est pas actif';
                     return 0;
@@ -268,11 +268,6 @@ class BCT_ContratLine extends BimpObject
 
                 if ((int) $this->getData('line_type') !== self::TYPE_ABO) {
                     $errors[] = 'Cette ligne n\'est pas un abonnement';
-                    return 0;
-                }
-
-                if ((string) $this->getData('date_cloture')) {
-                    $errors[] = 'Cet abonnement a déjà été résilié';
                     return 0;
                 }
                 break;
@@ -290,11 +285,23 @@ class BCT_ContratLine extends BimpObject
             return 0;
         }
 
-        if ($this->getData('date_fin_validite') < date('Y-m-d H:i:s')) {
+        if ($this->getDateFinReele() < date('Y-m-d H:i:s')) {
             return 0;
         }
 
         return 1;
+    }
+
+    public function isResiliated()
+    {
+        if ((int) $this->getData('statut') > 0) {
+            $date_cloture = $this->getData('date_cloture');
+            if ($date_cloture && $date_cloture < $this->getData('date_fin_validite')) {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     public function isSubline()
@@ -448,12 +455,12 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
-//        if ($this->isActionAllowed('resiliate') && $this->canSetAction('resiliate')) {
+//        if ($this->isActionAllowed('setResiliateDate') && $this->canSetAction('setResiliateDate')) {
 //            $buttons[] = array(
-//                'label'   => 'Résilier',
+//                'label'   => ($this->getData('date_cloture') ? 'Annuler / modifier la résiliation' : 'Résilier'),
 //                'icon'    => 'fas_times-circle',
-//                'onclick' => $this->getJsActionOnclick('resiliate', array(), array(
-//                    'form_name'      => 'resiliate',
+//                'onclick' => $this->getJsActionOnclick('setResiliateDate', array(), array(
+//                    'form_name'      => 'date_cloture',
 //                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onResiliateAbonnementFormSubmit($form, extra_data); }'
 //                ))
 //            );
@@ -1065,8 +1072,10 @@ class BCT_ContratLine extends BimpObject
                     $interval = BimpTools::getDatesIntervalData($date_debut, $date_fac_start);
                     $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période à facturer partiellement
                     $dt = new DateTime($date_debut);
-                    if ($nb_periods) {
+                    if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
+                    } elseif ($nb_periods < 0) {
+                        $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
                     }
                     $data['date_first_period_start'] = $dt->format('Y-m-d');
 
@@ -1192,16 +1201,19 @@ class BCT_ContratLine extends BimpObject
     public function getPeriodsToBuyData(&$errors = array(), $check_date = true)
     {
         $data = array(
-            'date_next_achat'         => '', // Date prochain achat
-            'date_achat_start'        => '', // Date début des achat sréelle
-            'nb_total_periods'        => 0, // Nombre total de périodes
-            'nb_periods_tobuy_max'    => 0, // Nombre total de périodes restant à facturer. 
-            'nb_periods_tobuy_today'  => 0, // Nombre de périodes à facturer à date.
-            'qty_for_1_period'        => 0,
-            'first_period_prorata'    => 1, // Prorata de la première période
-            'date_first_period_start' => '', // Début de la première période à acheter
-            'date_first_period_end'   => '', // Fin de la première période à acheter
-            'debug'                   => array()
+            'date_next_achat'             => '', // Date prochain achat
+            'date_achat_start'            => '', // Date début des achat sréelle
+            'nb_total_periods'            => 0, // Nombre total de périodes
+            'nb_periods_bought'           => 0, // Nombre de périodes déjà achetées
+            'nb_periods_tobuy_max'        => 0, // Nombre total de périodes restant à facturer. 
+            'nb_periods_tobuy_today'      => 0, // Nombre de périodes à facturer à date.
+            'nb_periods_never_bought'     => 0, // Nombre de périodes non achetées en cas de résiliation
+            'nb_periods_bought_never_fac' => 0, // Nombre de périodes achetées qui ne seront pas facturées en cas de résiliation
+            'qty_for_1_period'            => 0,
+            'first_period_prorata'        => 1, // Prorata de la première période
+            'date_first_period_start'     => '', // Début de la première période à acheter
+            'date_first_period_end'       => '', // Fin de la première période à acheter
+            'debug'                       => array()
         );
 
         if ($this->isLoaded()) {
@@ -1259,7 +1271,7 @@ class BCT_ContratLine extends BimpObject
                     if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
                     } elseif ($nb_periods < 0) {
-                        $dt->sub(new DateInterval('P' . (-$nb_periods * $periodicity) . 'M'));
+                        $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
                     }
                     $data['date_first_period_start'] = $dt->format('Y-m-d');
 
@@ -1286,11 +1298,6 @@ class BCT_ContratLine extends BimpObject
                     $data['date_first_period_end'] = $dt->format('Y-m-d');
                 }
 
-                if ($date_next_achat > $date_fin) {
-                    $errors[] = 'Tous les achats ont déjà été effectués';
-                    return $data;
-                }
-
                 if (!count($errors)) {
                     // Calcul du nombre de périodes restant à acheter
                     $interval = BimpTools::getDatesIntervalData($date_next_achat, $date_fin);
@@ -1309,6 +1316,51 @@ class BCT_ContratLine extends BimpObject
                         if ($data['nb_periods_tobuy_max'] > $data['nb_total_periods']) {
                             $data['nb_periods_tobuy_max'] = $data['nb_total_periods'];
                         }
+                    }
+
+                    $date_fin_reele = $date_fin;
+                    $date_cloture = $this->getData('date_cloture');
+
+                    // Si abo résilié: 
+                    if ($date_cloture) {
+                        $date_cloture = date('Y-m-d', strtotime($date_cloture));
+
+                        if ($date_cloture < $date_fin) {
+                            $interval = BimpTools::getDatesIntervalData($date_cloture, $date_fin);
+                            if ($interval['nb_monthes_decimal'] > 0) {
+                                $data['debug']['nb_periods_never_bought'] = array(
+                                    'interval'      => $interval,
+                                    'value_decimal' => $interval['nb_monthes_decimal'] / $periodicity
+                                );
+                                $data['nb_periods_never_bought'] = ceil($interval['nb_monthes_decimal'] / $periodicity);
+                                $data['nb_periods_tobuy_max'] -= $data['nb_periods_never_bought'];
+                            }
+
+                            if ($date_cloture < $date_next_achat) {
+                                $interval = BimpTools::getDatesIntervalData($date_cloture, $date_next_achat, false, false);
+                                if ($interval['nb_monthes_decimal'] > 0) {
+                                    $data['debug']['nb_periods_bought_never_fac'] = array(
+                                        'interval'      => $interval,
+                                        'value_decimal' => $interval['nb_monthes_decimal'] / $periodicity
+                                    );
+                                    $data['nb_periods_bought_never_fac'] = ceil($interval['nb_monthes_decimal'] / $periodicity);
+                                    $data['nb_periods_never_bought'] -= $data['nb_periods_bought_never_fac'];
+                                    $data['nb_periods_tobuy_max'] = 0;
+                                }
+                                $date_fin_reele = $date_next_achat;
+                            } else {
+                                $dt_fin = new DateTime($date_cloture);
+                                $dt_fin->sub(new DateInterval('P1D'));
+                                $date_fin_reele = $dt_fin->format('Y-m-d');
+                            }
+                        }
+                    }
+
+                    $data['nb_periods_bought'] = $data['nb_total_periods'] - $data['nb_periods_tobuy_max'] - $data['nb_periods_never_bought'];
+
+                    if ($date_next_achat > $date_fin_reele) {
+                        $errors[] = 'Tous les achats ont déjà été effectués';
+                        return $data;
                     }
 
                     // Calcul du nombre de périodes à acheter aujourd'hui : 
@@ -1521,6 +1573,18 @@ class BCT_ContratLine extends BimpObject
         }
 
         return $data;
+    }
+
+    public function getDateFinReele()
+    {
+        $date_fin = $this->getData('date_fin_validite');
+        $date_cloture = $this->getData('date_cloture');
+
+        if ($date_cloture && $date_cloture < $date_fin) {
+            return $date_cloture;
+        }
+
+        return $date_fin;
     }
 
     // Getters statiques:
@@ -1868,7 +1932,7 @@ class BCT_ContratLine extends BimpObject
         if ($id_prod) {
             $contrat = $this->getParentInstance();
             if (BimpObject::objectLoaded($contrat)) {
-                $filter = array(
+                $options = array(
                     'include_empty'    => true,
                     'empty_label'      => 'Aucun',
                     'active_only'      => true,
@@ -1876,9 +1940,12 @@ class BCT_ContratLine extends BimpObject
                     'no_sub_lines'     => true,
                     'excluded_id_line' => ($this->isLoaded() ? $this->id : 0)
                 );
-                if (!$other_product)
-                    $filter['id_product'] = $id_prod;
-                return $contrat->getAboLinesArray($filter);
+
+                if (!$other_product) {
+                    $options['id_product'] = $id_prod;
+                }
+
+                return $contrat->getAboLinesArray($options);
             }
         }
 
@@ -1974,32 +2041,34 @@ class BCT_ContratLine extends BimpObject
             case self::TYPE_ABO:
                 $date_cloture = $this->getData('date_cloture');
 
-                if ($date_cloture && $date_cloture < $this->getData('date_fin_validite')) {
-                    $html .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Résiliation le ' . date('d / m / Y', strtotime($date_cloture)) . '</span><br/><br/>';
+                if ($date_cloture) {
+                    $html .= '<span style="display: inline-block" class="danger">' . BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Résiliation le ' . date('d / m / Y', strtotime($date_cloture)) . '</span><br/>';
                 }
 
                 if ((int) $this->getData('id_line_renouv')) {
                     $line_revouv = $this->getChildObject('line_renouv');
                     if (BimpObject::objectLoaded($line_revouv)) {
-                        $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Renouvellé (Ligne n°' . $line_revouv->getData('rang') . ')</span><br/><br/>';
+                        $html .= '<span style="display: inline-block" class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Renouvellé (Ligne n°' . $line_revouv->getData('rang') . ')</span><br/>';
                     }
                 }
 
                 if ((int) $this->getData('id_linked_line')) {
                     $linked_line = $this->getChildObject('linked_line');
                     if (BimpObject::objectLoaded($linked_line)) {
-                        $html .= '<span class="info">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Abonnement lié à la ligne n° ' . $linked_line->getData('rang') . '</span><br/><br/>';
+                        $html .= '<span style="display: inline-block" class="info">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Abonnement lié à la ligne n° ' . $linked_line->getData('rang') . '</span><br/>';
                     } else {
-                        $html .= '<span class="danger">l\'abonnement lié (ligne #' . $this->getData('id_linked_line') . ') n\'existe plus</span><br/><br/>';
+                        $html .= '<span style="display: inline-block" class="danger">l\'abonnement lié (ligne #' . $this->getData('id_linked_line') . ') n\'existe plus</span><br/>';
                     }
                 }
 
                 $is_variable = (int) $this->getData('variable_qty');
                 if ($is_variable) {
-                    $html .= '<div style="display: inline-block" class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Abonnement à qté variable</div><br/>';
+                    $html .= '<span style="display: inline-block" class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Abonnement à qté variable</span><br/>';
                 }
 
                 $nb_units = $this->getNbUnits();
+
+                $html .= ($html ? '<br/>' : '');
 
                 $html .= 'Nb unité(s) : <b>' . $nb_units . '</b><br/>';
                 $html .= 'Qté totale ' . ($is_variable ? 'estimée ' : '') . ': <b>' . BimpTools::displayFloatValue($this->getData('qty'), 8, ',', 0, 0, 0, 0, 1, 1) . '</b><br/>';
@@ -2058,7 +2127,7 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
-    public function displayPeriods()
+    public function displayPeriods($no_html = false)
     {
         $html = '';
 
@@ -2076,6 +2145,10 @@ class BCT_ContratLine extends BimpObject
             $html .= 'Jusqu\'au <b>' . date('d / m / Y', strtotime($date_fin)) . '</b>';
         }
 
+        $date_cloture = $this->getData('date_cloture');
+        if ($date_cloture) {
+            $html .= ($no_html ? ' - ' : '<br/>') . '<span class="danger">Résiliation le ' . date('d / m / Y', strtotime($date_cloture)) . '</span>';
+        }
         return $html;
     }
 
@@ -2142,7 +2215,7 @@ class BCT_ContratLine extends BimpObject
                     $date_cloture = $this->getData('date_cloture');
 
                     $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
-                    $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période(s) ne seront pas facturer</span>';
+                    $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
             }
@@ -2220,13 +2293,29 @@ class BCT_ContratLine extends BimpObject
 
             if ((int) $this->getData('statut') > 0) {
                 $periods_data = $this->getPeriodsToBuyData();
-                $nb_periods_bought = $periods_data['nb_total_periods'] - $periods_data['nb_periods_tobuy_max'];
-                $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $periods_data['nb_total_periods'] ? 'warning' : 'success') : 'danger');
+                $nb_total_periods_achat = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_bought'];
+                $nb_periods_bought = $periods_data['nb_periods_bought'];
+                $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $nb_total_periods_achat ? 'warning' : 'success') : 'danger');
 
-                $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $periods_data['nb_total_periods'] . '</span>';
+                $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $nb_total_periods_achat . '</span>';
 
-                if ($nb_periods_bought < $periods_data['nb_total_periods']) {
+                if ($nb_periods_bought < $nb_total_periods_achat) {
                     $html .= '<br/>Prochaine achat : ' . $this->displayNextAchatDate(true);
+                }
+
+                if ($periods_data['nb_periods_never_bought'] > 0 || $periods_data['nb_periods_bought_never_fac'] > 0) {
+                    $date_cloture = $this->getData('date_cloture');
+
+                    $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+
+                    if ($periods_data['nb_periods_bought_never_fac'] > 0) {
+                        $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="warning">' . $periods_data['nb_periods_bought_never_fac'] . ' période' . ($periods_data['nb_periods_bought_never_fac'] > 1 ? 's achetées ne seront pas facturées' : ' achetée ne sera facturée') . '</span>';
+                    }
+
+                    if ($periods_data['nb_periods_never_bought'] > 0) {
+                        $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_bought'] . ' période' . ($periods_data['nb_periods_never_bought'] > 1 ? 's ne seront pas achetées' : ' ne sera pas achetée') . '</span>';
+                    }
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
             }
 
@@ -3611,15 +3700,21 @@ class BCT_ContratLine extends BimpObject
 
         $errors = array();
 
-        if (!in_array($type_action, array('renouv', 'resiliate'))) {
+        if (!in_array($type_action, array('renouv', 'setResiliateDate'))) {
             $errors[] = 'Type d\'action invalide';
         } else {
             if ($this->isLoaded($errors)) {
+                $linked_lines_filter = array($this->id);
                 $id_linked_line = (int) $this->getData('id_linked_line');
                 if ($id_linked_line) {
                     $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_line);
                     if (!BimpObject::objectLoaded($line)) {
                         $line = $this;
+                    } else {
+                        $linked_lines_filter[] = $id_linked_line;
+                        if ((int) $line->getData('fk_product') !== (int) $this->getData('fk_product')) {
+                            $line = $this;
+                        }
                     }
                 } else {
                     $line = $this;
@@ -3674,13 +3769,13 @@ class BCT_ContratLine extends BimpObject
                         $html .= BimpRender::renderAlerts($action_err, 'warning');
                     }
                     $html .= '</td>';
-
                     $html .= '</tr>';
 
                     $sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
                                 'fk_contrat'     => $line->getData('fk_contrat'),
                                 'fk_product'     => $line->getData('fk_product'),
-                                'id_linked_line' => $line->id
+                                'id_linked_line' => $linked_lines_filter,
+                                'rowid'          => array('operator' => '!=', 'value' => $line->id)
                                     ), 'rang');
 
                     foreach ($sub_lines as $sub_line) {
@@ -3900,13 +3995,26 @@ class BCT_ContratLine extends BimpObject
 
                 if (!count($errors)) {
                     $dates = array();
+
+                    $date_cloture = $this->getData('date_cloture');
+                    if ($date_cloture) {
+                        $dates[''] = 'Annuler la résiliation';
+                    }
+
                     $dt = new DateTime($period_data['date_next_period_tobill']);
                     $dates[$dt->format('Y-m-d')] = $dt->format('d / m / Y') . ' (0 période restant à facturer)';
-                    $value = $dt->format('Y-m-d');
 
-                    if ($period_data['nb_periods_tobill_max'] > 0) {
+                    if ($date_cloture) {
+                        $value = date('Y-m-d', strtotime($date_cloture));
+                    } else {
+                        $value = $dt->format('Y-m-d');
+                    }
+
+                    $nb_periods_to_bill = $period_data['nb_periods_tobill_max'] + $period_data['nb_periods_never_billed'];
+
+                    if ($nb_periods_to_bill > 0) {
                         $interval = new DateInterval('P' . $fac_periodicity . 'M ');
-                        for ($i = 1; $i <= $period_data['nb_periods_tobill_max']; $i++) {
+                        for ($i = 1; $i <= $nb_periods_to_bill; $i++) {
                             $dt->add($interval);
                             $dates[$dt->format('Y-m-d')] = $dt->format('d / m / Y') . ' (' . $i . ' période' . ($i > 1 ? 's' : '') . ' restant à facturer)';
                         }
@@ -4495,8 +4603,14 @@ class BCT_ContratLine extends BimpObject
                     if (!$date_fin) {
                         $errors[] = 'La date de fin de validité de la ligne à renouveller n\'est pas définie';
                     } else {
-                        $dt_ouv = new DateTime($date_fin);
-                        $dt_ouv->add(new DateInterval('P1D'));
+                        $date_cloture = (string) $this->getData('date_cloture');
+
+                        if ($date_cloture) {
+                            $dt_ouv = new DateTime($date_cloture);
+                        } else {
+                            $dt_ouv = new DateTime($date_fin);
+                            $dt_ouv->add(new DateInterval('P1D'));
+                        }
 
                         $nb_renouv = (int) $this->getData('nb_renouv');
 
@@ -4683,25 +4797,44 @@ class BCT_ContratLine extends BimpObject
         }
     }
 
-    public function resiliateAbonnement($date_cloture, &$warnings = array())
+    public function setDateCloture($date_cloture, &$warnings = array(), $check = true)
     {
         $errors = array();
 
-        if (!$this->isActionAllowed('resiliate', $errors)) {
+        if ($check && !$this->isActionAllowed('setResiliateDate', $errors)) {
             return $errors;
         }
 
-        $date_cloture = date('Y-m-d', strtotime($date_cloture));
+        if ($date_cloture) {
+            $date_cloture = date('Y-m-d', strtotime($date_cloture));
+        }
 
         $periods_data = $this->getPeriodsToBillData($errors);
 
         if (!count($errors)) {
-            if ($date_cloture < $periods_data['date_next_period_tobill']) {
+            if ($date_cloture && $date_cloture < $periods_data['date_next_period_tobill']) {
                 $date_cloture = $periods_data['date_next_period_tobill'];
 
                 $warnings[] = 'Ligne n° ' . $this->getData('rang') . ' : date de cloture décalée au ' . date('d / m / Y', strtotime($date_cloture));
             }
-            $this->updateField('date_cloture', $date_cloture . ' 00:00:00');
+
+            $errors = $this->updateField('date_cloture', $date_cloture . ' 00:00:00');
+
+            if (!count($errors)) {
+                $sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+                            'id_parent_line' => $this->id
+                ));
+
+                if (!empty($sub_lines)) {
+                    foreach ($sub_lines as $sub_line) {
+                        $sub_line_errors = $sub_line->setDateCloture($date_cloture, $warnings, false);
+
+                        if (count($sub_line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($sub_line_errors, 'Echec de l\'enregisrement de la date de résiliation pour la sous-ligne n° ' . $sub_line->getData('rang'));
+                        }
+                    }
+                }
+            }
         }
 
         return $errors;
@@ -5395,14 +5528,14 @@ class BCT_ContratLine extends BimpObject
         );
     }
 
-    public function actionResiliate($data, &$success)
+    public function actionSetResiliateDate($data, &$success)
     {
         $errors = array();
         $warnings = array();
         $success = '';
 
         $date_cloture = BimpTools::getArrayValueFromPath($data, 'date_cloture', '');
-        if (!$date_cloture) {
+        if (!$date_cloture && !$this->getData('date_cloture')) {
             $errors[] = 'Veuillez sélectionner une date de clôture';
         }
 
@@ -5418,7 +5551,7 @@ class BCT_ContratLine extends BimpObject
                 if (!BimpObject::objectLoaded($line)) {
                     $errors[] = 'La ligne #' . $id_line . ' n\'existe plus';
                 } else {
-                    $line_errors = $line->resiliateAbonnement($date_cloture, $warnings);
+                    $line_errors = $line->setDateCloture($date_cloture, $warnings);
 
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('rang'));
@@ -6538,6 +6671,10 @@ class BCT_ContratLine extends BimpObject
                     }
                 }
             }
+
+            $this->db->update('contratdet', array(
+                'id_line_renouv' => 0
+                    ), 'id_line_renouv = ' . $id);
         }
 
         return $errors;

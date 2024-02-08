@@ -142,6 +142,18 @@ class BIMP_Task extends BimpAbstractFollow
         }
 
         switch ($action) {
+            case 'Attribute':
+                if ((int) $this->getData('status') === 4) {
+                    $errors[] = 'Cette tâche est fermée';
+                }
+                return 1;
+
+            case 'close':
+                if ((int) $this->getData('status') === 4) {
+                    $errors[] = 'Cette tâche est déjà fermée';
+                }
+                return 1;
+
             case 'reopen':
                 if ((int) $this->getData('status') !== 4) {
                     $errors[] = 'Cette tâche n\'a pas besoin d\'être réouverte';
@@ -272,7 +284,7 @@ class BIMP_Task extends BimpAbstractFollow
 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
-            'label'   => 'Message autheur',
+            'label'   => 'Message auteur',
             'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array(
                 "obj_type"     => "bimp_object",
@@ -1258,7 +1270,7 @@ class BIMP_Task extends BimpAbstractFollow
                 }
             }
         }
-        
+
         parent::checkObject($context, $field);
     }
 

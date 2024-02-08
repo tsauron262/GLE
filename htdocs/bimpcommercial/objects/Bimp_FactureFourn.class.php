@@ -527,7 +527,7 @@ class Bimp_FactureFourn extends BimpCommAchat
     public function displayInfoDateF(){
         $dateMin = BimpCore::getConf('last_export_date', null, 'bimptocegid');
         if($dateMin && date($dateMin) > date($this->getData('datef')))
-            return 'Attention la date vas être remplacé par '.$dateMin;
+            return 'Attention la date va être remplacée par '.$dateMin;
     }
 
     public function displayPaidStatus($icon = true, $short_label = false)
@@ -1188,9 +1188,9 @@ class Bimp_FactureFourn extends BimpCommAchat
     public function checkDate()
     {
         $errors = array();
-        $dateMAx = '2020-04-01';
+        $dateMAx = BimpCore::getConf('last_export_date', null, 'bimptocegid');
         if ($this->getData('datef') < $dateMAx)
-            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+            $errors[] = 'Date inférieure au ' . $dateMAx . ' creation impossible';
         return $errors;
     }
 

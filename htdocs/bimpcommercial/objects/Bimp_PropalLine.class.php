@@ -336,7 +336,7 @@ class Bimp_PropalLine extends ObjectLine
                         $dt = new DateTime($date_start);
                         $dt->add($periodic_interval);
                         $dt->sub(new DateInterval('P1D'));
-                        $data['first_period_prorata'] = $dt->format('Y-m-d');
+                        $data['date_first_period_end'] = $dt->format('Y-m-d');
                     }
                 }
             }

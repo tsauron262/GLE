@@ -7,6 +7,15 @@ class EcologicAPI extends BimpAPI
     //token prod 9de90458-8d42-43a6-9a9c-4b0c066004f0
     //URL du site SwaggerUI = https://preprod-apiecologic.e-reparateur.eco/apidoc/ui/index#/
     //URL du site Swagger = https://apiecologic.e-reparateur.eco/apidoc/ui/index#/
+    
+    /*
+     * 
+vincent.izzi@opmconseil.com
+Vincent IZZI
+06.17.07.97.48      
+OPERATIONS PERFORMANCE MANAGEMENT                      
+www.opmconseil.com
+     */
 
     
     public static $asUser = false;

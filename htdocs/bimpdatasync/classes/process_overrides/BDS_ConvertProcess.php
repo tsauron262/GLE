@@ -7,15 +7,16 @@ class BDS_ConvertProcess extends BDSProcess
 
     public static $current_version = 2;
     public static $methods = array(
-        ''                    => '',
+        ''                         => '',
 //        'SignaturesToConvert'        => 'Conversion des signatures',
 //        'ProductRemisesCrtToConvert' => 'Conversion des remises CRT des produits',
 //        'PropalesCrtToConvert'       => 'Conversion des remises CRT des lignes de propales',
 //        'CommandesCrtToConvert'      => 'Conversion des remises CRT des lignes de commandes',
 //        'FacturesCrtToConvert'       => 'Conversion des remises CRT des lignes de factures',
-        'ShipmentsToConvert'  => 'Conversion des lignes d\'expédition',
-        'ReceptionsToConvert' => 'Conversion des lignes de réception',
-        'abosToConvert'       => 'Conversion des Abonnements'
+        'ShipmentsToConvert'       => 'Conversion des lignes d\'expédition',
+        'ReceptionsToConvert'      => 'Conversion des lignes de réception',
+        'abosToConvert'            => 'Conversion des Abonnements',
+        'abosPropalLinesToConvert' => 'Conversion des données abo dans propales'
     );
     public static $default_public_title = 'Scripts de conversions des données';
 
@@ -1270,6 +1271,90 @@ class BDS_ConvertProcess extends BDSProcess
 
         if (!empty($commandes_fails)) {
             $this->Alert('Commandes non traitables: ' . implode(', ', $commandes_fails));
+        }
+    }
+
+    // Données abos propales: 
+
+    public function findAbosPropalLinesToConvert(&$errors = array())
+    {
+        $elems = array();
+
+        BimpObject::loadClass('bimpcore', 'Bimp_Product');
+
+        $sql = BimpTools::getSqlFullSelectQuery('bimp_propal_line', array('id'), array(
+                    'a.abo_nb_units'        => 0,
+                    'a.abo_fac_periodicity' => array(
+                        'operator' => '>',
+                        'value'    => 0
+                    ),
+                    'a.abo_duration'        => array(
+                        'operator' => '>',
+                        'value'    => 0
+                    ),
+                    'or_prod'               => array(
+                        'or' => array(
+                            'a.linked_object_name' => 'bundleCorrect',
+                            'pef.type2'            => Bimp_Product::$abonnements_sous_types
+                        )
+                    )
+                        ), array(
+                    'pdet' => array(
+                        'table' => 'propaldet',
+                        'on'    => 'pdet.rowid = a.id_line'
+                    ),
+                    'pef'  => array(
+                        'table' => 'product_extrafields',
+                        'on'    => 'pef.fk_object = pdet.fk_product'
+                    )
+        ));
+
+        if ((int) $this->getOption('test_one', 0)) {
+            $sql .= ' LIMIT 1';
+        }
+
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+//            die('n : ' . count($rows));
+            foreach ($rows as $r) {
+                $elems[] = (int) $r['id'];
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+
+        return $elems;
+    }
+
+    public function execAbosPropalLinesToConvert(&$errors = array())
+    {
+        global $user;
+        $user->fetch(1);
+
+        $this->setCurrentObjectData('bimpcommercial', 'Bimp_PropalLine');
+        foreach ($this->references as $id_line) {
+            $this->incProcessed();
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', $id_line);
+            $line->useNoTransactionsDb();
+
+            if (BimpObject::objectLoaded($line)) {
+                $infos = '';
+                $err = $line->checkAboData($infos);
+
+                if (count($err)) {
+                    $this->Alert($err, $line);
+                }
+
+                if ($infos) {
+                    $this->Success($infos, $line);
+                    $this->incUpdated();
+                }
+            } else {
+                $this->Error('Ligne #' . $id_line . ' absente');
+                $this->incIgnored();
+            }
         }
     }
 

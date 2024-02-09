@@ -4598,12 +4598,13 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'date_from':
-                $html = BimpInput::renderInput('date', $prefixe . 'date_from', (string) $value);
+            case 'abo_date_from':
+                $html = BimpInput::renderInput('date', $prefixe . $field, (string) $value);
                 break;
 
             case 'date_to':
                 $html = BimpInput::renderInput('date', $prefixe . 'date_to', (string) $value);
-                $html .= '<p class="inputHelp">Pour les abonnements, ce champ est automatiquement ajusté en fonction de la date de début et de la durée</p>';
+//                $html .= '<p class="inputHelp">Pour les abonnements, ce champ est automatiquement ajusté en fonction de la date de début et de la durée</p>';
                 break;
 
             case 'force_qty_1':
@@ -5836,7 +5837,7 @@ class ObjectLine extends BimpObject
         if (isset($this->no_maj_bundle) && $this->no_maj_bundle) {
             return;
         }
-        
+
         if ((int) $this->id_product) {
             $product = $this->getProduct();
 
@@ -5853,6 +5854,7 @@ class ObjectLine extends BimpObject
                     $fieldsCopy[$field] = $this->getData($field);
                 }
 
+                $nb_units = (float) $this->getData('abo_nb_units');
                 $isAbonnement = $product->isAbonnement();
                 //on ajoute les sous lignes et calcule le tot
                 $dol_object = $this->getChildObject('dol_line');
@@ -5870,16 +5872,16 @@ class ObjectLine extends BimpObject
                                                 array(
                                                     'id_parent_line'     => $this->id,
                                                     'linked_id_object'   => $child_prod->id,
-                                                    'linked_object_name' => 'bundle'
+                                                    'linked_object_name' => 'bundle',
                                                 ), array(
-                                            'qty'        => $child_prod->getData('qty') * $this->qty,
                                             'id_product' => $child_prod->getData('fk_product_fils'),
                                                 ), BimpTools::merge_array($fieldsCopy, array(
-                                                    'editable'  => 0,
-                                                    'deletable' => 0,
-                                                    'remisable' => 2,
+                                                    'abo_nb_units' => $child_prod->getData('qty') * $nb_units,
+                                                    'editable'     => 0,
+                                                    'deletable'    => 0,
+                                                    'remisable'    => 2,
                                                         ), true),
-                                                                          $newLn));
+                                                                                           $newLn));
 
                         $dol_child = $newLn->getChildObject('dol_line');
                         $totHt += $dol_child->getData('total_ht');
@@ -5908,7 +5910,7 @@ class ObjectLine extends BimpObject
                                 $errors = BimpTools::merge_array($errors, $child->setRemise($pourcent3, 'Remise bundle ' . $product->getData('ref')));
                             }
                         }
-                        
+
                         // Ajout de la ligne de compensation
                         $newLn = null;
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
@@ -5923,9 +5925,10 @@ class ObjectLine extends BimpObject
                                             'desc'       => 'Annulation double prix Bundle',
                                             'pa_ht'      => -$totPa / $this->qty
                                                 ), BimpTools::merge_array($fieldsCopy, array(
-                                                    'type'      => static::LINE_FREE,
-                                                    'editable'  => 0,
-                                                    'deletable' => 0,
+                                                    'abo_nb_units' => $nb_units,
+                                                    'type'         => static::LINE_FREE,
+                                                    'editable'     => 0,
+                                                    'deletable'    => 0,
                                                         ), true),
                                                                           $newLn));
                         if (abs($pourcent) > 0.01 || abs($pourcent) < 0.01) {
@@ -6229,7 +6232,8 @@ class ObjectLine extends BimpObject
         $extra = array();
         if ($this->parent->dol_object->table_element_line != '') {
             $prod = $this->getProduct();
-            if ($prod && $prod->isDolExtraField('duree_i')) {
+            $field = 'duree_i';
+            if ($prod && $prod->isDolExtraField($field)) {
                 $sql = 'SELECT (a___dol_line___product___product.duree_i * a___dol_line.qty) as tot
                             FROM ' . MAIN_DB_PREFIX . $this->parent->dol_object->table_element_line . ' a___dol_line
                             LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product

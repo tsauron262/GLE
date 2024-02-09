@@ -1028,12 +1028,14 @@ class BCT_ContratLine extends BimpObject
                 $is_echu = (!(int) $this->getData('fac_term')); // Facturation à terme échu
                 $data['nb_total_periods'] = ceil($duration / $periodicity);
 
-                $date_debut = date('Y-m-d', strtotime($this->getData('date_debut_validite')));
+                $date_debut = $this->getData('date_debut_validite'); 
 
                 if (!$date_debut) {
                     $errors[] = 'Date de début de validité non définie';
                     return $data;
                 }
+                
+                $date_debut = date('Y-m-d', strtotime($date_debut));
 
                 $date_fin = $this->getData('date_fin_validite');
                 if (!$date_fin) {
@@ -1074,9 +1076,11 @@ class BCT_ContratLine extends BimpObject
                     $dt = new DateTime($date_debut);
                     if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
-                    } elseif ($nb_periods < 0) {
-                        $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
-                    }
+                    } 
+                    // Ne pas faire de sub la 1ère période doit être celle de l'abo de base avec un prorata > 1
+//                    elseif ($nb_periods < 0) {
+//                        $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
+//                    }
                     $data['date_first_period_start'] = $dt->format('Y-m-d');
 
                     // Calcul de la fin de la première période facturée partiellement : 
@@ -1270,9 +1274,11 @@ class BCT_ContratLine extends BimpObject
                     $dt = new DateTime($date_debut);
                     if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
-                    } elseif ($nb_periods < 0) {
-                        $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
-                    }
+                    } 
+                    // Ne pas faire de sub la 1ère période doit être celle de l'abo de base avec un prorata > 1
+//                    elseif ($nb_periods < 0) {
+//                        $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
+//                    }
                     $data['date_first_period_start'] = $dt->format('Y-m-d');
 
                     // Calcul de la fin de la première période facturée partiellement : 

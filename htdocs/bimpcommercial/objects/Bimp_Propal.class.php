@@ -1076,10 +1076,26 @@ class Bimp_Propal extends Bimp_PropalTemp
             if (BimpObject::objectLoaded($line)) {
                 if ($by_linked_contrat) {
                     $line_errors = array();
-                    $id_contrat_line = (int) $line->getData('id_linked_contrat_line');
 
-                    if (!$id_contrat_line) {
-                        $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $line->id);
+                    $id_contrat_line = 0;
+                    if ((int) $line->getData('id_parent_line')) {
+                        $parent_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', (int) $line->getData('id_parent_line'));
+
+                        if (BimpObject::objectLoaded($parent_line)) {
+                            $id_contrat_line = (int) $parent_line->getData('id_linked_contrat_line');
+
+                            if (!$id_contrat_line) {
+                                $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $parent_line->id);
+                            }
+                        } else {
+                            $line_errors[] = 'Ligne parent #' . (int) $line->getData('id_parent_line') . ' absente';
+                        }
+                    } else {
+                        $id_contrat_line = (int) $line->getData('id_linked_contrat_line');
+
+                        if (!$id_contrat_line) {
+                            $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $line->id);
+                        }
                     }
 
                     if ($id_contrat_line) {
@@ -2182,6 +2198,15 @@ class Bimp_Propal extends Bimp_PropalTemp
                         $prod = $line->getProduct();
 
                         if (!count($line_errors)) {
+                            $qty = $line->qty;
+
+                            if ((int) $line->getData('id_linked_contrat_line')) {
+                                $prod_duration = (int) $prod->getData('duree');
+                                if ($prod_duration) {
+                                    $qty = (float) $line->getData('abo_nb_units') * ((int) $line->getData('abo_duration') / $prod_duration);
+                                }
+                            }
+
                             $id_pfp = (int) $line->id_fourn_price;
                             if (!$id_pfp && BimpObject::objectLoaded($prod)) {
                                 $id_fourn = (int) $prod->getData('achat_def_id_fourn');
@@ -2207,7 +2232,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                         'fk_product'                   => $line->id_product,
                                         'description'                  => $line->desc,
                                         'product_type'                 => $line->product_type,
-                                        'qty'                          => $line->qty,
+                                        'qty'                          => $qty,
                                         'subprice'                     => $line->pu_ht,
                                         'tva_tx'                       => $line->tva_tx,
                                         'remise_percent'               => $line->remise,
@@ -2244,7 +2269,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                             'line_type'                    => BCT_ContratLine::TYPE_ABO,
                                             'description'                  => $line->desc,
                                             'product_type'                 => $line->product_type,
-                                            'qty'                          => $line->qty,
+                                            'qty'                          => $qty,
                                             'subprice'                     => $line->pu_ht,
                                             'tva_tx'                       => $line->tva_tx,
                                             'remise_percent'               => $line->remise,

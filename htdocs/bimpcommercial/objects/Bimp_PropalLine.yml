@@ -44,6 +44,10 @@ objects:
 fields: 
     # /!\ ATTENTION : en cas d'ajout de field, penser à gérer dans BS_SavPropalLine !
     
+    abo_nb_units: 
+        label: Nb unités dans l'abonnement
+        type: float
+        
     abo_fac_periodicity: 
         label: Périodicité de facturation
         type: int
@@ -78,6 +82,13 @@ fields:
         values: 
             array: nbRenouvellements
         default_value: 0
+        depends_on: id_product,id_linked_contrat_line
+        
+#    abo_date_start: 
+#        label: Date dé début de factuation
+#        type: date
+#        input: 
+#            help: A renseigner uniquement pour une facturaton partielle de l'abonnement
             
     id_linked_contrat_line: 
         label: Abonnement lié
@@ -160,11 +171,25 @@ forms:
                         show_values: 1
                     id_linked_contrat_line: 
                         show_values: 0
+            abo_date_from: 
+                show: 1
+                custom: 1
+                label: Date d'ouverture prévue
+                input_name: abo_date_from
+                data_type: date
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - abo_date_from
+                display_if: 
+                    field_name: is_abonnement
+                    show_values: 1
             abo_qty: 
                 show: 1
                 custom: 1
                 label: Quantité
-                input_name: abo_qties
+                input_name: abo_nb_units
                 input: 
                    type: custom
                    content: 
@@ -265,7 +290,7 @@ forms:
             abo_qty: 
                 custom: 1
                 label: Quantité
-                input_name: abo_qties
+                input_name: abo_nb_units
                 input: 
                    type: custom
                    content: 
@@ -304,12 +329,23 @@ forms:
                         method: renderLineInput
                         params: 
                             - date_from
+                            
+            abo_fac_prorata_infos: 
+                custom: 1
+                label: Infos prorata de facturation
+                input_name: abo_fac_prorata_infos
+                content: 
+                    callback: displayAboFacInfos
+                display_if: 
+                    field_name: id_linked_contrat_line
+                    hide_values: 0
+                depends_on: id_linked_contrat_line,date_from,abo_nb_units
+                            
             abo_fac_term:
                 field: abo_fac_term
                 display_if: 
                     field_name: id_linked_contrat_line
                     show_values: 0
-                        
             
 lists: 
     default: 

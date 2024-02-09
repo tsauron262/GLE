@@ -48,6 +48,7 @@ fields:
         type: int
         default_value: 0
         
+    abo_nb_units: unset
     abo_fac_periodicity: unset
     abo_duration: unset
     abo_fac_term: unset

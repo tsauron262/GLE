@@ -271,6 +271,8 @@ forms:
                 show: 0
             abo_duration: 
                 show: 0
+            abo_date_from: 
+                show: 0
             abo_fac_periodicity: 
                 show: 0
             abo_fac_term: 
@@ -360,11 +362,13 @@ forms:
                         params: 
                             - date_from
                 display_if: 
-                    fields_names: type,limited
+                    fields_names: type,limited,is_abonnement
                     type: 
                         show_values: 1,3
                     limited: 
                         hide_values: 0
+                    is_abonnement: 
+                        hide_values: 1
             date_to: 
                 custom: 1
                 label: Au
@@ -376,11 +380,13 @@ forms:
                         params: 
                             - date_to
                 display_if: 
-                    fields_names: type,limited
+                    fields_names: type,limited,is_abonnement
                     type: 
                         show_values: 1,3
                     limited: 
                         hide_values: 0
+                    is_abonnement: 
+                        hide_values: 1
             margins: 
                 custom: 1
                 label: Marges

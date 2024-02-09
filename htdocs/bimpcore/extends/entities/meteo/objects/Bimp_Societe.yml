@@ -1,0 +1,5 @@
+fields: 
+    zip: 
+        required: 0
+    town: 
+        required: 0

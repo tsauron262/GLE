@@ -48,6 +48,7 @@ fields:
         input: 
             type: search_entrepot
             help: Entrepôt de destination pour le retour des produits non sérialisés
+            
     qty: 
         label: Quantité
         type: float
@@ -58,7 +59,6 @@ lists:
         title: Lignes
         configurable: 1
         checkboxes: 1
-        positions: 1
         bulk_actions:
             - label: supprimer les lignes sélectionnées
               icon: fas_trash-alt

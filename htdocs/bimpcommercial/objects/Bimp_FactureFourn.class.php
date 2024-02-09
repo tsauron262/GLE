@@ -470,7 +470,11 @@ class Bimp_FactureFourn extends BimpCommAchat
         global $conf;
         $ref = dol_sanitizeFileName($this->dol_object->ref);
         $subdir = get_exdir($this->id, 2, 0, 0, $this->dol_object, 'invoice_supplier') . $ref;
-        return $conf->fournisseur->facture->dir_output . '/' . $subdir;
+        if($this->isLoaded() && $this->dol_object->entity > 0)
+//            die($conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/' . $subdir);
+            return $conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/' . $subdir;
+        else
+            return $conf->fournisseur->facture->dir_output . '/' . $subdir;
     }
 
     public function getTotalPaid()
@@ -523,7 +527,7 @@ class Bimp_FactureFourn extends BimpCommAchat
     public function displayInfoDateF(){
         $dateMin = BimpCore::getConf('last_export_date', null, 'bimptocegid');
         if($dateMin && date($dateMin) > date($this->getData('datef')))
-            return 'Attention la date vas être remplacé par '.$dateMin;
+            return 'Attention la date va être remplacée par '.$dateMin;
     }
 
     public function displayPaidStatus($icon = true, $short_label = false)
@@ -1184,9 +1188,9 @@ class Bimp_FactureFourn extends BimpCommAchat
     public function checkDate()
     {
         $errors = array();
-        $dateMAx = '2020-04-01';
+        $dateMAx = BimpCore::getConf('last_export_date', null, 'bimptocegid');
         if ($this->getData('datef') < $dateMAx)
-            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+            $errors[] = 'Date inférieure au ' . $dateMAx . ' creation impossible';
         return $errors;
     }
 

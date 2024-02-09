@@ -1034,6 +1034,13 @@ class BimpObject extends BimpCache
                     $or_sql = '';
 
                     foreach ($params['fields_search'] as $field) {
+                        if(stripos($field, 'ef.') !== false){
+                            if(!$this->dol_field_exists(str_replace('ef.', '', $field)))
+                                continue;
+//                        if($field == 'ef.libelle')
+//                            continue;
+                        }
+//                        
                         $or_sql .= ($or_sql ? ' OR ' : '') . '' . $field . ' LIKE \'%' . $search . '%\'';
                     }
 

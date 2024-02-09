@@ -126,6 +126,49 @@ class FournObjectLine extends ObjectLine
         $html = '';
 
         switch ($field) {
+            case 'tva_tx':
+                // ATTENTION $value contient la TVA du produit si celui-ci est sélectionné. 
+                if (is_null($value) && !$this->isLoaded()) {
+                    $value = BimpCache::cacheServeurFunction('getDefaultTva');
+                }
+
+                $parent = $this->getParentInstance();
+
+                if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
+                    $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
+                    $html .= ' <span class="inputInfo warning">Non applicable</span>';
+                } elseif (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
+                    $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
+                    $html .= $value . ' %';
+                    if (!$this->isEditable()) {
+                        $html .= ' <span class="inputInfo warning">(non modifiable)</span>';
+                    }
+                } else {
+                    if (static::$tva_free) {
+                        $html = BimpInput::renderInput('text', $prefixe . 'tva_tx', (float) $value, array(
+                                    'data'        => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => 2,
+                                        'min'       => 0,
+                                        'max'       => 100
+                                    ),
+                                    'addon_right' => '<i class="fa fa-percent"></i>'
+                        ));
+                    } else {
+                        $client = $parent->getChildObject('client');
+                        $tva_rates = BimpCache::getTaxesByRates(1);
+                        if (BimpObject::objectLoaded($client)) {
+                            $tva_rates = BimpTools::merge_array($tva_rates, BimpCache::getTaxesByRates($client->getData('fk_pays')), true);
+                        }
+                        if (is_null($value)) {
+                            $value = BimpCache::cacheServeurFunction('getDefaultTva');
+                        }
+                        $html = BimpInput::renderInput('select', $prefixe . 'tva_tx', (float) $value, array(
+                                    'options' => $tva_rates
+                        ));
+                    }
+                }
+                break;
             case 'pa_except':
                 $value = $this->pu_ht;
                 return BimpInput::renderInput('text', $prefixe . 'pa_except', (float) $value, array(

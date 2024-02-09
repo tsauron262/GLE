@@ -30,7 +30,7 @@ class Bimp_PropalLine extends ObjectLine
         36 => 'Triannuel'
     );
 
-    // Getters booléens
+    // Getters booléens :
 
     public function isDeletable($force_delete = false, &$errors = array()): int
     {
@@ -120,7 +120,7 @@ class Bimp_PropalLine extends ObjectLine
         return $n;
     }
 
-    // Getters données:
+    // Getters données :
 
     public function getValueByProduct($field)
     {
@@ -244,7 +244,7 @@ class Bimp_PropalLine extends ObjectLine
                     $date_fin = date('Y-m-d', strtotime($date_fin));
                 }
 
-                if (BimpTools::isSubmit('abo_date_from')) {
+                if (BimpTools::isPostFieldSubmit('abo_date_from')) {
                     $date_start = BimpTools::getPostFieldValue('abo_date_from', $this->date_from);
                 } else {
                     $date_start = BimpTools::getPostFieldValue('date_from', $this->date_from);
@@ -280,10 +280,10 @@ class Bimp_PropalLine extends ObjectLine
                     }
                 }
 
-                if ($duration % $periodicity != 0) {
+                if ($periodicity && $duration % $periodicity != 0) {
                     $errors[] = 'La durée totale de l\'abonnement doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $periodicity . ' mois)';
                 }
-                if ($duration % $prod_duration != 0) {
+                if ($prod_duration && $duration % $prod_duration != 0) {
                     $errors[] = 'La durée totale de l\'abonnement doit être un multiple de la durée unitaire de produit (' . $prod_duration . ' mois)';
                 }
                 if ($duration < $prod_duration) {
@@ -495,7 +495,7 @@ class Bimp_PropalLine extends ObjectLine
         if (count($errors)) {
             $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible de déterminer le prorata de facturation'), 'warning');
         } else {
-            $html .= '<br/><b>Nb périodes facturées : </b>' . $data['nb_periods_fac'];
+            $html .= '<b>Nb périodes facturées : </b>' . $data['nb_periods_fac'];
             if ($data['first_period_prorata'] != 1) {
                 $html .= '<br/><b>Prorata 1ère période (Du ' . date('d / m / Y', strtotime($data['date_first_period_start'])) .' au ' . date('d / m / Y', strtotime($data['date_first_period_end'])) .') : </b>' . BimpTools::displayFloatValue($data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1);
             }

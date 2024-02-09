@@ -275,6 +275,8 @@ forms:
                 show: 0
             abo_fac_periodicity: 
                 show: 0
+            abo_fac_prorata_infos: 
+                show: 0
             abo_fac_term: 
                 show: 0
             abo_nb_renouv: 

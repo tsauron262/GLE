@@ -203,6 +203,17 @@ forms:
                     abo_duration: 
                         hide_values: 0
                 depends_on: id_product
+            abo_fac_prorata_infos: 
+                show: 1
+                custom: 1
+                label: Infos prorata de facturation
+                input_name: abo_fac_prorata_infos
+                content: 
+                    callback: displayAboFacInfos
+                display_if: 
+                    field_name: id_linked_contrat_line
+                    hide_values: 0
+                depends_on: id_product,id_linked_contrat_line,abo_date_from,abo_nb_units
             abo_fac_term: 
                 show: 1
                 field: abo_fac_term

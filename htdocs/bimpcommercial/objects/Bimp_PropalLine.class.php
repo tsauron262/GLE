@@ -541,7 +541,7 @@ class Bimp_PropalLine extends ObjectLine
                             $html .= '1 facturation de <b>';
                             $html .= BimpTools::displayFloatValue($data['qty_per_period'] * $data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1);
                             $html .= '</b> unité(s)';
-                            if ($nb_periods) {
+                            if ($nb_periods > 1) {
                                 $html .= ' suivie de ' . ($nb_periods - 1) . ' facturation' . ($nb_periods - 1 > 1 ? 's' : '') . ' de <b>';
                                 $html .= BimpTools::displayFloatValue($data['qty_per_period'], 6, ',', 0, 0, 0, 0, 1, 1);
                                 $html .= '</b> unité(s)';

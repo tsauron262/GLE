@@ -4166,8 +4166,6 @@ class BimpObject extends BimpCache
         foreach ($fields as $sqlKey => $field_alias) {
             $sql .= ', SUM(' . $sqlKey . ') as ' . $field_alias;
         }
-
-        $sql .= BimpTools::getSqlFrom($table, $joins);
         
         if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
             $newJoins = array();
@@ -4175,6 +4173,8 @@ class BimpObject extends BimpCache
                 $joins = BimpTools::merge_array($joins, $newJoins);
             }
         }
+
+        $sql .= BimpTools::getSqlFrom($table, $joins);
         
         $sql .= BimpTools::getSqlWhere($filters);
 

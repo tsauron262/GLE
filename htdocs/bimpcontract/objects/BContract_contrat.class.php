@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php';
 
-if (!defined('BV_LIB')) {
+if (!defined('BV_LIB') && BimpCore::isModuleActive('bimpvalidation')) {
     require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
 }
 

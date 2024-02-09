@@ -1028,13 +1028,13 @@ class BCT_ContratLine extends BimpObject
                 $is_echu = (!(int) $this->getData('fac_term')); // Facturation à terme échu
                 $data['nb_total_periods'] = ceil($duration / $periodicity);
 
-                $date_debut = $this->getData('date_debut_validite'); 
+                $date_debut = $this->getData('date_debut_validite');
 
                 if (!$date_debut) {
                     $errors[] = 'Date de début de validité non définie';
                     return $data;
                 }
-                
+
                 $date_debut = date('Y-m-d', strtotime($date_debut));
 
                 $date_fin = $this->getData('date_fin_validite');
@@ -1076,7 +1076,7 @@ class BCT_ContratLine extends BimpObject
                     $dt = new DateTime($date_debut);
                     if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
-                    } 
+                    }
                     // Ne pas faire de sub la 1ère période doit être celle de l'abo de base avec un prorata > 1
 //                    elseif ($nb_periods < 0) {
 //                        $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
@@ -1274,7 +1274,7 @@ class BCT_ContratLine extends BimpObject
                     $dt = new DateTime($date_debut);
                     if ($nb_periods > 0) {
                         $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
-                    } 
+                    }
                     // Ne pas faire de sub la 1ère période doit être celle de l'abo de base avec un prorata > 1
 //                    elseif ($nb_periods < 0) {
 //                        $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
@@ -3748,6 +3748,7 @@ class BCT_ContratLine extends BimpObject
                     $html .= '<tr>';
                     $html .= '<th style="width: 45px"></th>';
                     $html .= '<th>Ligne n°</th>';
+                    $html .= '<th>Statut</th>';
                     $html .= '<th>Nombre d\'unités</th>';
                     $html .= '<th></th>';
                     $html .= '</tr>';
@@ -3766,6 +3767,8 @@ class BCT_ContratLine extends BimpObject
                     $html .= '</td>';
 
                     $html .= '<td>' . $line->getData('rang') . ' (principale)</td>';
+
+                    $html .= '<td>' . $line->displayDataDefault('statut') . '</td>';
 
                     $nb_units = ($line->getData('qty') / $duration) * $prod_duration;
                     $html .= '<td>' . $nb_units . '</td>';
@@ -3796,6 +3799,8 @@ class BCT_ContratLine extends BimpObject
                         $html .= '</td>';
 
                         $html .= '<td>' . $sub_line->getData('rang') . '</td>';
+
+                        $html .= '<td>' . $sub_line->displayDataDefault('statut') . '</td>';
 
                         $nb_units = ($sub_line->getData('qty') / (int) $sub_line->getData('duration')) * $prod_duration;
                         $html .= '<td>' . $nb_units . '</td>';
@@ -4403,18 +4408,28 @@ class BCT_ContratLine extends BimpObject
                                         ), true, true, true);
 
                         if (!BimpObject::objectLoaded($newLn)) {
-                            if ($this->getData('line_origin_type') === 'propal_line') {
-                                continue; // temporaire, bug à résoudre (id_parent_line non alimenté pour contrats créés depuis devis avant le 15/12) 
-                            }
                             $newLn = BimpObject::getInstance('bimpcontrat', 'BCT_ContratLine');
                         }
 
+                        $id_prod = (int) (int) $child_prod->getData('fk_product_fils');
+
                         $newLn->set('statut', (int) $this->getData('statut'));
                         $newLn->set('qty', $child_prod->getData('qty') * $qty);
-                        $newLn->set('fk_product', (int) $child_prod->getData('fk_product_fils'));
+                        $newLn->set('fk_product', $id_prod);
                         $newLn->set('id_parent_line', $this->id);
                         $newLn->set('linked_id_object', $child_prod->id);
                         $newLn->set('linked_object_name', 'bundle');
+
+                        if ($id_prod) {
+                            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+
+                            if (!BimpObject::objectLoaded($newLn) && BimpObject::objectLoaded($prod)) {
+                                $newLn->set('subprice', $newLn->getValueForProduct('subprice', $prod));
+                                $newLn->set('tva_tx', $newLn->getValueForProduct('tva_tx', $prod));
+                                $newLn->set('fk_product_fournisseur_price', $newLn->getValueForProduct('fk_product_fournisseur_price', $prod));
+                                $newLn->set('buy_price_ht', $newLn->getValueForProduct('buy_price_ht', $prod));
+                            }
+                        }
 
                         foreach ($fieldsCopy as $field) {
                             $newLn->set($field, $this->getData($field));
@@ -4512,27 +4527,27 @@ class BCT_ContratLine extends BimpObject
 
     public function renouvAbonnement($options = array(), &$errors = array(), &$warnings = array(), &$success = '', &$success_callback = '')
     {
+        if (!$this->isLoaded($errors)) {
+            return;
+        }
+
+        $prod = $this->getChildObject('product');
         $options = BimpTools::overrideArray(array(
                     'id_propal'         => -1,
                     'propal_label'      => '',
                     'fac_periodicity'   => (int) $this->getData('fac_periodicity'),
                     'achat_periodicity' => (int) $this->getData('achat_periodicity'),
-                    'subprice'          => (float) $this->getData('subprice'),
+                    'subprice'          => $this->getValueForProduct('subprice', $prod),
                     'duration'          => (int) $this->getData('duration'),
                     'fac_term'          => (int) $this->getData('fac_term'),
                     'lines'             => array()
                         ), $options);
-
-        if (!$this->isLoaded($errors)) {
-            return;
-        }
 
         $contrat = $this->getParentInstance();
         if (!BimpObject::objectLoaded($contrat)) {
             $errors[] = 'Contrat lié absent';
         }
 
-        $prod = $this->getChildObject('product');
         if (!BimpObject::objectLoaded($prod)) {
             $errors[] = 'Produit lié absent';
         } else {

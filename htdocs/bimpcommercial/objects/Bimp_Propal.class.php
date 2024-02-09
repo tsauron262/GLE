@@ -310,21 +310,21 @@ class Bimp_Propal extends Bimp_PropalTemp
                     return 0;
                 }
 
-                if (!(int) $this->getNbAbonnements()) {
+                if (!(int) $this->getNbAbonnements(true)) {
                     $errors[] = 'Aucune ligne d\'abonnement dans ce devis';
                     return 0;
                 }
 
-                $items = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('bimp_contrat'));
-                if (!empty($items)) {
-                    foreach ($items as $id) {
-                        $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id['id_object']);
-                        if ($obj->isLoaded()) {
-                            $errors[] = 'Contrat d\'abonnement déjà créé';
-                            return 0;
-                        }
-                    }
-                }
+//                $items = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('bimp_contrat'));
+//                if (!empty($items)) {
+//                    foreach ($items as $id) {
+//                        $obj = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id['id_object']);
+//                        if ($obj->isLoaded()) {
+//                            $errors[] = 'Contrat d\'abonnement déjà créé';
+//                            return 0;
+//                        }
+//                    }
+//                }
                 return 1;
 
             case 'classifyBilled':
@@ -1285,7 +1285,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             $err = array();
             if ($this->isActionAllowed('createContratAbo', $err)) {
-                $nb_abos = $this->getNbAbonnements();
+                $nb_abos = $this->getNbAbonnements(true);
                 if ($nb_abos > 0) {
                     $s = ($nb_abos > 1 ? 's' : '');
                     $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';

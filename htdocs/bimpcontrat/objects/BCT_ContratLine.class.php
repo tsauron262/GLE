@@ -154,14 +154,17 @@ class BCT_ContratLine extends BimpObject
 
     public function isLinkedToOtherRef()
     {
-        $linked_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $this->getData('id_linked_line'));
+        if ((int) $this->getData('id_linked_line')) {
+            $linked_line = $this->getChildObject('linked_line');
 
-        if (BimpObject::objectLoaded($linked_line)) {
-            if ((int) $linked_line->getData('fk_product') !== (int) $this->getData('fk_product')) {
-                return true;
+            if (BimpObject::objectLoaded($linked_line)) {
+                if ((int) $linked_line->getData('fk_product') !== (int) $this->getData('fk_product')) {
+                    return 1;
+                }
             }
         }
-        return false;
+
+        return 0;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -1933,29 +1936,51 @@ class BCT_ContratLine extends BimpObject
 
     public function getLinkableContratLinesArray()
     {
+        $lines = array(
+            0 => 'Aucun'
+        );
+
         $id_prod = (int) BimpTools::getPostFieldValue('fk_product', $this->getData('fk_product'));
         $other_product = (int) BimpTools::getPostFieldValue('type_linked_line', 0);
         if ($id_prod) {
             $contrat = $this->getParentInstance();
             if (BimpObject::objectLoaded($contrat)) {
-                $options = array(
-                    'include_empty'    => true,
-                    'empty_label'      => 'Aucun',
-                    'active_only'      => true,
-                    'with_periods'     => true,
-                    'no_sub_lines'     => true,
-                    'excluded_id_line' => ($this->isLoaded() ? $this->id : 0)
+                $filters = array(
+                    'id_parent_line' => 0,
+                    'id_linked_line' => 0
                 );
 
-                if (!$other_product) {
-                    $options['id_product'] = $id_prod;
+                if ($this->isLoaded()) {
+                    $filters['rowid'] = array(
+                        'operator' => '!=',
+                        'value'    => $this->id
+                    );
                 }
 
-                return $contrat->getAboLinesArray($options);
+                if ($other_product) {
+                    $filters['fk_product'] = array(
+                        'operator' => '!=',
+                        'value'    => $id_prod
+                    );
+                } else {
+                    $filters['fk_product'] = $id_prod;
+                }
+
+                $contrat_lines = $contrat->getLines('abo', false, $filters);
+
+                foreach ($contrat_lines as $line) {
+                    if (!$line->isActive() || $line->isResiliated()) {
+                        continue;
+                    }
+
+                    $lines[$line->id] = $line->displayProduct('ref_nom') . ' (' . $line->displayPeriods(true) . ')';
+                }
+
+                return $lines;
             }
         }
 
-        return array();
+        return $lines;
     }
 
     public function getClientPropalesArray()

@@ -72,6 +72,21 @@ class Bimp_PropalLine extends ObjectLine
         return 1;
     }
 
+    public function isAboLinkedToOtherRef()
+    {
+        if ((int) $this->getData('id_linked_contrat_line')) {
+            $linked_line = $this->getChildObject('linked_contrat_line');
+
+            if (BimpObject::objectLoaded($linked_line)) {
+                $id_prod = (int) BimpTools::getPostFieldValue('id_product', $this->id_product);
+                if ((int) $linked_line->getData('fk_product') !== $id_prod) {
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+
     // Getters params : 
 
     public function getListExtraBtn()
@@ -197,7 +212,7 @@ class Bimp_PropalLine extends ObjectLine
         return $qties;
     }
 
-    // Getters données : 
+    // Getters données :
 
     public function getAboFacData(&$errors = array())
     {
@@ -308,7 +323,7 @@ class Bimp_PropalLine extends ObjectLine
                         if ($nb_periods > 0) {
                             $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
                             $data['nb_periods_fac'] = $data['nb_total_periods'] - $nb_periods;
-                        } 
+                        }
 //                        elseif ($nb_periods < 0) {
 //                            $dt->sub(new DateInterval('P' . (abs($nb_periods) * $periodicity) . 'M'));
 //                        }
@@ -370,7 +385,16 @@ class Bimp_PropalLine extends ObjectLine
                 if (BimpObject::objectLoaded($contrat_line)) {
                     $contrat = $contrat_line->getParentInstance();
                     if (BimpObject::objectLoaded($contrat)) {
-                        $html .= 'Ajout à un abonnement en cours du contrat ' . $contrat->getLink() . ' (ligne n° ' . $contrat_line->getData('rang') . ') <br/><br/>';
+                        $html .= 'Ajout à un abonnement en cours du contrat ' . $contrat->getLink() . ' (ligne n° ' . $contrat_line->getData('rang') . ')';
+
+//                        if ((int) $contrat_line->getData('fk_product') !== (int) $this->id_product) {
+//                            $product = $contrat_line->getChildObject('product');
+//                            if (BimpObject::objectLoaded($product)) {
+//                                $html .= '<br/>' . $product->getLink();
+//                            }
+//                        }
+
+                        $html .= '<br/><br/>';
                     } else {
                         $html .= '<span class="danger">Le contrat de l\'abonnement lié n\'existe plus</span><br/><br/>';
                         $contrat_line = null;
@@ -497,7 +521,7 @@ class Bimp_PropalLine extends ObjectLine
         } else {
             $html .= '<b>Nb périodes facturées : </b>' . $data['nb_periods_fac'];
             if ($data['first_period_prorata'] != 1) {
-                $html .= '<br/><b>Prorata 1ère période (Du ' . date('d / m / Y', strtotime($data['date_first_period_start'])) .' au ' . date('d / m / Y', strtotime($data['date_first_period_end'])) .') : </b>' . BimpTools::displayFloatValue($data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1);
+                $html .= '<br/><b>Prorata 1ère période (Du ' . date('d / m / Y', strtotime($data['date_first_period_start'])) . ' au ' . date('d / m / Y', strtotime($data['date_first_period_end'])) . ') : </b>' . BimpTools::displayFloatValue($data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1);
             }
             $html .= '<br/><b>Qté totale finale: </b>' . BimpTools::displayFloatValue($data['total_qty'], 6, ',', 0, 0, 0, 0, 1, 1);
             if ($data['first_period_prorata'] != 1) {
@@ -706,10 +730,32 @@ class Bimp_PropalLine extends ObjectLine
                 $id_client = (int) $this->db->getValue('propal', 'fk_soc', 'rowid = ' . (int) $this->getData('id_obj'));
 
                 if ($id_client) {
-                    $lines = BCT_Contrat::getClientAbosLinesArray((int) $id_client, $product->id, true, 'NON (Ajouter en tant que nouvel abonnement)');
+                    $other_ref = BimpTools::getPostFieldValue('abo_linked_line_other_ref', null);
+                    $id_linked_contrat_line = (int) $this->getData('id_linked_contrat_line');
+
+                    if (is_null($other_ref) && $id_linked_contrat_line) {
+                        $id_linked_product = (int) $this->db->getValue('contratdet', 'fk_product', 'rowid = ' . $id_linked_contrat_line);
+
+                        if ($id_linked_product !== (int) $product->id) {
+                            $other_ref = 1;
+                        }
+                    }
+
+                    $filters = array();
+
+                    if ((int) $other_ref) {
+                        $filters['a.fk_product'] = array(
+                            'operator' => '!=',
+                            'value'    => $product->id
+                        );
+                    } else {
+                        $filters['a.fk_product'] = $product->id;
+                    }
+
+                    $lines = BCT_Contrat::getClientAbosLinesArray((int) $id_client, $filters, true, 'NON (Ajouter en tant que nouvel abonnement)', (int) $other_ref);
 
                     if (count($lines) > 1) {
-                        $html .= BimpInput::renderInput('select', 'id_linked_contrat_line', (int) $this->getData('id_linked_contrat_line'), array(
+                        $html .= BimpInput::renderInput('select', 'id_linked_contrat_line', $id_linked_contrat_line, array(
                                     'options' => $lines
                         ));
 
@@ -725,7 +771,7 @@ class Bimp_PropalLine extends ObjectLine
                 }
             }
         } else {
-            return 'KO - ' . $product->id;
+            $html .= BimpRender::renderAlerts('Aucun produit sélectionné ou le produit n\'est pas un abonnement');
         }
 
         $html .= '<input type="hidden" value="0" name="id_linked_contrat_line"/>';
@@ -761,10 +807,10 @@ class Bimp_PropalLine extends ObjectLine
                         $check = false;
                     }
 
-                    if ((int) $contrat_line->getData('fk_product') !== (int) $this->id_product) {
-                        $errors[] = 'Ajout à un abonnement en cours : le produit ne correspond pas';
-                        $check = false;
-                    }
+//                    if ((int) $contrat_line->getData('fk_product') !== (int) $this->id_product) {
+//                        $errors[] = 'Ajout à un abonnement en cours : le produit ne correspond pas';
+//                        $check = false;
+//                    }
                 }
 
                 $propal = $this->getParentInstance();

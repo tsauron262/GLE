@@ -263,6 +263,8 @@ forms:
                 show: 0
             abo_infos: 
                 show: 0
+            abo_linked_line_other_ref: 
+                show: 0
             id_linked_contrat_line: 
                 show: 0
             abo_linked_contrat_line_infos: 

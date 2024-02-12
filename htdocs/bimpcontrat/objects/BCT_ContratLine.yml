@@ -413,13 +413,13 @@ forms:
             - field: fk_product
             - field: description
             - custom: 1
+              label: Lier à un abonnement d'une ref différente
               input_name: type_linked_line
               type: bool
               input:
                   type: toggle
               value:
                   callback: isLinkedToOtherRef
-              label: Liée a une ligne produit différent
             - field: id_linked_line
             - field: date_ouverture_prevue
             - title: vente

@@ -298,7 +298,7 @@ class GSX_v2 extends GSX_Const
             global $conf;
             $this->acti_token = $token;
             $this->auth_token = $token;
-           $this->auth_token = BimpCore::setConf('apple_token', $token, 'bimpapple', $conf->entity);
+            BimpCore::setConf('apple_token', $token, 'bimpapple', $conf->entity);
            return 1;
         }
         

@@ -415,7 +415,7 @@ forms:
             - custom: 1
               label: Lier à un abonnement d'une ref différente
               input_name: type_linked_line
-              type: bool
+              data_type: bool
               input:
                   type: toggle
               value:

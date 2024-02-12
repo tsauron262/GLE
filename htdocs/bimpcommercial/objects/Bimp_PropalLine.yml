@@ -135,11 +135,16 @@ forms:
                 custom: 1
                 label: Lier à un abonnement d'une ref différente
                 input_name: abo_linked_line_other_ref
-                type: bool
+                data_type: bool
                 input:
                     type: toggle
                 value:
                     callback: isAboLinkedToOtherRef
+                edit:
+                    callback: 
+                        method: isFieldEditable
+                        params: 
+                            - abo_linked_line_other_ref
             id_linked_contrat_line: 
                 show: 1
                 field: id_linked_contrat_line
@@ -286,11 +291,16 @@ forms:
                 custom: 1
                 label: Lier à un abonnement d'une ref différente
                 input_name: abo_linked_line_other_ref
-                type: bool
+                data_type: bool
                 input:
                     type: toggle
                 value:
                     callback: isAboLinkedToOtherRef
+                edit:
+                    callback: 
+                        method: isFieldEditable
+                        params: 
+                            - abo_linked_line_other_ref
             id_linked_contrat_line: 
                 show: 1
                 field: id_linked_contrat_line

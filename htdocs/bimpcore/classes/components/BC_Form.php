@@ -317,7 +317,7 @@ class BC_Form extends BC_Panel
         $html .= '<input type="hidden" name="' . $this->fields_prefix . 'sub_objects" value="' . implode(',', $this->sub_objects) . '"/>';
 
         if ($form_tag) {
-            /*todo deux fois ajaxresultcontainer, mais neccessaire dans le form pour que les eventelle champ soit renvoyé en même temp*/
+            /* todo deux fois ajaxresultcontainer, mais neccessaire dans le form pour que les eventelle champ soit renvoyé en même temp */
             $html .= '<div class="ajaxResultContainer" style="display: none"></div>';
 //            $html .= '</div>';
             $html .= '</form>';
@@ -661,7 +661,7 @@ class BC_Form extends BC_Panel
         } else {
             $title = BimpTools::ucfirst(BimpObject::getInstanceLabel($object));
         }
-        
+
         $html .= '<h3>' . $title . '</h3>';
         $html .= '</div>';
         $html .= '</div>';
@@ -833,13 +833,21 @@ class BC_Form extends BC_Panel
             }
             if (isset($params['edit']) && !(int) $params['edit']) {
                 $content = BimpInput::renderInput('hidden', $params['input_name'], $params['value']);
-                $content .= $params['value'];
-                
+
+                if (isset($params['data_type']) && $params['data_type'] == 'bool') {
+                    if ((int) $params['value']) {
+                        $content .= '<span class="success">OUI</span>';
+                    } else {
+                        $content .= '<span class="danger">NON</span>';
+                    }
+                } else {
+                    $content .= $params['value'];
+                }
+
                 $extra_data = array();
                 $extra_data['form_row'] = $row;
                 $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], $params['multiple'], 'customField', $extra_data);
-            }
-            else{
+            } else {
                 $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $row_path . '/input', $params['value'], $field_params);
                 $input->display_card_mode = 'visible';
                 $input->setNamePrefix($this->fields_prefix);

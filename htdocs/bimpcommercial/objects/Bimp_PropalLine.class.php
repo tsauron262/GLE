@@ -48,7 +48,7 @@ class Bimp_PropalLine extends ObjectLine
                 }
             }
 
-            if (in_array($field, array('abo_fac_periodicity', 'abo_duration', 'abo_nb_units', 'abo_date_from', 'date_from', 'id_linked_contrat_line', 'abo_fac_term', 'abo_nb_renouv'))) {
+            if (in_array($field, array('abo_fac_periodicity', 'abo_duration', 'abo_nb_units', 'abo_date_from', 'date_from', 'abo_linked_line_other_ref', 'id_linked_contrat_line', 'abo_fac_term', 'abo_nb_renouv'))) {
                 if ((int) $this->getData('id_parent_line')) {
                     return 0;
                 }

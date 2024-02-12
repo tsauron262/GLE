@@ -7,6 +7,7 @@ class EcologicAPI extends BimpAPI
     //token prod 9de90458-8d42-43a6-9a9c-4b0c066004f0
     //URL du site SwaggerUI = https://preprod-apiecologic.e-reparateur.eco/apidoc/ui/index#/
     //URL du site Swagger = https://apiecologic.e-reparateur.eco/apidoc/ui/index#/
+    // https://ecologic-france.atlassian.net/wiki/spaces/FondsRepPublic/pages/3629121571/Guide+d+veloppeur+-+API+GesCo+Fonds+R+parations+EEE
     
     /*
      * 
@@ -151,7 +152,7 @@ www.opmconseil.com
             $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
             $return = $this->execCurl('createsupportrequest', $params, $errors);
             
-            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && isset($return['ResponseData']['IsValid']) && $return['ResponseData']['IsValid']){
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) /*&& isset($return['ResponseData']['IsValid']) && $return['ResponseData']['IsValid']*/){
                 $warnings = BimpTools::merge_array($warnings, $errors);
                 $errors = array();
                 $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];

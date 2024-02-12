@@ -773,7 +773,14 @@ class BCT_Contrat extends BimpDolObject
         $html .= '</div>';
 
         $lines = $this->getLines('abo', false, array(
-            'id_parent_line' => 0
+            'fk_product' => array(
+                'operator' => '>',
+                'value'    => 0
+            ),
+            'product:type2' => array(
+                'operator' => '!=',
+                'value'    => 20
+            )
         ));
 
         if (empty($lines)) {

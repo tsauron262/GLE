@@ -27,10 +27,28 @@ if (!$user->admin) {
     exit;
 }
 
-//BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
-//echo BCT_Contrat::createRenouvTasks();
-//echo BCT_Contrat::RenouvAuto();
+BimpObject::loadClass('bimpcore', 'Bimp_Product');
 
+$sql = BimpTools::getSqlFullSelectQuery('bimp_propal_line', array('id'), array(
+            'or_abo'    => array(
+                'or' => array(
+                    'a.id_linked_contrat_line' => array('operator' => '>', 'value' => 0),
+                    'a.abo_nb_units'           => 0,
+                )
+            ),
+            'pef.type2' => Bimp_Product::$abonnements_sous_types
+                ), array(
+            'pdet' => array(
+                'table' => 'propaldet',
+                'on'    => 'pdet.rowid = a.id_line'
+            ),
+            'pef'  => array(
+                'table' => 'product_extrafields',
+                'on'    => 'pef.fk_object = pdet.fk_product'
+            )
+        ));
+
+echo $sql;
 
 echo '<br/>FIN';
 echo '</body></html>';

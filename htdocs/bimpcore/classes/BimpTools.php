@@ -2287,7 +2287,7 @@ class BimpTools
 
         $data['nb_monthes_decimal'] = $data['full_monthes'];
 
-        if ($data['remain_days'] > 0) {
+        if ($data['remain_days'] != 0) {
             $data['nb_monthes_decimal'] += $data['remain_days'] / cal_days_in_month(CAL_GREGORIAN, (int) $dt_to->format('n'), (int) $dt_to->format('Y'));
         }
 

@@ -205,7 +205,7 @@ function setAbonnementLineQties($form, $input) {
 
     var qty_per_month = 0;
     var qty_per_fac_period = 0;
-    var qty_per_prod_period = parseFloat($form.find('input[name="abo_qty_per_product_period"').val());
+    var nb_units = parseFloat($form.find('input[name="abo_nb_units"').val());
 
 
     if (duration && fac_periodicity) {
@@ -222,7 +222,7 @@ function setAbonnementLineQties($form, $input) {
         nb_prod_periods = 1;
     }
 
-    var total_qty = qty_per_prod_period * nb_prod_periods;
+    var total_qty = nb_units * nb_prod_periods;
 
     switch ($input.attr('name')) {
         case 'qty':
@@ -237,8 +237,8 @@ function setAbonnementLineQties($form, $input) {
             total_qty = parseFloat($form.find('input[name="abo_qty_per_fac_period"').val()) * nb_fac_periods;
             break;
 
-        case 'abo_qty_per_product_period':
-            total_qty = parseFloat($form.find('input[name="abo_qty_per_product_period"').val()) * nb_prod_periods;
+        case 'abo_nb_units':
+            total_qty = parseFloat($form.find('input[name="abo_nb_units"').val()) * nb_prod_periods;
             break;
     }
 
@@ -250,12 +250,12 @@ function setAbonnementLineQties($form, $input) {
     if (total_qty && duration) {
         qty_per_month = total_qty / duration;
         qty_per_fac_period = qty_per_month * fac_periodicity;
-        qty_per_prod_period = qty_per_month * prod_duration;
+        nb_units = qty_per_month * prod_duration;
     }
 
     $form.find('input[name="qty"],input[name="abo_total_qty"]').val(total_qty);
     $form.find('input[name="abo_qty_per_fac_period"]').val(qty_per_fac_period);
-    $form.find('input[name="abo_qty_per_product_period"]').val(qty_per_prod_period);
+    $form.find('input[name="abo_nb_units"]').val(nb_units);
 }
 
 // Events: 
@@ -356,7 +356,7 @@ function onObjectLineFormLoaded($form) {
 
         var sel = 'input[name="qty"]';
         sel += ',input[name="abo_total_qty"]';
-        sel += ',input[name="abo_qty_per_product_period"]';
+        sel += ',input[name="abo_nb_units"]';
         sel += ',input[name="abo_qty_per_fac_period"]';
         sel += ',select[name="abo_fac_periodicity"]';
         sel += ',input[name="abo_duration"]';
@@ -365,7 +365,7 @@ function onObjectLineFormLoaded($form) {
             $inputs.change(function () {
                 setAbonnementLineQties($form, $(this));
             });
-            setAbonnementLineQties($form, $form.find('input[name="abo_qty_per_product_period"]'));
+            setAbonnementLineQties($form, $form.find('input[name="abo_nb_units"]'));
         }
     }
 }
@@ -416,12 +416,12 @@ $(document).ready(function () {
             case 'abo_qties':
                 var sel = 'input[name="abo_total_qty"]';
                 sel += ',input[name="abo_qty_per_fac_period"]';
-                sel += ',input[name="abo_qty_per_product_period"]';
+                sel += ',input[name="abo_nb_units"]';
                 var $inputs = e.$form.find(sel);
                 $inputs.change(function () {
                     setAbonnementLineQties(e.$form, $(this));
                 });
-                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_qty_per_product_period"]'));
+                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_nb_units"]'));
                 break;
 
             case 'abo_fac_periodicity':
@@ -431,7 +431,7 @@ $(document).ready(function () {
                 $input.change(function () {
                     setAbonnementLineQties(e.$form, $(this));
                 });
-                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_qty_per_product_period"]'));
+                setAbonnementLineQties(e.$form, e.$form.find('input[name="abo_nb_units"]'));
                 break;
         }
     });

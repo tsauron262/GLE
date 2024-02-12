@@ -144,9 +144,9 @@ class BimpComm extends BimpDolObject
 
     public function hasDemandsValidations($exclude_user_affected = true)
     {
-        if(!BimpCore::isModuleActive('bimpvalidateorder'))
+        if (!BimpCore::isModuleActive('bimpvalidateorder'))
             return false;
-        
+
         global $user;
 
         if (BimpCore::isModuleActive('bimpvalidation')) {
@@ -2879,7 +2879,8 @@ class BimpComm extends BimpDolObject
     }
 
     public function createMajLn($dataFiltre, $dataParamsDirect, $data = array(), &$newLn = null)
-    {//atention filtre doit être unique, sinon tout sera écrasé
+    {
+        //atention filtre doit être unique, sinon tout sera écrasé
         $errors = array();
         if (!count($dataFiltre))
             $errors[] = 'Pas de filtre createMajLn';
@@ -2898,6 +2899,8 @@ class BimpComm extends BimpDolObject
 
             foreach ($dataFiltre as $name => $value)
                 $newLn->set($name, $value);
+
+            $warnings = array();
 
             if (!$newLn->isLoaded())
                 $errors = BimpTools::merge_array($errors, $newLn->create($warnings, true));

@@ -102,6 +102,10 @@ function getTabTypeObject($typeFiltre = null)
         'Bimp_Product'          => array(
             'urls'   => array('bimpcore/index.php?fc=product'),
             'module' => 'bimpcore'
+        ),
+        'BCT_Contrat' => array(
+            'urls'   => array('bimpcontrat/index.php?fc=contrat'),
+            'module' => 'bimpcontrat'
         )
     );
 

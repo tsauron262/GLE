@@ -279,7 +279,7 @@ class GSX_v2 extends GSX_Const
 
     public function reauthenticate()
     {
-        BimpCore::addlog('Reauthentificate, old Token : '.$this->auth_token);
+        BimpCore::addlog('Reauthentificate, old Token : '.$this->auth_token.' appleId '.$this->appleId);
 //        static::debug($this->appleId, 'reauthentification');
         if ($this->auth_token) {
             $this->saveToken('auth', '');

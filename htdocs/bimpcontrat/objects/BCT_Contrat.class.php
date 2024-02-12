@@ -492,84 +492,6 @@ class BCT_Contrat extends BimpDolObject
         return BimpCache::getSocieteRibsArray($id_client, true);
     }
 
-    public function getAboLinesArray($options = array())
-    {
-        $options = BimpTools::overrideArray(array(
-                    'include_empty'    => false,
-                    'empty_label'      => '',
-                    'active_only'      => false,
-                    'with_periods'     => false,
-                    'id_product'       => 0,
-                    'no_sub_lines'     => false,
-                    'excluded_id_line' => 0
-                        ), $options);
-
-        if ($this->isLoaded()) {
-            $key = 'contrat_' . $this->id . '_abos_lines_array';
-
-            if ($options['active_only']) {
-                $key .= '_active_only';
-            }
-
-            if ($options['with_periods']) {
-                $key .= '_with_periods';
-            }
-
-            if ($options['no_sub_lines']) {
-                $key .= '_no_sub_lines';
-            }
-
-            if (!isset(self::$cache[$key])) {
-                self::$cache[$key] = array();
-
-                $filters = array();
-
-                if ($options['id_product']) {
-                    $filters['fk_product'] = $options['id_product'];
-                }
-
-                if ($options['no_sub_lines']) {
-                    $filters['id_parent_line'] = 0;
-                    $filters['id_linked_line'] = 0;
-                }
-
-                if ($options['excluded_id_line'] > 0) {
-                    $filters['rowid'] = array(
-                        'operator' => '!=',
-                        'value'    => $options['excluded_id_line']
-                    );
-                }
-
-                $lines = $this->getLines('abo', false, $filters);
-
-                foreach ($lines as $line) {
-                    if ($options['active_only']) {
-                        if (!$line->isActive() || $line->isResiliated()) {
-                            continue;
-                        }
-                    }
-
-                    $line_label = $line->displayProduct('ref_nom');
-
-                    if ($options['with_periods']) {
-                        $line_label .= ' (' . $line->displayPeriods(true) . ')';
-                    }
-                    self::$cache[$key][$line->id] = $line_label;
-                }
-            }
-
-            return self::getCacheArray($key, $options['include_empty'], 0, $options['empty_label']);
-        }
-
-        if ($options['include_empty']) {
-            return array(
-                0 => $options['empty_label']
-            );
-        }
-
-        return array();
-    }
-
     public function getContratsToMergeArray()
     {
         $contrats = array();
@@ -594,7 +516,7 @@ class BCT_Contrat extends BimpDolObject
         return $contrats;
     }
 
-    public static function getClientAbosLinesArray($id_client, $id_product, $include_empty = true, $empty_label = '')
+    public static function getClientAbosLinesArray($id_client, $filters = array(), $include_empty = true, $empty_label = '', $display_refs = false)
     {
         $lines = array();
 
@@ -603,31 +525,57 @@ class BCT_Contrat extends BimpDolObject
         }
 
         BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
-        $sql = BimpTools::getSqlFullSelectQuery('contratdet', array('a.rowid as id_line', 'c.ref'), array(
+
+        $fields = array('a.rowid as id_line', 'c.ref');
+
+        if ($display_refs) {
+            $fields[] = 'p.ref as prod_ref';
+        }
+
+        $filters = BimpTools::merge_array(array(
                     'c.fk_soc'         => $id_client,
                     'c.version'        => 2,
                     'a.line_type'      => BCT_ContratLine::TYPE_ABO,
-                    'a.fk_product'     => $id_product,
                     'a.id_linked_line' => 0,
                     'a.id_parent_line' => 0,
                     'a.statut'         => 4,
                     'a.date_cloture'   => 'IS_NULL'
-                        ), array(
-                    'c' => array(
-                        'table' => 'contrat',
-                        'on'    => 'c.rowid = a.fk_contrat'
-                    )
-        ));
+                        ), $filters);
 
+        $joins = array(
+            'c' => array(
+                'table' => 'contrat',
+                'on'    => 'c.rowid = a.fk_contrat'
+            )
+        );
+
+        if ($display_refs) {
+            $joins['p'] = array(
+                'table' => 'product',
+                'on'    => 'p.rowid = a.fk_product'
+            );
+        }
+
+        $sql = BimpTools::getSqlFullSelectQuery('contratdet', $fields, $filters, $joins);
+        
         $rows = self::getBdb()->executeS($sql, 'array');
 
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $r['id_line']);
                 if (BimpObject::objectLoaded($line)) {
-                    $lines[$line->id] = 'Contrat ' . $r['ref'] . ' - ligne n° ' . $line->getData('rang') . ' - ' . $line->displayPeriods(true);
+                    $label = 'Contrat ' . $r['ref'] . ' - ligne n° ' . $line->getData('rang');
+
+                    if ($display_refs) {
+                        $label .= ' (' . $r['prod_ref'] . ')';
+                    }
+
+                    $label .= ' - ' . $line->displayPeriods(true);
+                    $lines[$line->id] = $label;
                 }
             }
+        } else {
+            die(self::getBdb()->err());
         }
 
         return $lines;
@@ -773,7 +721,7 @@ class BCT_Contrat extends BimpDolObject
         $html .= '</div>';
 
         $lines = $this->getLines('abo', false, array(
-            'fk_product' => array(
+            'fk_product'    => array(
                 'operator' => '>',
                 'value'    => 0
             ),

@@ -1,0 +1,2 @@
+
+- Abonnements : ajout choix ref différente pour liaison abonnement en cours. 

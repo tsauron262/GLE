@@ -95,7 +95,7 @@ fields:
         type: id_object
         object: linked_contrat_line
         default_value: 0
-        depends_on: id_product
+        depends_on: id_product,abo_linked_line_other_ref
         input: 
             type: custom
             content: 
@@ -130,6 +130,16 @@ forms:
                 display_if: 
                     field_name: is_abonnement
                     show_values: 1
+            abo_linked_line_other_ref: 
+                show: 1
+                custom: 1
+                label: Lier à un abonnement d'une ref différente
+                input_name: abo_linked_line_other_ref
+                type: bool
+                input:
+                    type: toggle
+                value:
+                    callback: isAboLinkedToOtherRef
             id_linked_contrat_line: 
                 show: 1
                 field: id_linked_contrat_line
@@ -272,6 +282,15 @@ forms:
                     type: custom
                     content: 
                         callback: renderAboInfos
+            abo_linked_line_other_ref:
+                custom: 1
+                label: Lier à un abonnement d'une ref différente
+                input_name: abo_linked_line_other_ref
+                type: bool
+                input:
+                    type: toggle
+                value:
+                    callback: isAboLinkedToOtherRef
             id_linked_contrat_line: 
                 show: 1
                 field: id_linked_contrat_line

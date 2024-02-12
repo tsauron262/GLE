@@ -833,7 +833,16 @@ class BC_Form extends BC_Panel
             }
             if (isset($params['edit']) && !(int) $params['edit']) {
                 $content = BimpInput::renderInput('hidden', $params['input_name'], $params['value']);
-                $content .= $params['value'];
+
+                if (isset($params['data_type']) && $params['data_type'] == 'bool') {
+                    if ((int) $params['value']) {
+                        $content .= '<span class="success">OUI</span>';
+                    } else {
+                        $content .= '<span class="danger">NON</span>';
+                    }
+                } else {
+                    $content .= $params['value'];
+                }
 
                 $extra_data = array();
                 $extra_data['form_row'] = $row;

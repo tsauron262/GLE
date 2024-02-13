@@ -285,12 +285,14 @@ www.opmconseil.com
         }
         
         if($response_code == 200){
-            foreach($return['ResponseData']['ValidationErrors'] as $err){
-                if(is_array($err) && isset($err['MessageType']) && $err['MessageType'] == 'W'){
-                    $infos .= '<br/>Warnings '. BimpRender::renderAlerts(implode(' - ', $err), 'warnings');
+            if(isset($return['ResponseData']['ValidationErrors']) && is_array($return['ResponseData']['ValidationErrors'])){
+                foreach($return['ResponseData']['ValidationErrors'] as $err){
+                    if(is_array($err) && isset($err['MessageType']) && $err['MessageType'] == 'W'){
+                        $infos .= '<br/>Warnings '. BimpRender::renderAlerts(implode(' - ', $err), 'warnings');
+                    }
+                    else
+                        $errors[] = implode(' - ', $err);
                 }
-                else
-                    $errors[] = implode(' - ', $err);
             }
         }
         

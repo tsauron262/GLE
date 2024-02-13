@@ -4380,7 +4380,7 @@ class BimpComm extends BimpDolObject
             'f.marge_finale_ok',
             'f.total_achat_reval_ok',
             'fef.expertise',
-            'ec.fk_socpeople as id_user',
+            'MIN(ec.fk_socpeople) as id_user',
             's.zip',
             's.fk_pays'
         );
@@ -4431,7 +4431,7 @@ class BimpComm extends BimpDolObject
 
         $sql = BimpTools::getSqlFullSelectQuery('facture', $fields, $filters, $joins, array(
                     'default_alias' => 'f'
-        ));
+        )).' GROUP BY f.rowid';
 
         $rows = $bdb->executeS($sql, 'array');
 

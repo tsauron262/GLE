@@ -8088,18 +8088,37 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         return $this->processRedirect(false);
     }
+    
+    public function getListConfigs(){
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        global $user;
+        
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+        return ListTableConfig::getUserConfigsArray($user->id, $this, $list_name, false);
+    }
+    
+    public function getListConfig(){
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        global $user;
+        
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+        $conf = ListTableConfig::getUserCurrentConfig($user->id, $this, $list_name);
+        if($conf && $conf->id > 0)
+            return $conf->id;
+    }
 
     public function renderListCsvColsOptions()
     {
         $list_name = BimpTools::getPostFieldValue('list_name', 'default');
         $list_type = BimpTools::getPostFieldValue('list_type', 'list_table');
         $light_export = BimpTools::getPostFieldValue('light_export', 0);
+        $config_id = BimpTools::getPostFieldValue('config_id', null);
 
         $bc_list = null;
 
         switch ($list_type) {
             case 'list_table':
-                $bc_list = new BC_ListTable($this, $list_name);
+                $bc_list = new BC_ListTable($this, $list_name, $level = 1, null, null, null, $config_id);
                 break;
 
             case 'stats_list':
@@ -10093,6 +10112,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $success_callback = '';
 
         $list_name = BimpTools::getArrayValueFromPath($data, 'list_name', '', $errors, 1, 'Nom de la liste absent');
+        $config_id = BimpTools::getArrayValueFromPath($data, 'config_id', null);
         $list_type = BimpTools::getArrayValueFromPath($data, 'list_type', '', $errors, 1, 'Type de liste absent');
         $list_data = BimpTools::getArrayValueFromPath($data, 'list_data', array(), $errors, 1, 'Paramètres de la liste absents');
 
@@ -10140,11 +10160,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             switch ($list_type) {
                 case 'list_table':
-                    $list = new BC_ListTable($this, $list_name, 1, isset($list_data['id_parent']) ? (int) $list_data['id_parent'] : 0);
+                    $list = new BC_ListTable($this, $list_name, 1, isset($list_data['id_parent']) ? (int) $list_data['id_parent'] : 0, null, null, $config_id);
                     break;
 
                 case 'stats_list':
-                    $list = new BC_StatsList($this, $list_name, isset($list_data['id_parent']) ? (int) $list_data['id_parent'] : 0);
+                    $list = new BC_StatsList($this, $list_name, isset($list_data['id_parent']) ? (int) $list_data['id_parent'] : 0, null, null, $config_id);
                     break;
             }
 

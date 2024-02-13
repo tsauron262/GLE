@@ -167,6 +167,14 @@ www.opmconseil.com
             if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){
                 $ecologicData['RequestOk'] = true;
             }
+            elseif(((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])){
+                $errors = array();
+                BimpCore::addlog('Suppression des info demande de remboursmeent '.$sav->id.' old requestId : '.$ecologicData['RequestId']);
+                unset($ecologicData['RequestId']);
+                unset($ecologicData['RequestOk']);
+                $sav->updateField('ecologic_data', $ecologicData);
+                return $this->traiteReq($errors, $warnings, $data, $ecologicData, $siteId, $ref, $tabFile, $dateClose, $facRef, $sav);
+            }
             
             
         }

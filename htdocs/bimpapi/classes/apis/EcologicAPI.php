@@ -176,8 +176,9 @@ www.opmconseil.com
             $this->options['log_errors'] = false;
             $return = $this->execCurl('createclaim', $params, $errors);
             $this->options['log_errors'] = true;
-            if(isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim' && isset($ecologicData['RequestId'])){
+            if(((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])){
                 $errors = array();
+                BimpCore::addlog('Suppression des info demande de remboursmeent '.$sav->id.' old requestId : '.$ecologicData['RequestId']);
                 unset($ecologicData['RequestId']);
                 unset($ecologicData['RequestOk']);
                 $sav->updateField('ecologic_data', $ecologicData);

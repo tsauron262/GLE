@@ -2118,32 +2118,6 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
 
-            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
-            $liste = $contrat->getList(array(
-                'fk_soc'     => $this->id,
-                'or_version' => array('or' => array(
-                        'or1' => array('and_fields' => array('version' => 1, 'statut' => 11)),
-                        'or2' => array('and_fields' => array('version' => 2, 'statut' => 1))
-                    ))
-            ));
-
-            if (count($liste)) {
-                $s = (count($liste) > 1) ? 's' : '';
-                $html .= 'Contrat' . $s . ' actif' . $s . ': ';
-                $fl = true;
-                foreach ($liste as $infos) {
-                    $contrat->fetch($infos['rowid']);
-                    $card = new BC_Card($contrat);
-                    if ($fl) {
-                        $html .= '<span class=\'bs-popover\' ' . BimpRender::renderPopoverData($card->renderHtml(), 'top', true) . ' >' . $contrat->getNomUrl() . ' </span>';
-                        $fl = false;
-                    } else {
-                        $html .= ', ' . '<span class=\'bs-popover\' ' . BimpRender::renderPopoverData($card->renderHtml(), 'top', true) . ' >' . $contrat->getNomUrl() . ' </span>';
-                    }
-                }
-            }
-            $contrat = null;
-
             if ($this->dol_object->date_creation) {
                 $dt = new DateTime(BimpTools::getDateFromTimestamp($this->dol_object->date_creation));
                 $date_regle_encoure = new DateTime("2021-05-01");
@@ -2190,6 +2164,51 @@ class Bimp_Societe extends BimpDolObject
                     $html .= '</span>';
                     $html .= '</div>';
                 }
+            }
+
+            $contrats = BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', array(
+                        'fk_soc'  => $this->id,
+                        'version' => 1,
+                        'statut'  => 11
+            ));
+
+            if (!empty($contrats)) {
+                $html .= '<div class="object_header_infos">';
+                $s = (count($contrats) > 1) ? 's' : '';
+                $html .= 'Contrat' . $s . ' actif' . $s . ' : ';
+
+                $fl = true;
+                foreach ($contrats as $contrat) {
+                    if (!$fl) {
+                        $html .= ', ';
+                    } else {
+                        $fl = false;
+                    }
+                    $html .= $contrat->getLink();
+                }
+                $html .= '</div>';
+            }
+
+            $contrats = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_Contrat', array(
+                        'fk_soc'  => $this->id,
+                        'version' => 2
+            ));
+
+            if (!empty($contrats)) {
+                $html .= '<div class="object_header_infos">';
+                $s = (count($contrats) > 1) ? 's' : '';
+                $html .= 'Contrat' . $s . ' d\'abonnement : ';
+
+                $fl = true;
+                foreach ($contrats as $contrat) {
+                    if (!$fl) {
+                        $html .= ', ';
+                    } else {
+                        $fl = false;
+                    }
+                    $html .= $contrat->getLink();
+                }
+                $html .= '</div>';
             }
         }
 

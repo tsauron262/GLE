@@ -5209,6 +5209,12 @@ class BCT_ContratLine extends BimpObject
                     if (!BimpObject::objectLoaded($line)) {
                         $line_errors[] = 'Ligne #' . $id_line . ' inexistante';
                     } else {
+                        $id_parent_line = (int) $line->getData('id_parent_line');
+
+                        if ($id_parent_line && in_array($id_parent_line, $ids)) {
+                            continue;
+                        }
+                        
                         if ($line->isActionAllowed('activate', $line_errors)) {
                             $line_errors = $line->activate();
                         }

@@ -996,6 +996,18 @@ class BCT_ContratLine extends BimpObject
         return $date;
     }
 
+    public function getDateFinReele()
+    {
+        $date_fin = $this->getData('date_fin_validite');
+        $date_cloture = $this->getData('date_cloture');
+
+        if ($date_cloture && $date_cloture < $date_fin) {
+            return $date_cloture;
+        }
+
+        return $date_fin;
+    }
+
     public function getPeriodsToBillData(&$errors = array(), $check_date = true, $check_remaining_periods_to_bill = false)
     {
         $data = array(
@@ -1178,9 +1190,7 @@ class BCT_ContratLine extends BimpObject
                     } elseif ($date_now > $date_next_facture) {
                         $interval = BimpTools::getDatesIntervalData($date_next_period_tobill, $date_now);
                         if ($interval['nb_monthes_decimal'] > 0) {
-//                            $data['interval'] = $interval;
                             $nb_periods_decimal = ($interval['nb_monthes_decimal'] / $periodicity);
-//                            $data['nb_periods_dec'] = $nb_periods_decimal;
                             if ($is_echu) {
                                 $data['nb_periods_tobill_today'] = floor($nb_periods_decimal);
                             } else {
@@ -1562,8 +1572,8 @@ class BCT_ContratLine extends BimpObject
                 foreach ($rows as $r) {
                     $data[] = array(
                         'id_facture' => (int) $r['id_facture'],
-                        'from'       => $r['date_start'],
-                        'to'         => $r['date_end'],
+                        'from'       => date('Y-m-d', strtotime($r['date_start'])),
+                        'to'         => date('Y-m-d', strtotime($r['date_end'])),
                         'qty'        => $r['qty'],
                         'is_regul'   => ($r['linked_object_name'] == 'contrat_line_regul' ? 1 : 0)
                     );
@@ -1588,16 +1598,136 @@ class BCT_ContratLine extends BimpObject
         return $data;
     }
 
-    public function getDateFinReele()
+    public function getCommandesFournData($include_reguls = false, $return = 'data')
     {
-        $date_fin = $this->getData('date_fin_validite');
-        $date_cloture = $this->getData('date_cloture');
+        $data = array();
 
-        if ($date_cloture && $date_cloture < $date_fin) {
-            return $date_cloture;
+        $sql = BimpTools::getSqlFullSelectQuery('commande_fournisseurdet', array('cf.rowid as id_cf', 'a.date_start', 'a.date_end', '(a.qty + cfl.qty_modif) as full_qty', 'cfl.linked_object_name'), array(
+                    'cf.fk_statut'           => array(
+                        'operator' => '<',
+                        'value'    => 6
+                    ),
+                    'cfl.linked_object_name' => ($include_reguls ? array('contrat_line', 'contrat_line_regul') : 'contrat_line'),
+                    'cfl.linked_id_object'   => $this->id
+                        ), array(
+                    'cfl' => array(
+                        'table' => 'bimp_commande_fourn_line',
+                        'on'    => 'cfl.id_line = a.rowid'
+                    ),
+                    'cf'  => array(
+                        'table' => 'commande_fournisseur',
+                        'on'    => 'cf.rowid = a.fk_commande'
+                    )
+                        ), array(
+                    'order_by'  => 'a.date_start',
+                    'order_way' => 'ASC'
+        ));
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        switch ($return) {
+            case 'data':
+                foreach ($rows as $r) {
+                    $data[] = array(
+                        'id_cf'    => (int) $r['id_cf'],
+                        'from'     => $r['date_start'],
+                        'to'       => $r['date_end'],
+                        'qty'      => $r['full_qty'],
+                        'is_regul' => ($r['linked_object_name'] == 'contrat_line_regul' ? 1 : 0)
+                    );
+                }
+                break;
+
+            case 'qties':
+                $data = array(
+                    'achat_qty' => 0,
+                    'regul_qty' => 0
+                );
+                foreach ($rows as $r) {
+                    if ($r['linked_object_name'] == 'contrat_line_regul') {
+                        $data['regul_qty'] += (float) $r['qty'];
+                    } else {
+                        $data['achat_qty'] += (float) $r['qty'];
+                    }
+                }
+                break;
         }
 
-        return $date_fin;
+        return $data;
+    }
+
+    public function getQtiesToInvoice($periods_data = null, &$errors = array())
+    {
+        $data = array();
+
+        if (is_null($periods_data)) {
+            $periods_data = $this->getPeriodsToBillData($errors, true, true);
+        }
+
+        $fac_periodicity = (int) $this->getData('fac_periodicity');
+
+        if (!$fac_periodicity) {
+            $errors[] = 'Périodicité de facturation non définie';
+        }
+
+        if (!count($errors)) {
+            $fac_data = $this->getFacturesData(true);
+            $achats_data = $this->getCommandesFournData(true);
+
+            $periodic_interval = new DateInterval('P' . $fac_periodicity . 'M');
+            $on_day_interval = new DateInterval('P1D');
+
+            $dt = new DateTime($periods_data['date_next_period_tobill']);
+            $dt->sub($on_day_interval);
+            $from = $dt->format('Y-m-d');
+
+            $bought = 0;
+            $billed = 0;
+            
+            // Qtés avant prochaine période facturée:
+            foreach ($achats_data as $a_data) {
+                if ($a_data['from'] <= $from) {
+                    $bought += BimpTools::calcProrataQty(($a_data['qty']), $a_data['from'], $a_data['to'], $a_data['from'], $from);
+                }
+            }
+            foreach ($fac_data as $f_data) {
+                if ($f_data['from'] <= $from) {
+                    $billed += BimpTools::calcProrataQty(($f_data['qty']), $f_data['from'], $f_data['to'], $f_data['from'], $from);
+                }
+            }
+
+            // Qté à facturer pour chaque période : 
+            for ($i = 1; $i <= $periods_data['nb_periods_tobill_max']; $i++) {
+                $dt->add($on_day_interval);
+                $from = $dt->format('Y-m-d');
+                $dt->add($periodic_interval);
+                $dt->sub($on_day_interval);
+                $to = $dt->format('Y-m-d');
+
+                foreach ($achats_data as $a_data) {
+                    $bought += BimpTools::calcProrataQty(($a_data['qty']), $a_data['from'], $a_data['to'], $from, $to);
+                }
+
+                foreach ($fac_data as $f_data) {
+                    $billed += BimpTools::calcProrataQty(($f_data['qty']), $f_data['from'], $f_data['to'], $from, $to);
+                }
+
+                $data[$i] = array(
+                    'from'   => $from,
+                    'to'     => $to,
+                    'dates'  => 'Du ' . date('d / m / Y', strtotime($from)) . ' au ' . date('d / m / Y', strtotime($to)),
+                    'bought' => $bought,
+                    'billed' => $billed
+                );
+            }
+        }
+
+        return $data;
+    }
+
+    public function getQtiesToBuy()
+    {
+        
     }
 
     // Getters statiques:
@@ -2957,6 +3087,19 @@ class BCT_ContratLine extends BimpObject
                                                     $row_html .= ' ' . $unit_label;
                                                 }
                                                 $row_html .= '</div>';
+
+                                                $qties_errors = array();
+                                                $qties_data = $line->getQtiesToInvoice($periods_data, $qties_errors);
+
+                                                if (!count($qties_errors)) {
+                                                    $row_html .= '<pre>';
+                                                    $row_html .= print_r($qties_data, 1);
+                                                    $row_html .= '</pre>';
+                                                } else {
+                                                    $row_html .= 'ERR<pre>';
+                                                    $row_html .= print_r($qties_errors, 1);
+                                                    $row_html .= '</pre>';
+                                                }
                                             }
                                         }
                                     }

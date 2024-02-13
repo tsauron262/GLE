@@ -2173,7 +2173,7 @@ class Bimp_Societe extends BimpDolObject
             ));
 
             if (!empty($contrats)) {
-                $html .= '<div class="object_header_infos">';
+                $html .= '<br/><div class="object_header_infos">';
                 $s = (count($contrats) > 1) ? 's' : '';
                 $html .= 'Contrat' . $s . ' actif' . $s . ' : ';
 
@@ -2184,7 +2184,7 @@ class Bimp_Societe extends BimpDolObject
                     } else {
                         $fl = false;
                     }
-                    $html .= $contrat->getLink();
+                    $html .= $contrat->getLink(array('object_icons' => 0));
                 }
                 $html .= '</div>';
             }
@@ -2195,7 +2195,7 @@ class Bimp_Societe extends BimpDolObject
             ));
 
             if (!empty($contrats)) {
-                $html .= '<div class="object_header_infos">';
+                $html .= '<br/><div class="object_header_infos">';
                 $s = (count($contrats) > 1) ? 's' : '';
                 $html .= 'Contrat' . $s . ' d\'abonnement : ';
 
@@ -2206,7 +2206,7 @@ class Bimp_Societe extends BimpDolObject
                     } else {
                         $fl = false;
                     }
-                    $html .= $contrat->getLink();
+                    $html .= $contrat->getLink(array('object_icons' => 0));
                 }
                 $html .= '</div>';
             }

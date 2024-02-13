@@ -30,6 +30,7 @@ labels:
     
 nom_url: 
     syntaxe: <ref>
+    card: default
                 
 objects:
     client:

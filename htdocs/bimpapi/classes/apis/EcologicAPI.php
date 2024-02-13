@@ -219,7 +219,7 @@ www.opmconseil.com
                         $paramsFile = array();
                         $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
                         $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
-                        $return = $this->execCurl('AttachFile', $paramsFile, $warnings);
+                        $return = $this->execCurl('AttachFile', $paramsFile, $errors);
                         if(stripos($return, 'Code 200') !== false){
 //                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
                             $ecologicData['files'][] = $fileT[1];
@@ -281,6 +281,18 @@ www.opmconseil.com
         if($response_code == 206){
             foreach($return['ResponseData']['ValidationErrors'] as $err){
                 $errors[] = implode(' - ', $err);
+            }
+        }
+        
+        if($response_code == 200){
+            if(isset($return['ResponseData']['ValidationErrors']) && is_array($return['ResponseData']['ValidationErrors'])){
+                foreach($return['ResponseData']['ValidationErrors'] as $err){
+                    if(is_array($err) && isset($err['MessageType']) && $err['MessageType'] == 'W'){
+                        $infos .= '<br/>Warnings '. BimpRender::renderAlerts(implode(' - ', $err), 'warnings');
+                    }
+                    else
+                        $errors[] = implode(' - ', $err);
+                }
             }
         }
         

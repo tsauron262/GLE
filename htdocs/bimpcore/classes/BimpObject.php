@@ -228,7 +228,7 @@ class BimpObject extends BimpCache
                 $instance = clone self::$cache[$cache_key];
             }
         }
-        
+
         $instance->reset();
 
         if (is_a($instance, 'BimpObject')) {
@@ -745,9 +745,9 @@ class BimpObject extends BimpCache
     {
         if ($this->isLoaded()) {
             $more = '';
-            if($this->getEntity_name() && $this->getData('entity') > 1)
-                $more .= '/'.$this->getData('entity');
-            return DOL_DATA_ROOT .$more. '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+            if ($this->getEntity_name() && $this->getData('entity') > 1)
+                $more .= '/' . $this->getData('entity');
+            return DOL_DATA_ROOT . $more . '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
         }
 
         return '';
@@ -771,10 +771,10 @@ class BimpObject extends BimpCache
         $file = $this->module . '/' . $this->object_name . '/' . $this->id . '/' . $file_name;
 
         $more = '';
-        if($this->getEntity_name() && $this->getData('entity'))
-            $more .= 'entity='.$this->getData('entity').'&';
-        
-        return DOL_URL_ROOT . '/' . $page . '.php?'.$more.'modulepart=bimpcore&file=' . urlencode($file);
+        if ($this->getEntity_name() && $this->getData('entity'))
+            $more .= 'entity=' . $this->getData('entity') . '&';
+
+        return DOL_URL_ROOT . '/' . $page . '.php?' . $more . 'modulepart=bimpcore&file=' . urlencode($file);
     }
 
     public function getNameProperties()
@@ -1034,8 +1034,8 @@ class BimpObject extends BimpCache
                     $or_sql = '';
 
                     foreach ($params['fields_search'] as $field) {
-                        if(stripos($field, 'ef.') !== false){
-                            if(!$this->dol_field_exists(str_replace('ef.', '', $field)))
+                        if (stripos($field, 'ef.') !== false) {
+                            if (!$this->dol_field_exists(str_replace('ef.', '', $field)))
                                 continue;
 //                        if($field == 'ef.libelle')
 //                            continue;
@@ -4166,7 +4166,7 @@ class BimpObject extends BimpCache
         foreach ($fields as $sqlKey => $field_alias) {
             $sql .= ', SUM(' . $sqlKey . ') as ' . $field_alias;
         }
-        
+
         if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
             $newJoins = array();
             if ($this->getEntityFilter($newJoins, $filters)) {
@@ -4175,7 +4175,7 @@ class BimpObject extends BimpCache
         }
 
         $sql .= BimpTools::getSqlFrom($table, $joins);
-        
+
         $sql .= BimpTools::getSqlWhere($filters);
 
         $rows = $this->db->executeS($sql, 'array');
@@ -4912,7 +4912,7 @@ class BimpObject extends BimpCache
                         $errors[] = 'Echec de l\'enregistrement des données - opération annulée';
 
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
-                            'Action' => 'Save From Post',
+                            'Action'   => 'Save From Post',
                             'Warnings' => $warnings
                                 ), true);
                     }
@@ -7449,21 +7449,20 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $url = $this->getListPageUrl();
 
             if ($url) {
-                if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+                if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
                     $objectTest = BimpObject::getInstance($this->module, $this->object_name, BimpTools::getValue('id'), null, false);
                     global $conf;
                     $currentEntity = $conf->entity;
-                    if($objectTest->isLoaded() /*&& $objectTest->can('view')*/ && $objectTest->getData('entity') > 0 && $currentEntity != $objectTest->getData('entity')){
+                    if ($objectTest->isLoaded() /* && $objectTest->can('view') */ && $objectTest->getData('entity') > 0 && $currentEntity != $objectTest->getData('entity')) {
                         global $mc;
-                        $ret=$mc->switchEntity($objectTest->getData('entity'));
+                        $ret = $mc->switchEntity($objectTest->getData('entity'));
                         global $user;
                         $user->getrights('', true);
-                        if($objectTest->can('view')){
+                        if ($objectTest->can('view')) {
                             $html .= BimpRender::renderAlerts('Changement d\'entité.........', "warning");
                             $html .= '<script>location.reload();</script>';
-                        }
-                        else{//ca marche pas, onn reste sur l'entité curent
-                            $ret=$mc->switchEntity($currentEntity);
+                        } else {//ca marche pas, onn reste sur l'entité curent
+                            $ret = $mc->switchEntity($currentEntity);
                         }
                     }
                 }
@@ -8838,7 +8837,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 $fl = false;
             }
-            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /*htmlentities(addslashes(**/$value/*))*/ . '\''));
+            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */$value/* )) */ . '\''));
         }
         $js .= '}, ';
         if (isset($params['result_container'])) {
@@ -9659,23 +9658,25 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= $icon . $label . $status;
         }
 
-        if (!$is_public) {
-            $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
-            $modal_view = (isset($params['modal_view']) ? $params['modal_view'] : 'default');
+        if ((int) BimpTools::getArrayValueFromPath($params, ('object_icons'), 1)) {
+            if (!$is_public) {
+                $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
+                $modal_view = (isset($params['modal_view']) ? $params['modal_view'] : 'default');
 
-            if (($url && $external_link) || $modal_view) {
-                $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
+                if (($url && $external_link) || $modal_view) {
+                    $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
+                }
             }
-        }
 
-        if ($card_html) {
-            $html .= '<span class="objectIcon cardPopoverIcon">';
-            $html .= BimpRender::renderIcon('fas_sticky-note');
-            $html .= '</span>';
-        }
+            if ($card_html) {
+                $html .= '<span class="objectIcon cardPopoverIcon">';
+                $html .= BimpRender::renderIcon('fas_sticky-note');
+                $html .= '</span>';
+            }
 
-        if (!$is_public && method_exists($this, 'getNomUrlExtra')) {
-            $html .= $this->getNomUrlExtra();
+            if (!$is_public && method_exists($this, 'getNomUrlExtra')) {
+                $html .= $this->getNomUrlExtra();
+            }
         }
 
         $html .= '</span>';

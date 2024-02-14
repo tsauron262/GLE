@@ -762,7 +762,6 @@ fields:
         label: Consigne référence externe
         type: text
         
-
 fields_tables: 
     identity:
         title: Identité

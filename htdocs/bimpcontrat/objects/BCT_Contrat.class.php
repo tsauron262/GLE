@@ -557,7 +557,7 @@ class BCT_Contrat extends BimpDolObject
         }
 
         $sql = BimpTools::getSqlFullSelectQuery('contratdet', $fields, $filters, $joins);
-        
+
         $rows = self::getBdb()->executeS($sql, 'array');
 
         if (is_array($rows)) {
@@ -1968,6 +1968,66 @@ class BCT_Contrat extends BimpDolObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Overrides : 
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            $client = $this->getChildObject('client');
+
+            $comms = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+            $id_commercial = 0;
+            if (BimpObject::objectLoaded($client)) {
+                $client_commerciaux = $client->getIdCommercials(true);
+
+                if (isset($client_commerciaux[0]) && $client_commerciaux[0]) {
+                    $id_commercial = $client_commerciaux[0];
+
+                    if (!empty($comms) && (count($comms) > 1 || $comms[0] != $id_commercial)) {
+                        $this->dol_object->delete_linked_contact('internal', 'SALESREPFOLL');
+                        $comms = array();
+                    }
+                }
+            }
+
+            if (empty($comms)) {
+                if (!$id_commercial) {
+                    $id_commercial = (int) $this->getData('fk_commercial_suivi');
+                }
+
+                if ($id_commercial) {
+                    $this->dol_object->add_contact($id_commercial, 'SALESREPFOLL', 'internal');
+                }
+            }
+
+            if ($id_commercial && (int) $this->getData('fk_commercial_suivi') !== $id_commercial ||
+                    (!empty($comms) && (!(int) $this->getData('fk_commercial_suivi') || !in_array((int) $this->getData('fk_commercial_suivi'), $comms)))) {
+                if (!$id_commercial && !empty($comms)) {
+                    $id_commercial = $comms[0];
+                }
+
+                if ($id_commercial) {
+                    $this->updateField('fk_commercial_suivi', $id_commercial);
+                }
+            }
+
+            $id_contact = (int) $client->getData('contact_default');
+            if ($id_contact) {
+                $contacts = $this->dol_object->getIdContact('external', 'BILLING2');
+
+                if (!empty($contacts) && (count($contacts) > 1 || $contacts[0] != $id_contact)) {
+                    $this->dol_object->delete_linked_contact('external', 'BILLING2');
+                }
+
+                if (empty($contacts) || !in_array($id_contact, $contacts)) {
+                    $this->dol_object->add_contact($id_contact, 'BILLING2', 'external');
+                }
+            }
+        }
     }
 
     // Méthodes statiques : 

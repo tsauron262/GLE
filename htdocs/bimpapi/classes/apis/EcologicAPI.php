@@ -143,7 +143,6 @@ www.opmconseil.com
     
     
     public function traiteReq(&$errors, &$warnings, $data, $ecologicData, $siteId, $ref, $tabFile, $dateClose, $facRef, $sav){
-        
         $params = array();
         $params['fields'] = $data;
         
@@ -168,6 +167,14 @@ www.opmconseil.com
             if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){
                 $ecologicData['RequestOk'] = true;
             }
+            elseif(((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])){
+                $errors = array();
+                BimpCore::addlog('Suppression des info demande de remboursmeent '.$sav->id.' old requestId : '.$ecologicData['RequestId']);
+                unset($ecologicData['RequestId']);
+                unset($ecologicData['RequestOk']);
+                $sav->updateField('ecologic_data', $ecologicData);
+                return $this->traiteReq($errors, $warnings, $data, $ecologicData, $siteId, $ref, $tabFile, $dateClose, $facRef, $sav);
+            }
             
             
         }
@@ -176,6 +183,15 @@ www.opmconseil.com
             $params['url_params'] = array('RequestId' => $ecologicData['RequestId'], 'RepairEndDate' => $dateClose, 'ConsumerInvoiceNumber'=>$facRef, 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
             $this->options['log_errors'] = false;
             $return = $this->execCurl('createclaim', $params, $errors);
+            $this->options['log_errors'] = true;
+            if(((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])){
+                $errors = array();
+                BimpCore::addlog('Suppression des info demande de remboursmeent '.$sav->id.' old requestId : '.$ecologicData['RequestId']);
+                unset($ecologicData['RequestId']);
+                unset($ecologicData['RequestOk']);
+                $sav->updateField('ecologic_data', $ecologicData);
+                return $this->traiteReq($errors, $warnings, $data, $ecologicData, $siteId, $ref, $tabFile, $dateClose, $facRef, $sav);
+            }
             $this->options['log_errors'] = true;
             if(isset($return['ResponseData']) && isset($return['ResponseData']['ClaimId'])){
                 $warnings = BimpTools::merge_array($warnings, $errors);
@@ -287,7 +303,7 @@ www.opmconseil.com
         if($response_code == 200){
             if(isset($return['ResponseData']['ValidationErrors']) && is_array($return['ResponseData']['ValidationErrors'])){
                 foreach($return['ResponseData']['ValidationErrors'] as $err){
-                    if(is_array($err) && isset($err['MessageType']) && $err['MessageType'] == 'W'){
+                    if(is_array($err) && isset($err['MessageType']) && ($err['MessageType'] == 'W' || $err['MessageType'] == 'E')){//E provisoire en atendant correction coté Ecologic
                         $infos .= '<br/>Warnings '. BimpRender::renderAlerts(implode(' - ', $err), 'warnings');
                     }
                     else

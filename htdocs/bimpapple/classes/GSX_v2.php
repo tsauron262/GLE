@@ -280,9 +280,9 @@ class GSX_v2 extends GSX_Const
     public function reauthenticate()
     {
 //        static::debug($this->appleId, 'reauthentification');
-        if ($this->auth_token) {
-            $this->saveToken('auth', '');
-        }
+//        if ($this->auth_token) {
+//            $this->saveToken('auth', '');
+//        }
 
         $this->logged = false;
 

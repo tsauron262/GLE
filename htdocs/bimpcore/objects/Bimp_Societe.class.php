@@ -1168,12 +1168,17 @@ class Bimp_Societe extends BimpDolObject
         return '';
     }
 
-    public function getIdCommercials()
+    public function getIdCommercials($active_only = false)
     {
         $return = array();
         if ($this->isLoaded()) {
             $sql = $this->db->db->query("SELECT fk_user FROM " . MAIN_DB_PREFIX . "societe_commerciaux WHERE fk_soc = " . $this->id);
             while ($ln = $this->db->db->fetch_object($sql)) {
+                if ($active_only) {
+                    if (!(int) $this->db->getValue('user', 'statut', 'rowid = ' . $ln->fk_user)) {
+                        continue;
+                    }
+                }
                 $return[] = $ln->fk_user;
             }
         }

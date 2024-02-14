@@ -409,6 +409,17 @@ forms:
                 input_name: list_name
                 input: 
                     type: hidden
+            config_id: 
+                custom: 1
+                label: Config de liste
+                input_name: config_id
+                input: 
+                    type: select
+                values:
+                    callback: getListConfigs
+                value:
+                    callback: getListConfig
+                depends_on: list_name
             file_name: 
                 custom: 1
                 label: Nom du fichier
@@ -448,7 +459,7 @@ forms:
                 input_name: cols_options
                 content: 
                     callback: renderListCsvColsOptions
-                depends_on: light_export,list_name
+                depends_on: light_export,list_name,config_id
                     
     generate_pdf: 
         title: Générer un document PDF

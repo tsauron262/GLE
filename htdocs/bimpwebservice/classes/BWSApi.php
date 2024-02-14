@@ -51,6 +51,7 @@ class BWSApi
                 'module'      => array('label' => 'Nom du module', 'require' => 1),
                 'object_name' => array('label' => 'Nom de l\'objet', 'required' => 1),
                 'filters'     => array('label' => 'Filtres'),
+                'panel_filters'     => array('label' => 'Filtres JSON'),
                 'order_by'    => array('label' => 'Trier par'),
                 'order_way'   => array('label' => 'Sens du trie')
             )
@@ -665,17 +666,25 @@ class BWSApi
 
         if (!count($this->errors)) {
             $filters = BimpTools::getArrayValueFromPath($this->params, 'filters', '');
+            
+            $list = array();
+            $obj_instance = $this->getObjectInstance();
 
             if ($filters) {
                 $filters = json_decode($filters, 1);
+            }
+            else{
+                $panel_filters  = BimpTools::getArrayValueFromPath($this->params, 'panel_filters', '');
+                $panel = new BC_FiltersPanel($obj_instance);
+                $panel->setFilters(json_decode($panel_filters,1));
+                $filters = array();
+                $panel->getSqlFilters($filters);
             }
 
             if (empty($filters)) {
                 $this->addError('INVALID_PARAMETERS', 'Vous devez obligatoirement spécifier au moins un filtre');
             }
 
-            $list = array();
-            $obj_instance = $this->getObjectInstance();
 
             if ($this->check_erp_user_rights && !$obj_instance->can('view')) {
                 $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir une liste ' . $obj_instance->getLabel('of_plur'));

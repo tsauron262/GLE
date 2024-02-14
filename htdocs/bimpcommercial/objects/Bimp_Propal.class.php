@@ -2179,9 +2179,34 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                     if (!count($errors)) {
                         $success = 'Contrat ' . $contrat->getRef() . ' créé avec succès';
-                    }
 
-                    $contrat->copyContactsFromOrigin($this);
+                        $users_sign = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
+                        if (!empty($users_sign)) {
+                            if (empty($contrat->dol_object->getIdContact('internal', 'SALESREPSIGN'))) {
+                                $contrat->dol_object->add_contact($users_sign[0], 'SALESREPSIGN', 'internal');
+                            }
+                        }
+
+                        if (empty($contrat->dol_object->getIdContact('internal', 'SALESREPFOLL'))) {
+                            $users_follow = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+
+                            if (!empty($users_follow)) {
+                                $contrat->dol_object->add_contact($users_follow[0], 'SALESREPFOLL', 'internal');
+                            } elseif (!empty($users_sign)) {
+                                $contrat->dol_object->add_contact($users_sign[0], 'SALESREPFOLL', 'internal');
+                            }
+                        }
+
+                        if (empty($contrat->dol_object->getIdContact('external', 'BILLING2'))) {
+                            foreach (array('BILLING2', 'BILLING') as $code) {
+                                $contacts = $this->dol_object->getIdContact('external', $code);
+                                if (!empty($contacts)) {
+                                    $contrat->dol_object->add_contact($contacts[0], 'BILLING2', 'external');
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (!count($errors)) {

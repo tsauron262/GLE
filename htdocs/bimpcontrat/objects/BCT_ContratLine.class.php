@@ -425,16 +425,22 @@ class BCT_ContratLine extends BimpObject
         if ((int) $this->getData('statut') > 0) {
             $prod = $this->getChildObject('product');
 
-            $buttons[] = array(
-                'label'   => 'Liste des facturations effectuées',
-                'icon'    => 'fas_file-invoice-dollar',
-                'onclick' => $this->getJsLoadModalCustomContent('renderFacturesTable', 'Facturations' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
-            );
+//            $buttons[] = array(
+//                'label'   => 'Liste des facturations effectuées',
+//                'icon'    => 'fas_file-invoice-dollar',
+//                'onclick' => $this->getJsLoadModalCustomContent('renderFacturesTable', 'Facturations' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
+//            );
+//
+//            $buttons[] = array(
+//                'label'   => 'Liste des achats effectués',
+//                'icon'    => 'fas_cart-arrow-down',
+//                'onclick' => $this->getJsLoadModalCustomContent('renderAchatsTable', 'Achats ' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
+//            );
 
             $buttons[] = array(
-                'label'   => 'Liste des achats effectués',
-                'icon'    => 'fas_cart-arrow-down',
-                'onclick' => $this->getJsLoadModalCustomContent('renderAchatsTable', 'Achats ' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
+                'label'   => 'Synthèse facturations / achats',
+                'icon'    => 'fas_list',
+                'onclick' => $this->getJsLoadModalCustomContent('renderFacAchatsSynthese', 'Facturation / achats ' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
             );
 
             if ($this->isActionAllowed('deactivate') && $this->canSetAction('deactivate')) {
@@ -1602,7 +1608,7 @@ class BCT_ContratLine extends BimpObject
     {
         $data = array();
 
-        $sql = BimpTools::getSqlFullSelectQuery('commande_fournisseurdet', array('cf.rowid as id_cf', 'a.date_start', 'a.date_end', '(a.qty + cfl.qty_modif) as full_qty', 'cfl.linked_object_name'), array(
+        $sql = BimpTools::getSqlFullSelectQuery('commande_fournisseurdet', array('cf.rowid as id_cf', 'cfl.id as id_line', 'a.date_start', 'a.date_end', '(a.qty + cfl.qty_modif) as full_qty', 'cfl.linked_object_name'), array(
                     'cf.fk_statut'           => array(
                         'operator' => '<',
                         'value'    => 6
@@ -1630,8 +1636,9 @@ class BCT_ContratLine extends BimpObject
                 foreach ($rows as $r) {
                     $data[] = array(
                         'id_cf'    => (int) $r['id_cf'],
-                        'from'     => $r['date_start'],
-                        'to'       => $r['date_end'],
+                        'id_line'  => (int) $r['id_line'],
+                        'from'     => date('Y-m-d', strtotime($r['date_start'])),
+                        'to'       => date('Y-m-d', strtotime($r['date_end'])),
                         'qty'      => $r['full_qty'],
                         'is_regul' => ($r['linked_object_name'] == 'contrat_line_regul' ? 1 : 0)
                     );
@@ -1645,9 +1652,9 @@ class BCT_ContratLine extends BimpObject
                 );
                 foreach ($rows as $r) {
                     if ($r['linked_object_name'] == 'contrat_line_regul') {
-                        $data['regul_qty'] += (float) $r['qty'];
+                        $data['regul_qty'] += (float) $r['full_qty'];
                     } else {
-                        $data['achat_qty'] += (float) $r['qty'];
+                        $data['achat_qty'] += (float) $r['full_qty'];
                     }
                 }
                 break;
@@ -1683,7 +1690,7 @@ class BCT_ContratLine extends BimpObject
 
             $bought = 0;
             $billed = 0;
-            
+
             // Qtés avant prochaine période facturée:
             foreach ($achats_data as $a_data) {
                 if ($a_data['from'] <= $from) {
@@ -1696,6 +1703,11 @@ class BCT_ContratLine extends BimpObject
                 }
             }
 
+            $data[0] = array(
+                'bought' => $bought,
+                'billed' => $billed
+            );
+
             // Qté à facturer pour chaque période : 
             for ($i = 1; $i <= $periods_data['nb_periods_tobill_max']; $i++) {
                 $dt->add($on_day_interval);
@@ -1703,6 +1715,9 @@ class BCT_ContratLine extends BimpObject
                 $dt->add($periodic_interval);
                 $dt->sub($on_day_interval);
                 $to = $dt->format('Y-m-d');
+
+                $bought = 0;
+                $billed = 0;
 
                 foreach ($achats_data as $a_data) {
                     $bought += BimpTools::calcProrataQty(($a_data['qty']), $a_data['from'], $a_data['to'], $from, $to);
@@ -1725,9 +1740,81 @@ class BCT_ContratLine extends BimpObject
         return $data;
     }
 
-    public function getQtiesToBuy()
+    public function getQtiesToBuy($periods_data = null, &$errors = array())
     {
-        
+        $data = array();
+
+        if (is_null($periods_data)) {
+            $periods_data = $this->getPeriodsToBuyData($errors, true, true);
+        }
+
+        $achat_periodicity = (int) $this->getData('achat_periodicity');
+
+        if (!$achat_periodicity) {
+            $errors[] = 'Périodicité d\'achat non définie';
+        }
+
+        if (!count($errors)) {
+            $fac_data = $this->getFacturesData(true);
+            $achats_data = $this->getCommandesFournData(true);
+
+            $periodic_interval = new DateInterval('P' . $achat_periodicity . 'M');
+            $on_day_interval = new DateInterval('P1D');
+
+            $dt = new DateTime($periods_data['date_next_achat']);
+            $dt->sub($on_day_interval);
+            $from = $dt->format('Y-m-d');
+
+            $bought = 0;
+            $billed = 0;
+
+            // Qtés avant prochaine période achetée:
+            foreach ($achats_data as $a_data) {
+                if ($a_data['from'] <= $from) {
+                    $bought += BimpTools::calcProrataQty(($a_data['qty']), $a_data['from'], $a_data['to'], $a_data['from'], $from);
+                }
+            }
+            foreach ($fac_data as $f_data) {
+                if ($f_data['from'] <= $from) {
+                    $billed += BimpTools::calcProrataQty(($f_data['qty']), $f_data['from'], $f_data['to'], $f_data['from'], $from);
+                }
+            }
+
+            $data[0] = array(
+                'bought' => $bought,
+                'billed' => $billed
+            );
+
+            // Qté à acheter pour chaque période : 
+            for ($i = 1; $i <= $periods_data['nb_periods_tobuy_max']; $i++) {
+                $dt->add($on_day_interval);
+                $from = $dt->format('Y-m-d');
+                $dt->add($periodic_interval);
+                $dt->sub($on_day_interval);
+                $to = $dt->format('Y-m-d');
+
+                $bought = 0;
+                $billed = 0;
+
+                foreach ($achats_data as $a_data) {
+                    $bought += BimpTools::calcProrataQty(($a_data['qty']), $a_data['from'], $a_data['to'], $from, $to);
+                }
+
+                foreach ($fac_data as $f_data) {
+                    $billed += BimpTools::calcProrataQty(($f_data['qty']), $f_data['from'], $f_data['to'], $from, $to);
+                }
+
+                $data[$i] = array(
+                    'from'   => $from,
+                    'to'     => $to,
+                    'dates'  => 'Du ' . date('d / m / Y', strtotime($from)) . ' au ' . date('d / m / Y', strtotime($to)),
+                    'bought' => $bought,
+                    'billed' => $billed
+                );
+            }
+        }
+
+        return $data;
     }
 
     // Getters statiques:
@@ -2498,6 +2585,22 @@ class BCT_ContratLine extends BimpObject
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
 
+                if ((int) $this->getData('variable_qty')) {
+                    $qties = $this->getCommandesFournData(true, 'qties');
+
+                    if ($qties['achat_qty']) {
+                        $html .= '<div style="padding: 8px; margin-top: 10px; border: 1px solid #DCDCDC">';
+                        $html .= '<b>Qtés achetées: </b><br/>';
+                        $html .= 'Achats réguliers : <b>' . BimpTools::displayFloatValue($qties['achat_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+
+                        if ($qties['regul_qty']) {
+                            $html .= '<br/>Régularisations : <b>' . BimpTools::displayFloatValue($qties['regul_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                            $html .= '<br/>Total : <b>' . BimpTools::displayFloatValue($qties['achat_qty'] + $qties['regul_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                        }
+                        $html .= '</div>';
+                    }
+                }
+
                 if (BimpCore::isUserDev()) {
                     $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
                 }
@@ -2975,6 +3078,7 @@ class BCT_ContratLine extends BimpObject
                                 if (BimpObject::objectLoaded($line)) {
                                     $tr_class = '';
                                     $line_errors = array();
+                                    $nb_decimals = 6;
                                     $periods_data = $line->getPeriodsToBillData($line_errors, true, true);
                                     $canFactAvance = $this->canSetAction('facturationAvance');
 
@@ -3016,6 +3120,7 @@ class BCT_ContratLine extends BimpObject
                                     $row_html .= '<td>';
                                     $product = $line->getChildObject('product');
                                     if (BimpObject::objectLoaded($product)) {
+                                        $nb_decimals = (int) $product->getData('variable_qty_decimals');
                                         $row_html .= $product->getLink() . '<br/>';
                                         $row_html .= $product->getName() . '<br/>';
                                         $row_html .= $line->displayPeriodicity(false, array('fac'));
@@ -3028,14 +3133,19 @@ class BCT_ContratLine extends BimpObject
                                         $row_html .= BimpRender::renderAlerts('Attention : cette ligne est incluse dans un bundle - Veuillez de préférence sélectionner la ligne principale du bundle afin de facturer simultanément l\'ensemble des lignes du bundle', 'warning');
                                     }
 
+                                    $variable_qty = (int) $line->getData('variable_qty');
                                     $class = ($periods_data['nb_periods_tobill_today'] > 0 ? ($periods_data['nb_periods_tobill_today'] > 1 ? 'important' : 'warning') : 'danger');
                                     $s = ($periods_data['nb_periods_tobill_today'] > 1 ? 's' : '');
                                     $qty = $periods_data['nb_periods_tobill_today'] * $periods_data['qty_for_1_period'];
 
                                     $row_html .= 'A traiter aujoud\'hui : <span class="' . $class . '">' . $periods_data['nb_periods_tobill_today'] . ' période' . $s . ' de facturation</span>';
-                                    $row_html .= '&nbsp;(';
-                                    $row_html .= BimpTools::displayFloatValue($qty, 4, ',', 0, 1, 0, 1, 1, 1);
-                                    $row_html .= ' unité' . (abs($qty) > 1 ? 's' : '') . ')<br/>';
+
+                                    if (!$variable_qty) {
+                                        $row_html .= '&nbsp;(';
+                                        $row_html .= BimpTools::displayFloatValue($qty, 4, ',', 0, 1, 0, 1, 1, 1);
+                                        $row_html .= ' unité' . (abs($qty) > 1 ? 's' : '') . ')';
+                                    }
+                                    $row_html .= '<br/>';
 
                                     if (!empty($line_errors)) {
                                         $row_html .= BimpRender::renderAlerts($line_errors);
@@ -3066,47 +3176,105 @@ class BCT_ContratLine extends BimpObject
                                         }
 
                                         if (BimpObject::objectLoaded($product)) {
-                                            if ((int) $line->getData('variable_qty')) {
-                                                $nb_decimals = (int) $product->getData('variable_qty_decimals');
+                                            if ($variable_qty) {
                                                 $qty_per_period = $line->getFacQtyPerPeriod();
+                                                $unit_label = $product->getData('variable_qty_unit');
 
-                                                $row_html .= '<div style="margin-top: 10px">';
-                                                $row_html .= '<b>Quantité à facturer par période:</b><br/>';
-
-                                                $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty_per_period', $qty_per_period, array(
-                                                            'extra_class' => 'line_qty_per_period',
+                                                $row_html .= '<div style="margin-top: 10px" class="variable_qty_inputs_container">';
+                                                $row_html .= BimpInput::renderInput('select', 'line_' . $line->id . '_qty_mode', 'per_period', array(
+                                                            'extra_class' => 'line_qty_mode',
                                                             'data'        => array(
-                                                                'min'      => ($qty_per_period >= 0 ? 0 : 'none'),
-                                                                'max'      => ($qty_per_period < 0 ? 0 : 'none'),
-                                                                'decimals' => $nb_decimals
+                                                                'id_line' => $line->id
+                                                            ),
+                                                            'options'     => array(
+                                                                'per_period' => 'Quantité à facturer par période',
+                                                                'total'      => 'Quantité totale à facturer'
                                                             )
                                                 ));
+                                                $row_html .= '<input type="hidden" value="' . $qty_per_period . '" name="line_' . $line->id . '_qty_per_period" class="²"/>';
 
-                                                $unit_label = $product->getData('variable_qty_unit');
-                                                if ($unit_label) {
-                                                    $row_html .= ' ' . $unit_label;
+                                                $row_html .= '<div style="margin: 5px 0" class="line_' . $line->id . '_qties_per_period">';
+                                                $qties_errors = array();
+                                                $qties_data = $line->getQtiesToInvoice($periods_data, $qties_errors);
+                                                $qty_total_today = 0;
+
+                                                if (!count($qties_errors)) {
+                                                    if (isset($qties_data[0])) {
+                                                        $bought = $qties_data[0]['bought'];
+                                                        $billed = $qties_data[0]['billed'];
+                                                        $diff = $bought - $billed;
+                                                        if ($diff > 0) {
+                                                            $row_html .= '<span class="small">Qté achetée non facturée avant prochaine période facturée : <b>' . round($diff, 6) . '</b></span><br/>';
+                                                        }
+                                                    }
+
+                                                    for ($i = 1; $i <= $periods_data['nb_periods_tobill_max']; $i++) {
+                                                        $row_html .= '<div style="margin-top: 5px;' . ($i > $periods_data['nb_periods_tobill_today'] ? 'display: none' : '') . '" class="period_qty_input_container" data-period="' . $i . '">';
+
+                                                        $row_html .= ' - <b>Période ' . $i . '</b> <span class="small">(' . $qties_data[$i]['dates'] . ')</span> : <br/>';
+
+                                                        $qty = 0;
+                                                        if ($i === 1 && $diff > 0) {
+                                                            $qty += $diff;
+                                                        }
+
+                                                        $bought = $qties_data[$i]['bought'];
+                                                        $billed = $qties_data[$i]['billed'];
+                                                        $diff = $bought - $billed;
+                                                        $qty += ($diff > 0 ? $diff : $qty_per_period);
+
+                                                        if ($i <= $periods_data['nb_periods_tobill_today']) {
+                                                            $qty_total_today += $qty;
+                                                        }
+
+                                                        $qty = round($qty, 6);
+
+                                                        $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty_period_' . $i, $qty, array(
+                                                                    'extra_class' => 'line_period_qty',
+                                                                    'data'        => array(
+                                                                        'period'   => $i,
+                                                                        'min'      => ($qty_per_period >= 0 ? 0 : 'none'),
+                                                                        'max'      => ($qty_per_period < 0 ? 0 : 'none'),
+                                                                        'decimals' => 6
+                                                                    )
+                                                                )) . ($unit_label ? ' ' . $unit_label : '') . '&nbsp;&nbsp;&nbsp;&nbsp;';
+
+                                                        if ($diff > 0) {
+                                                            $row_html .= '<span class="small success">(Qté achetée non facturée)</span>';
+                                                        } else {
+                                                            $row_html .= '<span class="small warning">(Qté par défaut)</span>';
+                                                        }
+                                                        $row_html .= '</div>';
+                                                    }
+
+                                                    $row_html .= '<div style="margin: 8px 0; padding: 5px; border: 2px solid #B38424">';
+                                                    $row_html .= 'Qté totale à facturer : <span class="line_total_qty bold">' . round($qty_total_today, $nb_decimals) . '</span>';
+                                                    $row_html .= '</div>';
+                                                } else {
+                                                    $row_html .= BimpRender::renderAlerts($qties_errors);
+                                                    $qty_total_today = $qty_per_period * $periods_data['nb_periods_tobill_today'];
                                                 }
                                                 $row_html .= '</div>';
 
-                                                $qties_errors = array();
-                                                $qties_data = $line->getQtiesToInvoice($periods_data, $qties_errors);
+                                                $row_html .= '<div style="margin: 5px 0; display: none" class="line_' . $line->id . '_total_qty">';
 
-                                                if (!count($qties_errors)) {
-                                                    $row_html .= '<pre>';
-                                                    $row_html .= print_r($qties_data, 1);
-                                                    $row_html .= '</pre>';
-                                                } else {
-                                                    $row_html .= 'ERR<pre>';
-                                                    $row_html .= print_r($qties_errors, 1);
-                                                    $row_html .= '</pre>';
-                                                }
+                                                $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_total_qty', round($qty_total_today, $nb_decimals), array(
+                                                            'data' => array(
+                                                                'min'      => ($qty_per_period >= 0 ? 0 : 'none'),
+                                                                'max'      => ($qty_per_period < 0 ? 0 : 'none'),
+                                                                'decimals' => 6
+                                                            )
+                                                        )) . ($unit_label ? ' ' . $unit_label : '');
+
+                                                $row_html .= '</div>';
+                                                $row_html .= '</div>';
                                             }
                                         }
                                     }
 
                                     $row_html .= '</td>';
-                                    $row_html .= '<td>';
-                                    $row_html .= date('d / m / Y', strtotime($periods_data['date_next_facture']));
+                                    $row_html .= '<td style="text-align: center">';
+                                    $row_html .= '<b>' . date('d / m / Y', strtotime($periods_data['date_next_facture'])) . '</b>';
                                     $row_html .= '</td>';
                                 } else {
                                     $row_html .= '<td colspan="99">';
@@ -3114,11 +3282,13 @@ class BCT_ContratLine extends BimpObject
                                     $row_html .= '</td>';
                                 }
 
-                                $html .= '<tr class="contrat_line_row' . ($tr_class ? ' ' . $tr_class : '') . ' sub_line line_' . $id_main_line . '_sub_line"';
+                                $html .= '<tr class="contrat_line_row' . ($tr_class ? ' ' . $tr_class : '') . ($is_sub_line ? ' sub_line line_' . $id_main_line . '_sub_line' : '' ) . '"';
                                 $html .= ' data-id_client="' . $id_client . '"';
                                 $html .= ' data-fac_idx="' . $fac_idx . '"';
                                 $html .= ' data-id_line="' . $id_line . '"';
                                 $html .= ' data-is_sub_line="' . (int) $is_sub_line . '"';
+                                $html .= ' data-nb_periods_default="' . $periods_data['nb_periods_tobill_today'] . '"';
+                                $html .= ' data-nb_decimals="' . $nb_decimals . '"';
                                 $html .= '>';
                                 $html .= $row_html;
                                 $html .= '</tr>';
@@ -3155,7 +3325,7 @@ class BCT_ContratLine extends BimpObject
                     'id_contrat' => $id_contrat
                         ), $errors);
 
-        // Trie par fournisseur et entrepot: 
+        // Trie par fournisseur et entrepot:
         $lines_by_fourns = array();
 
         foreach ($lines as $id_line => $line_data) {
@@ -3178,10 +3348,6 @@ class BCT_ContratLine extends BimpObject
 
             $id_pfp = (int) $line->getData('fk_product_fournisseur_price');
             if (!$id_pfp) {
-//                $product = $line->getChildObject('product');
-//                    if (BimpObject::objectLoaded($product)) {
-//                      $product->getLastFournPriceId();                        
-//                    }
                 $line_errors[] = 'Aucun prix d\'achat fournisseur sélectionné pour cette ligne de contrat';
             } else {
                 $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
@@ -3300,6 +3466,7 @@ class BCT_ContratLine extends BimpObject
                         $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
                         if (BimpObject::objectLoaded($line)) {
                             $line_errors = array();
+                            $nb_decimals = 6;
                             $periods_data = $line->getPeriodsToBuyData($line_errors);
                             $line_errors = BimpTools::merge_array($line_errors, BimpTools::getArrayValueFromPath($line_data, 'errors', array()));
 
@@ -3335,6 +3502,7 @@ class BCT_ContratLine extends BimpObject
                             $row_html .= '<td>';
                             $product = $line->getChildObject('product');
                             if (BimpObject::objectLoaded($product)) {
+                                $nb_decimals = (int) $product->getData('variable_qty_decimals');
                                 $row_html .= $product->getLink() . '<br/>';
                                 $row_html .= $product->getName() . '<br/>';
                             }
@@ -3345,11 +3513,17 @@ class BCT_ContratLine extends BimpObject
                                 $row_html .= BimpRender::renderAlerts($line_errors);
                                 $row_html .= '</td>';
                             } else {
-                                $row_html .= '<td style="min-width: 250px">';
+                                $row_html .= '<td style="min-width: 390px">';
+
+                                $variable_qty = (int) $line->getData('variable_qty');
                                 $class = ($periods_data['nb_periods_tobuy_today'] > 0 ? ($periods_data['nb_periods_tobuy_today'] > 1 ? 'important' : 'warning') : 'danger');
                                 $s = ($periods_data['nb_periods_tobuy_today'] > 1 ? 's' : '');
                                 $row_html .= 'A traiter aujoud\'hui : <span class="' . $class . '">' . $periods_data['nb_periods_tobuy_today'] . ' période' . $s . '</span>';
-                                $row_html .= '&nbsp;(' . ($periods_data['nb_periods_tobuy_today'] * $periods_data['qty_for_1_period']) . ' unité' . $s . ')<br/>';
+
+                                if (!$variable_qty) {
+                                    $row_html .= '&nbsp;(' . ($periods_data['nb_periods_tobuy_today'] * $periods_data['qty_for_1_period']) . ' unité' . $s . ')';
+                                }
+                                $row_html .= '<br/>';
 
                                 if ($id_fourn && $periods_data['nb_periods_tobuy_max'] > 0) {
                                     $is_first_period = ($periods_data['date_next_achat'] == $periods_data['date_achat_start']);
@@ -3375,24 +3549,97 @@ class BCT_ContratLine extends BimpObject
                                                 )
                                     ));
 
-                                    if ((int) $line->getData('variable_qty')) {
-                                        $nb_decimals = (int) $product->getData('variable_qty_decimals');
+                                    if ($variable_qty) {
                                         $qty_per_period = $line->getAchatQtyPerPeriod();
+                                        $unit_label = $product->getData('variable_qty_unit');
 
-                                        $row_html .= '<div style="margin-top: 10px">';
-                                        $row_html .= '<b>Quantité à acheter par période:</b><br/>';
-                                        $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty_per_period', $qty_per_period, array(
-                                                    'extra_class' => 'line_qty_per_period',
+                                        $row_html .= '<div style="margin-top: 10px" class="variable_qty_inputs_container">';
+                                        $row_html .= BimpInput::renderInput('select', 'line_' . $line->id . '_qty_mode', 'per_period', array(
+                                                    'extra_class' => 'line_qty_mode',
                                                     'data'        => array(
-                                                        'min'      => ($qty_per_period >= 0 ? 0 : 'none'),
-                                                        'max'      => ($qty_per_period < 0 ? 0 : 'none'),
-                                                        'decimals' => $nb_decimals
+                                                        'id_line' => $line->id
+                                                    ),
+                                                    'options'     => array(
+                                                        'per_period' => 'Quantité à acheter par période',
+                                                        'total'      => 'Quantité totale à acheter'
                                                     )
                                         ));
-                                        $unit_label = $product->getData('variable_qty_unit');
-                                        if ($unit_label) {
-                                            $row_html .= ' ' . $unit_label;
+                                        $row_html .= '<input type="hidden" value="' . $qty_per_period . '" name="line_' . $line->id . '_qty_per_period"/>';
+
+                                        $row_html .= '<div style="margin: 5px 0" class="line_' . $line->id . '_qties_per_period">';
+                                        $qties_errors = array();
+                                        $qties_data = $line->getQtiesToBuy($periods_data, $qties_errors);
+                                        $qty_total_today = 0;
+
+                                        if (!count($qties_errors)) {
+                                            if (isset($qties_data[0])) {
+                                                $bought = $qties_data[0]['bought'];
+                                                $billed = $qties_data[0]['billed'];
+                                                $diff = $billed - $bought;
+                                                if ($diff > 0) {
+                                                    $row_html .= '<span class="small">Qté facturée non achetée avant prochaine période d\'achat : <b>' . round($diff, 6) . '</b></span><br/>';
+                                                }
+                                            }
+
+                                            for ($i = 1; $i <= $periods_data['nb_periods_tobuy_max']; $i++) {
+                                                $row_html .= '<div style="margin-top: 5px;' . ($i > $periods_data['nb_periods_tobuy_today'] ? 'display: none' : '') . '" class="period_qty_input_container" data-period="' . $i . '">';
+
+                                                $row_html .= ' - <b>Période ' . $i . '</b> <span class="small">(' . $qties_data[$i]['dates'] . ')</span> : <br/>';
+
+                                                $qty = 0;
+                                                if ($i === 1 && $diff > 0) {
+                                                    $qty += $diff;
+                                                }
+
+                                                $bought = $qties_data[$i]['bought'];
+                                                $billed = $qties_data[$i]['billed'];
+                                                $diff = $billed - $bought;
+                                                $qty += ($diff > 0 ? $diff : $qty_per_period);
+
+                                                if ($i <= $periods_data['nb_periods_tobuy_today']) {
+                                                    $qty_total_today += $qty;
+                                                }
+
+                                                $qty = round($qty, 6);
+
+                                                $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty_period_' . $i, $qty, array(
+                                                            'extra_class' => 'line_period_qty',
+                                                            'data'        => array(
+                                                                'period'   => $i,
+                                                                'min'      => ($qty_per_period >= 0 ? 0 : 'none'),
+                                                                'max'      => ($qty_per_period < 0 ? 0 : 'none'),
+                                                                'decimals' => 6
+                                                            )
+                                                        )) . ($unit_label ? ' ' . $unit_label : '') . '&nbsp;&nbsp;';
+
+                                                if ($diff > 0) {
+                                                    $row_html .= '<span class="small success">(Qté facturée non achetée : ' . $qty . ')</span>';
+                                                } else {
+                                                    $row_html .= '<span class="small warning">(Qté par défaut : ' . $qty_per_period . ')</span>';
+                                                }
+                                                $row_html .= '</div>';
+                                            }
+
+                                            $row_html .= '<div style="margin: 8px 0; padding: 5px; border: 2px solid #B38424">';
+                                            $row_html .= 'Qté totale à acheter : <span class="line_total_qty bold">' . round($qty_total_today, $nb_decimals) . '</span>';
+                                            $row_html .= '</div>';
+                                        } else {
+                                            $row_html .= BimpRender::renderAlerts($qties_errors);
+                                            $qty_total_today = $qty_per_period * $periods_data['nb_periods_tobuy_today'];
                                         }
+                                        $row_html .= '</div>';
+
+                                        $row_html .= '<div style="margin: 5px 0; display: none" class="line_' . $line->id . '_total_qty">';
+
+                                        $row_html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_total_qty', round($qty_total_today, $nb_decimals), array(
+                                                    'data' => array(
+                                                        'min'      => ($qty_per_period >= 0 ? 0 : 'none'),
+                                                        'max'      => ($qty_per_period < 0 ? 0 : 'none'),
+                                                        'decimals' => 6
+                                                    )
+                                                )) . ($unit_label ? ' ' . $unit_label : '');
+
+                                        $row_html .= '</div>';
                                         $row_html .= '</div>';
                                     }
                                 }
@@ -3436,7 +3683,13 @@ class BCT_ContratLine extends BimpObject
                             $row_html .= '</td>';
                         }
 
-                        $html .= '<tr class="contrat_line_row' . ($tr_class ? ' ' . $tr_class : '') . '" data-id_fourn="' . $id_fourn . '" data-id_entrepot="' . $id_entrepot . '" data-id_line="' . $id_line . '">';
+                        $html .= '<tr class="contrat_line_row' . ($tr_class ? ' ' . $tr_class : '') . '"';
+                        $html .= ' data-id_fourn="' . $id_fourn . '"';
+                        $html .= ' data-id_entrepot="' . $id_entrepot . '"';
+                        $html .= ' data-id_line="' . $id_line . '"';
+                        $html .= ' data-nb_periods_default="' . $periods_data['nb_periods_tobuy_today'] . '"';
+                        $html .= ' data-nb_decimals="' . $nb_decimals . '"';
+                        $html .= '>';
                         $html .= $row_html;
                         $html .= '</tr>';
                     }
@@ -3650,7 +3903,260 @@ class BCT_ContratLine extends BimpObject
         return $list->renderHtml();
     }
 
-    public function renderFacturesTable($id_facture = 0, $with_totals = true)
+    public function renderFacAchatsSynthese()
+    {
+        $tabs = array();
+
+        $tabs[] = array(
+            'id'      => 'fac_achat_qties',
+            'title'   => 'Synthèse quantités',
+            'icon'    => 'fas_list',
+            'content' => $this->renderFacAchatSyntheseTab()
+        );
+
+        $tabs[] = array(
+            'id'      => 'fac',
+            'title'   => 'Factures',
+            'icon'    => 'fas_file-invoice-dollar',
+            'content' => $this->renderFacturesTab()
+        );
+
+        $tabs[] = array(
+            'id'      => 'comm_fourn',
+            'title'   => 'Commandes fournisseurs',
+            'icon'    => 'fas_cart-arrow-down',
+            'content' => $this->renderAchatsTab()
+        );
+
+        return BimpRender::renderNavTabs($tabs, 'line_' . $this->id . '_synthese');
+    }
+
+    public function renderFacAchatSyntheseTab()
+    {
+        $html = '';
+
+        $total_achats_qty = 0;
+        $total_fac_qty = 0;
+
+        $last_achat_date_to = '';
+        $last_fac_date_to = '';
+
+        $html .= '<table style="width: 100%">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td style="width: 50%; padding: 10px; vertical-align: top">';
+
+        // Achats : 
+        $html .= '<h3>' . BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Quantités achetées</h3>';
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>Période</th>';
+        $html .= '<th style="text-align: center">Qté achetée</th>';
+        $html .= '<th style="text-align: center">Qté réceptionnée</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
+
+        $achats = $this->getCommandesFournData(true, 'data');
+
+        if (!empty($achats)) {
+            foreach ($achats as $achat) {
+                $html .= '<tr>';
+                $html .= '<td>';
+                $html .= 'Du <b>' . date('d / m / Y', strtotime($achat['from'])) . '</b> au <b>' . date('d / m / Y', strtotime($achat['to'])) . '</b>';
+                if ($achat['is_regul']) {
+                    $html .= '<br/><span class="important">(Régularisation)</span>';
+                }
+                $html .= '</td>';
+                $html .= '<td  style="text-align: center">' . $achat['qty'] . '</td>';
+                $html .= '<td  style="text-align: center">';
+                $cf_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $achat['id_line']);
+                if (BimpObject::objectLoaded($cf_line)) {
+                    $received_qty = (float) $cf_line->getReceivedQty(null, true);
+                    $received_class = ($received_qty > 0 ? ($received_qty >= $achat['qty'] ? 'success' : 'warning') : 'danger');
+                    $html .= '<span class="badge badge-' . $received_class . '">' . $received_qty . '</span>';
+                } else {
+                    $html .= '<span class="danger">Inconnue</span>';
+                }
+                $html .= '</td>';
+                $html .= '</tr>';
+
+                $total_achats_qty += $achat['qty'];
+
+                if (!$last_achat_date_to || $achat['to'] > $last_achat_date_to) {
+                    $last_achat_date_to = $achat['to'];
+                }
+            }
+        } else {
+            $html .= '<tr>';
+            $html .= '<td colspan="3">';
+            $html .= BimpRender::renderAlerts('Aucun achat effectué', 'warning');
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $achat_errors = array();
+        $achat_periods_data = $this->getPeriodsToBuyData($achat_errors);
+        if (count($achat_errors)) {
+            $html .= BimpRender::renderAlerts($achat_errors);
+        } else {
+            $html .= '<div style="margin: 10px 0; border: 1px solid #DCDCDC; padding: 8px">';
+            if ((int) $achat_periods_data['nb_periods_tobuy_max']) {
+                $dt = new DateTime($achat_periods_data['date_next_achat']);
+                $html .= '<span class="info">Il reste ' . $achat_periods_data['nb_periods_tobuy_max'] . ' période(s) à acheter</span><br/>';
+                $html .= 'Prochaine période à acheter : <b>du ' . $dt->format('d / m / Y');
+                $dt->add(new DateInterval('P' . (int) $this->getData('achat_periodicity') . 'M'));
+                $dt->sub(new DateInterval('P1D'));
+                $html .= ' au ' . $dt->format('d / m / Y');
+            } else {
+                $html .= '<span class="danger">Il ne reste plus aucune période à facturer</span>';
+            }
+            $html .= '</div>';
+        }
+        $html .= '</td>';
+
+        $html .= '<td style="width: 50%; padding: 10px; vertical-align: top">';
+
+        // Facturations : 
+        $html .= '<h3>' . BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Quantités facturées</h3>';
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>Période</th>';
+        $html .= '<th style="text-align: center">Qté facturée</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
+
+        $facs = $this->getFacturesData(true, 'data');
+
+        if (!empty($facs)) {
+            foreach ($facs as $fac) {
+                $html .= '<tr>';
+                $html .= '<td>';
+                $html .= 'Du <b>' . date('d / m / Y', strtotime($fac['from'])) . '</b> au <b>' . date('d / m / Y', strtotime($fac['to'])) . '</b>';
+                if ($fac['is_regul']) {
+                    $html .= '<br/><span class="important">(Régularisation)</span>';
+                }
+                $html .= '</td>';
+                $html .= '<td  style="text-align: center">' . $fac['qty'] . '</td>';
+                $html .= '</tr>';
+
+                $total_fac_qty += $fac['qty'];
+
+                if (!$last_fac_date_to || $fac['to'] > $last_fac_date_to) {
+                    $last_fac_date_to = $fac['to'];
+                }
+            }
+        } else {
+            $html .= '<tr>';
+            $html .= '<td colspan="3"  style="text-align: center">';
+            $html .= BimpRender::renderAlerts('Aucune facturation effectuée', 'warning');
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $fac_errors = array();
+        $fac_periods_data = $this->getPeriodsToBillData($fac_errors);
+        if (count($fac_errors)) {
+            $html .= BimpRender::renderAlerts($fac_errors);
+        } else {
+            $html .= '<div style="margin: 10px 0; border: 1px solid #DCDCDC; padding: 8px">';
+            if ((int) $fac_periods_data['nb_periods_tobill_max']) {
+                $dt = new DateTime($fac_periods_data['date_next_period_tobill']);
+                $html .= '<span class="info">Il reste ' . $fac_periods_data['nb_periods_tobill_max'] . ' période(s) à facturer</span><br/>';
+                $html .= 'Prochaine période facturée : <b>du ' . $dt->format('d / m / Y');
+                $dt->add(new DateInterval('P' . (int) $this->getData('fac_periodicity') . 'M'));
+                $dt->sub(new DateInterval('P1D'));
+                $html .= ' au ' . $dt->format('d / m / Y');
+            } else {
+                $html .= '<span class="danger">Il ne reste plus aucune période à facturer</span>';
+            }
+            $html .= '</div>';
+        }
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $html .= '<table class="bimp_list_table" style="margin-top: 30px; width: auto">';
+        $html .= '<tbody>';
+
+        $html .= '<tr>';
+        $html .= '<th>';
+        $html .= 'Total qté achetée' . ($last_achat_date_to ? ' (au ' . date('d / m / Y', strtotime($last_achat_date_to)) . ')' : '');
+        $html .= '</th>';
+        $html .= '<td style="text-align: center">';
+        $html .= '<b>' . $total_achats_qty . '</b>';
+        $html .= '</td>';
+        $html .= '<td></td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>';
+        $html .= 'Total qté facturée' . ($last_fac_date_to ? ' (au ' . date('d / m / Y', strtotime($last_fac_date_to)) . ')' : '');
+        $html .= '</th>';
+        $html .= '<td style="text-align: center">';
+        $html .= '<b>' . $total_fac_qty . '</b>';
+        $html .= '</td>';
+        $html .= '<td></td>';
+        $html .= '</tr>';
+
+        if ($total_achats_qty != $total_fac_qty) {
+            $html .= '<tr>';
+            if ($total_achats_qty > $total_fac_qty) {
+                $html .= '<th>Qté achetée non facturée</th>';
+            } else {
+                $html .= '<th>Surplus facturé</th>';
+            }
+
+            $html .= '<td style="text-align: center"><span class="badge badge-important">' . abs($total_achats_qty - $total_fac_qty) . '</span></td>';
+            $html .= '<td style="text-align: center">';
+            if ($this->isActionAllowed('regul') && $this->canSetAction('regul')) {
+                $onclick = $this->getJsActionOnclick('facRegul', array(), array(
+                    'form_name' => 'fac_regul'
+                ));
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_file-medical', 'iconLeft') . 'Facture de régularisation';
+                $html .= '</span>';
+            }
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+//        if ($total_fac_qty != $total_achats_qty) {
+//            $html .= '<tr>';
+//            $html .= '<th>Qté facturée non achetée</th>';
+//            $html .= '<td style="text-align: center"><span class="badge badge-important">' . ($total_fac_qty - $total_achats_qty) . '</span></td>';
+//            $html .= '<td style="text-align: center">';
+////                if ($this->isActionAllowed('regul') && $this->canSetAction('regul')) {
+////                    $onclick = $this->getJsActionOnclick('facRegul', array(), array(
+////                        'form_name' => 'fac_regul'
+////                    ));
+////                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+////                    $html .= BimpRender::renderIcon('fas_file-medical', 'iconLeft') . 'Facture de régularisation';
+////                    $html .= '</span>';
+////                }
+//            $html .= '</td>';
+//            $html .= '</tr>';
+//        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+        return $html;
+    }
+
+    public function renderFacturesTab($id_facture = 0, $with_totals = true)
     {
         $html = '';
 
@@ -3798,7 +4304,7 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
-    public function renderAchatsTable($id_commande_fourn = 0, $with_totals = true)
+    public function renderAchatsTab($id_commande_fourn = 0, $with_totals = true)
     {
         $html = '';
 
@@ -4080,21 +4586,21 @@ class BCT_ContratLine extends BimpObject
 
     public function renderFacRegulToSelect()
     {
-        $from_value = BimpTools::getPostFieldValue('period_from', '');
-        $from = $from_value;
+//        $from_value = BimpTools::getPostFieldValue('period_from', '');
+//        $from = $from_value;
         $to = '';
         $facs = $this->getFacturesData();
 
         $options = array();
 
         foreach ($facs as $data) {
-            if ($data['to'] < $from_value) {
-                continue;
-            }
-
-            if (!$from_value && (!$from || $data['from'] < $from)) {
-                $from = $data['from'];
-            }
+//            if ($data['to'] < $from_value) {
+//                continue;
+//            }
+//
+//            if (!$from_value && (!$from || $data['from'] < $from)) {
+//                $from = $data['from'];
+//            }
 
             if (!$to || $data['to'] > $to) {
                 $to = $data['to'];
@@ -4114,60 +4620,78 @@ class BCT_ContratLine extends BimpObject
     {
         $html = '';
 
-        $from = BimpTools::getPostFieldValue('period_from', '');
-        $to = BimpTools::getPostFieldValue('period_to', '');
+//        $from = BimpTools::getPostFieldValue('period_from', '');
+        $period_to = BimpTools::getPostFieldValue('period_to', '');
 
         $errors = array();
 
-        if (!$from) {
-            $errors[] = 'Veuillez sélectionner un début de période à régulariser';
-        }
+//        if (!$from) {
+//            $errors[] = 'Veuillez sélectionner un début de période à régulariser';
+//        }
 
-        if (!$to) {
-            $errors[] = 'Veuillez sélectionner une fin de période à régulariser';
+        if (!$period_to) {
+            $errors[] = 'Veuillez sélectionner une fin de période max à régulariser';
         }
 
         if (count($errors)) {
             $html .= BimpRender::renderAlerts($errors);
         } else {
             $facs_data = $this->getFacturesData(true);
+            $achats_data = $this->getCommandesFournData(true);
+
             $qty_fac = 0;
+            $qty_achat = 0;
 
-            $has_regul = false;
-
-            $html .= '<b>Facturations régulières sur la période sélectionnée : </b><br/>';
-            foreach ($facs_data as $fac_data) {
-                if ($fac_data['is_regul']) {
-                    $has_regul = true;
-                    continue;
-                }
-                if ($fac_data['from'] >= $from && $fac_data['to'] <= $to) {
-                    $qty_fac += (float) $fac_data['qty'];
-                    $html .= ' - Du ' . date('d / m / Y', strtotime($fac_data['from'])) . ' au ' . date('d / m / Y', strtotime($fac_data['to'])) . ' : ' . BimpTools::displayFloatValue($fac_data['qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '<br/>';
-                }
-            }
-            $html .= '<b>Quantité totale : ' . BimpTools::displayFloatValue($qty_fac, 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
-
-            if ($has_regul) {
-                $qty_regul = 0;
-                $html .= '<br/><br/>';
-                $html .= '<div style="padding: 10px; border: 1px solid #DCDCDC">';
-                $html .= '<span class="important">Régularisations déjà effectuées: </span><br/>';
-
+            $html .= '<b>Facturations sur la période sélectionnée : </b><br/>';
+            if (!empty($facs_data)) {
                 foreach ($facs_data as $fac_data) {
-                    if (!$fac_data['is_regul']) {
-                        continue;
-                    }
-                    $qty_regul += (float) $fac_data['qty'];
-                    $html .= ' - Du ' . date('d / m / Y', strtotime($fac_data['from'])) . ' au ' . date('d / m / Y', strtotime($fac_data['to'])) . ' : ' . BimpTools::displayFloatValue($fac_data['qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '<br/>';
-                }
+                    if ($fac_data['qty'] && $fac_data['from'] <= $period_to) {
+                        $qty_fac += $fac_data['qty'];
 
-                $html .= '<b>Quantité totale régularisations : ' . BimpTools::displayFloatValue($qty_regul, 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
-                $html .= '</div>';
+                        $html .= ' - Du ' . date('d / m / Y', strtotime($fac_data['from'])) . ' au ' . date('d / m / Y', strtotime($fac_data['to']));
+
+                        if ($fac_data['is_regul']) {
+                            $html .= ' <span class="important">[REGUL]</span>';
+                        }
+
+                        $html .= ' : ' . $fac_data['qty'] . '<br/>';
+                    }
+                }
             }
 
-            $html .= '<br/><br/>Quantité à régulariser : <br/>';
-            $html .= BimpInput::renderInput('qty', 'regul_qty', 0, array(
+            if (!$qty_fac) {
+                $html .= '<span class="warning">Aucune facturation effectuée</span><br/>';
+            }
+
+            $html .= '<br/><b>Achats sur la période sélectionnée : </b><br/>';
+            if (!empty($achats_data)) {
+                foreach ($achats_data as $achat_data) {
+                    if ($achat_data['qty'] && $achat_data['from'] <= $period_to) {
+                        $qty_achat += (float) $achat_data['qty'];
+
+                        $html .= ' - Du ' . date('d / m / Y', strtotime($achat_data['from'])) . ' au ' . date('d / m / Y', strtotime($achat_data['to']));
+
+                        if ($achat_data['is_regul']) {
+                            $html .= '<span class="important">[REGUL]</span> ';
+                        }
+
+                        $html .= ' : ' . $achat_data['qty'] . '<br/>';
+                    }
+                }
+            }
+
+            if (!$qty_achat) {
+                $html .= '<span class="warning">Aucun achat effectué</span><br/>';
+            }
+
+            $html .= '<div style="margin: 15px 0; padding: 8px; border: 1px solid #DCDCDC">';
+            $html .= 'Quantité totale achetée : <b>' . $qty_achat . '</b><br/>';
+            $html .= 'Quantité totale facturée : <b>' . $qty_fac . '</b><br/>';
+            $html .= 'Différence : <b>' . ($qty_achat - $qty_fac) . '</b>';
+            $html .= '</div>';
+
+            $html .= '<br/>Quantité à régulariser : <br/>';
+            $html .= BimpInput::renderInput('qty', 'regul_qty', $qty_achat - $qty_fac, array(
                         'data' => array(
                             'data_type' => 'number',
                             'decimals'  => 6
@@ -5357,7 +5881,7 @@ class BCT_ContratLine extends BimpObject
                         if ($id_parent_line && in_array($id_parent_line, $ids)) {
                             continue;
                         }
-                        
+
                         if ($line->isActionAllowed('activate', $line_errors)) {
                             $line_errors = $line->activate();
                         }
@@ -5499,12 +6023,13 @@ class BCT_ContratLine extends BimpObject
         $success = '';
 
         $id_facture = (int) BimpTools::getArrayValueFromPath($data, 'id_fac_regul', 0);
-        $from = BimpTools::getArrayValueFromPath($data, 'period_from', '');
         $to = BimpTools::getArrayValueFromPath($data, 'period_to', '');
         $qty = (float) BimpTools::getArrayValueFromPath($data, 'regul_qty', 0);
 
+        //        $from = BimpTools::getArrayValueFromPath($data, 'period_from', '');
+        $from = $this->getDateFacStart();
         if (!$from) {
-            $errors[] = 'Veuillez sélectionner une date de début de période à régulariser';
+            $errors[] = 'Date de début des facturations non définie';
         }
 
         if (!$to) {
@@ -5617,7 +6142,7 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 $fac_line->qty = $qty;
-                $fac_line->desc = $this->getData('description');
+                $fac_line->desc = '(Régularisation sur cette période)<br/><br/>' . $this->getData('description');
                 $fac_line->id_product = (int) $this->getData('fk_product');
                 $fac_line->pu_ht = $this->getData('subprice');
                 $fac_line->tva_tx = $this->getData('tva_tx');
@@ -5886,10 +6411,10 @@ class BCT_ContratLine extends BimpObject
 
                 foreach ($fac_lines as $line_data) {
                     $elements[] = json_encode(array(
-                        'id_line'        => (int) BimpTools::getArrayValueFromPath($line_data, 'id_line', 0),
-                        'nb_periods'     => (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0),
-                        'qty_per_period' => (int) BimpTools::getArrayValueFromPath($line_data, 'qty_per_period', 0),
-                        'sub_lines'      => BimpTools::getArrayValueFromPath($line_data, 'sub_lines', array()),
+                        'id_line'    => (int) BimpTools::getArrayValueFromPath($line_data, 'id_line', 0),
+                        'nb_periods' => (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0),
+                        'total_qty'  => (float) BimpTools::getArrayValueFromPath($line_data, 'total_qty', 0),
+                        'sub_lines'  => BimpTools::getArrayValueFromPath($line_data, 'sub_lines', array()),
                     ));
                 }
 
@@ -5956,7 +6481,6 @@ class BCT_ContratLine extends BimpObject
 
                                 $id_line = BimpTools::getArrayValueFromPath($line_data, 'id_line', 0);
                                 $nb_periods = (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0);
-                                $real_qty_per_period = (float) BimpTools::getArrayValueFromPath($line_data, 'qty_per_period', 0);
 
                                 if (!$id_line) {
                                     $process->incIgnored();
@@ -6003,20 +6527,20 @@ class BCT_ContratLine extends BimpObject
 
                                 $qty = 0;
                                 if ((int) $line->getData('variable_qty')) {
-                                    $qty_per_period = $real_qty_per_period;
+                                    $qty = (float) BimpTools::getArrayValueFromPath($line_data, 'total_qty', 0);
                                 } else {
                                     $qty_per_period = $line->getFacQtyPerPeriod();
-                                }
 
-                                if ($line_periods_data['date_next_period_tobill'] == $line_periods_data['date_first_period_start'] &&
-                                        $line_periods_data['first_period_prorata'] != 1) {
-                                    $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
+                                    if ($line_periods_data['date_next_period_tobill'] == $line_periods_data['date_first_period_start'] &&
+                                            $line_periods_data['first_period_prorata'] != 1) {
+                                        $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
 
-                                    if ($nb_periods > 1) {
-                                        $qty += $qty_per_period * ($nb_periods - 1);
+                                        if ($nb_periods > 1) {
+                                            $qty += $qty_per_period * ($nb_periods - 1);
+                                        }
+                                    } else {
+                                        $qty = $qty_per_period * $nb_periods;
                                     }
-                                } else {
-                                    $qty = $qty_per_period * $nb_periods;
                                 }
 
                                 if (!$qty) {
@@ -6082,21 +6606,21 @@ class BCT_ContratLine extends BimpObject
                                             $sub_line_qty = 0;
                                             $sub_line_qty_per_period = 0;
 
-                                            if (isset($line_data['sub_lines'][$sub_line->id]['qty_per_period'])) {
-                                                $sub_line_qty_per_period = $line_data['sub_lines'][$sub_line->id]['qty_per_period'];
+                                            if (isset($line_data['sub_lines'][$sub_line->id]['total_qty'])) {
+                                                $sub_line_qty = $line_data['sub_lines'][$sub_line->id]['total_qty'];
                                             } else {
                                                 $sub_line_qty_per_period = $sub_line->getFacQtyPerPeriod();
-                                            }
 
-                                            if ($sub_line_periods_data['date_next_period_tobill'] == $sub_line_periods_data['date_first_period_start'] &&
-                                                    $sub_line_periods_data['first_period_prorata'] != 1) {
-                                                $sub_line_qty = $sub_line_qty_per_period * (float) $sub_line_periods_data['first_period_prorata'];
+                                                if ($sub_line_periods_data['date_next_period_tobill'] == $sub_line_periods_data['date_first_period_start'] &&
+                                                        $sub_line_periods_data['first_period_prorata'] != 1) {
+                                                    $sub_line_qty = $sub_line_qty_per_period * (float) $sub_line_periods_data['first_period_prorata'];
 
-                                                if ($nb_periods > 1) {
-                                                    $sub_line_qty += $sub_line_qty_per_period * ($nb_periods - 1);
+                                                    if ($nb_periods > 1) {
+                                                        $sub_line_qty += $sub_line_qty_per_period * ($nb_periods - 1);
+                                                    }
+                                                } else {
+                                                    $sub_line_qty = $sub_line_qty_per_period * $nb_periods;
                                                 }
-                                            } else {
-                                                $sub_line_qty = $sub_line_qty_per_period * $nb_periods;
                                             }
 
                                             if (!$sub_line_qty) {
@@ -6383,10 +6907,10 @@ class BCT_ContratLine extends BimpObject
 
                 foreach ($lines as $line_data) {
                     $elements[] = json_encode(array(
-                        'id_line'        => (int) BimpTools::getArrayValueFromPath($line_data, 'id_line', 0),
-                        'nb_periods'     => (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0),
-                        'qty_per_period' => (int) BimpTools::getArrayValueFromPath($line_data, 'qty_per_period', 0),
-                        'pa_ht'          => (float) BimpTools::getArrayValueFromPath($line_data, 'pa_ht', 0),
+                        'id_line'    => (int) BimpTools::getArrayValueFromPath($line_data, 'id_line', 0),
+                        'nb_periods' => (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0),
+                        'total_qty'  => (float) BimpTools::getArrayValueFromPath($line_data, 'total_qty', 0),
+                        'pa_ht'      => (float) BimpTools::getArrayValueFromPath($line_data, 'pa_ht', 0),
                     ));
                 }
 
@@ -6457,7 +6981,7 @@ class BCT_ContratLine extends BimpObject
 
                                 $id_line = BimpTools::getArrayValueFromPath($line_data, 'id_line', 0);
                                 $nb_periods = (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0);
-                                $real_qty_per_period = (float) BimpTools::getArrayValueFromPath($line_data, 'qty_per_period', 0);
+                                $total_qty = (float) BimpTools::getArrayValueFromPath($line_data, 'total_qty', 0);
                                 $pa_ht = (float) BimpTools::getArrayValueFromPath($line_data, 'pa_ht', 0);
 
                                 if (!$id_line) {
@@ -6510,22 +7034,22 @@ class BCT_ContratLine extends BimpObject
                                     $nb_periods = $line_periods_data['nb_periods_tobuy_max'];
                                 }
 
+                                $qty = 0;
                                 if ((int) $line->getData('variable_qty')) {
-                                    $qty_per_period = $real_qty_per_period;
+                                    $qty = $total_qty;
                                 } else {
                                     $qty_per_period = $line->getAchatQtyPerPeriod();
-                                }
 
-                                $qty = 0;
-                                if ($line_periods_data['date_next_achat'] == $line_periods_data['date_achat_start'] &&
-                                        $line_periods_data['first_period_prorata'] != 1) {
-                                    $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
+                                    if ($line_periods_data['date_next_achat'] == $line_periods_data['date_achat_start'] &&
+                                            $line_periods_data['first_period_prorata'] != 1) {
+                                        $qty = $qty_per_period * (float) $line_periods_data['first_period_prorata'];
 
-                                    if ($nb_periods > 1) {
-                                        $qty += $qty_per_period * ($nb_periods - 1);
+                                        if ($nb_periods > 1) {
+                                            $qty += $qty_per_period * ($nb_periods - 1);
+                                        }
+                                    } else {
+                                        $qty = $qty_per_period * $nb_periods;
                                     }
-                                } else {
-                                    $qty = $qty_per_period * $nb_periods;
                                 }
 
                                 if (!$qty) {

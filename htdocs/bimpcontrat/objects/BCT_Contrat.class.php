@@ -557,7 +557,7 @@ class BCT_Contrat extends BimpDolObject
         }
 
         $sql = BimpTools::getSqlFullSelectQuery('contratdet', $fields, $filters, $joins);
-        
+
         $rows = self::getBdb()->executeS($sql, 'array');
 
         if (is_array($rows)) {
@@ -1284,7 +1284,7 @@ class BCT_Contrat extends BimpDolObject
     // Traitements : 
 
     public function addLinesToFacture($id_facture, $lines_data = null, $commit_each_line = false, $new_qties = true, &$nOk = 0)
-    {
+    {        
         // $commit_each_line : nécessaire pour le traitement des facturations périodiques.
         $errors = array();
 
@@ -1428,7 +1428,7 @@ class BCT_Contrat extends BimpDolObject
                     'pa_editable'        => 0,
                     'linked_id_object'   => (int) $line->id,
                     'linked_object_name' => 'contrat_line',
-                    'hide_in_pdf'        => (($line->getData('linked_object_name') == 'bundle' || $line->getData('linked_object_name') == 'bundleCorrect') ? 1 : 0)
+                    'hide_in_pdf'        => 0
                 ));
 
                 $date_from = null;
@@ -1464,6 +1464,16 @@ class BCT_Contrat extends BimpDolObject
 
                     if ($id_fac_parent_line) {
                         $fac_line->set('id_parent_line', $id_fac_parent_line);
+
+                        if ($line->getData('linked_object_name') == 'bundle' || $line->getData('linked_object_name') == 'bundleCorrect') {
+                            $fac_line->set('hide_in_pdf', 1);
+                        }
+                    } elseif ($line->getData('linked_object_name') == 'bundleCorrect') {
+                        $errors[] = 'La ligne n° ' . $line->getData('rang') . ' n\'a pas été ajouté à la facture car il s\'agit d\'une compensation d\'un bundle dont la ligne principale n\{a pas été ajoutée à la facture';
+                        if ($use_db_transactions && $commit_each_line) {
+                            $this->db->db->rollback();
+                        }
+                        continue;
                     }
                 }
 
@@ -1481,7 +1491,7 @@ class BCT_Contrat extends BimpDolObject
                         $pa_ht_fourn = $pfp->getData('price');
                     }
                 }
-
+                
                 $fac_line->qty = $line_qty;
                 $fac_line->desc = $line->getData('description');
                 $fac_line->id_product = (int) $line->getData('fk_product');

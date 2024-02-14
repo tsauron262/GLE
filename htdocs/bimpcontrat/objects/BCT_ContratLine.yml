@@ -690,11 +690,11 @@ forms:
               display_if: 
                   field_name: id_fac_regul
                   show_values: 0
-            - custom: 1
-              label: Période du
-              input_name: period_from
-              content: 
-                  callback: renderFacRegulFromSelect
+#            - custom: 1
+#              label: Période du
+#              input_name: period_from
+#              content: 
+#                  callback: renderFacRegulFromSelect
             - custom: 1
               label: Au
               input_name: period_to
@@ -706,7 +706,7 @@ forms:
               input_name: regul_qty
               content: 
                   callback: renderFacRegulQtyInput
-              depends_on: period_from,period_to
+              depends_on: period_to
               
     date_cloture: 
         rows: 

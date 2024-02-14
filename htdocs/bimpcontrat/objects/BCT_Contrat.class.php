@@ -2028,6 +2028,8 @@ class BCT_Contrat extends BimpDolObject
                 }
             }
         }
+        
+        return $errors;
     }
 
     // Méthodes statiques : 

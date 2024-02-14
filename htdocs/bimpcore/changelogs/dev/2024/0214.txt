@@ -1,0 +1,1 @@
+- Contrats abonnements : gestion des contacts client et commerciaux par défaut

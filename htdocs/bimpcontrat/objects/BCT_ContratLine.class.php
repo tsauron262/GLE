@@ -2407,7 +2407,7 @@ class BCT_ContratLine extends BimpObject
             }
 
             if ((int) $this->getData('statut') > 0) {
-                $html .= $this->displayNbPeriodsBought();
+                $html .= $this->displayNbPeriodsBought($periods_data);
             }
         } else {
             $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Pas d\'achats périodiques</span>';

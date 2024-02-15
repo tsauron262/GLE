@@ -32,6 +32,11 @@ class BV_Demande extends BimpObject
         }
         return parent::canSetAction($action);
     }
+    
+    public function canDelete() {
+        global $user;
+        return $user->admin;
+    }
 
     public function canProcess()
     {

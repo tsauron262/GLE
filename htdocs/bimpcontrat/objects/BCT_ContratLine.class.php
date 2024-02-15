@@ -1369,7 +1369,7 @@ class BCT_ContratLine extends BimpObject
                         }
                     }
 
-                    $data['nb_periods_bought'] = $data['nb_total_periods'] - $data['nb_periods_tobuy_max'] - $data['nb_periods_never_bought'];
+                    $data['nb_periods_bought'] = $data['nb_total_periods'] - $data['nb_periods_before_start'] - $data['nb_periods_tobuy_max'] - $data['nb_periods_never_bought'];
 
                     if ($date_next_achat > $date_fin_reele) {
                         $errors[] = 'Tous les achats ont déjà été effectués';
@@ -2226,7 +2226,7 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<span class="small">Prorata 1ère période : <b>' . BimpTools::displayFloatValue((float) $periods_data['first_period_prorata'], 2, ',', 0, 0, 0, 0, 1, 1) . '</b></span>';
             }
             $nb_total_periods_fac = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_billed'] - $periods_data['nb_periods_before_start'];
-            $class = ($periods_data['nb_periods_billed'] > 0 ? ($periods_data['nb_periods_billed'] < $nb_total_periods_fac ? 'warning' : 'success') : 'danger');
+            $class = ($periods_data['nb_periods_billed'] >=  $nb_total_periods_fac ? 'success' : ($periods_data['nb_periods_billed'] > 0 ? 'warning' : 'danger'));
 
             $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $periods_data['nb_periods_billed'] . ' sur ' . $nb_total_periods_fac . '</span>';
 
@@ -2265,7 +2265,7 @@ class BCT_ContratLine extends BimpObject
         if (!count($errors)) {
             $nb_total_periods_achat = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_bought'] - $periods_data['nb_periods_before_start'];
             $nb_periods_bought = $periods_data['nb_periods_bought'];
-            $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $nb_total_periods_achat ? 'warning' : 'success') : 'danger');
+            $class = ($nb_periods_bought >=  $nb_total_periods_achat ? 'success' : ($nb_periods_bought > 0 ? 'warning' : 'danger'));
 
             $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $nb_total_periods_achat . '</span>';
 

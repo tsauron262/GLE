@@ -647,9 +647,13 @@ class BimpConfig
 
         if (isset($current)) {
             $path = implode('/', $path);
-            if (isset(self::$values_cache[$this->cache_key][$path])) {
-                unset(self::$values_cache[$this->cache_key][$path]);
+            foreach(self::$values_cache[$this->cache_key] as $name => $inut){
+                if(stripos($name, $path) === 0)
+                    unset(self::$values_cache[$this->cache_key][$name]);
             }
+//            if (isset(self::$values_cache[$this->cache_key][$path])) {
+//                unset(self::$values_cache[$this->cache_key][$path]);
+//            }
             switch ($mode) {
                 case 'overrides':
                 default:

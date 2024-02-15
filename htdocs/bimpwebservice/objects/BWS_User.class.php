@@ -47,8 +47,74 @@ class BWS_User extends BimpObject
                 ))
             );
         }
+        $buttons[] = array(
+            'label'   => 'Test requête',
+            'icon'    => 'fas_vials',
+            'onclick' => $this->getJsActionOnclick('testReq', array(), array(
+                'form_name' => 'testReq'
+            ))
+        );
 
         return $buttons;
+    }
+    
+    public function actionTestReq($data, &$success){
+        $errors = $warnings = array();
+      
+        $params = array();
+        $req = BimpTools::getPostFieldValue('req');
+        
+        $headers = array();
+        $headers['BWS-LOGIN'] = base64_encode($this->getData('email'));
+        if($req == 'authenticate')
+            $params['pword'] = $this->getData('pword');
+        else{
+            $headers['BWS-TOKEN'] = base64_encode($this->getData('token'));
+            $params['module'] = BimpTools::getPostFieldValue('module_name');
+            $params['object_name'] = BimpTools::getPostFieldValue('object');
+            $params['filters'] = BimpTools::getPostFieldValue('filters');
+            $params['panel_filters'] = BimpTools::getPostFieldValue('panel_filters');
+        }
+        
+        $url = $_SERVER['HTTP_X_FORWARDED_PROTO'].'://'.$_SERVER['SERVER_NAME'].'/'.DOL_URL_ROOT.'/bimpwebservice/request.php?req='.$req;
+        $url = 'https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req='.$req;
+
+        
+        $curl_str = 'curl -s -X POST ';
+        foreach($headers as $param => $value){
+            $curl_str .= ' -H "'.$param.': '. addslashes($value).'"';
+        }
+        $curl_str .= ' \''.$url.'\'';
+        foreach($params as $param => $value){
+            if($value != '' && $value != 'any'){
+                $curl_str .= ' -F '.$param.'="'. addslashes($value).'"';
+            }
+        }
+        
+        $curl_str .= ' -k';
+        
+        $headers_str = array();
+        foreach ($headers as $header_name => $header_value) {
+            $headers_str[] = $header_name . ': ' . $header_value;
+        }
+        $ch = curl_init('');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers_str);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+//        curl_setopt($ch, CURLOPT_HEADER, 0);
+        
+        $response = curl_exec($ch);
+        
+        $errors[] = 'Résultat : ';
+        $errors[] = '<textarea style="min-width: 1000px;min-height: 100px;">'.$response.'</textarea>';
+        $errors[] = '<textarea style="min-width: 1000px;min-height: 100px;">'.$curl_str.'</textarea>';
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Getters booléens: 
@@ -110,6 +176,35 @@ class BWS_User extends BimpObject
         }
 
         return $this->rights;
+    }
+    
+    public function list_req(){
+        $rights = $this->getRights();
+        $list = array();
+        foreach($rights as $reqName => $data){
+            $list[$reqName] = $reqName;
+        }
+        return $list;
+    }
+    
+    public function list_module(){
+        $reqName = BimpTools::getPostFieldValue('req');
+        $rights = $this->getRights();
+        $list = array();
+        foreach($rights[$reqName] as $module => $data){
+            $list[$module] = $module;
+        }
+        return $list;
+    }
+    public function list_object(){
+        $reqName = BimpTools::getPostFieldValue('req');
+        $module = BimpTools::getPostFieldValue('module_name');
+        $rights = $this->getRights();
+        $list = array();
+        foreach($rights[$reqName][$module] as $object_name => $data){
+            $list[$object_name] = $object_name;
+        }
+        return $list;
     }
 
     public function getRightId($request_name, $module = 'any', $object_name = 'any')
@@ -322,7 +417,7 @@ class BWS_User extends BimpObject
 
     public function checkPWord($pword)
     {
-        return (hash('sha256', $pword) === $this->getData('pword'));
+        return (hash('sha256', $pword) === $this->getData('pword') || $pword === $this->getData('pword'));
     }
 
     public function checkToken($token)
@@ -334,9 +429,9 @@ class BWS_User extends BimpObject
                 $expire = $this->getData('token_expire');
 
                 if ($expire > date('Y-m-d H:i:s')) {
-                    return (hash('sha256', $token) === $cur_token);
+                    return (hash('sha256', $token) === $cur_token || $token === $cur_token);
                 }
-                return true;
+                return false;
             }
         }
 

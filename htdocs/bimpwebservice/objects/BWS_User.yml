@@ -78,6 +78,43 @@ forms:
             - field: profiles
             - field: id_user
             - field: active
+            
+    testReq:
+        rows:
+            - custom: 1
+              label: Requête
+              input_name: req
+              input: 
+                type: select
+              values: 
+                callback: list_req
+            - custom: 1
+              label: Module
+              input_name: module_name
+              input: 
+                type: select
+              values: 
+                callback: list_module
+              depends_on: req
+            - custom: 1
+              label: Object
+              input_name: object
+              input: 
+                type: select
+              values: 
+                callback: list_object
+              depends_on: req,module_name
+            - custom: 1
+              label: Filtres
+              input_name: filters
+              input: 
+                type: textarea
+            - custom: 1
+              label: Filtres PANEL
+              input_name: panel_filters
+              input: 
+                type: textarea
+              
     
 fields_tables: 
     infos: 

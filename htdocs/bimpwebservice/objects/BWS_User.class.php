@@ -117,7 +117,6 @@ class BWS_User extends BimpObject
         
         $response = curl_exec($ch);
         
-        $errors[] = 'Résultat : ';
         if(BimpTools::getPostFieldValue('panel_filters') != '')
             $errors[] = 'Filtres JSON  : <textarea style="min-width: 1000px;min-height: 100px;">'.BimpTools::getPostFieldValue('panel_filters').'</textarea>';
         $errors[] = 'Resultat : <textarea style="min-width: 1000px;min-height: 100px;">'.$response.'</textarea>';

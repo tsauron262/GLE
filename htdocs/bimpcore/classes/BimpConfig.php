@@ -478,14 +478,14 @@ class BimpConfig
 
     // récupération des données de configuration: 
 
-    public function get($full_path, $default_value = null, $required = false, $data_type = 'string')
+    public function get($full_path, $default_value = null, $required = false, $data_type = 'string', $no_cache = false)
     {
         if (is_null($full_path) || !$full_path) {
             return $default_value;
         }
 
         // Récup depuis le cache s'il existe: 
-        if (isset(self::$values_cache[$this->cache_key][$full_path])) {
+        if (!$no_cache && isset(self::$values_cache[$this->cache_key][$full_path])) {
             if (BimpDebug::isActive()) {
                 BimpDebug::$cache_infos['counts']['yml']['s']++;
             }

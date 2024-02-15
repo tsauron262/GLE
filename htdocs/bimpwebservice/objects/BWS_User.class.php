@@ -73,7 +73,7 @@ class BWS_User extends BimpObject
             $params['module'] = BimpTools::getPostFieldValue('module_name');
             $params['object_name'] = BimpTools::getPostFieldValue('object');
             $params['filters'] = BimpTools::getPostFieldValue('filters');
-            $params['panel_filters'] = BimpTools::getPostFieldValue('panel_filters');
+            $params['panel_filters'] = BimpTools::merge_array(BimpTools::getPostFieldValue('panel_filters', array()), BimpTools::getPostFieldValue('panel_filters2', array()), true);
         }
         
         $url = $_SERVER['HTTP_X_FORWARDED_PROTO'].'://'.$_SERVER['SERVER_NAME'].'/'.DOL_URL_ROOT.'/bimpwebservice/request.php?req='.$req;
@@ -181,8 +181,11 @@ class BWS_User extends BimpObject
     public function list_req(){
         $rights = $this->getRights();
         $list = array();
+        if (!defined('BWS_LIB_INIT')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/BWS_Lib.php';
+        }
         foreach($rights as $reqName => $data){
-            $list[$reqName] = $reqName;
+            $list[$reqName] = BWSApi::$requests[$reqName]['desc'].' ('.$reqName.')';
         }
         return $list;
     }
@@ -205,6 +208,14 @@ class BWS_User extends BimpObject
             $list[$object_name] = $object_name;
         }
         return $list;
+    }
+    
+    public function getParam($params){
+        return BimpTools::getPostFieldValue($params);
+    }
+    
+    public function hidenField(){
+        return 0;
     }
 
     public function getRightId($request_name, $module = 'any', $object_name = 'any')
@@ -446,7 +457,7 @@ class BWS_User extends BimpObject
 
         if (!count($errors)) {
             $subject = 'Nouveau mot de passe pour votre accès au Webservice BIMP';
-            $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès au Webservice BIPMP a été réinitialisé.<br/><br/>';
+            $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès au Webservice BIMP a été réinitialisé.<br/><br/>';
             $msg .= '<b>Nouveau mot de passe : </b>' . $pword_clear;
         }
         $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);

@@ -114,6 +114,28 @@ forms:
               input_name: panel_filters
               input: 
                 type: textarea
+#              show:
+#                  callback:
+#                     method: hidenField
+#                     params:
+#                         - panel_filters
+#              depends_on: req
+            - custom: 1
+              label: Filtre PANEL 2
+              input_name: panel_filters2
+              input:
+                type: object_filters
+                obj_module: 
+                    callback:
+                        method: getParam
+                        params:
+                            - module_name
+                obj_name: 
+                    callback:
+                        method: getParam
+                        params:
+                            - object
+              depends_on: module_name,object
               
     
 fields_tables: 

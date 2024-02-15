@@ -88,6 +88,7 @@ forms:
                 type: select
               values: 
                 callback: list_req
+              help: Ne sont géré actuelement que Authenticate et getObjectList
             - custom: 1
               label: Module
               input_name: module_name

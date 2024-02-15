@@ -87,7 +87,7 @@ class BWSApi
         'findClient'     => array(
             'desc'   => 'Retourne les données d\'un client',
             'params' => array(
-                'code' => array('Code client'),
+                'code' => array('label' => 'Code client'),
 //                'nom'   => array('label' => 'Nom'),
 //                'tel'   => array('label' => 'Numéro de téléphone'),
 //                'email' => array('label' => 'Adresse e-mail')

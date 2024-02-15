@@ -70,14 +70,24 @@ class BWS_User extends BimpObject
             $params['pword'] = $this->getData('pword');
         else{
             $headers['BWS-TOKEN'] = base64_encode($this->getData('token'));
+            
+            
+//            print_r($_POST['extra_data']);
             $params['module'] = BimpTools::getPostFieldValue('module_name');
-            $params['object_name'] = BimpTools::getPostFieldValue('object');
-            $params['filters'] = BimpTools::getPostFieldValue('filters');
-            $params['panel_filters'] = BimpTools::merge_array(BimpTools::getPostFieldValue('panel_filters', array()), BimpTools::getPostFieldValue('panel_filters2', array()), true);
+            $params['object_name'] = BimpTools::getPostFieldValue('obj_name');
+            foreach($_POST['extra_data'] as $name => $value){
+                if(stripos($name, 'show_') === false && $name != 'module_name' && $name != 'obj_name'){
+                    $params[$name] = BimpTools::getPostFieldValue($name);
+                }
+            }
+//            $params['filters'] = BimpTools::getPostFieldValue('filters');
+//            $filter1 = json_decode(BimpTools::getPostFieldValue('panel_filters'),1);
+//            $filter2 = json_decode(BimpTools::getPostFieldValue('panel_filters2'),1);
+//            $params['panel_filters'] = json_encode(BimpTools::merge_array($filter1, $filter2, true));
         }
         
         $url = $_SERVER['HTTP_X_FORWARDED_PROTO'].'://'.$_SERVER['SERVER_NAME'].'/'.DOL_URL_ROOT.'/bimpwebservice/request.php?req='.$req;
-        $url = 'https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req='.$req;
+        $url = 'https://erpi.bimp.fr/bimp8/bimpwebservice/request.php?req='.$req;
 
         
         $curl_str = 'curl -s -X POST ';
@@ -108,8 +118,10 @@ class BWS_User extends BimpObject
         $response = curl_exec($ch);
         
         $errors[] = 'Résultat : ';
-        $errors[] = '<textarea style="min-width: 1000px;min-height: 100px;">'.$response.'</textarea>';
-        $errors[] = '<textarea style="min-width: 1000px;min-height: 100px;">'.$curl_str.'</textarea>';
+        if(BimpTools::getPostFieldValue('panel_filters') != '')
+            $errors[] = 'Filtres JSON  : <textarea style="min-width: 1000px;min-height: 100px;">'.BimpTools::getPostFieldValue('panel_filters').'</textarea>';
+        $errors[] = 'Resultat : <textarea style="min-width: 1000px;min-height: 100px;">'.$response.'</textarea>';
+        $errors[] = 'Req Curl : <textarea style="min-width: 1000px;min-height: 100px;">'.$curl_str.'</textarea>';
         
         return array(
             'errors'   => $errors,
@@ -188,6 +200,85 @@ class BWS_User extends BimpObject
             $list[$reqName] = BWSApi::$requests[$reqName]['desc'].' ('.$reqName.')';
         }
         return $list;
+    }
+    
+    public function getfields(){
+        $fields = array();
+        
+        
+        
+        $fields[] = array(
+            'show' => 1,
+            'custom' =>  1,
+                'label'=> 'Requête',
+              'input_name'=> 'req',
+              'input'=> array( 
+                'type'=> 'select'
+                  ),
+              'values'=> $this->list_req(),
+              'help'=> 'Ne sont géré actuelement que Authenticate et getObjectList'
+        );
+        
+        if (!defined('BWS_LIB_INIT')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/BWS_Lib.php';
+        }
+        foreach(BWSApi::$requests as $reqName => $data){
+            foreach($data['params'] as $name_param => $data2){
+                $origNameParams = $name_param;
+                if($name_param == 'module')
+                    $name_param = 'module_name';
+                if($name_param == 'object_name')
+                    $name_param = 'obj_name';
+                if($name_param != 'pword'){
+                    $fields[$name_param] = array(
+                        'custom' =>  1,
+                            'label'=> $data2['label'],
+                          'input_name'=> $name_param,
+                          'input'=> array( 
+                            'type'=> 'text'
+                              ),
+//                          'value' => $name_param,
+                          'display_if' => array(
+                            'field_name' => 'show_'.$name_param,
+                            'show_values'=> 1
+                          )
+                    );
+                    if($name_param == 'module_name'){
+                        $fields[$name_param]['input']['type'] = 'select';
+                        $fields[$name_param]['values'] = $this->list_module();
+                        $fields[$name_param]['depends_on'] = 'req';
+                    }
+                    if($name_param == 'obj_name'){
+                        $fields[$name_param]['input']['type'] = 'select';
+                        $fields[$name_param]['values'] = $this->list_object();
+                        $fields[$name_param]['depends_on'] = 'req,module_name';
+                        
+                    }
+                    if($name_param == 'panel_filters'){
+                        $fields[$name_param]['input']['type'] = 'object_filters';
+                        $fields[$name_param]['input']['obj_module'] = BimpTools::getPostFieldValue('module_name');
+                        $fields[$name_param]['input']['obj_name'] = BimpTools::getPostFieldValue('obj_name');
+                        $fields[$name_param]['depends_on'] = 'module_name,obj_name';
+                    }
+                    
+                    $fields['show_'.$name_param] = array(
+                        'custom' =>  1,
+//                            'label'=> 'show_'.$data2['label'],
+                          'input_name'=> 'show_'.$name_param,
+                          'hidden' => 1,
+                          'input'=> array( 
+                            'type'=> 'hidden'
+                              ),
+                          'value' => isset(BWSApi::$requests[BimpTools::getPostFieldValue('req')]['params'][$origNameParams])? 1 : 0,
+                          'depends_on' => 'req'
+                    );
+                }
+            }
+        }
+//        echo '<pre>';
+//        print_r($fields);
+        $this->config->addParams('forms/testReq/', array('rows' => $fields));
+        return $fields;
     }
     
     public function list_module(){

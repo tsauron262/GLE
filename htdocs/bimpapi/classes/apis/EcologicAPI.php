@@ -161,7 +161,7 @@ www.opmconseil.com
             }
         }
         elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId']) && !isset($ecologicData['RequestOk'])){//on update la demande
-            $params['url_params'] = array('claimId'/*attention erreur API, ca devrait être RequestId*/ => $ecologicData['RequestId'],'callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
+            $params['url_params'] = array('RequestId'/*attention erreur API, ca devrait être RequestId*/ => $ecologicData['RequestId'],'callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
             $return = $this->execCurl('updatesupportrequest', $params, $errors);
             
             if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){

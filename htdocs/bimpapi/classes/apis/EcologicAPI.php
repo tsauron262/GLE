@@ -64,7 +64,7 @@ www.opmconseil.com
         ),
         'AttachFile'   => array(
             'label' => 'Ajouter document',
-            'url'   => 'AttachFile'
+            'url'   => 'attachFile'
         ),
         'updatesupportrequest'   => array(
             'label' => 'Modifier demande',
@@ -235,7 +235,7 @@ www.opmconseil.com
                         $paramsFile = array();
                         $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
                         $paramsFile['url_params'] = array('claimId' => $ecologicData['ClaimId'], 'fileName' => $fileT[1], 'fileExtension' => $fileT[2], 'documentType' => $fileT[3]);
-                        $return = $this->execCurl('attachFile', $paramsFile, $errors);
+                        $return = $this->execCurl('AttachFile', $paramsFile, $errors);
                         if(stripos($return, 'Code 200') !== false){
 //                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
                             $ecologicData['files'][] = $fileT[1];

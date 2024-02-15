@@ -1076,6 +1076,11 @@ class BCT_ContratLine extends BimpObject
                 if ($date_fac_start != $date_debut) {
                     // Calcul du début de la première période facturée partiellement : 
                     $interval = BimpTools::getDatesIntervalData($date_debut, $date_fac_start);
+                    $data['debug']['nb_periods_before_start'] = array(
+                        'interval'      => $interval,
+                        'value_decimal' => $interval['nb_monthes_decimal'] / $periodicity
+                    );
+
                     $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période à facturer partiellement
                     $dt = new DateTime($date_debut);
                     if ($nb_periods > 0) {
@@ -2226,7 +2231,7 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<span class="small">Prorata 1ère période : <b>' . BimpTools::displayFloatValue((float) $periods_data['first_period_prorata'], 2, ',', 0, 0, 0, 0, 1, 1) . '</b></span>';
             }
             $nb_total_periods_fac = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_billed'] - $periods_data['nb_periods_before_start'];
-            $class = ($periods_data['nb_periods_billed'] >=  $nb_total_periods_fac ? 'success' : ($periods_data['nb_periods_billed'] > 0 ? 'warning' : 'danger'));
+            $class = ($periods_data['nb_periods_billed'] >= $nb_total_periods_fac ? 'success' : ($periods_data['nb_periods_billed'] > 0 ? 'warning' : 'danger'));
 
             $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $periods_data['nb_periods_billed'] . ' sur ' . $nb_total_periods_fac . '</span>';
 
@@ -2265,7 +2270,7 @@ class BCT_ContratLine extends BimpObject
         if (!count($errors)) {
             $nb_total_periods_achat = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_bought'] - $periods_data['nb_periods_before_start'];
             $nb_periods_bought = $periods_data['nb_periods_bought'];
-            $class = ($nb_periods_bought >=  $nb_total_periods_achat ? 'success' : ($nb_periods_bought > 0 ? 'warning' : 'danger'));
+            $class = ($nb_periods_bought >= $nb_total_periods_achat ? 'success' : ($nb_periods_bought > 0 ? 'warning' : 'danger'));
 
             $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $nb_total_periods_achat . '</span>';
 

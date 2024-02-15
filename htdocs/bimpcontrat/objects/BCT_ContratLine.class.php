@@ -2241,6 +2241,10 @@ class BCT_ContratLine extends BimpObject
                 $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
                 $html .= BimpRender::renderAlerts($msg, 'warning');
             }
+
+            if (BimpCore::isUserDev()) {
+                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
+            }
         } else {
             $html .= BimpRender::renderAlerts($errors);
         }
@@ -2317,6 +2321,7 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<br/>A partir du <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
             }
 
+
             if ((int) $this->getData('statut') > 0) {
                 $html .= '<br/><br/>';
                 $html .= $this->displayNbPeriodsBilled();
@@ -2336,10 +2341,6 @@ class BCT_ContratLine extends BimpObject
                     }
                     $html .= '</div>';
                 }
-            }
-
-            if (BimpCore::isUserDev()) {
-                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
             }
         } else {
             $html .= '<span class="warning">Pas de facturation périodique</span>';

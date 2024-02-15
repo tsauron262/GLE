@@ -1163,7 +1163,7 @@ class BCT_ContratLine extends BimpObject
                         }
                     }
 
-                    $data['nb_periods_billed'] = $data['nb_total_periods'] - $data['nb_periods_tobill_max'] - $data['nb_periods_never_billed'];
+                    $data['nb_periods_billed'] = $data['nb_total_periods'] - $data['nb_periods_before_start'] - $data['nb_periods_tobill_max'] - $data['nb_periods_never_billed'];
 
                     if ($date_next_period_tobill > $date_fin_reele) {
                         if ($check_remaining_periods_to_bill) {

@@ -2211,6 +2211,90 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
+    public function displayNbPeriodsBilled($periods_data = null)
+    {
+        $html = '';
+
+        $errors = array();
+
+        if (is_null($periods_data)) {
+            $periods_data = $this->getPeriodsToBillData($errors);
+        }
+
+        if (!count($errors)) {
+            if ($periods_data['first_period_prorata'] != 1) {
+                $html .= '<span class="small">Prorata 1ère période : <b>' . BimpTools::displayFloatValue((float) $periods_data['first_period_prorata'], 2, ',', 0, 0, 0, 0, 1, 1) . '</b></span>';
+            }
+            $nb_total_periods_fac = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_billed'] - $periods_data['nb_periods_before_start'];
+            $class = ($periods_data['nb_periods_billed'] > 0 ? ($periods_data['nb_periods_billed'] < $nb_total_periods_fac ? 'warning' : 'success') : 'danger');
+
+            $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $periods_data['nb_periods_billed'] . ' sur ' . $nb_total_periods_fac . '</span>';
+
+            if ($periods_data['nb_periods_billed'] < $nb_total_periods_fac) {
+                $html .= '<br/>Prochaine facturation : ' . $this->displayNextFacDate(true);
+            }
+
+            if ($periods_data['nb_periods_never_billed'] > 0) {
+                $date_cloture = $this->getData('date_cloture');
+
+                $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+                $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
+                $html .= BimpRender::renderAlerts($msg, 'warning');
+            }
+        } else {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+
+        return $html;
+    }
+
+    public function displayNbPeriodsBought($periods_data = null)
+    {
+        $html = '';
+
+        $errors = array();
+        if (is_null($periods_data)) {
+            $periods_data = $this->getPeriodsToBuyData($errors);
+        }
+
+        if (!count($errors)) {
+            $nb_total_periods_achat = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_bought'] - $periods_data['nb_periods_before_start'];
+            $nb_periods_bought = $periods_data['nb_periods_bought'];
+            $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $nb_total_periods_achat ? 'warning' : 'success') : 'danger');
+
+            $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $nb_total_periods_achat . '</span>';
+
+            if ($nb_periods_bought < $nb_total_periods_achat) {
+                $html .= '<br/>Prochaine achat : ' . $this->displayNextAchatDate(true);
+            }
+
+            if ($periods_data['nb_periods_never_bought'] > 0 || $periods_data['nb_periods_bought_never_fac'] > 0) {
+                $date_cloture = $this->getData('date_cloture');
+
+                $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+
+                if ($periods_data['nb_periods_bought_never_fac'] > 0) {
+                    $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="warning">' . $periods_data['nb_periods_bought_never_fac'] . ' période' . ($periods_data['nb_periods_bought_never_fac'] > 1 ? 's achetées ne seront pas facturées' : ' achetée ne sera facturée') . '</span>';
+                }
+
+                if ($periods_data['nb_periods_never_bought'] > 0) {
+                    $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_bought'] . ' période' . ($periods_data['nb_periods_never_bought'] > 1 ? 's ne seront pas achetées' : ' ne sera pas achetée') . '</span>';
+                }
+                $html .= BimpRender::renderAlerts($msg, 'warning');
+            }
+
+            if (BimpCore::isUserDev()) {
+                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
+            }
+        } else {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+
+        return $html;
+    }
+
     public function displayFacInfos()
     {
         $html = '';
@@ -2234,29 +2318,8 @@ class BCT_ContratLine extends BimpObject
             }
 
             if ((int) $this->getData('statut') > 0) {
-                $periods_data = $this->getPeriodsToBillData();
-
-                if ($periods_data['first_period_prorata'] != 1) {
-                    $html .= '<br/><span class="small">Prorata 1ère période : <b>' . BimpTools::displayFloatValue((float) $periods_data['first_period_prorata'], 2, ',', 0, 0, 0, 0, 1, 1) . '</b></span>';
-                }
-
                 $html .= '<br/><br/>';
-                $nb_total_periods_fac = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_billed'] - $periods_data['nb_periods_before_start'];
-                $class = ($periods_data['nb_periods_billed'] > 0 ? ($periods_data['nb_periods_billed'] < $nb_total_periods_fac ? 'warning' : 'success') : 'danger');
-
-                $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $periods_data['nb_periods_billed'] . ' sur ' . $nb_total_periods_fac . '</span>';
-
-                if ($periods_data['nb_periods_billed'] < $nb_total_periods_fac) {
-                    $html .= '<br/>Prochaine facturation : ' . $this->displayNextFacDate(true);
-                }
-
-                if ($periods_data['nb_periods_never_billed'] > 0) {
-                    $date_cloture = $this->getData('date_cloture');
-
-                    $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
-                    $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
-                    $html .= BimpRender::renderAlerts($msg, 'warning');
-                }
+                $html .= $this->displayNbPeriodsBilled();
             }
 
             if ((int) $this->getData('variable_qty')) {
@@ -2343,34 +2406,7 @@ class BCT_ContratLine extends BimpObject
             }
 
             if ((int) $this->getData('statut') > 0) {
-                $nb_total_periods_achat = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_bought'] - $periods_data['nb_periods_before_start'];
-                $nb_periods_bought = $periods_data['nb_periods_bought'];
-                $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $nb_total_periods_achat ? 'warning' : 'success') : 'danger');
-
-                $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $nb_total_periods_achat . '</span>';
-
-                if ($nb_periods_bought < $nb_total_periods_achat) {
-                    $html .= '<br/>Prochaine achat : ' . $this->displayNextAchatDate(true);
-                }
-
-                if ($periods_data['nb_periods_never_bought'] > 0 || $periods_data['nb_periods_bought_never_fac'] > 0) {
-                    $date_cloture = $this->getData('date_cloture');
-
-                    $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
-
-                    if ($periods_data['nb_periods_bought_never_fac'] > 0) {
-                        $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="warning">' . $periods_data['nb_periods_bought_never_fac'] . ' période' . ($periods_data['nb_periods_bought_never_fac'] > 1 ? 's achetées ne seront pas facturées' : ' achetée ne sera facturée') . '</span>';
-                    }
-
-                    if ($periods_data['nb_periods_never_bought'] > 0) {
-                        $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_bought'] . ' période' . ($periods_data['nb_periods_never_bought'] > 1 ? 's ne seront pas achetées' : ' ne sera pas achetée') . '</span>';
-                    }
-                    $html .= BimpRender::renderAlerts($msg, 'warning');
-                }
-
-                if (BimpCore::isUserDev()) {
-                    $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
-                }
+                $html .= $this->displayNbPeriodsBought($periods_data);
             }
         } else {
             $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Pas d\'achats périodiques</span>';
@@ -5214,7 +5250,7 @@ class BCT_ContratLine extends BimpObject
                         if ($id_parent_line && in_array($id_parent_line, $ids)) {
                             continue;
                         }
-                        
+
                         if ($line->isActionAllowed('activate', $line_errors)) {
                             $line_errors = $line->activate();
                         }

@@ -57,10 +57,16 @@ class indexController extends BimpController
         foreach (BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
             'a.statut'     => array(0, 4),
             'a.fk_product' => $bundles_prods,
-            'c.version'    => 2
+            'c.version'    => 2,
+            'a.fac_ended'  => 0
                 ), null, null, array(
             'c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')
         )) as $line) {
+            $line->checkStatus();
+            if ((int) $line->getData('fac_ended')) {
+                continue;
+            }
+
             $errors = array();
             $bundle_units = $line->getNbUnits();
             if (!$bundle_units) {
@@ -120,7 +126,11 @@ class indexController extends BimpController
                 if (!empty($errors)) {
                     $html .= '<tr>';
                     $html .= '<td>' . $contrat->getLink() . '</td>';
-                    $html .= '<td>' . $bundle->getLink() . '<br/>Ligne n° ' . $line->getData('rang') . ' ' . $line->displayDataDefault('statut') . '</td>';
+                    $html .= '<td>' . $bundle->getLink() . '<br/>Ligne n° ' . $line->getData('rang') . ' ' . $line->displayDataDefault('statut');
+                    if ((int) $line->getData('statut') > 0) {
+                        $html .= '<br/>' . $line->displayNbPeriodsBilled();
+                    }
+                    $html .= '</td>';
                     $html .= '<td>';
                     $html .= BimpRender::renderAlerts($errors);
                     $html .= '</td>';

@@ -1048,6 +1048,9 @@ class BCT_ContratLine extends BimpObject
                 } else {
                     $date_fin = date('Y-m-d', strtotime($date_fin));
                 }
+                
+                $data['debug']['date_debut'] = $date_debut;
+                $data['debug']['date_fin'] = $date_fin;
 
                 // Date prochaine facture : 
                 $date_next_facture = $this->getDateNextFacture($check_date, $errors);
@@ -1076,6 +1079,11 @@ class BCT_ContratLine extends BimpObject
                 if ($date_fac_start != $date_debut) {
                     // Calcul du début de la première période facturée partiellement : 
                     $interval = BimpTools::getDatesIntervalData($date_debut, $date_fac_start);
+                    $data['debug']['nb_periods_before_start'] = array(
+                        'interval'      => $interval,
+                        'value_decimal' => $interval['nb_monthes_decimal'] / $periodicity
+                    );
+
                     $nb_periods = floor($interval['nb_monthes_decimal'] / $periodicity); // Nombre de périodes entières avant début de la première période à facturer partiellement
                     $dt = new DateTime($date_debut);
                     if ($nb_periods > 0) {
@@ -1163,7 +1171,7 @@ class BCT_ContratLine extends BimpObject
                         }
                     }
 
-                    $data['nb_periods_billed'] = $data['nb_total_periods'] - $data['nb_periods_tobill_max'] - $data['nb_periods_never_billed'];
+                    $data['nb_periods_billed'] = $data['nb_total_periods'] - $data['nb_periods_before_start'] - $data['nb_periods_tobill_max'] - $data['nb_periods_never_billed'];
 
                     if ($date_next_period_tobill > $date_fin_reele) {
                         if ($check_remaining_periods_to_bill) {
@@ -1369,7 +1377,7 @@ class BCT_ContratLine extends BimpObject
                         }
                     }
 
-                    $data['nb_periods_bought'] = $data['nb_total_periods'] - $data['nb_periods_tobuy_max'] - $data['nb_periods_never_bought'];
+                    $data['nb_periods_bought'] = $data['nb_total_periods'] - $data['nb_periods_before_start'] - $data['nb_periods_tobuy_max'] - $data['nb_periods_never_bought'];
 
                     if ($date_next_achat > $date_fin_reele) {
                         $errors[] = 'Tous les achats ont déjà été effectués';
@@ -2226,7 +2234,7 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<span class="small">Prorata 1ère période : <b>' . BimpTools::displayFloatValue((float) $periods_data['first_period_prorata'], 2, ',', 0, 0, 0, 0, 1, 1) . '</b></span>';
             }
             $nb_total_periods_fac = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_billed'] - $periods_data['nb_periods_before_start'];
-            $class = ($periods_data['nb_periods_billed'] > 0 ? ($periods_data['nb_periods_billed'] < $nb_total_periods_fac ? 'warning' : 'success') : 'danger');
+            $class = ($periods_data['nb_periods_billed'] >= $nb_total_periods_fac ? 'success' : ($periods_data['nb_periods_billed'] > 0 ? 'warning' : 'danger'));
 
             $html .= 'Nb périodes facturées: <span class="' . $class . '">' . $periods_data['nb_periods_billed'] . ' sur ' . $nb_total_periods_fac . '</span>';
 
@@ -2240,6 +2248,10 @@ class BCT_ContratLine extends BimpObject
                 $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
                 $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
                 $html .= BimpRender::renderAlerts($msg, 'warning');
+            }
+
+            if (BimpCore::isUserDev()) {
+                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
             }
         } else {
             $html .= BimpRender::renderAlerts($errors);
@@ -2261,7 +2273,7 @@ class BCT_ContratLine extends BimpObject
         if (!count($errors)) {
             $nb_total_periods_achat = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_bought'] - $periods_data['nb_periods_before_start'];
             $nb_periods_bought = $periods_data['nb_periods_bought'];
-            $class = ($nb_periods_bought > 0 ? ($nb_periods_bought < $nb_total_periods_achat ? 'warning' : 'success') : 'danger');
+            $class = ($nb_periods_bought >= $nb_total_periods_achat ? 'success' : ($nb_periods_bought > 0 ? 'warning' : 'danger'));
 
             $html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $nb_total_periods_achat . '</span>';
 
@@ -2317,6 +2329,7 @@ class BCT_ContratLine extends BimpObject
                 $html .= '<br/>A partir du <b>' . date('d / m / Y', strtotime($date_start)) . '</b>';
             }
 
+
             if ((int) $this->getData('statut') > 0) {
                 $html .= '<br/><br/>';
                 $html .= $this->displayNbPeriodsBilled();
@@ -2336,10 +2349,6 @@ class BCT_ContratLine extends BimpObject
                     }
                     $html .= '</div>';
                 }
-            }
-
-            if (BimpCore::isUserDev()) {
-                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
             }
         } else {
             $html .= '<span class="warning">Pas de facturation périodique</span>';

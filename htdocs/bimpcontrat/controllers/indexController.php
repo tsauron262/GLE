@@ -126,7 +126,7 @@ class indexController extends BimpController
                 if (!empty($errors)) {
                     $html .= '<tr>';
                     $html .= '<td>' . $contrat->getLink() . '</td>';
-                    $html .= '<td>' . $bundle->getLink() . '<br/>Ligne n° ' . $line->getData('rang') . ' ' . $line->displayDataDefault('statut') . '</td>';
+                    $html .= '<td>' . $bundle->getLink() . '<br/>Ligne n° ' . $line->getData('rang') . ' ' . $line->displayDataDefault('statut') . '<br/>' . $line->displayNbPeriodsBilled() . '</td>';
                     $html .= '<td>';
                     $html .= BimpRender::renderAlerts($errors);
                     $html .= '</td>';

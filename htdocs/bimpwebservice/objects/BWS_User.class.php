@@ -274,8 +274,6 @@ class BWS_User extends BimpObject
                 }
             }
         }
-//        echo '<pre>';
-//        print_r($fields);
         $this->config->addParams('forms/testReq/', array('rows' => $fields),'overrides',true);
         return $fields;
     }

@@ -2223,10 +2223,8 @@ class BCT_ContratLine extends BimpObject
 
         if (!count($errors)) {
             if ($periods_data['first_period_prorata'] != 1) {
-                $html .= '<br/><span class="small">Prorata 1ère période : <b>' . BimpTools::displayFloatValue((float) $periods_data['first_period_prorata'], 2, ',', 0, 0, 0, 0, 1, 1) . '</b></span>';
+                $html .= '<span class="small">Prorata 1ère période : <b>' . BimpTools::displayFloatValue((float) $periods_data['first_period_prorata'], 2, ',', 0, 0, 0, 0, 1, 1) . '</b></span>';
             }
-
-            $html .= '<br/><br/>';
             $nb_total_periods_fac = $periods_data['nb_total_periods'] - $periods_data['nb_periods_never_billed'] - $periods_data['nb_periods_before_start'];
             $class = ($periods_data['nb_periods_billed'] > 0 ? ($periods_data['nb_periods_billed'] < $nb_total_periods_fac ? 'warning' : 'success') : 'danger');
 
@@ -2320,6 +2318,7 @@ class BCT_ContratLine extends BimpObject
             }
 
             if ((int) $this->getData('statut') > 0) {
+                $html .= '<br/><br/>';
                 $html .= $this->displayNbPeriodsBilled();
             }
 

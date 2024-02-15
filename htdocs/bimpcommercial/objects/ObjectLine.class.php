@@ -5889,7 +5889,7 @@ class ObjectLine extends BimpObject
                         }
 
                         if ($prod_duration != $main_prod_duration) {
-                            $qty_ratio = ($qty_ratio / $main_prod_duration);
+                            $qty_ratio = ($prod_duration / $main_prod_duration);
                         }
                         
                         $newLn = null;

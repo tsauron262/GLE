@@ -234,8 +234,8 @@ www.opmconseil.com
                     if(!isset($ecologicData['files']) || !in_array($fileT[1], $ecologicData['files'])){
                         $paramsFile = array();
                         $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
-                        $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'fileName' => $fileT[1], 'fileExtension' => $fileT[2], 'documentType' => $fileT[3]);
-                        $return = $this->execCurl('AttachFile', $paramsFile, $errors);
+                        $paramsFile['url_params'] = array('claimId' => $ecologicData['ClaimId'], 'fileName' => $fileT[1], 'fileExtension' => $fileT[2], 'documentType' => $fileT[3]);
+                        $return = $this->execCurl('attachFile', $paramsFile, $errors);
                         if(stripos($return, 'Code 200') !== false){
 //                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
                             $ecologicData['files'][] = $fileT[1];

@@ -1048,6 +1048,9 @@ class BCT_ContratLine extends BimpObject
                 } else {
                     $date_fin = date('Y-m-d', strtotime($date_fin));
                 }
+                
+                $data['debug']['date_debut'] = $date_debut;
+                $data['debug']['date_fin'] = $date_fin;
 
                 // Date prochaine facture : 
                 $date_next_facture = $this->getDateNextFacture($check_date, $errors);

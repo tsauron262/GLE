@@ -64,7 +64,7 @@ www.opmconseil.com
         ),
         'AttachFile'   => array(
             'label' => 'Ajouter document',
-            'url'   => 'attachFile'
+            'url'   => 'attachfile'
         ),
         'updatesupportrequest'   => array(
             'label' => 'Modifier demande',

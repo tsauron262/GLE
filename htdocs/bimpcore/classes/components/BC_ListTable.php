@@ -108,7 +108,7 @@ class BC_ListTable extends BC_List
                 $this->params['add_object_row'] = 0;
             }
             if (!(int) $this->object->can("view")) {
-                $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
+                $this->errors[] = 's Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
             }
             if (!(int) $this->object->can("edit")) {
                 $this->params['enable_edit'] = 0;

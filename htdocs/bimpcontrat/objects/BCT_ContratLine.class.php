@@ -645,7 +645,7 @@ class BCT_ContratLine extends BimpObject
 
         if (BimpObject::objectLoaded($prod)) {
             switch ($field_name) {
-                case 'subprice':
+                case 'subprice':                    
                     return (float) $prod->getData('price');
 
                 case 'tva_tx':
@@ -5592,7 +5592,7 @@ class BCT_ContratLine extends BimpObject
 
         $fac_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'fac_periodicity', 0);
         $achat_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'achat_periodicity', 0);
-        $subprice = (float) BimpTools::getArrayValueFromPath($data, 'subprice', 0);
+        $subprice = (float) BimpTools::getArrayValueFromPath($data, 'renouv_subprice', 0);
         $duration = (int) BimpTools::getArrayValueFromPath($data, 'duration', 0);
         $fac_term = (int) BimpTools::getArrayValueFromPath($data, 'fac_term', 1);
 

@@ -232,9 +232,9 @@ class GSX_v2 extends GSX_Const
         } else
             static::debug($this->appleId, 'deconnexion GSX de ' . $this->appleId . ' sans reconnexion possible');
 
-        BimpCore::addlog('Echec tentative reauthentification');
+        BimpCore::addlog('Echec tentative reauthentification',3);
         $this->logged = false;
-        $this->saveToken('acti', '');
+//        $this->saveToken('acti', '');
 
         return 0;
     }
@@ -242,14 +242,14 @@ class GSX_v2 extends GSX_Const
     public static function debug($appleId, $msg)
     {
         if ($appleId == self::$default_ids['apple_id']) {
-            BimpCore::addlog($msg);
+            BimpCore::addlog($msg,3);
         }
     }
 
     public static function phantomAuth($login, $mdp)
     {
         if (function_exists('ssh2_connect')) {
-            BimpCore::addlog('Tentative de connexion Apple en auto.');
+            BimpCore::addlog('Tentative de connexion Apple en auto.',3);
             $connection = ssh2_connect('10.192.20.152', 22);
             $key1 = DOL_DOCUMENT_ROOT . 'bimpapple/phantom/cert/phantomjs.pub';
             $key2 = DOL_DOCUMENT_ROOT . 'bimpapple/phantom/cert/phantomjs';

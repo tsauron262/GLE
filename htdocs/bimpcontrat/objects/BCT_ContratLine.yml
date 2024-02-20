@@ -664,7 +664,12 @@ forms:
                       method: renderLinkedLinesCheckInputs
                       params: 
                           - renouv
-            - field: subprice
+            - custom: 1
+              label: Prix unitaire HT
+              input_name: renouv_subprice
+              data_type: money
+              input: 
+                  type: text                  
               value: 
                   callback: 
                       method: getValueForProduct

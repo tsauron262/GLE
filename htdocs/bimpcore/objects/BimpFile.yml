@@ -173,6 +173,13 @@ forms:
               edit:
                   callback: currentContext
             - field: in_emails
+    resize:
+        rows:
+            - custom: 1
+              label: Nouvelle taille (Mo)
+              input:
+                  type: text
+              input_name: new_size
       
 filters_panels: 
     global: 

@@ -498,6 +498,8 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
                 $this->Msg('DOSSIER FTP: ' . $this->ftp_dir);
                 $files = ftp_nlist($ftp, $this->ftp_dir);
+                
+                BimpTools::makeDirectories($this->local_dir);
 
                 $this->DebugData($files, 'LISTE FICHIERS FTP');
 

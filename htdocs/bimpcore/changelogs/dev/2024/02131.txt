@@ -1,0 +1,3 @@
+- debug token apple
+- debug api ecologic
+- aj choix config dans export csv

@@ -360,12 +360,12 @@ class BS_SAV_ExtEntity extends BS_SAV
         $tabFile[] = array($this->getFilesDir(), 'Restitution_' . $this->getData('ref') . '_signe', 'pdf', 'CONSUMERVALIDATION');
         if(!is_file($this->getFilesDir(). 'infos_materiel.jpg'))
             $this->convertHeic($this->getFilesDir(). 'infos_materiel');
-        if(is_file($this->getFilesDir(). 'infos_materiel.jpg'))
-            $this->resize($this->getFilesDir(), 'infos_materiel.jpg');
-        if(is_file($this->getFilesDir(). 'infos_materiel.JPG'))
-            $this->resize($this->getFilesDir(), 'infos_materiel.JPG');
-        if(is_file($this->getFilesDir(). 'infos_materiel.jpeg'))
-            $this->resize($this->getFilesDir(), 'infos_materiel.jpeg');
+        $list = BimpObject::getBimpObjectObjects('bimpcore', 'BimpFile', array('parent_object_name'=>'BS_SAV', 'id_parent'=>$this->id));
+        foreach($list as $bimp_file){
+            $bimp_file->useNoTransactionsDb();
+            if(stripos($bimp_file->getData('file_name'), 'infos_materiel') !== false)
+                    $bimp_file->resize(1);
+        }
         $tabFile[] = array($this->getFilesDir(), 'infos_materiel', 'pdf', 'NAMEPLATE');
 
         $api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);
@@ -376,32 +376,6 @@ class BS_SAV_ExtEntity extends BS_SAV
         );
     }
     
-    public function resize($dir, $file){
-        // Charger l'image à partir du fichier
-        if(!is_file($dir.'old_'.$file)){
-            $max_size = 1024 * 1024; // 1MO
-            $image_size = filesize($dir.$file);
-            if($image_size > $max_size){
-                copy($dir.$file, $dir.'old_'.$file);
-                $image = imagecreatefromjpeg($dir.$file);
-                imagejpeg($image, $dir.$file, $max_size / $image_size * 100);
-
-                // Définir le poids maximal souhaité (en octets)
-//                $i = 0;
-//                do {
-//                    $image = imagecreatefromjpeg($dir.$file);
-//                    $i++;
-//                    if($i > 20)
-//                        die('oups');
-//                    imagejpeg($image, $dir.$file, 90);
-//                    $image_size = filesize($dir.$file);
-//                    echo '$image_size'.$image_size;
-//                } while ($image_size > $max_size);
-                // Enregistrer l'image redimensionnée
-            }
-        }
-    }
-
     public function getDefaultSiteId()
     {
         global $tabCentre;

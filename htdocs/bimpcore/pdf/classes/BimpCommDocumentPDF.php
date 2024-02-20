@@ -1137,9 +1137,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 if (is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF')) {
                     $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et en boutique pour les particuliers.';
                 } elseif ($this->pdf->addCgvPages) {
-                    $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                    $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
                 } else {
-                    $html .= 'Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                    $html .= 'Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
                 }
                 $html .= "</span>";
                 $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.

@@ -2028,7 +2028,7 @@ class BCT_Contrat extends BimpDolObject
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -2102,6 +2102,8 @@ class BCT_Contrat extends BimpDolObject
 
                     $infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
 
+                    $lines_ok = '';
+                    $nb_contrat_lines_ok = 0;
                     foreach ($lines as $id_line) {
                         $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
 
@@ -2115,8 +2117,23 @@ class BCT_Contrat extends BimpDolObject
                                 $infos .= '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
                             } else {
                                 $infos .= '<span class="success">OK</span>';
+                                $lines_ok .= ($lines_ok ? ', ' : '') . $line->getData('rang');
+                                $nb_contrat_lines_ok++;
                             }
                             $infos .= '<br/>';
+                        }
+                    }
+
+
+
+                    if ($nb_contrat_lines_ok > 0) {
+                        $id_group = BimpCore::getUserGroupId('console');
+
+                        if ($id_group) {
+                            $s = ($nb_contrat_lines_ok > 1 ? 's' : '');
+                            $msg = $nb_contrat_lines_ok . ' ligne' . $s . ' renouvellée' . $s . ' automatiquement.<br/>';
+                            $msg .= 'Ligne' . $s . ' n° : ' . $lines_ok;
+                            $contrat->addNote($msg, BimpNote::BN_MEMBERS, 0, 0, '', BimpNote::BN_AUTHOR_USER, BimpNote::BN_DEST_GROUP, $id_group, 0, 1);
                         }
                     }
                 }

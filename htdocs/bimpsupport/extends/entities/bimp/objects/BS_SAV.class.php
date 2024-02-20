@@ -364,6 +364,8 @@ class BS_SAV_ExtEntity extends BS_SAV
             $this->resize($this->getFilesDir(), 'infos_materiel.jpg');
         if(is_file($this->getFilesDir(). 'infos_materiel.JPG'))
             $this->resize($this->getFilesDir(), 'infos_materiel.JPG');
+        if(is_file($this->getFilesDir(). 'infos_materiel.jpeg'))
+            $this->resize($this->getFilesDir(), 'infos_materiel.jpeg');
         $tabFile[] = array($this->getFilesDir(), 'infos_materiel', 'pdf', 'NAMEPLATE');
 
         $api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);

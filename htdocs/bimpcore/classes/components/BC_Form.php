@@ -59,6 +59,7 @@ class BC_Form extends BC_Panel
 
     public function __construct(BimpObject $object, $id_parent = null, $name = '', $level = 1, $content_only = false, $on_save = null)
     {
+        $this->params_def['rows_callback'] = array();
         $this->params_def['rows'] = array('type' => 'keys');
         $this->params_def['values'] = array('data_type' => 'array', 'request' => true, 'json' => true);
         $this->params_def['associations_params'] = array('data_type' => 'array', 'request' => true, 'json' => true);
@@ -112,6 +113,13 @@ class BC_Form extends BC_Panel
 
         if (!is_null($on_save)) {
             $this->params['on_save'] = $on_save;
+        }
+        
+        if ($object->config->isDefined('forms/' . $name . '/rows_callback')) {
+            $method = $object->config->get('forms/' . $name . '/rows_callback', '');
+            if ($method && method_exists($object, $method)) {
+                $object->{$method}();
+            }
         }
 
         parent::__construct($object, $name, $path, $content_only, $level);

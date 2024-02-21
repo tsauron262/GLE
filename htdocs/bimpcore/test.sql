@@ -1,1 +1,14 @@
-136425,230736,192685,192673,192677,192669,192681,224535,220163,231716,174101,164791,191841,231203,172753,8690,158425,130538,155663,231201,230875,209770,232819,207982,227875,231874,208977,206457,210900,219591,216757,206467,206452,206500,221959,206505,229016,231592,231589,206562,230812,229023,206510,215676,206462,206490,206517,205628,228037,206197,228041,207048,206552,206377,206515,193766,7131,209489,8715,7130,48914,8948,139500,82734,121956,130250,121968,121928,238395,238621,121948,121940,121996,121944,122004,130247,121932,121952,121936,121976,80366,5765,231767,239134,239138,231764,239615,231761,231728,231749,231746,231743,231740,230479,231725,231722,231731,231758,231755,231752,239131,230620,205598,242604,239029,200278,239583,242285,235865,231576,82410
+UPDATE llx_product act SET id_bimp = (SELECT rowid FROM ERP_PROD_BIMP.llx_product bim WHERE act.ref = bim.ref) WHERE act.id_bimp < 1 OR act.id_bimp is null;
+
+UPDATE llx_product_extrafields SET id_bimp = (SELECT id_bimp FROM llx_product p WHERE fk_object = p.rowid);
+
+
+UPDATE `llx_product_extrafields` act SET gamme = (SELECT gamme FROM ERP_PROD_BIMP.llx_product_extrafields bim WHERE act.id_bimp = bim.fk_object) WHERE (gamme = 0 || gamme is null) AND act.id_bimp > 0;
+
+UPDATE `llx_product_extrafields` act SET categorie = (SELECT categorie FROM ERP_PROD_BIMP.llx_product_extrafields bim WHERE act.id_bimp = bim.fk_object) WHERE (categorie = 0 || categorie is null) AND act.id_bimp > 0;
+
+UPDATE `llx_product_extrafields` act SET collection = (SELECT collection FROM ERP_PROD_BIMP.llx_product_extrafields bim WHERE act.id_bimp = bim.fk_object) WHERE (collection = 0 || collection is null) AND act.id_bimp > 0;
+
+UPDATE `llx_product_extrafields` act SET nature = (SELECT nature FROM ERP_PROD_BIMP.llx_product_extrafields bim WHERE act.id_bimp = bim.fk_object) WHERE (nature = 0 || nature is null) AND act.id_bimp > 0;
+
+UPDATE `llx_product_extrafields` act SET famille = (SELECT famille FROM ERP_PROD_BIMP.llx_product_extrafields bim WHERE act.id_bimp = bim.fk_object) WHERE (famille = 0 || famille is null) AND act.id_bimp > 0;

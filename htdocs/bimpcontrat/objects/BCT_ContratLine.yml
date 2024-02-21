@@ -664,7 +664,12 @@ forms:
                       method: renderLinkedLinesCheckInputs
                       params: 
                           - renouv
-            - field: subprice
+            - custom: 1
+              label: Prix unitaire HT
+              input_name: renouv_subprice
+              data_type: money
+              input: 
+                  type: text                  
               value: 
                   callback: 
                       method: getValueForProduct
@@ -674,6 +679,25 @@ forms:
             - field: duration
             - field: fac_term
             - field: achat_periodicity
+            
+    bulk_renouvellement:
+        title: Renouvellement
+        rows: 
+            - custom: 1
+              label: Ajouter le renouvellement à un devis
+              input_name: id_propal
+              input: 
+                  type: select
+                  options: 
+                      callback: getClientPropalesArray
+            - custom: 1
+              label: Libellé nouveau devis
+              input_name: propal_label
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_propal
+                  show_values: 0
             
     fac_regul: 
         rows: 

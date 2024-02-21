@@ -2038,7 +2038,7 @@ class BCT_Contrat extends BimpDolObject
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -2112,6 +2112,8 @@ class BCT_Contrat extends BimpDolObject
 
                     $infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
 
+                    $lines_ok = '';
+                    $nb_contrat_lines_ok = 0;
                     foreach ($lines as $id_line) {
                         $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
 
@@ -2125,8 +2127,23 @@ class BCT_Contrat extends BimpDolObject
                                 $infos .= '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
                             } else {
                                 $infos .= '<span class="success">OK</span>';
+                                $lines_ok .= ($lines_ok ? ', ' : '') . $line->getData('rang');
+                                $nb_contrat_lines_ok++;
                             }
                             $infos .= '<br/>';
+                        }
+                    }
+
+
+
+                    if ($nb_contrat_lines_ok > 0) {
+                        $id_group = BimpCore::getUserGroupId('console');
+
+                        if ($id_group) {
+                            $s = ($nb_contrat_lines_ok > 1 ? 's' : '');
+                            $msg = $nb_contrat_lines_ok . ' ligne' . $s . ' renouvellée' . $s . ' automatiquement.<br/>';
+                            $msg .= 'Ligne' . $s . ' n° : ' . $lines_ok;
+                            $contrat->addNote($msg, BimpNote::BN_MEMBERS, 0, 0, '', BimpNote::BN_AUTHOR_USER, BimpNote::BN_DEST_GROUP, $id_group, 0, 1);
                         }
                     }
                 }
@@ -2247,5 +2264,53 @@ class BCT_Contrat extends BimpDolObject
         }
 
         return $infos;
+    }
+
+    public static function checkInactivesLines()
+    {
+        $nOk = 0;
+        $bdb = self::getBdb();
+        $id_group = BimpCore::getUserGroupId('console');
+        
+        if ($id_group) {
+            $where = 'a.date_ouverture_prevue IS NOT NULL AND a.date_ouverture_prevue < \'' . date('Y-m-d') . ' 00:00:00\' AND a.statut = 0';
+            $where .= ' AND a.id_parent_line = 0 AND c.version = 2';
+            $rows = $bdb->getRows('contratdet a', $where, null, 'array', array('a.rowid', 'a.fk_contrat', 'a.rang'), null, null, array(
+                'c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')
+            ));
+
+            if (is_array($rows)) {
+                $contrats = array();
+
+                foreach ($rows as $r) {
+                    if (!isset($contrats[(int) $r['fk_contrat']])) {
+                        $contrats[(int) $r['fk_contrat']] = array();
+                    }
+
+                    $contrats[(int) $r['fk_contrat']][] = $r['rang'];
+                }
+
+                if (!empty($contrats)) {
+                    $where_note = 'obj_module = \'bimpcontrat\' AND obj_name = \'BCT_Contrat\' AND id_obj = ';
+
+                    foreach ($contrats as $id_contrat => $lines_rangs) {
+                        $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
+
+                        if (BimpObject::objectLoaded($contrat)) {
+                            $s = (count($lines_rangs) > 1 ? 's' : '');
+                            $msg = count($lines_rangs) . ' ligne' . $s . ' encore inactive' . $s . ' dont la date d\'ouverture prévue est dépassée : ligne' . $s . ' n° ' . implode(', ', $lines_rangs);
+
+                            if (!(int) $bdb->getValue('bimpcore_note', 'id', $where_note . $contrat->id . ' AND content = \'' . addslashes($msg) . '\'')) {
+                                if (empty($contrat->addNote($msg, BimpNote::BN_MEMBERS, 0, 0, '', BimpNote::BN_AUTHOR_USER, BimpNote::BN_DEST_GROUP, $id_group, 0, 1))) {
+                                    $nOk++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $nOk . ' alerte(s) créées';
     }
 }

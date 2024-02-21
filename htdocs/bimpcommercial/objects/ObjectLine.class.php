@@ -5854,14 +5854,15 @@ class ObjectLine extends BimpObject
                     $fieldsCopy[$field] = $this->getData($field);
                 }
 
-                $isAbonnement = $product->isAbonnement();
                 $nb_units = (float) $this->getData('abo_nb_units');
+                $isAbonnement = $product->isAbonnement();
                 $main_prod_duration = $product->getData('duree');
                 if (!$main_prod_duration) {
                     $errors[] = 'Duréé unitaire du produit ' . $product->getLink() . ' non définie';
                     return;
                 }
-
+                
+                
                 //on ajoute les sous lignes et calcule le tot
                 $dol_object = $this->getChildObject('dol_line');
                 $thisTot = $dol_object->getData('total_ht');
@@ -5888,9 +5889,9 @@ class ObjectLine extends BimpObject
                         }
 
                         if ($prod_duration != $main_prod_duration) {
-                            $qty_ratio = ($qty_ratio / $main_prod_duration);
+                            $qty_ratio = ($prod_duration / $main_prod_duration);
                         }
-
+                        
                         $newLn = null;
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
                                                 array(

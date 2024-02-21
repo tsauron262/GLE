@@ -64,7 +64,7 @@ www.opmconseil.com
         ),
         'AttachFile'   => array(
             'label' => 'Ajouter document',
-            'url'   => 'AttachFile'
+            'url'   => 'attachfile'
         ),
         'updatesupportrequest'   => array(
             'label' => 'Modifier demande',
@@ -161,7 +161,7 @@ www.opmconseil.com
             }
         }
         elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId']) && !isset($ecologicData['RequestOk'])){//on update la demande
-            $params['url_params'] = array('claimId'/*attention erreur API, ca devrait être RequestId*/ => $ecologicData['RequestId'],'callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
+            $params['url_params'] = array('RequestId'/*attention erreur API, ca devrait être RequestId*/ => $ecologicData['RequestId'],'callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
             $return = $this->execCurl('updatesupportrequest', $params, $errors);
             
             if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){
@@ -234,7 +234,7 @@ www.opmconseil.com
                     if(!isset($ecologicData['files']) || !in_array($fileT[1], $ecologicData['files'])){
                         $paramsFile = array();
                         $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
-                        $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
+                        $paramsFile['url_params'] = array('claimId' => $ecologicData['ClaimId'], 'fileName' => $fileT[1], 'fileExtension' => $fileT[2], 'documentType' => $fileT[3]);
                         $return = $this->execCurl('AttachFile', $paramsFile, $errors);
                         if(stripos($return, 'Code 200') !== false){
 //                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){

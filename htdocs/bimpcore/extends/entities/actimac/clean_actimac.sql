@@ -140,3 +140,10 @@ TRUNCATE TABLE `llx_stock_mouvement_extrafields`;
 
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+UPDATE llx_product_extrafields SET id_bimp = (SELECT id_bimp FROM llx_product p WHERE fk_object = p.rowid);
+
+
+UPDATE `llx_product_extrafields` act SET famille = (SELECT famille FROM ERP_PROD_BIMP.llx_product_extrafields bim WHERE act.id_bimp = bim.fk_object) WHERE (famille = 0 || famille is null) AND act.id_bimp > 0;

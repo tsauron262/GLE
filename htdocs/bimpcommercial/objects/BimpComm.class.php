@@ -2606,6 +2606,7 @@ class BimpComm extends BimpDolObject
     {
         if ($this->isLoaded()) {
             if (BimpCore::isModuleActive('bimpvalidation')) {
+                require_once DOL_DOCUMENT_ROOT.'/bimpvalidation/BV_Lib.php';
                 return BimpValidation::renderObjectDemandesList($this);
             } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');

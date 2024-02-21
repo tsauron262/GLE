@@ -199,8 +199,47 @@ class BimpFile extends BimpObject
 //                }
 //                break;
             }
+            
+            switch ($this->getData('file_ext')) {
+                case 'jpg':
+                case 'jpeg':
+                case 'JPG':
+                case 'JPEG':
+                    $buttons[] = array(
+                        'label'   => 'Redimessioner',
+                        'icon'    => 'fas_expand',
+                        'onclick' => $this->getJsActionOnclick('resize', array(), array(
+                            'form_name' => 'resize',
+                        ))
+                    );
+                    break;
+            }
         }
         return $buttons;
+    }
+    
+    public function actionResize($data, &$success = ''){
+        $success = 'Fichier redimesionné';
+        $this->resize($data['new_size']);
+        return array('errors'=>array(), 'warnings'=>array());
+    }
+    
+    public function resize($sizeMo){
+        $dir = $this->getFileDir();
+        $file = (string) $this->getData('file_name').'.'.(string) $this->getData('file_ext');
+        // Charger l'image à partir du fichier
+        if(!is_file($dir.'old_'.$file)){
+            $max_size = 1024 * 1024 * $sizeMo;
+            $image_size = filesize($dir.$file);
+            if($image_size > $max_size){
+                copy($dir.$file, $dir.'old_'.$file);
+                $image = imagecreatefromjpeg($dir.$file);
+                $ratio = $max_size / $image_size * 200;
+                imagejpeg($image, $dir.$file, $ratio);
+                clearstatcache();
+                $this->updateField('file_size', filesize($dir.$file));
+            }
+        }
     }
 
     public function getFilterListInterfaceClient()

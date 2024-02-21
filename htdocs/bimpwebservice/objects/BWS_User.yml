@@ -78,6 +78,67 @@ forms:
             - field: profiles
             - field: id_user
             - field: active
+            
+    testReq:
+        rows_callback: getfields
+#        rows:
+#            - custom: 1
+#              label: Requête
+#              input_name: req
+#              input: 
+#                type: select
+#              values: 
+#                callback: list_req
+#              help: Ne sont géré actuelement que Authenticate et getObjectList
+#            - custom: 1
+#              label: Module
+#              input_name: module_name
+#              input: 
+#                type: select
+#              values: 
+#                callback: list_module
+#              depends_on: req
+#            - custom: 1
+#              label: Object
+#              input_name: object
+#              input: 
+#                type: select
+#              values: 
+#                callback: list_object
+#              depends_on: req,module_name
+#            - custom: 1
+#              label: Filtres
+#              input_name: filters
+#              input: 
+#                type: textarea
+#            - custom: 1
+#              label: Filtres PANEL
+#              input_name: panel_filters
+#              input: 
+#                type: textarea
+##              show:
+##                  callback:
+##                     method: hidenField
+##                     params:
+##                         - panel_filters
+##              depends_on: req
+#            - custom: 1
+#              label: Filtre PANEL 2
+#              input_name: panel_filters2
+#              input:
+#                type: object_filters
+#                obj_module: 
+#                    callback:
+#                        method: getParam
+#                        params:
+#                            - module_name
+#                obj_name: 
+#                    callback:
+#                        method: getParam
+#                        params:
+#                            - object
+#              depends_on: module_name,object
+              
     
 fields_tables: 
     infos: 

@@ -360,6 +360,12 @@ class BS_SAV_ExtEntity extends BS_SAV
         $tabFile[] = array($this->getFilesDir(), 'Restitution_' . $this->getData('ref') . '_signe', 'pdf', 'CONSUMERVALIDATION');
         if(!is_file($this->getFilesDir(). 'infos_materiel.jpg'))
             $this->convertHeic($this->getFilesDir(). 'infos_materiel');
+        $list = BimpObject::getBimpObjectObjects('bimpcore', 'BimpFile', array('parent_object_name'=>'BS_SAV', 'id_parent'=>$this->id));
+        foreach($list as $bimp_file){
+            $bimp_file->useNoTransactionsDb();
+            if(stripos($bimp_file->getData('file_name'), 'infos_materiel') !== false)
+                    $bimp_file->resize(1);
+        }
         $tabFile[] = array($this->getFilesDir(), 'infos_materiel', 'pdf', 'NAMEPLATE');
 
         $api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);
@@ -369,7 +375,7 @@ class BS_SAV_ExtEntity extends BS_SAV
             'warnings' => $warnings
         );
     }
-
+    
     public function getDefaultSiteId()
     {
         global $tabCentre;

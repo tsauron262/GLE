@@ -1,0 +1,3 @@
+- Refonte de la gestion de token apple pour les compte par default
+- Gestion dossier temporaire pour les documents multientity
+- Gestion des entity pour les produit par entrepot.

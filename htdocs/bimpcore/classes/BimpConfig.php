@@ -619,7 +619,7 @@ class BimpConfig
         return $params;
     }
 
-    public function addParams($path, $params, $mode = 'overrides')
+    public function addParams($path, $params, $mode = 'overrides', $del_cache = false)
     {
         // Modes: 
         // - overrides: surcharge les (éventuels) paramètres actuels. 
@@ -646,6 +646,13 @@ class BimpConfig
         }
 
         if (isset($current)) {
+            if($del_cache){
+                $path = implode('/', $path);
+                foreach(self::$values_cache[$this->cache_key] as $name => $inut){
+                    if(stripos($name, $path) === 0)
+                        unset(self::$values_cache[$this->cache_key][$name]);
+                }
+            }
             switch ($mode) {
                 case 'overrides':
                 default:

@@ -1,6 +1,9 @@
 table: bimp_product_import_fourn
 icon: fas_box-open
 
+
+entity_name: bimpimportproductfourn
+
 labels: 
     name: Produit Fournisseurs Inc
     name_plur: Produits Fournisseurs

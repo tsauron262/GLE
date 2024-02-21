@@ -2261,10 +2261,13 @@ class BCT_Contrat extends BimpDolObject
         $nOk = 0;
         $bdb = self::getBdb();
         $id_group = BimpCore::getUserGroupId('console');
-
+        
         if ($id_group) {
-            $where = 'date_ouverture_prevue IS NOT NULL AND date_ouverture_prevue < \'' . date('Y-m-d') . ' 00:00:00\' AND statut = 0';
-            $rows = $bdb->getRows('contratdet', $where, null, 'array', array('fk_contrat', 'rang'));
+            $where = 'a.date_ouverture_prevue IS NOT NULL AND a.date_ouverture_prevue < \'' . date('Y-m-d') . ' 00:00:00\' AND a.statut = 0';
+            $where .= ' AND a.id_parent_line = 0 AND c.version = 2';
+            $rows = $bdb->getRows('contratdet a', $where, null, 'array', array('a.rowid', 'a.fk_contrat', 'a.rang'), null, null, array(
+                'c' => array('table' => 'contrat', 'on' => 'c.rowid = a.fk_contrat')
+            ));
 
             if (is_array($rows)) {
                 $contrats = array();
@@ -2287,7 +2290,7 @@ class BCT_Contrat extends BimpDolObject
                             $s = (count($lines_rangs) > 1 ? 's' : '');
                             $msg = count($lines_rangs) . ' ligne' . $s . ' encore inactive' . $s . ' dont la date d\'ouverture prévue est dépassée : ligne' . $s . ' n° ' . implode(', ', $lines_rangs);
 
-                            if (!(int) $bdb->getValue('bimpcore_note', 'id', $where_note . $contrat->id . ' AND content = \'' . $msg . '\'')) {
+                            if (!(int) $bdb->getValue('bimpcore_note', 'id', $where_note . $contrat->id . ' AND content = \'' . addslashes($msg) . '\'')) {
                                 if (empty($contrat->addNote($msg, BimpNote::BN_MEMBERS, 0, 0, '', BimpNote::BN_AUTHOR_USER, BimpNote::BN_DEST_GROUP, $id_group, 0, 1))) {
                                     $nOk++;
                                 }

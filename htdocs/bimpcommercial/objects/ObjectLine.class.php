@@ -5854,8 +5854,14 @@ class ObjectLine extends BimpObject
                     $fieldsCopy[$field] = $this->getData($field);
                 }
 
-                $nb_units = (float) $this->getData('abo_nb_units');
                 $isAbonnement = $product->isAbonnement();
+                $nb_units = (float) $this->getData('abo_nb_units');
+                $main_prod_duration = $product->getData('duree');
+                if (!$main_prod_duration) {
+                    $errors[] = 'Duréé unitaire du produit ' . $product->getLink() . ' non définie';
+                    return;
+                }
+
                 //on ajoute les sous lignes et calcule le tot
                 $dol_object = $this->getChildObject('dol_line');
                 $thisTot = $dol_object->getData('total_ht');
@@ -5867,6 +5873,24 @@ class ObjectLine extends BimpObject
                     $child_prods = $product->getChildrenObjects('child_products');
                     $parent = $this->getParentInstance();
                     foreach ($child_prods as $child_prod) {
+                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $child_prod->getData('fk_product_fils'));
+                        if (!BimpObject::objectLoaded($prod)) {
+                            $errors[] = 'Le produit #' . $child_prod->getData('fk_product_fils') . ' inclus dans le bundle n\'existe plus';
+                            continue;
+                        }
+
+                        $qty_ratio = 1;
+                        $prod_duration = $prod->getData('duree');
+
+                        if (!$prod_duration) {
+                            $errors[] = 'Duréé unitaire du produit ' . $prod->getLink() . ' non définie';
+                            continue;
+                        }
+
+                        if ($prod_duration != $main_prod_duration) {
+                            $qty_ratio = ($qty_ratio / $main_prod_duration);
+                        }
+
                         $newLn = null;
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
                                                 array(
@@ -5876,7 +5900,7 @@ class ObjectLine extends BimpObject
                                                 ), array(
                                             'id_product' => $child_prod->getData('fk_product_fils'),
                                                 ), BimpTools::merge_array($fieldsCopy, array(
-                                                    'abo_nb_units' => $child_prod->getData('qty') * $nb_units,
+                                                    'abo_nb_units' => $child_prod->getData('qty') * $nb_units * $qty_ratio,
                                                     'editable'     => 0,
                                                     'deletable'    => 0,
                                                     'remisable'    => 2,

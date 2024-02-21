@@ -70,6 +70,9 @@ class BCT_ContratLine extends BimpObject
 
             case 'deactivate':
                 return ($user->admin ? 1 : 0);
+
+            case 'addUnits':
+                return 1;
         }
         return parent::canSetAction($action);
     }
@@ -226,6 +229,16 @@ class BCT_ContratLine extends BimpObject
                     $errors[] = 'Cette ligne de contrat est déjà désactivée';
                     return 0;
                 }
+
+                if ((int) $this->getData('id_parent_line')) {
+                    $errors[] = 'Sous-ligne: veuillez désactiver la ligne parente';
+                    return 0;
+                }
+
+                if ((int) $this->db->getCount('contradet', 'id_linked_line = ' . $this->id . ' AND statut = ' . self::STATUS_ACTIVE, 'rowid') > 0) {
+                    $errors[] = 'Il existe des lignes liées actives';
+                    return 0;
+                }
                 return 1;
 
             case 'renouv':
@@ -276,6 +289,13 @@ class BCT_ContratLine extends BimpObject
                     return 0;
                 }
                 break;
+
+//            case 'addUnits':
+//                if ($this->isLoaded()) {
+//                    if ((int) $this->getData('')) {
+//                        
+//                    }
+//                }
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -6359,7 +6379,7 @@ class BCT_ContratLine extends BimpObject
                         $line_errors = array();
 
                         if ($line->isActionAllowed('renouv', $line_errors)) {
-                           $id_line_renouv = $line->renouvAbonnement(array(
+                            $id_line_renouv = $line->renouvAbonnement(array(
                                 'id_propal'    => $id_propal,
                                 'propal_label' => $propal_label
                                     ), $line_errors);

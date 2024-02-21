@@ -2606,7 +2606,6 @@ class BimpComm extends BimpDolObject
     {
         if ($this->isLoaded()) {
             if (BimpCore::isModuleActive('bimpvalidation')) {
-                BimpObject::loadClass('bimpvalidation', 'BimpValidation');
                 return BimpValidation::renderObjectDemandesList($this);
             } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');

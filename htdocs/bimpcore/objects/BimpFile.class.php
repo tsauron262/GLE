@@ -228,7 +228,7 @@ class BimpFile extends BimpObject
         $dir = $this->getFileDir();
         $file = (string) $this->getData('file_name').'.'.(string) $this->getData('file_ext');
         // Charger l'image à partir du fichier
-        if(!is_file($dir.'old_'.$file)){
+        if(!is_file($dir.'old_'.$file) && (stripos((string) $this->getData('file_ext'), 'jpg') !== false || stripos((string) $this->getData('file_ext'), 'jpeg') !== false)){
             $max_size = 1024 * 1024 * $sizeMo;
             $image_size = filesize($dir.$file);
             if($image_size > $max_size){

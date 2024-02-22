@@ -235,6 +235,8 @@ class BimpFile extends BimpObject
                 copy($dir.$file, $dir.'old_'.$file);
                 $image = imagecreatefromjpeg($dir.$file);
                 $ratio = $max_size / $image_size * 200;
+                if($ratio > 100)
+                    $ratio = 90;
                 imagejpeg($image, $dir.$file, $ratio);
                 clearstatcache();
                 $this->updateField('file_size', filesize($dir.$file));

@@ -680,6 +680,25 @@ forms:
             - field: fac_term
             - field: achat_periodicity
             
+    bulk_renouvellement:
+        title: Renouvellement
+        rows: 
+            - custom: 1
+              label: Ajouter le renouvellement à un devis
+              input_name: id_propal
+              input: 
+                  type: select
+                  options: 
+                      callback: getClientPropalesArray
+            - custom: 1
+              label: Libellé nouveau devis
+              input_name: propal_label
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_propal
+                  show_values: 0
+            
     fac_regul: 
         rows: 
             - custom: 1
@@ -695,11 +714,11 @@ forms:
               display_if: 
                   field_name: id_fac_regul
                   show_values: 0
-            - custom: 1
-              label: Période du
-              input_name: period_from
-              content: 
-                  callback: renderFacRegulFromSelect
+#            - custom: 1
+#              label: Période du
+#              input_name: period_from
+#              content: 
+#                  callback: renderFacRegulFromSelect
             - custom: 1
               label: Au
               input_name: period_to
@@ -711,7 +730,7 @@ forms:
               input_name: regul_qty
               content: 
                   callback: renderFacRegulQtyInput
-              depends_on: period_from,period_to
+              depends_on: period_to
               
     date_cloture: 
         rows: 

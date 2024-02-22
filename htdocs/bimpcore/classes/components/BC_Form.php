@@ -169,7 +169,6 @@ class BC_Form extends BC_Panel
 
         $this->data['on_save'] = $this->params['on_save'];
         $this->data['no_auto_submit'] = $this->params['no_auto_submit'];
-
         $current_bc = $prev_bc;
     }
 

@@ -794,9 +794,9 @@ class BimpTools
 
             case 'user':
                 return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_object);
-                
+
             case 'task':
-                require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
+                require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
                 global $db;
                 $task = new Task($db);
                 $task->fetch($id_object);
@@ -2297,6 +2297,59 @@ class BimpTools
             echo '</pre>';
         }
         return $data;
+    }
+
+    public static function calcProrataQty($qty_src, $from_src, $to_src, $from_dest, $to_dest)
+    {
+        $from_src = date('Y-m-d H:i:s', strtotime($from_src));
+        $to_src = date('Y-m-d H:i:s', strtotime($to_src));
+        $from_dest = date('Y-m-d H:i:s', strtotime($from_dest));
+        $to_dest = date('Y-m-d H:i:s', strtotime($to_dest));
+
+        if ($to_src >= $from_dest && $from_src <= $to_dest) {
+            if ($to_src <= $to_dest && $from_src >= $from_dest) {
+                return $qty_src;
+            }
+
+//            echo '<br/>PRORATA ' . $from_src . ' => ' . $to_src . ' / ' . $from_dest . ' => ' . $to_dest . '<br/>';
+//            echo 'INIT QTY : ' . $qty_src . '<br/>';
+
+            $interval = self::getDatesIntervalData($from_src, $to_src, 0, 1);
+            $nb_src_days = $interval['full_days'];
+
+//                echo 'src_days : ' . $nb_src_days . '<br/>';
+
+            if ($nb_src_days > 0) {
+                $qty_dest = $qty_src;
+
+                if ($from_src < $from_dest) {
+                    $interval = self::getDatesIntervalData($from_src, $from_dest, 0, 0);
+                    $prorata = $interval['full_days'] / $nb_src_days;
+
+                    if ($prorata) {
+                        $qty_dest -= ($qty_src * $prorata);
+                    }
+
+//                    echo 'before p : ' . $prorata . ' - qty => ' . $qty_dest . ' (days : ' . $interval['full_days'] . ')<br/>';
+                }
+
+                if ($to_src > $to_dest) {
+                    $interval = self::getDatesIntervalData($to_dest, $to_src, 0, 0);
+                    $prorata = $interval['full_days'] / $nb_src_days;
+
+                    if ($prorata) {
+                        $qty_dest -= ($qty_src * $prorata);
+                    }
+//                    echo 'after p : ' . $prorata . ' - qty => ' . $qty_dest . ' (days : ' . $interval['full_days'] . ')<br/>';
+                }
+
+                return $qty_dest;
+            }
+
+//            echo '<br/>';
+        }
+
+        return 0;
     }
 
     // Devises / prix: 

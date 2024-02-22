@@ -1,0 +1,5 @@
+
+Contrats abonnement : 
+    - Alertes lignes inactives
+    - Mise en place des processus de résiliation
+    - Synchronisation des facturations / achats pour les abonnements à quantités variables

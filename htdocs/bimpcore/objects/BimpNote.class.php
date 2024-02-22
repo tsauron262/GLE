@@ -44,13 +44,6 @@ class BimpNote extends BimpObject
         self::BN_DEST_GROUP => 'Groupe',
         self::BN_DEST_SOC   => 'Tiers (par mail)'
     );
-    # Pas d'ID en dur dans le code : utiliser des variables de conf. 
-    # Les ID sont à mettre dans config module bimpcore onglet "Groupes" => /bimpcore/index.php?fc=dev&tab=modules_conf
-//    const BN_GROUPID_LOGISTIQUE = 108; => BimpCore::getUserGroupId('logistique')
-//    const BN_GROUPID_FACT = 408; => BimpCore::getUserGroupId('facturation')
-//    const BN_GROUPID_ATRADIUS = 680; => BimpCore::getUserGroupId('atradius')
-//    const BN_GROUPID_CONTRAT = 686; => BimpCore::getUserGroupId('contrat')
-//    const BN_GROUPID_ACHAT = 8 (remplacé par 120); => BimpCore::getUserGroupId('achat')
     private static $jsReload = '
     if (typeof notifNote !== "undefined" && notifNote !== null)
         notifNote.reloadNotif();
@@ -987,16 +980,16 @@ class BimpNote extends BimpObject
         $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, id as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE ";
-        
+
         if ($id_max > 0)
             $reqDeb .= " date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
-        
+
         $where = "((type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
 
         if (count($listIdGr) > 0) {
             $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
         }
-        
+
         $where .= ')';
 
         $where .= "         ";

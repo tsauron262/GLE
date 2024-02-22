@@ -1,4 +1,5 @@
 function BimpContrat() {
+    var ptr = this;
     // Events:
 
     this.onPeriodicityMassProcessFormLoaded = function ($form) {
@@ -12,12 +13,23 @@ function BimpContrat() {
 
                 if (id_line) {
                     $form.find('tr.line_' + id_line + '_sub_line').addClass('selected');
+
+                    var $input = $row.find('input[name="line_' + id_line + '_nb_periods"]');
+                    if ($input.length && !parseInt($input.val())) {
+                        var nb_periods_default = parseInt($row.data('nb_periods_default'));
+                        $input.val(nb_periods_default).change();
+                    }
                 }
             } else {
                 $row.removeClass('selected');
 
                 if (id_line) {
                     $form.find('tr.line_' + id_line + '_sub_line').removeClass('selected');
+
+                    var $input = $row.find('input[name="line_' + id_line + '_nb_periods"]');
+                    if ($input.length && parseInt($input.val())) {
+                        $input.val(0).change();
+                    }
                 }
             }
         });
@@ -32,12 +44,16 @@ function BimpContrat() {
 
         $form.find('.check_all_lines').click(function () {
             $form.find('.line_check').each(function () {
-                $(this).prop('checked', true).change();
+                if (!$(this).prod('checked')) {
+                    $(this).prop('checked', true).change();
+                }
             });
         });
         $form.find('.uncheck_all_lines').click(function () {
             $form.find('.line_check').each(function () {
-                $(this).prop('checked', false).change();
+                if ($(this).prod('checked')) {
+                    $(this).prop('checked', false).change();
+                }
             });
         });
 
@@ -51,7 +67,83 @@ function BimpContrat() {
             } else {
                 $row.find('.line_check').prop('checked', true).change();
             }
+
+            if (!val) {
+                $row.find('.variable_qty_inputs_container').stop().slideUp(250, function () {
+                    $(this).attr('style', 'margin-top: 10px; display: none');
+                });
+            } else {
+                $row.find('.variable_qty_inputs_container').stop().slideDown(250, function () {
+                    $(this).attr('style', 'margin-top: 10px');
+                });
+            }
+
+            $row.find('.period_qty_input_container').each(function () {
+                var period = parseInt($(this).data('period'));
+
+                if (period <= val) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            ptr.checkPeriodicProcessFormLineTotalQty($row);
         });
+
+        $form.find('.line_period_qty').change(function () {
+            var $row = $(this).findParentByClass('contrat_line_row');
+            if ($.isOk($row)) {
+                ptr.checkPeriodicProcessFormLineTotalQty($row);
+            }
+        });
+
+        $form.find('select.line_qty_mode').change(function () {
+            var mode = $(this).val();
+            var id_line = parseInt($(this).data('id_line'));
+
+            if (id_line) {
+                switch (mode) {
+                    case 'per_period':
+                        $('.line_' + id_line + '_qties_per_period').stop().slideDown(250);
+                        $('.line_' + id_line + '_total_qty').stop().slideUp(250);
+                        break;
+
+                    case 'total':
+                        $('.line_' + id_line + '_total_qty').stop().slideDown(250);
+                        $('.line_' + id_line + '_qties_per_period').stop().slideUp(250);
+                        break;
+                }
+            }
+        });
+    };
+
+    this.checkPeriodicProcessFormLineTotalQty = function ($row) {
+        if ($row.find('.variable_qty_inputs_container').length) {
+            var id_line = parseInt($row.data('id_line'));
+            var nb_periods = parseFloat($row.find('input.line_nb_periods').val());
+            var nb_decimals = parseInt($row.data('nb_decimals'));
+
+            if (!isNaN(nb_periods) && nb_periods) {
+                var total = 0;
+                var qty_per_period = parseFloat($row.find('input[name="line_' + id_line + '_qty_per_period"]'));
+
+                for (var i = 1; i <= nb_periods; i++) {
+                    var $input = $row.find('input[name="line_' + id_line + '_qty_period_' + i + '"]');
+
+                    if ($input.length) {
+                        total += parseFloat($input.val());
+                    } else {
+                        total += qty_per_period;
+                    }
+                }
+                
+                total = Math.round10(total, -nb_decimals);
+
+                $row.find('input[name="line_' + id_line + '_total_qty"]').val(total);
+                $row.find('span.line_total_qty').text(total);
+            }
+        }
     };
 
     // Traitements formulaires:
@@ -74,18 +166,18 @@ function BimpContrat() {
                     bimp_msg('Ligne #' + id_line + ' : Nombre de périodes à facturer invalide', 'danger');
                     has_errors = true;
                 } else if (nb_periods > 0) {
-                    var qty_per_period = 0;
-                    var $input = $line_row.find($('input.line_qty_per_period'));
+                    var total_qty = 0;
+                    var $input = $line_row.find($('input[name="line_' + id_line + '_total_qty"]'));
                     if ($input.length) {
-                        qty_per_period = parseFloat($input.val());
-                        if (isNaN(qty_per_period)) {
+                        total_qty = parseFloat($input.val());
+                        if (isNaN(total_qty)) {
                             $line_row.addClass('has_errors');
-                            qty_per_period = 0;
-                            bimp_msg('Ligne #' + id_line + ' : Quantité à facturer par période invalide', 'danger');
+                            total_qty = 0;
+                            bimp_msg('Ligne #' + id_line + ' : Quantité totale à facturer invalide', 'danger');
                             has_errors = true;
-                        } else if (!qty_per_period) {
+                        } else if (!total_qty) {
                             $line_row.addClass('has_errors');
-                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité à facturer par période supérieure à 0', 'danger');
+                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité totale à facturer supérieure à 0', 'danger');
                             has_errors = true;
                         }
                     }
@@ -111,20 +203,23 @@ function BimpContrat() {
                     var sub_lines = {};
 
                     $form.find('tr.line_' + id_line + '_sub_line').each(function () {
-                        var $input = $(this).find($('input.line_qty_per_period'));
+                        var id_sub_line = parseInt($(this).data('id_line'));
 
-                        if ($input.length) {
-                            var id_sub_line = parseInt($(this).data('id_line'));
-                            sub_lines[id_sub_line] = {
-                                'qty_per_period': parseFloat($input.val())
-                            };
+                        if (!isNaN(id_sub_line) && id_sub_line) {
+                            var $input = $(this).find($('input[name="line_' + id_sub_line + '_total_qty"]'));
+
+                            if ($input.length) {
+                                sub_lines[id_sub_line] = {
+                                    'total_qty': parseFloat($input.val())
+                                };
+                            }
                         }
                     });
 
                     clients[id_client][fac_idx]['lines'].push({
                         'id_line': id_line,
                         'nb_periods': nb_periods,
-                        'qty_per_period': qty_per_period,
+                        'total_qty': total_qty,
                         'sub_lines': sub_lines
                     });
                 }
@@ -134,8 +229,6 @@ function BimpContrat() {
         if (has_errors) {
             return false;
         }
-
-//        console.log(clients);
 
         extra_data['clients'] = clients;
         return extra_data;
@@ -153,13 +246,13 @@ function BimpContrat() {
                 var id_entrepot = parseInt($line_row.data('id_entrepot'));
                 var id_line = parseInt($line_row.data('id_line'));
                 var nb_periods = parseInt($line_row.find($('input.line_nb_periods')).val());
-                var qty_per_period = 0;
 
                 if (isNaN(nb_periods)) {
                     $line_row.addClass('has_errors');
                     bimp_msg('Ligne #' + id_line + ' : Qté invalide', 'danger');
                     has_errors = true;
                 } else if (nb_periods > 0) {
+                    var total_qty = 0;
                     var pa_ht = parseFloat($line_row.find($('input.line_pa_ht')).val());
 
                     if (typeof (fourns[id_fourn]) === 'undefined') {
@@ -173,17 +266,17 @@ function BimpContrat() {
                         };
                     }
 
-                    var $input = $line_row.find($('input.line_qty_per_period'));
+                    var $input = $line_row.find($('input[name="line_' + id_line + '_total_qty"]'));
                     if ($input.length) {
-                        qty_per_period = parseFloat($input.val());
-                        if (isNaN(qty_per_period)) {
+                        total_qty = parseFloat($input.val());
+                        if (isNaN(total_qty)) {
                             $line_row.addClass('has_errors');
-                            qty_per_period = 0;
-                            bimp_msg('Ligne #' + id_line + ' : Quantité à acheter par période invalide', 'danger');
+                            total_qty = 0;
+                            bimp_msg('Ligne #' + id_line + ' : Quantité totale à acheter invalide', 'danger');
                             has_errors = true;
-                        } else if (!qty_per_period) {
+                        } else if (!total_qty) {
                             $line_row.addClass('has_errors');
-                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité à facturer par période supérieure à 0', 'danger');
+                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité totale à acheter supérieure à 0', 'danger');
                             has_errors = true;
                         }
                     }
@@ -191,7 +284,7 @@ function BimpContrat() {
                     fourns[id_fourn][id_entrepot]['lines'].push({
                         'id_line': id_line,
                         'nb_periods': nb_periods,
-                        'qty_per_period': qty_per_period,
+                        'total_qty': total_qty,
                         'pa_ht': pa_ht
 
                     });

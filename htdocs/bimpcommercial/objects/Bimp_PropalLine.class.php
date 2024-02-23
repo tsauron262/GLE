@@ -1041,15 +1041,33 @@ class Bimp_PropalLine extends ObjectLine
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
+        $errors = array();
+
         if ($this->getData('linked_object_name') == 'discount') {
             $parent = $this->getParentInstance();
             $parent->dol_object->statut = 0;
-            $return = parent::delete($warnings, $force_delete);
+            $errors = parent::delete($warnings, $force_delete);
             $parent->dol_object->statut = $parent->getInitData('statut');
-        } else
-            $return = parent::delete($warnings, $force_delete);
 
+            return $errors;
+        }
 
-        return $return;
+        $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $this->id);
+        if ($id_contrat_line) {
+            $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
+        }
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            if (BimpObject::objectLoaded($contrat_line) && (int) $contrat_line->getData('statut') === BCT_ContratLine::STATUS_ATT_PROPAL) {
+                $contrat_line->set('statut', 0);
+                $contrat_line->dol_object->statut = 0;
+                $w = array();
+                $contrat_line->delete($w, true);
+            }
+        }
+
+        return $errors;
     }
 }

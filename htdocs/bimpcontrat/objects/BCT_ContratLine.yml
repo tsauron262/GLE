@@ -637,6 +637,40 @@ forms:
                     content: 
                         callback: renderPeriodicProcessInputs
                         
+    add_units: 
+        title: Ajout / retrait d\'unité
+        rows: 
+            - custom: 1
+              label: Ajouter le renouvellement à un devis
+              input_name: id_propal
+              input: 
+                  type: select
+                  options: 
+                      callback: getClientPropalesArray
+              value: 
+                  callback: getLastClientPropalId
+            - custom: 1
+              label: Date d'ouverture prévue
+              input_name: date_ouv
+              data_type: date
+              required: 1
+              input: 
+                  type: date
+                  help: Obligatoire pour le calcul du prorata de facturation, pourra être modifiée ultérieurement
+            - custom: 1
+              label: Libellé nouveau devis
+              input_name: propal_label
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_propal
+                  show_values: 0
+            - custom: 1
+              label: Nombre d\'unités à ajouter / retirer
+              input_name: nb_units
+              content: 
+                  callback: renderAddUnitsInputs
+        
     renouvellement: 
         title: Renouvellement
         force_edit: 1
@@ -648,6 +682,8 @@ forms:
                   type: select
                   options: 
                       callback: getClientPropalesArray
+              value: 
+                  callback: getLastClientPropalId
             - custom: 1
               label: Libellé nouveau devis
               input_name: propal_label
@@ -690,6 +726,8 @@ forms:
                   type: select
                   options: 
                       callback: getClientPropalesArray
+              value: 
+                  callback: getLastClientPropalId
             - custom: 1
               label: Libellé nouveau devis
               input_name: propal_label
@@ -941,6 +979,8 @@ lists:
     default: 
         configurable: 1
         checkboxes: 1
+        item_checkbox: 
+            callback: areBulkActionsAllowed
         filters_panel: default
         sort_field: rowid
         sort_way: desc

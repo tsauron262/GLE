@@ -364,13 +364,13 @@ class BCT_ContratLine extends BimpObject
 
         return 0;
     }
-    
+
     public function areBulkActionsAllowed()
     {
         if ((int) $this->getData('id_parent_line')) {
             return 0;
         }
-        
+
         return 1;
     }
 
@@ -2473,7 +2473,7 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
-    public function displayProduct($display = 'ref_nom')
+    public function displayProduct($display = 'ref_nom', $single_line = true, $include_duration = false)
     {
         $html = '';
         $product = $this->getChildObject('product');
@@ -2489,12 +2489,21 @@ class BCT_ContratLine extends BimpObject
                     break;
 
                 case 'ref_nom':
-                    $html .= $product->getRef() . ' - ' . $product->getName();
+                    $html .= $product->getRef() . ($single_line ? ' - ' : '<br/>' ) . $product->getName();
                     break;
 
                 case 'nom_url':
                     $html .= $product->getLink();
                     break;
+
+                case 'link_nom':
+                    $html .= $product->getLink() . ($single_line ? ' - ' : '<br/>' ) . $product->getName();
+            }
+
+            if ($include_duration) {
+                $duree = $product->getData('duree');
+                $html .= ($single_line ? ' ' : '<br/>');
+                $html .= '<span style="color: #999999">' . BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . ($duree ? $duree : 'Non définie') . ' mois</span>';
             }
         }
 
@@ -2579,10 +2588,6 @@ class BCT_ContratLine extends BimpObject
                 $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
                 $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
                 $html .= BimpRender::renderAlerts($msg, 'warning');
-            }
-
-            if (BimpCore::isUserDev()) {
-                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
             }
         } else {
             $html .= BimpRender::renderAlerts($errors);
@@ -5548,7 +5553,7 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 $where = 'fk_contrat = ' . $contrat->id . ' AND (rowid = ' . $id_linked_line . ' OR id_linked_line = ' . $id_linked_line . ')';
-                $where .= ' AND fk_product = ' . $this->getData('fk_product') . ' AND rowid != ' . $this->id .' AND id_line_renouv = 0';
+                $where .= ' AND fk_product = ' . $this->getData('fk_product') . ' AND rowid != ' . $this->id . ' AND id_line_renouv = 0';
 
                 $rows = $this->db->getRows('contratdet', $where, null, 'array', array('rowid'));
 
@@ -5651,7 +5656,7 @@ class BCT_ContratLine extends BimpObject
                                 if (count($line_errors)) {
                                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $new_line->getData('rang') . ' : échec de l\'enregistrement de l\'ID de la ligne de renouvellement');
                                 }
-                                
+
                                 $lines_renouv[] = $id_line;
                             }
 
@@ -6650,7 +6655,7 @@ class BCT_ContratLine extends BimpObject
         }
 
         $lines_renouv = array();
-        
+
         if ($this->isLoaded()) {
             $fac_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'fac_periodicity', 0);
             $achat_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'achat_periodicity', 0);
@@ -6725,7 +6730,7 @@ class BCT_ContratLine extends BimpObject
 
                             if (!count($line_errors)) {
                                 $nOk++;
-                                
+
                                 if (!$id_propal) {
                                     $id_propal_line = (int) $this->db->getValue('contratdet', 'id_line_origin', 'rowid = ' . (int) $line->getData('id_line_renouv'));
                                     if ($id_propal_line) {

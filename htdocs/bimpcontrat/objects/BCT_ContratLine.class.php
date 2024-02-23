@@ -6741,14 +6741,8 @@ class BCT_ContratLine extends BimpObject
                         }
 
                         if (count($line_errors)) {
-                            echo '<pre>';
-                            print_r($lines_renouv);
-                            echo '</pre>';
                             $contrat = $line->getParentInstance();
                             $errors[] = BimpTools::getMsgFromArray($line_errors, 'Contrat ' . (BimpObject::objectLoaded($contrat) ? $contrat->getRef() : '#' . $line->getData('fk_contrat')) . ' - Ligne n° ' . $line->getData('rang') . ' : échec du renouvellement');
-                            echo '<pre>';
-                            print_r($errors);
-                            exit;
                         }
                     }
                 }

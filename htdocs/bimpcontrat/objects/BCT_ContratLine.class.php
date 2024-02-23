@@ -4981,6 +4981,7 @@ class BCT_ContratLine extends BimpObject
                     $prod = $line->getChildObject('product');
                     if (BimpObject::objectLoaded($prod)) {
                         $line_label .= '<br/>' . $prod->getLink();
+                        $line_label .= '<br/>' . $prod->getName();
                     }
                 } else {
                     $line_errors[] = 'cette ligne n\'existe plus';

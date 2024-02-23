@@ -846,6 +846,7 @@ class BCT_Contrat extends BimpDolObject
                             $nb_units = ($qty / $duration) * $prod_duration;
 
                             switch ((int) $line->getData('statut')) {
+                                case -2:
                                 case -1:
                                 case 0:
                                     $units['inactive'] += $nb_units;

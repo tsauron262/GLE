@@ -45,6 +45,10 @@ class BIMP_Task extends BimpAbstractFollow
     private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
 
     // Droits users: 
+    
+    public function isDev(){
+        return ($this->getData('type_manuel') == 'devvv');
+    }
 
     public function canView()
     {
@@ -91,10 +95,13 @@ class BIMP_Task extends BimpAbstractFollow
 
     public function canEditField($field_name)
     {
+        global $user;
         switch ($field_name) {
             case 'id_user_owner':
             case 'id_task':
                 return $this->canAttribute();
+            case 'ok_metier':
+                return ($user->admin && !BimpCore::isUserDev());
         }
 
         return parent::canEditField($field_name);

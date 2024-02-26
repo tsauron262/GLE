@@ -146,6 +146,10 @@ fields:
                 type: callback
                 method: displayPageLink
         
+    ok_metier: 
+        label: Acceptation métier
+        type: bool
+        
  
 fields_tables:
     default: 
@@ -165,6 +169,11 @@ fields_tables:
                   callback: displayType
             - field: subj
             - field: txt
+            - field: ok_metier
+              show:
+                  callback: is_dev
+              edit: 1
+                  
             - field: url
               display: link
             - field: comment
@@ -192,6 +201,9 @@ forms:
             - field: id_user_owner
             - field: users_follow
             - field: url
+            - field: ok_metier
+              show:
+                  callback: is_dev
             
     add:
         rows:
@@ -209,6 +221,10 @@ forms:
               input_name: task_files
               input: 
                   type: drop_files
+            - field: ok_metier
+              display_if:
+                field_name: type_manuel
+                show_values: dev
               
     addUser:
         extends: add

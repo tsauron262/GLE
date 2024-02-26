@@ -144,7 +144,7 @@ class BIMP_Task extends BimpAbstractFollow
                 return 1;
         }
 
-        if (!$this->isLoaded($errors)) {
+        if (!in_array($action, array('generateListCsv')) && !$this->isLoaded($errors)) {
             return 0;
         }
 

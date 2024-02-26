@@ -534,7 +534,7 @@ class BWS_User extends BimpObject
                     $error = 'Token invalide';
                     return false;
                 }
-                $error = 'Token expiré';
+                $error = 'Token expiré (' . $expire . ') - Veuillez reconnecter votre compte';
                 return false;
             }
             $error = 'Token absent';

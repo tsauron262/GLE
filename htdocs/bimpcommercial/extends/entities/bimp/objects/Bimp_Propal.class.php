@@ -117,15 +117,15 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         return parent::isActionAllowed($action, $errors);
     }
 
-    public function isFieldContratEditable()
-    {
-        if (BimpTools::getPostFieldValue('field_name') == 'duree_mois') {
-            $fields = BimpTools::getPostFieldValue('fields');
-            if ($fields['objet_contrat'] == 'ASMX')
-                return 1;
-            return 0;
-        }
-    }
+//    public function isFieldContratEditable()
+//    { // A checker... 
+//        if (BimpTools::getPostFieldValue('field_name') == 'duree_mois') {
+//            $fields = BimpTools::getPostFieldValue('fields');
+//            if ($fields['objet_contrat'] == 'ASMX')
+//                return 1;
+//            return 0;
+//        }
+//    }
 
     public function isDemandeFinAllowed(&$errors = array())
     {

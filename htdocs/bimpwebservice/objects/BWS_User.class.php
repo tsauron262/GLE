@@ -519,7 +519,7 @@ class BWS_User extends BimpObject
         return (hash('sha256', $pword) === $this->getData('pword') || $pword === $this->getData('pword'));
     }
 
-    public function checkToken($token)
+    public function checkToken($token, &$error = '')
     {
         if ($this->isLoaded()) {
             $cur_token = $this->getData('token');
@@ -528,12 +528,17 @@ class BWS_User extends BimpObject
                 $expire = $this->getData('token_expire');
 
                 if ($expire > date('Y-m-d H:i:s')) {
-                    return (hash('sha256', $token) === $cur_token || $token === $cur_token);
+                    if ($token === $cur_token || hash('sha256', $token) === $cur_token) {
+                        return true;
+                    }
+                    $error = 'Token invalide';
+                    return false;
                 }
+                $error = 'Token expiré';
                 return false;
             }
+            $error = 'Token absent';
         }
-
         return false;
     }
 

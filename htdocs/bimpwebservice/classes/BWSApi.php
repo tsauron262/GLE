@@ -3,9 +3,6 @@
 /*
  * curl -k -X POST -H "BWS-LOGIN: cGV0ZXJAYmltcC5mcg==" "https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req=authenticate" -F pword=cVpwYlc4M0pTb0M2
 
-
-
-
   curl -k -X POST -H "BWS-TOKEN: Zkd5Y0RiTFhBek4xOTByWU5PVDBxVjM1" -H "BWS-LOGIN: cGV0ZXJAYmltcC5mcg==" "https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req=getContractInfo"
  */
 
@@ -48,12 +45,12 @@ class BWSApi
         'getObjectsList' => array(
             'desc'   => 'Retourne une liste d\'IDs d\'objets selon les filtres indiqués',
             'params' => array(
-                'module'      => array('label' => 'Nom du module', 'require' => 1),
-                'object_name' => array('label' => 'Nom de l\'objet', 'required' => 1),
-                'filters'     => array('label' => 'Filtres'),
-                'panel_filters'     => array('label' => 'Filtres JSON'),
-                'order_by'    => array('label' => 'Trier par'),
-                'order_way'   => array('label' => 'Sens du trie')
+                'module'        => array('label' => 'Nom du module', 'require' => 1),
+                'object_name'   => array('label' => 'Nom de l\'objet', 'required' => 1),
+                'filters'       => array('label' => 'Filtres'),
+                'panel_filters' => array('label' => 'Filtres JSON'),
+                'order_by'      => array('label' => 'Trier par'),
+                'order_way'     => array('label' => 'Sens du trie')
             )
         ),
         'createObject'   => array(
@@ -177,6 +174,50 @@ class BWSApi
         return $this->errors;
     }
 
+    protected function getChildrenData($object, $children)
+    {
+        $children_data = array();
+        if (!empty($children)) {
+            foreach ($children as $child_name => $child_data) {
+                if (!is_array($child_data))
+                    $child_name = $child_data;
+                if (!$object->config->isDefined('objects/' . $child_name)) {
+                    $this->addError('INVALID_PARAMETER', 'L\'objet enfant "' . $child_name . '" n\'existe pas pour les ' . $object->getLabel('name_plur'));
+                } else {
+                    if ($object->config->get('objects/' . $child_name . '/relation', '') === 'hasMany') {
+                        $child = $object->getChildObject($child_name);
+                        if (!is_a($child, 'BimpObject')) {
+                            $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
+                        } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
+                                ($this->check_erp_user_rights && !$child->can('view'))) {
+                            $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
+                        } else {
+                            $children_data[$child_name] = array();
+                            foreach ($object->getChildrenObjects($child_name) as $child_object) {
+                                $data = $child_object->getDataArray(true, $this->check_erp_user_rights);
+                                $data['children'] = (is_array($child_data) ? $this->getChildrenData($child_object, $child_data) : array());
+                                $children_data[$child_name][] = $data;
+                            }
+                        }
+                    } elseif ($object->config->get('objects/' . $child_name . '/relation', '') === 'hasOne') {
+                        $child = $object->getChildObject($child_name);
+                        if (!is_a($child, 'BimpObject')) {
+                            $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
+                        } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
+                                (0)) {
+                            $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permissionnnnnnnn d\'obtenir les données des objets enfants "' . $child_name . '"');
+                        } else {
+                            $data = $child->getDataArray(true, $this->check_erp_user_rights);
+                            $data['children'] = (is_array($child_data) ? $this->getChildrenData($child_object, $child_data) : array());
+                            $children_data[$child_name] = $data;
+                        }
+                    }
+                }
+            }
+        }
+        return $children_data;
+    }
+
     // Traitements: 
 
     public function init($login, $token)
@@ -206,8 +247,9 @@ class BWSApi
 
         if ($this->request_name !== 'authenticate') {
             $token = base64_decode($token);
-            if (!$this->ws_user->checkToken($token)) {
-                $this->addError('TOKEN_INVALIDE', 'Token invalide ou arrivé à expiration');
+            $err = '';
+            if (!$this->ws_user->checkToken($token, $err)) {
+                $this->addError('TOKEN_INVALIDE', ($err ? $err : 'Token invalide ou arrivé à expiration'));
                 return false;
             }
         }
@@ -568,7 +610,7 @@ class BWSApi
                     $children = json_decode($children);
                 }
 
-                
+
                 /*
                  * Todo implémenter recursivité des child exemple pour contrat array('lines'=>array('produit'))
                  * curl -s -X POST -H "BWS-LOGIN: cC50a2F0Y2hlbmtvQGJpbXAuZnI=" -H "BWS-TOKEN:RFdVNTJ0WENEcmkwdVByZlM4Z0ZSQXc2" 'https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req=getObjectData' -F module=bimpcontract -F object_name=BContract_contrat -F ref=CDP2401-0003 -F "children={\"lines\":[\"produit\"]}
@@ -583,51 +625,6 @@ class BWSApi
         }
 
         return $response;
-    }
-    
-    protected function getChildrenData($object, $children){
-        $children_data = array();
-        if (!empty($children)) {
-            foreach ($children as $child_name => $child_data) {
-                if(!is_array($child_data))
-                    $child_name = $child_data;
-                if (!$object->config->isDefined('objects/' . $child_name)){
-                    $this->addError('INVALID_PARAMETER', 'L\'objet enfant "' . $child_name . '" n\'existe pas pour les ' . $object->getLabel('name_plur'));
-                } else {
-                    if($object->config->get('objects/' . $child_name . '/relation', '') === 'hasMany') {
-                        $child = $object->getChildObject($child_name);
-                        if (!is_a($child, 'BimpObject')) {
-                            $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
-                        } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
-                                ($this->check_erp_user_rights && !$child->can('view'))) {
-                            $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
-                        } else {
-                            $children_data[$child_name] = array();
-                            foreach ($object->getChildrenObjects($child_name) as $child_object) {
-                                $data = $child_object->getDataArray(true, $this->check_erp_user_rights);
-                                $data['children'] = (is_array($child_data) ? $this->getChildrenData($child_object, $child_data) : array());
-                                $children_data[$child_name][] = $data;
-                                
-                            }
-                        }
-                    }
-                    elseif($object->config->get('objects/' . $child_name . '/relation', '') === 'hasOne') {
-                        $child = $object->getChildObject($child_name);
-                        if (!is_a($child, 'BimpObject')) {
-                            $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
-                        } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
-                                (0)) {
-                            $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permissionnnnnnnn d\'obtenir les données des objets enfants "' . $child_name . '"');
-                        } else {
-                            $data = $child->getDataArray(true, $this->check_erp_user_rights);
-                            $data['children'] = (is_array($child_data) ? $this->getChildrenData($child_object, $child_data) : array());
-                            $children_data[$child_name] = $data;
-                        }
-                    }
-                }
-            }
-        }
-        return $children_data;
     }
 
     protected function wsRequest_getObjectValue()
@@ -666,17 +663,16 @@ class BWSApi
 
         if (!count($this->errors)) {
             $filters = BimpTools::getArrayValueFromPath($this->params, 'filters', '');
-            
+
             $list = array();
             $obj_instance = $this->getObjectInstance();
 
             if ($filters) {
                 $filters = json_decode($filters, 1);
-            }
-            else{
-                $panel_filters  = BimpTools::getArrayValueFromPath($this->params, 'panel_filters', '');
+            } else {
+                $panel_filters = BimpTools::getArrayValueFromPath($this->params, 'panel_filters', '');
                 $panel = new BC_FiltersPanel($obj_instance);
-                $panel->setFilters(json_decode($panel_filters,1));
+                $panel->setFilters(json_decode($panel_filters, 1));
                 $filters = array();
                 $panel->getSqlFilters($filters);
             }

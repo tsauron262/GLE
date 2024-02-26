@@ -234,7 +234,7 @@ class BimpFile extends BimpObject
             if($image_size > $max_size){
                 copy($dir.$file, $dir.'old_'.$file);
                 $image = imagecreatefromjpeg($dir.$file);
-                $ratio = $max_size / $image_size * 100;
+                $ratio = round($max_size / $image_size * 100);
 //                if($ratio > 90)
 //                    $ratio = 90;
 //                die($ratio.'pp');

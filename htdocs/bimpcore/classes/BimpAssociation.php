@@ -219,7 +219,7 @@ class BimpAssociation
 
         if (is_null($id_object)) {
             if (!isset($this->object->id) || !$this->object->id) {
-                return array('ID ' . $this->object->getLabel('of_the') . ' absent');
+                return array('ID ' . $this->object->getLabel('of_the') . ' absent (100)');
             }
             $id_object = $this->object->id;
         }
@@ -283,7 +283,7 @@ class BimpAssociation
 
         if (is_null($id_associate)) {
             if (!isset($this->associate->id) || !$this->associate->id) {
-                return array('ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent');
+                return array('ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent (101)');
             }
             $id_associate = $this->associate->id;
         }
@@ -344,7 +344,7 @@ class BimpAssociation
 
         if (is_null($id_object)) {
             if (!isset($this->object->id) || !$this->object->id) {
-                return array('ID ' . $this->object->getLabel('of_the') . ' absent');
+                return array('ID ' . $this->object->getLabel('of_the') . ' absent (102)');
             }
             $id_object = $this->object->id;
         }
@@ -393,7 +393,7 @@ class BimpAssociation
 
         if (is_null($id_associate)) {
             if (!isset($this->associate->id) || !$this->associate->id) {
-                return array('ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent');
+                return array('ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent (103)');
             }
             $id_associate = $this->associate->id;
         }
@@ -438,11 +438,11 @@ class BimpAssociation
         $errors = array();
 
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID ' . $this->object->getLabel('of_the') . ' absent';
+            $errors[] = 'ID ' . $this->object->getLabel('of_the') . ' absent (104)';
         }
 
         if (is_null($id_associate) || !$id_associate) {
-            $errors[] = 'ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent';
+            $errors[] = 'ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent (105)';
         }
 
         if (!count($errors)) {
@@ -480,7 +480,7 @@ class BimpAssociation
         $errors = array();
 
         if (is_null($id_object) || !$id_object) {
-            $errors[] = 'ID ' . $this->object->getLabel('of_the') . ' absent';
+            $errors[] = 'ID ' . $this->object->getLabel('of_the') . ' absent (106)';
         } else {
             $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
             $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
@@ -515,7 +515,7 @@ class BimpAssociation
         $errors = array();
 
         if (is_null($id_associate) || !$id_associate) {
-            $errors[] = 'ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent';
+            $errors[] = 'ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent (107)';
         } else {
             $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
             $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');

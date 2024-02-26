@@ -1337,7 +1337,7 @@ class BimpObject extends BimpCache
         }
 
         if (!$check) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent (201)';
         }
 
         return $check;
@@ -2366,7 +2366,7 @@ class BimpObject extends BimpCache
             if (!$force_action && !$instance->canSetAction($action)) {
                 $result['errors'][] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$instance->isActionAllowed($action, $result['errors'])) {
-                $result['errors'][] = 'Action impossible';
+                $result['errors'][] = 'Action impossible (1001) '.$action;
             }
 
             if (!count($result['errors'])) {
@@ -2433,7 +2433,7 @@ class BimpObject extends BimpCache
             if (!$force_action && !$this->canSetAction($action)) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$this->isActionAllowed($action, $errors)) {
-                $errors[] = 'Action impossible';
+                $errors[] = 'Action impossible (1002)';
             }
 
             if (!count($errors)) {
@@ -2452,7 +2452,7 @@ class BimpObject extends BimpCache
             if (!$force_action && !$this->canSetAction($action)) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$this->isActionAllowed($action, $errors)) {
-                $errors[] = 'Action impossible';
+                $errors[] = 'Action impossible (1003)';
             }
 
             if (!count($errors)) {
@@ -2469,7 +2469,7 @@ class BimpObject extends BimpCache
             if (!$force_action && !$this->canSetAction($action)) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$this->isActionAllowed($action, $errors)) {
-                $errors[] = 'Action impossible';
+                $errors[] = 'Action impossible (1004)';
             }
 
             if (!count($errors)) {

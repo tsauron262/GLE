@@ -361,6 +361,16 @@ class BIMP_Task extends BimpAbstractFollow
 
     public function getSous_type_list_taskArray()
     {
+        if(!$this->isLoaded()){
+            $sT = array();
+            foreach(self::$sous_types as $datas){
+                foreach($datas as $code => $values){
+                    $sT[$code] = $values;
+                }
+            }
+            return $sT;
+        }
+        
         $type = BimpTools::getPostFieldValue('type_manuel', $this->getData('type_manuel'));
 
         if (isset($type) && self::$sous_types[$type])

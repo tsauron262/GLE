@@ -631,6 +631,44 @@ class Bimp_User extends BimpObject
     }
 
     // Affichage: 
+    
+    public function displayUserGroupsSecu()
+    {
+        $tabs = self::getCacheUserGroupSecu();
+        
+        
+        $collection = BimpCollection::getInstance('bimpcore', 'Bimp_UserGroup');
+        $collection->addFields(array('nom'));
+        $collection->addItems($tabs[$this->id]);
+        $tabHtml = array();
+        foreach ($tabs[$this->id] as $id) {
+            $obj = $collection->getObjectInstance((int) $id);
+            global $modeCSV;
+            if($modeCSV)
+                $tabHtml[] = $obj->getData('nom');
+            else
+                $tabHtml[] = $obj->getLink();
+        }
+        
+        return implode('<br/>', $tabHtml);
+    }
+    
+    public static function getCacheUserGroupSecu()
+    {
+        $clef = 'userGroupSecu';
+        if(!isset(BimpCache::$cache[$clef])){
+            global $conf;
+            $bdb = BimpCache::getBdb();
+            $tab = array();
+            $rows = $bdb->executeS('SELECT fk_user, fk_usergroup FROM llx_usergroup_user WHERE fk_usergroup IN (SELECT DISTINCT(fk_usergroup) fk_usergroup FROM llx_usergroup_rights) AND entity = '.$conf->entity);
+            foreach($rows as $row){
+                $tab[$row->fk_user][] = $row->fk_usergroup;
+            }
+            BimpCache::$cache[$clef] = $tab;
+        }
+//        print_r(BimpCache::$cache[$clef]);die;
+        return BimpCache::$cache[$clef];
+    }
 
     public function displayCountry()
     {

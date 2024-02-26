@@ -91,6 +91,9 @@ fields:
     dateemployment:
         label: Date d'embauche
         type: date
+    datec:
+        label: Créer le 
+        type: date
     address: 
         label: Adresse
         type: text
@@ -625,6 +628,13 @@ lists:
             job:
             email: 
             office_phone:
+                
+                
+lists_cols: 
+    groups_secu: 
+        label: Groupe Secu
+        value: 
+            callback: displayUserGroupsSecu
                    
 views_lists: 
     default: 

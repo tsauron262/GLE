@@ -221,7 +221,7 @@ class BimpAbstractFollow extends BimpObject
     
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded($errors)) {
+        if (!in_array($action, array('generateListCsv')) && !$this->isLoaded($errors)) {
             return 0;
         }
 

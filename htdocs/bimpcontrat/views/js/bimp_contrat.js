@@ -137,7 +137,7 @@ function BimpContrat() {
                         total += qty_per_period;
                     }
                 }
-                
+
                 total = Math.round10(total, -nb_decimals);
 
                 $row.find('input[name="line_' + id_line + '_total_qty"]').val(total);
@@ -336,6 +336,30 @@ function BimpContrat() {
 
         extra_data['lines'] = lines;
 
+        return extra_data;
+    };
+
+    this.onAddUnitsFormSubmit = function ($form, extra_data) {
+        var lines = [];
+
+        $form.find('input.line_nb_units').each(function () {
+            var nb_units = parseInt($(this).val());
+
+            if (nb_units) {
+                var id_line = parseInt($(this).data('id_line'));
+                lines.push({
+                    'id_line': id_line,
+                    'nb_units': nb_units
+                });
+            }
+        });
+
+        if (!lines.length) {
+            bimp_msg('Aucune unité à ajouter ou retirer', 'danger');
+            return false;
+        }
+
+        extra_data.lines = lines;
         return extra_data;
     };
 }

@@ -810,8 +810,8 @@ class BCT_Contrat extends BimpDolObject
                     $prod_duration = 0;
                     if (BimpObject::objectLoaded($prod)) {
                         $prod_duration = (int) $prod->getData('duree');
-                        $desc .= $prod->getLink();
-                        $desc .= '<br/>Durée unitaire du produit : <b>' . $prod->getData('duree') . 'mois</b>';
+                        $desc .= $prod->getLink() . '<br/><b>' . $prod->getName() . '</b><br/>';
+                        $desc .= '<span style="color: #999999; font-size: 11px">' . BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Durée unitaire : ' . ($prod_duration ? $prod_duration . ' mois' : 'Non définie') . '</span>';
                     } else {
                         $prod_duration = 1;
                         $desc .= '<span class="danger">Le produit #' . $id_prod . ' n\'existe plus</span>';
@@ -846,6 +846,7 @@ class BCT_Contrat extends BimpDolObject
                             $nb_units = ($qty / $duration) * $prod_duration;
 
                             switch ((int) $line->getData('statut')) {
+                                case -2:
                                 case -1:
                                 case 0:
                                     $units['inactive'] += $nb_units;
@@ -866,13 +867,13 @@ class BCT_Contrat extends BimpDolObject
                             $dates = '';
 
                             if ((int) $line->getData('statut') > 0) {
-                                $dates .= 'Du ' . date('d / m / Y', strtotime($line->getData('date_ouverture')));
-                                $dates .= ' au ' . date('d / m / Y', strtotime($line->getData('date_fin_validite')));
+                                $dates .= 'Du <b>' . date('d / m / Y', strtotime($line->getData('date_ouverture'))) . '</b>';
+                                $dates .= ' au <b>' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . '</b>';
                             } else {
                                 $dates .= 'Ouverture prévue : ';
                                 $date_ouverture_prevue = $line->getData('date_ouverture_prevue');
                                 if ($date_ouverture_prevue) {
-                                    $dates .= date('d / m / Y', strtotime($date_ouverture_prevue));
+                                    $dates .= '<b>' . date('d / m / Y', strtotime($date_ouverture_prevue)) . '</b>';
                                 } else {
                                     $dates .= 'non définie';
                                 }
@@ -888,6 +889,16 @@ class BCT_Contrat extends BimpDolObject
                                 }
                             }
 
+                            $num = $line->getData('rang');
+
+                            $id_parent_line = (int) $line->getData('id_parent_line');
+                            if ($id_parent_line) {
+                                $parent_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_parent_line);
+                                if (BimpObject::objectLoaded($parent_line)) {
+                                    $num .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
+                                }
+                            }
+
                             $buttons_html = '';
 
                             foreach ($line->getListExtraBtn() as $button) {
@@ -895,8 +906,8 @@ class BCT_Contrat extends BimpDolObject
                             }
 
                             $lines_rows[] = array(
-                                'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc'),
-                                'n'         => array('content' => $line->getData('rang'), 'colspan' => ($is_sub_line ? 1 : 2)),
+                                'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
+                                'n'         => array('content' => $num, 'colspan' => ($is_sub_line ? 1 : 2)),
                                 'linked'    => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
                                 'statut'    => $line->displayDataDefault('statut'),
                                 'dates'     => $dates,
@@ -1284,7 +1295,7 @@ class BCT_Contrat extends BimpDolObject
     // Traitements : 
 
     public function addLinesToFacture($id_facture, $lines_data = null, $commit_each_line = false, $new_qties = true, &$nOk = 0)
-    {        
+    {
         // $commit_each_line : nécessaire pour le traitement des facturations périodiques.
         $errors = array();
 
@@ -1491,7 +1502,7 @@ class BCT_Contrat extends BimpDolObject
                         $pa_ht_fourn = $pfp->getData('price');
                     }
                 }
-                
+
                 $fac_line->qty = $line_qty;
                 $fac_line->desc = $line->getData('description');
                 $fac_line->id_product = (int) $line->getData('fk_product');
@@ -1767,6 +1778,27 @@ class BCT_Contrat extends BimpDolObject
         }
 
         return $errors;
+    }
+
+    public function createPropal($label, &$errors = array(), &$warnings = array())
+    {
+        $propal = null;
+
+        if ($this->isLoaded($errors)) {
+            $propal = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Propal', array(
+                        'fk_soc'            => $this->getData('fk_soc'),
+                        'libelle'           => $label,
+                        'datep'             => date('Y-m-d'),
+                        'entrepot'          => $this->getData('entrepot'),
+                        'ef_type'           => $this->getData('secteur'),
+                        'expertise'         => $this->getData('expertise'),
+                        'rib_client'        => $this->getData('rib_client'),
+                        'fk_cond_reglement' => $this->getData('condregl'),
+                        'fk_mode_reglement' => $this->getData('moderegl')
+                            ), true, $errors, $warnings);
+        }
+
+        return $propal;
     }
 
     // Actions : 
@@ -2271,7 +2303,7 @@ class BCT_Contrat extends BimpDolObject
         $nOk = 0;
         $bdb = self::getBdb();
         $id_group = BimpCore::getUserGroupId('console');
-        
+
         if ($id_group) {
             $where = 'a.date_ouverture_prevue IS NOT NULL AND a.date_ouverture_prevue < \'' . date('Y-m-d') . ' 00:00:00\' AND a.statut = 0';
             $where .= ' AND a.id_parent_line = 0 AND c.version = 2';

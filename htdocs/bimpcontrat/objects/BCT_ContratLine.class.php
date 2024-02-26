@@ -115,7 +115,13 @@ class BCT_ContratLine extends BimpObject
             }
         }
 
-        if ((int) $this->getData('statut') <= 0) {
+        $status = (int) $this->getData('statut');
+        if ($status === self::STATUS_ATT_PROPAL) {
+            $errors[] = 'En attente d\'acceptation du devis';
+            return 0;
+        }
+
+        if ($status <= 0) {
             return 1;
         }
 
@@ -290,12 +296,29 @@ class BCT_ContratLine extends BimpObject
                 }
                 break;
 
-//            case 'addUnits':
-//                if ($this->isLoaded()) {
-//                    if ((int) $this->getData('')) {
-//                        
-//                    }
-//                }
+            case 'addUnits':
+                if ($this->isLoaded()) {
+                    if ((int) $this->getData('statut') != self::STATUS_ACTIVE) {
+                        $errors[] = 'Cette ligne n\'est pas active';
+                        return 0;
+                    }
+
+                    if ((int) $this->getData('id_parent_line')) {
+                        $errors[] = 'Sous-ligne : veuillez ajouter les unités à la ligne parente';
+                        return 0;
+                    }
+
+                    if ($this->getDateFinReele() <= date('Y-m-d') . ' 00:00:00') {
+                        $errors[] = 'Date de fin dépassée';
+                        return 0;
+                    }
+
+                    if ($this->isResiliated()) {
+                        $errors[] = 'Cet abonnement est en cours de résiliation';
+                        return 0;
+                    }
+                }
+                return 1;
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -340,6 +363,15 @@ class BCT_ContratLine extends BimpObject
         }
 
         return 0;
+    }
+
+    public function areBulkActionsAllowed()
+    {
+        if ((int) $this->getData('id_parent_line')) {
+            return 0;
+        }
+
+        return 1;
     }
 
     // Getters params:
@@ -464,16 +496,19 @@ class BCT_ContratLine extends BimpObject
                 'icon'    => 'fas_list',
                 'onclick' => $this->getJsLoadModalCustomContent('renderFacAchatsSynthese', 'Facturation / achats ' . (BimpObject::objectLoaded($prod) ? ' - ' . $prod->getRef() . ' ' . $prod->getName() : ''))
             );
+        }
 
-            if ($this->isActionAllowed('deactivate') && $this->canSetAction('deactivate')) {
-                $buttons[] = array(
-                    'label'   => 'Désactiver',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('deactivate', array(), array(
-                        'confirm_msg' => 'Veuillez confirmer'
-                    ))
-                );
-            }
+        if ($this->isActionAllowed('addUnits') && $this->canSetAction('addUnits')) {
+            $buttons[] = array(
+                'label'   => 'Ajouter / retirer des unités',
+                'icon'    => 'fas_plus',
+                'onclick' => $this->getJsActionOnclick('addUnits', array(
+                    'id_objects' => array($this->id)
+                        ), array(
+                    'form_name'      => 'add_units',
+                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onAddUnitsFormSubmit($form, extra_data); }'
+                ))
+            );
         }
 
         if ($this->isActionAllowed('facRegul') && $this->canSetAction('facRegul')) {
@@ -482,6 +517,17 @@ class BCT_ContratLine extends BimpObject
                 'icon'    => 'fas_file-medical',
                 'onclick' => $this->getJsActionOnclick('facRegul', array(), array(
                     'form_name' => 'fac_regul'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('renouv') && $this->canSetAction('renouv')) {
+            $buttons[] = array(
+                'label'   => 'Renouveller',
+                'icon'    => 'fas_redo',
+                'onclick' => $this->getJsActionOnclick('renouv', array(), array(
+                    'form_name'      => 'renouvellement',
+                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onRenouvAbonnementFormSubmit($form, extra_data); }'
                 ))
             );
         }
@@ -497,13 +543,12 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
-        if ($this->isActionAllowed('renouv') && $this->canSetAction('renouv')) {
+        if ($this->isActionAllowed('deactivate') && $this->canSetAction('deactivate')) {
             $buttons[] = array(
-                'label'   => 'Renouveller',
-                'icon'    => 'fas_redo',
-                'onclick' => $this->getJsActionOnclick('renouv', array(), array(
-                    'form_name'      => 'renouvellement',
-                    'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onRenouvAbonnementFormSubmit($form, extra_data); }'
+                'label'   => 'Désactiver',
+                'icon'    => 'fas_times',
+                'onclick' => $this->getJsActionOnclick('deactivate', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer'
                 ))
             );
         }
@@ -587,6 +632,19 @@ class BCT_ContratLine extends BimpObject
         }
 
         if (in_array($list_name, array('contrat'))) {
+            if ($this->canSetAction('addUnits')) {
+                $actions[] = array(
+                    'label'   => 'Ajouter / retirer des unités aux lignes sélectionnées',
+                    'icon'    => 'fas_plus',
+                    'onclick' => $this->getJsBulkActionOnclick('addUnits', array(
+                        'fk_contrat' => $id_contrat
+                            ), array(
+                        'form_name'      => 'add_units',
+                        'on_form_submit' => 'function($form, extra_data) { return BimpContrat.onAddUnitsFormSubmit($form, extra_data); }'
+                    ))
+                );
+            }
+
             if ($this->canSetAction('renouv')) {
                 $actions[] = array(
                     'label'   => 'Renouveller les lignes sélectionnées',
@@ -660,6 +718,21 @@ class BCT_ContratLine extends BimpObject
     }
 
     // Getters données:
+
+    public function getLastClientPropalId()
+    {
+        $contrat = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($contrat)) {
+            $id_client = (int) $contrat->getData('fk_soc');
+
+            if ($id_client) {
+                return (int) $this->db->getValue('propal', 'rowid', 'fk_soc = ' . $id_client . ' AND fk_statut = 0', 'rowid', 'desc');
+            }
+        }
+
+        return -1;
+    }
 
     public function getDataAtDate($field_name, $date = null)
     {
@@ -2400,7 +2473,7 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
-    public function displayProduct($display = 'ref_nom')
+    public function displayProduct($display = 'ref_nom', $single_line = true, $include_duration = false)
     {
         $html = '';
         $product = $this->getChildObject('product');
@@ -2416,12 +2489,21 @@ class BCT_ContratLine extends BimpObject
                     break;
 
                 case 'ref_nom':
-                    $html .= $product->getRef() . ' - ' . $product->getName();
+                    $html .= $product->getRef() . ($single_line ? ' - ' : '<br/>' ) . $product->getName();
                     break;
 
                 case 'nom_url':
                     $html .= $product->getLink();
                     break;
+
+                case 'link_nom':
+                    $html .= $product->getLink() . ($single_line ? ' - ' : '<br/>' ) . $product->getName();
+            }
+
+            if ($include_duration) {
+                $duree = $product->getData('duree');
+                $html .= ($single_line ? ' ' : '<br/>');
+                $html .= '<span style="color: #999999">' . BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . ($duree ? $duree : 'Non définie') . ' mois</span>';
             }
         }
 
@@ -2506,10 +2588,6 @@ class BCT_ContratLine extends BimpObject
                 $msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
                 $msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
                 $html .= BimpRender::renderAlerts($msg, 'warning');
-            }
-
-            if (BimpCore::isUserDev()) {
-                $html .= BimpRender::renderFoldableContainer('Infos dev', '<pre>' . print_r($periods_data, 1) . '</pre>', array('open' => false));
             }
         } else {
             $html .= BimpRender::renderAlerts($errors);
@@ -4845,6 +4923,102 @@ class BCT_ContratLine extends BimpObject
         return $html;
     }
 
+    public function renderAddUnitsInputs()
+    {
+        $errors = array();
+        $html = '';
+
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
+
+        if (empty($id_lines)) {
+            $errors[] = 'Aucune ligne sélectionnée';
+        } else {
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th>Ligne</th>';
+            $html .= '<th style="text-align: center">Unités à ajouter / retirer</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+
+            $html .= '<tbody>';
+
+            foreach ($id_lines as $id_line) {
+                $line_errors = array();
+                $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+
+                $line_label = '';
+                if (BimpObject::objectLoaded($line)) {
+                    $id_linked_line = (int) $line->getData('id_linked_line');
+                    if ($id_linked_line && in_array($id_linked_line, $id_lines)) {
+                        $linked_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_line);
+                        if (BimpObject::objectLoaded($linked_line) && (int) $linked_line->getData('fk_product') === (int) $line->getData('fk_product')) {
+                            continue;
+                        }
+                    }
+
+                    $line->isActionAllowed('addUnits', $line_errors);
+
+                    $extra_lines = array();
+
+                    $rows = $this->db->getRows('contratdet', 'id_linked_line = ' . $line->id . ' AND fk_product = ' . (int) $line->getData('fk_product'), null, 'array', array('rowid', 'rang'));
+                    if (is_array($rows)) {
+                        foreach ($rows as $r) {
+                            if (in_array((int) $r['rowid'], $id_lines)) {
+                                $extra_lines[] = $r['rang'];
+                            }
+                        }
+                    } else {
+                        die($this->db->err());
+                    }
+
+                    if (empty($extra_lines)) {
+                        $line_label = 'Ligne n° ' . $line->getData('rang');
+                    } else {
+                        $line_label = 'Lignes n° ' . $line->getData('rang') . ', ' . implode(', ', $extra_lines);
+                    }
+
+                    $prod = $line->getChildObject('product');
+                    if (BimpObject::objectLoaded($prod)) {
+                        $line_label .= '<br/>' . $prod->getLink();
+                        $line_label .= '<br/>' . $prod->getName();
+                    }
+                } else {
+                    $line_errors[] = 'cette ligne n\'existe plus';
+                    $line_label = 'Ligne #' . $id_line;
+                }
+
+                $html .= '<tr>';
+                $html .= '<td>' . $line_label . '</td>';
+
+                if (count($line_errors)) {
+                    $html .= '<td>';
+                    $html .= '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
+                    $html .= '</td>';
+                } else {
+                    $html .= '<td style="text-align: center">';
+                    $html .= BimpInput::renderInput('qty', 'line_' . $id_line . '_nb_units', 1, array(
+                                'extra_class' => 'line_nb_units',
+                                'data'        => array(
+                                    'id_line'  => $line->id,
+                                    'decimals' => 0
+                                )
+                    ));
+                    $html .= '</td>';
+                }
+                $html .= '</tr>';
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+        return $html;
+    }
+
     // Traitements:
 
     public function checkLinkedLine(&$errors = array())
@@ -5325,7 +5499,7 @@ class BCT_ContratLine extends BimpObject
         }
     }
 
-    public function renouvAbonnement($options = array(), &$errors = array(), &$warnings = array(), &$success = '', &$success_callback = '')
+    public function renouvAbonnement($options = array(), &$lines_renouv = array(), &$errors = array(), &$warnings = array(), &$success = '', &$success_callback = '')
     {
         if (!$this->isLoaded($errors)) {
             return;
@@ -5380,7 +5554,7 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 $where = 'fk_contrat = ' . $contrat->id . ' AND (rowid = ' . $id_linked_line . ' OR id_linked_line = ' . $id_linked_line . ')';
-                $where .= ' AND fk_product = ' . $this->getData('fk_product') . ' AND rowid != ' . $this->id;
+                $where .= ' AND fk_product = ' . $this->getData('fk_product') . ' AND rowid != ' . $this->id . ' AND id_line_renouv = 0';
 
                 $rows = $this->db->getRows('contratdet', $where, null, 'array', array('rowid'));
 
@@ -5417,7 +5591,6 @@ class BCT_ContratLine extends BimpObject
                 if (!$qty) {
                     $errors[] = 'Aucune unité à renouveller';
                 } else {
-                    $is_bundle = $prod->isBundle();
                     $pa_ht = (float) $this->getData('buy_price_ht');
                     $id_pfp = (int) $this->getData('fk_product_fournisseur_price');
                     if ($id_pfp) {
@@ -5466,8 +5639,8 @@ class BCT_ContratLine extends BimpObject
                                     'duration'                     => $options['duration'],
                                     'fac_term'                     => $options['fac_term'],
                                     'nb_renouv'                    => $nb_renouv,
-                                    'id_line_origin'               => $this->id,
-                                    'line_origin_type'             => 'contrat_line',
+                                    'id_line_origin'               => ($options['id_propal'] < 0 ? $this->id : 0),
+                                    'line_origin_type'             => ($options['id_propal'] < 0 ? 'contrat_line' : ''),
                                     'achat_periodicity'            => $options['achat_periodicity'],
                                     'variable_qty'                 => $this->getData('variable_qty'),
                                     'date_ouverture_prevue'        => $dt_ouv->format('Y-m-d') . ' 00:00:00'
@@ -5484,6 +5657,8 @@ class BCT_ContratLine extends BimpObject
                                 if (count($line_errors)) {
                                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $new_line->getData('rang') . ' : échec de l\'enregistrement de l\'ID de la ligne de renouvellement');
                                 }
+
+                                $lines_renouv[] = $id_line;
                             }
 
                             if (!count($errors) && $options['id_propal'] >= 0) {
@@ -5493,125 +5668,20 @@ class BCT_ContratLine extends BimpObject
                                         $errors[] = 'Le devis #' . $options['id_propal'] . ' n\'existe plus';
                                     }
                                 } else {
-                                    $propal = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Propal', array(
-                                                'fk_soc'            => $contrat->getData('fk_soc'),
-                                                'libelle'           => $options['propal_label'],
-                                                'datep'             => date('Y-m-d'),
-                                                'entrepot'          => $contrat->getData('entrepot'),
-                                                'ef_type'           => $contrat->getData('secteur'),
-                                                'expertise'         => $contrat->getData('expertise'),
-                                                'rib_client'        => $contrat->getData('rib_client'),
-                                                'fk_cond_reglement' => $contrat->getData('condregl'),
-                                                'fk_mode_reglement' => $contrat->getData('moderegl')
-                                                    ), true, $errors, $warnings);
+                                    $propal_errors = array();
+                                    $propal = $contrat->createPropal($options['propal_label'], $propal_errors, $warnings);
 
-                                    if (!count($errors)) {
+                                    if (count($propal_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($propal_errors, 'Echec de la création du devis');
+                                    } else {
                                         $success .= ($success ? '<br/>' : '') . 'Création du devis ' . $propal->getLink() . ' OK';
                                     }
                                 }
 
                                 if (!count($errors)) {
-                                    $propal_line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
+                                    $new_line->createLinkedPropalLine($propal, array(), $errors, $warnings, $success);
 
-                                    if ($is_bundle) {
-                                        $propal_line->no_maj_bundle = true;
-                                    }
-
-                                    $propal_line->id_product = $prod->id;
-                                    $propal_line->product_type = $this->getData('product_type');
-                                    $propal_line->desc = $this->getData('description');
-                                    $propal_line->qty = $qty;
-                                    $propal_line->pu_ht = $options['subprice'];
-                                    $propal_line->tva_tx = $prod->getData('tva_tx');
-                                    $propal_line->pa_ht = $pa_ht;
-                                    $propal_line->id_fourn_price = $pfp;
-                                    $propal_line->remise = $this->getData('remise_percent');
-                                    $propal_line->date_from = $dt_ouv->format('Y-m-d') . ' 00:00:00';
-
-                                    $err = $propal_line->validateArray(array(
-                                        'id_obj'              => $propal->id,
-                                        'type'                => 1,
-                                        'abo_fac_periodicity' => $options['fac_periodicity'],
-                                        'abo_duration'        => $options['duration'],
-                                        'abo_fac_term'        => $options['fac_term'],
-                                        'abo_nb_renouv'       => $nb_renouv
-                                    ));
-
-                                    if (!count($err)) {
-                                        $err = $propal_line->create($warnings, true);
-                                    }
-
-                                    if (count($err)) {
-                                        $errors[] = BimpTools::getMsgFromArray($err, 'Echec de l\'ajout de la ligne au devis');
-                                    } else {
-
-                                        $new_line->set('line_origin_type', 'propal_line');
-                                        $new_line->set('id_line_origin', $propal_line->id);
-
-                                        $err = $new_line->update($warnings, true);
-                                        if (count($err)) {
-                                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat');
-                                        }
-
-                                        $success .= ($success ? '<br/>' : '') . 'Ajout de la ligne au devis OK';
-
-                                        if ($is_bundle) {
-                                            // Ajout des sous-lignes de bundle au devis : 
-                                            foreach (BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
-                                                'id_parent_line' => $new_line->id
-                                            )) as $bundle_line) {
-                                                $bundle_propal_line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
-                                                $bundle_propal_line->no_maj_bundle = true;
-
-                                                $bundle_propal_line->id_product = $bundle_line->getData('fk_product');
-                                                $bundle_propal_line->product_type = $bundle_line->getData('product_type');
-                                                $bundle_propal_line->desc = $bundle_line->getData('description');
-                                                $bundle_propal_line->qty = $bundle_line->getData('qty');
-                                                $bundle_propal_line->pu_ht = $bundle_line->getData('subprice');
-                                                $bundle_propal_line->tva_tx = $bundle_line->getData('tva_tx');
-                                                $bundle_propal_line->pa_ht = $bundle_line->getData('buy_price_ht');
-                                                $bundle_propal_line->id_fourn_price = $bundle_line->getData('fk_product_fournisseur_price');
-                                                $bundle_propal_line->remise = $bundle_line->getData('remise_percent');
-                                                $bundle_propal_line->date_from = $bundle_line->getData('date_ouverture_prevue');
-
-                                                $err = $bundle_propal_line->validateArray(array(
-                                                    'id_obj'              => $propal->id,
-                                                    'id_parent_line'      => $propal_line->id,
-                                                    'type'                => ($bundle_line->getData('linked_object_name') === 'bundleCorrect' ? ObjectLine::LINE_FREE : ObjectLine::LINE_PRODUCT),
-                                                    'editable'            => 0,
-                                                    'deletable'           => 0,
-                                                    'linked_object_name'  => $bundle_line->getData('linked_object_name'),
-                                                    'linked_id_object'    => $bundle_line->getData('linked_id_object'),
-                                                    'abo_fac_periodicity' => $bundle_line->getData('fac_periodicity'),
-                                                    'abo_duration'        => $bundle_line->getData('duration'),
-                                                    'abo_fac_term'        => $bundle_line->getData('fac_term'),
-                                                    'abo_nb_renouv'       => $bundle_line->getData('nb_renouv'),
-                                                ));
-
-                                                if ($bundle_line->getData('linked_object_name') === 'bundleCorrect') {
-                                                    $bundle_propal_line->set('remisable', 2);
-                                                }
-
-                                                if (!count($err)) {
-                                                    $err = $bundle_propal_line->create($warnings, true);
-                                                }
-
-                                                if (count($err)) {
-                                                    $bundle_prod = $bundle_line->getChildObject('product');
-                                                    $errors[] = BimpTools::getMsgFromArray($err, 'Echec de l\'ajout d\une sous-ligne de bundle au devis (Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ')');
-                                                } else {
-                                                    $bundle_line->set('line_origin_type', 'propal_line');
-                                                    $bundle_line->set('id_line_origin', $bundle_propal_line->id);
-
-                                                    $err = $bundle_line->update($warnings, true);
-                                                    if (count($err)) {
-                                                        $bundle_prod = $bundle_line->getChildObject('product');
-                                                        $errors[] = BimpTools::getMsgFromArray($err, 'Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ' : Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat ');
-                                                    }
-                                                }
-                                            }
-                                        }
-
+                                    if (!count($errors)) {
                                         $url = $propal->getUrl();
 
                                         if ($url) {
@@ -5668,6 +5738,280 @@ class BCT_ContratLine extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function createLinkedLine($nb_units, &$id_propal = -1, $options = array(), &$errors = array(), &$warnings = array(), &$success = '', &$success_callback = '')
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        if (!(float) $nb_units) {
+            $errors[] = 'Aucune unité à ajouter ou retirer';
+        }
+
+        $prod = $this->getChildObject('product');
+        $options = BimpTools::overrideArray(array(
+                    'propal_label'          => '',
+                    'date_ouverture_prevue' => null
+                        ), $options);
+
+        $contrat = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($contrat)) {
+            $errors[] = 'Contrat lié absent';
+        }
+
+        if (!BimpObject::objectLoaded($prod)) {
+            $errors[] = 'Produit lié absent';
+        } else {
+            $duration = (int) $this->getData('duration');
+            $fac_periodicity = (int) $this->getData('fac_periodicity');
+            $date_fin = $this->getData('date_fin_validite');
+
+            $prod_duration = 0;
+            if (BimpObject::objectLoaded($prod)) {
+                $prod_duration = (int) $prod->getData('duree');
+            }
+            if (!$prod_duration) {
+                $errors[] = 'Durée unitaire du produit non définie';
+            }
+
+            if (!$duration) {
+                $errors[] = 'Durée de l\'abonnement non définie';
+            }
+
+            if (!$fac_periodicity) {
+                $errors[] = 'Périodicité de facturation non définie';
+            }
+
+            if (!$date_fin) {
+                $errors[] = 'La date de fin de validité non définie';
+            }
+
+            if (!count($errors)) {
+                if ($duration % $fac_periodicity != 0) {
+                    $errors[] = 'La durée totale de l\'abonnement doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $fac_periodicity . ' mois)';
+                }
+                if ($duration % $prod_duration != 0) {
+                    $errors[] = 'La durée totale de l\'abonnement  doit être un multiple de la durée unitaire de produit (' . $prod_duration . ' mois)';
+                } elseif ($duration < $prod_duration) {
+                    $errors[] = 'La durée totale de l\'abonnement ne peut pas être inférieure à la durée unitaire de produit (' . $prod_duration . ' mois)';
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $qty = $nb_units * ($duration / $prod_duration);
+            $pa_ht = (float) $this->getData('buy_price_ht');
+            $id_pfp = (int) $this->getData('fk_product_fournisseur_price');
+            if ($id_pfp) {
+                $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
+
+                if (BimpObject::objectLoaded($pfp)) {
+                    $pa_ht = (float) $pfp->getData('price');
+                }
+            }
+
+            $id_linked_line = $this->id;
+            if ($this->getData('id_linked_line')) {
+                $id_linked_line = (int) $this->getData('id_linked_line');
+            }
+
+            $new_line = BimpObject::createBimpObject('bimpcontrat', 'BCT_ContratLine', array(
+                        'fk_contrat'                   => $this->getData('fk_contrat'),
+                        'fk_product'                   => $prod->id,
+                        'label'                        => $this->getData('label'),
+                        'statut'                       => ($options['id_propal'] >= 0 ? self::STATUS_ATT_PROPAL : 0),
+                        'line_type'                    => BCT_ContratLine::TYPE_ABO,
+                        'description'                  => $this->getData('description'),
+                        'product_type'                 => $this->getData('product_type'),
+                        'id_linked_line'               => $id_linked_line,
+                        'qty'                          => $qty,
+                        'subprice'                     => $prod->getData('price'),
+                        'tva_tx'                       => $prod->getData('tva_tx'),
+                        'remise_percent'               => $this->getData('remise_percent'),
+                        'fk_product_fournisseur_price' => $id_pfp,
+                        'buy_price_ht'                 => $pa_ht,
+                        'fac_periodicity'              => $fac_periodicity,
+                        'duration'                     => $duration,
+                        'fac_term'                     => $this->getData('fac_term'),
+                        'nb_renouv'                    => $this->getData('nb_renouv'),
+                        'id_line_origin'               => ($id_propal < 0 ? $this->id : 0),
+                        'line_origin_type'             => ($id_propal < 0 ? 'contrat_line' : ''),
+                        'achat_periodicity'            => $this->getData('achat_periodicity'),
+                        'variable_qty'                 => $this->getData('variable_qty'),
+                        'date_ouverture_prevue'        => ($options['date_ouverture_prevue'] ? date('Y-m-d', strtotime($options['date_ouverture_prevue'])) . ' 00:00:00' : null)
+                            ), true, $errors, $warnings);
+
+            if (!count($errors)) {
+                $success .= ($success ? '<br/>' : '') . 'Création de la nouvelle ligne de contrat OK';
+
+                if (!count($errors) && $id_propal >= 0) {
+                    if ($id_propal) {
+                        $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+                        if (!BimpObject::objectLoaded($propal)) {
+                            $errors[] = 'Le devis #' . $id_propal . ' n\'existe plus';
+                        }
+                    } else {
+                        $propal_errors = array();
+                        $propal = $contrat->createPropal($options['propal_label'], $propal_errors, $warnings);
+
+                        if (count($propal_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($propal_errors, 'Echec de la création du devis');
+                        } else {
+                            $id_propal = $propal->id;
+                            $success .= ($success ? '<br/>' : '') . 'Création du devis ' . $propal->getLink() . ' OK';
+                        }
+                    }
+
+                    if (!count($errors)) {
+                        $new_line->createLinkedPropalLine($propal, array(
+                            'id_linked_contrat_line' => $id_linked_line
+                                ), $errors);
+
+                        if (!count($errors)) {
+                            $url = $propal->getUrl();
+
+                            if ($url) {
+                                $success_callback .= 'window.open(\'' . $url . '\');';
+                            }
+                        }
+                    }
+                }
+
+                return $new_line->id;
+            }
+        }
+
+        return 0;
+    }
+
+    public function createLinkedPropalLine($propal, $options = array(), &$errors = array(), &$warnings = array(), &$success = '')
+    {
+        $options = BimpTools::overrideArray(array(
+                    'id_linked_contrat_line' => 0
+                        ), $options);
+        if (!$this->isLoaded($errors)) {
+            return null;
+        }
+
+        $prod = $this->getChildObject('product');
+        if (!BimpObject::objectLoaded($prod)) {
+            $errors[] = 'Aucun produit';
+            return null;
+        }
+
+        if ((int) $this->getData('id_line_origin')) {
+            $errors[] = 'Impossible d\'ajouter une ligne de devis à partir de cette ligne de contrat. Celle-ci est déjà liée à une pièce d\'origine';
+            return null;
+        }
+
+        $is_bundle = $prod->isBundle();
+        $propal_line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
+
+        if ($is_bundle) {
+            $propal_line->no_maj_bundle = true;
+        }
+
+        $propal_line->id_product = $prod->id;
+        $propal_line->product_type = $this->getData('product_type');
+        $propal_line->desc = $this->getData('description');
+        $propal_line->qty = $this->getData('qty');
+        $propal_line->pu_ht = $this->getData('subprice');
+        $propal_line->tva_tx = $prod->getData('tva_tx');
+        $propal_line->pa_ht = $this->getData('buy_price_ht');
+        $propal_line->id_fourn_price = $this->getData('fk_product_fournisseur_price');
+        $propal_line->remise = $this->getData('remise_percent');
+        $propal_line->date_from = $this->getData('date_ouverture_prevue');
+
+        $propal_line_errors = $propal_line->validateArray(array(
+            'id_obj'                 => $propal->id,
+            'type'                   => 1,
+            'abo_fac_periodicity'    => $this->getData('fac_periodicity'),
+            'abo_duration'           => $this->getData('duration'),
+            'abo_fac_term'           => $this->getData('fac_term'),
+            'abo_nb_renouv'          => $this->getData('nb_renouv'),
+            'id_linked_contrat_line' => $options['id_linked_contrat_line']
+        ));
+
+        if (!count($propal_line_errors)) {
+            $propal_line_errors = $propal_line->create($warnings, true);
+        }
+
+        if (count($propal_line_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($propal_line_errors, 'Echec de l\'ajout de la ligne au devis ' . $propal->getLink());
+        } else {
+            $this->set('line_origin_type', 'propal_line');
+            $this->set('id_line_origin', $propal_line->id);
+
+            $err = $this->update($warnings, true);
+            if (count($err)) {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat');
+            }
+
+            $success .= ($success ? '<br/>' : '') . 'Ajout de la ligne au devis ' . $propal->getLink() . ' OK';
+
+            if ($is_bundle) {
+                // Ajout des sous-lignes de bundle au devis : 
+                foreach (BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+                    'id_parent_line' => $this->id
+                )) as $bundle_line) {
+                    $bundle_propal_line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
+                    $bundle_propal_line->no_maj_bundle = true;
+
+                    $bundle_propal_line->id_product = $bundle_line->getData('fk_product');
+                    $bundle_propal_line->product_type = $bundle_line->getData('product_type');
+                    $bundle_propal_line->desc = $bundle_line->getData('description');
+                    $bundle_propal_line->qty = $bundle_line->getData('qty');
+                    $bundle_propal_line->pu_ht = $bundle_line->getData('subprice');
+                    $bundle_propal_line->tva_tx = $bundle_line->getData('tva_tx');
+                    $bundle_propal_line->pa_ht = $bundle_line->getData('buy_price_ht');
+                    $bundle_propal_line->id_fourn_price = $bundle_line->getData('fk_product_fournisseur_price');
+                    $bundle_propal_line->remise = $bundle_line->getData('remise_percent');
+                    $bundle_propal_line->date_from = $bundle_line->getData('date_ouverture_prevue');
+
+                    $err = $bundle_propal_line->validateArray(array(
+                        'id_obj'              => $propal->id,
+                        'id_parent_line'      => $propal_line->id,
+                        'type'                => ($bundle_line->getData('linked_object_name') === 'bundleCorrect' ? ObjectLine::LINE_FREE : ObjectLine::LINE_PRODUCT),
+                        'editable'            => 0,
+                        'deletable'           => 0,
+                        'linked_object_name'  => $bundle_line->getData('linked_object_name'),
+                        'linked_id_object'    => $bundle_line->getData('linked_id_object'),
+                        'abo_fac_periodicity' => $bundle_line->getData('fac_periodicity'),
+                        'abo_duration'        => $bundle_line->getData('duration'),
+                        'abo_fac_term'        => $bundle_line->getData('fac_term'),
+                        'abo_nb_renouv'       => $bundle_line->getData('nb_renouv'),
+                    ));
+
+                    if ($bundle_line->getData('linked_object_name') === 'bundleCorrect') {
+                        $bundle_propal_line->set('remisable', 2);
+                    }
+
+                    if (!count($err)) {
+                        $err = $bundle_propal_line->create($warnings, true);
+                    }
+
+                    if (count($err)) {
+                        $bundle_prod = $bundle_line->getChildObject('product');
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Echec de l\'ajout d\une sous-ligne de bundle au devis (Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ')');
+                    } else {
+                        $bundle_line->set('line_origin_type', 'propal_line');
+                        $bundle_line->set('id_line_origin', $bundle_propal_line->id);
+
+                        $err = $bundle_line->update($warnings, true);
+                        if (count($err)) {
+                            $bundle_prod = $bundle_line->getChildObject('product');
+                            $errors[] = BimpTools::getMsgFromArray($err, 'Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ' : Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat ');
+                        }
+                    }
+                }
+            }
+
+            return $propal_line;
+        }
+
+        return null;
     }
 
     // Gestion positions:
@@ -6311,6 +6655,8 @@ class BCT_ContratLine extends BimpObject
             }
         }
 
+        $lines_renouv = array();
+
         if ($this->isLoaded()) {
             $fac_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'fac_periodicity', 0);
             $achat_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'achat_periodicity', 0);
@@ -6355,7 +6701,7 @@ class BCT_ContratLine extends BimpObject
                         'duration'          => $duration,
                         'fac_term'          => $fac_term,
                         'lines'             => $lines
-                            ), $errors, $warnings, $success, $sc);
+                            ), $lines_renouv, $errors, $warnings, $success, $sc);
                 }
             }
         } else {
@@ -6365,28 +6711,26 @@ class BCT_ContratLine extends BimpObject
                 $errors[] = 'Aucune ligne sélectionnée';
             } else {
                 $nOk = 0;
-                $lines_renouv = array();
                 foreach ($lines as $id_line) {
                     $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
 
                     if (!BimpObject::objectLoaded($line)) {
-                        $warnings[] = 'La ligné #' . $id_line . ' n\'existe plus';
+                        $warnings[] = 'La ligne #' . $id_line . ' n\'existe plus';
                     } else {
-                        if (in_array((int) $line->getData('id_line_renouv'), $lines_renouv)) {
+                        if (in_array($line->id, $lines_renouv)) {
                             continue;
                         }
 
                         $line_errors = array();
 
                         if ($line->isActionAllowed('renouv', $line_errors)) {
-                            $id_line_renouv = $line->renouvAbonnement(array(
+                            $line->renouvAbonnement(array(
                                 'id_propal'    => $id_propal,
                                 'propal_label' => $propal_label
-                                    ), $line_errors);
+                                    ), $lines_renouv, $line_errors);
 
                             if (!count($line_errors)) {
                                 $nOk++;
-                                $lines_renouv[] = $id_line_renouv;
 
                                 if (!$id_propal) {
                                     $id_propal_line = (int) $this->db->getValue('contratdet', 'id_line_origin', 'rowid = ' . (int) $line->getData('id_line_renouv'));
@@ -6467,6 +6811,84 @@ class BCT_ContratLine extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionAddUnits($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+        $lines = BimpTools::getArrayValueFromPath($data, 'lines', array());
+        if (empty($lines)) {
+            $errors[] = 'Aucune ligne sélectionnée';
+        } else {
+            $id_propal = (int) BimpTools::getArrayValueFromPath($data, 'id_propal', -1);
+            $propal_label = '';
+
+            if ($id_propal === 0) {
+                $propal_label = BimpTools::getArrayValueFromPath($data, 'propal_label', '');
+
+                if (!$propal_label) {
+                    $errors[] = 'Veuillez saisir le libellé du nouveau devis';
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $date_ouv = BimpTools::getArrayValueFromPath($data, 'date_ouv', null);
+            $nOk = 0;
+            foreach ($lines as $line_data) {
+                if (!(float) $line_data['nb_units']) {
+                    continue;
+                }
+
+                $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $line_data['id_line']);
+
+                if (!BimpObject::objectLoaded($line)) {
+                    $warnings[] = 'La ligne #' . $line_data['id_line'] . ' n\'existe plus';
+                } else {
+                    $line_errors = array();
+
+                    if ($line->isActionAllowed('addUnits', $line_errors)) {
+                        $line->createLinkedLine($line_data['nb_units'], $id_propal, array(
+                            'propal_label'          => $propal_label,
+                            'date_ouverture_prevue' => $date_ouv
+                                ), $line_errors);
+
+                        if (!count($line_errors)) {
+                            $nOk++;
+                        }
+                    }
+
+                    if (count($line_errors)) {
+                        $contrat = $line->getParentInstance();
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Contrat ' . (BimpObject::objectLoaded($contrat) ? $contrat->getRef() : '#' . $line->getData('fk_contrat')) . ' - Ligne n° ' . $line->getData('rang') . ' : échec de l\'ajout d\'unité');
+                    }
+                }
+            }
+
+            if ($nOk) {
+                $s = ($nOk > 1 ? 's' : '');
+                $success = $nOk . ' ligne' . $s . ' traitée' . $s . ' avec succès';
+                if ($id_propal > 0) {
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+                    if (BimpObject::objectLoaded($propal)) {
+                        $url = $propal->getUrl();
+                        if ($url) {
+                            $sc = 'window.open(\'' . $url . '\');';
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
         );
     }
 

@@ -57,7 +57,7 @@ class BCT_ContratLine extends BimpObject
         switch ($action) {
             case 'facturationAvance':
             case 'activate':
-                return (int) !empty($user->rights->bimpcontract->to_validate);
+                return (int) ($user->admin || !empty($user->rights->bimpcontract->to_validate));
 
             case 'periodicFacProcess':
                 return 1;
@@ -466,7 +466,7 @@ class BCT_ContratLine extends BimpObject
     {
         $buttons = array();
 
-        if ($this->isActionAllowed('activate') && $this->canSetAction('activate')) {
+        if ($this->isActionAllowed('activate', $err)/* && $this->canSetAction('activate')*/) {
             $buttons[] = array(
                 'label'   => 'Activer',
                 'icon'    => 'fas_check-circle',
@@ -474,7 +474,12 @@ class BCT_ContratLine extends BimpObject
                     'form_name' => 'activate'
                 ))
             );
-        }
+        } 
+//        else {
+//            echo '<pre>';
+//            print_r($err);
+//            exit;
+//        }
 
         if ((int) $this->getData('statut') > 0) {
             $prod = $this->getChildObject('product');

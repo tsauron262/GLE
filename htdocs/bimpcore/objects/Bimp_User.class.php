@@ -521,6 +521,30 @@ class Bimp_User extends BimpObject
         return $buttons;
     }
 
+    public function getListExtraBulkActions()
+    {
+        global $user;
+
+        $actions = array();
+
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('solvabilite_status')) {
+            $actions[] = array(
+                'label'   => 'Editer statut',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
+                    'field_name'   => 'statut',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                        ), array(
+                    'form_name' => 'bulk_edit_field'
+                ))
+            );
+        }
+
+
+        return $actions;
+    }
+
     public function getEditFormName()
     {
         global $user;

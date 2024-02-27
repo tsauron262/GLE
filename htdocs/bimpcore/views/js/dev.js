@@ -131,6 +131,13 @@ function BimpModuleConf() {
         }
 
         var param_name = $input.attr('name');
+        var parent_path = '';
+        var $row = $input.findParentByClass('sub_params_row');
+
+        if ($.isOk($row)) {
+            parent_path = $row.data('parent_full_path');
+        }
+        
         var value = $input.val();
         var id_entity = parseInt($input.data('id_entity'));
 
@@ -145,7 +152,7 @@ function BimpModuleConf() {
         }
 
         // Save: 
-        bmc.saveParam(module_name, param_name, value, id_entity);
+        bmc.saveParam(module_name, param_name, value, id_entity, parent_path);
     };
 
     this.checkAllSubParamsDisplay = function (module, $container) {
@@ -210,9 +217,13 @@ function BimpModuleConf() {
         }
     };
 
-    this.saveParam = function (module, param_name, value, id_entity) {
+    this.saveParam = function (module, param_name, value, id_entity, parent_path) {
         if (typeof (id_entity) === 'undefined') {
             id_entity = 0;
+        }
+
+        if (typeof (parent_path) === 'undefined') {
+            parent_path = '';
         }
 
         var entity_type = 'all';
@@ -222,6 +233,7 @@ function BimpModuleConf() {
 
         BimpAjax('saveModuleConfParam', {
             module: module,
+            parent_path: parent_path,
             param_name: param_name,
             value: value,
             id_entity: id_entity,
@@ -242,9 +254,13 @@ function BimpModuleConf() {
         });
     };
 
-    this.removeParam = function (module, param_name, id_entity) {
+    this.removeParam = function (module, param_name, id_entity, parent_path) {
         if (typeof (id_entity) === 'undefined') {
             id_entity = 0;
+        }
+
+        if (typeof (parent_path) === 'undefined') {
+            parent_path = '';
         }
 
         var entity_type = 'all';
@@ -254,6 +270,7 @@ function BimpModuleConf() {
 
         BimpAjax('removeModuleConfParam', {
             module: module,
+            parent_path: parent_path,
             param_name: param_name,
             id_entity: id_entity,
             entity_type: entity_type

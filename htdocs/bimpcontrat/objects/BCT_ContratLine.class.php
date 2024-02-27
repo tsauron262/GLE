@@ -466,7 +466,7 @@ class BCT_ContratLine extends BimpObject
     {
         $buttons = array();
 
-        if ($this->isActionAllowed('activate', $err)/* && $this->canSetAction('activate')*/) {
+        if ($this->isActionAllowed('activate') && $this->canSetAction('activate')) {
             $buttons[] = array(
                 'label'   => 'Activer',
                 'icon'    => 'fas_check-circle',
@@ -474,12 +474,7 @@ class BCT_ContratLine extends BimpObject
                     'form_name' => 'activate'
                 ))
             );
-        } 
-//        else {
-//            echo '<pre>';
-//            print_r($err);
-//            exit;
-//        }
+        }
 
         if ((int) $this->getData('statut') > 0) {
             $prod = $this->getChildObject('product');

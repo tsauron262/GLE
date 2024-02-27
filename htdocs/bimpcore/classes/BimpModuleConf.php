@@ -126,9 +126,36 @@ class BimpModuleConf
         return $full_params;
     }
 
-    public function getParamDefs($param_name)
+    public function getParamDefs($param_name, $parent_path = '')
     {
-        return $this->config->getCompiledParams('params/' . $param_name);
+        $path = 'params/';
+
+        if ($parent_path) {
+            $sub_params = null;
+            foreach (explode('/', $parent_path) as $name) {
+                if (is_array($sub_params)) {
+                    foreach ($sub_params as $key => $data) {
+                        if (isset($data['params'][$name])) {
+                            $path .= $key . '/params/';
+                        }
+                    }
+                }
+                $path .= $name . '/sub_params/';
+                $sub_params = $this->config->getParams($path);
+            }
+
+            if (is_array($sub_params)) {
+                foreach ($sub_params as $key => $data) {
+                    if (isset($data['params'][$param_name])) {
+                        $path .= $key . '/params/';
+                    }
+                }
+            }
+        }
+        
+        $path .= $param_name;
+
+        return $this->config->getCompiledParams($path);
     }
 
     public static function getEntities($entity_type)
@@ -142,12 +169,12 @@ class BimpModuleConf
 //                        if (BimpCore::isModeDev()) {
 //                            self::$entities[$entity_type][1] = 'Entité 1';
 //                        } else {
-                            $entity = getEntity('bimp_conf', 0);
-                            if ($entity) {
-                                self::$entities[$entity_type][$entity] = 'Courante'; // todo: remplacer par nom
-                            } else {
-                                return BimpRender::renderAlerts('Aucune entité courante');
-                            }
+                        $entity = getEntity('bimp_conf', 0);
+                        if ($entity) {
+                            self::$entities[$entity_type][$entity] = 'Courante'; // todo: remplacer par nom
+                        } else {
+                            return BimpRender::renderAlerts('Aucune entité courante');
+                        }
 //                        }
 
                         break;
@@ -163,7 +190,7 @@ class BimpModuleConf
 //                            self::$entities[$entity_type][1] = 'Entité 1';
 //                            self::$entities[$entity_type][2] = 'Entité 2';
 //                        } else {
-                            self::$entities[$entity_type] = BimpCache::getEntitiesCacheArray(true, 'Globale');
+                        self::$entities[$entity_type] = BimpCache::getEntitiesCacheArray(true, 'Globale');
 //                        }
                         break;
                 }
@@ -280,7 +307,7 @@ class BimpModuleConf
 
     // Méthodes statiques: 
 
-    public static function renderParamsTable($module, $params, &$n_errors = 0, $entity_type = 'all')
+    public static function renderParamsTable($module, $params, &$n_errors = 0, $entity_type = 'all', $parent_path = '')
     {
         $html = '';
 
@@ -289,7 +316,7 @@ class BimpModuleConf
             $html .= '<tbody>';
 
             foreach ($params as $name => $param_defs) {
-                $html .= self::renderParamRow($entity_type, $module, $name, $param_defs, $n_errors);
+                $html .= self::renderParamRow($entity_type, $module, $name, $param_defs, $n_errors, false, $parent_path);
 
                 $type = BimpTools::getArrayValueFromPath($param_defs, 'type', 'string');
                 $sub_params_defs = BimpTools::getArrayValueFromPath($param_defs, 'sub_params', array());
@@ -303,7 +330,10 @@ class BimpModuleConf
                         $sub_params = BimpTools::getArrayValueFromPath($sub_params_def, 'params', array());
 
                         if (!is_null($sub_params)) {
-                            $html .= '<tr class="sub_params_row" data-parent_param="' . $name . '" data-if="' . (!is_null($if) ? htmlentities(implode(',', $if)) : '') . '">';
+                            $html .= '<tr class="sub_params_row"';
+                            $html .= ' data-parent_param="' . $name . '"';
+                            $html .= ' data-parent_full_path="' . ($parent_path ? $parent_path . '/' : '') . $name . '"';
+                            $html .= ' data-if="' . (!is_null($if) ? htmlentities(implode(',', $if)) : '') . '">';
                             $html .= '<td colspan="3">';
                             $html .= '<div class="sub_params_container">';
                             if (is_null($if)) {
@@ -327,18 +357,17 @@ class BimpModuleConf
         return $html;
     }
 
-    public static function renderParamRow($entity_type, $module, $name, $param_defs = null, &$n_errors = 0, $content_only = false)
+    public static function renderParamRow($entity_type, $module, $name, $param_defs = null, &$n_errors = 0, $content_only = false, $parent_path = '')
     {
         $html = '';
 
         if (empty($param_defs)) {
             $conf = new BimpModuleConf($module);
-            $param_defs = $conf->getParamDefs($name);
+            $param_defs = $conf->getParamDefs($name, $parent_path);
         }
 
         $entities = self::getEntities($entity_type);
         $can_edit = BimpCore::isUserDev();
-//            $can_edit = false;
         $required = BimpTools::getArrayValueFromPath($param_defs, 'required', 0);
         $values = array();
 
@@ -410,7 +439,7 @@ class BimpModuleConf
                     $html .= '</td>';
                     $html .= '<td>';
 
-                    $html .= '<span class="btn btn-light-danger iconBtn" onclick="BimpModuleConf.removeParam(\'' . $module . '\', \'' . $name . '\', ' . $id_entity . ')">';
+                    $html .= '<span class="btn btn-light-danger iconBtn" onclick="BimpModuleConf.removeParam(\'' . $module . '\', \'' . $name . '\', ' . $id_entity . ', \'' . $parent_path . '\')">';
                     $html .= BimpRender::renderIcon('fas_trash-alt');
                     $html .= '</span>';
                 }

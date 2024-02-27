@@ -289,7 +289,7 @@ class ErpAPI extends BimpAPI
     {
         $params['url_end'] = '/bimpwebservice/request.php';
         $params['header_out'] = false;
-        $params['allow_reconnect'] = false;
+        $params['allow_reconnect'] = true;
 
         if (!isset($params['url_params'])) {
             $params['url_params'] = array();
@@ -306,6 +306,9 @@ class ErpAPI extends BimpAPI
 
         if (isset($response_body['errors'])) {
             foreach ($response_body['errors'] as $error) {
+                if ($error['code'] === 'TOKEN_INVALIDE') {
+                    return 'unauthenticate';
+                }
                 $errors[] = $error['message'] . (isset($error['code']) ? ' (Code: ' . $error['code'] . ')' : '');
             }
         }

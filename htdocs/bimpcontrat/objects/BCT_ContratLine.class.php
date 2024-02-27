@@ -57,7 +57,7 @@ class BCT_ContratLine extends BimpObject
         switch ($action) {
             case 'facturationAvance':
             case 'activate':
-                return (int) !empty($user->rights->bimpcontract->to_validate);
+                return (int) ($user->admin || !empty($user->rights->bimpcontract->to_validate));
 
             case 'periodicFacProcess':
                 return 1;

@@ -74,6 +74,13 @@ params:
         type: bool
         cat: signatures
         def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  devis_loc_signature_allow_docusign_phone_auth: 
+                      label: Autoriser l'authentification par téléphone
+                      type: bool
+                      def: 0
         
     devis_loc_signature_allow_refuse: 
         label: Autoriser le refus des signatures pour les devis de location
@@ -92,6 +99,13 @@ params:
         type: bool
         cat: signatures
         def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  contrat_loc_signature_allow_docusign_phone_auth: 
+                      label: Autoriser l'authentification par téléphone
+                      type: bool
+                      def: 0
         
     contrat_loc_signature_allow_refuse: 
         label: Autoriser le refus des signatures pour les contrats de location
@@ -110,6 +124,13 @@ params:
         type: bool
         cat: signatures
         def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  pvr_loc_signature_allow_docusign_phone_auth: 
+                      label: Autoriser l'authentification par téléphone
+                      type: bool
+                      def: 0
         
     cpvr_loc_signature_allow_refuse: 
         label: Autoriser le refus des signatures pour les PV de réception

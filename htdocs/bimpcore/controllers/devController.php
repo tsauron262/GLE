@@ -400,6 +400,7 @@ class devController extends BimpController
         $n_errors = 0;
 
         $module = BimpTools::getValue('module', '');
+        $parent_path = BimpTools::getValue('parent_path', '');
         $param_name = BimpTools::getValue('param_name', '');
         $value = BimpTools::getValue('value', '');
         $id_entity = (int) BimpTools::getValue('id_entity', null);
@@ -421,7 +422,7 @@ class devController extends BimpController
             $errors = BimpCore::setConf($param_name, $value, $module, $id_entity);
 
             if (!count($errors)) {
-                $param_row = BimpModuleConf::renderParamRow($entity_type, $module, $param_name, null, $n_errors, true);
+                $param_row = BimpModuleConf::renderParamRow($entity_type, $module, $param_name, null, $n_errors, true, $parent_path);
             }
         }
 
@@ -441,6 +442,7 @@ class devController extends BimpController
         $n_errors = 0;
 
         $module = BimpTools::getValue('module', '');
+        $parent_path = BimpTools::getValue('parent_path', '');
         $param_name = BimpTools::getValue('param_name', '');
         $id_entity = (int) BimpTools::getValue('id_entity', null);
         $entity_type = BimpTools::getValue('entity_type', 'all');
@@ -461,7 +463,7 @@ class devController extends BimpController
             $errors = BimpCore::RemoveConf($param_name, $module, $id_entity);
 
             if (!count($errors)) {
-                $param_row = BimpModuleConf::renderParamRow($entity_type, $module, $param_name, null, $n_errors, true);
+                $param_row = BimpModuleConf::renderParamRow($entity_type, $module, $param_name, null, $n_errors, true, $parent_path);
             }
         }
 

@@ -415,13 +415,18 @@ class BimpDolObject extends BimpObject
     {
         return '';
     }
+    
+    
+    public function getSubDir(){
+        return dol_sanitizeFileName($this->getRef());
+    }
 
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
             $dir_output = $this->getDirOutput();
             if ($dir_output) {
-                return $dir_output . '/' . dol_sanitizeFileName($this->getRef()) . '/';
+                return $dir_output . '/' . $this->getSubDir() . '/';
             }
         }
 

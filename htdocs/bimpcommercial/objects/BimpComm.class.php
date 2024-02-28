@@ -1664,7 +1664,7 @@ class BimpComm extends BimpDolObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity='.$this->getData('entity').'&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
             }
         }
 

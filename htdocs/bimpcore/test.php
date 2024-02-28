@@ -27,8 +27,8 @@ if (!$user->admin) {
     exit;
 }
 
-BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
-echo Bimp_Facture::checkMargesRevalAll();
+//BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+//echo Bimp_Facture::checkMargesRevalAll();
 
 echo '<br/>FIN';
 echo '</body></html>';

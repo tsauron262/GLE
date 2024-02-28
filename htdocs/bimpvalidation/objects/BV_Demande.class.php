@@ -489,7 +489,7 @@ class BV_Demande extends BimpObject
 
     // Traitements:
 
-    public function setAccepted($check_object = true, &$warnings = array(), &$success = '')
+    public function setAccepted($check_object = true, &$warnings = array(), &$success = '', &$obj_validation_errors = array())
     {
         $errors = array();
 
@@ -509,18 +509,15 @@ class BV_Demande extends BimpObject
 
             if ($check_object) {
                 $obj = $this->getObjInstance();
-                $obj->useNoTransactionsDb();
 
                 $validation_success = '';
                 $validation_errors = BimpValidation::checkObjectValidations($obj, $this->getData('type_object'), $validation_success);
-                
-                $obj->useTransactionsDb();
 
                 if (count($validation_errors)) {
 //                    $warnings[] = BimpTools::getMsgFromArray($validation_errors, 'Erreurs lors de la tentative de validation ' . (BimpObject::objectLoaded($obj) ? $obj->getLabel('of_the') : 'de l\'objet lié'));
                     $msg = 'Acceptation de la demande de validation effectuée mais échec de la validation ' . $obj->getLabel('of_the');
                     $msg .= '<br/>Veuillez tenter une validation manuelle : ' . $obj->getLink();
-                    $warnings[] = $msg;
+                    $obj_validation_errors[] = $msg;
                 } else {
                     $success .= ($success ? '<br/>' : '') . $validation_success;
                 }
@@ -696,7 +693,8 @@ class BV_Demande extends BimpObject
         $success = 'Demande ' . $this->displayValidationType() . ' acceptée';
         $success_callback = 'bimp_reloadPage();';
 
-        $errors = $this->setAccepted(true, $warnings, $success);
+        $obj_validation_errors = array();
+        $errors = $this->setAccepted(true, $warnings, $success, $obj_validation_errors);
 
         global $user;
         if (!count($errors)) {
@@ -729,6 +727,10 @@ class BV_Demande extends BimpObject
                         }
                     }
                 }
+            }
+            
+            if (count($obj_validation_errors)) {
+                $errors[] = BimpTools::merge_array($errors, $obj_validation_errors);
             }
         }
 

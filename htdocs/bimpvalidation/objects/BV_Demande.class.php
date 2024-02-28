@@ -509,9 +509,12 @@ class BV_Demande extends BimpObject
 
             if ($check_object) {
                 $obj = $this->getObjInstance();
+                $obj->useNoTransactionsDb();
 
                 $validation_success = '';
                 $validation_errors = BimpValidation::checkObjectValidations($obj, $this->getData('type_object'), $validation_success);
+                
+                $obj->useTransactionsDb();
 
                 if (count($validation_errors)) {
 //                    $warnings[] = BimpTools::getMsgFromArray($validation_errors, 'Erreurs lors de la tentative de validation ' . (BimpObject::objectLoaded($obj) ? $obj->getLabel('of_the') : 'de l\'objet lié'));

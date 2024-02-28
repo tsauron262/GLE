@@ -439,26 +439,29 @@ class Bimp_FactureFourn extends BimpCommAchat
         return ModelePDFSuppliersInvoices::liste_modeles($this->db->db);
     }
 
-    public function getFilesDir()
-    {
-        if ($this->isLoaded()) {
-            return $this->getDirOutput() . '/';
-        }
+//    public function getFilesDir()
+//    {
+//        if ($this->isLoaded()) {
+//            return $this->getDirOutput() . '/';
+//        }
+//
+//        return '';
+//    }
 
-        return '';
-    }
-
-    public function getFileUrl($file_name, $page = 'document')
-    {
-        $dir = $this->getFilesDir();
-        if ($dir) {
-            if (file_exists($dir . $file_name)) {
-                $subdir = get_exdir($this->id, 2, 0, 0, $this->dol_object, 'invoice_supplier') . $this->getData('ref');
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . static::$files_module_part . '&entity='.$this->getData('entity').'&file=' . htmlentities($subdir . '/' . $file_name);
-            }
-        }
-
-        return '';
+//    public function getFileUrl($file_name, $page = 'document')
+//    {
+//        $dir = $this->getFilesDir();
+//        if ($dir) {
+//            if (file_exists($dir . $file_name)) {
+//                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . static::$files_module_part . '&entity='.$this->getData('entity').'&file=' . htmlentities($this->getSubDir() . '/' . $file_name);
+//            }
+//        }
+//
+//        return '';
+//    }
+    
+    public function getSubDir(){
+        return get_exdir($this->id, 2, 0, 0, $this->dol_object, 'invoice_supplier') . dol_sanitizeFileName($this->getRef());
     }
 
     public function getDirOutput()
@@ -469,12 +472,11 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         global $conf;
         $ref = dol_sanitizeFileName($this->dol_object->ref);
-        $subdir = get_exdir($this->id, 2, 0, 0, $this->dol_object, 'invoice_supplier') . $ref;
         if($this->isLoaded() && $this->dol_object->entity > 0)
 //            die($conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/' . $subdir);
-            return $conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/' . $subdir;
+            return $conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/';
         else
-            return $conf->fournisseur->facture->dir_output . '/' . $subdir;
+            return $conf->fournisseur->facture->dir_output . '/';
     }
 
     public function getTotalPaid()

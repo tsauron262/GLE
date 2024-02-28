@@ -26,4 +26,16 @@ class BimpCommercialCronExec extends BimpCron
         
         return 0;
     }
+    
+    public function hourlyChecks()
+    {
+        $this->current_cron_name = 'Vérifs toutes les heures des pièces commerciales';
+        
+        $this->output .= '***** Vérifs Maj + reval OK des dernières factures mises à jour *****';
+        $facture_class = '';
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Facture', $facture_class);
+        $this->output .= $facture_class::checkMargesRevalAll();
+        
+        return 0;
+    }
 }

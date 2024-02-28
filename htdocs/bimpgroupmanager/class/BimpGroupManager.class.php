@@ -45,6 +45,8 @@ class BimpGroupManager {
 
     /* Used to limit SQL queries */
     var $cache;
+    static $cacheStatic;
+    static $i;
 
     function __construct($db) {
         $this->db = $db;
@@ -297,24 +299,24 @@ class BimpGroupManager {
      * Used by trigger action USER_SETINGROUP
      */
     function insertInGroups($userid, $groupid, $entity, $setmsg, $user = null, $fromTrigger = true) {
+        static::$i++;
+        if(static::$i > 15)
+            die('oups boucle');
         if ($user == null) {
             $user = new User($this->db);
             $user->fetch($userid);
         }
 
-        if ($fromTrigger) {
-            $grp = $this->getGroup($groupid);
-            ($setmsg == true) ? setEventMessages('Ajouté au groupe ' . $grp->name, null, 'mesgs') : null;
+        if ($fromTrigger && $setmsg) {
+            setEventMessages('Ajouté au groupe ' .$this->getGroupName($groupid), null, 'mesgs');
         }
-
+//
         $parentid = $this->getParentId($groupid);
         $groups = $this->getGroupIdByUserId($userid, $entity);
-        $grp = $this->getGroup($parentid);
         while (in_array($parentid, $groups) != false) {
             $parentid2 = $this->getParentId($parentid);
             if ($setmsg == true) {
-                setEventMessages('Reste dans le groupe ' . $grp->name, null, 'mesgs');
-                $grp = $this->getGroup($parentid2);
+                setEventMessages('Reste dans le groupe ' . $this->getGroupName($parentid), null, 'mesgs');
             }
             $parentid = $parentid2;
         }
@@ -324,7 +326,7 @@ class BimpGroupManager {
         //dol_syslog("Ajout au groupe ".$parentid . " le user ".$user->id, 3);
         if (! is_object($user->oldcopy)) 
             $user->oldcopy = clone $user;
-        if ($user->SetInGroup($parentid, $entity, 1)) {
+        if ($user->SetInGroup($parentid, $entity)) {
             $this->initCache();
             return 1;
         } else {
@@ -337,38 +339,45 @@ class BimpGroupManager {
      */
     
     function getGroup($id) {
-        if (!isset($this->cache['tabGrp'][$id])) {
+        if (!isset(static::$cacheStatic['tabGrp'][$id])) {
             $grp = new UserGroup($this->db);
             $grp->fetch($id);
-            $this->cache['tabGrp'][$id] = $grp;
+            static::$cacheStatic['tabGrp'][$id] = $grp;
         }
-        return $this->cache['tabGrp'][$id];
+        return static::$cacheStatic['tabGrp'][$id];
+    }
+    
+    function getGroupName($id) {
+        $sql = $this->db->query('SELECT nom FROM '.MAIN_DB_PREFIX.'usergroup WHERE rowid = '.$id);
+        while($ln = $this->db->fetch_object($sql)){
+            return $ln->nom;
+        }
     }
     
     /* Get all groups id where the user is */
 
     function getGroupIdByUserId($userid, $entity = 1) {
-        if (!isset($this->cache['grpsUser'][$userid])) {
+        if (!isset(static::$cacheStatic['grpsUser'][$userid])) {
             $groupids = array();
             $sql = "SELECT fk_usergroup";
             $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user";
             $sql.= " WHERE fk_user=" . $userid. ' AND entity='.$entity;
-
+            
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {
                     $groupids[] = $obj->fk_usergroup;
                 }
             }
-            $this->cache['grpsUser'][$userid] = $groupids;
+            static::$cacheStatic['grpsUser'][$userid] = $groupids;
         }
-        return $this->cache['grpsUser'][$userid];
+        return static::$cacheStatic['grpsUser'][$userid];
     }
 
     /* Get the unique parent id by the id one of his child ($id) */
 
     function getParentId($id) {
-        if (!isset($this->cache['parentGrp'][$id])) {
+        if (!isset(static::$cacheStatic['parentGrp'][$id])) {
             $sql = 'SELECT fk_parent';
             $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_grp_grp';
             $sql .= ' WHERE fk_child = ' . $id;
@@ -376,13 +385,12 @@ class BimpGroupManager {
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {
-                    $this->cache['parentGrp'][$id] = $obj->fk_parent;
+                    static::$cacheStatic['parentGrp'][$id] = $obj->fk_parent;
                 }
             } else {
-                $this->cache['parentGrp'][$id] = -1;
-                return $this->cache['parentGrp'][$id];
+                static::$cacheStatic['parentGrp'][$id] = -1;
             }
         }
-        return $this->cache['parentGrp'][$id];
+        return static::$cacheStatic['parentGrp'][$id];
     }
 }

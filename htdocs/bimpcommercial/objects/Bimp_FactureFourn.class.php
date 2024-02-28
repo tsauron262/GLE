@@ -454,7 +454,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         if ($dir) {
             if (file_exists($dir . $file_name)) {
                 $subdir = get_exdir($this->id, 2, 0, 0, $this->dol_object, 'invoice_supplier') . $this->getData('ref');
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . static::$files_module_part . '&file=' . htmlentities($subdir . '/' . $file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . static::$files_module_part . '&entity='.$this->getData('entity').'&file=' . htmlentities($subdir . '/' . $file_name);
             }
         }
 

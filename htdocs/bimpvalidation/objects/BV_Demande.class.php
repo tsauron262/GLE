@@ -687,7 +687,7 @@ class BV_Demande extends BimpObject
         $success = 'Demande ' . $this->displayValidationType() . ' acceptée';
         $success_callback = 'bimp_reloadPage();';
 
-        $this->setAccepted(true, $warnings, $success);
+        $errors = $this->setAccepted(true, $warnings, $success);
 
         global $user;
         if (!count($errors)) {

@@ -443,7 +443,7 @@ class BimpDolObject extends BimpObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity=' . $this->dol_object->entity . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity=' . $this->dol_object->entity . '&file=' . urlencode($this->getSubDir()) . '/' . urlencode($file_name);
             }
         }
 
@@ -1060,7 +1060,7 @@ class BimpDolObject extends BimpObject
                             $fileName = $this->getPdfModelFileName($data['model']);
                         } else {
                             $ref = dol_sanitizeFileName($this->getRef());
-                            $fileName = $ref . '/' . $ref . ".pdf";
+                            $fileName = $this->getSubDir() . '/' . $ref . ".pdf";
                         }
                     }
 
@@ -1073,7 +1073,7 @@ class BimpDolObject extends BimpObject
                     if (method_exists($this, 'getFileUrl') && $this->getFileUrl($fileName . '.pdf') != '') {
                         $url = $this->getFileUrl($fileName . '.pdf');
                     } else {
-                        $url = DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . urlencode($fileName);
+                        $url = DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&entity=' . $this->getData('entity') . '&file=' . urlencode($fileName);
                     }
 
                     $success_callback = 'window.open(\'' . $url . '\');';

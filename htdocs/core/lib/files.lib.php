@@ -2844,14 +2844,14 @@ function dol_check_secure_access_document($modulepart, $original_file, $entity, 
 		if ($fuser->rights->fournisseur->commande->{$lire} || preg_match('/^specimen/i', $original_file)) {
 			$accessallowed = 1;
 		}
-		$original_file = $conf->fournisseur->commande->dir_output.'/'.$original_file;
+		$original_file = $conf->fournisseur->commande->multidir_output[$entity].'/'.$original_file;
 		$sqlprotectagainstexternals = "SELECT fk_soc as fk_soc FROM ".MAIN_DB_PREFIX."commande_fournisseur WHERE ref='".$db->escape($refname)."' AND entity=".$conf->entity;
 	} elseif (($modulepart == 'facture_fournisseur' || $modulepart == 'invoice_supplier') && !empty($conf->fournisseur->facture->dir_output)) {
 		// Wrapping pour les factures fournisseurs
 		if ($fuser->rights->fournisseur->facture->{$lire} || preg_match('/^specimen/i', $original_file)) {
 			$accessallowed = 1;
 		}
-		$original_file = $conf->fournisseur->facture->dir_output.'/'.$original_file;
+		$original_file = $conf->fournisseur->facture->multidir_output[$entity].'/'.$original_file;
 		$sqlprotectagainstexternals = "SELECT fk_soc as fk_soc FROM ".MAIN_DB_PREFIX."facture_fourn WHERE ref='".$db->escape($refname)."' AND entity=".$conf->entity;
 	} elseif ($modulepart == 'supplier_payment') {
 		// Wrapping pour les rapport de paiements

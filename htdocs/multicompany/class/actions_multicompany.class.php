@@ -5035,15 +5035,25 @@ class ActionsMulticompany
 					$entities = explode(",", $shares);
 					$dir_output = array();
 					$dir_temp = array();
+
+                                        if($element == 'supplier_invoice'){
+                                                $element = 'fournisseur->facture';
+                                                $elementpath = 'fournisseur/facture';
+                                        }
+                                        if($element == 'supplier_order'){
+                                                $element = 'fournisseur->commande';
+                                                $elementpath = 'fournisseur/commande';
+                                        }
 					foreach($entities as $entity) {
-						if (!array_key_exists($entity, $conf->$element->multidir_output)) {
+                                                $isset = eval('array_key_exists($entity, $conf->'.$element.'->multidir_output);');
+						if (!$isset) {
 							$path = ($entity > 1 ? "/".$entity : '');
 
 							$dir_output[$entity] = DOL_DATA_ROOT.$path."/".$elementpath;
 							$dir_temp[$entity] = DOL_DATA_ROOT.$path."/".$elementpath."/temp";
 
-							$conf->$element->multidir_output += $dir_output;
-							$conf->$element->multidir_temp += $dir_temp;
+							eval('$conf->'.$element.'->multidir_output += $dir_output;');
+							eval('$conf->'.$element.'->multidir_temp += $dir_temp;');
 						}
 						if (in_array($element, array('propal', 'commande', 'facture'))) {
 							if (!isset($conf->mycompany->multidir_output) || !is_array($conf->mycompany->multidir_output)) {

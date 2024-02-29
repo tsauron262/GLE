@@ -27,8 +27,8 @@ if (!$user->admin) {
     exit;
 }
 
-BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
-echo BCT_Contrat::checkInactivesLines();
+//BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+//echo Bimp_Facture::checkMargesRevalAll();
 
 echo '<br/>FIN';
 echo '</body></html>';

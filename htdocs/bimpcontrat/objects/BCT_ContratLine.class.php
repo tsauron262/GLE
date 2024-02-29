@@ -241,7 +241,7 @@ class BCT_ContratLine extends BimpObject
                     return 0;
                 }
 
-                if ((int) $this->db->getCount('contradet', 'id_linked_line = ' . $this->id . ' AND statut = ' . self::STATUS_ACTIVE, 'rowid') > 0) {
+                if ((int) $this->db->getCount('contratdet', 'id_linked_line = ' . $this->id . ' AND statut = ' . self::STATUS_ACTIVE, 'rowid') > 0) {
                     $errors[] = 'Il existe des lignes liées actives';
                     return 0;
                 }

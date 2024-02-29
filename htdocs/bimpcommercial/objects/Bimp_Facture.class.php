@@ -2134,7 +2134,7 @@ class Bimp_Facture extends BimpComm
     public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null)
     {
         $tot = $this->getData('total_ht') - $this->getData('marge');
-        if(BimpCore::isModuleActive('bimpfinanc')){
+        if (BimpCore::isModuleActive('bimpfinanc')) {
             $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
             if (is_null($statut_reval)) {
                 foreach ($tabReval as $reval)
@@ -5116,8 +5116,8 @@ class Bimp_Facture extends BimpComm
 
                 $marge_finale = $margin + (float) $revals['accepted'];
 
-                if ((float) $marge_finale !== (float) $this->getData('marge_finale_ok')) {
-                    $old_marge = (float) $this->getData('marge_finale_ok');
+                $old_marge = (float) $this->getData('marge_finale_ok');
+                if ((float) $marge_finale !== $old_marge) {
                     $up_errors = $this->updateField('marge_finale_ok', $marge_finale);
 
                     if (count($up_errors)) {
@@ -6277,7 +6277,7 @@ class Bimp_Facture extends BimpComm
         else
             $montant = (float) BimpTools::getPostFieldValue('montant');
 
-        if (!$avoir_total and!$montant)
+        if (!$avoir_total and !$montant)
             $errors[] = "Montant non renseigné alors que l'avoir est partiel";
 
         $nb_demande = (int) sizeof(BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote',
@@ -7529,7 +7529,6 @@ class Bimp_Facture extends BimpComm
             foreach ($rows as $r) {
                 $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
                 if (BimpObject::objectLoaded($facture)) {
-                    $fac_errors = array();
                     $fac_errors = $facture->checkMargin(true, true);
                     $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
 
@@ -7543,6 +7542,41 @@ class Bimp_Facture extends BimpComm
         }
 
         return $errors;
+    }
+
+    public static function checkMargesRevalAll($check_only_diff_margins = false)
+    {
+        $where = '';
+        
+        $last_check_tms = BimpCore::getConf('factures_marges_revals_last_check_tms', '');
+        if ($last_check_tms) {
+            $where = 'tms > \'' . $last_check_tms . '\'';
+        } else {
+            $where = 'tms > \'2024-02-28 00:00:00\''; // Jour de mise en place du cron sur Bimp
+        }
+
+        if ($check_only_diff_margins) {
+            $where .= ' AND marge != marge_finale_ok';
+        }
+
+        $rows = self::getBdb()->getRows('facture', $where, null, 'array', array('rowid'), 'rowid', 'desc');
+
+        $nchecked = 0;
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+                if (BimpObject::objectLoaded($facture)) {
+                    $nchecked++;
+                    $facture->checkMargin(true, true);
+                    $facture->checkTotalAchat(true);
+                }
+            }
+        }
+
+        BimpCore::setConf('factures_marges_revals_last_check_tms', date('Y-m-d H:i:s'));
+
+        return $nchecked . ' facture(s) vérifée(s)';
     }
 
     // Gestion Graphs : 

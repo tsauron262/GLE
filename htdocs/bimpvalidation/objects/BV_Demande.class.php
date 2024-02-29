@@ -32,8 +32,9 @@ class BV_Demande extends BimpObject
         }
         return parent::canSetAction($action);
     }
-    
-    public function canDelete() {
+
+    public function canDelete()
+    {
         global $user;
         return $user->admin;
     }
@@ -41,6 +42,10 @@ class BV_Demande extends BimpObject
     public function canProcess()
     {
         global $user;
+
+        if ($user->login == 'f.martinez') {
+            return 1;
+        }
 
         $id_user_affected = (int) $this->getData('id_user_affected');
 
@@ -484,17 +489,20 @@ class BV_Demande extends BimpObject
 
     // Traitements:
 
-    public function setAccepted($check_object = true, &$warnings = array(), &$success = '')
+    public function setAccepted($check_object = true, &$warnings = array(), &$success = '', &$obj_validation_errors = array())
     {
         $errors = array();
 
         global $user;
 
+        $this->useNoTransactionsDb();
         $this->set('status', 1);
         $this->set('id_user_validate', $user->id);
         $this->set('date_validate', date('Y-m-d H:i:s'));
 
         $errors = $this->update($warnings, true);
+
+        $this->useTransactionsDb();
 
         if (!count($errors)) {
             $this->addObjectLog('Demande acceptée', 'ACCEPTED');
@@ -506,7 +514,10 @@ class BV_Demande extends BimpObject
                 $validation_errors = BimpValidation::checkObjectValidations($obj, $this->getData('type_object'), $validation_success);
 
                 if (count($validation_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($validation_errors, 'Erreurs lors de la tentative de validation ' . (BimpObject::objectLoaded($obj) ? $obj->getLabel('of_the') : 'de l\'objet lié'));
+//                    $warnings[] = BimpTools::getMsgFromArray($validation_errors, 'Erreurs lors de la tentative de validation ' . (BimpObject::objectLoaded($obj) ? $obj->getLabel('of_the') : 'de l\'objet lié'));
+                    $msg = 'Acceptation de la demande de validation effectuée mais échec de la validation ' . $obj->getLabel('of_the');
+                    $msg .= '<br/>Veuillez tenter une validation manuelle : ' . $obj->getLink();
+                    $obj_validation_errors[] = $msg;
                 } else {
                     $success .= ($success ? '<br/>' : '') . $validation_success;
                 }
@@ -682,7 +693,8 @@ class BV_Demande extends BimpObject
         $success = 'Demande ' . $this->displayValidationType() . ' acceptée';
         $success_callback = 'bimp_reloadPage();';
 
-        $this->setAccepted(true, $warnings, $success);
+        $obj_validation_errors = array();
+        $errors = $this->setAccepted(true, $warnings, $success, $obj_validation_errors);
 
         global $user;
         if (!count($errors)) {
@@ -715,6 +727,10 @@ class BV_Demande extends BimpObject
                         }
                     }
                 }
+            }
+            
+            if (count($obj_validation_errors)) {
+                $errors[] = BimpTools::merge_array($errors, $obj_validation_errors);
             }
         }
 

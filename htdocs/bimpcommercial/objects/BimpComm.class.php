@@ -1664,7 +1664,7 @@ class BimpComm extends BimpDolObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity='.$this->getData('entity').'&file=' . urlencode($this->getSubDir()) . '/' . urlencode($file_name);
             }
         }
 
@@ -2235,7 +2235,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             global $conf;
 
-            $dir = $this->getDirOutput() . '/' . dol_sanitizeFileName($this->getRef());
+            $dir = $this->getDirOutput() . '/' . dol_sanitizeFileName($this->getSubDir());
 
             if (!function_exists('dol_dir_list')) {
                 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';

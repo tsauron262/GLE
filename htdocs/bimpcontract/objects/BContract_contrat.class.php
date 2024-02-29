@@ -856,7 +856,7 @@ class BContract_contrat extends BimpDolObject
         $duree_vendu = $this->getDurreeVendu();
         $dureeFi = $this->getInfosDureeFi();
         return $duree_vendu - $dureeFi['contrat']['tot'];
-        
+
 //        $reste = 0;
 //        $totalHeuresVendues = 0;
 //        $totalHeuresFaites = 0;
@@ -1011,11 +1011,11 @@ class BContract_contrat extends BimpDolObject
 //            $child = $this->getChildObject('lines', $id);
 //            $total_PA += $child->getData('buy_price_ht') * $child->getData('qty');
 //        }
-        
+
         $lines = $this->getChildrenObjects('lines');
         foreach ($lines as $line) {
             $prod = $line->getChildObject('produit');
-            if($line_type == -1 || ($line_type == 3 && $prod->getData('duree_i') > 0) || ($line_type == 4 && $prod->getData('duree_i') < 1))
+            if ($line_type == -1 || ($line_type == 3 && $prod->getData('duree_i') > 0) || ($line_type == 4 && $prod->getData('duree_i') < 1))
                 $total_PA += $line->getData('buy_price_ht') * $line->getData('qty');
         }
         return $total_PA;
@@ -1682,11 +1682,16 @@ class BContract_contrat extends BimpDolObject
                 $dureePrlong += $av->getNbMois();
         }
 
-        if ($ratioTotalOrRatioInitDuree)
-            $ratio += $dureePrlong / $dureeContratSansProlongation;
-        else
-            $ratio += $dureePrlong / $this->getDureeInitial();
-
+        $duree_init = 0;
+        if ($ratioTotalOrRatioInitDuree) {
+            $duree_init = $dureeContratSansProlongation;
+        } else {
+            $duree_init = $this->getDureeInitial();
+        }
+        
+        if ($duree_init && $dureePrlong) {
+            $ratio += $dureePrlong / $duree_init;
+        }
         return $ratio;
     }
 
@@ -1884,10 +1889,10 @@ class BContract_contrat extends BimpDolObject
     public function getInfosDureeFi()
     {
         $infos = array(
-            'contrat' => array('tot' => 0, 'dep' => 0),
+            'contrat'      => array('tot' => 0, 'dep' => 0),
             'hors_contrat' => array('tot' => 0, 'dep' => 0),
         );
-        
+
         $tms_in_contrat = 0;
         $tms_out_contrat = 0;
 
@@ -1900,9 +1905,9 @@ class BContract_contrat extends BimpDolObject
             $tab1 = 'hors_contrat';
             if ($child->getData('id_line_contrat') || $child->getData('type') == 5)
                 $tab1 = 'contrat';
-            
+
             $infos[$tab1]['tot'] += $child->getData('duree');
-            if($child->isDep())
+            if ($child->isDep())
                 $infos[$tab1]['dep'] += $child->getData('duree');
         }
 
@@ -2402,12 +2407,12 @@ class BContract_contrat extends BimpDolObject
     public function renderThisStatsFi($display = true, $in_contrat = true)
     {
         $html = "";
-        $total_contrat = $this->getTotalContrat();  
+        $total_contrat = $this->getTotalContrat();
         $cout = $coutPrevi = 0;
 
         $duree_vendu = $this->getDurreeVendu();
-        if($duree_vendu){
-    //        $fis = $this->getListFi();
+        if ($duree_vendu) {
+            //        $fis = $this->getListFi();
             $fis = BimpCache::getBimpObjectList('bimptechnique', 'BT_ficheInter', ['fk_contrat' => $this->id]);
             $dureeFi = $this->getInfosDureeFi();
             $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
@@ -2426,25 +2431,24 @@ class BContract_contrat extends BimpDolObject
 //            $html .= "Nombre d'heures de délégation vendue : ".print_r($this->getTotalHeureDelegation(true),true).'<br/>';
             $htmlT .= "Nombre d'heures FI dans le contrat : " . $ficheInter->timestamp_to_time($dureeFi['contrat']['tot']) . '<br />';
             $htmlT .= "Dont : " . $ficheInter->timestamp_to_time($dureeFi['contrat']['dep']) . ' h de déplacement<br />';
-            if($dureeFi['hors_contrat']['tot'] > 0){
+            if ($dureeFi['hors_contrat']['tot'] > 0) {
                 $htmlT .= "Nombre d'heures FI hors du contrat : " . $ficheInter->timestamp_to_time($dureeFi['hors_contrat']['tot']) . ' (non pris en compte)<br />';
                 $htmlT .= "Dont : " . $ficheInter->timestamp_to_time($dureeFi['hors_contrat']['dep']) . ' h de déplacement<br />';
             }
-            $htmlT .= "Nombre d'heures restante : " . $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot'])  . '<br/>';
+            $htmlT .= "Nombre d'heures restante : " . $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot']) . '<br/>';
             $htmlT .= "Coût technique: " . BimpTools::displayMoneyValue(BT_ficheInter::dureeToPrice($dureeFi['contrat']['tot'])) . " (" . BT_ficheInter::dureeToPrice(3600) . " €/h * " . $ficheInter->timestamp_to_time($dureeFi['contrat']['tot']) . ")<br />";
             $htmlT .= "Coût prévisionel: " . BimpTools::displayMoneyValue($cout_previsionelle) . "<br />";
             $htmlT .= '</strong>';
             $html .= BimpRender::renderPanel('Interventions', $htmlT);
-
 
             $cout += BT_ficheInter::dureeToPrice($dureeFi['contrat']['tot']);
             $coutPrevi += $cout_previsionelle;
         }
 
         $pa = $this->getTotalPa(4);
-        if($pa > 0){
+        if ($pa > 0) {
             $htmlT = "<strong>";
-            $htmlT .= 'Prix d\'achat : '. BimpTools::displayMoneyValue($pa);
+            $htmlT .= 'Prix d\'achat : ' . BimpTools::displayMoneyValue($pa);
             $htmlT .= '</strong>';
             $html .= BimpRender::renderPanel('Prix de revient', $htmlT);
             $cout += $pa;
@@ -2464,7 +2468,7 @@ class BContract_contrat extends BimpDolObject
         }
         $html .= "Vendu: " . "<strong class='warning'>" . BimpTools::displayMoneyValue($this->getTotalContrat()) . "</strong><br />";
         $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . BimpTools::displayMoneyValue($marge) . "</strong><br />";
-        if($marge != $marge_previsionelle){
+        if ($marge != $marge_previsionelle) {
             if ($marge_previsionelle > 0) {
                 $class2 = 'success';
                 $icone2 = 'arrow-up';
@@ -2474,7 +2478,7 @@ class BContract_contrat extends BimpDolObject
             }
             $html .= "Marge Prévisionelle: " . "<strong class='$class2'>" . BimpRender::renderIcon($icone2) . " " . BimpTools::displayMoneyValue($marge_previsionelle) . "</strong><br />";
         }
-            
+
         if (!$in_contrat) {
             $html = "Contrat: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . BimpTools::displayMoneyValue($marge) . "</strong><br />";
         }
@@ -2745,7 +2749,7 @@ class BContract_contrat extends BimpDolObject
             $contrat->set('relance_renouvellement', 1);
             $contrat->set('syntec', 0);
 
-             $errors = $contrat->create();
+            $errors = $contrat->create();
 
             if (!count($errors)) {
                 foreach ($data->services as $nb => $infos) {
@@ -3668,7 +3672,7 @@ class BContract_contrat extends BimpDolObject
     public function actionUpdateSyntec($data = array(), &$success = '')
     {
         $syntec = file_get_contents("https://syntec.fr/");
-        
+
         if (preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)) {
             $indice = str_replace(' ', "", strip_tags($matches[0]));
             BimpCore::setConf('current_indice_syntec', str_replace(' ', "", strip_tags($indice)));
@@ -3676,7 +3680,7 @@ class BContract_contrat extends BimpDolObject
         } else {
             $errors [] = "Impossible de récupérer l'indice Syntec automatiquement, merci de le rensseigner manuellement";
         }
-        
+
         return [
             'success'  => $success,
             'errors'   => $errors,
@@ -3849,8 +3853,8 @@ class BContract_contrat extends BimpDolObject
         if (!count($errors)) {
             if ($facture->dol_object->addLine(
                             "Facturation du reste à payer de votre contrat numéro " . $this->getRef(),
-                            $this->reste_a_payer(),
-                            1, 20, 0, 0, 0, 0, '', '', 0, 0, '', 'HT', 0, 0
+                   $this->reste_a_payer(),
+                                   1, 20, 0, 0, 0, 0, '', '', 0, 0, '', 'HT', 0, 0
                     )) {
                 addElementElement("contrat", "facture", $this->id, $facture->id);
                 $success = "Facture " . $facture->getRef() . " créée avec succès";

@@ -105,7 +105,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                                         foreach ($parcellesBrut['Parcel'] as $parcel) {
                                             $text = 'Colis : ' . (string) $parcel->attributes()['code'] . ' de ' . (string) $parcel->attributes()['service'];
                                             if (isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
-                                                $text = '<a target="_blank" href="' . (string) $parcel->attributes()['TrackingUrl'] . '">' . $text . "</a>";
+                                                $text = '<a target="_blank" href="' . str_replace('{codelangue}', 'FR', (string) $parcel->attributes()['TrackingUrl']) . '">' . $text . "</a>";
                                             $noteOK = false;
                                             foreach ($notes as $note) {
                                                 if ($noteOK)

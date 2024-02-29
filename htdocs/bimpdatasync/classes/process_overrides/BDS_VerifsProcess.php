@@ -59,10 +59,6 @@ class BDS_VerifsProcess extends BDSProcess
 
     public function executeCheckFacsMargin($step_name, &$errors = array(), $extra_data = array())
     {
-        
-        /*
-         * remplacé par un data sync
-         */
         $result = array();
 
         switch ($step_name) {

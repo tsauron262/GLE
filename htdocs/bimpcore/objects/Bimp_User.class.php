@@ -1060,24 +1060,24 @@ class Bimp_User extends BimpObject
         $tabs = array();
 
         $tabs[] = array(
-            'id'            => 'user_rights',
-            'title'         => BimpRender::renderIcon('fas_user-check', 'iconLeft') . 'Droits utilisateur',
+            'id'            => 'all_rights',
+            'title'         => BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Tous les droits',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#user_rights .nav_tab_ajax_result\')', array('user_rights'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderAllRightsList', '$(\'#all_rights .nav_tab_ajax_result\')', array(''), array('button' => ''))
         );
-
+        
         $tabs[] = array(
             'id'            => 'usergroups_rights',
             'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Droits groupes de l\'utilisateur',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#usergroups_rights .nav_tab_ajax_result\')', array('usergroups_rights'), array('button' => ''))
         );
-
+        
         $tabs[] = array(
-            'id'            => 'all_rights',
-            'title'         => BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Tous les droits',
+            'id'            => 'user_rights',
+            'title'         => BimpRender::renderIcon('fas_user-check', 'iconLeft') . 'Droits utilisateur',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderAllRightsList', '$(\'#all_rights .nav_tab_ajax_result\')', array(''), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#user_rights .nav_tab_ajax_result\')', array('user_rights'), array('button' => ''))
         );
 
         return BimpRender::renderNavTabs($tabs, 'perms');

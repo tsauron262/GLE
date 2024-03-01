@@ -1,0 +1,27 @@
+
+        
+lists: 
+    global: 
+        checkboxes: 1
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        
+forms:
+    augmentation:
+        msgs: 
+            - content: Attention action iréverssible
+              type: danger
+        rows:
+            - custom: 1
+              label: Pourcent
+              input_name: percent
+              data_type: percent
+              input: 
+                  type: text
+            - custom: 1
+              label: Pour annulation
+              input_name: annul
+              data_type: bool
+              input: 
+                  type: toggle
+            

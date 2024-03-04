@@ -86,8 +86,8 @@ class BWS_User extends BimpObject
 //            $params['panel_filters'] = json_encode(BimpTools::merge_array($filter1, $filter2, true));
         }
         
-        $url = $_SERVER['HTTP_X_FORWARDED_PROTO'].'://'.$_SERVER['SERVER_NAME'].'/'.DOL_URL_ROOT.'/bimpwebservice/request.php?req='.$req;
-        $url = 'https://erpi.bimp.fr/bimp8/bimpwebservice/request.php?req='.$req;
+        $url = $data['url'].'?req='.$req;
+//        $url = 'https://erpi.bimp.fr/bimp8/bimpwebservice/request.php?req='.$req;
 
         
         $curl_str = 'curl -s -X POST ';
@@ -101,7 +101,6 @@ class BWS_User extends BimpObject
             }
         }
         
-        $curl_str .= ' -k';
         
         $headers_str = array();
         foreach ($headers as $header_name => $header_value) {
@@ -113,6 +112,13 @@ class BWS_User extends BimpObject
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        
+        if(!$data['certif']){
+            $curl_str .= ' -k';
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($ch, CURLOPT_PROXY_SSL_VERIFYPEER, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        }
 //        curl_setopt($ch, CURLOPT_HEADER, 0);
         
         $response = curl_exec($ch);
@@ -205,6 +211,28 @@ class BWS_User extends BimpObject
         $fields = array();
         
         
+        
+        $fields[] = array(
+            'show' => 1,
+            'custom' =>  1,
+                'label'=> 'Url',
+              'input_name'=> 'url',
+              'input'=> array( 
+                'type'=> 'text'
+                  ),
+              'value' => $_SERVER['HTTP_X_FORWARDED_PROTO'].'://'.$_SERVER['SERVER_NAME'].'/'.DOL_URL_ROOT.'/bimpwebservice/request.php'
+        );
+        
+        $fields[] = array(
+            'show' => 1,
+            'custom' =>  1,
+                'label'=> 'Verifier certificat',
+              'input_name'=> 'certif',
+              'input'=> array( 
+                'type'=> 'toggle'
+                  ),
+              'value' => 1
+        );
         
         $fields[] = array(
             'show' => 1,

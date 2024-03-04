@@ -1405,7 +1405,12 @@ class BContract_echeancier extends BimpObject
                 $lines = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine');
                 $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
                 foreach ($lines->getList(['fk_contrat' => $contrat->id, "renouvellement" => $contrat->getData('current_renouvellement')]) as $idLine => $infos) {
-                    $desc .= $infos['description'] . "<br /><br />";
+                    if(BimpCore::isEntity('blyyd') || $infos['description'] == ''){
+                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $infos['fk_product']);
+                        $desc .= $prod->getData('label') . "<br /><br />";
+                    }
+                    else
+                        $desc .= $infos['description'] . "<br /><br />";
                 }
 
                 if (!count($errors)) {

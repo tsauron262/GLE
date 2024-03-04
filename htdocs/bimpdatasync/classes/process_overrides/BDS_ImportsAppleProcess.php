@@ -24,7 +24,8 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         'ArtFree2'      => 'rpcp',
         'ArtFree3'      => 'cto',
         'ArtLastPA'     => 'cur_pa_ht',
-        'ArtIsSupp'     => 'crt'
+        'ArtIsSupp'     => 'crt',
+        'weight'        => 'weight'
     );
     public static $prices_keys = array(
         'code produit' => 'ref_fourn',

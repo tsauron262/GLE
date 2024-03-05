@@ -909,14 +909,16 @@ class BL_CommandeShipment extends BimpObject
     {
         $html = '';
 
-        if ((int) $this->getData('id_signature') === -1) {
+        if ((int) !$this->getData('id_signature')) {
             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
                 $onclick = $this->getJsActionOnclick('createSignature', array(), array(
                     'confirm_msg' => 'Veuillez confirmer'
                 ));
 
-                $html .= '<span class="warning">Non applicable</span>';
-                $html .= '&nbsp;&nbsp;';
+                if((int) $this->getData('id_signature') === -1){
+                    $html .= '<span class="warning">Non applicable</span>';
+                    $html .= '&nbsp;&nbsp;';
+                }
                 $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer signature';
                 $html .= '</span>';
@@ -928,6 +930,7 @@ class BL_CommandeShipment extends BimpObject
 
             if (BimpObject::objectLoaded($signature)) {
                 $html .= $signature->getLink();
+                $html .= $signature->displayActionsButtons();
             }
         }
 

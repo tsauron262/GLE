@@ -911,7 +911,7 @@ class BL_CommandeShipment extends BimpObject
 
         if ((int) !$this->getData('id_signature')) {
             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
-                $onclick = $this->getJsActionOnclick('createSignature', array(), array(
+                $onclick = $this->getJsActionOnclick('createSignature', array('redirect' => 0), array(
                     'confirm_msg' => 'Veuillez confirmer'
                 ));
 
@@ -2959,13 +2959,14 @@ class BL_CommandeShipment extends BimpObject
 
         $pdf_chiffre = BimpTools::getArrayValueFromPath($data, 'pdf_chiffre', 1);
         $pdf_detail = BimpTools::getArrayValueFromPath($data, 'pdf_detail', 1);
+        $redirect = BimpTools::getArrayValueFromPath($data, 'redirect', 1);
 
         $errors = $this->createSignature($warnings, $pdf_chiffre, $pdf_detail);
 
         if (!count($errors)) {
             $signature = $this->getChildObject('signature');
 
-            if (BimpObject::objectLoaded($signature)) {
+            if (BimpObject::objectLoaded($signature) && $redirect) {
                 $url = $signature->getUrl();
             }
         }

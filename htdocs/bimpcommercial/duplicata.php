@@ -65,7 +65,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 
 $ref = dol_sanitizeFileName($ref);
 
-$srcFile = DOL_DATA_ROOT . '/' . $type . '/' . $ref . '/' . $ref . '.pdf';
+$srcFile = DOL_DATA_ROOT . ($entity > 1 ? '/'.$entity : '').'/' . $type . '/' . $ref . '/' . $ref . '.pdf';
 
 if (!file_exists($srcFile)) {
     echo 'Fichier absent. Veuillez contacter votre interlocuteur';

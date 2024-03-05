@@ -498,6 +498,7 @@ class API_Api extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        global $conf;
         $errors = array();
 
         $api_name = $this->getData('name');
@@ -511,7 +512,7 @@ class API_Api extends BimpObject
         }
 
         if (class_exists($api_class_name)) {
-            $idx = $this->db->getMax('bimpapi_api', 'api_idx', 'name = \'' . $api_name . '\'');
+            $idx = $this->db->getMax('bimpapi_api', 'api_idx', 'name = \'' . $api_name . '\' AND entity = '.$conf->entity);
 
             if ($api_class_name::$allow_multiple_instances) {
                 $idx = (int) $idx;

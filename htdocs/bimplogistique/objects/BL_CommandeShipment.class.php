@@ -956,6 +956,16 @@ class BL_CommandeShipment extends BimpObject
                 }
             }
         }
+        else{
+            if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
+                $onclick = $this->getJsActionOnclick('createSignature', array('redirect' => 0), array(
+                    'confirm_msg' => 'Veuillez confirmer'
+                ));
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer signature';
+                $html .= '</span>';
+            }
+        }
 
         return $html;
     }

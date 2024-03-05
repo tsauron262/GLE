@@ -234,7 +234,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                             $html .= ' concernant les retards de réglement ci-après.<br/><br/>';
                             $html .= '<b>Si vous pensez que cette ' . ($relance_idx < 4 ? 'relance' : 'mise en demeure');
                             $html .= ' n\'a pas lieu d\'être, merci d\'en informer immédiatement ';
-                            $html .= '<a href="mailto:recouvrementolys@bimp.fr">Recouvrement Olys</a>';
+                            $html .= '<a href="mailto:'.BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial').'">Recouvrement</a>';
                             $html .= ' en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.)</b>';
 
                             $html .= '<br/><br/>';

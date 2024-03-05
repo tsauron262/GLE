@@ -156,7 +156,7 @@ class API_Api extends BimpObject
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $rows = self::getBdb()->getRows('bimpapi_api', ($active_only ? 'active = 1' : '1'), null, 'array', array(
+            $rows = self::getBdb()->getRows('bimpapi_api', ($active_only ? 'active = 1' : '1').' AND entity = '.$conf->entity, null, 'array', array(
                 $key,
                 'api_idx',
                 'title'

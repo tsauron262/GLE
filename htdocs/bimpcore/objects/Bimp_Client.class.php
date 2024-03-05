@@ -3629,7 +3629,7 @@ class Bimp_Client extends Bimp_Societe
 //                                $email = $client->getCommercialEmail(true, true);
 //                                $is_comm_default = true;
 //                            }
-                            $email = 'recouvrementolys@bimp.fr';
+                            $email = BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial');
 
                             if ($email) {
                                 $subject = 'Client ' . $client->getRef() . ' ' . $client->getName() . ' - Vérifier relances à réactiver';

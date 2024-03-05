@@ -1089,7 +1089,7 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
-
+die('test' .$mail_body);
                     if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), implode(',', $cc), '', 0, 1, '', '', implode(',', $replyTo))) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';

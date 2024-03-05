@@ -2778,7 +2778,7 @@ class Bimp_Client extends Bimp_Societe
                             $msg .= 'Merci d\'en vérifier la raison et de procéder à sa régularisation.<br/>';
                             $msg .= 'Lien acompte: ' . $fac->getLink();
 
-                            if (mailSyn2($subject, 'recouvrementolys@bimp.fr', '', $msg)) {
+                            if (mailSyn2($subject, BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial'), '', $msg)) {
                                 $fac->updateField('relance_active', 0);
                             } else {
                                 $msg = 'Echec de l\'envoi du mail de notification au service recouvrement pour l\'acompte ' . $fac->getRef();

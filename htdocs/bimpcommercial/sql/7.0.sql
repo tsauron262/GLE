@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_relance_clients` ADD `entity` INT NOT NULL DEFAULT 1;

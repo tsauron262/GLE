@@ -1066,7 +1066,9 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
-                    $from = 'recouvrementolys@bimp.fr';
+                    $from = BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial');
+                    
+                    
                     $replyTo = array();
                     $cc = array();
 

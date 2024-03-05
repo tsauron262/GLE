@@ -4547,7 +4547,7 @@ class ObjectLine extends BimpObject
                 if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= ' <span class="inputInfo warning">Non applicable</span>';
-                } elseif (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
+                } elseif (!$this->isEditable($force_edit) || $attribute_equipment/* || !$this->canEditPrixVente()*/) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';
                     if (!$this->isEditable()) {

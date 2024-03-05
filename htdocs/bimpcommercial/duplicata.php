@@ -18,6 +18,12 @@ if (isset($_GET['t'])) {
     $type = 'facture';
 }
 
+if (isset($_GET['e'])) {
+    $entity = trim(strip_tags(stripslashes($_GET['e'])));
+} else {
+    $entity = 1;
+}
+
 if (!in_array($type, array('facture', 'propale', 'commande'))) {
     echo 'Type de document invalide';
     exit;

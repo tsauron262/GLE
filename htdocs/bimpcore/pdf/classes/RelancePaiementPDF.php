@@ -428,7 +428,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
         $html .= $label . ' :</span>';
 
-        $html .= '<br/><b>Service Recouvrement</b><br/>recouvrementolys@bimp.fr - 04 82 90 20 29';
+        $html .= '<br/><b>Service Recouvrement</b><br/>'.BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial');
 
         if (!empty($users)) {
             $html .= '<br/>et';

@@ -38,12 +38,13 @@ class BContract_contratLine_ExtEntity extends BContract_contratLine
                         $newPercent = (100 + ($data['percent'] / $totCtr * $resteAFACT)) / 100;
                     }
                     if($newPercent !== 1){
-//                        $errors[] = 'ok percent final'.$newPercent.' nominal '. (100 + $data['percent'])/100 .' totCtr : '.$totCtr.' restafact '.$resteAFACT .' line ht '. $line->getData('subprice')*$newPercent;
+//                        $warnings[] = 'ok percent final'.$newPercent.' nominal '. (100 + $data['percent'])/100 .' totCtr : '.$totCtr.' restafact '.$resteAFACT .' line ht '. $line->getData('subprice')*$newPercent;
                         $fields = array('total_ht', 'total_ttc', 'total_tva', 'subprice', 'price_ht');
                         foreach($fields as $field){
                             $line->set($field, $line->getData($field) * $newPercent);
                         }
-                        $line->update($warnings);
+                        $line->update($warnings, true);
+//                        $warnings[] = 'update OK';
                     }
                     else{
                         $errors[] = $line->getRef().' contrat '.$parent->getRef().' pas de changement';

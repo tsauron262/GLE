@@ -400,12 +400,11 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     public function insertTableProdFourn()
     {
-        global $conf;
         $tabs = array_chunk($this->bimp_product_import_fourn, 1000);
         foreach ($tabs as $tab) {
             if (count($tab) > 0) {
                 if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`, entity) "
-                                . "VALUES (" . implode('),(', $tab) . ", '.$conf->entity.')") > 0) {
+                                . "VALUES (" . implode('),(', $tab) . ")") > 0) {
                     $this->Success(count($tab) . ' lignes insérées dans bimp_product_import_fourn');
                 } else
                     $this->Error('Erreur sql ' . $this->db->db->error());
@@ -665,6 +664,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     function addTableProdFourn($refLdlc, $codeLdlc, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $refFabriquant, $data)
     {
+        global $conf;
         $this->incProcessed($this->prod_import_instance);
 
         $data = addslashes(json_encode($data, JSON_UNESCAPED_UNICODE));
@@ -674,7 +674,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $refFabriquant = addslashes($refFabriquant);
 
         if ($this->updateSql) {
-            $this->bimp_product_import_fourn[] = "" . $this->params['id_fourn'] . ", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "'";
+            $this->bimp_product_import_fourn[] = "" . $this->params['id_fourn'] . ", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "', ".$conf->entity;
             $this->incCreated($this->prod_import_instance);
 //            if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
 //                            . "VALUES ()") > 0) {

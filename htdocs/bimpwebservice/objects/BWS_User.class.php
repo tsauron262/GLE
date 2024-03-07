@@ -76,7 +76,7 @@ class BWS_User extends BimpObject
             $params['module'] = BimpTools::getPostFieldValue('module_name');
             $params['object_name'] = BimpTools::getPostFieldValue('obj_name');
             foreach($_POST['extra_data'] as $name => $value){
-                if(stripos($name, 'show_') === false && stripos($anme, 'add_') !== 0 && $name != 'module_name' && $name != 'obj_name' && $name != 'url' && $name != 'certif'){
+                if(stripos($name, 'show_') === false && stripos($name, 'add_') !== 0 && $name != 'module_name' && $name != 'obj_name' && $name != 'url' && $name != 'certif'){
                     $params[$name] = BimpTools::getPostFieldValue($name);
                 }
             }

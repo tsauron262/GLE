@@ -592,7 +592,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     {
         if (empty($this->refProdToIdProd)) {
             $result = $this->db->getRows('product', 'entity IN (' . getEntity('product') . ', 0)', null, 'array', array('ref', 'rowid', 'url', 'barcode', 'price', 'tva_tx'));
-die('entity IN (' . getEntity('product') . ', 0)');
+
             if (!is_null($result)) {
                 foreach ($result as $res) {
                     $this->refProdToIdProd[$res['ref']] = (int) $res['rowid'];

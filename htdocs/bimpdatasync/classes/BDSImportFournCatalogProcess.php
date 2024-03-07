@@ -400,11 +400,12 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     public function insertTableProdFourn()
     {
+        global $conf;
         $tabs = array_chunk($this->bimp_product_import_fourn, 1000);
         foreach ($tabs as $tab) {
             if (count($tab) > 0) {
-                if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
-                                . "VALUES (" . implode('),(', $tab) . ")") > 0) {
+                if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`, entity) "
+                                . "VALUES (" . implode('),(', $tab) . ", '.$conf->entity.')") > 0) {
                     $this->Success(count($tab) . ' lignes insérées dans bimp_product_import_fourn');
                 } else
                     $this->Error('Erreur sql ' . $this->db->db->error());
@@ -500,6 +501,8 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 $files = ftp_nlist($ftp, $this->ftp_dir);
                 
                 BimpTools::makeDirectories($this->local_dir);
+                if(!is_dir($this->local_dir))
+                    $errors[] = 'Le dossier : '.$this->local_dir.' n\'existe pas a est ne peut être créer';
 
                 $this->DebugData($files, 'LISTE FICHIERS FTP');
 
@@ -588,7 +591,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     public function fetchProducts()
     {
         if (empty($this->refProdToIdProd)) {
-            $result = $this->db->getRows('product', '1', null, 'array', array('ref', 'rowid', 'url', 'barcode', 'price', 'tva_tx'));
+            $result = $this->db->getRows('product', 'entity IN (' . getEntity('product') . ', 0)', null, 'array', array('ref', 'rowid', 'url', 'barcode', 'price', 'tva_tx'));
 
             if (!is_null($result)) {
                 foreach ($result as $res) {
@@ -645,12 +648,13 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     function truncTableProdFourn(&$errors = array())
     {
+        global $conf;
         if ($this->updateSql) {
             if (!isset($this->params['id_fourn']) || !(int) $this->params['id_fourn']) {
                 $errors[] = 'ID fournisseur absent';
                 return false;
             }
-            if ($this->db->db->query("DELETE FROM " . MAIN_DB_PREFIX . "bimp_product_import_fourn WHERE id_fourn = " . $this->params['id_fourn']) <= 0) {
+            if ($this->db->db->query("DELETE FROM " . MAIN_DB_PREFIX . "bimp_product_import_fourn WHERE id_fourn = " . $this->params['id_fourn'] . ' AND entity ='.$conf->entity) <= 0) {
                 $errors[] = 'Echec de la troncature de la table "bimp_product_import_fourn"';
                 return false;
             }

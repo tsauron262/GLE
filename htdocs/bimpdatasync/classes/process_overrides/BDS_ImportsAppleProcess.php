@@ -426,7 +426,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                                         break;
 
                                     case 'price':
-                                        $value = (float) str_replace(' ', '', $value);
+                                        $value = str_replace(' ', '', $value);
                                         $value = (float) str_replace(',', '.', $value);
                                         break;
                                 }

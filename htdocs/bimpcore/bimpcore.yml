@@ -385,3 +385,7 @@ params:
         label: Validation strict (adresse, condition de reg...)
         type: bool
         def: 0
+    desactive_api:
+        label: Désactiver les API
+        type: bool
+        def: 0

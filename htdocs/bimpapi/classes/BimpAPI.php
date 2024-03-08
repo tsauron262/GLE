@@ -367,6 +367,8 @@ abstract class BimpAPI
 
     public function execCurl($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1)
     {
+        if(BimpCore::getConf('desactive_api'))
+            die('desactivé');
         $return = '';
 
         $request_label = BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/label', $request_name);

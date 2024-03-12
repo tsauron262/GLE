@@ -519,10 +519,6 @@ class BimpFile extends BimpObject
                             continue;
                         }
 
-                        if (preg_match('/^(.*)_deleted\..*$/', $f)) {
-                            continue;
-                        }
-
                         if (!in_array($f, $current_files)) {
                             $this->reset();
 
@@ -544,13 +540,18 @@ class BimpFile extends BimpObject
                             }
 
                             if (!count($file_errors)) {
+                                $deleted = 0;
+                                if (preg_match('/^(.*)_deleted\..*$/', $f)) {
+                                    $deleted = 1;
+                                }
                                 $file_errors = $this->validateArray(array(
                                     'parent_module'      => $module,
                                     'parent_object_name' => $object_name,
                                     'id_parent'          => $id_object,
                                     'file_name'          => $file_name,
                                     'file_ext'           => $path_info['extension'],
-                                    'file_size'          => filesize($file_dir . '/' . $f)
+                                    'file_size'          => filesize($file_dir . '/' . $f),
+                                    'deleted'            => $deleted
                                 ));
 
                                 if (!count($file_errors)) {
@@ -817,7 +818,10 @@ class BimpFile extends BimpObject
                         $dir = $this->getFileDir();
                         $ext = $this->getData('file_ext');
                         if (file_exists($dir . $current_name . '.' . $ext)) {
-                            if ($error = BimpTools::renameFile($dir, $current_name . '.' . $ext, $new_name . '.' . $ext)) {
+                            if(isset($this->true_delete) && $this->true_delete) {
+                                BimpCore::addlog('Fichier en true delete qui existe sur le serveur...', 4);
+                            }
+                            elseif ($error = BimpTools::renameFile($dir, $current_name . '.' . $ext, $new_name . '.' . $ext)) {
                                 return array($error);
                             }
                         }
@@ -856,7 +860,7 @@ class BimpFile extends BimpObject
         $this->set('deleted', 1);
         $this->set('user_delete', (int) $user->id);
         $this->set('date_delete', date('Y-m-d H:i:s'));
-        $this->set('file_name', $this->getData('file_name') . $this->id . '_deleted');
+        $this->set('file_name', $this->getData('file_name') . '_' . $this->id . '_deleted');
 
         $errors = $this->update($warnings, true);
 
@@ -864,9 +868,10 @@ class BimpFile extends BimpObject
             $dir = $this->getFileDir();
             $file = $this->getData('file_name') . '.' . $this->getData('file_ext');
 
+            /* géré dans update
             if (file_exists($dir . $file)) {
                 BimpTools::renameFile($dir, $file, $this->getData('file_name') . '_' . $this->id . '_deleted.' . $this->getData('file_ext'));
-            }
+            }*/
 
             $parent = $this->getParentInstance();
 

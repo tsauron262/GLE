@@ -116,7 +116,7 @@ class BCT_ContratLine extends BimpObject
         }
 
         $status = (int) $this->getData('statut');
-        if ($status === self::STATUS_ATT_PROPAL) {
+        if (!$force_delete && $status === self::STATUS_ATT_PROPAL) {
             $errors[] = 'En attente d\'acceptation du devis';
             return 0;
         }

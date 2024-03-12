@@ -576,11 +576,11 @@ class BimpFile extends BimpObject
                 foreach ($current_files as $id_file => $file_name) {
                     if (!in_array($file_name, $files)) {
                         if ($this->fetch((int) $id_file)) {
-                            $warnings = array();
-                            $this->true_delete = true;
-                            $err = $this->delete($warnings, true);
-                            $this->true_delete = false;
-                            $this->reset();
+//                            $warnings = array();
+//                            $this->true_delete = true;
+//                            $err = $this->delete($warnings, true);
+//                            $this->true_delete = false;
+//                            $this->reset();
                         }
                     }
                 }

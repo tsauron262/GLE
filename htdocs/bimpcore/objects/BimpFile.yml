@@ -1,6 +1,7 @@
 table: bimpcore_file
 common_fields: 1
 icon: fas_file
+no_transaction_db: 1
 
 parent_module: 
     field_value: parent_module

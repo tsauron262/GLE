@@ -1052,6 +1052,7 @@ class Bimp_PropalLine extends ObjectLine
             return $errors;
         }
 
+        $contrat_line = null;
         $id_contrat_line = (int) $this->db->getValue('contratdet', 'rowid', 'line_origin_type = \'propal_line\' AND id_line_origin = ' . $this->id);
         if ($id_contrat_line) {
             $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);

@@ -649,6 +649,7 @@ class Bimp_PropalLine extends ObjectLine
 
         $value = (int) $this->getData('abo_duration');
         $options = array();
+        $possible_values = array(1, 6, 12, 24, 36, 48, 60);
 
         if ($duree_unitaire) {
             $options['data']['min'] = $duree_unitaire;
@@ -658,6 +659,16 @@ class Bimp_PropalLine extends ObjectLine
             if ($value < $duree_unitaire) {
                 $value = $duree_unitaire;
             }
+
+            foreach ($possible_values as $idx => $val) {
+                if ($val < $duree_unitaire || ($val % $duree_unitaire != 0)) {
+                    unset($possible_values[$idx]);
+                }
+            }
+        }
+        
+        if (!empty($possible_values)) {
+            $options['possible_values'] = $possible_values;
         }
 
         $html .= BimpInput::renderInput('qty', 'abo_duration', $value, $options);

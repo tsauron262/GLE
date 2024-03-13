@@ -2815,7 +2815,8 @@ class BimpCache
                     'town'        => $centre[6],
                     'id_entrepot' => $centre[8],
                     'shipTo'      => $centre[4],
-                    'active'      => (isset($centre[9]) ? $centre[9] : 1)
+                    'active'      => (isset($centre[9]) ? $centre[9] : 1),
+                    'infos'      => (isset($centre['infos']) ? $centre['infos'] : '')
                 );
             }
         }

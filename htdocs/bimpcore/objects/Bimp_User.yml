@@ -91,6 +91,9 @@ fields:
     dateemployment:
         label: Date d'embauche
         type: date
+    datec:
+        label: Créer le 
+        type: date
     address: 
         label: Adresse
         type: text
@@ -364,8 +367,7 @@ forms:
                       callback: getUserGroupsArray
             - custom: 1
               show: 
-                  callback: 
-                      is_module_active: MULTICOMPANY
+                  is_module_active: MULTICOMPANY
               label: Entités
               input_name: entities
               data_type: id
@@ -605,6 +607,8 @@ lists:
             - label: supprimer les utilisateurs sélectionnés
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
         sort_field: id
         sort_way: desc
         n: 10
@@ -625,6 +629,13 @@ lists:
             job:
             email: 
             office_phone:
+                
+                
+lists_cols: 
+    groups_secu: 
+        label: Groupe Secu
+        value: 
+            callback: displayUserGroupsSecu
                    
 views_lists: 
     default: 

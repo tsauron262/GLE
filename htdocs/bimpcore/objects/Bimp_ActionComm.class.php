@@ -28,6 +28,8 @@ class Bimp_ActionComm extends BimpObject
 
         if (!$this->isLoaded()) {
             $idUserCreate = $user->id;
+            if(count($usersAssigned) != 1 || !in_array($user->id, $usersAssigned))//n'est pas l'utilisateur assignée, et na pas le droit de créer des action pour d'autres.
+                return false;
         } else {
             $idUserCreate = $this->getData('fk_user_author');
         }

@@ -724,7 +724,8 @@ class BContract_echeancier extends BimpObject
                     $html .= '<td style="text-align:center"><b>' . price($facture->getData('total_ht')) . ' €</b> </td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('total_tva')) . ' € </b></td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
-                            . '<td style="text-align:center"><b>' . price($facture->getTotalMargeWithReval(array('correction_pa'))) . ' €</b></td>'
+//                            . '<td style="text-align:center"><b>' . price($facture->getTotalMargeWithReval(array('correction_pa'))) . ' €</b></td>'
+                            . '<td style="text-align:center"><b>' . price($facture->getData('total_achat_reval_ok')) . ' €</b></td>'
                             . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                             . '<td style="text-align:center">' . $paye . '</td>'
                             . '<td style="text-align:center">' . $displayAppatenance . '</td>'
@@ -1405,7 +1406,13 @@ class BContract_echeancier extends BimpObject
                 $lines = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine');
                 $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
                 foreach ($lines->getList(['fk_contrat' => $contrat->id, "renouvellement" => $contrat->getData('current_renouvellement')]) as $idLine => $infos) {
-                    $desc .= $infos['description'] . "<br /><br />";
+                    if(BimpCore::isEntity('blyyd') || $infos['description'] == ''){
+                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $infos['fk_product']);
+                        if($prod->getData('label') != '')
+                            $desc .= $prod->getData('label') . "<br /><br />";
+                    }
+                    else
+                        $desc .= $infos['description'] . "<br /><br />";
                 }
 
                 if (!count($errors)) {

@@ -37,11 +37,13 @@ abstract class BimpAPI
 
     public function __construct($api_idx = 0, $id_user_account = 0, $debug_mode = false)
     {
+        global $conf;
         $this->debug_mode = $debug_mode;
         $this->idx = $api_idx;
         $this->apiObject = BimpCache::findBimpObjectInstance('bimpapi', 'API_Api', array(
                     'name'    => static::$name,
-                    'api_idx' => $api_idx
+                    'api_idx' => $api_idx,
+                    'entity'  => $conf->entity/*todo devrait être géré dans findbimpobjectinstance*/
                         ), false);
 
         if ($this->isApiOk($this->errors)) {
@@ -365,6 +367,8 @@ abstract class BimpAPI
 
     public function execCurl($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1)
     {
+        if(BimpCore::getConf('desactive_api'))
+            die('desactivé');
         $return = '';
 
         $request_label = BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/label', $request_name);

@@ -24,7 +24,9 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         'ArtFree2'      => 'rpcp',
         'ArtFree3'      => 'cto',
         'ArtLastPA'     => 'cur_pa_ht',
-        'ArtIsSupp'     => 'crt'
+        'ArtIsSupp'     => 'crt',
+        'weight'        => 'weight',
+        'description'        => 'description'
     );
     public static $prices_keys = array(
         'code produit' => 'ref_fourn',
@@ -425,7 +427,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                                         break;
 
                                     case 'price':
-                                        $value = (float) str_replace(' ', '', $value);
+                                        $value = str_replace(' ', '', $value);
                                         $value = (float) str_replace(',', '.', $value);
                                         break;
                                 }

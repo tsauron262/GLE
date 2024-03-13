@@ -4271,6 +4271,26 @@ class BimpObject extends BimpCache
 
         return $rows;
     }
+    
+    public function getListConfigs()
+    {
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        global $user;
+
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+        return ListTableConfig::getUserConfigsArray($user->id, $this, $list_name, false);
+    }
+
+    public function getListConfig()
+    {
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        global $user;
+
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+        $conf = ListTableConfig::getUserCurrentConfig($user->id, $this, $list_name);
+        if ($conf && $conf->id > 0)
+            return $conf->id;
+    }
 
     // Gestion des signatures: 
 
@@ -6501,8 +6521,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return 1;
     }
 
-    // Gestion des droits users: 
-
+    // Gestion des droits users:
 
     public function can($right)
     {
@@ -8089,26 +8108,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     public function renderHeaderBtnRedir()
     {
         return $this->processRedirect(false);
-    }
-
-    public function getListConfigs()
-    {
-        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
-        global $user;
-
-        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
-        return ListTableConfig::getUserConfigsArray($user->id, $this, $list_name, false);
-    }
-
-    public function getListConfig()
-    {
-        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
-        global $user;
-
-        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
-        $conf = ListTableConfig::getUserCurrentConfig($user->id, $this, $list_name);
-        if ($conf && $conf->id > 0)
-            return $conf->id;
     }
 
     public function renderListCsvColsOptions()

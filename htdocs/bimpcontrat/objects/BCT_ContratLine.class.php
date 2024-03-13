@@ -11,6 +11,7 @@ class BCT_ContratLine extends BimpObject
         self::TYPE_TEXT => array('label' => 'Texte', 'icon' => 'fas_align-left')
     );
 
+    const STATUS_PROPAL_REFUSED = -3;
     const STATUS_ATT_PROPAL = -2;
     const STATUS_NONE = -1;
     const STATUS_INACTIVE = 0;
@@ -18,11 +19,12 @@ class BCT_ContratLine extends BimpObject
     const STATUS_CLOSED = 5;
 
     public static $status_list = array(
-        self::STATUS_ATT_PROPAL => array('label' => 'Attente acceptation devis', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
-        self::STATUS_NONE       => array('label' => 'Non Applicable'),
-        self::STATUS_INACTIVE   => array('label' => 'Inactif', 'icon' => 'fas_times', 'classes' => array('warning')),
-        self::STATUS_ACTIVE     => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success')),
-        self::STATUS_CLOSED     => array('label' => 'Fermé', 'icon' => 'fas_times-circle', 'classes' => array('danger')),
+        self::STATUS_PROPAL_REFUSED => array('label' => 'Devis refusé', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger')),
+        self::STATUS_ATT_PROPAL     => array('label' => 'Attente acceptation devis', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        self::STATUS_NONE           => array('label' => 'Non Applicable'),
+        self::STATUS_INACTIVE       => array('label' => 'Inactif', 'icon' => 'fas_times', 'classes' => array('warning')),
+        self::STATUS_ACTIVE         => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::STATUS_CLOSED         => array('label' => 'Fermé', 'icon' => 'fas_times-circle', 'classes' => array('danger')),
     );
     public static $periodicities = array(
         0  => 'Aucune',
@@ -57,7 +59,7 @@ class BCT_ContratLine extends BimpObject
         switch ($action) {
             case 'facturationAvance':
             case 'activate':
-                return (int) !empty($user->rights->bimpcontract->to_validate);
+                return (int) ($user->admin || !empty($user->rights->bimpcontract->to_validate));
 
             case 'periodicFacProcess':
                 return 1;
@@ -116,7 +118,7 @@ class BCT_ContratLine extends BimpObject
         }
 
         $status = (int) $this->getData('statut');
-        if ($status === self::STATUS_ATT_PROPAL) {
+        if (!$force_delete && $status === self::STATUS_ATT_PROPAL) {
             $errors[] = 'En attente d\'acceptation du devis';
             return 0;
         }
@@ -130,7 +132,7 @@ class BCT_ContratLine extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (!$force_edit && (int) $this->getData('statut') === (int) self::STATUS_ATT_PROPAL) {
+        if (!$force_edit && in_array((int) $this->getData('statut'), array(self::STATUS_ATT_PROPAL, self::STATUS_PROPAL_REFUSED))) {
             return 0;
         }
 
@@ -220,6 +222,11 @@ class BCT_ContratLine extends BimpObject
                     return 0;
                 }
 
+                if ($status == self::STATUS_PROPAL_REFUSED) {
+                    $errors[] = 'Devis refusé - Réviser le devis ou supprimer la ligne de contrat';
+                    return 0;
+                }
+
                 if ((int) $contrat->getData('statut') <= 0) {
                     $errors[] = 'Le contrat n\'est pas validé';
                     return 0;
@@ -241,7 +248,7 @@ class BCT_ContratLine extends BimpObject
                     return 0;
                 }
 
-                if ((int) $this->db->getCount('contradet', 'id_linked_line = ' . $this->id . ' AND statut = ' . self::STATUS_ACTIVE, 'rowid') > 0) {
+                if ((int) $this->db->getCount('contratdet', 'id_linked_line = ' . $this->id . ' AND statut = ' . self::STATUS_ACTIVE, 'rowid') > 0) {
                     $errors[] = 'Il existe des lignes liées actives';
                     return 0;
                 }

@@ -223,7 +223,7 @@ lists:
         
 forms:
     newAppartenance:
-        row:
+        rows:
             - field: renouvellement
     default:
         rows:

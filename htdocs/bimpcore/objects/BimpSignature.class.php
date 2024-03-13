@@ -280,7 +280,7 @@ class BimpSignature extends BimpObject
             );
         }
 
-        if ($this->isActionAllowed('refreshDocuSign') && $this->canSetAction('refreshDocuSign')) {
+        if ($this->isActionAllowed('refreshDocuSign') && $this->canSetAction('refreshDocuSign') && $this->getData('id_envelope_docu_sign')) {
             $buttons[] = array(
                 'label'   => 'Actualiser DocuSign',
                 'icon'    => 'fas_sync',

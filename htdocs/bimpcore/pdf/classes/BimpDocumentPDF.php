@@ -69,7 +69,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $logo_file = $testFile;
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('BP'))) {
-                $testFile = str_replace(array(".jpg", ".png"), "_BP.png", $logo_file);
+                $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
                 if (is_file($testFile))
                     $logo_file = $testFile;
             }
@@ -160,6 +160,10 @@ class BimpDocumentPDF extends BimpModelPDF
 
         if (BimpCore::isEntity('prolease')) {
             $line2 .= ' - RCS : ' . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
+            // IntraCommunautary VAT
+            if ($this->footerCompany->tva_intra != '') {
+                $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->footerCompany->tva_intra);
+            }
         } else {
             if ($this->footerCompany->idprof1 && ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)) {
                 $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);

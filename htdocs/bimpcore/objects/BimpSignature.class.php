@@ -641,9 +641,12 @@ class BimpSignature extends BimpObject
                     continue;
                 }
 
-                $signature_params = $this->getSignatureParams($signataire, 'docusign', $errors);
+                $signature_params_errors = array();
+                $signature_params = $this->getSignatureParams($signataire, 'docusign', $signature_params_errors);
 
-                if (!empty($signature_params)) {
+                if (!empty($signature_params_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($signature_params_errors, 'Signataire ' . $signataire->getName());
+                } elseif (!empty($signature_params)) {
                     if (!$email_body) {
                         if (method_exists($obj, 'getDocuSignEmailContent')) {
                             $email_body = $obj->getDocuSignEmailContent($doc_type, $signataire);
@@ -727,6 +730,7 @@ class BimpSignature extends BimpObject
 
                     // Attention le nom sera automatiquement celui indiqué dans $params['name']
                     // Pour demander à saisir un autre nom utiliser plutôt un textTab
+
                     if (isset($signature_params['nom'])) {
                         $params['tabs']['fullNameTabs'] = array();
                         $params['tabs']['fullNameTabs'][] = array(
@@ -755,13 +759,64 @@ class BimpSignature extends BimpObject
                         );
                     }
 
+                    if ((int) $signataire->getData('type') === BimpSignataire::TYPE_CLIENT && (int) $signataire->getData('need_sms_code')) {
+                        $phones = array();
+                        $client = $signataire->getChildObject('client');
+                        if (BimpObject::objectLoaded($client)) {
+                            $phone = $client->getData('phone');
+                            if ($phone) {
+                                $phones[] = BimpTools::cleanPhoneNumberStr($phone, true, true);
+                            }
+                        }
+
+                        $contact = $signataire->getChildObject('contact');
+
+                        if (BimpObject::objectLoaded($contact)) {
+                            $phone = $contact->getData('phone_mobile');
+                            if ($phone) {
+                                $phones[] = BimpTools::cleanPhoneNumberStr($phone, true, true);
+                            }
+
+                            $phone = $contact->getData('phone');
+                            if ($phone) {
+                                $phones[] = BimpTools::cleanPhoneNumberStr($phone, true, true);
+                            }
+
+                            $phone = $contact->getData('phone_perso');
+                            if ($phone) {
+                                $phones[] = BimpTools::cleanPhoneNumberStr($phone, true, true);
+                            }
+                        }
+
+                        if (empty($phones)) {
+                            $errors[] = 'Signataire ' . $signataire->getName() . '" : aucun numéro de téléphone enregistré pour l\'authentification par sms. Veuillez renseigner au moins un numéro sur la fiche du client ou du contact sélectionné';
+                        } else {
+//                            $params['phoneAuthentication'] = array(
+//                                'recipMayProvideNumber' => true
+//                            );
+
+                            $params['idCheckConfigurationName'] = 'SMS Auth $';
+                            $params['smsAuthentication'] = array(
+                                'senderProvidedNumbers' => $phones
+                            );
+                        }
+                    }
+
                     $signers[] = $params;
                     $i++;
                 } else {
-                    $errors[] = 'Paramètre DocuSign absents pour le signataire "' . $signataire->getName() . '"';
+                    $errors[] = 'Paramètres DocuSign absents pour le signataire "' . $signataire->getName() . '"';
                 }
             }
         }
+
+//        echo 'ERR<pre>';
+//        print_r($errors);
+//        echo '</pre>';
+//
+//        echo 'SIGNERS <pre>';
+//        print_r($signers);
+//        exit;
 
         return $signers;
     }
@@ -1122,7 +1177,7 @@ class BimpSignature extends BimpObject
     public function renderHeaderExtraLeft()
     {
         $html = '';
-        
+
         if ($this->isLoaded() && !$this->isSigned()) {
             $warning = $this->displayNoPublicAccessWarnings();
 
@@ -1181,7 +1236,7 @@ class BimpSignature extends BimpObject
 
             $html .= '</div>';
         }
-        
+
         return $html;
     }
 
@@ -1433,7 +1488,7 @@ class BimpSignature extends BimpObject
                 if ((int) BimpTools::getArrayValueFromPath($params, 'display_fonction', $is_company)) {
                     $texts['fonction'] = utf8_decode($signataire->getData('fonction'));
                 }
-                
+
                 if ((int) BimpTools::getArrayValueFromPath($params, 'display_ville', 0)) {
                     $texts['ville'] = utf8_decode($signataire->getData('ville'));
                 }
@@ -2011,7 +2066,7 @@ class BimpSignature extends BimpObject
                         } else {
                             require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-                            if(!count($files)){
+                            if (!count($files)) {
                                 $file_ext = pathinfo($_FILES['file_signed']['name'], PATHINFO_EXTENSION);
                                 $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
                                 $this->set('signed_doc_ext', strtolower($file_ext));
@@ -2028,12 +2083,11 @@ class BimpSignature extends BimpObject
                                     $success .= 'Téléchargement du fichier effectué avec succès';
                                 }
                                 BimpTools::cleanDolEventsMsgs();
-                            }
-                            else{
+                            } else {
                                 $file_ext = pathinfo($files[0], PATHINFO_EXTENSION);
                                 $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
                                 $this->set('signed_doc_ext', strtolower($file_ext));
-                                BimpTools::moveTmpFiles($errors, $files, $dir,$file_name);
+                                BimpTools::moveTmpFiles($errors, $files, $dir, $file_name);
                             }
 
                             if (!count($errors)) {
@@ -2043,7 +2097,7 @@ class BimpSignature extends BimpObject
                                     if (BimpObject::objectLoaded($signataire)) {
                                         $signataire_warnings = array();
                                         $signataire_errors = $signataire->setSignedPapier($date, $signataire_warnings);
-                                        
+
                                         if (count($signataire_errors)) {
                                             $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de la mise à jour du signataire "' . $signataire->getName() . '"');
                                         }

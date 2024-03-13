@@ -1664,7 +1664,7 @@ class BimpComm extends BimpDolObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity='.$this->getData('entity').'&file=' . urlencode($this->getSubDir()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&entity=' . $this->getData('entity') . '&file=' . urlencode($this->getSubDir()) . '/' . urlencode($file_name);
             }
         }
 
@@ -2606,7 +2606,7 @@ class BimpComm extends BimpDolObject
     {
         if ($this->isLoaded()) {
             if (BimpCore::isModuleActive('bimpvalidation')) {
-                require_once DOL_DOCUMENT_ROOT.'/bimpvalidation/BV_Lib.php';
+                require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
                 return BimpValidation::renderObjectDemandesList($this);
             } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
@@ -3138,6 +3138,22 @@ class BimpComm extends BimpDolObject
                         if (empty($err)) {
                             $err = $new_line->attributeEquipment($data['id_equipment'], 0, true, false);
                         }
+                    }
+                }
+            }
+
+            // Transert liaison ligne de contrat : 
+            if ($params['is_review'] && $origin->object_name == 'Bimp_Propal') {
+                $contrat_line = BimpCache::findBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', array(
+                            'line_origin_type' => 'propal_line',
+                            'id_line_origin'   => $line->id
+                                ), true);
+
+                if (BimpObject::objectLoaded($contrat_line)) {
+                    $contrat_line->updateField('id_line_origin', $new_line->id);
+
+                    if ((int) $contrat_line->getData('statut') !== BCT_ContratLine::STATUS_ATT_PROPAL) {
+                        $contrat_line->updateField('statut', BCT_ContratLine::STATUS_ATT_PROPAL);
                     }
                 }
             }
@@ -4432,7 +4448,7 @@ class BimpComm extends BimpDolObject
 
         $sql = BimpTools::getSqlFullSelectQuery('facture', $fields, $filters, $joins, array(
                     'default_alias' => 'f'
-        )).' GROUP BY f.rowid';
+                )) . ' GROUP BY f.rowid';
 
         $rows = $bdb->executeS($sql, 'array');
 

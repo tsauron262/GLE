@@ -1866,9 +1866,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                             ), true);
 
             if (BimpObject::objectLoaded($contrat_line)) {
-                $contrat_line->updateField('statut', 0);
-                $contrat_line->dol_object->statut = 0;
-                $contrat_line->delete($w, true);
+                $contrat_line->updateField('statut', BCT_ContratLine::STATUS_PROPAL_REFUSED); // Pas de delete car devis possiblement révisé ultérieurement.
+//                $contrat_line->dol_object->statut = 0;
+//                $contrat_line->delete($w, true);
             }
         }
     }

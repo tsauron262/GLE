@@ -305,6 +305,8 @@ fields_tables:
             - field: rappel_service_expire
               edit:
                   callback: isCommercialOrSup
+            - field: fk_project
+              edit: 1
                   
     livraison: 
         title: Livraison

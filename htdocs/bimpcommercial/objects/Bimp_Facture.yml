@@ -916,6 +916,8 @@ fields_tables:
             - label: Infos export Chorus
               value: 
                   callback: displayChorusData
+            - field: fk_project
+              edit: 1
                   
     client: 
         rows: 

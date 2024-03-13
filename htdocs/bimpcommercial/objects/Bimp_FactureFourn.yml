@@ -252,6 +252,8 @@ fields_tables:
                   conf: 
                       module: bimpcommercial
                       name: use_link_achat_fourn_equipment
+            - field: fk_project
+              edit: 1
                   
     client: 
         title: Fournisseur

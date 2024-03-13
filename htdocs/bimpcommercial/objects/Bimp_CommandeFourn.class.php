@@ -441,8 +441,10 @@ class Bimp_CommandeFourn extends BimpCommAchat
     public function getDirOutput()
     {
         global $conf;
-
-        return $conf->fournisseur->commande->dir_output;
+        if($this->isLoaded() && $this->dol_object->entity > 0)
+            return $conf->fournisseur->commande->multidir_output[$this->dol_object->entity] . '/';
+        else
+            return $conf->fournisseur->commande->dir_output . '/';
     }
 
     public function getListFilters()

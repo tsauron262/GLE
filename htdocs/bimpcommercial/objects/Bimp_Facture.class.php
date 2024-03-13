@@ -2116,8 +2116,10 @@ class Bimp_Facture extends BimpComm
     public function getDirOutput()
     {
         global $conf;
-
-        return $conf->facture->dir_output;
+        if($this->isLoaded() && $this->dol_object->entity > 0)
+            return $conf->facture->multidir_output[$this->dol_object->entity] . '/';
+        else
+            return $conf->facture->dir_output . '/';
     }
 
     public function getRequestIdFactureReplaced()

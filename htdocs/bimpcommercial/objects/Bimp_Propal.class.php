@@ -1015,8 +1015,10 @@ class Bimp_Propal extends Bimp_PropalTemp
     public function getDirOutput()
     {
         global $conf;
-
-        return $conf->propal->dir_output;
+        if($this->isLoaded() && $this->dol_object->entity > 0)
+            return $conf->propal->multidir_output[$this->dol_object->entity] . '/';
+        else
+            return $conf->propal->dir_output . '/';
     }
 
     public function getAbonnementsLinesIds($not_added_to_contrat = false)

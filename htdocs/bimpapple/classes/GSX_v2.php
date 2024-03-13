@@ -438,6 +438,8 @@ class GSX_v2 extends GSX_Const
 
     public function exec($request_name, $params, &$response_headers = array(), $extra = array())
     {
+        if(BimpCore::getConf('desactive_api'))
+            die('desactivé');
         if (!(string) $request_name) {
             $this->curlError('(inconnue)', 'Nom de la requête absent', '', true);
             return false;

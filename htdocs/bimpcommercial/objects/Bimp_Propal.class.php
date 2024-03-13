@@ -1852,6 +1852,25 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $errors;
     }
 
+    public function onRefused()
+    {
+        $w = array();
+        $lines = $this->getAbonnementLines();
+
+        foreach ($lines as $line) {
+            $contrat_line = BimpCache::findBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', array(
+                        'line_origin_type' => 'propal_line',
+                        'id_line_origin'   => $line->id
+                            ), true);
+
+            if (BimpObject::objectLoaded($contrat_line)) {
+                $contrat_line->updateField('statut', 0);
+                $contrat_line->dol_object->statut = 0;
+                $contrat_line->delete($w, true);
+            }
+        }
+    }
+
     // Traitements - overrides BimpComm:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
@@ -1984,6 +2003,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                             $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de l\'annulation de la signature');
                         }
                     }
+                }
+
+                if ((int) $data['new_status'] === 3) { // Refusée
+                    $this->onRefused();
                 }
             }
         }

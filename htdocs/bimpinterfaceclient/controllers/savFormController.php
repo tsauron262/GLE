@@ -1081,7 +1081,10 @@ class savFormController extends BimpPublicController
         }
         $msg .= '<b>Adresse du centre LDLC Apple : </b>' . "\n";
         $msg .= $centre['address'] . "\n";
-        $msg .= $centre['zip'] . ' ' . $centre['town'] . "\n\n";
+        $msg .= $centre['zip'] . ' ' . $centre['town'] . "\n";
+        if($centre['infos'] != '')
+            $msg .= $centre['infos']."\n";
+        $msg .= "\n";
 
         if (is_a($dt_begin, 'DateTime')) {
             $msg .= '<b>Date du rendez-vous: </b>' . "\n";
@@ -2262,6 +2265,8 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     $success_html .= '<p>Lieu: <b><br/>';
                     $success_html .= $centre['address'] . '<br/>';
                     $success_html .= $centre['zip'] . ' ' . $centre['town'] . '</b></p><br/>';
+                    if($centre['infos'] != '')
+                        $success_html .= $centre['infos'].'<br/>';
 
                     if ($email_client_ok) {
                         $success_html .= '<p>Un e-mail récapitulatif a été envoyé à <b>' . $email_client . '</b></p>';

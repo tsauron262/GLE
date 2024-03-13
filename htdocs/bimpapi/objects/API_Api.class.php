@@ -146,7 +146,8 @@ class API_Api extends BimpObject
 
     public static function getApisArray($include_empty = false, $active_only = true, $key = 'name')
     {
-        $cache_key = 'bimp_apis_array_by_' . $key;
+        $conf;
+        $cache_key = 'bimp_apis_array_by_' . $key.'_'.$conf->entity;
 
         if ($active_only) {
             $cache_key .= '_active_only';
@@ -155,7 +156,7 @@ class API_Api extends BimpObject
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $rows = self::getBdb()->getRows('bimpapi_api', ($active_only ? 'active = 1' : '1'), null, 'array', array(
+            $rows = self::getBdb()->getRows('bimpapi_api', ($active_only ? 'active = 1' : '1').' AND entity = '.$conf->entity, null, 'array', array(
                 $key,
                 'api_idx',
                 'title'
@@ -497,6 +498,7 @@ class API_Api extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        global $conf;
         $errors = array();
 
         $api_name = $this->getData('name');
@@ -510,7 +512,7 @@ class API_Api extends BimpObject
         }
 
         if (class_exists($api_class_name)) {
-            $idx = $this->db->getMax('bimpapi_api', 'api_idx', 'name = \'' . $api_name . '\'');
+            $idx = $this->db->getMax('bimpapi_api', 'api_idx', 'name = \'' . $api_name . '\' AND entity = '.$conf->entity);
 
             if ($api_class_name::$allow_multiple_instances) {
                 $idx = (int) $idx;

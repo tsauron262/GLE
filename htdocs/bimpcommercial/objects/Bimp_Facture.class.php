@@ -315,6 +315,9 @@ class Bimp_Facture extends BimpComm
                 ))) {
             return 1;
         }
+        
+        if($field == 'entrepot' && $this->getData('entrepot') < 1)
+            return 1;
 
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;

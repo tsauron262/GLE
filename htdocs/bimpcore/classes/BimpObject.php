@@ -2366,7 +2366,7 @@ class BimpObject extends BimpCache
             if (!$force_action && !$instance->canSetAction($action)) {
                 $result['errors'][] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$instance->isActionAllowed($action, $result['errors'])) {
-                $result['errors'][] = 'Action impossible (1001) '.$action;
+                $result['errors'][] = 'Action impossible (1001) ' . $action;
             }
 
             if (!count($result['errors'])) {
@@ -2400,7 +2400,7 @@ class BimpObject extends BimpCache
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
         global $dont_rollback;
         if ($use_db_transactions) {
-            if (isset($result['errors']) && count($result['errors']) and!isset($dont_rollback)) {
+            if (isset($result['errors']) && count($result['errors']) and !isset($dont_rollback)) {
                 $instance->db->db->rollback();
 
                 if ((int) BimpCore::getConf('log_actions_rollbacks')) {
@@ -4270,6 +4270,26 @@ class BimpObject extends BimpCache
         }
 
         return $rows;
+    }
+    
+    public function getListConfigs()
+    {
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        global $user;
+
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+        return ListTableConfig::getUserConfigsArray($user->id, $this, $list_name, false);
+    }
+
+    public function getListConfig()
+    {
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        global $user;
+
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+        $conf = ListTableConfig::getUserCurrentConfig($user->id, $this, $list_name);
+        if ($conf && $conf->id > 0)
+            return $conf->id;
     }
 
     // Gestion des signatures: 
@@ -6501,8 +6521,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return 1;
     }
 
-    // Gestion des droits users: 
-
+    // Gestion des droits users:
 
     public function can($right)
     {
@@ -8087,24 +8106,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     public function renderHeaderBtnRedir()
     {
         return $this->processRedirect(false);
-    }
-    
-    public function getListConfigs(){
-        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
-        global $user;
-        
-        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
-        return ListTableConfig::getUserConfigsArray($user->id, $this, $list_name, false);
-    }
-    
-    public function getListConfig(){
-        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
-        global $user;
-        
-        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
-        $conf = ListTableConfig::getUserCurrentConfig($user->id, $this, $list_name);
-        if($conf && $conf->id > 0)
-            return $conf->id;
     }
 
     public function renderListCsvColsOptions()

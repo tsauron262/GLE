@@ -157,6 +157,10 @@ class BContract_contratLine extends BContract_contrat
 
         return $buttons;
     }
+    
+    public function getListExtraBulkActions(){
+        
+    }
 
     public function deleteDolObject(&$errors)
     {

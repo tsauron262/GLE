@@ -45,9 +45,11 @@ class PartStock extends BimpObject
 
     public function canSetAction($action)
     {
+        global $user;
+        
         switch ($action) {
             case 'correct':
-                return $this->isUserAdmin();
+                return (int) ($this->isUserAdmin() || $user->login == 'jc.cannet'); // temp pour dépannage
         }
 
         return parent::canSetAction($action);

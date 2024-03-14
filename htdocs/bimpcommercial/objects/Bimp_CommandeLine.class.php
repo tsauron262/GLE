@@ -823,6 +823,9 @@ class Bimp_CommandeLine extends ObjectLine
                 if (isset($reservedQties['status'][0])) {
                     $reserved_qty -= $reservedQties['status'][0];
                 }
+                if (isset($reservedQties['status'][303])) {
+                    $reserved_qty -= $reservedQties['status'][303];
+                }
 
                 $shipped_qty = (float) $this->getShippedQty();
                 $billed_qty = (float) $this->getBilledQty();

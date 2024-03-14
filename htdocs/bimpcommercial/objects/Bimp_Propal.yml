@@ -603,6 +603,8 @@ fields_tables:
               edit: 1
             - field: zone_vente
               edit: 1
+            - field: fk_project
+              edit: 1
     
     client: 
         rows: 

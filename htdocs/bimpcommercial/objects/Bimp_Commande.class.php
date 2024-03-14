@@ -678,9 +678,17 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function getDirOutput()
     {
-        global $conf;
+//        global $conf;
 
-        return $conf->commande->dir_output;
+//        return $conf->commande->dir_output;
+        
+        global $conf;
+        $ref = dol_sanitizeFileName($this->dol_object->ref);
+        if($this->isLoaded() && $this->dol_object->entity > 0)
+//            die($conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/' . $subdir);
+            return $conf->commande->multidir_output[$this->dol_object->entity] . '/';
+        else
+            return $conf->commande->dir_output . '/';
     }
 
     public function getActionsButtons()

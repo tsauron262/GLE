@@ -5601,6 +5601,29 @@ class BF_Demande extends BimpObject
         return BimpInput::renderInput('select', 'signature_type', $value, array('options' => $options));
     }
 
+    public function renderSignaturePhoneAuthInput($doc_type = '')
+    {
+        $html = '';
+
+        $signature_type = BimpTools::getPostFieldValue('signature_type', '');
+
+        if ($signature_type === 'docusign') {
+            if ((int) BimpCore::getConf($doc_type . '_loc_signature_allow_docusign_phone_auth', null, 'bimpfinancement')) {
+                $html .= BimpInput::renderInput('toggle', 'signature_phone_auth', 1);
+            } else {
+                $html .= '<input type="hidden" value="0" name="signature_phone_auth"/>';
+                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Non autorisé</span>';
+            }
+        }
+
+        if (!$html) {
+            $html .= '<input type="hidden" value="0" name="signature_phone_auth"/>';
+            $html .= '<span class="warning">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non applicable</span>';
+        }
+
+        return $html;
+    }
+
     public function renderSignatureInitDocuSignInput($doc_type = '')
     {
         $html = '';
@@ -5642,6 +5665,7 @@ class BF_Demande extends BimpObject
         if ($this->isLoaded($errors)) {
             $id_contact = BimpTools::getArrayValueFromPath($data, 'id_contact_signature', (int) $this->getData('id_contact'));
             $signature_type = BimpTools::getArrayValueFromPath($data, 'signature_type', '', $errors, true, 'Aucun type de signature sélectionné');
+            $phone_auth = (int) BimpTools::getArrayValueFromPath($data, 'signature_phone_auth', 0);
             $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getSignatureEmailContent($signature_type));
 
             $field_name = 'id_signature_' . $doc_type;
@@ -5701,7 +5725,8 @@ class BF_Demande extends BimpObject
                                     'allow_elec'     => (!$ds_required ? 1 : 0),
                                     'allow_dist'     => $allow_dist,
                                     'allow_docusign' => $allow_docusign,
-                                    'allow_refuse'   => (int) BimpCore::getConf($doc_type . '_loc_signature_allow_refuse', null, 'bimpfinancement')
+                                    'allow_refuse'   => (int) BimpCore::getConf($doc_type . '_loc_signature_allow_refuse', null, 'bimpfinancement'),
+                                    'need_sms_code'  => $phone_auth
                                         ), true, $signataire_errors, $warnings);
 
                         if (!BimpObject::objectLoaded($signataire_locataire)) {

@@ -49,7 +49,7 @@ class PartStock extends BimpObject
         
         switch ($action) {
             case 'correct':
-                return (int) ($this->isUserAdmin() || $user->login == 'jc.cannet'); // temp pour dépannage
+                return (int) ($this->isUserAdmin() || $user->rights->bimpapple->part_stock->admin);
         }
 
         return parent::canSetAction($action);

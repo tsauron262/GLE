@@ -50,7 +50,7 @@ class modBimpApple extends DolibarrModules
 
         // Id for module (must be unique).
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-        $this->numero = 1100000;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+        $this->numero = 3506000;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
         // Key text used to identify module (for permissions, menus, etc...)
         $this->rights_class = 'bimpapple';
 
@@ -181,13 +181,14 @@ class modBimpApple extends DolibarrModules
         $this->rights = array();  // Permission array used by this module
 
         $r = 0;
-//		$this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
-//		$this->rights[$r][1] = 'lire';	// Permission label
-//		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
-//		$this->rights[$r][4] = 'read';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//
-//		$r++;
+        $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+        $this->rights[$r][1] = 'Admin stocks composants';	// Permission label
+        $this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'part_stock';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = 'admin';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+//		
         // Main menu entries
         $this->menu = array();   // List of menus to add
         $r = 0;

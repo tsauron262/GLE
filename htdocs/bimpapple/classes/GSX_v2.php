@@ -1170,6 +1170,8 @@ class GSX_v2 extends GSX_Const
         
         if(!isset($headers['X-Apple-AppToken']) && isset($headers['x-apple-apptoken']))
             $headers['X-Apple-AppToken'] = $headers['x-apple-apptoken'];
+        if(!isset($headers['X-Apple-Gigafiles-Cid']) && isset($headers['x-apple-figafiles-cid']))
+            $headers['X-Apple-Gigafiles-Cid'] = $headers['x-apple-gigafiles-cid'];
 
         if (!isset($headers['X-Apple-AppToken']) || !(string) $headers['X-Apple-AppToken']) {
             $msg = 'Echec de l\'envoi des fichiers. Paramètre X-Apple-AppToken non reçu';

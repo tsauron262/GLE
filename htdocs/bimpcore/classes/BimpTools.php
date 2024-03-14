@@ -2605,6 +2605,23 @@ class BimpTools
         return $emails_str;
     }
 
+    public static function cleanPhoneNumberStr($phone_number, $with_country_prefixe = true, $without_spaces = true)
+    {
+        $phone_number = str_replace(array('.', '-', '_', '/'), ' ', $phone_number);
+
+        if ($without_spaces) {
+            $phone_number = str_replace(' ', '', $phone_number);
+        }
+
+        if ($with_country_prefixe) {
+            if (stripos($phone_number, '0') === 0) {
+                $phone_number = "+33" . substr($phone_number, 1);
+            }
+        }
+
+        return $phone_number;
+    }
+
     public static function displayPhone($phone, $with33 = false)
     {
         $phone = str_replace('+33', '0', $phone);

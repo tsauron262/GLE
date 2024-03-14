@@ -31,8 +31,12 @@ class BimpComm_ExtEntity extends BimpComm_LdlcFiliale
         }
 
         if ((int) $this->getData('id_demande_fin')) {
-            $errors[] = 'Une demande de location a déjà été faite';
-            return 0;
+            $df = $this->getChildObject('demande_fin');
+
+            if (BimpObject::objectLoaded($df) && !in_array((int) $df->getData('status'), array(BimpCommDemandeFin::DOC_STATUS_REFUSED, BimpCommDemandeFin::DOC_STATUS_CANCELED))) {
+                $errors[] = 'Il y a déjà une demande de location en cours pour ' . $this->getLabel('this');
+                return 0;
+            }
         }
         return 1;
     }
@@ -44,40 +48,45 @@ class BimpComm_ExtEntity extends BimpComm_LdlcFiliale
         $buttons = array();
 
         if ($this->field_exists('id_demande_fin')) {
+            $df_cancelled = false;
             if ((int) $this->getData('id_demande_fin')) {
                 $df = $this->getChildObject('demande_fin');
 
                 if (BimpObject::objectLoaded($df)) {
-                    $buttons = BimpTools::merge_array($buttons, $df->getActionsButtons());
+                    if (in_array((int) $df->getData('status'), array(BimpCommDemandeFin::DOC_STATUS_REFUSED, BimpCommDemandeFin::DOC_STATUS_CANCELED))) {
+                        $df_cancelled = true;
+                    } else {
+                        $buttons = BimpTools::merge_array($buttons, $df->getActionsButtons());
+                    }
                 }
-            } else {
-                if ($this->isDemandeFinCreatable()) {
-                    $df = BimpObject::getInstance('bimpcommercial', 'BimpCommDemandeFin');
+            }
 
-                    if ($df->isActionAllowed('createDemandeFinancement') && $df->canSetAction('createDemandeFinancement')) {
-                        $type_origine = '';
-                        switch ($this->object_name) {
-                            case 'Bimp_Propal':
-                                $type_origine = 'propale';
-                                break;
-                            case 'Bimp_Commande':
-                                $type_origine = 'commande';
-                                break;
-                        }
+            if ($df_cancelled || $this->isDemandeFinCreatable()) {
+                $df = BimpObject::getInstance('bimpcommercial', 'BimpCommDemandeFin');
 
-                        if ($type_origine) {
-                            $buttons[] = array(
-                                'label'   => 'Demande de location',
-                                'icon'    => 'fas_comment-dollar',
-                                'onclick' => $df->getJsActionOnclick('createDemandeFinancement', array(
-                                    'target'       => $df::$def_target,
-                                    'type_origine' => $type_origine,
-                                    'id_origine'   => $this->id
-                                        ), array(
-                                    'form_name' => 'demande_financement'
-                                ))
-                            );
-                        }
+                if ($df->isActionAllowed('createDemandeFinancement') && $df->canSetAction('createDemandeFinancement')) {
+                    $type_origine = '';
+                    switch ($this->object_name) {
+                        case 'Bimp_Propal':
+                            $type_origine = 'propale';
+                            break;
+                        case 'Bimp_Commande':
+                            $type_origine = 'commande';
+                            break;
+                    }
+
+                    if ($type_origine) {
+                        $buttons[] = array(
+                            'label'   => ($df_cancelled ? 'Nouvelle d' : 'D') . 'emande de location',
+                            'icon'    => 'fas_comment-dollar',
+                            'onclick' => $df->getJsActionOnclick('createDemandeFinancement', array(
+                                'target'       => $df::$def_target,
+                                'type_origine' => $type_origine,
+                                'id_origine'   => $this->id
+                                    ), array(
+                                'form_name' => 'demande_financement'
+                            ))
+                        );
                     }
                 }
             }

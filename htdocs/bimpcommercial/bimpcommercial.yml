@@ -222,6 +222,13 @@ params:
                       label: Autoriser les signatures DocuSign pour les devis de location
                       type: bool
                       def: 0
+                      sub_params: 
+                          - if: 1
+                            params: 
+                                devis_fin_signature_allow_docusign_phone_auth:
+                                    label: Autoriser l'authentification par téléphone
+                                    type: bool
+                                    def: 0
                   devis_fin_signature_allow_refuse: 
                       label: Autoriser le refus des signatures pour les devis de location
                       type: bool
@@ -243,6 +250,13 @@ params:
                       label: Autoriser les signatures DocuSign pour les contrats de location
                       type: bool
                       def: 0
+                      sub_params: 
+                          - if: 1
+                            params: 
+                                contrat_fin_signature_allow_docusign_phone_auth:
+                                    label: Autoriser l'authentification par téléphone
+                                    type: bool
+                                    def: 0
                   contrat_fin_signature_allow_refuse: 
                       label: Autoriser le refus des signatures pour les contrats de location
                       type: bool
@@ -264,6 +278,13 @@ params:
                       label: Autoriser les signatures DocuSign pour les PV de réception
                       type: bool
                       def: 0
+                      sub_params: 
+                          - if: 1
+                            params: 
+                                pvr_fin_signature_allow_docusign_phone_auth:
+                                    label: Autoriser l'authentification par téléphone
+                                    type: bool
+                                    def: 0
                   pvr_fin_signature_allow_refuse: 
                       label: Autoriser le refus des signatures pour les PV de réception
                       type: bool

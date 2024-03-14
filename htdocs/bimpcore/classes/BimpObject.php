@@ -7133,36 +7133,38 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
 
-            if (BimpCore::getConf('date_archive', '') != '') {
-                $btnHisto = '<div id="notes_archives_' . $this->object_name . '_' . $list->identifier . '_container">';
-                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . '_' . $list->identifier . "_container')", array($filter_by_user, $list_model, $suffixe, true, $withLinked)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
-                $btnHisto .= '</div>';
-            }
+            if (!BimpCore::isModeDev()) { // ça fait planter flodev...
+                if (BimpCore::getConf('date_archive', '') != '') {
+                    $btnHisto = '<div id="notes_archives_' . $this->object_name . '_' . $list->identifier . '_container">';
+                    $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . '_' . $list->identifier . "_container')", array($filter_by_user, $list_model, $suffixe, true, $withLinked)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
+                    $btnHisto .= '</div>';
+                }
 
-            $sup = '';
-            if ($withLinked && $withLinked !== 'false' && !is_a($this, 'Bimp_Societe') && !is_a($this, 'Bimp_Product')) {
-                $linkedObjects = $this->getFullLinkedObjetsArray(false);
-                if (count($linkedObjects) > 0) {
-                    $filterLinked = array('linked' => array('or' => array()));
-                    foreach ($linkedObjects as $data_linked => $inut) {
-                        $data_linked = json_decode($data_linked, true);
-                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV', 'BS_Ticket', 'BR_Reservation', 'Bimp_PropalLine', 'Bimp_CommandeLine', 'Bimp_FactureLine', 'BimpRevalorisation', 'FactureDolLine', 'Bimp_Vente', 'Bimp_FactureFournLine', 'Bimp_CommandeFournLine', 'Bimp_Achat'))) {
-                            $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
-                                    'obj_module' => $data_linked['module'],
-                                    'obj_name'   => $data_linked['object_name'],
-                                    'id_obj'     => $data_linked['id_object']
-                            ));
+                $sup = '';
+                if ($withLinked && $withLinked !== 'false' && !is_a($this, 'Bimp_Societe') && !is_a($this, 'Bimp_Product')) {
+                    $linkedObjects = $this->getFullLinkedObjetsArray(false);
+                    if (count($linkedObjects) > 0) {
+                        $filterLinked = array('linked' => array('or' => array()));
+                        foreach ($linkedObjects as $data_linked => $inut) {
+                            $data_linked = json_decode($data_linked, true);
+                            if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV', 'BS_Ticket', 'BR_Reservation', 'Bimp_PropalLine', 'Bimp_CommandeLine', 'Bimp_FactureLine', 'BimpRevalorisation', 'FactureDolLine', 'Bimp_Vente', 'Bimp_FactureFournLine', 'Bimp_CommandeFournLine', 'Bimp_Achat'))) {
+                                $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
+                                        'obj_module' => $data_linked['module'],
+                                        'obj_name'   => $data_linked['object_name'],
+                                        'id_obj'     => $data_linked['id_object']
+                                ));
+                            }
                         }
-                    }
-                    $nb = count($filterLinked['linked']['or']);
-                    if ($nb > 180)
-                        BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')', 2, 'bimpcore', $this, $filterLinked['linked']);
+                        $nb = count($filterLinked['linked']['or']);
+                        if ($nb > 180)
+                            BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')', 2, 'bimpcore', $this, $filterLinked['linked']);
 
-                    $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
-                    $list2->addIdentifierSuffix($suffixe . '_linked');
-                    $list2->addFieldFilterValue('obj_type', 'bimp_object');
-                    $list2->addFieldFilterValue('custom', $filterLinked['linked']);
-                    $sup .= $list2->renderHtml();
+                        $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
+                        $list2->addIdentifierSuffix($suffixe . '_linked');
+                        $list2->addFieldFilterValue('obj_type', 'bimp_object');
+                        $list2->addFieldFilterValue('custom', $filterLinked['linked']);
+                        $sup .= $list2->renderHtml();
+                    }
                 }
             }
 

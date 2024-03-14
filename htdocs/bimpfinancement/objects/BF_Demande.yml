@@ -642,6 +642,15 @@ forms:
                     callback: 
                         method: renderSignatureTypeSelect
                         
+            phone_auth: 
+                custom: 1
+                label: Demander une authentification par téléphone
+                input_name: signature_phone_auth
+                depends_on: signature_type
+                content:
+                    callback: 
+                        method: renderSignaturePhoneAuthInput
+                
             email_content: 
                 custom: 1
                 label: Contenu e-mail client pour la signature à distance
@@ -662,7 +671,11 @@ forms:
                 content:
                     callback: 
                         params: 
-                            - devis                            
+                            - devis    
+                            
+            phone_auth: 
+                show: 0
+                
             email_content:
                 value: 
                     callback: 
@@ -679,6 +692,13 @@ forms:
                     callback: 
                         params: 
                             - contrat
+                            
+            phone_auth: 
+                content:
+                    callback:
+                        params: 
+                            - contrat
+                        
             email_content:
                 value: 
                     callback: 
@@ -695,6 +715,10 @@ forms:
                     callback: 
                         params: 
                             - pvr
+                            
+            phone_auth: 
+                show: 0
+                
             email_content:
                 value: 
                     callback: 

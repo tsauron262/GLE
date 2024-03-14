@@ -1045,11 +1045,12 @@ class Bimp_CommandeLine extends ObjectLine
                 if (!is_null($id_shipment) && (int) $id_shipment !== (int) $id_s) {
                     continue;
                 }
-                if ($shipments_validated_only) {
-                    $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_s);
-                    if (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') !== BL_CommandeShipment::BLCS_EXPEDIEE) {
-                        continue;
-                    }
+                $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_s);
+                if ($shipments_validated_only && (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') !== BL_CommandeShipment::BLCS_EXPEDIEE)) {
+                    continue;
+                }
+                if (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') == BL_CommandeShipment::BLCS_ANNULEE) {
+                    continue;
                 }
                 if (isset($shipment_data['qty'])) {
                     $qty += (float) $shipment_data['qty'];

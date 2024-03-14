@@ -8315,6 +8315,7 @@ class Bimp_CommandeLine extends ObjectLine
                     if ($isProduct) {
                         if ($diff < 0) {
                             $res_qties = $this->getReservationsQties(0);
+                            $res_qties += $this->getReservationsQties(303);
 
                             if ($res_qties < abs($diff)) {
                                 if ($res_qties > 1) {

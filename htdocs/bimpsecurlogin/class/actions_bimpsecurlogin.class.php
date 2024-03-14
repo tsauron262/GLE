@@ -180,6 +180,9 @@ class securLogSms
         if (stripos($this->ip, '10.212.13') === 0)//vpn
             return 1;
         
+        if (stripos($this->ip, '10.8.12.') === 0)//vpn
+            return 1;
+        
         if (is_file($this->filename)) {//ip white liste
             $tmp = file_get_contents($this->filename);
             $tab = explode("\n", $tmp);

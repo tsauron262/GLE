@@ -1175,7 +1175,7 @@ class GSX_v2 extends GSX_Const
         }
 
         if (!isset($headers['X-Apple-Gigafiles-Cid']) || !(string) $headers['X-Apple-Gigafiles-Cid']) {
-            $msg = 'Echec de l\'envoi des fichiers. Paramètre X-Apple-AppToken non reçu';
+            $msg = 'Echec de l\'envoi des fichiers. Paramètre X-Apple-Gigafiles-Cid non reçu';
             $this->curlError('filesUpload', $msg);
             return false;
         }

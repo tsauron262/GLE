@@ -663,6 +663,7 @@ class BWSApi
 
         if (!count($this->errors)) {
             $filters = BimpTools::getArrayValueFromPath($this->params, 'filters', '');
+            $joins = array();
 
             $list = array();
             $obj_instance = $this->getObjectInstance();
@@ -674,7 +675,7 @@ class BWSApi
                 $panel = new BC_FiltersPanel($obj_instance);
                 $panel->setFilters(json_decode($panel_filters, 1));
                 $filters = array();
-                $panel->getSqlFilters($filters);
+                $panel->getSqlFilters($filters, $joins);
             }
 
             if (empty($filters)) {
@@ -690,7 +691,7 @@ class BWSApi
                 $order_by = BimpTools::getArrayValueFromPath($this->params, 'order_by', $primary);
                 $order_way = BimpTools::getArrayValueFromPath($this->params, 'order_way', 'ASC');
 
-                $rows = $obj_instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary));
+                $rows = $obj_instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary), $joins);
 
                 if (!empty($rows)) {
                     foreach ($rows as $r) {

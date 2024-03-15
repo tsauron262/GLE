@@ -246,7 +246,11 @@ class BimpDb
                 } else {
                     $firstLoop = false;
                 }
-                $sql .= '`' . $f . '`';
+                if (!preg_match('/[\. ]/', $f)) {
+                    $sql .= '`' . $f . '`';
+                } else {
+                    $sql .= $f;
+                }
             }
         }
 
@@ -258,10 +262,6 @@ class BimpDb
         }
 
         $sql .= ' LIMIT 1';
-
-//        if ($table == 'stock_mouvement') {
-//            die($sql);
-//        }
 
         $result = $this->db->query($sql);
         if ($result && $this->db->num_rows($result)) {

@@ -555,6 +555,21 @@ class BimpConfig
         return $current;
     }
 
+    public function getkeys($full_path)
+    {
+        $keys = array();
+
+        $params = $this->getParams($full_path);
+
+        if (is_array($params)) {
+            foreach ($params as $key => $sub_params) {
+                $keys[] = $key;
+            }
+        }
+
+        return $keys;
+    }
+
     public function getCompiledParams($full_path)
     {
         $params = $this->getParams($full_path);
@@ -646,10 +661,10 @@ class BimpConfig
         }
 
         if (isset($current)) {
-            if($del_cache){
+            if ($del_cache) {
                 $path = implode('/', $path);
-                foreach(self::$values_cache[$this->cache_key] as $name => $inut){
-                    if(stripos($name, $path) === 0)
+                foreach (self::$values_cache[$this->cache_key] as $name => $inut) {
+                    if (stripos($name, $path) === 0)
                         unset(self::$values_cache[$this->cache_key][$name]);
                 }
             }

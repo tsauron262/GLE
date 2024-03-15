@@ -394,7 +394,7 @@ class DocusignAPI extends BimpAPI
             $client_id = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_id', '');
 
             if (BimpCore::isModeDev()) {
-                $url_redirect = 'http://10.192.20.122/' . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php?mode_dev=1';
+                $url_redirect = 'http://10.192.20.122' . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php?mode_dev=1';
                 die($url_redirect);
             } else {
                 $url_redirect = 'https://' . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
@@ -450,10 +450,12 @@ class DocusignAPI extends BimpAPI
                     $client_id = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_id', '');
 
                     if (BimpCore::isModeDev()) {
-                        $url_redirect = 'http://10.192.20.122/' . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php?mode_dev=1';
+                        $url_redirect = 'http://10.192.20.122' . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php?mode_dev=1';
                     } else {
                         $url_redirect = 'https://' . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
                     }
+                    
+//                    die($url_redirect);
 
                     $_SESSION['id_user_docusign'] = $this->userAccount->id;
                     $url = $this->getBaseUrl('auth') . "/oauth/auth?response_type=code&scope=signature&client_id=" . $client_id . "&redirect_uri=" . urlencode($url_redirect);

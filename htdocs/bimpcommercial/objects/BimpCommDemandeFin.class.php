@@ -76,6 +76,11 @@ class BimpCommDemandeFin extends BimpObject
             return 0;
         }
 
+        if (in_array((int) $this->getData('status'), array(self::DOC_STATUS_CANCELED, self::DOC_STATUS_CANCELED))) {
+            $errors[] = 'Demande de location refusée ou annulée';
+            return 0;
+        }
+        
         switch ($action) {
             case 'createDemandeFinancement':
                 if ($this->isLoaded()) {
@@ -99,12 +104,12 @@ class BimpCommDemandeFin extends BimpObject
 
             case 'createDevisFinSignature':
             case 'uploadSignedDevisFin':
-//                $devis_files = $this->getDevisFilesArray();
-//                if (empty($devis_files)) {
-//                    $errors[] = 'Aucun devis de location n\'a encore été reçu';
-//                    return 0;
-//                }
-
+                $devis_files = $this->getDevisFilesArray();
+                if (empty($devis_files)) {
+                    $errors[] = 'Aucun devis de location n\'a encore été reçu';
+                    return 0;
+                }
+                
                 if ((int) $this->getData('id_signature_devis_fin')) {
                     if ($action == 'createDevisFinSignature') {
                         $errors[] = 'La fiche signature du devis de location existe déjà';
@@ -2249,6 +2254,8 @@ class BimpCommDemandeFin extends BimpObject
             $allow_refuse = (int) BimpCore::getConf('contrat_fin_signature_allow_refuse', null, 'bimpcommercial');
 
             $signature_type = BimpTools::getArrayValueFromPath($data, 'signature_type', '');
+            $phone_auth = (int) BimpTools::getArrayValueFromPath($data, 'signature_phone_auth', '');
+
             $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getSignatureEmailContent($signature_type));
 
             if (!$cessionnaire_email && in_array($signature_type, array('docusign', 'elec'))) {
@@ -2302,7 +2309,8 @@ class BimpCommDemandeFin extends BimpObject
                                     'id_contact'     => (int) $this->getData('id_contact_signature'),
                                     'allow_dist'     => $allow_dist,
                                     'allow_docusign' => $allow_docusign,
-                                    'allow_refuse'   => $allow_refuse
+                                    'allow_refuse'   => $allow_refuse,
+                                    'need_sms_code'  => $phone_auth
                                         ), true, $signataire_errors, $warnings);
 
                         if (!BimpObject::objectLoaded($signataire_locataire)) {
@@ -2536,6 +2544,7 @@ class BimpCommDemandeFin extends BimpObject
             $allow_refuse = (int) BimpCore::getConf('pvr_fin_signature_allow_refuse', null, 'bimpcommercial');
 
             $signature_type = BimpTools::getArrayValueFromPath($data, 'signature_type', '');
+            $phone_auth = (int) BimpTools::getArrayValueFromPath($data, 'signature_phone_auth', '');
             $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getSignatureEmailContent($signature_type));
 
             if (!$loueur_email && in_array($signature_type, array('docusign', 'elec'))) {
@@ -2585,7 +2594,8 @@ class BimpCommDemandeFin extends BimpObject
                                     'id_contact'     => (int) $this->getData('id_contact_signature'),
                                     'allow_dist'     => $allow_dist,
                                     'allow_docusign' => $allow_docusign,
-                                    'allow_refuse'   => $allow_refuse
+                                    'allow_refuse'   => $allow_refuse,
+                                    'need_sms_code'  => $phone_auth
                                         ), true, $signataire_errors, $warnings);
 
                         if (!BimpObject::objectLoaded($signataire_locataire)) {
@@ -2762,6 +2772,29 @@ class BimpCommDemandeFin extends BimpObject
         }
 
         return BimpInput::renderInput('select', 'signature_type', $value, array('options' => $options));
+    }
+
+    public function renderSignaturePhoneAuthInput($doc_type)
+    {
+        $html = '';
+
+        $signature_type = BimpTools::getPostFieldValue('signature_type', '');
+
+        if ($signature_type === 'docusign') {
+            if ((int) BimpCore::getConf($doc_type . '_signature_allow_docusign_phone_auth', null, 'bimpcommercial')) {
+                $html .= BimpInput::renderInput('toggle', 'signature_phone_auth', 1);
+            } else {
+                $html .= '<input type="hidden" value="0" name="signature_phone_auth"/>';
+                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Non autorisé</span>';
+            }
+        }
+
+        if (!$html) {
+            $html .= '<input type="hidden" value="0" name="signature_phone_auth"/>';
+            $html .= '<span class="warning">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non applicable</span>';
+        }
+
+        return $html;
     }
 
     public function getSignatureEmailContent($signature_type = '', $doc_type = '')

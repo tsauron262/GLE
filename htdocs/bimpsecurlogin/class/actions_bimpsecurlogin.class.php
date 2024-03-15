@@ -145,15 +145,12 @@ class securLogSms
 
         $this->traiteMessageUser();
 
-        if (isset($_SESSION['sucur']) && $_SESSION['sucur'] == $this->nomCookie)//session deja securise
-            return 1;
+//        if (isset($_SESSION['sucur']) && $_SESSION['sucur'] == $this->nomCookie)//session deja securise
+//            return 1;
 
         if ($this->asSecureCokie())
             return 1;
-
-        if (stripos($this->ip, '10.20.') !== false)//interne
-            return 1;
-
+        
         if ($this->isIpWhite($this->ip))
             return 1;
 
@@ -176,10 +173,19 @@ class securLogSms
 
     function isIpWhite($ipTest)
     {
+
+        if (stripos($this->ip, '10.20.') !== false)//interne
+            return 1;
+        
+        if (stripos($this->ip, '10.212.13') === 0)//vpn
+            return 1;
+        
+        if (stripos($this->ip, '10.8.12.') === 0)//vpn
+            return 1;
+        
         if (is_file($this->filename)) {//ip white liste
             $tmp = file_get_contents($this->filename);
             $tab = explode("\n", $tmp);
-            $tab[] = '91.164.189.142';
             foreach ($tab as $ip) {
                 $tabT = explode("//", $ip);
                 $ip = $tabT[0];
@@ -357,9 +363,9 @@ class securLogSms
     {
 //        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `".MAIN_DB_PREFIX."events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
         $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `" . MAIN_DB_PREFIX . "bimp_secure_log` WHERE DATEDIFF(now(), tms ) <= 31 GROUP BY IP ORDER BY `nb` DESC");
-        $tabIp = array("78.195.193.207//flo");
+        $tabIp = array("78.195.193.207//flo", '91.164.189.142//tommy');
         while ($ln = $this->db->fetch_object($sql))
-            if ($ln->nb > 1)
+            if ($ln->nb > 2)
                 $tabIp[] = $ln->ip;
         file_put_contents($this->filename, implode("\n", $tabIp));
         //Viré les 1 mois

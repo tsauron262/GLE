@@ -1419,6 +1419,8 @@ class BimpObject extends BimpCache
 
     public function isDolField($field_name)
     {
+        if($this->isExtraField($field_name))
+            return 0;
         if ($this->isDolObject()) {
             if ((int) $this->getConf('fields/' . $field_name . '/dol_extra_field', 0)) {
                 return 1;
@@ -1768,7 +1770,10 @@ class BimpObject extends BimpCache
         }
 
         if ($this->getEntity_name()) {
-            $data['entity'] = $conf->entity;
+            if($this->getData('entity'))
+                $data['entity'] = $this->getData('entity');
+            else
+                $data['entity'] = $conf->entity;
         }
 
         return $data;
@@ -2744,7 +2749,7 @@ class BimpObject extends BimpCache
         return $filters;
     }
 
-    protected function checkFieldHistory($field, $value)
+    protected function checkFieldHistory($field, $value, $filters = array())
     {
         if (is_null($value)) {
             return;
@@ -2755,16 +2760,20 @@ class BimpObject extends BimpCache
                 // On vérifie que la valeur courante est bien enregistrée: 
                 $where = 'module = \'' . $this->module . '\' AND object = \'' . $this->object_name . '\'';
                 $where .= ' AND id_object = ' . (int) $this->id . ' AND field = \'' . $field . '\'';
+                $where .= ' AND value = \'' . $current_value . '\'';
+                if(count($filters))
+                    $where .= ' AND filters = \''.json_encode ($filters).'\'';
                 if ($this->id > 0 && !is_null($current_value) && !(int) $this->db->getValue('bimpcore_history', 'id', $where, 'date', 'DESC')) {
                     $this->db->insert('bimpcore_history', array(
                         'module'    => $this->module,
                         'object'    => $this->object_name,
                         'id_object' => $this->id,
                         'field'     => $field,
-                        'value'     => $this->getDbValue($field, $current_value)
+                        'value'     => $this->getDbValue($field, $current_value),
+                        'filters'   => json_encode($filters)
                     ));
                 }
-                $this->history[$field] = $value;
+                $this->history[$field] = array('value' => $value, 'filters' => $filters);
             }
         }
     }
@@ -2791,8 +2800,8 @@ class BimpObject extends BimpCache
         $errors = array();
         $bimpHistory = BimpObject::getInstance('bimpcore', 'BimpHistory');
 
-        foreach ($this->history as $field => $value) {
-            $errors = BimpTools::merge_array($errors, $bimpHistory->add($this, $field, $value));
+        foreach ($this->history as $field => $datas) {
+            $errors = BimpTools::merge_array($errors, $bimpHistory->add($this, $field, $datas['value'], $datas['filters']));
         }
 
         $this->history = array();
@@ -5980,7 +5989,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
                     }
 
-                    if ($prop && property_exists($this->dol_object, $prop)) {
+                    if ($prop && property_exists($this->dol_object, $prop) && !$this->isExtraField($field)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
                     } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                         $bimpObjectFields[$field] = $value;
@@ -6025,7 +6034,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
                 }
 
-                if ($prop && property_exists($this->dol_object, $prop)) {
+                if ($prop && property_exists($this->dol_object, $prop) && !$this->isExtraField($field)) {
                     $value = $this->dol_object->{$prop};
                 } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                     $bimpObjectFields[] = $field;
@@ -6357,17 +6366,15 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Gestion Fields Extra:
-
-    public function getExtraFieldsDefinitionParams($definition_name, &$table = '', &$filters = array(), $id_object = null)
-    {
-        $errors = array();
+    
+    public function getExtraFieldsDefinitionFilters($definition_name, $with_id_prop = false, $id_object = null, &$errors = array()){
+        $filters = array();
 
         if (!$this->config->isDefined('extrafields/' . $definition_name)) {
             $errors[] = 'Définitions absentes';
         } else {
             $path = 'extrafields/' . $definition_name . '/';
 
-            $table = $this->config->get($path . 'table', '');
             $id_prop = $this->config->get($path . 'id_prop', '');
             $filter_by_entity = (int) $this->config->get($path . 'filter_by_entity', 0, false, 'bool');
             $filters = $this->config->get($path . 'filters', array(), false, 'array');
@@ -6381,14 +6388,32 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
 
+            if($with_id_prop){
+                if (!$id_prop) {
+                    $errors[] = 'id_prop absent';
+                } else {
+                    $filters[$id_prop] = (!is_null($id_object) ? $id_object : $this->id);
+                }
+            }
+        }
+
+        return $filters;
+    }
+
+    public function getExtraFieldsDefinitionParams($definition_name, &$table = '', &$filters = array(), $id_object = null)
+    {
+        $errors = array();
+
+        if (!$this->config->isDefined('extrafields/' . $definition_name)) {
+            $errors[] = 'Définitions absentes';
+        } else {
+            $path = 'extrafields/' . $definition_name . '/';
+
+            $table = $this->config->get($path . 'table', '');
+            $filters = $this->getExtraFieldsDefinitionFilters($definition_name, true, $id_object, $errors);
+
             if (!$table) {
                 $errors[] = 'Table absente';
-            }
-
-            if (!$id_prop) {
-                $errors[] = 'id_prop absent';
-            } else {
-                $filters[$id_prop] = (!is_null($id_object) ? $id_object : $this->id);
             }
         }
 
@@ -6427,6 +6452,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     foreach ($fields as $field_name) {
                         $db_field_name = $this->config->get('fields/' . $field_name . '/db_name', $field_name);
                         $data[$db_field_name] = $this->getDbValue($field_name, $this->getData($field_name));
+                        $this->checkFieldHistory($field_name, $data[$db_field_name], $this->getExtraFieldsDefinitionFilters($definition_name));
                     }
 
                     // Vérif de l'existance de l'entrée en base : 
@@ -11172,7 +11198,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         BimpTools::loadDolClass($module, $file, $class_name);
 
                         if (class_exists($class_name)) {
-                            $instance = new $class_name($this->db->db);
+                            global $db;
+                            $instance = new $class_name($db);
                         }
 
                         // todo

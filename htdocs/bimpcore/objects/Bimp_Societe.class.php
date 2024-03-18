@@ -1389,7 +1389,7 @@ class Bimp_Societe extends BimpDolObject
                         'operator' => '!=',
                         'value'    => 2
                     ),
-                    'entity' => explode(',', getEntity('commande'))
+                    'c.entity' => explode(',', getEntity('commande'))
         ));
 
         $rows = $this->db->executeS($sql, 'array');

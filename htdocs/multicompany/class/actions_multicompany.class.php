@@ -5541,7 +5541,8 @@ class ActionsMulticompany
 							// Convert the array of strings into an object
 							for ( i = 0, l = queries.length; i < l; i++ ) {
 								temp = queries[i].split("=");
-                                        console.log(temp);
+                                                                if(temp[1] == undefined)
+                                                                    continue;
 								temp[1] = temp[1].replace(/#builddoc/gi, "");
 								params[temp[0]] = temp[1];
 							}
@@ -5721,7 +5722,8 @@ class ActionsMulticompany
 				// Convert the array of strings into an object
 				for ( i = 0, l = queries.length; i < l; i++ ) {
 					temp = queries[i].split("=");
-                                        console.log(temp);
+                                        if(temp[1] == undefined)
+                                            continue;
 					temp[1] = temp[1].replace(/#builddoc/gi, "");
 					params[temp[0]] = temp[1];
 				}

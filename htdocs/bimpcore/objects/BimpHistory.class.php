@@ -88,15 +88,17 @@ class BimpHistory extends BimpObject
 //                    'field'     => $field,
 //                    'filters'   => json_encode($filters)
 //                        ));echo $definition_name.'<br/><br/>';
-        return $this->getList(array(
+        $filtres = array(
                     'module'    => $object->module,
                     'object'    => $object->object_name,
                     'id_object' => (int) $object->id,
-                    'field'     => $field,
-                    'filters'   => json_encode($filters)
-                        ), null, null, 'id', 'desc', 'array', array(
-                    'id', 'id_user', 'date', 'value'
-        ));
+                    'field'     => $field
+        );
+        if(count($filters)){
+            $filtres['filters'] = json_encode($filters);
+        }
+        return $this->getList($filtres, null, null, 'id', 'desc', 'array', array(
+                    'id', 'id_user', 'date', 'value'));
     }
 
     public function renderCard(BimpObject $object, $field, $limit = 15, $display_user = true, $display_title = true)

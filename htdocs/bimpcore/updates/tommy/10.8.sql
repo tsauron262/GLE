@@ -10,17 +10,19 @@ CREATE TABLE llx_societe_atradius (
 `date_rappel_atradius` DATETIME NULL DEFAULT NULL,
 `date_atradius` DATETIME DEFAULT NULL,
 `outstanding_limit_atradius` DECIMAL(24,8) DEFAULT 0 NOT NULL,
-`date_check_credit_safe` DATETIME DEFAULT NULL,
 `outstanding_limit_manuel` DECIMAL(24,8) DEFAULT 0 NOT NULL,
 `outstanding_limit_credit_check` DECIMAL(24,8) DEFAULT 0 NOT NULL,
 `outstanding_limit` DECIMAL(24,8) DEFAULT 0 NOT NULL,
 entity INT default 1
 ) ENGINE=InnoDB;
 
+ALTER table llx_bimpcore_history ADD filters text DEFAULT '[]';
+
+
 
 INSERT into llx_societe_atradius (SELECT null, rowid,id_atradius,date_depot_icba,outstanding_limit_icba,status_atradius,
-date_demande_atradius,date_rappel_atradius,date_atradius,outstanding_limit_atradius,date_check_credit_safe,outstanding_limit_manuel,
+date_demande_atradius,date_rappel_atradius,date_atradius,outstanding_limit_atradius,outstanding_limit_manuel,
 outstanding_limit_credit_check,outstanding_limit,1 FROM llx_societe);
 
 
-UPDATE llx_bimpcore_history SET filters = '{"entity":"1"}' WHERE filters = '[]' AND filed IN ('outstanding_limit', 'outstanding_limit_credit_check', 'outstanding_limit_manuel', 'outstanding_limit_atradius', 'outstanding_limit_icba');
+UPDATE llx_bimpcore_history SET filters = '{"entity":"1"}' WHERE filters = '[]' AND field IN ('outstanding_limit', 'outstanding_limit_credit_check', 'outstanding_limit_manuel', 'outstanding_limit_atradius', 'outstanding_limit_icba');

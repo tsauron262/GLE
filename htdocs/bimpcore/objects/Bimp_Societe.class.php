@@ -1388,7 +1388,8 @@ class Bimp_Societe extends BimpDolObject
                     'c.invoice_status' => array(
                         'operator' => '!=',
                         'value'    => 2
-                    )
+                    ),
+                    'entity' => explode(',', getEntity('commande'))
         ));
 
         $rows = $this->db->executeS($sql, 'array');

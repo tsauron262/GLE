@@ -6384,7 +6384,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     global $conf;
                     $filters['entity'] = $conf->entity;
                 } else {
-                    $filters['entity'] = 1;
+                    $filters['entity'] = (string) 1;
                 }
             }
 

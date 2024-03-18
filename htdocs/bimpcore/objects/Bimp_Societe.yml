@@ -22,6 +22,13 @@ labels:
         callback: getSocieteLabel
     is_female: 
         callback: getSocieteIsFemale
+        
+extrafields: 
+    atradius: 
+        table: societe_atradius
+        id_prop: id_soc
+        filter_by_entity: 1
+        delete_db_row: 1
     
 objects: 
     contacts: 
@@ -470,6 +477,8 @@ fields:
         history_user: 1
         input: 
             help: Remplissage automatique selon données des 3 champs "Limite de crédit". 
+        extra: 1
+        extrafields: atradius
             
     outstanding_limit_credit_safe: 
         label: Limite recommandée par Crédit SAFE
@@ -487,6 +496,8 @@ fields:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
         show: 
             callback: useCreditSafe
+        extra: 1
+        extrafields: atradius
             
     outstanding_limit_manuel:    
         label: Limite Crédit Manuelle
@@ -495,6 +506,8 @@ fields:
         default_value: 0
         show: 
             callback: useEncours
+        extra: 1
+        extrafields: atradius
         
     date_check_credit_safe:
         label: Date de verification Crédit SAFE
@@ -512,24 +525,32 @@ fields:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
         show: 
             callback: useAtradius
+        extra: 1
+        extrafields: atradius
 
     date_atradius: 
         label: Date d'expiration de la couverture Atradius
         type: datetime
         show: 
             callback: useAtradius
+        extra: 1
+        extrafields: atradius
 
     date_rappel_atradius: 
         label: Date rappel expiration de la couverture Atradius
         type: datetime
         show: 
             callback: useAtradius
+        extra: 1
+        extrafields: atradius
         
     date_demande_atradius: 
         label: Date de demande de couverture Atradius
         type: datetime
         show: 
             callback: useAtradius
+        extra: 1
+        extrafields: atradius
             
     status_atradius:
         label: Statut Atradius
@@ -539,6 +560,8 @@ fields:
         default_value: 0
         show: 
             callback: useAtradius
+        extra: 1
+        extrafields: atradius
         
     outstanding_limit_icba:
         label: Limite de crédit ICBA 
@@ -549,12 +572,16 @@ fields:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
         show: 
             callback: useAtradius
+        extra: 1
+        extrafields: atradius
         
     date_depot_icba:
         label: Date de dépôt du Rapport
         type: datetime
         show: 
             callback: useAtradius
+        extra: 1
+        extrafields: atradius
         
     fk_account: 
         label: Compte bancaire
@@ -753,6 +780,8 @@ fields:
         type: int   
         show: 
             callback: useAtradius
+        extra: 1
+        extrafields: atradius
         
     msg_fact:
         label: Message Facturation

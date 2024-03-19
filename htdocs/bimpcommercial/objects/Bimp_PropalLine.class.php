@@ -558,6 +558,7 @@ class Bimp_PropalLine extends ObjectLine
             $duration = (int) $this->getData('abo_duration');
             $periodicity = (int) $this->getData('abo_fac_periodicity');
             $nb_units = (float) $this->getData('abo_nb_units');
+            $prod_duration = 0;
 
             $prod = $this->getProduct();
             if (BimpObject::objectLoaded($prod)) {
@@ -580,10 +581,14 @@ class Bimp_PropalLine extends ObjectLine
                             $html .= BimpTools::displayFloatValue($data['qty_per_period'] * $data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1);
                             $html .= '</b> unité(s)';
 
+                            $html .= ' <span style="font-style: italic">(';
+
                             if ($prod_duration && $periodicity != $prod_duration) {
                                 $nb_prod_periods = $periodicity / $prod_duration;
-                                $html .= ' <span style="font-style: italic">(soit au total <b>' . BimpTools::displayFloatValue($nb_units * $data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods != 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 4, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . ')</span>';
+                                $html .= 'soit au total <b>' . BimpTools::displayFloatValue($nb_units, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods != 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 4, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . ' ';
                             }
+
+                            $html .= 'au prorata de <b>' . BimpTools::displayFloatValue($data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>)</span>';
 
                             if ($nb_periods > 1) {
                                 $html .= '<br/>Suivie de ' . ($nb_periods - 1) . ' facturation' . ($nb_periods - 1 > 1 ? 's' : '') . ' de <b>';
@@ -595,8 +600,6 @@ class Bimp_PropalLine extends ObjectLine
                                 $nb_prod_periods = ($duration - $periodicity) / $prod_duration;
                                 $html .= ' <span style="font-style: italic">(soit au total <b>' . BimpTools::displayFloatValue($nb_units, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods != 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 4, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . ')</span>';
                             }
-
-                            $html .= '<br/>(Prorata première période : <b>' . BimpTools::displayFloatValue($data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>)';
                         } else {
                             $html .= $nb_periods . ' ';
                             if ($nb_periods > 1) {

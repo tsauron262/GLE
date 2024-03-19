@@ -1163,7 +1163,7 @@ class BT_ficheInter extends BimpDolObject
 
 //        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
         
-        $arrayCode = $children->getArrayServiceForBilling();
+        $arrayCode = BT_ficheInter_det::$servicesForFacturation;
         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
         $product->find(Array('ref' => $arrayCode[$type]));
         

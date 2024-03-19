@@ -208,8 +208,6 @@ class pdf_fi
                 $pdf->SetXY($this->marge_gauche, $this->marge_haute - 17);
                 $pdf->SetFont('', 'B', 14);
                 $pdf->setXY(58, 10);
-                
-                $pdf->writeHTML('<style>p {margin: 0;}</style>');
 
                 $title = "Rapport d'interventions";
                 $ref = "N° " . $propref;
@@ -638,6 +636,8 @@ class pdf_fi
                         $desc = $child->getData('description');
                         $desc = preg_replace("/(\n)?[ \s]*<[ \/]*br[ \/]*>[ \s]*(\n)?/", '<br/>', $desc);
                         $desc = str_replace("\n", '<br/>', $desc);
+                        $desc = str_replace('<p>', '', $desc);
+                        $desc = str_replace('</p>', '<br/>', $desc);
 
                         $pdf->writeHTML($desc);
                     }

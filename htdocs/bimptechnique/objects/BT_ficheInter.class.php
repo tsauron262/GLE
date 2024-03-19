@@ -1161,7 +1161,12 @@ class BT_ficheInter extends BimpDolObject
     {
         $children = $this->getChildrenList('inters', ["type" => $type]);
 
-        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
+//        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
+        
+        $arrayCode = $children->getArrayServiceForBilling();
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
+        $product->find(Array('ref' => $arrayCode[$type]));
+        
         $services = [];
         $index = 1;
         if (count($children)) {
@@ -2937,13 +2942,16 @@ class BT_ficheInter extends BimpDolObject
                                             'id_obj' => (int) $new_facture->id)
                                 )
                 );
-                $dep_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) BimpCore::getConf('id_dep', 0, 'bimptechnique'));
+                $children = $this->getChildrenList('inters');
+//                $dep_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) BimpCore::getConf('id_dep', 0, 'bimptechnique'));
+                $arrayCode = $children->getArrayServiceForBilling();
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
+                $product->find(Array('ref' => $arrayCode[$children::TYPE_DEPLA]));
                 if ($dep_de_reference->isLoaded()) {
                     $new_factureLine->pu_ht = $dep_de_reference->getData('price');
 
                     $qty = 1;
 
-                    $children = $this->getChildrenList('inters');
                     if (count($children) > 0) {
                         foreach ($children as $id_child) {
                             $child = $this->getChildObject('inters', $id_child);

@@ -12,9 +12,9 @@ params:
         label: ID Société auto terminer
         def: ''
         info: Plusieurs ID possible (séparer par une virgule sans espace)
-    id_serv19: 
-        label: ID serv19
-        def: 0
-    id_dep: 
-        label: ID dep
-        def: 0
+#    id_serv19: 
+#        label: ID serv19
+#        def: 0
+#    id_dep: 
+#        label: ID dep
+#        def: 0

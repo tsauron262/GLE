@@ -552,6 +552,14 @@ class Bimp_PropalLine extends ObjectLine
         if ((int) $this->getData('abo_fac_periodicity')) {
             $html .= '<span style="font-size: 9px">';
 
+            $duration = (int) $this->getData('abo_duration');
+            $periodicity = (int) $this->getData('abo_fac_periodicity');
+            $prod_duration = 0;
+            $prod = $this->getProduct();
+            if (BimpObject::objectLoaded($prod)) {
+                $prod_duration = (int) $prod->getData('duree');
+            }
+
             if ((int) $this->getData('id_linked_contrat_line')) {
                 $errors = array();
                 $data = $this->getAboFacData($errors);
@@ -581,13 +589,16 @@ class Bimp_PropalLine extends ObjectLine
                             }
 
                             $html .= 'de <b>' . BimpTools::displayFloatValue($data['qty_per_period'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s)';
+
+                            if ($prod_duration && $periodicity != $prod_duration) {
+                                $nb_units_per_periods = (($this->qty / $duration) * $prod_duration) / $nb_periods;
+                                $nb_prod_periodes = $duration / $prod_duration;
+                                $html .= ' <span style="font-style: italic">(' . BimpTools::displayFloatValue($nb_units_per_periods, 6, ',', 0, 0, 0, 0, 1, 1) . ' unité(s) de ' . $prod_duration . ' mois x ' . $nb_prod_periodes . ')</span>';
+                            }
                         }
                     }
                 }
             } elseif ($this->qty) {
-                $duration = (int) $this->getData('abo_duration');
-                $periodicity = (int) $this->getData('abo_fac_periodicity');
-
                 if ($duration && $periodicity) {
                     $nb_periods = $duration / $periodicity;
 
@@ -600,6 +611,12 @@ class Bimp_PropalLine extends ObjectLine
                         }
 
                         $html .= 'de <b>' . BimpTools::displayFloatValue($this->qty / $nb_periods, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s)';
+
+                        if ($prod_duration && $periodicity != $prod_duration) {
+                            $nb_units_per_periods = (($this->qty / $duration) * $prod_duration) / $nb_periods;
+                            $nb_prod_periodes = $duration / $prod_duration;
+                            $html .= ' <span style="font-style: italic">(<b>' . BimpTools::displayFloatValue($nb_units_per_periods, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $prod_duration . '</b> mois x <b>' . $nb_prod_periodes . '</b>)</span>';
+                        }
                     }
                 }
             }
@@ -610,11 +627,13 @@ class Bimp_PropalLine extends ObjectLine
         $nb_renouv = (int) $this->getData('abo_nb_renouv');
         if ($nb_renouv) {
             $html .= ($html ? '<br/>' : '') . '<span style="font-style: italic; font-size: 9px">';
-            $html .= 'Cet abonnement sera renouvelé de manière tacite ';
+            $html .= 'Cet abonnement sera renouvelé tacitement ';
             if ($nb_renouv > 0) {
-                $html .= $nb_renouv . ' fois ';
+                $html .= $nb_renouv . ' fois';
+            } else {
+                $html .= 'de manière illimité';
             }
-            $html .= 'sans dénonciation de votre part.</span>';
+            $html .= ' sans dénonciation de votre part.</span>';
         }
 
 
@@ -666,7 +685,7 @@ class Bimp_PropalLine extends ObjectLine
                 }
             }
         }
-        
+
         if (!empty($possible_values)) {
             $options['possible_values'] = $possible_values;
         }

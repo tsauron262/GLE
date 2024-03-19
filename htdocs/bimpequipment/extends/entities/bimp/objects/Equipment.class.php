@@ -258,7 +258,27 @@ class Equipment_ExtEntity extends Equipment
                 ));
 
                 if (!count($errors)) {
-                    $line->id_product = 4300;
+                    $line->id_product = 248953;
+                    $line->qty = 2;
+                    $line->pu_ht = 0;
+
+                    $errors = $line->create($warnings, true);
+                }
+            }
+            //creation de l'enlevement que pour YESSS ELECTRIQUE
+            if (!count($errors) && $place->getData('id_client') == 252908) {
+                $line = $commande->getLineInstance();
+
+                $errors = $line->validateArray(array(
+                    'id_obj'    => (int) $commande->id,
+                    'type'      => ObjectLine::LINE_PRODUCT,
+                    'deletable' => 1,
+                    'editable'  => 0,
+                    'remisable' => 0
+                ));
+
+                if (!count($errors)) {
+                    $line->id_product = 248950;
                     $line->qty = 1;
                     $line->pu_ht = 0;
 

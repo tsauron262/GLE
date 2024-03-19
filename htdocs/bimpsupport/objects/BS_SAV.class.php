@@ -2784,8 +2784,17 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             } elseif ((int) $internal_stock->getData('qty') > 0) {
                                 $has_internal_stock = true;
                                 $input = 'Qté disponible: <span class="success">' . $internal_stock->getData('qty') . '</span><br/>';
-                                $input .= BimpRender::renderAlerts('Veuillez obligatoirement prendre le composant dans le stock interne', 'info');
-                                $input .= '<input type="hidden" value="1" name="from_internal_stock_' . $part->id . '" class="from_internal_stock_input"/>';
+                                
+                                if($consigned_stock && BimpObject::objectLoaded($consigned_stock) && $consigned_stock->getData('qty') > 0){
+                                    $input .= BimpInput::renderInput('toggle', 'from_internal_stock_' . $part->id, 0, array(
+                                                'extra_class' => 'from_internal_stock_check'
+                                    ));
+                                }
+                                
+                                else{
+                                    $input .= BimpRender::renderAlerts('Veuillez obligatoirement prendre le composant dans le stock interne', 'info');
+                                    $input .= '<input type="hidden" value="1" name="from_internal_stock_' . $part->id . '" class="from_internal_stock_input"/>';
+                                }
                             }
                         }
 

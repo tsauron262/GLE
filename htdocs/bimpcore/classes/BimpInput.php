@@ -338,7 +338,12 @@ class BimpInput
                 $input_id .= rand(0, 999999);
                 $html .= '<div class="toggleContainer">';
                 $html .= '<input type="hidden" class="toggle_value ' . $extra_class . '" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"' . $data . '/>';
-                $html .= '<input type="checkbox" class="toggle" id="' . $input_id . '_toggle" ' . ($value ? ' checked' : '') . '/>';
+                $html .= '<input type="checkbox" class="toggle ';
+                if ($extra_class) {
+                    $html .= ' class="' . $extra_class . '"';
+                }
+                
+                $html .= '" id="' . $input_id . '_toggle" ' . ($value ? ' checked' : '') . '/>';
                 if ($display_labels) {
                     $html .= '<span class="toggle-label-off">' . $options['toggle_off'] . '</span>';
                 }

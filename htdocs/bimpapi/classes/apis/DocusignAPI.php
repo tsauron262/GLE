@@ -380,7 +380,7 @@ class DocusignAPI extends BimpAPI
 //
 ////        $this->reqCreateEnvelope($params, $errors);
 //        
-        $this->createHook($params, $errors);
+        $this->createHook($errors);
     }
 
     public function connect(&$errors = array(), &$warnings = array())

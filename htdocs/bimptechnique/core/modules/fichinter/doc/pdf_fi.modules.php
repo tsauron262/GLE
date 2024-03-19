@@ -561,7 +561,7 @@ class pdf_fi
                         // Tarif
 //                        $id_service = ($child->getData('type') == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique');
                         
-                        $arrayCode = $children->getArrayServiceForBilling();
+                        $arrayCode = $child->getArrayServiceForBilling();
                         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
                         $product->find(Array('ref' => $arrayCode[$type]));
                         $id_service = $product->id;

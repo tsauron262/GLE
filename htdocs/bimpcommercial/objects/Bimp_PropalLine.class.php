@@ -225,9 +225,7 @@ class Bimp_PropalLine extends ObjectLine
             'nb_periods_fac'          => 0,
             'qty_per_period'          => 0,
             'total_qty'               => 0,
-            'nb_units_per_period'     => 0,
             'prod_duration'           => 0,
-            'nb_prod_periods'         => 0,
             'debug'                   => array()
         );
 
@@ -357,11 +355,6 @@ class Bimp_PropalLine extends ObjectLine
                         $dt->add($periodic_interval);
                         $dt->sub(new DateInterval('P1D'));
                         $data['date_first_period_end'] = $dt->format('Y-m-d');
-                    }
-
-                    if ($duration && $prod_duration && $data['nb_periods_fac']) {
-                        $data['nb_units_per_period'] = (($this->qty / $duration) * $prod_duration) / $data['nb_periods_fac'];
-                        $data['nb_prod_periods'] = $duration / $prod_duration;
                     }
                 }
             }

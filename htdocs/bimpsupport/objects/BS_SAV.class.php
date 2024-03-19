@@ -2787,7 +2787,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 
                                 if($consigned_stock && BimpObject::objectLoaded($consigned_stock) && $consigned_stock->getData('qty') > 0){
                                     $input .= BimpInput::renderInput('toggle', 'from_internal_stock_' . $part->id, 0, array(
-                                                'extra_class' => 'from_internal_stock_check'
+                                                'extra_class' => 'from_internal_stock_input'
                                     ));
                                 }
                                 

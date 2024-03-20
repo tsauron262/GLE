@@ -500,7 +500,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function useAtradius()
     {
-        return ($this->useEncours() && BimpCore::getConf('useAtradius'));
+        1;//return ($this->useEncours() && BimpCore::getConf('useAtradius'));
     }
 
     // Getters params: 
@@ -1388,7 +1388,8 @@ class Bimp_Societe extends BimpDolObject
                     'c.invoice_status' => array(
                         'operator' => '!=',
                         'value'    => 2
-                    )
+                    ),
+                    'c.entity' => explode(',', getEntity('commande'))
         ));
 
         $rows = $this->db->executeS($sql, 'array');
@@ -3018,6 +3019,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function onNewOutstanding_limit($oldLimit)
     {
+        global $conf;
         if ($this->isLoaded()) {
             $emails = '';
             $commerciaux = $this->getIdCommercials();
@@ -3038,7 +3040,7 @@ class Bimp_Societe extends BimpDolObject
                 mailSyn2($subject, $emails, '', $msg);
 
             if (strlen($this->getData('siren')) == 9) {
-                $this->db->db->query("UPDATE " . MAIN_DB_PREFIX . "societe SET outstanding_limit = '" . $this->getData('outstanding_limit') . "' WHERE siren = '" . $this->getData('siren') . "'");
+                $this->db->db->query("UPDATE " . MAIN_DB_PREFIX . "societe_atradius SET outstanding_limit = '" . $this->getData('outstanding_limit') . "' WHERE entity = ".$conf->entity." AND id_soc IN (SELECT rowid FROM ".MAIN_DB_PREFIX."societe WHERE siren = '" . $this->getData('siren') . "')");
             }
         }
     }

@@ -5857,7 +5857,7 @@ class ObjectLine extends BimpObject
                 $nb_units = (float) $this->getData('abo_nb_units');
                 $isAbonnement = $product->isAbonnement();
                 $main_prod_duration = $product->getData('duree');
-                if (!$main_prod_duration) {
+                if (!$main_prod_duration && $isAbonnement) {
                     $errors[] = 'Duréé unitaire du produit ' . $product->getLink() . ' non définie';
                     return;
                 }
@@ -5883,7 +5883,7 @@ class ObjectLine extends BimpObject
                         $qty_ratio = 1;
                         $prod_duration = $prod->getData('duree');
 
-                        if (!$prod_duration) {
+                        if (!$prod_duration && $isAbonnement) {
                             $errors[] = 'Duréé unitaire du produit ' . $prod->getLink() . ' non définie';
                             continue;
                         }

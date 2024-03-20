@@ -823,6 +823,9 @@ class Bimp_CommandeLine extends ObjectLine
                 if (isset($reservedQties['status'][0])) {
                     $reserved_qty -= $reservedQties['status'][0];
                 }
+                if (isset($reservedQties['status'][303])) {
+                    $reserved_qty -= $reservedQties['status'][303];
+                }
 
                 $shipped_qty = (float) $this->getShippedQty();
                 $billed_qty = (float) $this->getBilledQty();
@@ -1045,11 +1048,12 @@ class Bimp_CommandeLine extends ObjectLine
                 if (!is_null($id_shipment) && (int) $id_shipment !== (int) $id_s) {
                     continue;
                 }
-                if ($shipments_validated_only) {
-                    $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_s);
-                    if (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') !== BL_CommandeShipment::BLCS_EXPEDIEE) {
-                        continue;
-                    }
+                $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_s);
+                if ($shipments_validated_only && (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') !== BL_CommandeShipment::BLCS_EXPEDIEE)) {
+                    continue;
+                }
+                if (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') == BL_CommandeShipment::BLCS_ANNULEE) {
+                    continue;
                 }
                 if (isset($shipment_data['qty'])) {
                     $qty += (float) $shipment_data['qty'];
@@ -8311,6 +8315,7 @@ class Bimp_CommandeLine extends ObjectLine
                     if ($isProduct) {
                         if ($diff < 0) {
                             $res_qties = $this->getReservationsQties(0);
+                            $res_qties += $this->getReservationsQties(303);
 
                             if ($res_qties < abs($diff)) {
                                 if ($res_qties > 1) {

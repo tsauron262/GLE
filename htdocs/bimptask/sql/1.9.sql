@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_task` ADD `position` int NOT NULL DEFAULT 0;

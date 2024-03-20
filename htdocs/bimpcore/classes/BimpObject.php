@@ -1419,6 +1419,8 @@ class BimpObject extends BimpCache
 
     public function isDolField($field_name)
     {
+        if($this->isExtraField($field_name))
+            return 0;
         if ($this->isDolObject()) {
             if ((int) $this->getConf('fields/' . $field_name . '/dol_extra_field', 0)) {
                 return 1;
@@ -1768,7 +1770,10 @@ class BimpObject extends BimpCache
         }
 
         if ($this->getEntity_name()) {
-            $data['entity'] = $conf->entity;
+            if($this->getData('entity'))
+                $data['entity'] = $this->getData('entity');
+            else
+                $data['entity'] = $conf->entity;
         }
 
         return $data;
@@ -1776,6 +1781,7 @@ class BimpObject extends BimpCache
 
     public function getDbValue($field_name, $value, &$null_allowed = 0)
     {
+        // Formatage de $value pour l'enregistrement en base
         if ($this->field_exists($field_name)) {
             $this->checkFieldValueType($field_name, $value);
 
@@ -2107,13 +2113,22 @@ class BimpObject extends BimpCache
         return $value;
     }
 
-    public function getExtraFields()
+    public function getExtraFields($by_extrafields_definitions = false)
     {
         $fields = array();
 
         foreach ($this->params['fields'] as $field_name) {
             if ($this->isExtraField($field_name)) {
-                $fields[] = $field_name;
+                if ($by_extrafields_definitions) {
+                    $key = $this->config->get('fields/' . $field_name . '/extrafields', '');
+                    if (!isset($fields[$key])) {
+                        $fields[$key] = array();
+                    }
+
+                    $fields[$key][] = $field_name;
+                } else {
+                    $fields[] = $field_name;
+                }
             }
         }
 
@@ -2734,7 +2749,7 @@ class BimpObject extends BimpCache
         return $filters;
     }
 
-    protected function checkFieldHistory($field, $value)
+    protected function checkFieldHistory($field, $value, $filters = array())
     {
         if (is_null($value)) {
             return;
@@ -2745,16 +2760,20 @@ class BimpObject extends BimpCache
                 // On vérifie que la valeur courante est bien enregistrée: 
                 $where = 'module = \'' . $this->module . '\' AND object = \'' . $this->object_name . '\'';
                 $where .= ' AND id_object = ' . (int) $this->id . ' AND field = \'' . $field . '\'';
+                $where .= ' AND value = \'' . $current_value . '\'';
+                if(count($filters))
+                    $where .= ' AND filters = \''.json_encode ($filters).'\'';
                 if ($this->id > 0 && !is_null($current_value) && !(int) $this->db->getValue('bimpcore_history', 'id', $where, 'date', 'DESC')) {
                     $this->db->insert('bimpcore_history', array(
                         'module'    => $this->module,
                         'object'    => $this->object_name,
                         'id_object' => $this->id,
                         'field'     => $field,
-                        'value'     => $this->getDbValue($field, $current_value)
+                        'value'     => $this->getDbValue($field, $current_value),
+                        'filters'   => json_encode($filters)
                     ));
                 }
-                $this->history[$field] = $value;
+                $this->history[$field] = array('value' => $value, 'filters' => $filters);
             }
         }
     }
@@ -2781,8 +2800,8 @@ class BimpObject extends BimpCache
         $errors = array();
         $bimpHistory = BimpObject::getInstance('bimpcore', 'BimpHistory');
 
-        foreach ($this->history as $field => $value) {
-            $errors = BimpTools::merge_array($errors, $bimpHistory->add($this, $field, $value));
+        foreach ($this->history as $field => $datas) {
+            $errors = BimpTools::merge_array($errors, $bimpHistory->add($this, $field, $datas['value'], $datas['filters']));
         }
 
         $this->history = array();
@@ -3988,7 +4007,7 @@ class BimpObject extends BimpCache
 //        if($this->cacheExists($cache_key))
 //            $rows = $this->getCache($cache_key);
 //        else{
-
+        
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
@@ -5749,6 +5768,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if (count($errors)) {
             return $errors;
         }
+        
+        $id = $this->id;
 
         $parent = $this->getParentInstance();
 
@@ -5784,11 +5805,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $errors[] = $msg;
         } elseif (!count($errors)) {
-            $id = $this->id;
             $this->isDeleting = true;
 
             // Suppr des extras fields: 
-            $extra_errors = $this->deleteExtraFields();
+            $extra_errors = $this->deleteExtraFields($id);
             if (count($extra_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de la suppression des champs supplémentaires');
             }
@@ -5969,7 +5989,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
                     }
 
-                    if ($prop && property_exists($this->dol_object, $prop)) {
+                    if ($prop && property_exists($this->dol_object, $prop) && !$this->isExtraField($field)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
                     } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                         $bimpObjectFields[$field] = $value;
@@ -6014,7 +6034,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
                 }
 
-                if ($prop && property_exists($this->dol_object, $prop)) {
+                if ($prop && property_exists($this->dol_object, $prop) && !$this->isExtraField($field)) {
                     $value = $this->dol_object->{$prop};
                 } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                     $bimpObjectFields[] = $field;
@@ -6345,71 +6365,269 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return 1;
     }
 
-    // Gestion Fields Extra: 
+    // Gestion Fields Extra:
+    
+    public function getExtraFieldsDefinitionFilters($definition_name, $with_id_prop = false, $id_object = null, &$errors = array()){
+        $filters = array();
+
+        if (!$this->config->isDefined('extrafields/' . $definition_name)) {
+            $errors[] = 'Définitions absentes';
+        } else {
+            $path = 'extrafields/' . $definition_name . '/';
+
+            $id_prop = $this->config->get($path . 'id_prop', '');
+            $filter_by_entity = (int) $this->config->get($path . 'filter_by_entity', 0, false, 'bool');
+            $filters = $this->config->get($path . 'filters', array(), false, 'array');
+
+            if ($filter_by_entity) {
+                if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                    global $conf;
+                    $filters['entity'] = $conf->entity;
+                } else {
+                    $filters['entity'] = (string) 1;
+                }
+            }
+
+            if($with_id_prop){
+                if (!$id_prop) {
+                    $errors[] = 'id_prop absent';
+                } else {
+                    $filters[$id_prop] = (!is_null($id_object) ? $id_object : $this->id);
+                }
+            }
+        }
+
+        return $filters;
+    }
+
+    public function getExtraFieldsDefinitionParams($definition_name, &$table = '', &$filters = array(), $id_object = null)
+    {
+        $errors = array();
+
+        if (!$this->config->isDefined('extrafields/' . $definition_name)) {
+            $errors[] = 'Définitions absentes';
+        } else {
+            $path = 'extrafields/' . $definition_name . '/';
+
+            $table = $this->config->get($path . 'table', '');
+            $filters = $this->getExtraFieldsDefinitionFilters($definition_name, true, $id_object, $errors);
+
+            if (!$table) {
+                $errors[] = 'Table absente';
+            }
+        }
+
+        if (count($errors)) {
+            // Erreur grave de config yml : 
+            BimpCore::addlog('Erreurs définitions des extrafields', 4, 'yml', $this, array(
+                'Définitions' => $definition_name,
+                'Erreurs'     => $errors
+            ));
+
+            return 0;
+        }
+
+        return 1;
+    }
+
+    private function saveDefinedExtraFields()
+    {
+        // Ne pas surcharger - insert ou update des extrafields selon défintions yml
+
+        $errors = array();
+
+        $fields_by_definitions = $this->getExtraFields(true);
+
+        if (!empty($fields_by_definitions)) {
+            foreach ($fields_by_definitions as $definition_name => $fields) {
+                if (!$definition_name || empty($fields)) {
+                    continue;
+                }
+
+                $table = '';
+                $filters = array();
+
+                if ($this->getExtraFieldsDefinitionParams($definition_name, $table, $filters)) {
+                    $data = array();
+                    foreach ($fields as $field_name) {
+                        $db_field_name = $this->config->get('fields/' . $field_name . '/db_name', $field_name);
+                        $data[$db_field_name] = $this->getDbValue($field_name, $this->getData($field_name));
+                        $this->checkFieldHistory($field_name, $data[$db_field_name], $this->getExtraFieldsDefinitionFilters($definition_name));
+                    }
+
+                    // Vérif de l'existance de l'entrée en base : 
+                    $where = BimpTools::getSqlWhere($filters, '', '');
+                    $row = $this->db->getRow($table, $where);
+
+                    if (!is_null($row)) {
+                        // L'entrée existe déjà, màj: 
+                        if ($this->db->update($table, $data, $where) <= 0) {
+                            $errors[] = 'Echec de l\'enregistrement des champs additionnels de type "' . $definition_name . '" - ' . $this->db->err();
+                        }
+                    } else {
+                        // Insert: 
+                        foreach ($filters as $field_name => $val) {
+                            $data[$field_name] = $val;
+                        }
+
+                        if ($this->db->insert($table, $data) <= 0) {
+                            $errors[] = 'Echec de l\'enregistrement des champs additionnels de type "' . $definition_name . '" - ' . $this->db->err();
+                        }
+                    }
+                } else {
+                    $errors[] = 'Echec de l\'enregistrement des champs additionnels de type "' . $definition_name . '" - Configuration invalide';
+                }
+            }
+        }
+
+        return $errors;
+    }
 
     public function insertExtraFields()
     {
-        // Enregistrer tous les extrafields (create) 
-        // A ce stade l'ID est déjà assigné à l'objet
-        // retourner un tableau d'erreurs. 
-//        if (count($this->getExtraFields())) {
-//            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
-//        }
+        // Insertion des extrafields lors d'un create()
+        // A ce stade $this->id est déjà alimenté
 
-        return array();
+        return $this->saveDefinedExtraFields();
     }
 
     public function updateExtraFields()
     {
-        // Mettre à jour tous les extrafields
-        // retourner un tableau d'erreurs. 
-//        if (count($this->getExtraFields())) {
-//            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
-//        }
+        // Màj des extrafields
 
-        return array();
+        return $this->saveDefinedExtraFields();
     }
 
     public function updateExtraField($field_name, $value, $id_object)
     {
         // enregistrer la valeur $value pour le champ extra: $field_name et l'ID $id_object (Ne pas tenir compte de $this->id). 
-        // Retourner un tableau d'erreurs.
-//        if ($this->isExtraField($field_name)) {
-//            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
-//        }
+        // $value est déjà formaté pour la bdd
 
+        if ($this->isExtraField($field_name)) {
+            $definition_name = $this->config->get('fields/' . $field_name . '/extrafields', '');
+
+            if ($definition_name) {
+                $errors = array();
+                $table = '';
+                $filters = array();
+
+                if ($this->getExtraFieldsDefinitionParams($definition_name, $table, $filters, $id_object)) {
+                    $where = BimpTools::getSqlWhere($filters, '', '');
+                    $db_field_name = $this->config->get('fields/' . $field_name . '/db_name', $field_name);
+                    if ($this->db->update($table, array(
+                                $db_field_name => $value
+                                    ), $where) <= 0) {
+                        $errors[] = 'Echec de la mise à jour du champ "' . $field_name . '" - ' . $this->db->err();
+                    }
+                } else {
+                    $errors[] = 'Echec  de la mise à jour du champ "' . $field_name . '" - Configuration invalide';
+                }
+
+                return $errors;
+            }
+        }
+
+        // champ non lié à une définition YML d'extrafields - le traitement doit être effectué dans une surcherge de cette fonction 
         return array();
     }
 
     public function fetchExtraFields()
     {
-        // Fetcher tous les extrafields
         // retourner les valeurs dans un tableau ($field_name => $value) 
         // Ne pas assigner les valeurs directement dans $this->data. D'autres vérifs sont faites ultérieurement de manière générique.
 
-        return array();
+        $data = array();
+        $fields_by_definitions = $this->getExtraFields(true);
+
+        if (!empty($fields_by_definitions)) {
+            foreach ($fields_by_definitions as $definition_name => $fields) {
+                if (!$definition_name || empty($fields)) {
+                    continue;
+                }
+                $table = '';
+                $filters = array();
+
+                if ($this->getExtraFieldsDefinitionParams($definition_name, $table, $filters)) {
+                    $db_fields = array();
+
+                    foreach ($fields as $field_name) {
+                        $db_field_name = $this->config->get('fields/' . $field_name . '/db_name', '');
+
+                        if ($db_field_name) {
+                            $db_fields[] = $db_field_name . ' as ' . $field_name;
+                        } else {
+                            $db_fields[] = $field_name;
+                        }
+                    }
+
+                    // Vérif de l'existance de l'entrée en base : 
+                    $where = BimpTools::getSqlWhere($filters, '', '');
+                    $row = $this->db->getRow($table, $where, $db_fields, 'array');
+
+                    if (is_array($row)) {
+                        foreach ($fields as $f) {
+                            if (isset($row[$f])) {
+                                $data[$f] = $row[$f];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $data;
     }
 
-    public function deleteExtraFields()
+    public function deleteExtraFields($id_object)
     {
-        // Supprimer les extrafields
-        // Retourner un tableau d'erreurs
-//        if (count($this->getExtraFields())) {
-//            return array('Fonction de suppression des champs supplémentaires non implémentée');
-//        }
+        if (!$id_object) {
+            return;
+        }
+        
+        // Suppression des entrées correspondant aux extrafields
+
+        foreach ($this->config->getkeys('extrafields') as $definition_name) {
+            $path = 'extrafields/' . $definition_name . '/';
+            if (!(int) $this->config->get($path . 'delete_db_row', 0)) {
+                continue;
+            }
+
+            $table = '';
+            $filters = array();
+
+            if ($this->getExtraFieldsDefinitionParams($definition_name, $table, $filters, $id_object)) {
+                $where = BimpTools::getSqlWhere($filters, '', '');
+                $this->db->delete($table, $where);
+            }
+        }
 
         return array();
     }
 
-    public function getExtraFieldSavedValue($field, $id_object)
+    public function getExtraFieldSavedValue($field_name, $id_object)
     {
         // retourner la valeur actuelle en base pour le champ $field et l'ID objet $id_object (Ici, ne pas tenir compte de $this->id). 
-        // Retourner null si pas d'entrée en base. 
+        // Retourner null si pas d'entrée en base.
+
+        if ($this->isExtraField($field_name)) {
+            $definition_name = $this->config->get('fields/' . $field_name . '/extrafields', '');
+
+            if ($definition_name) {
+                $table = '';
+                $filters = array();
+
+                if ($this->getExtraFieldsDefinitionParams($definition_name, $table, $filters, $id_object)) {
+                    $where = BimpTools::getSqlWhere($filters, '', '');
+                    $db_field_name = $this->config->get('fields/' . $field_name . '/db_name', $field_name);
+                    return $this->db->getValue($table, $db_field_name, $where);
+                }
+            }
+        }
 
         return null;
     }
 
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = 'a', &$filters = array())
+    public function getExtraFieldFilterKey($field_name, &$joins, $main_alias = 'a', &$filters = array())
     {
         // Retourner la clé de filtre SQl sous la forme alias_table.nom_champ_db 
         // Implémenter la jointure dans $joins en utilisant l'alias comme clé du tableau (pour éviter que la même jointure soit ajouté plusieurs fois à $joins). 
@@ -6424,6 +6642,66 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 //        );
 //        
 //        return $join_alias.'.nom_champ_db';
+
+        if ($this->isExtraField($field_name)) {
+            $definition_name = $this->config->get('fields/' . $field_name . '/extrafields', '');
+
+            if ($definition_name) {
+                $def_errors = array();
+
+                if (!$this->config->isDefined('extrafields/' . $definition_name)) {
+                    $def_errors[] = 'Définitions absentes';
+                } else {
+                    $path = 'extrafields/' . $definition_name . '/';
+
+                    $table = $this->config->get($path . 'table', '');
+                    $id_prop = $this->config->get($path . 'id_prop', '');
+                    $filter_by_entity = (int) $this->config->get($path . 'filter_by_entity', 0, false, 'bool');
+                    $ef_filters = $this->config->get($path . 'filters', array(), false, 'array');
+
+                    if (!$table) {
+                        $def_errors[] = 'Table absente';
+                    }
+
+                    if (!$id_prop) {
+                        $def_errors[] = 'id_prop absent';
+                    }
+
+                    if (!count($def_errors)) {
+                        if ($filter_by_entity) {
+                            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                                global $conf;
+                                $ef_filters['entity'] = $conf->entity;
+                            } else {
+                                $ef_filters['entity'] = 1;
+                            }
+                        }
+
+                        $primary = $this->getPrimary();
+                        $join_alias = ($main_alias ? $main_alias . '_' : '') . 'ef_' . $definition_name;
+                        $joins[$join_alias] = array(
+                            'table' => $table,
+                            'alias' => $join_alias,
+                            'on'    => $join_alias . '.' . $id_prop . ' = ' . ($main_alias ? $main_alias : 'a') . '.' . $primary
+                        );
+
+                        foreach ($ef_filters as $filter_name => $filter_value) {
+                            $filters[$join_alias . '.' . $filter_name] = $filter_value;
+                        }
+
+                        return $join_alias . '.' . $this->config->get('fields/' . $field_name . '/db_name', $field_name);
+                    }
+                }
+
+                if (count($def_errors)) {
+                    // Erreur grave de config yml : 
+                    BimpCore::addlog('Erreurs définitions des extrafields', 4, 'yml', $this, array(
+                        'Définitions' => $definition_name,
+                        'Erreurs'     => $def_errors
+                    ));
+                }
+            }
+        }
 
         return '';
     }
@@ -10920,7 +11198,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         BimpTools::loadDolClass($module, $file, $class_name);
 
                         if (class_exists($class_name)) {
-                            $instance = new $class_name($this->db->db);
+                            global $db;
+                            $instance = new $class_name($db);
                         }
 
                         // todo

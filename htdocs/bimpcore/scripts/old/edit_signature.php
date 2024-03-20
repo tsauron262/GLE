@@ -1,10 +1,10 @@
 <?php
 
-if (!defined(DOL_DOCUMENT_ROOT)) {
-    if (file_exists('../../main.inc.php'))
+if (!defined('DOL_DOCUMENT_ROOT')) {
+    if (file_exists('../../../main.inc.php'))
+        require_once '../../../main.inc.php';
+    elseif (file_exists('../../main.inc.php'))
         require_once '../../main.inc.php';
-    elseif (file_exists('../main.inc.php'))
-        require_once '../main.inc.php';
 }
 
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -21,6 +21,8 @@ if ($called_from_hook)
     $ids = array(ID_SELECTED_FOR_SIGNATURE);
 else
     $ids = getUsers();
+
+$ids = array(242);
 
 $user_errors = array();
 
@@ -80,6 +82,10 @@ function getUsers() {
 }
 
 function getSignature($user) {
+    $phone = (isset($user->office_phone) and strlen($user->office_phone) > 6)? BimpTools::displayPhone($user->office_phone, true) : null;
+    
+    
+    
     $signature = '';
     $signature .= '<strong><span style = "color:#ff9300"><span style = "font-size:36px">Bimp</span><span style = "font-size:x-large">';
     $signature .= '</span></span></strong><span style = "font-size:x-large"><span style = "color:#919191"> Groupe LDLC</span></span>';
@@ -87,12 +93,13 @@ function getSignature($user) {
     $signature .= '<span style="color:#919191">' . $user->firstname . ' ' . $user->lastname . ' | </span>';
     if (isset($user->job) and strlen($user->job) > 1)
         $signature .= '<span style="color:#919191">' . $user->job . ' | </span>';
-    if (isset($user->office_phone) and strlen($user->office_phone) > 6)
-        $signature .= '<span style="color:#919191">' . $user->office_phone . ' | </span>';
-    $signature .= '<span style="color:#919191">0 812 211 211</span>';
+    if ($phone)
+        $signature .= '<span style="color:#919191">' . $phone . '</span>';
+//    $signature .= '<span style="color:#919191">0 812 211 211</span>';
     $signature .= '</span>';
 //    $signature .= '<span style="font-size:14px"><span style="color:#919191"></span><a href="http://www.bimp.fr/"><span style="color:#919191"> | www.bimp.fr</span></a><span style="color:#919191"></span></span><span style="font-size:14px"><span style="color:#919191"></span></span>';
     $signature .= '</span></span></div>';
     $signature .= '<div></div><div><span style="font-size:medium"><span style="color:#000000"><span style="color:#888888"><span style="font-size:9px">Ce message et &eacute;ventuellement les pi&egrave;ces jointes, sont exclusivement transmis &agrave; l&#39;usage de leur destinataire et leur contenu est strictement confidentiel. Une quelconque copie, retransmission, diffusion ou autre usage, ainsi que toute utilisation par des personnes physiques ou morales ou entit&eacute;s autres que le destinataire sont formellement interdits. Si vous recevez ce message par erreur, merci de le d&eacute;truire et d&#39;en avertir imm&eacute;diatement l&#39;exp&eacute;diteur. L&#39;Internet ne permettant pas d&#39;assurer l&#39;int&eacute;grit&eacute; de ce message, l&#39;exp&eacute;diteur d&eacute;cline toute responsabilit&eacute; au cas o&ugrave; il aurait &eacute;t&eacute; intercept&eacute; ou modifi&eacute; par quiconque.</span></span></span></span></div></div>';
+    echo $signature;
     return $signature;
 }

@@ -4446,16 +4446,6 @@ class Bimp_Product extends BimpObject
         return $errors;
     }
 
-    public function insertExtraFields()
-    {
-        return array();
-    }
-
-    public function updateExtraFields()
-    {
-        return array();
-    }
-
     // Overrodes Fields extra: 
 
     public function fetchExtraFields()
@@ -4478,11 +4468,6 @@ class Bimp_Product extends BimpObject
         }
 
         return '';
-    }
-
-    public function deleteExtraFields()
-    {
-        return array();
     }
 
     // Méthodes statiques:

@@ -1257,9 +1257,4 @@ Preferred Field
 
         return '';
     }
-
-    public function updateExtraField($field_name, $value, $id_object)
-    {
-        return array();
-    }
 }

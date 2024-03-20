@@ -649,7 +649,7 @@ class BCT_Contrat extends BimpDolObject
         return $html;
     }
 
-    public function renderContacts($type = 0, $code = '', $input_name = '')
+    public function renderContacts($nature = 0, $code = '', $input_name = '')
     {
         $html = '';
         if ($input_name != '') {
@@ -662,30 +662,40 @@ class BCT_Contrat extends BimpDolObject
 
         $html .= '<thead>';
         $html .= '<tr>';
-        if ($type == 0)
+
+        if ($nature == 0) {
             $html .= '<th>Nature</th>';
+        }
+
         $html .= '<th>Tiers</th>';
         $html .= '<th>Utilisateur / Contact</th>';
-        if ($code == '')
+        if ($code == '') {
             $html .= '<th>Type de contact</th>';
+        }
         $html .= '<th></th>';
         $html .= '</tr>';
         $html .= '</thead>';
 
-        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list' . $type . '_' . $code;
+        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list_' . $nature . '_' . $code;
+
         $html .= '<tbody id="' . $list_id . '">';
-        $html .= $this->renderContactsList($type, $code);
+        $html .= $this->renderContactsList($nature, $code, $list_id);
 
         $html .= '</tbody>';
-
         $html .= '</table>';
 
-        $filtre = array('id_client' => (int) $this->getData('fk_soc'));
-        if ($type && $code != '') {
-            if ($type == 'internal') {
-                $filtre['user_type_contact'] = $this->getIdTypeContact($type, $code);
-            } elseif ($type == 'external') {
-                $filtre['tiers_type_contact'] = $this->getIdTypeContact($type, $code);
+        $filtre = array(
+            'id_client' => (int) $this->getData('fk_soc'),
+            'nature'      => $nature,
+            'code'      => $code,
+            'list_id'   => $list_id
+        );
+
+        if ($nature && $code != '') {
+            if ($nature == 'internal') {
+                $filtre['user_type_contact'] = $this->getIdTypeContact($nature, $code);
+            } elseif ($nature == 'external') {
+                $filtre['tiers_type_contact'] = $this->getIdTypeContact($nature, $code);
             }
         }
 

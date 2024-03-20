@@ -3,7 +3,7 @@
 class BimpHistory extends BimpObject
 {
 
-    public function add(BimpObject $object, $field, $value)
+    public function add(BimpObject $object, $field, $value, $filters)
     {
         $this->reset();
         
@@ -38,7 +38,8 @@ class BimpHistory extends BimpObject
                 'field'     => $field,
                 'value'     => $this->db->db->escape($value),
                 'date'      => date('Y-m-d H:i:s'),
-                'id_user'   => (int) $id_user
+                'id_user'   => (int) $id_user,
+                'filters'   => json_encode($filters)
             );
 
             $errors = $this->validateArray($data);
@@ -73,15 +74,31 @@ class BimpHistory extends BimpObject
         if (!isset($object->id) || !$object->id) {
             return array();
         }
-
-        return $this->getList(array(
+        
+        $filters = array();
+        $definition_name = $object->getConf('fields/' . $field . '/extrafields', '');
+        if($definition_name){
+            $filters = $object->getExtraFieldsDefinitionFilters($definition_name);
+        }
+        
+//print_r(array(
+//                    'module'    => $object->module,
+//                    'object'    => $object->object_name,
+//                    'id_object' => (int) $object->id,
+//                    'field'     => $field,
+//                    'filters'   => json_encode($filters)
+//                        ));echo $definition_name.'<br/><br/>';
+        $filtres = array(
                     'module'    => $object->module,
                     'object'    => $object->object_name,
                     'id_object' => (int) $object->id,
                     'field'     => $field
-                        ), null, null, 'id', 'desc', 'array', array(
-                    'id', 'id_user', 'date', 'value'
-        ));
+        );
+        if(count($filters)){
+            $filtres['filters'] = json_encode($filters);
+        }
+        return $this->getList($filtres, null, null, 'id', 'desc', 'array', array(
+                    'id', 'id_user', 'date', 'value'));
     }
 
     public function renderCard(BimpObject $object, $field, $limit = 15, $display_user = true, $display_title = true)

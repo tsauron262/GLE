@@ -37,10 +37,6 @@ fields:
         label: Fournisseur
         type: id_object
         object: fournisseur
-        input: 
-            type: search_societe
-            societe_type: supplier
-            help: Entrez le nom ou la référence d'un fournisseur pour effectuer une recherche
         required: 1
         
     ref_fourn:

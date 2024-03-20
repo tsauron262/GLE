@@ -15,7 +15,7 @@ class BimpConfig
     public $current = null;
     public $errors = array();
     public static $keywords = array(
-        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf', 'dol_conf', 'is_module_active', 'verif_cond'
+        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf', 'dol_conf', 'is_module_active', 'is_module_non_active', 'verif_cond'
     );
     public $cache_key = '';
     protected static $params = array();
@@ -555,6 +555,21 @@ class BimpConfig
         return $current;
     }
 
+    public function getkeys($full_path)
+    {
+        $keys = array();
+
+        $params = $this->getParams($full_path);
+
+        if (is_array($params)) {
+            foreach ($params as $key => $sub_params) {
+                $keys[] = $key;
+            }
+        }
+
+        return $keys;
+    }
+
     public function getCompiledParams($full_path)
     {
         $params = $this->getParams($full_path);
@@ -646,10 +661,10 @@ class BimpConfig
         }
 
         if (isset($current)) {
-            if($del_cache){
+            if ($del_cache) {
                 $path = implode('/', $path);
-                foreach(self::$values_cache[$this->cache_key] as $name => $inut){
-                    if(stripos($name, $path) === 0)
+                foreach (self::$values_cache[$this->cache_key] as $name => $inut) {
+                    if (stripos($name, $path) === 0)
                         unset(self::$values_cache[$this->cache_key][$name]);
                 }
             }
@@ -761,6 +776,9 @@ class BimpConfig
             }
             if (isset($value['is_module_active'])) {
                 return $this->getIsModuleActive($value['is_module_active'], $path . '/is_module_active');
+            }
+            if (isset($value['is_module_non_active'])) {
+                return !$this->getIsModuleActive($value['is_module_non_active'], $path . '/is_module_non_active');
             }
             if (isset($value['verif_cond'])) {
                 return BimpTools::verifCond($value['verif_cond']);

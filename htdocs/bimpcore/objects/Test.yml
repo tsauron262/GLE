@@ -1,0 +1,51 @@
+
+table: bimp_test
+common_fields: 0
+
+labels: 
+    name: Test
+    
+extrafields: 
+    ext1: 
+        table: bimp_test_ext1
+        id_prop: id_obj
+        filter_by_entity: 1
+        delete_db_row: 1
+        filters: 
+            field_filter: test
+        
+    ext2: 
+        table: bimp_test_ext2
+        id_prop: id_obj
+        filter_by_entity: 0
+        delete_db_row: 0
+    
+fields: 
+    base1: 
+        label: Base 1
+        
+    base2: 
+        label: Base 2
+        
+    ext1_1: 
+        label: Ext1 1
+        extra: 1
+        extrafields: ext1
+        
+    ext1_2: 
+        label: Ext1 2
+        extra: 1
+        extrafields: ext1
+        
+    ext2_1: 
+        label: Ext2 1
+        extra: 1
+        extrafields: ext2
+        
+    ext2_2: 
+        label: Ext2 2
+        extra: 1
+        extrafields: ext2
+        db_name: ext2_2_db
+        
+    

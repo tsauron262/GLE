@@ -409,14 +409,24 @@ class BIMP_Task extends BimpAbstractFollow
         return $status;
     }
 
-    public function getListFiltre($type = "normal")
+    public function getListFiltre($type = "normal", $title = 'Toutes')
     {
         global $user;
-        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : ($type == "byMy" ? 'Mes tâches créées' : 'Toutes les tâches')));
+        
+        $listName = 'default';
+        
+        if($type == 'orgaDev')
+            $listName = 'sortable';
+        
+        $list = new BC_ListTable($this, $listName, 1, null, $title);
         $list->addIdentifierSuffix($type);
 
         if ($type == 'byMy')
             $list->addFieldFilterValue('user_create', (int) $user->id);
+        elseif ($type == "orgaDev"){
+            $list->addFieldFilterValue('type_manuel', 'dev');
+            $list->addFieldFilterValue('status', array(0,1,2,3));
+        }  
         elseif ($type == "my")
             $list->addFieldFilterValue('id_user_owner', (int) $user->id);
         else
@@ -601,7 +611,7 @@ class BIMP_Task extends BimpAbstractFollow
         $sql = 'SELECT DISTINCT a.id';
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy('id', 'ASC', 'a');
+        $sql .= BimpTools::getSqlOrderBy('position', 'ASC', 'a');
         $sql .= BimpTools::getSqlLimit(30);
 
         $rows = $bdb->executeS($sql, 'array');
@@ -649,6 +659,7 @@ class BIMP_Task extends BimpAbstractFollow
                 $task = array(
                     'id'            => $t->getData('id'),
                     'user_type'     => $user_type,
+                    'position'     => $t->getData('position'),
                     'prio'          => $prio,
                     'status_icon'   => $status_icon,
                     'prio_badge'    => $prio_badge,

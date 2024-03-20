@@ -2108,6 +2108,9 @@ class BContract_contrat extends BimpDolObject
                 $fin = new DateTime($this->getData('date_end_renouvellement'));
             }
         }
+        
+        if($this->getData('end_date_contrat') != $this->getEndDate()->format('Y-m-d'))
+            $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
 
         if (is_object($fin))
             return $fin->format($format);

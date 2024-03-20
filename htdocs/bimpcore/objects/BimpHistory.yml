@@ -44,5 +44,8 @@ fields:
     id_user: 
         label: Utilisateur
         type: id_object
+    filters: 
+        label: Filtre
+        type: json
         
         

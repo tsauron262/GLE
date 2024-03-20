@@ -695,60 +695,6 @@ class Bimp_Paiement extends BimpObject
         return BimpRender::renderAlerts('Aucun montant déplaçable disponible');
     }
 
-    // Gestion extra fields: 
-
-//    public function fetchExtraFields()
-//    {
-//        $fields = array(
-//            'type' => ''
-//        );
-//
-//        if ($this->isLoaded()) {
-////            $fields['type'] = (int) $this->db->getValue($this->getTable(), 'fk_paiement', 'rowid = ' . (int) $this->id);
-//        }
-//
-//        return $fields;
-//    }
-//
-//    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
-//    {
-//        switch ($field) {
-//            case 'type':
-//                return ($main_alias ? $main_alias : 'a') . '.fk_paiement';
-//        }
-//        return '';
-//    }
-//
-//    public function insertExtraFields()
-//    {
-//        return array();
-//    }
-//
-//    public function updateExtraFields()
-//    {
-//        return array();
-//    }
-//
-//    public function updateExtraField($field_name, $value, $id_object)
-//    {
-//        return array();
-//    }
-//
-//    public function deleteExtraFields()
-//    {
-//        return array();
-//    }
-//
-//    public function getExtraFieldSavedValue($field, $id_object)
-//    {
-//        switch ($field) {
-//            case 'type':
-//                return (int) $this->db->getValue($this->getTable(), 'fk_paiement', 'rowid = ' . (int) $id_object);
-//        }
-//
-//        return null;
-//    }
-
     // Traitements: 
 
     public function onDelete()

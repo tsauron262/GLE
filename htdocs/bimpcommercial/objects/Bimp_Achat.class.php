@@ -240,9 +240,4 @@ class Bimp_Achat extends BimpObject
                 return $join_alias . '.ref_fourn';
         }
     }
-
-    public function updateExtraField($field_name, $value, $id_object)
-    {
-        return array();
-    }
 }

@@ -2511,12 +2511,16 @@ class BimpComm extends BimpDolObject
 
         $html .= '<thead>';
         $html .= '<tr>';
-        if ($nature == 0)
+        
+        if ($nature == 0) {
             $html .= '<th>Nature</th>';
+        }
         $html .= '<th>Tiers</th>';
         $html .= '<th>Utilisateur / Contact</th>';
-        if ($code == '')
+
+        if ($code == '') {
             $html .= '<th>Type de contact</th>';
+        }
         $html .= '<th></th>';
         $html .= '</tr>';
         $html .= '</thead>';
@@ -2554,9 +2558,9 @@ class BimpComm extends BimpDolObject
                             'icon_before' => 'plus-circle',
                             'classes'     => array('btn', 'btn-default'),
                             'attr'        => array(
-                                'onclick' => $this->getJsActionOnclick('addContact', $filtre, array(
+                                'onclick' => $this->getJsActionOnclick('addContact', array(), array(
                                     'form_name'        => 'contact',
-                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);)}}'
+                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
                                 ))
                             )
                         )

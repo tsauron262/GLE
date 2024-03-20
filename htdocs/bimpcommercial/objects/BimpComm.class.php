@@ -2558,7 +2558,7 @@ class BimpComm extends BimpDolObject
                             'icon_before' => 'plus-circle',
                             'classes'     => array('btn', 'btn-default'),
                             'attr'        => array(
-                                'onclick' => $this->getJsActionOnclick('addContact', array(), array(
+                                'onclick' => $this->getJsActionOnclick('addContact', $filtre, array(
                                     'form_name'        => 'contact',
                                     'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
                                 ))

@@ -27,8 +27,12 @@ if (!$user->admin) {
     exit;
 }
 
-//BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
-//echo Bimp_Facture::checkMargesRevalAll();
+//$df = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', 88);
+//
+//echo 'ST : ' . $df->displayData('status', 'default', false, false, true);
+//echo 'ST2 : ' . strip_tags($df->displayData('status', 'default', false, false, true));
+
+
 
 echo '<br/>FIN';
 echo '</body></html>';

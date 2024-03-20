@@ -284,6 +284,22 @@ class BF_Demande extends BimpObject
                 }
                 return 1;
 
+            case 'reviewDemandeFinancement':
+                if (!(int) BimpCore::getConf('allow_reviews', null, 'bimpfinancement')) {
+                    $errors[] = 'Les révisions des demandes de location sont désactivées';
+                    return 0;
+                }
+                if ((int) $this->getData('status') < 10) {
+                    $errors[] = 'Cette demande de location n\'est pas encore acceptée';
+                    return 0;
+                }
+
+                if ((int) $this->getData('status') >= 20) {
+                    $errors[] = 'Cette demande de location est annulée ou refusée. Veuillez préalablement réouvrir cette demande';
+                    return 0;
+                }
+                return 1;
+
             case 'generateDevisFinancement':
             case 'uploadDevisFinancement':
             case 'forceDevisSigned':
@@ -673,6 +689,15 @@ class BF_Demande extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('reviewDemandeFinancement') && $this->canSetAction('reviewDemandeFinancement')) {
+            $buttons[] = array(
+                'label'   => 'Réviser cette demande',
+                'icon'    => 'fas_undo',
+                'onclick' => $this->getJsActionOnclick('reviewDemandeFinancement', array(), array(
+                    'form_name' => 'review'
+                ))
+            );
+        }
         if ($this->isNewStatusAllowed(self::STATUS_VALIDATED) && $this->canSetStatus(self::STATUS_VALIDATED)) {
             $buttons['validate'] = array(
                 'label'   => 'Valider les élements financés',
@@ -3221,6 +3246,75 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
+    public function renderReviewFormInput($input_name)
+    {
+        $html = '';
+
+        switch ($input_name) {
+            case 'review_elements':
+                $html .= BimpInput::renderInput('toggle', 'review_elements', (int) BimpTools::getPostFieldValue('review_elements', 1));
+                break;
+
+            case 'review_demande_refin':
+                if ((int) $this->getData('status') >= self::STATUS_ACCEPTED) {
+                    if ((int) BimpTools::getPostFieldValue('review_elements', 1)) {
+                        $html .= '<span class="success">OUI</span>';
+                        $html .= BimpInput::renderInput('hidden', 'review_demande_refin', 1);
+                    } else {
+                        $html .= BimpInput::renderInput('toggle', 'review_demande_refin', (int) BimpTools::getPostFieldValue('review_demande_refin', 1));
+                    }
+                } else {
+                    $html .= '<span class="warning">Aucune demande refinanceur acceptée</span>';
+                    $html .= BimpInput::renderInput('hidden', 'review_demande_refin', 0);
+                }
+                break;
+
+            case 'review_devis':
+                if ((int) $this->getData('devis_status') >= self::DOC_GENERATED) {
+                    if ((int) BimpTools::getPostFieldValue('review_demande_refin', 1)) {
+                        $html .= '<span class="success">OUI</span>';
+                        $html .= BimpInput::renderInput('hidden', 'review_devis', 1);
+                    } else {
+                        $html .= BimpInput::renderInput('toggle', 'review_devis', (int) BimpTools::getPostFieldValue('review_devis', 1));
+                    }
+                } else {
+                    $html .= '<span class="warning">Devis non généré</span>';
+                    $html .= BimpInput::renderInput('hidden', 'review_devis', 0);
+                }
+                break;
+
+            case 'review_contrat':
+                if ((int) $this->getData('contrat_status') >= self::DOC_GENERATED) {
+                    if ((int) BimpTools::getPostFieldValue('review_devis', 1)) {
+                        $html .= '<span class="success">OUI</span>';
+                        $html .= BimpInput::renderInput('hidden', 'review_contrat', 1);
+                    } else {
+                        $html .= BimpInput::renderInput('toggle', 'review_contrat', (int) BimpTools::getPostFieldValue('review_contrat', 1));
+                    }
+                } else {
+                    $html .= '<span class="warning">Contrat non généré</span>';
+                    $html .= BimpInput::renderInput('hidden', 'review_contrat', 0);
+                }
+                break;
+
+            case 'review_pvr':
+                if ((int) $this->getData('pvr_status') >= self::DOC_GENERATED) {
+                    if ((int) BimpTools::getPostFieldValue('review_contrat', 1)) {
+                        $html .= '<span class="success">OUI</span>';
+                        $html .= BimpInput::renderInput('hidden', 'review_pvr', 1);
+                    } else {
+                        $html .= BimpInput::renderInput('toggle', 'review_pvr', (int) BimpTools::getPostFieldValue('review_pvr', 1));
+                    }
+                } else {
+                    $html .= '<span class="warning">PV de réception non généré</span>';
+                    $html .= BimpInput::renderInput('hidden', 'review_pvr', 0);
+                }
+                break;
+        }
+
+        return $html;
+    }
+
     // Traitements: 
 
     public function editClientDataFromSource($client_data)
@@ -4204,22 +4298,15 @@ class BF_Demande extends BimpObject
 
         if (!count($errors)) {
             BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
-//            $sources = $this->getChildrenObjects('sources');
-//            foreach ($sources as $source) {
-
             $source = $this->getSource();
 
-            if (!BimpObject::objectLoaded($source)) {
-//                $errors[] = 'Aucune source principale';
-            } else {
+            if (BimpObject::objectLoaded($source)) {
                 $src_errors = $source->setDocFinStatus($doc_type, BimpCommDemandeFin::DOC_STATUS_ACCEPTED);
 
                 if (count($src_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
                 }
             }
-
-//            }
 
             if (!count($errors)) {
                 $this->addObjectLog(static::getDocTypeLabel($doc_type) . ' forcé au statut "Signé"', strtoupper($doc_type) . '_FORCED_SIGNED');
@@ -4364,6 +4451,125 @@ class BF_Demande extends BimpObject
             if (!count($errors)) {
                 $this->updateField('id_facture_cli_rev', $facture->id);
                 $facture->dol_object->add_object_linked('bf_demande', $this->id);
+            }
+        }
+
+        return $errors;
+    }
+
+    public function reviewDocFin($doc_type)
+    {
+        $errors = array();
+        $warnings = array();
+
+        if ((int) $this->getData($doc_type . '_status') >= self::DOC_GENERATED) {
+            $source = $this->getSource();
+
+            if (BimpObject::objectLoaded($source)) {
+                $src_errors = $source->reviewDocFin($doc_type);
+
+                if (count($src_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
+                }
+            }
+
+            if (!count($errors)) {
+                if ((int) $this->getData('id_signature_' . $doc_type)) {
+                    $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature_', $doc_type));
+
+                    if (BimpObject::objectLoaded($signature)) {
+                        $signature_errors = $signature->cancelAllSignatures($warnings, 'Document mis en révision');
+
+                        if (count($errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de l\'annulation de la signature');
+                        } else {
+                            $this->set('id_signature_' . $doc_type, 0);
+                            $this->set('signature_' . $doc_type . '_params', array());
+
+                            if ($this->field_exists($doc_type . '_signataires_data')) {
+                                $this->set($doc_type . '_signataires_data', array());
+                            }
+                        }
+                    }
+                }
+
+                $this->set($doc_type . '_status', self::DOC_NONE);
+
+                $errors = $this->update($warnings, true);
+
+                if (!count($errors)) {
+                    $this->addObjectLog(ucfirst($doc_type) . ' de location mis en révision', strtoupper($doc_type) . '_REVIEWD');
+
+                    // Suppr des fichiers : 
+
+                    $files_names = array($this->getSignatureDocFileName($doc_type, true));
+
+                    if ($doc_type === 'devis') {
+                        foreach ($this->getDevisFilesArray(false) as $f) {
+                            $files_names[] = $f;
+                        }
+                    } else {
+                        $files_names[] = $this->getSignatureDocFileName($doc_type);
+                    }
+
+                    foreach ($files_names as $file_name) {
+                        $file_infos = pathinfo($file_name);
+                        $file = BimpCache::findBimpObjectInstance('bimpcore', 'BimpFile', array(
+                                    'parent_module'      => 'bimpfinancement',
+                                    'parent_object_name' => 'BF_Demande',
+                                    'id_parent'          => $this->id,
+                                    'file_name'          => $file_infos['filename'],
+                                    'file_ext'           => $file_infos['extension']
+                                        ), true);
+
+                        if (BimpObject::objectLoaded($file)) {
+                            $file->delete($warnings, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function reviewDemandeRefin($submit_new_status = true)
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            $demandes_refin = BimpCache::getBimpObjectObjects('bimpfinancement', 'BF_DemandeRefinanceur', array(
+                        'id_demande' => $this->id,
+                        'status'     => array(
+                            'operator' => '>',
+                            'value'    => 0
+                        )
+            ));
+
+            if (count($demandes_refin)) {
+                foreach ($demandes_refin as $dr) {
+                    $dr->set('status', 0);
+                    $warnings = array();
+                    $dr_errors = $dr->update($warnings, true);
+
+                    if (count($dr_errors)) {
+                        $refin = $dr->getChildObject('refinanceur');
+                        $errors[] = BimpTools::getMsgFromArray($dr_errors, 'Refinanceur ' . (BimpObject::objectLoaded($refin) ? '"' . $refin->getName() . '"' : '#' . $dr->getData('id_refinanceur')));
+                    }
+                }
+
+                if (!count($errors)) {
+                    $this->addObjectLog('Demande refinaceur mise en révision', 'DR_REVIEWED');
+
+                    if ($submit_new_status) {
+                        $sources = $this->getChildrenObjects('sources');
+
+                        BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
+                        foreach ($sources as $source) {
+                            $source->setDemandeFinancementStatus(BimpCommDemandeFin::DOC_STATUS_ATTENTE);
+                        }
+                    }
+                }
             }
         }
 
@@ -4527,6 +4733,78 @@ class BF_Demande extends BimpObject
                 $errors = $this->update($warnings, true);
                 $this->checkIsClosed();
             }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionReviewDemandeFinancement($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $review_elements = (int) BimpTools::getArrayValueFromPath($data, 'review_elements', 1);
+        $review_demande_refin = (int) BimpTools::getArrayValueFromPath($data, 'review_demande_refin', 1);
+        $review_devis = (int) BimpTools::getArrayValueFromPath($data, 'review_devis', 1);
+        $review_contrat = (int) BimpTools::getArrayValueFromPath($data, 'review_contrat', 1);
+        $review_pvr = (int) BimpTools::getArrayValueFromPath($data, 'review_pvr', 1);
+
+        if ((int) $this->getData('pvr_status') >= self::DOC_GENERATED && ($review_pvr || $review_contrat || $review_devis || $review_demande_refin || $review_elements)) {
+            $pvr_errors = $this->reviewDocFin('pvr');
+
+            if (count($pvr_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($pvr_errors, 'Echec de la mise en révision du PV de réception');
+            } else {
+                $success = 'Mise en révision du PVR effectuée';
+            }
+        }
+
+        if ((int) $this->getData('contrat_status') >= self::DOC_GENERATED && ($review_contrat || $review_devis || $review_demande_refin || $review_elements)) {
+            $contrat_errors = $this->reviewDocFin('contrat');
+
+            if (count($contrat_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($contrat_errors, 'Echec de la mise en révision du contrat');
+            } else {
+                $success = 'Mise en révision du contrat effectuée';
+            }
+        }
+
+        if (!count($errors) && (int) $this->getData('devis_status') >= self::DOC_GENERATED && ($review_devis || $review_demande_refin || $review_elements)) {
+            $devis_errors = $this->reviewDocFin('devis');
+
+            if (count($devis_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($devis_errors, 'Echec de la mise en révision du devis');
+            } else {
+                $success .= ($success ? '<br/>' : '') . 'Mise en révision du devis effectuée';
+            }
+        }
+
+        if (!count($errors) && (int) $this->getData('status') >= self::STATUS_ACCEPTED && ($review_demande_refin || $review_elements)) {
+            $df_errors = $this->reviewDemandeRefin();
+
+            if (count($df_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($df_errors, 'Echec de la mise en révision de la demande refinanceur');
+            } else {
+                $success .= ($success ? '<br/>' : '') . 'Mise en révision de la demande refinanceur effectuée';
+            }
+        }
+
+        if (!count($errors) && (int) $this->getData('status') >= self::STATUS_VALIDATED && ($review_elements)) {
+            $elements_errors = $this->setNewStatus(self::STATUS_DRAFT);
+
+            if (count($elements_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($elements_errors, 'Echec de la mise en révision des élements financés (remise en brouillon de la demande)');
+            } else {
+                $success .= ($success ? '<br/>' : '') . 'Mise en révision des éléments financés effectuée';
+            }
+        }
+
+        if (!count($errors) && !$success) {
+            $warnings[] = 'Aucune mise en révision effectuée';
         }
 
         return array(

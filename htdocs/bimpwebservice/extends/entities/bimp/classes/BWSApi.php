@@ -51,6 +51,17 @@ BWSApi::$requests['setDocFinancementStatus'] = array(
     )
 );
 
+BWSApi::$requests['reviewDocFinancement'] = array(
+    'desc'   => 'Mise en révision d\'un document de location ',
+    'params' => array(
+        'demande_target' => array('label' => 'Destinataire de la demande de location', 'required' => 1),
+        'id_demande'     => array('label' => 'ID demande de location', 'data_type' => 'id', 'required' => 1),
+        'type_origine'   => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+        'id_origine'     => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+        'doc_type'       => array('label' => 'Type de document')
+    )
+);
+
 BWSApi::$requests['reopenDemandeFinancement'] = array(
     'demande_target' => array('label' => 'Destinataire de la demande de location', 'required' => 1),
     'id_demande'     => array('label' => 'ID demande de location', 'data_type' => 'id', 'required' => 1),
@@ -64,6 +75,8 @@ BWSApi::$requests['getContractInfo'] = array(
     'ref_cli'      => array('label' => 'Code client', 'required' => 0), 
     'prod'      => array('label' => 'Ref produit', 'required' => 0),
 );
+
+
 
 class BWSApi_ExtEntity extends BWSApi
 {
@@ -199,6 +212,41 @@ class BWSApi_ExtEntity extends BWSApi
                     $this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
                 } else {
                     $errors = $bcdf->setDocFinStatus($this->getParam('doc_type', '') . '_fin', (int) $this->getParam('status', ''));
+
+                    if (count($errors)) {
+                        $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                    }
+                }
+            }
+        }
+
+        return $response;
+    }
+    
+    protected function wsRequest_reviewDocFinancement()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $bcdf_class = '';
+            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+            $origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
+
+            if (!BimpObject::objectLoaded($origine)) {
+                $this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
+            } else {
+                $bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
+                            'obj_module' => $origine->module,
+                            'obj_name'   => $origine->object_name,
+                            'id_obj'     => $origine->id,
+                            'target'     => $this->getParam('demande_target', ''),
+                            'id_ext_df'  => (int) $this->getParam('id_demande', 0)
+                ));
+
+                if (!BimpObject::objectLoaded($bcdf)) {
+                    $this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
+                } else {
+                    $errors = $bcdf->reviewDocFin($this->getParam('doc_type', '').'_fin');
 
                     if (count($errors)) {
                         $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));

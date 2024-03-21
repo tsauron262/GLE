@@ -5828,7 +5828,7 @@ class BCT_ContratLine extends BimpObject
                         'fk_contrat'                   => $this->getData('fk_contrat'),
                         'fk_product'                   => $prod->id,
                         'label'                        => $this->getData('label'),
-                        'statut'                       => ($options['id_propal'] >= 0 ? self::STATUS_ATT_PROPAL : 0),
+                        'statut'                       => ($id_propal >= 0 ? self::STATUS_ATT_PROPAL : 0),
                         'line_type'                    => BCT_ContratLine::TYPE_ABO,
                         'description'                  => $this->getData('description'),
                         'product_type'                 => $this->getData('product_type'),

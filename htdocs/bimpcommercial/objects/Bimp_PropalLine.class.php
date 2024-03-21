@@ -32,7 +32,7 @@ class Bimp_PropalLine extends ObjectLine
 
     // Getters booléens :
 
-    public function isDeletable($force_delete = false, &$errors = array()): int
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if ($this->getData('linked_object_name') == 'discount')
             return 1;

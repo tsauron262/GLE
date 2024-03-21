@@ -1514,7 +1514,7 @@ class BimpSignature extends BimpObject
             $s_err = $signataire->cancelSignature();
 
             if (count($s_err)) {
-                $warnings[] = BimpTools::getMsgFromArray($s_err, 'Echec annulation pour le signataire "' . $signataire->getName() . '"');
+                $errors[] = BimpTools::getMsgFromArray($s_err, 'Echec annulation pour le signataire "' . $signataire->getName() . '"');
             }
         }
 

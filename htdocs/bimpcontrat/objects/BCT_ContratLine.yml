@@ -641,7 +641,7 @@ forms:
         title: Ajout / retrait d\'unité
         rows: 
             - custom: 1
-              label: Ajouter le renouvellement à un devis
+              label: Ajouter à un devis
               input_name: id_propal
               input: 
                   type: select

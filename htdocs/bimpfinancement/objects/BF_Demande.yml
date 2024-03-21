@@ -614,6 +614,63 @@ forms:
                   type: textarea
                   rows: 3
                   auto_expand: 1
+                  
+    review: 
+        title: Mise en révision de la demande de financement
+        rows: 
+            elements: 
+                custom: 1
+                label: Réviser les éléments financés
+                input_name: review_elements
+                content: 
+                    callback: 
+                        method: renderReviewFormInput
+                        params: 
+                            - review_elements
+                            
+            demande_refin: 
+                custom: 1
+                label: Réviser la demande refinanceur
+                input_name: review_demande_refin
+                content: 
+                    callback: 
+                        method: renderReviewFormInput
+                        params: 
+                            - review_demande_refin
+                depends_on: review_elements
+                            
+            devis: 
+                custom: 1
+                label: Réviser le devis
+                input_name: review_devis
+                content: 
+                    callback: 
+                        method: renderReviewFormInput
+                        params: 
+                            - review_devis
+                depends_on: review_demande_refin
+                            
+            contrat:
+                custom: 1
+                label: Réviser le contrat
+                input_name: review_contrat
+                content: 
+                    callback: 
+                        method: renderReviewFormInput
+                        params: 
+                            - review_contrat
+                depends_on: review_devis
+                
+            pvr:
+                custom: 1
+                label: Réviser le PV de réception
+                input_name: review_pvr
+                content: 
+                    callback: 
+                        method: renderReviewFormInput
+                        params: 
+                            - review_pvr
+                depends_on: review_contrat
                 
     create_signature: 
         title: Création de la signature

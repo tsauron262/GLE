@@ -663,18 +663,48 @@ class BF_DemandeSource extends BimpObject
             $api = $this->getAPI($errors);
 
             if (!count($errors)) {
-                $req_errors = array();                
+                $req_errors = array();
                 $id_demande = 0;
                 if ((int) $this->getData('id_init_demande')) {
                     $id_demande = (int) $this->getData('id_init_demande');
                 } else {
                     $id_demande = (int) $this->getData('id_demande');
                 }
-                
+
                 $api->setDocFinancementStatus($id_demande, $type_origine, $id_origine, $doc_type, BimpCommDemandeFin::DOC_STATUS_ACCEPTED, $req_errors);
 
                 if (count($req_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de l\'enregistrement du status signé sur ' . $this->displayName());
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function reviewDocFin($doc_type)
+    {
+        $errors = array();
+
+        $type_origine = $this->getData('type_origine');
+        $id_origine = (int) $this->getData('id_origine');
+
+        if ($type_origine && $id_origine) {
+            $api = $this->getAPI($errors);
+
+            if (!count($errors)) {
+                $req_errors = array();
+                $id_demande = 0;
+                if ((int) $this->getData('id_init_demande')) {
+                    $id_demande = (int) $this->getData('id_init_demande');
+                } else {
+                    $id_demande = (int) $this->getData('id_demande');
+                }
+
+                $api->reviewDocFin($id_demande, $type_origine, $id_origine, $doc_type, $req_errors);
+
+                if (count($req_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de l\'annulation du ' . $doc_type . ' sur ' . $this->displayName());
                 }
             }
         }

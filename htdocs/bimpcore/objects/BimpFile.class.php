@@ -199,7 +199,7 @@ class BimpFile extends BimpObject
 //                }
 //                break;
             }
-            
+
             switch ($this->getData('file_ext')) {
                 case 'jpg':
                 case 'jpeg':
@@ -217,30 +217,32 @@ class BimpFile extends BimpObject
         }
         return $buttons;
     }
-    
-    public function actionResize($data, &$success = ''){
+
+    public function actionResize($data, &$success = '')
+    {
         $success = 'Fichier redimesionné';
         $this->resize($data['new_size']);
-        return array('errors'=>array(), 'warnings'=>array());
+        return array('errors' => array(), 'warnings' => array());
     }
-    
-    public function resize($sizeMo){
+
+    public function resize($sizeMo)
+    {
         $dir = $this->getFileDir();
-        $file = (string) $this->getData('file_name').'.'.(string) $this->getData('file_ext');
+        $file = (string) $this->getData('file_name') . '.' . (string) $this->getData('file_ext');
         // Charger l'image à partir du fichier
-        if(!is_file($dir.'old_'.$file) && (stripos((string) $this->getData('file_ext'), 'jpg') !== false || stripos((string) $this->getData('file_ext'), 'jpeg') !== false)){
+        if (!is_file($dir . 'old_' . $file) && (stripos((string) $this->getData('file_ext'), 'jpg') !== false || stripos((string) $this->getData('file_ext'), 'jpeg') !== false)) {
             $max_size = 1024 * 1024 * $sizeMo;
-            $image_size = filesize($dir.$file);
-            if($image_size > $max_size){
-                copy($dir.$file, $dir.'old_'.$file);
-                $image = imagecreatefromjpeg($dir.$file);
+            $image_size = filesize($dir . $file);
+            if ($image_size > $max_size) {
+                copy($dir . $file, $dir . 'old_' . $file);
+                $image = imagecreatefromjpeg($dir . $file);
                 $ratio = round($max_size / $image_size * 100);
 //                if($ratio > 90)
 //                    $ratio = 90;
 //                die($ratio.'pp');
-                imagejpeg($image, $dir.$file, $ratio);
+                imagejpeg($image, $dir . $file, $ratio);
                 clearstatcache();
-                $this->updateField('file_size', filesize($dir.$file));
+                $this->updateField('file_size', filesize($dir . $file));
             }
         }
     }
@@ -335,27 +337,28 @@ class BimpFile extends BimpObject
 
         return '';
     }
-    
-    public function display_size(){
+
+    public function display_size()
+    {
         $unite = "o";
         $size = $this->getData('file_size');
-        if($size > 1024){
+        if ($size > 1024) {
             $size = $size / 1024;
             $unite = "Ko";
         }
-        if($size > 1024){
+        if ($size > 1024) {
             $size = $size / 1024;
             $unite = "Mo";
         }
-        if($size > 1024){
+        if ($size > 1024) {
             $size = $size / 1024;
             $unite = "Go";
         }
-        if($size > 1024){
+        if ($size > 1024) {
             $size = $size / 1024;
             $unite = "To";
         }
-        return round($size,2) .' '. $unite;
+        return round($size, 2) . ' ' . $unite;
     }
 
     public function displayAnonymizedFiles($bc_list)
@@ -742,13 +745,13 @@ class BimpFile extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
-        
+
         $name = (string) $this->getData('file_name');
         $files = BimpTools::getPostFieldValue($this->htmlName, array());
 
         if (!$name) {
             $name = BimpTools::cleanStringForUrl(pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_FILENAME));
-            if(!$name)
+            if (!$name)
                 $name = $files[0];
 
             if (!$name) {
@@ -759,7 +762,7 @@ class BimpFile extends BimpObject
         }
 
         $this->set('file_name', $name);
-        
+
         if (!isset($_FILES[$this->htmlName]) || empty($_FILES[$this->htmlName])) {
             /* nouvelle méthod */
             if (empty($files)) {
@@ -768,8 +771,8 @@ class BimpFile extends BimpObject
                 $files_dir = $this->getFileDir();
                 $ext = pathinfo($files[0], PATHINFO_EXTENSION);
                 $this->set('file_ext', $ext);
-                BimpTools::moveTmpFiles($warnings, $files, $files_dir,$name.'.'.$ext);
-                $this->set('file_size', filesize($files_dir.'/'.$name.'.'.$ext));
+                BimpTools::moveTmpFiles($warnings, $files, $files_dir, $name . '.' . $ext);
+                $this->set('file_size', filesize($files_dir . '/' . $name . '.' . $ext));
                 if (!count($errors)) {
                     $errors = parent::create($warnings, $force_create);
                 }
@@ -818,10 +821,9 @@ class BimpFile extends BimpObject
                         $dir = $this->getFileDir();
                         $ext = $this->getData('file_ext');
                         if (file_exists($dir . $current_name . '.' . $ext)) {
-                            if(isset($this->true_delete) && $this->true_delete) {
+                            if (isset($this->true_delete) && $this->true_delete) {
                                 BimpCore::addlog('Fichier en true delete qui existe sur le serveur...', 4);
-                            }
-                            elseif ($error = BimpTools::renameFile($dir, $current_name . '.' . $ext, $new_name . '.' . $ext)) {
+                            } elseif ($error = BimpTools::renameFile($dir, $current_name . '.' . $ext, $new_name . '.' . $ext)) {
                                 return array($error);
                             }
                         }
@@ -869,9 +871,9 @@ class BimpFile extends BimpObject
             $file = $this->getData('file_name') . '.' . $this->getData('file_ext');
 
             /* géré dans update
-            if (file_exists($dir . $file)) {
-                BimpTools::renameFile($dir, $file, $this->getData('file_name') . '_' . $this->id . '_deleted.' . $this->getData('file_ext'));
-            }*/
+              if (file_exists($dir . $file)) {
+              BimpTools::renameFile($dir, $file, $this->getData('file_name') . '_' . $this->id . '_deleted.' . $this->getData('file_ext'));
+              } */
 
             $parent = $this->getParentInstance();
 

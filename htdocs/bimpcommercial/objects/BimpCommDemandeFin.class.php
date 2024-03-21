@@ -80,7 +80,7 @@ class BimpCommDemandeFin extends BimpObject
             $errors[] = 'Demande de location refusée ou annulée';
             return 0;
         }
-        
+
         switch ($action) {
             case 'createDemandeFinancement':
                 if ($this->isLoaded()) {
@@ -109,7 +109,7 @@ class BimpCommDemandeFin extends BimpObject
                     $errors[] = 'Aucun devis de location n\'a encore été reçu';
                     return 0;
                 }
-                
+
                 if ((int) $this->getData('id_signature_devis_fin')) {
                     if ($action == 'createDevisFinSignature') {
                         $errors[] = 'La fiche signature du devis de location existe déjà';
@@ -1094,6 +1094,84 @@ class BimpCommDemandeFin extends BimpObject
                             }
                         }
                     }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function reviewDocFin($doc_type)
+    {
+        $errors = array();
+        $warnings = array();
+
+        if ($this->isLoaded($errors)) {
+            if (!in_array($doc_type, array('devis_fin', 'contrat_fin', 'pvr_fin'))) {
+                $errors[] = 'Type de document invalide';
+            } else {
+                $parent = $this->getParentInstance();
+
+                if ((int) $this->getData('id_signature_' . $doc_type)) {
+                    $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature_' . $doc_type));
+
+                    if (BimpObject::objectLoaded($signature)) {
+                        $signature_errors = $signature->cancelAllSignatures($warnings, 'Document mis en révision');
+
+                        if (count($errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de l\'annulation de la signature');
+                        } else {
+                            $this->set('id_signature_' . $doc_type, 0);
+                        }
+                    }
+                }
+
+                if (!count($errors)) {
+                    $this->set($doc_type . '_status', self::DOC_STATUS_NONE);
+                    $errors = $this->update($warnings, true);
+
+                    if (!count($errors)) {
+                        // suppr des fichiers pdf
+                        if (BimpObject::objectLoaded($parent)) {
+                            $files_names = array(
+                                $this->getSignatureDocFileName($doc_type, true)
+                            );
+
+                            if ($doc_type === 'devis_fin') {
+                                $files = $this->getDevisFilesArray();
+                                foreach ($files as $f) {
+                                    $files_names[] = $f;
+                                }
+                            } else {
+                                $files_names[] = $this->getSignatureDocFileName($doc_type);
+                            }
+
+                            foreach ($files_names as $file_name) {
+                                $file_infos = pathinfo($file_name);
+                                $file = BimpCache::findBimpObjectInstance('bimpcore', 'BimpFile', array(
+                                            'parent_module'      => $parent->module,
+                                            'parent_object_name' => $parent->object_name,
+                                            'id_parent'          => $parent->id,
+                                            'file_name'          => $file_infos['filename'],
+                                            'file_ext'           => $file_infos['extension']
+                                                ), true);
+
+                                if (BimpObject::objectLoaded($file)) {
+                                    $err = $file->delete($warnings, true);
+
+                                    if (count($err)) {
+                                        $errors[] = 'Echec suppr. fichier #' . $file->id . ' : <pre>' . print_r($err, 1) . '</pre>';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!count($errors)) {
+                if (BimpObject::objectLoaded($parent)) {
+                    $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' mis en révision', strtoupper($doc_type) . '_REVIEWED');
                 }
             }
         }

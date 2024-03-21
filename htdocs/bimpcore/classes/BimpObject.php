@@ -5362,7 +5362,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         // Log changement de statut
                         if ($status_prop && (int) $this->params['new_status_logs']) {
                             if ($init_status != $this->getData($status_prop)) {
-                                $this->addObjectLog('Mise au statut: ' . $this->displayData($status_prop, 'default', false, true), 'NEW_STATUS_' . $this->getData($status_prop));
+                                $this->addObjectLog('Mise au statut: "' . strip_tags($this->displayData($status_prop, 'default', false, false, true)) . '"', 'NEW_STATUS_' . $this->getData($status_prop));
                             }
                         }
 

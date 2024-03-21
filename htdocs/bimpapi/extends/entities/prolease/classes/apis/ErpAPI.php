@@ -19,6 +19,9 @@ ErpApi::$requests['sendDocFinancement'] = array(
 ErpApi::$requests['setDocFinancementStatus'] = array(
     'label' => 'Définir le statut du document d\'une demande de location'
 );
+ErpApi::$requests['reviewDocFinancement'] = array(
+    'label' => 'Mise en révision d\'un document de location'
+);
 
 class ErpAPI_ExtEntity extends ErpAPI
 {
@@ -137,6 +140,29 @@ class ErpAPI_ExtEntity extends ErpAPI
                 'id_origine'     => $id_origine,
                 'doc_type'       => $doc_type,
                 'status'         => $new_status
+            )), $errors);
+
+        if (isset($response['warnings'])) {
+            $warnings = BimpTools::merge_array($warnings, $response['warnings']);
+            unset($response['warnings']);
+        }
+
+        if (!count($errors)) {
+            return $response;
+        }
+
+        return null;
+    }
+
+    public function reviewDocFin($id_demande, $type_origine, $id_origine, $doc_type, &$errors = array(), &$warnings = array())
+    {
+        $response = $this->execCurl('reviewDocFinancement', array(
+            'fields' => array(
+                'demande_target' => 'prolease',
+                'id_demande'     => $id_demande,
+                'type_origine'   => $type_origine,
+                'id_origine'     => $id_origine,
+                'doc_type'       => $doc_type,
             )), $errors);
 
         if (isset($response['warnings'])) {

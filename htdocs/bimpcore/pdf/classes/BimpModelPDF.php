@@ -447,7 +447,7 @@ Abstract class BimpModelPDF
     public function getFilePath()
     {
         global $conf;
-
+        
         $path = DOL_DATA_ROOT . "/divers/";
 
         $nObj = $this->typeObject;
@@ -460,7 +460,9 @@ Abstract class BimpModelPDF
                 $path .= $nObj . "/";
         }
         if (is_object($objConf)) {
-            if (isset($objConf->dir_output))
+            if (isset($this->object) && isset($this->object->entity) && isset($objConf->multidir_output[$this->object->entity]))
+                $path = $objConf->multidir_output[$this->object->entity] . "/";
+            elseif (isset($objConf->dir_output))
                 $path = $objConf->dir_output . "/";
         }
 
@@ -468,7 +470,7 @@ Abstract class BimpModelPDF
             $path .= dol_sanitizeFileName($this->object->ref) . "/";
         if (!is_dir($path))
             dol_mkdir($path);
-
+        
         return $path;
     }
 

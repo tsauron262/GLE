@@ -27,6 +27,17 @@ if (!$user->admin) {
     exit;
 }
 
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/CepaPDF_new.php';
+$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 454033);
+
+$pdf = new CepaPDF($db);
+$pdf->client = $client;
+$pdf->render(DOL_DOCUMENT_ROOT . '/bimpcore/cepa_test2.pdf', 'F');
+
+echo '<script>window.open(\'' . DOL_URL_ROOT . '/bimpcore/cepa_test2.pdf\')</script>';
+
+
+
 //CREATE TABLE `llx_bimp_test` (
 //  `id` int(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
 //  `base1` varchar(255) NOT NULL DEFAULT '',

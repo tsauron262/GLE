@@ -291,6 +291,32 @@ Abstract class BimpModelPDF
         return $html;
     }
 
+    public function getLogoHtml()
+    {
+        $html = '';
+
+        global $conf;
+
+        $logo_file = $conf->mycompany->dir_output . '/logos/' . str_replace('.png', '_PRO.png', $this->fromCompany->logo);
+        if (!file_exists($logo_file)) {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        }
+        if (file_exists($logo_file)) {
+            $sizes = dol_getImageSize($logo_file, false);
+
+            $tabTaille = $this->calculeWidthHeightLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
+
+            $logo_width = $tabTaille[0];
+            $logo_height = $tabTaille[1];
+
+            $html .= '<img src="' . $logo_file . '" width="' . $logo_width . '" height="' . $logo_height . '"/>';
+            
+            
+        }
+
+        return $html;
+    }
+
     public function getSenderInfosHtml()
     {
         $html = '<br/><span style="font-size: 11px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
@@ -301,7 +327,7 @@ Abstract class BimpModelPDF
         $html .= '</span>';
         $html .= '<span style="color: #' . $this->primary . '; font-size: 7px;"><br/>';
         if ($this->fromCompany->url) {
-            $html .= $this->fromCompany->url . ($this->fromCompany->email ? ((strlen($this->fromCompany->url) > 30)? '<br/>' : ' - ') : '');
+            $html .= $this->fromCompany->url . ($this->fromCompany->email ? ((strlen($this->fromCompany->url) > 30) ? '<br/>' : ' - ') : '');
         }
         if ($this->fromCompany->email) {
             $html .= $this->fromCompany->email;

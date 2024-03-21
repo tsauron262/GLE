@@ -173,6 +173,10 @@ params:
         label: reply_to par défaut pour les e-mails publics
         cat: emails
         def: ''
+    email_facturation:
+        label: Adresse e-mail facturation
+        cat: emails
+        required: 1
     email_compta: 
         label: Adresse e-mail service comptabilité
         cat: emails
@@ -194,6 +198,11 @@ params:
         label: Email groupe achat
         cat: emails
         def: ''
+    email_dpo: 
+        label: Adresse e-mail DPO
+        cat: emails
+        def: ''
+        required: 1
         
     # Produits
     use_valid_product: 
@@ -358,6 +367,7 @@ params:
                       
     code_ics:
         label: Code ICS pour les RUM
+        required: 1
     extends_entity:
         label: Extend Entitée 
         required: 1

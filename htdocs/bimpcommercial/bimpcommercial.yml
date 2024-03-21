@@ -147,6 +147,9 @@ params:
         type: bool
         def: 0
         info: 'Ajoute la mention "NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus"'
+    sepa_date_prelevement: 
+        label: Mention "Date de prélèvement" dans les mandats SEPA
+        def: 30 jours net date de facture
     
     # Relances: 
     use_relances_paiements_clients: 

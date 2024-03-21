@@ -10,11 +10,13 @@ class CepaPDF extends BimpModelPDF
 
     public static $type = 'societe';
     public static $include_logo = true;
+    public $maxLogoHeight = 30; // px
     public $client = null;
+    
 
     protected function initData()
     {
-        $this->pdf->topMargin = 0;
+        $this->pdf->topMargin = 10;
     }
 
     protected function renderContent()

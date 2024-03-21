@@ -583,7 +583,7 @@ class Bimp_PropalLine extends ObjectLine
 
                             $html .= ' <span style="font-style: italic">(';
 
-                            if ($prod_duration && $periodicity != $prod_duration) {
+                            if ($prod_duration) {
                                 $nb_prod_periods = $periodicity / $prod_duration;
                                 $html .= 'soit au total <b>' . BimpTools::displayFloatValue($nb_units, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods != 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 4, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . ' ';
                             }

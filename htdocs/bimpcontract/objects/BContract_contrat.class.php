@@ -32,7 +32,6 @@ class BContract_contrat extends BimpDolObject
     //public $redirectMode = 4;
     public static $email_type = 'contract';
     public $email_group = "";
-    public $email_facturation = "";
     public static $element_name = "contrat";
     public static $dol_module = 'contrat';
     public static $files_module_part = 'contract';
@@ -192,7 +191,6 @@ class BContract_contrat extends BimpDolObject
     {
         $this->redirectMode = 4;
         $this->email_group = BimpCore::getConf('email_groupe', '', 'bimpcontract');
-        $this->email_facturation = BimpCore::getConf('email_facturation', '', 'bimpcontract');
 
         return parent::__construct($module, $object_name);
     }
@@ -3587,7 +3585,7 @@ class BContract_contrat extends BimpDolObject
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
                 if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
-                    $this->mail($this->email_facturation, self::MAIL_ACTIVATION, $commercial->getData('email'));
+                    $this->mail(BimpCore::getConf('email_facturation', null, 'bimpcore'), self::MAIL_ACTIVATION, $commercial->getData('email'));
                 } else {
                     $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
                 }
@@ -4534,7 +4532,7 @@ class BContract_contrat extends BimpDolObject
                             $msg .= "Client : " . $s->dol_object->getNomUrl() . '<br />';
                             $msg .= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : " . $comm->getNomUrl() . "<br />";
                             $msg .= "Facture : " . $f->dol_object->getNomUrl();
-                            mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", $this->email_facturation, BimpCore::getConf('devs_email'), $msg);
+                            mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", BimpCore::getConf('email_facturation', null, 'bimpcore'), BimpCore::getConf('devs_email'), $msg);
                             $success .= ($success ? '<br/>' : '') . "Le contrat " . $contrat->getRef() . " facturé avec succès";
                         }
                     }

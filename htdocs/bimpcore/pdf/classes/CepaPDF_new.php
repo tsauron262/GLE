@@ -10,8 +10,6 @@ class CepaPDF extends BimpModelPDF
 
     public static $type = 'societe';
     public static $include_logo = true;
-    public $rectif_email = 'dpo@bimp.fr';
-    public $date_prelevement = '30 jours net date de facture';
     public $client = null;
 
     protected function initData()

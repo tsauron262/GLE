@@ -4044,7 +4044,7 @@ class BimpObject extends BimpCache
             $filters['entity'] = $this->getEntitysArray();
             return 1;
         } else {
-            $parent = $this->getParentInstance();
+            $parent = $this->getNonFetchParent();
             if (get_class($parent) != 'BimpObject') {
                 $joins[$aliasParent] = array("alias" => $aliasParent, 'table' => $parent->getTable(), 'on' => $alias . '.' . $this->getParentIdProperty() . ' = ' . $aliasParent . '.' . $parent->getPrimary());
                 if ($parent->getEntity_name()) {

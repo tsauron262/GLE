@@ -23,12 +23,12 @@ class CepaPDF extends BimpModelPDF
         $this->typeObject = 'societe';
 
         $this->propal = new Propal($db);
+        
+        $this->pdf->topMargin = 10;
     }
 
-    protected function initData()
+    public function initData()
     {
-        $this->pdf->topMargin = 10;
-
         if (!BimpObject::objectLoaded($this->client) && BimpObject::objectLoaded($this->object)) {
             $this->client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->object->id);
         }

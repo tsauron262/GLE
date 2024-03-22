@@ -503,7 +503,7 @@ class BT_ficheInter extends BimpDolObject
     {
         $buttons = array();
 
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') === self::STATUT_BROUILLON) {
+        if ($this->isLoaded() /*&& (int) $this->getData('fk_statut') === self::STATUT_BROUILLON*/) {
             $buttons[] = array(
                 'label'   => 'Editer les objets liés',
                 'icon'    => 'fas_edit',

@@ -381,6 +381,28 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
+    public function getEntityFilter(&$joins, &$filters, $alias = 'a', $aliasParent = 'parent')
+    {
+        if (strlen($aliasParent) > 100)
+            die($aliasParent);
+        if ($this->getEntity_name()) {
+            $filters['entity'] = $this->getEntitysArray();
+            return 1;
+        } else {
+            $parent = $this->getNonFetchParent();
+            if (get_class($parent) != 'BimpObject') {
+                $joins[$aliasParent] = array("alias" => $aliasParent, 'table' => $parent->getTable(), 'on' => $alias . '.' . $this->getParentIdProperty() . ' = ' . $aliasParent . '.' . $parent->getPrimary());
+                if ($parent->getEntity_name()) {
+                    $filters[$aliasParent . '.entity'] = $parent->getEntitysArray();
+                    return 1;
+                } else {
+                    return $parent->getEntityFilter($joins, $filters, $aliasParent, $aliasParent .= '_parent');
+                }
+            }
+        }
+        return 0;
+    }
+
     public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false, $force_delete = false)
     {
         $instance = BimpObject::getInstance($module, $object_name);
@@ -395,6 +417,8 @@ class BimpCache
             if ($instance->isDolObject()) {
                 $filters = $instance->checkSqlFilters($filters, $joins, 'a');
             }
+            
+            $this->getEntityFilter($joins, $filters);
 
             $sql = BimpTools::getSqlSelect('a.' . $primary);
             $sql .= BimpTools::getSqlFrom($table, $joins);

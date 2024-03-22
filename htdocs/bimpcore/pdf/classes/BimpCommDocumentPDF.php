@@ -1009,7 +1009,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                                 }
                                 $row['qte'] = 1;
                             } elseif ($row['qte'] < 0) {
-                                $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1), '', 0, 0, 1, $modeDecimal);
+                                $row['pu_ht'] = BimpTools::displayMoneyValue((float) str_replace(",", ".", $row['pu_ht']) * ((float) $row['qte'] * -1), '', 0, 0, 1, $modeDecimal);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
                                 if (isset($row['pu_remise'])) {

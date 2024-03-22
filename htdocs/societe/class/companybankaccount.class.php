@@ -150,7 +150,6 @@ class CompanyBankAccount extends Account
 	 */
 	public function update(User $user = null, $notrigger = 0)
 	{
-            die('Test en cours. Désolé.');
 		global $conf;
 
 		$error = 0;
@@ -158,6 +157,7 @@ class CompanyBankAccount extends Account
 		if (!$this->id) {
 			return -1;
 		}
+            die('Test en cours 2. Désolé.');
 
 		if (dol_strlen($this->domiciliation) > 255) {
 			$this->domiciliation = dol_trunc($this->domiciliation, 254, 'right', 'UTF-8', 1);

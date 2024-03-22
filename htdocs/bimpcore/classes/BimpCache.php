@@ -1931,17 +1931,17 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getSocieteRibsArray($id_societe, $include_empty = false)
+    public static function getSocieteRibsArray($id_societe, $include_empty = false, $entity = 1)
     {
         if (!(int) $id_societe) {
             return ($include_empty ? array(0 => '') : array());
         }
 
-        $key = 'societe_' . $id_societe . '_ribs_array';
+        $key = 'societe_' . $id_societe . '_ribs_array_'.$entity;
 
         if (!isset(self::$cache[$key])) {
             self::$cache[$key] = array();
-            $result = self::getBdb()->getRows('societe_rib', '`fk_soc` =' . $id_societe, null, 'object', null, 'default_rib', 'DESC');
+            $result = self::getBdb()->getRows('societe_rib', '`fk_soc` =' . $id_societe . ' AND entity = '.$entity, null, 'object', null, 'default_rib', 'DESC');
 
             foreach ($result as $row) {
                 if ($row->default_rib) {

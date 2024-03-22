@@ -47,6 +47,7 @@ Abstract class BimpModelPDF
     public $prefName = "";
 
     # Données:
+    public $file_name = '';
     private $isInit = false;
     public $errors = array();
 
@@ -113,10 +114,6 @@ Abstract class BimpModelPDF
 
     public function render($file_name, $display, $display_only = false)
     {
-        if (!$this->isInit) {
-            $this->init(null);
-        }
-
         if (count($this->errors)) {
             setEventMessages('Probléme génération PDF', $this->errors, 'errors');
             return 0;
@@ -310,8 +307,6 @@ Abstract class BimpModelPDF
             $logo_height = $tabTaille[1];
 
             $html .= '<img src="' . $logo_file . '" width="' . $logo_width . '" height="' . $logo_height . '"/>';
-            
-            
         }
 
         return $html;

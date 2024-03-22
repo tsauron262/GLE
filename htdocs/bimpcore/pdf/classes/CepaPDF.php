@@ -10,82 +10,252 @@ class CepaPDF extends BimpModelPDF
 {
 
     public static $type = 'societe';
+    public $mode = "normal";
+    public static $include_logo = true;
+    public $maxLogoHeight = 30; // px
+    public $client = null;
     public $propal = null;
     public $rib = null;
-    public $mode = "normal";
-    public $signature_bloc = true;
-    public $signature_bloc_label = 'Bon pour commande';
-    public $pdf2 = null;
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
         parent::__construct($db, $orientation = 'P', $format = 'A4');
-
-        $this->langs->load("bills");
-        $this->langs->load("propal");
-        $this->langs->load("products");
-
         $this->typeObject = 'societe';
 
         $this->propal = new Propal($db);
-//        $this->pdf2 = new BimpPDF($orientation, $format);
-        $this->pdf2 = pdf_getInstance($format);
     }
 
     protected function initData()
     {
-        require_once DOL_DOCUMENT_ROOT . '/includes/tcpdi/tcpdi.php';
-        require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/fpdf2.php';
-        require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/autoload.php';
-        $this->pdf2->addPage();
-        $this->pdf2->SetFont('Times');
+        $this->pdf->topMargin = 10;
 
-        $file_path = BimpCore::requireFileForEntity('bimpcore', 'pdf/docs_sources/SEPA.pdf', true);
+        if (!BimpObject::objectLoaded($this->client) && BimpObject::objectLoaded($this->object)) {
+            $this->client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->object->id);
+        }
 
-        if (!$file_path || !file_exists($file_path)) {
-            $this->errors[] = 'Fichier source "SEPA.pdf" absent';
-        } else {
-            $pagecountTpl = $this->pdf2->setSourceFile($file_path);
-            $tplidx = $this->pdf2->importPage(1, "/MediaBox");
-            $this->pdf2->useTemplate($tplidx, 0, 0, 0, 0, true);
-//        $size = $this->pdf2->getTemplateSize($tplidx);
-//        $this->pdf2->useTemplate($tplidx, null, null, $size['w'], $size['h'], true);
-
-            $soc = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $this->object->id);
-
-            $rib = $soc->getDefaultRib(true);
-
-            if (BimpObject::objectLoaded($rib)) {
-                $rum = $rib->getData('rum');
-                $file = $this->getFilePath() . $rib->getFileName();
-
-                $this->pdf2->setXY(120, 107.3);
-                $this->pdf2->Cell(70, 8, $rum, 0);
-
-                $off_x = 0;
-                $off_y = 0;
-
-                switch (BimpCore::getExtendsEntity()) {
-                    case 'actimac':
-                        $off_x = 2;
-                        $off_y = 0.7;
-                        break;
-                }
-
-                $this->pdf2->setXY(60 + $off_x, 40 + $off_y);
-                $this->pdf2->Cell(70, 8, $soc->getData('code_client'), 0);
-
-                $this->pdf2->Close();
-
-                $this->pdf2->Output($file, 'F');
-            } else {
-                $this->errors[] = 'Aucun RIB par défaut pour ce client';
-            }
+        if (BimpObject::objectLoaded($this->client)) {
+            $this->rib = $this->client->getDefaultRib(true);
         }
     }
-//    public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0) {
-//        
-//        $this->init($object);
-//        return 1;
-//    }
+
+    public function getFileName()
+    {
+        if (BimpObject::objectLoaded($this->rib)) {
+            return $this->rib->getFileName();
+        }
+
+        return parent::getFileName();
+    }
+
+    protected function renderContent()
+    {
+        global $mysoc;
+
+        $html = '';
+
+        $html .= $this->getLogoHtml();
+        $html .= '<div style="text-align: center; color: #' . $this->primary . '; font-size: 12px; font-weight: bold; line-height: 8px">MANDAT DE PRELEVEMENT SEPA</div>';
+
+        $html .= '<div style="text-align: center;font-style: italic; font-size: 9px;font-weight: normal">';
+        $html .= 'A compléter, dater, signer, accompagner d\'un RIB et envoyer par e-mail';
+
+        $email = BimpCore::getConf('email_facturation', null, 'bimpcore');
+        if ($email) {
+            $html .= ' à <br/>';
+            $html .= '<a href="mailto: ' . $email . '">' . $email . '</a>';
+        }
+        $html .= '</div>';
+
+        $html .= '<br/><br/>';
+
+        $html .= '<table style="width: 100%">';
+        $html .= '<tr>';
+        $html .= '<td width="8%"></td>';
+        $html .= '<td width="84%" style="font-size: 8px">';
+        if (BimpObject::objectLoaded($this->client)) {
+            $html .= 'Compte client : <b>' . $this->client->getRef() . '</b><br/><br/>';
+        }
+
+        $date_prelevement = BimpCore::getConf('sepa_date_prelevement', null, 'bimpcommercial');
+        if ($date_prelevement) {
+            $html .= 'Date de prélèvement : <b>' . $date_prelevement . '</b><br/><br/>';
+        }
+
+        $html .= 'En signant ce formulaire de mandat, vous autorisez la société ' . $mysoc->name . ' à envoyer des instructions à votre banque pour débiter votre compte, et votre banque à débiter votre compte conformément aux instructions de la société ' . $mysoc->name;
+        $html .= '<br/>Vous bénéficiez du droit d\'être remboursé par votre banque selon les conditions décrites dans la convention que vous avez signée avec elle.';
+        $html .= '<br/>Une demande de remboursement doit être présentée :';
+        $html .= '<ul>';
+        $html .= '<li>Dans les 8 semaines suivant la date de débit de votre compte pour un prélèvement autorisé</li>';
+        $html .= '<li>Sans tarder et au plus tard dans les 13 mois en cas de prélèvement non autorisé</li>';
+        $html .= '</ul>';
+        $html .= 'Vos droits concernant le présent mandat sont expliqués dans un document que vous pouvez obtenir auprès de votre banque.';
+
+        $html .= '<br/><br/><span style="color: #'.$this->primary.'">Référence Unique Mandat (RUM)</span>';
+
+        $rum = '';
+        if (BimpObject::objectLoaded($this->rib)) {
+            $rum = ' : <b>' . $this->rib->getData('rum') . '</b>';
+        }
+
+        if ($rum) {
+            $html .= $rum;
+        } else {
+            $html .= ' <span style="font-style: italic; font-size: 6px">(réservée au créancier)</span> : <span style="color: #CCCACA">_______________________________________________</span>';
+        }
+
+        $html .= '</td>';
+        $html .= '<td width = "8%"></td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        $html .= '<table style="width: 100%" cellpadding="10" cellspacing="10">';
+        $html .= '<tr>';
+        $html .= '<td width="50%" style="border: solid 1px #000000;">';
+        $html .= '<span style="line-height: 8px; text-align: center; color: #' . $this->primary . '">Titulaire du compte à débiter</span>';
+        $html .= '<div style="font-size: 8px; line-height: 20px">';
+        $html .= '<b>Nom et Prénom ou Société <span style="color: #' . $this->primary . '">*</span> : </b><span style="color: #CCCACA">_______________________</span>';
+        $html .= '<br/><span style="color: #CCCACA">_________________________________________________</span><br/>';
+        $html .= '<b>Adresse <span style="color: #' . $this->primary . '">*</span> : </b><span style="color: #CCCACA">_______________________________________</span>';
+        $html .= '<br/><span style="color: #CCCACA">_________________________________________________</span><br/>';
+        $html .= '<b>Code postal <span style="color: #' . $this->primary . '">*</span> : </b><span style="color: #CCCACA">___________________________________</span><br/>';
+        $html .= '<b>Ville <span style="color: #' . $this->primary . '">*</span> : </b><span style="color: #CCCACA">__________________________________________</span><br/>';
+        $html .= '<b>Pays <span style="color: #' . $this->primary . '">*</span> : </b><span style="color: #CCCACA">_________________________________________</span>';
+        $html .= '</div>';
+        $html .= '</td>';
+
+        $html .= '<td width="50%" style="border: solid 1px #000000">';
+        $html .= '<span style="color: #' . $this->primary . '">Identiifiant Créancier SEPA : </span>';
+
+        $code_ics = BimpCore::getConf('code_ics', null, 'bimpcore');
+        if ($code_ics) {
+            $html .= $code_ics;
+        }
+
+        $html .= '<div style="font-size: 8px; line-height: 20px">';
+        $html .= '<b>Société : </b>' . $mysoc->name . '<br/>';
+        $html .= '<b>Adresse : </b>' . $mysoc->address . '<br/>';
+        $html .= '<b>Code postal : </b>' . $mysoc->zip . '<br/>';
+        $html .= '<b>Ville : </b>' . $mysoc->town . '<br/>';
+        $html .= '<b>Pays : </b>' . ($mysoc->pays ? $mysoc->pays : 'France');
+
+        $html .= '</div>';
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td colspan="2" style="border: solid 1px #000000">';
+        $html .= '<span style="text-align: center; color: #' . $this->primary . ';">Compte à débiter</span><br/><br/>';
+
+        $html .= '<table cellpadding="2" style="width: 100%">';
+        $html .= '<tr>';
+        $html .= '<td width="40px">';
+        $html .= '<b>BIC <span style="color: #' . $this->primary . '">*</span></b>';
+        $html .= '</td>';
+        $html .= '<td colspan="7">';
+        $html .= $this->getBoxesHtml(11);
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td colspan="99" line-height="6px"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td width="40px">';
+        $html .= '<b>IBAN <span style="color: #' . $this->primary . '">*</span></b>';
+        $html .= '</td>';
+
+        for ($i = 1; $i <= 6; $i++) {
+            $html .= '<td width="65px">';
+            $html .= $this->getBoxesHtml(4);
+            $html .= '</td>';
+        }
+
+        $html .= '<td>';
+        $html .= $this->getBoxesHtml(3);
+        $html .= '</td>';
+
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        $html .= '<div style="color: #' . $this->primary . '; line-height: 8px; font-size: 7px; text-align: center">';
+        $html .= '<b>Veuillez compléter tous les champs (*) du mandat, joindre un RIB ou RICE, puis adresser l\'ensemble au créancier.</b>';
+        $html .= '</div>';
+
+        $html .= '<br/>';
+
+        $html .= '<table style="width: 100%" cellpadding="3" cellspacing="15">';
+        $html .= '<tr>';
+        $html .= '<td width="50%">';
+
+        $html .= '<table cellpadding="2" style="width: 100%">';
+
+        $html .= '<tr>';
+        $html .= '<td width="30px">Le <span style="color: #' . $this->primary . '">*</span> : </td>';
+        $html .= '<td>';
+        $html .= $this->getBoxesHtml(2);
+        $html .= '</td>';
+        $html .= '<td>';
+        $html .= $this->getBoxesHtml(2);
+        $html .= '</td>';
+        $html .= '<td>';
+        $html .= $this->getBoxesHtml(4);
+        $html .= '</td>';
+        $html .= '<td width="20px"></td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td colspan="99" style="line-height: 30px">&nbsp;</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td width="30px">A <span style="color: #' . $this->primary . '">*</span> : </td>';
+        $html .= '<td colspan="4" style="color: #CCCACA">_______________________________</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+        $html .= '</td>';
+
+        $html .= '<td width="50%" style="border: solid 1px #000000">';
+        $html .= '<span style="text-align: center; font-size: 7px; line-height: 8px">';
+        $html .= 'Signature du titulaire du compte à débiter <span style="color: #' . $this->primary . '">*</span>';
+        $html .= '</span>';
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        $html .= '<div style="font-size: 7px; font-style: italic">';
+        $html .= 'Les informations contenues dans le présent mandat, qui doit être complété, sont destinées à n\'être utilisées par la société ' . $mysoc->name . ',';
+        $html .= 'en sa qualité de responsable du traitement, que pour la gestion de sa relation avec son client. Les informations collectées sont ';
+        $html .= 'indispensables à cette gestion. Elles pourront donner lieu à l\'exercice par le client de ses droits d\'opposition pour des motifs ';
+        $html .= 'légitimes, d\'interrogation, d\'accès et de rectification relativement à l\'ensemble des données qui le concernent et qui s\'exercent ';
+        $html .= 'auprès de la société ' . $mysoc->name . ', par courrier électronique';
+
+        $email = BimpCore::getConf('email_dpo', null, 'bimpcore');
+        if ($email) {
+            $html .= ' à l\'adresse <a href="mailto: ' . $email . '">' . $email . '</a>';
+        }
+
+        $html .= ', accompagné d\'une copie d\'un titre d\'identité.';
+        $html .= '</div>';
+
+        $this->writeContent($html);
+    }
+
+    public function getBoxesHtml($n = 1, $size = 15)
+    {
+        $html = '';
+
+        $html .= '<table>';
+        $html .= '<tr>';
+        for ($i = 1; $i <= $n; $i++) {
+            $html .= '<td width="' . $size . 'px" height="' . $size . 'px" style="border: solid 1px #000000;, line-height: ' . $size . 'px"></td>';
+        }
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        return $html;
+    }
 }

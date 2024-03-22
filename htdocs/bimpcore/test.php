@@ -30,7 +30,7 @@ if (!$user->admin) {
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/CepaPDF_new.php';
 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 454033);
 
-$pdf = new CepaPDF($db);
+$pdf = new CepaPDFNew($db);
 $pdf->client = $client;
 $pdf->render(DOL_DOCUMENT_ROOT . '/bimpcore/cepa_test2.pdf', 'F');
 

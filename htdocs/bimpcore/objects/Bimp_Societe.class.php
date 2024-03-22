@@ -686,7 +686,7 @@ class Bimp_Societe extends BimpDolObject
         if ($createIfNotExist) {
             $rib = BimpObject::createBimpObject('bimpcore', 'Bimp_SocBankAccount', array(
                         'fk_soc'      => $this->id,
-                        'label'       => 'bdfhjdskbfkjds',
+//                        'label'       => 'bdfhjdskbfkjds',
                         'default_rib' => 1
                             ), true);
 

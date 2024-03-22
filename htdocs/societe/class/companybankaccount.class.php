@@ -188,7 +188,7 @@ class CompanyBankAccount extends Account
 			$sql .= ",label = NULL";
 		}
 		$sql .= " WHERE rowid = ".((int) $this->id);
-die("Tes ten cours. désolé.".$sql);
+                
 		$result = $this->db->query($sql);
 		if ($result) {
 			if (!$notrigger) {

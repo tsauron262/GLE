@@ -114,6 +114,10 @@ Abstract class BimpModelPDF
 
     public function render($file_name, $display, $display_only = false)
     {
+        if (!$this->isInit) {
+            $this->init(null);
+        }
+
         if (count($this->errors)) {
             setEventMessages('Probléme génération PDF', $this->errors, 'errors');
             return 0;
@@ -468,7 +472,7 @@ Abstract class BimpModelPDF
     public function getFilePath()
     {
         global $conf;
-        
+
         $path = DOL_DATA_ROOT . "/divers/";
 
         $nObj = $this->typeObject;
@@ -491,7 +495,7 @@ Abstract class BimpModelPDF
             $path .= dol_sanitizeFileName($this->object->ref) . "/";
         if (!is_dir($path))
             dol_mkdir($path);
-        
+
         return $path;
     }
 

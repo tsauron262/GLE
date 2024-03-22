@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
 ini_set('display_errors', 1);
 
-class CepaPDF extends BimpModelPDF
+class CepaPDF_Old extends BimpModelPDF
 {
 
     public static $type = 'societe';

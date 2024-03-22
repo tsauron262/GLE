@@ -999,7 +999,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
 
                     if (isset($bimpLines[$line->id])) {
-                        if ($bimpLine->getData("force_qty_1")) {
+                        if ($bimpLine->getData("force_qty_1") && (float) $row['qte'] != 0) {
                             if ($row['qte'] > 0) {
                                 $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, $modeDecimal);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];

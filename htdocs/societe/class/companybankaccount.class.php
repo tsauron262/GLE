@@ -150,6 +150,7 @@ class CompanyBankAccount extends Account
 	 */
 	public function update(User $user = null, $notrigger = 0)
 	{
+            die('Test en cours. Désolé.');
 		global $conf;
 
 		$error = 0;

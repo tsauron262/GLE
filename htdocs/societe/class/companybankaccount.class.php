@@ -157,7 +157,6 @@ class CompanyBankAccount extends Account
 		if (!$this->id) {
 			return -1;
 		}
-            die('Test en cours 2. Désolé.');
 
 		if (dol_strlen($this->domiciliation) > 255) {
 			$this->domiciliation = dol_trunc($this->domiciliation, 254, 'right', 'UTF-8', 1);
@@ -189,7 +188,7 @@ class CompanyBankAccount extends Account
 			$sql .= ",label = NULL";
 		}
 		$sql .= " WHERE rowid = ".((int) $this->id);
-
+die("Tes ten cours. désolé.".$sql);
 		$result = $this->db->query($sql);
 		if ($result) {
 			if (!$notrigger) {

@@ -222,7 +222,7 @@ class BT_ficheInter extends BimpDolObject
         if ($this->isLoaded()) {
             $status = (int) $this->getData('fk_statut');
 
-            if (in_array($field, array('fk_soc', 'fk_contrat', 'commandes', 'tickets', 'urgent', 'fk_user_tech', 'datei', 'time_from', 'time_to', 'description'))) {
+            if (in_array($field, array('fk_soc', /*'fk_contrat', 'commandes', 'tickets',*/ 'urgent', 'fk_user_tech', 'datei', 'time_from', 'time_to', 'description'))) {
                 if ($status !== self::STATUT_BROUILLON) {
                     return 0;
                 }

@@ -1,19 +1,28 @@
 <?php
 
-if (defined('') && in_array(BimpCore::getExtendsEntity(), array('bimp'))) {
-    require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/CepaPDF_new.php';
-} else {
+//if (defined('BIMP_LIB') && in_array(BimpCore::getExtendsEntity(), array('bimp'))) {
+//    require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/CepaPDF_new.php';
+//
+//    class pdf_cepa extends CepaPDFNew
+//    {
+//
+//        public function initData()
+//        {
+//            parent::initData();
+//        }
+//    }
+//
+//} else {
+//    require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/CepaPDF_old.php';
     require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/CepaPDF.php';
-}
 
-/**
- * 	Class to generate PDF proposal Azur
- */
-class pdf_cepa extends CepaPDF
-{
-
-    public function initData()
+    class pdf_cepa extends CepaPDF
     {
-        parent::initData();
+
+        public function initData()
+        {
+            parent::initData();
+        }
     }
-}
+
+//}

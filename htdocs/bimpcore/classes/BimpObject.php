@@ -6299,7 +6299,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     'Erreur SQL'    => $this->db->err(),
                     'Champs suppl.' => $bimpObjectFields,
                     'Result'        => $result,
-                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields))
+                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $where, print_r($bimpObjectFields,1)))
                 ));
             }
         }

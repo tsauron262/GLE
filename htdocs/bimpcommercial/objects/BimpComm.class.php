@@ -515,7 +515,7 @@ class BimpComm extends BimpDolObject
     {
         $client = $this->getClientFacture();
         if (BimpObject::objectLoaded($client)) {
-            return BimpCache::getSocieteRibsArray($client->id, $include_empty, $this->getData('entity'));
+            return BimpCache::getSocieteRibsArray($client->id, $include_empty, ($this->getData('entity')? $this->getData('entity') : 1));
         }
 
         return ($include_empty ? array(0 => '') : array());

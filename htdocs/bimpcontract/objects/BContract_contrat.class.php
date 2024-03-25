@@ -853,6 +853,7 @@ class BContract_contrat extends BimpDolObject
     {
         $duree_vendu = $this->getDurreeVendu();
         $dureeFi = $this->getInfosDureeFi();
+        $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
         return $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot']);
 
 //        $reste = 0;

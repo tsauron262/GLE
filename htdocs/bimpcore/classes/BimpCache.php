@@ -396,7 +396,9 @@ class BimpCache
                 $filters = $instance->checkSqlFilters($filters, $joins, 'a');
             }
             
-            $instance->getEntityFilter($joins, $filters);
+            global $conf;
+            if($conf->multicompany->enabled)
+                $instance->getEntityFilter($joins, $filters);
 
             $sql = BimpTools::getSqlSelect('a.' . $primary);
             $sql .= BimpTools::getSqlFrom($table, $joins);

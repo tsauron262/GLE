@@ -2437,7 +2437,7 @@ class BContract_contrat extends BimpDolObject
                 $htmlT .= "Nombre d'heures FI hors du contrat : " . $ficheInter->timestamp_to_time($dureeFi['hors_contrat']['tot']) . ' (non pris en compte)<br />';
                 $htmlT .= "Dont : " . $ficheInter->timestamp_to_time($dureeFi['hors_contrat']['dep']) . ' h de déplacement<br />';
             }
-            $htmlT .= "Nombre d'heures restante : " . $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot']) . '<br/>'.($this->getHeuresRestantesDelegation());
+            $htmlT .= "Nombre d'heures restante : " . $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot']) . '<br/>';
             $htmlT .= "Coût technique: " . BimpTools::displayMoneyValue(BT_ficheInter::dureeToPrice($dureeFi['contrat']['tot'])) . " (" . BT_ficheInter::dureeToPrice(3600) . " €/h * " . $ficheInter->timestamp_to_time($dureeFi['contrat']['tot']) . ")<br />";
             $htmlT .= "Coût prévisionel: " . BimpTools::displayMoneyValue($cout_previsionelle) . "<br />";
             $htmlT .= '</strong>';

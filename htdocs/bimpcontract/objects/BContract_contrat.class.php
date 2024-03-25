@@ -853,7 +853,7 @@ class BContract_contrat extends BimpDolObject
     {
         $duree_vendu = $this->getDurreeVendu();
         $dureeFi = $this->getInfosDureeFi();
-        return $duree_vendu - $dureeFi['contrat']['tot'];
+        return $duree_vendu - ($dureeFi['contrat']['tot'] / 60 / 60);
 
 //        $reste = 0;
 //        $totalHeuresVendues = 0;

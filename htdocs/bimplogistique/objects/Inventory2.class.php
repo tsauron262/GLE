@@ -1879,10 +1879,10 @@ AND i.id=' . (int) $this->id;
 
     public function getSerializeValue($field)
     {
-        if (isset($this->getInitData($field)[0]))
+        if (isset($this->getInitData($field)[0]) && unserialize(is_array($this->getInitData($field)[0])))
             return array_values(unserialize($this->getInitData($field)[0]));
 
-        if(is_array($this->getData($field)))
+        if(is_array($this->getData($field)) && is_array($this->getData($field)))
             return array_values($this->getData($field));
         return array();
     }

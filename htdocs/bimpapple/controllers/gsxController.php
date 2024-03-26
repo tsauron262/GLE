@@ -723,7 +723,7 @@ class gsxController extends BimpController
                     $parts_stock_data = (isset($params['parts_stock_data']) ? $params['parts_stock_data'] : array());
 
                     if (!empty($parts_stock_data)) {
-                        $sav->decreasePartsStock($parts_stock_data, 'REPAIR_' . $response['repairId'], 'Création de la réparation ' . $response['repairId']);
+                        $sav->decreasePartsStock($parts_stock_data, 'REPAIR_' . $response['repairId'], 'Création de la réparation ' . $response['repairId'], $params['repairType']);
                     }
 
                     if (!self::$test_mode) {

@@ -32,7 +32,7 @@ class PartStock extends BimpObject
 
         global $user;
 
-        if ($user->admin) {
+        if ($this->isUserAdmin() || $user->rights->bimpapple->part_stock->admin) {
             return 1;
         }
 

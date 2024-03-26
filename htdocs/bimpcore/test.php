@@ -27,6 +27,13 @@ if (!$user->admin) {
     exit;
 }
 
+$sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', 501841);
+$sav->decreasePartsStock(array(
+    'Z661-02363' => array(
+        
+    )
+), 'TEST', 'Test', 'CIn');
+
 //CREATE TABLE `llx_bimp_test` (
 //  `id` int(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
 //  `base1` varchar(255) NOT NULL DEFAULT '',

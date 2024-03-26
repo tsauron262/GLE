@@ -25,7 +25,20 @@ fields:
     serials: unset
     
     qty: 
+        label: Qté dispo
         display_if: unset
+        
+    qty_to_receive: 
+        label: Qté en attente de réception
+        type: int
+        input: 
+            type: qty
+        default_value: 0
+            
+    do_not_order: 
+        label: Ne plus commander
+        type: bool
+        default_value: 0
         
     description:
         label: Description
@@ -41,6 +54,10 @@ fields:
         type: money
         default_value: 0
         
+    date_last_vente: 
+        label: Date dernière vente
+        type: date
+        
 forms: 
     default: 
         rows: 
@@ -55,6 +72,10 @@ forms:
                 field: code_eee
             last_pa: 
                 field: last_pa
+            qty_to_receive: 
+                field: qty_to_receive
+            do_not_order: 
+                field: do_not_order
             
     edit: 
         rows: 
@@ -67,6 +88,10 @@ forms:
                 field: code_eee
             last_pa: 
                 field: last_pa
+            qty_to_receive: 
+                field: qty_to_receive
+            do_not_order: 
+                field: do_not_order
             
     csv_import: 
         rows: 
@@ -79,6 +104,43 @@ forms:
                   allowed_ext: csv
                   max_items: 1
                   help: 'Séparateur : ";"<br/>Colonnes : Réf., Description, Libellé produit, Prix d&apos;achat HT, Code eee, Qté à ajouter'
+                  
+    receive: 
+        title: Réceptionner
+        rows: 
+            - custom: 1
+              label: N° de réception
+              input_name: reception_number
+              input: 
+                  type: text
+            - custom: 1
+              label: Qté reçue
+              input_name: qty_received
+              data_type: int
+              input: 
+                  type: qty
+                  max_label: 1
+              min: 0
+              max: 
+                  field_value: qty_to_receive
+              value: 
+                  field_value: qty_to_receive
+                  
+    bulk_receive: 
+        title: Réceptionner
+        rows: 
+            - custom: 1
+              label: N° de réception
+              input_name: reception_number
+              input: 
+                  type: text
+            - field: code_centre
+            - custom: 1
+              label: qtés reçues par composant
+              input_name: qties
+              content: 
+                  callback: renderPartsReceivedQtiesInputs
+              depends_on: code_centre
             
 filters_panels: 
     default: 
@@ -90,8 +152,13 @@ lists:
         title: Stocks internes
         cols: 
             serials: unset
+            qty_to_receive: 
             description: 
             product_label: 
             code_eee: 
             last_pa: 
                 edit: 1
+            do_not_order: 
+                edit: 1
+            date_last_vente:
+            

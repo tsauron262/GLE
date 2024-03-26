@@ -7,7 +7,7 @@ title:
         
 js:
     - /bimpapple/views/js/gsx.js
-    - /bimpapple/views/js/consigned_stocks.js
+    - /bimpapple/views/js/parts_stocks.js
     
     
 objects:

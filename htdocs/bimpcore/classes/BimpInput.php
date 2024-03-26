@@ -34,8 +34,10 @@ class BimpInput
         if (isset($options['data'])) {
             $data = BimpRender::renderTagData($options['data']);
         }
-        if (isset($options['no_autocorrect']) && $options['no_autocorrect'])
+
+        if (isset($options['no_autocorrect']) && $options['no_autocorrect']) {
             $data .= ' autocorrect="off" autocapitalize="none"';
+        }
 
 
         switch ($type) {
@@ -622,9 +624,9 @@ class BimpInput
 
             case 'search_projet':
                 $socid = -1;
-                
+
                 if (is_null($formproject)) {
-                    require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
+                    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
                     global $db;
                     $formproject = new FormProjets($db);
                 }

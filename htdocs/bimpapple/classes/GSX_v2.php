@@ -4,6 +4,7 @@ require_once __DIR__ . '/GSX_Const.php';
 
 class GSX_v2 extends GSX_Const
 {
+
 //old shipto correspond a altimac   
     public static $oldShipTos = array(1134736, 608105, 1185605, 608111);
     protected static $instance = null;
@@ -65,9 +66,9 @@ class GSX_v2 extends GSX_Const
         if (count($errors)) {
             $this->errors[] = BimpTools::getMsgFromArray($errors);
         }
-        
-        
-        if($user->array_options['options_apple_id'] == "" && BimpCore::getConf('use_gsx_def_id', false, 'bimpapple')){
+
+
+        if ($user->array_options['options_apple_id'] == "" && BimpCore::getConf('use_gsx_def_id', false, 'bimpapple')) {
             //passage sur les id de base
 //            $userT = new User(BimpCache::getBdb()->db);
 //            $userT->fetch(242);
@@ -77,11 +78,10 @@ class GSX_v2 extends GSX_Const
 //                $this->auth_token = $userT->array_options['options_gsx_auth_token'];
 //            }
 //            else{
-                $this->acti_token = BimpCore::getConf('apple_token', '', 'bimpapple');
-                $this->auth_token = BimpCore::getConf('apple_token', '', 'bimpapple');
+            $this->acti_token = BimpCore::getConf('apple_token', '', 'bimpapple');
+            $this->auth_token = BimpCore::getConf('apple_token', '', 'bimpapple');
 //            }
-        }
-        else{
+        } else {
             if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
                 $this->acti_token = $user->array_options['options_gsx_acti_token'];
             }
@@ -186,7 +186,7 @@ class GSX_v2 extends GSX_Const
             'userAppleId' => $this->appleId,
             'authToken'   => $this->acti_token
         ));
-        
+
         $oldToken = $this->acti_token;
 
         if (isset($result['authToken'])) {
@@ -200,7 +200,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $this->displayDebug('échec');
-        $this->initError('Echec authentification (oldToken : '.$oldToken.' newToken :  ' . $this->acti_token . ')');
+        $this->initError('Echec authentification (oldToken : ' . $oldToken . ' newToken :  ' . $this->acti_token . ')');
 
         if ($this->appleId == self::$default_ids['apple_id']) {
 //            global $gsx_logout_mail_send, $phantomAuthTest;
@@ -232,7 +232,7 @@ class GSX_v2 extends GSX_Const
         } else
             static::debug($this->appleId, 'deconnexion GSX de ' . $this->appleId . ' sans reconnexion possible');
 
-        BimpCore::addlog('Echec tentative reauthentification',3);
+        BimpCore::addlog('Echec tentative reauthentification', 3);
         $this->logged = false;
 //        $this->saveToken('acti', '');
 
@@ -242,14 +242,14 @@ class GSX_v2 extends GSX_Const
     public static function debug($appleId, $msg)
     {
         if ($appleId == self::$default_ids['apple_id']) {
-            BimpCore::addlog($msg,3);
+            BimpCore::addlog($msg, 3);
         }
     }
 
     public static function phantomAuth($login, $mdp)
     {
         if (function_exists('ssh2_connect')) {
-            BimpCore::addlog('Tentative de connexion Apple en auto.',3);
+            BimpCore::addlog('Tentative de connexion Apple en auto.', 3);
             $connection = ssh2_connect('10.192.20.152', 22);
             $key1 = DOL_DOCUMENT_ROOT . 'bimpapple/phantom/cert/phantomjs.pub';
             $key2 = DOL_DOCUMENT_ROOT . 'bimpapple/phantom/cert/phantomjs';
@@ -293,15 +293,15 @@ class GSX_v2 extends GSX_Const
     {
 //        static::debug($this->appleId, 'enregistrement token ' . $type . ' : ' . $token); // Génère trop de logs. 
         $is_default = ($this->appleId === self::$default_ids['apple_id']);
-        if($is_default){
-            BimpCore::addlog('Save token, old Token : '.$this->auth_token.' <br/>new : '.$token.' <br/>appleId : '.$this->appleId);
+        if ($is_default) {
+            BimpCore::addlog('Save token, old Token : ' . $this->auth_token . ' <br/>new : ' . $token . ' <br/>appleId : ' . $this->appleId);
             global $conf;
             $this->acti_token = $token;
             $this->auth_token = $token;
             BimpCore::setConf('apple_token', $token, 'bimpapple', $conf->entity);
-           return 1;
+            return 1;
         }
-        
+
         $field = '';
         switch ($type) {
             case 'acti':
@@ -400,7 +400,7 @@ class GSX_v2 extends GSX_Const
 
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
-            $headers[] = 'X-Apple-Service-Version: v'.static::getVersion();
+            $headers[] = 'X-Apple-Service-Version: v' . static::getVersion();
         }
 
         if (isset($extra['headers']) && is_array($extra['headers'])) {
@@ -423,23 +423,24 @@ class GSX_v2 extends GSX_Const
 
         return 1;
     }
-    
-    public static function getVersion(){
+
+    public static function getVersion()
+    {
         global $user;
         $users = json_decode(BimpCore::getConf('gsx_user_beta', 0, 'bimpapple'), true);
-        
-        if(is_array($users) && in_array($user->id, $users)){
+
+        if (is_array($users) && in_array($user->id, $users)) {
             BimpCore::setConf('nb_gsx_beta', "++", 'bimpapple');
             return 5;
-        }
-        else
+        } else
             return BimpCore::getConf('gsx_version', 0, 'bimpapple');
     }
 
     public function exec($request_name, $params, &$response_headers = array(), $extra = array())
     {
-        if(BimpCore::getConf('desactive_api'))
+        if (BimpCore::getConf('desactive_api'))
             die('desactivé');
+
         if (!(string) $request_name) {
             $this->curlError('(inconnue)', 'Nom de la requête absent', '', true);
             return false;
@@ -562,10 +563,10 @@ class GSX_v2 extends GSX_Const
 
                     case 'AUTH_TOKEN_STILL_ACTIVE'://bizarre, on renvoie le même token
                         return array('authToken' => $params['authToken']);
-                        
+
                     case 'UNAUTHORIZED':
                     default:
-                        BimpCore::addlog('Erreur req GSX code: '.$error['code'].' data : '. print_r($error,1));
+                        BimpCore::addlog('Erreur req GSX code: ' . $error['code'] . ' data : ' . print_r($error, 1));
                         $msg = $error['message'];
                         $curl_errors[] = $msg . ($error['code'] ? ' (Code: ' . $error['code'] . ')' : '');
                         $this->curlError($request_name, BimpTools::getArrayValueFromPath($error, 'message', 'Erreur inconnue'), BimpTools::getArrayValueFromPath($error, 'code', ''));
@@ -700,7 +701,7 @@ class GSX_v2 extends GSX_Const
             $params['coverageOption'] = $coverageOption;
         }
 
-        if ($consumerLaw /*&& $this->getVersion() < 5*/) {
+        if ($consumerLaw /* && $this->getVersion() < 5 */) {
             $params['consumerLaw'] = $consumerLaw;
         }
 
@@ -1167,10 +1168,10 @@ class GSX_v2 extends GSX_Const
         if (!is_array($data) || empty($data) || !isset($data['attachments'])) {
             return false;
         }
-        
-        if(!isset($headers['X-Apple-AppToken']) && isset($headers['x-apple-apptoken']))
+
+        if (!isset($headers['X-Apple-AppToken']) && isset($headers['x-apple-apptoken']))
             $headers['X-Apple-AppToken'] = $headers['x-apple-apptoken'];
-        if(!isset($headers['X-Apple-Gigafiles-Cid']) && isset($headers['x-apple-gigafiles-cid']))
+        if (!isset($headers['X-Apple-Gigafiles-Cid']) && isset($headers['x-apple-gigafiles-cid']))
             $headers['X-Apple-Gigafiles-Cid'] = $headers['x-apple-gigafiles-cid'];
 
         if (!isset($headers['X-Apple-AppToken']) || !(string) $headers['X-Apple-AppToken']) {

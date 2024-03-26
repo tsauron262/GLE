@@ -1,0 +1,1 @@
+ALTER table  llx_buc_list_table_config ADD `pagination_auto` tinyint(1) NOT NULL DEFAULT 0;

@@ -1773,6 +1773,12 @@ class Bimp_Client extends Bimp_Societe
                 $list->addFieldFilterValue('version', 2);
                 break;
 
+            case 'contrats_v2_lines':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcontrat', 'BCT_ContratLine'), 'global', 1, null, 'Lignes d\'abonnement du client "' . $client_label . '"', 'fas_file-signature');
+                $list->addFieldFilterValue('parent:fk_soc', (int) $this->id);
+                $list->addFieldFilterValue('parent:version', 2);
+                break;
+
             case 'paiements_inc':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpfinanc', 'Bimp_PaiementInc'), 'client', 1, null, 'Paiements non identifiés du client "' . $client_label . '"', 'fas_question-circle');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
@@ -2497,16 +2503,25 @@ class Bimp_Client extends Bimp_Societe
         $tabs = array();
 
         $tabs[] = array(
-            'id'      => 'client_contrats_v2_synthese_tab',
-            'title'   => 'Synthèse abonnements',
-            'content' => $this->renderContratsV2SyntheseTab()
-        );
-
-        $tabs[] = array(
             'id'            => 'client_contrats_v2_list_tab',
             'title'         => 'Tous les contrats d\'abonnement',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_v2_list_tab .nav_tab_ajax_result\')', array('contrats_v2'), array('button' => ''))
+        );
+
+        $tabs[] = array(
+            'id'            => 'client_contrats_v2_synthese_tab',
+            'title'         => 'Synthèse abonnements',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderContratsV2SyntheseTab', '$(\'#client_contrats_v2_synthese_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+//            'content' => $this->renderContratsV2SyntheseTab()
+        );
+
+        $tabs[] = array(
+            'id'            => 'client_contrats_v2_lines_list_tab',
+            'title'         => 'Toutes les lignes d\'abonnement',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_v2_lines_list_tab .nav_tab_ajax_result\')', array('contrats_v2_lines'), array('button' => ''))
         );
 
         return BimpRender::renderNavTabs($tabs, 'client_contrats_v2_tab');

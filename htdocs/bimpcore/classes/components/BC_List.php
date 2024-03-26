@@ -187,6 +187,9 @@ class BC_List extends BC_Panel
                     $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
                 }
             }
+
+            $this->params['mode_append'] = (int) $this->userConfig->getData('pagination_auto');
+
         }
     }
 
@@ -744,7 +747,7 @@ class BC_List extends BC_Panel
         return $html;
     }
 
-    public function renderPagination()
+    public function renderPagination($mode = 'normal')
     {
         if (is_null($this->nbItems)) {
             return '';
@@ -769,33 +772,42 @@ class BC_List extends BC_Panel
             }
 
             $html .= '<div class="results_count">';
+            if($this->params['mode_append'])
+                $nFirst = 1;
             $html .= 'Résultat' . ($this->nbItems > 1 && $nFirst !== $nLast ? 's' : '');
             $html .= ' <span>' . $nFirst . '</span>' . ($nFirst !== $nLast ? ' à <span>' . $nLast . '</span>' : '');
             $html .= ' sur <span>' . $this->nbItems . '</span>';
             $html .= '</div>';
 
-            $html .= '<span class="navButton prevButton' . (((int) $this->params['p'] === 1) ? ' disabled' : '') . '">Précédent</span>';
-            $html .= '<div class="pages">';
+            
+            if(!$this->params['mode_append']){
+                $html .= '<span class="navButton prevButton' . (((int) $this->params['p'] === 1) ? ' disabled' : '') . '">Précédent</span>';
+                $html .= '<div class="pages">';
 
-            if ($first !== 1) {
-                $html .= '<span class="pageBtn' . (((int) $this->params['p'] === 1) ? ' active' : '') . '" data-p="1">1</span>';
-            }
-
-            $current = $first;
-            while ($current <= $last) {
-                if ($current !== 1) {
-                    $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
+                if ($first !== 1) {
+                    $html .= '<span class="pageBtn' . (((int) $this->params['p'] === 1) ? ' active' : '') . '" data-p="1">1</span>';
                 }
-                $html .= '<span class="pageBtn' . (((int) $current === (int) $this->params['p']) ? ' active' : '') . '" data-p="' . $current . '">' . $current . '</span>';
-                $current++;
-            }
 
-            if ($last !== $this->nbTotalPages) {
-                $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;<span class="pageBtn' . (((int) $this->params['p'] === (int) $this->nbTotalPages) ? ' active' : '') . '" data-p="' . $this->nbTotalPages . '">' . $this->nbTotalPages . '</span>';
-            }
+                $current = $first;
+                while ($current <= $last) {
+                    if ($current !== 1) {
+                        $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
+                    }
+                    $html .= '<span class="pageBtn' . (((int) $current === (int) $this->params['p']) ? ' active' : '') . '" data-p="' . $current . '">' . $current . '</span>';
+                    $current++;
+                }
 
-            $html .= '</div>';
-            $html .= '<span class="navButton nextButton' . (((int) $this->params['p'] >= $this->nbTotalPages) ? ' disabled' : '') . '">Suivant</span>';
+                if ($last !== $this->nbTotalPages) {
+                    $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;<span class="pageBtn' . (((int) $this->params['p'] === (int) $this->nbTotalPages) ? ' active' : '') . '" data-p="' . $this->nbTotalPages . '">' . $this->nbTotalPages . '</span>';
+                }
+
+                $html .= '</div>';
+                $html .= '<span class="navButton nextButton' . (((int) $this->params['p'] >= $this->nbTotalPages) ? ' disabled' : '') . '">Suivant</span>';
+            }
+            else{
+                $html .= '<span class="pageBtn active loadIfVisible" data-p="' . $this->params['p'] . '"></span>';
+                $html .= '<span class="navButton nextButtonAppend' . (((int) $this->params['p'] >= $this->nbTotalPages) ? ' disabled' : '') . '">Suivant</span>';
+            }
         }
 
         $this->setConfPath();

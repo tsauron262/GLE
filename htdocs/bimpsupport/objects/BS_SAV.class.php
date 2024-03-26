@@ -6272,8 +6272,10 @@ ORDER BY a.val_max DESC");
                                         }
 
                                         $date = date('Y-m-d');
+                                        BimpObject::loadClass('bimpapple', 'InternalStock');
 
                                         foreach ($parts as $part) {
+                                            
                                             $internal_stock = InternalStock::getStockInstance($code_centre, $part->getData('part_number'));
 
                                             if (BimpObject::objectLoaded($internal_stock)) {

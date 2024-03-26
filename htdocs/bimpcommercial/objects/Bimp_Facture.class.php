@@ -315,8 +315,8 @@ class Bimp_Facture extends BimpComm
                 ))) {
             return 1;
         }
-        
-        if($field == 'entrepot' && $this->getData('entrepot') < 1)
+
+        if ($field == 'entrepot' && $this->getData('entrepot') < 1)
             return 1;
 
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
@@ -2116,7 +2116,7 @@ class Bimp_Facture extends BimpComm
     public function getDirOutput()
     {
         global $conf;
-        if($this->isLoaded() && $this->dol_object->entity > 0)
+        if ($this->isLoaded() && $this->dol_object->entity > 0)
             return $conf->facture->multidir_output[$this->dol_object->entity] . '/';
         else
             return $conf->facture->dir_output . '/';
@@ -7051,23 +7051,32 @@ class Bimp_Facture extends BimpComm
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
 
                 if (BimpObject::objectLoaded($facture)) {
+                    $fac_users = array();
+
                     $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
-                    if (!$id_user) {
-                        $id_user = (int) $facture->getData('fk_user_author');
+                    if ($id_user) {
+                        $fac_users[] = $id_user;
                     }
 
-                    if (!$id_user) {
-                        $id_user = $id_default_user;
+                    $id_user = (int) $facture->getData('fk_user_author');
+                    if ($id_user) {
+                        $fac_users[] = $id_user;
                     }
 
-                    if (!isset($factures[$id_user])) {
-                        $factures[$id_user] = array();
+                    if (empty($fac_users)) {
+                        $fac_users[] = $id_default_user;
                     }
 
-                    $factures[$id_user][] = array(
-                        'id'   => $facture->id,
-                        'link' => $facture->getLink()
-                    );
+                    foreach ($fac_users as $id_user) {
+                        if (!isset($factures[$id_user])) {
+                            $factures[$id_user] = array();
+                        }
+
+                        $factures[$id_user][] = array(
+                            'id'   => $facture->id,
+                            'link' => $facture->getLink()
+                        );
+                    }
                 } else
                     echo 'oups fact inc ' . $r['rowid'];
             }
@@ -7552,7 +7561,7 @@ class Bimp_Facture extends BimpComm
     public static function checkMargesRevalAll($check_only_diff_margins = false)
     {
         $where = '';
-        
+
         $last_check_tms = BimpCore::getConf('factures_marges_revals_last_check_tms', '');
         if ($last_check_tms) {
             $where = 'tms > \'' . $last_check_tms . '\'';

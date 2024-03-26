@@ -230,9 +230,9 @@ function getListSearchFilters($row) {
     return filters;
 }
 
-function reloadObjectList(list_id, callback, full_reload, id_config) {
+function reloadObjectList(list_id, callback, full_reload, id_config, modeAppend) {
     var $list = $('#' + list_id);
-
+    
     if (!$list.length) {
         console.error('reloadObjectList(): identifiant de la liste invalide (' + list_id + ').');
         return;
@@ -253,7 +253,9 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
         data['full_reload'] = 1;
         $list.find('.list_table_cols_change_notification').slideUp(250);
     }
-
+    if (modeAppend) {
+        data['modeAppend'] = 1;
+    }
     if (typeof (id_config) !== 'undefined') {
         data['id_list_table_config'] = id_config;
     }
@@ -300,7 +302,12 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
 
                 hidePopovers($list);
 
-                bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
+                if(result.modeAppend)
+                    bimpAjax.$list.find('tbody.listRows').append(result.rows_html);
+                else
+                    bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
+                
+                
                 if (result.pagination_html) {
                     bimpAjax.$list.find('.listPagination').each(function () {
                         $(this).data('event_init', 0);
@@ -1289,7 +1296,7 @@ function sortListByPosition(list_id, first_page) {
     }
 }
 
-function loadPage($list, page) {
+function loadPage($list, page, modeAppend) {
     if (!$list.length) {
         bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
         return;
@@ -1297,7 +1304,7 @@ function loadPage($list, page) {
 
     $list.find('input[name=param_p]').val(page);
 
-    reloadObjectList($list.attr('id'));
+    reloadObjectList($list.attr('id'), undefined, undefined, undefined, modeAppend);
 }
 
 function deactivateSorting($list) {
@@ -1968,6 +1975,32 @@ function setPaginationEvents($list) {
                 });
             }
         }
+        
+//        var $listPagination = $(this);
+//        $(window).scroll(function(){
+//            var span = $listPagination.find("span.loadIfVisible");//renvoie la position par rapport au haut de page et la gauche de la page
+//            var positionVisbleBAs = ($(window).scrollTop()+window.innerHeight);
+//            if(span.length > 0 && positionVisbleBAs > span.offset().top){
+//                $listPagination.find('.nextButtonAppend').click();
+//            }
+//        });
+        
+        
+        var $next = $((this)).find('.nextButtonAppend');
+        if ($next.length) {
+            if (!$next.hasClass('disabled')) {
+                $next.click(function () {
+                    if ($(this).hasClass('processing') || $(this).hasClass('disabled')) {
+                        return;
+                    }
+
+                    $(this).addClass('selected');
+                    setPaginationLoading($pagination);
+                    loadPage($list, p + 1, true);
+                });
+            }
+        }
+        
         var $next = $((this)).find('.nextButton');
         if ($next.length) {
             if (!$next.hasClass('disabled')) {
@@ -2005,6 +2038,11 @@ function setPaginationLoading($pagination) {
     }
 
     $btn = $pagination.find('.nextButton');
+    if (!$btn.hasClass('disabled')) {
+        $btn.addClass('processing');
+    }
+    
+    $btn = $pagination.find('.nextButtonAppend');
     if (!$btn.hasClass('disabled')) {
         $btn.addClass('processing');
     }

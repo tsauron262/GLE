@@ -4045,7 +4045,7 @@ class BimpObject extends BimpCache
             return 1;
         } else {
             $parent = $this->getNonFetchParent();
-            if (get_class($parent) != 'BimpObject') {
+            if (get_class($parent) != 'BimpObject' && $parent->getTable() != '') {
                 $joins[$aliasParent] = array("alias" => $aliasParent, 'table' => $parent->getTable(), 'on' => $alias . '.' . $this->getParentIdProperty() . ' = ' . $aliasParent . '.' . $parent->getPrimary());
                 if ($parent->getEntity_name()) {
                     $filters[$aliasParent . '.entity'] = $parent->getEntitysArray();
@@ -6298,7 +6298,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Erreur SQL'    => $this->db->err(),
                     'Champs suppl.' => $bimpObjectFields,
-                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields))
+                    'Result'        => $result,
+                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $where, print_r($bimpObjectFields,1)))
                 ));
             }
         }

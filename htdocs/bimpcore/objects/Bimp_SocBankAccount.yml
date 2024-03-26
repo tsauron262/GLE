@@ -17,6 +17,8 @@ parent_id_property: fk_soc
 
 header_edit_form: default
 
+entity_name: soc_rib
+
 labels: 
     name: RIB
     name_plur: RIBs

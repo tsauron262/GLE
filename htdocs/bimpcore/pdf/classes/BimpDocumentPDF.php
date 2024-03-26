@@ -113,7 +113,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $this->pdf->topMargin = 44;
-
+        
         $this->header_vars = array(
             'primary_color' => $this->primary,
             'logo_img'      => $logo_file,

@@ -2414,6 +2414,16 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         $html .= '</td>';
         $html .= '</tr>';
+        
+
+        $html .= '<tr>';
+        $html .= '<th>Poids TOTAL</th>';
+        $html .= '<td>';
+        $html .= $this->displayTotalWeight();
+
+
+        $html .= '</td>';
+        $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
         $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft') . 'Montants totaux';

@@ -1,0 +1,1 @@
+UPDATE `llx_bimpcore_conf` SET `module` = 'bimpcore' WHERE `name` = 'email_facturation' AND `module` = 'bimpcontract';

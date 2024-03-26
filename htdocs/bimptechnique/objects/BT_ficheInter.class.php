@@ -222,7 +222,7 @@ class BT_ficheInter extends BimpDolObject
         if ($this->isLoaded()) {
             $status = (int) $this->getData('fk_statut');
 
-            if (in_array($field, array('fk_soc', 'fk_contrat', 'commandes', 'tickets', 'urgent', 'fk_user_tech', 'datei', 'time_from', 'time_to', 'description'))) {
+            if (in_array($field, array('fk_soc', /*'fk_contrat', 'commandes', 'tickets',*/ 'urgent', 'fk_user_tech', 'datei', 'time_from', 'time_to', 'description'))) {
                 if ($status !== self::STATUT_BROUILLON) {
                     return 0;
                 }
@@ -503,7 +503,7 @@ class BT_ficheInter extends BimpDolObject
     {
         $buttons = array();
 
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') === self::STATUT_BROUILLON) {
+        if ($this->isLoaded() /*&& (int) $this->getData('fk_statut') === self::STATUT_BROUILLON*/) {
             $buttons[] = array(
                 'label'   => 'Editer les objets liés',
                 'icon'    => 'fas_edit',
@@ -989,12 +989,12 @@ class BT_ficheInter extends BimpDolObject
             $label = $contrat->getData('label');
             $contrats[(int) $contrat->id] = $contrat->getRef() . '&nbsp;&nbsp;' . ($label ? ' - ' . $label : '');
         }
-        
+
         $filtres['statut'] = 1;
         $filtres['version'] = 2;
         foreach (BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', $filtres, 'rowid', 'desc') as $contrat) {
             $label = $contrat->getData('label');
-            $contrats[(int) $contrat->id] = 'Abonnement '.$contrat->getRef() . '&nbsp;&nbsp;' . ($label ? ' - ' . $label : '');
+            $contrats[(int) $contrat->id] = 'Abonnement ' . $contrat->getRef() . '&nbsp;&nbsp;' . ($label ? ' - ' . $label : '');
         }
 
         return $contrats;
@@ -1162,11 +1162,11 @@ class BT_ficheInter extends BimpDolObject
         $children = $this->getChildrenList('inters', ["type" => $type]);
 
 //        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
-        
+
         $arrayCode = BT_ficheInter_det::$servicesForFacturation;
         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
         $product->find(Array('ref' => $arrayCode[$type]));
-        
+
         $services = [];
         $index = 1;
         if (count($children)) {
@@ -1280,8 +1280,9 @@ class BT_ficheInter extends BimpDolObject
 
         return $html;
     }
-    
-    public static function dureeToPrice($duree){
+
+    public static function dureeToPrice($duree)
+    {
         return static::time_to_qty(static::timestamp_to_time($duree)) * BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
     }
 
@@ -2533,29 +2534,35 @@ class BT_ficheInter extends BimpDolObject
         $errors = [];
         $warnings = [];
 
-        $success = "Service facturation prévenu";
+        $email = BimpCore::getConf('email_facturation', null, 'bimpcore');
 
-        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+        if ($email) {
+            $errors[] = 'Adresse e-mail du service facturation non configuré';
+        } else {
+            $success = "Service facturation prévenu";
 
-        $subject = '[FI] ' . $this->getRef();
+            $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
-        if (BimpObject::objectLoaded($client)) {
-            $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
+            $subject = '[FI] ' . $this->getRef();
+
+            if (BimpObject::objectLoaded($client)) {
+                $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
+            }
+
+            $msg = 'Bonjour,<br/><br/>';
+            $msg .= 'Pour information, la FI ' . $this->getLink();
+
+            if (BimpObject::objectLoaded($client)) {
+                $msg .= ' pour le client ' . $client->getRef() . ' ' . $client->getName();
+            }
+
+            $msg .= ' a été signée par le client.<br/><br/>';
+
+            mailSyn2($subject, $email, '', $msg);
+
+            $this->addLog("Facturation client prévenue");
+            $this->updateField('fk_statut', 2);
         }
-
-        $msg = 'Bonjour,<br/><br/>';
-        $msg .= 'Pour information, la FI ' . $this->getLink();
-
-        if (BimpObject::objectLoaded($client)) {
-            $msg .= ' pour le client ' . $client->getRef() . ' ' . $client->getName();
-        }
-
-        $msg .= ' a été signée par le client.<br/><br/>';
-
-        mailSyn2($subject, 'facturationclients@bimp.fr', '', $msg);
-
-        $this->addLog("Facturation client prévenue");
-        $this->updateField('fk_statut', 2);
 
         return [
             'errors'   => $errors,
@@ -2845,12 +2852,12 @@ class BT_ficheInter extends BimpDolObject
 //            $message .= "Fiche d'intervention: " . $this->getNomUrl();
 //            $message .= "<br /> Client: " . $client->getNomUrl() . ' ' . $client->getName();
 //
-//            $bimpMail = new BimpMail($this, "Demande de facturation FI - [" . $this->getRef() . "] - " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $message, null, $cc);
+//            $bimpMail = new BimpMail($this, "Demande de facturation FI - [" . $this->getRef() . "] - " . $client->getRef() . " " . $client->getName(), BimpCore::getConf('email_facturation', null, 'bimpcore'), null, $message, null, $cc);
 //            $bimpMail->send($errors);
 //
 //            if (!count($errors)) {
 //                $log = "<br /><i><u>Message</u><br />" . $data->message . "<br />";
-//                $log .= "<u>Liste de difusion:</u><br >facturationclients@bimp.fr";
+//                $log .= "<u>Liste de difusion:</u><br >" . BimpCore::getConf('email_facturation', null, 'bimpcore');
 //                $log .= (!empty($cc)) ? "<br />" . $cc : '';
 //                $log .= "</i>";
 //                $this->addLog($log);
@@ -3418,10 +3425,10 @@ class BT_ficheInter extends BimpDolObject
     public static function timestamp_to_time($timestamp)
     {
         $neg = ($timestamp < 0);
-        $timestamp = abs($timestamp/60);
+        $timestamp = abs($timestamp / 60);
         $heures = floor($timestamp / 60);
         $minutes = floor($timestamp % 60);
-        return ($neg ? '-' : '').str_pad($heures, 2, "0", STR_PAD_LEFT) . ":" . str_pad($minutes, 2, "0", STR_PAD_LEFT);
+        return ($neg ? '-' : '') . str_pad($heures, 2, "0", STR_PAD_LEFT) . ":" . str_pad($minutes, 2, "0", STR_PAD_LEFT);
     }
 
     // Méthodes statiques: 

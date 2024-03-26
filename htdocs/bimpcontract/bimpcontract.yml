@@ -7,8 +7,6 @@ categories:
 params: 
     email_groupe: 
         label: Adrese e-mail groupe
-    email_facturation:
-        label: Adresse e-mail facturation
     use_autorised_service: 
         label: Utiliser les services autorisés
         type: bool

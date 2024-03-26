@@ -2313,6 +2313,18 @@ class BimpController
             if (BimpTools::isSubmit('selected_rows')) {
                 $list->setSelectedRows(BimpTools::getValue('selected_rows', array()));
             }
+            
+            
+            $modeAppend = false;
+            if($list->params['mode_append']){
+                if(BimpTools::getValue('modeAppend', false)){
+                    $modeAppend = true;
+                }
+                else{
+                    $list->params['p'] = 1;
+                }
+            }
+            
             $rows_html = $list->renderRows();
             $pagination_html = $list->renderPagination();
             $filters_panel_html = $list->renderFiltersPanel();
@@ -2343,6 +2355,7 @@ class BimpController
         return array(
             'errors'              => $errors,
             'rows_html'           => $rows_html,
+            'modeAppend'          => $modeAppend,
             'pagination_html'     => $pagination_html,
             'filters_panel_html'  => $filters_panel_html,
             'active_filters_html' => $active_filters_html,

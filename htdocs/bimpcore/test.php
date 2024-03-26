@@ -27,12 +27,24 @@ if (!$user->admin) {
     exit;
 }
 
-$sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', 501841);
-$sav->decreasePartsStock(array(
-    'Z661-02363' => array(
-        
-    )
-), 'TEST', 'Test', 'CIn');
+$file = DOL_DOCUMENT_ROOT . '/bimpcore/cepa_test2.pdf';
+if (file_exists($file)) {
+    unlink($file);
+}
+
+$file = DOL_DOCUMENT_ROOT . '/bimpcore/cepa_test.pdf';
+if (file_exists($file)) {
+    unlink($file);
+}
+
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/CepaPDF.php';
+$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 454033);
+
+$pdf = new CepaPDF($db);
+$pdf->client = $client;
+$pdf->render($file, 'F');
+
+echo '<script>window.open(\'' . DOL_URL_ROOT . '/bimpcore/cepa_test.pdf\')</script>';
 
 //CREATE TABLE `llx_bimp_test` (
 //  `id` int(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,

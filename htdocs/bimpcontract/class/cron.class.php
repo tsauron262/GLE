@@ -117,8 +117,11 @@ class cron extends BimpCron
                                 . 'Commercial suivi de contrat: ' . $commercial_suivi->getName() . '<br />Commercial signataire du contrat: ' . $commercial_signa->getName();
                         $mustSend = ($echeancier->isLoaded() && $echeancier->getData('validate')) ? false : true;
                         if (($mustSend)) {
-                            mailSyn2($sujet, 'facturationclients@bimp.fr', null, $message);
-                            $this->output .= $contrat->getRef() . ' => FAIT: RELANCE FACTURATION DEMAIN';
+                            $email = BimpCore::getConf('email_facturation', null, 'bimpcore');
+                            if ($email) {
+                                mailSyn2($sujet, $email, null, $message);
+                                $this->output .= $contrat->getRef() . ' => FAIT: RELANCE FACTURATION DEMAIN';
+                            }
                         }
                     }
                 }
@@ -145,8 +148,8 @@ class cron extends BimpCron
                 $msg .= $contrat->getNomUrl() . " => date d'activation prévu: <b>" . $date->format('d/m/Y') . "</b><br />";
                 BimpObject::loadClass('bimpcore', 'BimpNote');
                 $contrat->addNote("Contrat en attente de validation" . $contrat->getNomUrl() . " => date d'activation prévu: <b>" . $date->format('d/m/Y'),
-                                                                                                                                                  BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                                                                                                                                                  BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('contrat'));
+                                      BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                      BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('contrat'));
             }
         }
         if ($to_send) {
@@ -280,7 +283,7 @@ class cron extends BimpCron
 
         $bdb = BimpCache::getBdb();
         $bdb->db->commitAll();
-        
+
         foreach ($rows as $r) {
             $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier', (int) $r['id']);
 
@@ -321,7 +324,7 @@ class cron extends BimpCron
 //            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
 
             $bdb->db->begin();
-            
+
             $result = $echeancier->actionCreateFacture($data);
 
             if (count($result['errors'])) {
@@ -359,7 +362,10 @@ class cron extends BimpCron
                     $w = array();
                     $note_errors = $note->create($w, true);
                     if (count($note_errors)) {
-                        mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
+                        $email = BimpCore::getConf('email_facturation', null, 'bimpcore');
+                        if ($email) {
+                            mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), $email, null, $msg);
+                        }
                     }
 
                     $bdb->db->commit();

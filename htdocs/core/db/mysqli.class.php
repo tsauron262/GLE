@@ -1262,9 +1262,10 @@ class DoliDBMysqli extends DoliDB
                 $log = false;
             } elseif ($classLog == 'deadLock' && !(int) BimpCore::getConf('log_sql_dealocks')) {
                 $log = false;
-            } elseif ($classLog == 'sql_duplicate' && !(int) BimpCore::getConf('log_sql_duplicate')) {
+            } /*elseif ($classLog == 'sql_duplicate' && !(int) BimpCore::getConf('log_sql_duplicate')) {
                 $log = false;
-            }
+            }*/
+            
             if ($log) {
                 $extra_data = array(
                    'Code erreur' => $this->lasterrno,

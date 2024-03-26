@@ -202,7 +202,7 @@ class Bimp_Product extends BimpObject
                 return $this->canValidate();
 
             case 'mouvement':
-                return ($this->canValidate() || $user->rights->bimpcommercial->correct_stocks);
+                return (($this->canValidate() || $user->rights->bimpcommercial->correct_stocks) && $this->isTypeProduct());
 
             case 'updatePrice':
                 return ($this->canValidate() && $this->canEditPrices());

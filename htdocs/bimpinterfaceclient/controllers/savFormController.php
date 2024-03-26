@@ -237,7 +237,7 @@ class savFormController extends BimpPublicController
 
             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                         'email_custom' => array(
-                            'custom' => 'LOWER(email) = \'' . strtolower($email) . '\''
+                            'custom' => 'LOWER(a.email) = \'' . strtolower($email) . '\''
                         )
 //                        'email' => $email
                             ), true);
@@ -1830,7 +1830,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         if (!BimpObject::objectLoaded($userClient)) {
                             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                                         'email_custom' => array(
-                                            'custom' => 'LOWER(email) = \'' . strtolower($data['client_email']) . '\''
+                                            'custom' => 'LOWER(a.email) = \'' . strtolower($data['client_email']) . '\''
                                         )
 //                                        'email' => $data['client_email']
                                             ), true);
@@ -1859,7 +1859,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                     // On recherche à nouveau le userClient: 
                                     $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                                                 'email_custom' => array(
-                                                    'custom' => 'LOWER(email) = \'' . strtolower($data['client_email']) . '\''
+                                                    'custom' => 'LOWER(a.email) = \'' . strtolower($data['client_email']) . '\''
                                                 )
                                                     ), true);
 

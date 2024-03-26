@@ -1775,8 +1775,8 @@ class Bimp_Client extends Bimp_Societe
 
             case 'contrats_v2_lines':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcontrat', 'BCT_ContratLine'), 'global', 1, null, 'Lignes d\'abonnement du client "' . $client_label . '"', 'fas_file-signature');
-                $list->addFieldFilterValue('parent:fk_soc', (int) $this->id);
-                $list->addFieldFilterValue('parent:version', 2);
+                $list->addFieldFilterValue('parent.fk_soc', (int) $this->id);
+//                $list->addFieldFilterValue('parent.version', 2);
                 break;
 
             case 'paiements_inc':

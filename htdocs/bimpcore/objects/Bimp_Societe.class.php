@@ -2205,16 +2205,14 @@ class Bimp_Societe extends BimpDolObject
                 $s = (count($contrats) > 1) ? 's' : '';
                 $html .= 'Contrat' . $s . ' d\'abonnement : ';
 
-//                $fl = true;
+                $fl = true;
                 foreach ($contrats as $contrat) {
-//                    if (!$fl) {
-//                        $html .= ', ';
-//                    } else {
-//                        $fl = false;
-//                    }
-                    $html .= '<div>';
+                    if (!$fl) {
+                        $html .= '<br/>';
+                    } else {
+                        $fl = false;
+                    }
                     $html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>'));
-                    $html .= '</div>';
                 }
                 $html .= '</div>';
             }

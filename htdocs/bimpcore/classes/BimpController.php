@@ -856,6 +856,11 @@ class BimpController
         }
 
         $req_id = (int) BimpTools::getValue('request_id', 0);
+        $bimp_hash = BimpTools::getValue('bimp_hash', '');
+        if(class_exists('Session') && !Session::isHashValid($bimp_hash)){
+//            die('Token invalide, merci de rafraîchir votre page, et de retenter l\'opération');
+        }
+            
         $debug_content = '';
 
         $errors = array();
@@ -882,6 +887,10 @@ class BimpController
                 if (!isset($result['warnings'])) {
                     $result['warnings'] = array();
                 }
+                
+                
+                if(class_exists('Session'))
+                    $result['bimp_hash'] = Session::getHash();
 
                 $result['warnings'] = BimpTools::merge_array($result['warnings'], static::getAndResetAjaxWarnings());
 

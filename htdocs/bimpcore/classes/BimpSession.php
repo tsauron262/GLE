@@ -7,6 +7,8 @@ class Session {
     private $sessionId = '';
     private $db = null;
     private $timeDeb = 0;
+//    public static $timeValidBimpHash = (60 * 60 * 1);
+    public static $timeValidBimpHash = (60 * 10);
     // Initialisation de la session lors de l'appel de la classe
     public function __construct($db){
         $this->timeDeb = hrtime(true);
@@ -29,6 +31,14 @@ class Session {
             $this->alimentSession();
         }
 //        echo '<pre>';print_r($_SESSION);
+    }
+
+    public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+    {
+        for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
+            
+        }
+        return $s;
     }
     
     
@@ -94,6 +104,16 @@ class Session {
             $_SESSION['dol_login'] = $ln->login;
         }
         
+        if(isset($_SESSION['bimp_hash'][0])){
+            if(($_SESSION['bimp_hash'][0]['time']+(static::$timeValidBimpHash/2)) < time()){
+                $_SESSION['bimp_hash'][1] = $_SESSION['bimp_hash'][0];
+                $this->addBimpHash();
+            }
+        }
+        else
+            $this->addBimpHash();
+//        echo '<pre>';print_r($_SESSION['bimp_hash']);
+        
         self::$sessionBase = $_SESSION;
     }
     // Ecriture des sessions
@@ -139,6 +159,28 @@ class Session {
     //        }
         }
         return true;
+    }
+    
+    static function getHash(){
+        if(isset($_SESSION['bimp_hash'][0]))
+            return $_SESSION['bimp_hash'][0]['hash'];
+    }
+    
+    static function isHashValid($hash){
+        if(!BimpCore::getConf('use_bimp_hash'))
+            return true;
+        if(isset($_SESSION['bimp_hash'][0]['hash']) && $_SESSION['bimp_hash'][0]['hash'] == $hash && ($_SESSION['bimp_hash'][0]['time']+static::$timeValidBimpHash) > time())
+            return true;
+        if(isset($_SESSION['bimp_hash'][1]['hash']) && $_SESSION['bimp_hash'][1]['hash'] == $hash && ($_SESSION['bimp_hash'][1]['time']+static::$timeValidBimpHash) > time())
+            return true;
+        return false;
+    }
+    
+    function addBimpHash(){
+        $_SESSION['bimp_hash'][0] = array(
+            'time' => time(),
+            'hash' => static::randomPassword('25')
+        );
     }
     
     function arrayRecursiveDiff($aArray1, $aArray2) {

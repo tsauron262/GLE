@@ -6,6 +6,10 @@ if (!defined('BIMP_LIB')) {
     if (!defined('MOD_DEV')) {
         define('MOD_DEV', 0);
     }
+    if(!MOD_DEV){
+        global $dolibarr_main_prod;
+        $dolibarr_main_prod = 1;
+    }
     if (!defined('ID_ERP')) {
         define('ID_ERP', 1);
     }

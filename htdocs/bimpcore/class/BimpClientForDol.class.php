@@ -21,8 +21,15 @@ class BimpClientForDol extends Bimp_Client
         $msg .= "Encours ICBA passé à 0 € (expiration après 1 an)";
 
         if (!empty($clients)) {
+            $dt = new DateTime();
+            $dt->sub(new DateInterval('P1M'));
+            $where_check = 'obj_name = \'Bimp_Client\' AND content = \'' . $msg . '\' AND date_create >= \'' . $dt->format('Y-m-d') . '\' AND id_obj = ';
+            
             BimpObject::loadClass('bimpcore', 'BimpNote');
             foreach ($clients as $c) {
+                if ((int) $this->db->getCount('bimpcore_note', $where_check . $c->id) > 0) {
+                    continue;
+                }
 
                 // Commercial
                 $commercial = $c->getCommercial();

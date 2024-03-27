@@ -866,7 +866,8 @@ function gsx_LoadRepairPartStockForm($button, id_sav, serial) {
         'module': 'bimpsupport',
         'object_name': 'BS_SAV',
         'id_object': id_sav,
-        'form_name': 'parts_consigned_stock'
+        'form_name': 'parts_consigned_stock',
+        'repairType': data.repairType
     }, 'Gestion du stock consigné', function ($form) {
         if ($.isOk($form)) {
             var modal_idx = parseInt($form.data('modal_idx'));

@@ -1373,6 +1373,7 @@ class BContract_contrat extends BimpDolObject
             $fin = $fin->sub(new DateInterval("P1D"));
             return $fin;
         }
+
         return '';
     }
 
@@ -1687,7 +1688,7 @@ class BContract_contrat extends BimpDolObject
         } else {
             $duree_init = $this->getDureeInitial();
         }
-        
+
         if ($duree_init && $dureePrlong) {
             $ratio += $dureePrlong / $duree_init;
         }
@@ -2107,9 +2108,11 @@ class BContract_contrat extends BimpDolObject
                 $fin = new DateTime($this->getData('date_end_renouvellement'));
             }
         }
-        
-        if($this->getData('end_date_contrat') != $this->getEndDate()->format('Y-m-d'))
-            $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
+
+        $end_date = $this->getEndDate();
+        if ($end_date && $this->getData('end_date_contrat') != $end_date->format('Y-m-d')) {
+            $this->updateField('end_date_contrat', $end_date->format('Y-m-d'));
+        }
 
         if (is_object($fin))
             return $fin->format($format);

@@ -1153,18 +1153,18 @@ class BS_SAV extends BimpObject
                         'onclick' => $onclick
                     );
                 }
-                
-                
+
+
 
                 if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise') && !is_null($propal)) {
                     if ($this->object_name === 'Bimp_Commande' || $this->object_name === 'Bimp_Propal' || (int) $this->getData('fk_statut') === 0) {
                         $buttons[] = array(
-                            'label'       => 'Déduire un crédit disponible',
-                            'icon' => 'fas_file-import',
-                            'classes'     => array('btn', 'btn-default'),
+                            'label'   => 'Déduire un crédit disponible',
+                            'icon'    => 'fas_file-import',
+                            'classes' => array('btn', 'btn-default'),
                             'onclick' => $propal->getJsActionOnclick('useRemise', array(), array(
-                                    'form_name' => 'use_remise'
-                            )
+                                'form_name' => 'use_remise'
+                                    )
                             )
                         );
                     }
@@ -1311,10 +1311,10 @@ class BS_SAV extends BimpObject
     {
         if ($this->isLoaded()) {
             global $conf;
-            if($conf->entity == 1)
+            if ($conf->entity == 1)
                 return DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/';
             else
-                return DOL_DATA_ROOT .'/'.$conf->entity. '/bimpcore/sav/' . $this->id . '/';
+                return DOL_DATA_ROOT . '/' . $conf->entity . '/bimpcore/sav/' . $this->id . '/';
         }
 
         return '';
@@ -1592,8 +1592,8 @@ class BS_SAV extends BimpObject
         if (BimpObject::objectLoaded($equipment) && $imeiPrivilegie && $equipment->getData('imei') != '' && $equipment->getData('imei') != 'n/a') {
             return (string) $equipment->getData('imei');
         }
-        
-        
+
+
         if (BimpObject::objectLoaded($equipment)) {
             return (string) $equipment->getData('serial');
         }
@@ -1993,7 +1993,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
@@ -2762,6 +2762,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $input = '';
 
                         if (BimpObject::objectLoaded($internal_stock)) {
+                            if ((int) $internal_stock->getData('do_not_order') && BimpTools::getPostFieldValue('repairType', '') === 'CIN') {
+                                $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                                $msg .= 'Attention : ce composant ne doit plus être commandé, veuillez de préférence utiliser un stock consigné ou créer une réparation d\'un autre type que "Carry In"';
+                                $input .= BimpRender::renderAlerts($msg, 'warning');
+                            }
+
                             if ((int) $internal_stock->getData('serialized')) {
                                 $has_internal_stock = true;
                                 $serials = $internal_stock->getData('serials');
@@ -2774,7 +2780,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                         $options[$serial] = $serial;
                                     }
 
-                                    $input = 'Qté disponible: <span class="success">' . count($serials) . '</span><br/>';
+                                    $input .= 'Qté disponible: <span class="success">' . count($serials) . '</span><br/>';
                                     $input .= '<span class="small">Numéro de série : </span><br/>';
                                     $input .= BimpInput::renderInput('select', 'internal_stock_serial_' . $part->id, 'none', array(
                                                 'extra_class' => 'from_internal_stock_serial',
@@ -2784,14 +2790,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             } elseif ((int) $internal_stock->getData('qty') > 0) {
                                 $has_internal_stock = true;
                                 $input = 'Qté disponible: <span class="success">' . $internal_stock->getData('qty') . '</span><br/>';
-                                
-                                if($consigned_stock && BimpObject::objectLoaded($consigned_stock) && $consigned_stock->getData('qty') > 0){
+
+                                if ($consigned_stock && BimpObject::objectLoaded($consigned_stock) && $consigned_stock->getData('qty') > 0) {
                                     $input .= BimpInput::renderInput('toggle', 'from_internal_stock_' . $part->id, 0, array(
                                                 'extra_class' => 'from_internal_stock_input'
                                     ));
-                                }
-                                
-                                else{
+                                } else {
                                     $input .= BimpRender::renderAlerts('Veuillez obligatoirement prendre le composant dans le stock interne', 'info');
                                     $input .= '<input type="hidden" value="1" name="from_internal_stock_' . $part->id . '" class="from_internal_stock_input"/>';
                                 }
@@ -4340,26 +4344,26 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
                 break;
             case 'restitution':
-                    $contact_pref = 1; // On force l'envoi par e-mail
+                $contact_pref = 1; // On force l'envoi par e-mail
 
-                    $subject = " Bon de restitution ".$this->getRef();
+                $subject = " Bon de restitution " . $this->getRef();
 
-                    $mail_msg = 'Bonjour, ' . "\n\n";
-                    $mail_msg .= 'Vous trouverez ci-joint votre bon de restitution ' . $this->getLink(array(), 'public') . " \n\n";
-                    $mail_msg .= 'Merci d\'avoir choisi ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n";
-                    $mail_msg .= 'Cordialement';
-                    
-                    $files = array();
-                    
-                    $dir = $this->getFilesDir();
-                    $file_name = 'Restitution_' . dol_sanitizeFileName($this->getRef()) . '.pdf';
-                    $fileRest = $dir . $file_name;
-                    if (is_file($fileRest)) {
-                        $files[] = array($fileRest, 'application/pdf', $file_name);
-                    }
-                    if(!count($files))
-                        $errors[] = 'Bon de restitution inexistant ';
-                
+                $mail_msg = 'Bonjour, ' . "\n\n";
+                $mail_msg .= 'Vous trouverez ci-joint votre bon de restitution ' . $this->getLink(array(), 'public') . " \n\n";
+                $mail_msg .= 'Merci d\'avoir choisi ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n";
+                $mail_msg .= 'Cordialement';
+
+                $files = array();
+
+                $dir = $this->getFilesDir();
+                $file_name = 'Restitution_' . dol_sanitizeFileName($this->getRef()) . '.pdf';
+                $fileRest = $dir . $file_name;
+                if (is_file($fileRest)) {
+                    $files[] = array($fileRest, 'application/pdf', $file_name);
+                }
+                if (!count($files))
+                    $errors[] = 'Bon de restitution inexistant ';
+
                 break;
         }
 
@@ -5142,7 +5146,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $code_centre;
     }
 
-    public function decreasePartsStock($parts_stock_data, $code_mvt, $desc)
+    public function decreasePartsStock($parts_stock_data, $code_mvt, $desc, $repair_type = '')
     {
         BimpObject::loadClass('bimpapple', 'InternalStock');
         BimpObject::loadClass('bimpapple', 'ConsignedStock');
@@ -5167,7 +5171,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $qty = (int) $stock_data['internal_stock']['qty'];
 
                         if ($qty > 0) {
-                            $stock->correctStock(-$qty, '', $code_mvt, $desc, $warnings, true, true);
+                            $stock_errors = $stock->correctStock(-$qty, '', $code_mvt, $desc, $warnings, true, true);
+
+                            if (!count($stock_errors) && in_array($repair_type, array('CIN'))) {
+                                $stock->modifQtyToReceive($qty);
+                            }
                         }
                     }
                 }
@@ -5385,7 +5393,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     global $user;
                     $propal->dol_object->update($user);
                 }
-                if ($propal->dol_object->cond_reglement_id != BimpCore::getConf('sav_cond_reglement',null, 'bimpsupport') || $propal->dol_object->mode_reglement_id != BimpCore::getConf('sav_mode_reglement',null, 'bimpsupport')) {
+                if ($propal->dol_object->cond_reglement_id != BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport') || $propal->dol_object->mode_reglement_id != BimpCore::getConf('sav_mode_reglement', null, 'bimpsupport')) {
                     //exception pour les virement bencaire a la commande 
                     if ($propal->dol_object->cond_reglement_id != 20 || $propal->dol_object->mode_reglement_id != 2) {
                         //on vérifie encours
@@ -5643,18 +5651,17 @@ ORDER BY a.val_max DESC");
                             $new_propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $new_id_propal);
 
                             $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
-                            
-                            
+
 //                            if (!BimpObject::objectLoaded($line)) {
-                                $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+                            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
 //                            }
-                            
+
                             $line->validateArray(array(
-                                'id_obj'             => (int) $new_id_propal,
-                                'type'               => BS_SavPropalLine::LINE_PRODUCT,
-                                'deletable'          => 0,
-                                'editable'           => 0,
-                                'remisable'          => 0,
+                                'id_obj'    => (int) $new_id_propal,
+                                'type'      => BS_SavPropalLine::LINE_PRODUCT,
+                                'deletable' => 0,
+                                'editable'  => 0,
+                                'remisable' => 0,
                             ));
 
                             $line->desc = "Machine(s) : " . $this->getNomMachine() .
@@ -5674,9 +5681,9 @@ ORDER BY a.val_max DESC");
                                 $error_label = 'mise à jour';
                                 $line_errors = $line->update($line_warnings, true);
                             }
-                            
-                            
-                            
+
+
+
 //                            $new_propal->dol_object->addline(
 //                                    "Machine(s) : " . $this->getNomMachine() .
 //                                    "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, BimpCore::getConf('id_prod_refus', '', 'bimpsupport'), $client->dol_object->remise_percent, 'HT', null, null, 1);
@@ -6254,6 +6261,25 @@ ORDER BY a.val_max DESC");
                                                 if (isset($data['send_msg']) && $data['send_msg']) {
                                                     $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Facture', false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null)));
                                                 }
+                                            }
+                                        }
+
+                                        // Changement date dernière vente des stocks internes:                                        
+                                        $parts = $this->getChildrenObjects('apple_parts');
+                                        $code_centre = (string) $this->getData('code_centre_repa');
+                                        if (!$code_centre) {
+                                            $code_centre = (string) $this->getData('code_centre');
+                                        }
+
+                                        $date = date('Y-m-d');
+                                        BimpObject::loadClass('bimpapple', 'InternalStock');
+
+                                        foreach ($parts as $part) {
+                                            
+                                            $internal_stock = InternalStock::getStockInstance($code_centre, $part->getData('part_number'));
+
+                                            if (BimpObject::objectLoaded($internal_stock)) {
+                                                $internal_stock->updateField('date_last_vente', $date);
                                             }
                                         }
                                     }
@@ -7907,7 +7933,7 @@ ORDER BY a.val_max DESC");
             }
 
             $cgv = "";
-            $cgv .= "-La société ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')." ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
+            $cgv .= "-La société " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . " ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
             $prixRefus = "49";
 
@@ -7931,7 +7957,7 @@ ORDER BY a.val_max DESC");
             $cgv .= "- Des frais de <b>" . $prixRefus . "€ TTC</b> seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contrefaçon ont été installées.<br/><br/>";
             $cgv .= "- Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de <b>4€ par jour</b>.<br/><br/>";
             $cgv .= "- Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruits, après accord du tribunal.<br/><br/>";
-            $cgv .= "- ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')." n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximum de 1000 €), en carte bleue.<br/><br/>";
+            $cgv .= "- " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . " n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximum de 1000 €), en carte bleue.<br/><br/>";
 
             if ($prioritaire && $isIphone) {
                 $cgv .= '- J\'accepte les frais de 96 TTC de prise en charge urgente';

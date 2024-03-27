@@ -81,7 +81,7 @@ function ConsignedStocks() {
         if (has_error) {
             return false;
         }
-        
+
         if (!parts.length) {
             bimp_msg('Aucun compoosant à réceptionner', 'danger', null, true);
             return false;
@@ -155,5 +155,55 @@ function ConsignedStocksShipment() {
     };
 }
 
+function InternalStocks() {
+    this.onBulkReceiveFormSubmit = function ($form, extra_data) {
+        var qties = [];
+
+        $form.find('.part_qty_received').each(function () {
+            var qty = parseInt($(this).val());
+
+            if (qty > 0) {
+                var id_part = parseInt($(this).data('id_part'));
+
+                qties.push({
+                    'id_part': id_part,
+                    'qty_received': qty
+                });
+            }
+        });
+
+        if (!qties.length) {
+            bimp_msg('Aucune unité à réceptionner saisie', 'danger', null, true);
+            return 0;
+        }
+
+        extra_data.qties = qties;
+
+        return extra_data;
+    };
+
+    this.receiveAll = function ($btn) {
+        var $container = $btn.findParentByClass('qties_inputContainer');
+
+        if ($.isOk($container)) {
+            $container.find('input.part_qty_received').each(function () {
+                $(this).val($(this).data('max'));
+            });
+        }
+    };
+
+    this.receiveNone = function ($btn) {
+        var $container = $btn.findParentByClass('qties_inputContainer');
+
+        if ($.isOk($container)) {
+            $container.find('input.part_qty_received').each(function () {
+                $(this).val(0);
+            });
+        }
+    }
+}
+
 var ConsignedStocks = new ConsignedStocks();
 var ConsignedStocksShipment = new ConsignedStocksShipment();
+
+var InternalStocks = new InternalStocks();

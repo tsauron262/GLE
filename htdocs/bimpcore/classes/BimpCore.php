@@ -127,9 +127,11 @@ class BimpCore
         $layout->addJsVars(self::getJsVars());
 
         // Ajouts variables local: 
-        $layout->addLocalVars(array(
-            'bimp_hash' => Session::getHash()
-        ));
+        if(class_exists('Session')){
+            $layout->addLocalVars(array(
+                'bimp_hash' => Session::getHash()
+            ));
+        }
 
         self::$filesInit = true;
     }

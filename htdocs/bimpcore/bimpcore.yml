@@ -404,4 +404,7 @@ params:
         label: Activer la vérification du hash
         type: bool
         def: 0
+    user_bimp_hash:
+        label: Users test bimp_hash
+        info: json
         

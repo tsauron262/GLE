@@ -552,13 +552,13 @@ class Bimp_Societe extends BimpDolObject
                     'onclick' => $this->getJsLoadModalForm('logo', 'Changer le logo')
                 );
             }
-            if ($this->can('edit') && $this->isEditable()) {
-                $buttons[] = array(
-                    'label'   => 'Créer Remote Token',
-                    'icon'    => 'fas_gamepad',
-                    'onclick' => $this->getJsActionOnclick('createRemoteToken')
-                );
-            }
+//            if ($this->can('edit') && $this->isEditable()) {
+//                $buttons[] = array(
+//                    'label'   => 'Créer Remote Token',
+//                    'icon'    => 'fas_gamepad',
+//                    'onclick' => $this->getJsActionOnclick('createRemoteToken')
+//                );
+//            }
 
             if ($this->canSetAction('merge') && $this->isActionAllowed('merge')) {
                 $buttons[] = array(
@@ -3505,25 +3505,25 @@ class Bimp_Societe extends BimpDolObject
         );
     }
 
-    public function actionCreateRemoteToken($data, &$success)
-    {
-        $errors = $warnings = array();
-        $success = 'Création réussie';
-        $remoteToken = BimpObject::getInstance('bimpsupport', 'BS_Remote_Token');
-        $errors = BimpTools::merge_array($errors, $remoteToken->validateArray(array('id_client' => $this->id)));
-        $errors = BimpTools::merge_array($errors, $remoteToken->create());
-        if (!count($errors)) {
-            $warnings[] = "Token : " . $remoteToken->getData('token') . '<br/>'
-                    . 'Server : <a href="stun.bimp.fr:' . $remoteToken->getData('port') . '">stun.bimp.fr:' . $remoteToken->getData('port') . '</a><br/>'
-                    . 'Mdp : ' . $remoteToken->getData('mdp') . '<br/>'
-                    . '<a href="' . DOL_URL_ROOT . "/bimpsupport/privatekey.php" . '">Certificat</a><br/>';
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
+//    public function actionCreateRemoteToken($data, &$success)
+//    {
+//        $errors = $warnings = array();
+//        $success = 'Création réussie';
+//        $remoteToken = BimpObject::getInstance('bimpsupport', 'BS_Remote_Token');
+//        $errors = BimpTools::merge_array($errors, $remoteToken->validateArray(array('id_client' => $this->id)));
+//        $errors = BimpTools::merge_array($errors, $remoteToken->create());
+//        if (!count($errors)) {
+//            $warnings[] = "Token : " . $remoteToken->getData('token') . '<br/>'
+//                    . 'Server : <a href="stun.bimp.fr:' . $remoteToken->getData('port') . '">stun.bimp.fr:' . $remoteToken->getData('port') . '</a><br/>'
+//                    . 'Mdp : ' . $remoteToken->getData('mdp') . '<br/>'
+//                    . '<a href="' . DOL_URL_ROOT . "/bimpsupport/privatekey.php" . '">Certificat</a><br/>';
+//        }
+//
+//        return array(
+//            'errors'   => $errors,
+//            'warnings' => $warnings
+//        );
+//    }
 
     public function actionCheckSolvabilite($data, &$success)
     {

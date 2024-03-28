@@ -3170,6 +3170,12 @@ class Bimp_Client extends Bimp_Societe
 
     public function getIdAtradius(&$errors = array())
     {
+        if ($this->isAnonymised()){
+            $errors[] = 'Impossible de synchro avec une client Annonymisé';
+            return 0;
+        }
+        
+        
         if ((int) $this->getData('id_atradius') > 0) {
             return (int) $this->getData('id_atradius');
         }

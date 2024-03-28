@@ -53,6 +53,16 @@ class Bimp_Propal extends Bimp_PropalTemp
         3 => array('label' => 'Refusée', 'icon' => 'exclamation-circle', 'classes' => array('danger')),
         4 => array('label' => 'Commande facturée', 'icon' => 'check', 'classes' => array('success')),
     );
+
+    const CONTRATS_STATUS_NONE = 0;
+    const CONTRATS_STATUS_TODO = 1;
+    const CONTRATS_STATUS_DONE = 2;
+
+    public static $contrats_status_list = array(
+        self::CONTRATS_STATUS_NONE => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
+        self::CONTRATS_STATUS_TODO => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
+        self::CONTRATS_STATUS_DONE => array('label' => 'Traités', 'icon' => 'fas_check', 'classes' => array('success'))
+    );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $acomptes_allowed = true;
     public static $default_signature_params = array(
@@ -1015,13 +1025,13 @@ class Bimp_Propal extends Bimp_PropalTemp
     public function getDirOutput()
     {
         global $conf;
-        if($this->isLoaded() && $this->dol_object->entity > 0)
+        if ($this->isLoaded() && $this->dol_object->entity > 0)
             return $conf->propal->multidir_output[$this->dol_object->entity] . '/';
         else
             return $conf->propal->dir_output . '/';
     }
 
-    public function getAbonnementsLinesIds($not_added_to_contrat = false)
+    public function getAbonnementsLinesIds($not_added_to_contrat = false, $return_id_product = false)
     {
         $lines = array();
         if ($this->isLoaded()) {
@@ -1032,7 +1042,12 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $where .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.line_origin_type = \'propal_line\' AND cdet.id_line_origin = a.id AND cdet.statut != -2) = 0';
             }
 
-            $rows = $this->db->getRows('bimp_propal_line a', $where, null, 'array', array('DISTINCT a.id'), 'position', 'asc', array(
+            $fields = array('DISTINCT a.id');
+            if ($return_id_product) {
+                $fields[] = 'pdet.fk_product';
+            }
+
+            $rows = $this->db->getRows('bimp_propal_line a', $where, null, 'array', $fields, 'position', 'asc', array(
                 'pdet' => array(
                     'table' => 'propaldet',
                     'on'    => 'pdet.rowid = a.id_line'
@@ -1053,8 +1068,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN (' . implode(',', $lines) . ')', null, 'array', array('DISTINCT a.id'), null, null, array());
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
-                        if (!in_array($r['id'], $lines))
-                            $lines[$r['id']] = $r['id'];
+                        if (!array_key_exists($r['id'], $lines)) {
+                            if ($return_id_product) {
+                                $lines[$r['id']] = $r['fk_product'];
+                            } else {
+                                $lines[$r['id']] = $r['id'];
+                            }
+                        }
                     }
                 }
             }
@@ -1068,10 +1088,10 @@ class Bimp_Propal extends Bimp_PropalTemp
         return count($this->getAbonnementsLinesIds($not_added_to_contrat));
     }
 
-    public function getAbonnementLines($by_linked_contrat = false, &$errors = array())
+    public function getAbonnementLines($by_linked_contrat = false, &$errors = array(), $not_added_to_contrat = false)
     {
         $lines = array();
-        $items = $this->getAbonnementsLinesIds();
+        $items = $this->getAbonnementsLinesIds($not_added_to_contrat);
 
         foreach ($items as $id_line) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', $id_line);
@@ -1207,6 +1227,10 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
+        if (BimpCore::isModuleActive('bimpcontrat') && $this->field_exists('contrats_status') && in_array((int) $this->getData('fk_statut'), array(Propal::STATUS_SIGNED, Propal::STATUS_BILLED))) {
+            $html .= '<br/>Contrats d\'abonnement : ' . $this->displayDataDefault('contrats_status');
+        }
+
         $html .= parent::renderHeaderStatusExtra();
 
         return $html;
@@ -1285,8 +1309,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
             }
 
-            $err = array();
-            if ($this->isActionAllowed('createContratAbo', $err)) {
+            if ($this->isActionAllowed('createContratAbo')) {
                 $nb_abos = $this->getNbAbonnements(true);
                 if ($nb_abos > 0) {
                     $s = ($nb_abos > 1 ? 's' : '');
@@ -1309,13 +1332,6 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
-            } else {
-//                global $user;
-//                if ($user->admin) {
-//                    $html .= '<pre>';
-//                    $html .= print_r($err, 1);
-//                    $html .= '</pre>';
-//                }
             }
         }
 
@@ -1412,10 +1428,12 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     public function renderContratAboInput()
     {
+        $this->checkContratsStatus();
+        
         $html = '';
 
         $errors = array();
-        $contrats = $this->getAbonnementLines(true, $errors);
+        $contrats = $this->getAbonnementLines(true, $errors, true);
 
         if (empty($contrats)) {
             $errors[] = 'Il n\'y a aucune ligne à ajouter à un contrat d\'abonnement';
@@ -1476,7 +1494,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             if ($has_linked_lines) {
                 $html .= '<tr>';
-                $html .= '<td colspan="2"><b>Lignes à ajouter à un abonnement en cours</b></td>';
+                $html .= '<td colspan="2"><b>Lignes à ajouter à un abonnement en cours ou déjà présentes dans un contrat</b></td>';
                 $html .= '</tr>';
 
                 foreach ($contrats as $id_contrat => $lines) {
@@ -1514,6 +1532,95 @@ class Bimp_Propal extends Bimp_PropalTemp
     }
 
     // Traitements: 
+
+    public function checkContratsStatus($cur_status = null)
+    {
+        $errors = array();
+                
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+        
+        if (!$this->field_exists('contrats_status')) {
+            $errors[] = 'statut contrat non activé';
+            return $errors;
+        }
+
+        $new_contrats_status = self::CONTRATS_STATUS_NONE;
+
+        if (BimpCore::isModuleActive('bimpcontrat')) {
+            if (is_null($cur_status)) {
+                $cur_status = (int) $this->getData('fk_statut');
+            }
+
+            if (in_array($cur_status, array(2, 4))) {
+                if ($this->getData('date_valid') <= '2023-10-01 00:00:00') {
+                    $new_contrats_status = self::CONTRATS_STATUS_DONE;
+                } else {
+                    $lines = $this->getAbonnementsLinesIds(true, true);
+
+                    if (!empty($lines)) {
+                        $commandes_ids = array();
+
+                        // Vérif lignes de commandes existantes pour chaque produit : 
+                        foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande')) as $item) {
+                            if (!in_array((int) $item['id_object'], $commandes_ids)) {
+                                $commandes_ids[] = (int) $item['id_object'];
+                            }
+                        }
+
+                        foreach ($lines as $id_line => $id_product) {
+                            foreach ($commandes_ids as $id_commande) {
+                                if ((int) $this->db->getCount('commandedet', 'fk_commande = ' . $id_commande . ' AND fk_product = ' . $id_product, 'rowid')) {
+                                    unset($lines[$id_line]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!empty($lines)) {
+                        $new_contrats_status = self::CONTRATS_STATUS_TODO;
+                    } else {
+                        $new_contrats_status = self::CONTRATS_STATUS_DONE;
+                    }
+                }
+            }
+        }
+
+        if ($new_contrats_status !== (int) $this->getData('contrats_status')) {
+            $errors = $this->updateField('contrats_status', $new_contrats_status);
+
+            if (!count($errors)) {
+                $this->addObjectLog('Statut des contrats d\'abonnement passé à ' . strip_tags($this->displayDataDefault('contrats_status')));
+            }
+        }
+        
+        return $errors;
+    }
+
+    public function onValidate(&$warnings = array())
+    {
+        $errors = parent::onValidate($warnings);
+        $this->checkContratsStatus(1);
+        return $errors;
+    }
+
+    public function onUnvalidate(&$warnings = array())
+    {
+        $errors = parent::onUnvalidate($warnings);
+        $this->checkContratsStatus();
+        return $errors;
+    }
+
+    public function onNewStatus($new_status, $current_status, $extra_data = array(), &$warnings = array())
+    {
+        $errors = parent::onNewStatus($new_status, $current_status, $extra_data, $warnings);
+
+        $this->checkContratsStatus($new_status);
+
+        return $errors;
+    }
 
     public function review($check = true, &$errors = array(), &$warnings = array(), $is_refus = false)
     {
@@ -1871,6 +1978,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 //                $contrat_line->delete($w, true);
             }
         }
+
+        $this->checkContratsStatus();
     }
 
     // Traitements - overrides BimpComm:
@@ -2171,7 +2280,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         global $no_bundle_lines_process;
         $no_bundle_lines_process = true;
 
-        $contrats = $this->getAbonnementLines(true, $errors);
+        $contrats = $this->getAbonnementLines(true, $errors, true);
 
         if (!count($errors) && empty($contrats)) {
             $errors[] = 'Il n\'y a aucune ligne à ajouter à un contrat d\'abonnement';
@@ -2376,6 +2485,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
             }
         }
+
+        $this->checkContratsStatus();
 
         $no_bundle_lines_process = false;
 
@@ -2860,6 +2971,8 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
+        $this->checkContratsStatus();
+
         return $errors;
     }
 
@@ -2869,6 +2982,8 @@ class Bimp_Propal extends Bimp_PropalTemp
             $errors = $this->updateField('fk_statut', Propal::STATUS_NOTSIGNED);
         }
 
+        $this->checkContratsStatus();
+
         return $errors;
     }
 
@@ -2877,6 +2992,8 @@ class Bimp_Propal extends Bimp_PropalTemp
         if ((int) $this->getData('fk_statut') === Propal::STATUS_NOTSIGNED) {
             $errors = $this->updateField('fk_statut', Propal::STATUS_VALIDATED);
         }
+
+        $this->checkContratsStatus();
 
         return $errors;
     }

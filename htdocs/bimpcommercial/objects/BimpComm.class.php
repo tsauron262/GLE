@@ -2640,7 +2640,13 @@ class BimpComm extends BimpDolObject
     }
 
     // Traitements:
-
+    
+    public function onNewStatus($new_status, $current_status, $extra_data = array(), &$warnings = array())
+    {
+        // Pour surcharges. Ne surtout pas suppr. cette fonction
+        return array();
+    }
+    
     public function startLineTransaction()
     {
         static::$dont_check_parent_on_update = true;

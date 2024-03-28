@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 6;
+    public static $current_version = 7;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -990,21 +990,18 @@ class BDS_VerifsProcess extends BDSProcess
         $rows = $this->db->executeS($sql, 'array');
 
         if (is_array($rows)) {
+            $elements = array();
 
             foreach ($rows as $r) {
-                $elements = array();
-
-                foreach ($rows as $r) {
-                    $elements[] = (int) $r['id_line'];
-                }
-
-                $data['steps']['process'] = array(
-                    'label'                  => 'Correction des stocks',
-                    'on_error'               => 'continue',
-                    'elements'               => $elements,
-                    'nbElementsPerIteration' => 100
-                );
+                $elements[] = (int) $r['id_line'];
             }
+
+            $data['steps']['process'] = array(
+                'label'                  => 'Correction des stocks',
+                'on_error'               => 'continue',
+                'elements'               => $elements,
+                'nbElementsPerIteration' => 100
+            );
         } else {
             $errors[] = $this->db->err();
         }
@@ -1070,20 +1067,18 @@ class BDS_VerifsProcess extends BDSProcess
         $rows = $this->db->executeS($sql, 'array');
 
         if (is_array($rows)) {
+            $elements = array();
+
             foreach ($rows as $r) {
-                $elements = array();
-
-                foreach ($rows as $r) {
-                    $elements[] = (int) $r['rowid'];
-                }
-
-                $data['steps']['process'] = array(
-                    'label'                  => 'Vérifs de statuts des abonnements',
-                    'on_error'               => 'continue',
-                    'elements'               => $elements,
-                    'nbElementsPerIteration' => 100
-                );
+                $elements[] = (int) $r['rowid'];
             }
+
+            $data['steps']['process'] = array(
+                'label'                  => 'Vérifs de statuts des abonnements',
+                'on_error'               => 'continue',
+                'elements'               => $elements,
+                'nbElementsPerIteration' => 100
+            );
         } else {
             $errors[] = $this->db->err();
         }
@@ -1108,6 +1103,66 @@ class BDS_VerifsProcess extends BDSProcess
                     $line->checkStatus($infos);
                     if (!empty($infos)) {
                         $this->Info($infos, $line);
+                    }
+                }
+            }
+        }
+    }
+
+    // Vérifs et correction des statuts abonnements dans les devis: 
+
+    public function initCheckPropalsContratsStatus(&$data, &$errors = array())
+    {
+        $rows = $this->db->getRows('propal', '(fk_statut IN (2, 4) AND date_valid IS NULL OR date_valid >= \'2023-10-01 00:00:00\') AND contrats_status = 0', null, 'array', array('rowid'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $elements = array();
+
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['rowid'];
+                }
+
+//                die('N : ' . count($elements));
+
+                $data['steps']['process'] = array(
+                    'label'                  => 'Vérifs des statuts abonnements',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 100
+                );
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCheckPropalsContratsStatus($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcommercial', 'Bimp_Propal');
+            if (!empty($this->references)) {
+                foreach ($this->references as $id_propal) {
+                    $this->incProcessed();
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+
+                    if (!BimpObject::objectLoaded($propal)) {
+                        $this->Error('Propal #' . $id_propal . ' inexistante');
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $cur_status = (int) $propal->getData('contrats_status');
+                    $err = $propal->checkContratsStatus(null);
+                    $new_status = (int) $propal->getData('contrats_status');
+
+//                    $this->Info('New : ' . $new_status . ' - old : ' . $cur_status, $propal);
+                    
+                    if (!empty($err)) {
+                        $this->Error($err, $propal);
+                        $this->incIgnored();
+                    } elseif ($cur_status !== $new_status) {
+                        $this->incUpdated();
                     }
                 }
             }
@@ -1328,13 +1383,27 @@ class BDS_VerifsProcess extends BDSProcess
                         'reports_delay' => 365
                             ), true, $errors, $warnings);
         }
-        
+
         if ($cur_version < 6) {
             // Opération "Vérif des statuts des abonnements": 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des statuts des abonnements',
                         'name'          => 'checkAbonnementsStatus',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
+                            ), true, $errors, $warnings);
+        }
+
+        if ($cur_version < 7) {
+            // Opération "Vérif des statuts abonnements des propales": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Vérif des statuts abonnements des propales',
+                        'name'          => 'checkPropalsContratsStatus',
                         'description'   => '',
                         'warning'       => '',
                         'active'        => 1,

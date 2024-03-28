@@ -13,14 +13,14 @@ class InterfacePostProcess extends BimpCommTriggers
 
         $object_name = '';
         $action_name = '';
-        
+
         $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name, $warnings);
 
         if (BimpObject::objectLoaded($bimpObject)) {
             $obj_errors = BimpTools::getDolEventsMsgs(array('errors'), false);
             if (empty($obj_errors)) {
                 BimpObject::loadClass('bimpalert', 'AlertProduit');
-                if(class_exists('AlertProduit'))
+                if (class_exists('AlertProduit'))
                     AlertProduit::traiteAlertes($bimpObject, $action_name, $errors, $warnings);
                 switch ($action_name) {
                     case 'CREATE':
@@ -47,9 +47,10 @@ class InterfacePostProcess extends BimpCommTriggers
                         }
                         break;
                 }
-                
-                if(isset($bimpObject->dol_object))
+
+                if (isset($bimpObject->dol_object)) {
                     $bimpObject->hydrateDolObject();
+                }
 
                 if (count($warnings)) {
                     setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');

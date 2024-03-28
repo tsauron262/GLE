@@ -165,7 +165,13 @@ fields:
     signature_params: 
         label: Paramètres incrustation signature
         type: json
-                
+    contrats_status: 
+        label: Statut contrats d'abonnement
+        type: int
+        values:
+            array: contrats_status_list
+        default_value: 0
+    
 forms: 
     default: 
         on_save: redirect

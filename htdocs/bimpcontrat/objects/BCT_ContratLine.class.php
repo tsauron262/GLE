@@ -7985,6 +7985,9 @@ class BCT_ContratLine extends BimpObject
         $id = $this->id;
         $id_contrat = (int) $this->getData('fk_contrat');
 
+        $id_line_origin = (int) $this->getData('id_line_origin');
+        $type_origine = $this->getData('line_origin_type');
+
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
@@ -8007,6 +8010,17 @@ class BCT_ContratLine extends BimpObject
             $this->db->update('contratdet', array(
                 'id_line_renouv' => 0
                     ), 'id_line_renouv = ' . $id);
+
+            if ($id_line_origin && $type_origine === 'propal_line') {
+                $id_propal = (int) $this->db->getValue('bimp_propal_line', 'id_obj', 'id = ' . $id_line_origin);
+
+                if ($id_propal) {
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+                    if (BimpObject::objectLoaded($propal)) {
+                        $propal->checkContratsStatus();
+                    }
+                }
+            }
         }
 
         return $errors;

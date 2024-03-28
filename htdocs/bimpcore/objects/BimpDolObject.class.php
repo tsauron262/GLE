@@ -1038,7 +1038,7 @@ class BimpDolObject extends BimpObject
 
         return $html;
     }
-
+    
     // Actions: 
 
     public function actionGeneratePdf($data, &$success = '', $errors = array(), $warnings = array())

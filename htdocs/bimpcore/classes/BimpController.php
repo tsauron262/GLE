@@ -232,11 +232,15 @@ class BimpController
 
                 $html = '';
                 $html .= '<h2 class="danger">Erreur Fatale</h2>';
-                $html .= '<strong>' . $file . '</strong> - Ligne <strong>' . $line . '</strong><br/>';
+                
+                global $dolibarr_main_prod;
+                if(!$dolibarr_main_prod){
+                    $html .= '<strong>' . $file . '</strong> - Ligne <strong>' . $line . '</strong><br/>';
 
-                $html .= BimpRender::renderAlerts(str_replace("\n", '<br/>', $msg));
+                    $html .= BimpRender::renderAlerts(str_replace("\n", '<br/>', $msg));
 
-                $html .= '<br/><br/>';
+                    $html .= '<br/><br/>';
+                }
 
                 $html .= '<div class="warning" style="font-size: 15px; text-align: center;">';
                 $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');

@@ -230,7 +230,7 @@ class BL_CommandeFournReception extends BimpObject
         $buttons[] = array(
             'label'   => 'Détails',
             'icon'    => 'fas_bars',
-            'onclick' => $this->getJsLoadModalView('details', 'Détails de la réception ' . $this->getData('ref'))
+            'onclick' => $this->getJsLoadModalView('details', 'Détails de la réception ' . addslashes($this->getData('ref')))
         );
 
         $success_callback = '';

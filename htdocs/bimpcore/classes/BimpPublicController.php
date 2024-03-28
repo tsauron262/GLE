@@ -55,8 +55,8 @@ class BimpPublicController extends BimpController
             BimpTools::setContext('private');
             accessforbidden();
         }
-        
-        if(isset($_GET['entity'])){
+
+        if (isset($_GET['entity'])) {
             global $conf;
             $conf->entity = $_GET['entity'];
             $_SESSION['dol_entity'] = $_GET['entity'];
@@ -270,6 +270,16 @@ class BimpPublicController extends BimpController
         $html .= '<meta charset = "UTF-8">';
         $html .= '<meta name = "viewport" content = "width=device-width, initial-scale=1">';
 
+        $url = BimpCore::getFileUrl('/includes/jquery/js/jquery.min.js');
+        if ($url) {
+            $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
+        }
+        
+        $url = BimpCore::getFileUrl('/bimpinterfaceclient/views/js/public.js');
+        if ($url) {
+            $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
+        }
+
         foreach ($params['js_files'] as $jsFile) {
             $url = BimpCore::getFileUrl($jsFile);
             if ($url) {
@@ -429,27 +439,19 @@ class BimpPublicController extends BimpController
     {
         $html = '';
 
-        $html .= '<script ype="text/javascript">
-    function verif_for_active_button() {
-    var cur_pw = document.getElementById(\'cur_pw\').value;
-            var new_pw = document.getElementById(\'new_pw\').value;
-                    var confirm_pw = document.getElementById(\'confirm_pw\').value;
-                            var btn = document.getElementById(\'public_form_submit\');
-                                    if (cur_pw && new_pw && confirm_pw && new_pw == confirm_pw) {
-                            btn.disabled = false;
-                            } else {
-                            btn.disabled = true;
-                            }
-                            }</script>';
-
         $html .= '<label for="cur_pw">Mot de passe actuel</label><br/>';
         $html .= '<input id="cur_pw" type="password" name="bic_cur_pw" onkeyup="verif_for_active_button()" placeholder="Mot de passe actuel">';
 
         $html .= '<label for="new_pw">Nouveau mot de passe</label><br />';
-        $html .= '<input id="new_pw" type="password" name="bic_new_pw" onkeyup="verif_for_active_button()" placeholder="Nouveau mot de passe"><br />';
+        $html .= '<input id="new_pw" type="password" name="bic_new_pw" onkeyup="verif_pw()" placeholder="Nouveau mot de passe">';
 
-        $html .= '<label for="confirm_pw">Confirmer votre nouveau mot de passe</label><br />';
-        $html .= '<input id="confirm_pw" onkeyup="verif_for_active_button()" type="password" name="bic_confirm_new_pw" placeholder="Confirmation">';
+        $html .= '<p class="alert_msg" id="min_chars_alert">- 8 caractères minimum</p>';
+        $html .= '<p class="alert_msg" id="special_chars_alert">- Au moins un caractère spécial</p>';
+        $html .= '<p class="alert_msg" id="maj_chars_alert">- Au moins un caractère majuscule</p>';
+        $html .= '<p class="alert_msg" id="num_chars_alert">- Au moins un caractère numérique</p>';
+
+        $html .= '<br/><label for="confirm_pw">Confirmer votre nouveau mot de passe</label><br />';
+        $html .= '<input id="confirm_pw" onkeyup="verif_pw()" type="password" name="bic_confirm_new_pw" placeholder="Confirmation">';
 
         return $html;
     }

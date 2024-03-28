@@ -407,4 +407,5 @@ params:
     user_bimp_hash:
         label: Users test bimp_hash
         info: json
+        def: []
         

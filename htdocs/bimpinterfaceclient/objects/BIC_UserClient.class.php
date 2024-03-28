@@ -459,11 +459,11 @@ class BIC_UserClient extends BimpObject
     public function getPublicEntity()
     {
         $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : $this->getData('main_public_entity'));
-        
+
         if ($public_entity && !$this->getData('main_public_entity')) {
             $this->updateField('main_public_entity', $public_entity);
         }
-        
+
         if (!$public_entity) {
             $public_entity = BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
         }
@@ -798,10 +798,9 @@ class BIC_UserClient extends BimpObject
         $errors = array();
         $warnings = array();
         $mdp_clear = BimpTools::randomPassword(8);
-        
+
         $success = 'Mot de passe généré avec succès : ' . $mdp_clear;
 
-        
         $this->set('password', hash('sha256', $mdp_clear));
         $this->set('renew_required', 1);
 
@@ -838,9 +837,13 @@ class BIC_UserClient extends BimpObject
         $warnings = array();
         $success = 'Mot de passe réinitialisé avec succès';
 
+        $mdp_clear = '';
         $errors = $this->reinitPassword($warnings, $mdp_clear);
-        
-        $success .= ' : ' . $mdp_clear;
+
+        global $user;
+        if ($user->admin) {
+            $success .= ' : ' . $mdp_clear;
+        }
 
         return array(
             'errors'   => $errors,

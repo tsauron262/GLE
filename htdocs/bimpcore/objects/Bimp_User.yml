@@ -139,6 +139,10 @@ fields:
         label: Tél. portable perso
         dol_extra_field: 1
         type: password
+        min_length: 10
+        special_required: 0
+        maj_required: 0
+        num_required: 0
 #    skype: 
 #        label: Identifiant Skype
     fk_user: 

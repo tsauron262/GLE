@@ -168,7 +168,7 @@ class Session {
     
     static function isHashValid($hash){
         global $user;
-        if(!BimpCore::getConf('use_bimp_hash') && !in_array($user->id, BimpCore::getConf('user_bimp_hash')))
+        if(!BimpCore::getConf('use_bimp_hash') && !in_array($user->id, json_decode(BimpCore::getConf('user_bimp_hash'),true)))
             return true;
         if(isset($_SESSION['bimp_hash'][0]['hash']) && $_SESSION['bimp_hash'][0]['hash'] == $hash && ($_SESSION['bimp_hash'][0]['time']+static::$timeValidBimpHash) > time())
             return true;

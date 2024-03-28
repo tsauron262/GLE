@@ -174,7 +174,7 @@ class Session {
         if(isset($_SESSION['bimp_hash'][1]['hash']) && $_SESSION['bimp_hash'][1]['hash'] == $hash && ($_SESSION['bimp_hash'][1]['time']+static::$timeValidBimpHash) > time())
             return true;
         if(class_exists('BimpCore'))
-            BimpCore::addlog ('Token invalide', 3);
+            BimpCore::addlog ('Token invalide action = '.BimpTools::getPostFieldValue('action'), 3);
         return false;
     }
     

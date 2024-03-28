@@ -53,7 +53,7 @@ class BimpTools
      */
 
     public static function getValue($key, $default_value = null, $decode = true, $protected = false, $check = '', $filter = null, $options = null)
-    {        
+    {
         $keys = explode('/', $key);
 
         $value = null;
@@ -85,14 +85,35 @@ class BimpTools
         if (is_null($value)) {
             return $default_value;
         }
-        
+
         if (is_string($value) && $decode) {
             $value = stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
         }
-        
-        if (is_string($value) && $check) {
-            $value = sanitizeVal($value, $check, $filter, $options);
+
+        if ((int) BimpCore::getConf('activate_post_data_check')) {
+            if (is_string($value) && $value && $check) {
+                $val_temp = sanitizeVal($value, $check, $filter, $options);
+
+                if (!$val_temp || $val_temp != $value) {
+                    if ((int) BimpCore::getConf('post_data_check_log_only')) {
+                        if (!$val_temp) {
+                            BimpCore::addlog('Donnée invalidée', 3, 'secu', null, array(
+                                'Key' => $key
+                            ));
+                        } else {
+                            BimpCore::addlog('Donnée modifiée', 2, 'secu', null, array(
+                                'Key'             => $key,
+                                'Valeur initiale' => $value,
+                                'Valeur modifiée' => $val_temp
+                            ));
+                        }
+                    } else {
+                        $value = $val_temp;
+                    }
+                }
+            }
         }
+
 
         return $value;
     }

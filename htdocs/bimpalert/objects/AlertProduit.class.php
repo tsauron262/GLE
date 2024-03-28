@@ -101,8 +101,9 @@ class AlertProduit extends BimpObject
     
     public function getObjectInfo($key) {
         $type = $this->getData('type_piece');
-        if(BimpTools::getValue('type_piece')) {
-            $type = BimpTools::getValue('type_piece');
+        
+        if(BimpTools::isSubmit('type_piece')) {
+            $type = BimpTools::getValue('type_piece', '', 0, 0, 'alphanohtml');
         }
         
         return self::$type_piece[$type][$key];

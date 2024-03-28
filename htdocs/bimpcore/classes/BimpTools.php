@@ -48,14 +48,13 @@ class BimpTools
         }
         return 1;
     }
-
     /*
      * $protected = que du string
      */
-    public static function getValue($key, $default_value = null, $decode = true, $protected = false)
-    {
+
+    public static function getValue($key, $default_value = null, $decode = true, $protected = false, $check = '', $filter = null, $options = null)
+    {        
         $keys = explode('/', $key);
-        
 
         $value = null;
         foreach ($keys as $current_key) {
@@ -76,9 +75,9 @@ class BimpTools
                 }
             }
         }
-        
-        if($protected && !ctype_alnum(str_replace(array('_'), '', $value)) && $value != ''){
-            BimpCore::addlog('Protection 65789 activée key '.$key.' value : '.  strip_tags(addslashes($value)), 3);
+
+        if ($protected && !ctype_alnum(str_replace(array('_'), '', $value)) && $value != '') {
+            BimpCore::addlog('Protection 65789 activée key ' . $key . ' value : ' . strip_tags(addslashes($value)), 3);
             echo BimpRender::renderAlerts('Protection 65789 activée');
             die;
         }
@@ -86,9 +85,13 @@ class BimpTools
         if (is_null($value)) {
             return $default_value;
         }
-
+        
         if (is_string($value) && $decode) {
-            return stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
+            $value = stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
+        }
+        
+        if (is_string($value) && $check) {
+            $value = sanitizeVal($value, $check, $filter, $options);
         }
 
         return $value;
@@ -3369,7 +3372,7 @@ class BimpTools
         for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
             
         }
-        
+
         if ($force_special_char && !preg_match('/[@\-_!\?]/', $s)) {
             $n = rand(1, $length);
             $chars = '@-_!?';

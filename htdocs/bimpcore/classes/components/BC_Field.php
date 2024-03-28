@@ -92,6 +92,12 @@ class BC_Field extends BimpComponent
         'object_filters' => array(
             'obj_module' => array('default' => ''),
             'obj_name'   => array('default' => '')
+        ),
+        'password'       => array(
+            'min_length'       => array('data_type' => 'int', 'default' => 12), // Nombre de caractères minimum
+            'special_required' => array('data_type' => 'bool', 'default' => 1), // Caractère spécial obligatoire
+            'maj_required'     => array('data_type' => 'bool', 'default' => 1), // Caractère majuscule obligatoire
+            'num_required'     => array('data_type' => 'bool', 'default' => 1), // Caractère numérique obligatoire
         )
     );
     public static $missing_if_empty_types = array(

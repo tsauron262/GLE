@@ -49,9 +49,13 @@ class BimpTools
         return 1;
     }
 
-    public static function getValue($key, $default_value = null, $decode = true)
+    /*
+     * $protected = que du string
+     */
+    public static function getValue($key, $default_value = null, $decode = true, $protected = false)
     {
         $keys = explode('/', $key);
+        
 
         $value = null;
         foreach ($keys as $current_key) {
@@ -71,6 +75,11 @@ class BimpTools
                     break;
                 }
             }
+        }
+        
+        if($protected && !ctype_alnum($value) && $value != ''){
+            echo BimpRender::renderAlerts('Protection 65789 activée');
+            die;
         }
 
         if (is_null($value)) {

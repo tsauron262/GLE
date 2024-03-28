@@ -399,3 +399,9 @@ params:
         label: Désactiver les API
         type: bool
         def: 0
+        
+    use_bimp_hash:
+        label: Activer la vérification du hash
+        type: bool
+        def: 0
+        

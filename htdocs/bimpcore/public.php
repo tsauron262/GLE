@@ -12,7 +12,7 @@ if (!BimpCore::getConf('module_version_bimpinterfaceclient', '')) {
 }
 
 $module = BimpTools::getBacktraceArray('module');
-$controller_name = BimpTools::getValue('fc', 'index');
+$controller_name = BimpTools::getValue('fc', 'index', true, true);
 
 if (!$module || !$controller_name) {
     accessforbidden();

@@ -95,6 +95,12 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     if (typeof (bimp_context) !== 'undefined' && bimp_context) {
         bimpAjax.url += "&bimp_context=" + bimp_context;
     }
+    if (typeof localStorage.getItem('bimp_hash') !== 'undefined'){
+        data['bimp_hash'] = localStorage.getItem('bimp_hash');
+    }
+    else if (typeof (bimp_hash) !== 'undefined' && bimp_hash) {
+        data['bimp_hash'] = bimp_hash;
+    }
 
     // Affichage du message de chargement ou suppression du contenu actuel si nécessaire
     if (this.display_processing) {
@@ -274,6 +280,10 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             contentType: bimpAjax.contentType,
             processData: bimpAjax.processData,
             success: function (result) {
+                if(typeof (result.bimp_hash) !== 'undefined') {
+                    localStorage.setItem('bimp_hash', result.bimp_hash);
+                }
+                
                 if (typeof (result.request_id) !== 'undefined') {
                     bimpAjax = bimp_requests[parseInt(result.request_id)];
                 } else {

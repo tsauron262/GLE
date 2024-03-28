@@ -126,6 +126,13 @@ class BimpCore
         // Ajouts variables JS: 
         $layout->addJsVars(self::getJsVars());
 
+        // Ajouts variables local: 
+        if(class_exists('Session')){
+            $layout->addLocalVars(array(
+                'bimp_hash' => Session::getHash()
+            ));
+        }
+
         self::$filesInit = true;
     }
 
@@ -885,7 +892,7 @@ class BimpCore
         $id_conf = (int) $bdb->getValue('bimpcore_conf', 'id', 'module = \'' . $module . '\' AND name = \'' . $name . '\' AND entity = ' . $entity);
         if ($id_conf) {
             if ($bdb->delete('bimpcore_conf', 'id = ' . $id_conf) <= 0) {
-                $errors[] = 'Echec suppr. param "' . $name . '" - ' . $this->db->err();
+                $errors[] = 'Echec suppr. param "' . $name . '" - ' ;//. $this->db->err();
             }
         }
 

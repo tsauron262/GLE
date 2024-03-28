@@ -9,6 +9,7 @@ class BimpLayout
     public $js_files = array();
     public $css_files = array();
     public $js_vars = array();
+    public $local_vars = array();
     public $page_title = '';
     public $extra_head = '';
     public $body_id = 'mainbody';
@@ -117,6 +118,15 @@ class BimpLayout
         }
     }
 
+    public function addLocalVars($local_vars)
+    {
+        if (is_array($local_vars) && !empty($local_vars)) {
+            foreach ($local_vars as $var_name => $var_value) {
+                $this->local_vars[$var_name] = $var_value;
+            }
+        }
+    }
+
     // Traitements:
 
     public function initHead()
@@ -132,6 +142,14 @@ class BimpLayout
                 $bimp_layout_js_vars .= "\t" . 'var ' . $var_name . ' = ';
                 $bimp_layout_js_vars .= $var_value;
                 $bimp_layout_js_vars .= ';' . "\n";
+            }
+            foreach ($this->local_vars as $var_name => $var_value) {
+                $bimp_layout_js_vars .= "\t" . 'localStorage.setItem("' . $var_name . '",';
+                if(is_int($var_value))
+                    $bimp_layout_js_vars .= $var_value;
+                else
+                    $bimp_layout_js_vars .= '"' . $var_value . '"';
+                $bimp_layout_js_vars .= ');' . "\n";
             }
 
             $bimp_layout_js_vars .= '</script>' . "\n";

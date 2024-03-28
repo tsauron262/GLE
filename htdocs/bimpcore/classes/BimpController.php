@@ -26,7 +26,7 @@ class BimpController
         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
 
         if (is_null($controller)) {
-            $controller = BimpTools::getValue('fc', 'index');
+            $controller = BimpTools::getValue('fc', 'index', true, true);
         }
 
         if (BimpCore::getContext() == "public" && file_exists($dir . 'public_' . $controller . 'Controller.php')) {
@@ -850,12 +850,22 @@ class BimpController
 
     protected function ajaxProcess()
     {
+        header('Content-Type: application/json');
         BimpDebug::addDebugTime('Début affichage page');
         if (BimpDebug::isActive()) {
             BimpDebug::addParamsDebug();
         }
 
         $req_id = (int) BimpTools::getValue('request_id', 0);
+        $bimp_hash = BimpTools::getValue('bimp_hash', '');
+        if(class_exists('Session') && !Session::isHashValid($bimp_hash)){
+            die(json_encode(array(
+                'errors'     => array('Token invalide, merci de rafraîchir votre page, et de retenter l\'opération'),
+                'warnings'   => static::getAndResetAjaxWarnings(),
+                'request_id' => $req_id
+            )));
+        }
+            
         $debug_content = '';
 
         $errors = array();
@@ -882,6 +892,10 @@ class BimpController
                 if (!isset($result['warnings'])) {
                     $result['warnings'] = array();
                 }
+                
+                
+                if(class_exists('Session'))
+                    $result['bimp_hash'] = Session::getHash();
 
                 $result['warnings'] = BimpTools::merge_array($result['warnings'], static::getAndResetAjaxWarnings());
 

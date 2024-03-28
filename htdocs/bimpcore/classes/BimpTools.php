@@ -78,7 +78,7 @@ class BimpTools
         }
         
         if($protected && !ctype_alnum($value) && $value != ''){
-            BimpCore::addlog('Protection 65789 activée key '.$key.' value : '.  strip_tags(addslashes($string)), 3);
+            BimpCore::addlog('Protection 65789 activée key '.$key.' value : '.  strip_tags(addslashes($value)), 3);
             echo BimpRender::renderAlerts('Protection 65789 activée');
             die;
         }

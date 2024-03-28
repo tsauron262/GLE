@@ -3364,10 +3364,17 @@ class BimpTools
         return $result;
     }
 
-    public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+    public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@-_!?', $force_special_char = true)
     {
         for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
             
+        }
+        
+        if ($force_special_char && !preg_match('/[@\-_!\?]/', $s)) {
+            $n = rand(1, $length);
+            $chars = '@-_!?';
+            $char = $chars[rand(0, 5)];
+            $s = substr_replace($s, $char, $n, 1);
         }
         return $s;
     }
@@ -4015,7 +4022,6 @@ if (!function_exists('mime_content_type')) {
 
     function mime_content_type($filename)
     {
-
         $mime_types = array(
             'txt'  => 'text/plain',
             'htm'  => 'text/html',

@@ -652,11 +652,11 @@ class BIC_UserClient extends BimpObject
         return $errors;
     }
 
-    public function reinitPassword(&$warnings = array())
+    public function reinitPassword(&$warnings = array(), &$mdp_clear = '')
     {
         $errors = array();
 
-        $mdp_clear = BimpTools::randomPassword(7);
+        $mdp_clear = BimpTools::randomPassword(8);
         $this->set('password', hash('sha256', $mdp_clear));
         $this->set('renew_required', 1);
 
@@ -797,9 +797,11 @@ class BIC_UserClient extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Mot de passe généré avec succès';
+        $mdp_clear = BimpTools::randomPassword(8);
+        
+        $success = 'Mot de passe généré avec succès : ' . $mdp_clear;
 
-        $mdp_clear = BimpTools::randomPassword(7);
+        
         $this->set('password', hash('sha256', $mdp_clear));
         $this->set('renew_required', 1);
 
@@ -836,7 +838,9 @@ class BIC_UserClient extends BimpObject
         $warnings = array();
         $success = 'Mot de passe réinitialisé avec succès';
 
-        $errors = $this->reinitPassword($warnings);
+        $errors = $this->reinitPassword($warnings, $mdp_clear);
+        
+        $success .= ' : ' . $mdp_clear;
 
         return array(
             'errors'   => $errors,
@@ -853,7 +857,7 @@ class BIC_UserClient extends BimpObject
 
         $mdp_clear = '';
         if (!$this->getData('password')) {
-            $mdp_clear = BimpTools::randomPassword(7);
+            $mdp_clear = BimpTools::randomPassword(8);
             $this->set('password', hash('sha256', $mdp_clear));
         }
 

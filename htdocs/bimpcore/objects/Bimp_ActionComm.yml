@@ -288,6 +288,7 @@ forms:
                 required: 1
             link:
                 custom: 1
+                input_name: link
                 content: 
                     callback: displayElement
                 label: Objet liée

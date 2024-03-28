@@ -8,7 +8,7 @@ class Session {
     private $db = null;
     private $timeDeb = 0;
 //    public static $timeValidBimpHash = (60 * 60 * 1);
-    public static $timeValidBimpHash = (60 * 10);
+    public static $timeValidBimpHash = (60 * 60 * 12);
     // Initialisation de la session lors de l'appel de la classe
     public function __construct($db){
         $this->timeDeb = hrtime(true);

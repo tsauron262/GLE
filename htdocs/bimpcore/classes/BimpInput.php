@@ -141,7 +141,33 @@ class BimpInput
                 break;
 
             case 'password':
+                $min_length = (int) BimpTools::getArrayValueFromPath($options, 'min_length', 12);
+                $special_required = (int) BimpTools::getArrayValueFromPath($options, 'special_required', 1);
+                $maj_required = (int) BimpTools::getArrayValueFromPath($options, 'maj_required', 1);
+                $num_required = (int) BimpTools::getArrayValueFromPath($options, 'num_required', 1);
+
+                $data .= ' data-min_length="' . $min_length . '"';
+                $data .= ' data-special_required="' . $special_required . '"';
+                $data .= ' data-maj_required="' . $maj_required . '"';
+                $data .= ' data-num_required="' . $num_required . '"';
+
                 $html .= '<input type="password" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"' . $data . '/>';
+                $html .= '<p class="inputHelp">';
+                $html .= $min_length . ' caractères minimum';
+                if ($special_required || $maj_required || $num_required) {
+                    $html .= '<br/>Veuillez utiliser au moins : ';
+
+                    if ($special_required) {
+                        $html .= '<br/> - Un caractère spécial';
+                    }
+                    if ($maj_required) {
+                        $html .= '<br/> - Un caractère majuscule';
+                    }
+                    if ($num_required) {
+                        $html .= '<br/> - Un caractère numérique';
+                    }
+                }
+                $html .= '</p>';
                 break;
 
             case 'qty':

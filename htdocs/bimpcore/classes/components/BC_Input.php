@@ -28,6 +28,12 @@ class BC_Input extends BimpComponent
             'no_autocorrect'  => array('data_type' => 'bool', 'default' => 0),
             'possible_values' => array('data_type' => 'array', 'default' => array())
         ),
+        'password'                    => array(
+            'min_length'       => array('data_type' => 'int', 'default' => 12), // Nombre de caractères minimum
+            'special_required' => array('data_type' => 'bool', 'default' => 1), // Caractère spécial obligatoire
+            'maj_required'     => array('data_type' => 'bool', 'default' => 1), // Caractère majuscule obligatoire
+            'num_required'     => array('data_type' => 'bool', 'default' => 1), // Caractère numérique obligatoire
+        ),
         'qty'                         => array(
             'step'            => array('data_type' => 'float', 'default' => 1),
             'min_label'       => array('data_type' => 'bool', 'default' => 0),
@@ -151,7 +157,7 @@ class BC_Input extends BimpComponent
             'include_empty'        => array('data_type' => 'bool', 'default' => 0),
             'has_commissions_only' => array('data_type' => 'bool', 'default' => 0),
             'with_caisse_close'    => array('data_type' => 'bool', 'default' => 0),
-            'with_caisse_open'    => array('data_type' => 'bool', 'default' => 0)
+            'with_caisse_open'     => array('data_type' => 'bool', 'default' => 0)
         ),
         'search_object'               => array(
             'object'          => array('default' => ''),
@@ -584,6 +590,13 @@ class BC_Input extends BimpComponent
                 $options['files_dir'] = isset($this->params['files_dir']) ? $this->params['check_mentions'] : '';
                 $options['allowed_types'] = isset($this->params['allowed_types']) ? $this->params['allowed_types'] : '';
                 $options['allowed_ext'] = isset($this->params['allowed_ext']) ? $this->params['allowed_ext'] : '';
+                break;
+
+            case 'password':
+                $options['min_length'] = isset($this->params['min_length']) ? (int) $this->params['min_length'] : (isset($this->field_params['min_length']) ? $this->field_params['min_length'] : 12);
+                $options['special_required'] = isset($this->params['special_required']) ? (int) $this->params['special_required'] : (isset($this->field_params['special_required']) ? $this->field_params['special_required'] : 1);
+                $options['maj_required'] = isset($this->params['maj_required']) ? (int) $this->params['maj_required'] : (isset($this->field_params['maj_required']) ? $this->field_params['maj_required'] : 1);
+                $options['num_required'] = isset($this->params['num_required']) ? (int) $this->params['num_required'] : (isset($this->field_params['num_required']) ? $this->field_params['num_required'] : 1);
                 break;
         }
 

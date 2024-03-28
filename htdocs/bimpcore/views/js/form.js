@@ -605,6 +605,7 @@ function saveAssociations(operation, associations, $resultContainer, successCall
 
 function validateForm($form) {
     var data_missing = false;
+    var has_errors = false;
     var check = true;
 
     if ($form.find('.is_reloading').length) {
@@ -613,11 +614,26 @@ function validateForm($form) {
     }
 
     $form.find('.inputContainer').each(function () {
+        $(this).removeClass('value_required');
+        var input_check = true;
+
         var $template = $(this).findParentByClass('subObjectFormTemplate');
         if (!$.isOk($template)) {
             var field_name = $(this).data('field_name');
             if (field_name) {
+
                 var $input = $(this).find('[name="' + field_name + '"]');
+
+                if ($input.length) {
+                    err = $input.data('has_errors');
+                    if (typeof (err) !== 'undefined') {
+                        err = parseInt(err);
+                        if (!isNaN(err) && err) {
+                            has_errors = true;
+                            input_check = false;
+                        }
+                    }
+                }
 
                 // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
                 if ($(this).find('.cke').length) {
@@ -669,10 +685,8 @@ function validateForm($form) {
                                 }
                             });
                             if (!list_check) {
-                                $(this).addClass('value_required');
+                                input_check = false;
                                 data_missing = true;
-                            } else {
-                                $(this).removeClass('value_required');
                             }
                         }
                     } else {
@@ -682,22 +696,22 @@ function validateForm($form) {
                                 if (!parseInt($input.val()) || parseInt($input.val()) <= 0) {
 //                                    bimp_msg($input.tagName() + $input.attr('name') + ': ' + $input.val());
                                     data_missing = true;
-                                    $(this).addClass('value_required');
-                                } else {
-                                    $(this).removeClass('value_required');
+                                    input_check = false;
                                 }
                             } else {
                                 if ($input.val() === '') {
                                     data_missing = true;
-                                    $(this).addClass('value_required');
-                                } else {
-                                    $(this).removeClass('value_required');
+                                    input_check = false;
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+
+        if (!input_check) {
+            $(this).addClass('value_required');
         }
     });
 
@@ -718,6 +732,11 @@ function validateForm($form) {
     if (data_missing) {
         check = false;
         bimp_msg('Certains champs obligatoires ne sont pas renseignés', 'danger', null, true);
+    }
+
+    if (has_errors) {
+        check = false;
+        bimp_msg('Certains champs comportent des erreurs. Veuillez corriger', 'danger', null, true);
     }
 
     return check;
@@ -2356,6 +2375,59 @@ function loadSearchObjectResults($input, idx) {
     }
 }
 
+function checkPasswordInput($input) {
+    if (!$.isOk($input)) {
+        return false;
+    }
+
+    $input.data('has_errors', 0);
+
+    $input.parent().find('.pwErrorMsg').remove();
+
+    var val = $input.val();
+
+    if (val) {
+        var msg = '';
+        var min_length = $input.data('min_length');
+        if (typeof (min_length) !== 'undefined') {
+            min_length = parseInt(min_length);
+            if (!isNaN(min_length) && min_length && val.length < min_length) {
+                msg += (msg ? '<br/>' : '') + 'Veuillez saisir au moin ' + min_length + ' caractères';
+            }
+        }
+
+        var spec = parseInt($input.data('special_required'));
+        if (!isNaN(spec) && spec) {
+            if (!/[^A-Za-z0-9]+/.test(val)) {
+                msg += (msg ? '<br/>' : '') + 'Veuillez utiliser au moins un caractère spécial';
+            }
+        }
+
+        var maj = parseInt($input.data('maj_required'));
+        if (!isNaN(maj) && maj) {
+            if (!/[A-Z]+/.test(val)) {
+                msg += (msg ? '<br/>' : '') + 'Veuillez utiliser au moins un caractère majuscule';
+            }
+        }
+
+        var num = parseInt($input.data('num_required'));
+        if (!isNaN(num) && num) {
+            if (!/[0-9]+/.test(val)) {
+                msg += (msg ? '<br/>' : '') + 'Veuillez utiliser au moins un caractère numérique';
+            }
+        }
+
+        if (msg) {
+            $input.parent().append('<div class="danger pwErrorMsg" style="margin-top: 10px">' + msg + '</div>');
+            $input.data('has_errors', 1);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 // Gestion de l'affichage conditionnel des champs:
 
 function toggleInputDisplay($container, $input) {
@@ -3140,7 +3212,7 @@ function setInputsEvents($container) {
             var field_name = $(this).data('field_name');
             var $input = $(this).parent().find('textarea[name="' + field_name + '"],input[name="' + field_name + '"]');
             var replace_cur_value = parseInt($(this).data('replace_cur_value'));
-            
+
             if (isNaN(replace_cur_value)) {
                 replace_cur_value = 0;
             }
@@ -3581,6 +3653,11 @@ function setInputsEvents($container) {
     });
     $container.find('.bimp_drop_files_container').each(function () {
         BFU.initEvents($(this));
+    });
+    $container.find('input[type="password"]').each(function () {
+        $(this).change(function () {
+            checkPasswordInput($(this));
+        });
     });
 }
 

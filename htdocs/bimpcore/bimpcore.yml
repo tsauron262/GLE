@@ -17,6 +17,8 @@ categories:
         label: Groupes
     bimplogs: 
         label: Logs
+    secu: 
+        label: Sécurité
         
         
 params: 
@@ -35,14 +37,6 @@ params:
         label: Message de vérouillage des GIT PULL
         info: Si défini, les GIT PULL sont bloqués et le message est affiché lors d'une tentative de pull.<br/>Un bouton est également affiché pour dévérouillage immédiat.
         def: ''
-    mode_securlogin: 
-        label: Mode Secure Login
-        type: select
-        values: 
-            0: Pas de vérifs
-            1: Code SMS écran
-            2: Normal
-        def: 0
     send_sms: 
         label: Activer l'envoi de SMS
         type: bool
@@ -400,12 +394,36 @@ params:
         type: bool
         def: 0
         
+    # Sécurité : 
+    mode_securlogin: 
+        label: Mode Secure Login
+        type: select
+        values: 
+            0: Pas de vérifs
+            1: Code SMS écran
+            2: Normal
+        def: 0
+        cat: secu
     use_bimp_hash:
         label: Activer la vérification du hash
         type: bool
         def: 0
+        cat: secu
     user_bimp_hash:
         label: Users test bimp_hash
         info: json
         def: []
+        cat: secu
+    activate_post_data_check: 
+        label: Activer la vérification des données POST / GET
+        type: bool
+        def: 0
+        cat: secu
+        sub_params: 
+            - if: 1
+              params: 
+                  post_data_check_log_only: 
+                      label: Ne faire que logguer les valeurs invalides
+                      type: bool
+                      def: 1
         

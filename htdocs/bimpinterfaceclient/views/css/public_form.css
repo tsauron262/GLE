@@ -131,3 +131,10 @@ label {
   color: #1F995C;
   text-align: center;
   margin: 30px 0; }
+
+/* line 134, ../scss/public_form.scss */
+p.alert_msg {
+  font-size: 11px;
+  line-height: 11px;
+  margin-left: 30px;
+  color: #A00000; }

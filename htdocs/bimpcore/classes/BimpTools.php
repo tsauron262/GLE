@@ -48,14 +48,13 @@ class BimpTools
         }
         return 1;
     }
-
     /*
      * $protected = que du string
      */
-    public static function getValue($key, $default_value = null, $decode = true, $protected = false)
+
+    public static function getValue($key, $default_value = null, $decode = true, $protected = false, $check = '', $filter = null, $options = null)
     {
         $keys = explode('/', $key);
-        
 
         $value = null;
         foreach ($keys as $current_key) {
@@ -76,9 +75,9 @@ class BimpTools
                 }
             }
         }
-        
-        if($protected && !ctype_alnum(str_replace(array('_'), '', $value)) && $value != ''){
-            BimpCore::addlog('Protection 65789 activée key '.$key.' value : '.  strip_tags(addslashes($value)), 3);
+
+        if ($protected && !ctype_alnum(str_replace(array('_'), '', $value)) && $value != '') {
+            BimpCore::addlog('Protection 65789 activée key ' . $key . ' value : ' . strip_tags(addslashes($value)), 3);
             echo BimpRender::renderAlerts('Protection 65789 activée');
             die;
         }
@@ -88,8 +87,33 @@ class BimpTools
         }
 
         if (is_string($value) && $decode) {
-            return stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
+            $value = stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
         }
+
+        if ((int) BimpCore::getConf('activate_post_data_check')) {
+            if (is_string($value) && $value && $check) {
+                $val_temp = sanitizeVal($value, $check, $filter, $options);
+
+                if (!$val_temp || $val_temp != $value) {
+                    if ((int) BimpCore::getConf('post_data_check_log_only')) {
+                        if (!$val_temp) {
+                            BimpCore::addlog('Donnée invalidée', 3, 'secu', null, array(
+                                'Key' => $key
+                            ));
+                        } else {
+                            BimpCore::addlog('Donnée modifiée', 2, 'secu', null, array(
+                                'Key'             => $key,
+                                'Valeur initiale' => $value,
+                                'Valeur modifiée' => $val_temp
+                            ));
+                        }
+                    } else {
+                        $value = $val_temp;
+                    }
+                }
+            }
+        }
+
 
         return $value;
     }
@@ -3364,10 +3388,17 @@ class BimpTools
         return $result;
     }
 
-    public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+    public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@-_!?', $force_special_char = true)
     {
         for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
             
+        }
+
+        if ($force_special_char && !preg_match('/[@\-_!\?]/', $s)) {
+            $n = rand(1, $length);
+            $chars = '@-_!?';
+            $char = $chars[rand(0, 5)];
+            $s = substr_replace($s, $char, $n, 1);
         }
         return $s;
     }
@@ -4015,7 +4046,6 @@ if (!function_exists('mime_content_type')) {
 
     function mime_content_type($filename)
     {
-
         $mime_types = array(
             'txt'  => 'text/plain',
             'htm'  => 'text/html',

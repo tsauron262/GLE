@@ -27,7 +27,8 @@ class Bimp_Log extends BimpObject
         'sql_duplicate' => 'Doublons champ bdd',
         'api'           => 'API',
         'gsx'           => 'GSX',
-        'ws'            => 'Webservice'
+        'ws'            => 'Webservice',
+        'secu'          => 'Sécurité'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),

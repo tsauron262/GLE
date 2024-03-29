@@ -4109,7 +4109,7 @@ function setFiltersInputAddFilterFormEvents($container) {
     });
 }
 
-// Outils: 
+// Outils:
 
 function BimpInputHashtags() {
     var bih = this;

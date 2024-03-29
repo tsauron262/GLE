@@ -16,7 +16,7 @@
 <input id="cur_pw" type="password" name="bic_cur_pw" onkeyup="verif_for_active_button()" placeholder="Mot de passe actuel">
 
 <label for="new_pw">Nouveau mot de passe</label><br />
-<input id="new_pw" type="password" name="bic_new_pw" onkeyup="verif_for_active_button()" placeholder="Nouveau mot de passe"><br />
+<input id="new_pw" type="password" name="bic_new_pw" onkeyup="verif_for_active_button()" placeholder="Nouveau mot de passeee"><br />
 
 <label for="confirm_pw">Confirmer votre nouveau mot de passe</label><br />
 <input id="confirm_pw" onkeyup="verif_for_active_button()" type="password" name="bic_confirm_new_pw" placeholder="Confirmation">

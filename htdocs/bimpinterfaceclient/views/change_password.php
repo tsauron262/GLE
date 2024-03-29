@@ -154,7 +154,7 @@
                 <div id="erp_bimp">
                     <label for="password">Nouveau mot de passe</label>
                     <br />
-                    <input id="password" type="password" name="new_password" onkeyup="verif_for_active_button()"  placeholder="Nouveau mot de passe">
+                    <input id="password" type="password" name="new_password" onkeyup="verif_for_active_button()"  placeholder="Nouveau mot de passeee">
                     <br />
                     <input id="confirme_password" onkeyup="verif_for_active_button()" type="password" name="confirme_password"  placeholder="Confirmer votre mot de passe">
                     <br /><br /><br />

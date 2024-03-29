@@ -459,11 +459,11 @@ class BIC_UserClient extends BimpObject
     public function getPublicEntity()
     {
         $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : $this->getData('main_public_entity'));
-        
+
         if ($public_entity && !$this->getData('main_public_entity')) {
             $this->updateField('main_public_entity', $public_entity);
         }
-        
+
         if (!$public_entity) {
             $public_entity = BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
         }
@@ -652,11 +652,11 @@ class BIC_UserClient extends BimpObject
         return $errors;
     }
 
-    public function reinitPassword(&$warnings = array())
+    public function reinitPassword(&$warnings = array(), &$mdp_clear = '')
     {
         $errors = array();
 
-        $mdp_clear = BimpTools::randomPassword(7);
+        $mdp_clear = BimpTools::randomPassword(8);
         $this->set('password', hash('sha256', $mdp_clear));
         $this->set('renew_required', 1);
 
@@ -797,9 +797,10 @@ class BIC_UserClient extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Mot de passe généré avec succès';
+        $mdp_clear = BimpTools::randomPassword(8);
 
-        $mdp_clear = BimpTools::randomPassword(7);
+        $success = 'Mot de passe généré avec succès : ' . $mdp_clear;
+
         $this->set('password', hash('sha256', $mdp_clear));
         $this->set('renew_required', 1);
 
@@ -836,7 +837,13 @@ class BIC_UserClient extends BimpObject
         $warnings = array();
         $success = 'Mot de passe réinitialisé avec succès';
 
-        $errors = $this->reinitPassword($warnings);
+        $mdp_clear = '';
+        $errors = $this->reinitPassword($warnings, $mdp_clear);
+
+        global $user;
+        if ($user->admin) {
+            $success .= ' : ' . $mdp_clear;
+        }
 
         return array(
             'errors'   => $errors,
@@ -853,7 +860,7 @@ class BIC_UserClient extends BimpObject
 
         $mdp_clear = '';
         if (!$this->getData('password')) {
-            $mdp_clear = BimpTools::randomPassword(7);
+            $mdp_clear = BimpTools::randomPassword(8);
             $this->set('password', hash('sha256', $mdp_clear));
         }
 

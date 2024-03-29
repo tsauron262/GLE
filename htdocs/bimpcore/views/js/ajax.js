@@ -73,6 +73,19 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.error = function () {
     };
+    
+    this.addBimpHash = function () {
+        if (typeof localStorage.getItem('bimp_hash') !== 'undefined'){
+            var bimp_hash = localStorage.getItem('bimp_hash');
+        }
+
+        if (typeof (bimp_hash) !== 'undefined' && bimp_hash) {
+            if(typeof (data.append) == 'function')
+                data.append("bimp_hash", localStorage.getItem('bimp_hash'));
+            else
+                data['bimp_hash'] = bimp_hash;
+        }
+    };
 
     // Surchage des paramètres par défaut: 
     if (typeof (params) === 'object') {
@@ -95,16 +108,8 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     if (typeof (bimp_context) !== 'undefined' && bimp_context) {
         bimpAjax.url += "&bimp_context=" + bimp_context;
     }
-    if (typeof localStorage.getItem('bimp_hash') !== 'undefined'){
-        var bimp_hash = localStorage.getItem('bimp_hash');
-    }
     
-    if (typeof (bimp_hash) !== 'undefined' && bimp_hash) {
-        if(typeof (data.append) == 'function')
-            data.append("bimp_hash", localStorage.getItem('bimp_hash'));
-        else
-            data['bimp_hash'] = bimp_hash;
-    }
+    bimpAjax.addBimpHash();
 
     // Affichage du message de chargement ou suppression du contenu actuel si nécessaire
     if (this.display_processing) {
@@ -497,6 +502,7 @@ function bimp_on_login_success() {
 
     for (var i in bimp_nologged_requests) {
         if (typeof (bimp_requests[bimp_nologged_requests[i]]) !== 'undefined') {
+            bimp_requests[bimp_nologged_requests[i]].addBimpHash();
             bimp_requests[bimp_nologged_requests[i]].send(bimp_requests[bimp_nologged_requests[i]]);
         }
     }

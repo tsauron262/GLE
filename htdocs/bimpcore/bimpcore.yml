@@ -409,11 +409,14 @@ params:
         type: bool
         def: 0
         cat: secu
-    user_bimp_hash:
-        label: Users test bimp_hash
-        info: json
-        def: []
-        cat: secu
+        sub_params: 
+            - if: 0
+              params:
+                  user_bimp_hash:
+                      label: Users test bimp_hash
+                      info: json
+                      def: []
+                      cat: secu
     activate_post_data_check: 
         label: Activer la vérification des données POST / GET
         type: bool

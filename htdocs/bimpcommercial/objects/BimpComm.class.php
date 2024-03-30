@@ -4741,7 +4741,7 @@ class BimpComm extends BimpDolObject
 
     //graph
 
-    public function getInfoGraph($graphName = '')
+    public function getInfoGraph($graphName = '', $options = array())
     {
         $data = parent::getInfoGraph($graphName);
         $arrondirEnMinuteGraph = 60 * 12;

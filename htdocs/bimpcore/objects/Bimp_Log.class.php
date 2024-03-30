@@ -50,9 +50,9 @@ class Bimp_Log extends BimpObject
         'API Ecologic'
     );
 
-    public function getInfoGraph($graphName = '')
+    public function getInfoGraph($graphName = '', $options = array())
     {
-        $data = parent::getInfoGraph($graphName);
+        $data = parent::getInfoGraph($graphName, $options);
         if ($graphName == '15M')
             $arrondirEnMinuteGraph = 15;
         elseif ($graphName == '3H')

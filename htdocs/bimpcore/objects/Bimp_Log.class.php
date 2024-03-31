@@ -81,7 +81,7 @@ class Bimp_Log extends BimpObject
         return $data;
     }
 
-    public function getGraphDatasPoints($params, $numero_data = 1)
+    public function getGraphDatasPoints($nameGraph, $params)
     {
         $result = array(1 => array());
 

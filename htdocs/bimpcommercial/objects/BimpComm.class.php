@@ -4755,7 +4755,7 @@ class BimpComm extends BimpDolObject
         return $data;
     }
 
-    public function getGraphDatasPoints($params)
+    public function getGraphDatasPoints($nameGraph, $params)
     {
         $result = array(1 => array(), 2 => array());
 

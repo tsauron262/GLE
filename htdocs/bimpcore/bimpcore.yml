@@ -415,7 +415,7 @@ params:
                   user_bimp_hash:
                       label: Users test bimp_hash
                       info: json
-                      def: []
+                      def: '[]'
                       cat: secu
     activate_post_data_check: 
         label: Activer la vérification des données POST / GET

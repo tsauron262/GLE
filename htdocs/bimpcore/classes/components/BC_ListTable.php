@@ -2170,7 +2170,7 @@ class BC_ListTable extends BC_List
 
                 $selected = in_array((int) $id_object, $this->selected_rows);
                 $modified = (isset($this->new_values[$id_object]) && !empty($this->new_values[$id_object]));
-                $is_sub_row = (isset($row['id_parent_line']) && (int) $row['id_parent_line']);
+                $is_sub_row = (isset($row['id_parent_line']) && (int) $row['id_parent_line'] && array_key_exists($row['id_parent_line'], $this->rows));
 
                 $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow' . ($modified ? ' modified' : '') . ($selected ? ' selected' : '');
                 if ($is_sub_row) {

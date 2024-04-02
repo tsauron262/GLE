@@ -232,7 +232,7 @@ function getListSearchFilters($row) {
 
 function reloadObjectList(list_id, callback, full_reload, id_config, modeAppend) {
     var $list = $('#' + list_id);
-    
+
     if (!$list.length) {
         console.error('reloadObjectList(): identifiant de la liste invalide (' + list_id + ').');
         return;
@@ -302,12 +302,12 @@ function reloadObjectList(list_id, callback, full_reload, id_config, modeAppend)
 
                 hidePopovers($list);
 
-                if(result.modeAppend)
+                if (result.modeAppend)
                     bimpAjax.$list.find('tbody.listRows').append(result.rows_html);
                 else
                     bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
-                
-                
+
+
                 if (result.pagination_html) {
                     bimpAjax.$list.find('.listPagination').each(function () {
                         $(this).data('event_init', 0);
@@ -1275,7 +1275,7 @@ function sortListByPosition(list_id, first_page) {
 
     if ($list.length) {
         var position_field = $list.data('position_field');
-        
+
         if (!position_field) {
             position_field = 'position';
         }
@@ -1437,26 +1437,29 @@ function gestionParentLine($list) {
     var idsParent = new Object();
     $list.find('.objectListItemRow').each(function () {
         if ($(this).data('id_parent_line') > 0) {
-            $(this).hide();
             idsParent[$(this).data('id_parent_line')] = $(this).data('id_parent_line');
         }
     });
-    
+
     for (const id_parent_line in idsParent) {
         var $parentLineTd = $list.find('[data-id_object=' + id_parent_line + ']').children('td').first();
-        
-        $parentLineTd.append('<a class="btn btn-info detail_' + id_parent_line + '">Detail<i class="fa fa-plus-circle iconRight"></i></a><a class="btn btn-info cache_detail_' + id_parent_line + '">Détail<i class="fa fa-minus-circle iconRight"></i></a>');
-        $list.find('.cache_detail_' + id_parent_line + '').hide();
-        $list.find('.detail_' + id_parent_line + '').click(function () {
-            $list.find('[data-id_parent_line=' + id_parent_line + ']').show();
-            $list.find('.detail_' + id_parent_line + '').hide();
-            $list.find('.cache_detail_' + id_parent_line + '').show();
-        });
-        $list.find('.cache_detail_' + id_parent_line + '').click(function () {
-            $list.find('[data-id_parent_line=' + id_parent_line + ']').hide();
-            $list.find('.detail_' + id_parent_line + '').show();
+
+        if ($.isOk($parentLineTd)) {
+            $list.find('.objectListItemRow[data-id_parent_line=' + id_parent_line + ']').hide();
+
+            $parentLineTd.append('<a class="btn btn-info detail_' + id_parent_line + '">Detail<i class="fa fa-plus-circle iconRight"></i></a><a class="btn btn-info cache_detail_' + id_parent_line + '">Détail<i class="fa fa-minus-circle iconRight"></i></a>');
             $list.find('.cache_detail_' + id_parent_line + '').hide();
-        });
+            $list.find('.detail_' + id_parent_line + '').click(function () {
+                $list.find('[data-id_parent_line=' + id_parent_line + ']').show();
+                $list.find('.detail_' + id_parent_line + '').hide();
+                $list.find('.cache_detail_' + id_parent_line + '').show();
+            });
+            $list.find('.cache_detail_' + id_parent_line + '').click(function () {
+                $list.find('[data-id_parent_line=' + id_parent_line + ']').hide();
+                $list.find('.detail_' + id_parent_line + '').show();
+                $list.find('.cache_detail_' + id_parent_line + '').hide();
+            });
+        }
     }
 }
 
@@ -1975,7 +1978,7 @@ function setPaginationEvents($list) {
                 });
             }
         }
-        
+
 //        var $listPagination = $(this);
 //        $(window).scroll(function(){
 //            var span = $listPagination.find("span.loadIfVisible");//renvoie la position par rapport au haut de page et la gauche de la page
@@ -1984,8 +1987,8 @@ function setPaginationEvents($list) {
 //                $listPagination.find('.nextButtonAppend').click();
 //            }
 //        });
-        
-        
+
+
         var $next = $((this)).find('.nextButtonAppend');
         if ($next.length) {
             if (!$next.hasClass('disabled')) {
@@ -2000,7 +2003,7 @@ function setPaginationEvents($list) {
                 });
             }
         }
-        
+
         var $next = $((this)).find('.nextButton');
         if ($next.length) {
             if (!$next.hasClass('disabled')) {
@@ -2041,7 +2044,7 @@ function setPaginationLoading($pagination) {
     if (!$btn.hasClass('disabled')) {
         $btn.addClass('processing');
     }
-    
+
     $btn = $pagination.find('.nextButtonAppend');
     if (!$btn.hasClass('disabled')) {
         $btn.addClass('processing');

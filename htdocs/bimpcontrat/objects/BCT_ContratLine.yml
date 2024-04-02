@@ -1084,6 +1084,7 @@ lists:
                 
     achat: 
         extends: default
+        item_checkbox: 1
         filters_panel: achat_periods
         sort_field: date_next_achat
         sort_way: asc

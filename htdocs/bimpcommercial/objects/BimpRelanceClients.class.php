@@ -520,7 +520,6 @@ class BimpRelanceClients extends BimpObject
                     } else {
                         $this->db->db->commit();
                         $nOk++;
-                        break;
                     }
                     if (count($line_warnings)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_warnings, $line->getRelanceLineLabel());

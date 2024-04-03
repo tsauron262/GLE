@@ -44,7 +44,7 @@ class BimpRelanceClients extends BimpObject
 
         switch ($action) {
             case 'sendAllEmails':
-                if (!$this->hasLinesAttente(BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL)) {
+                if ($this->isLoaded() && !$this->hasLinesAttente(BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL)) {
                     $errors[] = 'Il n\'y a aucune relance en attente d\'envoi par e-mail';
                     return 0;
                 }
@@ -338,11 +338,11 @@ class BimpRelanceClients extends BimpObject
         $html .= '</td>';
         $html .= '<td>';
         if ($nb_att_mails > 0 && $this->canSetAction('sendAllEmails')) {
-            $onclick = $this->getJsActionOnclick('sendAllEmails', array(
-                'all_relances' => 1
-                    ), array(
-                'confirm_msg' => 'Veuillez confirmer l\\\'envoi de tous les e-mails en attente'
-            ));
+//            $onclick = $this->getJsActionOnclick('sendAllEmails', array(
+//                'all_relances' => 1
+//                    ), array(
+//                'confirm_msg' => 'Veuillez confirmer l\\\'envoi de tous les e-mails en attente'
+//            ));
             $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
             $html .= 'Envoyer tous les e-mails en attente' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
             $html .= '</span>';
@@ -504,8 +504,8 @@ class BimpRelanceClients extends BimpObject
             $lines = BimpCache::getBimpObjectObjects('bimpcore', 'BimpRelanceClientsLine', array(
                         'status' => BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL
             ));
-//
-//            if (!empty($lines)) {
+
+            if (!empty($lines)) {
                 $this->db->db->commitAll();
                 $nOk = 0;
 
@@ -527,12 +527,12 @@ class BimpRelanceClients extends BimpObject
                     break;
                 }
 
-//                if ($nOk) {
+                if ($nOk) {
                     $success .= $nOk . ' relance(s) envoyée(s) par e-mail avec succès';
-//                }
-//            } else {
-//                $errors[] = 'Il n\'y a aucune relance en attente d\'envoi par e-mail';
-//            }
+                }
+            } else {
+                $errors[] = 'Il n\'y a aucune relance en attente d\'envoi par e-mailll';
+            }
         } elseif ($this->isLoaded($errors)) {
             $errors = $this->sendEmails(false, $warnings);
 

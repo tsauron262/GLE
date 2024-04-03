@@ -338,11 +338,11 @@ class BimpRelanceClients extends BimpObject
         $html .= '</td>';
         $html .= '<td>';
         if ($nb_att_mails > 0 && $this->canSetAction('sendAllEmails')) {
-//            $onclick = $this->getJsActionOnclick('sendAllEmails', array(
-//                'all_relances' => 1
-//                    ), array(
-//                'confirm_msg' => 'Veuillez confirmer l\\\'envoi de tous les e-mails en attente'
-//            ));
+            $onclick = $this->getJsActionOnclick('sendAllEmails', array(
+                'all_relances' => 1
+                    ), array(
+                'confirm_msg' => 'Veuillez confirmer l\\\'envoi de tous les e-mails en attente'
+            ));
             $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
             $html .= 'Envoyer tous les e-mails en attente' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
             $html .= '</span>';

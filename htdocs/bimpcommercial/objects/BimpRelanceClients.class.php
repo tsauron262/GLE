@@ -534,9 +534,7 @@ class BimpRelanceClients extends BimpObject
                 $errors[] = 'Il n\'y a aucune relance en attente d\'envoi par e-mail';
             }
         } elseif ($this->isLoaded($errors)) {
-            $mail_warnings = array();
             $errors = $this->sendEmails(false, $warnings);
-            $warnings = array_merge($mail_warnings, $warnings);
 
             if (!count($warnings)) {
                 $success = 'Tous les emails ont été envoyés avec succès';

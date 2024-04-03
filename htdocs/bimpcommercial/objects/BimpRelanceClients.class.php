@@ -499,9 +499,9 @@ class BimpRelanceClients extends BimpObject
         $success = '';
 
         if ((int) BimpTools::getArrayValueFromPath($data, 'all_relances', 0)) {
-            BimpObject::loadClass('bimpcore', 'BimpRelanceClientsLine');
+            BimpObject::loadClass('bimpcommercial', 'BimpRelanceClientsLine');
 
-            $lines = BimpCache::getBimpObjectObjects('bimpcore', 'BimpRelanceClientsLine', array(
+            $lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'BimpRelanceClientsLine', array(
                         'status' => BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL
             ));
 

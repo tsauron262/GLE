@@ -317,6 +317,61 @@ class BimpRelanceClients extends BimpObject
         return $list->renderHtml();
     }
 
+    public function renderBeforeListContent()
+    {
+        $html = '';
+
+        $nb_att_mails = (int) $this->db->getCount('bimp_relance_clients_line', 'status = ' . BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL);
+        $nb_att_courriers = (int) $this->db->getCount('bimp_relance_clients_line', 'status = ' . BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER);
+        $nb_att_tel = (int) $this->db->getCount('bimp_relance_clients_line', 'status = ' . BimpRelanceClientsLine::RELANCE_ATTENTE_TEL);
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-sm-12 col-md-6 col-lg-4">';
+
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<th>En attente d\'envoi par e-mail</th>';
+        $html .= '<td style="text-align: center">';
+        $html .= '<span class="badge badge-' . ($nb_att_mails > 0 ? 'warning' : 'success') . '">' . $nb_att_mails . '</span>';
+        $html .= '</td>';
+        $html .= '<td>';
+        if ($nb_att_mails > 0) {
+            $html .= '<span class="btn btn-default" onclick="">';
+            $html .= 'Envoyer tous les e-mails en attente' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+            $html .= '</span>';
+        }
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>En attente d\'envoi par courrier</th>';
+        $html .= '<td style="text-align: center">';
+        $html .= '<span class="badge badge-' . ($nb_att_courriers > 0 ? 'warning' : 'success') . '">' . $nb_att_courriers . '</span>';
+        $html .= '</td>';
+        $html .= '<td></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>En attente d\'appel téléphonique</th>';
+        $html .= '<td style="text-align: center">';
+        $html .= '<span class="badge badge-' . ($nb_att_tel > 0 ? 'warning' : 'success') . '">' . $nb_att_tel . '</span>';
+        $html .= '</td>';
+        $html .= '<td></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
     // Traitements:
 
     public function sendEmails($force_send = false, &$warnings = array(), $bds_process = null)
@@ -441,10 +496,48 @@ class BimpRelanceClients extends BimpObject
             $mail_warnings = array();
             $errors = $this->sendEmails(false, $warnings);
             $warnings = array_merge($mail_warnings, $warnings);
-        }
 
-        if (!count($warnings)) {
-            $success = 'Tous les emails ont été envoyés avec succès';
+            if (!count($warnings)) {
+                $success = 'Tous les emails ont été envoyés avec succès';
+            }
+        } elseif ((int) BimpTools::getArrayValueFromPath($data, 'all_relances', 0)) {
+
+
+            BimpObject::loadClass('bimpcore', 'BimpRelanceClientsLine');
+
+            $lines = BimpCache::getBimpObjectObjects('bimpcore', 'BimpRelanceClientsLine', array(
+                        'status' => BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL
+            ));
+
+            if (!empty($lines)) {
+                $this->db->db->commitAll();
+                $nOk = 0;
+
+                foreach ($lines as $line) {
+                    $this->db->db->begin();
+
+                    $line_warnings = array();
+                    $line_errors = $line->sendRelanceEmail($line_warnings, false);
+                    if (count($line_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel() . ' - Echec envoi e-mail au client');
+                        $this->db->db->rollback();
+                    } else {
+                        $this->db->db->commit();
+                        $nOk++;
+                    }
+                    if (count($line_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, $line->getRelanceLineLabel());
+                    }
+                    
+                    break;
+                }
+
+                if ($nOk) {
+                    $success .= $nOk . ' relance(s) envoyée(s) par e-mail avec succès';
+                }
+            } else {
+                $warnings[] = 'Il n\'y a aucune relance en attente d\'envoi par e-mail';
+            }
         }
 
         return array(

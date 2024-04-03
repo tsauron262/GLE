@@ -139,6 +139,8 @@ lists:
             callback: getListExtraButtons
         header_buttons: 
             callback: getListExtraHeaderButtons
+        before_content: 
+            callback: renderBeforeListContent
         edit_btn: 1
         edit_form: edit
         page_btn: 1

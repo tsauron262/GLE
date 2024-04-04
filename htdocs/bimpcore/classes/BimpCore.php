@@ -27,6 +27,7 @@ class BimpCore
             'filters'           => '/bimpcore/views/js/filters.js',
             'form'              => '/bimpcore/views/js/form.js',
             'list'              => '/bimpcore/views/js/list.js',
+            'graph'              => '/bimpcore/views/js/graph.js',
             'view'              => '/bimpcore/views/js/view.js',
             'viewsList'         => '/bimpcore/views/js/viewsList.js',
             'listCustom'        => '/bimpcore/views/js/listCustom.js',

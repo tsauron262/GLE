@@ -161,6 +161,8 @@ class BC_Panel extends BimpComponent
                     } else {
                         $content .= $value;
                     }
+//                    echo '<pre>';print_r($defs);
+//                    echo '</pre>'.$param_name.' '. get_class($this);
                     $content .= '"/>';
                 }
             }

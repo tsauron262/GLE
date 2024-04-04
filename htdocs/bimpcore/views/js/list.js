@@ -2134,10 +2134,14 @@ function updateGraph(list_id, idGraph, list_name) {
     if (typeof (list_id) !== 'undefined' && list_id) {
         var $list = $('#' + list_id);
         var $conteneur = $('#' + list_id + '_' + idGraph + '_chartContainer');
+        var $option_conteneur = $('#' + list_id + '_' + idGraph + '_chartOption');
 
         if ($.isOk($list) && $.isOk($conteneur)) {
             extra_data['list_data'] = getListData($list);
             extra_data['idGraph'] = idGraph;
+            if($option_conteneur.find('form').length > 0){
+                extra_data['form']= $option_conteneur.find('form').serialize();
+         }
 
             setObjectAction(null, {
                 module: $list.data('module'),

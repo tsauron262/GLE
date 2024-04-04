@@ -1702,6 +1702,7 @@ class Bimp_Client extends Bimp_Societe
 
         $list = null;
         $list2 = null;
+        $graph = null;
         $client_label = $this->getRef() . ' - ' . $this->getName();
 
         switch ($list_type) {
@@ -1743,6 +1744,14 @@ class Bimp_Client extends Bimp_Societe
                 $list->setAddFormValues(array('fields' => array('fk_soc' => $this->id)));
 
                 $list->addFieldFilterValue('or_client', array(
+                    'or' => array(
+                        'fk_soc'            => $this->id,
+                        'id_client_facture' => $this->id
+                    )
+                ));
+                
+                $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'parDay');
+                $graph->addFieldFilterValue('or_client', array(
                     'or' => array(
                         'fk_soc'            => $this->id,
                         'id_client_facture' => $this->id
@@ -1842,6 +1851,12 @@ class Bimp_Client extends Bimp_Societe
             $html .= BimpRender::renderAlerts('La liste de type "' . $list_type . '" n\'existe pas');
         } else {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
+        }
+
+        if (is_a($graph, 'BC_Graph')) {
+            $html .= 'kkkkk'.$graph->renderHtml();
+        } else {
+            $html .= BimpRender::renderAlerts('Le graph  n\'existe pas');
         }
 
         if (is_a($list2, 'BC_ListTable'))

@@ -110,6 +110,9 @@ sections:
                   list: 
                       panel: 1
                       object: log
+                - type: graph
+                  graph:
+                      object: log
                       
         processes: 
             label: Processus

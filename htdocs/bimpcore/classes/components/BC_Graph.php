@@ -70,6 +70,8 @@ class BC_Graph extends BC_Panel
                         $this->formData['xDateConfig']['values']['day'] = 'Jour';
                 if(in_array('month', $this->params['xDateConfig']['params']))
                         $this->formData['xDateConfig']['values']['month'] = 'Mois';
+                if(in_array('hour', $this->params['xDateConfig']['params']))
+                        $this->formData['xDateConfig']['values']['hour'] = 'Heure';
             }
            
             if(isset($this->params['xDateConfig']['date1']) && $this->params['xDateConfig']['date1']){
@@ -78,8 +80,15 @@ class BC_Graph extends BC_Panel
                     'type' => 'date'
                 );
                 if(isset($this->params['xDateConfig']['def']) && $this->params['xDateConfig']['def']){
+                    $date = null;
                     if($this->params['xDateConfig']['def'] == '1year'){
-                        $this->formData['date1']['value'] = '2023-04-01';
+                        $date=date("Y-m-d", strtotime("-1 year"));
+                    }
+                    if($this->params['xDateConfig']['def'] == '1month'){
+                        $date=date("Y-m-d", strtotime("-1 month"));
+                    }
+                    if($date){
+                        $this->formData['date1']['value'] = $date;//'2023-04-01';
                     }
                 }
             }
@@ -169,14 +178,20 @@ class BC_Graph extends BC_Panel
         
         $options['animationEnabled'] = true;
         $options['theme'] = "light2";
-        $options['title'] = array("text" => $this->params['title']);
+        if($this->params['title'] != '')
+            $options['title'] = array("text" => $this->params['title']);
+        else
+            $options['title'] = array("text" => $this->object->getLabel('', true));
         if($this->userOptions['xDateConfig']){
             switch ($this->userOptions['xDateConfig']) {
                 case 'month' :
                     $options['axisX'] = array("title" => "Date", "valueFormatString" => 'MMM YYYY');
                     break;
-                default:
+                case 'day' :
                     $options['axisX'] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
+                    break;
+                default:
+                    $options['axisX'] = array("title" => "Date", "valueFormatString" => 'HH:mm:ss DD MMM YYYY');
             }
         }
         else
@@ -197,6 +212,9 @@ class BC_Graph extends BC_Panel
             $dataGraphe = $this->object->$method($this->userOptions);
         }
         elseif(count($this->params['yConfig'])){
+            if(method_exists($this->object, 'prepareForGraph')){
+                $dataGraphe = $this->object->prepareForGraph();
+            }
             $dataGraphe = $this->getDatasInfos($this->params['yConfig']);
         }
         else{
@@ -218,7 +236,7 @@ class BC_Graph extends BC_Panel
         if($useK){
             foreach($dataGraphe as $id1 => $tmp1){
                 foreach($tmp1['dataPoints'] as $id2 =>$tmp2){
-                    $dataGraphe[$id1]['dataPoints'][$id2]['y'] = $tmp2['y'] / 1000;
+                    $dataGraphe[$id1]['dataPoints'][$id2]['y'] = round($tmp2['y'] / 1000);
                 }
             }
         }
@@ -266,15 +284,37 @@ class BC_Graph extends BC_Panel
         if($this->userOptions['xDateConfig'] == 'month'){
             $xFiled = 'date_format('.$xFiled.', \'%Y-%m\')';
         }
+        elseif($this->userOptions['xDateConfig'] == 'day'){
+            $xFiled = 'date_format('.$xFiled.', \'%Y-%m-%d\')';
+        }
+        elseif($this->userOptions['xDateConfig'] == 'hour'){
+            $xFiled = 'date_format('.$xFiled.', \'%Y-%m-%d %h:00:00\')';
+        }
         $return_fields = array($xFiled.' as x');//.$this->fieldX);
         $joins = array();
         if(isset($params['fields'])){
             foreach($params['fields'] as $nameField => $tabField){
-                $return_fields[] = $tabField['calc'].'('.$tabField['field'].') as y';
+                $field = $nameField;
+                if(is_array($tabField) && isset($tabField['field']))
+                    $field = $tabField['field'];
+                $calc = 'SUM';
+                if(is_array($tabField) && isset($tabField['calc']))
+                    $calc = $tabField['calc'];
+                $name = '';
+                if(is_array($tabField) && isset($tabField['title']))
+                    $name = $tabField['title'];
+                else{
+                    $name = $this->object->getConf('fields/'.$nameField.'/label', array(), true, 'array');
+                }
+                $visible = 1;
+                if(is_array($tabField) && isset($tabField['visible']))
+                    $visible = $tabField['visible'];
+                
+                $return_fields[] = $calc.'('.$field.') as y';
                 $data = array(
-                    'name'      => $tabField['title'],
+                    'name'      => $name,
                     'type' => 'column',
-                    'visible'   => 1,
+                    'visible'   => $visible,
                     'dataPoints'=> array()
                 );
                 $groupBy = 'x';

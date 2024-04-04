@@ -257,6 +257,8 @@ class BimpStruct
             $name = $config->getFromCurrentPath('name', 'default');
             $panel = $config->getFromCurrentPath('panel', 1, false, 'bool');
             $title = $config->getFromCurrentPath('title', null);
+            if($title == '')
+                    $title = $object->getLabel('', true);
             $icon = $config->getFromCurrentPath('icon', null);
             
             $html .= $object->renderGraph($name, $title);

@@ -313,7 +313,7 @@ class Bimp_Stat_Date extends BimpObject
         }
     }
 
-    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC')
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC', $groupBy = '')
     {
         $filters["a.filter"] = $this->signatureFilter;
         if ($this->isOk)

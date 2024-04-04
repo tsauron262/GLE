@@ -72,4 +72,6 @@ sections:
                     list: 
                         panel: 1
                         object: statsDate
-                
+                  - type: graph
+                    graph: 
+                        object: statsDate

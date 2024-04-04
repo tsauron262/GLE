@@ -180,8 +180,6 @@ lists:
             commande_total:
             facture_qty: 
             facture_total:
-        graph: 
-            - stats
                 
     clientMonth: 
         extends: default
@@ -195,4 +193,29 @@ lists:
             type: 
                 name: mode
                 filter: year
-                
+                    
+                    
+graph:
+    default:
+        title: Stat
+        use_k: 0
+        xDateConfig:
+            field: date
+            params: 
+                - month 
+                - day
+            date1: 1
+            date2: 2
+            def: 1year
+        y: €
+        yConfig:
+            fields:
+                devis_qty: 
+                    visible: 0
+                devis_total:
+                commande_qty:
+                    visible: 0
+                commande_total:
+                facture_qty: 
+                    visible: 0
+                facture_total:

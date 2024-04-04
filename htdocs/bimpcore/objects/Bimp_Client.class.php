@@ -1735,6 +1735,14 @@ class Bimp_Client extends Bimp_Societe
             case 'propales':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'client', 1, null, 'Propositions commerciales du client "' . $client_label . '"');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                
+                $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'parDay');
+                $graph->addFieldFilterValue('or_client', array(
+                    'or' => array(
+                        'fk_soc'            => $this->id,
+                        'id_client_facture' => $this->id
+                    )
+                ));
                 break;
 
             case 'commandes':
@@ -1768,6 +1776,14 @@ class Bimp_Client extends Bimp_Societe
             case 'factures':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Facture'), 'client', 1, null, 'Factures du client "' . $client_label . '"');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                
+                $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'parDay');
+                $graph->addFieldFilterValue('or_client', array(
+                    'or' => array(
+                        'fk_soc'            => $this->id,
+                        'id_client_facture' => $this->id
+                    )
+                ));
                 break;
 
             case 'contrats':

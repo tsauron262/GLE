@@ -26,7 +26,7 @@ class BimpController
         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
 
         if (is_null($controller)) {
-            $controller = BimpTools::getValue('fc', 'index', true, true);
+            $controller = BimpTools::getValue('fc', 'index', true, 'aZ09comma');
         }
 
         if (BimpCore::getContext() == "public" && file_exists($dir . 'public_' . $controller . 'Controller.php')) {

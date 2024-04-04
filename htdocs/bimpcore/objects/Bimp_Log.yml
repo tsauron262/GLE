@@ -11,8 +11,6 @@ list_page_url:
     controller: dev
     url_params: 
         tab: logs
-        
-has_graph: 1
 
 header_list_name: default
 header_delete_btn: 1

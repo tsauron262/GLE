@@ -106,7 +106,7 @@ class Bimp_Stat_Date extends BimpObject
         return parent::displayData('date');
     }
 
-    public function getInfoGraph($graphName = '')
+    public function getInfoGraph($graphName = '', $options = array())
     {
         if (static::$modeDateGraph == 'day')
             $xValueFormatString = 'DD MMM, YYYY';
@@ -119,7 +119,7 @@ class Bimp_Stat_Date extends BimpObject
 
 
 
-        $data = parent::getInfoGraph($graphName);
+        $data = parent::getInfoGraph($graphName, $option);
         $data["data1"] = array("name" => 'Facture HT');
         $data["data2"] = array("name" => 'Commande HT', 'visible' => 0);
         $data["data3"] = array("name" => 'Devis HT', 'visible' => 0);
@@ -313,7 +313,7 @@ class Bimp_Stat_Date extends BimpObject
         }
     }
 
-    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC')
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC', $groupBy = '')
     {
         $filters["a.filter"] = $this->signatureFilter;
         if ($this->isOk)

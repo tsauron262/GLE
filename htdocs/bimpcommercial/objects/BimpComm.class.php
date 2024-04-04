@@ -4741,9 +4741,9 @@ class BimpComm extends BimpDolObject
 
     //graph
 
-    public function getInfoGraph($graphName = '')
+    public function getInfoGraph($graphName = '', $options = array())
     {
-        $data = parent::getInfoGraph($graphName);
+        $data = parent::getInfoGraph($graphName, $option);
         $arrondirEnMinuteGraph = 60 * 12;
         $data["data1"] = array("name" => 'Nb', "type" => "column");
         $data["data2"] = array("name" => 'Total HT', "type" => "column");
@@ -4755,7 +4755,7 @@ class BimpComm extends BimpDolObject
         return $data;
     }
 
-    public function getGraphDatasPoints($params)
+    public function getGraphDatasPoints($nameGraph, $params)
     {
         $result = array(1 => array(), 2 => array());
 

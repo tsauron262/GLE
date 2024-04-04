@@ -958,6 +958,45 @@ lists:
         graph:
             - client
             
+graph:
+    parDay:
+        title: Nb Piéces / CA
+        xDateConfig:
+            field: date_commande
+            params: 
+                - month 
+                - day
+            date1: 1
+            date2: 2
+            def: 1year
+        y: ggt
+        yConfig:
+            fields:
+                nb:
+                    title: Nombre de piéces
+                    field: rowid
+                    calc: COUNT
+                total_ht:
+                    title: CA ht
+                    field: total_ht
+                    calc: SUM
+        data_callback: getGraphConsoDatas
+        options:
+            type:
+                name: Type de graph
+                type: select
+                values: 
+                    columnArea: Bar et Air empiler
+                    column: Colonne
+                    area: Air
+                    stackedColumn: Colonne emplier
+                    stackedArea: Air empiler
+                value: columnArea
+            dif:
+                name: Diférence
+                type: switch
+                value: 1
+            
 views: 
     default: 
         objects_change_reload: BimpFile,BimpNote,RemiseGlobale

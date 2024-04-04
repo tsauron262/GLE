@@ -372,12 +372,8 @@ class BimpDb
 
 
         $sql .= ' WHERE ' . $where;
-//        echo $sql;
+        
         $result = $this->executeS($sql, 'array');
-
-//        echo '<pre>';
-//        print_r($result);
-//        exit;
 
         if (isset($result[0]['nb_rows'])) {
             return (int) $result[0]['nb_rows'];

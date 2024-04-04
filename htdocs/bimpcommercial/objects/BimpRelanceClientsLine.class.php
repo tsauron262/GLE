@@ -668,7 +668,7 @@ class BimpRelanceClientsLine extends BimpObject
                 'to_process_only'     => true,
                 'relance_idx_allowed' => array((int) $this->getData('relance_idx'))
             ));
-            
+
             foreach ($clients_factures as $id_client => $client_data) {
                 if ((int) $id_client !== (int) $client->id) {
                     continue;
@@ -1067,8 +1067,12 @@ class BimpRelanceClientsLine extends BimpObject
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
                     $from = BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial');
-                    
-                    
+
+                    if ($from && strpos($from, ',') > 0) {
+                        $from = explode(',', $from);
+                        $from = $from[0];
+                    }
+
                     $replyTo = array();
                     $cc = array();
 
@@ -1089,7 +1093,7 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
-//die('test' .$mail_body.'<br/><br/>'.$email. ' from '.$from);
+                    
                     if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), implode(',', $cc), '', 0, 1, '', '', implode(',', $replyTo))) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';

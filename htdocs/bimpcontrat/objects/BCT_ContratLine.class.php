@@ -2131,7 +2131,12 @@ class BCT_ContratLine extends BimpObject
         }
 
         if (!empty($params['id_lines'])) {
-            $filters['a.rowid'] = $params['id_lines'];
+            $filters['or_lines'] = array(
+                'or' => array(
+                    'a.rowid'          => $params['id_lines'],
+                    'a.id_parent_line' => $params['id_lines']
+                )
+            );
         } else {
             $filters = array(
                 'a.statut'            => 4,
@@ -3639,6 +3644,9 @@ class BCT_ContratLine extends BimpObject
 
                         $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
                         if (BimpObject::objectLoaded($line)) {
+                            if (!(int) $line->getData('achat_periodicity') || in_array($line->getData('linked_object_name'), array('bundleCorrect'))) {
+                                continue;
+                            }
                             $line_errors = array();
                             $nb_decimals = 6;
                             $periods_data = $line->getPeriodsToBuyData($line_errors);
@@ -3665,6 +3673,8 @@ class BCT_ContratLine extends BimpObject
                             $contrat = $line->getParentInstance();
                             if (BimpObject::objectLoaded($contrat)) {
                                 $row_html .= $contrat->getLink();
+                            } else {
+                                $row_html .= '<span class="danger">Contrat #' . $line->getData('fk_contrat') . ' (n\'existe plus)</span>';
                             }
                             if ($debug) {
                                 $row_html .= BimpRender::renderFoldableContainer('Infos débug', '<pre>' . print_r($periods_data, 1) . '</pre>', array(

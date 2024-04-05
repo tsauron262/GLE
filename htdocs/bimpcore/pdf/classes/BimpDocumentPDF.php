@@ -75,8 +75,18 @@ class BimpDocumentPDF extends BimpModelPDF
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
                 $testFile = str_replace(array(".jpg"/* , "_RESEAUNANCE.png" */, ".png"), "_SAV.png", $logo_file);
-                if (is_file($testFile))
+                if (is_file($testFile)) {
                     $logo_file = $testFile;
+                } else {
+                    global $user;
+                    
+                    if ($user->login == 'f.martinez') {
+                        echo 'PAS DE FICHIER <br/>';
+                        echo '<pre>';
+                        print_r(scandir($conf->mycompany->dir_output . '/logos/'));
+                        exit;
+                    }
+                }
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
                 $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
@@ -113,7 +123,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $this->pdf->topMargin = 44;
-        
+
         $this->header_vars = array(
             'primary_color' => $this->primary,
             'logo_img'      => $logo_file,

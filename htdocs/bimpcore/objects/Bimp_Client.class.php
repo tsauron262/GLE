@@ -1870,9 +1870,7 @@ class Bimp_Client extends Bimp_Societe
         }
 
         if (is_a($graph, 'BC_Graph')) {
-            $html .= 'kkkkk'.$graph->renderHtml();
-        } else {
-            $html .= BimpRender::renderAlerts('Le graph  n\'existe pas');
+            $html .= $graph->renderHtml();
         }
 
         if (is_a($list2, 'BC_ListTable'))

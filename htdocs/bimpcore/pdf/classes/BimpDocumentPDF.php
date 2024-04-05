@@ -52,9 +52,9 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function initData()
     {
-        if (BimpCore::isEntity('actimac') && isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) { // Temporaire... 
-            $this->primary = '008ECC';
-        }
+//        if (BimpCore::isEntity('actimac') && isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) { // Temporaire... 
+//            $this->primary = '008ECC';
+//        }
 
         parent::initData();
     }

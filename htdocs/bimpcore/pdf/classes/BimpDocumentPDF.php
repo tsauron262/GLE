@@ -50,15 +50,6 @@ class BimpDocumentPDF extends BimpModelPDF
 
     // Initialisation:
 
-    protected function initData()
-    {
-//        if (BimpCore::isEntity('actimac') && isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) { // Temporaire... 
-//            $this->primary = '008ECC';
-//        }
-
-        parent::initData();
-    }
-
     protected function initHeader()
     {
         global $conf;
@@ -459,7 +450,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderBottom()
     {
-        $table = new BimpPDF_Table($this->pdf, false);
+        $table = new BimpPDF_Table($this->pdf, false, $this->primary);
         $table->cellpadding = 0;
         $table->remove_empty_cols = false;
         $table->addCol('left', '', 95);
@@ -669,7 +660,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $this->writeContent($html);
 
                     foreach ($annexe['lists'] as $list) {
-                        $table = new BimpPDF_Table($this->pdf, false);
+                        $table = new BimpPDF_Table($this->pdf, false, $this->primary);
                         $table->new_page_title = '<div style="font-weight: bold;font-size: 9px;">' . $annexe_title . ' - ' . $list['title'] . ' (suite)</div>';
                         $table->cellpadding = 1;
 

@@ -11,6 +11,7 @@ colors:
         
 pdf:
     primary: 'ed513b'
+    primary_sav: '008ECC'
 
 interface_client: 
     primary: 'ed513b'

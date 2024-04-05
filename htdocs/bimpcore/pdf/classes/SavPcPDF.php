@@ -19,5 +19,11 @@ class SavPcPDF extends BimpCommDocumentPDF
         $this->langs->load("products");
 
         $this->typeObject = 'sav';
+
+        $primary = BimpCore::getParam('pdf/primary_sav', '');
+
+        if ($primary) {
+            $this->primary = $primary;
+        }
     }
 }

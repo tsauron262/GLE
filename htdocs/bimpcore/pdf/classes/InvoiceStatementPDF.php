@@ -145,7 +145,7 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
         if (count($this->collection->getIds()) == 0) {
             $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune facture</p>');
         } else {
-            $table = new BimpPDF_Table($this->pdf);
+            $table = new BimpPDF_Table($this->pdf, true, $this->primary);
 
             $table->addCol('ref', 'Référence', 23, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('libelle', 'Libellé', 0, 'text-align: left;', '', 'text-align: left;');

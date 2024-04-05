@@ -269,7 +269,7 @@ class TransferPDF extends BimpModelPDF
             $lines = $this->object->getLines();
 
             if (count($lines)) {
-                $table = new BimpPDF_Table($this->pdf);
+                $table = new BimpPDF_Table($this->pdf, true, $this->primary);
                 $table->addCol('desc', 'Désignation');
                 $table->addCol('qty', 'Qté', 30);
 

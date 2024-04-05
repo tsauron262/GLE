@@ -295,16 +295,27 @@ lists:
             send_to: 
             processed:
             nb_occurence:
-        graph:
-            - 15M
-            - 1H
-            - 3H
-            - 6H
-            - 12H
 
     object: 
         extends: default
         before_list_callback: unset
         cols: 
             obj: unset
+            
+           
+graph:
+    default:
+        use_k: 1
+        xDateConfig:
+            field: last_occurence
+            params: 
+                - hour
+                - day
+                - month 
+            date1: 1
+            date2: 2
+            def: 1month
+        yConfig:
+            fields:
+                nb_occurence:
         

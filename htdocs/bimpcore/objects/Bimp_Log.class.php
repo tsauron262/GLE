@@ -50,50 +50,50 @@ class Bimp_Log extends BimpObject
         'API Ecologic'
     );
 
-    public function getInfoGraph($graphName = '', $options = array())
-    {
-        $data = parent::getInfoGraph($graphName, $options);
-        if ($graphName == '15M')
-            $arrondirEnMinuteGraph = 15;
-        elseif ($graphName == '3H')
-            $arrondirEnMinuteGraph = 60 * 3;
-        elseif ($graphName == '6H')
-            $arrondirEnMinuteGraph = 60 * 6;
-        elseif ($graphName == '12H')
-            $arrondirEnMinuteGraph = 60 * 12;
-        else
-            $arrondirEnMinuteGraph = 60;
-        $data["data1"] = array("name" => 'Nb Logs', "type" => "column");
-        $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM, YYYY HH:mm');
-        $data["axeY"] = array("title" => 'Nb');
-        $data["params"] = array('minutes' => $arrondirEnMinuteGraph);
-        $unite = 'minute';
-        if ($arrondirEnMinuteGraph >= 60) {
-            $unite = 'heure';
-            $arrondirEnMinuteGraph = $arrondirEnMinuteGraph / 60;
-        }
-        if ($arrondirEnMinuteGraph != 1)
-            $unite .= 's';
-        else
-            $arrondirEnMinuteGraph = '';
-        $data["title"] = 'Log par ' . $arrondirEnMinuteGraph . ' ' . $unite;
-
-        return $data;
-    }
-
-    public function getGraphDatasPoints($nameGraph, $params)
-    {
-        $result = array(1 => array());
-
-        $arrondirEnMinuteGraph = $params['minutes'];
-        $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($arrondirEnMinuteGraph*60))*$arrondirEnMinuteGraph*60";
-        $sql = $this->db->db->query('SELECT count(*) as nb, ' . $dateStr . ' as timestamp FROM ' . MAIN_DB_PREFIX . 'bimpcore_log GROUP BY ' . $dateStr);
-        while ($ln = $this->db->db->fetch_object($sql)) {
-            $result[1][] = array("x" => "new Date(" . $ln->timestamp * 1000 . ")", "y" => (int) $ln->nb);
-        }
-
-        return $result;
-    }
+//    public function getInfoGraph($graphName = '', $options = array())
+//    {
+//        $data = parent::getInfoGraph($graphName, $options);
+//        if ($graphName == '15M')
+//            $arrondirEnMinuteGraph = 15;
+//        elseif ($graphName == '3H')
+//            $arrondirEnMinuteGraph = 60 * 3;
+//        elseif ($graphName == '6H')
+//            $arrondirEnMinuteGraph = 60 * 6;
+//        elseif ($graphName == '12H')
+//            $arrondirEnMinuteGraph = 60 * 12;
+//        else
+//            $arrondirEnMinuteGraph = 60;
+//        $data["data1"] = array("name" => 'Nb Logs', "type" => "column");
+//        $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM, YYYY HH:mm');
+//        $data["axeY"] = array("title" => 'Nb');
+//        $data["params"] = array('minutes' => $arrondirEnMinuteGraph);
+//        $unite = 'minute';
+//        if ($arrondirEnMinuteGraph >= 60) {
+//            $unite = 'heure';
+//            $arrondirEnMinuteGraph = $arrondirEnMinuteGraph / 60;
+//        }
+//        if ($arrondirEnMinuteGraph != 1)
+//            $unite .= 's';
+//        else
+//            $arrondirEnMinuteGraph = '';
+//        $data["title"] = 'Log par ' . $arrondirEnMinuteGraph . ' ' . $unite;
+//
+//        return $data;
+//    }
+//
+//    public function getGraphDatasPoints($nameGraph, $params)
+//    {
+//        $result = array(1 => array());
+//
+//        $arrondirEnMinuteGraph = $params['minutes'];
+//        $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($arrondirEnMinuteGraph*60))*$arrondirEnMinuteGraph*60";
+//        $sql = $this->db->db->query('SELECT count(*) as nb, ' . $dateStr . ' as timestamp FROM ' . MAIN_DB_PREFIX . 'bimpcore_log GROUP BY ' . $dateStr);
+//        while ($ln = $this->db->db->fetch_object($sql)) {
+//            $result[1][] = array("x" => "new Date(" . $ln->timestamp * 1000 . ")", "y" => (int) $ln->nb);
+//        }
+//
+//        return $result;
+//    }
 
     // Droits user: 
 

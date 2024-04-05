@@ -1373,3 +1373,8 @@ stats_lists:
             tot_brouillon:
             tot_valide:
             tot_abandon: 
+
+graph:
+    parDay:
+        xDateConfig:
+            field: datef

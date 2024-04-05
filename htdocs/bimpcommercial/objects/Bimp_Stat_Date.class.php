@@ -106,67 +106,67 @@ class Bimp_Stat_Date extends BimpObject
         return parent::displayData('date');
     }
 
-    public function getInfoGraph($graphName = '', $options = array())
-    {
-        if (static::$modeDateGraph == 'day')
-            $xValueFormatString = 'DD MMM, YYYY';
-        elseif (static::$modeDateGraph == 'hour')
-            $xValueFormatString = 'DD MMM, YYYY HH:mm';
-        elseif (static::$modeDateGraph == 'month')
-            $xValueFormatString = 'MMM, YYYY';
-        else
-            $xValueFormatString = 'YYYY';
-
-
-
-        $data = parent::getInfoGraph($graphName, $option);
-        $data["data1"] = array("name" => 'Facture HT');
-        $data["data2"] = array("name" => 'Commande HT', 'visible' => 0);
-        $data["data3"] = array("name" => 'Devis HT', 'visible' => 0);
-        if (static::$modeDateGraph != 'year')
-            $data["data4"] = array("name" => 'Facture HT a 1an', 'color' => "#F08080", 'lineDashType' => "dash");
-        $data["axeX"] = array("title" => "Date", "valueFormatString" => $xValueFormatString);
-        $data["axeY"] = array("title" => 'K €', "suffix" => "", "minimum" => 30, "valueFormatString" => "#,##0 €");
-
-        $data["title"] = 'Factures Commandes et Devis par ';
-        if (static::$modeDateGraph == 'day')
-            $data["title"] .= 'Jour';
-        elseif (static::$modeDateGraph == 'month')
-            $data["title"] .= 'Mois';
-        elseif (static::$modeDateGraph == 'year')
-            $data["title"] .= 'Ans';
-
-        return $data;
-    }
-
-    public function getGraphDataPoint($params, $numero_data = 1)
-    {
-        $tabDate = explode("-", $this->getData('date'));
-        if (static::$modeDateGraph == 'day')
-            $tabDate[1]--;
-        elseif (static::$modeDateGraph == 'month') {
-            if ($tabDate[1] == 1) {
-                $tabDate[1] = 12;
-                $tabDate[0]--;
-            } else
-                $tabDate[1]--;
-        }
-        if (static::$modeDateGraph == 'year')
-            $x = "new Date(" . $tabDate[0] . ", 0)";
-        else
-            $x = "new Date(" . implode(", ", $tabDate) . ")";
-        if ($numero_data == 1)
-            $y = $this->getData('facture_total');
-        elseif ($numero_data == 2)
-            $y = $this->getData('commande_total');
-        elseif ($numero_data == 3)
-            $y = $this->getData('devis_total');
-        elseif ($numero_data == 4)
-            $y = str_replace(",", ".", $this->displayOldValue('facture_total', 12));
-
-        $y = (float) $y;
-        return array("x" => $x, "y" => $y);
-    }
+//    public function getInfoGraph($graphName = '', $options = array())
+//    {
+//        if (static::$modeDateGraph == 'day')
+//            $xValueFormatString = 'DD MMM, YYYY';
+//        elseif (static::$modeDateGraph == 'hour')
+//            $xValueFormatString = 'DD MMM, YYYY HH:mm';
+//        elseif (static::$modeDateGraph == 'month')
+//            $xValueFormatString = 'MMM, YYYY';
+//        else
+//            $xValueFormatString = 'YYYY';
+//
+//
+//
+//        $data = parent::getInfoGraph($graphName, $option);
+//        $data["data1"] = array("name" => 'Facture HT');
+//        $data["data2"] = array("name" => 'Commande HT', 'visible' => 0);
+//        $data["data3"] = array("name" => 'Devis HT', 'visible' => 0);
+//        if (static::$modeDateGraph != 'year')
+//            $data["data4"] = array("name" => 'Facture HT a 1an', 'color' => "#F08080", 'lineDashType' => "dash");
+//        $data["axeX"] = array("title" => "Date", "valueFormatString" => $xValueFormatString);
+//        $data["axeY"] = array("title" => 'K €', "suffix" => "", "minimum" => 30, "valueFormatString" => "#,##0 €");
+//
+//        $data["title"] = 'Factures Commandes et Devis par ';
+//        if (static::$modeDateGraph == 'day')
+//            $data["title"] .= 'Jour';
+//        elseif (static::$modeDateGraph == 'month')
+//            $data["title"] .= 'Mois';
+//        elseif (static::$modeDateGraph == 'year')
+//            $data["title"] .= 'Ans';
+//
+//        return $data;
+//    }
+//
+//    public function getGraphDataPoint($params, $numero_data = 1)
+//    {
+//        $tabDate = explode("-", $this->getData('date'));
+//        if (static::$modeDateGraph == 'day')
+//            $tabDate[1]--;
+//        elseif (static::$modeDateGraph == 'month') {
+//            if ($tabDate[1] == 1) {
+//                $tabDate[1] = 12;
+//                $tabDate[0]--;
+//            } else
+//                $tabDate[1]--;
+//        }
+//        if (static::$modeDateGraph == 'year')
+//            $x = "new Date(" . $tabDate[0] . ", 0)";
+//        else
+//            $x = "new Date(" . implode(", ", $tabDate) . ")";
+//        if ($numero_data == 1)
+//            $y = $this->getData('facture_total');
+//        elseif ($numero_data == 2)
+//            $y = $this->getData('commande_total');
+//        elseif ($numero_data == 3)
+//            $y = $this->getData('devis_total');
+//        elseif ($numero_data == 4)
+//            $y = str_replace(",", ".", $this->displayOldValue('facture_total', 12));
+//
+//        $y = (float) $y;
+//        return array("x" => $x, "y" => $y);
+//    }
 
     public function traiteFilters(&$filters)
     {
@@ -317,9 +317,14 @@ class Bimp_Stat_Date extends BimpObject
     {
         $filters["a.filter"] = $this->signatureFilter;
         if ($this->isOk)
-            return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way);
+            return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way, $groupBy);
         else
             return array();
+    }
+    
+    public function prepareForGraph(){
+        $this->isOk = true;
+        $this->signatureFilter = '[]{"facture_type":["3"]}[]"day"';
     }
 
     public function getLabel($type = "", $ucfirst = false)

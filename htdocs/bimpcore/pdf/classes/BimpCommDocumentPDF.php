@@ -1170,6 +1170,7 @@ En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intér
             $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
             $html .= "</span>";
             $html .= "</p>";
+            $this->writeContent($html);
         }
         else{
             if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv) {

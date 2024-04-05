@@ -50,6 +50,15 @@ class BimpDocumentPDF extends BimpModelPDF
 
     // Initialisation:
 
+    protected function initData()
+    {
+        if (BimpCore::isEntity('actimac') && isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) { // Temporaire... 
+            $this->primary = '008ECC';
+        }
+
+        parent::initData();
+    }
+
     protected function initHeader()
     {
         global $conf;
@@ -77,10 +86,6 @@ class BimpDocumentPDF extends BimpModelPDF
                 $testFile = str_replace(array(".jpg"/* , "_RESEAUNANCE.png" */, ".png"), "_SAV.png", $logo_file);
                 if (is_file($testFile)) {
                     $logo_file = $testFile;
-                }
-
-                if (BimpCore::isEntity('actimac')) { // Temporaire... 
-                    $this->primary = '008ECC';
                 }
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {

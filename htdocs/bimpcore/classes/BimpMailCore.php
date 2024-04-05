@@ -163,6 +163,12 @@ class BimpMailCore
     public function setFromType($type)
     {
         $this->type = $type;
+
+        $primary = BimpCore::getParam('public_email/primary_' . $type, '');
+
+        if ($primary) {
+            $this->primary = $primary;
+        }
     }
 
     public function send(&$errors = array(), &$warnings = array())

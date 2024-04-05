@@ -18,3 +18,5 @@ interface_client:
     
 public_email: 
     primary: 'ed513b'
+    primary_actimag: '008ECC'
+    primary_ldlc: '008ECC'

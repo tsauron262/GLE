@@ -77,15 +77,10 @@ class BimpDocumentPDF extends BimpModelPDF
                 $testFile = str_replace(array(".jpg"/* , "_RESEAUNANCE.png" */, ".png"), "_SAV.png", $logo_file);
                 if (is_file($testFile)) {
                     $logo_file = $testFile;
-                } else {
-                    global $user;
-                    
-                    if ($user->login == 'f.martinez') {
-                        echo 'PAS DE FICHIER <br/>';
-                        echo '<pre>';
-                        print_r(scandir($conf->mycompany->dir_output . '/logos/'));
-                        exit;
-                    }
+                }
+
+                if (BimpCore::isEntity('actimac')) { // Temporaire... 
+                    $this->primary = '008ECC';
                 }
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {

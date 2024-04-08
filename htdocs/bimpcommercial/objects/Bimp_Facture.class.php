@@ -7058,9 +7058,11 @@ class Bimp_Facture extends BimpComm
                         $fac_users[] = $id_user;
                     }
 
-                    $id_user = (int) $facture->getData('fk_user_author');
-                    if ($id_user) {
-                        $fac_users[] = $id_user;
+                    if (empty($fac_users) || $id_user > 1) {
+                        $id_user = (int) $facture->getData('fk_user_author');
+                        if ($id_user) {
+                            $fac_users[] = $id_user;
+                        }
                     }
 
                     if (empty($fac_users)) {

@@ -170,13 +170,6 @@ class BimpDocumentPDF extends BimpModelPDF
                 $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->footerCompany->tva_intra);
             }
         } else {
-            if ($this->footerCompany->idprof1 && ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)) {
-                $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);
-                if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                    $field = $reg[1];
-                }
-                $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof1);
-            }
 
             if ($this->footerCompany->idprof2) {
                 $field = $this->langs->transcountrynoentities("ProfId2", $this->footerCompany->country_code);
@@ -191,7 +184,14 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (preg_match('/\((.*)\)/i', $field, $reg)) {
                     $field = $reg[1];
                 }
-                $line2 .= ($line2 ? " - " : "") . 'RCS' . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
+                $line2 .= ($line2 ? " - " : "") . 'RCS' . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4).' ';
+            }
+            if ($this->footerCompany->idprof1 /*&& ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)*/) {
+                $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);
+                if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                    $field = $reg[1];
+                }
+                $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof1);
             }
 
             if ($this->footerCompany->idprof3) {

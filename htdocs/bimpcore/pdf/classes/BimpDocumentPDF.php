@@ -197,7 +197,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (preg_match('/\((.*)\)/i', $field, $reg)) {
                     $field = $reg[1];
                 }
-                $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
+                $line2 .= ($line2 ? " - " : "") . 'RCS' . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
             }
 
             if ($this->footerCompany->idprof5) {

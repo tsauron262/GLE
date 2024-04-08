@@ -754,7 +754,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     {
         global $conf, $user;
 
-        $table = new BimpPDF_AmountsTable($this->pdf);
+        $table = new BimpPDF_AmountsTable($this->pdf, $this->primary);
 
         if ($this->hidePrice)
             $table->setCols(array('desc'));

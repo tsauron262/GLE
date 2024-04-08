@@ -13,6 +13,17 @@ class InvoiceSavPDF extends InvoicePDF
     public $sav = null;
     public $signature_bloc = false;
 
+    public function __construct($db)
+    {
+        parent::__construct($db);
+
+        $primary = BimpCore::getParam('pdf/primary_sav', '');
+
+        if ($primary) {
+            $this->primary = $primary;
+        }
+    }
+
     public function init($object)
     {
         if (!is_null($object) && is_a($object, 'Facture') && (int) $object->id) {
@@ -25,7 +36,7 @@ class InvoiceSavPDF extends InvoicePDF
             }
 
             // Chargement CGV : 
-            
+
             $cgv_file = '';
             switch (BimpCore::getExtendsEntity()) {
                 case 'bimp':
@@ -57,7 +68,7 @@ class InvoiceSavPDF extends InvoicePDF
         parent::initHeader();
         $rows = '';
         if (!is_null($this->sav)) {
-            $rows .= '<span style="color: #' . BimpCore::getParam('pdf/primary', '000000') . '">' . $this->sav->getData('ref') . '</span><br/>';
+            $rows .= '<span style="color: #' . $this->primary . '">' . $this->sav->getData('ref') . '</span><br/>';
             $equipment = $this->sav->getchildObject('equipment');
             if (!is_null($equipment) && $equipment->isLoaded()) {
                 $rows .= $equipment->getData('serial');

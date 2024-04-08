@@ -75,8 +75,9 @@ class BimpDocumentPDF extends BimpModelPDF
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
                 $testFile = str_replace(array(".jpg"/* , "_RESEAUNANCE.png" */, ".png"), "_SAV.png", $logo_file);
-                if (is_file($testFile))
+                if (is_file($testFile)) {
                     $logo_file = $testFile;
+                }
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
                 $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
@@ -113,7 +114,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $this->pdf->topMargin = 44;
-        
+
         $this->header_vars = array(
             'primary_color' => $this->primary,
             'logo_img'      => $logo_file,
@@ -449,7 +450,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderBottom()
     {
-        $table = new BimpPDF_Table($this->pdf, false);
+        $table = new BimpPDF_Table($this->pdf, false, $this->primary);
         $table->cellpadding = 0;
         $table->remove_empty_cols = false;
         $table->addCol('left', '', 95);
@@ -659,7 +660,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $this->writeContent($html);
 
                     foreach ($annexe['lists'] as $list) {
-                        $table = new BimpPDF_Table($this->pdf, false);
+                        $table = new BimpPDF_Table($this->pdf, false, $this->primary);
                         $table->new_page_title = '<div style="font-weight: bold;font-size: 9px;">' . $annexe_title . ' - ' . $list['title'] . ' (suite)</div>';
                         $table->cellpadding = 1;
 

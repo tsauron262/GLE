@@ -18,11 +18,11 @@ class BimpPDF_AmountsTable extends BimpPDF_Table
         'total_ttc' => array('label' => 'Total TTC', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;')
     );
 
-    public function __construct($pdf)
+    public function __construct($pdf, $primary = null)
     {
         $this->setCols(array('desc', 'pu_ht', 'reduc', 'pu_remise', 'qte', 'progress', 'total_ht', 'tva', 'total_ttc'));
 
-        parent::__construct($pdf);
+        parent::__construct($pdf, true, $primary);
     }
 
     public function setCols($cols)

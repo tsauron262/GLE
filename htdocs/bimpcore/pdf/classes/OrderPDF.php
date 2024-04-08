@@ -317,8 +317,6 @@ class OrderPDF extends BimpCommDocumentPDF
 
     public function renderDocInfos()
     {
-        $primary = BimpCore::getParam('pdf/primary', '000000');
-
         $html = '';
 
         $town = '';
@@ -353,7 +351,7 @@ class OrderPDF extends BimpCommDocumentPDF
         $html .= '<div>';
         $html .= '<table style="width: 100%;" cellspacing="0" cellpadding="5px">';
         $html .= '<tr>';
-        $html .= '<td colspan="2" style="border-top: solid 1px #' . $primary . '; border-bottom: solid 1px #' . $primary . '; color: #' . $primary . '">';
+        $html .= '<td colspan="2" style="border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '; color: #' . $this->primary . '">';
         $html .= 'DESTINATAIRE';
         $html .= '</td>';
         $html .= '</tr>';
@@ -597,7 +595,7 @@ class BLPDF extends OrderPDF
     {
         global $conf;
 
-        $table = new BimpPDF_AmountsTable($this->pdf);
+        $table = new BimpPDF_AmountsTable($this->pdf, $this->primary);
 //        $table->addColDef('code_article', 'Code article', 30);
         $table->addColDef('dl', 'DL', 10, 'text-align: center;', '', 'text-align: center;');
         $table->addColDef('ral', 'RAL', 10, 'text-align: center;', '', 'text-align: center;');

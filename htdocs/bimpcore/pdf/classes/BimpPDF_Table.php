@@ -19,7 +19,7 @@ class BimpPDF_Table
     public $title = '';
     public $new_page_title = '';
 
-    public function __construct($pdf, $borders = true)
+    public function __construct($pdf, $borders = true, $primary = null)
     {
         $this->pdf = $pdf;
         if ($borders) {
@@ -28,7 +28,10 @@ class BimpPDF_Table
             $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table/table_no_borders.css');
         }
 
-        $primary = BimpCore::getParam('pdf/primary', '000000');
+        if (is_null($primary)) {
+            $primary = BimpCore::getParam('pdf/primary', '000000');
+        }
+
         $this->styles = str_replace('{primary}', $primary, $this->styles);
     }
 
@@ -214,12 +217,12 @@ class BimpPDF_Table
 
         $html .= '</tr>';
         $html .= '</table>';
-        
+
 //        global $user; 
 //        if ($user->login = 'f.martinez') {
 //            echo htmlentities($html);
 //        }
-        
+
         $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html . "", false, false, true, false, '');
     }
 

@@ -88,10 +88,8 @@ class OrderFournPDF extends BimpCommDocumentPDF
     {
         $html = '';
 
-        $primary = BimpCore::getParam('pdf/primary', '000000');
-
         $html .= '<div class="row">';
-        $html .= '<span style="font-weight: bold; color: #' . $primary . ';">';
+        $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
         $html .= 'Livraison :</span><br/>';
 
         if (BimpObject::objectLoaded($this->bimpCommObject)) {
@@ -178,7 +176,7 @@ class OrderFournPDF extends BimpCommDocumentPDF
 
         $html .= '</div>';
 
-        $html .= '<div style="border-top: solid 1px #' . $primary . ';"></div>';
+        $html .= '<div style="border-top: solid 1px #' . $this->primary . ';"></div>';
 
         $html .= '<div>';
 

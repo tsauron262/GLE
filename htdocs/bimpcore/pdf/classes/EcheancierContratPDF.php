@@ -103,8 +103,6 @@
         }
         
         public function renderDocInfos() {
-            $primary = BimpCore::getParam('pdf/primary', '000000');
-
             $html = '';
 
             $html .= '<div class="section addresses_section">';
@@ -148,7 +146,7 @@
             
             if(count($allPeriodes['periodes']) > 0) {
                 $this->writeContent('<p style="font-weight: bold; font-size: 12px">Echéancier pour ' . ($allPeriodes['infos']['nombre_periodes'] + $allPeriodes['infos']['periode_incomplette_mois'] ) . ' ' . (($allPeriodes['infos']['nombre_periodes'] + $allPeriodes['infos']['periode_incomplette_mois'] > 1) ? 'périodes' : 'periode') . '</p>');
-                $table = new BimpPDF_Table($this->pdf);
+                $table = new BimpPDF_Table($this->pdf, true, $this->primary);
             
                 $table->addCol('periode', 'Période de référence', 20, 'text-align: left;', '', 'text-align: left;');
                 $table->addCol('datePrelevement', 'Date de prélèvement', 20, 'text-align: center;', '', 'text-align: center;');

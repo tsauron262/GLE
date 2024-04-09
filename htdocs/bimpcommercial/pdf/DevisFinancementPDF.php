@@ -120,7 +120,7 @@ class DevisFinancementPDF extends BimpDocumentPDF
 
     public function renderLines()
     {
-        $table = new BimpPDF_Table($this->pdf);
+        $table = new BimpPDF_Table($this->pdf, true, $this->primary);
         $table->addCol('desc', 'Désignation', 0, '', '', '');
         $table->addCol('qte', 'Quantité', 25, 'text-align: center', '', 'text-align: center');
 

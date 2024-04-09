@@ -146,7 +146,7 @@ class InterStatementPDF extends BimpCommDocumentPDF
             
             $this->writeContent('<h3>Interventions effectuées</h3>');
             
-            $table = new BimpPDF_Table($this->pdf);
+            $table = new BimpPDF_Table($this->pdf, true, $this->primary);
             
             $table->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
@@ -190,7 +190,7 @@ class InterStatementPDF extends BimpCommDocumentPDF
                 $this->writeContent('<br /><p style="font-weight: bold; font-size: 12px">Aucune intervention à venir / en cours</p>');
             } else {
                 $this->writeContent('<br /><h3>Interventions à venir / en cours</h3>');
-                $table2 = new BimpPDF_Table($this->pdf);
+                $table2 = new BimpPDF_Table($this->pdf, true, $this->primary);
             
                 $table2->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');

@@ -791,3 +791,8 @@ searches:
 signatures: 
     devis: 
         label: Devis
+
+graph:
+    parDay:
+        xDateConfig:
+            field: datep

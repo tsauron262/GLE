@@ -1241,13 +1241,19 @@ class BC_ListTable extends BC_List
         }
 
         foreach ($this->params['graph'] as $idGraph => $nomGraph) {
+            $actionRefresh = "updateGraph('" . $this->identifier . "', " . $idGraph . ", '" . $this->name . "');";
             $dataGraph = $this->object->getInfoGraph($idGraph);
-            $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartContainer" style="height: 300px; width: 100%;"></div>';
+            $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartOption"></div>';
+            $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartContainer" style="height: 800px; width: 100%;"></div>';
             $html .= '<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
             $html .= '<script>';
-            $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \'' . $this->identifier . "')updateGraph('" . $this->identifier . "', " . $idGraph . ", '" . $this->name . "');});";
+            $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \'' . $this->identifier . "')".$actionRefresh."});";
             if ($dataGraph['mode_data'] == 'objects')
-                $html .= "$('#" . $this->identifier . "').on('listRefresh', function(){updateGraph('" . $this->identifier . "', " . $idGraph . ", '" . $this->name . "');});";
+                $html .= "$('#" . $this->identifier . "').on('listRefresh', function(){".$actionRefresh."});";
+            $html .= '
+              $( "#'.$this->identifier . '_' . $idGraph . '_chartOption").on("refresh", function() {
+                '.$actionRefresh.'
+              });';
             $html .= '</script>';
         }
 

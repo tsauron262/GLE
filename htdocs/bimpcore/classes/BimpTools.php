@@ -75,7 +75,7 @@ class BimpTools
                 }
             }
         }
-
+        
         if (is_null($value)) {
             return $default_value;
         }

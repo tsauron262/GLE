@@ -139,7 +139,7 @@ class PretPDF extends BimpDocumentPDF
             return'';
         }
 
-        $table = new BimpPDF_AmountsTable($this->pdf);
+        $table = new BimpPDF_AmountsTable($this->pdf, $this->primary);
         $table->setCols(array('desc', 'pu_ht', 'qte', 'total_ht', 'total_ttc'));
         $table->cols_def['qte']['style'] = 'text-align: center;';
 

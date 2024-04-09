@@ -44,6 +44,14 @@ class BimpStruct
                 }
                 break;
 
+            case 'graph':
+                if ($config->isDefined($path . '/graph')) {
+                    $html = self::renderGraph($config, $path . '/graph', $parent_component);
+                } else {
+                    // logError
+                }
+                break;
+
             case 'list_custom':
                 if ($config->isDefined($path . '/list_custom')) {
                     $html = self::renderListCustom($config, $path . '/list_custom', $parent_component);
@@ -229,6 +237,54 @@ class BimpStruct
 
         $config->setCurrentPath($prev_path);
         return $html;
+    }
+    
+    public static function renderGraph(BimpConfig $config, $path, &$parent_component = null)
+    {
+        $html = '';
+        $prev_path = $config->current_path;
+        $config->setCurrentPath($path);
+
+        $object = $config->getObject($path . '/object');
+
+        if (is_null($object)) {
+            if (is_a($config->instance, 'BimpObject')) {
+                $object = $config->instance;
+            }
+        }
+
+        if (is_a($object, 'BimpObject')) {
+            $name = $config->getFromCurrentPath('name', 'default');
+            $panel = $config->getFromCurrentPath('panel', 1, false, 'bool');
+            $title = $config->getFromCurrentPath('title', null);
+            if($title == '')
+                    $title = $object->getLabel('', true);
+            $icon = $config->getFromCurrentPath('icon', null);
+            
+            $html .= $object->renderGraph($name, $title);
+        } else {
+            $html = BimpRender::renderAlerts('Instance invalide - Chemin: ' . $path . '/object');
+        }
+
+        $config->setCurrentPath($prev_path);
+        return $html;
+        
+        
+        $html = '';
+        $prev_path = $config->current_path;
+        $config->setCurrentPath($path);
+        $name = $config->getFromCurrentPath('name', 'default');
+        $title = $config->getFromCurrentPath('title', 'default');
+        
+        
+        if ($config->isDefined($path . '/object')) {
+            $object = $config->getObject($path . '/object');
+        } else {
+            $object = $config->instance;
+        }
+        
+        
+        return $object->renderGraph($name, $title);
     }
 
     public static function renderList(BimpConfig $config, $path, &$parent_component = null)

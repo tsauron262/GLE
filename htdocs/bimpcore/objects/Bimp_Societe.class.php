@@ -441,7 +441,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if (!count($errors)) {
-                $available_discounts = $this->getAvailableDiscountsAmounts();
+                $available_discounts = $this->getAvailableDiscountsAmounts(false, array(), 5);
                 if ($available_discounts) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' dispose de remises non consommées (' . BimpTools::displayMoneyValue($available_discounts) . ')';
                     $check = 0;
@@ -941,7 +941,7 @@ class Bimp_Societe extends BimpDolObject
         return 0;
     }
 
-    public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array())
+    public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array(), $delaiYear = 0)
     {
         if ($this->isLoaded()) {
             global $conf;
@@ -951,6 +951,10 @@ class Bimp_Societe extends BimpDolObject
             $sql .= ' WHERE r.entity = ' . $conf->entity;
             $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
             $sql .= ' AND r.fk_soc = ' . (int) $this->id;
+            
+            if($delaiYear > 0){
+                 $sql .= ' AND datec > DATE_SUB(NOW(),INTERVAL '.$delaiYear.' YEAR)';
+            }
 
             if ($is_fourn) {
                 $sql .= ' AND (r.fk_invoice_supplier IS NULL AND r.fk_invoice_supplier_line IS NULL)';

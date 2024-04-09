@@ -675,7 +675,7 @@ class BimpFile extends BimpObject
 
     // Overrides: 
 
-    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null, $extra_order_by = NULL, $extra_order_way = 'ASC')
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null, $extra_order_by = NULL, $extra_order_way = 'ASC', $groupBy = '')
     {
         if (!$this->isLoaded()) {
             if (isset($filters['parent_module']) &&

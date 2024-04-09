@@ -1702,6 +1702,7 @@ class Bimp_Client extends Bimp_Societe
 
         $list = null;
         $list2 = null;
+        $graph = null;
         $client_label = $this->getRef() . ' - ' . $this->getName();
 
         switch ($list_type) {
@@ -1734,6 +1735,14 @@ class Bimp_Client extends Bimp_Societe
             case 'propales':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'client', 1, null, 'Propositions commerciales du client "' . $client_label . '"');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                
+                $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'parDay');
+                $graph->addFieldFilterValue('or_client', array(
+                    'or' => array(
+                        'fk_soc'            => $this->id,
+                        'id_client_facture' => $this->id
+                    )
+                ));
                 break;
 
             case 'commandes':
@@ -1743,6 +1752,14 @@ class Bimp_Client extends Bimp_Societe
                 $list->setAddFormValues(array('fields' => array('fk_soc' => $this->id)));
 
                 $list->addFieldFilterValue('or_client', array(
+                    'or' => array(
+                        'fk_soc'            => $this->id,
+                        'id_client_facture' => $this->id
+                    )
+                ));
+                
+                $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'parDay');
+                $graph->addFieldFilterValue('or_client', array(
                     'or' => array(
                         'fk_soc'            => $this->id,
                         'id_client_facture' => $this->id
@@ -1759,6 +1776,14 @@ class Bimp_Client extends Bimp_Societe
             case 'factures':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Facture'), 'client', 1, null, 'Factures du client "' . $client_label . '"');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                
+                $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'parDay');
+                $graph->addFieldFilterValue('or_client', array(
+                    'or' => array(
+                        'fk_soc'            => $this->id,
+                        'id_client_facture' => $this->id
+                    )
+                ));
                 break;
 
             case 'contrats':
@@ -1842,6 +1867,10 @@ class Bimp_Client extends Bimp_Societe
             $html .= BimpRender::renderAlerts('La liste de type "' . $list_type . '" n\'existe pas');
         } else {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
+        }
+
+        if (is_a($graph, 'BC_Graph')) {
+            $html .= $graph->renderHtml();
         }
 
         if (is_a($list2, 'BC_ListTable'))

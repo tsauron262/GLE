@@ -39,7 +39,8 @@ class gsxController extends BimpController
         ''     => 'Général',
         'MOD'  => 'Module',
         'OTH'  => 'Autre',
-        'REPL' => 'Remplacement'
+        'REPL' => 'Remplacement',
+        'CNTC' => 'Facturation'
     );
     protected $repairs = array();
     protected $issueCodes = null;

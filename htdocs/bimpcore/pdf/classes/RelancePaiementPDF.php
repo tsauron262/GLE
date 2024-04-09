@@ -485,7 +485,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $total_credit = BimpTools::getArrayValueFromPath($this->data, 'total_credit', 0);
         $solde = $total_debit - $total_credit;
 
-        $table = new BimpPDF_Table($this->pdf);
+        $table = new BimpPDF_Table($this->pdf, true, $this->primary);
 
         $table->addCol('date', 'Date', 18);
         $table->addCol('fac', 'N° Facture', 25);

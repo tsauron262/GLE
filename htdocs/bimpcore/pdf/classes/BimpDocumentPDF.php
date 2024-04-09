@@ -75,8 +75,9 @@ class BimpDocumentPDF extends BimpModelPDF
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
                 $testFile = str_replace(array(".jpg"/* , "_RESEAUNANCE.png" */, ".png"), "_SAV.png", $logo_file);
-                if (is_file($testFile))
+                if (is_file($testFile)) {
                     $logo_file = $testFile;
+                }
             }
             if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
                 $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
@@ -113,7 +114,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $this->pdf->topMargin = 44;
-        
+
         $this->header_vars = array(
             'primary_color' => $this->primary,
             'logo_img'      => $logo_file,
@@ -134,27 +135,31 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf;
 
         if ($this->footerCompany->name) {
-            $line1 .= $this->langs->convToOutputCharset($this->footerCompany->name);
+            $line1 .= '<span style="font-weight: bold;">' . $this->langs->convToOutputCharset($this->footerCompany->name).' </span> | ';
         }
-
-        if ($this->footerCompany->forme_juridique_code) {
-            $line1 .= " - " . $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->footerCompany->forme_juridique_code));
-        }
-
-        if ($this->footerCompany->capital) {
-            $captital = price2num($this->footerCompany->capital);
-            if (is_numeric($captital) && $captital > 0) {
-                $line1 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", price($captital, 0, $this->langs, 0, 0, 0, $conf->currency));
-            } else {
-                $line1 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", $this->footerCompany->capital, $this->langs);
-            }
+        if ($this->footerCompany->url) {
+            $line1 .= $this->footerCompany->url.'<br/>';
         }
 
         if ($this->footerCompany->address) {
             if (BimpCore::isEntity('prolease')) {
                 $line2 .= $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town;
             } else {
-                $line1 .= " - " . $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town . " - Tél " . $this->footerCompany->phone;
+                $line1 .= $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town . " | Tél : " . $this->footerCompany->phone;
+            }
+        }
+        
+
+        if ($this->footerCompany->forme_juridique_code) {
+            $line2 .= $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->footerCompany->forme_juridique_code));
+        }
+
+        if ($this->footerCompany->capital) {
+            $captital = price2num($this->footerCompany->capital);
+            if (is_numeric($captital) && $captital > 0) {
+                $line2 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", price($captital, 0, $this->langs, 0, 0, 0, $conf->currency));
+            } else {
+                $line2 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", $this->footerCompany->capital, $this->langs);
             }
         }
 
@@ -165,13 +170,6 @@ class BimpDocumentPDF extends BimpModelPDF
                 $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->footerCompany->tva_intra);
             }
         } else {
-            if ($this->footerCompany->idprof1 && ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)) {
-                $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);
-                if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                    $field = $reg[1];
-                }
-                $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof1);
-            }
 
             if ($this->footerCompany->idprof2) {
                 $field = $this->langs->transcountrynoentities("ProfId2", $this->footerCompany->country_code);
@@ -179,6 +177,21 @@ class BimpDocumentPDF extends BimpModelPDF
                     $field = $reg[1];
                 }
                 $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof2);
+            }
+
+            if ($this->footerCompany->idprof4) {
+                $field = $this->langs->transcountrynoentities("ProfId4", $this->footerCompany->country_code);
+                if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                    $field = $reg[1];
+                }
+                $line2 .= ($line2 ? " - " : "") . 'RCS' . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4).' ';
+            }
+            if ($this->footerCompany->idprof1 /*&& ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)*/) {
+                $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);
+                if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                    $field = $reg[1];
+                }
+                $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof1);
             }
 
             if ($this->footerCompany->idprof3) {
@@ -189,14 +202,6 @@ class BimpDocumentPDF extends BimpModelPDF
 //                
 //            }
                 $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof3);
-            }
-
-            if ($this->footerCompany->idprof4) {
-                $field = $this->langs->transcountrynoentities("ProfId4", $this->footerCompany->country_code);
-                if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                    $field = $reg[1];
-                }
-                $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
             }
 
             if ($this->footerCompany->idprof5) {
@@ -449,7 +454,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderBottom()
     {
-        $table = new BimpPDF_Table($this->pdf, false);
+        $table = new BimpPDF_Table($this->pdf, false, $this->primary);
         $table->cellpadding = 0;
         $table->remove_empty_cols = false;
         $table->addCol('left', '', 95);
@@ -659,7 +664,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $this->writeContent($html);
 
                     foreach ($annexe['lists'] as $list) {
-                        $table = new BimpPDF_Table($this->pdf, false);
+                        $table = new BimpPDF_Table($this->pdf, false, $this->primary);
                         $table->new_page_title = '<div style="font-weight: bold;font-size: 9px;">' . $annexe_title . ' - ' . $list['title'] . ' (suite)</div>';
                         $table->cellpadding = 1;
 

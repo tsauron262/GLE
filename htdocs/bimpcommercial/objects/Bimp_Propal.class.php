@@ -57,11 +57,13 @@ class Bimp_Propal extends Bimp_PropalTemp
     const CONTRATS_STATUS_NONE = 0;
     const CONTRATS_STATUS_TODO = 1;
     const CONTRATS_STATUS_DONE = 2;
+    const CONTRATS_STATUS_DONE_FORCED = 3;
 
     public static $contrats_status_list = array(
-        self::CONTRATS_STATUS_NONE => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
-        self::CONTRATS_STATUS_TODO => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
-        self::CONTRATS_STATUS_DONE => array('label' => 'Traités', 'icon' => 'fas_check', 'classes' => array('success'))
+        self::CONTRATS_STATUS_NONE        => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
+        self::CONTRATS_STATUS_TODO        => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
+        self::CONTRATS_STATUS_DONE        => array('label' => 'Traités', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::CONTRATS_STATUS_DONE_FORCED => array('label' => 'Traités (forcé)', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $acomptes_allowed = true;
@@ -145,6 +147,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return $commande->can("create") /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */;
 
             case 'createContratAbo':
+            case 'ForceContratsStatus':
                 if ($user->admin || $user->rights->contrat->creer) {
                     return 1;
                 }
@@ -310,6 +313,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createContratAbo':
+            case 'ForceContratsStatus':
+                if ((int) $this->getData('contrats_status') === self::CONTRATS_STATUS_DONE_FORCED) {
+                    $errors[] = 'Le statut "Traités" a été forcé';
+                    return 0;
+                }
                 if (!in_array($status, array(Propal::STATUS_SIGNED, Propal::STATUS_BILLED))) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
@@ -1324,6 +1332,17 @@ class Bimp_Propal extends Bimp_PropalTemp
                         $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
                         $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter les lignes à un contrat d\'abonnement';
                         $msg .= '</span>';
+
+                        if ($this->isActionAllowed('ForceContratsStatus') && $this->canSetAction('ForceContratsStatus')) {
+                            $onclick = $this->getJsActionOnclick('ForceContratsStatus', array(), array(
+                                'confirm_msg' => 'Veuillez confirmer'
+                            ));
+
+                            $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                            $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Traités"';
+                            $msg .= '</span>';
+                        }
+
                         $msg .= '</div>';
                     } else {
                         $msg .= '<span class="danger">';
@@ -1429,7 +1448,7 @@ class Bimp_Propal extends Bimp_PropalTemp
     public function renderContratAboInput()
     {
         $this->checkContratsStatus();
-        
+
         $html = '';
 
         $errors = array();
@@ -1536,14 +1555,18 @@ class Bimp_Propal extends Bimp_PropalTemp
     public function checkContratsStatus($cur_status = null)
     {
         $errors = array();
-                
+
         if (!$this->isLoaded($errors)) {
             return $errors;
         }
-        
+
         if (!$this->field_exists('contrats_status')) {
             $errors[] = 'statut contrat non activé';
             return $errors;
+        }
+
+        if ((int) $this->getData('contrats_status') === self::CONTRATS_STATUS_DONE_FORCED) {
+            return array();
         }
 
         $new_contrats_status = self::CONTRATS_STATUS_NONE;
@@ -1595,7 +1618,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $this->addObjectLog('Statut des contrats d\'abonnement passé à ' . strip_tags($this->displayDataDefault('contrats_status')));
             }
         }
-        
+
         return $errors;
     }
 
@@ -2572,6 +2595,20 @@ class Bimp_Propal extends Bimp_PropalTemp
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionForceContratsStatus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Enregistrement effectué';
+
+        $errors = $this->updateField('contrats_status', self::CONTRATS_STATUS_DONE_FORCED);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

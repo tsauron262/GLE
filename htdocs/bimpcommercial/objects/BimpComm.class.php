@@ -4738,56 +4738,6 @@ class BimpComm extends BimpDolObject
         return $data;
     }
 
-    //graph
-
-    public function getInfoGraph($graphName = '')
-    {
-        $data = parent::getInfoGraph($graphName);
-        $arrondirEnMinuteGraph = 60 * 12;
-        $data["data1"] = array("name" => 'Nb', "type" => "column");
-        $data["data2"] = array("name" => 'Total HT', "type" => "column");
-        $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
-//        $data["axeY"] = array("title" => 'Nb');
-        $data["params"] = array('minutes' => $arrondirEnMinuteGraph);
-        $data["title"] = ucfirst($this->getLabel('name_plur')) . ' par jour';
-
-        return $data;
-    }
-
-    public function getGraphDatasPoints($params)
-    {
-        $result = array(1 => array(), 2 => array());
-
-        $fieldTotal = 'total_ht';
-        if ($this->object_name == 'Bimp_Propal')
-            $dateStr = "UNIX_TIMESTAMP(datep)";
-        elseif ($this->object_name == 'Bimp_Facture') {
-            $dateStr = "UNIX_TIMESTAMP(datef)";
-        } else
-            $dateStr = "UNIX_TIMESTAMP(date_commande)";
-
-
-        $req = 'SELECT count(*) as nb, SUM(' . $fieldTotal . ') as total_ht, ' . $dateStr . ' as timestamp FROM ' . MAIN_DB_PREFIX . $this->params['table'] . ' a ';
-        $filter = array();
-        $filter['entity'] = getEntity('bimp_conf', 0);
-        foreach (json_decode(BimpTools::getPostFieldValue('param_list_filters'), true) as $filterT) {
-            if (isset($filterT['filter']) && is_array($filterT['filter']))
-                $filter[] = $filterT['filter'];
-            elseif (isset($filterT['filter']) && isset($filterT['name']))
-                $filter[$filterT['name']] = $filterT['filter'];
-        }
-        $req .= BimpTools::getSqlWhere($filter);
-        $req .= ' GROUP BY ' . $dateStr;
-        $sql = $this->db->db->query($req);
-        while ($ln = $this->db->db->fetch_object($sql)) {
-            $tabDate = array($ln->annee, $ln->month, $ln->day, $ln->hour, $ln->minute);
-            $result[1][] = array("x" => "new Date(" . $ln->timestamp * 1000 . ")", "y" => (int) $ln->nb);
-            $result[2][] = array("x" => "new Date(" . $ln->timestamp * 1000 . ")", "y" => (int) $ln->total_ht);
-        }
-
-        return $result;
-    }
-
     // post process: 
 
     public function onCreate(&$warnings = array())

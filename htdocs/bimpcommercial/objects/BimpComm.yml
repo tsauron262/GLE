@@ -955,8 +955,29 @@ lists:
             
     client: 
         extends: default
-        graph:
-            - client
+            
+graph:
+    parDay:
+        title: Nb Piéces / CA
+        xDateConfig:
+            field: date_commande
+            params: 
+                - month 
+                - day
+            date1: 1
+            date2: 2
+            def: 1year
+        y: ggt
+        yConfig:
+            fields:
+                nb:
+                    title: Nombre de piéces
+                    field: rowid
+                    calc: COUNT
+                total_ht:
+                    title: CA ht
+                    field: total_ht
+                    calc: SUM
             
 views: 
     default: 

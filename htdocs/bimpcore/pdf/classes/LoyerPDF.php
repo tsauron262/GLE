@@ -10,7 +10,7 @@ class LoyerPDF extends PropalPDF
 
     public function renderLines()
     {
-        $table = new BimpPDF_AmountsTable($this->pdf);
+        $table = new BimpPDF_AmountsTable($this->pdf, $this->primary);
         $table->addColDef('loyer', 'Prix (mois)');
         $table->addColDef('mois', 'Engagement');
 

@@ -140,6 +140,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                             }
                         }
                         break;
+                    case 'champagne':
+                        $this->fromCompany->name = 'LDLC APPLE';
+                        break;
 
                     case 'actimag':
                         break;
@@ -754,7 +757,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     {
         global $conf, $user;
 
-        $table = new BimpPDF_AmountsTable($this->pdf);
+        $table = new BimpPDF_AmountsTable($this->pdf, $this->primary);
 
         if ($this->hidePrice)
             $table->setCols(array('desc'));
@@ -1151,13 +1154,28 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 $html .= '<span style="font-weight: bold;">';
                 $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
                 $html .= "</span>";
-                $html .= "</p>";
 
-                $html .= '<p style="font-size: 6px; font-style: italic">Merci de noter systématiquement le n° de facture sur votre règlement.</p>';
+                $html .= '</p><p style="font-size: 6px; font-style: italic">Merci de noter systématiquement le n° de facture sur votre règlement.';
             }
+            
+            $html .= "</p>";
 
             $this->writeContent($html);
-        } else {
+        } elseif(BimpCore::getExtendsEntity() === 'champagne'){
+            $html .= '<p style="font-size: 6px; font-style: italic">';
+            $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
+En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
+            $html .= 'La Société ' . $this->fromCompany->name . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques. ';
+            $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
+            $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.';
+
+            $html .= '<span style="font-weight: bold;">';
+            $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
+            $html .= "</span>";
+            $html .= "</p>";
+            $this->writeContent($html);
+        }
+        else{
             if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv) {
                 $html = '';
                 $html .= '<p style="font-size: 6px; font-style: italic">';

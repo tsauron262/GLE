@@ -2,26 +2,26 @@
 
 class propalsController extends BimpController
 {
+
     var $socid = "";
 
     public function displayHead()
     {
         global $db, $langs, $user;
-        
-        if(BimpTools::getValue("socid") > 0){
-            $this->socid = BimpTools::getValue("socid");
+
+        if (BimpTools::isSubmit("socid")) {
+            $this->socid = (int) BimpTools::getValue("socid", 0, 'int');
             require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
             $soc = new Societe($db);
             $soc->fetch($this->socid);
             $head = societe_prepare_head($soc);
             dol_fiche_head($head, 'bimpcomm', '');
-            
+
             $linkback = '<a href="' . DOL_URL_ROOT . '/societe/list.php?restore_lastsearch_values=1">' . $langs->trans("BackToList") . '</a>';
 
             dol_banner_tab($soc, 'id', $linkback, ($user->societe_id ? 0 : 1), 'rowid', 'nom', '', '&fc=clientPropals');
         }
     }
-
 //    public function renderHtml()
 //    {
 //        $list = 'default';

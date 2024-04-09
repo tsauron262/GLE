@@ -839,7 +839,7 @@ class BT_ficheInter_det extends BimpDolObject
                 $this->set('departure_pm', null);
             } elseif ($type != 2) {
                 // Si type non déplacement et non libre
-                if ((int) BimpTools::getValue('am_pm', 0)) {
+                if ((int) BimpTools::getValue('am_pm', 0, 'int')) {
                     // Si matin et après-midi: 
                     $arrived_am = BimpTools::getValue('arrived_am_time', '', 'alphanohtml');
                     $departure_am = BimpTools::getValue('departure_am_time', 'alphanohtml');

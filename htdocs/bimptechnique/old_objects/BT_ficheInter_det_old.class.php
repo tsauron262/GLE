@@ -377,8 +377,8 @@ class BT_ficheInter_det extends BimpDolObject
 
         if (!count($errors)) {
             $total_hours = 0;
-            if (BimpTools::getPostFieldValue("duree")) {
-                $total_hours = BimpTools::getValue('duree');
+            if (BimpTools::isPostFieldSubmit("duree")) {
+                $total_hours = BimpTools::getPostFieldValue('duree');
             }
             
             if (BimpTools::getPostFieldValue("arrived") && BimpTools::getPostFieldValue("departure")) {

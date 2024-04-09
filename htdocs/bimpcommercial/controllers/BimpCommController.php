@@ -65,7 +65,7 @@ class BimpCommController extends BimpController
         $id_parent = (int) BimpTools::getValue('id_parent', 0, 'int');
 
         if (!$module && !$object_name) {
-            $type = BimpTools::getValue('object_type', '');
+            $type = BimpTools::getValue('object_type', '', 'aZ09');
             if ($type) {
                 BimpObject::loadClass('bimpcommercial', 'ObjectLine');
                 $module = (string) ObjectLine::getModuleByType($type);

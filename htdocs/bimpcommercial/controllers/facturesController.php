@@ -9,8 +9,8 @@ class facturesController extends BimpController
     {
         global $db, $langs, $user;
 
-        if (BimpTools::getValue("socid") > 0) {
-            $this->socid = BimpTools::getValue("socid");
+        if (BimpTools::isSubmit('socid')) {
+            $this->socid = BimpTools::getValue("socid", 0, 'int');
             require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
             $soc = new Societe($db);
             $soc->fetch($this->socid);
@@ -24,8 +24,8 @@ class facturesController extends BimpController
     }
     
     public function display(){
-        if (BimpTools::getValue("socid") > 0)
-            $this->socid = BimpTools::getValue("socid");
+        if (BimpTools::isSubmit('socid'))
+            $this->socid = BimpTools::getValue("socid", 0, 'int');
         return parent::display();
     }
 

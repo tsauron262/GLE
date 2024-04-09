@@ -4797,7 +4797,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        if (BimpTools::getValue('line_tva_tx')) {
+        if (BimpTools::isSubmit('line_tva_tx')) {
             $line_tva_tx = (float) BimpTools::getValue('line_tva_tx', 0, 'float');
         }
 

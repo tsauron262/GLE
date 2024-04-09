@@ -955,15 +955,15 @@ class BS_Ticket extends BimpAbstractFollow
 
             $sujet .= "<b>" . $label_serial_imei . ":</b> " . BimpTools::getValue('serial_imei', '', 'alphanohtml') . "<br />";
 
-            if (BimpTools::getValue('adresse_envois')) {
+            if (BimpTools::isSubmit('adresse_envois')) {
                 $sujet .= "<b>Adresse d'envoi:</b> " . BimpTools::getValue('adresse_envois', '', 'alphanohtml') . "<br />";
             }
 
-            if (BimpTools::getValue('contact_in_soc')) {
+            if (BimpTools::isSubmit('contact_in_soc')) {
                 $sujet .= "<b>Utilisateur:</b> " . BimpTools::getValue('contact_in_soc', '', 'alphanohtml') . "<br />";
             }
 
-            if (BimpTools::getValue('email_bon_retour')) {
+            if (BimpTools::isSubmit('email_bon_retour')) {
                 $sujet .= "<b>Adresse email pour envoi du bon de retour:</b> " . BimpTools::getValue('email_bon_retour', '', 'alphanohtml') . "<br />";
             }
 

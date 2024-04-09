@@ -388,7 +388,7 @@ class devController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 

@@ -837,7 +837,7 @@ class BimpController
                 $id_obj = (int) BimpTools::getvalue('id', 0, 'int');
 
                 if ($id_obj) {
-                    $obj = $notif->getObject();
+                    $obj = $notif->getObject($id_obj);
 
                     if (BimpObject::objectLoaded($obj)) {
                         $methode = 'action' . ucfirst(BimpTools::getvalue('actionNotif', '', 'aZ09'));

@@ -35,9 +35,9 @@ class BimpNotification extends BimpObject
         return -1;
     }
 
-    public function getObject($id)
+    public function getObject($id_object)
     {
-        return BimpCache::getBimpObjectInstance($this->getData('module'), $this->getData('class'), $id);
+        return BimpCache::getBimpObjectInstance($this->getData('module'), $this->getData('class'), $id_object);
     }
 
     public function setActionViewed($id)

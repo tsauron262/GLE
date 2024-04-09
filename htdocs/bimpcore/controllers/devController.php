@@ -77,8 +77,8 @@ class devController extends BimpController
         $html .= '<div class="row" style="margin-bottom: 30px">';
         $html .= '<div class="col-sm-12">';
         $html .= 'Version:';
-        if (defined('BIMP_EXTENDS_VERSION')) {
-            $html .= '<b>' . BIMP_EXTENDS_VERSION . '</b>';
+        if (BimpCore::getVersion()) {
+            $html .= '<b>' . BimpCore::getVersion() . '</b>';
         } else {
             $html .= '<span class="danger">Aucune</span>';
         }
@@ -280,8 +280,8 @@ class devController extends BimpController
 
         $html .= '<div style="margin-bottom: 10px;font-size: 14px">';
         $html .= 'Version: ';
-        if (defined('BIMP_EXTENDS_VERSION')) {
-            $html .= '<b>' . BIMP_EXTENDS_VERSION . '</b>';
+        if (BimpCore::getVersion()) {
+            $html .= '<b>' . BimpCore::getVersion() . '</b>';
         } else {
             $html .= '<span class="danger">Aucune</span>';
         }

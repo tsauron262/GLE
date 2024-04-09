@@ -45,8 +45,8 @@ class BimpController
         }
 
         // Surcharge Version: 
-        if (defined('BIMP_EXTENDS_VERSION')) {
-            $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/controllers/' . $controllerClassBase . '.php';
+        if (BimpCore::getVersion()) {
+            $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/controllers/' . $controllerClassBase . '.php';
             if (file_exists($version_file)) {
                 $className = $controllerClassBase . '_ExtVersion';
                 if (!class_exists($className)) {
@@ -234,13 +234,13 @@ class BimpController
                 $html .= '<h2 class="danger">Erreur Fatale</h2>';
 
                 global $dolibarr_main_prod;
-                if (!$dolibarr_main_prod) {
+//                if(!$dolibarr_main_prod){
                     $html .= '<strong>' . $file . '</strong> - Ligne <strong>' . $line . '</strong><br/>';
 
                     $html .= BimpRender::renderAlerts(str_replace("\n", '<br/>', $msg));
 
                     $html .= '<br/><br/>';
-                }
+//                }
 
                 $html .= '<div class="warning" style="font-size: 15px; text-align: center;">';
                 $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');

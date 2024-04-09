@@ -11,12 +11,12 @@ colors:
         
 pdf:
     primary: 'ed513b'
-    primary_sav: '008ECC'
+    primary_sav: '0096c8'
 
 interface_client: 
     primary: 'ed513b'
     
 public_email: 
     primary: 'ed513b'
-    primary_actimag: '008ECC'
-    primary_ldlc: '008ECC'
+    primary_actimag: '0096c8'
+    primary_ldlc: '0096c8'

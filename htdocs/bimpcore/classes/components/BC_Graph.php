@@ -68,12 +68,14 @@ class BC_Graph extends BC_Panel
                     'values'    => array(),
                     'value'     => $this->params['xDateConfig']['params'][0]
                 );
-                if(in_array('day', $this->params['xDateConfig']['params']))
-                        $this->formData['xDateConfig']['values']['day'] = 'Jour';
-                if(in_array('month', $this->params['xDateConfig']['params']))
-                        $this->formData['xDateConfig']['values']['month'] = 'Mois';
                 if(in_array('hour', $this->params['xDateConfig']['params']))
                         $this->formData['xDateConfig']['values']['hour'] = 'Heure';
+                if(in_array('day', $this->params['xDateConfig']['params']))
+                        $this->formData['xDateConfig']['values']['day'] = 'Jour';
+                if(in_array('week', $this->params['xDateConfig']['params']))
+                        $this->formData['xDateConfig']['values']['week'] = 'Semaine';
+                if(in_array('month', $this->params['xDateConfig']['params']))
+                        $this->formData['xDateConfig']['values']['month'] = 'Mois';
             }
            
             if(isset($this->params['xDateConfig']['date1']) && $this->params['xDateConfig']['date1']){
@@ -198,6 +200,8 @@ class BC_Graph extends BC_Panel
                     break;
                 case 'day' :
                     $options['axisX'] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
+                case 'week' :
+                    $options['axisX'] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
                     break;
                 default:
                     $options['axisX'] = array("title" => "Date", "valueFormatString" => 'HH:mm:ss DD MMM YYYY');
@@ -299,7 +303,18 @@ class BC_Graph extends BC_Panel
         elseif($this->userOptions['xDateConfig'] == 'hour'){
             $xFiled = 'date_format('.$xFiled.', \'%Y-%m-%d %h:00:00\')';
         }
+        elseif($this->userOptions['xDateConfig'] == 'week'){
+            $xFiled = 'MIN(date_format('.$xFiled.', \'%Y-%m-%d\'))';
+        }
         $return_fields = array($xFiled.' as x');//.$this->fieldX);
+        
+        
+        $groupBy = ($this->params['mode'] == 'doughnut')? null : 'x';
+        if($this->userOptions['xDateConfig'] == 'week'){
+            $groupBy = 'date_format('.$this->fieldX.', \'%Y-%u\')';
+        }
+        
+        
         $joins = array();
         $i = 0;
         if(isset($params['fields'])){
@@ -350,8 +365,6 @@ class BC_Graph extends BC_Panel
                     foreach($tabField['filters'] as $field_name => $value)
                     $filters = BimpTools::mergeSqlFilter($filters, $field_name, $value);
                 }
-                
-                $groupBy = ($this->params['mode'] == 'doughnut')? null : 'x';
                 
                 $oldValue = null;
                 if($this->userOptions['relative'] == 1){

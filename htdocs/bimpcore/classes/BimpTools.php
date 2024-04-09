@@ -172,7 +172,7 @@ class BimpTools
 
         // Filtres listes:
         if (BimpTools::isSubmit('param_list_filters')) {
-            $filters = json_decode(BimpTools::getValue('param_list_filters', array(), 'array'));
+            $filters = json_decode(BimpTools::getValue('param_list_filters', '', 'json'));
             foreach ($filters as $filter) {
                 if (isset($filter->name) && $filter->name === $field_name) {
                     return $filter->filter;

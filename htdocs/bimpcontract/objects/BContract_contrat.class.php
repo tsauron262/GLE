@@ -849,12 +849,21 @@ class BContract_contrat extends BimpDolObject
         return $echeancier;
     }
 
-    public function getHeuresRestantesDelegation()
+    public function getHeuresRestantesDelegation($format = 'time')
     {
         $duree_vendu = $this->getDurreeVendu();
         $dureeFi = $this->getInfosDureeFi();
-        $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
-        return $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot']);
+
+        switch ($format) {
+            case 'float':
+            default:
+                return $duree_vendu - $dureeFi['contrat']['tot'];
+
+            case 'time':
+                $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
+                return $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot']);
+        }
+
 
 //        $reste = 0;
 //        $totalHeuresVendues = 0;
@@ -4841,7 +4850,7 @@ class BContract_contrat extends BimpDolObject
     public function update(&$warnings = array(), $force_update = false)
     {
         $type_piece = BimpTools::getValue('type_piece', '', 'aZ09comma');
-        
+
         if ($type_piece) {
             $id = 0;
             switch ($type_piece) {

@@ -998,7 +998,7 @@ class BT_ficheInter_det extends BimpDolObject
                     }
                 }
 
-                $heuresRestantes = $contrat->getHeuresRestantesDelegation();
+                $heuresRestantes = $contrat->getHeuresRestantesDelegation('float');
 
                 if (in_array(BimpTools::getPostFieldValue('type'), $typeVerifInter)) {
                     if (BimpTools::getPostFieldValue('am_pm')) {

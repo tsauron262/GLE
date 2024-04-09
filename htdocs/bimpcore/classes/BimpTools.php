@@ -1804,6 +1804,12 @@ class BimpTools
                     $value = 0;
                 }
                 return $value;
+                
+            case 'int': 
+                if (is_bool($value)) {
+                    return $value;
+                }
+                return sanitizeVal($value, $check, $filter, $options);
 
             case 'date':
                 if (!preg_match('/^[0-9 \-\:]+$/', $value)) {

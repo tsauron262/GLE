@@ -1587,7 +1587,7 @@ class Bimp_Product extends BimpObject
             if (BimpTools::isSubmit('id_entrepot')) {
                 $id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
             } elseif (BimpTools::isSubmit('param_list_filters')) {
-                $filters = json_decode(BimpTools::getValue('param_list_filters', array(), 'array'));
+                $filters = json_decode(BimpTools::getValue('param_list_filters', '', 'json_nohtml'));
                 foreach ($filters as $filter) {
                     if ($filter->name === 'id_commande_client') {
                         $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $filter->filter);

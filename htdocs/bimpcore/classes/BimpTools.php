@@ -91,9 +91,7 @@ class BimpTools
                 if (!$val_temp || $val_temp != $value) {
                     if ((int) BimpCore::getConf('post_data_check_log_only')) {
                         if (!$val_temp) {
-                            BimpCore::addlog('Donnée invalidée', 3, 'secu', null, array(
-                                'Key' => $key
-                            ));
+                            BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array();
                         } else {
                             BimpCore::addlog('Donnée modifiée', 2, 'secu', null, array(
                                 'Key'             => $key,

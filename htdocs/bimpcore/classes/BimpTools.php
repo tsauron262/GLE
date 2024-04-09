@@ -88,7 +88,7 @@ class BimpTools
             if ($value && $check) {
                 $val_temp = self::sanitizeVal($value, $check, $filter, $options);
 
-                if (!$val_temp || $val_temp != $value) {
+                if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $value != $value)) {
                     if ((int) BimpCore::getConf('post_data_check_log_only')) {
                         if (!$val_temp) {
                             BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(

@@ -75,7 +75,7 @@ class BimpTools
                 }
             }
         }
-        
+
         if (is_null($value)) {
             return $default_value;
         }
@@ -91,12 +91,15 @@ class BimpTools
                 if (!$val_temp || $val_temp != $value) {
                     if ((int) BimpCore::getConf('post_data_check_log_only')) {
                         if (!$val_temp) {
-                            BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array());
+                            BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
+                                'check'           => $check,
+                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) $value),
+                            ));
                         } else {
-                            BimpCore::addlog('Donnée modifiée', 2, 'secu', null, array(
-                                'Key'             => $key,
-                                'Valeur initiale' => $value,
-                                'Valeur modifiée' => $val_temp
+                            BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
+                                'check'           => $check,
+                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) $value),
+                                'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) $val_temp)
                             ));
                         }
                     } else {

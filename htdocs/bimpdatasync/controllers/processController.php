@@ -10,8 +10,8 @@ class processController extends BimpController
         $result_html = '';
         $process_html = '';
 
-        $id_process = (int) BimpTools::getValue('id_process', 0);
-        $id_operation = (int) BimpTools::getValue('id_operation', 0);
+        $id_process = (int) BimpTools::getValue('id_process', 0, 'int');
+        $id_operation = (int) BimpTools::getValue('id_operation', 0, 'int');
         $options = array();
         $data = array();
 
@@ -67,7 +67,7 @@ class processController extends BimpController
             'process_html'      => $process_html,
             'operation_data'    => $data,
             'operation_options' => $options,
-            'request_id'        => BimpTools::getValue('request_id', 0)
+            'request_id'        => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -77,20 +77,20 @@ class processController extends BimpController
         $warnings = array();
         $html = '';
         $process_html = '';
-        $modal_idx = BimpTools::getValue('modal_idx', 0);
+        $modal_idx = (int) BimpTools::getValue('modal_idx', 0, 'int');
         $id_process = 0;
         $id_operation = 0;
 
         $operation_data = array();
         $operation_options = array(
-            'module'            => BimpTools::getValue('module', ''),
-            'object_name'       => BimpTools::getValue('object_name', ''),
-            'id_object'         => (int) BimpTools::getValue('id_object', 0),
-            'action'            => BimpTools::getValue('object_action', ''),
-            'action_extra_data' => BimpTools::getValue('extra_data', ''),
+            'module'            => BimpTools::getValue('module', '', 'aZ09'),
+            'object_name'       => BimpTools::getValue('object_name', '', 'aZ09'),
+            'id_object'         => (int) BimpTools::getValue('id_object', 0, 'int'),
+            'action'            => BimpTools::getValue('object_action', '', 'aZ09'),
+            'action_extra_data' => BimpTools::getValue('extra_data', '', 'json'),
             'mode'              => 'ajax',
             'debug'             => BimpCore::isUserDev(),
-            'force_use_report'     => (int) BimpTools::getValue('use_report')
+            'force_use_report'     => (int) BimpTools::getValue('use_report', 0, 'int')
         );
 
         require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
@@ -147,7 +147,7 @@ class processController extends BimpController
             'operation_options' => $operation_options,
             'process_html'      => $process_html,
             'modal_idx'         => $modal_idx,
-            'request_id'        => BimpTools::getValue('request_id', 0)
+            'request_id'        => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -203,7 +203,7 @@ class processController extends BimpController
             'errors'      => $errors,
             'warnings'    => $warnings,
             'step_result' => $result,
-            'request_id'  => BimpTools::getValue('request_id', 0)
+            'request_id'  => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -212,8 +212,8 @@ class processController extends BimpController
         $errors = array();
         $warnings = array();
 
-        $id_process = (int) BimpTools::getPostFieldValue('id_process', 0);
-        $id_operation = (int) BimpTools::getPostFieldValue('id_operation', 0);
+        $id_process = (int) BimpTools::getPostFieldValue('id_process', 0, 'int');
+        $id_operation = (int) BimpTools::getPostFieldValue('id_operation', 0, 'int');
 
         if (is_null($id_process) || !$id_process) {
             $errors[] = 'ID du processus absent';
@@ -253,7 +253,7 @@ class processController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'result'     => $result,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -303,7 +303,7 @@ class processController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'result'     => $result,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 }

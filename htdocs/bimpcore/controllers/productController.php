@@ -7,8 +7,8 @@ class productController extends BimpController
     {
         $errors = array();
         $html = '';
-        $id_product = (int) BimpTools::getValue('id');
-        $type_of_object = BimpTools::getValue('typeofobject');
+        $id_product = (int) BimpTools::getValue('id', 0, 'int');
+        $type_of_object = BimpTools::getValue('typeofobject', '', 'aZ09');
 
         // Instance of object
         if ($type_of_object == 'BContract_contrat')
@@ -42,7 +42,7 @@ class productController extends BimpController
                 die(json_encode(array(
                     'errors'     => $errors,
                     'html'       => 'Non implémenté',
-                    'request_id' => BimpTools::getValue('request_id', 0)
+                    'request_id' => BimpTools::getValue('request_id', 0, 'int')
                 )));
             case 'Bimp_Commande':
                 $condition = 'a.rowid = b.fk_commande';
@@ -76,7 +76,7 @@ class productController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 }

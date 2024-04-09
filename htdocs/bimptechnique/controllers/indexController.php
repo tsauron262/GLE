@@ -12,7 +12,7 @@ class indexController extends BimpController
         $list = new BC_ListTable($fi_instance, "tech");
 
         $title = 'Fiches d\'intervention';
-        $userId = (int) BimpTools::getValue('specialTech', $user->id);
+        $userId = (int) BimpTools::getValue('specialTech', $user->id, 'int');
         $tech = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_User", $userId);
         
         if (BimpObject::objectLoaded($tech)) {

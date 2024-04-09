@@ -114,7 +114,7 @@ HAVING scan_exp != scan_det";
         $errors = array();
         $ids_prod = array();
 
-        $has_filter = (int) BimpTools::getValue('filter_inventory');
+        $has_filter = (int) BimpTools::getValue('filter_inventory', 0, 'int');
 
         $errors = BimpTools::merge_array($errors, $this->checkDuplicateIncludeExclude());
 
@@ -128,7 +128,7 @@ HAVING scan_exp != scan_det";
             return $errors;
         }
 
-        $warehouse_and_type = BimpTools::getValue('warehouse_and_type');
+        $warehouse_and_type = BimpTools::getValue('warehouse_and_type', null, 'alphanohtml');
 
         // Définition de l'entrepot par défault
         list($w_main, $t_main) = explode('_', $warehouse_and_type[0]);
@@ -829,7 +829,7 @@ HAVING scan_exp != scan_det";
                                 die(json_encode(array(
                                     'errors'     => $errors,
                                     'data'       => array(),
-                                    'request_id' => BimpTools::getValue('request_id', 0)
+                                    'request_id' => BimpTools::getValue('request_id', 0, 'int')
                                 )));
                             }
 

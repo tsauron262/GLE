@@ -195,7 +195,7 @@ abstract class BimpComponent
             if ($request) {
                 $json = isset($defs['json']) ? (bool) $defs['json'] : false;
                 if (BimpTools::isSubmit('param_' . $name)) {
-                    $param = BimpTools::getValue('param_' . $name);
+                    $param = BimpTools::getValue('param_' . $name, null, 'json');
                     if ($json && !is_null($param) && is_string($param)) {
                         $param = json_decode($param, true);
                     }
@@ -419,7 +419,7 @@ abstract class BimpComponent
 
             // Si nouvelle config demandée: 
             if (!$id_config && BimpTools::isSubmit('id_' . static::$type . '_config')) {
-                $id_config = BimpTools::getValue('id_' . static::$type . '_config', 0);
+                $id_config = (int) BimpTools::getValue('id_' . static::$type . '_config', 0, 'int');
 
                 if (!$id_config) {
                     // Choix de ne pas utiliser de config par l'utilisateur: 
@@ -441,7 +441,7 @@ abstract class BimpComponent
 
             // Si config en cours d'utilisation: 
             if (!$id_config && BimpTools::isSubmit('id_current_' . static::$type . '_config')) {
-                $id_config = (int) BimpTools::getValue('id_current_' . static::$type . '_config', 0);
+                $id_config = (int) BimpTools::getValue('id_current_' . static::$type . '_config', 0, 'int');
                 $this->newUserConfigSet = false;
 
                 if (!$id_config) {

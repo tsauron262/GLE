@@ -1189,7 +1189,7 @@ class BimpCore
                 return array();
             }
 
-            if (!(int) BimpCore::getConf('use_bimp_logs') && !(int) BimpTools::getValue('use_logs', 0)) {
+            if (!(int) BimpCore::getConf('use_bimp_logs') && !(int) BimpTools::getValue('use_logs', 0, 'int')) {
                 return array();
             }
 

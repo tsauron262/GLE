@@ -42,7 +42,7 @@ class BC_FiltersPanel extends BC_Panel
 //        $this->values = $this->params['default_values'];
 
         if (BimpTools::isSubmit('id_current_list_filters')) {
-            $this->id_list_filters = (int) BimpTools::getValue('id_current_list_filters', 0);
+            $this->id_list_filters = (int) BimpTools::getValue('id_current_list_filters', 0, 'int');
         }
 
 //        $this->addIdentifierSuffix($list_type . '_' . $list_name);

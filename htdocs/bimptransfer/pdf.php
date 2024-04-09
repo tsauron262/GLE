@@ -9,7 +9,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/TransferPDF.php';
 
 global $db, $langs;
 
-$id_transfer = (int) BimpTools::getValue('id_transfer');
+$id_transfer = (int) BimpTools::getValue('id_transfer', 0, 'int');
 
 $errors = array();
 

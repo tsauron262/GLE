@@ -27,7 +27,7 @@ class userController extends BimpController
 
         $frais_user = $this->config->getObject('', 'user');
         if (!BimpObject::objectLoaded($frais_user)) {
-            return BimpRender::renderAlerts('Utilisateur non trouvé pour l\'ID ' . BimpTools::getValue('id', ''));
+            return BimpRender::renderAlerts('Utilisateur non trouvé pour l\'ID ' . BimpTools::getValue('id', 0, 'int'));
         }
 
         global $user, $langs;

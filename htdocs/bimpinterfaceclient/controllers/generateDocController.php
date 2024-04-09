@@ -15,15 +15,15 @@ class generateDocController extends BimpPublicController
 
         $errors = array();
 
-        $doc_type = BimpTools::getValue('dt', '');
+        $doc_type = BimpTools::getValue('dt', '', 'aZ09');
         if (!$doc_type) {
             $errors[] = 'Type de document à générer absent';
         } else {
             switch ($doc_type) {
                 case 'sav_destruct':
                     $html .= '<h2 style="text-align: center">Bon de destruction</h2>';
-                    $id_sav = (int) BimpTools::getValue('ids', 0);
-                    $ref_sav = BimpTools::getValue('rs', '');
+                    $id_sav = (int) BimpTools::getValue('ids', 0, 'int');
+                    $ref_sav = BimpTools::getValue('rs', '', 'alphanohtml');
 
                     if (!$id_sav) {
                         $errors[] = 'Identifiant de votre dossier SAV absent';

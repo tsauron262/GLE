@@ -7,9 +7,9 @@ class docController extends BimpPublicController
 
     public function display()
     {
-        $doc = BimpTools::getValue('doc', '');
-        $id = BimpTools::getValue('docid', 0);
-        $ref = BimpTools::getValue('docref', '');
+        $doc = BimpTools::getValue('doc', '', 'aZ09');
+        $id = BimpTools::getValue('docid', 0, 'int');
+        $ref = BimpTools::getValue('docref', '', 'alphanohtml');
 
         if (!$doc) {
             $this->errors[] = 'Type de document absent';
@@ -150,7 +150,7 @@ class docController extends BimpPublicController
 
                     $dir = $bcdf->getFilesDir();
                     $doc_type = str_replace('_signed', '', $doc);
-                    $file_name = $bcdf->getSignatureDocFileName($doc_type, ($doc != $doc_type ? true : false), (int) BimpTools::getValue('file_idx', 0));
+                    $file_name = $bcdf->getSignatureDocFileName($doc_type, ($doc != $doc_type ? true : false), (int) BimpTools::getValue('file_idx', 0, 'int'));
 
                     if (!file_exists($dir . $file_name)) {
                         $this->errors[] = 'Ce document n\'existe pas (' . $file_name . ')';

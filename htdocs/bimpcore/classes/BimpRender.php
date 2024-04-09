@@ -514,9 +514,9 @@ class BimpRender
 
         if (is_array($tabs) && count($tabs)) {
             if ($tabs_id === 'maintabs' && BimpTools::isSubmit('navtab')) {
-                $active = BimpTools::getValue('navtab', $tabs[0]['id']);
+                $active = BimpTools::getValue('navtab', $tabs[0]['id'], 'aZ09');
             } else {
-                $active = BimpTools::getValue('navtab-' . $tabs_id, $tabs[0]['id']);
+                $active = BimpTools::getValue('navtab-' . $tabs_id, $tabs[0]['id'], 'aZ09');
             }
         }
 

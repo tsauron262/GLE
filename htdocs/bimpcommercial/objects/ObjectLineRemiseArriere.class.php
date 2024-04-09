@@ -29,7 +29,7 @@ class ObjectLineRemiseArriere extends BimpObject
     public function getParentObjectType()
     {
         if (BimpTools::isSubmit('extra_data/parent_object_type')) {
-            return BimpTools::getValue('extra_data/parent_object_type');
+            return BimpTools::getValue('extra_data/parent_object_type', '', 'aZ09comma');
         }
 
         return (string) $this->getData('object_type');
@@ -41,7 +41,7 @@ class ObjectLineRemiseArriere extends BimpObject
             return array(
                 array(
                     'name'   => 'object_type',
-                    'filter' => BimpTools::getValue('extra_data/parent_object_type', '')
+                    'filter' => BimpTools::getValue('extra_data/parent_object_type', '', 'aZ09comma')
                 )
             );
         } elseif ((string) $this->getData('object_type')) {

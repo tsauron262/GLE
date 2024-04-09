@@ -183,7 +183,7 @@ function getTypeAndId($url = null, $request = null)
         foreach ($dataT['urls'] as $filtreUrl) {
             if (stripos($url, $filtreUrl) !== false) {
                 $element_type = $typeT;
-                $element_id = BimpTools::getValue($dataT['nomIdUrl'], 0);
+                $element_id = BimpTools::getValue($dataT['nomIdUrl'], 0, 'int');
                 break;
             }
         }

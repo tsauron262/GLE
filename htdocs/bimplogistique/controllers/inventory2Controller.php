@@ -5,9 +5,9 @@ class inventory2Controller extends BimpController {
     protected function ajaxProcessInsertInventoryLine() {
         
         $warnings = array();
-        $input = trim(BimpTools::getValue('input'));
-        $id_inventory = (int) BimpTools::getValue('id');
-        $quantity_input = BimpTools::getValue('quantity');
+        $input = trim(BimpTools::getValue('input', '', 'alphanohtml'));
+        $id_inventory = (int) BimpTools::getValue('id', 0, 'int');
+        $quantity_input = BimpTools::getValue('quantity', 0, 'float');
         $inventory = BimpCache::getBimpObjectInstance($this->module, 'Inventory2', $id_inventory);
         $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine2');
         $id_product = 0;
@@ -20,7 +20,7 @@ class inventory2Controller extends BimpController {
             die(json_encode(array(
                 'errors'     => $errors,
                 'data'       => array(),
-                'request_id' => BimpTools::getValue('request_id', 0)
+                'request_id' => BimpTools::getValue('request_id', 0, 'int')
             )));
         }
             
@@ -45,7 +45,7 @@ class inventory2Controller extends BimpController {
             'warnings'   => $warnings,
             'success'    => $msg,
             'data'       => $data,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -84,7 +84,7 @@ class inventory2Controller extends BimpController {
         die(json_encode(array(
             'data'       => $html,
             'success'    => 'Produit ajouté',
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
     
@@ -96,7 +96,7 @@ class inventory2Controller extends BimpController {
         die(json_encode(array(
             'url'        => $prod->getNomUrl(),
             'success'    => 'Produit ajouté',
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
         
     }
@@ -111,7 +111,7 @@ class inventory2Controller extends BimpController {
         die(json_encode(array(
             'errors'     => $errors,
             'success'    => 'Équipement ingnoré',
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
         
     }

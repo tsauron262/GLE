@@ -178,7 +178,7 @@ class indexController extends BimpController
         if (!isset($user->id) || !$user->id) {
             $html .= BimpRender::renderAlerts('Aucun utilisateur connecté. Veuillez vous authentifier');
         } else {
-            $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+            $id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
 
             $caisses = array();
 
@@ -259,7 +259,7 @@ class indexController extends BimpController
         $html = '';
 
         if (is_null($caisses)) {
-            $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+            $id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
 
             if ($id_entrepot) {
                 $instance = BimpObject::getInstance($this->module, 'BC_Caisse');
@@ -540,9 +540,9 @@ class indexController extends BimpController
             $errors[] = 'Aucun utilisateur connecté. Authentification nécessaire';
         }
 
-        $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
-        $fonds = (float) BimpTools::getValue('fonds', 0);
-        $confirm_fonds = (int) BimpTools::getValue('confirm_fonds', 0);
+        $id_caisse = (int) BimpTools::getValue('id_caisse', 0, 'int');
+        $fonds = (float) BimpTools::getValue('fonds', 0, 'float');
+        $confirm_fonds = (int) BimpTools::getValue('confirm_fonds', 0, 'int');
         $need_confirm_fonds = 0;
 
         if (!$id_caisse) {
@@ -635,7 +635,7 @@ class indexController extends BimpController
             'errors'             => $errors,
             'html'               => $html,
             'need_confirm_fonds' => $need_confirm_fonds,
-            'request_id'         => BimpTools::getValue('request_id', 0),
+            'request_id'         => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -650,9 +650,9 @@ class indexController extends BimpController
             $errors[] = 'Aucun utilisateur connecté. Authentification nécessaire';
         }
 
-        $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
-        $fonds = (float) BimpTools::getValue('fonds', 0);
-        $confirm_fonds = (int) BimpTools::getValue('confirm_fonds', 0);
+        $id_caisse = (int) BimpTools::getValue('id_caisse', 0, 'int');
+        $fonds = (float) BimpTools::getValue('fonds', 0, 'int');
+        $confirm_fonds = (int) BimpTools::getValue('confirm_fonds', 0, 'int');
         $need_confirm_fonds = 0;
         $id_entrepot = 0;
         $recap_url = '';
@@ -749,7 +749,7 @@ class indexController extends BimpController
             'html'               => $html,
             'need_confirm_fonds' => $need_confirm_fonds,
             'id_entrepot'        => $id_entrepot,
-            'request_id'         => BimpTools::getValue('request_id', 0),
+            'request_id'         => BimpTools::getValue('request_id', 0, 'int'),
             'recap_url'          => $recap_url,
             'recap_width'        => $recap_width
         );
@@ -759,8 +759,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
-        $id_client = (int) BimpTools::getValue('id_client', 0);
+        $id_caisse = (int) BimpTools::getValue('id_caisse', 0, 'int');
+        $id_client = (int) BimpTools::getValue('id_client', 0, 'int');
 
         if (!$id_caisse) {
             $errors[] = 'ID de la caisse absent';
@@ -796,7 +796,7 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
             'vente_data' => $data
         );
     }
@@ -806,7 +806,7 @@ class indexController extends BimpController
         $errors = array();
         $data = array();
 
-        $id_vente = (int) BimpTools::getValue('id_vente');
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -822,7 +822,7 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'vente_data' => $data,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -830,8 +830,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
-        $id_vente = (int) BimpTools::getValue('id_vente', 0);
+        $id_caisse = (int) BimpTools::getValue('id_caisse', 0, 'int');
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
 
         if (!$id_caisse) {
             $errors[] = 'ID de la caisse absent';
@@ -872,7 +872,7 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
             'vente_data' => $data
         );
     }
@@ -885,8 +885,8 @@ class indexController extends BimpController
         $ticket_html = '';
         $ticket_errors = array();
 
-        $id_vente = (int) BimpTools::getValue('id_vente');
-        $status = BimpTools::getValue('status');
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
+        $status = BimpTools::getValue('status', null, 'int');
 
         $vente = null;
 
@@ -952,7 +952,7 @@ class indexController extends BimpController
             'success'         => $success,
             'ticket_html'     => $ticket_html,
             'ticket_errors'   => $ticket_errors,
-            'request_id'      => BimpTools::getValue('request_id', 0),
+            'request_id'      => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -960,8 +960,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $id_user_resp = BimpTools::getValue('id_user_resp', 0);
+        $id_vente = BimpTools::getValue('id_vente', 0, 'int');
+        $id_user_resp = BimpTools::getValue('id_user_resp', 0, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -988,15 +988,15 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'success'    => 'Commercial de la vente enregistré avec succès',
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
     protected function ajaxProcessSaveNotePlus()
     {
         $errors = array();
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $note_plus = BimpTools::getValue('note_plus', '');
+        $id_vente = BimpTools::getValue('id_vente', 0, 'int');
+        $note_plus = BimpTools::getValue('note_plus', '', 'restricthtml');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1020,15 +1020,15 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'success'    => 'Note privée de la vente enregistrée avec succès',
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
     protected function ajaxProcessSaveNotePublic()
     {
         $errors = array();
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $note_public = BimpTools::getValue('note_public', '');
+        $id_vente = BimpTools::getValue('id_vente', 0, 'int');
+        $note_public = BimpTools::getValue('note_public', '', 'restricthtml');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1052,7 +1052,7 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'success'    => 'Note publique de la vente enregistrée avec succès',
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -1060,8 +1060,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $id_cond = BimpTools::getValue('id_cond', 0);
+        $id_vente = BimpTools::getValue('id_vente', 0, 'int');
+        $id_cond = BimpTools::getValue('id_cond', 0, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1092,7 +1092,7 @@ class indexController extends BimpController
             'errors'     => $errors,
             'success'    => 'Conditions de réglement mises à jour avec succès',
             'vente_data' => $vente_data,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -1100,7 +1100,7 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $vente_ht = BimpTools::getValue('vente_ht', null);
+        $vente_ht = BimpTools::getValue('vente_ht', null, 'int');
         $id_vente = BimpTools::getValue('id_vente', 0);
 
         if (!$id_vente) {
@@ -1134,7 +1134,7 @@ class indexController extends BimpController
             'errors'     => $errors,
             'success'    => 'Mise à jour des conditions de vente effectuée avec succès',
             'vente_data' => $vente_data,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -1142,8 +1142,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = (int) BimpTools::getValue('id_vente', 0);
-        $id_client = (int) BimpTools::getValue('id_client', 0);
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
+        $id_client = (int) BimpTools::getValue('id_client', 0, 'int');
 
         $html = '';
         $discounts_html = '';
@@ -1195,7 +1195,7 @@ class indexController extends BimpController
             'errors'         => $errors,
             'html'           => $html,
             'discounts_html' => $discounts_html,
-            'request_id'     => BimpTools::getValue('request_id', 0),
+            'request_id'     => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -1203,8 +1203,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $id_contact = BimpTools::getValue('id_contact', 0);
+        $id_vente = BimpTools::getValue('id_vente', 0, 'int');
+        $id_contact = BimpTools::getValue('id_contact', 0, 'int');
 
         $html = '';
 
@@ -1232,7 +1232,7 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -1240,8 +1240,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $search = BimpTools::getValue('search', '');
-        $id_vente = (int) BimpTools::getValue('id_vente', 0);
+        $search = BimpTools::getValue('search', '', 'alphanohtml');
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1270,7 +1270,7 @@ class indexController extends BimpController
 
         return array(
             'errors'      => $errors,
-            'request_id'  => BimpTools::getValue('request_id', 0),
+            'request_id'  => BimpTools::getValue('request_id', 0, 'int'),
             'cart_html'   => $result['cart_html'],
             'result_html' => $result['result_html'],
             'vente_data'  => $vente_data
@@ -1281,9 +1281,9 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = (int) BimpTools::getValue('id_vente', 0);
-        $id_object = (int) BimpTools::getValue('id_object', 0);
-        $object_name = BimpTools::getValue('object_name', '');
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
+        $id_object = (int) BimpTools::getValue('id_object', 0, 'int');
+        $object_name = BimpTools::getValue('object_name', '', 'alphanohtml');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1316,7 +1316,7 @@ class indexController extends BimpController
 
         return array(
             'errors'     => $errors,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
             'html'       => $html,
             'vente_data' => $vente_data
         );
@@ -1326,9 +1326,9 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $id_article = BimpTools::getValue('id_article', 0);
-        $qty = BimpTools::getValue('qty', null);
+        $id_vente = BimpTools::getValue('id_vente', 0, 'int');
+        $id_article = BimpTools::getValue('id_article', 0, 'int');
+        $qty = BimpTools::getValue('qty', null, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1374,7 +1374,7 @@ class indexController extends BimpController
             'vente_data' => $vente_data,
             'total_ttc'  => $total_ttc,
             'stock'      => $stock,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -1382,8 +1382,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $id_article = BimpTools::getValue('id_article', 0);
+        $id_vente = BimpTools::getValue('id_vente', 0, 'int');
+        $id_article = BimpTools::getValue('id_article', 0, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1417,7 +1417,7 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'vente_data' => $vente_data,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 
@@ -1425,8 +1425,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = (int) BimpTools::getValue('id_vente', 0);
-        $id_remise = BimpTools::getValue('id_remise', 0);
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
+        $id_remise = BimpTools::getValue('id_remise', 0, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1436,7 +1436,6 @@ class indexController extends BimpController
             $errors[] = 'ID de la remise absent';
         }
 
-        $html = '';
         $vente_data = array();
 
         if (!count($errors)) {
@@ -1456,7 +1455,7 @@ class indexController extends BimpController
 
         return array(
             'errors'     => $errors,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
             'vente_data' => $vente_data
         );
     }
@@ -1465,9 +1464,9 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = (int) BimpTools::getValue('id_vente', 0);
-        $code = BimpTools::getValue('code', '');
-        $montant = BimpTools::getValue('montant', 0);
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
+        $code = BimpTools::getValue('code', '', 'aZ09');
+        $montant = BimpTools::getValue('montant', 0, 'float');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1500,7 +1499,7 @@ class indexController extends BimpController
 
         return array(
             'errors'     => $errors,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
             'html'       => $html,
             'vente_data' => $vente_data
         );
@@ -1510,8 +1509,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = (int) BimpTools::getValue('id_vente', 0);
-        $id_paiement = BimpTools::getValue('id_paiement', 0);
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
+        $id_paiement = BimpTools::getValue('id_paiement', 0, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1542,7 +1541,7 @@ class indexController extends BimpController
 
         return array(
             'errors'     => $errors,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
             'html'       => $html,
             'vente_data' => $vente_data
         );
@@ -1552,7 +1551,7 @@ class indexController extends BimpController
     {
         return array(
             'html'       => $this->renderCaisseSelect(),
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -1562,8 +1561,8 @@ class indexController extends BimpController
         $warnings = array();
         $equipments = array();
 
-        $serial = BimpTools::getValue('serial', '');
-        $id_vente = (int) BimpTools::getValue('id_vente', 0);
+        $serial = BimpTools::getValue('serial', '', 'alphanohtml');
+        $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
 
         if (!$serial) {
             $errors[] = 'Aucun numéro de série spécifié';
@@ -1640,7 +1639,7 @@ class indexController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'equipments' => $equipments,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -1648,8 +1647,8 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $id_return = BimpTools::getValue('id_return', 0);
+        $id_vente = BimpTools::getValue('id_vente', 0, 'int');
+        $id_return = BimpTools::getValue('id_return', 0, 'int');
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1683,7 +1682,7 @@ class indexController extends BimpController
         return array(
             'errors'     => $errors,
             'vente_data' => $vente_data,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int'),
         );
     }
 }

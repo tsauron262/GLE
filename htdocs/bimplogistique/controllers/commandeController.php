@@ -36,7 +36,7 @@ class commandeController extends BimpController
 
         $commande = $this->config->getObject('', 'commande');
         if (!BimpObject::objectLoaded($commande)) {
-            return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
+            return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', 0, 'int'));
         }
 
         if (!$commande->isLogistiqueActive()) {

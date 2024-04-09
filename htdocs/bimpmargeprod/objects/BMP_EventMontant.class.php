@@ -1340,7 +1340,7 @@ class BMP_EventMontant extends Abstract_margeprod
 
         foreach ($coprods as $id_cp => $cp_name) {
             if (BimpTools::isSubmit('coprod_' . $id_cp . '_part')) {
-                $this->cp_new_parts[$id_cp] = BimpTools::getValue('coprod_' . $id_cp . '_part', '');
+                $this->cp_new_parts[$id_cp] = BimpTools::getValue('coprod_' . $id_cp . '_part', '', 'alphanohtml');
             }
         }
     }

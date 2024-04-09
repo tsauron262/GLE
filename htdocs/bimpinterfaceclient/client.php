@@ -62,24 +62,24 @@ if ($fc !== 'doc') {
     }
 }
 
-$controllerName = BimpTools::getValue('fc', 'InterfaceClient');
+$controllerName = BimpTools::getValue('fc', 'InterfaceClient', 'aZ09');
 
 switch ($controllerName) {
     case 'contrat_ticket':
         $controllerName = 'InterfaceClient';
         $_GET['tab'] = 'contrats';
-        if ((int) BimpTools::getValue('id', 0)) {
+        if ((int) BimpTools::getValue('id', 0, 'int')) {
             $_GET['content'] = 'card';
-            $_GET['id_contrat'] = BimpTools::getValue('id');
+            $_GET['id_contrat'] = BimpTools::getValue('id', 0, 'int');
         }
         break;
 
     case 'ticket':
     case 'tickets':
         $_GET['tab'] = 'tickets';
-        if ($controllerName == 'ticket' && (int) BimpTools::getValue('id', 0)) {
+        if ($controllerName == 'ticket' && (int) BimpTools::getValue('id', 0, 'int')) {
             $_GET['content'] = 'card';
-            $_GET['id_ticket'] = BimpTools::getValue('id');
+            $_GET['id_ticket'] = BimpTools::getValue('id', 0, 'int');
         }
         $controllerName = 'InterfaceClient';
         break;

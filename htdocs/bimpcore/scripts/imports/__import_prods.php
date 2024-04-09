@@ -26,7 +26,7 @@ if (!$user->admin) {
     exit;
 }
 
-if ((int) BimpTools::getValue('delete', 0)) {
+if ((int) BimpTools::getValue('delete', 0, 'int')) {
     $bdb = new BimpDb($db);
     $rows = $bdb->getRows('product', 'import_actimac = 1', null, 'array', array('rowid'));
 
@@ -183,7 +183,7 @@ foreach ($lines as $idx => $line) {
     $refs_fourn[$data[0]] = $data[1];
 }
 
-if (!(int) BimpTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0, 'int')) {
     if (is_array($rows) && count($rows)) {
         echo count($rows) . ' élément(s) à traiter <br/><br/>';
 

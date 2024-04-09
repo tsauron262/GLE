@@ -5812,7 +5812,7 @@ class BF_Demande extends BimpObject
     public function update(&$warnings = [], $force_update = false)
     {
         if (BimpTools::isSubmit('updload_doc_type')) {
-            $doc_type = BimpTools::getValue('updload_doc_type');
+            $doc_type = BimpTools::getValue('updload_doc_type', '', 'aZ09');
             unset($_POST['updload_doc_type']); // Pour éviter boucle infinie si nouvel appel à update()
             return $this->uploadDocument($doc_type, $warnings);
         }

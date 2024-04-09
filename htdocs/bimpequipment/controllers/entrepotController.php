@@ -20,7 +20,7 @@ class entrepotController extends equipmentController
 
         $entrepot = $this->config->getObject('', 'entrepot');
         if (is_null($entrepot) || !isset($entrepot->id) || !$entrepot->id) {
-            return BimpRender::renderAlerts('Aucun entrepôt trouvé pour l\'ID ' . BimpTools::getValue('id', ''));
+            return BimpRender::renderAlerts('Aucun entrepôt trouvé pour l\'ID ' . BimpTools::getValue('id', 0, 'int'));
         }
 
         $html = '';

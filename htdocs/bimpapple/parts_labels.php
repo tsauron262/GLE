@@ -33,7 +33,7 @@ if (!$shipment->isActionAllowed('fetchPartsReturnLabel', $errors)) {
 }
 
 $filters = array();
-$pack_number = BimpTools::getValue('pack_number', 0);
+$pack_number = BimpTools::getValue('pack_number', 0, 'int');
 
 if ($pack_number) {
     $filters['pack_number'] = $pack_number;

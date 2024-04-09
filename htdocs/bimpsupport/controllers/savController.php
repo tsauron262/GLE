@@ -96,7 +96,7 @@ class savController extends gsxController
         $errors = array();
         $success = 'Proposition commerciale créée avec succès';
 
-        $id_sav = (int) BimpTools::getValue('id_sav', 0);
+        $id_sav = (int) BimpTools::getValue('id_sav', 0, 'int');
         if (!$id_sav) {
             $errors[] = 'ID du SAV absent';
         } else {
@@ -111,7 +111,7 @@ class savController extends gsxController
         die(json_encode(array(
             'errors'     => $errors,
             'success'    => $success,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -121,7 +121,7 @@ class savController extends gsxController
         $success = 'Propale Généré avec succès';
         $file_url = '';
 
-        $id_sav = (int) BimpTools::getValue('id_sav', 0);
+        $id_sav = (int) BimpTools::getValue('id_sav', 0, 'int');
 
         if (!$id_sav) {
             $errors[] = 'ID du SAV absent';
@@ -139,7 +139,7 @@ class savController extends gsxController
         die(json_encode(array(
             'errors'     => $errors,
             'success'    => $success,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 }

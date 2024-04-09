@@ -10,11 +10,11 @@ BimpCore::displayHeaderFiles();
 
 $errors = $warnings = array();
 
-$code = BimpTools::getValue('code', '');
+$code = BimpTools::getValue('code', '', 'restricthtml');
 if (!$code) {
     $errors[] = 'Code absent';
 } else {
-    if ((int) BimpTools::getValue('mode_dev', 0)) {
+    if ((int) BimpTools::getValue('mode_dev', 0, 'int')) {
         echo 'Code : "' . $code . '"<br/><br/>';
     }
 

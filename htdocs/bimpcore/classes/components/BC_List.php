@@ -59,7 +59,7 @@ class BC_List extends BC_Panel
         $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['display_active_filters'] = array('data_type' => 'bool', 'default' => 1);
 
-        $full_reload = BimpTools::getValue('full_reload', 0);
+        $full_reload = (int) BimpTools::getValue('full_reload', 0, 'int');
 
         if ($full_reload) {
             $this->no_ajax_params = true;
@@ -69,7 +69,7 @@ class BC_List extends BC_Panel
             $parent_id_property = $object->getParentIdProperty();
             if (!is_null($parent_id_property)) {
                 if (BimpTools::isSubmit($parent_id_property)) {
-                    $this->id_parent = BimpTools::getValue($parent_id_property, null);
+                    $this->id_parent = BimpTools::getValue($parent_id_property, null, 'int');
                 }
             }
         }
@@ -434,7 +434,7 @@ class BC_List extends BC_Panel
 //        }
 
         if (!$this->newUserConfigSet && BimpTools::isSubmit('id_current_filters_panel_config')) {
-            $id_config = (int) BimpTools::getValue('id_current_filters_panel_config');
+            $id_config = (int) BimpTools::getValue('id_current_filters_panel_config', 0, 'int');
         }
 
         if (!$id_config && BimpObject::objectLoaded($this->userConfig) && (int) $this->userConfig::$has_filters) {
@@ -453,7 +453,7 @@ class BC_List extends BC_Panel
         }
 
         if (BimpTools::isSubmit('filters_panel_values') && !$use_default_filters) {
-            $this->bc_filtersPanel->setFilters(BimpTools::getValue('filters_panel_values', array()));
+            $this->bc_filtersPanel->setFilters(BimpTools::getValue('filters_panel_values', array(), 'array'));
         } elseif ($id_default_filters) {
             $this->bc_filtersPanel->loadSavedValues($id_default_filters);
         } elseif (!empty($this->params['filters_panel_values'])) {

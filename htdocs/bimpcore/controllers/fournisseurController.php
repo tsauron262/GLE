@@ -7,8 +7,8 @@ class fournisseurController extends societeController
 
     public function init()
     {
-        if (!BimpTools::getValue('ajax', 0)) {
-            $id_soc = (int) BimpTools::getValue('id', 0);
+        if (!BimpTools::getValue('ajax', 0, 'int')) {
+            $id_soc = (int) BimpTools::getValue('id', 0, 'int');
 
             if ($id_soc) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);

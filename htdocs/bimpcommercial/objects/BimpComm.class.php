@@ -777,9 +777,8 @@ class BimpComm extends BimpDolObject
 
     public function getListFilters()
     {
-        global $user;
         $return = array();
-        if (BimpTools::getValue("my") == 1) {
+        if ((int) BimpTools::getValue("my", 0, 'int') == 1) {
             $return[] = array(
                 'name'   => 'fk_user_author',
                 'filter' => 2
@@ -3541,7 +3540,7 @@ class BimpComm extends BimpDolObject
 
     public function getClientFactureContactsArray()
     {
-        $id_client_facture = BimpTools::getValue('id_client_facture');
+        $id_client_facture = BimpTools::getValue('id_client_facture', null, 'int');
 
         if (is_null($id_client_facture)) {
             $client = $this->getClientFacture();
@@ -5286,8 +5285,8 @@ class BimpComm extends BimpDolObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $origin = BimpTools::getValue('origin', '');
-        $origin_id = BimpTools::getValue('origin_id', 0);
+        $origin = BimpTools::getValue('origin', '', 'aZ09comma');
+        $origin_id = BimpTools::getValue('origin_id', 0, 'int');
         $origin_object = null;
         if ($this->field_exists('fk_user_author')) {
             if (is_null($this->data['fk_user_author']) || !(int) $this->data['fk_user_author']) {

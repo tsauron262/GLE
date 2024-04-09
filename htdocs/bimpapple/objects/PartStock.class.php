@@ -338,7 +338,7 @@ class PartStock extends BimpObject
             $errors = parent::create($warnings, $force_create);
 
             if (!count($errors) && !$this->getData('serialized')) {
-                $qty = BimpTools::getValue('qty_tot', 0);
+                $qty = BimpTools::getValue('qty_tot', 0, 'int');
                 if ($qty > 0) {
                     $errors = $this->correctStock($qty, '', 'CREATION');
                 }

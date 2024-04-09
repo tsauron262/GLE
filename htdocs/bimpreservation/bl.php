@@ -10,9 +10,9 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/OrderPDF.php';
 
 global $db, $langs;
 
-$id_commande = (int) BimpTools::getValue('id_commande');
-$num_bl = (int) BimpTools::getValue('num_bl');
-$id_contact = (int) BimpTools::getValue('id_contact_shipment', 0);
+$id_commande = (int) BimpTools::getValue('id_commande', 0, 'int');
+$num_bl = (int) BimpTools::getValue('num_bl', 0, 'int');
+$id_contact = (int) BimpTools::getValue('id_contact_shipment', 0, 'int');
 
 $errors = array();
 

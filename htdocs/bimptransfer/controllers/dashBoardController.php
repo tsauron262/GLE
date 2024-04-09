@@ -180,7 +180,7 @@ class dashBoardController extends BimpController {
 
     private function getIdWarehouse() {
         global $user;
-        $id_warehouse = (int) BimpTools::getValue('id_warehouse');
+        $id_warehouse = (int) BimpTools::getValue('id_warehouse', 0, 'int');
         if (!$id_warehouse > 0)
             $id_warehouse = (int) $user->array_options['options_defaultentrepot'];
         return $id_warehouse;

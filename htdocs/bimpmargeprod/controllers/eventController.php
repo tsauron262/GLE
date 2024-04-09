@@ -6,15 +6,15 @@ class eventController extends BimpController
     public function ajaxProcessLoadEventMontantDetails()
     {
         $errors = array();
-        $id_event_montant = BimpTools::getValue('id_event_montant');
+        $id_event_montant = (int) BimpTools::getValue('id_event_montant', 0, 'int');
         $details = array();
         
         $eventMontant = null;
 
-        if (is_null($id_event_montant)) {
+        if (!$id_event_montant) {
             $errors[] = 'ID du montant absent';
         } else {
-            $eventMontant = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_EventMontant', (int) $id_event_montant);
+            $eventMontant = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_EventMontant', $id_event_montant);
             if (!BimpObject::objectLoaded($eventMontant)) {
                 $errors[] = 'Le montant d\'ID ' . $id_event_montant . ' n\'existe pas';
             } else {
@@ -78,7 +78,7 @@ class eventController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 }

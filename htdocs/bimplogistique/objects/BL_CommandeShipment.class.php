@@ -472,7 +472,7 @@ class BL_CommandeShipment extends BimpObject
     public function getIdClient()
     {
         if (BimpTools::isSubmit('extra_data/id_commande_client')) {
-            $this->set('id_commande_client', (int) BimpTools::getValue('extra_data/id_commande_client', 0));
+            $this->set('id_commande_client', (int) BimpTools::getValue('extra_data/id_commande_client', 0, 'int'));
         }
 
         $commande = $this->getParentInstance();
@@ -2022,7 +2022,7 @@ class BL_CommandeShipment extends BimpObject
         if ((int) $this->getData('id_commande_client')) {
             $commande = $this->getParentInstance();
         } else {
-            $id_commande = BimpTools::getValue('extra_data/id_commande', 0);
+            $id_commande = BimpTools::getValue('extra_data/id_commande', 0, 'int');
 
             if ($id_commande) {
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
@@ -3075,7 +3075,7 @@ class BL_CommandeShipment extends BimpObject
         ));
 
         foreach ($lines as $line) {
-            $qty = (float) BimpTools::getValue('line_' . $line->id . '_qty', 0);
+            $qty = (float) BimpTools::getValue('line_' . $line->id . '_qty', 0, 'float');
 
             $qty = $line->getExpQtyFromNbPeriods($qty);
 
@@ -3089,7 +3089,7 @@ class BL_CommandeShipment extends BimpObject
             } else {
                 $product = $line->getProduct();
                 if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
-                    $equipments = BimpTools::getValue('line_' . $line->id . '_equipments', array());
+                    $equipments = BimpTools::getValue('line_' . $line->id . '_equipments', array(), 'array');
 
                     if (count($equipments) > abs($qty)) {
                         $errors[] = 'Ligne n°' . $line->getData('position') . ': vous ne pouvez sélectionner que ' . abs($qty) . ' équipement(s).<br/>Veuillez désélectionner ' . (count($equipments) - abs($qty)) . ' équipement(s).';
@@ -3108,7 +3108,7 @@ class BL_CommandeShipment extends BimpObject
             foreach ($lines as $line) {
                 $line_warnings = array();
 
-                $qty = (float) BimpTools::getValue('line_' . $line->id . '_qty', 0);
+                $qty = (float) BimpTools::getValue('line_' . $line->id . '_qty', 0, 'float');
 
                 if ($qty) {
                     $data = array(
@@ -3116,15 +3116,15 @@ class BL_CommandeShipment extends BimpObject
                     );
 
                     if (BimpTools::isSubmit('line_' . $line->id . '_group_articles')) {
-                        $data['group_articles'] = (int) BimpTools::getValue('line_' . $line->id . '_group_articles', 0);
+                        $data['group_articles'] = (int) BimpTools::getValue('line_' . $line->id . '_group_articles', 0, 'int');
                     }
 
                     if (BimpTools::isSubmit('line_' . $line->id . '_id_entrepot')) {
-                        $data['id_entrepot'] = (int) BimpTools::getValue('line_' . $line->id . '_id_entrepot', 0);
+                        $data['id_entrepot'] = (int) BimpTools::getValue('line_' . $line->id . '_id_entrepot', 0, 'int');
                     }
 
                     if (BimpTools::isSubmit('line_' . $line->id . '_equipments')) {
-                        $data['equipments'] = (int) BimpTools::getValue('line_' . $line->id . '_equipments', array());
+                        $data['equipments'] = (int) BimpTools::getValue('line_' . $line->id . '_equipments', array(), 'array');
                     }
 
                     $line_errors = $line->setShipmentData($this, $data, $line_warnings, true);
@@ -3136,7 +3136,7 @@ class BL_CommandeShipment extends BimpObject
                     } else {
                         $product = $line->getProduct();
                         if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
-                            $equipments = BimpTools::getValue('line_' . $line->id . '_equipments', array());
+                            $equipments = BimpTools::getValue('line_' . $line->id . '_equipments', array(), 'array');
                             if (count($equipments)) {
                                 $line_errors = $line->addEquipmentsToShipment($this->id, $equipments);
                                 if (count($line_errors)) {

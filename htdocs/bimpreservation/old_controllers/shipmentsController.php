@@ -10,12 +10,12 @@ class shipmentsController extends BimpController
         $expedition = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
         $list = new BC_ListTable($expedition, 'default', 1, null, 'Expéditions', 'sign-out');
 
-        $id_entrepot = (int) BimpTools::getValue('id_entrepot');
+        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0, 'int');
         if ($id_entrepot) {
             $list->addFieldFilterValue('a.id_entrepot', $id_entrepot);
         }
 
-        $invoiced = BimpTools::getValue('invoiced', null);
+        $invoiced = BimpTools::getValue('invoiced', null, 'int');
 
         $joins = array();
 
@@ -41,7 +41,7 @@ class shipmentsController extends BimpController
             }
         }
 
-        $shipped = BimpTools::getValue('shipped', null);
+        $shipped = BimpTools::getValue('shipped', null, 'int');
 
         if (!is_null($shipped)) {
             if ((int) $shipped > 0) {

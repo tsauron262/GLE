@@ -446,7 +446,7 @@ class PisteAPI extends BimpAPI
         switch ($request_name) {
             case 'soumettreFacture':
                 $errors = array();
-                $id_facture = (int) BimpTools::getValue('id_facture', 0);
+                $id_facture = (int) BimpTools::getValue('id_facture', 0, 'int');
 
                 if (!$id_facture) {
                     $errors[] = 'ID de la facture absent';

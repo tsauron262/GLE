@@ -28,7 +28,7 @@ if (!$user->admin) {
 
 $id_entrepots = array('COM'=>178, 'DEPCOM'=>344);
 
-$action = BimpTools::getValue('action', '');
+$action = BimpTools::getValue('action', '', 'aZ09');
 
 if (!$action) {
     $actions = array(
@@ -95,7 +95,7 @@ function importStocks($id_entrepots)
         $rows[] = array('qty'=>$data[$keys['qty']], 'ref'=>$data[$keys['ref']], 'dep'=>$data[$keys['dep']]);
     }
 
-    $exec = (int) BimpTools::getValue('exec', 0);
+    $exec = (int) BimpTools::getValue('exec', 0, 'int');
 
     if (!$exec) {
         $path = pathinfo(__FILE__);
@@ -219,7 +219,7 @@ function importEquipments($id_entrepots)
         );
     }
 
-    $exec = (int) BimpTools::getValue('exec', 0);
+    $exec = (int) BimpTools::getValue('exec', 0, 'int');
 
     if (!$exec) {
         $path = pathinfo(__FILE__);

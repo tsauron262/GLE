@@ -37,7 +37,7 @@ class BR_ServiceShipment extends BimpObject
         if (BimpObject::objectLoaded($commande)) {
             if ((int) $commande->getData('id_facture')) {
                 if (is_null($remove_from_order)) {
-                    $remove_from_order = (int) BimpTools::getValue('fields/remove_from_order', 0);
+                    $remove_from_order = (int) BimpTools::getValue('fields/remove_from_order', 0, 'int');
                 }
 
                 if ((int) $remove_from_order) {

@@ -637,7 +637,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
         if (in_array($field, array('fk_cond_reglement', 'fk_mode_reglement'))) {
-            if (BimpTools::getValue('action', '') === 'loadObjectInput' && in_array(BimpTools::getValue('field_name', ''), array('fk_cond_reglement', 'fk_mode_reglement'))) {
+            if (BimpTools::getValue('action', '', 'aZ09comma') === 'loadObjectInput' && in_array(BimpTools::getValue('field_name', '', 'aZ09comma'), array('fk_cond_reglement', 'fk_mode_reglement'))) {
                 switch ($field) {
                     case 'fk_cond_reglement':
                         return $this->getCondReglementBySociete();
@@ -1107,9 +1107,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function getProductFournisseursPricesArray()
     {
         if (BimpTools::isSubmit('id_product')) {
-            $id_product = (int) BimpTools::getValue('id_product', 0);
+            $id_product = (int) BimpTools::getValue('id_product', 0, 'int');
         } elseif (BimpTools::isSubmit('fields')) {
-            $fields = BimpTools::getValue('fields', array());
+            $fields = BimpTools::getValue('fields', array(), 'array');
             if (isset($fields['id_product'])) {
                 $id_product = (int) $fields['id_product'];
             }
@@ -4614,11 +4614,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $errors = array();
         $propal = null;
 
-        $origin = BimpTools::getValue('origin', '');
-        $origin_id = (int) BimpTools::getValue('origin_id', 0);
+        $origin = BimpTools::getValue('origin', '', 'aZ09comma');
+        $origin_id = (int) BimpTools::getValue('origin_id', 0, 'int');
 
         // Fermeture de la propale si nécessaire
-        if ((int) BimpTools::getValue('close_propal', 0)) {
+        if ((int) BimpTools::getValue('close_propal', 0, 'int')) {
             if ($origin === 'propal') {
                 if (!$origin_id) {
                     $errors[] = 'ID de la proposition commerciale d\'origine absent';

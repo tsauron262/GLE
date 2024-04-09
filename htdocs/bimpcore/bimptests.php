@@ -26,7 +26,7 @@ if (!$user->admin) {
     exit;
 }
 
-$type_test = BimpTools::getValue('type', '');
+$type_test = BimpTools::getValue('type', '', 'aZ09comma');
 if (!$type_test) {
     echo BimpRender::renderAlerts('Type de test absent');
     exit;
@@ -34,7 +34,7 @@ if (!$type_test) {
 
 switch ($type_test) {
     case 'sms':
-        $num = BimpTools::getValue('num', '');
+        $num = BimpTools::getValue('num', '', 'alphanohtml');
         if (!$num) {
             echo BimpRender::renderAlerts('Numéro de tel. absent (param url "num"');
         } else {

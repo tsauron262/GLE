@@ -566,8 +566,8 @@ class BCT_ContratLine extends BimpObject
     public function getListsBulkActions($list_name = 'default')
     {
         $id_contrat = 0;
-        if (BimpTools::getValue('fc', '') === 'contrat') {
-            $id_contrat = (int) BimpTools::getValue('id', 0);
+        if (BimpTools::getValue('fc', '', 'aZ09comma') === 'contrat') {
+            $id_contrat = (int) BimpTools::getValue('id', 0, 'int');
         }
 
         $actions = array();

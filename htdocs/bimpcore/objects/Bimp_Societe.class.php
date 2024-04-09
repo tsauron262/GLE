@@ -2321,7 +2321,7 @@ class Bimp_Societe extends BimpDolObject
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            if ((int) BimpTools::getValue('no_logo', 0)) {
+            if ((int) BimpTools::getValue('no_logo', 0, 'int')) {
                 if ($this->db->update($this->getTable(), array(
                             'logo' => ''
                                 ), 'rowid = ' . (int) $this->id) <= 0) {
@@ -3911,7 +3911,7 @@ class Bimp_Societe extends BimpDolObject
 
         if (!count($errors)) {
             if (BimpTools::isSubmit('is_company')) {
-                if ((int) BimpTools::getValue('is_company')) {
+                if ((int) BimpTools::getValue('is_company', 0, 'int')) {
                     if (!(int) $this->getData('fk_typent') && BimpCore::getConf('siren_required')) {
                         $errors[] = 'Veuillez sélectionner le type de tiers';
                     } elseif ((int) $this->getData('fk_typent') == 8) {
@@ -3950,7 +3950,7 @@ class Bimp_Societe extends BimpDolObject
 
                         if (!count($errors)) {
 //                            if ($siret !== $this->getInitData('siret')) {
-//                                if (!(int) BimpTools::getValue('siren_ok', 0)) {
+//                                if (!(int) BimpTools::getValue('siren_ok', 0, 'int)) {
 //                                if(!$this->isSirenOk()){
 //                                    $errors[] = 'Veuillez saisir un n° SIRET valide : '.$this->getData('siret');
 //                                }
@@ -3959,7 +3959,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                 } else {
                     if (BimpTools::isSubmit('prenom')) {
-                        $prenom = BimpTools::getValue('prenom', '');
+                        $prenom = BimpTools::getValue('prenom', '', 'alphanohtml');
                         if ($prenom) {
                             $nom = strtoupper($this->getData('nom')) . ' ' . BimpTools::ucfirst($prenom);
                             $this->set('nom', $nom);
@@ -4003,8 +4003,8 @@ class Bimp_Societe extends BimpDolObject
                 $this->set('note_public', $note);
             }
 
-            $have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client') == 1) ? true : false;
-            if ($have_already_code_comptable && empty(BimpTools::getValue('code_compta'))) {
+            $have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client', 0, 'int') == 1) ? true : false;
+            if ($have_already_code_comptable && empty(BimpTools::getValue('code_compta', '', 'alphanohtml'))) {
                 $errors[] = "Vous devez rensseigner un code comptable client";
             }
 
@@ -4081,7 +4081,7 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        $fc = BimpTools::getValue('fc', 'index', true, true);
+        $fc = BimpTools::getValue('fc', 'index', 'aZ09');
 
         if (in_array($fc, array('client', 'fournisseur')) && ($init_client != $this->getData('client') || $init_fourn != $this->getData('fournisseur'))) {
             $this->reloadPage = true;

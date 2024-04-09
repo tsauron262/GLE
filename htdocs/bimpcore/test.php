@@ -27,9 +27,10 @@ if (!$user->admin) {
     exit;
 }
 
-$propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', 918449); 
-if (BimpObject::objectLoaded($propal)) {
-    $propal->checkContratsStatus();
+if (preg_match('/^[0-9 \-\:]+$/', date('Y-m-d H:i:s'))) {
+    echo 'OK';
+} else {
+    echo 'Ko';
 }
 
 echo '<br/>FIN';

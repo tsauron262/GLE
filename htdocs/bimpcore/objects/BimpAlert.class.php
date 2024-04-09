@@ -97,7 +97,7 @@ class BimpAlert extends BimpObject
 
     public static function getMsgs()
     {
-        if (!BimpTools::getValue('ajax')) {
+        if (!(int) BimpTools::getValue('ajax', 0, 'int')) {
             $objs = BimpCache::getBimpObjectObjects('bimpcore', 'BimpAlert', array('status' => 1, 'type' => 0), 'position');
             $html = '';
             foreach ($objs as $alert) {

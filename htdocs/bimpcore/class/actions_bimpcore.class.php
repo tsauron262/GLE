@@ -106,7 +106,7 @@ class ActionsBimpcore
                     && (stripos($url, '/comm/') !== false || stripos($url, '/societe/') !== false)){
                 if(stripos($url, 'societe/list.php?leftmenu=thirdparties') || stripos($url, 'societe/index.php?mainmenu=companies&leftmenu='))
                     $tabObj = array("bimpcore", "Bimp_Societe");
-                elseif(BimpTools::getValue('type', 's') == 'f')
+                elseif(BimpTools::getValue('type', 's', 'aZ09comma') == 'f')
                     $tabObj = array("bimpcore", "Bimp_Fournisseur");
                 else
                     $tabObj = array("bimpcore", "Bimp_Client");

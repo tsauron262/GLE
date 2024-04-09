@@ -142,7 +142,7 @@ class BMP_EventCalcMontant extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $id_calc_montant = BimpTools::getValue('id_calc_montant', $this->getData('id_calc_montant'));
+        $id_calc_montant = BimpTools::getValue('id_calc_montant', $this->getData('id_calc_montant'), 'int');
         if (!is_null($id_calc_montant) && $id_calc_montant) {
             $this->set('id_calc_montant', $id_calc_montant);
             

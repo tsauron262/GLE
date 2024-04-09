@@ -34,21 +34,21 @@ class ObjectLine extends BimpObject
     public $nbCalcremise = 0;
     public $id_remise_except = null;
     public static $product_line_data = array(
-        'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
-        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'default' => null),
-        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => null),
-        'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
-        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null),
-        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => null),
-        'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0, 'default' => null),
-        'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
-        'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
-        'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null),
-        'product_type'   => array('label' => 'Service', 'type' => 'bool', 'required' => 0, 'default' => 0)
+        'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1, 'check' => 'int'),
+        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'default' => null, 'check' => 'int'),
+        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => null, 'check' => 'restricthtml'),
+        'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1, 'check' => 'float'),
+        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null, 'check' => 'float'),
+        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => null, 'check' => 'float'),
+        'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0, 'default' => null, 'check' => 'float'),
+        'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0, 'check' => 'float'),
+        'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null, 'check' => 'date'),
+        'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null, 'check' => 'date'),
+        'product_type'   => array('label' => 'Service', 'type' => 'bool', 'required' => 0, 'default' => 0, 'check' => 'int')
     );
     public static $text_line_data = array(
-        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
-        'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
+        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => '', 'check' => 'restricthtml'),
+        'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null, 'check' => 'int')
     );
     protected $product = null;
     protected $post_id_product = null;
@@ -4339,17 +4339,44 @@ class ObjectLine extends BimpObject
 
         $this->getIdProductFromPost();
 
+        $data_check = 'restricthtml';
+
+        switch ($field) {
+            case 'id_product':
+            case 'id_fourn_price':
+            case 'remisable':
+            case 'hide_in_pdf':
+            case 'remise_crt':
+            case 'force_qty_1':
+                $data_check = 'int';
+                break;
+
+            case 'pa_ht':
+            case 'pu_ht':
+            case 'tva_tx':
+            case 'remise':
+            case 'qty':
+                $data_check = 'float';
+                break;
+
+            case 'date_from':
+            case 'abo_date_from':
+            case 'date_to':
+                $data_check = 'date';
+                break;
+        }
+
         if (BimpTools::isSubmit('new_values/' . $this->id . '/' . $field)) {
-            $value = BimpTools::getValue('new_values/' . $this->id . '/' . $field);
+            $value = BimpTools::getValue('new_values/' . $this->id . '/' . $field, null, $data_check);
         } elseif ($field === 'id_product') {
             $value = (int) $this->id_product;
         } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'pa_ht', 'remisable', 'desc'))) {
             $value = $this->getValueByProduct($field);
         } else {
             if (BimpTools::isSubmit($field)) {
-                $value = BimpTools::getValue($field);
+                $value = BimpTools::getValue($field, null, $data_check);
             } elseif (BimpTools::isSubmit('fields/' . $field)) {
-                $value = BimpTools::getValue('fields/' . $field);
+                $value = BimpTools::getValue('fields/' . $field, null, $data_check);
             } else {
                 if (isset($this->{$field})) {
                     $value = $this->{$field};
@@ -4547,7 +4574,7 @@ class ObjectLine extends BimpObject
                 if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= ' <span class="inputInfo warning">Non applicable</span>';
-                } elseif (!$this->isEditable($force_edit) || $attribute_equipment/* || !$this->canEditPrixVente()*/) {
+                } elseif (!$this->isEditable($force_edit) || $attribute_equipment/* || !$this->canEditPrixVente() */) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';
                     if (!$this->isEditable()) {
@@ -4721,7 +4748,7 @@ class ObjectLine extends BimpObject
         if ($this->isLoaded()) {
             $id_line = $this->id;
         } else {
-            $id_line = BimpTools::getValue('id_object_line', 0);
+            $id_line = BimpTools::getValue('id_object_line', 0, 'int');
         }
 
         $lines = array();
@@ -4758,33 +4785,33 @@ class ObjectLine extends BimpObject
         }
 
         if (BimpTools::isSubmit('line_pu_ht')) {
-            $line_pu = (float) BimpTools::getValue('line_pu_ht');
+            $line_pu = (float) BimpTools::getValue('line_pu_ht', 0, 'float');
         }
 
         if (BimpTools::isSubmit('line_pa_ht')) {
-            $line_pa = (float) BimpTools::getValue('line_pa_ht');
+            $line_pa = (float) BimpTools::getValue('line_pa_ht', 0, 'float');
         } elseif (BimpTools::isSubmit('line_id_fourn_price')) {
-            $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) BimpTools::getValue('line_id_fourn_price'));
+            $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) BimpTools::getValue('line_id_fourn_price', 0, 'int'));
             if (BimpObject::objectLoaded($fournPrice)) {
                 $line_pa = (float) $fournPrice->getData('price');
             }
         }
 
         if (BimpTools::getValue('line_tva_tx')) {
-            $line_tva_tx = (float) BimpTools::getValue('line_tva_tx');
+            $line_tva_tx = (float) BimpTools::getValue('line_tva_tx', 0, 'float');
         }
 
         if (BimpTools::isSubmit('line_qty')) {
-            $line_qty = (float) BimpTools::getValue('line_qty');
+            $line_qty = (float) BimpTools::getValue('line_qty', 0, 'float');
         }
 
         if (BimpTools::isSubmit('line_remisable')) {
-            $is_line_remisable = (int) BimpTools::getValue('line_remisable');
+            $is_line_remisable = (int) BimpTools::getValue('line_remisable', 0, 'int');
         }
 
         if ($is_line_remisable) {
             if (BimpTools::isSubmit('line_remise')) {
-                $line_remise = (float) BimpTools::getValue('line_remise');
+                $line_remise = (float) BimpTools::getValue('line_remise', 0, 'float');
             } elseif (BimpTools::isSubmit('line_remises')) {
                 $line_remise = 0;
                 $remises = array();
@@ -4803,7 +4830,7 @@ class ObjectLine extends BimpObject
                     }
                 }
 
-                $new_remises = BimpTools::getValue('line_remises');
+                $new_remises = BimpTools::getValue('line_remises', array(), 'array');
 
                 foreach ($new_remises as $new_remise) {
                     if (isset($new_remise['id']) && (int) $new_remise['id']) {
@@ -5405,8 +5432,10 @@ class ObjectLine extends BimpObject
 
             if (is_array($data)) {
                 foreach ($data as $field => $params) {
+                    $data_check = BimpTools::getArrayValueFromPath($params, 'check', 'restricthtml');
+                    
                     if (BimpTools::isSubmit($field)) {
-                        $this->{$field} = BimpTools::getValue($field);
+                        $this->{$field} = BimpTools::getValue($field, null, $data_check);
                     } elseif (is_null($this->{$field}) && isset($params['default'])) {
                         $this->{$field} = $params['default'];
                     }
@@ -5686,7 +5715,7 @@ class ObjectLine extends BimpObject
         $id_equipment = 0;
 
         if (!$this->no_equipment_post) {
-            $id_equipment = (int) BimpTools::getValue('id_equipment', 0);
+            $id_equipment = (int) BimpTools::getValue('id_equipment', 0, 'int');
             if ($id_equipment) {
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
                 if (!BimpObject::objectLoaded($equipment)) {
@@ -5740,7 +5769,7 @@ class ObjectLine extends BimpObject
 
                 // Ajout remise: 
                 if (BimpTools::isSubmit('default_remise')) {
-                    $remise_value = (float) BimpTools::getValue('default_remise', 0);
+                    $remise_value = (float) BimpTools::getValue('default_remise', 0, 'float');
                     if ($remise_value) {
                         if ($this->isRemisable()) {
                             $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
@@ -5861,8 +5890,8 @@ class ObjectLine extends BimpObject
                     $errors[] = 'Duréé unitaire du produit ' . $product->getLink() . ' non définie';
                     return;
                 }
-                
-                
+
+
                 //on ajoute les sous lignes et calcule le tot
                 $dol_object = $this->getChildObject('dol_line');
                 $thisTot = $dol_object->getData('total_ht');
@@ -5891,7 +5920,7 @@ class ObjectLine extends BimpObject
                         if ($prod_duration != $main_prod_duration) {
                             $qty_ratio = ($prod_duration / $main_prod_duration);
                         }
-                        
+
                         $newLn = null;
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
                                                 array(
@@ -5906,7 +5935,7 @@ class ObjectLine extends BimpObject
                                                     'deletable'    => 0,
                                                     'remisable'    => 2,
                                                         ), true),
-                                                                                           $newLn));
+                                                $newLn));
 
                         $dol_child = $newLn->getChildObject('dol_line');
                         $totHt += $dol_child->getData('total_ht');
@@ -5955,7 +5984,7 @@ class ObjectLine extends BimpObject
                                                     'editable'     => 0,
                                                     'deletable'    => 0,
                                                         ), true),
-                                                                          $newLn));
+                                                $newLn));
                         if (abs($pourcent) > 0.01 || abs($pourcent) < 0.01) {
                             $errors = BimpTools::merge_array($errors, $newLn->setRemise($pourcent2, 'Remise bundle ' . $product->getData('ref')));
                         }

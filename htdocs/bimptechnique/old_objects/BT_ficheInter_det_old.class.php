@@ -370,7 +370,7 @@ class BT_ficheInter_det extends BimpDolObject
         $data->description = BimpTools::getPostFieldValue("description");
 
         if (BimpTools::getPostFieldValue('date')) {
-            $data->date = BimpTools::getValue("date");
+            $data->date = BimpTools::getValue("date", null, 'date');
         } else {
             $errors[] = "Vous devez choisir une date";
         }

@@ -28,7 +28,7 @@ if (!$user->admin) {
 
 $file = DOL_DATA_ROOT . '/bimpcore/cron_logs.txt';
 if (file_exists($file)) {
-    if ((int) BimpTools::getValue('delete_file', 0)) {
+    if ((int) BimpTools::getValue('delete_file', 0, 'int')) {
         unlink($file);
         if (file_exists($file)) {
             echo '<span class="danger">Echec suppr</span>';

@@ -1579,7 +1579,11 @@ class BContract_echeancier extends BimpObject
         $errors = [];
         $warnings = [];
         $success = "";
-        if (BimpTools::getValue('next_facture_date')) {
+        
+        $next_facture_date = BimpTools::getValue('next_facture_date', '', 'date');
+        $fin_periode = BimpTools::getValue('fin_periode', '', 'date');
+        
+        if ($next_facture_date && $fin_periode) {
             $success = "Création de la facture avec succès";
             $parent = $this->getParentInstance();
 
@@ -1588,8 +1592,9 @@ class BContract_echeancier extends BimpObject
             } else {
                 $reste_a_payer = $parent->reste_a_payer();
                 $reste_periode = $parent->reste_periode();
-                $start = new DateTime(BimpTools::getValue('next_facture_date'));
-                $end = new DateTime(BimpTools::getValue('fin_periode'));
+                $start = new DateTime($next_facture_date);
+                $end = new DateTime($fin_periode);
+                
                 $interval = $start->diff($end->add(new dateInterval('P1D')));
                 if ($interval->m == 0 && $interval->y == 0) {
                     $nb = 1;
@@ -1605,8 +1610,8 @@ class BContract_echeancier extends BimpObject
                 return "Vous ne pouvez pas indiquer un montant égale à 0";
             }
 
-            $this->actionCreateFacture($data = Array('date_start' => BimpTools::getValue('next_facture_date'), 'date_end' => BimpTools::getValue('fin_periode'), 'total_ht' => $montant));
-            $new_next_date = new DateTime(BimpTools::getValue('fin_periode'));
+            $this->actionCreateFacture($data = Array('date_start' => $next_facture_date, 'date_end' => $fin_periode, 'total_ht' => $montant));
+            $new_next_date = new DateTime($fin_periode);
             $new_next_date->add(new dateInterval('P1D'));
             $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
 //            $parent->renderEcheancier(); ??? 

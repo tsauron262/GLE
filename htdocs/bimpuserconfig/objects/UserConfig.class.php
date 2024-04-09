@@ -637,7 +637,7 @@ class UserConfig extends BimpObject
     public function validatePost()
     {
         if (!(int) $this->getData('id_owner')) {
-            switch ((int) BimpTools::getValue('owner_type', self::OWNER_TYPE_USER)) {
+            switch ((int) BimpTools::getValue('owner_type', self::OWNER_TYPE_USER, 'int')) {
                 case self::OWNER_TYPE_USER:
                     global $user;
                     if (BimpObject::objectLoaded($user)) {
@@ -648,7 +648,7 @@ class UserConfig extends BimpObject
                     break;
 
                 case self::OWNER_TYPE_GROUP:
-                    $this->set('id_owner', (int) BimpTools::getValue('id_group', 0));
+                    $this->set('id_owner', (int) BimpTools::getValue('id_group', 0, 'int'));
                     break;
             }
         }

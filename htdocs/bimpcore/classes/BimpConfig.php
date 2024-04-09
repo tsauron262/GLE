@@ -251,8 +251,8 @@ class BimpConfig
 
                 // Surcharges version:
                 $override_params = array();
-                if (defined('BIMP_EXTENDS_VERSION')) {
-                    $version_module_dir = 'extends/versions/' . BIMP_EXTENDS_VERSION . ($module_dir ? '/' . $module_dir : '');
+                if (BimpCore::getVersion()) {
+                    $version_module_dir = 'extends/versions/' . BimpCore::getVersion() . ($module_dir ? '/' . $module_dir : '');
                     $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $version_module_dir . '/' . $file_name . '.yml';
                     if (file_exists($version_file)) {
                         $version_params = $this->getParamsFromFile($module, $version_module_dir, $file_name, $errors, false);

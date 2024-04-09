@@ -129,8 +129,8 @@ class BimpObject extends BimpCache
                 }
 
                 // Surcharge version:
-                if (defined('BIMP_EXTENDS_VERSION')) {
-                    $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/' . $object_name . '.class.php';
+                if (BimpCore::getVersion()) {
+                    $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/objects/' . $object_name . '.class.php';
                     if (file_exists($version_file)) {
                         $className = $object_name . '_ExtVersion';
                         if (!class_exists($className)) {
@@ -189,8 +189,8 @@ class BimpObject extends BimpCache
                             }
 
                             // Surcharge version:
-                            if (defined('BIMP_EXTENDS_VERSION')) {
-                                $ext_version_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/' . $ext_object_name . '.class.php';
+                            if (BimpCore::getVersion()) {
+                                $ext_version_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/versions/' . BimpCore::getVersion() . '/objects/' . $ext_object_name . '.class.php';
                                 if (file_exists($ext_version_file)) {
                                     $ext_className = $ext_object_name . '_ExtVersion';
                                     if (!class_exists($ext_className)) {
@@ -288,8 +288,8 @@ class BimpObject extends BimpCache
 
                 // Vérif surcharges (nécessaire car certaine surcharge peuvent affecter les variables statiques des classes de base)
                 // Version:
-                if (defined('BIMP_EXTENDS_VERSION')) {
-                    $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/' . $object_name . '.class.php';
+                if (BimpCore::getVersion()) {
+                    $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/objects/' . $object_name . '.class.php';
                     if (file_exists($version_file)) {
                         $final_class_name = $object_name . '_ExtVersion';
                         if (!class_exists($final_class_name)) {

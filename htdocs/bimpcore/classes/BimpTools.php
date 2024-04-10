@@ -52,7 +52,7 @@ class BimpTools
      * $protected = que du string
      */
 
-    public static function getValue($key, $default_value = null, $decode = true, $check = '', $filter = null, $options = null)
+    public static function getValue($key, $default_value = null, $check = 'restricthtml', $filter = null, $options = null, $decode = true)
     {
         $keys = explode('/', $key);
 
@@ -76,12 +76,6 @@ class BimpTools
             }
         }
 
-//        if ($protected && !ctype_alnum(str_replace(array('_'), '', $value)) && $value != '') {
-//            BimpCore::addlog('Protection 65789 activée key ' . $key . ' value : ' . strip_tags(addslashes($value)), 3);
-//            echo BimpRender::renderAlerts('Protection 65789 activée');
-//            die;
-//        }
-
         if (is_null($value)) {
             return $default_value;
         }
@@ -91,20 +85,21 @@ class BimpTools
         }
 
         if ((int) BimpCore::getConf('activate_post_data_check')) {
-            if (is_string($value) && $value && $check) {
-                $val_temp = sanitizeVal($value, $check, $filter, $options);
+            if ($value && $check) {
+                $val_temp = self::sanitizeVal($value, $check, $filter, $options);
 
-                if (!$val_temp || $val_temp != $value) {
+                if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $value != $value)) {
                     if ((int) BimpCore::getConf('post_data_check_log_only')) {
                         if (!$val_temp) {
-                            BimpCore::addlog('Donnée invalidée', 3, 'secu', null, array(
-                                'Key' => $key
+                            BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
+                                'check'           => $check,
+                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value)),
                             ));
                         } else {
-                            BimpCore::addlog('Donnée modifiée', 2, 'secu', null, array(
-                                'Key'             => $key,
-                                'Valeur initiale' => $value,
-                                'Valeur modifiée' => $val_temp
+                            BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
+                                'check'           => $check,
+                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value)),
+                                'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) htmlentities($val_temp))
                             ));
                         }
                     } else {
@@ -142,7 +137,7 @@ class BimpTools
 
         // Filtres listes:
         if (BimpTools::isSubmit('param_list_filters')) {
-            $filters = json_decode(BimpTools::getValue('param_list_filters'));
+            $filters = json_decode(BimpTools::getValue('param_list_filters', array(), 'array'));
             foreach ($filters as $filter) {
                 if (isset($filter->name) && $filter->name === $field_name) {
                     return 1;
@@ -153,31 +148,31 @@ class BimpTools
         return 0;
     }
 
-    public static function getPostFieldValue($field_name, $default_value = null)
+    public static function getPostFieldValue($field_name, $default_value = null, $check = 'restricthtml', $filter = null, $options = null, $decode = true)
     {
         // Chargement d'un formulaire:
         if (BimpTools::isSubmit('param_values/fields/' . $field_name)) {
-            return BimpTools::getValue('param_values/fields/' . $field_name);
+            return BimpTools::getValue('param_values/fields/' . $field_name, $default_value, $check, $filter, $options, $decode);
         }
 
         // Chargement d'un input: 
         if (BimpTools::isSubmit('fields/' . $field_name)) {
-            return BimpTools::getValue('fields/' . $field_name);
+            return BimpTools::getValue('fields/' . $field_name, $default_value, $check, $filter, $options, $decode);
         }
 
         // Action ajax: 
         if (BimpTools::isSubmit('extra_data/' . $field_name)) {
-            return BimpTools::getValue('extra_data/' . $field_name);
+            return BimpTools::getValue('extra_data/' . $field_name, $default_value, $check, $filter, $options, $decode);
         }
 
         // Envoi des données d'un formulaire: 
         if (BimpTools::isSubmit($field_name)) {
-            return BimpTools::getValue($field_name);
+            return BimpTools::getValue($field_name, $default_value, $check, $filter, $options, $decode);
         }
 
         // Filtres listes:
         if (BimpTools::isSubmit('param_list_filters')) {
-            $filters = json_decode(BimpTools::getValue('param_list_filters'));
+            $filters = json_decode(BimpTools::getValue('param_list_filters', '', 'json'));
             foreach ($filters as $filter) {
                 if (isset($filter->name) && $filter->name === $field_name) {
                     return $filter->filter;
@@ -1780,6 +1775,53 @@ class BimpTools
 
     // Gestion de données:
 
+    public static function sanitizeVal($value, $check, $filter, $options)
+    {
+        switch ($check) {
+            case 'array':
+                if (!is_array($value)) {
+                    return array();
+                }
+                return $value;
+        }
+
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        // Pour ajouter d'autres types de vérifications que celles de Dolibarr
+        switch ($check) {
+            case 'json':
+            case 'json_nohtml':
+                // Pour l'instant pas de vérif (json_decode devrait échouer si invalide)
+                return $value;
+
+            case 'float':
+                $value = trim($value);
+                $value = str_replace(' ', '', $value);
+                $value = str_replace(',', '.', $value);
+                if (!self::isNumericType($value)) {
+                    $value = 0;
+                }
+                return $value;
+                
+            case 'int': 
+                if (is_bool($value)) {
+                    return $value;
+                }
+                return sanitizeVal($value, $check, $filter, $options);
+
+            case 'date':
+                if (!preg_match('/^[0-9 \-\:]+$/', $value)) {
+                    $value = '';
+                }
+                return $value;
+
+            default:
+                return sanitizeVal($value, $check, $filter, $options);
+        }
+    }
+
     public static function checkValueByType($type, &$value, &$errors = array())
     {
         if (is_null($value)) {
@@ -1910,7 +1952,7 @@ class BimpTools
 
     public static function isNumericType($value)
     {
-        return ((is_int($value) || is_float($value) || is_bool($value) || (is_string($value) && preg_match('/^[0-9]+[.,]*[0-9]*$/', $value) && substr($value, -1) != '.')));
+        return ((is_int($value) || is_float($value) || is_bool($value) || (is_string($value) && preg_match('/^\-?[0-9]+[.,]*[0-9]*$/', $value) && substr($value, -1) != '.')));
     }
 
     public static function isString($value)

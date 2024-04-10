@@ -240,7 +240,7 @@ class BS_Inter extends BimpObject
                 }
             }
 
-            if ((int) BimpTools::getValue('start_timer', 0)) {
+            if ((int) BimpTools::getValue('start_timer', 0, 'int')) {
                 $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
                 if (!$timer->setObject($this, 'timer', true, (int) $this->getData('tech_id_user'))) {
                     $warnings[] = 'Echec de l\'initialisation du chrono appel payant';

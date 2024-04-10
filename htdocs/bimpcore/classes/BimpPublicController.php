@@ -22,26 +22,26 @@ class BimpPublicController extends BimpController
             $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : '');
         }
 
-        switch (BimpTools::getValue('back', '')) {
+        switch (BimpTools::getValue('back', '', 'aZ09')) {
             case 'savForm':
                 $this->back_url = BimpObject::getPublicBaseUrl() . 'fc=savForm';
 
                 if (BimpTools::isSubmit('resgsx')) {
-                    $res_id = BimpTools::getValue('resgsx', '');
+                    $res_id = BimpTools::getValue('resgsx', '', 'alphanohtml');
                     if ($res_id) {
                         $this->back_url .= '&resgsx=' . $res_id;
                     }
                 }
 
                 if (BimpTools::isSubmit('resgsx')) {
-                    $res_id = BimpTools::getValue('resgsx', '');
+                    $res_id = BimpTools::getValue('resgsx', '', 'alphanohtml');
                     if ($res_id) {
                         $this->back_url .= '&resgsx=' . $res_id;
                     }
                 }
 
                 if (BimpTools::isSubmit('centre_id')) {
-                    $shipTo = BimpTools::getValue('centre_id', '');
+                    $shipTo = BimpTools::getValue('centre_id', '', 'aZ09');
                     if ($shipTo) {
                         $this->back_url .= '&centre_id=' . $shipTo;
                     }
@@ -92,12 +92,12 @@ class BimpPublicController extends BimpController
         if (BimpTools::isSubmit('public_form_submit')) {
             $this->processPublicForm();
         } elseif (BimpTools::isSubmit('display_public_form')) {
-            $method = 'display' . ucfirst(BimpTools::getValue('public_form')) . 'Form';
+            $method = 'display' . ucfirst(BimpTools::getValue('public_form', '', 'aZ09')) . 'Form';
 
             if (method_exists($this, $method)) {
                 $this->{$method}();
             } else {
-                $this->displayPublicForm(BimpTools::getValue('public_form', ''));
+                $this->displayPublicForm(BimpTools::getValue('public_form', '', 'aZ09'));
             }
             exit;
         }
@@ -409,7 +409,7 @@ class BimpPublicController extends BimpController
         $html = '';
 
         $html .= '<label for="bic_login_email">Email</label><br/>';
-        $html .= '<input id="bic_login_email" type="text" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '')) . '">';
+        $html .= '<input id="bic_login_email" type="text" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '', 'alphanohtml')) . '">';
         $html .= '<br/><br/>';
         $html .= '<label for="bic_login_pw">Mot de passe</label><br/>';
         $html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
@@ -430,7 +430,7 @@ class BimpPublicController extends BimpController
         $html = '';
 
         $html .= '<label for="email">Email</label><br/>';
-        $html .= '<input id="email" type="text" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '') . '">';
+        $html .= '<input id="email" type="text" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '', 'alphanohtml') . '">';
 
         return $html;
     }
@@ -460,14 +460,14 @@ class BimpPublicController extends BimpController
 
     public function processPublicForm()
     {
-        $form_name = BimpTools::getValue('public_form', '');
+        $form_name = BimpTools::getValue('public_form', '', 'aZ09');
 
         $method = 'processPublic' . ucfirst($form_name);
         if ($form_name && method_exists($this, 'processPublic' . ucfirst($form_name))) {
             $errors = $this->{$method}();
 
             if (count($errors)) {
-                $method = 'display' . ucfirst(BimpTools::getValue('public_form')) . 'Form';
+                $method = 'display' . ucfirst(BimpTools::getValue('public_form', '', 'aZ09')) . 'Form';
                 if (method_exists($this, $method)) {
                     $this->{$method}($errors);
                 } else {
@@ -475,7 +475,7 @@ class BimpPublicController extends BimpController
                 }
                 exit;
             } else {
-                $back_url = BimpTools::getValue('public_form_back_url', '');
+                $back_url = BimpTools::getValue('public_form_back_url', '', 'alphanohtml');
 
                 if ($back_url) {
                     header("Location: " . $back_url);

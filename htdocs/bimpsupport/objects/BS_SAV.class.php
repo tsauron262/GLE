@@ -758,8 +758,8 @@ class BS_SAV extends BimpObject
     public function getListFilters()
     {
         $filters = array();
-        if (BimpTools::isSubmit('id_entrepot') && BimpTools::getValue('id_entrepot') != '') {
-            $entrepots = explode('-', BimpTools::getValue('id_entrepot'));
+        if (BimpTools::isSubmit('id_entrepot') && BimpTools::getValue('id_entrepot', '', 'aZ09') != '') {
+            $entrepots = explode('-', BimpTools::getValue('id_entrepot', '', 'aZ09'));
 
             $filters[] = array('name'   => 'id_entrepot', 'filter' => array(
                     'IN' => implode(',', $entrepots)
@@ -767,7 +767,7 @@ class BS_SAV extends BimpObject
         }
 
         if (BimpTools::isSubmit('code_centre')) {
-            $codes = explode('-', BimpTools::getValue('code_centre'));
+            $codes = explode('-', BimpTools::getValue('code_centre', '', 'aZ09'));
             foreach ($codes as &$code) {
                 $code = "'" . $code . "'";
             }
@@ -777,7 +777,7 @@ class BS_SAV extends BimpObject
         }
 
         if (BimpTools::isSubmit('status')) {
-            $filters[] = array('name' => 'status', 'filter' => (int) BimpTools::getValue('status'));
+            $filters[] = array('name' => 'status', 'filter' => (int) BimpTools::getValue('status', 0, 'int'));
         }
 
         return $filters;
@@ -1425,7 +1425,7 @@ class BS_SAV extends BimpObject
         $objsoc = false;
         $id_soc = (int) $this->getData('id_client');
         if (!$id_soc) {
-            $id_soc = (int) BimpTools::getValue('id_client', 0);
+            $id_soc = (int) BimpTools::getValue('id_client', 0, 'int');
         }
         if ($id_soc > 0) {
             $objsoc = new Societe($this->db->db);
@@ -1434,7 +1434,7 @@ class BS_SAV extends BimpObject
 
         $mask = self::$ref_model;
 
-        $mask = str_replace('{CENTRE}', (string) $this->getData('code_centre'), $mask);
+        $mask = str_replace('{CENTRE}', (string) $this->getData('code_centre', '', 'aZ09'), $mask);
 
         return($tmp->getNextValue($objsoc, $this, $mask));
     }
@@ -3175,7 +3175,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
         if ($acompte > 0 && !count($errors)) {
             if (!(int) $id_mode_paiement) {
-                $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', null);
+                $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', null, 'int');
             }
 
             if (!(int) $id_mode_paiement) {
@@ -4039,13 +4039,13 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         if (!$msg_type) {
             if (BimpTools::isSubmit('msg_type')) {
-                $msg_type = BimpTools::getValue('msg_type');
+                $msg_type = BimpTools::getValue('msg_type', '', 'aZ09');
             } else {
                 return array($error_msg . ' (Type de message absent)');
             }
         }
 
-        $extra_data = BimpTools::getValue('extra_data', array());
+        $extra_data = BimpTools::getValue('extra_data', array(), 'array');
         if (isset($extra_data['nbJours'])) {
             $nbJours = (int) $extra_data['nbJours'];
         }
@@ -5538,8 +5538,10 @@ ORDER BY a.val_max DESC");
             $propal = $this->getChildObject('propal');
             $propal->dol_object->closeProposal($user, 3, "Auto via SAV");
             $this->removeReservations();
-            if (BimpTools::getValue('send_msg', 0))
+
+            if ((int) BimpTools::getValue('send_msg', 0, 'int')) {
                 $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
+            }
 
             if ((int) $propal->getData('id_signature')) {
                 $signature = $propal->getChildObject('signature');
@@ -6275,7 +6277,7 @@ ORDER BY a.val_max DESC");
                                         BimpObject::loadClass('bimpapple', 'InternalStock');
 
                                         foreach ($parts as $part) {
-                                            
+
                                             $internal_stock = InternalStock::getStockInstance($code_centre, $part->getData('part_number'));
 
                                             if (BimpObject::objectLoaded($internal_stock)) {
@@ -7150,7 +7152,7 @@ ORDER BY a.val_max DESC");
         }
 
         if ((float) $this->getData('acompte') > 0) {
-            if (!(int) BimpTools::getValue('mode_paiement_acompte', 0)) {
+            if (!(int) BimpTools::getValue('mode_paiement_acompte', 0, 'int')) {
                 $errors[] = 'Veuillez sélectionner un mode de paiement pour l\'acompte';
             }
             if ($this->useCaisseForPayments) {
@@ -7251,12 +7253,12 @@ ORDER BY a.val_max DESC");
                     $this->generatePDF('pc', $warnings);
 
                     // Envoi du mail / sms:
-                    if (BimpTools::getValue('send_msg', 0)) {
+                    if ((int) BimpTools::getValue('send_msg', 0, 'int')) {
                         $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debut'));
                     }
 
                     // Création de la signature du Bon de prise en charge:
-                    if ((int) BimpTools::getValue('create_signature_pc', 0)) {
+                    if ((int) BimpTools::getValue('create_signature_pc', 0, 'int')) {
                         $signature_errors = $this->createSignature('sav_pc');
                         if (count($signature_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($signature_errors);

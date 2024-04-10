@@ -117,14 +117,14 @@ class BMP_EventMontantDetail extends BimpObject
     public function validatePost()
     {
         if (BimpTools::isSubmit('id_montant_detail_value')) {
-            $id_value = (int) BimpTools::getValue('id_montant_detail_value');
+            $id_value = (int) BimpTools::getValue('id_montant_detail_value', 0, 'int');
             if (is_null($id_value) || !$id_value) {
                 return array('Aucune valeur prédéfinie sélectionnée');
             }
 
-            $id_event_montant = BimpTools::getValue('id_event_montant');
+            $id_event_montant = (int) BimpTools::getValue('id_event_montant', 0, 'int');
 
-            if (is_null($id_event_montant) || !$id_event_montant) {
+            if (!$id_event_montant) {
                 return array('ID du montant correspondant absent');
             }
 
@@ -137,9 +137,9 @@ class BMP_EventMontantDetail extends BimpObject
 
             $label = $detailValue->getData('label');
 
-            $quantity = BimpTools::getValue('quantity', null);
+            $quantity = BimpTools::getValue('quantity', null, 'float');
             if ((int) $detailValue->getData('use_groupe_number')) {
-                $id_group = BimpTools::getValue('id_group', 0);
+                $id_group = BimpTools::getValue('id_group', 0, 'int');
                 if ($id_group) {
                     $group = BimpCache::getBimpObjectInstance($this->module, 'BMP_EventGroup', (int) $id_group);
                     if ($group->isLoaded()) {

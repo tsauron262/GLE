@@ -258,12 +258,12 @@ class FournObjectLine extends ObjectLine
                     }
 
                     if (!(int) $this->id_fourn_price) {
-                        $this->pu_ht = BimpTools::getValue('pa_except', $this->pu_ht);
+                        $this->pu_ht = (float) BimpTools::getValue('pa_except', $this->pu_ht, 'float');
                     }
                     break;
 
                 case self::LINE_FREE:
-                    $this->pu_ht = (float) BimpTools::getValue('pa_except', (float) $this->pu_ht);
+                    $this->pu_ht = (float) BimpTools::getValue('pa_except', (float) $this->pu_ht, 'float');
                     break;
             }
         }

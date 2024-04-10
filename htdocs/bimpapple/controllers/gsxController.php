@@ -501,13 +501,13 @@ class gsxController extends BimpController
         }
 
         // Traitement des fichiers: 
-        $idx = BimpTools::getValue('attachments_nextIdx', 0);
+        $idx = (int) BimpTools::getValue('attachments_nextIdx', 0, 'int');
         if ($idx) {
             $files = array();
 
             for ($i = 1; $i < $idx; $i++) {
                 if (isset($_POST['attachments_fileOrigin_' . $i]) && $_POST['attachments_fileOrigin_' . $i] === 'sav') {
-                    $id_file = (int) BimpTools::getValue('attachments_savFile_' . $i, 0);
+                    $id_file = (int) BimpTools::getValue('attachments_savFile_' . $i, 0, 'int');
                     if ($id_file) {
                         $fileObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $id_file);
                         if (BimpObject::objectLoaded($fileObj)) {
@@ -2287,7 +2287,7 @@ class gsxController extends BimpController
         }
 
         $filesError = false;
-        if (in_array(BimpTools::getValue('includeFiles', ''), array('1', 1, 'Y')) && !is_null($id_sav)) {
+        if (in_array(BimpTools::getValue('includeFiles', '', 'aZ09'), array('1', 1, 'Y')) && !is_null($id_sav)) {
             $dir = DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . $id_sav . '/';
             $files = scandir($dir);
             if (count($files)) {
@@ -2485,7 +2485,7 @@ class gsxController extends BimpController
                             $prixTot = str_replace("  ", "", $prixTot);
                             $prixTot = (float) str_replace(",", ".", $prixTot);
                             $repair->totalFromOrder = $prixTot;
-                            if (BimpTools::getValue('requestReviewByApple', '') === "Y") {
+                            if (BimpTools::getValue('requestReviewByApple', '', 'aZ') === "Y") {
                                 $prixTot = 0;
                             }
                             if ((int) $id_sav) {
@@ -2839,7 +2839,7 @@ class gsxController extends BimpController
                             'type'     => 'secondary',
                             'foldable' => true
                 ));
-                if (BimpCore::isEntity('bimp') && BimpObject::objectLoaded($sav) && BimpTools::getValue('gsx_params/withpdf', 'false') == 'true') {
+                if (BimpCore::isEntity('bimp') && BimpObject::objectLoaded($sav) && BimpTools::getValue('gsx_params/withpdf', 'false', 'aZ') == 'true') {
                     $sav_dir = $sav->getFilesDir();
                     if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
                         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.php';
@@ -4139,23 +4139,23 @@ class gsxController extends BimpController
 
     protected function ajaxProcessGsxRequest()
     {
-        if ((int) BimpTools::getValue('gsx_requestForm', 0)) {
+        if ((int) BimpTools::getValue('gsx_requestForm', 0, 'int')) {
             $method = 'gsxProcessRequestForm';
             $params = array(
-                'requestName' => BimpTools::getValue('gsx_requestName', ''),
-                'serial'      => BimpTools::getValue('gsx_serial', ''),
-                'id_sav'      => BimpTools::getValue('gsx_id_sav', 0),
-                'id_repair'   => BimpTools::getValue('gsx_id_repair', 0)
+                'requestName' => BimpTools::getValue('gsx_requestName', '', 'aZ09comma'),
+                'serial'      => BimpTools::getValue('gsx_serial', '', 'alphanohtml'),
+                'id_sav'      => (int) BimpTools::getValue('gsx_id_sav', 0, 'int'),
+                'id_repair'   => (int) BimpTools::getValue('gsx_id_repair', 0, 'int')
             );
-        } elseif ((int) BimpTools::getValue('gsx_fetchRepairEligibility', 0)) {
+        } elseif ((int) BimpTools::getValue('gsx_fetchRepairEligibility', 0, 'int')) {
             $method = 'gsxFetchRepairEligibility';
             $params = array(
-                'serial' => BimpTools::getValue('gsx_serial', ''),
-                'id_sav' => BimpTools::getValue('gsx_id_sav', 0),
+                'serial' => BimpTools::getValue('gsx_serial', '', 'alphanohtml'),
+                'id_sav' => BimpTools::getValue('gsx_id_sav', 0, 'int'),
             );
         } else {
-            $method = BimpTools::getValue('gsx_method', '');
-            $params = BimpTools::getValue('gsx_params', array());
+            $method = BimpTools::getValue('gsx_method', '', 'aZ09comma');
+            $params = BimpTools::getValue('gsx_params', array(), 'array');
         }
 
         if ($method) {
@@ -4182,8 +4182,8 @@ class gsxController extends BimpController
     {
         $errors = array();
 
-        $serial = BimpTools::getValue('serial', '');
-        $id_sav = (int) BimpTools::getValue('id_sav', 0);
+        $serial = BimpTools::getValue('serial', '', 'alphanohtml');
+        $id_sav = (int) BimpTools::getValue('id_sav', 0, 'int');
 
         if (!$serial) {
             $errors[] = 'Numéro de série absent';
@@ -4200,7 +4200,7 @@ class gsxController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => (int) BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -4209,10 +4209,10 @@ class gsxController extends BimpController
         $errors = array();
         $html = '';
 
-        $requestType = BimpTools::getValue('requestType', '');
-        $serial = BimpTools::getValue('serial', '');
-        $id_sav = BimpTools::getValue('id_sav', null);
-        $id_repair = BimpTools::getValue('id_repair', null);
+        $requestType = BimpTools::getValue('requestType', '', aZ09comma);
+        $serial = BimpTools::getValue('serial', '', 'alphanohtml');
+        $id_sav = BimpTools::getValue('id_sav', null, 'int');
+        $id_repair = BimpTools::getValue('id_repair', null, 'int');
 
         if (!$requestType) {
             $errors[] = 'Type de requête absent';
@@ -4229,7 +4229,7 @@ class gsxController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => (int) BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -4238,18 +4238,18 @@ class gsxController extends BimpController
         $errors = array();
         $html = '';
 
-        $id_sav = BimpTools::getValue('id_sav', 0);
-        $id_repair = BimpTools::getValue('id_repair', null);
-        $serial = BimpTools::getValue('serial', '');
-        $requestType = BimpTools::getValue('repairType', '');
-        $symptomCode = BimpTools::getValue('symptomesCodes', '');
+        $id_sav = BimpTools::getValue('id_sav', 0, 'int');
+        $id_repair = BimpTools::getValue('id_repair', null, 'int');
+        $serial = BimpTools::getValue('serial', '', 'alphanohtml');
+        $requestType = BimpTools::getValue('repairType', '', 'aZ09comma');
+        $symptomCode = BimpTools::getValue('symptomesCodes', '', 'aZ09comma');
 
         $html = $this->renderRequestForm($id_sav, $serial, $requestType, $symptomCode, $id_repair, $errors);
 
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -4258,10 +4258,10 @@ class gsxController extends BimpController
         $errors = array();
         $html = '';
 
-        $id_sav = BimpTools::getValue('id_sav', 0);
-        $id_repair = BimpTools::getValue('id_repair', null);
-        $serial = BimpTools::getValue('serial', '');
-        $requestType = BimpTools::getValue('request_type', '');
+        $id_sav = BimpTools::getValue('id_sav', 0, 'int');
+        $id_repair = BimpTools::getValue('id_repair', null, 'int');
+        $serial = BimpTools::getValue('serial', '', 'alphanohtml');
+        $requestType = BimpTools::getValue('request_type', '', 'aZ09comma');
 
         $gsxRequest = new GSX_Request($this->gsx, $requestType);
 
@@ -4300,7 +4300,7 @@ class gsxController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -4308,9 +4308,9 @@ class gsxController extends BimpController
     {
         $errors = array();
 
-        $id_sav = BimpTools::getValue('id_sav', 0);
-        $number = BimpTools::getValue('importNumber', '');
-        $numberType = BimpTools::getValue('importNumberType', '');
+        $id_sav = BimpTools::getValue('id_sav', 0, 'int');
+        $number = BimpTools::getValue('importNumber', '', 'aZ09comma');
+        $numberType = BimpTools::getValue('importNumberType', '', 'aZ09comma');
 
         if (!$id_sav) {
             $errors[] = 'ID du SAV absent 70';
@@ -4338,7 +4338,7 @@ class gsxController extends BimpController
 
         die(json_encode(array(
             'errors'     => $errors,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -4346,7 +4346,7 @@ class gsxController extends BimpController
     {
         $errors = array();
 
-        $id_repair = (int) BimpTools::getValue('id_repair', 0);
+        $id_repair = (int) BimpTools::getValue('id_repair', 0, 'int');
 
         if (!$id_repair) {
             $errors[] = 'ID de la réparation absent';
@@ -4363,7 +4363,7 @@ class gsxController extends BimpController
 
         die(json_encode(array(
             'errors'     => $errors,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -4372,7 +4372,7 @@ class gsxController extends BimpController
         $errors = array();
         $html = '';
 
-        $id_sav = BimpTools::getValue('id_sav', 0);
+        $id_sav = (int) BimpTools::getValue('id_sav', 0, 'int');
 
         if (!$id_sav) {
             $errors[] = 'ID du SAV absent 71';
@@ -4388,16 +4388,16 @@ class gsxController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
     protected function ajaxProcessLoadPartsList()
     {
         $errors = array();
-        $serial = BimpTools::getValue('serial', '');
-        $id_sav = BimpTools::getValue('id_sav', 0);
-        $sufixe = BimpTools::getValue('sufixe', '');
+        $serial = BimpTools::getValue('serial', '', 'alphanohtml');
+        $id_sav = BimpTools::getValue('id_sav', 0, 'int');
+        $sufixe = BimpTools::getValue('sufixe', '', 'aZ09comma');
         $html = '';
 
         if (!$serial) {
@@ -4416,7 +4416,7 @@ class gsxController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 

@@ -998,7 +998,7 @@ class BMP_Event extends BimpObject
 
         $calc_instance = BimpObject::getInstance($this->module, 'BMP_CalcMontant');
 
-        $debug = (int) BimpTools::getValue('db_mode', 0);
+        $debug = (int) BimpTools::getValue('db_mode', 0, 'int');
 
         if ($debug) {
             $html .= '<h3>Détails calculs: </h3>';

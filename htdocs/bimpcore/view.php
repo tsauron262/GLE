@@ -6,10 +6,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 $errors = array();
 
-$module = BimpTools::getValue('module', '');
-$object_name = BimpTools::getValue('object_name', '');
-$id_object = BimpTools::getValue('id_object', 0);
-$view = BimpTools::getValue('view', 'default');
+$module = BimpTools::getValue('module', '', 'aZ09');
+$object_name = BimpTools::getValue('object_name', '', 'aZ09');
+$id_object = BimpTools::getValue('id_object', 0, 'int');
+$view = BimpTools::getValue('view', 'default', 'aZ09');
 
 if (!$module) {
     $errors[] = 'Module absent';

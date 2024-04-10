@@ -124,9 +124,9 @@ class BC_Caisse extends BimpObject
 
         if (!$id_entrepot) {
             if (BimpTools::isSubmit('id_entrepot')) {
-                $id_entrepot = (int) BimpTools::getValue('id_entrepot');
+                $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0, 'int');
             } elseif (BimpTools::isSubmit('param_values/fields/id_entrepot')) {
-                $id_entrepot = (int) BimpTools::getValue('param_values/fields/id_entrepot');
+                $id_entrepot = (int) BimpTools::getValue('param_values/fields/id_entrepot', 0, 'int');
             }
         }
 

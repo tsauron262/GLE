@@ -93,26 +93,28 @@ class BContract_Serials_Imei extends BimpObject
     {
         $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
 
-        switch (BimpTools::getValue('attached_serials_separator')) {
+        switch (BimpTools::getValue('attached_serials_separator', 0, 'int')) {
             case 1:
-                $tab_serials = explode("<br>", BimpTools::getValue('attached_serials'));
+                $tab_serials = explode("<br>", BimpTools::getValue('attached_serials', '', 'restricthtml'));
                 break;
         }
 
         foreach ($tab_serials as $index => $serial) {
             if ($serial != "") {
+                $id_service = (int) BimpTools::getValue('attached_service', 0, 'int');
+
                 $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_Serials_Imei');
                 if ($instance->find(['serial' => $serial, 'id_contrat' => $contrat->id])) {
                     $services = explode(',', $instance->getData('id_line'));
-                    if (!in_array(BimpTools::getValue('attached_service'), $services)) {
-                        $new_field_id_line = $instance->getData('id_line') . ',' . BimpTools::getValue('attached_service');
+                    if ($id_service && !in_array($id_service, $services)) {
+                        $new_field_id_line = $instance->getData('id_line') . ',' . $id_service;
                         $this->db->update('bcontract_serials', ['id_line' => $new_field_id_line], 'id = ' . $instance->id);
                     }
                 } else {
                     parent::create();
                     $this->set('serial', $serial);
                     $this->set('id_contrat', $_REQUEST['id']);
-                    $this->set('id_line', BimpTools::getValue('attached_service'));
+                    $this->set('id_line', $id_service);
                     $this->update();
                 }
             }

@@ -49,7 +49,7 @@ class BimpCommController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -59,13 +59,13 @@ class BimpCommController extends BimpController
         $sucess = '';
         $html = '';
 
-        $module = BimpTools::getValue('module', '');
-        $object_name = BimpTools::getValue('object_name', '');
-        $id_object_line = BimpTools::getValue('id_object_line', null);
-        $id_parent = (int) BimpTools::getValue('id_parent', 0);
+        $module = BimpTools::getValue('module', '', 'aZ09comma');
+        $object_name = BimpTools::getValue('object_name', '', 'aZ09comma');
+        $id_object_line = BimpTools::getValue('id_object_line', null, 'int');
+        $id_parent = (int) BimpTools::getValue('id_parent', 0, 'int');
 
         if (!$module && !$object_name) {
-            $type = BimpTools::getValue('object_type', '');
+            $type = BimpTools::getValue('object_type', '', 'aZ09');
             if ($type) {
                 BimpObject::loadClass('bimpcommercial', 'ObjectLine');
                 $module = (string) ObjectLine::getModuleByType($type);
@@ -91,7 +91,7 @@ class BimpCommController extends BimpController
             'errors'     => $errors,
             'success'    => $sucess,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 }

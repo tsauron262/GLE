@@ -97,7 +97,7 @@ class BC_Form extends BC_Panel
             $parent_id_property = $object->getParentIdProperty();
             if (!is_null($parent_id_property)) {
                 if (BimpTools::isSubmit($parent_id_property)) {
-                    $this->id_parent = BimpTools::getValue($parent_id_property, null);
+                    $this->id_parent = BimpTools::getValue($parent_id_property, null, 'int');
                 } else {
                     $id_parent = $object->getParentId();
                     if (!is_null($id_parent) && $id_parent) {

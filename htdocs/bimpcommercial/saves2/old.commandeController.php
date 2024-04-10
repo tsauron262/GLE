@@ -54,12 +54,12 @@ class commandeController extends BimpController
         $success = 'Création de l\'expédition effectuée avec succès';
 
         BimpObject::loadClass('bimpreservation', 'BR_Reservation');
-        $errors = BR_Reservation::createShipment((int) BimpTools::getValue('id_commande_client', 0));
+        $errors = BR_Reservation::createShipment((int) BimpTools::getValue('id_commande_client', 0, 'int'));
 
         die(json_encode(array(
             'errors'     => $errors,
             'success'    => $success,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 }

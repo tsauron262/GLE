@@ -565,7 +565,7 @@ abstract class DoliDB implements Database
         if (BimpTools::isSubmit('ajax')) {
             echo json_encode(array(
                 'errors'           => $errors,
-                'request_id'       => BimpTools::getValue('request_id', 0)
+                'request_id'       => BimpTools::getValue('request_id', 0, 'int')
             ));
         }
         else{

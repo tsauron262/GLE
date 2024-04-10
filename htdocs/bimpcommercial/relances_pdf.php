@@ -8,7 +8,7 @@ $errors = array();
 
 $equipments = array();
 
-$id_relance = (int) BimpTools::getValue('id_relance', 0);
+$id_relance = (int) BimpTools::getValue('id_relance', 0, 'int');
 
 if (!$id_relance) {
     $errors[] = 'ID de la relance absent';

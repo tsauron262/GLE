@@ -10,7 +10,7 @@ $errors = array();
 
 $n = BDS_Report::cleanReports($errors);
 
-if ((int) BimpTools::getValue('debug', 0)) {
+if ((int) BimpTools::getValue('debug', 0, 'int')) {
     if (!$n) {
         echo 'Aucun rapport à supprimer';
     } else {

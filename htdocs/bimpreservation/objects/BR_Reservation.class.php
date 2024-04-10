@@ -385,7 +385,7 @@ class BR_Reservation extends BimpObject
 
         if (!$id_commande_client) {
             if (BimpTools::isSubmit('fields')) {
-                $fields = BimpTools::getValue('fields', array());
+                $fields = BimpTools::getValue('fields', array(), 'array');
                 if (isset($fields['id_shipment'])) {
                     $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $fields['id_shipment']);
                     if (BimpObject::objectLoaded($shipment)) {
@@ -714,7 +714,7 @@ class BR_Reservation extends BimpObject
 
         if (!$id_commande_client) {
             if (BimpTools::isSubmit('extra_data')) {
-                $extra_data = BimpTools::getValue('extra_data', array());
+                $extra_data = BimpTools::getValue('extra_data', array(), 'array');
                 if (isset($extra_data['id_commande_client'])) {
                     $id_commande_client = (int) $extra_data['id_commande_client'];
                 }
@@ -1897,8 +1897,8 @@ class BR_Reservation extends BimpObject
 
     public function validatePost()
     {
-        if ((int) BimpTools::getValue('new_status', 0)) {
-            return $this->setNewStatus(BimpTools::getValue('status'), array('qty' => BimpTools::getValue('qty'), 'id_equipment' => BimpTools::getValue('id_equipment')));
+        if (BimpTools::isSubmit('new_status')) {
+            return $this->setNewStatus((int) BimpTools::getValue('status', 0, 'int'), array('qty' => BimpTools::getValue('qty', 0, 'float'), 'id_equipment' => BimpTools::getValue('id_equipment', 0, 'int')));
         }
 
         return parent::validatePost();

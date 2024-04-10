@@ -11,7 +11,7 @@ class savFormController extends BimpPublicController
             return BimpRender::renderAlerts('Les demandes de réparations en ligne ne sont actuellement pas disponibles');
         }
 
-        if ((int) BimpTools::getValue('cancel_rdv', 0)) {
+        if ((int) BimpTools::getValue('cancel_rdv', 0, 'int')) {
             return $this->renderCancelRdvForm();
         }
 
@@ -20,7 +20,7 @@ class savFormController extends BimpPublicController
         $code_centre = '';
 
         if (BimpTools::isSubmit('centre')) {
-            $code_centre = BimpTools::getValue('centre', '');
+            $code_centre = BimpTools::getValue('centre', '', 'aZ09');
 
             if ($code_centre) {
                 $centres = BimpCache::getCentres();
@@ -31,9 +31,8 @@ class savFormController extends BimpPublicController
             }
         }
 
-        $res_id = BimpTools::getValue('resgsx', '');
-        $shipto = BimpTools::getValue('centre_id', '');
-        $acId = BimpTools::getValue('ac', '');
+        $res_id = BimpTools::getValue('resgsx', '', 'alphanohtml');
+        $shipto = BimpTools::getValue('centre_id', '', 'alphanohtml');
         $reservation = null;
         $errors = array();
 
@@ -907,9 +906,9 @@ class savFormController extends BimpPublicController
         $html .= '<div id="cancel_sav_form" class="bimp_public_form">';
         $html .= '<h2>Annulation de votre Rendez-vous</h2>';
 
-        $id_sav = (int) BimpTools::getValue('sav', 0);
-        $ref_sav = BimpTools::getValue('r', '');
-        $res_id = BimpTools::getValue('res', '');
+        $id_sav = (int) BimpTools::getValue('sav', 0, 'int');
+        $ref_sav = BimpTools::getValue('r', '', 'alphanohtml');
+        $res_id = BimpTools::getValue('res', '', 'alphanohtml');
 
         $errors = array();
         $sav = null;
@@ -942,8 +941,8 @@ class savFormController extends BimpPublicController
                 }
             }
 
-            $code_centre = BimpTools::getValue('c', '');
-            $date = BimpTools::getValue('d', '');
+            $code_centre = BimpTools::getValue('c', '', 'aZ09');
+            $date = BimpTools::getValue('d', '', 'date');
 
             if (!$code_centre && BimpObject::objectLoaded($sav)) {
                 $code_centre = $sav->getData('code_centre');
@@ -1154,12 +1153,12 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         $errors = array();
         $warnings = array();
 
-        $email = BimpTools::getValue('client_email', '');
+        $email = BimpTools::getValue('client_email', '', 'alphanohtml');
         if ($email) {
             if (!BimpValidate::isEmail($email)) {
                 $errors[] = 'Veuillez saisir une adresse e-mail valide';
             } else {
-                $html .= $this->renderCustomerInfosForm($email, $errors, $warnings, BimpTools::getValue('code_centre', ''));
+                $html .= $this->renderCustomerInfosForm($email, $errors, $warnings, BimpTools::getValue('code_centre', '', 'aZ09'));
             }
         } else {
             $errors[] = 'Veuillez saisir une adresse e-mail';
@@ -1169,7 +1168,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             'errors'     => $errors,
             'warnings'   => $warnings,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -1186,7 +1185,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         $town = '';
         $fk_country = 1;
 
-        $id_contact = (int) BimpTools::getValue('id_contact', 0);
+        $id_contact = (int) BimpTools::getValue('id_contact', 0, 'int');
 
         if ($id_contact) {
             $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
@@ -1218,7 +1217,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             'fk_pays'    => $fk_country,
             'errors'     => array(),
             'warnings'   => array(),
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -1228,8 +1227,8 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         $errors = array();
         $warnings = array();
 
-        $code_product = BimpTools::getValue('code_product', '');
-        $code_centre = BimpTools::getValue('code_centre', '');
+        $code_product = BimpTools::getValue('code_product', '', 'alphanohtml');
+        $code_centre = BimpTools::getValue('code_centre', '', 'aZ09');
 
         if ($code_product && $code_centre) {
             $centres = BimpCache::getCentres();
@@ -1373,7 +1372,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             'errors'     => $errors,
             'warnings'   => $warnings,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -1443,7 +1442,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         }
 
         foreach ($inputs as $input_name => $input) {
-            $data[$input_name] = BimpTools::getValue($input_name);
+            $data[$input_name] = BimpTools::getValue($input_name, null, 'restricthtml');
 
             if ($input['required'] && (is_null($data[$input_name]) || $data[$input_name] === '')) {
                 $errors[] = 'Champ obligatoire non renseigné: "' . $input['label'] . '"';
@@ -1465,7 +1464,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             $errors[] = 'Veuillez saisir au moins un numéro de téléphone';
         }
 
-        if ((!isset($data['reservation_id']) || !$data['reservation_id']) && !(int) BimpTools::getValue('force_validate', 0)) {
+        if ((!isset($data['reservation_id']) || !$data['reservation_id']) && !(int) BimpTools::getValue('force_validate', 0, 'int')) {
             if (!isset($data['sav_day']) || !$data['sav_day']) {
                 $errors[] = 'Veuillez sélectionner le jour du RDV';
             }
@@ -1498,7 +1497,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
         if (!count($errors)) {
             // Check Client: 
-            $id_client = (int) BimpTools::getValue('id_client', 0);
+            $id_client = (int) BimpTools::getValue('id_client', 0, 'int');
 
             if ($id_client) {
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
@@ -1575,7 +1574,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     $reservation_exists = true;
 
                     $debug .= 'Réservation déjà existante: ' . $reservationId . '<br/>';
-                } elseif (!(int) BimpTools::getValue('force_validate', 0)) {
+                } elseif (!(int) BimpTools::getValue('force_validate', 0, 'int')) {
                     $req_errors = array();
 
                     if (BimpCore::isModeDev()) {
@@ -1716,7 +1715,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         ));
                     }
                 } else {
-                    $noRdvReason = BimpTools::getValue('force_validate_reason', 'non spécifiée');
+                    $noRdvReason = BimpTools::getValue('force_validate_reason', 'non spécifiée', 'alphanohtml');
                     $debug .= 'Pas de réservation.<br/>Raison: ' . $noRdvReason . '<br/>';
                 }
 
@@ -2311,7 +2310,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             'force_validate'        => $forceValidate,
             'force_validate_reason' => $forceValidateReason,
             'debug'                 => (BimpCore::isModeDev() ? $debug : ''),
-            'request_id'            => BimpTools::getValue('request_id', 0)
+            'request_id'            => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -2321,9 +2320,9 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         $warnings = array();
         $success_html = '';
 
-        $id_sav = BimpTools::getValue('id_sav', 0);
-        $ref_sav = BimpTools::getValue('ref_sav', '');
-        $reservation_id = BimpTools::getValue('reservation_id', '');
+        $id_sav = BimpTools::getValue('id_sav', 0, 'int');
+        $ref_sav = BimpTools::getValue('ref_sav', '', 'alphanohtml');
+        $reservation_id = BimpTools::getValue('reservation_id', '', 'alphanohtml');
 
         if (!$ref_sav) {
             $errors[] = 'Reférence du SAV absente';
@@ -2391,7 +2390,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             'errors'       => $errors,
             'warnings'     => $warnings,
             'success_html' => $success_html,
-            'request_id'   => BimpTools::getValue('request_id', 0)
+            'request_id'   => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 }

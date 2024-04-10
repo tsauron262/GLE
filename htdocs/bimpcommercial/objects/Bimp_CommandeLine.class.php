@@ -4886,7 +4886,7 @@ class Bimp_CommandeLine extends ObjectLine
             $values = array();
 
             if (BimpTools::isSubmit('fields/equipments')) {
-                foreach (BimpTools::getValue('fields/equipments', array()) as $id_equipment) {
+                foreach (BimpTools::getValue('fields/equipments', array(), 'array') as $id_equipment) {
                     if (count($values) >= $max) {
                         break;
                     }
@@ -10091,16 +10091,16 @@ class Bimp_CommandeLine extends ObjectLine
 
         $periodicity_extra_params = $this->getData('periodicity_extra_params');
         if (BimpTools::isPostFieldSubmit('has_fac_periodicity')) {
-            if (!(int) BimpTools::getValue('has_fac_periodicity', 0)) {
-                $this->set('fac_periodicity', 0);
-                $this->set('fac_nb_periods', 0);
+            if (!(int) BimpTools::getValue('has_fac_periodicity', 0, 'int')) {
+                $this->set('fac_periodicity', 0, 'int');
+                $this->set('fac_nb_periods', 0, 'int');
                 $this->set('fac_periods_start', null);
                 $this->set('next_date_fac', null);
             }
         }
 
         if (BimpTools::isPostFieldSubmit('has_exp_periodicity')) {
-            if (!(int) BimpTools::getValue('has_exp_periodicity', 0)) {
+            if (!(int) BimpTools::getValue('has_exp_periodicity', 0, 'int')) {
                 $this->set('exp_periodicity', 0);
                 $this->set('exp_nb_periods', 0);
                 $this->set('exp_periods_start', null);
@@ -10122,7 +10122,7 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if (BimpTools::isPostFieldSubmit('has_achat_periodicity')) {
-            if (!(int) BimpTools::getValue('has_achat_periodicity', 0)) {
+            if (!(int) BimpTools::getValue('has_achat_periodicity', 0, 'int')) {
                 $this->set('achat_periodicity', 0);
                 $this->set('achat_nb_periods', 0);
                 $this->set('achat_periods_start', null);

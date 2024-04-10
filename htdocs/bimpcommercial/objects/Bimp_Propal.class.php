@@ -2619,7 +2619,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $errors = parent::validatePost();
 
         if (BimpTools::isSubmit('duree_validite')) {
-            $this->dol_object->duree_validite = (int) BimpTools::getValue('duree_validite');
+            $this->dol_object->duree_validite = (int) BimpTools::getValue('duree_validite', 0, 'int');
         }
 
         return $errors;
@@ -2805,7 +2805,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         if (!count($errors)) {
             $list = $this->dol_object->liste_type_contact('internal', 'position', 1);
             if (isset($list['SALESREPSIGN'])) {
-                $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
+                $id_user = (int) BimpTools::getValue('id_user_commercial', 0, 'int');
                 if ($id_user) {
                     if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
                         $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');

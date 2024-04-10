@@ -966,7 +966,7 @@ class Bimp_PropalLine extends ObjectLine
 
         if ($this->isAbonnement()) {
             if (BimpTools::isSubmit('abo_date_from')) {
-                $this->date_from = BimpTools::getValue('abo_date_from', null);
+                $this->date_from = BimpTools::getValue('abo_date_from', null, 'date');
             }
         }
 

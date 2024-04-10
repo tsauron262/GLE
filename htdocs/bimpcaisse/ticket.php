@@ -19,7 +19,7 @@ echo '<body>';
 
 $errors = array();
 
-$id_vente = (int) BimpTools::getValue('id_vente', 0);
+$id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
 $html = '';
 
 if (!$id_vente) {

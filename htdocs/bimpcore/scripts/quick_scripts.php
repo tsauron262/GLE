@@ -24,7 +24,7 @@ if (!$user->admin) {
     echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
 }
 
-$action = BimpTools::getValue('action', '');
+$action = BimpTools::getValue('action', '', 'aZ09');
 
 if (!$action) {
     $actions = array(
@@ -267,7 +267,7 @@ switch ($action) {
     case 'check_list_table_configs':
         BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
 
-        $exec = (int) BimpTools::getValue('exec', 0);
+        $exec = (int) BimpTools::getValue('exec', 0, 'int');
 
         if (!$exec) {
             $path = pathinfo(__FILE__);
@@ -281,9 +281,9 @@ switch ($action) {
         break;
 
     case 'check_stocks_mouvements':
-        $date_min = BimpTools::getValue('date_min', '');
-        $date_max = BimpTools::getValue('date_max', date('Y-m-d H:i:s'));
-        $id_product = BimpTools::getValue('id_product', 0);
+        $date_min = BimpTools::getValue('date_min', '', 'date');
+        $date_max = BimpTools::getValue('date_max', date('Y-m-d H:i:s'), 'date');
+        $id_product = BimpTools::getValue('id_product', 0, 'int');
 
         if (!$date_min) {
             echo BimpRender::renderAlerts('Indiquer date_min et date_max dans l\'url', 'info');

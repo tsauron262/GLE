@@ -814,7 +814,7 @@ class BContract_echeancier extends BimpObject
                 $html .= '</td>';
 
                 $infos = $this->getFacturesExterneByPeriode($dateTime_start_mkTime->format('Y-m-d') . '_' . $dateTime_end_mkTime->format('Y-m-d'));
-                
+
                 if (!count($infos)) {
                     $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'
                             . '<td style="text-align:center">' . price($tva) . ' € </td>'
@@ -864,16 +864,16 @@ class BContract_echeancier extends BimpObject
 
 
             if (($user->rights->facture->creer && $reste_periodeEntier == 0 && round($contrat->getTotalContrat(), 2) - round($contrat->getTotalDejaPayer(), 2) != 0) && $contrat->getData('statut') == 11) {
-                
+
                 $dateDebT = new DateTime($contrat->getData('date_start'));
                 $dateFinT = $contrat->getEndDate();
                 $onclick = $this->getJsActionOnclick("createFacture", array(
-                    'labelLn'  => 'Facturation supplémentaire',
-                    'label'    => 'Complément à',
-                    'total_ht' => $contrat->getTotalContrat() - $contrat->getTotalDejaPayer(),
-                    'pa'       => ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')),
-                    'date_start' => $dateDebT->format('Y-m-d'), 
-                    'date_end' => $dateFinT->format('Y-m-d')
+                    'labelLn'    => 'Facturation supplémentaire',
+                    'label'      => 'Complément à',
+                    'total_ht'   => $contrat->getTotalContrat() - $contrat->getTotalDejaPayer(),
+                    'pa'         => ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')),
+                    'date_start' => $dateDebT->format('Y-m-d'),
+                    'date_end'   => $dateFinT->format('Y-m-d')
                         ), array(
                     "success_callback" => $callback
                         )
@@ -1314,7 +1314,7 @@ class BContract_echeancier extends BimpObject
     {
         global $user;
         $obj = json_decode($this->getData('facturesExterne_soldePeriode'));
-        if(!is_object($obj))
+        if (!is_object($obj))
             $obj = (object) array();
         $named = $data['date_start'] . '_' . $data['date_end'];
         $obj->{$named} = Array('ref' => $data['factureExterne'], 'ht' => $data['total_ht'], 'by' => $user->id);
@@ -1406,12 +1406,11 @@ class BContract_echeancier extends BimpObject
                 $lines = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine');
                 $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
                 foreach ($lines->getList(['fk_contrat' => $contrat->id, "renouvellement" => $contrat->getData('current_renouvellement')]) as $idLine => $infos) {
-                    if(BimpCore::isEntity('blyyd') || $infos['description'] == ''){
+                    if (BimpCore::isEntity('blyyd') || $infos['description'] == '') {
                         $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $infos['fk_product']);
-                        if($prod->getData('label') != '')
+                        if ($prod->getData('label') != '')
                             $desc .= $prod->getData('label') . "<br /><br />";
-                    }
-                    else
+                    } else
                         $desc .= $infos['description'] . "<br /><br />";
                 }
 
@@ -1579,17 +1578,24 @@ class BContract_echeancier extends BimpObject
         $errors = [];
         $warnings = [];
         $success = "";
-        if (BimpTools::getValue('next_facture_date')) {
+
+        $next_facture_date = BimpTools::getValue('next_facture_date', '', 'date');
+        $fin_periode = BimpTools::getValue('fin_periode', '', 'date');
+
+        if ($next_facture_date && $fin_periode) {
             $success = "Création de la facture avec succès";
             $parent = $this->getParentInstance();
 
-            if (!empty(BimpTools::getValue('montant_ht'))) {
-                $montant = BimpTools::getValue('montant_ht');
+            $montant = 0;
+
+            if (BimpTools::isSubmit('montant_ht')) {
+                $montant = (float) BimpTools::getValue('montant_ht', 0, 'float');
             } else {
                 $reste_a_payer = $parent->reste_a_payer();
                 $reste_periode = $parent->reste_periode();
-                $start = new DateTime(BimpTools::getValue('next_facture_date'));
-                $end = new DateTime(BimpTools::getValue('fin_periode'));
+                $start = new DateTime($next_facture_date);
+                $end = new DateTime($fin_periode);
+
                 $interval = $start->diff($end->add(new dateInterval('P1D')));
                 if ($interval->m == 0 && $interval->y == 0) {
                     $nb = 1;
@@ -1605,8 +1611,8 @@ class BContract_echeancier extends BimpObject
                 return "Vous ne pouvez pas indiquer un montant égale à 0";
             }
 
-            $this->actionCreateFacture($data = Array('date_start' => BimpTools::getValue('next_facture_date'), 'date_end' => BimpTools::getValue('fin_periode'), 'total_ht' => $montant));
-            $new_next_date = new DateTime(BimpTools::getValue('fin_periode'));
+            $this->actionCreateFacture($data = Array('date_start' => $next_facture_date, 'date_end' => $fin_periode, 'total_ht' => $montant));
+            $new_next_date = new DateTime($fin_periode);
             $new_next_date->add(new dateInterval('P1D'));
             $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
 //            $parent->renderEcheancier(); ??? 

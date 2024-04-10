@@ -2075,7 +2075,7 @@ class BC_Vente extends BimpObject
         }
 
         if ($total_ttc < 0) {
-            $rbt_mode = BimpTools::getValue('avoir_rbt_mode', '');
+            $rbt_mode = BimpTools::getValue('avoir_rbt_mode', '', 'aZ09comma');
             if (!$rbt_mode) {
                 $errors[] = 'Mode de remboursement de l\'avoir client absent';
             } elseif ($rbt_mode === 'rbt') {
@@ -2736,7 +2736,7 @@ class BC_Vente extends BimpObject
             $paiement = BimpObject::getInstance('bimpcaisse', 'BC_VentePaiement');
             $paiement->deleteByParent($this->id);
 
-            $avoir_rbt_mode = BimpTools::getValue('avoir_rbt_mode', 'remise');
+            $avoir_rbt_mode = BimpTools::getValue('avoir_rbt_mode', 'remise', 'alphanohtml');
 
             switch ($avoir_rbt_mode) {
                 case 'remise':
@@ -2747,7 +2747,7 @@ class BC_Vente extends BimpObject
                     break;
 
                 case 'rbt':
-                    $avoir_rbt_paiement = BimpTools::getValue('avoir_rbt_paiement', '');
+                    $avoir_rbt_paiement = BimpTools::getValue('avoir_rbt_paiement', '', 'alphanohtml');
                     $rbt_errors = array();
 
                     if (!$avoir_rbt_mode) {

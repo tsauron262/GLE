@@ -9,11 +9,11 @@ class societeController extends BimpController
         $warnings = array();
         $data = array();
 
-        $module = BimpTools::getValue('module', 'bimpcore');
-        $object_name = BimpTools::getValue('object_name', 'Bimp_Societe');
-        $id_object = BimpTools::getValue('id_object', 0);
-        $field = BimpTools::getValue('field', '');
-        $value = BimpTools::getValue('value', '');
+        $module = BimpTools::getValue('module', 'bimpcore', 'aZ09');
+        $object_name = BimpTools::getValue('object_name', 'Bimp_Societe', 'aZ09');
+        $id_object = BimpTools::getValue('id_object', 0, 'int');
+        $field = BimpTools::getValue('field', '', 'aZ09');
+        $value = BimpTools::getValue('value', '', 'alphanohtml');
 
         if (!$field) {
             $errors[] = 'Type de numéro absent';
@@ -38,7 +38,7 @@ class societeController extends BimpController
             'warnings'   => $warnings,
             'data'       => $data,
             'siren_ok'   => (count($errors) ? 0 : 1),
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 }

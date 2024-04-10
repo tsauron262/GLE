@@ -25,9 +25,9 @@ class commandesFournController extends BimpController
 
     public function getSocid()
     {
-        if ($this->socid < 1) {
-            if (BimpTools::getValue("socid") > 0) {
-                $this->socid = BimpTools::getValue("socid");
+        if ($this->socid < 1 && BimpTools::isSubmit('socid')) {
+            $this->socid = BimpTools::getValue("socid", 0, 'int');
+            if ($this->socid) {
                 $this->soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
             }
         }
@@ -36,9 +36,10 @@ class commandesFournController extends BimpController
     public function renderProdsTab()
     {
         $this->getSocid();
+        
         BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeFournLine');
 //        Bimp_CommandeFournLine::checkAllQties();
-        //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
+        //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0, 'int);
 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
 

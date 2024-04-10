@@ -161,7 +161,7 @@ class BC_VenteReturn extends BimpObject
             $tva_tx = (float) $product->dol_object->tva_tx;
 
             if (BimpTools::isSubmit('price_ttc')) {
-                $prix_ttc = round((float) BimpTools::getValue('price_ttc'), 2);
+                $prix_ttc = round((float) BimpTools::getValue('price_ttc', 0, 'float'), 2);
             } else {
                 if ((float) $equipment->getData('prix_vente') > 0) {
                     $prix_ttc = round((float) $equipment->getData('prix_vente'), 2);
@@ -201,7 +201,7 @@ class BC_VenteReturn extends BimpObject
             $prix_ttc = 0;
 
             if (BimpTools::isSubmit('price_ttc')) {
-                $prix_ttc = round((float) BimpTools::getValue('price_ttc', 0), 2);
+                $prix_ttc = round((float) BimpTools::getValue('price_ttc', 0, 'float'), 2);
             } else {
                 $prix_ttc = round((float) $product->dol_object->price_ttc, 2);
             }

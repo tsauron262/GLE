@@ -10,7 +10,7 @@ require_once './pdf/classes/ExpeditionPDF.php';
 global $db, $langs;
 $errors = array();
 
-$id_shipment = (int) BimpTools::getValue('id_shipment', 0);
+$id_shipment = (int) BimpTools::getValue('id_shipment', 0, 'int');
 
 if (!$id_shipment) {
     die('Erreur: ID de l\'expédition absent');
@@ -22,7 +22,7 @@ if (!BimpObject::objectLoaded($shipment)) {
     die('Erreur: L\'expédition d\'ID ' . $id_shipment . ' n\'existe pas');
 }
 
-$qty = (int) BimpTools::getValue('qty', 1);
+$qty = (int) BimpTools::getValue('qty', 1, 'int');
 
 $pdf = new ExpeditionPDF($db);
 

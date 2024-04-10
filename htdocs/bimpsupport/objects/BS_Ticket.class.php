@@ -121,8 +121,8 @@ class BS_Ticket extends BimpAbstractFollow
         if (BimpCore::isContextPublic()) {
 //            $id_contrat = (int) $this->getData('id_contrat');
 //
-//            if (!$id_contrat && BimpTools::getValue("fc", '') == "contrat_ticket" && (int) BimpTools::getValue("id", 0)) {
-//                $id_contrat = (int) BimpTools::getValue("id");
+//            if (!$id_contrat && BimpTools::getValue("fc", '', 'aZ09') == "contrat_ticket" && (int) BimpTools::getValue("id", 0, 'int')) {
+//                $id_contrat = (int) BimpTools::getValue("id", 0, 'int');
 //            }
 //
 //            if ($id_contrat > 0) {
@@ -950,28 +950,28 @@ class BS_Ticket extends BimpAbstractFollow
                 }
             }
 
-            $label_serial_imei = self::$arrayTypeSerialImei[BimpTools::getValue('choix')];
+            $label_serial_imei = self::$arrayTypeSerialImei[BimpTools::getValue('choix', '', 'alphanohtml')];
             $sujet = "------------------------------<br />";
 
-            $sujet .= "<b>" . $label_serial_imei . ":</b> " . BimpTools::getValue('serial_imei') . "<br />";
+            $sujet .= "<b>" . $label_serial_imei . ":</b> " . BimpTools::getValue('serial_imei', '', 'alphanohtml') . "<br />";
 
-            if (BimpTools::getValue('adresse_envois')) {
-                $sujet .= "<b>Adresse d'envoi:</b> " . BimpTools::getValue('adresse_envois') . "<br />";
+            if (BimpTools::isSubmit('adresse_envois')) {
+                $sujet .= "<b>Adresse d'envoi:</b> " . BimpTools::getValue('adresse_envois', '', 'alphanohtml') . "<br />";
             }
 
-            if (BimpTools::getValue('contact_in_soc')) {
-                $sujet .= "<b>Utilisateur:</b> " . BimpTools::getValue('contact_in_soc') . "<br />";
+            if (BimpTools::isSubmit('contact_in_soc')) {
+                $sujet .= "<b>Utilisateur:</b> " . BimpTools::getValue('contact_in_soc', '', 'alphanohtml') . "<br />";
             }
 
-            if (BimpTools::getValue('email_bon_retour')) {
-                $sujet .= "<b>Adresse email pour envoi du bon de retour:</b> " . BimpTools::getValue('email_bon_retour') . "<br />";
+            if (BimpTools::isSubmit('email_bon_retour')) {
+                $sujet .= "<b>Adresse email pour envoi du bon de retour:</b> " . BimpTools::getValue('email_bon_retour', '', 'alphanohtml') . "<br />";
             }
 
             $sujet .= "------------------------------<br /><br />";
 
             $sujet .= $this->getData('sujet');
             $this->set('sujet', $sujet);
-            $this->set('serial', BimpTools::getValue('serial_imei'));
+            $this->set('serial', BimpTools::getValue('serial_imei', '', 'alphanohtml'));
         } else {
             $this->set('id_user_resp', (int) $user->id);
         }
@@ -1016,7 +1016,7 @@ class BS_Ticket extends BimpAbstractFollow
                         $warnings[] = 'Echec de l\'envoi de l\'e-mail de confirmation';
                     }
                 } else {
-                    if ((int) BimpTools::getValue('start_timer', 0)) {
+                    if ((int) BimpTools::getValue('start_timer', 0, 'int')) {
                         $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
                         if (!$timer->setObject($this, 'appels_timer', true)) {
                             $warnings[] = 'Echec de l\'initialisation du chrono appel payant';

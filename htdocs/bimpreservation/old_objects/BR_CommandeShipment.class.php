@@ -102,7 +102,7 @@ class BR_CommandeShipment extends BimpObject
     public function getIdClient()
     {
         if (BimpTools::isSubmit('extra_data/id_commande_client')) {
-            $this->set('id_commande_client', (int) BimpTools::getValue('extra_data/id_commande_client', 0));
+            $this->set('id_commande_client', (int) BimpTools::getValue('extra_data/id_commande_client', 0, 'int'));
         }
 
         $commande = $this->getParentInstance();

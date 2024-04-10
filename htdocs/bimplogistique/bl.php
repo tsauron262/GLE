@@ -9,7 +9,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/OrderPDF.php';
 
 global $db, $langs;
 
-$id_shipment = (int) BimpTools::getValue('id_shipment');
+$id_shipment = (int) BimpTools::getValue('id_shipment', 0, 'int');
 
 $errors = array();
 
@@ -29,9 +29,9 @@ if (!$id_shipment) {
             $errors[] = 'ID de la commande client absent';
         } else {
             $pdf = new BLPDF($db, $shipment);
-            $pdf->chiffre = BimpTools::getValue('chiffre', 1);
-            $pdf->detail = BimpTools::getValue('detail', 1);
-            $display_only = (int) BimpTools::getValue('display_only', 0);
+            $pdf->chiffre = BimpTools::getValue('chiffre', 1, 'int');
+            $pdf->detail = BimpTools::getValue('detail', 1, 'int');
+            $display_only = (int) BimpTools::getValue('display_only', 0, 'int');
             
             $pdf->init($commande->dol_object);
             $file = $pdf->getFilePath() . $pdf->getFileName();

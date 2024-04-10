@@ -11,8 +11,8 @@ global $db, $user;
 $user = new User($db);
 $user->fetch(1);
 
-$id_cron = (int) BimpTools::getValue('id_cron', 0);
-$debug = (int) BimpTools::getValue('debug', 0);
+$id_cron = (int) BimpTools::getValue('id_cron', 0, 'int');
+$debug = (int) BimpTools::getValue('debug', 0, 'int');
 
 if ($debug) {
     ignore_user_abort(0);

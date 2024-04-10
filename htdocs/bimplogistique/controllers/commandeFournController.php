@@ -36,7 +36,7 @@ class commandeFournController extends BimpController
 
         $commande = $this->config->getObject('', 'commande_fourn');
         if (!BimpObject::objectLoaded($commande)) {
-            return BimpRender::renderAlerts('Aucune commande fournisseur trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
+            return BimpRender::renderAlerts('Aucune commande fournisseur trouvée pour l\'ID ' . BimpTools::getValue('id', 0, 'int'));
         }
 
         if (!$commande->isLogistiqueActive()) {

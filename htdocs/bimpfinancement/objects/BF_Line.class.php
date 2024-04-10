@@ -824,7 +824,7 @@ class BF_Line extends BimpObject
 
     public function validate()
     {
-        $use_pu_for_pa = (int) BimpTools::getValue('use_pu_for_pa', 0);
+        $use_pu_for_pa = (int) BimpTools::getValue('use_pu_for_pa', 0, 'int');
         $errors = array();
 
         switch ($this->getData('type')) {

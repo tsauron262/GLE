@@ -5,7 +5,7 @@ class contratController extends BimpController
 
     public function init()
     {
-        if (!BimpTools::getValue('ajax', 0)) {
+        if (!(int) BimpTools::getValue('ajax', 0, 'int')) {
             $contrat = $this->config->getObject('', 'contrat');
             if (BimpObject::objectLoaded($contrat)) {
                 if ((int) $contrat->getData('version') !== 2) {

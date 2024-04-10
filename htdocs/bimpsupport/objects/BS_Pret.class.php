@@ -181,7 +181,7 @@ class BS_Pret extends BimpObject
     {
         $filters = array();
         if (BimpTools::isSubmit('id_entrepot')) {
-            $entrepots = explode('-', BimpTools::getValue('id_entrepot'));
+            $entrepots = explode('-', BimpTools::getValue('id_entrepot', 'aZ09'));
 
             $filters[] = array('name'   => 'id_entrepot', 'filter' => array(
                     'IN' => implode(',', $entrepots)

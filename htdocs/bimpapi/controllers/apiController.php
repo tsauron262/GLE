@@ -148,12 +148,12 @@ class apiController extends BimpController
     protected function ajaxProcessBimpApiRequest()
     {
         // Point d'entrée de toutes les requêtes ajax nécessitant une connexion à une API
-        $api_name = BimpTools::getValue('api_name', '');
-        $api_idx = (int) BimpTools::getValue('api_idx', 0);
-        $request_name = BimpTools::getValue('api_requestName', '');
-        $method = BimpTools::getValue('api_method', 'apiRequest');
-        $params = BimpTools::getValue('api_params', array());
-        $options = BimpTools::getValue('api_options', array());
+        $api_name = BimpTools::getValue('api_name', '', 'aZ09comma');
+        $api_idx = (int) BimpTools::getValue('api_idx', 0, 'int');
+        $request_name = BimpTools::getValue('api_requestName', '', 'aZ09comma');
+        $method = BimpTools::getValue('api_method', 'apiRequest', 'aZ09comma');
+        $params = BimpTools::getValue('api_params', array(), 'array');
+        $options = BimpTools::getValue('api_options', array(), 'array');
 
         if (is_string($params)) {
             $params = json_decode($params, 1);
@@ -189,8 +189,8 @@ class apiController extends BimpController
         $errors = array();
         $warnings = array();
 
-        $api_name = BimpTools::getValue('api_name', '');
-        $api_idx = BimpTools::getValue('api_idx', 0);
+        $api_name = BimpTools::getValue('api_name', '', 'aZ09comma');
+        $api_idx = (int) BimpTools::getValue('api_idx', 0, 'int');
 
         if (!$api_name) {
             $errors[] = 'Type d\'API absent';

@@ -3081,7 +3081,7 @@ class BT_ficheInter extends BimpDolObject
 
         if ((int) $this->getData('fk_contrat')) {
             $verifContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', (int) $this->getData('fk_contrat'));
-            $heuresRestantes = $verifContrat->getHeuresRestantesDelegation();
+            $heuresRestantes = $verifContrat->getHeuresRestantesDelegation('float');
             if ($verifContrat->isContratDelegation()) {
                 $totalHeuresVendu = 0;
 

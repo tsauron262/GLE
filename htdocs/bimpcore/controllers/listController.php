@@ -5,10 +5,10 @@ class ListController extends BimpController
 
     public function renderHtml()
     {
-        $module = BimpTools::getValue('module', $this->module);
-        $object_name = BimpTools::getValue('object_name', '');
-        $filters = json_decode(BimpTools::getValue('filters', '', true));
-        $list_name = BimpTools::getValue('list_name', 'default');
+        $module = BimpTools::getValue('module', $this->module, 'aZ09');
+        $object_name = BimpTools::getValue('object_name', '', 'aZ09');
+        $filters = json_decode(BimpTools::getValue('filters', '', 'json_nohtml'));
+        $list_name = BimpTools::getValue('list_name', 'default', 'aZ09');
 
         if (!$object_name) {
             return BimpRender::renderAlerts('Type d\'objet asbent');
@@ -33,8 +33,8 @@ class ListController extends BimpController
 
     public function getPageTitle()
     {
-        $module = BimpTools::getValue('module', $this->module);
-        $object_name = BimpTools::getValue('object_name', '');
+        $module = BimpTools::getValue('module', $this->module, 'aZ09');
+        $object_name = BimpTools::getValue('object_name', '', 'aZ09');
 
         if ($object_name) {
             $instance = BimpObject::getInstance($module, $object_name);

@@ -1324,6 +1324,58 @@ class BimpObject extends BimpCache
         return $tab;
     }
 
+    public function getFieldDataCheckType($field_name)
+    {
+        $check = 'restricthtml';
+
+        $data_type = $this->getConf('fields/' . $field_name . '/type', '');
+
+        switch ($data_type) {
+            case 'string':
+            case 'text':
+            case 'password':
+                $check = 'alphanohtml';
+                break;
+
+            case 'html':
+                $check = 'restricthtml';
+                break;
+
+            case 'int':
+            case 'bool':
+            case 'id':
+            case 'id_parent':
+            case 'id_object':
+                $check = 'int';
+                break;
+
+            case 'float':
+            case 'money':
+            case 'percent':
+            case 'qty':
+                $check = 'float';
+                break;
+
+            case 'color':
+                $check = 'aZ09';
+                break;
+
+            case 'date':
+            case 'time':
+            case 'datetime':
+                $check = 'date';
+                break;
+
+            case 'json':
+            case 'object_filters':
+            case 'items_list':
+                $check = 'none';
+                break;
+        }
+
+        return $check;
+    }
+
     // Getters boolééns:
 
     public function isLoaded(&$errors = array())
@@ -1419,7 +1471,7 @@ class BimpObject extends BimpCache
 
     public function isDolField($field_name)
     {
-        if($this->isExtraField($field_name))
+        if ($this->isExtraField($field_name))
             return 0;
         if ($this->isDolObject()) {
             if ((int) $this->getConf('fields/' . $field_name . '/dol_extra_field', 0)) {
@@ -1770,7 +1822,7 @@ class BimpObject extends BimpCache
         }
 
         if ($this->getEntity_name()) {
-            if($this->getData('entity'))
+            if ($this->getData('entity'))
                 $data['entity'] = $this->getData('entity');
             else
                 $data['entity'] = $conf->entity;
@@ -2572,10 +2624,10 @@ class BimpObject extends BimpCache
         $filters = array();
 
         if (is_null($fields) && BimpTools::isSubmit('search_fields')) {
-            $fields = BimpTools::getValue('search_fields', null);
+            $fields = BimpTools::getValue('search_fields', null, 'array');
 
             if (BimpTools::isSubmit('search_children')) {
-                foreach (BimpTools::getValue('search_children') as $child_name => $child_fields) {
+                foreach (BimpTools::getValue('search_children', array(), 'array') as $child_name => $child_fields) {
                     $on_field = $this->getChildIdProperty($child_name);
                     if ($on_field) {
                         $instance = $this->getChildObject($child_name);
@@ -2592,7 +2644,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if (!is_null($fields)) {
+        if (!empty($fields)) {
             $prev_path = $this->config->current_path;
             foreach ($fields as $field_name => $value) {
                 if ($value === '') {
@@ -2761,8 +2813,8 @@ class BimpObject extends BimpCache
                 $where = 'module = \'' . $this->module . '\' AND object = \'' . $this->object_name . '\'';
                 $where .= ' AND id_object = ' . (int) $this->id . ' AND field = \'' . $field . '\'';
                 $where .= ' AND value = \'' . $current_value . '\'';
-                if(count($filters))
-                    $where .= ' AND filters = \''.json_encode ($filters).'\'';
+                if (count($filters))
+                    $where .= ' AND filters = \'' . json_encode($filters) . '\'';
                 if ($this->id > 0 && !is_null($current_value) && !(int) $this->db->getValue('bimpcore_history', 'id', $where, 'date', 'DESC')) {
                     $this->db->insert('bimpcore_history', array(
                         'module'    => $this->module,
@@ -3499,7 +3551,7 @@ class BimpObject extends BimpCache
         $errors = array();
 
         if (BimpTools::isSubmit('associations_params')) {
-            $assos = json_decode(BimpTools::getValue('associations_params'));
+            $assos = json_decode(BimpTools::getValue('associations_params', '', 'json_nohtml'));
             foreach ($assos as $params) {
                 if (isset($params->association)) {
                     if (isset($params->object_name) && isset($params->object_module) && isset($params->id_object)) {
@@ -4027,7 +4079,7 @@ class BimpObject extends BimpCache
 //        if($this->cacheExists($cache_key))
 //            $rows = $this->getCache($cache_key);
 //        else{
-        
+
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
@@ -4631,7 +4683,7 @@ class BimpObject extends BimpCache
 
             $value = null;
             if (BimpTools::isSubmit($field)) {
-                $value = BimpTools::getValue($field, null);
+                $value = BimpTools::getValue($field, null, $this->getFieldDataCheckType($field));
             } elseif (isset($this->data[$field])) {
                 $value = $this->getData($field);
             } else {
@@ -4645,7 +4697,7 @@ class BimpObject extends BimpCache
 
         foreach ($associations as $asso_name => $params) {
             if (BimpTools::isSubmit($asso_name)) {
-                $this->setAssociatesList($asso_name, BimpTools::getValue($asso_name));
+                $this->setAssociatesList($asso_name, BimpTools::getValue($asso_name, null, 'array'));
             }
         }
         $this->config->setCurrentPath($prev_path);
@@ -4992,7 +5044,7 @@ class BimpObject extends BimpCache
         $errors = array();
         $success_callback = '';
         if ($this->isLoaded()) {
-            $objects = explode(',', BimpTools::getValue('sub_objects', ''));
+            $objects = explode(',', BimpTools::getValue('sub_objects', '', 'aZ09comma'));
             foreach ($objects as $object_name) {
                 $object = $this->getChildObject($object_name);
                 if (is_a($object, 'BimpObject')) {
@@ -5000,11 +5052,11 @@ class BimpObject extends BimpCache
                     if ($this->isChild($object)) {
                         $parent_id_property = $object->getParentIdProperty();
                     }
-                    $multiple = BimpTools::getValue($object_name . '_multiple', 0);
+                    $multiple = BimpTools::getValue($object_name . '_multiple', 0, 'int');
                     $post_temp = $_POST;
                     $files_temp = $_FILES;
                     if ($multiple) {
-                        $count = BimpTools::getValue($object_name . '_count', 0);
+                        $count = BimpTools::getValue($object_name . '_count', 0, 'int');
                         for ($i = 1; $i <= $count; $i++) {
                             $_POST = array();
                             $_FILES = array();
@@ -5788,7 +5840,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if (count($errors)) {
             return $errors;
         }
-        
+
         $id = $this->id;
 
         $parent = $this->getParentInstance();
@@ -6319,7 +6371,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     'Erreur SQL'    => $this->db->err(),
                     'Champs suppl.' => $bimpObjectFields,
                     'Result'        => $result,
-                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $where, print_r($bimpObjectFields,1)))
+                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $where, print_r($bimpObjectFields, 1)))
                 ));
             }
         }
@@ -6387,8 +6439,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Gestion Fields Extra:
-    
-    public function getExtraFieldsDefinitionFilters($definition_name, $with_id_prop = false, $id_object = null, &$errors = array()){
+
+    public function getExtraFieldsDefinitionFilters($definition_name, $with_id_prop = false, $id_object = null, &$errors = array())
+    {
         $filters = array();
 
         if (!$this->config->isDefined('extrafields/' . $definition_name)) {
@@ -6409,7 +6462,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
 
-            if($with_id_prop){
+            if ($with_id_prop) {
                 if (!$id_prop) {
                     $errors[] = 'id_prop absent';
                 } else {
@@ -6604,7 +6657,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!$id_object) {
             return;
         }
-        
+
         // Suppression des entrées correspondant aux extrafields
 
         foreach ($this->config->getkeys('extrafields') as $definition_name) {
@@ -7712,7 +7765,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= BimpRender::renderIcon('fas_inbox');
             $html .= '</span>';
 
-            if (BimpTools::getValue('open', '') == 'suivi_mail') {
+            if (BimpTools::getValue('open', '', 'aZ09') == 'suivi_mail') {
                 $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
             }
 
@@ -7770,7 +7823,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             if ($url) {
                 if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
-                    $objectTest = BimpObject::getInstance($this->module, $this->object_name, BimpTools::getValue('id'), null, false);
+                    $objectTest = BimpObject::getInstance($this->module, $this->object_name, BimpTools::getValue('id', 0, 'int'), null, false);
                     global $conf;
                     $currentEntity = $conf->entity;
                     if ($objectTest->isLoaded() /* && $objectTest->can('view') */ && $objectTest->getData('entity') > 0 && $currentEntity != $objectTest->getData('entity')) {
@@ -8788,9 +8841,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         //pour patch le chargement auto des onglet
         if (!BimpTools::isSubmit('ajax')) {
             if ($nomTabs == '' || $nomTabs == "default") {
-                if (BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
+                if (BimpTools::isSubmit('tab') && BimpTools::getValue('tab', null, 'aZ09') != 'default')
                     return 'ne devrais jamais etre visible';
-            } elseif (BimpTools::getValue('tab') != $nomTabs)
+            } elseif (BimpTools::getValue('tab', null, 'aZ09') != $nomTabs)
                 return 'ne devrais jamais etre visible2';
         }
         if (method_exists($this, $fonction)) {
@@ -11388,11 +11441,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             return '';
         }
 
-        if (BimpTools::getValue("redirectForce_oldVersion"))
+        if ((int) BimpTools::getValue("redirectForce_oldVersion", 0, 'int')) {
             $_SESSION['oldVersion'] = true;
-
-        if (!BimpTools::getValue('redirectForce_oldVersion', 0)) {
-            $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
+        } else {
+            $redirect = ((BimpTools::getValue("redirectForce", 0, 'int') == 1) ? 1 : 0);
             $redirectMode = $this->redirectMode;
 
             $texteBtn = "";
@@ -11449,12 +11501,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $url = $this->getListUrl();
                 $texteBtn .= "Nouvelle version";
 
-                $search = null;
-                if (BimpTools::getValue("sall") != "") {
-                    $search = BimpTools::getValue("sall");
-                } elseif (BimpTools::getValue("search_all") != "") {
-                    $search = BimpTools::getValue("search_all");
+                $search = BimpTools::getValue("sall", '', 'alphanohtml');
+
+                if (!$search) {
+                    $search = BimpTools::getValue("search_all", '', 'alphanohtml');
                 }
+
                 if ($search) {
                     $objName = "";
                     if (isset($this->dol_object) && isset($this->dol_object->element))
@@ -11465,26 +11517,26 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         $objName = "facture_fourn";
                     $url .= "&search=1&object=" . $objName . "&sall=" . $search;
                 }
-                if (BimpTools::getValue("socid") != "") {
+                if ((int) BimpTools::isSubmit('socid')) {
                     $objName = "";
                     if (isset($this->dol_object) && isset($this->dol_object->element))
                         $objName = $this->dol_object->element;
-                    $url .= "&socid=" . BimpTools::getValue("socid");
+                    $url .= "&socid=" . BimpTools::getValue("socid", 0, 'int');
                 }
-                if (BimpTools::getValue("viewstatut") != "") {
-                    $url .= "&fk_statut=" . BimpTools::getValue("viewstatut");
+                if (BimpTools::isSubmit("viewstatut")) {
+                    $url .= "&fk_statut=" . BimpTools::getValue("viewstatut", 0, 'int');
                 }
-                if (BimpTools::getValue("statut") != "") {
-                    $url .= "&fk_statut=" . BimpTools::getValue("statut");
+                if (BimpTools::isSubmit("statut")) {
+                    $url .= "&fk_statut=" . BimpTools::getValue("statut", 0, 'int');
                 }
-                if (BimpTools::getValue("search_status") != "") {
-                    $url .= "&fk_statut=" . BimpTools::getValue("search_status");
+                if (BimpTools::isSubmit("search_status")) {
+                    $url .= "&fk_statut=" . BimpTools::getValue("search_status", 0, 'int');
                 }
-                if (BimpTools::getValue("mainmenu") != "") {
-                    $url .= "&mainmenu=" . BimpTools::getValue("mainmenu");
+                if (BimpTools::isSubmit("mainmenu")) {
+                    $url .= "&mainmenu=" . BimpTools::getValue("mainmenu", '', 'aZ09');
                 }
-                if (BimpTools::getValue("leftmenu") != "") {
-                    $url .= "&leftmenu=" . BimpTools::getValue("leftmenu");
+                if (BimpTools::isSubmit("leftmenu")) {
+                    $url .= "&leftmenu=" . BimpTools::getValue("leftmenu", '', 'aZ09');
                 }
             } else {
                 $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
@@ -11578,7 +11630,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     public function getDefaultCodeCentre()
     {
         if (BimpTools::isSubmit('code_centre')) {
-            return BimpTools::getValue('code_centre');
+            return BimpTools::getValue('code_centre', '', 'aZ09');
         } else {
             global $user;
             $userCentres = explode(' ', $user->array_options['options_apple_centre']);
@@ -11590,7 +11642,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $id_entrepot = (int) $this->getData('id_entrepot');
             if (!$id_entrepot) {
-                $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
             }
             if ($id_entrepot) {
                 global $tabCentre;

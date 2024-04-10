@@ -10,7 +10,7 @@ require_once './pdf/classes/ExpeditionPDF.php';
 global $db, $langs;
 $errors = array();
 
-$id_commande = (int) BimpTools::getValue('id_commande', 0);
+$id_commande = (int) BimpTools::getValue('id_commande', 0, 'int');
 
 if (!$id_commande) {
     die('Erreur: ID de la commande client absent');
@@ -22,7 +22,7 @@ if (!BimpObject::objectLoaded($commande)) {
     die('Erreur: La commande client d\'ID ' . $id_commande . ' n\'existe pas');
 }
 
-$qty = (int) BimpTools::getValue('qty', 1);
+$qty = (int) BimpTools::getValue('qty', 1, 'int');
 
 $pdf = new ExpeditionPDF($db);
 

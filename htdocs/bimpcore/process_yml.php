@@ -29,10 +29,10 @@ if (!$user->admin) {
 echo '<div style="padding: 30px">';
 
 
-$m = BimpTools::getValue('m', 'bimpcore');
-$o = BimpTools::getValue('o', '');
-$t = BimpTools::getValue('t', '');
-$n = BimpTools::getValue('n', '');
+$m = BimpTools::getValue('m', 'bimpcore', 'aZ09');
+$o = BimpTools::getValue('o', '', 'aZ09');
+$t = BimpTools::getValue('t', '', 'aZ09');
+$n = BimpTools::getValue('n', '', 'aZ09');
 
 if (!$m || !$o || $r || !$n) {
     echo 'Params invalides.<br/>';

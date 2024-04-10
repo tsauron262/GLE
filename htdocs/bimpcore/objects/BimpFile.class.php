@@ -289,7 +289,7 @@ class BimpFile extends BimpObject
     {
 //        return '$("#openForm").trigger("click");';
 
-        if (BimpTools::getValue('taskFact', 0) == 1) {
+        if (BimpTools::getValue('taskFact', 0, 'int') == 1) {
             $note = BimpObject::getInstance("bimpcore", "BimpNote");
             $parent = $this->getParentInstance();
             $onclick = '';

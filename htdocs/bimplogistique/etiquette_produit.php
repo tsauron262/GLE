@@ -7,17 +7,17 @@ ini_set('display_errors', 1);
 global $db, $langs;
 $errors = array();
 
-$type = BimpTools::getValue('type', '');
+$type = BimpTools::getValue('type', '', 'aZ09');
 
 if (!$type) {
     die('Erreur: type d\'étiquette à générer absent');
 }
 
-$id_product = (int) BimpTools::getValue('id_product', 0);
+$id_product = (int) BimpTools::getValue('id_product', 0, 'int');
 $id_products = array();
 
-if (BimpTools::getValue('id_products', '') != '') {
-    $id_products = explode(',', BimpTools::getValue('id_products', ''));
+if (BimpTools::isSubmit('id_products')) {
+    $id_products = explode(',', BimpTools::getValue('id_products', '', 'aZ09comma'));
 }
 
 if (!$id_product && count($id_products) == 0) {
@@ -34,7 +34,7 @@ if (count($id_products) == 0) {
     $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 }
 
-$qty = (int) BimpTools::getValue('qty', 1);
+$qty = (int) BimpTools::getValue('qty', 1, 'int');
 
 $pdf = null;
 switch ($type) {

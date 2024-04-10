@@ -383,7 +383,7 @@ class BimpApiRequest
                 $value = (int) $value;
                 if (isset($field_params['max'])) {
                     if ($value > (int) $field_params['max']) {
-                        $this->addError('"' . $field_params['label'] . '": la valeur maximale autorisée (' . $defs['max'] . ') est dépassée');
+                        $this->addError('"' . $field_params['label'] . '": la valeur maximale autorisée (' . $field_params['max'] . ') est dépassée');
                     }
                 }
                 break;
@@ -473,7 +473,7 @@ class BimpApiRequest
                 $subFields = BimpTools::getArrayValueFromPath($params, 'fields', array());
                 if (!empty($subFields)) {
                     if ((int) $params['multiple']) {
-                        $nextIdx = (int) BimpTools::getValue($inputName . '_nextIdx', 0);
+                        $nextIdx = (int) BimpTools::getValue($inputName . '_nextIdx', 0, 'int');
                         if ($nextIdx) {
                             $array = array();
                             for ($i = 1; $i < $nextIdx; $i++) {

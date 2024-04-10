@@ -71,7 +71,7 @@ class BCT_ContratLine extends BimpObject
                 return 1;
 
             case 'deactivate':
-                return ($user->admin ? 1 : 0);
+                return ($user->admin || $user->login == 'a.remeur' ? 1 : 0);
 
             case 'addUnits':
                 return 1;
@@ -566,8 +566,8 @@ class BCT_ContratLine extends BimpObject
     public function getListsBulkActions($list_name = 'default')
     {
         $id_contrat = 0;
-        if (BimpTools::getValue('fc', '') === 'contrat') {
-            $id_contrat = (int) BimpTools::getValue('id', 0);
+        if (BimpTools::getValue('fc', '', 'aZ09comma') === 'contrat') {
+            $id_contrat = (int) BimpTools::getValue('id', 0, 'int');
         }
 
         $actions = array();
@@ -2429,6 +2429,14 @@ class BCT_ContratLine extends BimpObject
 
                 if ($date_cloture) {
                     $html .= '<span style="display: inline-block" class="danger">' . BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Résiliation le ' . date('d / m / Y', strtotime($date_cloture)) . '</span><br/>';
+                }
+
+                $id_line_renouv_origin = (int) $this->db->getValue('contratdet', 'rowid', 'id_line_renouv = ' . $this->id);
+                if ($id_line_renouv_origin) {
+                    $line_renouv_origin = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line_renouv_origin);
+                    if (BimpObject::objectLoaded($line_renouv_origin)) {
+                        $html .= '<span style="display: inline-block" class="important">' . BimpRender::renderIcon('fas_sync', 'iconLeft') . 'Renouvellement de la ligne n°' . $line_renouv_origin->getData('rang') . '</span><br/>';
+                    }
                 }
 
                 if ((int) $this->getData('id_line_renouv')) {

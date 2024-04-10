@@ -380,7 +380,7 @@ class BDS_ConvertProcess extends BDSProcess
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line');
         $sql .= ' WHERE a.shipments != \'\' AND a.shipments != \'{}\' > 0';
-        $sql .= ' AND (SELECT SUM(sl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) != qty_total ';
+        $sql .= ' AND (SELECT COUNT(sl.id) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) = 0';
         $sql .= ' ORDER BY a.id asc';
 
         if ((int) $this->getOption('test_one', 0)) {

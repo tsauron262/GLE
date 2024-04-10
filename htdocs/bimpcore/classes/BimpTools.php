@@ -88,22 +88,26 @@ class BimpTools
             if ($value && $check) {
                 $val_temp = self::sanitizeVal($value, $check, $filter, $options);
 
-                if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $value != $value)) {
-                    if ((int) BimpCore::getConf('post_data_check_log_only')) {
-                        if (!$val_temp) {
-                            BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
-                                'check'           => $check,
-                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value)),
-                            ));
+                if (!in_array($key, array(// temporaire : pour éviter logs inutiles
+                            'diagnostic', 'notecreditsafe', 'accessoires'
+                        ))) {
+                    if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $value != $value)) {
+                        if ((int) BimpCore::getConf('post_data_check_log_only')) {
+                            if (!$val_temp) {
+                                BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
+                                    'check'           => $check,
+                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value)),
+                                ));
+                            } else {
+                                BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
+                                    'check'           => $check,
+                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value)),
+                                    'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) htmlentities($val_temp))
+                                ));
+                            }
                         } else {
-                            BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
-                                'check'           => $check,
-                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value)),
-                                'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) htmlentities($val_temp))
-                            ));
+                            $value = $val_temp;
                         }
-                    } else {
-                        $value = $val_temp;
                     }
                 }
             }
@@ -1791,6 +1795,16 @@ class BimpTools
 
         // Pour ajouter d'autres types de vérifications que celles de Dolibarr
         switch ($check) {
+            case 'alphanohtml':
+                $value = self::replaceBr($value);
+                break;
+
+            case 'int':
+                if (is_bool($value)) {
+                    return $value;
+                }
+                break;
+
             case 'json':
             case 'json_nohtml':
                 // Pour l'instant pas de vérif (json_decode devrait échouer si invalide)
@@ -1804,22 +1818,15 @@ class BimpTools
                     $value = 0;
                 }
                 return $value;
-                
-            case 'int': 
-                if (is_bool($value)) {
-                    return $value;
-                }
-                return sanitizeVal($value, $check, $filter, $options);
 
             case 'date':
                 if (!preg_match('/^[0-9 \-\:]+$/', $value)) {
                     $value = '';
                 }
                 return $value;
-
-            default:
-                return sanitizeVal($value, $check, $filter, $options);
         }
+
+        return sanitizeVal($value, $check, $filter, $options);
     }
 
     public static function checkValueByType($type, &$value, &$errors = array())

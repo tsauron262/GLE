@@ -89,7 +89,7 @@ class BimpTools
                 $val_temp = self::sanitizeVal($value, $check, $filter, $options);
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
-                            'diagnostic', 'notecreditsafe', 'accessoires'
+                            'diagnostic', 'notecreditsafe', 'accessoires', 'search_value'
                         ))) {
                     if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $value != $value)) {
                         if ((int) BimpCore::getConf('post_data_check_log_only')) {

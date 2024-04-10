@@ -1803,6 +1803,13 @@ class BimpTools
                 if (is_bool($value)) {
                     return $value;
                 }
+                if (is_string($value)) {
+                    if ($value == 'false') {
+                        return 0;
+                    } elseif ($value == 'true') {
+                        return 1;
+                    }
+                }
                 break;
 
             case 'json':

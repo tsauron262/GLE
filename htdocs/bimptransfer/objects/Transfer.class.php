@@ -135,7 +135,7 @@ class Transfer extends BimpDolObject
                 $tot += $prod->getCurrentPaHt() * $line->getData('quantity_sent');
             }
         }
-        return BimpTools::displayMoneyValue($tot). ' Ht';
+        return BimpTools::displayMoneyValue($tot). ' HT';
     }
 
     public function getAllWarehouses()

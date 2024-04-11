@@ -124,6 +124,19 @@ class Transfer extends BimpDolObject
     }
 
     // Getters Données: 
+    
+    public function displayValo()
+    {
+        $tot = 0;
+        foreach($this->getLines() as $line){
+//            $prod = $this->getChildObject('prod');
+            $prod = $line->getChildObject('product');
+            if(BimpObject::objectLoaded($prod)){
+                $tot += $prod->getCurrentPaHt() * $line->getData('quantity_sent');
+            }
+        }
+        return BimpTools::displayMoneyValue($tot). ' Ht';
+    }
 
     public function getAllWarehouses()
     {

@@ -4309,7 +4309,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'localise':
                 $eq = $this->getChildObject("equipment");
-                if ($eq->getData("status_gsx") != 3)
+                if (BimpObject::objectLoaded($eq) && $eq->getData("status_gsx") != 3)
                     $errors[] = "L'appareil " . $eq->getLink() . ' ne semble pas localisé';
                 else {
                     $contact_pref = 1; // On force l'envoi par e-mail
@@ -4343,6 +4343,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $mail_msg .= 'Merci de votre compréhension. <br/><br/>';
                 }
                 break;
+                
             case 'restitution':
                 $contact_pref = 1; // On force l'envoi par e-mail
 

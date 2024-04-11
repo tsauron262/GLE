@@ -96,13 +96,13 @@ class BimpTools
                             if (!$val_temp) {
                                 BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
                                     'check'           => $check,
-                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value)),
+                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value) . ' (' . gettype($value) . ')'),
                                 ));
                             } else {
                                 BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
                                     'check'           => $check,
-                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value)),
-                                    'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) htmlentities($val_temp))
+                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value) . ' (' . gettype($value) . ')'),
+                                    'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) htmlentities($val_temp) . ' (' . gettype($value) . ')')
                                 ));
                             }
                         } else {

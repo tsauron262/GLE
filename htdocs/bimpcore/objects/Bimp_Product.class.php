@@ -20,6 +20,7 @@ class Bimp_Product extends BimpObject
     public static $abonnements_sous_types = array(6, 20);
     public static $bundle_sous_types = array(20, 21);
     public static $sousTypeDep = array(3, 4);
+    public static $sousTypeInter = array(1, 3);
     public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
         0 => array('label' => 'Produit', 'icon' => 'fas_box'),
@@ -522,6 +523,11 @@ class Bimp_Product extends BimpObject
     public function isDep()
     {
         return (in_array($this->getData('type2'), static::$sousTypeDep));
+    }
+
+    public function isInter()
+    {
+        return (in_array($this->getData('type2'), static::$sousTypeInter));
     }
 
     public function isInContrat()

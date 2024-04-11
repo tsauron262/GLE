@@ -152,8 +152,8 @@ class apiController extends BimpController
         $api_idx = (int) BimpTools::getValue('api_idx', 0, 'int');
         $request_name = BimpTools::getValue('api_requestName', '', 'aZ09comma');
         $method = BimpTools::getValue('api_method', 'apiRequest', 'aZ09comma');
-        $params = BimpTools::getValue('api_params', array(), 'array');
-        $options = BimpTools::getValue('api_options', array(), 'array');
+        $params = BimpTools::getValue('api_params', array(), 'json_nohtml');
+        $options = BimpTools::getValue('api_options', array(), 'json_nohtml');
 
         if (is_string($params)) {
             $params = json_decode($params, 1);

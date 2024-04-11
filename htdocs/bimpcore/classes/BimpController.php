@@ -2988,7 +2988,7 @@ class BimpController
     {
         $list = array();
 
-        $table = BimpTools::getValue('table', null, 'aZ09');
+        $table = BimpTools::getValue('table', null, 'alphanohtml');
         $fields_search = explode(',', BimpTools::getValue('fields_search', null, 'alphanohtml'));
         $fields_return_label = BimpTools::getValue('field_return_label', '', 'alphanohtml');
         $label_syntaxe = html_entity_decode(BimpTools::getValue('label_syntaxe', '<label_1>', 'alphawithlgt'));

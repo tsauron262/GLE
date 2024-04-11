@@ -116,6 +116,9 @@ fields_tables:
                   callback: displayIsGood
             - field: user_valid
               display: nom_url
+            - label: Valorisation envoi
+              value:
+                callback: displayValo
 
 views:
     default:

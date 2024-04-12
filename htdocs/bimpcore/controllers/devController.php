@@ -34,11 +34,11 @@ class devController extends BimpController
 
         // ToolsBar:
         $html .= '<div class="buttonsContainer align-left" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
-        if (BimpCore::isModuleActive('bimpapple')) {
-            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/phantomApple.php" target="_blank">';
-            $html .= 'Connect Apple' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-            $html .= '</a>';
-        }
+//        if (BimpCore::isModuleActive('bimpapple')) {
+//            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/phantomApple.php" target="_blank">';
+//            $html .= 'Connect Apple' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+//            $html .= '</a>';
+//        }
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/test.php')) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/test.php" target="_blank">';

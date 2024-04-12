@@ -353,7 +353,10 @@ fields_tables:
             - custom: 1
               label: Rentabilitées technique
               value:
-                  callback: displayRentabilite
+                  callback: 
+                        method: displayRentabilite
+                        params:
+                            - 1
                   
     client: 
         rows: 

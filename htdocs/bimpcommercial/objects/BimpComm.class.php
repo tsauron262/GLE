@@ -1922,6 +1922,10 @@ class BimpComm extends BimpDolObject
 
         return BimpTools::displayMoneyValue($total, '', 0, 0, 0, 2, 1);
     }
+    
+    public function displayHelpForTvaAcompte(){
+        return 'TVA moyenne '.round($this->getData('total_tva') / $this->getData('total_ht')* 100). ' %';
+    }
 
     public function displayCommercial()
     {

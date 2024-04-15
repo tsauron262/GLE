@@ -66,7 +66,6 @@ class ExpeditionPDF extends BimpEtiquettePDF
 //                    }
 
                     $html .= '<table>';
-                    $html .= '<tr>';
                     $name = $client->getName();
 
                     if (strlen($name) > 50) {
@@ -85,8 +84,35 @@ class ExpeditionPDF extends BimpEtiquettePDF
                         }
                     }
 
+                    $html .= '<tr>';
                     $html .= '<td style="text-align: center; font-size: ' . $font_size . 'px; font-weight: bold">' . $name . '</td>';
                     $html .= '</tr>';
+                    
+                    
+                    /* gestion deuxieme nom */
+                    $name = $client->getData('name_alias');
+                    
+
+                    if (strlen($name) > 50) {
+                        $name = substr($name, 0, 50) . '...';
+                    }
+
+                    $font_size = 17;
+                    $max_chars = 14;
+
+                    while (BimpTools::getStringNbLines($name, $max_chars) > 1) {
+                        $max_chars++;
+                        $font_size--;
+
+                        if ($font_size < 10) {
+                            break;
+                        }
+                    }
+                    if($name != ''){
+                        $html .= '<tr>';
+                        $html .= '<td style="text-align: center; font-size: ' . $font_size . 'px;">' . $name . '</td>';
+                        $html .= '</tr>';
+                    }
 
                     $html .= '<tr>';
                     $html .= '<td style="text-align: center;font-size: 17px;font-weight: bold;color: #000000">' . $commande->getRef() . '</td>';

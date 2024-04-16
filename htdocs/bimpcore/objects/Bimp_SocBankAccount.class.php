@@ -375,7 +375,7 @@ class Bimp_SocBankAccount extends BimpObject
             if ($def) {
                 $this->db->update($this->getTable(), array(
                     'default_rib' => 0
-                        ), 'fk_soc = ' . (int) $this->getData('fk_soc') . ' AND type = \'' . $this->getData('type') . '\' AND rowid != ' . (int) $this->id.' AND entity = '.$this->getData('entity'));
+                        ), 'fk_soc = ' . (int) $this->getData('fk_soc') . ' AND type = \'' . $this->getData('type') . '\' AND rowid != ' . (int) $this->id.' AND entity = '.($this->getData('entity')? $this->getData('entity') : 1));
             }
         }
 

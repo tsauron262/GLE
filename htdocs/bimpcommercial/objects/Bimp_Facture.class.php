@@ -1755,8 +1755,8 @@ class Bimp_Facture extends BimpComm
     {
         global $langs, $conf;
 
-        $origin = BimpTools::getValue('origin', BimpTools::getValue('fields/origin', 0));
-        $id_origin = BimpTools::getValue('id_origin', BimpTools::getValue('fields/id_origin', 0));
+        $origin = BimpTools::getValue('origin', BimpTools::getValue('fields/origin', '', 'aZ09comma'));
+        $id_origin = BimpTools::getValue('id_origin', BimpTools::getValue('fields/id_origin', 0, 'int'));
 
         $id_soc = (int) $this->getData('fk_soc');
 
@@ -2124,12 +2124,12 @@ class Bimp_Facture extends BimpComm
 
     public function getRequestIdFactureReplaced()
     {
-        return BimpTools::getValue('id_facture_replaced', BimpTools::getValue('param_values/fields/id_facture_replaced', 0));
+        return BimpTools::getValue('id_facture_replaced', BimpTools::getValue('param_values/fields/id_facture_replaced', 0, 'int'), 'int');
     }
 
     public function getRequestIdFactureToCorrect()
     {
-        return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0));
+        return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0, 'int'), 'int');
     }
     /*
      * type reval = tableau des type accepté
@@ -6754,7 +6754,7 @@ class Bimp_Facture extends BimpComm
 
         switch ($type) {
             case Facture::TYPE_REPLACEMENT:
-                $id_facture_replaced = (int) BimpTools::getValue('id_facture_replaced', 0);
+                $id_facture_replaced = (int) BimpTools::getValue('id_facture_replaced', 0, 'int');
 
                 if (!$id_facture_replaced) {
                     $errors[] = 'Facture à remplacer absente';
@@ -7058,9 +7058,11 @@ class Bimp_Facture extends BimpComm
                         $fac_users[] = $id_user;
                     }
 
-                    $id_user = (int) $facture->getData('fk_user_author');
-                    if ($id_user) {
-                        $fac_users[] = $id_user;
+                    if (empty($fac_users) || $id_user > 1) {
+                        $id_user = (int) $facture->getData('fk_user_author');
+                        if ($id_user) {
+                            $fac_users[] = $id_user;
+                        }
                     }
 
                     if (empty($fac_users)) {

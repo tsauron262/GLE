@@ -5,7 +5,7 @@ require_once '../bimpcore/main.php';
 ini_set('display_errors', 1);
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-$id_commande = (int) BimpTools::getValue('id_commande');
+$id_commande = (int) BimpTools::getValue('id_commande', 0, 'int');
 
 if (!$id_commande) {
     echo 'ID de la commande client absent';

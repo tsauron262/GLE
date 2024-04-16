@@ -27,8 +27,8 @@ class userPropalsController extends BimpController
     {
         global $user;
         $id = $user->id;
-        if(BimpTools::getValue('id', 0) > 0)
-                $id = BimpTools::getValue('id', 0);
+        if (BimpTools::isSubmit('id'))
+            $id = (int) BimpTools::getValue('id', 0, 'int');
 
         $userObj = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id);
 
@@ -38,11 +38,10 @@ class userPropalsController extends BimpController
 
         $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
 
-        if($userObj->id == $user->id){
+        if ($userObj->id == $user->id) {
             $titre = 'Vos proposition commerciales';
-        }
-        else{
-            $titre = "Les propositions de : ".$userObj->getName();
+        } else {
+            $titre = "Les propositions de : " . $userObj->getName();
         }
         $list = new BC_ListTable($propal, 'user', 1, null, $titre);
         $list->addFieldFilterValue('ec.fk_socpeople', (int) $userObj->id);

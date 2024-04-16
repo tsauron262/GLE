@@ -9,7 +9,7 @@ class demandeController extends BimpController
         $warnings = array();
         $amount_ht = 0;
 
-        $id_demande_refin = (int) BimpTools::getValue('id_demande_refin', 0);
+        $id_demande_refin = (int) BimpTools::getValue('id_demande_refin', 0, 'int');
 
         if ($id_demande_refin) {
             $dr = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_DemandeRefinanceur', $id_demande_refin);
@@ -23,15 +23,15 @@ class demandeController extends BimpController
 
         if (!count($errors)) {
             if (!BimpObject::objectLoaded($dr)) {
-                $dr->set('id_demande', (int) BimpTools::getValue('id_demande', 0));
+                $dr->set('id_demande', (int) BimpTools::getValue('id_demande', 0, 'int'));
             }
 
-            $id_refin = BimpTools::getValue('id_refinanceur', null);
+            $id_refin = BimpTools::getValue('id_refinanceur', null, 'int');
             if (!is_null($id_refin)) {
                 $dr->set('id_refinanceur', $id_refin);
             }
 
-            $qty = BimpTools::getValue('qty', null);
+            $qty = BimpTools::getValue('qty', null, 'float');
             if (!is_null($qty)) {
                 $dr->set('qty', $qty);
             }
@@ -41,7 +41,7 @@ class demandeController extends BimpController
                 $dr->set('periodicity', $periodicity);
             }
 
-            $rate = BimpTools::getValue('rate', null);
+            $rate = BimpTools::getValue('rate', null, 'float');
             if (!is_null($rate)) {
                 $dr->set('rate', $rate);
             }
@@ -53,7 +53,7 @@ class demandeController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'amount_ht'  => $amount_ht,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 }

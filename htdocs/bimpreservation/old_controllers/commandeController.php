@@ -23,7 +23,7 @@ class commandeController extends reservationController
 //
 //        $commande = $this->config->getObject('', 'commande');
 //        if (!BimpObject::objectLoaded($commande)) {
-//            return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
+//            return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', 0, 'int'));
 //        }
 //
 //        if ($commande->dol_object->statut < 1) {
@@ -294,12 +294,12 @@ class commandeController extends reservationController
         $success = 'Création de l\'expédition effectuée avec succès';
 
         BimpObject::loadClass($this->module, 'BR_Reservation');
-        $errors = BR_Reservation::createShipment((int) BimpTools::getValue('id_commande_client', 0));
+        $errors = BR_Reservation::createShipment((int) BimpTools::getValue('id_commande_client', 0, 'int'));
 
         die(json_encode(array(
             'errors'     => $errors,
             'success'    => $success,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 }

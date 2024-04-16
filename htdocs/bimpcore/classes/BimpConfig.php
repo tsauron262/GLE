@@ -58,7 +58,7 @@ class BimpConfig
         }
 
         if (!$file_name) {
-            $this->errors[] = 'Fichier YML spécifié';
+            $this->errors[] = 'Fichier YML non spécifié';
         }
 
         if (count($this->errors)) {
@@ -251,8 +251,8 @@ class BimpConfig
 
                 // Surcharges version:
                 $override_params = array();
-                if (defined('BIMP_EXTENDS_VERSION')) {
-                    $version_module_dir = 'extends/versions/' . BIMP_EXTENDS_VERSION . ($module_dir ? '/' . $module_dir : '');
+                if (BimpCore::getVersion()) {
+                    $version_module_dir = 'extends/versions/' . BimpCore::getVersion() . ($module_dir ? '/' . $module_dir : '');
                     $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $version_module_dir . '/' . $file_name . '.yml';
                     if (file_exists($version_file)) {
                         $version_params = $this->getParamsFromFile($module, $version_module_dir, $file_name, $errors, false);
@@ -1131,6 +1131,7 @@ class BimpConfig
 
         $request_name = null;
         $default_value = null;
+        $check = 'restricthtml';
 
         if (is_string($params)) {
             $request_name = $params;
@@ -1141,14 +1142,18 @@ class BimpConfig
             if (isset($params['default_value'])) {
                 $default_value = $this->getvalue($params['default_value'], $path . '/default_value');
             }
+            
+            if (isset($params['check'])) {
+                $check = $params['check'];
+            }
         }
 
 
         if (!is_null($request_name) && is_string($request_name)) {
             if ($is_field) {
-                $value = BimpTools::getPostFieldValue($request_name, $default_value);
+                $value = BimpTools::getPostFieldValue($request_name, $default_value, $check);
             } else {
-                $value = BimpTools::getValue($request_name, $default_value);
+                $value = BimpTools::getValue($request_name, $default_value, $check);
             }
             return $value;
         }

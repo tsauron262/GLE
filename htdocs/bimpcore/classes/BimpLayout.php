@@ -58,9 +58,9 @@ class BimpLayout
             }
 
             // Véfication des extensions: 
-            if (defined('BIMP_EXTENDS_VERSION')) {
-                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/classes/' . $layout_name . '.php')) {
-                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/classes/' . $layout_name . '.php';
+            if (BimpCore::getVersion()) {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BimpCore::getVersion() . '/classes/' . $layout_name . '.php')) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BimpCore::getVersion() . '/classes/' . $layout_name . '.php';
                     $layout_class = $layout_name . '_ExtVersion';
                 }
             }

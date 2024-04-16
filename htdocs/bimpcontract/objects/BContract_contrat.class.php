@@ -849,12 +849,21 @@ class BContract_contrat extends BimpDolObject
         return $echeancier;
     }
 
-    public function getHeuresRestantesDelegation()
+    public function getHeuresRestantesDelegation($format = 'time')
     {
         $duree_vendu = $this->getDurreeVendu();
         $dureeFi = $this->getInfosDureeFi();
-        $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
-        return $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot']);
+
+        switch ($format) {
+            case 'float':
+            default:
+                return $duree_vendu - $dureeFi['contrat']['tot'];
+
+            case 'time':
+                $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
+                return $ficheInter->timestamp_to_time($duree_vendu - $dureeFi['contrat']['tot']);
+        }
+
 
 //        $reste = 0;
 //        $totalHeuresVendues = 0;
@@ -1837,7 +1846,7 @@ class BContract_contrat extends BimpDolObject
 
     public function getJoinFilesValues()
     {
-        $values = BimpTools::getValue('fields/join_files', array());
+        $values = BimpTools::getValue('fields/join_files', array(), 'array');
 
         $id_main_pdf_file = (int) $this->getDocumentFileId();
 
@@ -3116,7 +3125,7 @@ class BContract_contrat extends BimpDolObject
         $new_contrat->set('note_private', $this->getData('note_private'));
         $new_contrat->set('ref_ext', $this->getData('ref_ext'));
         $new_contrat->set('ref_customer', $this->getData('ref_customer'));
-        if (/* $this->getData('syntec') > 0 && */ BimpTools::getValue('use_syntec')) {
+        if (/* $this->getData('syntec') > 0 && */ (int) BimpTools::getValue('use_syntec', 0, 'int')) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         } else {
             $new_contrat->set('syntec', 0);
@@ -3148,7 +3157,7 @@ class BContract_contrat extends BimpDolObject
                 $child = $this->getChildObject("lines", $id_child);
 
                 $neew_price = $child->getData('subprice');
-                if ($this->getData('syntec') > 0 && BimpTools::getValue('use_syntec')) {
+                if ($this->getData('syntec') > 0 && BimpTools::getValue('use_syntec', 0, 'int')) {
                     $neew_price = $child->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('syntec'));
                 }
                 $new_contrat->dol_object->pa_ht = $child->getData('buy_price_ht'); // BUG DéBILE DOLIBARR
@@ -4812,12 +4821,14 @@ class BContract_contrat extends BimpDolObject
     {
         $errors = [];
 
-        if (BimpTools::getValue('use_syntec') && !BimpTools::getValue('syntec')) {
+        if (BimpTools::getValue('use_syntec', 0, 'int') && !BimpTools::getValue('syntec', '', 'alphanohtml')) {
             $errors[] = 'Vous devez rensseigner un indice syntec';
         }
 
-        if ((BimpTools::getValue('tacite') == 1 || BimpTools::getValue('tacite') == 1 || BimpTools::getValue('tacite') == 3)) {
-            if (BimpTools::getValue('duree_mois') != 12 && BimpTools::getValue('duree_mois') != 24 && BimpTools::getValue('duree_mois') != 36) {
+        $tacite = (int) BimpTools::getValue('tacite', 0, 'int');
+        if (in_array($tacite, array(1, 2, 3))) {
+            $duree = (int) BimpTools::getValue('duree_mois', 0, 'int');
+            if (!in_array($duree, array(12, 24, 36))) {
                 $errors[] = 'Vous ne pouvez pas demander un renouvellement TACITE pour des périodes différentes de (12, 24 ou 36 mois)';
             }
         }
@@ -4838,30 +4849,32 @@ class BContract_contrat extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-        if (BimpTools::getValue('type_piece')) {
+        $type_piece = BimpTools::getValue('type_piece', '', 'aZ09comma');
+
+        if ($type_piece) {
             $id = 0;
-            switch (BimpTools::getValue('type_piece')) {
+            switch ($type_piece) {
                 case 'propal':
-                    $id = BimpTools::getValue('propal_client');
+                    $id = (int) BimpTools::getValue('propal_client', 0, 'int');
                     break;
                 case 'commande':
-                    $id = BimpTools::getValue('commande_client');
+                    $id = (int) BimpTools::getValue('commande_client', 0, 'int');
                     break;
                 case 'facture_fourn':
-                    $id = BimpTools::getValue('facture_fourn_client');
+                    $id = (int) BimpTools::getValue('facture_fourn_client', 0, 'int');
                     break;
             }
-            if ($id == 0) {
-                return "Il n'y à pas de pièce " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . ' pour ce client';
+            if (!$id) {
+                return "Il n'y a pas de pièce " . self::$true_objects_for_link[$type_piece] . ' pour ce client';
             } else {
-                if (getElementElement(BimpTools::getValue('type_piece'), 'contrat', $id, $this->id)) {
-                    return "La piece " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . ' que vous avez choisi est déjà liée à ce contrat';
+                if (getElementElement($type_piece, 'contrat', $id, $this->id)) {
+                    return "La piece " . self::$true_objects_for_link[$type_piece] . ' que vous avez choisi est déjà liée à ce contrat';
                 } else {
-                    addElementElement(BimpTools::getValue('type_piece'), 'contrat', $id, $this->id);
-                    $success = "La " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . " a été liée au contrat avec succès";
+                    addElementElement($type_piece, 'contrat', $id, $this->id);
+                    $success = "La " . self::$true_objects_for_link[$type_piece] . " a été liée au contrat avec succès";
                 }
             }
-            return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
+            return ['success' => $success, 'warnings' => $warnings, 'errors' => array()];
         } else {
 
 //            $relance_renouvellement = BimpTools::getValue('relance_renouvellement');

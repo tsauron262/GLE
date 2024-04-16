@@ -2016,7 +2016,7 @@ class Bimp_User extends BimpObject
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            if ((int) BimpTools::getValue('no_photo', 0)) {
+            if ((int) BimpTools::getValue('no_photo', 0, 'int')) {
                 if ($this->db->update($this->getTable(), array(
                             'photo' => ''
                                 ), 'rowid = ' . (int) $this->id) <= 0) {

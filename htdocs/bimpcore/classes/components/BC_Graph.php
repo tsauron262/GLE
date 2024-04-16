@@ -15,10 +15,12 @@ class BC_Graph extends BC_Panel
         $this->params_def['xDateConfig'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['date'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['x'] = array('data_type' => 'string', 'default' => '');
+        $this->params_def['mode'] = array('data_type' => 'string', 'default' => '');//rien ou doughnut
         $this->params_def['y'] = array('data_type' => 'string', 'default' => '');
         $this->params_def['data_callback'] = array('data_type' => 'string', 'default' => '');
         $this->params_def['yConfig'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['use_k'] = array('data_type' => 'boolean', 'default' => 0);
+        $this->params_def['relative'] = array('data_type' => 'boolean', 'default' => -1);
         $this->params_def['filters'] = array('data_type' => 'array', 'json' => true, 'default' => json_decode(BimpTools::getPostFieldValue('param_filters', '[]'), true), 'request' => true);
 //        echo '<pre>';
 //        print_r($_POST);
@@ -66,12 +68,14 @@ class BC_Graph extends BC_Panel
                     'values'    => array(),
                     'value'     => $this->params['xDateConfig']['params'][0]
                 );
-                if(in_array('day', $this->params['xDateConfig']['params']))
-                        $this->formData['xDateConfig']['values']['day'] = 'Jour';
-                if(in_array('month', $this->params['xDateConfig']['params']))
-                        $this->formData['xDateConfig']['values']['month'] = 'Mois';
                 if(in_array('hour', $this->params['xDateConfig']['params']))
                         $this->formData['xDateConfig']['values']['hour'] = 'Heure';
+                if(in_array('day', $this->params['xDateConfig']['params']))
+                        $this->formData['xDateConfig']['values']['day'] = 'Jour';
+                if(in_array('week', $this->params['xDateConfig']['params']))
+                        $this->formData['xDateConfig']['values']['week'] = 'Semaine';
+                if(in_array('month', $this->params['xDateConfig']['params']))
+                        $this->formData['xDateConfig']['values']['month'] = 'Mois';
             }
            
             if(isset($this->params['xDateConfig']['date1']) && $this->params['xDateConfig']['date1']){
@@ -104,6 +108,13 @@ class BC_Graph extends BC_Panel
 //                    }
                 }
             }
+        }
+        if(isset($this->params['relative']) && $this->params['relative'] > -1){
+            $this->formData['relative'] = array(
+                'name' => 'Diférence',
+                'type' => 'switch',
+                'value'=> $this->params['relative']
+            );
         }
         
         foreach($this->formData as $tmpName => $tmpData){
@@ -188,6 +199,8 @@ class BC_Graph extends BC_Panel
                     $options['axisX'] = array("title" => "Date", "valueFormatString" => 'MMM YYYY');
                     break;
                 case 'day' :
+                    $options['axisX'] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
+                case 'week' :
                     $options['axisX'] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
                     break;
                 default:
@@ -290,8 +303,20 @@ class BC_Graph extends BC_Panel
         elseif($this->userOptions['xDateConfig'] == 'hour'){
             $xFiled = 'date_format('.$xFiled.', \'%Y-%m-%d %h:00:00\')';
         }
+        elseif($this->userOptions['xDateConfig'] == 'week'){
+            $xFiled = 'MIN(date_format('.$xFiled.', \'%Y-%m-%d\'))';
+        }
         $return_fields = array($xFiled.' as x');//.$this->fieldX);
+        
+        
+        $groupBy = ($this->params['mode'] == 'doughnut')? null : 'x';
+        if($this->userOptions['xDateConfig'] == 'week'){
+            $groupBy = 'date_format('.$this->fieldX.', \'%Y-%u\')';
+        }
+        
+        
         $joins = array();
+        $i = 0;
         if(isset($params['fields'])){
             foreach($params['fields'] as $nameField => $tabField){
                 $field = $nameField;
@@ -300,6 +325,9 @@ class BC_Graph extends BC_Panel
                 $calc = 'SUM';
                 if(is_array($tabField) && isset($tabField['calc']))
                     $calc = $tabField['calc'];
+                $type = 'column';
+                if(is_array($tabField) && isset($tabField['type']))
+                    $type = $tabField['type'];
                 $name = '';
                 if(is_array($tabField) && isset($tabField['title']))
                     $name = $tabField['title'];
@@ -311,77 +339,64 @@ class BC_Graph extends BC_Panel
                     $visible = $tabField['visible'];
                 
                 $return_fields[] = $calc.'('.$field.') as y';
-                $data = array(
-                    'name'      => $name,
-                    'type' => 'column',
-                    'visible'   => $visible,
-                    'dataPoints'=> array()
-                );
-                $groupBy = 'x';
-                $result = $this->object->getList($this->params['filters'], 10000, 1, null, null, 'array', $return_fields, $joins, null, 'ASC', $groupBy);
-                foreach($result as $tmp)
-                    $data['dataPoints'][] = array('x' => "new Date('".$tmp['x']."')", 'y' => floatval($tmp['y']));
-                $datas[] = $data;
+                
+                if($this->params['mode'] == 'doughnut'){
+                    if(!isset($data)){
+                        $data = array(
+                            'type' => 'doughnut',
+                            'dataPoints'=> array()
+                        );
+                    }
+                    else{
+                        $i = 0;
+                    }
+                }
+                else{
+                    $data = array(
+                        'name'      => $name,
+                        'type' => $type,
+                        'visible'   => $visible,
+                        'dataPoints'=> array()
+                    );
+                }
+                
+                $filters = $this->params['filters'];
+                if(isset($tabField['filters']) && is_array($tabField['filters'])){
+                    foreach($tabField['filters'] as $field_name => $value)
+                    $filters = BimpTools::mergeSqlFilter($filters, $field_name, $value);
+                }
+                
+                $oldValue = null;
+                if($this->userOptions['relative'] == 1){
+                    $filtersOldValue = $filters;
+                    if(isset($this->userOptions['date1']))
+                        $filtersOldValue[$this->fieldX] = array('operator' => '<', 'value' => $this->userOptions['date1']);
+                    $resultOldValue = $this->object->getList($filtersOldValue, 1, 1, $this->fieldX, 'DESC', 'array', $return_fields, $joins, null, 'ASC');
+                    if(isset($resultOldValue[0]))
+                        $oldValue = $resultOldValue[0]['y'];
+                }
+                
+                $result = $this->object->getList($filters, 10000, 1, $this->fieldX, 'ASC', 'array', $return_fields, $joins, null, 'ASC', $groupBy);
+                
+                /*
+                 * todo rajouter pour le relative la recup de la derniére oldValue avant la date de début.
+                 */
+                
+                foreach($result as $tmp){
+                    $y = floatval($tmp['y']);
+                    if($this->userOptions['relative'] == 1 && !is_null($oldValue))
+                        $y = $y - $oldValue;
+                        
+                    if(is_array($tabField) && isset($tabField['reverse']) && $tabField['reverse'])
+                        $y = -$y;
+                    if($this->userOptions['relative'] != 1 || !is_null($oldValue))
+                        $data['dataPoints'][] = array('x' => "new Date('".$tmp['x']."')", 'y' => $y, 'name'=> $name);
+                    $oldValue = floatval($tmp['y']);
+                }
+                $datas[$i] = $data;
+                $i++;
             }
         }
-        
-//        echo '<pre>';
-//        print_r($datas);
         return $datas;
-    }
-    
-    
-    public function getGraphConsoDatas($params)
-    {
-        $data = array();  
-        $cmds = BimpCache::getBimpObjectObjects('en', 'en_cmd', array(
-            'generic_type'      => 'CONSUMPTION',
-            'role'              => array('operator' => '>', 'value' => '0')
-        ), 'role', $sortorder = 'desc');
-
-        $i=0;
-        foreach($cmds as $cmdData){
-            $data[$i] = array("name" => $cmdData->getData('name'));
-            if($params['type'] == 'columnArea'){
-                if($cmdData->getData('role') == 1)
-                    $data[$i]["type"] = "stackedColumn";
-                elseif($cmdData->getData('role') > 1)
-                    $data[$i]["type"] = "stackedArea";
-            }
-            else{
-                $data[$i]["type"] = $params['type'];
-            }
-            if($cmdData->getData('role') > 1 || $cmdData->getData('id_cmd_parent') > 0)
-                $data[$i]["visible"] = 0;
-
-
-            $fields = array('date' => 'date', 'value' => 'value');
-            $where = "cmd_id = ".$cmdData->id;
-            if($params['date1'])
-                $where .= " AND date > '".$params['date1']."'";
-            if($params['date2'])
-                $where .= " AND date < '".$params['date2']."'";
-
-            if($params['xDateConfig'] == 'month'){
-                $fields['value'] = 'MAX(value) as value';
-                $fields['date'] = 'date_format(date, \'%Y-%m\') as date';
-                $where .= ' GROUP BY date_format(date, \'%Y-%m\')';
-            }
-
-            $histos = $this->db->getRows('en_historyArch2', $where, null, 'object', $fields, 'date', 'ASC');
-            $oldValue = null;
-            foreach($histos as $histo){
-                $val = $histo->value;
-                if($params['dif'] == 1 && !is_null($oldValue))
-                    $val = $val - $oldValue;
-                if($cmdData->getData('role') == 3)
-                    $val = -$val;
-                if($params['dif'] != 1 || !is_null($oldValue))
-                    $data[$i]['dataPoints'][] = array("x" => "new Date('".$histo->date."')", "y" => (int) ($val));
-                $oldValue = $histo->value;
-            }
-            $i++;
-        }
-        return $data;
     }
 }

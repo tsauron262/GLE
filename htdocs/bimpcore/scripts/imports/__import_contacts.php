@@ -73,7 +73,7 @@ foreach ($lines as $idx => $line) {
 //print_r($rows);
 //echo '</pre>';
 
-if (!(int) BimpTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0, 'int')) {
     if (is_array($rows) && count($rows)) {
         echo count($rows) . ' élément(s) à traiter <br/><br/>';
 

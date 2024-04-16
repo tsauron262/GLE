@@ -441,7 +441,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if (!count($errors)) {
-                $available_discounts = $this->getAvailableDiscountsAmounts();
+                $available_discounts = $this->getAvailableDiscountsAmounts(false, array(), 5);
                 if ($available_discounts) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' dispose de remises non consommées (' . BimpTools::displayMoneyValue($available_discounts) . ')';
                     $check = 0;
@@ -941,7 +941,7 @@ class Bimp_Societe extends BimpDolObject
         return 0;
     }
 
-    public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array())
+    public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array(), $delaiYear = 0)
     {
         if ($this->isLoaded()) {
             global $conf;
@@ -951,6 +951,10 @@ class Bimp_Societe extends BimpDolObject
             $sql .= ' WHERE r.entity = ' . $conf->entity;
             $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
             $sql .= ' AND r.fk_soc = ' . (int) $this->id;
+            
+            if($delaiYear > 0){
+                 $sql .= ' AND datec > DATE_SUB(NOW(),INTERVAL '.$delaiYear.' YEAR)';
+            }
 
             if ($is_fourn) {
                 $sql .= ' AND (r.fk_invoice_supplier IS NULL AND r.fk_invoice_supplier_line IS NULL)';
@@ -2321,7 +2325,7 @@ class Bimp_Societe extends BimpDolObject
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            if ((int) BimpTools::getValue('no_logo', 0)) {
+            if ((int) BimpTools::getValue('no_logo', 0, 'int')) {
                 if ($this->db->update($this->getTable(), array(
                             'logo' => ''
                                 ), 'rowid = ' . (int) $this->id) <= 0) {
@@ -2949,6 +2953,7 @@ class Bimp_Societe extends BimpDolObject
         $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters);
 
         if (is_array($factures)) {
+            $nb_relances_mise_en_demeure = (int) BimpCore::getConf('nb_relances_mise_en_demeure', 4, 'bimpcommercial');
             foreach ($factures as $fac) {
                 $rap = $fac->getRemainToPay();
 
@@ -2958,7 +2963,7 @@ class Bimp_Societe extends BimpDolObject
 
                 $nb_relances = (int) $fac->getData('nb_relance');
 
-                if ($nb_relances === 4) {
+                if ($nb_relances === $nb_relances_mise_en_demeure) {
                     $total_med += $rap;
                 } elseif ($nb_relances === 5) {
                     $total_contentieux += $rap;
@@ -3911,7 +3916,7 @@ class Bimp_Societe extends BimpDolObject
 
         if (!count($errors)) {
             if (BimpTools::isSubmit('is_company')) {
-                if ((int) BimpTools::getValue('is_company')) {
+                if ((int) BimpTools::getValue('is_company', 0, 'int')) {
                     if (!(int) $this->getData('fk_typent') && BimpCore::getConf('siren_required')) {
                         $errors[] = 'Veuillez sélectionner le type de tiers';
                     } elseif ((int) $this->getData('fk_typent') == 8) {
@@ -3950,7 +3955,7 @@ class Bimp_Societe extends BimpDolObject
 
                         if (!count($errors)) {
 //                            if ($siret !== $this->getInitData('siret')) {
-//                                if (!(int) BimpTools::getValue('siren_ok', 0)) {
+//                                if (!(int) BimpTools::getValue('siren_ok', 0, 'int)) {
 //                                if(!$this->isSirenOk()){
 //                                    $errors[] = 'Veuillez saisir un n° SIRET valide : '.$this->getData('siret');
 //                                }
@@ -3959,7 +3964,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                 } else {
                     if (BimpTools::isSubmit('prenom')) {
-                        $prenom = BimpTools::getValue('prenom', '');
+                        $prenom = BimpTools::getValue('prenom', '', 'alphanohtml');
                         if ($prenom) {
                             $nom = strtoupper($this->getData('nom')) . ' ' . BimpTools::ucfirst($prenom);
                             $this->set('nom', $nom);
@@ -4003,8 +4008,8 @@ class Bimp_Societe extends BimpDolObject
                 $this->set('note_public', $note);
             }
 
-            $have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client') == 1) ? true : false;
-            if ($have_already_code_comptable && empty(BimpTools::getValue('code_compta'))) {
+            $have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client', 0, 'int') == 1) ? true : false;
+            if ($have_already_code_comptable && empty(BimpTools::getValue('code_compta', '', 'alphanohtml'))) {
                 $errors[] = "Vous devez rensseigner un code comptable client";
             }
 
@@ -4081,7 +4086,7 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        $fc = BimpTools::getValue('fc', 'index', true, 'alphanohtml');
+        $fc = BimpTools::getValue('fc', 'index', 'aZ09');
 
         if (in_array($fc, array('client', 'fournisseur')) && ($init_client != $this->getData('client') || $init_fourn != $this->getData('fournisseur'))) {
             $this->reloadPage = true;

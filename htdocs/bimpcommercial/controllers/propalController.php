@@ -7,7 +7,7 @@ class propalController extends BimpCommController
 
     public function init()
     {
-        if (!BimpTools::getValue('ajax', 0)) {
+        if (!BimpTools::getValue('ajax', 0, 'int')) {
             $propal = $this->config->getObject('', 'propal');
             if (BimpObject::objectLoaded($propal)) {
                 $id_sav = (int) $propal->getIdSav();

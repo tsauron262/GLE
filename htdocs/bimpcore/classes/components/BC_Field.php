@@ -111,6 +111,8 @@ class BC_Field extends BimpComponent
         $this->params_def['label'] = array('required' => true);
         $this->params_def['type'] = array('default' => 'string');
         $this->params_def['required'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['no_html'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['protect_html'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['unused'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required_if'] = array();
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);
@@ -291,7 +293,8 @@ class BC_Field extends BimpComponent
             $field_params = $this->params;
             $field_params['type'] = $this->getParam('items_data_type', 'string');
             $bc_display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $field_params);
-            $bc_display->no_html = $this->no_html;
+            $bc_display->no_html = ($this->no_html || $this->params['no_html'])? 1 : 0;
+            $bc_display->protect_html = $this->params['protect_html'];
             $bc_display->setDisplayOptions($this->display_options);
 
             foreach ($this->value as $value) {
@@ -379,7 +382,8 @@ class BC_Field extends BimpComponent
         }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/displays/' . $this->display_name, $this->name, $this->params, $this->value);
-        $display->no_html = $this->no_html;
+        $display->no_html = ($this->no_html || $this->params['no_html'])? 1 : 0;
+        $display->protect_html = $this->params['protect_html'];
         $display->setDisplayOptions($this->display_options);
         $html .= $display->renderHtml();
 

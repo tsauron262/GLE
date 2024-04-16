@@ -86,7 +86,7 @@ class BR_OrderLine extends BimpObject
 
     public function getRemoveOrderLineType()
     {
-        $fields = BimpTools::getValue('fields', array());
+        $fields = BimpTools::getValue('fields', array(), 'array');
         $id = (int) isset($fields['id_br_order_line']) ? $fields['id_br_order_line'] : 0;
         if ($id) {
             if ($this->fetch($id)) {

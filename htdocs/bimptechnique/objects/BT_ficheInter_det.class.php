@@ -830,7 +830,7 @@ class BT_ficheInter_det extends BimpDolObject
             // Calcul durée: 
             if (in_array($type, array(5, 3, 6))) {
                 // Si type déplacement
-                $duree = (int) BimpTools::getValue('temps_trajet', 0);
+                $duree = (int) BimpTools::getValue('temps_trajet', 0, 'int');
                 $this->set('arrived', null);
                 $this->set('departure', null);
                 $this->set('arriverd_am', null);
@@ -839,12 +839,12 @@ class BT_ficheInter_det extends BimpDolObject
                 $this->set('departure_pm', null);
             } elseif ($type != 2) {
                 // Si type non déplacement et non libre
-                if ((int) BimpTools::getValue('am_pm', 0)) {
+                if ((int) BimpTools::getValue('am_pm', 0, 'int')) {
                     // Si matin et après-midi: 
-                    $arrived_am = BimpTools::getValue('arrived_am_time', '');
-                    $departure_am = BimpTools::getValue('departure_am_time', '');
-                    $arrived_pm = BimpTools::getValue('arrived_pm_time', '');
-                    $departure_pm = BimpTools::getValue('departure_pm_time', '');
+                    $arrived_am = BimpTools::getValue('arrived_am_time', '', 'alphanohtml');
+                    $departure_am = BimpTools::getValue('departure_am_time', 'alphanohtml');
+                    $arrived_pm = BimpTools::getValue('arrived_pm_time', '', 'alphanohtml');
+                    $departure_pm = BimpTools::getValue('departure_pm_time', '', 'alphanohtml');
 
                     if (!$arrived_am || !$departure_am) {
                         $errors[] = 'Veuillez sélectionner un heure d\'arrivée et de départ pour le matin';
@@ -880,8 +880,8 @@ class BT_ficheInter_det extends BimpDolObject
                         $duree = $duree_am + $duree_pm;
                     }
                 } else {
-                    $arrived = BimpTools::getValue('arrived_time', '');
-                    $departure = BimpTools::getValue('departure_time', '');
+                    $arrived = BimpTools::getValue('arrived_time', '', 'alphanohtml');
+                    $departure = BimpTools::getValue('departure_time', '', 'alphanohtml');
 
                     if ($arrived && $departure) {
                         $this->set('arrived', $date . ' ' . $arrived);
@@ -913,7 +913,7 @@ class BT_ficheInter_det extends BimpDolObject
 
             if ($duree >= 60 || $type == 2) {
                 if ($type == 0) {
-                    $service = BimpTools::getValue('service', '');
+                    $service = BimpTools::getValue('service', '', 'alphanohtml');
                     if ($service) {
                         if (preg_match('/^(contrat|commande)_(\d+)$/', $service, $matches)) {
                             switch ($matches[1]) {
@@ -928,7 +928,7 @@ class BT_ficheInter_det extends BimpDolObject
                         }
                     }
                 } elseif ($type == 6) {
-                    $id_commande = (int) BimpTools::getValue('id_commande_depl', 0);
+                    $id_commande = (int) BimpTools::getValue('id_commande_depl', 0, 'int');
 
                     if ($id_commande) {
                         $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
@@ -948,7 +948,7 @@ class BT_ficheInter_det extends BimpDolObject
                         }
                     }
                 } elseif ($type == 5) {
-                    $id_contrat_line = BimpTools::getValue('id_contrat_depl', 0);
+                    $id_contrat_line = BimpTools::getValue('id_contrat_depl', 0, 'int');
                 }
             }
 
@@ -998,7 +998,7 @@ class BT_ficheInter_det extends BimpDolObject
                     }
                 }
 
-                $heuresRestantes = $contrat->getHeuresRestantesDelegation();
+                $heuresRestantes = $contrat->getHeuresRestantesDelegation('float');
 
                 if (in_array(BimpTools::getPostFieldValue('type'), $typeVerifInter)) {
                     if (BimpTools::getPostFieldValue('am_pm')) {

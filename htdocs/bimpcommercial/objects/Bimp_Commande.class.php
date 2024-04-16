@@ -2,9 +2,9 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 
-if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION) {
-    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php')) {
-        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php';
+if (BimpCore::getVersion() && BimpCore::getVersion()) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php';
     }
 }
 
@@ -637,7 +637,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
         if (in_array($field, array('fk_cond_reglement', 'fk_mode_reglement'))) {
-            if (BimpTools::getValue('action', '') === 'loadObjectInput' && in_array(BimpTools::getValue('field_name', ''), array('fk_cond_reglement', 'fk_mode_reglement'))) {
+            if (BimpTools::getValue('action', '', 'aZ09comma') === 'loadObjectInput' && in_array(BimpTools::getValue('field_name', '', 'aZ09comma'), array('fk_cond_reglement', 'fk_mode_reglement'))) {
                 switch ($field) {
                     case 'fk_cond_reglement':
                         return $this->getCondReglementBySociete();
@@ -649,6 +649,38 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         return parent::getData($field, $withDefault);
+    }
+    
+    public function displayRentabilite($withDetail = false)
+    {
+        $html = '';
+        $totVendu = $totRealise = 0;
+        foreach ($this->getLines('product') as $line) {
+            $prod = $line->getProduct();
+            if($prod->isInter()){
+                $totVendu += $line->getTotalHt(true);
+                $duree = $this->db->getValue('fichinterdet', 'SUM(duree)', '`id_line_commande` = '.$line->id);
+                $dureeProd = $prod->getData('duree_i');
+                if($dureeProd < 1)
+                    $dureeProd = 3600;
+                $realise = $duree / $dureeProd * $prod->getData('cost_price');
+                $totRealise += $realise;
+                
+                if($withDetail){
+//                    $html .= $prod->printData();
+                    $html .= $prod->getLink();
+                    $html .= '<br/>Vendu : '.$line->getFullQty().' * '. $dureeProd/3600 .'h soit '.$line->getTotalHt(true).' €';
+                    $html .= '<br/>Réalisé : '.$duree / 3600 .' h / soit : '.$realise.' €';
+                    $html .= '<br/><br/>';
+                }
+            }
+        }
+        if($totRealise)
+            $html .= round(100 - (($totRealise / $totVendu)  * 100), 2) . ' %';
+        else
+            $html .= 'N/A';
+        
+        return $html;
     }
 
     public function getDefaultListExtraButtons()
@@ -1107,9 +1139,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function getProductFournisseursPricesArray()
     {
         if (BimpTools::isSubmit('id_product')) {
-            $id_product = (int) BimpTools::getValue('id_product', 0);
+            $id_product = (int) BimpTools::getValue('id_product', 0, 'int');
         } elseif (BimpTools::isSubmit('fields')) {
-            $fields = BimpTools::getValue('fields', array());
+            $fields = BimpTools::getValue('fields', array(), 'array');
             if (isset($fields['id_product'])) {
                 $id_product = (int) $fields['id_product'];
             }
@@ -4614,11 +4646,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $errors = array();
         $propal = null;
 
-        $origin = BimpTools::getValue('origin', '');
-        $origin_id = (int) BimpTools::getValue('origin_id', 0);
+        $origin = BimpTools::getValue('origin', '', 'aZ09comma');
+        $origin_id = (int) BimpTools::getValue('origin_id', 0, 'int');
 
         // Fermeture de la propale si nécessaire
-        if ((int) BimpTools::getValue('close_propal', 0)) {
+        if ((int) BimpTools::getValue('close_propal', 0, 'int')) {
             if ($origin === 'propal') {
                 if (!$origin_id) {
                     $errors[] = 'ID de la proposition commerciale d\'origine absent';

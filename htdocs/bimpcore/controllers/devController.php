@@ -34,11 +34,11 @@ class devController extends BimpController
 
         // ToolsBar:
         $html .= '<div class="buttonsContainer align-left" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
-        if (BimpCore::isModuleActive('bimpapple')) {
-            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/phantomApple.php" target="_blank">';
-            $html .= 'Connect Apple' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-            $html .= '</a>';
-        }
+//        if (BimpCore::isModuleActive('bimpapple')) {
+//            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/phantomApple.php" target="_blank">';
+//            $html .= 'Connect Apple' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+//            $html .= '</a>';
+//        }
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/test.php')) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/test.php" target="_blank">';
@@ -77,8 +77,8 @@ class devController extends BimpController
         $html .= '<div class="row" style="margin-bottom: 30px">';
         $html .= '<div class="col-sm-12">';
         $html .= 'Version:';
-        if (defined('BIMP_EXTENDS_VERSION')) {
-            $html .= '<b>' . BIMP_EXTENDS_VERSION . '</b>';
+        if (BimpCore::getVersion()) {
+            $html .= '<b>' . BimpCore::getVersion() . '</b>';
         } else {
             $html .= '<span class="danger">Aucune</span>';
         }
@@ -280,8 +280,8 @@ class devController extends BimpController
 
         $html .= '<div style="margin-bottom: 10px;font-size: 14px">';
         $html .= 'Version: ';
-        if (defined('BIMP_EXTENDS_VERSION')) {
-            $html .= '<b>' . BIMP_EXTENDS_VERSION . '</b>';
+        if (BimpCore::getVersion()) {
+            $html .= '<b>' . BimpCore::getVersion() . '</b>';
         } else {
             $html .= '<span class="danger">Aucune</span>';
         }
@@ -374,8 +374,8 @@ class devController extends BimpController
         $warnings = array();
         $html = '';
 
-        $module_name = BimpTools::getValue('module_name', '');
-        $entity_type = BimpTools::getValue('entity_type', 'all');
+        $module_name = BimpTools::getValue('module_name', '', 'aZ09');
+        $entity_type = BimpTools::getValue('entity_type', 'all', 'aZ09');
 
         if (!$module_name) {
             $errors[] = 'Nom du module non spécifié';
@@ -388,7 +388,7 @@ class devController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -399,12 +399,12 @@ class devController extends BimpController
         $param_row = '';
         $n_errors = 0;
 
-        $module = BimpTools::getValue('module', '');
-        $parent_path = BimpTools::getValue('parent_path', '');
-        $param_name = BimpTools::getValue('param_name', '');
-        $value = BimpTools::getValue('value', '');
-        $id_entity = (int) BimpTools::getValue('id_entity', null);
-        $entity_type = BimpTools::getValue('entity_type', 'all');
+        $module = BimpTools::getValue('module', '', 'aZ09');
+        $parent_path = BimpTools::getValue('parent_path', 'alphanohtml');
+        $param_name = BimpTools::getValue('param_name', 'aZ09');
+        $value = BimpTools::getValue('value', '', 'restricthtml');
+        $id_entity = (int) BimpTools::getValue('id_entity', null, 'int');
+        $entity_type = BimpTools::getValue('entity_type', 'all', 'aZ09');
 
         if (is_null($id_entity)) {
             $errors[] = 'Entité absente ou invalide';
@@ -431,7 +431,7 @@ class devController extends BimpController
             'warnings'   => $warnings,
             'param_row'  => $param_row,
             'has_errors' => ($n_errors > 0),
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -441,11 +441,11 @@ class devController extends BimpController
         $param_row = '';
         $n_errors = 0;
 
-        $module = BimpTools::getValue('module', '');
-        $parent_path = BimpTools::getValue('parent_path', '');
-        $param_name = BimpTools::getValue('param_name', '');
-        $id_entity = (int) BimpTools::getValue('id_entity', null);
-        $entity_type = BimpTools::getValue('entity_type', 'all');
+        $module = BimpTools::getValue('module', '', 'aZ09');
+        $parent_path = BimpTools::getValue('parent_path', '', 'alphanohtml');
+        $param_name = BimpTools::getValue('param_name', '', 'aZ09');
+        $id_entity = (int) BimpTools::getValue('id_entity', null, 'aZ09');
+        $entity_type = BimpTools::getValue('entity_type', 'all', 'aZ09');
 
         if (is_null($id_entity)) {
             $errors[] = 'Entité absente ou invalide';
@@ -471,7 +471,7 @@ class devController extends BimpController
             'errors'     => $errors,
             'param_row'  => $param_row,
             'has_errors' => ($n_errors > 0),
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -480,8 +480,8 @@ class devController extends BimpController
         return array(
             'errors'     => array(),
             'warnings'   => array(),
-            'html'       => BimpModuleConf::renderSearchParamsResults(BimpTools::getValue('search', ''), BimpTools::getValue('entity_type', 'all')),
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'html'       => BimpModuleConf::renderSearchParamsResults(BimpTools::getValue('search', '', 'alphanohtml'), BimpTools::getValue('entity_type', 'all', 'aZ09')),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -492,13 +492,13 @@ class devController extends BimpController
         $errors = array();
         $html = '';
 
-        $type = BimpTools::getValue('type', '');
+        $type = BimpTools::getValue('type', '', 'aZ09');
 
         if (!$type) {
             $errors[] = 'Type absent';
         }
 
-        $module = BimpTools::getValue('module', '');
+        $module = BimpTools::getValue('module', '', 'aZ09');
 
         if (!$module) {
             $errors[] = 'Module absent';
@@ -517,7 +517,7 @@ class devController extends BimpController
             'errors'     => $errors,
             'warnings'   => array(),
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 
@@ -527,7 +527,7 @@ class devController extends BimpController
         $warnings = array();
         $html = '';
 
-        $file_data = BimpTools::getValue('file_data', '');
+        $file_data = BimpTools::getValue('file_data', '', 'json_nohtml');
 
         if (!$file_data) {
             $errors[] = 'Données du fichier à afficher absentes';
@@ -559,7 +559,7 @@ class devController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 }

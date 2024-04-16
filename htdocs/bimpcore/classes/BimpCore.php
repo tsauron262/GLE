@@ -461,8 +461,8 @@ class BimpCore
 
                 if (!empty($modules_extends_updates)) {
                     foreach ($modules_extends_updates as $module => $extends_updates) {
-                        if (defined('BIMP_EXTENDS_VERSION') && isset($extends_updates['version'])) {
-                            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql/';
+                        if (BimpCore::getVersion() && isset($extends_updates['version'])) {
+                            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/sql/';
                             if (!file_exists($dir) || !is_dir($dir)) {
                                 continue;
                             }
@@ -483,7 +483,7 @@ class BimpCore
                                     echo 'FICHIER ABSENT: ' . $dir . $extend_version . '.sql <br/>';
                                     continue;
                                 }
-                                echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de la version "' . BIMP_EXTENDS_VERSION . '"';
+                                echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de la version "' . BimpCore::getVersion() . '"';
                                 if ($bdb->executeFile($dir . $extend_version . '.sql', $file_errors)) {
                                     echo ' [OK]<br/>';
                                 } else {
@@ -493,7 +493,7 @@ class BimpCore
                             echo '<br/>';
 
                             if ($new_version) {
-                                BimpCore::setConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, $new_version);
+                                BimpCore::setConf('module_sql_version_' . $module . '_version_' . BimpCore::getVersion(), $new_version);
                             }
                         }
 
@@ -583,7 +583,7 @@ class BimpCore
 
     public static function getModulesExtendsUpdates()
     {
-        if (!defined('BIMP_EXTENDS_VERSION') && BimpCore::getExtendsEntity() == '') {
+        if (!BimpCore::getVersion() && BimpCore::getExtendsEntity() == '') {
             return array();
         }
 
@@ -603,10 +603,10 @@ class BimpCore
             }
 
             foreach ($modules as $module) {
-                if (defined('BIMP_EXTENDS_VERSION')) {
-                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql';
+                if (BimpCore::getVersion()) {
+                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/sql';
                     if (file_exists($dir) && is_dir($dir)) {
-                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, 0);
+                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . BimpCore::getVersion(), 0);
                         $files = scandir($dir);
 
                         foreach ($files as $f) {
@@ -1023,11 +1023,13 @@ class BimpCore
 
     public static function getVersion()
     {
-        if (defined('BIMP_EXTENDS_VERSION')) {
+        $version = BimpCore::getConf('extends_version', '');
+     
+        if (!$version && defined('BIMP_EXTENDS_VERSION')) {
             return BIMP_EXTENDS_VERSION;
         }
 
-        return '';
+        return $version;
     }
 
     public static function isEntity($entity)
@@ -1049,13 +1051,13 @@ class BimpCore
 
     public static function isVersion($version)
     {
-        if (defined('BIMP_EXTENDS_VERSION')) {
+        if (BimpCore::getVersion()) {
             if (is_array($version)) {
-                if (in_array(BIMP_EXTENDS_VERSION, $version)) {
+                if (in_array(BimpCore::getVersion(), $version)) {
                     return 1;
                 }
             } else {
-                if (BIMP_EXTENDS_VERSION == $version) {
+                if (BimpCore::getVersion() == $version) {
                     return 1;
                 }
             }
@@ -1190,7 +1192,7 @@ class BimpCore
                 return array();
             }
 
-            if (!(int) BimpCore::getConf('use_bimp_logs') && !(int) BimpTools::getValue('use_logs', 0)) {
+            if (!(int) BimpCore::getConf('use_bimp_logs') && !(int) BimpTools::getValue('use_logs', 0, 'int')) {
                 return array();
             }
 
@@ -1289,8 +1291,8 @@ class BimpCore
                         $data['Erreurs Màj log'] = $errUpdate;
                     }
 
-                    $data['GET'] = $_GET;
-                    $data['POST'] = $_POST;
+                    $data['GET'] = BimpTools::htmlentities_array($_GET);
+                    $data['POST'] = BimpTools::htmlentities_array($_POST);
                     $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                 }
             }
@@ -1543,7 +1545,7 @@ class BimpCore
             $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
             $onclick = $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
                 'fields' => array(
-                    'url' => $_SERVER['REQUEST_URI']
+                    'url' => dol_escape_htmltag($_SERVER['REQUEST_URI'])
                 )
             ));
 

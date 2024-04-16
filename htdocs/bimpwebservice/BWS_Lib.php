@@ -6,9 +6,9 @@ if (!defined('BWS_LIB_INIT')) {
     $dir = __DIR__ . '/classes/';
     include_once $dir . 'BWSApi.php';
 
-    if (defined('BIMP_EXTENDS_VERSION')) {
-        if (file_exists(DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BIMP_EXTENDS_VERSION . '/classes/BWSApi.php')) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BIMP_EXTENDS_VERSION . '/classes/BWSApi.php';
+    if (BimpCore::getVersion()) {
+        if (file_exists(DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BimpCore::getVersion() . '/classes/BWSApi.php')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BimpCore::getVersion() . '/classes/BWSApi.php';
         }
     }
 

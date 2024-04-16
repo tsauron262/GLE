@@ -330,7 +330,7 @@ class cegidController extends BimpController {
 
         die(json_encode(array(
             'success_callback' => 'bimp_reloadPage()',
-            'request_id'       => BimpTools::getValue('request_id', 0),
+            'request_id'       => BimpTools::getValue('request_id', 0, 'int'),
             'errors'           => $errors
         )));
     }
@@ -358,7 +358,7 @@ class cegidController extends BimpController {
          
          die(json_encode(array(
             'success_callback' => $js,
-            'request_id'       => BimpTools::getValue('request_id', 0),
+            'request_id'       => BimpTools::getValue('request_id', 0, 'int'),
             'errors'           => $errors
         )));
     }
@@ -372,7 +372,7 @@ class cegidController extends BimpController {
         
          die(json_encode(array(
             'success_callback' => $js,
-            'request_id'       => BimpTools::getValue('request_id', 0),
+            'request_id'       => BimpTools::getValue('request_id', 0, 'int'),
             'errors'           => $errors
         )));
     }

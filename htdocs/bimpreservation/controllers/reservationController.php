@@ -40,10 +40,10 @@ class reservationController extends BimpController
         $errors = array();
         $success = '';
 
-        $id_reservation = BimpTools::getValue('id_reservation');
-        $status = BimpTools::getValue('status');
+        $id_reservation = (int) BimpTools::getValue('id_reservation', 0, 'int');
+        $status = BimpTools::getValue('status', 0, 'int');
 
-        if (is_null($id_reservation) || !$id_reservation) {
+        if (!$id_reservation) {
             $errors[] = 'ID de la réservation absent ou invalide';
         }
 
@@ -67,7 +67,7 @@ class reservationController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'success'    => $success,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -77,8 +77,8 @@ class reservationController extends BimpController
         $success = '';
         $id_reservation = 0;
 
-        $id_commande_client = (int) BimpTools::getValue('id_commande_client');
-        $serial = BimpTools::getValue('serial', '');
+        $id_commande_client = (int) BimpTools::getValue('id_commande_client', 0, 'int');
+        $serial = BimpTools::getValue('serial', '', 'alphanohtml');
 
         if (!$id_commande_client) {
             $errors[] = 'ID de la commande client absent';
@@ -107,7 +107,7 @@ class reservationController extends BimpController
             'errors'         => $errors,
             'success'        => $success,
             'id_reservation' => $id_reservation,
-            'request_id'     => BimpTools::getValue('request_id', 0)
+            'request_id'     => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -115,8 +115,8 @@ class reservationController extends BimpController
     {
         $errors = array();
 
-        $id_reservation_cmd_fourn = (int) BimpTools::getValue('id_reservation_cmd_fourn', 0);
-        $force_remove = (int) BimpTools::getValue('force_remove', 0);
+        $id_reservation_cmd_fourn = (int) BimpTools::getValue('id_reservation_cmd_fourn', 0, 'int');
+        $force_remove = (int) BimpTools::getValue('force_remove', 0, 'int');
 
         if (!$id_reservation_cmd_fourn) {
             $errors[] = 'ID de la la réservation absent';
@@ -137,7 +137,7 @@ class reservationController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'success'    => $success,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 }

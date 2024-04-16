@@ -9,7 +9,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/PropalSavPDF.php';
 
 global $db, $langs;
 
-$id_sav = (int) BimpTools::getValue('id_sav');
+$id_sav = (int) BimpTools::getValue('id_sav', 0, 'int');
 
 $errors = array();
 

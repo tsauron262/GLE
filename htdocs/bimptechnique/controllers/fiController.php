@@ -254,7 +254,7 @@ class fiController extends BimpController
 //
 //        die(json_encode(array(
 //            'success_callback' => "window.location.href = '" . DOL_URL_ROOT . "/bimptechnique/?fc=fi&id=" . $instance->id . "'",
-//            'request_id'       => BimpTools::getValue('request_id', 0), // Important
+//            'request_id'       => BimpTools::getValue('request_id', 0, 'int'), // Important
 //            'errors'           => $errors
 //        )));
     }

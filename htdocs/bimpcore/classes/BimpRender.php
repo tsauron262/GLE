@@ -514,9 +514,9 @@ class BimpRender
 
         if (is_array($tabs) && count($tabs)) {
             if ($tabs_id === 'maintabs' && BimpTools::isSubmit('navtab')) {
-                $active = BimpTools::getValue('navtab', $tabs[0]['id']);
+                $active = BimpTools::getValue('navtab', $tabs[0]['id'], 'aZ09');
             } else {
-                $active = BimpTools::getValue('navtab-' . $tabs_id, $tabs[0]['id']);
+                $active = BimpTools::getValue('navtab-' . $tabs_id, $tabs[0]['id'], 'aZ09');
             }
         }
 
@@ -1020,6 +1020,7 @@ class BimpRender
 
         $params = BimpTools::overrideArray(array(
                     'no_html'   => false,
+                    'protect_html'=> false,
                     'title'     => '',
                     'foldable'  => 0,
                     'open'      => 1,
@@ -1062,12 +1063,16 @@ class BimpRender
                                     'foldable'  => $foldable,
                                     'title'     => $label,
                                     'open'      => $open,
-                                    'max_depth' => ($max_depth - 1)
+                                    'max_depth' => ($max_depth - 1),
+                                    'protect_html' => $params['protect_html']
                         ));
                     } else {
                         $html .= '<div class="array_content_row">';
                         $html .= '<span class="array_content_label">' . $label . ': </span>';
-                        $html .= '<span class="array_content_value">' . $value . '</span>';
+                        if($params['protect_html'])
+                            $html .= '<span class="array_content_value">' . htmlentities($value) . '</code></span>';
+                        else
+                            $html .= '<span class="array_content_value">' . $value . '</span>';
                         $html .= '</div>';
                     }
                 }

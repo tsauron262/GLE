@@ -672,7 +672,7 @@ class BC_ListTable extends BC_List
         if (BimpTools::isSubmit('search_fields')) {
             $fields = array();
 
-            $searches = BimpTools::getValue('search_fields', array());
+            $searches = BimpTools::getValue('search_fields', array(), 'array');
 
             foreach ($searches as $col_name => $search_filter) {
                 $field_object = $this->object;

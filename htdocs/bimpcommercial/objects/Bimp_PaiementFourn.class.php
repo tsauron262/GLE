@@ -70,7 +70,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
 
     public function getAmountFromFacture()
     {
-        $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);
+        $id_facture = (int) BimpTools::getValue('fields/id_facture', 0, 'int');
 
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
@@ -116,7 +116,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
 
         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
         if (BimpTools::isSubmit('param_values/fields/id_facture')) {
-            $list[] = array('rowid' => (int) BimpTools::getValue('param_values/fields/id_facture', 0));
+            $list[] = array('rowid' => (int) BimpTools::getValue('param_values/fields/id_facture', 0, 'int'));
         } else {
             $list = $facture->getList(array(
                 'fk_soc'    => $id_fourn,
@@ -292,11 +292,11 @@ class Bimp_PaiementFourn extends Bimp_Paiement
             $errors[] = 'Compte bancaire absent';
         }
 
-        $total_to_pay = (float) BimpTools::getValue('total_to_pay', 0);
-        $total_avoirs = (float) BimpTools::getValue('total_avoirs', 0);
-        $total_paid = (float) BimpTools::getValue('total_paid_amount');
+        $total_to_pay = (float) BimpTools::getValue('total_to_pay', 0, 'float');
+        $total_avoirs = (float) BimpTools::getValue('total_avoirs', 0, 'float');
+        $total_paid = (float) BimpTools::getValue('total_paid_amount', 0, 'float');
 
-        $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', ''), true);
+        $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', '', 'json_nohtml'), true);
         $total_factures_versements = 0;
 
         if ((is_null($total_paid) || !$total_paid) && (is_null($avoirs) || !count($avoirs))) {
@@ -334,8 +334,8 @@ class Bimp_PaiementFourn extends Bimp_Paiement
 
         // Calcul du total payé par facture. 
         while (BimpTools::isSubmit('amount_' . $i)) {
-            $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
-            $amount = (float) BimpTools::getValue('amount_' . $i, 0);
+            $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');
+            $amount = (float) BimpTools::getValue('amount_' . $i, 0, 'float');
 
             if ($id_facture <= 0) {
                 $errors[] = 'ID facture invalide (ligne ' . $i . ')';
@@ -386,7 +386,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
             // Insertion des avoirs éventuels: 
             $i = 1;
             while (BimpTools::isSubmit('amount_' . $i)) {
-                $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
+                $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');
                 if (isset($factures[$id_facture]) && $factures[$id_facture]->isLoaded()) {
                     foreach ($avoirs as $avoir) {
                         if ($avoir['input_name'] === 'amount_' . $i) {

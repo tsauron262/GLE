@@ -98,7 +98,7 @@ class EtiquetteSac1 extends BimpEtiquettePDF {
 global $db, $langs;
 $errors = array();
 
-$type = BimpTools::getValue('type', '');
+$type = BimpTools::getValue('type', '', 'aZ09');
 
 if (!$type) {
     die('Erreur: type d\'étiquette à générer absent');
@@ -106,8 +106,8 @@ if (!$type) {
 
 $id_sacs = array();
 
-if (BimpTools::getValue('id_sacs', '') != '') {
-    $id_sacs = explode(',', BimpTools::getValue('id_sacs', ''));
+if (BimpTools::isSubmit('id_sacs')) {
+    $id_sacs = explode(',', BimpTools::getValue('id_sacs', '', 'aZ09comma'));
 }
 
 if (count($id_sacs) == 0) {
@@ -115,7 +115,7 @@ if (count($id_sacs) == 0) {
 }
 
 
-$qty = (int) BimpTools::getValue('qty', 1);
+$qty = (int) BimpTools::getValue('qty', 1, 'int');
 
 $pdf = null;
 switch ($type) {

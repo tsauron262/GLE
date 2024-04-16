@@ -33,8 +33,8 @@ class Equipment_ExtEntity extends Equipment
     {
         switch ($action) {
             case 'importSpare':
-                if (BimpTools::getValue('fc', '') == 'client') {
-                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) BimpTools::getValue('id', 0));
+                if (BimpTools::getValue('fc', '', 'aZ09') == 'client') {
+                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) BimpTools::getValue('id', 0, 'int'));
                     if (BimpObject::objectLoaded($client)) {
                         if (!(int) $client->getData('entrepot_spare')) {
                             $errors[] = 'Le client ' . $client->getLink() . ' n\'a pas d\'entrepôt SPARE';
@@ -104,8 +104,8 @@ class Equipment_ExtEntity extends Equipment
         if ($this->isActionAllowed('importSpare') && $this->canSetAction('importSpare')) {
             $data = array();
 
-            if (BimpTools::getValue('fc', '') == 'client') {
-                $data['id_client'] = (int) BimpTools::getValue('id', 0);
+            if (BimpTools::getValue('fc', '', 'aZ09') == 'client') {
+                $data['id_client'] = (int) BimpTools::getValue('id', 0, 'int');
             }
 
             $buttons[] = array(

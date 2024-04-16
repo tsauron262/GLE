@@ -8,11 +8,12 @@ class commandesController extends BimpController
 
     public function displayHead()
     {
-        global $db, $langs, $user;
+        global $langs, $user;
 
         $this->getSocid();
-        if (BimpTools::getValue("socid") > 0) {
-            $this->socid = BimpTools::getValue("socid");
+        $socid = (int) BimpTools::getValue("socid", 0, 'int');
+        if ($socid) {
+            $this->socid = $socid;
             require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
             $head = societe_prepare_head($this->soc->dol_object);
             dol_fiche_head($head, 'bimpcomm', '');
@@ -27,11 +28,13 @@ class commandesController extends BimpController
     {
         if ($this->socid < 1) {
             if ((int) BimpTools::isSubmit('id_client')) {
-                $this->socid = (int) BimpTools::getValue("id_client", 0);
+                $this->socid = (int) BimpTools::getValue("id_client", 0, 'int');
                 $this->soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
-            } elseif (BimpTools::getValue("socid") > 0) {
-                $this->socid = BimpTools::getValue("socid");
-                $this->soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
+            } elseif (BimpTools::isSubmit("socid")) {
+                $this->socid = (int) BimpTools::getValue("socid", 0, 'int');
+                if ($this->socid) {
+                    $this->soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
+                }
             }
         }
     }
@@ -125,15 +128,13 @@ class commandesController extends BimpController
 //            //$list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
 //        }
         return BimpRender::renderAlerts('Attention en cours de dév, les données sont celle du 28/09/2023')
-            . $list->renderHtml();
+                . $list->renderHtml();
     }
-    
-    
 
     public function renderProdsTabs()
     {
         $this->getSocid();
-//        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
+//        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0, 'int');
 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
 

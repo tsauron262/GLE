@@ -75,8 +75,8 @@ class Bimp_UserGroup extends BimpObject
     {
         $buttons = array();
 
-        if (BimpTools::getValue('fc', '') === 'user') {
-            $id_user = (int) BimpTools::getValue('id', 0);
+        if (BimpTools::getValue('fc', '', 'aZ09') === 'user') {
+            $id_user = (int) BimpTools::getValue('id', 0, 'int');
             if ($id_user && $this->isActionAllowed('removeUsers') && $this->canSetAction('removeUsers')) {
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
 
@@ -102,8 +102,8 @@ class Bimp_UserGroup extends BimpObject
         $buttons = array();
 
         $id_user = 0;
-        if (BimpTools::getValue('fc', '') === 'user') {
-            $id_user = (int) BimpTools::getValue('id', 0);
+        if (BimpTools::getValue('fc', '', 'aZ09') === 'user') {
+            $id_user = (int) BimpTools::getValue('id', 0, 'int');
 
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
             if (BimpObject::objectLoaded($user)) {

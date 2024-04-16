@@ -730,7 +730,7 @@ class GSX_Request_v2
                 if (count($subDatasNode) == 1) {
                     $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, array(), 1);
                     if ($multiple) {
-                        $nextIdx = (int) BimpTools::getValue($inputName . '_nextIdx', 0);
+                        $nextIdx = (int) BimpTools::getValue($inputName . '_nextIdx', 0, 'int');
                         if ($nextIdx) {
                             $array = array();
                             for ($i = 1; $i < $nextIdx; $i++) {

@@ -263,7 +263,7 @@ class BC_StatsList extends BC_List
         if (is_null($this->groupBy)) {
             $this->groupBy = array();
 
-            $groupsBy = BimpTools::getValue('group_by', array());
+            $groupsBy = BimpTools::getValue('group_by', array(), 'array');
             $idx = (int) $this->groupByIndex;
             $next_gb_idx = null;
 
@@ -324,7 +324,7 @@ class BC_StatsList extends BC_List
     protected function fetchSearchFilters()
     {
         $init_post = $_POST;
-        $search_fields = BimpTools::getValue('search_fields', array());
+        $search_fields = BimpTools::getValue('search_fields', array(), 'array');
         unset($_POST['search_fields']);
 
         $obj_fields = array();

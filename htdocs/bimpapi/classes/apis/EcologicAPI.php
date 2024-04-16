@@ -107,7 +107,7 @@ www.opmconseil.com
 
     public function testRequest(&$errors = array(), &$warnings = array())
     {
-        $data = $this->executereqWithCache('printproducttypewithlabellist', array(
+        $data = $this->executereqWithCache('getrepairsitesbyats', array(
             'url_params' => array()
                 ), $errors, $warnings);
         

@@ -296,7 +296,13 @@ class BimpDb
 
     public function getValue($table, $field, $where = '1', $order_by = '', $order_way = 'DESC')
     {
-        $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
+        $sql = 'SELECT ';
+        if(stripos($field, '(') === false)
+            $sql .=  '`' . $field . '`';
+        else
+            $sql .= $field;
+        
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
         if ($order_by) {
             $sql .= ' ORDER BY `' . $order_by . '` ' . $order_way;
         }

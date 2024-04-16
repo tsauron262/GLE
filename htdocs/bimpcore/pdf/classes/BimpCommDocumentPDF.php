@@ -140,6 +140,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                             }
                         }
                         break;
+                    case 'champagne':
+                        $this->fromCompany->name = 'LDLC APPLE';
+                        break;
 
                     case 'actimag':
                         break;

@@ -7,9 +7,9 @@ class transferController extends BimpController {
         $errors = array();
         $id_affected = NULL;
 
-        $input = BimpTools::getValue('input');
-        $id_transfer = (int) BimpTools::getValue('id');
-        $quantity_input = (int) BimpTools::getValue('quantity');
+        $input = BimpTools::getValue('input', null, 'alphanohtml');
+        $id_transfer = (int) BimpTools::getValue('id', 0, 'int');
+        $quantity_input = (int) BimpTools::getValue('quantity', 0, 'int');
         $transfert_line = BimpObject::getInstance('bimptransfer', 'TransferLine');
         $id_product = 0;
         $id_equipment = 0;
@@ -69,7 +69,7 @@ class transferController extends BimpController {
             'errors' => $errors,
             'success' => sizeof($errors) == 0 ? "Transfert enregistré" : '',
             'data' => $data,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
 
@@ -91,7 +91,7 @@ class transferController extends BimpController {
     
     public function getPageTitle() {
         $title = 'Transfert';
-        $id_transfer = (int) BimpTools::getValue('id');
+        $id_transfer = (int) BimpTools::getValue('id', 0, 'int');
         $title .= '#' . $id_transfer;
         return $title;
     }

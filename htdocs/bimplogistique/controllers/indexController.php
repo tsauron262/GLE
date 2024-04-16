@@ -25,7 +25,7 @@ class indexController extends BimpController
         die(json_encode(array(
             'data'       => $html,
             'success'    => 'Produit ajouté',
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
     
@@ -37,7 +37,7 @@ class indexController extends BimpController
         die(json_encode(array(
             'url'        => $prod->getNomUrl(),
             'success'    => 'Produit ajouté',
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
         
     }

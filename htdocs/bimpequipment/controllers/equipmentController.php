@@ -12,7 +12,7 @@ class equipmentController extends BimpController
         }
 
         $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_Pret'), 'default', 1, null, 'Prêts de l\'équipement');
-        $list->addAssociateAssociationFilter('equipments', BimpTools::getValue('id', 0));
+        $list->addAssociateAssociationFilter('equipments', BimpTools::getValue('id', 0, 'int'));
         return $list->renderHtml();
     }
 
@@ -22,14 +22,14 @@ class equipmentController extends BimpController
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
 
-        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0));
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0, 'int'));
 
         if (!BimpObject::objectLoaded($equipment)) {
             return BimpRender::renderAlerts('ID de l\'équipement invalide');
         }
 
         $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SAV'), 'default', 1, null, 'SAV enregistrés pour cet équipement', 'wrench');
-        $list->addFieldFilterValue('id_equipment', BimpTools::getValue('id', 0));
+        $list->addFieldFilterValue('id_equipment', BimpTools::getValue('id', 0, 'int'));
 
         $place = $equipment->getCurrentPlace();
         if (BimpObject::objectLoaded($place)) {
@@ -57,7 +57,7 @@ class equipmentController extends BimpController
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
 
-        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0));
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0, 'int'));
 
         if (!BimpObject::objectLoaded($equipment)) {
             return BimpRender::renderAlerts('ID de l\'équipement invalide');
@@ -74,7 +74,7 @@ class equipmentController extends BimpController
     
     public function renderAchats(){
         $html = '';
-        $id_equipment = (int) BimpTools::getValue('id', 0);
+        $id_equipment = (int) BimpTools::getValue('id', 0, 'int');
         if ($id_equipment) {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
             $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commande Fournisseur', 'wrench');
@@ -97,11 +97,11 @@ class equipmentController extends BimpController
             die(json_encode(array(
                 'errors'     => $errors,
                 'data'       => $data,
-                'request_id' => BimpTools::getValue('request_id', 0)
+                'request_id' => BimpTools::getValue('request_id', 0, 'int')
             )));
             
 
-        $serial = (string) BimpTools::getValue('serial', '');
+        $serial = (string) BimpTools::getValue('serial', '', 'alphanohtml');
 
         if (!$serial) {
             $errors[] = 'Numéro de série absent';
@@ -120,7 +120,7 @@ class equipmentController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'data'       => $data,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
     
@@ -137,7 +137,7 @@ class equipmentController extends BimpController
         $sucess = '';
         $html = '';
 
-        $id_equipment = (int) BimpTools::getValue('id_equipment', 0);
+        $id_equipment = (int) BimpTools::getValue('id_equipment', 0, 'int');
         if ($id_equipment) {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
             if (BimpObject::objectLoaded($equipment)) {
@@ -168,7 +168,7 @@ class equipmentController extends BimpController
             'errors'     => $errors,
             'success'    => $sucess,
             'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
     
@@ -182,7 +182,7 @@ class equipmentController extends BimpController
         $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine2');
 
         $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes d'inventaire contenant l'équipement");
-        $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id'));
+        $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id', 0, 'int'));
         $list->addJoin('bl_inventory_2', 'a.fk_inventory = i.id', 'i');
         $html .= $list->renderHtml();
         
@@ -191,7 +191,7 @@ class equipmentController extends BimpController
         $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine');
 
         $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes dancien inventaire contenant l'équipement");
-        $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id'));
+        $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id', 0, 'int'));
         $list->addJoin('bl_inventory', 'a.fk_inventory = i.id', 'i');
         $html .=  $list->renderHtml();
         

@@ -22,7 +22,7 @@ class BS_Sac extends BimpObject
     public function getDefaultCodeCentre()
     {
         if (BimpTools::isSubmit('code_centre')) {
-            return BimpTools::getValue('code_centre');
+            return BimpTools::getValue('code_centre', '', 'aZ09');
         } else {
             global $user;
             $userCentres = explode(' ', $user->array_options['options_apple_centre']);
@@ -34,7 +34,7 @@ class BS_Sac extends BimpObject
 
             $id_entrepot = (int) $this->getData('id_entrepot');
             if (!$id_entrepot) {
-                $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+                $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0, 'int');
             }
             if ($id_entrepot) {
                 global $tabCentre;

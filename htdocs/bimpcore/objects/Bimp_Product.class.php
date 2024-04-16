@@ -20,6 +20,7 @@ class Bimp_Product extends BimpObject
     public static $abonnements_sous_types = array(6, 20);
     public static $bundle_sous_types = array(20, 21);
     public static $sousTypeDep = array(3, 4);
+    public static $sousTypeInter = array(1, 3);
     public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
         0 => array('label' => 'Produit', 'icon' => 'fas_box'),
@@ -522,6 +523,11 @@ class Bimp_Product extends BimpObject
     public function isDep()
     {
         return (in_array($this->getData('type2'), static::$sousTypeDep));
+    }
+
+    public function isInter()
+    {
+        return (in_array($this->getData('type2'), static::$sousTypeInter));
     }
 
     public function isInContrat()
@@ -1353,7 +1359,7 @@ class Bimp_Product extends BimpObject
     {
         global $cache_scann;
 
-        $id_inventory = BimpTools::getValue('id');
+        $id_inventory = (int) BimpTools::getValue('id', 0, 'int');
         $key = $id_inventory . ($is_show_room ? '_sr' : '');
 
         if (!isset($cache_scann[$key])) {
@@ -1585,9 +1591,9 @@ class Bimp_Product extends BimpObject
     {
         if (is_null($id_entrepot)) {
             if (BimpTools::isSubmit('id_entrepot')) {
-                $id_entrepot = BimpTools::getValue('id_entrepot');
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
             } elseif (BimpTools::isSubmit('param_list_filters')) {
-                $filters = json_decode(BimpTools::getValue('param_list_filters', array()));
+                $filters = json_decode(BimpTools::getValue('param_list_filters', '', 'json_nohtml'));
                 foreach ($filters as $filter) {
                     if ($filter->name === 'id_commande_client') {
                         $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $filter->filter);
@@ -2147,7 +2153,7 @@ class Bimp_Product extends BimpObject
 
     public function displayStockInventory()
     {
-        $id_inventory = BimpTools::getValue('id');
+        $id_inventory = (int) BimpTools::getValue('id', 0, 'int');
         $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory', $id_inventory);
         $stock = $this->getStocksForEntrepot($inventory->getData('fk_warehouse'));
         return $stock['reel'];
@@ -2160,7 +2166,7 @@ class Bimp_Product extends BimpObject
 
     public function displayStockInventorySr()
     {
-        $id_inventory = BimpTools::getValue('id');
+        $id_inventory = (int) BimpTools::getValue('id', 0, 'int');
         $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
     }
@@ -2598,7 +2604,7 @@ class Bimp_Product extends BimpObject
     public function renderStock()
     {
         /* Ne peut être utilisé que dans l'affichage des listes à cause de $inventory->current_wt */
-        $id_inventory = (int) BimpTools::getValue('id');
+        $id_inventory = (int) BimpTools::getValue('id', 0, 'int');
         $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
         $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
         return $diff['stock'];
@@ -2607,7 +2613,7 @@ class Bimp_Product extends BimpObject
     public function renderNbScanned()
     {
         /* Ne peut être utilisé que dans l'affichage des listes à cause de $inventory->current_wt */
-        $id_inventory = (int) BimpTools::getValue('id');
+        $id_inventory = (int) BimpTools::getValue('id', 0, 'int');
         $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
         $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
         return $diff['nb_scan'];
@@ -4337,9 +4343,9 @@ class Bimp_Product extends BimpObject
 
     public function validatePost()
     {
-        $marque = BimpTools::getValue('marque', '');
-        $ref_const = BimpTools::getValue('ref_constructeur', '');
-        $mailValid = BimpTools::getValue('mailValid', 0);
+        $marque = BimpTools::getValue('marque', '', 'alphanohtml');
+        $ref_const = BimpTools::getValue('ref_constructeur', '', 'alphanohtml');
+        $mailValid = (int) BimpTools::getValue('mailValid', 0, 'int');
 
         if ($marque && $ref_const) {
             $ref = strtoupper(substr($marque, 0, 3));

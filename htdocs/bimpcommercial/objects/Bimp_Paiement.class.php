@@ -459,7 +459,7 @@ class Bimp_Paiement extends BimpObject
 
         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
         if (BimpTools::isSubmit('param_values/fields/id_facture')) {
-            $list[] = array('rowid' => (int) BimpTools::getValue('param_values/fields/id_facture', 0));
+            $list[] = array('rowid' => (int) BimpTools::getValue('param_values/fields/id_facture', 0, 'int'));
         } else {
             $list = $facture->getList(array(
                 'fk_soc'    => $id_client,
@@ -923,7 +923,7 @@ class Bimp_Paiement extends BimpObject
         $errors = parent::validatePost();
 
         if (BimpTools::isSubmit('id_mode_paiement')) {
-            $id_paiement = BimpTools::getValue('id_mode_paiement', 0);
+            $id_paiement = BimpTools::getValue('id_mode_paiement', 0, 'aZ09');
             if (is_string($id_paiement)) {
                 if (preg_match('/^\d+$/', $id_paiement)) {
                     $id_paiement = (int) $id_paiement;
@@ -935,7 +935,7 @@ class Bimp_Paiement extends BimpObject
         }
 
 //        if (BimpTools::isSubmit('id_account')) {
-//            $this->dol_object->fk_account = (int) BimpTools::getValue('id_account', 0);
+//            $this->dol_object->fk_account = (int) BimpTools::getValue('id_account', 0, 'int');
 //        }
 
         if (!(int) $this->dol_object->paiementid) {
@@ -965,9 +965,9 @@ class Bimp_Paiement extends BimpObject
                 $errors[] = 'Date antérieure au début d\'exercice ('.$date_debut_ex.')';
         }
 
-        if ($this->useCaisse && (int) BimpTools::getValue('use_caisse', 0)) {
+        if ($this->useCaisse && (int) BimpTools::getValue('use_caisse', 0, 'int')) {
             $use_caisse = true;
-            $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
+            $id_caisse = (int) BimpTools::getValue('id_caisse', 0, 'int');
             if (!$id_caisse) {
                 $errors[] = 'Caisse absente';
             } else {
@@ -981,7 +981,7 @@ class Bimp_Paiement extends BimpObject
                 }
             }
         } else {
-            $id_account = (int) BimpTools::getValue('id_account', 0);
+            $id_account = (int) BimpTools::getValue('id_account', 0, 'int');
 
             if (!$id_account) {
                 $errors[] = 'Veuillez sélectionner un compte bancaire';
@@ -1047,9 +1047,9 @@ class Bimp_Paiement extends BimpObject
             }
 
             // Check montants: 
-            $total_paid = (float) BimpTools::getValue('total_paid_amount');
+            $total_paid = (float) BimpTools::getValue('total_paid_amount', null, 'float');
 
-            $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', ''), true);
+            $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', '', 'json_nohtml'), true);
             $total_factures_versements = 0;
 
             if ((is_null($total_paid) || !$total_paid) && (is_null($avoirs) || !is_array($avoirs) || !count($avoirs))) {
@@ -1068,8 +1068,8 @@ class Bimp_Paiement extends BimpObject
 
             // Calcul du total payé par facture. 
             while (BimpTools::isSubmit('amount_' . $i)) {
-                $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
-                $amount = (float) BimpTools::getValue('amount_' . $i, 0);
+                $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');
+                $amount = (float) BimpTools::getValue('amount_' . $i, 0, 'int');
 
                 if ($id_facture <= 0) {
                     $errors[] = 'ID facture invalide (ligne ' . $i . ')';
@@ -1172,7 +1172,7 @@ class Bimp_Paiement extends BimpObject
                     BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                     $i = 1;
                     while (BimpTools::isSubmit('amount_' . $i)) {
-                        $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
+                        $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');
                         if ($id_facture && isset($factures[$id_facture]) && BimpObject::objectLoaded($factures[$id_facture])) {
                             $facture = $factures[$id_facture];
                             foreach ($avoirs as $avoir) {

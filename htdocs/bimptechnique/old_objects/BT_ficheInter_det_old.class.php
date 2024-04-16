@@ -370,15 +370,15 @@ class BT_ficheInter_det extends BimpDolObject
         $data->description = BimpTools::getPostFieldValue("description");
 
         if (BimpTools::getPostFieldValue('date')) {
-            $data->date = BimpTools::getValue("date");
+            $data->date = BimpTools::getValue("date", null, 'date');
         } else {
             $errors[] = "Vous devez choisir une date";
         }
 
         if (!count($errors)) {
             $total_hours = 0;
-            if (BimpTools::getPostFieldValue("duree")) {
-                $total_hours = BimpTools::getValue('duree');
+            if (BimpTools::isPostFieldSubmit("duree")) {
+                $total_hours = BimpTools::getPostFieldValue('duree');
             }
             
             if (BimpTools::getPostFieldValue("arrived") && BimpTools::getPostFieldValue("departure")) {

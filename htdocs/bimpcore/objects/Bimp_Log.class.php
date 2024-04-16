@@ -706,8 +706,8 @@ class Bimp_Log extends BimpObject
 
         $params = array();
 
-        $params['GET'] = $_GET;
-        $params['POST'] = $_POST;
+        $params['GET'] = BimpTools::htmlentities_array($_GET);
+        $params['POST'] = BimpTools::htmlentities_array($_POST);
 
         if (!empty($_REQUEST)) {
             $req_params = implode('&', $_REQUEST);

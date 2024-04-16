@@ -31,7 +31,7 @@ class client_savController extends BimpController
         
         $return = '';
 
-        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) BimpTools::getValue('id', 0));
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) BimpTools::getValue('id', 0, 'int'));
 
         if (!BimpObject::objectLoaded($client)) {
             return BimpRender::renderAlerts('ID du client invalide');

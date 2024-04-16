@@ -44,7 +44,7 @@ class InterfaceClientController extends BimpPublicController
             }
         }
 
-        $this->tabActive = BimpTools::getValue('tab', 'home');
+        $this->tabActive = BimpTools::getValue('tab', 'home', 'aZ09');
     }
 
     public function renderHtml()
@@ -466,7 +466,7 @@ class InterfaceClientController extends BimpPublicController
 
         global $userClient;
 
-        $content = BimpTools::getValue('content', 'list');
+        $content = BimpTools::getValue('content', 'list', 'aZ09');
 
         switch ($content) {
             case 'list':
@@ -535,7 +535,7 @@ class InterfaceClientController extends BimpPublicController
                     $html .= '</div>';
                 }
 
-                $id_contrat = (int) BimpTools::getValue('id_contrat', 0);
+                $id_contrat = (int) BimpTools::getValue('id_contrat', 0, 'int');
                 if (!$id_contrat) {
                     $html .= BimpRender::renderAlerts('Référence du contrat absente');
                 } else {
@@ -613,7 +613,7 @@ class InterfaceClientController extends BimpPublicController
         $html = '';
 
         global $userClient;
-        $content = BimpTools::getValue('content', 'list');
+        $content = BimpTools::getValue('content', 'list', 'aZ09');
 
         switch ($content) {
             case 'list':
@@ -723,7 +723,7 @@ class InterfaceClientController extends BimpPublicController
         }
 
         global $userClient;
-        $content = BimpTools::getValue('content', 'list');
+        $content = BimpTools::getValue('content', 'list', 'aZ09');
 
         switch ($content) {
             case 'list':
@@ -757,7 +757,7 @@ class InterfaceClientController extends BimpPublicController
                     $html .= '</div>';
                 }
 
-                $id_sav = (int) BimpTools::getValue('id_sav', 0);
+                $id_sav = (int) BimpTools::getValue('id_sav', 0, 'int');
                 if (!$id_sav) {
                     $html .= BimpRender::renderAlerts('Référence du SAV absente');
                 } else {

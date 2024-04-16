@@ -2,9 +2,9 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 
-if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION) {
-    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php')) {
-        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php';
+if (BimpCore::getVersion() && BimpCore::getVersion()) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php';
     }
 }
 
@@ -2619,7 +2619,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $errors = parent::validatePost();
 
         if (BimpTools::isSubmit('duree_validite')) {
-            $this->dol_object->duree_validite = (int) BimpTools::getValue('duree_validite');
+            $this->dol_object->duree_validite = (int) BimpTools::getValue('duree_validite', 0, 'int');
         }
 
         return $errors;
@@ -2805,7 +2805,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         if (!count($errors)) {
             $list = $this->dol_object->liste_type_contact('internal', 'position', 1);
             if (isset($list['SALESREPSIGN'])) {
-                $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
+                $id_user = (int) BimpTools::getValue('id_user_commercial', 0, 'int');
                 if ($id_user) {
                     if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
                         $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');

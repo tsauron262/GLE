@@ -284,7 +284,7 @@ class BR_ReservationCmdFourn extends BimpObject
     public function validatePost()
     {
         $create_commande = false;
-        if (BimpTools::getValue('id_commande_fournisseur', 0) === 'new') {
+        if (BimpTools::getValue('id_commande_fournisseur', 0, 'aZ09') === 'new') {
             $_POST['id_commande_fournisseur'] = 0;
             $create_commande = true;
         }

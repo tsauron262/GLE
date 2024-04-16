@@ -350,6 +350,13 @@ fields_tables:
                     method: displayBool
                     params:
                         - asPreuvePaiment
+            - custom: 1
+              label: Rentabilitées technique
+              value:
+                  callback: 
+                        method: displayRentabilite
+                        params:
+                            - 1
                   
     client: 
         rows: 
@@ -833,6 +840,11 @@ filters_panels:
 #        label: St. fac.
 #        display: icon
 #        min_width: 30
+lists_cols: 
+    rentabiliteTechnique:
+        label: Rentabilitée Technique
+        value: 
+            callback: displayRentabilite
         
 lists: 
     default: 

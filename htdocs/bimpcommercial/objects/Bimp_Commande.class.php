@@ -650,6 +650,38 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         return parent::getData($field, $withDefault);
     }
+    
+    public function displayRentabilite($withDetail = false)
+    {
+        $html = '';
+        $totVendu = $totRealise = 0;
+        foreach ($this->getLines('product') as $line) {
+            $prod = $line->getProduct();
+            if($prod->isInter()){
+                $totVendu += $line->getTotalHt(true);
+                $duree = $this->db->getValue('fichinterdet', 'SUM(duree)', '`id_line_commande` = '.$line->id);
+                $dureeProd = $prod->getData('duree_i');
+                if($dureeProd < 1)
+                    $dureeProd = 3600;
+                $realise = $duree / $dureeProd * $prod->getData('cost_price');
+                $totRealise += $realise;
+                
+                if($withDetail){
+//                    $html .= $prod->printData();
+                    $html .= $prod->getLink();
+                    $html .= '<br/>Vendu : '.$line->getFullQty().' * '. $dureeProd/3600 .'h soit '.$line->getTotalHt(true).' €';
+                    $html .= '<br/>Réalisé : '.$duree / 3600 .' h / soit : '.$realise.' €';
+                    $html .= '<br/><br/>';
+                }
+            }
+        }
+        if($totRealise)
+            $html .= round(100 - (($totRealise / $totVendu)  * 100), 2) . ' %';
+        else
+            $html .= 'N/A';
+        
+        return $html;
+    }
 
     public function getDefaultListExtraButtons()
     {

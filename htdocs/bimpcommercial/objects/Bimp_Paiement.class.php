@@ -923,7 +923,7 @@ class Bimp_Paiement extends BimpObject
         $errors = parent::validatePost();
 
         if (BimpTools::isSubmit('id_mode_paiement')) {
-            $id_paiement = BimpTools::getValue('id_mode_paiement', 0, 'int');
+            $id_paiement = BimpTools::getValue('id_mode_paiement', 0, 'aZ09');
             if (is_string($id_paiement)) {
                 if (preg_match('/^\d+$/', $id_paiement)) {
                     $id_paiement = (int) $id_paiement;

@@ -1922,6 +1922,10 @@ class BimpComm extends BimpDolObject
 
         return BimpTools::displayMoneyValue($total, '', 0, 0, 0, 2, 1);
     }
+    
+    public function displayHelpForTvaAcompte(){
+        return 'TVA moyenne '.round($this->getData('total_tva') / $this->getData('total_ht')* 100). ' %';
+    }
 
     public function displayCommercial()
     {
@@ -3504,6 +3508,19 @@ class BimpComm extends BimpDolObject
                     if (count($line_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de l\'ajout de l\'acompte ' . $this->getLabel('to_the'));
                     }
+                }
+                
+                $idComm = $this->getIdCommercial();
+                $email = BimpTools::getUserEmailOrSuperiorEmail($idComm);
+
+                $infoClient = "";
+                $client = $this->getChildObject('client');
+                if (is_object($client) && $client->isLoaded()) {
+                    $infoClient = " du client " . $client->getLink();
+                }
+
+                if (!empty($email)) {
+                    mailSyn2("Acompte sur ".$this->getName(true), $email, null, 'Bonjour, un acompte de '.$amount.' € a été ajouté à la ' . $this->getLink() . $infoClient);
                 }
 
                 addElementElement(static::$dol_module, $factureA->table_element, $this->id, $factureA->id);

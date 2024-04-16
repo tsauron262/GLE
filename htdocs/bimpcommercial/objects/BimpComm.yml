@@ -726,6 +726,8 @@ forms:
               required: 1
               input: 
                   type: text
+                  help : 
+                      callback: displayHelpForTvaAcompte
                   
     logs: 
         rows: 

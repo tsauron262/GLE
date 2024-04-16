@@ -271,27 +271,29 @@ class PisteAPI extends BimpAPI
     public function testRequest(&$errors = array(), &$warnings = array())
     {
 
-        $data = array('fields' => array(
-                "typeObjet"  => "FACTURE",
-                "codeLangue" => "fr"
-        ));
-//        print_r($this->execCurl('ajouterFichierDansSysteme', $data, $errors));
-//        die;
+        return $this->rechercheClientStructures('32038748300433');
 
-        return $this->execCurl('typepj', $data, $errors);
+//        $data = array('fields' => array(
+//                "typeObjet"  => "FACTURE",
+//                "codeLangue" => "fr"
+//        ));
+////        print_r($this->execCurl('ajouterFichierDansSysteme', $data, $errors));
+////        die;
+//
+//        return $this->execCurl('typepj', $data, $errors);
 
-        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', 1090967);
-
-        $file_name = dol_sanitizeFileName($facture->getRef()) . '.pdf';
-        $dir = $facture->getFilesDir();
-
-        $data = array('fields' => array(
-                "idUtilisateurCourant" => 0,
-                "pieceJointeFichier"   => base64_encode(file_get_contents($dir . '/' . $file_name)),
-                "pieceJointeNom"       => 'bis-' . $file_name,
-                "pieceJointeTypeMime"  => mime_content_type($dir . '/' . $file_name),
-                "pieceJointeExtension" => pathinfo($dir . '/' . $file_name, PATHINFO_EXTENSION),
-        ));
+//        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', 1090967);
+//
+//        $file_name = dol_sanitizeFileName($facture->getRef()) . '.pdf';
+//        $dir = $facture->getFilesDir();
+//
+//        $data = array('fields' => array(
+//                "idUtilisateurCourant" => 0,
+//                "pieceJointeFichier"   => base64_encode(file_get_contents($dir . '/' . $file_name)),
+//                "pieceJointeNom"       => 'bis-' . $file_name,
+//                "pieceJointeTypeMime"  => mime_content_type($dir . '/' . $file_name),
+//                "pieceJointeExtension" => pathinfo($dir . '/' . $file_name, PATHINFO_EXTENSION),
+//        ));
 //        print_r($this->execCurl('ajouterFichierDansSysteme', $data, $errors));
 //        die;
 

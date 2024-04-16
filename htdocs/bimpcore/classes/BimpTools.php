@@ -83,6 +83,11 @@ class BimpTools
         if (is_string($value) && $decode) {
             $value = stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
         }
+        
+        if ($value == 'true')
+            $value = 1;
+        elseif ($value == 'false')
+            $value = 0;
 
         if ((int) BimpCore::getConf('activate_post_data_check')) {
             if ($value && $check) {

@@ -612,7 +612,7 @@ class BIMP_Task extends BimpAbstractFollow
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('position', 'ASC', 'a');
-        $sql .= BimpTools::getSqlLimit(30);
+        $sql .= BimpTools::getSqlLimit(50);
 
         $rows = $bdb->executeS($sql, 'array');
 

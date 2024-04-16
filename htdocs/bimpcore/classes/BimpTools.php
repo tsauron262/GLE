@@ -120,6 +120,16 @@ class BimpTools
 
         return $value;
     }
+    
+    public static function htmlentities_array($array){
+        foreach($array as $clef => $value){
+            if(is_array($value))
+                $array[$clef] = BimpTools::htmlentities_array ($value);
+            else
+                $array[$clef] = htmlentities($value);
+        }
+        return $array;
+    }
 
     public static function isPostFieldSubmit($field_name)
     {

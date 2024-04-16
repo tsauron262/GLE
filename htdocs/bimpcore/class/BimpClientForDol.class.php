@@ -30,7 +30,8 @@ class BimpClientForDol extends Bimp_Client
                 $c->set('outstanding_limit_icba', 0);
                 $c->set('outstanding_limit_credit_check', 0);
                 $c->set('outstanding_limit_atradius', 0);
-                $c->update();
+                $warnings = array();
+                $c->update($warnings, true);
 
                 $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
                 $nb_rappels++;

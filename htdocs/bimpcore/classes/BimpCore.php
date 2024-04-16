@@ -1291,8 +1291,8 @@ class BimpCore
                         $data['Erreurs Màj log'] = $errUpdate;
                     }
 
-                    $data['GET'] = $_GET;
-                    $data['POST'] = $_POST;
+                    $data['GET'] = BimpTools::htmlentities_array($_GET);
+                    $data['POST'] = BimpTools::htmlentities_array($_POST);
                     $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                 }
             }
@@ -1545,7 +1545,7 @@ class BimpCore
             $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
             $onclick = $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
                 'fields' => array(
-                    'url' => $_SERVER['REQUEST_URI']
+                    'url' => dol_escape_htmltag($_SERVER['REQUEST_URI'])
                 )
             ));
 

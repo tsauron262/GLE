@@ -181,6 +181,10 @@ params:
                   relances_clients_entrepots_speciaux: 
                       label: ID Entrepôts spéciaux pour les relances
                       info: Liste des entrepôts à relancer séparément lors des relances globales
+                  nb_relances_mise_en_demeure: 
+                      label: Nombre de relances d'une facture pour la mise au statut "Mise en demeure" du client
+                      info: entier de 1 à 4
+                      def: 4
                     
     # Signatures: 
         

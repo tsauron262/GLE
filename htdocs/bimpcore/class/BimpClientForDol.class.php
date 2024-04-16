@@ -36,6 +36,7 @@ class BimpClientForDol extends Bimp_Client
                 $nb_rappels++;
                 
                 if ((int) $this->db->getCount('bimpcore_note', $where_check . $c->id) > 0) {
+                    mailSyn2('Probléme MAJ ICBA '.$c->id, 'dev@bimp.fr', null, 'L\'encours devrait deja être supprimer');
                     continue;
                 }
 

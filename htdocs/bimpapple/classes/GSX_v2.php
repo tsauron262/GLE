@@ -1137,6 +1137,28 @@ class GSX_v2 extends GSX_Const
         return $this->exec('consignmentOrderShipment', $params);
     }
 
+    // Commandes de stocks internes : 
+    
+    public function stockingOrderPartsSummary()
+    {
+        
+    }
+    
+    public function stockingOrderCreate()
+    {
+        
+    }
+    
+    public function stockingOrderUpdate()
+    {
+        
+    }
+    
+    public function stockingOrderDelete()
+    {
+        
+    }
+    
     // Requêtes - Divers:
 
     public function filesUpload($serial, $files, $module = '')

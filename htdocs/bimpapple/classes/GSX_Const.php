@@ -1,6 +1,5 @@
 <?php
 
-
 BimpCore::requireFileForEntity('bimpapple', '/classes/GSX_Const_entity.php');
 
 class GSX_Const extends GSX_Const_entity
@@ -65,12 +64,17 @@ class GSX_Const extends GSX_Const_entity
             'consignmentDeliveryAcknowledge' => 'gsx/api/consignment/delivery/acknowledge',
             'consignmentOrderSubmit'         => 'gsx/api/consignment/order/submit',
             'consignmentOrderShipment'       => 'gsx/api/consignment/order/shipment',
+            // Commandes stocks internes
+            'stockingOrderPartsSummary'      => 'gsx/api/order/stocking/parts/summary',
+            'stockingOrderCreate'            => 'gsx/api/order/stocking/create',
+            'stockingOrderUpdate'            => 'gsx/api/order/stocking/update',
+            'stockingOrderDelete'            => 'gsx/api/order/stocking/delete',
             // Autre: 
-            'partsSummary'                   => 'gsx/api/parts/summary',
-            'filesUpload'                    => 'gsx/api/attachment/upload-access',
-            'articleLookup'                  => 'gsx/api/content/article/lookup',
-            'getFile'                        => 'gsx/api/document-download',
-            'attributeLookup'                => 'gsx/api/attribute/lookup'
+            'partsSummary'    => 'gsx/api/parts/summary',
+            'filesUpload'     => 'gsx/api/attachment/upload-access',
+            'articleLookup'   => 'gsx/api/content/article/lookup',
+            'getFile'         => 'gsx/api/document-download',
+            'attributeLookup' => 'gsx/api/attribute/lookup'
         )
     );
     public static $getRequests = array(
@@ -92,13 +96,13 @@ class GSX_Const extends GSX_Const_entity
             'test' => array('AppleCare-Partner-0001442050.Test.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Test.apple.com.key'),
             'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.chain.pem', 'tresor', 'AppleCare-Partner-0001442050.Prod.apple.com.chain.key')
         ),
-        897316 => array(
+        897316  => array(
             'test' => array('AppleCare-Partner-0001442050.Test.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Test.apple.com.key'),
             'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.chain.pem', 'tresor', 'AppleCare-Partner-0001442050.Prod.apple.com.chain.key')
         ),
-        608111 => array(
-             'test' => array('AppleCare-Partner-0000608111.Test.apple.com.fullchain.pem', 'tresor', 'AppleCare-Partner-0000608111.Test.apple.com.key'),
-             'prod' => array('AppleCare-Partner-0000608111.Prod.apple.com.fullchain.pem', 'tresor', 'AppleCare-Partner-0000608111.Prod.apple.com.key')
+        608111  => array(
+            'test' => array('AppleCare-Partner-0000608111.Test.apple.com.fullchain.pem', 'tresor', 'AppleCare-Partner-0000608111.Test.apple.com.key'),
+            'prod' => array('AppleCare-Partner-0000608111.Prod.apple.com.fullchain.pem', 'tresor', 'AppleCare-Partner-0000608111.Prod.apple.com.key')
         )
     );
     public static $test_ids = array(
@@ -126,7 +130,7 @@ class GSX_Const extends GSX_Const_entity
     );
     public static $repair_types = array(
         'CIN'  => 'Carry-In',
-        'CRBR' => 'Carry-In (Sans recommande de stock)',//Return Before Replace',
+        'CRBR' => 'Carry-In (Sans recommande de stock)', //Return Before Replace',
         'CINR' => 'Carry-In Non-Replenishment',
         'MINS' => 'Mail-In Return to Service Location',
 //        'MINC' => 'Mail-In Return to Customer',

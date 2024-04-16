@@ -5386,7 +5386,7 @@ class BCT_ContratLine extends BimpObject
                 $bundle_total_ht = $this->getData('total_ht');
                 $qty = $this->getData('qty');
                 $totPa = 0;
-                if ($bundle_total_ht > 0) {
+                if ($bundle_total_ht) {
                     $lines_total_ht_sans_remises = 0;
 
                     $child_prods = $product->getChildrenObjects('child_products');
@@ -5429,12 +5429,13 @@ class BCT_ContratLine extends BimpObject
                         $line_errors = $line_warnings = array();
 
                         if (!$newLn->isLoaded()) {
-                            $line_errors = $newLn->create($line_warnings, true);
+                        $line_errors = $newLn->create($line_warnings, true);
                             if (count($line_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec ajout de la ligne pour le produit ' . $child_prod->getRef());
                                 continue;
                             }
-                        } else {
+                        } 
+                        else {
                             $line_errors = $newLn->update($line_warnings, true);
                             if (count($line_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec mise à jour de la ligne pour le produit ' . $child_prod->getRef());

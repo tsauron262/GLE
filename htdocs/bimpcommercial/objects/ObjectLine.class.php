@@ -5867,7 +5867,7 @@ class ObjectLine extends BimpObject
                 $dol_object = $this->getChildObject('dol_line');
                 $thisTot = $dol_object->getData('total_ht');
                 $totPa = 0;
-                if ($thisTot > 0) {
+                if ($thisTot) {
                     $totHt = 0;
                     $totHtSansRemise = 0;
                     $totHtSansRemiseRemisable = 0;
@@ -5918,7 +5918,7 @@ class ObjectLine extends BimpObject
                             BimpCore::addlog('Attention, composant d\'un bundle abonnement pas abonnement LN : ' . $newLn->id . ' prod : ' . $product->getLink());
                     }
 
-                    if ($totHt != 0) {
+                    if ($totHt) {
                         $pourcent = 100 - ($thisTot / $totHt * 100);
                         if ($totHtSansRemiseRemisable == 0 || $totHtSansRemise == 0) {
                             BimpCore::addlog('Aucune ligne remisable pour calcul du prix bundle', 3, 'bimpcommercial', $this);

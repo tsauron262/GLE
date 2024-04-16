@@ -1636,8 +1636,12 @@ class BL_CommandeFournReception extends BimpObject
                 if (!count($errors) && count($codes_config_errors) && (!isset($data['force_validation']) || !(int) $data['force_validation'])) {
                     $data['force_validation'] = 1;
                     $errors = $this->saveLinesData($lines_data, $warnings, $force_equipments_attribution);
+
+                    $use_bds = ((int) BimpCore::getConf('use_bds_for_receptions', null, 'bimpcommercial') || (int) $this->getData('validation_status') === 0);
+
                     $onclick = $this->getJsActionOnclick('validateReception', $data, array(
-                        'success_callback' => 'function() {bimpModal.clearCurrentContent();}'
+                        'success_callback' => 'function() {bimpModal.clearCurrentContent();}',
+                        'use_bimpdatasync' => ($use_bds ? 1 : 0)
                     ));
 
                     $msg = BimpTools::getMsgFromArray($codes_config_errors);

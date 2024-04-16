@@ -27,6 +27,14 @@ class BimpClientForDol extends Bimp_Client
             
             BimpObject::loadClass('bimpcore', 'BimpNote');
             foreach ($clients as $c) {
+                $c->set('outstanding_limit_icba', 0);
+                $c->set('outstanding_limit_credit_check', 0);
+                $c->set('outstanding_limit_atradius', 0);
+                $c->update();
+
+                $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
+                $nb_rappels++;
+                
                 if ((int) $this->db->getCount('bimpcore_note', $where_check . $c->id) > 0) {
                     continue;
                 }
@@ -41,14 +49,6 @@ class BimpClientForDol extends Bimp_Client
                 $this->addError(implode('', $c->addNote($msg,
                                                         BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                                                         BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
-
-                $c->set('outstanding_limit_icba', 0);
-                $c->set('outstanding_limit_credit_check', 0);
-                $c->set('outstanding_limit_atradius', 0);
-                $c->update();
-
-                $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
-                $nb_rappels++;
             }
         }
 

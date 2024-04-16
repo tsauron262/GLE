@@ -96,7 +96,7 @@ class BimpTools
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value'
                         ))) {
-                    if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $value != $value)) {
+                    if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $val_temp != $value)) {
                             if (!$val_temp) {
                                 BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
                                     'check'           => $check,
@@ -105,8 +105,8 @@ class BimpTools
                             } else {
                                 BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
                                     'check'           => $check,
-                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value) . ' (' . gettype($value) . ')'),
-                                    'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) htmlentities($val_temp) . ' (' . gettype($value) . ')')
+                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) '"'.htmlentities($value).'"' . ' (' . gettype($value) . ')'),
+                                    'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) '"'.htmlentities($val_temp).'"' . ' (' . gettype($value) . ')')
                                 ));
                             }
                         if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {

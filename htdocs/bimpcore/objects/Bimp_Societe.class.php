@@ -2953,6 +2953,7 @@ class Bimp_Societe extends BimpDolObject
         $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters);
 
         if (is_array($factures)) {
+            $nb_relances_mise_en_demeure = (int) BimpCore::getConf('nb_relances_mise_en_demeure', 4, 'bimpcommercial');
             foreach ($factures as $fac) {
                 $rap = $fac->getRemainToPay();
 
@@ -2962,7 +2963,7 @@ class Bimp_Societe extends BimpDolObject
 
                 $nb_relances = (int) $fac->getData('nb_relance');
 
-                if ($nb_relances === (int) BimpCore::getConf('nb_relances_mise_en_demeure', 4, 'bimpcommercial')) {
+                if ($nb_relances === $nb_relances_mise_en_demeure) {
                     $total_med += $rap;
                 } elseif ($nb_relances === 5) {
                     $total_contentieux += $rap;

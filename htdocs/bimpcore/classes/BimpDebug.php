@@ -139,14 +139,14 @@ class BimpDebug
     public static function addParamsDebug()
     {
         if (!empty($_GET)) {
-            self::addDebug('params', 'Paramètres GET', '<pre>' . print_r($_GET, 1) . '</pre>', array(
+            self::addDebug('params', 'Paramètres GET', '<pre>' . print_r(BimpTools::htmlentities_array($_GET), 1) . '</pre>', array(
                 'foldable' => true,
                 'open'     => true
             ));
         }
 
         if (!empty($_POST)) {
-            self::addDebug('params', 'Paramètres POST', '<pre>' . print_r($_POST, 1) . '</pre>', array(
+            self::addDebug('params', 'Paramètres POST', '<pre>' . print_r(BimpTools::htmlentities_array($_POST), 1) . '</pre>', array(
                 'foldable' => true,
                 'open'     => true
             ));

@@ -97,7 +97,6 @@ class BimpTools
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value'
                         ))) {
                     if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $value != $value)) {
-                        if ((int) BimpCore::getConf('post_data_check_log_only')) {
                             if (!$val_temp) {
                                 BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
                                     'check'           => $check,
@@ -110,7 +109,7 @@ class BimpTools
                                     'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) htmlentities($val_temp) . ' (' . gettype($value) . ')')
                                 ));
                             }
-                        } else {
+                        if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
                             $value = $val_temp;
                         }
                     }
@@ -146,7 +145,7 @@ class BimpTools
 
         // Filtres listes:
         if (BimpTools::isSubmit('param_list_filters')) {
-            $filters = json_decode(BimpTools::getValue('param_list_filters', array(), 'array'));
+            $filters = json_decode(BimpTools::getValue('param_list_filters', '[]', 'json_nohtml'));
             foreach ($filters as $filter) {
                 if (isset($filter->name) && $filter->name === $field_name) {
                     return 1;
@@ -181,7 +180,7 @@ class BimpTools
 
         // Filtres listes:
         if (BimpTools::isSubmit('param_list_filters')) {
-            $filters = json_decode(BimpTools::getValue('param_list_filters', '', 'json'));
+            $filters = json_decode(BimpTools::getValue('param_list_filters', '[]', 'json_nohtml'));
             foreach ($filters as $filter) {
                 if (isset($filter->name) && $filter->name === $field_name) {
                     return $filter->filter;

@@ -10,8 +10,10 @@ if ($fc !== 'doc') { // Nécessaire pour l'affichage des docs PDF.
     define('ALLOW_ALL_IFRAME', true);
 
     $url = "https://";
-    $url .= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $url .= $_SERVER['HTTP_HOST'] . htmlentities($_SERVER['REQUEST_URI']);
     $url = str_replace('nav_not_compatible', 'compatible', $url);
+    if(stripos($url, '(') !== false)
+            $url = '';
 }
 
 if (isset($_REQUEST['nav_not_compatible'])) {

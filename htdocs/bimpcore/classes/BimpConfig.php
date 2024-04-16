@@ -58,7 +58,7 @@ class BimpConfig
         }
 
         if (!$file_name) {
-            $this->errors[] = 'Fichier YML spécifié';
+            $this->errors[] = 'Fichier YML non spécifié';
         }
 
         if (count($this->errors)) {

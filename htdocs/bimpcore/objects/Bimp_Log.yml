@@ -64,6 +64,7 @@ fields:
     url_params: 
         label: Params URL
         type: json
+        protect_html: 1
         
     obj_module: 
         label: Module

@@ -10,6 +10,7 @@ class BC_Display extends BimpComponent
     public $field_params = null;
     public $value = null;
     public $no_html = false;
+    public $protect_html = false;
     protected static $cache = array();
     public static $dates_formats = array(
         'Y-m-d'     => 'AAAA-MM-JJ',
@@ -1220,8 +1221,9 @@ class BC_Display extends BimpComponent
                     } else {
                         if (is_array($this->value)) {
                             $html .= BimpRender::renderRecursiveArrayContent($this->value, array(
-                                        'foldable' => $this->params['foldable'],
-                                        'open'     => $this->params['open']
+                                        'foldable'      => $this->params['foldable'],
+                                        'open'          => $this->params['open'],
+                                        'protect_html'  => $this->protect_html
                             ));
                         } else {
                             $html .= (string) $this->value;

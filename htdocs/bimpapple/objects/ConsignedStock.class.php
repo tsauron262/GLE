@@ -155,7 +155,7 @@ class ConsignedStock extends PartStock
             $errors[] = 'Veuillez sélectionner une livraison';
         }
 
-        $code_centre = BimpTools::getPostFieldValue('code_centre', '');
+        $code_centre = BimpTools::getPostFieldValue('code_centre', '', 'aZ09');
 
         if (!$code_centre) {
             $errors[] = 'Veuillez sélectionner un centre';

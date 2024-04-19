@@ -105,6 +105,20 @@ forms:
                   max_items: 1
                   help: 'Séparateur : ";"<br/>Colonnes : Réf., Description, Libellé produit, Prix d&apos;achat HT, Code eee, Qté à ajouter'
                   
+    gsx_order: 
+        title: Commande de stock GSX
+        rows: 
+            - field: code_centre
+            - custom: 1
+              label: Composants
+              input_name: parts
+              content: 
+                  callback: renderPartsOrderQtiesInputs
+              depends_on: code_centre
+              display_if: 
+                  field_name: code_centre
+                  hide_values: ''
+              
     receive: 
         title: Réceptionner
         rows: 

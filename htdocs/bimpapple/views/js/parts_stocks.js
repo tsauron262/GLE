@@ -156,6 +156,39 @@ function ConsignedStocksShipment() {
 }
 
 function InternalStocks() {
+    this.onOrderFormSubmit = function ($form, extra_data) {
+        var parts = [];
+        if ($.isOk($form)) {
+            $form.find('.part_qty_input').each(function () {
+                var qty = parseInt($(this).val());
+                var part_number = $(this).data('part_number');
+
+                if (isNaN(qty)) {
+                    bimp_msg('Composant "' + part_number + '" : qté invalide', 'danger');
+                } else if (qty) {
+                    parts.push({
+                        'number': part_number,
+                        'qty': qty,
+                        'code_eee': $(this).data('code_eee'),
+                        'desc': $(this).data('desc')
+                    });
+                }
+            });
+
+            if (!parts.length) {
+                bimp_msg('Aucune qté à commander saisie', 'warning', null, true);
+                return 0;
+            } else {
+                extra_data.parts = parts;
+            }
+        } else {
+            bimp_msg('Erreur technique - opération impossible ($form absent))', 'danger');
+            return 0;
+        }
+
+        return extra_data;
+    };
+
     this.onBulkReceiveFormSubmit = function ($form, extra_data) {
         var qties = [];
 
@@ -205,5 +238,4 @@ function InternalStocks() {
 
 var ConsignedStocks = new ConsignedStocks();
 var ConsignedStocksShipment = new ConsignedStocksShipment();
-
 var InternalStocks = new InternalStocks();

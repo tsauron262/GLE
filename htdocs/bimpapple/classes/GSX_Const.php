@@ -67,14 +67,16 @@ class GSX_Const extends GSX_Const_entity
             // Commandes stocks internes
             'stockingOrderPartsSummary'      => 'gsx/api/order/stocking/parts/summary',
             'stockingOrderCreate'            => 'gsx/api/order/stocking/create',
-            'stockingOrderUpdate'            => 'gsx/api/order/stocking/update',
-            'stockingOrderDelete'            => 'gsx/api/order/stocking/delete',
+            'stockingOrderSummary'           => 'gsx/api/order/stocking/summary',
+            'stockingOrderDetails'           => 'gsx/api/order/stocking/details',
+//            'stockingOrderUpdate'            => 'gsx/api/order/stocking/update',
+//            'stockingOrderDelete'            => 'gsx/api/order/stocking/delete',
             // Autre: 
-            'partsSummary'    => 'gsx/api/parts/summary',
-            'filesUpload'     => 'gsx/api/attachment/upload-access',
-            'articleLookup'   => 'gsx/api/content/article/lookup',
-            'getFile'         => 'gsx/api/document-download',
-            'attributeLookup' => 'gsx/api/attribute/lookup'
+            'partsSummary'                   => 'gsx/api/parts/summary',
+            'filesUpload'                    => 'gsx/api/attachment/upload-access',
+            'articleLookup'                  => 'gsx/api/content/article/lookup',
+            'getFile'                        => 'gsx/api/document-download',
+            'attributeLookup'                => 'gsx/api/attribute/lookup'
         )
     );
     public static $getRequests = array(

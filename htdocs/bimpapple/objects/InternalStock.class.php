@@ -22,6 +22,7 @@ class InternalStock extends PartStock
 
             case 'correct':
             case 'receive':
+            case 'order':
                 return 1;
         }
 
@@ -62,6 +63,17 @@ class InternalStock extends PartStock
             );
         }
 
+        if ($this->canSetAction('order')) {
+            $buttons[] = array(
+                'label'   => 'Commande de stock',
+                'icon'    => 'fas_cart-arrow-down',
+                'onclick' => $this->getJsActionOnclick('receive', array(), array(
+                    'form_name'      => 'gsx_order',
+                    'on_form_submit' => 'function($form, extra_data) {return  InternalStocks.onOrderFormSubmit($form, extra_data);}'
+                ))
+            );
+        }
+
         if ($this->isActionAllowed('csvImport') && $this->canSetAction('csvImport')) {
             $buttons[] = array(
                 'label'   => 'Import CSV',
@@ -93,6 +105,107 @@ class InternalStock extends PartStock
     }
 
     // Rendus HTML : 
+
+    public function renderPartsOrderQtiesInputs()
+    {
+        $html = '';
+        $errors = array();
+
+        $code_centre = BimpTools::getPostFieldValue('code_centre', '', 'aZ09');
+
+        if (!$code_centre) {
+            $errors[] = 'Veuillez sélectionner un centre';
+        } else {
+            $centre = $this->getCentreData($code_centre, $errors);
+
+            if (!count($errors)) {
+                $shipTo = BimpTools::getArrayValueFromPath($centre, 'shipTo', '');
+
+                if (!$shipTo) {
+                    $errors[] = 'Aucun n° shipTo pour le centre ' . $centre['label'];
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
+            $gsx = new GSX_v2($shipTo);
+
+            $parts = $gsx->stockingOrderPartsSummary();
+
+            if (!$gsx->logged) {
+                $html .= BimpRender::renderAlerts($gsx->displayNoLogged());
+            } else {
+                $errors = $gsx->getErrors();
+
+                if (!count($errors)) {
+                    if (empty($parts)) {
+                        return BimpRender::renderAlerts('Aucun composant commandable pour ce n° ShipTo', 'warning');
+                    } else {
+//                        $html .= '<pre>';
+//                        $html .= print_r($parts, 1);
+//                        $html .= '</pre>';
+                        // Répartition par type : 
+                        $parts_by_types = array();
+
+                        foreach ($parts as $part) {
+                            if (!isset($parts_by_types[$part['typeCode']])) {
+                                $parts_by_types[$part['typeCode']] = array(
+                                    'label' => $part['typeDescription'],
+                                    'parts' => array()
+                                );
+                            }
+
+                            $parts_by_types[$part['typeCode']][] = $part;
+                        }
+
+                        $headers = array(
+                            'type' => 'Type',
+                            'ref'  => 'Référence',
+                            'Desc' => 'Désignation',
+                            'qty'  => 'Qté à commander'
+                        );
+
+                        $rows = array();
+
+                        $i = 0;
+                        foreach ($parts_by_types as $type_code => $type_data) {
+                            foreach ($type_data['parts'] as $part) {
+                                $i++;
+                                $rows[] = array(
+                                    'ref'  => $part['partNumber'],
+                                    'type' => $type_data['label'],
+                                    'desc' => $part['description'],
+                                    'qty'  => BimpInput::renderInput('qty', 'part_' . $i . '_qty', 0, array(
+                                        'extra_class' => 'part_qty_input',
+                                        'data'        => array(
+                                            'data_type'   => 'number',
+                                            'min'         => 0,
+                                            'decimals'    => 0,
+                                            'part_number' => $part['partNumber'],
+                                            'desc'        => $part['description'],
+                                            'code_eee'    => (is_array($part['eeeCodes']) ? implode(',', $part['eeeCodes']) : (is_string($part['eeeCodes']) ? $part['eeeCodes'] : ''))
+                                        )
+                                    ))
+                                );
+                            }
+                        }
+
+                        $html .= BimpRender::renderBimpListTable($rows, $headers, array(
+                                    'searchable' => true
+                        ));
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
+    }
 
     public function renderPartsReceivedQtiesInputs()
     {
@@ -182,6 +295,91 @@ class InternalStock extends PartStock
     }
 
     // Actions: 
+
+    public function actionOrder($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Commande de stock effectuée avec succès sur GSX';
+
+        $shipTo = '';
+        $code_centre = BimpTools::getArrayValueFromPath($data, 'code_centre', '');
+
+        if (!$code_centre) {
+            $errors[] = 'Centre absent';
+        } else {
+            $centre = $this->getCentreData($code_centre, $errors);
+
+            if (!count($errors)) {
+                $shipTo = BimpTools::getArrayValueFromPath($centre, 'shipTo', '');
+
+                if (!$shipTo) {
+                    $errors[] = 'Aucun n° shipTo pour le centre ' . $centre['label'];
+                }
+            }
+        }
+
+        $parts_data = BimpTools::getArrayValueFromPath($data, 'parts', array());
+        if (empty($parts_data)) {
+            $errors[] = 'Aucun composant à commander saisi';
+        }
+
+        if (!count($errors)) {
+            $parts = array();
+
+            foreach ($parts_data as $p) {
+                $parts[] = array(
+                    'number'   => $p['number'],
+                    'quantity' => $p['qty']
+                );
+            }
+            // Requête GSX: 
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
+            $gsx = new GSX_v2($shipTo);
+
+            $result = $gsx->stockingOrderCreate($parts);
+            if (!$gsx->logged) {
+                $errors[] = $gsx->displayNoLogged();
+            } else {
+                $errors = $gsx->getErrors();
+
+                if (!count($errors) && !is_array($result) || empty($result)) {
+                    $errors[] = 'Aucune réponse reçue';
+                } else {
+                    if (isset($result['orderId'])) {
+                        $success .= '<br/>N° de commande : <b>' . $result['orderId'] . '</b>';
+                    }
+
+                    foreach ($parts_data as $part) {
+                        $part_errors = array();
+                        $stock = self::getStockInstance($code_centre, $part['number']);
+
+                        if (BimpObject::objectLoaded($stock)) {
+                            $part_errors = $this->modifQtyToReceive($part['qty']);
+                        } else {
+                            $stock = BimpObject::createBimpObject('bimpapple', 'InternalStock', array(
+                                        'code_centre'    => $code_centre,
+                                        'part_number'    => $part['number'],
+                                        'qty'            => 0,
+                                        'qty_to_receive' => $part['qty'],
+                                        'description'    => $part['desc'],
+                                        'code_eee'       => $part['code_eee']
+                                            ), true, $part_errors);
+                        }
+
+                        if (count($part_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($part_errors, 'Echec de l\'enregistrement des qtés attendues pour le composant "' . $part['number'] . '"');
+                        }
+                    }
+                }
+            }
+        }
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public function actionCsvImport($data, &$success)
     {
@@ -300,7 +498,7 @@ class InternalStock extends PartStock
                                     'product_label' => $prod_label,
                                     'code_eee'      => $eee,
                                     'last_pa'       => $pa_ht
-                                        ), true, $line_errors, $line_wanings);
+                                        ), true, $line_errors, $line_warnings);
                         if (!count($line_errors))
                             $line_errors = $stock->correctStock($qty, '', 'IMPORT_CSV', 'Import CSV');
                     }

@@ -675,7 +675,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
             }
         }
-        if($totRealise)
+        if($totVendu)
             $html .= round(100 - (($totRealise / $totVendu)  * 100), 2) . ' %';
         else
             $html .= 'N/A';

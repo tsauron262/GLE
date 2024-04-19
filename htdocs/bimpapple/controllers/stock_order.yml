@@ -1,0 +1,23 @@
+
+bootstrap: 1
+
+title: 
+    callback: 
+        object: stock_order
+        method: getPageTitle
+        
+js:
+    - /bimpapple/views/js/gsx.js
+
+objects: 
+    stock_order: 
+        instance: 
+            bimp_object: StockOrder
+            id_object: 
+                request: id
+                
+sections:
+    - type: view
+      view: 
+          name: default
+          object: stock_order

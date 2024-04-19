@@ -49,6 +49,12 @@ objects:
                 module: bimpapple
                 name: ConsignedStock
                 
+    stock_order: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: StockOrder
+                
     cs_shipment: 
         instance: 
             bimp_object: 
@@ -159,6 +165,17 @@ sections:
                           type: list
                           list: 
                               object: consigned_stock
+                    - id: stock_orders
+                      title: Commandes de stock
+                      icon: fas_cart-arrow-down
+                      show: 
+                          conf: 
+                              module: bimpapple
+                              name: gsx_allow_stock_order
+                      struct: 
+                          type: list
+                          list: 
+                              object: stock_order
                     - id: cs_shipments
                       title: Renvois stocks consignés
                       icon: fas_shipping-fast

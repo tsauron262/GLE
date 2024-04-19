@@ -1,0 +1,119 @@
+
+table: bimp_apple_stock_order
+primary: id
+icon: fas_cart-arrow-down
+controller: stock_order
+common_fields: 1
+
+list_page_url: 
+    module: bimpsupport
+    controller: index
+    url_params: 
+        tab: part_stocks
+        navtab-maintabs: stock_orders
+        
+header_list_name: default
+header_btn: 
+    callback: getActionsButtons
+
+labels: 
+    name: commande de stock
+    name_plur: commandes de stock
+    is_female: 1
+
+fields: 
+    type: 
+        label: Type de stock
+        values:
+            internal: Interne
+            consigned: Consigné
+        default_value: internal
+            
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        
+    code_centre: 
+        label: Centre
+        required: 1
+        values: 
+            array: centres
+            
+    order_id: 
+        label: N° de commande
+        
+    date_order: 
+        label: Date commande
+        type: datetime
+        
+    parts: 
+        label: Composants
+        type: json
+     
+forms: 
+    create: 
+        rows: 
+            - field: code_centre
+        
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: code_centre
+            - field: order_id
+            - field: status
+            - field: date_order
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: infos
+                  col_md: 6
+                  col_lg: 6
+            - cols: 
+                - type: custom
+                  custom:
+                      callback: renderPartsList
+    
+filters_panels: 
+    default: 
+        filters: 
+            code_centre: 
+            order_id: 
+            status: 
+            date_order:
+            
+lists: 
+    default: 
+        title: Commandes de stock
+        icon: fas_cart-arrow-down
+        configurable: 1
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 10
+        page_btn: 1
+        add_btn: 1
+        add_form_name: create
+        add_btn_label: Nouvelle commande de stock
+        delete_btn: 1
+        cols: 
+            type: 
+            code_centre: 
+            status: 
+            order_id: 
+            date_order:
+            
+        
+        
+    
+    

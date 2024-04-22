@@ -175,12 +175,12 @@ fields:
         user_edit: 1
     note_private: 
         label: Note privée
-        type: text
+        type: html
         user_edit: 1
         hashtags: 1
     note_public:
         label: Note publique
-        type: text
+        type: html
         user_edit: 1
         hashtags: 1
         

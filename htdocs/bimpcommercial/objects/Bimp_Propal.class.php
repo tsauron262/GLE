@@ -2030,6 +2030,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $new_data['fin_validite'] = BimpTools::getDateFromTimestamp($fin_validite);
         $new_data['id_signature'] = 0;
         $new_data['signature_params'] = array();
+        $new_data['contrats_status'] = 0;
 
         $errors = parent::duplicate($new_data, $warnings, $force_create);
 

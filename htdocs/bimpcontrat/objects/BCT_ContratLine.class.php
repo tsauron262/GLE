@@ -75,6 +75,9 @@ class BCT_ContratLine extends BimpObject
 
             case 'addUnits':
                 return 1;
+
+            case 'checkDateNextFac':
+                return BimpCore::isUserDev();
         }
         return parent::canSetAction($action);
     }
@@ -147,6 +150,10 @@ class BCT_ContratLine extends BimpObject
         }
 
         if ((int) $this->getData('id_parent_line') && in_array($field, array('fac_periodicity', 'duration', 'fac_term', 'nb_renouv', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start', 'variable_qty'))) {
+            return 0;
+        }
+
+        if ($this->isLoaded() && (int) $this->getData('id_linked_line') && in_array($field, array('fac_periodicity', 'achat_periodicity', 'duration', 'fac_term', 'nb_renouv', 'variable_qty'))) {
             return 0;
         }
 
@@ -560,6 +567,14 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('checkDateNextFac') && $this->canSetAction('checkDateNextFac')) {
+            $buttons[] = array(
+                'label'   => 'Vérif date next fac (dev)',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('checkDateNextFac', array(), array())
+            );
+        }
+
         return $buttons;
     }
 
@@ -927,7 +942,7 @@ class BCT_ContratLine extends BimpObject
         return $date_fac_start;
     }
 
-    public function getDateNextFacture($check_date = false, &$errors = array())
+    public function getDateNextFacture($check_date = false, &$errors = array(), &$infos = array())
     {
         if (!$this->isLoaded() || (int) $this->getData('statut') <= 0) {
             return '';
@@ -973,8 +988,10 @@ class BCT_ContratLine extends BimpObject
                 $dt = new DateTime($res[0]['max_date']);
                 $dt->add(new DateInterval('P1D'));
                 $new_date = $dt->format('Y-m-d');
+                $infos[] = 'Date dernière fac : ' . $new_date;
             } elseif ($date_fac_start) {
                 $new_date = $date_fac_start;
+                $infos[] = 'Date fac start : ' . $new_date;
             }
 
             if ($new_date) {
@@ -996,18 +1013,38 @@ class BCT_ContratLine extends BimpObject
                             $dt = new DateTime($date_debut);
                             $dt->add(new DateInterval('P' . ($nb_periods * $periodicity) . 'M'));
                             $new_date = $dt->format('Y-m-d');
+
+                            $infos[] = 'Date fac échue  : ' . $new_date;
                         }
                     } else {
                         $new_date = $date_fac_start;
+                        $infos[] = 'Date fac start 2 : ' . $new_date;
                     }
                 } elseif (!(int) $this->getData('fac_term')) {
                     $dt = new DateTime($new_date);
                     $dt->add(new DateInterval('P' . (int) $this->getData('fac_periodicity') . 'M'));
                     $new_date = $dt->format('Y-m-d');
+                    $infos[] = 'Terme échu : ' . $new_date;
+                }
+            }
+
+            if ($new_date && !(int) $this->getData('fac_term')) {
+                $date_fin = $this->getData('date_fin_validite');
+
+                if ($date_fin) {
+                    $date_fin = date('Y-m-d', strtotime($date_fin));
+
+                    if ($new_date > $date_fin) {
+                        $new_date = $date_fin;
+                        $infos[] = 'Terme échu - ajusté sur date fin : ' . $new_date;
+                    }
+                } else {
+                    $infos[] = 'date fin ok : ' . $date_fin;
                 }
             }
 
             if ($new_date && $new_date != $date) {
+                $infos[] = 'NEW DATE SET : ' . $new_date;
                 $check_errors = $this->updateField('date_next_facture', date('Y-m-d', strtotime($new_date)));
 
                 if (!count($check_errors)) {
@@ -5046,7 +5083,7 @@ class BCT_ContratLine extends BimpObject
 
     // Traitements:
 
-    public function checkLinkedLine(&$errors = array())
+    public function checkLinkedLine(&$errors = array(), $update = false)
     {
         $check = true;
         $id_linked_line = (int) $this->getData('id_linked_line');
@@ -5067,6 +5104,11 @@ class BCT_ContratLine extends BimpObject
                     $this->set('variable_qty', $linked_line->getData('variable_qty'));
                     $this->set('nb_renouv', $linked_line->getData('nb_renouv'));
                     $this->set('fac_term', $linked_line->getData('fac_term'));
+
+                    if ($update) {
+                        $warnings = array();
+                        $this->update($warnings, true);
+                    }
                 }
             } else {
                 $errors[] = 'La ligne de contrat d\'abonnement liée #' . $id_linked_line . ' n\'existe plus';
@@ -5098,6 +5140,17 @@ class BCT_ContratLine extends BimpObject
         if (!count($errors)) {
             $this->majBundle($errors, $warnings);
             $this->checkStatus();
+
+            $lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+                        'id_linked_line' => $this->id
+            ));
+            
+            if (!empty($lines)) {
+                foreach ($lines as $line) {
+                    $err = array();
+                    $line->checkLinkedLine($err, true);
+                }
+            }
         }
     }
 
@@ -5437,13 +5490,12 @@ class BCT_ContratLine extends BimpObject
                         $line_errors = $line_warnings = array();
 
                         if (!$newLn->isLoaded()) {
-                        $line_errors = $newLn->create($line_warnings, true);
+                            $line_errors = $newLn->create($line_warnings, true);
                             if (count($line_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec ajout de la ligne pour le produit ' . $child_prod->getRef());
                                 continue;
                             }
-                        } 
-                        else {
+                        } else {
                             $line_errors = $newLn->update($line_warnings, true);
                             if (count($line_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec mise à jour de la ligne pour le produit ' . $child_prod->getRef());
@@ -6915,6 +6967,20 @@ class BCT_ContratLine extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $sc
+        );
+    }
+
+    public function actionCheckDateNextFac($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Check fait';
+
+        $this->getDateNextFacture(true, $errors, $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

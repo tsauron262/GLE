@@ -23,3 +23,8 @@ params:
         label: User beta testeur
         info: Tableau json de type [1,2]
         def: []
+        
+    gsx_allow_stock_order: 
+        label: Autoriser les commandes de stock GSX
+        type: bool
+        def: 0

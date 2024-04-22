@@ -180,7 +180,7 @@ class AbstractNotification {
                return -1;
             if (notif.isNew(a) > notif.isNew(b))
                return 1;
-            if(a.position != undefined){
+            if(a.position !== undefined){
                 if (a.position > b.position)
                    return -1;
                 if (a.position < b.position)

@@ -966,10 +966,10 @@ graph:
             params: 
                 - month 
                 - day
+                - year
             date1: 1
             date2: 2
-            def: 1year
-        y: ggt
+            def: 5year
         yConfig:
             fields:
                 nb:

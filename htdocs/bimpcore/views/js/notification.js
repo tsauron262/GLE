@@ -29,6 +29,7 @@ class AbstractNotification {
         }
         
         this.id_max = 0;
+        this.use_localStorage = false;
         this.id_notification = id_notification;
         this.content = [];
 //        this.nom = nom;
@@ -151,9 +152,12 @@ class AbstractNotification {
                 var add = 0;
             else
                 var add = 1;
-            bimp_storage.set(this.id_notification + "_content", element.content, add);
-            this.traiteStorage();
-//            this.traiteElement(element.content);
+            if(this.use_localStorage){
+                bimp_storage.set(this.id_notification + "_content", element.content, add);
+                this.traiteStorage();
+            }
+            else
+                this.traiteElement(element.content);
         }
 
     }

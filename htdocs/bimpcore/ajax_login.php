@@ -8,7 +8,8 @@ require_once '../main.inc.php';
    <script>
        <?php
         if(class_exists('Session')){
-            echo "localStorage.setItem('bimp_hash', '".Session::getHash()."');";
+            echo "var bimp_storage = new BimpStorage();";
+            echo "bimp_storage.set('bimp_hash', '".Session::getHash()."');";
         }
        ?>
    

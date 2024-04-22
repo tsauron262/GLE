@@ -181,7 +181,6 @@ class AbstractNotification {
             if (notif.isNew(a) > notif.isNew(b))
                return 1;
             if(a.position != undefined){
-                console.log(a.position);
                 if (a.position > b.position)
                    return -1;
                 if (a.position < b.position)
@@ -674,56 +673,8 @@ function BimpNotification() {
     };
 }
 
-class BimpStorage {
-
-    getFullKey(key) {
-        return dol_url_root+'_'+entity+'_' + key;
-    }
-
-    get(key) {
-//        console.log(this.getFullKey(key));
-        var value = localStorage.getItem(this.getFullKey(key));
-        var obj = JSON.parse(value);
-
-        // Is an object
-        if (typeof obj === 'object' && obj !== null)
-            return obj;
-
-        return value;
-    }
-    ;
-            set(key, value, add = false) {
-        // Est un object
-        if(add){
-            var oldValue = this.get(key);
-            if(typeof oldValue === 'object' && typeof value === 'object'){
-//                console.log('concat response', oldValue, value);
-                value = {
-                    ...oldValue,
-                    ...value
-                };
-//                console.log('result', value);
-            }
-            else
-                console.log('oups concat impossible');
-                
-        }
-        
-        
-        if (typeof value === 'object' && value !== null)
-            return localStorage.setItem(this.getFullKey(key), JSON.stringify(value));
-
-        return localStorage.setItem(this.getFullKey(key), value);
-    }
-    ;
-            remove(key) {
-        localStorage.removeItem(this.getFullKey(key));
-    }
-    ;
-}
-
 var bimp_notification = new BimpNotification();
-var bimp_storage = new BimpStorage();
+var bimp_storage = new BimpStorage('obj');
 
 $(document).ready(function () {
     $('a#notiDropdown').hide();

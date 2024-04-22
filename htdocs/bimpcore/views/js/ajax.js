@@ -33,6 +33,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     // Paramètres par défaut: 
     this.request_id = request_id;
+    this.bimp_storage = new BimpStorage();
     this.action = action;
     this.url = ajaxRequestsUrl;
     this.type = 'POST';
@@ -75,13 +76,13 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     };
     
     this.addBimpHash = function () {
-        if (typeof localStorage.getItem('bimp_hash') !== 'undefined'){
-            var bimp_hash = localStorage.getItem('bimp_hash');
+        if (typeof bimpAjax.bimp_storage.get('bimp_hash') !== 'undefined'){
+            var bimp_hash = bimpAjax.bimp_storage.get('bimp_hash');
         }
 
         if (typeof (bimp_hash) !== 'undefined' && bimp_hash) {
             if(typeof (data.append) == 'function')
-                data.append("bimp_hash", localStorage.getItem('bimp_hash'));
+                data.append("bimp_hash", bimpAjax.bimp_storage.get('bimp_hash'));
             else
                 data['bimp_hash'] = bimp_hash;
         }
@@ -290,7 +291,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             processData: bimpAjax.processData,
             success: function (result) {
                 if(typeof (result.bimp_hash) !== 'undefined') {
-                    localStorage.setItem('bimp_hash', result.bimp_hash);
+                    bimpAjax.bimp_storage.set('bimp_hash', result.bimp_hash);
                 }
                 
                 if (typeof (result.request_id) !== 'undefined') {

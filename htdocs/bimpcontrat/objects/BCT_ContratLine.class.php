@@ -153,6 +153,10 @@ class BCT_ContratLine extends BimpObject
             return 0;
         }
 
+        if ($this->isLoaded() && (int) $this->getData('id_linked_line') && in_array($field, array('fac_periodicity', 'achat_periodicity', 'duration', 'fac_term', 'nb_renouv', 'variable_qty'))) {
+            return 0;
+        }
+
 
         if (in_array($field, array('achat_periodicity', 'variable_qty'))) {
             if ((int) $this->getData('fk_product')) {
@@ -5079,7 +5083,7 @@ class BCT_ContratLine extends BimpObject
 
     // Traitements:
 
-    public function checkLinkedLine(&$errors = array())
+    public function checkLinkedLine(&$errors = array(), $update = false)
     {
         $check = true;
         $id_linked_line = (int) $this->getData('id_linked_line');
@@ -5100,6 +5104,11 @@ class BCT_ContratLine extends BimpObject
                     $this->set('variable_qty', $linked_line->getData('variable_qty'));
                     $this->set('nb_renouv', $linked_line->getData('nb_renouv'));
                     $this->set('fac_term', $linked_line->getData('fac_term'));
+
+                    if ($update) {
+                        $warnings = array();
+                        $this->update($warnings, true);
+                    }
                 }
             } else {
                 $errors[] = 'La ligne de contrat d\'abonnement liée #' . $id_linked_line . ' n\'existe plus';
@@ -5131,6 +5140,17 @@ class BCT_ContratLine extends BimpObject
         if (!count($errors)) {
             $this->majBundle($errors, $warnings);
             $this->checkStatus();
+
+            $lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+                        'id_linked_line' => $this->id
+            ));
+            
+            if (!empty($lines)) {
+                foreach ($lines as $line) {
+                    $err = array();
+                    $line->checkLinkedLine($err, true);
+                }
+            }
         }
     }
 

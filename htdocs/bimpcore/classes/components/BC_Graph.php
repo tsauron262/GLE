@@ -76,6 +76,8 @@ class BC_Graph extends BC_Panel
                         $this->formData['xDateConfig']['values']['week'] = 'Semaine';
                 if(in_array('month', $this->params['xDateConfig']['params']))
                         $this->formData['xDateConfig']['values']['month'] = 'Mois';
+                if(in_array('year', $this->params['xDateConfig']['params']))
+                        $this->formData['xDateConfig']['values']['year'] = 'Ans';
             }
            
             if(isset($this->params['xDateConfig']['date1']) && $this->params['xDateConfig']['date1']){
@@ -87,6 +89,9 @@ class BC_Graph extends BC_Panel
                     $date = null;
                     if($this->params['xDateConfig']['def'] == '1year'){
                         $date=date("Y-m-d", strtotime("-1 year"));
+                    }
+                    if($this->params['xDateConfig']['def'] == '5year'){
+                        $date=date("Y-m-d", strtotime("-5 year"));
                     }
                     if($this->params['xDateConfig']['def'] == '1month'){
                         $date=date("Y-m-d", strtotime("-1 month"));
@@ -195,6 +200,9 @@ class BC_Graph extends BC_Panel
             $options['title'] = array("text" => $this->object->getLabel('', true));
         if($this->userOptions['xDateConfig']){
             switch ($this->userOptions['xDateConfig']) {
+                case 'year' :
+                    $options['axisX'] = array("title" => "Date", "valueFormatString" => 'YYYY');
+                    break;
                 case 'month' :
                     $options['axisX'] = array("title" => "Date", "valueFormatString" => 'MMM YYYY');
                     break;
@@ -294,7 +302,10 @@ class BC_Graph extends BC_Panel
     public function getDatasInfos($params){
         $datas= array();
         $xFiled = $this->fieldX;
-        if($this->userOptions['xDateConfig'] == 'month'){
+        if($this->userOptions['xDateConfig'] == 'year'){
+            $xFiled = 'date_format('.$xFiled.', \'%Y\')';
+        }
+        elseif($this->userOptions['xDateConfig'] == 'month'){
             $xFiled = 'date_format('.$xFiled.', \'%Y-%m\')';
         }
         elseif($this->userOptions['xDateConfig'] == 'day'){

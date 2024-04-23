@@ -193,7 +193,7 @@ fields:
     mail_sec: 
         label: E-Mail de secours
         dol_extra_field: 1
-        type: password
+        type: text
     code_sms: 
         label: Code SMS
         dol_extra_field: 1

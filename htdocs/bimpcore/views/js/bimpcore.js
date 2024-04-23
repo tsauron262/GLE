@@ -721,6 +721,59 @@ function getBadge(text, size, style) {
 }
 
 
+
+class BimpStorage {
+    constructor(type = 'text') {
+        this.type = type;
+      }
+
+    getFullKey(key) {
+        return dol_url_root+'_'+entity+'_' + key;
+    }
+
+    get(key, type = 'text') {
+//        console.log(this.getFullKey(key));
+        var value = localStorage.getItem(this.getFullKey(key));
+        if(this.type == 'obj'){
+            var obj = JSON.parse(value);
+
+            // Is an object
+            if (typeof obj === 'object' && obj !== null)
+                return obj;
+    }
+
+        return value;
+    };
+    set(key, value, add = false) {
+        // Est un object
+        if(add){
+            var oldValue = this.get(key);
+            if(typeof oldValue === 'object' && typeof value === 'object'){
+//                console.log('concat response', oldValue, value);
+                value = {
+                    ...oldValue,
+                    ...value
+                };
+//                console.log('result', value);
+            }
+            else
+                console.log('oups concat impossible');
+                
+        }
+        
+        
+        if (typeof value === 'object' && value !== null)
+            return localStorage.setItem(this.getFullKey(key), JSON.stringify(value));
+
+        return localStorage.setItem(this.getFullKey(key), value);
+    };
+    remove(key) {
+        localStorage.removeItem(this.getFullKey(key));
+    };
+}
+
+
+
 $(document).ready(function () {
     $('body').on('formLoaded', function (e) {
         if ($.isOk(e.$form)) {

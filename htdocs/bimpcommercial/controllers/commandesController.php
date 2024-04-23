@@ -71,17 +71,24 @@ class commandesController extends BimpController
 
 
         $list = new BC_ListTable($propal, $list, 1, null, $titre);
+        $graph = new BC_Graph($propal, 'parDay');
 
         if ($this->socid) {
+            $graph->addFieldFilterValue('fk_soc', (int) $this->soc->id);
             $list->addFieldFilterValue('fk_soc', (int) $this->soc->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
         }
         if (isset($_REQUEST['fk_statut'])) {
             $filtres = explode(",", $_REQUEST['fk_statut']);
             $list->addFieldFilterValue('fk_statut', $filtres);
+            $graph->addFieldFilterValue('fk_statut', $filtres);
         }
 
-        return $list->renderHtml();
+        
+        $html = $list->renderHtml();
+        if(isset($graph))
+            $html .= $graph->renderHtml();
+        return $html;
     }
 
     public function renderShipmentsTab()

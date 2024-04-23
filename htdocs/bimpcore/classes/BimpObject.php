@@ -1326,7 +1326,7 @@ class BimpObject extends BimpCache
 
     public function getFieldDataCheckType($field_name)
     {
-        $check = 'restricthtml';
+        $check = 'alphanohtml';
 
         $data_type = $this->getConf('fields/' . $field_name . '/type', '');
 
@@ -1372,7 +1372,7 @@ class BimpObject extends BimpCache
                 $check = 'none';
                 break;
         }
-
+        
         return $check;
     }
 
@@ -11530,7 +11530,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $url .= "&fk_statut=" . BimpTools::getValue("statut", 0, 'int');
                 }
                 if (BimpTools::isSubmit("search_status")) {
-                    $url .= "&fk_statut=" . BimpTools::getValue("search_status", 0, 'int');
+                    $url .= "&fk_statut=" . BimpTools::getValue("search_status", 0, 'string');//potentiellement plusieurs 1,2
                 }
                 if (BimpTools::isSubmit("mainmenu")) {
                     $url .= "&mainmenu=" . BimpTools::getValue("mainmenu", '', 'aZ09');

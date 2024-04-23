@@ -1007,7 +1007,7 @@ class BimpNote extends BimpObject
         if (!$onlyNotViewed) {
 //            $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
             $tabReq[1] = $reqDeb . $where . $reqFin;
-            $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser . $reqFin;
+            $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser.' AND type_dest > 0 ' . $reqFin;
         }
 
 //        echo '<pre>';

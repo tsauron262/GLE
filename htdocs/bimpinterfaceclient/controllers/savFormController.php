@@ -1442,7 +1442,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         }
 
         foreach ($inputs as $input_name => $input) {
-            $data[$input_name] = BimpTools::getValue($input_name, null, 'restricthtml');
+            $data[$input_name] = BimpTools::getValue($input_name, null, 'alphanohtml');
 
             if ($input['required'] && (is_null($data[$input_name]) || $data[$input_name] === '')) {
                 $errors[] = 'Champ obligatoire non renseigné: "' . $input['label'] . '"';

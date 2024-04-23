@@ -231,7 +231,7 @@ class StockOrder extends BimpObject
         } else {
             $headers = array(
                 'ref'     => 'Réf.',
-                'desc'    => 'Desc',
+                'desc'    => 'Description',
                 'qty'     => 'Qté',
                 'buttons' => ''
             );
@@ -614,7 +614,7 @@ class StockOrder extends BimpObject
                             'part_number'    => $part_number,
                             'qty'            => 0,
                             'qty_to_receive' => (int) $part_data['qty'],
-                            'description'    => $part_data['desc'],
+                            'product_label'  => $part_data['desc'],
                             'code_eee'       => $eeeCode
                                 ), true, $stock_errors);
                     }

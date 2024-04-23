@@ -437,6 +437,7 @@ class BS_SAV_ExtVersion extends BS_SAV
             $errors['Saisir les numéros'];
         else {
             $tmp = str_replace(' ', ',', $tmp);
+            $tmp = str_replace(';', ',', $tmp);
             $nums = explode(',', $tmp);
             $bdb = BimpObject::getBdb(true);
             $db = $bdb->db;

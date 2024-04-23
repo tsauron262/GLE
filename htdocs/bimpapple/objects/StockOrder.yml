@@ -2,7 +2,7 @@
 table: bimp_apple_stock_order
 primary: id
 icon: fas_cart-arrow-down
-controller: stock_order
+controller: stockOrder
 common_fields: 1
 
 list_page_url: 
@@ -21,6 +21,12 @@ labels:
     name_plur: commandes de stock
     is_female: 1
 
+objects: 
+    user_order: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_order
 fields: 
     type: 
         label: Type de stock
@@ -48,6 +54,12 @@ fields:
     date_order: 
         label: Date commande
         type: datetime
+        
+    id_user_order: 
+        label: Commande effectuée par
+        type: id_object
+        object: user_order
+        default_value: 0
         
     parts: 
         label: Composants
@@ -79,6 +91,10 @@ views:
                       name: infos
                   col_md: 6
                   col_lg: 6
+            - cols: 
+                - type: custom
+                  custom:
+                      callback: renderSearchPartsForm
             - cols: 
                 - type: custom
                   custom:

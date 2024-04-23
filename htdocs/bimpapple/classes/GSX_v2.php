@@ -399,7 +399,7 @@ class GSX_v2 extends GSX_Const
         );
 
 //        $headers[] = 'Content-Length: 0';
-        
+
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
             $headers[] = 'X-Apple-Service-Version: v' . static::getVersion();
@@ -1143,11 +1143,20 @@ class GSX_v2 extends GSX_Const
 
     // Commandes de stocks internes : 
 
-    public function stockingOrderPartsSummary()
+    public function stockingOrderPartsSummary($params)
     {
-        return $this->exec('stockingOrderPartsSummary', array(
-            'description' => 'IPhone'
-        ));
+        $result = $this->exec('stockingOrderPartsSummary', $params);
+
+        if (!empty($this->errors['curl'])) {
+            foreach ($this->errors['curl'] as $idx => $error) {
+                if (isset($error['code']) && (string) $error['code'] === 'NO_DATA_FOUND') {
+                    unset($this->errors['curl'][$idx]);
+                    return array();
+                }
+            }
+        }
+
+        return $result;
     }
 
     public function stockingOrderCreate($parts, $action = 'SAVE')

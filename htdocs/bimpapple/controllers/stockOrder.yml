@@ -8,6 +8,7 @@ title:
         
 js:
     - /bimpapple/views/js/gsx.js
+    - /bimpapple/views/js/parts_stocks.js
 
 objects: 
     stock_order: 

@@ -236,6 +236,113 @@ function InternalStocks() {
     }
 }
 
+function StockOrder() {
+    this.searchParts = function ($button, id_stock_order) {
+        if (!id_stock_order) {
+            bimp_msg('Id de la commande de stock absent', 'danger');
+            return;
+        }
+        if ($.isOk($button)) {
+            var $form = $button.findParentByClass('stockOrderSearchPartForm');
+
+            if ($.isOk($form)) {
+                var search_type = $form.find('select[name="search_type"]').val();
+
+                if (!search_type) {
+                    bimp_msg('Veillez sélectionner un type de recherche', 'danger', null, true);
+                    return;
+                }
+
+                var search_terms = $form.find('input[name="search_terms"]').val();
+
+                if (!search_terms) {
+                    bimp_msg('Veillez saisir votre recherche', 'danger', null, true);
+                    return;
+                }
+
+                if ($.isOk($button) && $button.hasClass('disabled')) {
+                    return;
+                }
+
+                GsxAjax('gsx_stockOrderSearchParts', {
+                    id_stock_order: id_stock_order,
+                    search_type: search_type,
+                    search_terms: search_terms
+                }, $form.find('.quickAddForm_ajax_result'), {
+                    url: dol_url_root + '/bimpapple/index.php?fc=stockOrder',
+                    $button: $button,
+                    display_success: false,
+                    append_html: true,
+                    display_processing: true,
+                    processing_msg: 'Recherche en cours'
+                });
+            }
+        }
+    };
+
+    this.addPart = function ($btn, id_stock_order, ref, desc) {
+        if ($.isOk($btn)) {
+            if ($btn.hasClass('disabled')) {
+                return;
+            }
+
+            var qty = parseInt($btn.parent('td').parent('tr').find('input.part_qty').val());
+
+            if (isNaN(qty)) {
+                bimp_msg('Qté invalide', 'danger', null, true);
+            } else if (!qty) {
+                bimp_msg('Aucune quantité saisie', 'danger', null, true);
+            } else {
+                setObjectAction($btn, {
+                    'module': 'bimpapple',
+                    'object_name': 'StockOrder',
+                    'id_object': id_stock_order
+                }, 'addPart', {
+                    ref: ref,
+                    desc: desc,
+                    qty: qty
+                });
+            }
+
+        }
+    };
+
+    this.setPartQty = function ($input, part_number, id_stock_order) {
+        if (!parseInt(id_stock_order)) {
+            bimp_msg('ID de la commande de stock absent', 'danger', null, true);
+            return;
+        }
+
+        if ($.isOk($input)) {
+            var qty = parseInt($input.val());
+
+            if (isNaN(qty)) {
+                bimp_msg('Qté invalide', 'danger', null, true);
+                return;
+            }
+
+            setObjectAction($(''), {
+                module: 'bimpapple',
+                object_name: 'StockOrder',
+                id_object: id_stock_order
+            }, 'setPartQty', {
+                part_number: part_number,
+                qty: qty
+            }, null, null, {
+                no_triggers: 1
+            });
+            return;
+        }
+
+        bimp_msg('Erreur technique - enregistrement impossible', 'danger', null, true);
+    };
+
+    this.reloadPartsList = function () {
+        $('.reloadStockorderPartsListButton').click();
+    };
+}
+
 var ConsignedStocks = new ConsignedStocks();
 var ConsignedStocksShipment = new ConsignedStocksShipment();
 var InternalStocks = new InternalStocks();
+var StockOrder = new StockOrder();

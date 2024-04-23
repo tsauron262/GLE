@@ -98,7 +98,7 @@ class gsxController extends BimpController
         }
 
         return array(
-            'errors' => 'Méthode "' . $method_name . '" inexistante'
+            'errors' => 'Méthode "' . $method_name . '" inexistante (' . get_class($this) . ')'
         );
     }
 
@@ -1071,7 +1071,7 @@ class gsxController extends BimpController
 
         if ($serial) {
             $data = $equipment->gsxFetchIdentifiers($serial);
-            if(is_array($data)){
+            if (is_array($data)) {
                 $data['product_label'] = $data['productDescription'];
             }
 //            $matches = array();
@@ -1887,7 +1887,6 @@ class gsxController extends BimpController
                                     $trees[] = $tree;
                                 }
                             }
-
                         }
                     }
                     if (!empty($trees)) {
@@ -2651,45 +2650,45 @@ class gsxController extends BimpController
             if (BimpObject::objectLoaded($equipment)) {
                 if (isset($data['identifiers']['serial']) && $data['identifiers']['serial'] === $equipment->getData('serial')) {
 //                    if (!(int) $equipment->getData('id_product') && preg_match('/^\*+$/', $equipment->getData('product_label'))) {//Todo pourquoi ?
-                        $update = false;
+                    $update = false;
 
-                        if (isset($data['productDescription']) && !preg_match('/^\*+$/', $data['productDescription'])) {
-                            $equipment->set('product_label', $data['productDescription']);
+                    if (isset($data['productDescription']) && !preg_match('/^\*+$/', $data['productDescription'])) {
+                        $equipment->set('product_label', $data['productDescription']);
+                        $update = true;
+                    }
+
+                    if (isset($data['warrantyInfo']['warrantyStatusDescription']) &&
+                            $data['warrantyInfo']['warrantyStatusDescription'] !== $equipment->getData('warranty_type')) {
+                        $equipment->set('warranty_type', $data['warrantyInfo']['warrantyStatusDescription']);
+                        $update = true;
+                    }
+
+                    if (isset($data['warrantyInfo']['coverageEndDate']) &&
+                            (string) $data['warrantyInfo']['coverageEndDate'] &&
+                            !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['coverageEndDate'])) {
+                        $dt = new DateTime($data['warrantyInfo']['coverageEndDate']);
+                        $date = $dt->format('Y-m-d');
+                        if ($date !== $equipment->getData('date_warranty_end')) {
+                            $equipment->set('date_warranty_end', $date);
                             $update = true;
                         }
+                    }
 
-                        if (isset($data['warrantyInfo']['warrantyStatusDescription']) &&
-                                $data['warrantyInfo']['warrantyStatusDescription'] !== $equipment->getData('warranty_type')) {
-                            $equipment->set('warranty_type', $data['warrantyInfo']['warrantyStatusDescription']);
+                    if (isset($data['warrantyInfo']['purchaseDate']) &&
+                            (string) $data['warrantyInfo']['purchaseDate'] &&
+                            !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['purchaseDate'])) {
+                        $dt = new DateTime($data['warrantyInfo']['purchaseDate']);
+                        $date = $dt->format('Y-m-d');
+                        if ($date !== $equipment->getData('date_purchase')) {
+                            $equipment->set('date_purchase', $date);
                             $update = true;
                         }
+                    }
 
-                        if (isset($data['warrantyInfo']['coverageEndDate']) &&
-                                (string) $data['warrantyInfo']['coverageEndDate'] &&
-                                !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['coverageEndDate'])) {
-                            $dt = new DateTime($data['warrantyInfo']['coverageEndDate']);
-                            $date = $dt->format('Y-m-d');
-                            if ($date !== $equipment->getData('date_warranty_end')) {
-                                $equipment->set('date_warranty_end', $date);
-                                $update = true;
-                            }
-                        }
-
-                        if (isset($data['warrantyInfo']['purchaseDate']) &&
-                                (string) $data['warrantyInfo']['purchaseDate'] &&
-                                !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['purchaseDate'])) {
-                            $dt = new DateTime($data['warrantyInfo']['purchaseDate']);
-                            $date = $dt->format('Y-m-d');
-                            if ($date !== $equipment->getData('date_purchase')) {
-                                $equipment->set('date_purchase', $date);
-                                $update = true;
-                            }
-                        }
-
-                        if ($update) {
-                            $warnings = array();
-                            $equipment->update($warnings, true);
-                        }
+                    if ($update) {
+                        $warnings = array();
+                        $equipment->update($warnings, true);
+                    }
 //                    }
                 }
             }

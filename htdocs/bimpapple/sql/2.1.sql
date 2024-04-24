@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_apple_stock_order` ADD id_user_order int (11) NOT NULL DEFAULT 0;

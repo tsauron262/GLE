@@ -398,6 +398,8 @@ class GSX_v2 extends GSX_Const
             'X-Apple-ShipTo: ' . $this->shipTo
         );
 
+//        $headers[] = 'Content-Length: 0';
+
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
             $headers[] = 'X-Apple-Service-Version: v' . static::getVersion();
@@ -436,7 +438,7 @@ class GSX_v2 extends GSX_Const
             return BimpCore::getConf('gsx_version', 0, 'bimpapple');
     }
 
-    public function exec($request_name, $params, &$response_headers = array(), $extra = array())
+    public function exec($request_name, $params = array(), &$response_headers = array(), $extra = array())
     {
         if (BimpCore::getConf('desactive_api'))
             die('desactivé');
@@ -468,6 +470,8 @@ class GSX_v2 extends GSX_Const
 
         if (count($params)) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, json_encode($params));
+        } else {
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, '{}');
         }
 
         if (in_array($request_name, self::$getRequests)) {
@@ -1138,27 +1142,55 @@ class GSX_v2 extends GSX_Const
     }
 
     // Commandes de stocks internes : 
-    
-    public function stockingOrderPartsSummary()
+
+    public function stockingOrderPartsSummary($params)
     {
-        
+        $result = $this->exec('stockingOrderPartsSummary', $params);
+
+        if (!empty($this->errors['curl'])) {
+            foreach ($this->errors['curl'] as $idx => $error) {
+                if (isset($error['code']) && (string) $error['code'] === 'NO_DATA_FOUND') {
+                    unset($this->errors['curl'][$idx]);
+                    return array();
+                }
+            }
+        }
+
+        return $result;
     }
-    
-    public function stockingOrderCreate()
+
+    public function stockingOrderCreate($parts, $action = 'SAVE')
     {
-        
+        return $this->exec('stockingOrderCreate', array(
+                    'action' => $action,
+                    'parts'  => $parts
+        ));
     }
-    
+
+    public function stockingOrderSummary()
+    {
+        $params = array();
+
+        return $this->exec('stockingOrderSummary', $params);
+    }
+
+    public function stockingOrderDetails()
+    {
+        $params = array();
+
+        return $this->exec('stockingOrderDetails', $params);
+    }
+
     public function stockingOrderUpdate()
     {
         
     }
-    
+
     public function stockingOrderDelete()
     {
         
     }
-    
+
     // Requêtes - Divers:
 
     public function filesUpload($serial, $files, $module = '')

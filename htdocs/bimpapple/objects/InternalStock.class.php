@@ -92,7 +92,7 @@ class InternalStock extends PartStock
         return $buttons;
     }
 
-    // Rendus HTML : 
+    // Rendus HTML :
 
     public function renderPartsReceivedQtiesInputs()
     {
@@ -300,7 +300,7 @@ class InternalStock extends PartStock
                                     'product_label' => $prod_label,
                                     'code_eee'      => $eee,
                                     'last_pa'       => $pa_ht
-                                        ), true, $line_errors, $line_wanings);
+                                        ), true, $line_errors, $line_warnings);
                         if (!count($line_errors))
                             $line_errors = $stock->correctStock($qty, '', 'IMPORT_CSV', 'Import CSV');
                     }

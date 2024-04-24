@@ -39,11 +39,19 @@ class BimpInput
             $data .= ' autocorrect="off" autocapitalize="none"';
         }
 
+        $extra_attr = '';
+
+        if (isset($options['extra_attr']) && is_array($options['extra_attr']) && $options['extra_attr']) {
+            foreach ($options['extra_attr'] as $attr_name => $attr_value) {
+                $extra_attr .= ' ' . $attr_name . '="' . htmlentities($attr_value) . '"';
+            }
+        }
+
 
         switch ($type) {
             case 'hidden':
                 $value = htmlentities($value);
-                $html .= '<input type="hidden" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '" class="' . $extra_class . '"' . $data . '/>';
+                $html .= '<input type="hidden" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '" class="' . $extra_class . '"' . $data . $extra_attr . '/>';
                 break;
 
             case 'text':
@@ -70,6 +78,7 @@ class BimpInput
                     }
 
                     $html .= $data;
+                    $html .= $extra_attr;
 
                     if ($extra_class) {
                         $html .= ' class="' . $extra_class . '"';
@@ -94,6 +103,7 @@ class BimpInput
                         $html .= ' style="' . $options['style'] . '"';
                     }
                     $html .= $data;
+                    $html .= $extra_attr;
                     $html .= '/>';
                 }
 
@@ -151,7 +161,7 @@ class BimpInput
                 $data .= ' data-maj_required="' . $maj_required . '"';
                 $data .= ' data-num_required="' . $num_required . '"';
 
-                $html .= '<input type="password" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"' . $data . '/>';
+                $html .= '<input type="password" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"' . $data . $extra_attr . '/>';
                 $html .= '<p class="inputHelp">';
                 $html .= $min_length . ' caractères minimum';
                 if ($special_required || $maj_required || $num_required) {
@@ -198,7 +208,7 @@ class BimpInput
                     if (isset($options['style'])) {
                         $html .= ' style="' . $options['style'] . '"';
                     }
-                    $html .= $data;
+                    $html .= $data . $extra_attr;
                     $html .= ' class="qtyInput' . ($extra_class ? ' ' . $extra_class : '') . '"';
                     $html .= '/>';
 
@@ -232,7 +242,7 @@ class BimpInput
                     if (isset($options['style'])) {
                         $html .= ' style="' . $options['style'] . '"';
                     }
-                    $html .= $data;
+                    $html .= $data . $extra_attr;
                     $html .= ' class="qtyInput' . ($extra_class ? ' ' . $extra_class : '') . '"';
                     $html .= '/>';
 
@@ -318,7 +328,7 @@ class BimpInput
                     $html .= ' maxlength="' . (int) $options['maxlength'] . '"';
                 }
 
-                $html .= $data . '>' . $value . '</textarea>';
+                $html .= $data . $extra_attr . '>' . $value . '</textarea>';
                 break;
 
             case 'html':
@@ -345,7 +355,7 @@ class BimpInput
                 break;
 
             case 'switch':
-                $html .= '<select class="switch ' . $extra_class . '" id="' . $input_id . '" name="' . $field_name . '"' . $data . '>';
+                $html .= '<select class="switch ' . $extra_class . '" id="' . $input_id . '" name="' . $field_name . '"' . $data . $extra_attr . '>';
                 $html .= '<option value="1"' . ($value ? ' selected' : '') . '>OUI</option>';
                 $html .= '<option value="0"' . (!$value ? ' selected' : '') . '>NON</option>';
                 $html .= '</select>';
@@ -365,7 +375,7 @@ class BimpInput
 
                 $input_id .= rand(0, 999999);
                 $html .= '<div class="toggleContainer">';
-                $html .= '<input type="hidden" class="toggle_value ' . $extra_class . '" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"' . $data . '/>';
+                $html .= '<input type="hidden" class="toggle_value ' . $extra_class . '" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"' . $data . $extra_attr . '/>';
                 $html .= '<input type="checkbox" class="toggle ' . $extra_class . '" id="' . $input_id . '_toggle" ' . ($value ? ' checked' : '') . '/>';
                 if ($display_labels) {
                     $html .= '<span class="toggle-label-off">' . $options['toggle_off'] . '</span>';
@@ -393,7 +403,7 @@ class BimpInput
                     if (count($options['options']) > 15) {
                         $extra_class .= ($extra_class ? ' ' : '') . 'searchable_select';
                     }
-                    $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '"' . $data . '>';
+                    $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '"' . $data . $extra_attr . '>';
                     foreach ($options['options'] as $option_value => $opt) {
                         $html .= self::renderSelectOption($option_value, $opt, $value);
                     }
@@ -439,7 +449,7 @@ class BimpInput
                 global $langs;
                 $langs->load('bills');
                 $form->load_cache_types_paiements();
-                $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '"' . $data . '>';
+                $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '"' . $data . $extra_attr . '>';
 
                 if ((int) $options['include_empty']) {
                     $html .= '<option';
@@ -558,7 +568,7 @@ class BimpInput
                         $html .= ' data-' . $data_name . '="' . $data_value . '"';
                     }
                 }
-                $html .= $data;
+                $html .= $data . $extra_attr;
                 $html .= '/>';
                 $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
                 $html .= '</div>';

@@ -1,6 +1,22 @@
 <?php
 
 function sizing($texte, $nombre, $espaceAvant = false, $zero = false, $zeroAvant = false) {
+    if(BimpCore::getConf('use_csv', 0, 'bimptocegid')){
+        if(stripos($texte, '"') !== false){//attention deja des "
+            if(stripos($texte, '"') === 0 && stripos($texte, '";') === (strlen($texte)-2)){
+                $texte = substr($texte,1,-2);
+            }
+            else
+                die('oups longeur '.strlen($texte). ' "; trouvé au '.stripos($texte, '";'));
+        }
+
+        if(is_int($texte))
+            return $texte.';';
+        else
+            return '"'.$texte.'";';
+    }
+    
+    
         $longeurText = strlen($texte);
         $avantTexte = "";
         $espacesRequis = $nombre - $longeurText;

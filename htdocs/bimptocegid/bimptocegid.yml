@@ -236,3 +236,7 @@ params:
     export_only_fact:
         label: Exporté que les factures
         def: 0
+    use_csv:
+        label: Utiliser CSV plutto que TRA
+        type: bool
+        def: 0

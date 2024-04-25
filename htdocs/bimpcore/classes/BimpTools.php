@@ -90,17 +90,20 @@ class BimpTools
             $value = 0;
 
         if ((int) BimpCore::getConf('activate_post_data_check')) {
+            if (is_string($value)) {
+                $value = trim($value);
+            }
             if ($value && $check) {
                 $val_temp = self::sanitizeVal($value, $check, $filter, $options);
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value'
                         ))) {
-                    if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $val_temp != $value)) {
+                    if (!$val_temp || (is_string($value) && $val_temp != $value)) {
                         if (!$val_temp) {
                             BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
                                 'check'           => $check,
-                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value) . ' (' . gettype($value) . ')'),
+                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : '"' . (string) htmlentities($value) . '" (' . gettype($value) . ')'),
                             ));
                         } else {
                             BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(

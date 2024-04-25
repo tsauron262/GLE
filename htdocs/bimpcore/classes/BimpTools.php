@@ -83,7 +83,7 @@ class BimpTools
         if (is_string($value) && $decode) {
             $value = stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
         }
-        
+
         if ($value == 'true')
             $value = 1;
         elseif ($value == 'false')
@@ -97,18 +97,18 @@ class BimpTools
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value'
                         ))) {
                     if (!$val_temp || (is_string($value) && trim($val_temp) != trim($value)) || (!is_string($value) && $val_temp != $value)) {
-                            if (!$val_temp) {
-                                BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
-                                    'check'           => $check,
-                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value) . ' (' . gettype($value) . ')'),
-                                ));
-                            } else {
-                                BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
-                                    'check'           => $check,
-                                    'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) '"'.htmlentities($value).'"' . ' (' . gettype($value) . ')'),
-                                    'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) '"'.htmlentities($val_temp).'"' . ' (' . gettype($value) . ')')
-                                ));
-                            }
+                        if (!$val_temp) {
+                            BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
+                                'check'           => $check,
+                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) htmlentities($value) . ' (' . gettype($value) . ')'),
+                            ));
+                        } else {
+                            BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
+                                'check'           => $check,
+                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) '"' . htmlentities($value) . '"' . ' (' . gettype($value) . ')'),
+                                'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) '"' . htmlentities($val_temp) . '"' . ' (' . gettype($value) . ')')
+                            ));
+                        }
                         if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
                             $value = $val_temp;
                         }
@@ -119,16 +119,6 @@ class BimpTools
 
 
         return $value;
-    }
-    
-    public static function htmlentities_array($array){
-        foreach($array as $clef => $value){
-            if(is_array($value))
-                $array[$clef] = BimpTools::htmlentities_array ($value);
-            else
-                $array[$clef] = htmlentities($value);
-        }
-        return $array;
     }
 
     public static function isPostFieldSubmit($field_name)
@@ -3000,6 +2990,17 @@ class BimpTools
         }
 
         return array_merge($array1, $array2);
+    }
+
+    public static function htmlentities_array($array)
+    {
+        foreach ($array as $clef => $value) {
+            if (is_array($value))
+                $array[$clef] = BimpTools::htmlentities_array($value);
+            else
+                $array[$clef] = htmlentities($value);
+        }
+        return $array;
     }
 
     // Gestion des nombres: 

@@ -173,6 +173,7 @@ fields:
                 method: getModeReglements
                 params:
                     - 0
+        history: 1
 #        input: 
 #            type: select_payment
 #            include_empty: 1

@@ -5,10 +5,12 @@ class StockOrder extends BimpObject
 
     const STATUT_BROUILLON = 0;
     const STATUT_ORDERED = 1;
+    const STATUT_RECEIVED = 2;
 
     public static $status_list = array(
         self::STATUT_BROUILLON => array('label' => 'Brouillon', 'icon' => 'far_file-alt', 'classes' => array('warning')),
-        self::STATUT_ORDERED   => array('label' => 'Commande effectuée', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::STATUT_ORDERED   => array('label' => 'En attente de réception', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        self::STATUT_RECEIVED  => array('label' => 'Réceptionnée', 'icon' => 'fas_check', 'classes' => array('success')),
     );
 
     // Droits Users: 
@@ -22,6 +24,7 @@ class StockOrder extends BimpObject
                 return 1;
 
             case 'order':
+            case 'receive':
                 return 1;
         }
 
@@ -56,13 +59,24 @@ class StockOrder extends BimpObject
                     return 0;
                 }
 
-                if ((int) $this->getData('status')) {
-                    $errors[] = 'Ce renvoi n\'est plus au statut brouillon';
+                if ((int) $this->getData('status') > 0) {
+                    $errors[] = 'Cette commande de stock n\'est plus au statut brouillon';
                     return 0;
                 }
 
                 if (empty($this->getData('parts'))) {
-                    $errors[] = 'Aucun composant ajouté à cette commande';
+                    $errors[] = 'Aucun composant ajouté à cette commande de stock';
+                    return 0;
+                }
+                return 1;
+
+            case 'receive':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                if ((int) $this->getData('status') !== self::STATUT_ORDERED) {
+                    $errors[] = 'Cette commande de stock n\'est pas au statut "En attente de réception"';
                     return 0;
                 }
                 return 1;
@@ -118,6 +132,16 @@ class StockOrder extends BimpObject
                 'label'   => 'Commander',
                 'icon'    => 'fas_cart-arrow-down',
                 'onclick' => $this->getJsActionOnclick('order', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer'
+                ))
+            );
+        }
+
+        if ($this->canSetAction('receive') && $this->isActionAllowed('receive')) {
+            $buttons[] = array(
+                'label'   => 'Réceptionner entièrement',
+                'icon'    => 'fas_arrow-circle-down',
+                'onclick' => $this->getJsActionOnclick('receive', array(), array(
                     'confirm_msg' => 'Veuillez confirmer'
                 ))
             );
@@ -298,6 +322,46 @@ class StockOrder extends BimpObject
                         )
                     )
         ));
+    }
+
+    public function renderInfosGsx()
+    {
+        $html = '';
+//        if ($this->isLoaded() && (int) $this->getData('status') > 0) {
+//            $errors = array();
+//            $order_id = $this->getData('order_id');
+//
+//            if (!$order_id) {
+//                $errors[] = 'N° de commande absent';
+//            } else {
+//                $gsx = new GSX_v2($this->getShipTo($errors));
+//
+//                if (!count($errors)) {
+//                    $result = $gsx->stockingOrderDetails($order_id);
+//
+//                    if (!$gsx->logged) {
+//                        $errors[] = $gsx->displayNoLogged();
+//                    } else {
+//                        $errors = $gsx->getErrors();
+//                        
+//                        if (!count($errors)) {
+//                            $html .= 'RESULT : <pre>';
+//                            $html .= print_r($result, 1);
+//                            $html .= '</pre>';
+//                        }
+//                    }
+//                }
+//            }
+//
+//
+//            if (count($errors)) {
+//                $html .= BimpRender::renderAlerts($errors);
+//            }
+//            $title = BimpRender::renderIcon('fab_apple', 'iconLeft') . 'Infos GSX';
+//            $html = BimpRender::renderPanel($title, $html);
+//        }
+
+        return $html;
     }
 
     // Traitements: 
@@ -630,5 +694,52 @@ class StockOrder extends BimpObject
                 'warnings' => $warnings
             );
         }
+    }
+
+    public function actionReceive($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Réception effectuée';
+
+        $parts = $this->getData('parts');
+        $stock_class = '';
+        switch ($this->getData('type')) {
+            case 'internal':
+                $stock_class = 'InternalStock';
+                break;
+
+            case 'consigned':
+                $stock_class = 'ConsignedStock';
+                break;
+        }
+
+        BimpObject::loadClass('bimpapple', $stock_class);
+
+        $code_centre = $this->getData('code_centre');
+
+        foreach ($parts as $part_number => $part_data) {
+            $stock = $stock_class::getStockInstance($code_centre, $part_number);
+
+            if (BimpObject::objectLoaded($stock)) {
+                $stock->setReceivedQty($part_data['qty']);
+            } else {
+                $errors[] = 'Composant "' . $part_number . '" : stock absent pour ce centre';
+            }
+        }
+
+        if (!count($errors)) {
+            $errors = $this->updateField('status', self::STATUT_RECEIVED);
+
+            if (!count($errors)) {
+                $this->addObjectLog('Commande réceptionnée', 'RECEIVED');
+            }
+        }
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 }

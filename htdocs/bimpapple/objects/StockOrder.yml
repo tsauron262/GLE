@@ -91,6 +91,11 @@ views:
                       name: infos
                   col_md: 6
                   col_lg: 6
+                - type: custom
+                  custom:
+                      callback: renderInfosGsx
+                  col_md: 6
+                  col_lg: 6
             - cols: 
                 - type: custom
                   custom:

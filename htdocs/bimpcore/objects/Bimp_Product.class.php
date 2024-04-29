@@ -1078,6 +1078,17 @@ class Bimp_Product extends BimpObject
                     'force_update' => 1
                 )
             );
+            $actions[] = array(
+                'label'      => 'Editer Nature',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'nature',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
         }
         return $actions;
     }

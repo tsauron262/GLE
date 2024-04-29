@@ -181,6 +181,17 @@ class InternalStock extends PartStock
         return $errors;
     }
 
+    public function setReceivedQty($qty_received, $reception_number = '')
+    {
+        $errors = $this->correctStock($qty_received, '', 'DELIVERY' . ($reception_number ? '_' . $reception_number : ''), 'Réception' . ($reception_number ? ' n° ' . $reception_number : ''));
+
+        if (!count($errors)) {
+            $errors = $this->modifQtyToReceive(-$qty_received);
+        }
+
+        return $errors;
+    }
+
     // Actions: 
 
     public function actionCsvImport($data, &$success)
@@ -336,11 +347,7 @@ class InternalStock extends PartStock
             if (!$qty_received) {
                 $errors = 'Veillez saisir une quantité supérieure à 0';
             } else {
-                $errors = $this->correctStock($qty_received, '', 'DELIVERY' . ($reception_number ? '_' . $reception_number : ''), 'Réception' . ($reception_number ? ' n° ' . $reception_number : ''));
-
-                if (!count($errors)) {
-                    $errors = $this->modifQtyToReceive(-$qty_received);
-                }
+                $errors = $this->setReceivedQty($qty_received, $reception_number);
 
                 if (!count($errors)) {
                     $s = ($qty_received > 1 ? 's' : '');
@@ -365,11 +372,7 @@ class InternalStock extends PartStock
                             continue;
                         }
 
-                        $part_errors = $part->correctStock($qty_received, '', 'DELIVERY' . ($reception_number ? '_' . $reception_number : ''), 'Réception' . ($reception_number ? ' n° ' . $reception_number : ''));
-
-                        if (!count($part_errors)) {
-                            $part_errors = $part->modifQtyToReceive(-$qty_received);
-                        }
+                        $part_errors = $part->setReceivedQty($qty_received, $reception_number);
 
                         if (count($part_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($part_errors, 'Composant "' . $part->getRef() . '"');

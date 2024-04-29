@@ -1337,10 +1337,11 @@ class GSX_v2 extends GSX_Const
 
     public function getErrors()
     {
+        global $user;
         $errors = array();
 
         if (!empty($this->errors['init'])) {
-            $errors[] = BimpTools::getMsgFromArray($this->errors['init'], 'Erreurs d\'initialisation GSX');
+            $errors[] = BimpTools::getMsgFromArray($this->errors['init'], 'Erreurs d\'initialisation GSX, user : '.$user->id);
         }
 
         if (!empty($this->errors['curl'])) {

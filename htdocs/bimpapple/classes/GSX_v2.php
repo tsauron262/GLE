@@ -1174,9 +1174,11 @@ class GSX_v2 extends GSX_Const
         return $this->exec('stockingOrderSummary', $params);
     }
 
-    public function stockingOrderDetails()
+    public function stockingOrderDetails($orderId)
     {
-        $params = array();
+        $params = array(
+            'orderId' => $orderId
+        );
 
         return $this->exec('stockingOrderDetails', $params);
     }

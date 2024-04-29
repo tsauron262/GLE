@@ -46,7 +46,7 @@ class PartStock extends BimpObject
     public function canSetAction($action)
     {
         global $user;
-        
+
         switch ($action) {
             case 'correct':
                 return (int) ($this->isUserAdmin() || $user->rights->bimpapple->part_stock->admin);
@@ -207,6 +207,11 @@ class PartStock extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function setReceivedQty($qty_received, $reception_number = '')
+    {
+        return $this->correctStock($qty_received, '', 'DELIVERY' . ($reception_number ? '_' . $reception_number : ''), 'Réception' . ($reception_number ? ' n° ' . $reception_number : ''));
     }
 
     // Actions: 

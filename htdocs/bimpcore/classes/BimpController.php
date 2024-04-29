@@ -234,7 +234,7 @@ class BimpController
                 $html .= '<h2 class="danger">Erreur Fatale</h2>';
 
                 global $dolibarr_main_prod;
-                if(!$dolibarr_main_prod){
+                if (!$dolibarr_main_prod) {
                     $html .= '<strong>' . $file . '</strong> - Ligne <strong>' . $line . '</strong><br/>';
 
                     $html .= BimpRender::renderAlerts(str_replace("\n", '<br/>', $msg));
@@ -873,15 +873,18 @@ class BimpController
             BimpDebug::addParamsDebug();
         }
 
-        $req_id = (int) BimpTools::getValue('request_id', 0, 'int');
-        $bimp_hash = BimpTools::getValue('bimp_hash', '', 'alphanohtml');
-        if (class_exists('Session') && !Session::isHashValid($bimp_hash)) {
-            die(json_encode(array(
-                'errors'     => array('Token invalide, merci de rafraîchir votre page, et de retenter l\'opération'),
-                'warnings'   => static::getAndResetAjaxWarnings(),
-                'request_id' => $req_id
-            )));
+        if (!defined('NO_BIMP_HASH')) { // pour dev
+            $req_id = (int) BimpTools::getValue('request_id', 0, 'int');
+            $bimp_hash = BimpTools::getValue('bimp_hash', '', 'alphanohtml');
+            if (class_exists('Session') && !Session::isHashValid($bimp_hash)) {
+                die(json_encode(array(
+                    'errors'     => array('Token invalide, merci de rafraîchir votre page, et de retenter l\'opération'),
+                    'warnings'   => static::getAndResetAjaxWarnings(),
+                    'request_id' => $req_id
+                )));
+            }
         }
+
 
         $debug_content = '';
 

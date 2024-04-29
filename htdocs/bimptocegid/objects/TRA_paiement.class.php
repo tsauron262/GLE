@@ -75,7 +75,8 @@
                 'FIN'       => '41199000',
                 'SOFINC'    => '41199100',
                 'CG'        => '41199200',
-                'FIN_YC'    => '51151200'
+                'FIN_YC'    => '51151200',
+                'ALMA'      => '51151500'
             ];
             
             $affichageByModeReglement = [

@@ -155,17 +155,18 @@ class BimpDebug
 
     public static function testLogDebug()
     {
-        global $bimp_start_time;
+        global $bimp_start_time, $user;
         $msg = '';
+        $debMail = 'User '.$user->login.'<br/>';
         if (!(float) $bimp_start_time) {
             $msg .= 'Variable bimp_start_time absente du fichier index.php';
-            mailSyn2('test', 'tommy@bimp.fr', null, $msg);
+            mailSyn2('Page time indeterminer', 'tommy@bimp.fr', null, $debMail.$msg);
         } else {
             if ((microtime(1) - $bimp_start_time) > 40) {
                 $msg .= (microtime(1) - $bimp_start_time) . ' sec';
 
                 $msg .= self::renderDebugTimes();
-                mailSyn2('test', 'tommy@bimp.fr', null, $msg);
+                mailSyn2('Page trés lourde', 'tommy@bimp.fr', null, $debMail.$msg);
                 BimpCore::addlog('Page trop lourde ' . microtime(1) - $bimp_start_time, Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info' => $msg));
             }
         }

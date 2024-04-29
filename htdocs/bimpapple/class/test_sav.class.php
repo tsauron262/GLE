@@ -59,7 +59,7 @@ class test_sav
             if ($idUser == 0)
                 $idUser = 2;
             global $user, $db, $conf, $langs;
-            $conf->entity = 1;
+//            $conf->entity = 1;
             $user = new User($db);
             $user->fetch($idUser);
             $user->fetch_optionals($idUser);

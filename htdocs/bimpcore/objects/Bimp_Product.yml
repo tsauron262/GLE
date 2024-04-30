@@ -120,6 +120,7 @@ fields:
         label: Libellé
         user_edit: 1
         required: 1
+        no_strip_tags: 1
         
     description: 
         label: Description

@@ -215,6 +215,7 @@ fields:
     address:
         label: Adresse
         type: text
+        no_strip_tags: 1
         user_edit: 1
         
     zip: 

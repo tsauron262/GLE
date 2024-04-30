@@ -113,6 +113,7 @@ class BC_Field extends BimpComponent
         $this->params_def['required'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['no_html'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['protect_html'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['no_strip_tags'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['unused'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required_if'] = array();
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);

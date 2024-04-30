@@ -27,6 +27,7 @@ fields:
     execution:
         label: Code a exécuter
         type: text
+        no_strip_tags: 1
         input: 
             auto_expand: 1
             help: Vous pouvez positionné $msg et $niveau

@@ -257,6 +257,7 @@ class StockOrder extends BimpObject
                 'ref'     => 'Réf.',
                 'desc'    => 'Description',
                 'qty'     => 'Qté',
+                'price'     => 'Prix Stock',
                 'buttons' => ''
             );
 
@@ -286,6 +287,7 @@ class StockOrder extends BimpObject
                     'ref'     => $part_number,
                     'qty'     => $qty_html,
                     'desc'    => $part['desc'],
+                    'price'    => $part['price'].' €',
                     'buttons' => ($parts_editable ? BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $this->getJsActionOnclick('removePart', array(
                                 'part_number' => $part_number
                                     ), array(
@@ -506,6 +508,11 @@ class StockOrder extends BimpObject
             $errors[] = 'Description absente';
         }
 
+        $price = BimpTools::getArrayValueFromPath($data, 'price', '');
+        if (!$price) {
+            $errors[] = 'Prix absent';
+        }
+
         $qty = (int) BimpTools::getArrayValueFromPath($data, 'qty', 0);
         if (!$qty) {
             $errors[] = 'Aucune quantité à commander';
@@ -519,7 +526,8 @@ class StockOrder extends BimpObject
             } else {
                 $parts[$ref] = array(
                     'desc' => $desc,
-                    'qty'  => $qty
+                    'qty'  => $qty,
+                    'price'=> $price
                 );
 
                 $errors = $this->updateField('parts', $parts);
@@ -617,7 +625,7 @@ class StockOrder extends BimpObject
                     'orderId' => '123456'
                 );
             } else {
-                $result = $gsx->stockingOrderCreate($order_parts);
+                $result = $gsx->stockingOrderCreate($order_parts, 'CS_'.$this->id, 'CONFIRM');
                 if (!$gsx->logged) {
                     $errors[] = BimpRender::renderAlerts($gsx->displayNoLogged());
                 } else {
@@ -651,6 +659,7 @@ class StockOrder extends BimpObject
 
                     if (BimpObject::objectLoaded($stock)) {
                         $stock_errors = $stock->modifQtyToReceive((int) $part_data['qty']);
+                        $stock->updateField('last_pa', $part_data['desc']);
                     } else {
                         $eeeCode = '';
 //
@@ -678,6 +687,7 @@ class StockOrder extends BimpObject
                             'part_number'    => $part_number,
                             'qty'            => 0,
                             'qty_to_receive' => (int) $part_data['qty'],
+                            'last_pa'        => $part_data['price'],
                             'product_label'  => $part_data['desc'],
                             'code_eee'       => $eeeCode
                                 ), true, $stock_errors);

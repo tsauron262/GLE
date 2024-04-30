@@ -44,6 +44,7 @@ class stockOrderController extends gsxController
                             'ref'     => 'Ref.',
                             'desc'    => 'Désignation',
                             'qty'     => 'Qté à commander',
+                            'price'     => 'Prix Stock',
                             'buttons' => ''
                         );
 
@@ -51,7 +52,7 @@ class stockOrderController extends gsxController
                         foreach ($result as $part) {
                             $i++;
 
-                            $onclick = 'StockOrder.addPart($(this), ' . $id_stock_order . ', \'' . htmlentities($part['partNumber']) . '\', \'' . htmlentities($part['description']) . '\')';
+                            $onclick = 'StockOrder.addPart($(this), ' . $id_stock_order . ', \'' . htmlentities($part['partNumber']) . '\', \'' . htmlentities($part['description']) . '\', \'' . htmlentities($part['stockPrice']) . '\')';
                             $button_html = '<span class="btn btn-default" onclick="' . $onclick . '">';
                             $button_html .= 'Ajouter' . BimpRender::renderIcon('fas_plus-circle', 'iconRight');
                             $button_html .= '</span>';
@@ -62,6 +63,7 @@ class stockOrderController extends gsxController
                                 'qty'     => BimpInput::renderInput('qty', 'part_' . $i . '_qty', 1, array(
                                     'extra_class' => 'part_qty'
                                 )),
+                                'price'   => $part['stockPrice'].' €',
                                 'buttons' => $button_html
                             );
                         }

@@ -1159,9 +1159,10 @@ class GSX_v2 extends GSX_Const
         return $result;
     }
 
-    public function stockingOrderCreate($parts, $action = 'SAVE')
+    public function stockingOrderCreate($parts, $code, $action = 'SAVE')
     {
         return $this->exec('stockingOrderCreate', array(
+                    'purchaseOrderNumber' => $code,
                     'action' => $action,
                     'parts'  => $parts
         ));

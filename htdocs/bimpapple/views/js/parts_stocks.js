@@ -280,7 +280,7 @@ function StockOrder() {
         }
     };
 
-    this.addPart = function ($btn, id_stock_order, ref, desc) {
+    this.addPart = function ($btn, id_stock_order, ref, desc, price) {
         if ($.isOk($btn)) {
             if ($btn.hasClass('disabled')) {
                 return;
@@ -300,7 +300,8 @@ function StockOrder() {
                 }, 'addPart', {
                     ref: ref,
                     desc: desc,
-                    qty: qty
+                    qty: qty,
+                    price: price
                 });
             }
 

@@ -87,6 +87,7 @@ fields:
         label: Texte
         type: text
         hashtags: 1
+        no_strip_tags: 1
         input: 
             hashtags: 1
             auto_expand: 1

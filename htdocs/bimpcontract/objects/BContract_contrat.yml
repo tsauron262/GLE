@@ -357,6 +357,7 @@ fields:
     logs:
         label: Logs contrat
         type: text
+        no_strip_tags: 1
     relance_renouvellement:
         label: Relance Email pour renouvellement du contrat
         type: bool

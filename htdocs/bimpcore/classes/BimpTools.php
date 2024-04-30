@@ -51,6 +51,17 @@ class BimpTools
     /*
      * $protected = que du string
      */
+    
+    public static function toAscii($string){
+        $longueur=strlen($string);
+        $return = '';
+        for($i=0;$i<$longueur;$i++)
+        {
+            $caractere=substr($string,$i,1);
+            $return .= ord($caractere)."-";
+        }
+        return $return;
+    }
 
     public static function getValue($key, $default_value = null, $check = 'restricthtml', $filter = null, $options = null, $decode = true)
     {
@@ -114,7 +125,9 @@ class BimpTools
                                 'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) '"' . htmlentities($value) . '"' . ' (' . gettype($value) . ')'),
                                 'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) '"' . htmlentities($val_temp) . '"' . ' (' . gettype($value) . ')'),
                                 'Valeur initiale brut' => '"'.$value.'"',
-                                'Valeur modifiée brut' => '"'.$val_temp.'"'
+                                'Valeur modifiée brut' => '"'.$val_temp.'"',
+                                'Valeur initiale ascii' => '"'. BimpTools::toAscii($value).'"',
+                                'Valeur modifiée ascii' => '"'.BimpTools::toAscii($val_temp).'"'
                             ));
                         }
                         if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {

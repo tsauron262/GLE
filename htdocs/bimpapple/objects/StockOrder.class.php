@@ -137,15 +137,15 @@ class StockOrder extends BimpObject
             );
         }
 
-        if ($this->canSetAction('receive') && $this->isActionAllowed('receive')) {
-            $buttons[] = array(
-                'label'   => 'Réceptionner entièrement',
-                'icon'    => 'fas_arrow-circle-down',
-                'onclick' => $this->getJsActionOnclick('receive', array(), array(
-                    'confirm_msg' => 'Veuillez confirmer'
-                ))
-            );
-        }
+//        if ($this->canSetAction('receive') && $this->isActionAllowed('receive')) {
+//            $buttons[] = array(
+//                'label'   => 'Réceptionner entièrement',
+//                'icon'    => 'fas_arrow-circle-down',
+//                'onclick' => $this->getJsActionOnclick('receive', array(), array(
+//                    'confirm_msg' => 'Veuillez confirmer'
+//                ))
+//            );
+//        }
 
 
         return $buttons;

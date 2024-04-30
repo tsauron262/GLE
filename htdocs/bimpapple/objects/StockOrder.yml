@@ -5,6 +5,8 @@ icon: fas_cart-arrow-down
 controller: stockOrder
 common_fields: 1
 
+entity_name: InternalStock
+
 list_page_url: 
     module: bimpsupport
     controller: index

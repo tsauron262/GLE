@@ -168,6 +168,7 @@ fields:
     note: 
         label: Note
         type: text
+        no_strip_tags: 1
     apple_id: 
         label: Identifiant Apple
         dol_extra_field: 1

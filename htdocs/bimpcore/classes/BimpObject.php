@@ -2970,7 +2970,7 @@ class BimpObject extends BimpCache
                             BimpCore::addlog('STRIP TAGS effectué', 3, 'secu', $this, array(
                                 'Champ' => $field,
                                 'Type'  => $type . ' (Items : ' . $item_type . ')',
-                                'Val'   => $value
+                                'Val'   => htmlentities($value)
                             ));
 //                            $value = $new_val;
                         }
@@ -2985,7 +2985,7 @@ class BimpObject extends BimpCache
                         BimpCore::addlog('STRIP TAGS effectué', 3, 'secu', $this, array(
                             'Champ' => $field,
                             'Type'  => $type,
-                            'Val'   => $value
+                            'Val'   => htmlentities($value)
                         ));
 //                    $value = $new_val;
                     }

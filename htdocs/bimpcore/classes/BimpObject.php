@@ -2964,6 +2964,7 @@ class BimpObject extends BimpCache
                     }
 
                     if ($auto_strip_tags && is_string($value) && !in_array($item_type, array('html', 'json', 'object_filters'))) {
+                        $value = BimpTools::replaceBr($value);
                         $new_val = strip_tags($value);
 
                         if ($new_val !== $value) {
@@ -2980,6 +2981,7 @@ class BimpObject extends BimpCache
                 return $check;
             } else {
                 if ($auto_strip_tags && is_string($value) && !in_array($type, array('html', 'json', 'object_filters'))) {
+                    $value = BimpTools::replaceBr($value);
                     $new_val = strip_tags($value);
 
                     if ($new_val !== $value) {

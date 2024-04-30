@@ -616,9 +616,9 @@ function BimpNotification() {
             var notification = this;
             $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
                 eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '(' + value.id_notification + ');');
-                notification.notificationActive[id_notification].obj.traiteStorage();
-                if(notification.notificationActive[id_notification].obj.id_max > 0) 
-                    localStorageOk = true;
+//                notification.notificationActive[id_notification].obj.traiteStorage();
+//                if(notification.notificationActive[id_notification].obj.id_max > 0) 
+//                    localStorageOk = true;
             });
 
         }

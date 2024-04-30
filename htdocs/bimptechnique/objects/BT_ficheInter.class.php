@@ -877,14 +877,14 @@ class BT_ficheInter extends BimpDolObject
 
         $filters['fk_soc'] = Array('operator' => '=', 'value' => $this->getData('fk_soc'));
 
-        $filters['date_start'] = array(
+        $filters['date_cloture'] = array(
             'operator' => '>=',
             'value'    => $date_butoire_n_1->format('Y-m-d')
         );
 
         $contrat_n_n_mois_1 = $instance->getList($filters);
 
-        $filters['date_start'] = array(
+        $filters['date_cloture'] = array(
             'operator' => '>=',
             'value'    => $date_butoire_n->format('Y-m-d')
         );

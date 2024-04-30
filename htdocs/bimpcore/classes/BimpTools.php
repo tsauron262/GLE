@@ -93,6 +93,9 @@ class BimpTools
             if (is_string($value)) {
                 $value = trim($value);
             }
+            if ($check == 'alphanohtml') {
+                $value = str_replace(array('<br/>', '<br>'), "\n", $value);
+            }
             if ($value && $check) {
                 $val_temp = self::sanitizeVal($value, $check, $filter, $options);
 

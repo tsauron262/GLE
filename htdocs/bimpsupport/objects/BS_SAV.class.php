@@ -5662,7 +5662,7 @@ ORDER BY a.val_max DESC");
                             $line->validateArray(array(
                                 'id_obj'    => (int) $new_id_propal,
                                 'type'      => BS_SavPropalLine::LINE_PRODUCT,
-                                'deletable' => 0,
+                                'deletable' => 1,
                                 'editable'  => 0,
                                 'remisable' => 0,
                             ));

@@ -2762,7 +2762,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $input = '';
 
                         if (BimpObject::objectLoaded($internal_stock)) {
-                            if ((int) $internal_stock->getData('do_not_order') && BimpTools::getPostFieldValue('repairType', '') === 'CIN') {
+                            if ((int) $internal_stock->getData('do_not_order') && BimpTools::getPostFieldValue('repairType', '') === 'CIN' && $internal_stock->getData('qty') > 0) {
                                 $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                                 $msg .= 'Attention : ce composant ne doit plus être commandé, veuillez de préférence utiliser un stock consigné ou créer une réparation d\'un autre type que "Carry In"';
                                 $input .= BimpRender::renderAlerts($msg, 'warning');
@@ -5662,7 +5662,7 @@ ORDER BY a.val_max DESC");
                             $line->validateArray(array(
                                 'id_obj'    => (int) $new_id_propal,
                                 'type'      => BS_SavPropalLine::LINE_PRODUCT,
-                                'deletable' => 0,
+                                'deletable' => 1,
                                 'editable'  => 0,
                                 'remisable' => 0,
                             ));

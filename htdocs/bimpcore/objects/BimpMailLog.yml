@@ -36,21 +36,26 @@ fields:
         displays: 
             default: 
                 type: mail
+        no_strip_tags: 1
     mail_from:
         label: From
         type: string
         displays: 
             default: 
                 type: mail
+        no_strip_tags: 1
     mail_cc:
         label: CC
         type: string
+        no_strip_tags: 1
     mail_subject:
         label: Sujet
         type: string
+        no_strip_tags: 1
     msg:
         label: Message
         type: string
+        no_strip_tags: 1
     old_trace:
         label: Dernière info
         type: string

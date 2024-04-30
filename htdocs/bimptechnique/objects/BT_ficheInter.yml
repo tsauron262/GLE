@@ -281,6 +281,7 @@ fields:
             
     logs:
         label: Logs FI
+        no_strip_tags: 1
         type: text
         
     signed:

@@ -420,6 +420,12 @@ params:
                       info: json
                       def: '[]'
                       cat: secu
+    auto_strip_tags: 
+        label: strip_tags systématique pour toutes les données non HTML (ou JSON / OBJECT FILTERS)
+        type: bool
+        def: 0
+        cat: secu
+        
     activate_post_data_check: 
         label: Activer la vérification des données POST / GET
         type: bool

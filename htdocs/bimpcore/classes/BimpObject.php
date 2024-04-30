@@ -1372,7 +1372,7 @@ class BimpObject extends BimpCache
                 $check = 'none';
                 break;
         }
-        
+
         return $check;
     }
 
@@ -2923,6 +2923,8 @@ class BimpObject extends BimpCache
                 }
             }
 
+            $auto_strip_tags = (int) BimpCore::getConf('auto_strip_tags', null, 'bimpcore');
+
             // Traitement des cas particuliers des listes de valeurs: 
             if ($type === 'items_list') {
                 if (is_string($value)) {
@@ -2951,11 +2953,38 @@ class BimpObject extends BimpCache
                             continue;
                         }
                     }
+
                     if (!BimpTools::checkValueByType($item_type, $item_value, $errors)) {
                         $check = false;
                     }
+
+                    if ($auto_strip_tags && is_string($value) && !in_array($item_type, array('html', 'json', 'object_filters'))) {
+                        $new_val = strip_tags($value);
+
+                        if ($new_val !== $value) {
+                            BimpCore::addlog('STRIP TAGS effectué', 3, 'secu', $this, array(
+                                'Champ' => $field,
+                                'Type'  => $type . ' (Items : ' . $item_type . ')',
+                                'Val'   => $value
+                            ));
+//                            $value = $new_val;
+                        }
+                    }
                 }
                 return $check;
+            } else {
+                if ($auto_strip_tags && is_string($value) && !in_array($type, array('html', 'json', 'object_filters'))) {
+                    $new_val = strip_tags($value);
+
+                    if ($new_val !== $value) {
+                        BimpCore::addlog('STRIP TAGS effectué', 3, 'secu', $this, array(
+                            'Champ' => $field,
+                            'Type'  => $type . ' (Items : ' . $item_type . ')',
+                            'Val'   => $value
+                        ));
+//                    $value = $new_val;
+                    }
+                }
             }
 
             // Vérification et ajustement de la valeur selon son type: 
@@ -3944,7 +3973,7 @@ class BimpObject extends BimpCache
 //    
     // Getters Listes
 
-    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC',  $groupBy = '')
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC', $groupBy = '')
     {
         $table = $this->getTable();
         $primary = $this->getPrimary();
@@ -3967,13 +3996,13 @@ class BimpObject extends BimpCache
                         $field = $matches[1];
                         $field_alias = $matches[2];
                     }
-                    
+
                     if (preg_match('/^(.*)\((.*),(.*)\)$/', $field, $matches)) {//(.*)\((.*),(.*)\)
                         $operateur = $matches[1];
                         $operateur2 = $matches[3];
                         $field = $matches[2];
                     }
-                    
+
                     if (preg_match('/^(.*)\((.*)\)$/', $field, $matches)) {
                         $operateur = $matches[1];
                         $field = $matches[2];
@@ -3982,11 +4011,11 @@ class BimpObject extends BimpCache
                     if ($this->field_exists($field)) {
                         $sqlKey = $this->getFieldSqlKey($field, 'a', null, $filters, $joins);
                         if ($sqlKey) {
-                            if($operateur == '')
+                            if ($operateur == '')
                                 $fieldTmp = $sqlKey;
                             else
-                                $fieldTmp = $operateur.'('.$sqlKey.($operateur2 != '' ? ', '.$operateur2 : '').')';
-                            $fields[] = $fieldTmp.($field_alias ? ' as ' . $field_alias : '');
+                                $fieldTmp = $operateur . '(' . $sqlKey . ($operateur2 != '' ? ', ' . $operateur2 : '') . ')';
+                            $fields[] = $fieldTmp . ($field_alias ? ' as ' . $field_alias : '');
                         }
                     } else {
                         BimpCore::addlog('getList() : Champ à retourner invalide', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
@@ -4063,9 +4092,9 @@ class BimpObject extends BimpCache
 
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        
-        if($groupBy)
-            $sql .= ' GROUP BY '.$groupBy;
+
+        if ($groupBy)
+            $sql .= ' GROUP BY ' . $groupBy;
 
         if ($order_by == 'rand') {
             $sql .= ' ORDER BY rand() ';
@@ -10568,10 +10597,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'success_callback' => $success_callback
         );
     }
-
     /*
      * obsolete a suppr
      */
+
     public function actionGetGraphData($data, &$success)
     {
         global $modeCSV, $modeGraph;
@@ -10585,13 +10614,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
         $post_temp = $_POST;
         $_POST = $list_data;
-        
-        /* recup des champ client*/
+
+        /* recup des champ client */
         $dataTmp = explode('&', $data['form']);
         $dataClient = array();
-        foreach($dataTmp as $val){
+        foreach ($dataTmp as $val) {
             $dataTmp2 = explode('=', $val);
-            if(isset($dataTmp2[1]))
+            if (isset($dataTmp2[1]))
                 $dataClient[$dataTmp2[0]] = $dataTmp2[1];
         }
 
@@ -10599,27 +10628,23 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint'))
             $list->initForGraph();
         $nameGraph = $list->getParam('graph')[$data['idGraph']];
-        
-        
-        
 
         $options = array();
 //        $options['form'] = $this->getFormGraph($nameGraph);
-        
+
         $userOption = array();
-        foreach($options['form'] as $input_name => $datas){
+        foreach ($options['form'] as $input_name => $datas) {
             $val = '';
-            if(isset($dataClient[$input_name])){
+            if (isset($dataClient[$input_name])) {
                 $val = $dataClient[$input_name];
-            }
-            elseif(isset($datas['value'])){
+            } elseif (isset($datas['value'])) {
                 $val = $datas['value'];
             }
             $options['form'][$input_name]['value'] = $val;
             $userOption[$input_name] = $val;
         }
-        
-        
+
+
         $dataGraphe = $this->getInfoGraph($nameGraph, $userOption);
         $options['animationEnabled'] = true;
         $options['theme'] = "light2";
@@ -10634,31 +10659,27 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             "dockInsidePlotArea" => false,
             "itemclick"          => "toogleDataSeries",
         );
-        
-        
-        
+
         //gestion des options
-        if(isset($options['form']) && count($options['form'])){
-            
-            $formHtml = '<form id="'. $list_id . '_' . $data['idGraph'] . '_chartForm">';
+        if (isset($options['form']) && count($options['form'])) {
+
+            $formHtml = '<form id="' . $list_id . '_' . $data['idGraph'] . '_chartForm">';
             $formHtml .= '<table class="bimp_list_table">';
             $formHtml .= '<tbody class="headers_col">';
-            foreach($options['form'] as $input_name => $optionData){
-                $value = (isset($optionData['value'])? $optionData['value'] : '');
+            foreach ($options['form'] as $input_name => $optionData) {
+                $value = (isset($optionData['value']) ? $optionData['value'] : '');
                 $dataGraphe['params'][$input_name] = $value;
                 $optionsInput = array();
-                if(isset($optionData['values']))
+                if (isset($optionData['values']))
                     $optionsInput['options'] = $optionData['values'];
-                $formHtml .= '<tr><th>'.$optionData['name'].'</th><td>'.BimpInput::renderInput($optionData['type'], $input_name, $value, $optionsInput).'</td></tr>';
-                
-                
+                $formHtml .= '<tr><th>' . $optionData['name'] . '</th><td>' . BimpInput::renderInput($optionData['type'], $input_name, $value, $optionsInput) . '</td></tr>';
             }
-            $formHtml .= '</tbody></table>'.BimpRender::renderButton(array('label' => 'Valider', 'onclick'=>'$(this).parent().parent().trigger( \'refresh\' );', 'type' => 'primary'));
+            $formHtml .= '</tbody></table>' . BimpRender::renderButton(array('label' => 'Valider', 'onclick' => '$(this).parent().parent().trigger( \'refresh\' );', 'type' => 'primary'));
             $formHtml .= '</form>';
         }
-        
-        
-        
+
+
+
         $i = 1;
         if ($dataGraphe['mode_data'] == 'unique' && method_exists($this, 'getGraphDatasPoints')) {//On apelle une seul methode pour tous les points
             $tmpDatas = $this->getGraphDatasPoints($nameGraph, $dataGraphe['params']);
@@ -10681,7 +10702,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas[$i])) {//On apelle une seul methode pour tous les points
                 $tmpData['dataPoints'] = $tmpDatas[$i];
             } else {
-                $errors[] = 'Aucune methode pour charger les points ' . $dataGraphe['mode_data'].' ('.$i.')';
+                $errors[] = 'Aucune methode pour charger les points ' . $dataGraphe['mode_data'] . ' (' . $i . ')';
             }
             $options['data'][] = $tmpData;
             $i++;
@@ -10694,7 +10715,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $success_callback = str_replace('"toogleDataSeries"', 'toogleDataSeries', $success_callback);
 
         $success_callback .= '$("#' . $list_id . '_' . $data['idGraph'] . '_chartContainer").CanvasJSChart(options);';
-        $success_callback .= '$("#' . $list_id . '_' . $data['idGraph'] . '_chartOption").html("'. addslashes($formHtml).'");';
+        $success_callback .= '$("#' . $list_id . '_' . $data['idGraph'] . '_chartOption").html("' . addslashes($formHtml) . '");';
 
         $success_callback .= 'function toogleDataSeries(e){
                     if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
@@ -10715,8 +10736,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         $graph = new BC_Graph($this, $data['idGraph']);
         return $graph->getDatas($data['form']);
-        
-        
     }
 
     public function actionEraseCache($data, &$success)
@@ -11530,7 +11549,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $url .= "&fk_statut=" . BimpTools::getValue("statut", 0, 'int');
                 }
                 if (BimpTools::isSubmit("search_status")) {
-                    $url .= "&fk_statut=" . BimpTools::getValue("search_status", 0, 'string');//potentiellement plusieurs 1,2
+                    $url .= "&fk_statut=" . BimpTools::getValue("search_status", 0, 'string'); //potentiellement plusieurs 1,2
                 }
                 if (BimpTools::isSubmit("mainmenu")) {
                     $url .= "&mainmenu=" . BimpTools::getValue("mainmenu", '', 'aZ09');

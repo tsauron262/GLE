@@ -37,7 +37,7 @@ fields:
         type: string
     value: 
         label: Valeur
-        type: text
+        type: html
     date: 
         label: Date
         type: datetime

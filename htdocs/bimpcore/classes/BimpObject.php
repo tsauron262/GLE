@@ -2979,7 +2979,7 @@ class BimpObject extends BimpCache
                     if ($new_val !== $value) {
                         BimpCore::addlog('STRIP TAGS effectué', 3, 'secu', $this, array(
                             'Champ' => $field,
-                            'Type'  => $type . ' (Items : ' . $item_type . ')',
+                            'Type'  => $type,
                             'Val'   => $value
                         ));
 //                    $value = $new_val;

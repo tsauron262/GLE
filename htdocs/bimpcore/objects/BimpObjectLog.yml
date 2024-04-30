@@ -22,7 +22,7 @@ fields:
         
     msg: 
         label: Message
-        type: text
+        type: html
         required: 1
         hashtags: 1
         

@@ -109,7 +109,9 @@ class BimpTools
                             BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
                                 'check'           => $check,
                                 'Valeur initiale' => (is_array($value) ? 'ARRAY' : (string) '"' . htmlentities($value) . '"' . ' (' . gettype($value) . ')'),
-                                'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) '"' . htmlentities($val_temp) . '"' . ' (' . gettype($value) . ')')
+                                'Valeur modifiée' => (is_array($val_temp) ? 'ARRAY' : (string) '"' . htmlentities($val_temp) . '"' . ' (' . gettype($value) . ')'),
+                                'Valeur initiale brut' => '"'.$value.'"',
+                                'Valeur modifiée brut' => '"'.$val_temp.'"'
                             ));
                         }
                         if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {

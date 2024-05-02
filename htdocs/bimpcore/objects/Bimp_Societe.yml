@@ -607,6 +607,7 @@ fields:
             note: 1   
             auto_expand: 1
             rows: 3
+        no_strip_tags: 1
             
     note_public: 
         label: Note publique
@@ -617,6 +618,7 @@ fields:
             note: 1
             auto_expand: 1
             rows: 3
+        no_strip_tags: 1
            
     secteuractivite:
         label: Secteur d'activité

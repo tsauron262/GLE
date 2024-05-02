@@ -2601,7 +2601,7 @@ class BimpTools
 
     public static function replaceEmailTags($text)
     {
-        return preg_replace("/<(.*)@(.*)>/i", '($1@$2)', $text);
+        return preg_replace("/<[^@\s]*@[^@\s]*\.[^@\s]*>/i", '($1@$2)', $text);
     }
 
     public static function cleanString($string)

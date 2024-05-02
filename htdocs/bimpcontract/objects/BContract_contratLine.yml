@@ -42,6 +42,7 @@ fields:
         type: string
         input:
             help: Laisse vide pour mettre la description du service
+        no_strip_tags: 1
     statut:
         label: Etat du service
         type: int

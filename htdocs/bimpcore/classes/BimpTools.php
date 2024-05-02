@@ -2596,6 +2596,7 @@ class BimpTools
 
     public static function replaceBr($text, $replacement = "\n")
     {
+        $text = preg_replace('/\s\s+/', ' ', $text);
         return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
     }
 

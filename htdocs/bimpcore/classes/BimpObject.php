@@ -2930,6 +2930,7 @@ class BimpObject extends BimpCache
                 }
             }
 
+            $allowed_tags = array('a', '@');
             // Traitement des cas particuliers des listes de valeurs: 
             if ($type === 'items_list') {
                 if (is_string($value)) {
@@ -2965,7 +2966,7 @@ class BimpObject extends BimpCache
 
                     if ($auto_strip_tags && is_string($value) && !in_array($item_type, array('html', 'json', 'object_filters'))) {
                         $value = BimpTools::replaceBr($value);
-                        $new_val = strip_tags($value);
+                        $new_val = strip_tags($value, $allowed_tags);
 
                         if ($new_val !== $value) {
                             BimpCore::addlog('STRIP TAGS effectué champ : '.$field, 3, 'secu', $this, array(
@@ -2982,7 +2983,7 @@ class BimpObject extends BimpCache
             } else {
                 if ($auto_strip_tags && is_string($value) && !in_array($type, array('html', 'json', 'object_filters'))) {
                     $value = BimpTools::replaceBr($value);
-                    $new_val = strip_tags($value);
+                    $new_val = strip_tags($value, $allowed_tags);
 
                     if ($new_val !== $value) {
                         BimpCore::addlog('STRIP TAGS effectué champ : '.$field, 3, 'secu', $this, array(

@@ -2989,7 +2989,8 @@ class BimpObject extends BimpCache
                             'Objet' => get_class($this),
                             'Champ' => $field,
                             'Type'  => $type,
-                            'Val'   => htmlentities($value)
+                            'Val'   => htmlentities($value),
+                            'New Val'   => htmlentities($new_val)
                         ));
 //                    $value = $new_val;
                     }

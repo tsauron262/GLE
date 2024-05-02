@@ -227,6 +227,7 @@ fields:
         label: Event agenda
         type: string
         extra: 1
+        no_strip_tags: 1
         
     extra24:
         label: Heure d'arrivé AM

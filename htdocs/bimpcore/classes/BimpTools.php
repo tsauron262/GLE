@@ -105,7 +105,7 @@ class BimpTools
                 $value = trim($value);
             }
             if ($check == 'alphanohtml') {
-                $value = str_replace(array('<br/>', '<br>'), "\n", $value);
+                $value = BimpTools::replaceBr($value);
             }
             if ($value && $check) {
                 $val_temp = self::sanitizeVal($value, $check, $filter, $options);

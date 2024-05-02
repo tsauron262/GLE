@@ -106,6 +106,7 @@ class BimpTools
             }
             if ($check == 'alphanohtml') {
                 $value = BimpTools::replaceBr($value);
+                $value = BimpTools::replaceEmailTags($value);
             }
             if ($value && $check) {
                 $val_temp = self::sanitizeVal($value, $check, $filter, $options);

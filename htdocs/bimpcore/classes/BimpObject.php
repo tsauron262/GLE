@@ -2968,7 +2968,7 @@ class BimpObject extends BimpCache
                         $new_val = strip_tags($value);
 
                         if ($new_val !== $value) {
-                            BimpCore::addlog('STRIP TAGS effectué', 3, 'secu', $this, array(
+                            BimpCore::addlog('STRIP TAGS effectué champ : '.$field, 3, 'secu', $this, array(
                                 'Objet' => get_class($this),
                                 'Champ' => $field,
                                 'Type'  => $type . ' (Items : ' . $item_type . ')',
@@ -2985,7 +2985,7 @@ class BimpObject extends BimpCache
                     $new_val = strip_tags($value);
 
                     if ($new_val !== $value) {
-                        BimpCore::addlog('STRIP TAGS effectué', 3, 'secu', $this, array(
+                        BimpCore::addlog('STRIP TAGS effectué champ : '.$field, 3, 'secu', $this, array(
                             'Objet' => get_class($this),
                             'Champ' => $field,
                             'Type'  => $type,

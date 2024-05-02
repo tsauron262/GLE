@@ -99,6 +99,7 @@ fields:
         type: money
     logs:
         label: Suivi du remplacement des numéros de séries
+        no_strip_tags: 1
     date_ouverture_prevue:
         label: Date start
         type: date

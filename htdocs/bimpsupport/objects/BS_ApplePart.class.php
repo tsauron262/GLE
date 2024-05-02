@@ -150,7 +150,7 @@ class BS_ApplePart extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array(/* 'qty', */'stock_price', 'exchange_price', 'out_of_warranty', 'price_type', 'not_invoiced'))) {
+        if (in_array($field, array(/* 'qty', */'stock_price', 'exchange_price', 'warranty', 'price_type', 'not_invoiced'))) {
             return (int) $this->isPropalEditable();
         }
         return (int) parent::isFieldEditable($field, $force_edit);
@@ -715,7 +715,7 @@ class BS_ApplePart extends BimpObject
                     'editable'           => 0,
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_apple_part',
-                    'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+                    'warranty'    => (int) $this->getData('warranty'),
                     'remisable'          => 1
                 ));
                 if (!count($line_errors)) {
@@ -842,7 +842,7 @@ class BS_ApplePart extends BimpObject
                     'editable'           => 0,
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_apple_part',
-                    'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+                    'warranty'    => (int) $this->getData('warranty'),
                     'remisable'          => 1
                 ));
 

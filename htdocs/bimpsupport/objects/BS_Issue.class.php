@@ -245,7 +245,7 @@ class BS_Issue extends BimpObject
                 $html .= '<th>Ref.</th>';
                 $html .= '<th>Libellé</th>';
 //                $html .= '<th>Qté</th>';
-                $html .= '<th>Hors garantie</th>';
+                $html .= '<th>Garantie</th>';
                 $html .= '<th>Prix</th>';
                 $html .= '<th>Cmde stock</th>';
                 $html .= '<th></th>';
@@ -257,7 +257,7 @@ class BS_Issue extends BimpObject
                     $html .= '<td>' . $part->displayData('part_number') . '</td>';
                     $html .= '<td>' . $part->displayData('label') . '</td>';
 //                    $html .= '<td>' . $part->displayData('qty') . '</td>';
-                    $html .= '<td>' . $part->displayData('out_of_warranty') . '</td>';
+                    $html .= '<td>' . $part->displayData('warranty') . '</td>';
                     $html .= '<td>' . $part->displayData('price_type') . '</td>';
                     $html .= '<td>' . $part->displayData('no_order') . '</td>';
                     $html .= '<td>';

@@ -222,6 +222,7 @@ fields:
         label: Fiche
         type: string
         extra: 1
+        no_strip_tags: 1
         
     action:
         label: Event agenda

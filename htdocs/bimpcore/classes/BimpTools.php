@@ -91,7 +91,8 @@ class BimpTools
                 $value = trim($value);
             }
             if ($check == 'alphanohtml') {
-                $value = str_replace(array('<br/>', '<br>'), "\n", $value);
+                $value = BimpTools::replaceBr($value);
+                $value = BimpTools::replaceEmailTags($value);
             }
             if ($value && $check) {
                 $val_temp = self::sanitizeVal($value, $check, $filter, $options);
@@ -2582,7 +2583,13 @@ class BimpTools
 
     public static function replaceBr($text, $replacement = "\n")
     {
+        $text = preg_replace('/\s\s+/', ' ', $text);
         return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
+    }
+
+    public static function replaceEmailTags($text)
+    {
+        return preg_replace("/<[^@\s]*@[^@\s]*\.[^@\s]*>/i", '($1@$2)', $text);
     }
 
     public static function cleanString($string)

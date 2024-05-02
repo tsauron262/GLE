@@ -32,7 +32,7 @@ fields:
         
     msg: 
         label: Message
-        type: text
+        type: html
         hashtags: 1
         displays: 
             alert: 

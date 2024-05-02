@@ -22,7 +22,7 @@
  *       \file       htdocs/core/ajax/ajaxcompanies.php
  *       \brief      File to return Ajax response on third parties request
  */
-
+die('no');
 if (!defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', 1); // Disables token renewal
 if (!defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');
 if (!defined('NOREQUIREHTML'))  define('NOREQUIREHTML', '1');

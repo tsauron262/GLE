@@ -74,6 +74,7 @@ fields:
             auto_expand: 1
         sortable: 0
         searchable: 0
+        no_strip_tags: 1
         
     resolution: 
         label: Résolution

@@ -95,7 +95,10 @@ class BimpTools
                 $value = BimpTools::replaceEmailTags($value);
             }
             if ($value && $check) {
-                $val_temp = self::sanitizeVal($value, $check, $filter, $options);
+                $val_temp = $value;
+                $val_temp = str_replace('"', 'ù£ù', $val_temp);
+                $val_temp = self::sanitizeVal($val_temp, $check, $filter, $options);
+                $val_temp = str_replace('ù£ù', '"', $val_temp);
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value'

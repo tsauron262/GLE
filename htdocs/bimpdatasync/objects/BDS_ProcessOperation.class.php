@@ -34,7 +34,7 @@ class BDS_ProcessOperation extends BimpObject
                     case 'toggle':
                     case 'date':
                     case 'datetime':
-                        $value = BimpTools::getPostFieldValue($input_name, null);
+                        $value = BimpTools::getPostFieldValue($input_name, null, 'alphanohtml');
                         if (is_null($value)) {
                             $value = $option->getData('default_value');
 
@@ -83,7 +83,7 @@ class BDS_ProcessOperation extends BimpObject
                         break;
                 }
             }
-            $options['debug'] = (int) BimpTools::getPostFieldValue('operation_' . (int) $this->id . '_debug_active', 0);
+            $options['debug'] = (int) BimpTools::getPostFieldValue('operation_' . (int) $this->id . '_debug_active', 0, 'int');
         }
     }
 

@@ -127,7 +127,7 @@ class BF_Refinanceur extends BimpObject
 
             $taux = array();
             foreach ($demande_class::$marges as $amount => $marge) {
-                $taux[$amount] = (float) BimpTools::getPostFieldValue('taux_' . $amount, 0);
+                $taux[$amount] = (float) BimpTools::getPostFieldValue('taux_' . $amount, 0, 'float');
             }
 
             $this->set('taux', $taux);

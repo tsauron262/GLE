@@ -209,7 +209,7 @@ class BimpTools
 
     public static function getAjaxFileName($field_name)
     {
-        return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name));
+        return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name, '', 'alphanohtml'));
     }
 
     public static function moveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null)

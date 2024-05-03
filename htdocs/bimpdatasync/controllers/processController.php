@@ -157,8 +157,8 @@ class processController extends BimpController
         $warnings = array();
         $result = array();
 
-        $id_process = (int) BimpTools::getPostFieldValue('id_process', 0);
-        $id_operation = (int) BimpTools::getPostFieldValue('id_operation', 0);
+        $id_process = (int) BimpTools::getPostFieldValue('id_process', 0, 'int');
+        $id_operation = (int) BimpTools::getPostFieldValue('id_operation', 0, 'int');
 
         if (is_null($id_process) || !$id_process) {
             $errors[] = 'ID du processus absent';
@@ -181,18 +181,18 @@ class processController extends BimpController
         if (!count($errors)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
 
-            $options = BimpTools::getPostFieldValue('options', array());
-            $elements = BimpTools::getPostFieldValue('elements', array());
+            $options = BimpTools::getPostFieldValue('options', array(), 'array');
+            $elements = BimpTools::getPostFieldValue('elements', array(), 'array');
 
             $bds_process = BDSProcess::createProcessById($id_process, $errors, $options, $elements);
 
             if (!count($errors) && is_a($bds_process, 'BDSProcess')) {
-                $id_report = (int) BimpTools::getPostFieldValue('id_report', 0);
-                $iteration = (int) BimpTools::getPostFieldValue('iteration', 0);
-                $step_name = BimpTools::getPostFieldValue('step_name', '');
+                $id_report = (int) BimpTools::getPostFieldValue('id_report', 0, 'int');
+                $iteration = (int) BimpTools::getPostFieldValue('iteration', 0, 'int');
+                $step_name = BimpTools::getPostFieldValue('step_name', '', 'alphanohtml');
                 $extra_data = array(
-                    'operation' => BimpTools::getPostFieldValue('operation_data', array()),
-                    'step'      => BimpTools::getPostFieldValue('step_data', array())
+                    'operation' => BimpTools::getPostFieldValue('operation_data', array(), 'array'),
+                    'step'      => BimpTools::getPostFieldValue('step_data', array(), 'array')
                 );
 
                 $result = $bds_process->executeOperationStep($id_operation, $step_name, $id_report, $iteration, $extra_data);
@@ -242,8 +242,8 @@ class processController extends BimpController
             $bds_process = BDSProcess::createProcessById($id_process, $errors, $options);
 
             if (!is_null($bds_process)) {
-                $id_report = (int) BimpTools::getPostFieldValue('id_report', 0);
-                $operation_data = BimpTools::getPostFieldValue('operation_data', array());
+                $id_report = (int) BimpTools::getPostFieldValue('id_report', 0, 'int');
+                $operation_data = BimpTools::getPostFieldValue('operation_data', array(), 'array');
 
                 $result = $bds_process->finalizeOperation($id_operation, $id_report, $operation_data, $errors);
             }
@@ -262,8 +262,8 @@ class processController extends BimpController
         $errors = array();
         $warnings = array();
 
-        $id_process = (int) BimpTools::getPostFieldValue('id_process', 0);
-        $id_operation = (int) BimpTools::getPostFieldValue('id_operation', 0);
+        $id_process = (int) BimpTools::getPostFieldValue('id_process', 0, 'int');
+        $id_operation = (int) BimpTools::getPostFieldValue('id_operation', 0, 'int');
 
         if (is_null($id_process) || !$id_process) {
             $errors[] = 'ID du processus absent';
@@ -286,14 +286,14 @@ class processController extends BimpController
         if (!count($errors)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
 
-            $options = BimpTools::getPostFieldValue('options', array());
+            $options = BimpTools::getPostFieldValue('options', array(), 'array');
             $options['mode'] = 'ajax';
 
             $bds_process = BDSProcess::createProcessById($id_process, $errors, $options);
 
             if (!is_null($bds_process)) {
-                $id_report = (int) BimpTools::getPostFieldValue('id_report', 0);
-                $operation_data = BimpTools::getPostFieldValue('operation_data', array());
+                $id_report = (int) BimpTools::getPostFieldValue('id_report', 0, 'int');
+                $operation_data = BimpTools::getPostFieldValue('operation_data', array(), 'array');
 
                 $result = $bds_process->cancelOperation($id_operation, $id_report, $operation_data, $errors);
             }

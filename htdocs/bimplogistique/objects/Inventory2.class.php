@@ -405,8 +405,8 @@ HAVING scan_exp != scan_det";
 
         // TODO update déclenché depuis une autre classe ?
 
-        $has_filter = (int) BimpTools::getPostFieldValue('filter_inventory');
-        $delete_scan_and_exp = (int) BimpTools::getPostFieldValue('delete_scan_and_exp');
+        $has_filter = (int) BimpTools::getPostFieldValue('filter_inventory', 0, 'int');
+        $delete_scan_and_exp = (int) BimpTools::getPostFieldValue('delete_scan_and_exp', 0, 'int');
 
         if ((int) $this->getData('status') == self::STATUS_OPEN) {
 
@@ -508,23 +508,23 @@ HAVING scan_exp != scan_det";
 
     public function getPostedFilterData()
     {
-        $incl_categorie = BimpTools::getPostFieldValue('incl_categorie');
-        $excl_categorie = BimpTools::getPostFieldValue('excl_categorie');
-
-        $incl_collection = BimpTools::getPostFieldValue('incl_collection');
-        $excl_collection = BimpTools::getPostFieldValue('excl_collection');
-
-        $incl_nature = BimpTools::getPostFieldValue('incl_nature');
-        $excl_nature = BimpTools::getPostFieldValue('excl_nature');
-
-        $incl_famille = BimpTools::getPostFieldValue('incl_famille');
-        $excl_famille = BimpTools::getPostFieldValue('excl_famille');
-
-        $incl_gamme = BimpTools::getPostFieldValue('incl_gamme');
-        $excl_gamme = BimpTools::getPostFieldValue('excl_gamme');
-
-        $incl_product = $this->getPostedIdsProducts('incl_product');
-        $excl_product = $this->getPostedIdsProducts('excl_product');
+//        $incl_categorie = BimpTools::getPostFieldValue('incl_categorie');
+//        $excl_categorie = BimpTools::getPostFieldValue('excl_categorie');
+//
+//        $incl_collection = BimpTools::getPostFieldValue('incl_collection');
+//        $excl_collection = BimpTools::getPostFieldValue('excl_collection');
+//
+//        $incl_nature = BimpTools::getPostFieldValue('incl_nature');
+//        $excl_nature = BimpTools::getPostFieldValue('excl_nature');
+//
+//        $incl_famille = BimpTools::getPostFieldValue('incl_famille');
+//        $excl_famille = BimpTools::getPostFieldValue('excl_famille');
+//
+//        $incl_gamme = BimpTools::getPostFieldValue('incl_gamme');
+//        $excl_gamme = BimpTools::getPostFieldValue('excl_gamme');
+//
+//        $incl_product = $this->getPostedIdsProducts('incl_product');
+//        $excl_product = $this->getPostedIdsProducts('excl_product');
 
         $return = array();
 
@@ -554,7 +554,7 @@ HAVING scan_exp != scan_det";
         foreach ($_POST as $key => $inut) {
 
             if (preg_match('/^prod_' . $input_name . '_[0-9]+/', $key)) {
-                $new_id = BimpTools::getPostFieldValue($key);
+                $new_id = BimpTools::getPostFieldValue($key, 0, 'int');
                 if (!isset($ids_prod[$new_id]) and 0 < $new_id)
                     $ids_prod[$new_id] = $new_id;
             }
@@ -744,7 +744,7 @@ HAVING scan_exp != scan_det";
             // Close
         } elseif ($status == self::STATUS_CLOSED) {
             $errors = BimpTools::merge_array($errors, $this->close());
-            $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
+            $date_mouvement = BimpTools::getPostFieldValue('date_mouvement', null, 'date');
             if (!$this->setDateMouvement($date_mouvement))
                 $errors[] = "Erreur lors de la définition de la date du mouvement";
             else
@@ -786,8 +786,8 @@ HAVING scan_exp != scan_det";
             if (!is_array($lines) || empty($lines)) {
                 $errors[] = 'Aucune ligne dans le fichier';
             } else {
-                $separator = BimpTools::getPostFieldValue('separator', ';');
-                $test_only = (int) BimpTools::getPostFieldValue('test_only', 0);
+                $separator = BimpTools::getPostFieldValue('separator', ';', 'alphanohtml');
+                $test_only = (int) BimpTools::getPostFieldValue('test_only', 0, 'int');
 
                 $i = 0;
                 foreach ($lines as $line) {

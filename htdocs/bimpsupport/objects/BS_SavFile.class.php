@@ -58,7 +58,7 @@ class BS_SavFile extends BimpFile
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            if ((int) BimpTools::getPostFieldValue('in_fac_email', 0)) {
+            if ((int) BimpTools::getPostFieldValue('in_fac_email', 0, 'int')) {
                 $file_errors = array();
                 $sav = $this->getParentInstance();
 

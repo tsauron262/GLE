@@ -645,8 +645,8 @@ class BRH_Holiday extends BimpObject
     {
         $errors = array();
 
-        $hd_from = BimpTools::getPostFieldValue('date_debut_halfday', '');
-        $hd_to = BimpTools::getPostFieldValue('date_fin_halfday', '');
+        $hd_from = BimpTools::getPostFieldValue('date_debut_halfday', '', 'alphanohtml');
+        $hd_to = BimpTools::getPostFieldValue('date_fin_halfday', '', 'alphanohtml');
 
         if ($hd_from && $hd_to) {
             $hd = 0;
@@ -678,7 +678,7 @@ class BRH_Holiday extends BimpObject
         $errors = array();
 
         if (!$this->isLoaded()) {
-            if (!(int) BimpTools::getPostFieldValue('is_collectif', 0)) {
+            if (!(int) BimpTools::getPostFieldValue('is_collectif', 0, 'int')) {
                 if (!(int) $this->getData('fk_user')) {
                     $errors[] = 'Veullez sélectionner un utilisateur';
                 }

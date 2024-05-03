@@ -911,7 +911,7 @@ class BT_ficheInter extends BimpDolObject
 
         $lines = $this->getLinesFacturable();
 
-        $id_commande = BimpTools::getPostFieldValue('id_commande');
+        $id_commande = BimpTools::getPostFieldValue('id_commande', null, 'int');
 
         if (count($lines) && $id_commande > 0) {
             foreach ($lines as $id) {
@@ -3003,13 +3003,13 @@ class BT_ficheInter extends BimpDolObject
 
     public function validatePost()
     {
-        $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature');
+        $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature', 0, 'int');
 
         if ($id_contact) {
             $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
 
             if (BimpObject::objectLoaded($contact)) {
-                if (array_key_exists('signataire', $_POST) and BimpTools::getPostFieldValue('signataire') == '')
+                if (array_key_exists('signataire', $_POST) and BimpTools::getPostFieldValue('signataire', '', 'alphanohtml') == '')
                     $_POST['signataire'] = $contact->getName();
 
 //                if(array_key_exists('email_signature', $_POST) and BimpTools::getPostFieldValue('email_signature') == '')
@@ -3021,7 +3021,7 @@ class BT_ficheInter extends BimpDolObject
         $errors = parent::validatePost();
 
         if (!count($errors)) {
-            if ((int) BimpTools::getPostFieldValue('signature_set', 0)) {
+            if ((int) BimpTools::getPostFieldValue('signature_set', 0, 'int')) {
                 if (!count($this->getChildrenList("inters"))) {
                     $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention sans intervention enregistrée";
 //                    $errors[] = print_r($_POST, 1);
@@ -3068,7 +3068,7 @@ class BT_ficheInter extends BimpDolObject
                 }
             }
 
-            if ($this->getInitData('fk_contrat') != BimpTools::getPostFieldValue('fk_contrat')) {
+            if ($this->getInitData('fk_contrat') != BimpTools::getPostFieldValue('fk_contrat', null, 'int')) {
                 
             }
         }
@@ -3160,7 +3160,7 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm->punctual = 1;
                 $actioncomm->userownerid = (int) $this->getData('fk_user_tech');
                 $actioncomm->elementtype = 'fichinter';
-                $actioncomm->type_id = BimpTools::getPostFieldValue('type_planning', 0);
+                $actioncomm->type_id = BimpTools::getPostFieldValue('type_planning', 0, 'int');
                 $actioncomm->datep = strtotime($this->getData('datei') . " " . $this->getData('time_from'));
                 $actioncomm->datef = strtotime($this->getData('datei') . " " . $this->getData('time_to'));
                 $actioncomm->socid = $this->getData('fk_soc');
@@ -3215,7 +3215,7 @@ class BT_ficheInter extends BimpDolObject
         $errors = parent::update($warnings, $force_update);
 
         if (!$this->no_update_process && !count($errors)) {
-            if ((int) BimpTools::getPostFieldValue('signature_set', 0)) {
+            if ((int) BimpTools::getPostFieldValue('signature_set', 0, 'int')) {
                 $this->setSigned($warnings);
             }
 

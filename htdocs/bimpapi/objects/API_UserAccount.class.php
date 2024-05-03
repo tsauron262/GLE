@@ -151,7 +151,7 @@ class API_UserAccount extends BimpObject
 
     public function getExternalTokenFormTitle()
     {
-        $api_name = BimpTools::getPostFieldValue('api_name', '');
+        $api_name = BimpTools::getPostFieldValue('api_name', '', 'aZ09');
 
         if ($api_name) {
             $api = BimpAPI::getApiInstance($api_name);
@@ -266,7 +266,7 @@ class API_UserAccount extends BimpObject
         $html = '';
         $errors = array();
 
-        $api_name = BimpTools::getPostFieldValue('api_name', '');
+        $api_name = BimpTools::getPostFieldValue('api_name', '', 'aZ09');
 
         if ($api_name) {
             $api = BimpAPI::getApiInstance($api_name);

@@ -837,7 +837,7 @@ class BCT_ContratLine extends BimpObject
         $value = $this->getData($field_name);
 
         if (in_array($field_name, array('fac_periodicity', 'fac_term', 'achat_periodicity', 'duration'))) {
-            $id_linked_line = (int) BimpTools::getPostFieldValue('id_linked_line');
+            $id_linked_line = (int) BimpTools::getPostFieldValue('id_linked_line', 0, 'int');
             if ($id_linked_line && $id_linked_line !== (int) $this->getInitData('id_linked_line')) {
                 // Si la ligne liée vient de changer, on reprend les même params: 
                 $linked_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_line);
@@ -1650,7 +1650,7 @@ class BCT_ContratLine extends BimpObject
     {
         $date = '';
 
-        $id_lines = BimpTools::getPostFieldValue('id_objects');
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         if (!empty($id_lines)) {
             $where = 'rowid IN (' . implode(',', $id_lines) . ')';
@@ -2035,7 +2035,7 @@ class BCT_ContratLine extends BimpObject
                 )
             );
 
-            $id_lines = BimpTools::getPostFieldValue('id_objects', array());
+            $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
             if (!empty($id_lines)) {
                 $filters['a.rowid'] = $id_lines;
             }
@@ -2298,7 +2298,7 @@ class BCT_ContratLine extends BimpObject
 
         if (!(int) $id_entrepot) {
             if (BimpTools::isPostFieldSubmit('id_entrepot')) {
-                $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0);
+                $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0, 'int');
             } elseif ($this->isLoaded()) {
                 $contrat = $this->getParentInstance();
 
@@ -2332,8 +2332,8 @@ class BCT_ContratLine extends BimpObject
             0 => 'Aucun'
         );
 
-        $id_prod = (int) BimpTools::getPostFieldValue('fk_product', $this->getData('fk_product'));
-        $other_product = (int) BimpTools::getPostFieldValue('type_linked_line', 0);
+        $id_prod = (int) BimpTools::getPostFieldValue('fk_product', $this->getData('fk_product'), 'int');
+        $other_product = (int) BimpTools::getPostFieldValue('type_linked_line', 0, 'int');
         if ($id_prod) {
             $contrat = $this->getParentInstance();
             if (BimpObject::objectLoaded($contrat)) {
@@ -2596,9 +2596,9 @@ class BCT_ContratLine extends BimpObject
     {
         $html = '';
 
-        $fac_periodicity = (int) BimpTools::getPostFieldValue('fac_periodicity', 0);
-        $duration = (int) BimpTools::getPostFieldValue('duration', 0);
-        $qty_per_period = (float) BimpTools::getPostFieldValue('qty_per_period', 0);
+        $fac_periodicity = (int) BimpTools::getPostFieldValue('fac_periodicity', 0, 'int');
+        $duration = (int) BimpTools::getPostFieldValue('duration', 0, 'int');
+        $qty_per_period = (float) BimpTools::getPostFieldValue('qty_per_period', 0, 'float');
 
         if ($fac_periodicity && $duration) {
             if ($duration % $fac_periodicity != 0) {
@@ -2838,7 +2838,7 @@ class BCT_ContratLine extends BimpObject
 
     public function displayClientNameInput()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
         if ($id_client) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
             if (BimpObject::objectLoaded($client)) {
@@ -2851,7 +2851,7 @@ class BCT_ContratLine extends BimpObject
 
     public function displayFournNameInput()
     {
-        $id_fourn = (int) BimpTools::getPostFieldValue('id_fourn', 0);
+        $id_fourn = (int) BimpTools::getPostFieldValue('id_fourn', 0, 'int');
         if ($id_fourn) {
             $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $id_fourn);
             if (BimpObject::objectLoaded($fourn)) {
@@ -2864,7 +2864,7 @@ class BCT_ContratLine extends BimpObject
 
     public function displayProductNameInput()
     {
-        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0, 'int');
         if ($id_product) {
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
             if (BimpObject::objectLoaded($prod)) {
@@ -2877,7 +2877,7 @@ class BCT_ContratLine extends BimpObject
 
     public function displayContratNameInput()
     {
-        $id_contrat = (int) BimpTools::getPostFieldValue('id_contrat', 0);
+        $id_contrat = (int) BimpTools::getPostFieldValue('id_contrat', 0, 'int');
         if ($id_contrat) {
 
             $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
@@ -3047,7 +3047,7 @@ class BCT_ContratLine extends BimpObject
         $html = '';
         $errors = array();
 
-        $operation_type = BimpTools::getPostFieldValue('operation_type', '');
+        $operation_type = BimpTools::getPostFieldValue('operation_type', '', 'aZ09');
 
         if (!$operation_type) {
             $errors[] = 'Type d\'opération périodique non spécifiée';
@@ -3073,10 +3073,10 @@ class BCT_ContratLine extends BimpObject
         $html = '';
 
         BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
-        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
-        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
-        $id_contrat = (int) BimpTools::getPostFieldValue('id_contrat', 0);
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0, 'int');
+        $id_contrat = (int) BimpTools::getPostFieldValue('id_contrat', 0, 'int');
 
         $errors = array();
         $debug = (BimpCore::isModeDev() || BimpCore::isUserDev());
@@ -3533,11 +3533,11 @@ class BCT_ContratLine extends BimpObject
     {
         $html = '';
 
-        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
-        $id_fourn_filter = (int) BimpTools::getPostFieldValue('id_fourn', 0);
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
-        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
-        $id_contrat = (int) BimpTools::getPostFieldValue('id_contrat', 0);
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
+        $id_fourn_filter = (int) BimpTools::getPostFieldValue('id_fourn', 0, 'int');
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0, 'int');
+        $id_contrat = (int) BimpTools::getPostFieldValue('id_contrat', 0, 'int');
 
         $errors = array();
         $debug = (BimpCore::isModeDev() || BimpCore::isUserDev());
@@ -4815,22 +4815,12 @@ class BCT_ContratLine extends BimpObject
 
     public function renderFacRegulToSelect()
     {
-//        $from_value = BimpTools::getPostFieldValue('period_from', '');
-//        $from = $from_value;
         $to = '';
         $facs = $this->getFacturesData();
 
         $options = array();
 
         foreach ($facs as $data) {
-//            if ($data['to'] < $from_value) {
-//                continue;
-//            }
-//
-//            if (!$from_value && (!$from || $data['from'] < $from)) {
-//                $from = $data['from'];
-//            }
-
             if (!$to || $data['to'] > $to) {
                 $to = $data['to'];
             }
@@ -4849,14 +4839,9 @@ class BCT_ContratLine extends BimpObject
     {
         $html = '';
 
-//        $from = BimpTools::getPostFieldValue('period_from', '');
-        $period_to = BimpTools::getPostFieldValue('period_to', '');
+        $period_to = BimpTools::getPostFieldValue('period_to', '', 'date');
 
         $errors = array();
-
-//        if (!$from) {
-//            $errors[] = 'Veuillez sélectionner un début de période à régulariser';
-//        }
 
         if (!$period_to) {
             $errors[] = 'Veuillez sélectionner une fin de période max à régulariser';
@@ -4990,7 +4975,7 @@ class BCT_ContratLine extends BimpObject
         $errors = array();
         $html = '';
 
-        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         if (empty($id_lines)) {
             $errors[] = 'Aucune ligne sélectionnée';
@@ -7835,7 +7820,7 @@ class BCT_ContratLine extends BimpObject
                     }
 
                     if (BimpTools::isPostFieldSubmit('qty_per_period')) {
-                        $qty_per_period = (float) BimpTools::getPostFieldValue('qty_per_period', 0);
+                        $qty_per_period = (float) BimpTools::getPostFieldValue('qty_per_period', 0, 'float');
 
                         if (!$qty_per_period) {
                             $errors[] = 'Veuillez définir une quantité par période';

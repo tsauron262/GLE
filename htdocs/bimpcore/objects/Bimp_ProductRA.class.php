@@ -16,7 +16,7 @@ class Bimp_ProductRA extends BimpObject
     {
         switch ($field_name) {
             case 'nom':
-                $type = BimpTools::getPostFieldValue('type');
+                $type = BimpTools::getPostFieldValue('type', '', 'aZ09');
                 if ($type !== 'other' && !$this->isLoaded() || $type !== $this->getData('type')) {
                     return static::$types[$type];
                 }

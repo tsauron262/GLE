@@ -747,7 +747,7 @@ class BimpFile extends BimpObject
         $errors = array();
 
         $name = (string) $this->getData('file_name');
-        $files = BimpTools::getPostFieldValue($this->htmlName, array());
+        $files = BimpTools::getPostFieldValue($this->htmlName, array(), 'array');
 
         if (!$name) {
             $name = BimpTools::cleanStringForUrl(pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_FILENAME));

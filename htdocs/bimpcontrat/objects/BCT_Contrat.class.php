@@ -290,8 +290,8 @@ class BCT_Contrat extends BimpDolObject
 
     public function getConditionReglementClient()
     {
-        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0)) {
-            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc_facturation', BimpTools::getPostFieldValue('fk_soc', 0));
+        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0, 'int')) {
+            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc_facturation', (int) BimpTools::getPostFieldValue('fk_soc', 0, 'int'), 'int');
             if (!$id_soc) {
                 if ((int) $this->getData('fk_soc_facturation') > 0) {
                     $id_soc = $this->getData('fk_soc_facturation');
@@ -317,8 +317,8 @@ class BCT_Contrat extends BimpDolObject
 
     public function getModeReglementClient()
     {
-        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0)) {
-            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc_facturation', BimpTools::getPostFieldValue('fk_soc', 0));
+        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0, 'int')) {
+            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc_facturation', BimpTools::getPostFieldValue('fk_soc', 0, 'int'), 'int');
             if (!$id_soc) {
                 if ((int) $this->getData('fk_soc_facturation') > 0) {
                     $id_soc = $this->getData('fk_soc_facturation');

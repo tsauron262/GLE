@@ -265,7 +265,7 @@ class BimpRevalorisation extends BimpObject
     public function getFactureLinesArray()
     {
         $return = array();
-        $id_facture = (int) BimpTools::getPostFieldValue('id_facture', (int) $this->getData('id_facture'));
+        $id_facture = (int) BimpTools::getPostFieldValue('id_facture', (int) $this->getData('id_facture'), 'int');
 
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);

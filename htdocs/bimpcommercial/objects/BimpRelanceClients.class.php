@@ -946,7 +946,7 @@ class BimpRelanceClients extends BimpObject
 
         if (!count($errors)) {
             if ($init_date_prevue) {
-                $opt = BimpTools::getPostFieldValue('lines_update_option', 'none');
+                $opt = BimpTools::getPostFieldValue('lines_update_option', 'none', 'aZ09');
 
                 $filters = null;
 

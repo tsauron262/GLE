@@ -138,7 +138,7 @@ class BDS_Process extends BimpObject
 
     public function getDefaultProcessToInstallName()
     {
-        $class_name = BimpTools::getPostFieldValue('classname', '');
+        $class_name = BimpTools::getPostFieldValue('classname', '', 'alphanohtml');
 
         if ($class_name && self::loadProcessClass($class_name)) {
             if (preg_match('/^BDS_(.+)Process$/', $class_name, $matches)) {
@@ -157,7 +157,7 @@ class BDS_Process extends BimpObject
 
     public function getDefaultProcessToInstallTitle()
     {
-        $class_name = BimpTools::getPostFieldValue('classname', '');
+        $class_name = BimpTools::getPostFieldValue('classname', '', 'alphanohtml');
 
         if ($class_name && self::loadProcessClass($class_name)) {
             return $class_name::$default_public_title;

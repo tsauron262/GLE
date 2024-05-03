@@ -84,7 +84,7 @@ class BS_Pret extends BimpObject
                 ));
             }
         } else {
-            $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0);
+            $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0, 'int');
 
             $unreturned = $this->getUnreturnedEquipments($id_entrepot);
 

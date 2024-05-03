@@ -1408,7 +1408,7 @@ class BContract_contrat extends BimpDolObject
 
     public function getAddContactIdClient()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client');
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
 
         if (!$id_client) {
             $id_client = (int) $this->getData('fk_soc');
@@ -5096,7 +5096,7 @@ class BContract_contrat extends BimpDolObject
     public function getSignatureEmailContent($doc_type = '', $signature_type = null)
     {
         if (!$signature_type) {
-            if (BimpTools::getPostFieldValue('init_docusign') && BimpCore::getConf('contrat_signature_allow_docusign', null, 'bimpcontract')) {
+            if ((int) BimpTools::getPostFieldValue('init_docusign', 0, 'int') && BimpCore::getConf('contrat_signature_allow_docusign', null, 'bimpcontract')) {
                 $signature_type = 'docusign';
             } else {
                 $signature_type = 'elec';

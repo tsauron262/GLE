@@ -273,7 +273,7 @@ class BimpDolObject extends BimpObject
     public function getEmailContentByModel()
     {
         $content = '';
-        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
+        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0, 'int');
 
         if ($id_model) {
             $template = self::getEmailTemplateData($id_model);
@@ -322,7 +322,7 @@ class BimpDolObject extends BimpObject
     public function getEmailTopicByModel()
     {
         $topic = '';
-        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
+        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0, 'int');
 
         if ($id_model) {
             $template = self::getEmailTemplateData($id_model);
@@ -360,7 +360,7 @@ class BimpDolObject extends BimpObject
 
     public function getJoinFilesValues()
     {
-        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
+        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0, 'int');
 
         if ($id_model) {
             $template = self::getEmailTemplateData($id_model);
@@ -370,7 +370,7 @@ class BimpDolObject extends BimpObject
             }
         }
 
-        $values = BimpTools::getPostFieldValue('join_files', array());
+        $values = BimpTools::getPostFieldValue('join_files', array(), 'array');
         $list = $this->getAllFiles();
 
         $id_main_pdf_file = (int) $this->getDocumentFileId();
@@ -530,7 +530,7 @@ class BimpDolObject extends BimpObject
 
     public function getAddContactIdClient()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client');
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
         if (!$id_client) {
             $id_client = (int) $this->getData('fk_soc');
         }
@@ -1234,7 +1234,7 @@ class BimpDolObject extends BimpObject
             if (!count($errors)) {
                 $mail_object = $data['mail_object'];
 
-                $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
+                $id_model = (int) BimpTools::getPostFieldValue('id_model', 0, 'int');
 
                 if ($id_model) {
                     global $langs;
@@ -1424,7 +1424,7 @@ class BimpDolObject extends BimpObject
                         if (!(int) $soc->getData('status')) {
                             $errors[] = 'Ce client est désactivé';
                         } elseif ((int) !$soc->isSolvable($this->object_name, $warnings)) {
-                            if (!BimpTools::getPostFieldValue('force_create_by_soc', 0)) {
+                            if (!(int) BimpTools::getPostFieldValue('force_create_by_soc', 0, 'int')) {
                                 $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
                             } else {
                                 global $user, $langs;

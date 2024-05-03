@@ -639,8 +639,8 @@ class BF_DemandeRefinanceur extends BimpObject
     public function create(&$warnings = [], $force_create = false)
     {
         $date_demande = '';
-        if ((int) BimpTools::getPostFieldValue('demande_done', 0)) {
-            $date_demande = BimpTools::getPostFieldValue('date_demande', '');
+        if ((int) BimpTools::getPostFieldValue('demande_done', 0, 'int')) {
+            $date_demande = BimpTools::getPostFieldValue('date_demande', '', 'date');
             $this->set('status', self::STATUS_ATTENTE);
         } else {
             $this->set('status', self::STATUS_TODO);
@@ -663,15 +663,15 @@ class BF_DemandeRefinanceur extends BimpObject
         $conds = '';
         $new_status = null;
 
-        if ((int) $this->getData('status') === self::STATUS_TODO && (int) BimpTools::getPostFieldValue('demande_done', 0)) {
-            $date_demande = BimpTools::getPostFieldValue('date_demande', '');
+        if ((int) $this->getData('status') === self::STATUS_TODO && (int) BimpTools::getPostFieldValue('demande_done', 0, 'int')) {
+            $date_demande = BimpTools::getPostFieldValue('date_demande', '', 'date');
             $this->set('status', self::STATUS_ATTENTE);
         }
-        if ((int) $this->getData('status') === self::STATUS_ATTENTE && (int) BimpTools::getPostFieldValue('demande_accepted', 0)) {
-            if ((int) BimpTools::getPostFieldValue('under_conditions', 0)) {
+        if ((int) $this->getData('status') === self::STATUS_ATTENTE && (int) BimpTools::getPostFieldValue('demande_accepted', 0, 'int')) {
+            if ((int) BimpTools::getPostFieldValue('under_conditions', 0, 'int')) {
                 $new_status = self::STATUS_ACCEPTEE_CONDS;
 
-                $conds = BimpTools::getPostFieldValue('conditions', '');
+                $conds = BimpTools::getPostFieldValue('conditions', '', 'alphanohtml');
                 if ($conds) {
                     $comment = $this->getData('comment');
                     $comment .= ($comment ? '<br/><br/>' : '') . '<b>Conditions d\'acceptation : </b><br/>' . $conds;
@@ -704,7 +704,7 @@ class BF_DemandeRefinanceur extends BimpObject
                 }
             }
 
-            if ((int) BimpTools::getPostFieldValue('demande_selected', 0)) {
+            if ((int) BimpTools::getPostFieldValue('demande_selected', 0, 'int')) {
                 $select_errors = $this->setSelected();
 
                 if (!empty($select_errors)) {

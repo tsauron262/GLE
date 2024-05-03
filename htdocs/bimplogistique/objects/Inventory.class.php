@@ -151,9 +151,9 @@ class Inventory extends BimpDolObject
         $errors = array();
 
         if ((int) $data['status'] == self::STATUS_PARTIALLY_CLOSED) {
-            $only_scanned = BimpTools::getPostFieldValue('only_scanned');
+            $only_scanned = (int) BimpTools::getPostFieldValue('only_scanned', 0, 'int');
             $errors = BimpTools::merge_array($errors, $this->closePartially($only_scanned));
-            $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
+            $date_mouvement = BimpTools::getPostFieldValue('date_mouvement', null, 'date');
             if (!$this->setDateMouvement($date_mouvement))
                 $errors[] = "Erreur lors de la définition de la date du mouvement";
         }

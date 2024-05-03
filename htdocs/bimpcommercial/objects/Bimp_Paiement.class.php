@@ -119,7 +119,7 @@ class Bimp_Paiement extends BimpObject
 
     public function getAmountFromFacture()
     {
-        $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0);
+        $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0, 'int');
 
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
@@ -449,9 +449,9 @@ class Bimp_Paiement extends BimpObject
 
     public function renderFacturesAmountsInputs()
     {
-        $is_rbt = (int) BimpTools::getPostFieldValue('is_rbt', 0); // Cas d'un remboursement ou non.
+        $is_rbt = (int) BimpTools::getPostFieldValue('is_rbt', 0, 'int'); // Cas d'un remboursement ou non.
 
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
 
         if (!$id_client) {
             return BimpRender::renderAlerts('Client absent');
@@ -661,7 +661,7 @@ class Bimp_Paiement extends BimpObject
 
     public function renderAmountToMoveInput()
     {
-        $id_fac = (int) BimpTools::getPostFieldValue('id_facture_from', 0);
+        $id_fac = (int) BimpTools::getPostFieldValue('id_facture_from', 0, 'int');
 
         if ($id_fac) {
             $facs = $this->getFacsAmounts();
@@ -1026,17 +1026,17 @@ class Bimp_Paiement extends BimpObject
         $banque_emetteur = '';
 
         if (in_array($type_paiement, array('CHQ', 'VIR'))) {
-            $nom_emetteur = BimpTools::getPostFieldValue('nom_emetteur', '');
+            $nom_emetteur = BimpTools::getPostFieldValue('nom_emetteur', '', 'alphanohtml');
         }
         if ($type_paiement === 'CHQ') {
-            $banque_emetteur = BimpTools::getPostFieldValue('banque_emetteur', '');
+            $banque_emetteur = BimpTools::getPostFieldValue('banque_emetteur', '', 'alphanohtml');
         }
 
 //        $this->dol_object->datepaye = dol_now();
         $this->dol_object->datepaye = strtotime($this->getData('datep'));
         $this->dol_object->fk_account = (int) $account->id;
 
-        $single_amount = BimpTools::getPostFieldValue('single_amount', null);
+        $single_amount = BimpTools::getPostFieldValue('single_amount', null, 'float');
 
         if (is_null($single_amount)) {
             // Paiement de plusieurs factures 
@@ -1256,7 +1256,7 @@ class Bimp_Paiement extends BimpObject
             }
 
             $facture = null;
-            $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0);
+            $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0, 'int');
             if (!$id_facture) {
                 $errors[] = 'ID de la facture concernée absent';
             } else {
@@ -1264,7 +1264,7 @@ class Bimp_Paiement extends BimpObject
                 if (!BimpObject::objectLoaded($facture)) {
                     $errors[] = 'La facture d\'ID ' . $id_facture . ' n\'existe pas';
                 } else {
-                    $errors = $facture->checkSingleAmoutPaiement($single_amount, (int) BimpTools::getPostFieldValue('force_extra_paiement', 0));
+                    $errors = $facture->checkSingleAmoutPaiement($single_amount, (int) BimpTools::getPostFieldValue('force_extra_paiement', 0, 'int'));
                 }
             }
 

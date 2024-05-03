@@ -59,7 +59,7 @@ class ConsignedStock extends PartStock
         $html = '';
         $errors = array();
 
-        $code_centre = BimpTools::getPostFieldValue('code_centre', '');
+        $code_centre = BimpTools::getPostFieldValue('code_centre', '', 'aZ09');
 
         if (!$code_centre) {
             $errors[] = 'Veuillez sélectionner un centre';
@@ -75,7 +75,7 @@ class ConsignedStock extends PartStock
 
                     $gsx = new GSX_v2($shipTo);
 
-                    $statusId = BimpTools::getPostFieldValue('status', 0);
+                    $statusId = (int) BimpTools::getPostFieldValue('status', 0, 'int');
                     $result = $gsx->consignmentOrdersLookup('INCREASE', ($statusId == 1 ? 'ALL' : 'OPEN'));
 
                     if (!$gsx->logged) {
@@ -149,7 +149,7 @@ class ConsignedStock extends PartStock
         $html = '';
         $errors = array();
 
-        $delivery_number = BimpTools::getPostFieldValue('deliveryNumber', '');
+        $delivery_number = BimpTools::getPostFieldValue('deliveryNumber', '', 'alphanohtml');
 
         if (!$delivery_number) {
             $errors[] = 'Veuillez sélectionner une livraison';
@@ -323,7 +323,7 @@ class ConsignedStock extends PartStock
         $html = '';
         $errors = array();
 
-        $code_centre = BimpTools::getPostFieldValue('code_centre', '');
+        $code_centre = BimpTools::getPostFieldValue('code_centre', '', 'aZ09');
 
         if (!$code_centre) {
             $errors[] = 'Veuillez sélectionner un centre';

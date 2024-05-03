@@ -353,7 +353,7 @@ class BV_Rule extends BimpObject
         $html .= '</td>';
         $html .= '</tr>';
 
-        switch (BimpTools::getPostFieldValue('type', '')) {
+        switch (BimpTools::getPostFieldValue('type', '', 'aZ09')) {
             case 'comm':
                 $has_inputs = true;
                 $html .= '<tr>';
@@ -378,13 +378,13 @@ class BV_Rule extends BimpObject
 
         $extra_params = $this->getData('extra_params');
         if (BimpTools::isPostFieldSubmit('if_sup_only')) {
-            $extra_params['if_sup_only'] = (int) BimpTools::getPostFieldValue('if_sup_only');
+            $extra_params['if_sup_only'] = (int) BimpTools::getPostFieldValue('if_sup_only', 0, 'int');
         }
 
         switch ($this->getData('type')) {
             case 'comm':
                 if (BimpTools::isPostFieldSubmit('sur_marge')) {
-                    $extra_params['sur_marge'] = (int) BimpTools::getPostFieldValue('sur_marge');
+                    $extra_params['sur_marge'] = (int) BimpTools::getPostFieldValue('sur_marge', 0, 'int');
                 }
                 break;
         }

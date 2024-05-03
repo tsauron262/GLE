@@ -190,7 +190,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 if ($this->getInitData('price') != $this->getData('price'))
                     $this->history['price'] = $this->getData('price');
                 $this->saveHistory();
-                if ((int) BimpTools::getPostFieldValue('is_cur_pa', 0)) {
+                if ((int) BimpTools::getPostFieldValue('is_cur_pa', 0, 'int')) {
                     $prod = $this->getChildObject('product');
                     $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $result, 'fourn_price', (int) $result);
                     if (count($curpa_errors)) {
@@ -198,7 +198,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                     }
                 }
 
-                if ((int) BimpTools::getPostFieldValue('update_comm_fourn', 0)) {
+                if ((int) BimpTools::getPostFieldValue('update_comm_fourn', 0, 'int')) {
                     $prod = $this->getChildObject('product');
                     if (BimpObject::objectLoaded($prod)) {
                         $prod->updateCommandesFournPa((int) $this->getData('fk_soc'), $buyprice);

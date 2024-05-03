@@ -88,7 +88,7 @@ class ListConfig extends BCUserConfig
                     return FiltersConfig::getUserConfigsArray($user->id, $object, '', $include_empty);
 
                 case self::OWNER_TYPE_GROUP:
-                    $id_group = (int) BimpTools::getPostFieldValue('id_group', $this->getData('id_owner'));
+                    $id_group = (int) BimpTools::getPostFieldValue('id_group', $this->getData('id_owner'), 'int');
                     if ($id_group) {
                         return FiltersConfig::getGroupConfigsArray($id_group, $object, '', $include_empty);
                     }
@@ -121,7 +121,7 @@ class ListConfig extends BCUserConfig
                             return ListFilters::getUserConfigsArray($user->id, $object, '', $include_empty);
 
                         case self::OWNER_TYPE_GROUP:
-                            $id_group = (int) BimpTools::getPostFieldValue('id_group', $this->getData('id_owner'));
+                            $id_group = (int) BimpTools::getPostFieldValue('id_group', $this->getData('id_owner'), 'int');
                             if ($id_group) {
                                 return ListFilters::getGroupConfigsArray($id_group, $object, '', $include_empty);
                             }

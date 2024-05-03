@@ -371,15 +371,15 @@ class FiltersConfig extends BCUserConfig
         $errors = array();
 
         if (BimpTools::isSubmit('filters_items')) {
-            $items = BimpTools::getPostFieldValue('filters_items', array());
+            $items = BimpTools::getPostFieldValue('filters_items', array(), 'array');
 
             if (empty($items)) {
                 $errors[] = 'Aucun filtre ajouté à cette configuration';
             } else {
                 $filters = array();
 
-                $module = BimpTools::getPostFieldValue('obj_module', $this->getData('obj_module'));
-                $object_name = BimpTools::getPostFieldValue('obj_name', $this->getData('obj_name'));
+                $module = BimpTools::getPostFieldValue('obj_module', $this->getData('obj_module'), 'aZ09');
+                $object_name = BimpTools::getPostFieldValue('obj_name', $this->getData('obj_name'), 'aZ09');
 
                 if (!$module || !$object_name) {
                     $errors[] = 'Objet associé invalide';
@@ -387,8 +387,8 @@ class FiltersConfig extends BCUserConfig
                     $base_obj = BimpObject::getInstance($module, $object_name);
 
                     foreach ($items as $filter_name) {
-                        $label = BimpTools::getPostFieldValue($filter_name . '_label', '');
-                        $open = BimpTools::getPostFieldValue($filter_name . '_open', 0);
+                        $label = BimpTools::getPostFieldValue($filter_name . '_label', '', 'alphanohtml');
+                        $open = (int) BimpTools::getPostFieldValue($filter_name . '_open', 0, 'int');
 
                         $filter_name = str_replace('___', ':', $filter_name);
 

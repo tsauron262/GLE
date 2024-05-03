@@ -1272,22 +1272,22 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function getCondReglementBySociete()
     {
-        $origin = BimpTools::getPostFieldValue('origin', '');
-        $origin_id = (int) BimpTools::getPostFieldValue('origin_id', 0);
+        $origin = BimpTools::getPostFieldValue('origin', '', 'aZ09');
+        $origin_id = (int) BimpTools::getPostFieldValue('origin_id', 0, 'int');
 
         $id_soc_propal = 0;
         if ($origin == 'propal' && $origin_id) {
             $id_soc_propal = (int) $this->db->getValue('propal', 'fk_soc', 'rowid = ' . $origin_id);
         }
 
-        $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0);
+        $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0, 'int');
         if (!$id_soc) {
             if ((int) $this->getData('id_client_facture')) {
                 $id_soc = (int) $this->getData('id_client_facture');
             } else {
-                $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+                $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0, 'int');
                 if (!$id_soc) {
-                    $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
+                    $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
                 }
                 if (!$id_soc && $this->getData('fk_soc') > 0) {
                     $id_soc = $this->getData('fk_soc');
@@ -1315,22 +1315,22 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function getModeReglementBySociete()
     {
-        $origin = BimpTools::getPostFieldValue('origin', '');
-        $origin_id = (int) BimpTools::getPostFieldValue('origin_id', 0);
+        $origin = BimpTools::getPostFieldValue('origin', '', 'aZ09');
+        $origin_id = (int) BimpTools::getPostFieldValue('origin_id', 0, 'int');
 
         $id_soc_propal = 0;
         if ($origin == 'propal' && $origin_id) {
             $id_soc_propal = (int) $this->db->getValue('propal', 'fk_soc', 'rowid = ' . $origin_id);
         }
 
-        $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0);
+        $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0, 'int');
         if (!$id_soc) {
             if ((int) $this->getData('id_client_facture')) {
                 $id_soc = (int) $this->getData('id_client_facture');
             } else {
-                $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+                $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0, 'int');
                 if (!$id_soc) {
-                    $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
+                    $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
                 }
                 if (!$id_soc && $this->getData('fk_soc') > 0) {
                     $id_soc = $this->getData('fk_soc');
@@ -1490,7 +1490,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         $shipments = $this->getShipmentsArray();
 
-        $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0);
+        $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0, 'int');
 
         if (!$id_shipment) {
             foreach ($shipments as $id_s => $shipment) {
@@ -1506,7 +1506,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function renderShipmentLinesListInput()
     {
-        $lines = BimpTools::getPostFieldValue('shipment_lines_list', array());
+        $lines = BimpTools::getPostFieldValue('shipment_lines_list', array(), 'array');
 
         if (empty($lines)) {
             $lines = array();
@@ -1528,9 +1528,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function renderShipmentLinesInputs()
     {
         $html = '';
-        $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0);
+        $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0, 'int');
 
-        $lines = BimpTools::getPostFieldValue('shipment_lines_list', array());
+        $lines = BimpTools::getPostFieldValue('shipment_lines_list', array(), 'array');
 
         if (is_string($lines)) {
             $lines = explode(',', $lines);
@@ -1632,7 +1632,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             array('value' => 0, 'label' => 'Nouvelle facture')
         );
 
-        if ((int) BimpTools::getPostFieldValue('new_facture', 0)) {
+        if ((int) BimpTools::getPostFieldValue('new_facture', 0, 'int')) {
             $id_facture = 0;
         } else {
             $comm_factures = $this->getInvoicesArray(true);
@@ -1702,7 +1702,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 );
             }
 
-            $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0);
+            $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0, 'int');
         }
 
         return BimpInput::renderInput('select', 'id_facture', $id_facture, array(
@@ -1714,7 +1714,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         BimpObject::loadClass('bimpcommercial', 'ObjectLine');
 
-        $lines = BimpTools::getPostFieldValue('facture_lines_list', array());
+        $lines = BimpTools::getPostFieldValue('facture_lines_list', array(), 'array');
 
         if (empty($lines)) {
             $lines = array();
@@ -1733,9 +1733,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function renderFactureLinesInputs()
     {
         $html = '';
-        $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0);
+        $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0, 'int');
 
-        $lines = BimpTools::getPostFieldValue('facture_lines_list', array());
+        $lines = BimpTools::getPostFieldValue('facture_lines_list', array(), 'array');
 
         if (is_string($lines)) {
             $lines = explode(',', $lines);
@@ -2034,7 +2034,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             return BimpRender::renderAlerts('ID de la commande client absent');
         }
 
-        $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0);
+        $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0, 'int');
 
         if (!$id_shipment) {
             return BimpRender::renderAlerts('Aucune expédition sélectionnée', 'warning');
@@ -2047,7 +2047,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         self::loadClass('bimpcommercial', 'ObjectLine');
 
-        $selected_reservations = explode(',', BimpTools::getPostFieldValue('reservations', ''));
+        $selected_reservations = explode(',', BimpTools::getPostFieldValue('reservations', '', 'alphanohtml'));
 
         $lines = $this->getChildrenObjects('lines', array(
             'type' => ObjectLine::LINE_PRODUCT

@@ -349,9 +349,9 @@ class Transfer extends BimpDolObject
             } else {
                 global $user;
                 $now = date('Y-m-d H:i:s');
-                $separator = BimpTools::getPostFieldValue('separator', ';');
+                $separator = BimpTools::getPostFieldValue('separator', ';', 'alphanohtml');
                 $recup_serials = 1; //(int) BimpTools::getPostFieldValue('recup_serials', 1);
-                $test_only = (int) BimpTools::getPostFieldValue('test_only', 0);
+                $test_only = (int) BimpTools::getPostFieldValue('test_only', 0, 'int');
                 $id_entrepot = (int) $this->getData('id_warehouse_source');
 
                 $i = 0;

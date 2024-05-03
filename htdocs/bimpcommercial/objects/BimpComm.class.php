@@ -1115,7 +1115,7 @@ class BimpComm extends BimpDolObject
 
     public function getAddContactIdClient()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client');
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
         if (!$id_client) {
             $id_client = (int) $this->getData('fk_soc');
         }
@@ -1191,8 +1191,8 @@ class BimpComm extends BimpDolObject
     public function getCreateFromOriginCheckMsg()
     {
         if (!$this->isLoaded()) {
-            $origin = BimpTools::getPostFieldValue('origin');
-            $origin_id = BimpTools::getPostFieldValue('origin_id');
+            $origin = BimpTools::getPostFieldValue('origin', '', 'aZ09');
+            $origin_id = BimpTools::getPostFieldValue('origin_id', 0, 'int');
 
             if ($origin && $origin_id) {
                 $where = '`fk_source` = ' . (int) $origin_id . ' AND `sourcetype` = \'' . $origin . '\'';
@@ -1333,10 +1333,10 @@ class BimpComm extends BimpDolObject
 
     public function getCondReglementBySociete()
     {
-        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0)) {
-            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0, 'int')) {
+            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0, 'int');
             if (!$id_soc) {
-                $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
+                $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
             }
 
             if (!$id_soc && $this->getData('fk_soc') > 0) {
@@ -1363,8 +1363,8 @@ class BimpComm extends BimpDolObject
 
     public function getModeReglementBySociete()
     {
-        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0)) {
-            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0, 'int')) {
+            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0, 'int');
             if (!$id_soc && $this->getData('fk_soc') > 0) {
                 $id_soc = $this->getData('fk_soc');
             }

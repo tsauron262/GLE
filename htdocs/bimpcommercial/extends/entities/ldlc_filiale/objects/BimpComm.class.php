@@ -21,7 +21,7 @@ class BimpComm_LdlcFiliale extends BimpComm
     
     function isValidatable(&$errors = array())
     {
-        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial'))) && (!BimpTools::getPostFieldValue('confirm_fdp', 0))) {
+        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial'))) && (!(int) BimpTools::getPostFieldValue('confirm_fdp', 0, 'int'))) {
             $lines = $this->getLines('not_text');
             $ok = false;
             foreach ($lines as $line) {

@@ -98,7 +98,7 @@ class InternalStock extends PartStock
     {
         $html = '';
 
-        $code_centre = BimpTools::getPostFieldValue('code_centre', '');
+        $code_centre = BimpTools::getPostFieldValue('code_centre', '', 'aZ09');
 
         if (!$code_centre) {
             $html .= '<span class="danger">Aucun centre sélectionné</span>';

@@ -37,6 +37,7 @@ fields:
     data:
         label: Data
         type: text
+        no_strip_tags: 1
     type:
         label: Type
         values: 

@@ -311,7 +311,8 @@ fields:
         type: string
         size: 128
         required: 0
-        searchable: 0        
+        searchable: 0   
+        no_strip_tags: 1     
         
     note:
         label: Note

@@ -59,10 +59,14 @@ fields:
     exchange_price: 
         label: Prix d'échange
         type: money
-    out_of_warranty:
-        label: Hors garantie
-        type: bool
-        default_value: 1
+    warranty:
+        label: Garantie
+        type: select
+        default_value: 0
+        values:
+            0: Hors Garantie
+            1: Garantie Apple
+            2: Garantie LDLC
     no_order: 
         label: Commande de stock
         type: bool
@@ -110,7 +114,7 @@ fields_tables:
 #              edit: 1
             - field: price_type
               edit: 1
-            - field: out_of_warranty
+            - field: warranty
               edit: 1
             - field: no_order
               edit: 1
@@ -162,7 +166,7 @@ lists:
 #                label: Qté
 #                edit: 
 #                    callback: isCartEditable
-            out_of_warranty: 
+            warranty: 
                 edit: 
                     callback: isCartEditable
             price_type: 
@@ -197,7 +201,7 @@ lists:
 #                label: Qté
 #                edit: 
 #                    callback: isCartEditable
-            out_of_warranty: 
+            warranty: 
                 edit: 
                     callback: isCartEditable
             price_type: 

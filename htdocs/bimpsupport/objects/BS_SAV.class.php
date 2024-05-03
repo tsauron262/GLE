@@ -282,7 +282,7 @@ class BS_SAV extends BimpObject
             $montant += $propal->getData('total_ht');
             $lines = $this->getPropalLines();
             foreach ($lines as $lineS) {
-                if ($lineS->getData('linked_object_name') == 'sav_garantie') {
+                if (stripos($this->getData('linked_object_name'), 'sav_garantie') !== false) {
                     $montant -= $lineS->getTotalHT(true);
                 }
                 if ($lineS->getData('linked_object_name') == 'discount') {
@@ -3691,7 +3691,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 'remisable'          => 0,
                 'linked_id_object'   => (int) $this->id,
                 'linked_object_name' => 'sav_prioritaire',
-                'out_of_warranty'    => 1
+                'warranty'    => 0
             ));
 
             $line->desc = '';
@@ -3859,7 +3859,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'type' => array("in" => array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
         )) as $line) {
             if ((int) $line->pu_ht > 0) {
-                if (!(int) $line->getData('out_of_warranty')) {
+                if ((int) $line->getData('warranty')) {
                     $line->fetch($line->id);
                     $remise = (float) $line->remise;
                     $coefRemise = (100 - $remise) / 100;
@@ -3867,14 +3867,27 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $prod = $line->getChildObject('product');
                     if ($prod->isLoaded())
                         $prod_type = $prod->getData('fk_product_type');
-                    if ($prod_type != 1) {
-                        $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
-                        $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
-                        $garantiePa += (float) $line->pa_ht * (float) $line->qty;
-                    } else {
-                        $garantieHtService += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
-                        $garantieTtcService += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
-                        $garantiePaService += (float) $line->pa_ht * (float) $line->qty;
+                    if($line->getData('warranty') == 1){
+                        if ($prod_type != 1) {
+                            $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                            $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                            $garantiePa += (float) $line->pa_ht * (float) $line->qty;
+                        } else {
+                            $garantieHtService += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                            $garantieTtcService += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                            $garantiePaService += (float) $line->pa_ht * (float) $line->qty;
+                        }
+                    }
+                    elseif($line->getData('warranty') == 2){
+                        if ($prod_type != 1) {
+                            $garantieHt2 += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                            $garantieTtc2 += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                            $garantiePa2 += (float) $line->pa_ht * (float) $line->qty;
+                        } else {
+                            $garantieHtService2 += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                            $garantieTtcService2 += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                            $garantiePaService2 += (float) $line->pa_ht * (float) $line->qty;
+                        }
                     }
                 } else {
                     $this->allGarantie = false;
@@ -3921,7 +3934,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 'remisable'          => 0
             ));
 
-            $line->desc = 'Garantie';
+            $line->desc = 'Garantie APPLE';
             $line->id_product = 0;
             $line->pu_ht = -$garantieHt;
             $line->pa_ht = -$garantiePa;
@@ -3968,11 +3981,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 'deletable'          => 0,
                 'editable'           => 0,
                 'linked_id_object'   => (int) $this->id,
-                'linked_object_name' => 'sav_garantie',
+                'linked_object_name' => 'sav_garantie_service',
                 'remisable'          => 0
             ));
 
-            $line->desc = 'Garantie main d\'oeuvre';
+            $line->desc = 'Garantie main d\'oeuvre APPLE';
             $line->id_product = 0;
             $line->pu_ht = -$garantieHtService;
             $line->pa_ht = -$garantiePaService;
@@ -3981,6 +3994,114 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $line->qty = 1;
             if ((float) $garantieHtService) {
                 $line->tva_tx = 100 * ($garantieTtcService / $garantieHtService);
+            } else {
+                $line->tva_tx = 0;
+            }
+            $line->remise = 0;
+
+            $error_label = '';
+            if (!$line->isLoaded()) {
+                $error_label = 'création';
+                $line_errors = $line->create($line_warnings, true);
+            } else {
+                $error_label = 'mise à jour';
+                $line_errors = $line->update($line_warnings, true);
+            }
+        } else {
+            if ($line->isLoaded()) {
+                $error_label = 'suppression';
+                $line_errors = $line->delete($line_warnings, true);
+            }
+        }
+        
+        /* GARANTIE LDLC
+         * 
+         */
+        
+
+        $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
+                    'id_obj'             => (int) $propal->id,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'sav_garantie_LDLC'
+                        ), true, true, true);
+
+        if (!BimpObject::objectLoaded($line)) {
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+        }
+
+        $line_errors = array();
+
+        if ((float) $garantieHt2 > 0) {
+            $line->validateArray(array(
+                'id_obj'             => (int) $propal->id,
+                'type'               => BS_SavPropalLine::LINE_FREE,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_garantie_LDLC',
+                'remisable'          => 0
+            ));
+
+            $line->desc = 'Garantie LDLC';
+            $line->id_product = 0;
+            $line->pu_ht = -$garantieHt2;
+            $line->pa_ht = -$garantiePa2;
+            $line->id_fourn_price = 0;
+            $line->qty = 1;
+            if ((float) $garantieHt2) {
+                $line->tva_tx = 100 * ($garantieTtc2 / $garantieHt2);
+            } else {
+                $line->tva_tx = 0;
+            }
+            $line->remise = 0;
+
+            $error_label = '';
+            if (!$line->isLoaded()) {
+                $error_label = 'création';
+                $line_errors = $line->create($line_warnings, true);
+            } else {
+                $error_label = 'mise à jour';
+                $line_errors = $line->update($line_warnings, true);
+            }
+        } else {
+            if ($line->isLoaded()) {
+                $error_label = 'suppression';
+                $line_errors = $line->delete($line_warnings, true);
+            }
+        }
+
+        $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
+                    'id_obj'             => (int) $propal->id,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'sav_garantie_service_LDLC'
+                        ), true, true, true);
+
+        if (!BimpObject::objectLoaded($line)) {
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+        }
+
+        $line_errors = array();
+
+        if ((float) $garantieHtService2 > 0) {
+            $line->validateArray(array(
+                'id_obj'             => (int) $propal->id,
+                'type'               => BS_SavPropalLine::LINE_FREE,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_garantie_service_LDLC',
+                'remisable'          => 0
+            ));
+
+            $line->desc = 'Garantie main d\'oeuvre LDLC';
+            $line->id_product = 0;
+            $line->pu_ht = -$garantieHtService2;
+            $line->pa_ht = -$garantiePaService2;
+            $line->product_type = 1;
+            $line->id_fourn_price = 0;
+            $line->qty = 1;
+            if ((float) $garantieHtService2) {
+                $line->tva_tx = 100 * ($garantieTtcService2 / $garantieHtService2);
             } else {
                 $line->tva_tx = 0;
             }
@@ -4579,9 +4700,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         foreach ($this->getPropalLines() as $line) {
             $prod = $line->getProduct();
             if ($line->getData('linked_object_name') == 'sav_apple_part' || (BimpObject::objectLoaded($prod) && stripos($prod->getData("ref"), "sav-niveau") !== false)) {
-                $out_of_warranty = $garantie ? 0 : 1;
-                if ((int) $line->getData("out_of_warranty") !== $out_of_warranty) {
-                    $line->set("out_of_warranty", $out_of_warranty);
+                if ((int) $line->getData("warranty") !== $garantie) {
+                    $line->set("warranty", $garantie);
                     $w = array();
                     $line->update($w, true);
                 }
@@ -4786,7 +4906,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             'linked_id_object'   => 0,
                             'linked_object_name' => '',
                             'id_reservation'     => 0,
-                            'out_of_warranty'    => 1,
+                            'warranty'    => 0,
                             'position'           => (int) $line['rang'],
                             'remisable'          => 0
                         );
@@ -4833,7 +4953,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                                     (float) $sp['qty'] === (float) $line['qty'] &&
                                                     (float) $sp['remise'] === (float) $line['remise_percent']) {
                                                 $data['type'] = BS_SavPropalLine::LINE_PRODUCT;
-                                                $data['out_of_warranty'] = (int) $sp['out_of_warranty'];
+                                                $data['warranty'] = (int) !$sp['out_of_warranty'];
                                                 $data['deletable'] = 1;
                                                 $data['editable'] = 1;
                                                 $data['def_pu_ht'] = (float) $line['subprice'];
@@ -4859,7 +4979,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                         $data['type'] = BS_SavPropalLine::LINE_FREE;
                                         $data['linked_object_name'] = 'sav_apple_part';
                                         $data['linked_id_object'] = (int) $part['id'];
-                                        $data['out_of_warranty'] = (int) $part['out_of_warranty'];
+                                        $data['warranty'] = (int) $part['warranty'];
                                         $data['remisable'] = 1;
                                         unset($apple_parts[$idx]);
                                         $insert = true;
@@ -4912,7 +5032,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             'linked_id_object'   => 0,
                             'linked_object_name' => '',
                             'id_reservation'     => 0,
-                            'out_of_warranty'    => 1,
+                            'warranty'    => 0,
                             'position'           => (int) $line['rang'],
                             'remisable'          => 1
                         );

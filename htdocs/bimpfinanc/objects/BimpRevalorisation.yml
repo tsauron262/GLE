@@ -149,6 +149,7 @@ fields:
         input: 
             rows: 1
             auto_expand: 1
+        no_strip_tags: 1
             
     serial:
         label: N° de série

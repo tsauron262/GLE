@@ -25,10 +25,14 @@ fields:
             type: hidden
         default_value: 0
         
-    out_of_warranty:
-        label: Hors garantie
-        type: bool
-        default_value: 1
+    warranty:
+        label: Garantie
+        type: select
+        default_value: 0
+        values:
+            0: Hors Garantie
+            1: Garantie Apple
+            2: Garantie LDLC
         display_if:
             field_name: type
             show_values: 1
@@ -163,7 +167,7 @@ forms:
 #                  field_name: type
 #                  show_values: 1
                   
-            - field: out_of_warranty
+            - field: warranty
             
             - custom: 1
               label: Prix d'achat
@@ -269,7 +273,7 @@ lists:
                 object: 
                     callback: getParentInstance
         cols: 
-            out_of_warranty: 
+            warranty: 
                 edit: 
                     callback: isWarrantyEditable
                 item_show: 

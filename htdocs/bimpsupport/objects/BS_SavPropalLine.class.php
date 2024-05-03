@@ -98,7 +98,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
     public function updateSav()
     {
-        if ($this->getData('linked_object_name') === 'sav_garantie') {
+        if (stripos($this->getData('linked_object_name'), 'sav_garantie') !== false) {
             return array();
         }
 
@@ -278,7 +278,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
         $errors = parent::validate();
 
         if ((int) $this->getData('type') !== self::LINE_TEXT) {
-            if (!(int) $this->getData('out_of_warranty')) {
+            if ((int) $this->getData('warranty')) {
                 $this->set('remisable', 0);
             }
 //            if ((int) $this->getData('out_of_warranty')) {
@@ -307,7 +307,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 //            }
         } else {
             $this->set('remisable', 0);
-            $this->set('out_of_warranty', 1);
+            $this->set('warranty', 0);
         }
 
         return $errors;
@@ -346,7 +346,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
-        $is_garantie = ($this->getData('linked_object_name') === 'sav_garantie');
+        $is_garantie = (stripos($this->getData('linked_object_name'), 'sav_garantie') !== false);
 
         $propal = $this->getParentInstance();
 
@@ -366,7 +366,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
             $errors = parent::delete($warnings, $force_delete);
 
-            if (!count($errors)) {
+            if (!count($errors) && BimpObject::objectLoaded($sav)) {
                 if (!$is_garantie) {
                     $sav_error = $sav->processPropalGarantie();
                     if ($sav_error) {

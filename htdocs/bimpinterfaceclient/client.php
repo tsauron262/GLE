@@ -3,6 +3,11 @@
 // Todo: test cookie uniquement si on est dans le contexte d'une i-frame (Ajouter un param URL ?) 
 
 $fc = (isset($_GET['fc']) ? $_GET['fc'] : '');
+
+if (preg_match('/[^a-z0-9_]+/i', $fc)) {
+    die('Controller invalide');
+}
+
 $_REQUEST['bimp_context'] = 'public';
 
 if ($fc !== 'doc') { // Nécessaire pour l'affichage des docs PDF. 
@@ -12,8 +17,8 @@ if ($fc !== 'doc') { // Nécessaire pour l'affichage des docs PDF.
     $url = "https://";
     $url .= $_SERVER['HTTP_HOST'] . htmlentities($_SERVER['REQUEST_URI']);
     $url = str_replace('nav_not_compatible', 'compatible', $url);
-    if(stripos($url, '(') !== false)
-            $url = '';
+    if (stripos($url, '(') !== false)
+        $url = '';
 }
 
 if (isset($_REQUEST['nav_not_compatible'])) {

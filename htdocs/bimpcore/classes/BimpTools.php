@@ -117,9 +117,9 @@ class BimpTools
                                 'Valeur modifiée ascii' => '"' . BimpTools::toAscii($val_temp) . '"'
                             ));
                         }
-                        if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
-                            $value = $val_temp;
-                        }
+//                        if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
+//                            $value = $val_temp;
+//                        }
                     }
                 }
             }

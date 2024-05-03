@@ -1169,7 +1169,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 'statut'  => array(0, 1),
                 'version' => 2
             )) as $contrat) {
-                $contrats[$contrat->id] = $contrat->getRef() . ($with_label ? ' - ' . $contrat->getData('label') : '');
+                $contrats[$contrat->id] = $contrat->getRef() . ($with_label ? ' - ' . $contrat->getName() : '');
             }
         }
 

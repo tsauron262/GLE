@@ -366,7 +366,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
             $errors = parent::delete($warnings, $force_delete);
 
-            if (!count($errors)) {
+            if (!count($errors) && BimpObject::objectLoaded($sav)) {
                 if (!$is_garantie) {
                     $sav_error = $sav->processPropalGarantie();
                     if ($sav_error) {

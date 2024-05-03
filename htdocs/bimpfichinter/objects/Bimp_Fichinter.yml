@@ -202,6 +202,7 @@ fields:
         label: Demande
         type: string
         extra: 1
+        no_strip_tags: 1     
     extra18:
         label: Date du prochain RDV
         type: date

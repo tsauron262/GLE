@@ -173,7 +173,10 @@ lists:
             callback: getListHeaderButtons
         add_form_name: default
         add_btn: 
-            callback: isUserAdmin
+            callback: 
+                maethod: canSetAction
+                params:
+                    - correct
         edit_btn: 1
         edit_form: edit
         extra_btn: 

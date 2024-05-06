@@ -21,7 +21,7 @@ class BC_Graph extends BC_Panel
         $this->params_def['yConfig'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['use_k'] = array('data_type' => 'boolean', 'default' => 0);
         $this->params_def['relative'] = array('data_type' => 'boolean', 'default' => -1);
-        $this->params_def['filters'] = array('data_type' => 'array', 'json' => true, 'default' => json_decode(BimpTools::getPostFieldValue('param_filters', '[]'), true), 'request' => true);
+        $this->params_def['filters'] = array('data_type' => 'array', 'json' => true, 'default' => json_decode(BimpTools::getPostFieldValue('param_filters', '[]', 'json_nohtml'), true), 'request' => true);
 //        echo '<pre>';
 //        print_r($_POST);
 //        echo '<br/><br/>';

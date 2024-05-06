@@ -227,7 +227,7 @@ class BimpAbstractFollow extends BimpObject
 
         switch ($action) {
             case 'follow':
-                $email = BimpTools::getPostFieldValue('email', '');
+                $email = BimpTools::getPostFieldValue('email', '', 'email');
                 if($email != ''){
                     if (in_array($email, $this->getEmailFollow())) {
                         $labels = $this->getLabels();
@@ -237,7 +237,7 @@ class BimpAbstractFollow extends BimpObject
                 }
                 else{
                     global $user;
-                    $id_user = BimpTools::getPostFieldValue('id_user', $user->id);
+                    $id_user = (int) BimpTools::getPostFieldValue('id_user', $user->id, 'int');
                     if (!$id_user) {
                         $errors[] = 'Aucun utilisateur connecté';
                         return 0;
@@ -255,7 +255,7 @@ class BimpAbstractFollow extends BimpObject
                 return 1;
 
             case 'unfollow':
-                $email = BimpTools::getPostFieldValue('email', '');
+                $email = BimpTools::getPostFieldValue('email', '', 'email');
                 if($email != ''){
                     if (!in_array($email, $this->getData('emails_follow'))) {
                         $labels = $this->getLabels();
@@ -265,7 +265,7 @@ class BimpAbstractFollow extends BimpObject
                 }
                 else{
                     global $user;
-                    $id_user = BimpTools::getPostFieldValue('id_user', $user->id);
+                    $id_user = (int) BimpTools::getPostFieldValue('id_user', $user->id, 'int');
                     if (!$id_user) {
                         $errors[] = 'Aucun utilisateur connecté';
                         return 0;

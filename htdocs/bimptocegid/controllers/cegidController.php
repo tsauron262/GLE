@@ -301,9 +301,9 @@ class cegidController extends BimpController {
         global $user;
         $errors = Array();
         
-        $originalTRA = BimpTools::getPostFieldValue('originalTRA');
-        $newTRA = BimpTools::getPostFieldValue('newTRA');
-        $fichier = BimpTools::getPostFieldValue('fichier');
+        $originalTRA = BimpTools::getPostFieldValue('originalTRA', '', 'alphanohtml');
+        $newTRA = BimpTools::getPostFieldValue('newTRA', '', 'alphanohtml');
+        $fichier = BimpTools::getPostFieldValue('fichier', '', 'alphanohtml');
         
         $editingFileName = str_replace('.tra', '.editing', $fichier);
         
@@ -338,8 +338,8 @@ class cegidController extends BimpController {
 
     protected function ajaxProcessSearch(){
         
-        if(BimpTools::getPostFieldValue('facture') && BimpTools::getPostFieldValue('searchBy') == 1) {
-            die('La recherche par facture n\'est pas encore direponible');
+        if(BimpTools::getPostFieldValue('facture', '', 'alphanohtml') && BimpTools::getPostFieldValue('searchBy', '', 'alphanohtml') == 1) {
+            die('La recherche par facture n\'est pas encore disponible');
         }
         
         $tra = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA');
@@ -347,11 +347,11 @@ class cegidController extends BimpController {
         $js .= 'loadModalObjectCustomContent($(this), ' . $tra->getJsObjectData() . ', ';
         $js .= '\'searchResultat\', ';
         $js .= '{'
-                . 'auxiliaire: "'.BimpTools::getPostFieldValue('aux').'", '
-                . 'searchBy: "'.BimpTools::getPostFieldValue('searchBy').'",'
-                . 'facture: "'.BimpTools::getPostFieldValue('facture').'"'
+                . 'auxiliaire: "'.BimpTools::getPostFieldValue('aux', '', 'alphanohtml').'", '
+                . 'searchBy: "'.BimpTools::getPostFieldValue('searchBy', '', 'alphanohtml').'",'
+                . 'facture: "'.BimpTools::getPostFieldValue('facture', '', 'alphanohtml').'"'
                 . '}, ';
-        $js .= '\'' . 'Résultat pour '.BimpTools::getPostFieldValue('aux').'' . '\', ';
+        $js .= '\'' . 'Résultat pour '.BimpTools::getPostFieldValue('aux', '', 'alphanohtml').'' . '\', ';
         $js .= 'null' . ', ';
         $js .= '\'' . 'large' . '\'';
         $js .= ');';
@@ -359,7 +359,7 @@ class cegidController extends BimpController {
          die(json_encode(array(
             'success_callback' => $js,
             'request_id'       => BimpTools::getValue('request_id', 0, 'int'),
-            'errors'           => $errors
+            'errors'           => array()
         )));
     }
     
@@ -373,7 +373,7 @@ class cegidController extends BimpController {
          die(json_encode(array(
             'success_callback' => $js,
             'request_id'       => BimpTools::getValue('request_id', 0, 'int'),
-            'errors'           => $errors
+            'errors'           => array()
         )));
     }
     

@@ -1157,7 +1157,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $lines;
     }
 
-    public function getClientContratsAboArray()
+    public function getClientContratsAboArray($with_label = true)
     {
         $contrats = array(
             0 => 'Nouveau contrat'
@@ -1169,7 +1169,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 'statut'  => array(0, 1),
                 'version' => 2
             )) as $contrat) {
-                $contrats[$contrat->id] = $contrat->getRef();
+                $contrats[$contrat->id] = $contrat->getRef() . ($with_label ? ' - ' . $contrat->getName() : '');
             }
         }
 
@@ -1533,7 +1533,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $html .= '<td>';
                     $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat);
                     if (BimpObject::objectLoaded($contrat)) {
-                        $html .= $contrat->getLink();
+                        $html .= $contrat->getLink(array('syntaxe' => '<ref> - <name>'));
                     } else {
                         $html .= BimpRender::renderAlerts('Le contrat #' . $id_contrat . ' n\'existe plus');
                     }
@@ -2880,13 +2880,13 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
         if (!$signature_type) {
             if (BimpTools::isPostFieldSubmit('init_docusign')) {
-                if ((int) BimpTools::getPostFieldValue('init_docusign')) {
+                if ((int) BimpTools::getPostFieldValue('init_docusign', 0, 'int')) {
                     $signature_type = 'docusign';
                 }
             }
             if (!$signature_type) {
                 if (BimpTools::isPostFieldSubmit('open_public_access')) {
-                    if ((int) BimpTools::getPostFieldValue('open_public_access')) {
+                    if ((int) BimpTools::getPostFieldValue('open_public_access', 0, 'int')) {
                         $signature_type = 'elec';
                     }
                 }

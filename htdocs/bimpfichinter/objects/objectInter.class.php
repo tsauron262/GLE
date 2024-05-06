@@ -141,7 +141,7 @@ class ObjectInter extends extraFI{
     
     function getFieldFiltre($field, $mode){//show filtre form_value
         
-        $tabT = array("fk_soc" => BimpTools::getPostFieldValue("fk_soc"));
+        $tabT = array("fk_soc" => BimpTools::getPostFieldValue("fk_soc", 0, 'int'));
         
         if(isset($tabT[$field]) && $tabT[$field] > 0){
             $value = $tabT[$field];

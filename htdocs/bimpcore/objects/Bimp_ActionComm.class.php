@@ -24,7 +24,7 @@ class Bimp_ActionComm extends BimpObject
         if ($user->rights->agenda->allactions->$code)
             return 1;
 
-        $usersAssigned = BimpTools::getPostFieldValue('users_assigned', $this->getUsersAssigned());
+        $usersAssigned = BimpTools::getPostFieldValue('users_assigned', $this->getUsersAssigned(), 'array');
 
         if (!$this->isLoaded()) {
             $idUserCreate = $user->id;
@@ -264,7 +264,7 @@ class Bimp_ActionComm extends BimpObject
         $date = $this->getData($field_name);
 
         if (BimpTools::isPostFieldSubmit($field_name)) {
-            $date = BimpTools::getPostFieldValue($field_name, $date);
+            $date = BimpTools::getPostFieldValue($field_name, $date, 'date');
         }
 
         $input_type = 'datetime';
@@ -309,7 +309,7 @@ class Bimp_ActionComm extends BimpObject
 
         if ($this->canEdit()) {
             $this->dol_object->userassigned = array();
-            $users = BimpTools::getPostFieldValue('users_assigned', array());
+            $users = BimpTools::getPostFieldValue('users_assigned', array(), 'array');
             $transparency = (int) $this->getData('transparency');
 
             if (!empty($users)) {
@@ -323,7 +323,7 @@ class Bimp_ActionComm extends BimpObject
                 }
             }
 
-            $usergroups = BimpTools::getPostFieldValue('usergroups_assigned', array());
+            $usergroups = BimpTools::getPostFieldValue('usergroups_assigned', array(), 'array');
             if (!empty($usergroups)) {
                 foreach ($usergroups as $id_group) {
                     $users = BimpCache::getGroupUsersList($id_group);
@@ -351,7 +351,7 @@ class Bimp_ActionComm extends BimpObject
             }
 
             if (BimpTools::isPostFieldSubmit('contacts_assigned')) {
-                $contacts = BimpTools::getPostFieldValue('contacts_assigned', array());
+                $contacts = BimpTools::getPostFieldValue('contacts_assigned', array(), 'array');
 
                 $this->dol_object->socpeopleassigned = array();
 
@@ -413,7 +413,7 @@ class Bimp_ActionComm extends BimpObject
     public function onSave(&$errors = [], &$warnings = [])
     {
         if ($this->isLoaded() && BimpTools::isPostFieldSubmit('actioncomm_categories')) {
-            $categories = BimpTools::getPostFieldValue('actioncomm_categories', array());
+            $categories = BimpTools::getPostFieldValue('actioncomm_categories', array(), 'array');
             $this->dol_object->setCategories($categories);
         }
 
@@ -425,10 +425,10 @@ class Bimp_ActionComm extends BimpObject
         $errors = array();
 
         if (in_array('actioncomm_add_reminder', array(1, 'on'))) { // A implémenter dans le form "add"
-            $offsetvalue = BimpTools::getPostFieldValue('reminder_offset_value', 0);
-            $offsetunit = BimpTools::getPostFieldValue('reminder_offset_unit', '');
-            $remindertype = BimpTools::getPostFieldValue('reminder_type', '');
-            $modelmail = BimpTools::getPostFieldValue('reminder_model_email', '');
+            $offsetvalue = BimpTools::getPostFieldValue('reminder_offset_value', 0, 'float');
+            $offsetunit = BimpTools::getPostFieldValue('reminder_offset_unit', '', 'alphanohtml');
+            $remindertype = BimpTools::getPostFieldValue('reminder_type', '', 'alphanohtml');
+            $modelmail = BimpTools::getPostFieldValue('reminder_model_email', '', 'alphanohtml');
 
             if (!$offsetvalue || !$offsetunit || !$remindertype || !$modelmail) {
                 $errors[] = 'Paramètres invalide pour l\'envoi du rappel';

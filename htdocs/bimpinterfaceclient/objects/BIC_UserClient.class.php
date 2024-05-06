@@ -886,7 +886,7 @@ class BIC_UserClient extends BimpObject
             $errors = parent::create($warnings, $force_create);
 
             if (!count($errors)) {
-                if ($this->use_email && (int) BimpTools::getPostFieldValue('send_mail', 1)) {
+                if ($this->use_email && (int) BimpTools::getPostFieldValue('send_mail', 1, 'int')) {
                     $url = BimpObject::getPublicBaseUrl(false, $this->getPublicEntity()) . 'email=' . $this->getData('email');
 
                     $sujet = "Mot de passe Interface Client LDLC Apple";

@@ -304,6 +304,10 @@ function openCaisse($button, confirm_fonds) {
     }
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
+    if (isNaN(fonds)) {
+        fonds = 0;
+    }
+    
 //    if (!fonds) {
 //        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
 //        return;

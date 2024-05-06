@@ -1401,7 +1401,7 @@ class BimpCommission extends BimpObject
 
         if (!count($errors)) {
             // Ajout des factures dispos: 
-            $factures = $this->getAvailableFacturesList((int) BimpTools::getPostFieldValue('paid_only', 0), $this->getData('secteur'));
+            $factures = $this->getAvailableFacturesList((int) BimpTools::getPostFieldValue('paid_only', 0, 'int'), $this->getData('secteur'));
             $obj_field = '';
             switch ((int) $this->getData('type')) {
                 case self::TYPE_USER:
@@ -1425,7 +1425,7 @@ class BimpCommission extends BimpObject
             }
 
             // Ajout des reval dispos: 
-            $revals = $this->getAvailableRevalorisationsList((int) BimpTools::getPostFieldValue('paid_only', 0), $this->getData('secteur'));
+            $revals = $this->getAvailableRevalorisationsList((int) BimpTools::getPostFieldValue('paid_only', 0, 'int'), $this->getData('secteur'));
             foreach ($revals as $id_reval) {
                 $reval = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', (int) $id_reval);
                 if (BimpObject::objectLoaded($reval)) {

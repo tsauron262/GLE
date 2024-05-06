@@ -278,7 +278,7 @@ class BS_Ticket extends BimpAbstractFollow
     {
         $covers = self::$cover_types;
 
-        if ((int) BimpTools::getPostFieldValue('no_contrat', 0) || ($this->isLoaded() && !(int) $this->getData('id_contrat'))) {
+        if ((int) BimpTools::getPostFieldValue('no_contrat', 0, 'int') || ($this->isLoaded() && !(int) $this->getData('id_contrat'))) {
             unset($covers[1]);
         } else {
             unset($covers[2]);
@@ -477,12 +477,12 @@ class BS_Ticket extends BimpAbstractFollow
 
     public function getPostIdClient()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client_contrat', 0);
+        $id_client = (int) BimpTools::getPostFieldValue('id_client_contrat', 0, 'int');
         if (!$id_client) {
-            $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
+            $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'), 'int');
         }
         if (!$id_client) {
-            $id_client = (int) BimpTools::getPostFieldValue('id_client_service', (int) $this->getData('id_client_service'));
+            $id_client = (int) BimpTools::getPostFieldValue('id_client_service', (int) $this->getData('id_client_service'), 'int');
         }
         return $id_client;
     }
@@ -596,9 +596,9 @@ class BS_Ticket extends BimpAbstractFollow
     {
         $id_client = 0;
         $nom_url = '';
-        if ((int) BimpTools::getPostFieldValue('no_contrat', 0)) {
-            if (!(int) BimpTools::getPostFieldValue('no_client', 0)) {
-                $id_client = BimpTools::getPostFieldValue('id_client', 0);
+        if ((int) BimpTools::getPostFieldValue('no_contrat', 0, 'int')) {
+            if (!(int) BimpTools::getPostFieldValue('no_client', 0, 'int')) {
+                $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
             }
         } else {
             $contrat = $this->getChildObject('contrat');
@@ -853,26 +853,26 @@ class BS_Ticket extends BimpAbstractFollow
         $errors = parent::validatePost();
 
         if (!count($errors)) {
-            if ((int) BimpTools::getPostFieldValue('no_contrat', 0)) {
+            if ((int) BimpTools::getPostFieldValue('no_contrat', 0, 'int')) {
                 $this->set('id_contrat', 0);
 
-                $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
+                $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
                 if ($id_client) {
                     $this->set('id_client', $id_client);
                 }
 
-                if (BimpTools::getPostFieldValue('no_client', 0)) {
+                if (BimpTools::getPostFieldValue('no_client', 0, 'int')) {
                     $this->set('id_client', 0);
                     $this->set('id_contact', 0);
                 }
             } else {
                 if ((int) $this->getData('id_contrat')) {
-                    $id_client = BimpTools::getPostFieldValue('id_client_contrat', 0);
+                    $id_client = BimpTools::getPostFieldValue('id_client_contrat', 0, 'int');
                     if ($id_client) {
                         $this->set('id_client', $id_client);
                     }
                 } elseif ((int) $this->getData('id_service')) {
-                    $id_client = BimpTools::getPostFieldValue('id_client_service', 0);
+                    $id_client = BimpTools::getPostFieldValue('id_client_service', 0, 'int');
                     if ($id_client) {
                         $this->set('id_client', $id_client);
                     }

@@ -1000,27 +1000,29 @@ class BT_ficheInter_det extends BimpDolObject
 
                 $heuresRestantes = $contrat->getHeuresRestantesDelegation('float');
 
-                if (in_array(BimpTools::getPostFieldValue('type'), $typeVerifInter)) {
-                    if (BimpTools::getPostFieldValue('am_pm')) {
-                        $from1 = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_am_time"));
-                        $to1 = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_am_time"));
-                        $from2 = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_pm_time"));
-                        $to2 = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_pm_time"));
+                $date = BimpTools::getPostFieldValue('date', '', 'date');
+                $type = (int) BimpTools::getPostFieldValue('type', 0, 'int');
+
+                if (in_array($type, $typeVerifInter)) {
+                    if (BimpTools::getPostFieldValue('am_pm', null, 'alphanohtml')) {
+                        $from1 = new DateTime($date . ' ' . BimpTools::getPostFieldValue("arrived_am_time", null, 'date'));
+                        $to1 = new DateTime($date . ' ' . BimpTools::getPostFieldValue("departure_am_time", null, 'date'));
+                        $from2 = new DateTime($date . ' ' . BimpTools::getPostFieldValue("arrived_pm_time", null, 'date'));
+                        $to2 = new DateTime($date . ' ' . BimpTools::getPostFieldValue("departure_pm_time", null, 'date'));
 
                         $diff1 = $from1->diff($to1);
                         $diff2 = $from2->diff($to2);
                         $heuresFaites = ($diff1->h + ($diff1->i / 60)) + ($diff2->h + ($diff2->i / 60));
                     } else {
-                        $from = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_time"));
-                        $to = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_time"));
+                        $from = new DateTime($date . ' ' . BimpTools::getPostFieldValue("arrived_time", null, 'date'));
+                        $to = new DateTime($date . ' ' . BimpTools::getPostFieldValue("departure_time", null, 'date'));
                         $diff = $from->diff($to);
                         $heuresFaites = $diff->h + ($diff->i / 60);
                     }
                 }
 
-                if (in_array(BimpTools::getPostFieldValue('type'), $typeVerifDep)) {
-
-                    $heuresFaites = BimpTools::getPostFieldValue("temps_trajet") / 3600;
+                if (in_array($type, $typeVerifDep)) {
+                    $heuresFaites = BimpTools::getPostFieldValue("temps_trajet", 0, 'int') / 3600;
                 }
 
                 if ($heuresFaites > $heuresRestantes) {
@@ -1035,7 +1037,7 @@ class BT_ficheInter_det extends BimpDolObject
 
                     $message .= 'Heures restantes dans le contrat: ' . $this->convertTime($heuresRestantes);
                     $message .= '<br />Heures renseignées dans la ligne de FI: ' . $this->convertTime($heuresFaites);
-                    $message .= '<br />Type: ' . self::$types[BimpTools::getPostFieldValue('type')]['label'];
+                    $message .= '<br />Type: ' . self::$types[$type]['label'];
 
                     mailSyn2($sujet, $commercial->getData('email') . ', contrat@bimp.fr', null, $message);
                 }

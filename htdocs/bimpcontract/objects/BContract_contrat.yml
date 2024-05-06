@@ -315,7 +315,8 @@ fields:
     anticipate_close_note:
         label: Note de cloture anticipée
         dol_extra_field: 1
-        type: string
+        type: text
+        no_strip_tags: 1
     show_fact_line_in_pdf:
         label: Afficher tarification par période
         dol_extra_field: 1

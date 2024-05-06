@@ -3632,7 +3632,7 @@ class BMP_Event extends Abstract_margeprod
             }
 
             // Création des tarifs standards:
-            $tarifs = BimpTools::getPostFieldValue('tarifs');
+            $tarifs = BimpTools::getPostFieldValue('tarifs', null, 'array');
             if (is_array($tarifs)) {
                 foreach ($tarifs as $name) {
                     $tarif = BimpObject::getInstance($this->module, 'BMP_EventTarif');

@@ -640,7 +640,7 @@ class Bimp_Client extends Bimp_Societe
         $display_mode = BimpTools::getArrayValueFromPath($params, 'display_mode', null);
 
         if (is_null($display_mode)) {
-            $display_mode = BimpTools::getPostFieldValue('display_mode', '');
+            $display_mode = BimpTools::getPostFieldValue('display_mode', '', 'alphanohtml');
 
             if (!$display_mode) {
                 return array();
@@ -1884,7 +1884,7 @@ class Bimp_Client extends Bimp_Societe
         $html = '';
 
         if (is_null($clients)) {
-            $allowed_clients = BimpTools::getPostFieldValue('id_objects', array()); // Cas des clients sélectionnés dans liste.
+            $allowed_clients = BimpTools::getPostFieldValue('id_objects', array(), 'array'); // Cas des clients sélectionnés dans liste.
             $clients = $this->getFacturesToRelanceByClients(array(
                 'allowed_clients' => $allowed_clients
             ));
@@ -2106,7 +2106,7 @@ class Bimp_Client extends Bimp_Societe
 
     public function renderFreeRelancesFacturesInputs($with_checkboxes = true)
     {
-        $relance_idx = (int) BimpTools::getPostFieldValue('relance_idx', 0);
+        $relance_idx = (int) BimpTools::getPostFieldValue('relance_idx', 0, 'int');
 
         if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('ID du client absent');

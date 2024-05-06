@@ -106,7 +106,7 @@ class BMP_EventMontant extends Abstract_margeprod
 
     public function hasDetails()
     {
-        (int) $id_type_montant = BimpTools::getPostFieldValue('id_montant', $this->getData('id_montant'));
+        $id_type_montant = (int) BimpTools::getPostFieldValue('id_montant', $this->getData('id_montant'), 'int');
 
         if ($id_type_montant) {
             $type_montant = BimpCache::getBimpObjectInstance($this->module, 'BMP_TypeMontant', $id_type_montant);
@@ -273,8 +273,8 @@ class BMP_EventMontant extends Abstract_margeprod
     {
         $event = $this->getParentInstance();
         if (BimpObject::objectLoaded($event)) {
-            $id_coprod = BimpTools::getPostFieldValue('id_coprod', null);
-            $type = BimpTools::getPostFieldValue('type', null);
+            $id_coprod = BimpTools::getPostFieldValue('id_coprod', null, 'int');
+            $type = BimpTools::getPostFieldValue('type', null, 'alphanohtml');
             if (!is_null($id_coprod) && !is_null($type)) {
                 $montants = $event->getChildrenObjects('montants', array(
                     'type'      => (int) $type,
@@ -307,9 +307,9 @@ class BMP_EventMontant extends Abstract_margeprod
     {
         $event = $this->getParentInstance();
         if (BimpObject::objectLoaded($event)) {
-            $id_coprod = BimpTools::getPostFieldValue('id_coprod', null);
-            $type = BimpTools::getPostFieldValue('type', null);
-            $id_categ = BimpTools::getPostFieldValue('id_category_montant', null);
+            $id_coprod = BimpTools::getPostFieldValue('id_coprod', null, 'int');
+            $type = BimpTools::getPostFieldValue('type', null, 'alphanohtml');
+            $id_categ = BimpTools::getPostFieldValue('id_category_montant', null, 'int');
             if (!is_null($id_coprod) && !is_null($type) && !is_null($id_categ)) {
                 $montants = $event->getChildrenObjects('montants', array(
                     'type'                => (int) $type,
@@ -815,8 +815,8 @@ class BMP_EventMontant extends Abstract_margeprod
         $html = '';
         $event = $this->getParentInstance();
         if (BimpObject::objectLoaded($event)) {
-            $id_montant_coprod = BimpTools::getPostFieldValue('id_coprod');
-            $id_type_montant = BimpTools::getPostFieldValue('id_montant');
+            $id_montant_coprod = BimpTools::getPostFieldValue('id_coprod', null, 'int');
+            $id_type_montant = BimpTools::getPostFieldValue('id_montant', null, 'int');
 
             if (is_null($id_montant_coprod)) {
                 $errors[] = 'Coproducteur absent';

@@ -180,7 +180,7 @@ class BE_Package extends BimpObject
 
     public static function getQuantityMaxProduct()
     {
-        $id_package_product = BimpTools::getPostFieldValue('id_package_product', 0);
+        $id_package_product = BimpTools::getPostFieldValue('id_package_product', 0, 'int');
         $package_product = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackageProduct', $id_package_product);
         return $package_product->getData('qty');
     }
@@ -363,11 +363,11 @@ class BE_Package extends BimpObject
     {
         $equipments = array();
 
-        $id_equipment = (int) BimpTools::getPostFieldValue('id_equipment', 0);
+        $id_equipment = (int) BimpTools::getPostFieldValue('id_equipment', 0, 'int');
         if ($id_equipment) {
             $equipments[] = $id_equipment;
         } else {
-            $equipments = BimpTools::getPostFieldValue('equipments', array());
+            $equipments = BimpTools::getPostFieldValue('equipments', array(), 'array');
         }
 
         $html = '<input type="hidden" name="equipments" value="' . implode(',', $equipments) . '"/>';
@@ -393,11 +393,11 @@ class BE_Package extends BimpObject
     {
         $packageProducts = array();
 
-        $id_pp = BimpTools::getPostFieldValue('id_package_product', 0);
+        $id_pp = BimpTools::getPostFieldValue('id_package_product', 0, 'int');
         if ($id_pp) {
             $packageProducts[] = $id_pp;
         } else {
-            $packageProducts = BimpTools::getPostFieldValue('packageProducts', array());
+            $packageProducts = BimpTools::getPostFieldValue('packageProducts', array(), 'array');
         }
 
         $html = '<input type="hidden" name="packageProducts" value="' . implode(',', $packageProducts) . '"/>';

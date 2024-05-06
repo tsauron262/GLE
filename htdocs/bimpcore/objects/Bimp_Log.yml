@@ -57,6 +57,7 @@ fields:
     msg: 
         label: Message
         type: text
+        no_strip_tags: 1
         
     url: 
         label: URL

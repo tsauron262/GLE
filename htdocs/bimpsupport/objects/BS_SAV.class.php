@@ -1681,7 +1681,7 @@ class BS_SAV extends BimpObject
 
     public function getPreselectedIdContact()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'), 'int');
 
         if ($id_client) {
             if ($this->isLoaded() && (int) $this->getData('id_client') === $id_client) {
@@ -2625,7 +2625,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             }
         } else {
             $input_name = 'keep_equipment_current_place';
-            $id_equipment = (int) BimpTools::getPostFieldValue('id_equipment', 0);
+            $id_equipment = (int) BimpTools::getPostFieldValue('id_equipment', 0, 'int');
 
             if ($id_equipment) {
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
@@ -2762,7 +2762,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $input = '';
 
                         if (BimpObject::objectLoaded($internal_stock)) {
-                            if ((int) $internal_stock->getData('do_not_order') && BimpTools::getPostFieldValue('repairType', '') === 'CIN' && $internal_stock->getData('qty') > 0) {
+                            if ((int) $internal_stock->getData('do_not_order') && BimpTools::getPostFieldValue('repairType', '', 'alphanohtml') === 'CIN' && $internal_stock->getData('qty') > 0) {
                                 $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                                 $msg .= 'Attention : ce composant ne doit plus être commandé, veuillez de préférence utiliser un stock consigné ou créer une réparation d\'un autre type que "Carry In"';
                                 $input .= BimpRender::renderAlerts($msg, 'warning');
@@ -5938,8 +5938,8 @@ ORDER BY a.val_max DESC");
         }
 
         // Vérif contact signataire: 
-        if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0)) {
-            if (!(int) BimpTools::getPostFieldValue('id_contact_signataire', 0)) {
+        if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0, 'int')) {
+            if (!(int) BimpTools::getPostFieldValue('id_contact_signataire', 0, 'int')) {
                 $client_sav = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_sav);
                 if (BimpObject::objectLoaded($client_sav) && $client_sav->isCompany()) {
                     $errors[] = 'Veuillez sélectionner le contact signataire (obligatoire pour les clients pros)';
@@ -6431,9 +6431,9 @@ ORDER BY a.val_max DESC");
             if (count($pdf_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du Bon de restitution');
             } else {
-                if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0)) {
+                if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0, 'int')) {
                     // Création signature: 
-                    $signature_errors = $this->createSignature('sav_resti', BimpTools::getPostFieldValue('id_contact_signataire'));
+                    $signature_errors = $this->createSignature('sav_resti', BimpTools::getPostFieldValue('id_contact_signataire', 0, 'int'));
 
                     if (count($signature_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
@@ -7346,7 +7346,7 @@ ORDER BY a.val_max DESC");
                         } else {
                             $current_place = $equipment->getCurrentPlace();
 
-                            if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getPostFieldValue('keep_equipment_current_place', 0)) {
+                            if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getPostFieldValue('keep_equipment_current_place', 0, 'int')) {
                                 $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                                 $place_errors = $place->validateArray(array(
                                     'id_equipment' => (int) $this->getData('id_equipment'),

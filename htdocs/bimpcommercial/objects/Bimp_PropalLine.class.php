@@ -43,7 +43,7 @@ class Bimp_PropalLine extends ObjectLine
     {
         if ($this->isAbonnement()) {
             if (in_array($field, array('abo_fac_periodicity', 'abo_duration', 'abo_fac_term', 'abo_nb_renouv'))) {
-                if ((int) BimpTools::getPostFieldValue('id_linked_contrat_line', (int) $this->getData('id_linked_contrat_line'))) {
+                if ((int) BimpTools::getPostFieldValue('id_linked_contrat_line', (int) $this->getData('id_linked_contrat_line'), 'int')) {
                     return 0;
                 }
             }
@@ -78,7 +78,7 @@ class Bimp_PropalLine extends ObjectLine
             $linked_line = $this->getChildObject('linked_contrat_line');
 
             if (BimpObject::objectLoaded($linked_line)) {
-                $id_prod = (int) BimpTools::getPostFieldValue('id_product', $this->id_product);
+                $id_prod = (int) BimpTools::getPostFieldValue('id_product', $this->id_product, 'int');
                 if ((int) $linked_line->getData('fk_product') !== $id_prod) {
                     return 1;
                 }
@@ -162,7 +162,7 @@ class Bimp_PropalLine extends ObjectLine
     public function getInputValue($field_name)
     {
         if (in_array($field_name, array('abo_duration', 'abo_fac_periodicity', 'abo_fac_term'))) {
-            $id_linked_contrat_line = (int) BimpTools::getPostFieldValue('id_linked_contrat_line', $this->getData('id_linked_contrat_line'));
+            $id_linked_contrat_line = (int) BimpTools::getPostFieldValue('id_linked_contrat_line', $this->getData('id_linked_contrat_line'), 'int');
 
             if ($id_linked_contrat_line) {
                 $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_contrat_line);
@@ -173,7 +173,7 @@ class Bimp_PropalLine extends ObjectLine
         }
 
         if (in_array($field_name, array('abo_fac_periodicity', 'abo_fac_term'))) {
-            if (!$this->isLoaded() || ($field_name == 'abo_fac_periodicity' && !(int) $this->getData('abo_fac_periodicity')) || $this->id_product != (int) BimpTools::getPostFieldValue('id_product', $this->id_product)) {
+            if (!$this->isLoaded() || ($field_name == 'abo_fac_periodicity' && !(int) $this->getData('abo_fac_periodicity')) || $this->id_product != (int) BimpTools::getPostFieldValue('id_product', $this->id_product, 'int')) {
                 return $this->getValueByProduct($field_name);
             }
         }
@@ -261,9 +261,9 @@ class Bimp_PropalLine extends ObjectLine
                 }
 
                 if (BimpTools::isPostFieldSubmit('abo_date_from')) {
-                    $date_start = BimpTools::getPostFieldValue('abo_date_from', $this->date_from);
+                    $date_start = BimpTools::getPostFieldValue('abo_date_from', $this->date_from, 'date');
                 } else {
-                    $date_start = BimpTools::getPostFieldValue('date_from', $this->date_from);
+                    $date_start = BimpTools::getPostFieldValue('date_from', $this->date_from, 'date');
                 }
 
 
@@ -480,7 +480,7 @@ class Bimp_PropalLine extends ObjectLine
     {
         $html = '';
 
-        $id_linked_contrat_line = (int) BimpTools::getPostFieldValue('id_linked_contrat_line', $this->getData('id_linked_contrat_line'));
+        $id_linked_contrat_line = (int) BimpTools::getPostFieldValue('id_linked_contrat_line', $this->getData('id_linked_contrat_line'), 'int');
 
         if ($id_linked_contrat_line) {
             $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_linked_contrat_line);
@@ -680,7 +680,7 @@ class Bimp_PropalLine extends ObjectLine
         $html = '';
 
         $duree_unitaire = 0;
-        $id_product = (int) BimpTools::getPostFieldValue('id_product', $this->id_product);
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', $this->id_product, 'int');
 
         if ($id_product) {
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
@@ -783,7 +783,7 @@ class Bimp_PropalLine extends ObjectLine
                 $id_client = (int) $this->db->getValue('propal', 'fk_soc', 'rowid = ' . (int) $this->getData('id_obj'));
 
                 if ($id_client) {
-                    $other_ref = BimpTools::getPostFieldValue('abo_linked_line_other_ref', null);
+                    $other_ref = BimpTools::getPostFieldValue('abo_linked_line_other_ref', null, 'int');
                     $id_linked_contrat_line = (int) $this->getData('id_linked_contrat_line');
 
                     if (is_null($other_ref) && $id_linked_contrat_line) {

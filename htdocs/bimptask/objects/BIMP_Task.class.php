@@ -371,7 +371,7 @@ class BIMP_Task extends BimpAbstractFollow
             return $sT;
         }
         
-        $type = BimpTools::getPostFieldValue('type_manuel', $this->getData('type_manuel'));
+        $type = BimpTools::getPostFieldValue('type_manuel', $this->getData('type_manuel'), 'alphanohtml');
 
         if (isset($type) && self::$sous_types[$type])
             return self::$sous_types[$type];
@@ -448,7 +448,7 @@ class BIMP_Task extends BimpAbstractFollow
         }
 
         if (!$this->isLoaded()) {
-            $classRight = BimpTools::getPostFieldValue('type_manuel', null);
+            $classRight = BimpTools::getPostFieldValue('type_manuel', null, 'alphanohtml');
             if (is_null($classRight))
                 return 1;
         } else
@@ -1315,7 +1315,7 @@ class BIMP_Task extends BimpAbstractFollow
                 $parent->reouvrir();
             }
 
-            $files = BimpTools::getPostFieldValue('task_files', array());
+            $files = BimpTools::getPostFieldValue('task_files', array(), 'array');
 
             if (!empty($files)) {
                 $files_dir = $this->getFilesDir();

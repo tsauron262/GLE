@@ -119,7 +119,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
 
 //    public function isFieldContratEditable()
 //    { // A checker... 
-//        if (BimpTools::getPostFieldValue('field_name') == 'duree_mois') {
+//        if (BimpTools::getPostFieldValue('field_name', '', 'aZ09') == 'duree_mois') {
 //            $fields = BimpTools::getPostFieldValue('fields');
 //            if ($fields['objet_contrat'] == 'ASMX')
 //                return 1;
@@ -273,7 +273,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
             case 'periodicity':
             case 'mode_calcul':
                 BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $className);
-                $target = BimpTools::getPostFieldValue('target', '');
+                $target = BimpTools::getPostFieldValue('target', '', 'aZ09');
                 if (!$target) {
                     $target = $className::$def_target;
                 }

@@ -978,7 +978,7 @@ class BF_Demande extends BimpObject
     {
         $errors = array();
 
-        $id_demandes = BimpTools::getPostFieldValue('id_objects', array());
+        $id_demandes = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         if (empty($id_demandes)) {
             $errors[] = 'Aucune demande sélectionnée';
@@ -1154,7 +1154,7 @@ class BF_Demande extends BimpObject
     public function getDemandesSourcesArray()
     {
         $sources = array();
-        $id_demandes = BimpTools::getPostFieldValue('id_objects', array());
+        $id_demandes = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         if (!empty($id_demandes)) {
             foreach ($id_demandes as $id_demande) {
@@ -1179,7 +1179,7 @@ class BF_Demande extends BimpObject
 
     public function getCessionnaireContactsArray()
     {
-        $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0);
+        $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0, 'int');
 
         if ($id_refin) {
             $id_societe = (int) $this->db->getValue('bf_refinanceur', 'id_societe', 'id = ' . $id_refin);
@@ -1552,7 +1552,7 @@ class BF_Demande extends BimpObject
 
             case 'cessionnaire_saison_sociale':
             case 'cessionnaire_siren':
-                $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0);
+                $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0, 'int');
                 if ($id_refin) {
                     $id_soc = (int) $this->db->getValue('bf_refinanceur', 'id_societe', 'id = ' . $id_refin);
                     if ($id_soc) {
@@ -1570,7 +1570,7 @@ class BF_Demande extends BimpObject
                 return '';
 
             case 'cessionnaire_id_contact_signataire':
-                $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0);
+                $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0, 'int');
                 if ($id_refin) {
                     return (int) $this->db->getValue('bf_refinanceur', 'id_def_contact_signataire', 'id = ' . $id_refin);
                 }
@@ -1579,7 +1579,7 @@ class BF_Demande extends BimpObject
             case 'cessionnaire_nom':
             case 'cessionnaire_email':
             case 'cessionnaire_qualite':
-                $id_contact = (int) BimpTools::getPostFieldValue('cessionnaire_id_contact_signataire', 0);
+                $id_contact = (int) BimpTools::getPostFieldValue('cessionnaire_id_contact_signataire', 0, 'int');
                 if ($id_contact) {
                     $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
                     if (BimpObject::objectLoaded($contact)) {
@@ -1705,7 +1705,7 @@ class BF_Demande extends BimpObject
 
             case 'fac_fourn_rev_id_mode_reglement':
             case 'fac_fourn_rev_id_cond_reglement':
-                $id_fourn = BimpTools::getPostFieldValue('fac_fourn_rev_id_fourn', 0);
+                $id_fourn = (int) BimpTools::getPostFieldValue('fac_fourn_rev_id_fourn', 0, 'int');
                 if ($id_fourn) {
                     $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_fourn);
                     if (BimpObject::objectLoaded($fourn)) {
@@ -1745,7 +1745,7 @@ class BF_Demande extends BimpObject
 
             case 'fac_cli_rev_id_mode_reglement':
             case 'fac_cli_rev_id_cond_reglement':
-                $id_client = BimpTools::getPostFieldValue('fac_cli_rev_id_client', 0);
+                $id_client = BimpTools::getPostFieldValue('fac_cli_rev_id_client', 0, 'int');
                 if ($id_client) {
                     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_client);
                     if (BimpObject::objectLoaded($client)) {
@@ -3252,7 +3252,7 @@ class BF_Demande extends BimpObject
 
         switch ($input_name) {
             case 'review_elements':
-                $html .= BimpInput::renderInput('toggle', 'review_elements', (int) BimpTools::getPostFieldValue('review_elements', 1));
+                $html .= BimpInput::renderInput('toggle', 'review_elements', (int) BimpTools::getPostFieldValue('review_elements', 1, 'int'));
                 break;
 
             case 'review_demande_refin':
@@ -3261,7 +3261,7 @@ class BF_Demande extends BimpObject
                         $html .= '<span class="success">OUI</span>';
                         $html .= BimpInput::renderInput('hidden', 'review_demande_refin', 1);
                     } else {
-                        $html .= BimpInput::renderInput('toggle', 'review_demande_refin', (int) BimpTools::getPostFieldValue('review_demande_refin', 1));
+                        $html .= BimpInput::renderInput('toggle', 'review_demande_refin', (int) BimpTools::getPostFieldValue('review_demande_refin', 1, 'int'));
                     }
                 } else {
                     $html .= '<span class="warning">Aucune demande refinanceur acceptée</span>';
@@ -3275,7 +3275,7 @@ class BF_Demande extends BimpObject
                         $html .= '<span class="success">OUI</span>';
                         $html .= BimpInput::renderInput('hidden', 'review_devis', 1);
                     } else {
-                        $html .= BimpInput::renderInput('toggle', 'review_devis', (int) BimpTools::getPostFieldValue('review_devis', 1));
+                        $html .= BimpInput::renderInput('toggle', 'review_devis', (int) BimpTools::getPostFieldValue('review_devis', 1, 'int'));
                     }
                 } else {
                     $html .= '<span class="warning">Devis non généré</span>';
@@ -3289,7 +3289,7 @@ class BF_Demande extends BimpObject
                         $html .= '<span class="success">OUI</span>';
                         $html .= BimpInput::renderInput('hidden', 'review_contrat', 1);
                     } else {
-                        $html .= BimpInput::renderInput('toggle', 'review_contrat', (int) BimpTools::getPostFieldValue('review_contrat', 1));
+                        $html .= BimpInput::renderInput('toggle', 'review_contrat', (int) BimpTools::getPostFieldValue('review_contrat', 1, 'int'));
                     }
                 } else {
                     $html .= '<span class="warning">Contrat non généré</span>';
@@ -3303,7 +3303,7 @@ class BF_Demande extends BimpObject
                         $html .= '<span class="success">OUI</span>';
                         $html .= BimpInput::renderInput('hidden', 'review_pvr', 1);
                     } else {
-                        $html .= BimpInput::renderInput('toggle', 'review_pvr', (int) BimpTools::getPostFieldValue('review_pvr', 1));
+                        $html .= BimpInput::renderInput('toggle', 'review_pvr', (int) BimpTools::getPostFieldValue('review_pvr', 1, 'int'));
                     }
                 } else {
                     $html .= '<span class="warning">PV de réception non généré</span>';
@@ -3670,9 +3670,9 @@ class BF_Demande extends BimpObject
                 $dir = $this->getFilesDir();
 
                 if ($doc_type == 'devis') {
-                    if ((int) BimpTools::getPostFieldValue('replace_devis', 0)) {
+                    if ((int) BimpTools::getPostFieldValue('replace_devis', 0, 'int')) {
                         $file_name_base = pathinfo($file_name, PATHINFO_FILENAME);
-                        $file_name = BimpTools::getPostFieldValue('replaced_devis', '');
+                        $file_name = BimpTools::getPostFieldValue('replaced_devis', '', 'alphanohtml');
 
                         if (!$file_name) {
                             $errors[] = 'Devis à remplacé non sélectionné';
@@ -5883,7 +5883,7 @@ class BF_Demande extends BimpObject
     {
         $html = '';
 
-        $signature_type = BimpTools::getPostFieldValue('signature_type', '');
+        $signature_type = BimpTools::getPostFieldValue('signature_type', '', 'aZ09');
 
         if ($signature_type === 'docusign') {
             if ((int) BimpCore::getConf($doc_type . '_loc_signature_allow_docusign_phone_auth', null, 'bimpfinancement')) {
@@ -6107,16 +6107,16 @@ class BF_Demande extends BimpObject
     {
         if (!$signature_type) {
             if (BimpTools::isPostFieldSubmit('signature_type')) {
-                $signature_type = BimpTools::getPostFieldValue('signature_type', '');
+                $signature_type = BimpTools::getPostFieldValue('signature_type', '', 'aZ09');
             } else {
                 if (BimpTools::isPostFieldSubmit('init_docusign')) {
-                    if ((int) BimpTools::getPostFieldValue('init_docusign')) {
+                    if ((int) BimpTools::getPostFieldValue('init_docusign', 0, 'int')) {
                         $signature_type = 'docusign';
                     }
                 }
                 if (!$signature_type) {
                     if (BimpTools::isPostFieldSubmit('open_public_access')) {
-                        if ((int) BimpTools::getPostFieldValue('open_public_access')) {
+                        if ((int) BimpTools::getPostFieldValue('open_public_access', 0, 'int')) {
                             $signature_type = 'elec';
                         }
                     }

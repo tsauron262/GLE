@@ -2562,7 +2562,7 @@ class Bimp_Product extends BimpObject
             $this->id => $this->getRef()
         );
 
-        $id_merged_product = (int) BimpTools::getPostFieldValue('id_merged_product', 0);
+        $id_merged_product = (int) BimpTools::getPostFieldValue('id_merged_product', 0, 'int');
 
         if ($id_merged_product) {
             $product = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_merged_product);
@@ -2579,7 +2579,7 @@ class Bimp_Product extends BimpObject
             $options[(int) $id_merged_product] = $product->getRef();
         }
 
-        return BimpInput::renderInput('select', 'id_kept_product', BimpTools::getPostFieldValue('id_kept_product', $this->id), array(
+        return BimpInput::renderInput('select', 'id_kept_product', BimpTools::getPostFieldValue('id_kept_product', $this->id, 'int'), array(
                     'options' => $options
         ));
     }
@@ -3069,9 +3069,9 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
 
-        $id_fourn = (int) BimpTools::getPostFieldValue('fp_id_fourn', 0);
-        $ref_fourn = BimpTools::getPostFieldValue('fp_ref_fourn', '');
-        $price = (float) BimpTools::getPostFieldValue('fp_pa_ht', 0);
+        $id_fourn = (int) BimpTools::getPostFieldValue('fp_id_fourn', 0, 'int');
+        $ref_fourn = BimpTools::getPostFieldValue('fp_ref_fourn', '', 'alphanohtml');
+        $price = (float) BimpTools::getPostFieldValue('fp_pa_ht', 0, 'float');
 
         $fourn_html = '';
         if ($id_fourn) {
@@ -4390,9 +4390,9 @@ class Bimp_Product extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            $id_fourn = (int) BimpTools::getPostFieldValue('fp_id_fourn', 0);
-            $ref_fourn = BimpTools::getPostFieldValue('fp_ref_fourn', '');
-            $pa_ht = (float) BimpTools::getPostFieldValue('fp_pa_ht', 0);
+            $id_fourn = (int) BimpTools::getPostFieldValue('fp_id_fourn', 0, 'int');
+            $ref_fourn = BimpTools::getPostFieldValue('fp_ref_fourn', '', 'alphanohtml');
+            $pa_ht = (float) BimpTools::getPostFieldValue('fp_pa_ht', 0, 'float');
 
             if ($id_fourn && $ref_fourn) {
                 $fp_errors = array();

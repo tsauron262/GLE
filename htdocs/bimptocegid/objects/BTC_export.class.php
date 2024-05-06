@@ -753,9 +753,9 @@ class BTC_export extends BimpObject {
     
     public function search() {
         
-        $numero_of_piece = BimpTools::getPostFieldValue('numero_of_piece');
+//        $numero_of_piece = BimpTools::getPostFieldValue('numero_of_piece', '', 'alphanohtml');
         
-        
+        // ??
         return 'bonjour';
         
     }

@@ -2421,7 +2421,7 @@ class BimpObject extends BimpCache
             $parent_id_prop = $instance->getParentIdProperty();
             if ($parent_id_prop) {
                 if (!BimpObject::objectLoaded($instance->parent)) {
-                    $id_parent = (int) BimpTools::getPostFieldValue($parent_id_prop);
+                    $id_parent = (int) BimpTools::getPostFieldValue($parent_id_prop, 0, 'int');
                     if ($id_parent) {
                         $instance->setIdParent($id_parent);
                     }
@@ -4407,7 +4407,7 @@ class BimpObject extends BimpCache
 
     public function getListConfigs()
     {
-        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default', 'aZ09');
         global $user;
 
         BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
@@ -4416,7 +4416,7 @@ class BimpObject extends BimpCache
 
     public function getListConfig()
     {
-        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default', 'aZ09');
         global $user;
 
         BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
@@ -4698,7 +4698,7 @@ class BimpObject extends BimpCache
     {
         $errors = array();
         $prev_path = $this->config->current_path;
-        $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
+        $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0, 'int');
 
         $fields = $this->getConf('fields', array(), true, 'array');
 
@@ -4959,7 +4959,7 @@ class BimpObject extends BimpCache
         $success_callback = '';
 
         $errors = $this->validatePost();
-        $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
+        $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0, 'int');
 
         if (!count($errors)) {
             $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
@@ -8512,10 +8512,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function renderListCsvColsOptions()
     {
-        $list_name = BimpTools::getPostFieldValue('list_name', 'default');
-        $list_type = BimpTools::getPostFieldValue('list_type', 'list_table');
-        $light_export = BimpTools::getPostFieldValue('light_export', 0);
-        $config_id = BimpTools::getPostFieldValue('config_id', null);
+        $list_name = BimpTools::getPostFieldValue('list_name', 'default', 'aZ09');
+        $list_type = BimpTools::getPostFieldValue('list_type', 'list_table', 'aZ09');
+        $light_export = BimpTools::getPostFieldValue('light_export', 0, 'int');
+        $config_id = BimpTools::getPostFieldValue('config_id', null, 'int');
 
         $bc_list = null;
 
@@ -10280,7 +10280,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $options = array();
 
         if (is_null($field)) {
-            $field = BimpTools::getPostFieldValue('sort_field');
+            $field = BimpTools::getPostFieldValue('sort_field', 'aZ09');
         }
 
         if ($this->config->isDefined('fields/' . $field . '/sort_options')) {

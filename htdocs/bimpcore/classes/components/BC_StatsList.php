@@ -849,7 +849,7 @@ class BC_StatsList extends BC_List
         $this->groupBy = null;
         $this->cols = null;
 
-        $this->groupBy = json_decode(BimpTools::getPostFieldValue('group_by', ''), 1);
+        $this->groupBy = json_decode(BimpTools::getPostFieldValue('group_by', '', 'json_nohtml'), 1);
         $this->fetchCols();
 
         $user_config_cols_options = array();

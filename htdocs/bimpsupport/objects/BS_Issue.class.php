@@ -92,7 +92,7 @@ class BS_Issue extends BimpObject
             }
         }
 
-        return (int) BimpTools::getPostFieldValue('tier_part', 0);
+        return (int) BimpTools::getPostFieldValue('tier_part', 0, 'int');
     }
 
     // Getters array: 
@@ -340,9 +340,9 @@ class BS_Issue extends BimpObject
         $html = '';
         $errors = array();
 
-        $serial = BimpTools::getPostFieldValue('serial', '');
-        $issue_category = BimpTools::getPostFieldValue('issue_category', '');
-        $issue_code = BimpTools::getPostFieldValue('issue_code', '');
+        $serial = BimpTools::getPostFieldValue('serial', '', 'alphanohtml');
+        $issue_category = BimpTools::getPostFieldValue('issue_category', '', 'alphanohtml');
+        $issue_code = BimpTools::getPostFieldValue('issue_code', '', 'alphanohtml');
 
         if (!$serial) {
             $errors[] = 'N° de série absent';
@@ -546,7 +546,7 @@ class BS_Issue extends BimpObject
         $errors = parent::validate();
 
         if (!count($errors)) {
-            if (!(int) BimpTools::getPostFieldValue('tier_part', 0)) {
+            if (!(int) BimpTools::getPostFieldValue('tier_part', 0, 'int')) {
                 if (!$this->getData('category_code')) {
                     $errors[] = 'Veuillez sélectionner un code catégorie';
                 }
@@ -586,7 +586,7 @@ class BS_Issue extends BimpObject
     {
         $errors = array();
 
-        if ((int) BimpTools::getPostFieldValue('tier_part', 0)) {
+        if ((int) BimpTools::getPostFieldValue('tier_part', 0, 'int')) {
             $this->set('category_code', '');
             $this->set('category_label', 'Composants tiers');
             $this->set('issue_code', '');

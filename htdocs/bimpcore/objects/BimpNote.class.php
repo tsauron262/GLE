@@ -858,7 +858,7 @@ class BimpNote extends BimpObject
         $errors = array();
         if ($this->getData('type_dest') == self::BN_DEST_SOC) {
             $this->set('visiblity', self::BN_ALL);
-            $mail = BimpTools::getPostFieldValue('mail_dest');
+            $mail = BimpTools::getPostFieldValue('mail_dest', '', 'email');
             $content = $this->getData('content');
             if ($mail == '') {
                 BimpTools::displayBacktrace();

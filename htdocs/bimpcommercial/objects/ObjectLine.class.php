@@ -1199,7 +1199,7 @@ class ObjectLine extends BimpObject
 
     public function getIdFournPriceFromPost()
     {
-        $id = BimpTools::getPostFieldValue('id_fourn_price', null);
+        $id = BimpTools::getPostFieldValue('id_fourn_price', null, 'int');
 
         if (!is_null($id)) {
             $this->id_fourn_price = (int) $id;
@@ -1215,7 +1215,7 @@ class ObjectLine extends BimpObject
             $id_equipment = null;
 
             if (!$this->no_equipment_post) {
-                $id_equipment = BimpTools::getPostFieldValue('id_equipment', null);
+                $id_equipment = BimpTools::getPostFieldValue('id_equipment', null, 'int');
             }
 
             if (is_null($id_equipment) && BimpObject::objectLoaded($this->post_equipment)) {
@@ -1241,7 +1241,7 @@ class ObjectLine extends BimpObject
             }
 
             if (!$id_product) {
-                $id_product = BimpTools::getPostFieldValue('id_product', null);
+                $id_product = BimpTools::getPostFieldValue('id_product', null, 'int');
 
                 if (is_null($id_product)) {
                     $id_product = (int) $this->id_product;
@@ -4670,8 +4670,8 @@ class ObjectLine extends BimpObject
 
             case 'hide_in_pdf':
                 $type = (int) $this->getData('type');
-                $pu_ht = (float) BimpTools::getPostFieldValue('pu_ht', $this->pu_ht);
-                $qty = (float) BimpTools::getPostFieldValue('qty', $this->qty);
+                $pu_ht = (float) BimpTools::getPostFieldValue('pu_ht', $this->pu_ht, 'float');
+                $qty = (float) BimpTools::getPostFieldValue('qty', $this->qty, 'float');
                 if ($this->field_exists('qty_modif')) {
                     $qty += (float) $this->getData('qty_modif');
                 }

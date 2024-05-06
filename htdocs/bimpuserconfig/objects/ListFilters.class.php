@@ -14,7 +14,7 @@ class ListFilters extends BCUserConfig
     public function getCreateJsCallback()
     {
         if ($this->isLoaded()) {
-            $filters_id = BimpTools::getPostFieldValue('filters_id', '');
+            $filters_id = BimpTools::getPostFieldValue('filters_id', '', 'alphanohtml');
 
             if ($filters_id) {
                 return 'loadSavedFilters(\'' . $filters_id . '\', ' . $this->id . ', 1);';
@@ -27,7 +27,7 @@ class ListFilters extends BCUserConfig
     public function getUpdateJsCallback()
     {
         if ($this->isLoaded()) {
-            $filters_id = BimpTools::getPostFieldValue('filters_id', '');
+            $filters_id = BimpTools::getPostFieldValue('filters_id', '', 'alphanohtml');
 
             if ($filters_id) {
                 return 'loadSavedFilters(\'' . $filters_id . '\', 0, 1);';

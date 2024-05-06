@@ -19,7 +19,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
 
     public function getFourn()
     {
-        return BimpTools::getPostFieldValue('id_fourn', 0);
+        return BimpTools::getPostFieldValue('id_fourn', 0, 'int');
     }
 
     public function getListsExtraButtons()
@@ -277,7 +277,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
 
         global $db, $user, $conf;
 
-        $id_account = (int) BimpTools::getPostFieldValue('id_account', BimpCore::getConf('id_default_bank_account', 0));
+        $id_account = (int) BimpTools::getPostFieldValue('id_account', BimpCore::getConf('id_default_bank_account', 0), 'int');
         $account = null;
 
         if ($id_account) {
@@ -318,10 +318,10 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         $banque_emetteur = '';
 
         if (in_array($type_paiement, array('CHQ', 'VIR'))) {
-            $nom_emetteur = BimpTools::getPostFieldValue('nom_emetteur', '');
+            $nom_emetteur = BimpTools::getPostFieldValue('nom_emetteur', '', 'alphanohtml');
         }
         if ($type_paiement === 'CHQ') {
-            $banque_emetteur = BimpTools::getPostFieldValue('banque_emetteur', '');
+            $banque_emetteur = BimpTools::getPostFieldValue('banque_emetteur', '', 'alphanohtml');
         }
 
         $this->dol_object->datepaye = dol_now();

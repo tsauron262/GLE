@@ -882,7 +882,7 @@ class BR_Reservation extends BimpObject
                         $html .= BimpRender::renderAlerts('Aucun équipement disponible dans l\'entrepôt ' . $entrepot->getNomUrl(1), 'warning');
                         $hidden = true;
                     } else {
-                        $selected_equipments = BimpTools::getPostFieldValue('equipments', array());
+                        $selected_equipments = BimpTools::getPostFieldValue('equipments', array(), 'array');
 
                         if (is_array($selected_equipments) && !empty($selected_equipments)) {
                             foreach ($selected_equipments as $id_equipment) {

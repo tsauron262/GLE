@@ -115,7 +115,7 @@ class BimpPublicController extends BimpController
                     accessforbidden();
                     exit;
                 }
-            } elseif ($this->new_pw_file && ((int) BimpTools::getPostFieldValue('bic_change_pw', 0) || (int) $userClient->getData('renew_required'))) {
+            } elseif ($this->new_pw_file && ((int) BimpTools::getPostFieldValue('bic_change_pw', 0, 'int') || (int) $userClient->getData('renew_required'))) {
                 // Formulaire changement de MDP: 
                 $this->displayChangePwForm(array(), (int) $userClient->getData('renew_required'));
                 exit;
@@ -127,7 +127,7 @@ class BimpPublicController extends BimpController
     {
         global $userClient;
 
-        if ((int) BimpTools::getPostFieldValue('bic_logout', 0)) {
+        if ((int) BimpTools::getPostFieldValue('bic_logout', 0, 'int')) {
             $this->userClientLogout();
         }
 
@@ -494,8 +494,8 @@ class BimpPublicController extends BimpController
 
         global $userClient;
 
-        $email = BimpTools::getPostFieldValue('bic_login_email', '');
-        $pw = BimpTools::getPostFieldValue('bic_login_pw', '');
+        $email = BimpTools::getPostFieldValue('bic_login_email', '', 'email');
+        $pw = BimpTools::getPostFieldValue('bic_login_pw', '', 'alphanohtml');
 
         if (!$email) {
             $errors[] = 'Veuillez saisir votre adresse e-mail';
@@ -533,7 +533,7 @@ class BimpPublicController extends BimpController
     {
         $errors = array();
 
-        $email = BimpTools::getPostFieldValue('bic_reinit_pw_email', '');
+        $email = BimpTools::getPostFieldValue('bic_reinit_pw_email', '', 'email');
 
         if (!$email) {
             $errors[] = 'Veuillez saisir votre adresse e-mail';
@@ -570,9 +570,9 @@ class BimpPublicController extends BimpController
         global $userClient;
 
         if (BimpObject::objectLoaded($userClient)) {
-            $cur_pw = BimpTools::getPostFieldValue('bic_cur_pw', '');
-            $new_pw = BimpTools::getPostFieldValue('bic_new_pw', '');
-            $confirm_pw = BimpTools::getPostFieldValue('bic_confirm_new_pw', '');
+            $cur_pw = BimpTools::getPostFieldValue('bic_cur_pw', '', 'alphanohtml');
+            $new_pw = BimpTools::getPostFieldValue('bic_new_pw', '', 'alphanohtml');
+            $confirm_pw = BimpTools::getPostFieldValue('bic_confirm_new_pw', '', 'alphanohtml');
 
             if (!$cur_pw) {
                 $errors[] = 'Veuillez saisir votre mot de passe actuel';

@@ -2204,7 +2204,7 @@ class Bimp_CommandeLine extends ObjectLine
             case 'achat_pa_ht':
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {
-                    return $product->getCurrentPaHt(BimpTools::getPostFieldValue('achat_id_fourn'));
+                    return $product->getCurrentPaHt(BimpTools::getPostFieldValue('achat_id_fourn', null, 'int'));
                 }
                 return 0;
 
@@ -2296,7 +2296,7 @@ class Bimp_CommandeLine extends ObjectLine
             )
         );
 
-        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         if (!empty($id_lines)) {
             $filters['a.id'] = $id_lines;
@@ -2374,7 +2374,7 @@ class Bimp_CommandeLine extends ObjectLine
             )
         );
 
-        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         if (!empty($id_lines)) {
             $filters['a.id'] = $id_lines;
@@ -2472,7 +2472,7 @@ class Bimp_CommandeLine extends ObjectLine
             )
         );
 
-        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         if (!empty($id_lines)) {
             $filters['a.id'] = $id_lines;
@@ -2578,7 +2578,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         if (!(int) $id_entrepot) {
             if (BimpTools::isPostFieldSubmit('id_entrepot')) {
-                $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0);
+                $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', 0, 'int');
             } elseif ($this->isLoaded()) {
                 $commande = $this->getParentInstance();
 
@@ -2589,10 +2589,10 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if (!(int) $id_fourn) {
-            $type_price = BimpTools::getPostFieldValue('type_price', 1);
+            $type_price = (int) BimpTools::getPostFieldValue('type_price', 1, 'int');
             switch ($type_price) {
                 case 1:
-                    $id_price = (int) BimpTools::getPostFieldValue('id_fourn_price', 0);
+                    $id_price = (int) BimpTools::getPostFieldValue('id_fourn_price', 0, 'int');
                     if (!$id_price && $this->isLoaded()) {
                         $id_price = (int) $this->getCommandeFournIdPrice();
                     }
@@ -2605,7 +2605,7 @@ class Bimp_CommandeLine extends ObjectLine
                     break;
 
                 case 2:
-                    $id_fourn = (int) BimpTools::getPostFieldValue('id_fourn', 0);
+                    $id_fourn = (int) BimpTools::getPostFieldValue('id_fourn', 0, 'int');
                     break;
             }
         }
@@ -3686,7 +3686,7 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function displayClientNameInput()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
         if ($id_client) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
             if (BimpObject::objectLoaded($client)) {
@@ -3699,7 +3699,7 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function displayFournNameInput()
     {
-        $id_fourn = (int) BimpTools::getPostFieldValue('id_fourn', 0);
+        $id_fourn = (int) BimpTools::getPostFieldValue('id_fourn', 0, 'int');
         if ($id_fourn) {
             $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $id_fourn);
             if (BimpObject::objectLoaded($fourn)) {
@@ -3712,7 +3712,7 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function displayProductNameInput()
     {
-        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0, 'int');
         if ($id_product) {
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
             if (BimpObject::objectLoaded($prod)) {
@@ -4913,7 +4913,7 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
-        $id_lines = BimpTools::getPostFieldValue('id_objects', array());
+        $id_lines = BimpTools::getPostFieldValue('id_objects', array(), 'array');
         $warnings = array();
 
         if (empty($id_lines) && $this->isLoaded()) {
@@ -5428,7 +5428,7 @@ class Bimp_CommandeLine extends ObjectLine
         $html = '';
         $errors = array();
 
-        $operation_type = BimpTools::getPostFieldValue('operation_type', '');
+        $operation_type = BimpTools::getPostFieldValue('operation_type', '', 'aZ09');
 
         if (!$operation_type) {
             $errors[] = 'Type d\'opération périodique non spécifiée';
@@ -5453,8 +5453,8 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
-        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0, 'int');
 
         $lines = self::getPeriodicExpLinesToProcess($errors, $id_client, $id_product);
 
@@ -5657,8 +5657,8 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
-        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0, 'int');
 
         $lines_by_clients = self::getPeriodicFacLinesToProcess($errors, $id_client, $id_product);
 
@@ -5924,9 +5924,9 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
-        $id_fourn_filter = (int) BimpTools::getPostFieldValue('id_fourn', 0);
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
-        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
+        $id_fourn_filter = (int) BimpTools::getPostFieldValue('id_fourn', 0, 'int');
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0, 'int');
 
         $lines = self::getPeriodicAchatLinesToProcess($errors, $id_fourn_filter, $id_client, $id_product);
 
@@ -10109,14 +10109,14 @@ class Bimp_CommandeLine extends ObjectLine
                     unset($periodicity_extra_params['exp_id_contact']);
                 }
             } else {
-                if ((int) $this->getData('fac_periodicity') > 0 && BimpTools::getPostFieldValue('exp_periodicity_same_values', 0)) {
+                if ((int) $this->getData('fac_periodicity') > 0 && (int) BimpTools::getPostFieldValue('exp_periodicity_same_values', 0, 'int')) {
                     $this->set('exp_periodicity', $this->getData('fac_periodicity'));
                     $this->set('exp_nb_periods', $this->getData('fac_nb_periods'));
                     $this->set('exp_periods_start', $this->getData('fac_periods_start'));
                 }
 
                 if (BimpTools::isPostFieldSubmit('exp_id_contact')) {
-                    $periodicity_extra_params['exp_id_contact'] = (int) BimpTools::getPostFieldValue('exp_id_contact');
+                    $periodicity_extra_params['exp_id_contact'] = (int) BimpTools::getPostFieldValue('exp_id_contact', 0, 'int');
                 }
             }
         }
@@ -10141,7 +10141,7 @@ class Bimp_CommandeLine extends ObjectLine
                     unset($periodicity_extra_params['achat_id_fourn_price']);
                 }
             } else {
-                $params_mode = BimpTools::getPostFieldValue('achat_periodicity_same_values', '');
+                $params_mode = BimpTools::getPostFieldValue('achat_periodicity_same_values', '', 'aZ09');
                 switch ($params_mode) {
                     case 'as_fac':
                         $this->set('achat_periodicity', $this->getData('fac_periodicity'));
@@ -10157,7 +10157,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
 
                 if (BimpTools::isPostFieldSubmit('achat_type_pa')) {
-                    $periodicity_extra_params['achat_type_pa'] = (int) BimpTools::getPostFieldValue('achat_type_pa');
+                    $periodicity_extra_params['achat_type_pa'] = (int) BimpTools::getPostFieldValue('achat_type_pa', 0, 'int');
                     switch ($periodicity_extra_params['achat_type_pa']) {
                         case 1: // PA fourn
                             if (isset($periodicity_extra_params['achat_id_fourn'])) {
@@ -10169,7 +10169,7 @@ class Bimp_CommandeLine extends ObjectLine
                             if (isset($periodicity_extra_params['achat_tva_tx'])) {
                                 unset($periodicity_extra_params['achat_tva_tx']);
                             }
-                            $periodicity_extra_params['achat_id_fourn_price'] = (int) BimpTools::getPostFieldValue('achat_id_fourn_price');
+                            $periodicity_extra_params['achat_id_fourn_price'] = (int) BimpTools::getPostFieldValue('achat_id_fourn_price', 0, 'int');
                             $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $periodicity_extra_params['achat_id_fourn_price']);
                             if (BimpObject::objectLoaded($pfp)) {
                                 $this->set('achat_id_fourn', $pfp->getData('fk_soc'));
@@ -10181,9 +10181,9 @@ class Bimp_CommandeLine extends ObjectLine
                             if (isset($periodicity_extra_params['achat_id_fourn_price'])) {
                                 unset($periodicity_extra_params['achat_id_fourn_price']);
                             }
-                            $periodicity_extra_params['achat_id_fourn'] = (int) BimpTools::getPostFieldValue('achat_id_fourn');
-                            $periodicity_extra_params['achat_pa_ht'] = (float) BimpTools::getPostFieldValue('achat_pa_ht');
-                            $periodicity_extra_params['achat_tva_tx'] = (float) BimpTools::getPostFieldValue('achat_tva_tx');
+                            $periodicity_extra_params['achat_id_fourn'] = (int) BimpTools::getPostFieldValue('achat_id_fourn', 0, 'int');
+                            $periodicity_extra_params['achat_pa_ht'] = (float) BimpTools::getPostFieldValue('achat_pa_ht', 0, 'float');
+                            $periodicity_extra_params['achat_tva_tx'] = (float) BimpTools::getPostFieldValue('achat_tva_tx', 0, 'float');
                             $this->set('achat_id_fourn', $periodicity_extra_params['achat_id_fourn']);
                             break;
                     }

@@ -99,7 +99,7 @@ class API_Api extends BimpObject
 
     public function getApiToInstallDefaultTitle()
     {
-        $api_name = BimpTools::getPostFieldValue('api_name');
+        $api_name = BimpTools::getPostFieldValue('api_name', '', 'aZ09');
         $class_name = ucfirst($api_name) . 'API';
 
         if (!class_exists($class_name)) {

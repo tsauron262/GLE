@@ -443,7 +443,7 @@ class BimpSignature extends BimpObject
     {
         switch ($field_name) {
             case 'email_content':
-                $signature_type = BimpTools::getPostFieldValue('signature_type', 'elec');
+                $signature_type = BimpTools::getPostFieldValue('signature_type', 'elec', 'aZ09');
                 $errors = array();
                 $obj = $this->getObj();
                 if ($this->isObjectValid($errors, $obj)) {
@@ -2036,7 +2036,7 @@ class BimpSignature extends BimpObject
         $warnings = array();
         $success = 'Document signé enregistré avec succès';
 
-        $signataires = BimpTools::getPostFieldValue('signataires');
+        $signataires = BimpTools::getPostFieldValue('signataires', array(), 'array');
 
         if (empty($signataires)) {
             $errors[] = 'Veuillez sélectionner au moins un signataire';
@@ -2044,13 +2044,13 @@ class BimpSignature extends BimpObject
             $obj = $this->getObj();
 
             if ($this->isObjectValid($errors, $obj)) {
-                $date = BimpTools::getPostFieldValue('date_signed', '');
+                $date = BimpTools::getPostFieldValue('date_signed', '', 'date');
 
                 if (!$date) {
                     $date = date('Y-m-d H:i:s');
                 }
 
-                $files = BimpTools::getPostFieldValue('file_signed', array());
+                $files = BimpTools::getPostFieldValue('file_signed', array(), 'array');
                 if (!count($files) && (!isset($_FILES['file_signed']) || !isset($_FILES['file_signed']['name']) || empty($_FILES['file_signed']['name']))) {
                     $errors[] = 'Fichier du document signé absent';
                 } else {
@@ -2297,7 +2297,7 @@ class BimpSignature extends BimpObject
 
     public function update(&$warnings = [], $force_update = false)
     {
-        if ((int) $this->getData('status') <= 0 && BimpTools::getPostFieldValue('sign_papier', 0)) {
+        if ((int) $this->getData('status') <= 0 && BimpTools::getPostFieldValue('sign_papier', 0, 'int')) {
             // Procédure nécessaire pour téléchargement du fichier: 
             $result = $this->setObjectAction('signPapier');
             $errors = BimpTools::getArrayValueFromPath($result, 'errors', array());

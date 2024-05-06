@@ -1738,7 +1738,7 @@ class BimpRelanceClientsLine extends BimpObject
                     $date_send = $this->getData('date_send');
                     $activate_relances = null;
                     if (BimpTools::isPostFieldSubmit('activate_relances')) {
-                        $activate_relances = (int) BimpTools::getPostFieldValue('activate_relances');
+                        $activate_relances = (int) BimpTools::getPostFieldValue('activate_relances', 0, 'int');
                     }
 
                     $relance_idx = (int) $this->getData('relance_idx');

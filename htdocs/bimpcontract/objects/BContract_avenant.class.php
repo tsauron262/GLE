@@ -200,9 +200,17 @@ class BContract_avenant extends BContract_contrat
 
     public function getProductPrice()
     {
-        $id_service = BimpTools::getPostFieldValue('id_serv');
-        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_service);
-        return $product->getData('price');
+        $id_service = (int) BimpTools::getPostFieldValue('id_serv', 0, 'int');
+
+        if ($id_service) {
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_service);
+
+            if (BimpObject::objectLoaded($product)) {
+                return $product->getData('price');
+            }
+        }
+
+        return 0;
     }
 
     public function getCoutTotal($taxe = 0)
@@ -844,24 +852,22 @@ class BContract_avenant extends BContract_contrat
     {
         $errors = parent::validatePost();
 
-        if ($this->isLoaded() && $this->getData('statut') != 0)
+        if ($this->isLoaded() && $this->getData('statut') != 0) {
             $errors[] = 'Cet avenant n\'est plus au statut brouillon';
+        }
 
-        $conserne_date_end_avp = false;
+        $years = (int) BimpTools::getPostFieldValue('years', 0, 'int');
+        $monthes = (int) BimpTools::getPostFieldValue('month', 0, 'int');
+        if ($years || $monthes) {
+            $by_month = (int) $this->getData('by_month');
 
-//         if(BimpTools::getPostFieldValue('type') && BimpTools::getPostFieldValue('type') == 1) $conserne_date_end_avp = true;
-        if (BimpTools::getPostFieldValue('years', null))
-            $conserne_date_end_avp = true;
-        if (BimpTools::getPostFieldValue('month', null))
-            $conserne_date_end_avp = true;
+            if (!$by_month && !$years) {
+                $errors[] = 'Vous ne pouvez pas choisir 0 année de prolongation';
+            }
 
-        if ($conserne_date_end_avp) {
-            if (!$this->getData('by_month'))
-                if (BimpTools::getPostFieldValue('years') == 0)
-                    $errors[] = 'Vous ne pouvez pas choisir 0 année de prolongation';
-            if ($this->getData('by_month'))
-                if (BimpTools::getPostFieldValue('month') == 0)
-                    $errors[] = 'Vous ne pouvez pas choisir 0 mois de prolongation';
+            if ($by_month && !$monthes) {
+                $errors[] = 'Vous ne pouvez pas choisir 0 mois de prolongation';
+            }
         }
 
         return $errors;
@@ -882,7 +888,7 @@ class BContract_avenant extends BContract_contrat
         }
 
         if (!count($errors)) {
-            $number = (int) $this->db->getCount('bcontract_avenant', 'id_contrat = ' . $id_contrat, 'id')+1;
+            $number = (int) $this->db->getCount('bcontract_avenant', 'id_contrat = ' . $id_contrat, 'id') + 1;
             $this->set('number_in_contrat', $number);
 
             $errors = parent::create($warnings, $force_create);
@@ -891,7 +897,7 @@ class BContract_avenant extends BContract_contrat
                 switch ((int) $this->getData('type')) {
                     case self::TYPE_SERVICE:
                         $det = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet');
-                        if (is_array($parent->dol_object->lines) && BimpTools::getPostFieldValue('type') == 0)
+                        if (is_array($parent->dol_object->lines) && (int) BimpTools::getPostFieldValue('type', 0, 'int') == 0)
                             foreach ($parent->dol_object->lines as $line) {
                                 $laLigne = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $line->id);
                                 if ($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
@@ -918,11 +924,11 @@ class BContract_avenant extends BContract_contrat
                         break;
 
                     case self::TYPE_PROLONG:
-                        if (BimpTools::getPostFieldValue('enMois')) {
-                            $months = BimpTools::getPostFieldValue('years');
+                        if ((int) BimpTools::getPostFieldValue('enMois', 0, 'int')) {
+                            $months = (int) BimpTools::getPostFieldValue('years', 0, 'int');
                             $this->updateField('by_month', 1);
                         } else {
-                            $months = BimpTools::getPostFieldValue('years') * 12;
+                            $months = (int) BimpTools::getPostFieldValue('years', 0, 'int') * 12;
                         }
 
                         $errors = $this->updateField('added_month', $months);
@@ -951,8 +957,10 @@ class BContract_avenant extends BContract_contrat
     {
         $errors = array();
 
-        if (BimpTools::getPostFieldValue("years", null)) {
-            $nombre_months = BimpTools::getPostFieldValue('years') * 12;
+        $years = (int) BimpTools::getPostFieldValue("years", 0, 'int');
+        
+        if ($years) {
+            $nombre_months = $years * 12;
             $end = new DateTime($this->getData('date_end'));
             $end->add(new DateInterval('P' . $nombre_months . 'M'));
 //            $end->sub(new DateInterval('P1D'));//comprendre
@@ -961,8 +969,8 @@ class BContract_avenant extends BContract_contrat
             BimpTools::merge_array($errors, $this->updateField('added_month', $nombre_months));
         }
 
-        if (BimpTools::getPostFieldValue("month", null)) {
-            $nombre_months = BimpTools::getPostFieldValue('month');
+        $nombre_months = (int) BimpTools::getPostFieldValue("month", 0, 'int');
+        if ($nombre_months) {
             $end = new DateTime($this->getData('date_end'));
             $end->add(new DateInterval('P' . $nombre_months . 'M'));
             $end->sub(new DateInterval('P1D'));

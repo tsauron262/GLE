@@ -1443,7 +1443,7 @@ class AppleShipment extends BimpObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-        if ((int) BimpTools::getPostFieldValue('ups_file_upload', 0)) {
+        if ((int) BimpTools::getPostFieldValue('ups_file_upload', 0, 'int')) {
             $result = $this->setObjectAction('uploadUpsFile');
             $warnings = $result['warnings'];
             return $result['errors'];

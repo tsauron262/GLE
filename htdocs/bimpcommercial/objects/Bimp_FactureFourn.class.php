@@ -504,7 +504,7 @@ class Bimp_FactureFourn extends BimpCommAchat
 
     public function getCreateFromOriginCheckMsg()
     {
-        if (BimpTools::getPostFieldValue('origin', '') === 'commande_fournisseur') {
+        if (BimpTools::getPostFieldValue('origin', '', 'aZ09') === 'commande_fournisseur') {
             return array(array(
                     'content' => 'Attention: après la création de la facture, les quantités de la commande fournisseurs ne seront plus modifiables dans la logistique',
                     'type'    => 'warning'

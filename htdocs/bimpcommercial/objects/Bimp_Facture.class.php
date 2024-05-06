@@ -4140,7 +4140,7 @@ class Bimp_Facture extends BimpComm
             if (isset($this->id_struture_client_chorus) && $this->id_struture_client_chorus) {
                 $id_structure = $this->id_struture_client_chorus;
             } else {
-                $id_structure = BimpTools::getPostFieldValue('id_structure', '');
+                $id_structure = BimpTools::getPostFieldValue('id_structure', '', 'alphanohtml');
             }
 
             if (!$id_structure) {
@@ -4263,8 +4263,8 @@ class Bimp_Facture extends BimpComm
             switch ($type) {
                 case Facture::TYPE_STANDARD:
                     if (!round($total_ttc_wo_discounts, 2) && $neg_lines > 0) {
-                        $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1);
-                        $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1);
+                        $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1, 'int');
+                        $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1, 'int');
                         $err = $this->createCreditNoteWithNegativesLines($lines, $convert_avoir, $use_remise);
 
                         if (count($err)) {
@@ -4278,9 +4278,9 @@ class Bimp_Facture extends BimpComm
                             $this->dol_object->type = Facture::TYPE_CREDIT_NOTE;
                         }
                     } else {
-                        if ($neg_lines > 0 && BimpTools::getPostFieldValue('create_avoir', 0)) {
-                            $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1);
-                            $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1);
+                        if ($neg_lines > 0 && (int) BimpTools::getPostFieldValue('create_avoir', 0, 'int')) {
+                            $convert_avoir = (int) BimpTools::getPostFieldValue('convert_avoir_to_reduc', 1, 'int');
+                            $use_remise = (int) BimpTools::getPostFieldValue('use_discount_in_facture', 1, 'int');
                             $err = $this->createCreditNoteWithNegativesLines($lines, $convert_avoir, $use_remise);
 
                             if (count($err)) {
@@ -6273,14 +6273,14 @@ class Bimp_Facture extends BimpComm
         $errors = $warnings = array();
         $id_user_valid = 0;
 
-        $motif = (int) BimpTools::getPostFieldValue('motif');
-        $avoir_total = (int) BimpTools::getPostFieldValue('avoir_total');
-        $comment = (string) BimpTools::getPostFieldValue('comment');
-        $join_files = (array) BimpTools::getPostFieldValue('join_files');
+        $motif = (int) BimpTools::getPostFieldValue('motif', 0, 'int');
+        $avoir_total = (int) BimpTools::getPostFieldValue('avoir_total', 0, 'int');
+        $comment = (string) BimpTools::getPostFieldValue('comment','', 'alphanohtml');
+        $join_files = (array) BimpTools::getPostFieldValue('join_files', array(), 'array');
         if ($avoir_total)
             $montant = (float) $this->dol_object->total_ttc;
         else
-            $montant = (float) BimpTools::getPostFieldValue('montant');
+            $montant = (float) BimpTools::getPostFieldValue('montant', 0, 'float');
 
         if (!$avoir_total and !$montant)
             $errors[] = "Montant non renseigné alors que l'avoir est partiel";
@@ -6336,11 +6336,11 @@ class Bimp_Facture extends BimpComm
         global $user;
         $errors = $warnings = array();
 
-        $valid_avoir = (int) BimpTools::getPostFieldValue('valid_avoir', 0);
+        $valid_avoir = (int) BimpTools::getPostFieldValue('valid_avoir', 0, 'int');
         $valid_avoir_id_user = (int) $user->id;
 
         if ($valid_avoir)
-            $valid_avoir_montant_accorder = (float) BimpTools::getPostFieldValue('valid_avoir_montant_accorder', 0);
+            $valid_avoir_montant_accorder = (float) BimpTools::getPostFieldValue('valid_avoir_montant_accorder', 0, 'float');
         else
             $valid_avoir_montant_accorder = 0;
 
@@ -6353,7 +6353,7 @@ class Bimp_Facture extends BimpComm
                 $msg .= "Demande d'avoir refusée";
 
             $user_valid = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
-            $comment = (string) BimpTools::getPostFieldValue('comment');
+            $comment = (string) BimpTools::getPostFieldValue('comment', '', 'alphanohtml');
             if ($comment != '')
                 $msg .= ", commentaire de " . $user_valid->getName() . " : " . $comment;
             else
@@ -6788,9 +6788,9 @@ class Bimp_Facture extends BimpComm
             case Facture::TYPE_CREDIT_NOTE:
                 $facture = null;
 
-                $id_fac_src = (int) BimpTools::getPostFieldValue('id_facture_to_correct', 0);
-                $avoir_same_lines = (int) BimpTools::getPostFieldValue('avoir_same_lines', 1);
-                $avoir_remain_to_pay = (int) BimpTools::getPostFieldValue('avoir_remain_to_pay', 0);
+                $id_fac_src = (int) BimpTools::getPostFieldValue('id_facture_to_correct', 0, 'int');
+                $avoir_same_lines = (int) BimpTools::getPostFieldValue('avoir_same_lines', 1, 'int');
+                $avoir_remain_to_pay = (int) BimpTools::getPostFieldValue('avoir_remain_to_pay', 0, 'int');
 
                 if ($avoir_same_lines && $avoir_remain_to_pay) {
                     $errors[] = 'Il n\'est pas possible de choisir l\'option "Créer l\'avoir avec les même lignes que la factures dont il est issu" et "Créer l\'avoir avec le montant restant à payer de la facture dont il est issu" en même temps. Veuillez choisir l\'une ou l\'autre';
@@ -6854,7 +6854,7 @@ class Bimp_Facture extends BimpComm
 
             case Facture::TYPE_STANDARD:
                 if (BimpTools::isSubmit('id_avoir_to_refacture')) {
-                    $id_avoir_to_refacture = (int) BimpTools::getPostFieldValue('id_avoir_to_refacture', 0);
+                    $id_avoir_to_refacture = (int) BimpTools::getPostFieldValue('id_avoir_to_refacture', 0, 'int');
                     if (!$id_avoir_to_refacture) {
                         $errors[] = 'ID de l\'avoir à refacturer absent';
                         return $errors;

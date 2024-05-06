@@ -120,9 +120,9 @@ class BimpTools
                                 'Valeur modifiée ascii' => '"' . BimpTools::toAscii($val_temp) . '"'
                             ));
                         }
-                        if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
-                            $value = $val_temp;
-                        }
+//                        if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
+//                            $value = $val_temp;
+//                        }
                     }
                 }
             }
@@ -212,7 +212,7 @@ class BimpTools
 
     public static function getAjaxFileName($field_name)
     {
-        return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name));
+        return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name, '', 'alphanohtml'));
     }
 
     public static function moveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null)

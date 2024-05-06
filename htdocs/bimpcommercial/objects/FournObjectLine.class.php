@@ -50,7 +50,7 @@ class FournObjectLine extends ObjectLine
         switch ($field) {
             case 'tva_tx':
                 $tva_tx = $this->tva_tx;
-                $id_fourn_price = (int) BimpTools::getPostFieldValue('id_fourn_price', (int) $this->id_fourn_price);
+                $id_fourn_price = (int) BimpTools::getPostFieldValue('id_fourn_price', (int) $this->id_fourn_price, 'int');
                 if ((int) $this->id_fourn_price !== $id_fourn_price) {
                     $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
                     if ($pfp->isLoaded()) {
@@ -63,7 +63,7 @@ class FournObjectLine extends ObjectLine
 
             case 'ref_supplier':
                 $ref_supplier = (string) $this->ref_supplier;
-                $id_fourn_price = (int) BimpTools::getPostFieldValue('id_fourn_price', (int) $this->id_fourn_price);
+                $id_fourn_price = (int) BimpTools::getPostFieldValue('id_fourn_price', (int) $this->id_fourn_price, 'int');
                 if ((int) $this->id_fourn_price !== $id_fourn_price) {
                     $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
                     if ($pfp->isLoaded()) {

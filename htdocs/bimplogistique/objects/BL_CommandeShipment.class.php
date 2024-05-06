@@ -614,7 +614,7 @@ class BL_CommandeShipment extends BimpObject
     {
         // Si plusieurs commandes différentes, on ne renvoie les valeurs que si la même pour chaque commande. 
 
-        $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
+        $shipments_list = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         $commandes = array();
         if (is_array($shipments_list) && !empty($shipments_list)) {
@@ -723,7 +723,7 @@ class BL_CommandeShipment extends BimpObject
 
     public function getBulkFactureClientContactsArray()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0, 'int');
 
         if (!$id_client) {
             $id_client = $this->getBulkFactureValue('id_client');
@@ -1738,7 +1738,7 @@ class BL_CommandeShipment extends BimpObject
     {
         $html = '';
 
-        $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
+        $shipments_list = BimpTools::getPostFieldValue('id_objects', array(), 'array');
 
         if (!is_array($shipments_list) || empty($shipments_list)) {
             return BimpRender::renderAlerts('Liste des expéditions absente');

@@ -368,8 +368,8 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 $pdf->SetXY('34', '147.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 
-                if(!is_null(BimpTools::getPostFieldValue('date_purchase')))
-                    $date_purchase = new DateTime(BimpTools::getPostFieldValue('date_purchase'));
+                if(!is_null(BimpTools::getPostFieldValue('date_purchase', null, 'date')))
+                    $date_purchase = new DateTime(BimpTools::getPostFieldValue('date_purchase', null, 'date'));
                 else
                     $date_purchase = new DateTime($equipment->getData("date_purchase"));
                 $pdf->MultiCell(300, 6, $date_purchase->format('d-m-Y'), 0, 'L');
@@ -377,10 +377,10 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 // Nom du revendeur
                 $pdf->SetXY('134', '146.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $name_reseller = BimpTools::getPostFieldValue('name_reseller');
+                $name_reseller = BimpTools::getPostFieldValue('name_reseller', null, 'alphanohtml');
                 if(!is_null($name_reseller)) {
                     if($name_reseller == 'AUTRE') {
-                        $name_reseller = BimpTools::getPostFieldValue('other_name_reseller');
+                        $name_reseller = BimpTools::getPostFieldValue('other_name_reseller', '', 'alphanohtml');
                         if($name_reseller == '')
                            $name_reseller = $sav->getData('name_reseller');
                     }
@@ -438,7 +438,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 $this->addCheck($pdf, 180, 56.3);
 
                 //Frais d’inspection facturés
-                $name_reseller = BimpTools::getPostFieldValue('name_reseller');
+                $name_reseller = BimpTools::getPostFieldValue('name_reseller', null, 'alphanohtml');
                 if(!is_null($name_reseller)) {
                     if($name_reseller == 'LDLC' or $name_reseller == 'BIMP' or $name_reseller == 'ACTIMAC')
                         $this->addCheck($pdf, 80.5, 66); // Checkbox à "Non"

@@ -1929,7 +1929,7 @@ class gsxController extends BimpController
             foreach ($questions as $q) {
                 $input_name = $prefixe . '_q_' . $q['questionId'];
 
-                $value = BimpTools::getPostFieldValue($input_name, '');
+                $value = BimpTools::getPostFieldValue($input_name, '', 'alphanohtml');
                 if ($value) {
                     $response = array(
                         'questionId' => $q['questionId'],

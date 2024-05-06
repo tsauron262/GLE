@@ -1255,7 +1255,7 @@ class Bimp_Societe extends BimpDolObject
         if ((int) $this->getData('fk_typent')) {
             $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
         }
-        if (BimpTools::getPostFieldValue('is_company') == '0')
+        if (BimpTools::getPostFieldValue('is_company', 0, 'int') == '0')
             $code = 'TE_PRIVATE';
         if ($code != '') {
             if ($code == 'TE_ADMIN') {
@@ -1275,7 +1275,7 @@ class Bimp_Societe extends BimpDolObject
         if ((int) $this->getData('fk_typent')) {
             $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
         }
-        if (BimpTools::getPostFieldValue('is_company') == '0') {
+        if (BimpTools::getPostFieldValue('is_company', 0, 'int') == '0') {
             $code = 'TE_PRIVATE';
         }
         if ($code != '') {
@@ -2389,7 +2389,7 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if ($this->isLoaded()) {
-            $new_comms = BimpTools::getPostFieldValue('soc_commerciaux', null);
+            $new_comms = BimpTools::getPostFieldValue('soc_commerciaux', null, 'array');
 
             if (is_array($new_comms)) {
                 $current_comms = $this->getCommerciauxArray(false, false);

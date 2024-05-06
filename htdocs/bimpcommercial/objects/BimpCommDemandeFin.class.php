@@ -381,8 +381,8 @@ class BimpCommDemandeFin extends BimpObject
     {
         $origine = null;
         if (!$this->isLoaded()) {
-            $type_origine = BimpTools::getPostFieldValue('type_origine', '');
-            $id_origine = (int) BimpTools::getPostFieldValue('id_origine', 0);
+            $type_origine = BimpTools::getPostFieldValue('type_origine', '', 'aZ09');
+            $id_origine = (int) BimpTools::getPostFieldValue('id_origine', 0, 'int');
 
             if ($type_origine && $id_origine) {
                 $origine = $this->getOrigineFromType($type_origine, $id_origine);
@@ -465,7 +465,7 @@ class BimpCommDemandeFin extends BimpObject
                 return $this->getDefaultIdContact('signature');
 
             case 'fonction_signataire':
-                $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature', 0);
+                $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature', 0, 'int');
                 if ($id_contact) {
                     return $this->db->getValue('socpeople', 'poste', 'rowid = ' . (int) $id_contact);
                 }
@@ -477,7 +477,7 @@ class BimpCommDemandeFin extends BimpObject
             case 'duration':
             case 'periodicity':
             case 'mode_calcul':
-                $target = BimpTools::getPostFieldValue('target', '');
+                $target = BimpTools::getPostFieldValue('target', '', 'aZ09');
                 if (!$target) {
                     $target = static::$def_target;
                 }
@@ -495,8 +495,8 @@ class BimpCommDemandeFin extends BimpObject
         $origine = null;
 
         if (!$this->isLoaded()) {
-            $type_origine = BimpTools::getPostFieldValue('type_origine', '');
-            $id_origine = (int) BimpTools::getPostFieldValue('id_origine', 0);
+            $type_origine = BimpTools::getPostFieldValue('type_origine', '', 'aZ09');
+            $id_origine = (int) BimpTools::getPostFieldValue('id_origine', 0, 'int');
 
             if ($type_origine && $id_origine) {
                 $origine = $this->getOrigineFromType($type_origine, $id_origine);
@@ -1638,7 +1638,7 @@ class BimpCommDemandeFin extends BimpObject
                     $errors[] = 'Commercial absent';
                 }
 
-                $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('poste') : ''));
+                $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('poste') : ''), 'alphanohtml');
 
                 $contacts_livraisons = array();
                 foreach (BimpTools::getArrayValueFromPath($data, 'contacts_livraisons', array()) as $id_contact_liv) {
@@ -1934,7 +1934,7 @@ class BimpCommDemandeFin extends BimpObject
             }
         }
 
-        $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('poste') : ''));
+        $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('poste') : ''), 'alphanohtml');
 
         $contacts_livraisons = array();
         foreach (BimpTools::getArrayValueFromPath($data, 'contacts_livraisons', $this->getData('contacts_livraisons')) as $id_contact_liv) {
@@ -2856,7 +2856,7 @@ class BimpCommDemandeFin extends BimpObject
     {
         $html = '';
 
-        $signature_type = BimpTools::getPostFieldValue('signature_type', '');
+        $signature_type = BimpTools::getPostFieldValue('signature_type', '', 'aZ09');
 
         if ($signature_type === 'docusign') {
             if ((int) BimpCore::getConf($doc_type . '_signature_allow_docusign_phone_auth', null, 'bimpcommercial')) {
@@ -2879,16 +2879,16 @@ class BimpCommDemandeFin extends BimpObject
     {
         if (!$signature_type) {
             if (BimpTools::isPostFieldSubmit('signature_type')) {
-                $signature_type = BimpTools::getPostFieldValue('signature_type', '');
+                $signature_type = BimpTools::getPostFieldValue('signature_type', '', 'aZ09');
             } else {
                 if (BimpTools::isPostFieldSubmit('init_docusign')) {
-                    if ((int) BimpTools::getPostFieldValue('init_docusign')) {
+                    if ((int) BimpTools::getPostFieldValue('init_docusign', 0, 'int')) {
                         $signature_type = 'docusign';
                     }
                 }
                 if (!$signature_type) {
                     if (BimpTools::isPostFieldSubmit('open_public_access')) {
-                        if ((int) BimpTools::getPostFieldValue('open_public_access')) {
+                        if ((int) BimpTools::getPostFieldValue('open_public_access', 0, 'int')) {
                             $signature_type = 'elec';
                         }
                     }

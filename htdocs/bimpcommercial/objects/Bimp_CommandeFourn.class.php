@@ -852,7 +852,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
     public function getPostReceptionsArray()
     {
-        $receptions = BimpTools::getPostFieldValue('receptions', array());
+        $receptions = BimpTools::getPostFieldValue('receptions', array(), 'array');
 
         $array = array();
         foreach ($receptions as $id_reception) {

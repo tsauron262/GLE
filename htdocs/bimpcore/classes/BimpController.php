@@ -3538,9 +3538,9 @@ class BimpController
         $notifs_for_user = array();
         BimpDebug::$active = false;
 
-        $notifs = BimpTools::getPostFieldValue('notificationActive');
+        $notifs = BimpTools::getPostFieldValue('notificationActive', array(), 'array');
 
-        if (is_array($notifs)) {
+        if (!empty($notifs)) {
             $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
             $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
         }

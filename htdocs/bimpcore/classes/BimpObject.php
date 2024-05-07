@@ -1632,6 +1632,18 @@ class BimpObject extends BimpCache
         return $this->getConf('export_light', 1);
     }
 
+    public function isDataDefined($field, $not_empty = true)
+    {
+        if (isset($this->data[$field]) && !is_null($this->data[$field])) {
+            if ($not_empty && empty($this->data[$field])) {
+                return 0;
+            }
+            return 1;
+        }
+
+        return 0;
+    }
+
     // Getters données: 
 
     public function getData($field, $default = true)
@@ -2970,7 +2982,7 @@ class BimpObject extends BimpCache
                         $new_val = strip_tags($value, $allowed_tags);
 
                         if ($new_val !== $value) {
-                            BimpCore::addlog('STRIP TAGS effectué champ : '.$field, 3, 'secu', $this, array(
+                            BimpCore::addlog('STRIP TAGS effectué champ : ' . $field, 3, 'secu', $this, array(
                                 'Objet' => get_class($this),
                                 'Champ' => $field,
                                 'Type'  => $type . ' (Items : ' . $item_type . ')',
@@ -2988,12 +3000,12 @@ class BimpObject extends BimpCache
                     $new_val = strip_tags($value, $allowed_tags);
 
                     if ($new_val !== $value) {
-                        BimpCore::addlog('STRIP TAGS effectué champ : '.$field, 3, 'secu', $this, array(
-                            'Objet' => get_class($this),
-                            'Champ' => $field,
-                            'Type'  => $type,
-                            'Val'   => htmlentities($value),
-                            'New Val'   => htmlentities($new_val)
+                        BimpCore::addlog('STRIP TAGS effectué champ : ' . $field, 3, 'secu', $this, array(
+                            'Objet'   => get_class($this),
+                            'Champ'   => $field,
+                            'Type'    => $type,
+                            'Val'     => htmlentities($value),
+                            'New Val' => htmlentities($new_val)
                         ));
 //                    $value = $new_val;
                     }

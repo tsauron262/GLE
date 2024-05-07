@@ -1735,7 +1735,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $html = '';
         $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0, 'int');
 
-        $lines = BimpTools::getPostFieldValue('facture_lines_list', array(), 'array');
+        $lines = BimpTools::getPostFieldValue('facture_lines_list', array(), 'alphanohtml');
 
         if (is_string($lines)) {
             $lines = explode(',', $lines);

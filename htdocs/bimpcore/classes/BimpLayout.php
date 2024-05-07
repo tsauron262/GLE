@@ -143,13 +143,18 @@ class BimpLayout
                 $bimp_layout_js_vars .= $var_value;
                 $bimp_layout_js_vars .= ';' . "\n";
             }
-            foreach ($this->local_vars as $var_name => $var_value) {
-                $bimp_layout_js_vars .= "\t" . 'localStorage.setItem("' . $var_name . '",';
-                if(is_int($var_value))
-                    $bimp_layout_js_vars .= $var_value;
-                else
-                    $bimp_layout_js_vars .= '"' . $var_value . '"';
-                $bimp_layout_js_vars .= ');' . "\n";
+            if(count($this->local_vars)){
+                $bimp_layout_js_vars .= "\t $(document).ready(function() {";
+                $bimp_layout_js_vars .= "\t var bimp_storage = new BimpStorage();";
+                foreach ($this->local_vars as $var_name => $var_value) {
+                    $bimp_layout_js_vars .= "\t" . 'bimp_storage.set("' . $var_name . '",';
+                    if(is_int($var_value))
+                        $bimp_layout_js_vars .= $var_value;
+                    else
+                        $bimp_layout_js_vars .= '"' . $var_value . '"';
+                    $bimp_layout_js_vars .= ');' . "\n";
+                }
+                $bimp_layout_js_vars .= "\t });";
             }
 
             $bimp_layout_js_vars .= '</script>' . "\n";

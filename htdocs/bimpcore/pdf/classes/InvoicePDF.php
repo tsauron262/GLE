@@ -300,7 +300,7 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('CustomerCode') . ' : </span>' . $this->langs->transnoentities($soc->code_client) . '<br/>';
         }
 
-        // Num TVA Client: //deja présente dans l'adresse.
+        // Num TVA Client: // deja présente dans l'adresse => Non, pas toujours apparemment... 
         if ($soc->tva_intra) {
             $html .= '<span style="font-weight: bold;">N° TVA client: </span>' . $this->langs->transnoentities($soc->tva_intra) . '<br/>';
         }

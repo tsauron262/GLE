@@ -60,3 +60,4 @@ package-lock.json
 
 doc/install.lock
 /htdocs/bimpcore/views/.sass-cache/
+/htdocs/en/

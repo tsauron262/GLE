@@ -43,10 +43,27 @@ function refreshGraph(graph){
 
 }
 function toogleDataSeries(e){
-    if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-            e.dataSeries.visible = false;
-    } else{
-            e.dataSeries.visible = true;
+    console.log(e);
+    if(e.dataSeries.type == 'doughnut'){
+        if (typeof(e.dataPoint.visible) === "undefined" || e.dataPoint.visible) {
+            e.dataPoint.old_y = e.dataPoint.y;
+            e.dataPoint.old_name = e.dataPoint.name;
+            e.dataPoint.name = "(" + e.dataPoint.old_name + ")";
+            e.dataPoint.y = 0;
+            e.dataPoint.visible = false;
+        }
+        else{
+            e.dataPoint.y = e.dataPoint.old_y;
+            e.dataPoint.name = e.dataPoint.old_name;
+            e.dataPoint.visible = true;
+        }
+    }
+    else{
+        if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                e.dataSeries.visible = false;
+        } else{
+                e.dataSeries.visible = true;
+        }
     }
     e.chart.render();
 }

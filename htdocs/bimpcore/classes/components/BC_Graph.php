@@ -140,10 +140,10 @@ class BC_Graph extends BC_Panel
             if($val != ''){
                 switch($input_name) {
                     case 'date1':
-                        $this->addFieldFilterValue($this->fieldX, array('operator' => '>', 'value' => $val));
+                        $this->addFieldFilterValue($this->fieldX, array('operator' => '>=', 'value' => $val));
                         break;
                     case 'date2':
-                        $this->addFieldFilterValue($this->fieldX, array('operator' => '<', 'value' => $val));
+                        $this->addFieldFilterValue($this->fieldX, array('operator' => '<=', 'value' => $val));
                         break;
                 }
             }
@@ -374,7 +374,7 @@ class BC_Graph extends BC_Panel
                 $filters = $this->params['filters'];
                 if(isset($tabField['filters']) && is_array($tabField['filters'])){
                     foreach($tabField['filters'] as $field_name => $value)
-                    $filters = BimpTools::mergeSqlFilter($filters, $field_name, $value);
+                        $filters = BimpTools::mergeSqlFilter($filters, $field_name, $value);
                 }
                 
                 $oldValue = null;

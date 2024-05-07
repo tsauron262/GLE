@@ -61,7 +61,8 @@
                 'FIN'       => 'OD',
                 'SOFINC'    => 'OD',
                 'CG'        => 'OD',
-                'FIN_YC'    => 'OD'
+                'FIN_YC'    => 'OD',
+                'MANDAD'    => 'RCT'
             ];
             
             $compteByModeReglement = [
@@ -76,7 +77,8 @@
                 'SOFINC'    => '41199100',
                 'CG'        => '41199200',
                 'FIN_YC'    => '51151200',
-                'ALMA'      => '51151500'
+                'ALMA'      => '51151500',
+                'MANDAD'    => '51151200'
             ];
             
             $affichageByModeReglement = [

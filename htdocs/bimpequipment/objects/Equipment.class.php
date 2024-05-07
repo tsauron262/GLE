@@ -1659,26 +1659,6 @@ class Equipment extends BimpObject
         return $identifiers;
     }
 
-    public function actionUpdateToNonSerilisable($data, &$success)
-    {
-        $success = 'Corrigé';
-        $warnings = array();
-
-        define('DONT_CHECK_SERIAL', true);
-        $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
-        return array('warnings' => $warnings, 'errors' => $errors);
-        ;
-    }
-
-    public function actionUpdateInfosGsx($data, &$success)
-    {
-        $success = 'Maj';
-        $warnings = array();
-
-        $errors = $this->majWithGsx($warnings);
-        return array('warnings' => $warnings, 'errors' => $errors);
-    }
-
     // Renders: 
 
     public function renderHeader($content_only = false, $params = array())
@@ -1703,6 +1683,68 @@ class Equipment extends BimpObject
         return parent::renderHeader($content_only, $params);
     }
 
+    public function renderHeaderExtraLeft()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            if ($this->canSetAction('merge')) {
+                $serial = $this->getData('serial');
+                $id_product = (int) $this->getData('id_product');
+
+                $filters = array(
+                    'id'     => array(
+                        'operator' => '!=',
+                        'value'    => $this->id
+                    ),
+                    'serial' => $serial
+                );
+
+                if ($id_product) {
+                    $filters['id_product'] = array(
+                        'or_field' => array(
+                            'IS_NULL',
+                            0,
+                            $id_product
+                        )
+                    );
+                }
+
+                $eqs = BimpCache::getBimpObjectObjects('bimpequipment', 'Equipment', $filters);
+
+                if (count($eqs)) {
+                    $msg = '<div>';
+
+                    if (count($eqs) > 1) {
+                        $msg .= count($eqs) . ' autres équipements partagent le même n° de série : <br/>';
+                    } else {
+                        $msg .= 'Un autre équipement partage le même n° de série : <br/>';
+                    }
+
+                    foreach ($eqs as $eq) {
+                        $msg .= ' - ' . $eq->getLink() . ' - (produit : ' . $this->displayProduct() . ')';
+                    }
+
+                    $msg .= '<div class="buttonsContainer" style="text-align: right">';
+                    $onclick = $this->getJsActionOnclick('merge', array(), array(
+                        'form_name' => 'merge'
+                    ));
+
+                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_object-group', 'iconLeft') . 'Fusionner les équipements';
+                    $msg .= '</span>';
+
+                    $msg .= '</div>';
+                    $msg .= '</div>';
+
+//                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                }
+            }
+        }
+
+        return $html;
+    }
+
     public function renderReservationsList()
     {
         $html = '';
@@ -1716,6 +1758,48 @@ class Equipment extends BimpObject
             $list->addFieldFilterValue('id_equipment', $this->id);
             $html = $list->renderHtml();
         }
+        return $html;
+    }
+
+    public function renderMergeFormInput()
+    {
+        $html = '';
+
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $serial = $this->getData('serial');
+            $id_product = (int) $this->getData('id_product');
+
+            $filters = array(
+                'id'     => array(
+                    'operator' => '!=',
+                    'value'    => $this->id
+                ),
+                'serial' => $serial
+            );
+
+            if ($id_product) {
+                $filters['id_product'] = array(
+                    'or_field' => array(
+                        'IS_NULL',
+                        0,
+                        $id_product
+                    )
+                );
+            }
+
+            $eqs = BimpCache::getBimpObjectObjects('bimpequipment', 'Equipment', $filters);
+
+            if (count($eqs)) {
+                
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
         return $html;
     }
 
@@ -1808,6 +1892,26 @@ class Equipment extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    public function actionUpdateToNonSerilisable($data, &$success)
+    {
+        $success = 'Corrigé';
+        $warnings = array();
+
+        define('DONT_CHECK_SERIAL', true);
+        $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
+        return array('warnings' => $warnings, 'errors' => $errors);
+        ;
+    }
+
+    public function actionUpdateInfosGsx($data, &$success)
+    {
+        $success = 'Maj';
+        $warnings = array();
+
+        $errors = $this->majWithGsx($warnings);
+        return array('warnings' => $warnings, 'errors' => $errors);
     }
 
     // Overrides

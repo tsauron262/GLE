@@ -529,6 +529,15 @@ forms:
             - field: date_warranty_end
             - object: places
             
+    merge: 
+        rows: 
+            - custom: 1
+              label: Equipements à fusionner
+              input_name: eqs_to_merge
+              type: custom
+              content: 
+                  callback: renderMergeFormInput
+            
 filters: 
     in_package: 
         label: inclus dans un package

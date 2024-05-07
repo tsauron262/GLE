@@ -331,6 +331,12 @@ fields:
         type: id_object
         object: package
         default_value: 0
+        
+    merged_ids: 
+        label: IDs des équipements fusionnés
+        type: items_list
+        item_data_type: id
+        use_braces: 1
 
 fields_tables: 
     default: 

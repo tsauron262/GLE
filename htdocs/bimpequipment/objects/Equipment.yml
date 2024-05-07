@@ -199,6 +199,9 @@ fields:
         label: Réf. immobilisation
         default_value: ''
         
+    ref_client:
+        label : N° interne client
+        
 #   A suppr.
     available: 
         label: Disponible à la vente
@@ -341,6 +344,8 @@ fields_tables:
             - field: meid
             - field: status_gsx
             - field: ref_immo
+            - field: ref_client
+              edit: 1
             - field: date_immo
             - label: Disponibilité
               value: 

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_be_equipment` ADD `merged_ids` TEXT NOT NULL DEFAULT '';

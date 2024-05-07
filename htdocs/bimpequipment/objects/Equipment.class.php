@@ -1737,7 +1737,7 @@ class Equipment extends BimpObject
                     $msg .= '</div>';
                     $msg .= '</div>';
 
-//                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
             }
         }
@@ -1772,10 +1772,6 @@ class Equipment extends BimpObject
             $id_product = (int) $this->getData('id_product');
 
             $filters = array(
-                'id'     => array(
-                    'operator' => '!=',
-                    'value'    => $this->id
-                ),
                 'serial' => $serial
             );
 
@@ -1792,7 +1788,20 @@ class Equipment extends BimpObject
             $eqs = BimpCache::getBimpObjectObjects('bimpequipment', 'Equipment', $filters);
 
             if (count($eqs)) {
-                
+                $items = array();
+                $values = array();
+
+                foreach ($eqs as $eq) {
+                    $items[$eq->id] = '#' . $eq->id . ' - (Produit : ' . $eq->displayProduct('nom_url') . ')';
+                    $values[] = $eq->id;
+                }
+                $html .= BimpInput::renderInput('check_list', 'eqs_to_merge', $values, array(
+                            'items' => $items
+                ));
+
+                $msg = 'En cas de conflits dans les données, ce sont celles de l\'équipement créé en premier qui seront conservées.';
+                $msg .= '<br/>L\'emplacement actuel sera déterminé par l\'emplacement le plus récent';
+                $html .= BimpRender::renderAlerts($msg, 'info');
             }
         }
 
@@ -1886,11 +1895,95 @@ class Equipment extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = '';
+        $success = 'Equipements fusionnés avec succès';
+        $sc = '';
+
+        $eqs_ids = BimpTools::getArrayValueFromPath($data, 'eqs_to_merge', array());
+
+        if (empty($eqs_ids)) {
+            $errors[] = 'Aucun équipement à fusionner sélectionné';
+        } elseif (count($eqs_ids) <= 1) {
+            $errors[] = 'Veuillez sélectionner au moins deux équipements';
+        } else {
+            $eqs = array();
+            foreach ($eqs_ids as $id) {
+                $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id);
+                if (BimpObject::objectLoaded($eq)) {
+                    $eqs[] = $eq;
+                } else {
+                    $errors[] = 'L\'équipement #' . $id . ' n\'existe plus';
+                }
+            }
+
+            if (!count($errors)) {
+                $eq_to_keep = null;
+                foreach ($eqs as $eq) {
+                    if (is_null($eq_to_keep) || $eq_to_keep->getData('date_create') > $eq->getData('date_create')) {
+                        $eq_to_keep = $eq;
+                    }
+                }
+
+                // Fusion des données : 
+                $fields = $this->getFieldsList();
+                $merged_ids = $eq_to_keep->getData('merged_ids');
+                foreach ($eqs as $eq) {
+                    if ($eq->id == $eq_to_keep->id) {
+                        continue;
+                    }
+
+                    if (!in_array($eq->id, $merged_ids)) {
+                        $merged_ids[] = $eq->id;
+                    }
+
+                    foreach ($fields as $field) {
+                        if (!$eq_to_keep->isDataDefined($field) && $eq->isDataDefined($field)) {
+                            $eq_to_keep->set($field, $eq->getData($field));
+                        }
+                    }
+                }
+
+                $eq_to_keep->set('merged_ids', $merged_ids);
+
+                if ((int) $eq_to_keep->getData('id_product')) {
+                    $eq_to_keep->set('product_label', '');
+                }
+
+                $errors = $eq_to_keep->update($warnings, true);
+
+                if (!count($errors)) {
+                    // Changement des IDs dans les objets liés et suppr des équipements: 
+                    foreach ($eqs as $eq) {
+                        if ($eq->id == $eq_to_keep->id) {
+                            continue;
+                        }
+
+                        BimpObject::changeBimpObjectId($eq->id, $eq_to_keep->id, 'bimpequipment', 'Equipment');
+                        $w = array();
+                        $eq->delete($w, true);
+                    }
+
+                    // Réintialisation des positions des emplacement : 
+                    $place = BimpCache::findBimpObjectInstance('bimpequipment', 'BE_Place', array(
+                                'id_equipment' => $eq_to_keep->id
+                                    ), true);
+                    if (BimpObject::objectLoaded($place)) {
+                        $place->setPosition(1);
+                    }
+
+                    if ($eq_to_keep->id != $this->id) {
+                        $url = $eq_to_keep->getUrl();
+                        if ($url) {
+                            $sc = 'setTimeout(function() {window.location(\'' . $url . '\')}, 1000);';
+                        }
+                    }
+                }
+            }
+        }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
         );
     }
 

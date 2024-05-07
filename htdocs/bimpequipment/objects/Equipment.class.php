@@ -87,7 +87,7 @@ class Equipment extends BimpObject
 
         return 0;
     }
-    
+
     public function isCreatable($force_create = false, &$errors = array())
     {
         return $this->isEditable($force_create, $errors);
@@ -302,7 +302,7 @@ class Equipment extends BimpObject
 
         return (count($errors) ? 0 : 1);
     }
-    
+
     public function isIphone()
     {
         $product_label = $this->displayProduct('nom', true);
@@ -1560,14 +1560,14 @@ class Equipment extends BimpObject
 
             if ($gsx->logged) {
                 $data = $gsx->productDetailsBySerial($serial);
-                if(!is_array($data) || !count($data)){
+                if (!is_array($data) || !count($data)) {
                     $nonApple = false;
-                    if(isset($gsx->errors['curl']))
-                        foreach($gsx->errors['curl'] as $error)
-                            if($error['code'] == 'DEVICE_INFORMATION_INVALID')//req ok mais serial inconnue
+                    if (isset($gsx->errors['curl']))
+                        foreach ($gsx->errors['curl'] as $error)
+                            if ($error['code'] == 'DEVICE_INFORMATION_INVALID')//req ok mais serial inconnue
                                 $nonApple = true;
-                    if(!$nonApple)
-                    return 0;
+                    if (!$nonApple)
+                        return 0;
                 }
                 if (!is_array($data)) {
                     $identifiers['status_gsx'] = 2;
@@ -1798,6 +1798,18 @@ class Equipment extends BimpObject
         );
     }
 
+    public function actionMerge($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides
 
     public function reset()
@@ -1813,20 +1825,26 @@ class Equipment extends BimpObject
         $serial = (string) $this->getData('serial');
         $id_product = (int) $this->getData('id_product');
 
-        $prod = $this->getChildObject('product');
-        if (is_object($prod) && $prod->barcode == $serial)
-            return array('Le numéro de série ne peut être identique au code-bar du produit ' . $value);
+        if ($id_product) {
+            $prod = $this->getChildObject('product');
 
-        if ($serial && $id_product) {
+            if (BimpObject::objectLoaded($prod) && $prod->barcode == $serial) {
+                return array('Le numéro de série ne peut par être identique au code-bar du produit (' . $serial . ')');
+            }
+        }
+
+
+        if ($serial) {
             if (!defined('DONT_CHECK_SERIAL')) {
-                $where = '`serial` = \'' . $serial . '\' AND `id_product` = ' . $id_product;
+                $where = '`serial` = \'' . $serial . ($id_product ? '\' AND `id_product` = ' . $id_product : '');
                 if ($this->isLoaded()) {
                     $where .= ' AND `id` != ' . (int) $this->id;
                 }
 
-                $value = $this->db->getValue($this->getTable(), 'id', $where);
-                if (!is_null($value) && (int) $value) {
-                    return array('Ce numéro de série pour ce même produit est déjà associé à l\'équipement ' . $value);
+                $id = (int) $this->db->getValue($this->getTable(), 'id', $where);
+                if ($id) {
+                    $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id);
+                    return array('Un équipement existe déjà pour ce numéro de série : ' . $eq->getLink());
                 }
             }
         }

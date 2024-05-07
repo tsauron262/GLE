@@ -1722,7 +1722,7 @@ class Equipment extends BimpObject
                     }
 
                     foreach ($eqs as $eq) {
-                        $msg .= ' - ' . $eq->getLink() . ' - (produit : ' . $this->displayProduct() . ')';
+                        $msg .= ' - ' . $eq->getLink() . ' - (produit : ' . $this->displayProduct() . ')<br/>';
                     }
 
                     $msg .= '<div class="buttonsContainer" style="text-align: right">';

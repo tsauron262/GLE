@@ -156,6 +156,21 @@ forms:
                 value: 0
             mode_reglement_supplier: unset
             cond_reglement_supplier: unset
+    light_particulier:
+        extends: light
+        rows:
+            is_company:
+                content: 
+                    callback: 
+                        method: renderIsCompanyInput
+                        params:
+                            - 0
+            email:
+                required: 1
+            phone: 
+                required: 1
+            address:
+                required: 1
                   
     default: 
         rows: 

@@ -220,7 +220,7 @@ class Bimp_Societe extends BimpDolObject
 
     // Getters booléens: 
 
-    public function isCompany()
+    public function isCompany($default = 1)
     {
         if (BimpObject::objectLoaded($this->dol_object)) {
             if (in_array($this->dol_object->typent_code, array('TE_PRIVATE', 'TE_UNKNOWN'))) {
@@ -238,7 +238,7 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        return 1;
+        return $default;
     }
 
     public function isClient()
@@ -2240,11 +2240,11 @@ class Bimp_Societe extends BimpDolObject
         return $html;
     }
 
-    public function renderIsCompanyInput()
+    public function renderIsCompanyInput($default = 1)
     {
         $html = '';
 
-        $isCompany = (int) $this->isCompany();
+        $isCompany = (int) $this->isCompany($default);
 
         if (!$this->isLoaded() || $this->canSwitchIsCompany()) {
             $html .= BimpInput::renderInput('toggle', 'is_company', $isCompany);

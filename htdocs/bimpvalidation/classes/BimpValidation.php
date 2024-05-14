@@ -201,10 +201,10 @@ class BimpValidation
                         $demande_errors[] = $msg;
                         $debug .= $msg . '<br/>';
                     }
-
+                    
                     if (count($demande_errors)) {
                         $debug .= 'Erreurs : <pre>' . print_r($demande_errors, 1) . '</pre>';
-                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la création d\'une demande de validation de type "' . $demande->displayDataDefault('type') . '"');
+                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la création d\'une demande de validation de type "' . $type . '"');
                     } else {
                         $demandes[] = $demande;
                         $debug .= 'OK (Demande #' . $demande->id . ').<br/>';

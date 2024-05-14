@@ -1995,7 +1995,6 @@ class Equipment extends BimpObject
         define('DONT_CHECK_SERIAL', true);
         $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
         return array('warnings' => $warnings, 'errors' => $errors);
-        ;
     }
 
     public function actionUpdateInfosGsx($data, &$success)
@@ -2033,7 +2032,7 @@ class Equipment extends BimpObject
 
         if ($serial) {
             if (!defined('DONT_CHECK_SERIAL')) {
-                $where = '`serial` = \'' . $serial . ($id_product ? '\' AND `id_product` = ' . $id_product : '');
+                $where = '`serial` = \'' . $serial . '\'' . ($id_product ? ' AND `id_product` = ' . $id_product : '');
                 if ($this->isLoaded()) {
                     $where .= ' AND `id` != ' . (int) $this->id;
                 }

@@ -4304,7 +4304,7 @@ class Bimp_Product extends BimpObject
         );
     }
 
-    public function validateValue($field, $value)
+    public function validateValue($field, $value, $forbidden_chars = array())
     {
         if ($field == 'cost_price_percent') {
             if ($value > 0 && $value != $this->getData('cost_price_percent') || $this->getData('cost_price_percent') > 0) {
@@ -4322,7 +4322,7 @@ class Bimp_Product extends BimpObject
             }
         }
 
-        return parent::validateValue($field, $value);
+        return parent::validateValue($field, $value, $forbidden_chars);
     }
 
     public function actionDuplicate($data, &$success)

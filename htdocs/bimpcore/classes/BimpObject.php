@@ -4714,6 +4714,12 @@ class BimpObject extends BimpCache
 
         $fields = $this->getConf('fields', array(), true, 'array');
 
+        $forbidden_chars = array();
+
+        if ((int) BimpCore::getConf('auto_strip_tags', null, 'bimpcore')) {
+            $forbidden_chars = array('<', '>');
+        }
+
         foreach ($fields as $field => $params) {
             if (!$this->isFieldActivated($field)) {
                 continue;
@@ -4744,7 +4750,7 @@ class BimpObject extends BimpCache
                 $value = $this->getCurrentConf('default_value', null);
             }
 
-            $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
+            $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value, $forbidden_chars));
         }
 
         $associations = $this->getConf('associations', array(), false, 'array');
@@ -4791,7 +4797,7 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function validateValue($field, $value)
+    public function validateValue($field, $value, $forbidden_chars = array())
     {
         $errors = array();
 
@@ -4901,6 +4907,19 @@ class BimpObject extends BimpCache
 
                         default:
                             $invalid_msg = 'La valeur doit être de type "' . $type . '"';
+                    }
+                }
+
+                if (!empty($forbidden_chars) && is_string($value) && !in_array($type, array('html', 'json', 'object_filters')) && !(int) $this->getConf('fields/' . $field . '/no_strip_tags', 0)) {
+                    $fc_msg = '';
+                    foreach ($forbidden_chars as $char) {
+                        if (strpos($value, $char) !== false) {
+                            $fc_msg .= $char;
+                        }
+                    }
+                    if ($fc_msg) {
+                        $invalid_msg = 'Caractère(s) interdit(s) : ' . $fc_msg;
+                        $validate = false;
                     }
                 }
 

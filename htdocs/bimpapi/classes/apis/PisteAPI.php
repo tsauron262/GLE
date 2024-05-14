@@ -271,7 +271,12 @@ class PisteAPI extends BimpAPI
     public function testRequest(&$errors = array(), &$warnings = array())
     {
         global $conf;
-        return $this->rechercheClientStructures($conf->global->MAIN_INFO_SIRET);
+        $data = $this->rechercheClientStructures($conf->global->MAIN_INFO_SIRET);
+        if(isset($data['listeStructures'][0]['idStructureCPP']))
+            $warnings[] = 'Id Fourn : '.$data['listeStructures'][0]['idStructureCPP'];
+        else
+            $errors[] = 'Hum hum';
+        return $data;
 
 //        $data = array('fields' => array(
 //                "typeObjet"  => "FACTURE",

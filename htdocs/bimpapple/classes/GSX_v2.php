@@ -587,6 +587,7 @@ class GSX_v2 extends GSX_Const
 
     public function productDetailsBySerial($serial, $requestType = 'repair')
     {
+        BimpCore::setConf('productDetailsBySerial', BimpCore::getConf('productDetailsBySerial', 0)+1);
         return $this->exec('productDetails', array(
                     'requestType' => 'REPAIR',
                     'device'      => array(

@@ -444,7 +444,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                     $equipment->fetch($r['id']);
                     $errors = BimpTools::merge_array($errors, $equipment->majWithGsx());
 
-$this->output .= $equipment->getData('serial').'<br/>';
+$this->output .= $$r['serial'].'<br/>';
                     if (count($errors)) {
 //                        print_r($errors);
                         $this->output .= 'Erreurs: <pre>' . print_r($errors, 1) . '</pre>';

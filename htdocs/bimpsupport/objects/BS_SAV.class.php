@@ -282,7 +282,7 @@ class BS_SAV extends BimpObject
             $montant += $propal->getData('total_ht');
             $lines = $this->getPropalLines();
             foreach ($lines as $lineS) {
-                if (stripos($this->getData('linked_object_name'), 'sav_garantie') !== false) {
+                if (stripos($lineS->getData('linked_object_name'), 'sav_garantie') !== false) {
                     $montant -= $lineS->getTotalHT(true);
                 }
                 if ($lineS->getData('linked_object_name') == 'discount') {

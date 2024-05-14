@@ -1520,7 +1520,7 @@ class Equipment extends BimpObject
 
     public function majWithGsx(&$warnings = array(), $withUpdate = true)
     {
-        return array('Désactivé');
+//        return array('Désactivé');
         $identifiers = static::gsxFetchIdentifiers($this->getData('serial'));
         if ($identifiers == 0)
             return array('Probléme GSX');

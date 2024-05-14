@@ -442,14 +442,16 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                         continue;
                     }
                     $equipment->fetch($r['id']);
-                    $errors = BimpTools::merge_array($errors, $equipment->majWithGsx());
+                    $errorsEq = $equipment->majWithGsx();
 
-$this->output .= $r['serial'].'<br/>';
-                    if (count($errors)) {
+                    $this->output .= $r['serial'].'<br/>';
+                    if (count($errorsEq)) {
 //                        print_r($errors);
-                        $this->output .= 'Erreurs: <pre>' . print_r($errors, 1) . '</pre>';
-                        break;
+                        $this->output .= 'Erreurs: <pre>' . print_r($errorsEq, 1) . '</pre>';
+                        if(isset($errorsEq[0]) && stripos($errorsEq[0], 'Un équipement existe') === false)
+                            break;
                     }
+                    $errors = BimpTools::merge_array($errors, $errorsEq);
 
                     $this->nbImei++;
                 }

@@ -426,7 +426,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
             if ($nb > 5) {//sinon c'est un test de reconnexion
 //                $filtre['status_gsx'] = array(0,3);
                 if (!$modeLabel)
-                    $filtre['custom'] = array('custom' => '(status_gsx = 0 || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))))');
+                    $filtre['custom'] = array('custom' => '(status_gsx = 0)');// || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))))');
                 $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
             } else {
                 $rows = $equipment->getList($filtre, $nb, 1, 'rand', 'asc', 'array', array('id', 'serial'));
@@ -444,7 +444,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                     $equipment->fetch($r['id']);
                     $errors = BimpTools::merge_array($errors, $equipment->majWithGsx());
 
-$this->output .= $$r['serial'].'<br/>';
+$this->output .= $r['serial'].'<br/>';
                     if (count($errors)) {
 //                        print_r($errors);
                         $this->output .= 'Erreurs: <pre>' . print_r($errors, 1) . '</pre>';

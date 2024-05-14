@@ -1691,6 +1691,10 @@ class Equipment extends BimpObject
         if ($this->isLoaded()) {
             if ($this->canSetAction('merge')) {
                 $serial = $this->getData('serial');
+                if(stripos($serial, 's') === 0)
+                        $serial2 = substr($serial, 1);
+                else
+                    $serial2 = 'S'.$serial;
                 $id_product = (int) $this->getData('id_product');
 
                 $filters = array(
@@ -1698,7 +1702,7 @@ class Equipment extends BimpObject
                         'operator' => '!=',
                         'value'    => $this->id
                     ),
-                    'serial' => $serial
+                    'serial' => array($serial, $serial2)
                 );
 
                 if ($id_product) {
@@ -1772,8 +1776,12 @@ class Equipment extends BimpObject
             $serial = $this->getData('serial');
             $id_product = (int) $this->getData('id_product');
 
+            if(stripos($serial, 's') === 0)
+                    $serial2 = substr($serial, 1);
+            else
+                $serial2 = 'S'.$serial;
             $filters = array(
-                'serial' => $serial
+                'serial' => array($serial, $serial2)
             );
 
             if ($id_product) {

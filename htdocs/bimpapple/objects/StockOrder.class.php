@@ -219,7 +219,7 @@ class StockOrder extends BimpObject
                             'partNumber'  => 'Ref. composant',
                             'description' => 'Description',
                             'eeeCode'     => 'Code EEE',
-                            'productName' => 'Nom du produit correspondant'
+//                            'productName' => 'Nom du produit correspondant'
                         )
             ));
             $html .= BimpInput::renderInputContainer('search_type', 'partNumber', $content);
@@ -228,6 +228,20 @@ class StockOrder extends BimpObject
             $content .= BimpInput::renderInput('text', 'search_terms', '');
 
             $html .= BimpInput::renderInputContainer('search_terms', '', $content);
+            
+            
+            $content = '<label>Par type de produit: </label>';
+            
+            $shipTo = $this->getShipTo($errors);
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
+            $gsx = new GSX_v2($shipTo);
+            $options = $gsx->getProductCacheOption();
+            
+//            echo '<pre>';print_r($options);die;
+            $content .= BimpInput::renderInput('select', 'search_parent_type', '', array('options'=>$options));
+
+            $html .= '<br/>'.BimpInput::renderInputContainer('search_parent_type', '', $content);
 
             $onclick = 'StockOrder.searchParts($(this), ' . $this->id . ')';
 

@@ -66,6 +66,7 @@ class GSX_Const extends GSX_Const_entity
             'consignmentOrderShipment'       => 'gsx/api/consignment/order/shipment',
             // Commandes stocks internes
             'stockingOrderPartsSummary'      => 'gsx/api/order/stocking/parts/summary',
+            'productHierarchy'               => 'gsx/api/content/product/hierarchy',
             'stockingOrderCreate'            => 'gsx/api/order/stocking/create',
             'stockingOrderSummary'           => 'gsx/api/order/stocking/summary',
             'stockingOrderDetails'           => 'gsx/api/order/stocking/details',
@@ -80,7 +81,7 @@ class GSX_Const extends GSX_Const_entity
         )
     );
     public static $getRequests = array(
-        'repairDetails', 'diagnosticSuites', 'fetchReservation', 'fetchAvailableSlots'
+        'repairDetails', 'diagnosticSuites', 'fetchReservation', 'fetchAvailableSlots', 'productHierarchy'
     );
     public static $fileContentRequests = array(
         'getFile'

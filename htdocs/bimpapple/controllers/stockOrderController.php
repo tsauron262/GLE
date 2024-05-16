@@ -26,15 +26,19 @@ class stockOrderController extends gsxController
         }
 
         $search_terms = BimpTools::getArrayValueFromPath($params, 'search_terms', '');
-        if (!$search_terms) {
+        $search_parent_type = BimpTools::getArrayValueFromPath($params, 'search_parent_type', '');
+        if (!$search_terms && !$search_parent_type) {
             $errors[] = 'Termes de recherche absents';
         }
 
         if (!count($errors)) {
             if ($this->gsx_v2->logged) {
-                $result = $this->gsx_v2->stockingOrderPartsSummary(array(
-                    $search_type => $search_terms
-                ));
+                $filter = array();
+                if($search_terms)
+                    $filter[$search_type] = $search_terms;
+                if($search_parent_type)
+                    $filter['productName'] = $search_parent_type;
+                $result = $this->gsx_v2->stockingOrderPartsSummary($filter);
 
                 if (is_array($result)) {
                     if (empty($result)) {

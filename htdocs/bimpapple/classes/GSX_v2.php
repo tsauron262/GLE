@@ -1147,7 +1147,7 @@ class GSX_v2 extends GSX_Const
     public function stockingOrderPartsSummary($params)
     {
         $result = $this->exec('stockingOrderPartsSummary', $params);
-
+        
         if (!empty($this->errors['curl'])) {
             foreach ($this->errors['curl'] as $idx => $error) {
                 if (isset($error['code']) && (string) $error['code'] === 'NO_DATA_FOUND') {
@@ -1158,6 +1158,38 @@ class GSX_v2 extends GSX_Const
         }
 
         return $result;
+    }
+    
+    public function getProductCache(){
+        $key = 'productAppleHierarchy';
+        if(!BimpCache::cacheServerExists($key)){
+            $result = $this->exec('productHierarchy', array());
+            BimpCache::setCacheServeur($key, $result);
+        }
+        return BimpCache::getCacheServeur($key);
+    }
+    
+    public function getProductCacheOption(){
+        $option = array();
+        $prods = $this->getProductCache();
+        $result = $this->productArrayToOption($prods, array(''=>''));
+//        echo '<pre>'; print_r($result);//die;
+        return $result;
+    }
+    
+    public function productArrayToOption($prods, $options = array()){
+        foreach($prods['children'] as $child){
+            if(isset($child['children']) && count($child['children'])){
+                $options[] = array('group' => array(
+                    'label'   => $child['productName'],
+                    'options' => $this->productArrayToOption($child)
+                ));
+            }
+            else{
+                $options[] = array('value' => $child['productName'], 'label'=> $child['productName']);
+            }
+        }
+        return $options;
     }
 
     public function stockingOrderCreate($parts, $code, $action = 'SAVE')

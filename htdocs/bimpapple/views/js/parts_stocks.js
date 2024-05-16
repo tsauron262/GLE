@@ -254,8 +254,11 @@ function StockOrder() {
                 }
 
                 var search_terms = $form.find('input[name="search_terms"]').val();
+                
+                
+                var search_parent_type = $form.find('select[name="search_parent_type"]').val();
 
-                if (!search_terms) {
+                if (!search_terms && !search_parent_type) {
                     bimp_msg('Veillez saisir votre recherche', 'danger', null, true);
                     return;
                 }
@@ -267,7 +270,8 @@ function StockOrder() {
                 GsxAjax('gsx_stockOrderSearchParts', {
                     id_stock_order: id_stock_order,
                     search_type: search_type,
-                    search_terms: search_terms
+                    search_terms: search_terms,
+                    search_parent_type: search_parent_type
                 }, $form.find('.quickAddForm_ajax_result'), {
                     url: dol_url_root + '/bimpapple/index.php?fc=stockOrder',
                     $button: $button,

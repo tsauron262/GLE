@@ -149,6 +149,8 @@ filters_panels:
             
 lists: 
     default: 
+        order_by: qty_to_receive
+        order_way: DESC
         title: Stocks internes
         cols: 
             serials: unset

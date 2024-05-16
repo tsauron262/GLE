@@ -1172,17 +1172,20 @@ class GSX_v2 extends GSX_Const
     public function getProductCacheOption(){
         $option = array();
         $prods = $this->getProductCache();
-        $result = $this->productArrayToOption($prods, array(''=>''));
+        if(isset($prods['children']) && is_array($prods['children']))
+            $result = $this->productArrayToOption($prods['children'], array(''=>''));
+        else
+            $result = array();
 //        echo '<pre>'; print_r($result);//die;
         return $result;
     }
     
     public function productArrayToOption($prods, $options = array()){
-        foreach($prods['children'] as $child){
+        foreach($prods as $child){
             if(isset($child['children']) && count($child['children'])){
                 $options[] = array('group' => array(
                     'label'   => $child['productName'],
-                    'options' => $this->productArrayToOption($child)
+                    'options' => $this->productArrayToOption($child['children'])
                 ));
             }
             else{

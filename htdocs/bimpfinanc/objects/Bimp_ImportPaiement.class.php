@@ -211,8 +211,8 @@ class Bimp_ImportPaiement extends BimpObject
         }
         if (count($dataMsg)){
             $mailRep = [];
-            if(BimpCore::getConf('email_compta') != '')
-                $mailRep[BimpCore::getConf('email_compta')] = BimpCore::getConf('email_compta');
+//            if(BimpCore::getConf('email_compta') != '')
+//                $mailRep[BimpCore::getConf('email_compta')] = BimpCore::getConf('email_compta');
             if(BimpCore::getConf('emails_notify_solvabilite_client_change') != '')
                 $mailRep[BimpCore::getConf('emails_notify_solvabilite_client_change')] = BimpCore::getConf('emails_notify_solvabilite_client_change');
             $msg = 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés automatiquement par le système :<br/><br/>' . implode('<br/>', $dataMsg);

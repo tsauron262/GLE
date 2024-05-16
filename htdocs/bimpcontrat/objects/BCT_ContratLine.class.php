@@ -1840,7 +1840,7 @@ class BCT_ContratLine extends BimpObject
         $fac_periodicity = (int) $this->getData('fac_periodicity');
 
         if (!$fac_periodicity) {
-            $errors[] = 'Périodicité de facturation non définie';
+//            $errors[] = 'Périodicité de facturation non définie';
         }
 
         if (!count($errors)) {

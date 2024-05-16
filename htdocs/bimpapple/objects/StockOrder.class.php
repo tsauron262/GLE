@@ -605,6 +605,11 @@ class StockOrder extends BimpObject
         if (empty($parts)) {
             $errors[] = 'Aucun composant ajouté à cette commande';
         }
+        
+        if ((int) $this->getData('status')) {
+            $errors[] = 'Ce renvoi n\'est plus au statut brouillon';
+            return 0;
+        }
 
         if (!count($errors)) {
             $order_parts = array();

@@ -5,12 +5,12 @@ class StockOrder extends BimpObject
 
     const STATUT_BROUILLON = 0;
     const STATUT_ORDERED = 1;
-    const STATUT_RECEIVED = 2;
+//    const STATUT_RECEIVED = 2;
 
     public static $status_list = array(
         self::STATUT_BROUILLON => array('label' => 'Brouillon', 'icon' => 'far_file-alt', 'classes' => array('warning')),
-        self::STATUT_ORDERED   => array('label' => 'En attente de réception', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
-        self::STATUT_RECEIVED  => array('label' => 'Réceptionnée', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::STATUT_ORDERED   => array('label' => 'Commandé', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+//        self::STATUT_RECEIVED  => array('label' => 'Réceptionnée', 'icon' => 'fas_check', 'classes' => array('success')),
     );
 
     // Droits Users: 

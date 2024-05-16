@@ -2765,7 +2765,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             if ((int) $internal_stock->getData('do_not_order') && BimpTools::getPostFieldValue('repairType', '', 'alphanohtml') === 'CIN' && $internal_stock->getData('qty') > 0) {
                                 $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                                 $msg .= 'Attention : ce composant ne doit plus être commandé, veuillez de préférence utiliser un stock consigné ou créer une réparation d\'un autre type que "Carry In"';
-                                $input .= BimpRender::renderAlerts($msg, 'warning');
+                                $input .= BimpRender::renderAlerts($msg);
                             }
 
                             if ((int) $internal_stock->getData('serialized')) {
@@ -2789,7 +2789,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 }
                             } elseif ((int) $internal_stock->getData('qty') > 0) {
                                 $has_internal_stock = true;
-                                $input = 'Qté disponible: <span class="success">' . $internal_stock->getData('qty') . '</span><br/>';
+                                $input .= 'Qté disponible: <span class="success">' . $internal_stock->getData('qty') . '</span><br/>';
 
                                 if ($consigned_stock && BimpObject::objectLoaded($consigned_stock) && $consigned_stock->getData('qty') > 0) {
                                     $input .= BimpInput::renderInput('toggle', 'from_internal_stock_' . $part->id, 0, array(

@@ -440,6 +440,12 @@ class Bimp_ImportPaiementLine extends BimpObject
         }
         return implode('<br/>', $return);
     }
+    
+    function getName($withGeneric = true) {
+        if($this->isLoaded())
+            return trim($this->getData('name'));
+        return 'Ligne d\'import';
+    }
 
     function getFactClient($max = 10)
     {

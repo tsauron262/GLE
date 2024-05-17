@@ -21,6 +21,7 @@ class InternalStock extends PartStock
                 return 0;
 
             case 'correct':
+                return ($user->admin || $user->rights->bimpapple->part_stock->admin);
             case 'receive':
                 return 1;
         }

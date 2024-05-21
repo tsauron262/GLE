@@ -634,7 +634,7 @@ class BS_SAV extends BimpObject
                 $facture = $this->getChildObject('facture_acompte');
                 if (BimpObject::objectLoaded($facture)) {
                     $ref = $facture->getData('ref');
-                    if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
+                    if (file_exists($facture->getDirOutput() . '/' . $ref . '.pdf')) {
                         $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
                         $js .= 'window.open("' . $url . '");';
                     }
@@ -812,7 +812,7 @@ class BS_SAV extends BimpObject
                 }
             } else {
                 $ref = 'PC-' . $this->getData('ref');
-                if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
+                if (file_exists($this->getFilesDir() . '/' . $ref . '.pdf')) {
                     $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
                     $buttons[] = array(
                         'label'   => 'Bon de prise en charge',
@@ -4196,7 +4196,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!is_null($propal)) {
             if ($propal->isLoaded()) {
                 $ref_propal = $propal->getSavedData("ref");
-                $fileProp = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/PC-" . $ref_propal . ".pdf";
+                $fileProp = $this->getFilesDir() . "/PC-" . $ref_propal . ".pdf";
                 if (is_file($fileProp)) {
                     $files[] = array($fileProp, 'application/pdf', 'PC-' . $ref_propal . '.pdf');
                 }
@@ -4295,7 +4295,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 //                    }
 //                }
                 if (!is_null($facture)) {
-                    $fileFact = DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf";
+                    $dir = $facture->getDirOutput();
+                    $fileFact = $dir . "/" . $facture->ref . ".pdf";
                     if (is_file($fileFact)) {
                         $files[] = array($fileFact, 'application/pdf', $facture->ref . '.pdf');
                     } else {
@@ -6352,7 +6353,7 @@ ORDER BY a.val_max DESC");
                                                 $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
 
                                                 $ref = $bimpFacture->getData('ref');
-                                                if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
+                                                if (file_exists($bimpFacture->getDirOutput() . '/' . $ref . '.pdf')) {
                                                     $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
                                                     $success_callback .= 'window.open("' . $url . '");';
                                                 }
@@ -6369,7 +6370,7 @@ ORDER BY a.val_max DESC");
                                                         $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $idAvoirFact);
                                                         if (BimpObject::objectLoaded($avoir)) {
                                                             $avoir_ref = $avoir->getRef();
-                                                            if ($avoir_ref && file_exists(DOL_DATA_ROOT . '/facture/' . $avoir_ref . '/' . $avoir_ref . '.pdf')) {
+                                                            if ($avoir_ref && file_exists($avoir->getDirOutput(). '/' . $avoir_ref . '.pdf')) {
                                                                 $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $avoir_ref . '/' . $avoir_ref . '.pdf');
                                                                 $success_callback .= 'window.open("' . $url . '");';
                                                             } else {

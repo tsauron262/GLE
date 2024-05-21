@@ -4275,9 +4275,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $facture = null;
                 $files = array();
                 if ((int) $this->getData('id_facture')) {
-                    $facture = $this->getChildObject('facture');
-                    if (BimpObject::objectLoaded($facture)) {
-                        $facture = $facture->dol_object;
+                    $Bfacture = $this->getChildObject('facture');
+                    if (BimpObject::objectLoaded($Bfacture)) {
+                        $facture = $Bfacture->dol_object;
                     } else {
                         unset($facture);
                         $facture = null;
@@ -4294,8 +4294,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 //                        $this->update();
 //                    }
 //                }
-                if (!is_null($facture)) {
-                    $dir = $facture->getDirOutput();
+                if (!is_null($Bfacture)) {
+                    $dir = $Bfacture->getDirOutput();
                     $fileFact = $dir . "/" . $facture->ref . ".pdf";
                     if (is_file($fileFact)) {
                         $files[] = array($fileFact, 'application/pdf', $facture->ref . '.pdf');

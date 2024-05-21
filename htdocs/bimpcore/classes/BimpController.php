@@ -3366,7 +3366,7 @@ class BimpController
     {
         $html = '';
         $type = BimpTools::getValue('type', 'erp', 'aZ09');
-        $year = BimpTools::getValue('year', date('Y'), int);
+        $year = BimpTools::getValue('year', date('Y'), 'int');
         $content_only = (int) BimpTools::getValue('content_only', 0, 'int');
 
         $dir = DOL_DOCUMENT_ROOT . '/bimpcore/changelogs/' . $type . '/';

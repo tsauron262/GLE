@@ -4300,7 +4300,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if (is_file($fileFact)) {
                         $files[] = array($fileFact, 'application/pdf', $facture->ref . '.pdf');
                     } else {
-                        $errors[] = 'Attention: PDF de la facture non trouvé et donc non envoyé au client';
+                        $errors[] = 'Attention: PDF de la facture non trouvé et donc non envoyé au client ('.$dir.')';
                         dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi de la facture au client', LOG_ERR);
                         BimpCore::addlog('Echec envoi facture sav par e-mail au client - PDF non trouvé', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
                             'Fichier' => $fileFact

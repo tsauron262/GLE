@@ -629,7 +629,9 @@ class BContract_echeancier extends BimpObject
 
         $html = '';
 
-        if (!$this->canEdit()) {
+        $can_edit = $this->canEdit();
+        
+        if (!$can_edit) {
             $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emise", 'info');
         }
 
@@ -649,7 +651,8 @@ class BContract_echeancier extends BimpObject
         $dateFin->sub(new DateInterval('P1D'));
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-        $can_edit = $this->canEdit();
+        
+        $can_create_next_facture = $can_edit;
 
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
         $html .= '<thead>';
@@ -824,7 +827,6 @@ class BContract_echeancier extends BimpObject
                             . '<td style="text-align:center">' . ($pa) . '€</td>'
                             . '<td style="text-align:center"><b style="color:grey">Période non facturée</b></td>'
                             . '<td style="text-align:center"><b class="important" >Période non facturée</b></td>';
-//                            . '<td style="text-align:center">' . $displayAppatenance . '</td>';
                 } else {
                     $html .= '<b><td style="text-align:center">' . price($infos['ht']) . ' € </td>'
                             . '<td style="text-align:center">' . price($infos['tva']) . ' € </td>'
@@ -832,14 +834,13 @@ class BContract_echeancier extends BimpObject
                             . '<td style="text-align:center">N/C</td>'
                             . '<td style="text-align:center"><b style="color:grey">' . $infos['ref'] . '</b></td>'
                             . '<td style="text-align:center"><b class="danger" >Info inconnue</b></td>';
-//                            . '<td style="text-align:center">' . $displayAppatenance . '</td></b>';
                 }
 
 
                 $html .= '<td style="text-align:center; margin-right:10%">';
                 if ($firstDinamycLine && $can_create_next_facture) {
                     // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER
-                    if ($user->rights->facture->creer && $this->canEdit()) {
+                    if ($user->rights->facture->creer && $can_edit) {
                         $onclick = $this->getJsActionOnclick("createFacture", array(
                             'date_start' => $dateTime_start_mkTime->format('Y-m-d'),
                             'date_end'   => $dateTime_end_mkTime->format('Y-m-d'),

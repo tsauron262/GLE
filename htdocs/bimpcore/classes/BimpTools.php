@@ -101,7 +101,7 @@ class BimpTools
                 $val_temp = str_replace('ù£ù', '"', $val_temp);
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
-                            'diagnostic', 'notecreditsafe', 'accessoires', 'search_value'
+                            'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
                         ))) {
                     if (!$val_temp || (is_string($value) && $val_temp != $value)) {
                         if (!$val_temp) {

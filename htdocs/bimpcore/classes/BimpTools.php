@@ -1836,6 +1836,15 @@ class BimpTools
                 $value = trim($value);
                 $value = str_replace(' ', '', $value);
                 $value = str_replace(',', '.', $value);
+
+                if (preg_match('/^[0-9]+\.$/', $value)) {
+                    $value .= '0';
+                }
+
+                if (preg_match('/^\.[0-9]+$/', $value)) {
+                    $value = '0' . $value;
+                }
+
                 if (!self::isNumericType($value)) {
                     $value = 0;
                 }

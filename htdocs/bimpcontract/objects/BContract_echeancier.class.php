@@ -849,7 +849,7 @@ class BContract_echeancier extends BimpObject
                             "success_callback" => $callback
                                 )
                         );
-                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $onclick . '")"><i class="fa fa-plus" ></i></span>';
+                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $onclick . '"><i class="fa fa-plus" ></i></span>';
 
                         $onclick = $this->getJsActionOnclick("solderPeriodeByFactureExterne", array(
                             'date_start' => $dateTime_start_mkTime->format('Y-m-d'),

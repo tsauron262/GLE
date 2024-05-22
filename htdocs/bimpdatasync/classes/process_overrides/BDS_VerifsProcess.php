@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 7;
+    public static $current_version = 8;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -84,6 +84,90 @@ class BDS_VerifsProcess extends BDSProcess
                         } elseif (count($fac_infos)) {
                             $this->incUpdated();
                             $this->Success(BimpTools::getMsgFromArray($fac_infos), $fac, $id_fac);
+                        }
+                    }
+                }
+                break;
+        }
+
+        return $result;
+    }
+
+    // Vérifs marges commandes : 
+
+    public function initCheckCommandesMargin(&$data, &$errors = array())
+    {
+        $date_from = $this->getOption('date_from', '');
+        $date_to = $this->getOption('date_to', '');
+        $nbElementsPerIteration = $this->getOption('nb_elements_per_iterations', 100);
+
+        if (!preg_match('/^[0-9]+$/', $nbElementsPerIteration) || !(int) $nbElementsPerIteration) {
+            $errors[] = 'Le nombre d\'élements par itération doit être un nombre entier positif';
+        }
+
+        if ($date_from && $date_to && $date_from > $date_to) {
+            $errors[] = 'La date de début doit être inférieure à la date de fin';
+        }
+
+        if (!count($errors)) {
+            $where = '';
+            if ($date_from) {
+                $where .= 'date_creation >= \'' . $date_from . ' 00:00:00\'';
+            }
+            if ($date_to) {
+                $where .= ($where ? ' AND ' : '') . 'date_creation <= \'' . $date_to . ' 23:59:59\'';
+            }
+
+            $rows = $this->db->getRows('commande', $where, null, 'array', array('rowid'), 'rowid', 'desc');
+            $elements = array();
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['rowid'];
+                }
+            }
+
+            if (empty($elements)) {
+                $errors[] = 'Aucune commande a traiter trouvée';
+            } else {
+                $data['steps'] = array(
+                    'check_margins' => array(
+                        'label'                  => 'Vérifications des marges',
+                        'on_error'               => 'continue',
+                        'elements'               => $elements,
+                        'nbElementsPerIteration' => (int) $nbElementsPerIteration
+                    )
+                );
+            }
+        }
+    }
+
+    public function executeCheckCommandesMargin($step_name, &$errors = array(), $extra_data = array())
+    {
+        $result = array();
+
+        switch ($step_name) {
+            case 'check_margins':
+                if (!empty($this->references)) {
+                    $this->setCurrentObjectData('bimpcommercial', 'Bimp_Commande');
+                    foreach ($this->references as $id_commande) {
+                        $this->incProcessed();
+                        $cmde_errors = array();
+                        $cmde_info = '';
+                        $cmde = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
+
+                        if (BimpObject::objectLoaded($cmde)) {
+                            $cmde_errors = $cmde->checkMarge($cmde_info);
+                        } else {
+                            $cmde_errors[] = 'Commande #' . $id_commande . ' non trouvée';
+                        }
+
+                        if (count($cmde_errors)) {
+                            $this->incIgnored();
+                            $this->Error(BimpTools::getMsgFromArray($cmde_errors, 'Commande #' . $id_commande), $cmde, $id_commande);
+                        } elseif ($cmde_info) {
+                            $this->incUpdated();
+                            $this->Success($cmde_info, $cmde, $id_commande);
                         }
                     }
                 }
@@ -1157,7 +1241,7 @@ class BDS_VerifsProcess extends BDSProcess
                     $new_status = (int) $propal->getData('contrats_status');
 
 //                    $this->Info('New : ' . $new_status . ' - old : ' . $cur_status, $propal);
-                    
+
                     if (!empty($err)) {
                         $this->Error($err, $propal);
                         $this->incIgnored();
@@ -1322,6 +1406,8 @@ class BDS_VerifsProcess extends BDSProcess
 
     public static function updateProcess($id_process, $cur_version, &$warnings = array())
     {
+        $bdb = BimpCache::getBdb();
+
         $errors = array();
 
         if ($cur_version < 2) {
@@ -1410,6 +1496,41 @@ class BDS_VerifsProcess extends BDSProcess
                         'use_report'    => 1,
                         'reports_delay' => 30
                             ), true, $errors, $warnings);
+        }
+
+        if ($cur_version < 8) {
+            // Opération "Vérif des marges des commandes": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Vérif des marges des commandes',
+                        'name'          => 'checkCommandesMargin',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
+                            ), true, $errors, $warnings);
+
+            if (BimpObject::objectLoaded($op)) {
+                $op_options = array();
+
+                $id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'date_from\'');
+                if ($id_option) {
+                    $op_options[] = $id_option;
+                }
+                $id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'date_to\'');
+                if ($id_option) {
+                    $op_options[] = $id_option;
+                }
+                $id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'nb_elements_per_iterations\'');
+                if ($id_option) {
+                    $op_options[] = $id_option;
+                }
+
+                if (!empty($op_options)) {
+                    $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
+                }
+            }
         }
 
         return $errors;

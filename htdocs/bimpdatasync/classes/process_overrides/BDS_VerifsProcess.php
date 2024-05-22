@@ -111,14 +111,22 @@ class BDS_VerifsProcess extends BDSProcess
 
         if (!count($errors)) {
             $where = '';
-            if ($date_from) {
-                $where .= 'date_creation >= \'' . $date_from . ' 00:00:00\'';
-            }
-            if ($date_to) {
-                $where .= ($where ? ' AND ' : '') . 'date_creation <= \'' . $date_to . ' 23:59:59\'';
+
+            if ($date_from || $date_to) {
+                if ($date_from) {
+                    $where .= 'tms >= \'' . $date_from . ' 00:00:00\'';
+                }
+                if ($date_to) {
+                    $where .= ($where ? ' AND ' : '') . 'tms <= \'' . $date_to . ' 23:59:59\'';
+                }
+            } else {
+                $tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
+                if ($tms) {
+                    $where .= 'tms >= \'' . $tms . '\'';
+                }
             }
 
-            $rows = $this->db->getRows('commande', $where, null, 'array', array('rowid'), 'rowid', 'desc');
+            $rows = $this->db->getRows('commande', $where, null, 'array', array('rowid'), 'tms', 'asc');
             $elements = array();
 
             if (is_array($rows)) {
@@ -150,6 +158,7 @@ class BDS_VerifsProcess extends BDSProcess
             case 'check_margins':
                 if (!empty($this->references)) {
                     $this->setCurrentObjectData('bimpcommercial', 'Bimp_Commande');
+                    $max_tms = '';
                     foreach ($this->references as $id_commande) {
                         $this->incProcessed();
                         $cmde_errors = array();
@@ -169,6 +178,18 @@ class BDS_VerifsProcess extends BDSProcess
                             $this->incUpdated();
                             $this->Success($cmde_info, $cmde, $id_commande);
                         }
+
+                        $tms = $cmde->dol_object->date_modification;
+
+                        if (!$max_tms || $tms > $max_tms) {
+                            $max_tms = $tms;
+                        }
+                    }
+
+                    $cur_tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
+                    $new_tms = date('Y-m-d H:i:s', $max_tms);
+                    if (!$cur_tms || $new_tms > $cur_tms) {
+                        BimpCore::setConf('commandes_marges_last_check_tms', $new_tms);
                     }
                 }
                 break;

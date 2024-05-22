@@ -1815,9 +1815,14 @@ class BimpTools
                 break;
 
             case 'int':
+                if ($value === 'NaN') {
+                    $value = 0;
+                }
+
                 if (is_bool($value)) {
                     return $value;
                 }
+                
                 if (is_string($value)) {
                     if ($value == 'false') {
                         return 0;
@@ -1833,6 +1838,10 @@ class BimpTools
                 return $value;
 
             case 'float':
+                if ($value === 'NaN') {
+                    $value = 0;
+                }
+
                 $value = trim($value);
                 $value = str_replace(' ', '', $value);
                 $value = str_replace(',', '.', $value);

@@ -5117,32 +5117,31 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public static function checkMargesAll()
     {
-//        $where = '';
-//
-//        $last_check_tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
-//        if ($last_check_tms) {
-//            $where = 'tms > \'' . $last_check_tms . '\'';
-//        } else {
-//            $where = 'tms > \'2024-02-28 00:00:00\''; // Jour de mise en place du cron sur Bimp
-//        }
-//
-//        $rows = self::getBdb()->getRows('facture', $where, null, 'array', array('rowid'), 'rowid', 'desc');
-//
-//        $nchecked = 0;
-//
-//        if (is_array($rows)) {
-//            foreach ($rows as $r) {
-//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
-//                if (BimpObject::objectLoaded($facture)) {
-//                    $nchecked++;
-//                    $facture->checkMargin(true, true);
-//                    $facture->checkTotalAchat(true);
-//                }
-//            }
-//        }
-//
-//        BimpCore::setConf('factures_marges_revals_last_check_tms', date('Y-m-d H:i:s'));
-//
-//        return $nchecked . ' facture(s) vérifée(s)';
+        $where = '';
+
+        $last_check_tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
+        if ($last_check_tms) {
+            $where = 'tms > \'' . $last_check_tms . '\'';
+        } else {
+            $where = 'tms > \'2024-05-22 00:00:00\''; // Jour de mise en place du cron sur Bimp
+        }
+
+        $rows = self::getBdb()->getRows('commande', $where, null, 'array', array('rowid'), 'tms', 'asc');
+
+        $nchecked = 0;
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+                if (BimpObject::objectLoaded($commande)) {
+                    $nchecked++;
+                    $commande->checkMarge();
+                }
+            }
+        }
+
+        BimpCore::setConf('commandes_marges_last_check_tms', date('Y-m-d H:i:s'));
+
+        return $nchecked . ' commande(s) vérifée(s)';
     }
 }

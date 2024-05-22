@@ -36,6 +36,11 @@ class BimpCommercialCronExec extends BimpCron
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture', $facture_class);
         $this->output .= $facture_class::checkMargesRevalAll();
         
+//        $this->output .= '***** Vérifs Marges commandes mises à jour *****<br/>';
+//        $commande_class = '';
+//        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande', $commande_class);
+//        $this->output .= $commande_class::checkMargesAll();
+        
         return 0;
     }
 }

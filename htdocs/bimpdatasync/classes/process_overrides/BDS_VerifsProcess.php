@@ -110,7 +110,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if (!count($errors)) {
-            $where = 'tms = \'2023-02-03 10:16:35\'';
+            $where = 'tms > \'2023-02-03 10:16:35\' AND (tms < \'2024-05-21 00:00:00\' OR date_creation > \'2023-01-01 00:00:00\')';
 
 //            if ($date_from || $date_to) {
 //                if ($date_from) {

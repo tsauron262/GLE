@@ -361,13 +361,14 @@ class savFormController extends BimpPublicController
                 $html .= '<label>Type</label><br/>';
                 $html .= $client->displayData('fk_typent', 'default', false, false);
                 $html .= '</div>';
-                $html .= '</div>';
+//                $html .= '</div>';
 
                 // N° SIRET: 
                 $html .= '<div class="col-xs-12 col-md-5" style="display: none">';
                 $html .= '<label>SIRET</label><br/>';
                 $html .= $client->getData('siret');
                 $html .= '</div>';
+                
                 $html .= '</div>';
             }
 

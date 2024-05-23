@@ -101,7 +101,7 @@ class BimpTools
                 $val_temp = str_replace('ù£ù', '"', $val_temp);
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
-                            'diagnostic', 'notecreditsafe', 'accessoires', 'search_value'
+                            'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
                         ))) {
                     if (!$val_temp || (is_string($value) && $val_temp != $value)) {
                         if (!$val_temp) {
@@ -1815,9 +1815,14 @@ class BimpTools
                 break;
 
             case 'int':
+                if ($value === 'NaN') {
+                    $value = 0;
+                }
+
                 if (is_bool($value)) {
                     return $value;
                 }
+                
                 if (is_string($value)) {
                     if ($value == 'false') {
                         return 0;
@@ -1833,9 +1838,22 @@ class BimpTools
                 return $value;
 
             case 'float':
+                if ($value === 'NaN') {
+                    $value = 0;
+                }
+
                 $value = trim($value);
                 $value = str_replace(' ', '', $value);
                 $value = str_replace(',', '.', $value);
+
+                if (preg_match('/^[0-9]+\.$/', $value)) {
+                    $value .= '0';
+                }
+
+                if (preg_match('/^\.[0-9]+$/', $value)) {
+                    $value = '0' . $value;
+                }
+
                 if (!self::isNumericType($value)) {
                     $value = 0;
                 }

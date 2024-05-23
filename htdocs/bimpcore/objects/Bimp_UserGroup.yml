@@ -66,6 +66,7 @@ fields:
     mail: 
         label: Mail principal
         dol_extra_field: 1
+        no_strip_tags: 1
 
     alias: 
         label: Alias mail

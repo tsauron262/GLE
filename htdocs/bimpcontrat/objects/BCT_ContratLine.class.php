@@ -5079,9 +5079,6 @@ class BCT_ContratLine extends BimpObject
                 if ((int) $this->getData('fk_contrat') !== (int) $linked_line->getData('fk_contrat')) {
                     $errors[] = 'La ligne liée n\'appartient pas au même contrat';
                     $check = false;
-//                } elseif ((int) $linked_line->getData('fk_product') !== (int) $this->getData('fk_product')) {
-//                    $errors[] = 'Abonnement lié : le produit ne correspond pas';
-//                    $check = false;
                 } else {
                     $this->set('fac_periodicity', $linked_line->getData('fac_periodicity'));
                     $this->set('achat_periodicity', $linked_line->getData('achat_periodicity'));
@@ -5206,9 +5203,6 @@ class BCT_ContratLine extends BimpObject
 
                         if (!(int) $this->getData('duration')) {
                             $errors[] = 'Durée de l\'abonnement non définie';
-                        }
-                        if (!(int) $this->getData('fac_periodicity')) {
-                            $errors[] = 'Périodicité de facturation non définie';
                         }
 
                         $dt = new DateTime($date_ouverture);
@@ -7894,10 +7888,8 @@ class BCT_ContratLine extends BimpObject
                             $errors[] = 'Aucun produit sélectionné';
                         }
 
-                        $periodicity = (int) $this->getData('fac_periodicity');
-                        if (!$periodicity) {
-                            $errors[] = 'Périodicité de facturation non définie';
-                        } else {
+                        $fac_periodicity = (int) $this->getData('fac_periodicity');
+                        if ($fac_periodicity) {
                             $prod_duration = (int) $prod->getData('duree');
                             $duration = (int) $this->getData('duration');
 
@@ -7909,8 +7901,8 @@ class BCT_ContratLine extends BimpObject
                                     $errors[] = 'Durée unitaire du produit non définie';
                                 }
                             } else {
-                                if ($duration % $periodicity != 0) {
-                                    $errors[] = 'La durée totale de l\'abonnement doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $periodicity . ' mois)';
+                                if ($duration % $fac_periodicity != 0) {
+                                    $errors[] = 'La durée totale de l\'abonnement doit être un multiple du nombre de mois correspondant à la périodicité de facturation (' . $fac_periodicity . ' mois)';
                                 }
                                 if ($duration % $prod_duration != 0) {
                                     $errors[] = 'La durée totale de l\'abonnement doit être un multiple de la durée unitaire de produit (' . $prod_duration . ' mois)';
@@ -7926,7 +7918,7 @@ class BCT_ContratLine extends BimpObject
                         } else {
                             $achat_periodicity = (int) $this->getData('achat_periodicity');
                             if ($achat_periodicity) {
-                                if ($periodicity < $achat_periodicity) {
+                                if ($achat_periodicity && $fac_periodicity && $fac_periodicity < $achat_periodicity) {
                                     $errors[] = 'La périodicité de facturation ne peut pas être inférieure à la périodicité d\'achat';
                                 }
                             }

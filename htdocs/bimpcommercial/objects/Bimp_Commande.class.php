@@ -650,36 +650,36 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         return parent::getData($field, $withDefault);
     }
-    
+
     public function displayRentabilite($withDetail = false)
     {
         $html = '';
         $totVendu = $totRealise = 0;
         foreach ($this->getLines('product') as $line) {
             $prod = $line->getProduct();
-            if($prod->isInter()){
+            if ($prod->isInter()) {
                 $totVendu += $line->getTotalHt(true);
-                $duree = $this->db->getValue('fichinterdet', 'SUM(duree)', '`id_line_commande` = '.$line->id);
+                $duree = $this->db->getValue('fichinterdet', 'SUM(duree)', '`id_line_commande` = ' . $line->id);
                 $dureeProd = $prod->getData('duree_i');
-                if($dureeProd < 1)
+                if ($dureeProd < 1)
                     $dureeProd = 3600;
                 $realise = $duree / $dureeProd * $prod->getData('cost_price');
                 $totRealise += $realise;
-                
-                if($withDetail){
+
+                if ($withDetail) {
 //                    $html .= $prod->printData();
                     $html .= $prod->getLink();
-                    $html .= '<br/>Vendu : '.$line->getFullQty().' * '. $dureeProd/3600 .'h soit '.$line->getTotalHt(true).' €';
-                    $html .= '<br/>Réalisé : '.$duree / 3600 .' h / soit : '.$realise.' €';
+                    $html .= '<br/>Vendu : ' . $line->getFullQty() . ' * ' . $dureeProd / 3600 . 'h soit ' . $line->getTotalHt(true) . ' €';
+                    $html .= '<br/>Réalisé : ' . $duree / 3600 . ' h / soit : ' . $realise . ' €';
                     $html .= '<br/><br/>';
                 }
             }
         }
-        if($totVendu)
-            $html .= round(100 - (($totRealise / $totVendu)  * 100), 2) . ' %';
+        if ($totVendu)
+            $html .= round(100 - (($totRealise / $totVendu) * 100), 2) . ' %';
         else
             $html .= 'N/A';
-        
+
         return $html;
     }
 
@@ -711,12 +711,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function getDirOutput()
     {
 //        global $conf;
-
 //        return $conf->commande->dir_output;
-        
+
         global $conf;
         $ref = dol_sanitizeFileName($this->dol_object->ref);
-        if($this->isLoaded() && $this->dol_object->entity > 0)
+        if ($this->isLoaded() && $this->dol_object->entity > 0)
 //            die($conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/' . $subdir);
             return $conf->commande->multidir_output[$this->dol_object->entity] . '/';
         else
@@ -2446,13 +2445,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         $html .= '</td>';
         $html .= '</tr>';
-        
 
         $html .= '<tr>';
         $html .= '<th>Poids TOTAL</th>';
         $html .= '<td>';
         $html .= $this->displayTotalWeight();
-
 
         $html .= '</td>';
         $html .= '</tr>';
@@ -5116,5 +5113,35 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         return $return;
+    }
+
+    public static function checkMargesAll()
+    {
+        $where = '';
+
+        $last_check_tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
+        if ($last_check_tms) {
+            $where = 'tms > \'' . $last_check_tms . '\'';
+        } else {
+            $where = 'tms > \'2024-05-22 00:00:00\''; // Jour de mise en place du cron sur Bimp
+        }
+
+        $rows = self::getBdb()->getRows('commande', $where, null, 'array', array('rowid'), 'tms', 'asc');
+
+        $nchecked = 0;
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+                if (BimpObject::objectLoaded($commande)) {
+                    $nchecked++;
+                    $commande->checkMarge();
+                }
+            }
+        }
+
+        BimpCore::setConf('commandes_marges_last_check_tms', date('Y-m-d H:i:s'));
+
+        return $nchecked . ' commande(s) vérifée(s)';
     }
 }

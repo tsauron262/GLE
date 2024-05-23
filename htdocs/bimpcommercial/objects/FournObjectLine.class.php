@@ -169,6 +169,7 @@ class FournObjectLine extends ObjectLine
                     }
                 }
                 break;
+
             case 'pa_except':
                 $value = $this->pu_ht;
                 return BimpInput::renderInput('text', $prefixe . 'pa_except', (float) $value, array(
@@ -257,13 +258,23 @@ class FournObjectLine extends ObjectLine
                         }
                     }
 
-                    if (!(int) $this->id_fourn_price) {
-                        $this->pu_ht = (float) BimpTools::getValue('pa_except', $this->pu_ht, 'float');
+                    if (!(int) $this->id_fourn_price && BimpTools::isSubmit('pa_except')) {
+                        $this->pu_ht = BimpTools::getValue('pa_except', $this->pu_ht, 'float');
+                        if (!is_null($this->pu_ht)) {
+                            $this->pu_ht = (float) $this->pu_ht;
+                        }
                     }
                     break;
 
                 case self::LINE_FREE:
-                    $this->pu_ht = (float) BimpTools::getValue('pa_except', (float) $this->pu_ht, 'float');
+                    if (BimpTools::isSubmit('pa_except')) {
+                        $this->pu_ht = BimpTools::getValue('pa_except', $this->pu_ht, 'float');
+                        
+                        if (!is_null($this->pu_ht)) {
+                            $this->pu_ht = (float) $this->pu_ht;
+                        }
+                    }
+
                     break;
             }
         }

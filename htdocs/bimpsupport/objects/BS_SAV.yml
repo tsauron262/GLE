@@ -486,6 +486,7 @@ fields:
         user_edit: 1
         input:
             no_autocorrect: 1
+        no_strip_tags: 1
     acompte: 
         label: Acompte
         type: money

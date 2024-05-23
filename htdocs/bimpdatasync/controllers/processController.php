@@ -5,6 +5,7 @@ class processController extends BimpController
 
     public function ajaxProcessBds_initProcessOperation()
     {
+        define('DISABLE_LONG_PAGE_NOTIFICATION', 1);
         $errors = array();
         $warnings = array();
         $result_html = '';
@@ -73,6 +74,7 @@ class processController extends BimpController
 
     public function ajaxProcessBds_initObjectActionProcess()
     {
+        define('DISABLE_LONG_PAGE_NOTIFICATION', 1);
         $errors = array();
         $warnings = array();
         $html = '';
@@ -153,6 +155,7 @@ class processController extends BimpController
 
     public function ajaxProcessBds_executeOperationStep()
     {
+        define('DISABLE_LONG_PAGE_NOTIFICATION', 1);
         $errors = array();
         $warnings = array();
         $result = array();
@@ -209,6 +212,7 @@ class processController extends BimpController
 
     public function ajaxProcessBds_finalizeOperationStep()
     {
+        define('DISABLE_LONG_PAGE_NOTIFICATION', 1);
         $errors = array();
         $warnings = array();
 
@@ -259,6 +263,7 @@ class processController extends BimpController
 
     public function ajaxProcessBds_cancelOperation()
     {
+        define('DISABLE_LONG_PAGE_NOTIFICATION', 1);
         $errors = array();
         $warnings = array();
 

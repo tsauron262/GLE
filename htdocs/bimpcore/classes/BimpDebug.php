@@ -162,7 +162,7 @@ class BimpDebug
             $msg .= 'Variable bimp_start_time absente du fichier index.php';
             mailSyn2('Page time indeterminer', 'tommy@bimp.fr', null, $debMail.$msg);
         } else {
-            if ((microtime(1) - $bimp_start_time) > 40) {
+            if (!defined('DISABLE_LONG_PAGE_NOTIFICATION') && (microtime(1) - $bimp_start_time) > 40) {
                 $msg .= (microtime(1) - $bimp_start_time) . ' sec';
 
                 $msg .= self::renderDebugTimes();

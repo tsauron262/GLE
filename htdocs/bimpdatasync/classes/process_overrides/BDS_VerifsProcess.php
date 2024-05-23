@@ -110,21 +110,21 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if (!count($errors)) {
-            $where = '';
+            $where = 'tms = \'2023-02-03 10:16:35\'';
 
-            if ($date_from || $date_to) {
-                if ($date_from) {
-                    $where .= 'tms >= \'' . $date_from . ' 00:00:00\'';
-                }
-                if ($date_to) {
-                    $where .= ($where ? ' AND ' : '') . 'tms <= \'' . $date_to . ' 23:59:59\'';
-                }
-            } else {
-                $tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
-                if ($tms) {
-                    $where .= 'tms >= \'' . $tms . '\'';
-                }
-            }
+//            if ($date_from || $date_to) {
+//                if ($date_from) {
+//                    $where .= 'tms >= \'' . $date_from . ' 00:00:00\'';
+//                }
+//                if ($date_to) {
+//                    $where .= ($where ? ' AND ' : '') . 'tms <= \'' . $date_to . ' 23:59:59\'';
+//                }
+//            } else {
+//                $tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
+//                if ($tms) {
+//                    $where .= 'tms >= \'' . $tms . '\'';
+//                }
+//            }
 
             $rows = $this->db->getRows('commande', $where, null, 'array', array('rowid'), 'tms', 'asc');
             $elements = array();
@@ -153,6 +153,7 @@ class BDS_VerifsProcess extends BDSProcess
     public function executeCheckCommandesMargin($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
+        $bdb = BimpCache::getBdb();
 
         switch ($step_name) {
             case 'check_margins':
@@ -167,6 +168,9 @@ class BDS_VerifsProcess extends BDSProcess
 
                         if (BimpObject::objectLoaded($cmde)) {
                             $cmde_errors = $cmde->checkMarge($cmde_info);
+                            if ($bdb->update('commande', array('tms' => date('Y-m-d H:i:s')), 'rowid = ' . $id_commande) <= 0) {
+                                $cmde_errors[] = 'Err màj tms ' . $bdb->err();
+                            }
                         } else {
                             $cmde_errors[] = 'Commande #' . $id_commande . ' non trouvée';
                         }

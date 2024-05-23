@@ -980,7 +980,7 @@ class BCT_Contrat extends BimpDolObject
                             $echeances_html .= ($echeances_html ? '<br/>' : '') . '<span class="' . $class . '">' . date('d / m / Y', strtotime($echeance)) . '</span>';
                         }
                     } else {
-                        $echeances_html .= '<span class="danger">Aucune échéance</span>';
+                        $echeances_html .= 'Aucune';
                     }
 
                     $detail_btn = '<span class="openCloseButton open-content" data-parent_level="3" data-content_extra_class="prod_' . $id_prod . '_detail">';

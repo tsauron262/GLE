@@ -201,8 +201,9 @@ class securLogSms
     {
         global $user;
         $this->user->oldcopy = clone($this->user);
-        if ($this->user->array_options['options_code_sms'] == $code) {
+        if ($this->user->array_options['options_code_sms'] == $code && $code != '') {
             $this->user->array_options['options_echec_auth'] = 0;
+            $this->user->array_options['options_code_sms'] = '';
             $this->user->update($user);
             $this->setSecure(1);
             return true;

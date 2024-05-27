@@ -5,6 +5,16 @@ fields:
         
     groupement:
         label: Groupement
+    type_educ: 
+        label: Type éducation
+        values: 
+            array: types_educ
+            
+    type_educ_fin_validite: 
+        label: Date de fin de validité (Enseignants / étudiants)
+        type: date
+        input: 
+            help: Obligatoire pour les enseignants / étudiants
 
 
 fields_tables: 

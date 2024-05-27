@@ -240,7 +240,15 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                     foreach ($result['reservations'] as $reservation) {
                         if (isset($reservation['reservationId'])) {
                             $this->debug_content .= '<span class="bold">Réservation ' . $reservation['reservationId'] . ': <br/></span>';
-                            if ($this->reservationExists($reservation['reservationId'])) {
+                            if($reservation['currentStatus'] == 'CANCELLED'){
+                                $sav = BimpObject::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('resgsx'=>$reservation['reservationId'], 'status'=>-1),1);
+                                if(is_object($sav) && $sav->isLoaded()){
+                                    $sav->updateField('status', -2);
+                                    $sav->addNote('Annulé coté GSX le ' . date('d / m / Y à H:i'), BImpNote::BN_ALL);
+                                }
+                            }
+                            
+                            elseif ($this->reservationExists($reservation['reservationId'])) {
                                 $this->debug_content .= BimpRender::renderAlerts('Déjà enregistrée', 'success');
                             } else {
                                 $fetch_errors = array();

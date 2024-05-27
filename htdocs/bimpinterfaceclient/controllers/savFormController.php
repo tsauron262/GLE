@@ -1481,6 +1481,9 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                 }
             }
         }
+        else{
+            $reservationDate = $data['sav_slot'];
+        }
 
         if (isset($data['eq_serial']) && (string) $data['eq_serial']) {
             if (preg_match('/^[0-9]{10,20}$/', $data['eq_serial'])) {

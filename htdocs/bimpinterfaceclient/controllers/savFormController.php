@@ -65,13 +65,24 @@ class savFormController extends BimpPublicController
                         }
                     } elseif (!is_array($result) || empty($result)) {
                         $fetch_errors[] = 'Aucune réponse reçue';
-                    } else {
-                        $reservation = $result;
+                    } elseif (!is_array($result) || empty($result)) {
+                        $fetch_errors[] = 'Aucune réponse reçue';
+                    } elseif($result['currentStatus'] == 'CANCELLED') {
+                         $errors[] = 'RDV annulé chez Apple';
+                    }
+                    else{
+                        $id_sav = (int) BimpCache::getBdb()->getValue('bs_sav', 'id', 'resgsx = \'' . $res_id . '\'');
+                        if($id_sav > 0)
+                            $errors[] = 'Formulaire déja envoyé';
+                        else{
+                            $reservation = $result;
 
-                        if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') != $reservation['customer']['emailId']) {
-                            // On déco l\'utilisateur client si l'adresse e-mail ne correspond pas
-                            $userClient = null;
-                            $_SESSION['userClient'] = 'none';
+
+                            if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') != $reservation['customer']['emailId']) {
+                                // On déco l\'utilisateur client si l'adresse e-mail ne correspond pas
+                                $userClient = null;
+                                $_SESSION['userClient'] = 'none';
+                            }
                         }
                     }
                 } else {

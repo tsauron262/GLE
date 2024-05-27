@@ -889,7 +889,7 @@ class BCT_Contrat extends BimpDolObject
                                 $dates .= 'Du <b>' . date('d / m / Y', strtotime($line->getData('date_ouverture'))) . '</b>';
                                 $dates .= ' au <b>' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . '</b>';
 
-                                if ($line_statut === BCT_ContratLine::STATUS_ACTIVE) {
+                                if (!(int) $line->getData('id_line_renouv')) {
                                     $date_fin = date('Y-m-d', strtotime($line->getData('date_fin_validite')));
                                     if (!in_array($date_fin, $echeances)) {
                                         $echeances[] = $date_fin;

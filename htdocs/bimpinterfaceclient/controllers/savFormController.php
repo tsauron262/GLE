@@ -257,7 +257,7 @@ class savFormController extends BimpPublicController
                 $html .= 'Un compte utilisateur existe déjà pour l\'adresse e-mail "' . $email . '".<br/>';
                 $html .= '</h3>';
                 $html .= '<h4 style="text-align: center; font-weight: bold" class="info">';
-                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm';
+                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . 'email='.$email.'&back=savForm';
 
                 if (isset($reservation['reservationId']) && isset($reservation['shipToCode'])) {
                     $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];

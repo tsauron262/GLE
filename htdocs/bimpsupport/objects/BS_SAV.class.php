@@ -30,6 +30,8 @@ class BS_SAV extends BimpObject
     const BS_SAV_ATT_CLIENT_ACTION = 7;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
+    
+    public $isClosable = true;
 
     //reparation en magasin avec retour avant remplacement
     //pas de doublons Réf centre
@@ -1003,11 +1005,13 @@ class BS_SAV extends BimpObject
                 if ($this->isActionAllowed('toRestitute')) {
                     if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
                         if (!is_null($propal) && $propal_status > 0) {
-                            $buttons[] = array(
-                                'label'   => 'Réparation terminée',
-                                'icon'    => 'check',
-                                'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
-                            );
+                            if($this->isClosable){
+                                $buttons[] = array(
+                                    'label'   => 'Réparation terminée',
+                                    'icon'    => 'check',
+                                    'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                                );
+                            }
                         }
                     }
 

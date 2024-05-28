@@ -202,6 +202,7 @@ class BS_SAV_ExtVersion extends BS_SAV
         $tabName = explode(' ', $nomClient);
         if((!isset($tabName[1]) || $tabName[1] == '' || $client->getData('fk_typent') != 8) && $this->asProdEcologic()){
             $html .= BimpRender::renderAlerts('! Attention les PROS ne sont pas concernés par le programme QualiRepair !');
+            $this->isClosable = false;
         }
         
         if ($this->asProdEcologic()) {
@@ -224,6 +225,7 @@ class BS_SAV_ExtVersion extends BS_SAV
                      'label' => 'Télécharger',
                      'icon_before' => 'upload'
                 )));
+                $this->isClosable = false;
         }
         return $html;
     }

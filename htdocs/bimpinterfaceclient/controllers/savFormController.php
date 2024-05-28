@@ -267,6 +267,13 @@ class savFormController extends BimpPublicController
 
                 $html .= '</h4>';
                 $html .= '</div>';
+                
+                /* pour vérif des tel */
+                if ((int) $userClient->getData('id_contact')) {
+                    $contact = $userClient->getChildObject('contact');
+                }
+                if($contact->getData('phone') != '' || $contact->getData('phone_perso') != '' || $contact->getData('phone_mobile') != '')
+                    $html .= '<input type="hidden" name="phone_ok" value="1"/>';
                 return $html;
             } else {
                 // Recherche d'un contact client:                 

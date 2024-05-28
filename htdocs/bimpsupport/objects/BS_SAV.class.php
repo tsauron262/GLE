@@ -7665,7 +7665,7 @@ ORDER BY a.val_max DESC");
                                 $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
                             }
 
-                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
+                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . '">espace personnel</a>' . "\n\n";
                             $msg .= 'L’équipe technique ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
 //                            mailSyn2($subject, $to, '', $msg);
@@ -7734,7 +7734,7 @@ ORDER BY a.val_max DESC");
                         $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
                     }
 
-                    $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
+                    $msg .= 'Vous pourrez néanmoins accéder à votre <a href="' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . '">espace personnel</a>, et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
                     $msg .= 'L’équipe technique ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
                     $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');

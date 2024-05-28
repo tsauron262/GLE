@@ -416,10 +416,12 @@ function SavPublicForm() {
             var $telMobile = $form.find('[name="client_phone_mobile"]');
             var $telPerso = $form.find('[name="client_phone_perso"]');
             var $telPro = $form.find('[name="client_phone_pro"]');
+            var $telOk = $form.find('[name="phone_ok"]');
 
             var telMobile = '';
             var telPerso = '';
             var telPro = '';
+            var telOk = '';
 
             if ($telMobile.length) {
                 telMobile = $telMobile.val();
@@ -433,7 +435,11 @@ function SavPublicForm() {
                 telPro = $telPro.val();
             }
 
-            if (!telMobile && !telPerso && !telPro) {
+            if ($telOk.length) {
+                telOk = $telOk.val();
+            }
+
+            if (!telMobile && !telPerso && !telPro && !telOk) {
                 check = false;
                 errors.push('Veuillez saisir au moins un numéro de téléphone');
             }

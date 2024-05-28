@@ -221,7 +221,8 @@ class BS_SAV_ExtVersion extends BS_SAV
                     'onclick' => $this->getJsActionOnclick('infoMateriel', array(), array(
                         'form_name' => 'info_materiel'
                     )),
-                     'label' => 'Télécharger'
+                     'label' => 'Télécharger',
+                     'icon_before' => 'upload'
                 )));
         }
         return $html;

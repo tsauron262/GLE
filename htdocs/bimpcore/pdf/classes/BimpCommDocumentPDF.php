@@ -108,7 +108,21 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     }
                 }
 
-                switch (BimpCore::getExtendsEntity()) {
+                $ext_entity = BimpCore::getExtendsEntity();
+
+                if ($ext_entity !== 'bimp' && (int) BimpCore::getConf('pdf_headers_entrepot_address', null, 'bimpcommercial')) {
+                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
+                        $entrepot = new Entrepot($this->db);
+                        $entrepot->fetch($this->object->array_options['options_entrepot']);
+                        if ($entrepot->address != "" && $entrepot->town != "") {
+                            $this->fromCompany->zip = $entrepot->zip;
+                            $this->fromCompany->address = $entrepot->address;
+                            $this->fromCompany->town = $entrepot->town;
+                        }
+                    }
+                }
+
+                switch ($ext_entity) {
                     case 'bimp':
                         if (method_exists($this->object, 'fetch_optionals')) {
                             $this->object->fetch_optionals();
@@ -140,11 +154,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                             }
                         }
                         break;
+
                     case 'champagne':
                         $this->fromCompany->name = 'LDLC APPLE';
-                        break;
-
-                    case 'actimag':
                         break;
                 }
 
@@ -272,7 +284,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         if (BimpObject::objectLoaded($bimpLine) && method_exists($bimpLine, 'displayPdfAboInfos')) {
             $abo_infos = $bimpLine->displayPdfAboInfos();
             if ($abo_infos) {
-                $desc .= ($desc ? '<br/><br/>' : '') . $abo_infos .'<br/>';
+                $desc .= ($desc ? '<br/><br/>' : '') . $abo_infos . '<br/>';
             }
         }
 
@@ -1140,9 +1152,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 if (is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF')) {
                     $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et en boutique pour les particuliers.';
                 } elseif ($this->pdf->addCgvPages) {
-                    $html .= 'Le présent devis est soumis aux conditions générales de ventes annexées et consultables sur le site (<a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)';//'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                    $html .= 'Le présent devis est soumis aux conditions générales de ventes annexées et consultables sur le site (<a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)'; //'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
                 } else {
-                    $html .= 'Le présent devis est soumis aux conditions générales de ventes (<a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)';//Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                    $html .= 'Le présent devis est soumis aux conditions générales de ventes (<a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)'; //Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
                 }
                 $html .= "</span>";
                 $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
@@ -1157,11 +1169,11 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                 $html .= '</p><p style="font-size: 6px; font-style: italic">Merci de noter systématiquement le n° de facture sur votre règlement.';
             }
-            
+
             $html .= "</p>";
 
             $this->writeContent($html);
-        } elseif(BimpCore::getExtendsEntity() === 'champagne'){
+        } elseif (BimpCore::getExtendsEntity() === 'champagne') {
             $html .= '<p style="font-size: 6px; font-style: italic">';
             $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
 En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
@@ -1174,8 +1186,7 @@ En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intér
             $html .= "</span>";
             $html .= "</p>";
             $this->writeContent($html);
-        }
-        else{
+        } else {
             if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv) {
                 $html = '';
                 $html .= '<p style="font-size: 6px; font-style: italic">';

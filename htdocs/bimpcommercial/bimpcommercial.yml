@@ -118,6 +118,12 @@ params:
         def: ''
         
     # PDFs: 
+    pdf_headers_entrepot_address: 
+        label: Afficher l'adresse de l'entrepôt dans l'en-tête des PDF
+        cat: pdfs
+        type: bool
+        def: 0
+        
     pdf_add_cgv: 
         label: Ajouter CGV dans les docs PDF
         cat: pdfs

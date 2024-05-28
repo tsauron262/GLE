@@ -5,10 +5,10 @@ function verif_pw() {
     var confirm_pw = document.getElementById('confirm_pw').value;
     var btn = document.getElementById('public_form_submit');
     
-    var check = true;
+    var check = false;
     
     if (cur_pw && new_pw && confirm_pw && new_pw == confirm_pw) {
-        check = false;
+        check = true;
     }
     
     if (!new_pw || new_pw.length < 8) {
@@ -40,8 +40,8 @@ function verif_pw() {
     }
     
     if (!check) {
-        btn.disabled = false;
-    } else {
         btn.disabled = true;
+    } else {
+        btn.disabled = false;
     }
 }

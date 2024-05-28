@@ -7878,6 +7878,8 @@ class BCT_ContratLine extends BimpObject
                             if (!BimpObject::objectLoaded($prod)) {
                                 $errors[] = 'Le produit #' . $this->getData('fk_product') . ' n\'existe plus';
                             } else {
+                                $prod->isVendable($errors);
+                                
                                 if (!$prod->isAbonnement()) {
                                     $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas de type abonnement';
                                 }

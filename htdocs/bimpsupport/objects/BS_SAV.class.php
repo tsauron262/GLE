@@ -32,6 +32,7 @@ class BS_SAV extends BimpObject
     const BS_SAV_FERME = 999;
     
     public $isClosable = true;
+    public $isRestituable = true;
 
     //reparation en magasin avec retour avant remplacement
     //pas de doublons Réf centre
@@ -1055,16 +1056,18 @@ class BS_SAV extends BimpObject
 //                        }
 //                    }
 
-                        $buttons[] = array(
-                            'label'   => 'Restituer (Payer)',
-                            'icon'    => 'times-circle',
-                            'onclick' => $this->getJsActionOnclick('close', array(
-                                'restitute' => 1,
-//                            'cond_reglement' => $cond_reglement
-                                    ), array(
-                                'form_name' => 'restitute'
-                            ))
-                        );
+                        if($this->isRestituable){
+                            $buttons[] = array(
+                                'label'   => 'Restituer (Payer)',
+                                'icon'    => 'times-circle',
+                                'onclick' => $this->getJsActionOnclick('close', array(
+                                    'restitute' => 1,
+    //                            'cond_reglement' => $cond_reglement
+                                        ), array(
+                                    'form_name' => 'restitute'
+                                ))
+                            );
+                        }
                     } else {
                         $buttons[] = array(
                             'label'   => 'Restituer',

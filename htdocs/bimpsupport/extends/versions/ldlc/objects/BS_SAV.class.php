@@ -217,7 +217,7 @@ class BS_SAV_ExtVersion extends BS_SAV
             if(!$ok){
                 $ok = $this->convertHeic($sav_dir.$file);
             }
-            if(!$ok)
+            if(!$ok){
                 $html .= BimpRender::renderAlerts('Attention le fichier '.$file.' n\'est pas présent. '.BimpRender::renderButton(array(
                     'onclick' => $this->getJsActionOnclick('infoMateriel', array(), array(
                         'form_name' => 'info_materiel'
@@ -225,7 +225,11 @@ class BS_SAV_ExtVersion extends BS_SAV
                      'label' => 'Télécharger',
                      'icon_before' => 'upload'
                 )));
-                $this->isClosable = false;
+                if(BimpCore::getExtendsEntity() == 'actimac')
+                    $this->isRestituable = false;
+                else
+                    $this->isClosable = false;
+            }
         }
         return $html;
     }

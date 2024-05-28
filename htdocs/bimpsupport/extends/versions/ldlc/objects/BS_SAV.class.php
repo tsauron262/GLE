@@ -225,7 +225,10 @@ class BS_SAV_ExtVersion extends BS_SAV
                      'label' => 'Télécharger',
                      'icon_before' => 'upload'
                 )));
-                $this->isClosable = false;
+                if(BimpCore::getExtendsEntity() == 'actimac')
+                    $this->isRestituable = false;
+                else
+                    $this->isClosable = false;
         }
         return $html;
     }

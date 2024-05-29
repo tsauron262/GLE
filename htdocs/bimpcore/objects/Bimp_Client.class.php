@@ -1735,7 +1735,7 @@ class Bimp_Client extends Bimp_Societe
             case 'propales':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'client', 1, null, 'Propositions commerciales du client "' . $client_label . '"');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
-                
+
                 $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'parDay');
                 $graph->addFieldFilterValue('or_client', array(
                     'or' => array(
@@ -1757,7 +1757,7 @@ class Bimp_Client extends Bimp_Societe
                         'id_client_facture' => $this->id
                     )
                 ));
-                
+
                 $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'parDay');
                 $graph->addFieldFilterValue('or_client', array(
                     'or' => array(
@@ -1776,7 +1776,7 @@ class Bimp_Client extends Bimp_Societe
             case 'factures':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Facture'), 'client', 1, null, 'Factures du client "' . $client_label . '"');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
-                
+
                 $graph = new BC_Graph(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'parDay');
                 $graph->addFieldFilterValue('or_client', array(
                     'or' => array(
@@ -2629,11 +2629,17 @@ class Bimp_Client extends Bimp_Societe
             }
 
             if (!empty($prods)) {
+                $now = date('Y-m-d');
+                $dt = new DateTime();
+                $dt->add(new DateInterval('P1M'));
+                $one_monce_from_now = $dt->format('Y-m-d');
+
                 $headers = array(
-                    'prod'    => 'Produit',
-                    'units'   => 'Unités',
-                    'qty'     => 'Qté totale',
-                    'buttons' => ''
+                    'prod'      => 'Produit',
+                    'units'     => 'Unités',
+                    'qty'       => 'Qté totale',
+                    'echeances' => 'Echéances',
+                    'buttons'   => ''
                 );
 
                 $lines_headers = array(
@@ -2653,6 +2659,8 @@ class Bimp_Client extends Bimp_Societe
                 $linked_icon = BimpRender::renderIcon('fas_level-up-alt', '', 'transform: rotate(90deg);font-size: 22px;');
 
                 foreach ($prods as $id_prod => $contrats_lines) {
+                    $echeances = array();
+
                     $units = array(
                         'active'   => 0,
                         'inactive' => 0,
@@ -2711,8 +2719,9 @@ class Bimp_Client extends Bimp_Societe
 
                                 $qty = (float) $line->getData('qty');
                                 $nb_units = ($qty / $duration) * $prod_duration;
+                                $line_statut = (int) $line->getData('statut');
 
-                                switch ((int) $line->getData('statut')) {
+                                switch ($line_statut) {
                                     case -2:
                                     case -1:
                                     case 0:
@@ -2733,9 +2742,16 @@ class Bimp_Client extends Bimp_Societe
 
                                 $dates = '';
 
-                                if ((int) $line->getData('statut') > 0) {
+                                if ($line_statut > 0) {
                                     $dates .= 'Du <b>' . date('d / m / Y', strtotime($line->getData('date_ouverture'))) . '</b>';
                                     $dates .= ' au <b>' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . '</b>';
+
+                                    if (!(int) $line->getData('id_line_renouv')) {
+                                        $date_fin = date('Y-m-d', strtotime($line->getData('date_fin_validite')));
+                                        if (!in_array($date_fin, $echeances)) {
+                                            $echeances[] = $date_fin;
+                                        }
+                                    }
                                 } else {
                                     $dates .= 'Ouverture prévue : ';
                                     $date_ouverture_prevue = $line->getData('date_ouverture_prevue');
@@ -2814,15 +2830,27 @@ class Bimp_Client extends Bimp_Societe
                         $qties_html .= '<span class="danger">Fermées : ' . $qties['closed'] . '</span>';
                     }
 
+                    $echeances_html = '';
+                    if (!empty($echeances)) {
+                        sort($echeances);
+                        foreach ($echeances as $echeance) {
+                            $class = ($echeance > $one_monce_from_now ? 'success' : ($echeance > $now ? 'warning' : 'danger'));
+                            $echeances_html .= ($echeances_html ? '<br/>' : '') . '<span class="' . $class . '">' . date('d / m / Y', strtotime($echeance)) . '</span>';
+                        }
+                    } else {
+                        $echeances_html .= 'Aucune';
+                    }
+
                     $detail_btn = '<span class="openCloseButton open-content" data-parent_level="3" data-content_extra_class="prod_' . $id_prod . '_detail">';
                     $detail_btn .= 'Détail';
                     $detail_btn .= '</span>';
 
                     $rows[] = array(
-                        'prod'    => $desc,
-                        'units'   => $units_html,
-                        'qty'     => $qties_html,
-                        'buttons' => $detail_btn
+                        'prod'      => $desc,
+                        'units'     => $units_html,
+                        'qty'       => $qties_html,
+                        'echeances' => $echeances_html,
+                        'buttons'   => $detail_btn
                     );
 
                     $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
@@ -3199,12 +3227,12 @@ class Bimp_Client extends Bimp_Societe
 
     public function getIdAtradius(&$errors = array())
     {
-        if ($this->isAnonymised()){
+        if ($this->isAnonymised()) {
             $errors[] = 'Impossible de synchro avec une client Annonymisé';
             return 0;
         }
-        
-        
+
+
         if ((int) $this->getData('id_atradius') > 0) {
             return (int) $this->getData('id_atradius');
         }

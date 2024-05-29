@@ -29,7 +29,7 @@
                         
             for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
                 if ($facture->dol_object->lines[$i]->desc == "Acompte" 
-                        && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total_ht')) {
+                        && $facture->dol_object->lines[$i]->total_ht == $facture->getData('total_ht')) {
                     $this->rapport['IGNORE'][$facture->getRef()] = "Facture d'accompte";
                     $facture->updateField('ignore_compta', 1);
                     $facture->updateField('exported',204);
@@ -50,7 +50,7 @@
             $reglement           = $this->db->getRow('c_paiement', 'id = ' . $id_reglement);
             $use_tva             = true;
             $use_d3e             = ($facture->getData('zone_vente') == 1) ? true : false;
-            $TTC                 = $facture->getData('multicurrency_total_ttc');
+            $TTC                 = $facture->getData('total_ttc');
             $controlle_ttc       = round($TTC, 2);          
             $entrepot            = $this->db->getRow('entrepot', 'rowid = ' . ($this->isVenteTicket($facture->id) ? $this->caisse->getData('id_entrepot') : $facture->getData('entrepot')));  
             $code_compta         = ($this->isVenteTicket($facture->id)) ? $entrepot->compte_aux : $this->TRA_tiers->getCodeComptable($client);
@@ -138,7 +138,7 @@
             $ecriture .= implode('', $structure) . "\n";
             
             $total_des_lignes = 0;
-            $total_tva = round($facture->getData('multicurrency_total_tva'),2);
+            $total_tva = round($facture->getData('total_tva'),2);
             $total_ht = 0;
             $total_deee = 0;
             
@@ -151,21 +151,21 @@
                     
                     // Définition du seens comptable de la ligne
                     if($this->sens_facture == "D") { //c'est une facture
-                        $sens = ($line->multicurrency_total_ht > 0) ? "C" : "D";
+                        $sens = ($line->total_ht > 0) ? "C" : "D";
                     }
                     if($this->sens_facture == "C") { //c'est un avoir
-                        $sens = ($line->multicurrency_total_ht > 0) ? "D" : "C";
+                        $sens = ($line->total_ht > 0) ? "D" : "C";
                     }
                     if(!$line->fk_product && method_exists($facture, 'getProdWithFactureType'))
                         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $facture->getProdWithFactureType($line));    
                     else
                         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     
-                    if($line->multicurrency_total_ht != 0) {
+                    if($line->total_ht != 0) {
                         $debug['ZONE_VENTE_' . $line->id] = $facture->getData('zone_vente');
-                        $current_montant = round($line->multicurrency_total_ht, 2);
+                        $current_montant = round($line->total_ht, 2);
                         if($use_d3e) {
-                            $current_montant = round($line->multicurrency_total_ht, 2) - ($product->getData('deee') * $line->qty);
+                            $current_montant = round($line->total_ht, 2) - ($product->getData('deee') * $line->qty);
                             $total_deee += $product->getData('deee') * $line->qty;
                         }
                         $total_ht += round($current_montant, 2);
@@ -185,7 +185,7 @@
                         $debug['CHOIX_COMPTE_' . $line->id] = $line->id . ' => ' . $this->compte_general;
                         $debug['ID_PRODUCT_' . $line->id] = $line->id . ' => ' . $line->fk_product;
                         
-                        $structure['SENS']                  = sizing($this->getSens($line->multicurrency_total_ht),1, true);
+                        $structure['SENS']                  = sizing($this->getSens($line->total_ht),1, true);
                         $structure['COMPTE_GENERAL']        = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true) , 17);
                         $structure['TYPE_DE_COMPTE']        = sizing("", 1);
                         $structure['CODE_AUXILIAIRE']       = sizing("", 16);
@@ -227,7 +227,7 @@
                         $this->compte_general = '44571000';
                     $structure['COMPTE_GENERAL']        = sizing($this->compte_general , 17);
                     $structure['SENS']                  = sizing($this->getSens($total_tva),1);
-                    $structure['MONTANT']               = sizing(abs(round($facture->getData('multicurrency_total_tva'), 2)), 20, true);
+                    $structure['MONTANT']               = sizing(abs(round($facture->getData('total_tva'), 2)), 20, true);
                     if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
                         $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                         $structure['REF_LIBRE']             = sizing("TVA",35);

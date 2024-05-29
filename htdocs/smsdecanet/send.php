@@ -36,6 +36,11 @@ if ($user->societe_id > 0)
 	accessforbidden();
 }
 
+
+if (!$user->admin) {
+	accessforbidden();
+}
+
 $action=GETPOST('action');
 
 

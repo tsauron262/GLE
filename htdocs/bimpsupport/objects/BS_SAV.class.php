@@ -30,6 +30,9 @@ class BS_SAV extends BimpObject
     const BS_SAV_ATT_CLIENT_ACTION = 7;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
+    
+    public $isClosable = true;
+    public $isRestituable = true;
 
     //reparation en magasin avec retour avant remplacement
     //pas de doublons Réf centre
@@ -1003,11 +1006,13 @@ class BS_SAV extends BimpObject
                 if ($this->isActionAllowed('toRestitute')) {
                     if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
                         if (!is_null($propal) && $propal_status > 0) {
-                            $buttons[] = array(
-                                'label'   => 'Réparation terminée',
-                                'icon'    => 'check',
-                                'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
-                            );
+                            if($this->isClosable){
+                                $buttons[] = array(
+                                    'label'   => 'Réparation terminée',
+                                    'icon'    => 'check',
+                                    'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                                );
+                            }
                         }
                     }
 
@@ -1051,16 +1056,18 @@ class BS_SAV extends BimpObject
 //                        }
 //                    }
 
-                        $buttons[] = array(
-                            'label'   => 'Restituer (Payer)',
-                            'icon'    => 'times-circle',
-                            'onclick' => $this->getJsActionOnclick('close', array(
-                                'restitute' => 1,
-//                            'cond_reglement' => $cond_reglement
-                                    ), array(
-                                'form_name' => 'restitute'
-                            ))
-                        );
+                        if($this->isRestituable){
+                            $buttons[] = array(
+                                'label'   => 'Restituer (Payer)',
+                                'icon'    => 'times-circle',
+                                'onclick' => $this->getJsActionOnclick('close', array(
+                                    'restitute' => 1,
+    //                            'cond_reglement' => $cond_reglement
+                                        ), array(
+                                    'form_name' => 'restitute'
+                                ))
+                            );
+                        }
                     } else {
                         $buttons[] = array(
                             'label'   => 'Restituer',
@@ -7665,7 +7672,7 @@ ORDER BY a.val_max DESC");
                                 $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
                             }
 
-                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
+                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . '">espace personnel</a>' . "\n\n";
                             $msg .= 'L’équipe technique ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
 //                            mailSyn2($subject, $to, '', $msg);
@@ -7734,7 +7741,7 @@ ORDER BY a.val_max DESC");
                         $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
                     }
 
-                    $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
+                    $msg .= 'Vous pourrez néanmoins accéder à votre <a href="' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . '">espace personnel</a>, et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
                     $msg .= 'L’équipe technique ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
                     $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');

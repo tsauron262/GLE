@@ -104,7 +104,7 @@ class BV_Rule extends BimpObject
             $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
             if (BimpObject::objectLoaded($group)) {
                 $group_users = $group->getUserGroupUsers(true);
-                foreach ($group_users as $id_user) {
+                foreach ($group_users as $id_user => $user) {
                     if (!in_array($id_user, $users)) {
                         if ($sup_only && !$bimp_user->isUserSuperior($id_user, 100)) {
                             continue;

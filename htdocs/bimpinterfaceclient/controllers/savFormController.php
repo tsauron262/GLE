@@ -65,13 +65,24 @@ class savFormController extends BimpPublicController
                         }
                     } elseif (!is_array($result) || empty($result)) {
                         $fetch_errors[] = 'Aucune réponse reçue';
-                    } else {
-                        $reservation = $result;
+                    } elseif (!is_array($result) || empty($result)) {
+                        $fetch_errors[] = 'Aucune réponse reçue';
+                    } elseif($result['currentStatus'] == 'CANCELLED') {
+                         $errors[] = 'RDV annulé chez Apple';
+                    }
+                    else{
+                        $id_sav = (int) BimpCache::getBdb()->getValue('bs_sav', 'id', 'resgsx = \'' . $res_id . '\'');
+                        if($id_sav > 0)
+                            $errors[] = 'Formulaire déja envoyé';
+                        else{
+                            $reservation = $result;
 
-                        if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') != $reservation['customer']['emailId']) {
-                            // On déco l\'utilisateur client si l'adresse e-mail ne correspond pas
-                            $userClient = null;
-                            $_SESSION['userClient'] = 'none';
+
+                            if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') != $reservation['customer']['emailId']) {
+                                // On déco l\'utilisateur client si l'adresse e-mail ne correspond pas
+                                $userClient = null;
+                                $_SESSION['userClient'] = 'none';
+                            }
                         }
                     }
                 } else {
@@ -246,7 +257,7 @@ class savFormController extends BimpPublicController
                 $html .= 'Un compte utilisateur existe déjà pour l\'adresse e-mail "' . $email . '".<br/>';
                 $html .= '</h3>';
                 $html .= '<h4 style="text-align: center; font-weight: bold" class="info">';
-                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm';
+                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . 'email='.$email.'&back=savForm';
 
                 if (isset($reservation['reservationId']) && isset($reservation['shipToCode'])) {
                     $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];
@@ -256,6 +267,13 @@ class savFormController extends BimpPublicController
 
                 $html .= '</h4>';
                 $html .= '</div>';
+                
+                /* pour vérif des tel */
+                if ((int) $userClient->getData('id_contact')) {
+                    $contact = $userClient->getChildObject('contact');
+                    if($contact->getData('phone') != '' || $contact->getData('phone_perso') != '' || $contact->getData('phone_mobile') != '')
+                        $html .= '<input type="hidden" name="phone_ok" value="1"/>';
+                }
                 return $html;
             } else {
                 // Recherche d'un contact client:                 
@@ -1480,6 +1498,9 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     $reservationDate = $data['sav_slot'];
                 }
             }
+        }
+        else{
+            $reservationDate = $data['sav_slot'];
         }
 
         if (isset($data['eq_serial']) && (string) $data['eq_serial']) {

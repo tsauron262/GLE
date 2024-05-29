@@ -1502,3 +1502,12 @@ searches:
         filters: 
             a.tobuy: 1
     
+functions:
+    - isAbonnement
+    - isBundle
+    - getProductTypeCompta
+    - getSousTypesArray
+    - getCodeComptableAchat
+    - getCodeComptableVente
+    - getCodeComptableVenteTva
+    - getCodeComptableVenteDeee

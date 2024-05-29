@@ -202,6 +202,7 @@ class BS_SAV_ExtVersion extends BS_SAV
         $tabName = explode(' ', $nomClient);
         if((!isset($tabName[1]) || $tabName[1] == '' || $client->getData('fk_typent') != 8) && $this->asProdEcologic()){
             $html .= BimpRender::renderAlerts('! Attention les PROS ne sont pas concernés par le programme QualiRepair !');
+            $this->isClosable = false;
         }
         
         if ($this->asProdEcologic()) {
@@ -216,8 +217,19 @@ class BS_SAV_ExtVersion extends BS_SAV
             if(!$ok){
                 $ok = $this->convertHeic($sav_dir.$file);
             }
-            if(!$ok)
-                $html .= BimpRender::renderAlerts('Attention le fichier '.$file.' n\'est pas présent');
+            if(!$ok){
+                $html .= BimpRender::renderAlerts('Attention le fichier '.$file.' n\'est pas présent. '.BimpRender::renderButton(array(
+                    'onclick' => $this->getJsActionOnclick('infoMateriel', array(), array(
+                        'form_name' => 'info_materiel'
+                    )),
+                     'label' => 'Télécharger',
+                     'icon_before' => 'upload'
+                )));
+                if(BimpCore::getExtendsEntity() == 'actimac')
+                    $this->isRestituable = false;
+                else
+                    $this->isClosable = false;
+            }
         }
         return $html;
     }

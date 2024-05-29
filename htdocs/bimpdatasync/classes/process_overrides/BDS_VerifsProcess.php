@@ -110,21 +110,25 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if (!count($errors)) {
-            $where = 'tms = \'2023-02-03 10:16:35\'';
+//            $where = 'tms > \'2023-02-03 10:16:35\' AND (tms < \'2024-05-21 00:00:00\' OR date_creation > \'2023-01-01 00:00:00\')';
 
-//            if ($date_from || $date_to) {
-//                if ($date_from) {
-//                    $where .= 'tms >= \'' . $date_from . ' 00:00:00\'';
-//                }
-//                if ($date_to) {
-//                    $where .= ($where ? ' AND ' : '') . 'tms <= \'' . $date_to . ' 23:59:59\'';
-//                }
-//            } else {
-//                $tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
-//                if ($tms) {
-//                    $where .= 'tms >= \'' . $tms . '\'';
-//                }
-//            }
+            $where = '';
+
+            if ($date_from || $date_to) {
+                if ($date_from) {
+                    $where .= 'tms >= \'' . $date_from . ' 00:00:00\'';
+                }
+                if ($date_to) {
+                    $where .= ($where ? ' AND ' : '') . 'tms <= \'' . $date_to . ' 23:59:59\'';
+                }
+            } else {
+                $tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
+                if ($tms) {
+                    $where .= 'tms > \'' . $tms . '\'';
+                }
+            }
+
+            $this->debug_content .= '<br/>WHERE : ' . $where . '<br/>';
 
             $rows = $this->db->getRows('commande', $where, null, 'array', array('rowid'), 'tms', 'asc');
             $elements = array();

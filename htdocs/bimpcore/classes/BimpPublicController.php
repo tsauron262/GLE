@@ -117,7 +117,12 @@ class BimpPublicController extends BimpController
                 }
             } elseif ($this->new_pw_file && ((int) BimpTools::getPostFieldValue('bic_change_pw', 0, 'int') || (int) $userClient->getData('renew_required'))) {
                 // Formulaire changement de MDP: 
+                $_SESSION['back_url'] = $_SERVER['REQUEST_URI'];
                 $this->displayChangePwForm(array(), (int) $userClient->getData('renew_required'));
+                exit;
+            }
+            elseif($this->back_url != ''){
+                header('Location: '.$this->back_url);
                 exit;
             }
         }
@@ -325,6 +330,9 @@ class BimpPublicController extends BimpController
             }
 
             $html .= $this->{$method}();
+            
+            if(isset($params['success_url']))
+                $html .= '<input type="hidden" name="success_url" value="' . $params['success_url'] . '"/>';
 
             $html .= '<br/>';
 
@@ -383,10 +391,14 @@ class BimpPublicController extends BimpController
 
     public function displayReinitPwForm($errors = array())
     {
+        print_r($_SESSION);
+        $backUrl = BimpObject::getPublicBaseUrl();
+        if(isset($_SESSION['back_url']))
+            $backUrl = $_SESSION['back_url'];
         $this->displayPublicForm('reinitPw', array(
             'main_title' => 'Réinitialisation de votre mot de passe',
             'sub_title'  => 'Le nouveau mot de passe sera envoyé à l\'adresse e-mail indiquée',
-            'back_url'   => BimpObject::getPublicBaseUrl(),
+            'back_url'   => $backUrl,
             'back_label' => 'Retour'
                 ), $errors);
     }
@@ -397,6 +409,7 @@ class BimpPublicController extends BimpController
             'sub_title'      => ($required ? 'Le changement de votre mot de passe est requis' : 'Modifier votre mot de passe'),
             'submit_label'   => 'Changer mon mot de passe',
             'submit_enabled' => false,
+            'success_url'=> $_SERVER['REQUEST_URI'],
             'back_url'       => BimpObject::getPublicBaseUrl() . ($required ? 'bic_logout=1' : 'tab=infos'),
             'back_label'     => ($required ? 'Déconnexion' : 'Retour')
                 ), $errors);
@@ -408,6 +421,7 @@ class BimpPublicController extends BimpController
     {
         $html = '';
 
+        $_SESSION['back_url'] = $_SERVER['REQUEST_URI'];
         $html .= '<label for="bic_login_email">Email</label><br/>';
         $html .= '<input id="bic_login_email" type="text" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '', 'alphanohtml')) . '">';
         $html .= '<br/><br/>';
@@ -552,9 +566,12 @@ class BimpPublicController extends BimpController
                 }
 
                 if (!count($errors)) {
+                    $backUrl = BimpObject::getPublicBaseUrl();
+                    if(isset($_SESSION['back_url']))
+                        $backUrl = $_SESSION['back_url'];
                     $this->displayPublicForm('reinitPw', array(
                         'success_msg' => 'Votre mot de passe a été réinitialisé avec succès.<br/>Veuillez consulter votre boîte mail pour l\'obtenir',
-                        'back_url'    => BimpObject::getPublicBaseUrl()
+                        'back_url'    => $backUrl
                     ));
                 }
             }
@@ -602,9 +619,12 @@ class BimpPublicController extends BimpController
                 $errors = $userClient->changePassword($new_pw);
 
                 if (!count($errors)) {
+                    $backUrl = BimpObject::getPublicBaseUrl();
+                    if(isset($_SESSION['back_url']))
+                        $backUrl = $_SESSION['back_url'];
                     $this->displayPublicForm('changePw', array(
                         'success_msg' => 'La mise à jour de votre mot de passe a été effectuée avec succès',
-                        'back_url'    => BimpObject::getPublicBaseUrl(),
+                        'back_url'    => $backUrl,
                         'back_label'  => 'Accédez à votre espace client'
                     ));
                 }

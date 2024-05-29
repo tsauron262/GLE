@@ -71,6 +71,7 @@ class BimpObject extends BimpCache
 //        'lists'                    => array('type' => 'keys'),
 //        'cards'                    => array('type' => 'keys'),
 //        'searches'                 => array('type' => 'keys'),
+        'functions'                => array('type' => 'array'),
     );
     public static $check_on_create = 1;
     public static $check_on_update = 1;
@@ -8359,6 +8360,27 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return $list->renderHtml();
     }
+    
+    public function renderFunctions()
+    {
+        $html = '';
+        
+        $functions = array('getLink', 'getFilesDir');
+        $functions = BimpTools::merge_array($functions, $this->getConf('functions/', array()));
+        
+        foreach($functions as $data){
+            if(!is_array($data)){
+                $title = $data.'()';
+                eval ('$content = $this->'.$data.'();');
+                if(is_array($content))
+                    $content = '<pre>'.print_r($content,1).'</pre>';
+                $html .= BimpRender::renderPanel($title, $content);
+            }
+        }
+        
+        
+        return $html;
+    }
 
     public function renderAllAssociationsLists()
     {
@@ -8696,6 +8718,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'title'         => 'Toutes les associations',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderAllAssociationsLists', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
+        );
+
+        $idHtml = 'object_divers_fonctions';
+        $tabs[] = array(
+            'id'            => $idHtml,
+            'title'         => 'Fonctions',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderFunctions', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );
 
         $html = "<h1>" . $this->getName() . " (" . get_class($this) . ")</h2>";

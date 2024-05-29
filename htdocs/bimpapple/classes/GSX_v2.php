@@ -980,7 +980,7 @@ class GSX_v2 extends GSX_Const
             'shipToCode'      => $shipTo,
             'toDate'          => $dt_to->format(DateTime::ATOM),
             'fromDate'        => $dt_from->format(DateTime::ATOM),
-            'currentStatus'   => 'RESERVED',
+//            'currentStatus'   => 'RESERVED',
             'reservationType' => 'CIN'
         );
 

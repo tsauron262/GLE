@@ -1247,12 +1247,12 @@ class BC_ListTable extends BC_List
             $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartContainer" style="height: 800px; width: 100%;"></div>';
             $html .= '<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
             $html .= '<script>';
-            $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \'' . $this->identifier . "')".$actionRefresh."});";
+            $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \'' . $this->identifier . "')" . $actionRefresh . "});";
             if ($dataGraph['mode_data'] == 'objects')
-                $html .= "$('#" . $this->identifier . "').on('listRefresh', function(){".$actionRefresh."});";
+                $html .= "$('#" . $this->identifier . "').on('listRefresh', function(){" . $actionRefresh . "});";
             $html .= '
-              $( "#'.$this->identifier . '_' . $idGraph . '_chartOption").on("refresh", function() {
-                '.$actionRefresh.'
+              $( "#' . $this->identifier . '_' . $idGraph . '_chartOption").on("refresh", function() {
+                ' . $actionRefresh . '
               });';
             $html .= '</script>';
         }
@@ -2792,11 +2792,13 @@ class BC_ListTable extends BC_List
                                     }
                                 }
 
-                                $value = BimpTools::replaceBr($value);
-                                $value = strip_tags($value);
-                                $value = html_entity_decode($value);
-                                $value = str_replace($separator, '', $value);
-                                $value = str_replace('"', '""', $value);
+                                if (is_string($value)) {
+                                    $value = BimpTools::replaceBr($value);
+                                    $value = strip_tags($value);
+                                    $value = html_entity_decode($value);
+                                    $value = str_replace($separator, '', $value);
+                                    $value = str_replace('"', '""', $value);
+                                }
 
                                 $line .= ($line ? $separator : '') . '"' . $value . '"';
                             }

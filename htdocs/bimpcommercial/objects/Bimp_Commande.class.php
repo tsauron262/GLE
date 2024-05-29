@@ -5126,21 +5126,27 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $where = 'tms > \'2024-05-22 00:00:00\''; // Jour de mise en place du cron sur Bimp
         }
 
-        $rows = self::getBdb()->getRows('commande', $where, 500, 'array', array('rowid'), 'tms', 'asc');
+        $rows = self::getBdb()->getRows('commande', $where, null, 'array', array('rowid'), 'tms', 'asc');
 
         $nchecked = 0;
 
         if (is_array($rows)) {
-            foreach ($rows as $r) {
-                $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
-                if (BimpObject::objectLoaded($commande)) {
-                    $nchecked++;
-                    $commande->checkMarge();
+            if (count($rows) > 1000) {
+                bimpcore::addlog('Cron vérfis marges commandes : trop de commande à vérifier (' . count($rows) . ') - exécution via BDS nécessaire', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial');
+            } else {
+                foreach ($rows as $r) {
+                    $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+                    if (BimpObject::objectLoaded($commande)) {
+                        $nchecked++;
+                        $commande->checkMarge();
+                    }
                 }
+
+                BimpCore::setConf('commandes_marges_last_check_tms', date('Y-m-d H:i:s'));
             }
         }
 
-        BimpCore::setConf('commandes_marges_last_check_tms', date('Y-m-d H:i:s'));
+
 
         return $nchecked . ' commande(s) vérifée(s)';
     }

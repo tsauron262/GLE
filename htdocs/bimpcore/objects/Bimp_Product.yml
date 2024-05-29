@@ -661,7 +661,12 @@ fields:
     variable_qty: 
         label: Abonnement à conso variable
         type: bool
-        default_value: 0        
+        default_value: 0      
+        
+    variable_pu_ht: 
+        label: Abonnement à prix de vente variable 
+        type: bool
+        default_value: 0      
         
     variable_qty_unit: 
         label: Type d'unité pour les consos variables
@@ -1045,6 +1050,8 @@ fields_tables:
             - field: fac_def_periodicity
               edit: 1
             - field: fac_def_terme
+              edit: 1
+            - field: variable_pu_ht
               edit: 1
             - field: variable_qty
               edit: 1

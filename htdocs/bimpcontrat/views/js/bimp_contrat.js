@@ -160,6 +160,7 @@ function BimpContrat() {
                 var fac_idx = parseInt($line_row.data('fac_idx'));
                 var id_line = parseInt($line_row.data('id_line'));
                 var nb_periods = parseInt($line_row.find('input.line_nb_periods').val());
+                var subprice = null;
 
                 if (isNaN(nb_periods)) {
                     $line_row.addClass('has_errors');
@@ -181,6 +182,21 @@ function BimpContrat() {
                             has_errors = true;
                         }
                     }
+                    $input = $line_row.find($('input[name="line_' + id_line + '_subprice"]'));
+                    if ($input.length) {
+                        var subprice = parseFloat($input.val());
+                        if (isNaN(subprice)) {
+                            $line_row.addClass('has_errors');
+                            subprice = 0;
+                            bimp_msg('Ligne #' + id_line + ' : prix de vente invalide', 'danger');
+                            has_errors = true;
+                        } else if (!subprice) {
+                            $line_row.addClass('has_errors');
+                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir un prix de vente à facturer supérieur à 0', 'danger');
+                            has_errors = true;
+                        }
+                    }
+
                     if (typeof (clients[id_client]) === 'undefined') {
                         clients[id_client] = {};
                     }
@@ -203,16 +219,47 @@ function BimpContrat() {
                     var sub_lines = {};
 
                     $form.find('tr.line_' + id_line + '_sub_line').each(function () {
+                        var $sub_line_row = $(this);
                         var id_sub_line = parseInt($(this).data('id_line'));
 
                         if (!isNaN(id_sub_line) && id_sub_line) {
-                            var $input = $(this).find($('input[name="line_' + id_sub_line + '_total_qty"]'));
+                            var sub_line_data = {};
+                            var $input = $sub_line_row.find($('input[name="line_' + id_sub_line + '_total_qty"]'));
 
                             if ($input.length) {
-                                sub_lines[id_sub_line] = {
-                                    'total_qty': parseFloat($input.val())
-                                };
+                                var sub_line_total_qty = parseFloat($input.val());
+                                if (isNaN(sub_line_total_qty)) {
+                                    $sub_line_row.addClass('has_errors');
+                                    total_qty = 0;
+                                    bimp_msg('Sous-ligne #' + id_sub_line + ' : Quantité totale à facturer invalide', 'danger');
+                                    has_errors = true;
+                                } else if (!sub_line_total_qty) {
+                                    $sub_line_row.addClass('has_errors');
+                                    bimp_msg('Sous-ligne #' + id_line + ' : Veuillez saisir une quantité totale à facturer supérieure à 0', 'danger');
+                                    has_errors = true;
+                                } else {
+                                    sub_line_data['total_qty'] = sub_line_total_qty;
+                                }
                             }
+
+                            $input = $sub_line_row.find($('input[name="line_' + id_sub_line + '_subprice"]'));
+                            if ($input.length) {
+                                var sub_line_subprice = parseFloat($input.val());
+                                if (isNaN(sub_line_subprice)) {
+                                    $sub_line_row.addClass('has_errors');
+                                    sub_line_subprice = 0;
+                                    bimp_msg('Sous-ligne #' + id_sub_line + ' : prix de vente invalide', 'danger');
+                                    has_errors = true;
+                                } else if (!sub_line_subprice) {
+                                    $sub_line_row.addClass('has_errors');
+                                    bimp_msg('Sous-ligne #' + id_sub_line + ' : Veuillez saisir un prix de vente à facturer supérieur à 0', 'danger');
+                                    has_errors = true;
+                                } else {
+                                    sub_line_data['subprice'] = sub_line_subprice;
+                                }
+                            }
+
+                            sub_lines[id_sub_line] = sub_line_data;
                         }
                     });
 
@@ -220,6 +267,7 @@ function BimpContrat() {
                         'id_line': id_line,
                         'nb_periods': nb_periods,
                         'total_qty': total_qty,
+                        'subprice': subprice,
                         'sub_lines': sub_lines
                     });
                 }

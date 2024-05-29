@@ -242,6 +242,12 @@ fields:
         values: 
             array: nbRenouvellements
             
+    variable_pu_ht: 
+        label: Abonnement à prix de vente variable
+        type: bool
+        default_value: 0
+        depends_on: fk_product
+        
     variable_qty: 
         label: Abonnement à quantité variable
         type: bool
@@ -426,6 +432,7 @@ forms:
             - field: date_fac_start
             - field: fac_periodicity
             - field: fac_term
+            - field: variable_pu_ht
             - field: variable_qty
             - field: duration
             - custom: 1
@@ -825,6 +832,7 @@ fields_tables:
             - label: nombre total de périodes
               value: 
                   callback: getFacNbPeriods
+            - field: variable_pu_ht
             - field: variable_qty
             - label: Qté par période
               value: 

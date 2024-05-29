@@ -122,7 +122,7 @@ class BDS_VerifsProcess extends BDSProcess
             } else {
                 $tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
                 if ($tms) {
-                    $where .= 'tms >= \'' . $tms . '\'';
+                    $where .= 'tms > \'' . $tms . '\'';
                 }
             }
 

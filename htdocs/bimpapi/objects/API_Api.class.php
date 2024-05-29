@@ -146,7 +146,7 @@ class API_Api extends BimpObject
 
     public static function getApisArray($include_empty = false, $active_only = true, $key = 'name')
     {
-        $conf;
+        global $conf;
         $cache_key = 'bimp_apis_array_by_' . $key.'_'.$conf->entity;
 
         if ($active_only) {

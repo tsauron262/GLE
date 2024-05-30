@@ -399,17 +399,19 @@ class Bimp_CommandeLine extends ObjectLine
                 $type = (int) $this->getData('type');
                 $reserved_qties = $this->getReservedQties();
                 $product = $this->getProduct();
+                $full_qty = $this->getFullQty();
 
                 if ($type === self::LINE_PRODUCT && $this->canSetAction('addToCommandeFourn') && !(int) $this->getData('id_contrat_line_export')) {
                     if (BimpObject::objectLoaded($product)) {
-                        if ((int) $product->getData('fk_product_type') !== 0 || (isset($reserved_qties['status'][0]) && $reserved_qties['status'][0] > 0))
+                        if ($full_qty < 0 || ((int) $product->getData('fk_product_type') !== 0 || (isset($reserved_qties['status'][0]) && $reserved_qties['status'][0] > 0))) {
                             $buttons[] = array(
-                                'label'   => 'Commander',
+                                'label'   => ($full_qty >= 0 ? 'Commander' : 'Retour fournisseur'),
                                 'icon'    => 'fas_cart-arrow-down',
                                 'onclick' => $this->getJsActionOnclick('addToCommandeFourn', array(), array(
                                     'form_name' => 'commande_fourn'
                                 ))
                             );
+                        }
                     }
                 }
 
@@ -2610,12 +2612,12 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        if ($id_fourn /*&& $id_entrepot*/) {
+        if ($id_fourn /* && $id_entrepot */) {
             $sql = 'SELECT cf.rowid as id, cf.ref, cf.date_creation as date, s.nom FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur cf';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cfe ON cf.rowid = cfe.fk_object';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON s.rowid = cf.fk_soc';
             $sql .= ' WHERE cf.fk_soc = ' . (int) $id_fourn . ' AND cf.fk_statut = 0';
-            if($id_entrepot)
+            if ($id_entrepot)
                 $sql .= ' AND cfe.entrepot = ' . (int) $id_entrepot;
             $sql .= ' ORDER BY cf.rowid DESC';
 
@@ -3148,6 +3150,13 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
         } else {
+            $cf_qty = $this->getBoughtQty();
+            if ($cf_qty < 0) {
+                $html .= '<div class="bold">';
+                $html .= 'Qté retournée au fournisseur : ';
+                $html .= '<span class="badge badge-info">' . $cf_qty . '</span>';
+                $html .= '</div>';
+            }
             if ($this->isProductSerialisable()) {
                 // Liste des équipements retournés:
 
@@ -4550,79 +4559,112 @@ class Bimp_CommandeLine extends ObjectLine
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
+            $full_qty = $this->getFullQty();
             $ordered_qty = $this->getBoughtQty();
 
-            if ($product->isSerialisable() || (!(int) $this->getData('achat_periodicity') && $product->isTypeProduct())) {
-                $max = $this->getReservationsQties(0);
-                $min = 1;
-                $decimals = 0;
-            } else {
-                $max = $this->getFullQty() - $ordered_qty;
-                $min = 0.000001;
-                $decimals = 6;
-            }
-
-
-            $periods_data = null;
-            $qty_per_period = null;
-
-            if ((int) $this->getData('achat_periodicity')) {
-                $periods_data = $this->getNbPeriodesToBuyData();
-                $qty_per_period = $this->getAchatQtyFor1Periode();
-                $value = $qty_per_period * $periods_data['nb_periods_tobuy_today'];
-
-                if ($min === 1) {
-                    if ($value < 1 && $value > 0) {
-                        $value = 1;
-                    } else {
-                        $value = floor($value);
-                    }
+            if ($full_qty >= 0) {
+                if ($product->isSerialisable() || (!(int) $this->getData('achat_periodicity') && $product->isTypeProduct())) {
+                    $max = $this->getReservationsQties(0);
+                    $min = 1;
+                    $decimals = 0;
+                } else {
+                    $max = $full_qty - $ordered_qty;
+                    $min = 0.000001;
+                    $decimals = 6;
                 }
 
-                if ($value > $max) {
+
+                $periods_data = null;
+                $qty_per_period = null;
+
+                if ((int) $this->getData('achat_periodicity')) {
+                    $periods_data = $this->getNbPeriodesToBuyData();
+                    $qty_per_period = $this->getAchatQtyFor1Periode();
+                    $value = $qty_per_period * $periods_data['nb_periods_tobuy_today'];
+
+                    if ($min === 1) {
+                        if ($value < 1 && $value > 0) {
+                            $value = 1;
+                        } else {
+                            $value = floor($value);
+                        }
+                    }
+
+                    if ($value > $max) {
+                        $value = $max;
+                    }
+                } else {
                     $value = $max;
                 }
-            } else {
-                $value = $max;
-            }
 
-            if ($max > 0) {
-                $html .= BimpInput::renderInput('qty', 'qty', $value, array(
-                            'data'      => array(
-                                'data_type' => 'number',
-                                'min'       => $min,
-                                'max'       => $max,
-                                'decimals'  => $decimals
-                            ),
-                            'max_label' => 1
-                ));
+                if ($max > 0) {
+                    $html .= BimpInput::renderInput('qty', 'qty', $value, array(
+                                'data'      => array(
+                                    'data_type' => 'number',
+                                    'min'       => $min,
+                                    'max'       => $max,
+                                    'decimals'  => $decimals
+                                ),
+                                'max_label' => 1
+                    ));
 
-                $msg = '';
-                if ((int) $this->getData('achat_periodicity')) {
-                    $msg = 'Achat périodique tous les <b>' . $this->getData('achat_periodicity') . ' mois</b><br/>';
-                    $msg .= '<b>' . $qty_per_period . ' unité' . ($qty_per_period > 1 ? 's' : '') . '</b> par achat périodique<br/>';
+                    $msg = '';
+                    if ((int) $this->getData('achat_periodicity')) {
+                        $msg = 'Achat périodique tous les <b>' . $this->getData('achat_periodicity') . ' mois</b><br/>';
+                        $msg .= '<b>' . $qty_per_period . ' unité' . ($qty_per_period > 1 ? 's' : '') . '</b> par achat périodique<br/>';
 
-                    if ($periods_data['start_date']) {
-                        $dt = new DateTime($periods_data['start_date']);
-                        $msg .= '<b>1er achat: </b>' . $dt->format('d / m / Y') . '<br/>';
+                        if ($periods_data['start_date']) {
+                            $dt = new DateTime($periods_data['start_date']);
+                            $msg .= '<b>1er achat: </b>' . $dt->format('d / m / Y') . '<br/>';
+                        }
+
+                        $msg .= '<b>Nombre d\'achat  déjà effectués: </b>' . $periods_data['nb_periods_bought'] . '<br/>';
+                        $msg .= '<b>Achats à effectuer à date: </b>' . $periods_data['nb_periods_tobuy_today'] . ' (<b>' . ($qty_per_period * $periods_data['nb_periods_tobuy_today']) . ' unité(s)</b>)<br/>';
+                    } elseif ($ordered_qty > 0) {
+                        if (($ordered_qty > 1)) {
+                            $msg = $ordered_qty . ' unités ont déjà été commandées';
+                        } else {
+                            $msg = $ordered_qty . ' unité a déjà été commandée';
+                        }
                     }
 
-                    $msg .= '<b>Nombre d\'achat  déjà effectués: </b>' . $periods_data['nb_periods_bought'] . '<br/>';
-                    $msg .= '<b>Achats à effectuer à date: </b>' . $periods_data['nb_periods_tobuy_today'] . ' (<b>' . ($qty_per_period * $periods_data['nb_periods_tobuy_today']) . ' unité(s)</b>)<br/>';
-                } elseif ($ordered_qty > 0) {
-                    if (($ordered_qty > 1)) {
-                        $msg = $ordered_qty . ' unités ont déjà été commandées';
+                    if ($msg) {
+                        $html .= BimpRender::renderAlerts($msg, 'info');
+                    }
+                } else {
+                    $html .= '<input type="hidden" name="qty" value="0"/>';
+                    $html .= BimpRender::renderAlerts('Il ne reste aucune unité à commander');
+                }
+            } else {
+                $min = $full_qty - $ordered_qty;
+                if ($product->isSerialisable()) {
+                    $max = -1;
+                    $decimals = 0;
+                } else {
+                    $max = -0.000001;
+                    $decimals = 6;
+                }
+
+                if ($min < 0) {
+                    $html .= BimpInput::renderInput('qty', 'qty', $min, array(
+                                'data'      => array(
+                                    'data_type' => 'number',
+                                    'min'       => $min,
+                                    'max'       => $max,
+                                    'decimals'  => $decimals
+                                ),
+                                'min_label' => 1
+                    ));
+
+                    if (($ordered_qty < 1)) {
+                        $msg = abs($ordered_qty) . ' unités ont déjà été retournées au fournisseur';
                     } else {
-                        $msg = $ordered_qty . ' unité a déjà été commandée';
+                        $msg = abs($ordered_qty) . ' unité a déjà été retournée au fournisseur';
                     }
+                } else {
+                    $html .= '<input type="hidden" name="qty" value="0"/>';
+                    $html .= BimpRender::renderAlerts('Il ne reste aucune unité à retourner');
                 }
-
-                if ($msg) {
-                    $html .= BimpRender::renderAlerts($msg, 'info');
-                }
-            } else {
-                $html .= '<input type="hidden" name="qty" value="0"/>';
-                $html .= BimpRender::renderAlerts('Il ne reste aucune unité à commander');
             }
         } else {
             $html .= '<input type="hidden" name="qty" value="0"/>';

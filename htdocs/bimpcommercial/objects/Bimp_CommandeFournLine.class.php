@@ -658,29 +658,45 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $commande = $this->getParentInstance();
 
             if (BimpObject::objectLoaded($commande) && (int) $this->id_product) {
-                BimpObject::loadClass('bimpequipment', 'BE_Place');
-                $sql = BimpTools::getSqlSelect(array('a.id', 'a.serial'));
-                $sql .= BimpTools::getSqlFrom('be_equipment', array(
-                            'p' => array(
-                                'table' => 'be_equipment_place',
-                                'alias' => 'p',
-                                'on'    => 'p.id_equipment = a.id'
-                            )
-                ));
-                $sql .= BimpTools::getSqlWhere(array(
-                            'a.id_product'  => (int) $this->id_product,
-                            'p.position'    => 1,
-                            'p.type'        => BE_Place::BE_PLACE_ENTREPOT,
-                            'p.id_entrepot' => (int) $commande->getData('entrepot')
-                ));
+                $id_entrepot = (int) $commande->getData('entrepot');
 
-                $rows = self::getBdb()->executeS($sql, 'array');
+//                $comm_line = null;
+//                if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
+//                    $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+//                }
+//
+//                if (BimpObject::objectLoaded($comm_line)) {
+//                    $return_eqs = $comm_line->getData('equipments_returned');
+//
+//                    foreach ($return_eqs as $id_eq => $eq_price) {
+//                        $serial = $this->db->getValue('be_equipment', 'serial', 'id = ' . $id_eq);
+//                        $items[$id_eq] = ($serial ? $serial : 'Equipment #' . $id_eq);
+//                    }
+//                } else {
+                    BimpObject::loadClass('bimpequipment', 'BE_Place');
+                    $sql = BimpTools::getSqlSelect(array('a.id', 'a.serial'));
+                    $sql .= BimpTools::getSqlFrom('be_equipment', array(
+                                'p' => array(
+                                    'table' => 'be_equipment_place',
+                                    'alias' => 'p',
+                                    'on'    => 'p.id_equipment = a.id'
+                                )
+                    ));
+                    $sql .= BimpTools::getSqlWhere(array(
+                                'a.id_product'  => (int) $this->id_product,
+                                'p.position'    => 1,
+                                'p.type'        => BE_Place::BE_PLACE_ENTREPOT,
+                                'p.id_entrepot' => $id_entrepot
+                    ));
 
-                if (!is_null($rows)) {
-                    foreach ($rows as $r) {
-                        $items[(int) $r['id']] = $r['serial'];
+                    $rows = self::getBdb()->executeS($sql, 'array');
+
+                    if (!is_null($rows)) {
+                        foreach ($rows as $r) {
+                            $items[(int) $r['id']] = $r['serial'];
+                        }
                     }
-                }
+//                }
 
                 foreach ($items as $id_equipment => $label) {
                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
@@ -689,10 +705,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         continue;
                     }
                     $err = array();
-                    if (!$equipment->isAvailable((int) $commande->getData('entrepot'), $err, array(), array('sav'))) {
+                    if (!$equipment->isAvailable($id_entrepot, $err, array(), array('sav'))) {
                         unset($items[$id_equipment]);
                     }
                 }
+                
             }
         }
 

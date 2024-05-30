@@ -218,13 +218,25 @@ searches:
         label_syntaxe: 'Réparation n°<a.repair_number> - N° de série: <a.serial>'
         
         
+filters_panels: 
+    default: 
+        filters: 
+            id_sav:
+            repair_number:
+            date_create:
+            closed:
+            date_closed:
+            ready_for_pick_up:
+            repair_complete:
 lists: 
     default: 
         title: Liste des Repa GSX
         configurable: 1
+        filters_panel: default
         cols:
             id_sav:
             repair_number:
+            date_create:
             closed:
             date_closed:
             ready_for_pick_up:

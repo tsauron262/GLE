@@ -145,20 +145,20 @@ class BCT_ContratLine extends BimpObject
 
         $status = (int) $this->getData('statut');
 
-        if (!$force_edit && $status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_qty', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start'))) {
+        if (!$force_edit && $status > 0 && in_array($field, array('fk_product', 'qty', 'price_ht', 'subprice', 'tva_tx', 'remise_percent', 'fac_periodicity', 'duration', 'variable_pu_ht', 'variable_qty', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start'))) {
             return 0;
         }
 
-        if ((int) $this->getData('id_parent_line') && in_array($field, array('fac_periodicity', 'duration', 'fac_term', 'nb_renouv', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start', 'variable_qty'))) {
+        if ((int) $this->getData('id_parent_line') && in_array($field, array('fac_periodicity', 'duration', 'fac_term', 'nb_renouv', 'date_ouverture_prevue', 'date_fac_start', 'date_achat_start', 'variable_qty', 'variable_pu_ht'))) {
             return 0;
         }
 
-        if ($this->isLoaded() && (int) $this->getData('id_linked_line') && in_array($field, array('fac_periodicity', 'achat_periodicity', 'duration', 'fac_term', 'nb_renouv', 'variable_qty'))) {
+        if ($this->isLoaded() && (int) $this->getData('id_linked_line') && in_array($field, array('fac_periodicity', 'achat_periodicity', 'duration', 'fac_term', 'nb_renouv', 'variable_qty', 'variable_pu_ht'))) {
             return 0;
         }
 
 
-        if (in_array($field, array('achat_periodicity', 'variable_qty'))) {
+        if (in_array($field, array('achat_periodicity', 'variable_qty', 'variable_pu_ht'))) {
             if ((int) $this->getData('fk_product')) {
                 $product = $this->getChildObject('product');
                 if (BimpObject::objectLoaded($product) && $product->isBundle()) {
@@ -821,6 +821,9 @@ class BCT_ContratLine extends BimpObject
                     }
                     return $def_periodicity;
 
+                case 'variable_pu_ht':
+                    return (int) $prod->getData('variable_pu_ht');
+
                 case 'variable_qty':
                     return (int) $prod->getData('variable_qty');
 
@@ -854,6 +857,7 @@ class BCT_ContratLine extends BimpObject
             case 'buy_price_ht':
             case 'fac_periodicity':
             case 'achat_periodicity':
+            case 'variable_pu_ht':
             case 'variable_qty':
             case 'description':
                 if ((int) $this->getData('fk_product') !== (int) $this->getInitData('fk_product') ||
@@ -1711,7 +1715,7 @@ class BCT_ContratLine extends BimpObject
         $data = array();
 
         $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
-        $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('f.rowid as id_facture', 'a.date_start', 'a.date_end', 'a.qty', 'fl.linked_object_name'), array(
+        $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('f.rowid as id_facture', 'a.date_start', 'a.date_end', 'a.qty', 'fl.linked_object_name', 'a.subprice as pu_ht'), array(
                     'f.type'                => array(0, 1, 2),
                     'f.fk_statut'           => array(0, 1, 2),
                     'f.fk_facture_source'   => array(
@@ -1747,6 +1751,7 @@ class BCT_ContratLine extends BimpObject
                         'from'       => date('Y-m-d', strtotime($r['date_start'])),
                         'to'         => date('Y-m-d', strtotime($r['date_end'])),
                         'qty'        => $r['qty'],
+                        'pu_ht'      => (float) $r['pu_ht'],
                         'is_regul'   => ($r['linked_object_name'] == 'contrat_line_regul' ? 1 : 0)
                     );
                 }
@@ -1774,7 +1779,7 @@ class BCT_ContratLine extends BimpObject
     {
         $data = array();
 
-        $sql = BimpTools::getSqlFullSelectQuery('commande_fournisseurdet', array('cf.rowid as id_cf', 'cfl.id as id_line', 'a.date_start', 'a.date_end', '(a.qty + cfl.qty_modif) as full_qty', 'cfl.linked_object_name'), array(
+        $sql = BimpTools::getSqlFullSelectQuery('commande_fournisseurdet', array('cf.rowid as id_cf', 'cfl.id as id_line', 'a.date_start', 'a.date_end', '(a.qty + cfl.qty_modif) as full_qty', 'cfl.linked_object_name', 'a.subprice as pa_ht'), array(
                     'cf.fk_statut'           => array(
                         'operator' => '<',
                         'value'    => 6
@@ -1806,6 +1811,7 @@ class BCT_ContratLine extends BimpObject
                         'from'     => date('Y-m-d', strtotime($r['date_start'])),
                         'to'       => date('Y-m-d', strtotime($r['date_end'])),
                         'qty'      => $r['full_qty'],
+                        'pa_ht'    => (float) $r['pa_ht'],
                         'is_regul' => ($r['linked_object_name'] == 'contrat_line_regul' ? 1 : 0)
                     );
                 }
@@ -2492,6 +2498,10 @@ class BCT_ContratLine extends BimpObject
                     }
                 }
 
+                if ((int) $this->getData('variable_pu_ht')) {
+                    $html .= '<span style="display: inline-block" class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Abonnement à prix de vente variable</span><br/>';
+                }
+
                 $is_variable = (int) $this->getData('variable_qty');
                 if ($is_variable) {
                     $html .= '<span style="display: inline-block" class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Abonnement à qtés variables</span><br/>';
@@ -3164,6 +3174,7 @@ class BCT_ContratLine extends BimpObject
             $html .= '<th>Contrat</th>';
             $html .= '<th>Produit / service</th>';
             $html .= '<th>Quantités</th>';
+            $html .= '<th>PU HT</th>';
             $html .= '<th>Date prochaine facturation</th>';
             $html .= '</tr>';
             $html .= '</thead>';
@@ -3497,6 +3508,26 @@ class BCT_ContratLine extends BimpObject
                                     }
 
                                     $row_html .= '</td>';
+
+                                    $row_html .= '<td>';
+                                    if ((int) $line->getData('variable_pu_ht')) {
+                                        $row_html .= '<p class="warning">';
+                                        $row_html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'PU HT à renseigner';
+                                        $row_html .= '</p>';
+
+                                        $row_html .= BimpInput::renderInput('text', 'line_' . $line->id . '_subprice', (float) $line->getData('subprice'), array(
+                                                    'data'        => array(
+                                                        'data_type' => 'number',
+                                                        'decimals'  => 7
+                                                    ),
+                                                    'addon_right' => '<i class="fa fa-' . BimpTools::getCurrencyIcon('EUR') . '"></i>',
+                                                    'style'       => 'width: 120px'
+                                        ));
+                                    } else {
+                                        $row_html .= BimpTools::displayMoneyValue($line->getData('subprice'));
+                                    }
+                                    $row_html .= '</td>';
+
                                     $row_html .= '<td style="text-align: center">';
                                     $row_html .= '<b>' . date('d / m / Y', strtotime($periods_data['date_next_facture'])) . '</b>';
                                     $row_html .= '</td>';
@@ -4170,6 +4201,8 @@ class BCT_ContratLine extends BimpObject
         $last_achat_date_to = '';
         $last_fac_date_to = '';
 
+        $variable_pu_ht = (int) $this->getData('variable_pu_ht');
+
         $html .= '<table style="width: 100%">';
         $html .= '<tbody>';
         $html .= '<tr>';
@@ -4182,6 +4215,11 @@ class BCT_ContratLine extends BimpObject
         $html .= '<tr>';
         $html .= '<th>Période</th>';
         $html .= '<th style="text-align: center">Qté achetée</th>';
+
+        if ($variable_pu_ht) {
+            $html .= '<th style="text-align: center">PA HT</th>';
+        }
+
         $html .= '<th style="text-align: center">Qté réceptionnée</th>';
         $html .= '</tr>';
         $html .= '</thead>';
@@ -4200,6 +4238,11 @@ class BCT_ContratLine extends BimpObject
                 }
                 $html .= '</td>';
                 $html .= '<td  style="text-align: center">' . $achat['qty'] . '</td>';
+                
+                if ($variable_pu_ht) {
+                    $html .= '<td  style="text-align: center">' . BimpTools::displayMoneyValue($achat['pa_ht']) . '</td>';
+                }
+                
                 $html .= '<td  style="text-align: center">';
                 $cf_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $achat['id_line']);
                 if (BimpObject::objectLoaded($cf_line)) {
@@ -4259,6 +4302,9 @@ class BCT_ContratLine extends BimpObject
         $html .= '<tr>';
         $html .= '<th>Période</th>';
         $html .= '<th style="text-align: center">Qté facturée</th>';
+        if ($variable_pu_ht) {
+            $html .= '<th style="text-align: center">PU HT</th>';
+        }
         $html .= '</tr>';
         $html .= '</thead>';
 
@@ -4276,6 +4322,9 @@ class BCT_ContratLine extends BimpObject
                 }
                 $html .= '</td>';
                 $html .= '<td  style="text-align: center">' . $fac['qty'] . '</td>';
+                if ($variable_pu_ht) {
+                    $html .= '<td  style="text-align: center">' . BimpTools::displayMoneyValue($fac['pu_ht']) . '</td>';
+                }
                 $html .= '</tr>';
 
                 $total_fac_qty += $fac['qty'];
@@ -5126,7 +5175,7 @@ class BCT_ContratLine extends BimpObject
             $lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
                         'id_linked_line' => $this->id
             ));
-            
+
             if (!empty($lines)) {
                 foreach ($lines as $line) {
                     $err = array();
@@ -7072,6 +7121,7 @@ class BCT_ContratLine extends BimpObject
                         'id_line'    => (int) BimpTools::getArrayValueFromPath($line_data, 'id_line', 0),
                         'nb_periods' => (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0),
                         'total_qty'  => (float) BimpTools::getArrayValueFromPath($line_data, 'total_qty', 0),
+                        'subprice'   => (float) BimpTools::getArrayValueFromPath($line_data, 'subprice', 0),
                         'sub_lines'  => BimpTools::getArrayValueFromPath($line_data, 'sub_lines', array()),
                     ));
                 }
@@ -7139,6 +7189,7 @@ class BCT_ContratLine extends BimpObject
 
                                 $id_line = BimpTools::getArrayValueFromPath($line_data, 'id_line', 0);
                                 $nb_periods = (int) BimpTools::getArrayValueFromPath($line_data, 'nb_periods', 0);
+                                $subprice = null;
 
                                 if (!$id_line) {
                                     $process->incIgnored();
@@ -7181,6 +7232,14 @@ class BCT_ContratLine extends BimpObject
                                     $process->incIgnored();
                                     $process->Error($line_errors, $facture, $line_ref);
                                     continue;
+                                }
+
+                                // Check subprice variable: 
+                                if ((int) $line->getData('variable_pu_ht')) {
+                                    $subprice = (float) BimpTools::getArrayValueFromPath($line_data, 'subprice', 0);
+                                    if (!$subprice) {
+                                        $process->Alert('ATTENTION : Prix de vente non défini ou égal à 0', $facture, $line_ref);
+                                    }
                                 }
 
                                 $qty = 0;
@@ -7292,6 +7351,14 @@ class BCT_ContratLine extends BimpObject
                                                 'nb_periods' => $nb_periods,
                                                 'qty'        => $sub_line_qty
                                             );
+
+                                            if ((int) $sub_line->getData('variable_pu_ht')) {
+                                                $sub_lines_data[$sub_line->id]['subprice'] = (float) BimpTools::getArrayValueFromPath($line_data, 'sub_lines/' . $sub_line->id . '/subprice', 0);
+
+                                                if (!$sub_lines_data[$sub_line->id]['subprice']) {
+                                                    $process->Alert('ATTENTION : Prix de vente non défini ou égal à 0', $facture, $line_ref . ' (Sous-ligne n°' . $sub_line->getData('rang') . ')');
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -7300,6 +7367,10 @@ class BCT_ContratLine extends BimpObject
                                         'nb_periods' => $nb_periods,
                                         'qty'        => $qty
                                     );
+
+                                    if (!is_null($subprice)) {
+                                        $lines_data[$id_line]['subprice'] = $subprice;
+                                    }
 
                                     foreach ($sub_lines_data as $id_sub_line => $sub_line_data) {
                                         $lines_data[$id_sub_line] = $sub_line_data;

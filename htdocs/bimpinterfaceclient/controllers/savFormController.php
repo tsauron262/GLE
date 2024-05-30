@@ -67,16 +67,14 @@ class savFormController extends BimpPublicController
                         $fetch_errors[] = 'Aucune réponse reçue';
                     } elseif (!is_array($result) || empty($result)) {
                         $fetch_errors[] = 'Aucune réponse reçue';
-                    } elseif($result['currentStatus'] == 'CANCELLED') {
-                         $errors[] = 'RDV annulé chez Apple';
-                    }
-                    else{
+                    } elseif ($result['currentStatus'] == 'CANCELLED') {
+                        $errors[] = 'RDV annulé chez Apple';
+                    } else {
                         $id_sav = (int) BimpCache::getBdb()->getValue('bs_sav', 'id', 'resgsx = \'' . $res_id . '\'');
-                        if($id_sav > 0)
+                        if ($id_sav > 0)
                             $errors[] = 'Formulaire déja envoyé';
-                        else{
+                        else {
                             $reservation = $result;
-
 
                             if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') != $reservation['customer']['emailId']) {
                                 // On déco l\'utilisateur client si l'adresse e-mail ne correspond pas
@@ -257,7 +255,7 @@ class savFormController extends BimpPublicController
                 $html .= 'Un compte utilisateur existe déjà pour l\'adresse e-mail "' . $email . '".<br/>';
                 $html .= '</h3>';
                 $html .= '<h4 style="text-align: center; font-weight: bold" class="info">';
-                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . 'email='.$email.'&back=savForm';
+                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . 'email=' . $email . '&back=savForm';
 
                 if (isset($reservation['reservationId']) && isset($reservation['shipToCode'])) {
                     $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];
@@ -267,12 +265,16 @@ class savFormController extends BimpPublicController
 
                 $html .= '</h4>';
                 $html .= '</div>';
-                
+
                 /* pour vérif des tel */
                 if ((int) $userClient->getData('id_contact')) {
                     $contact = $userClient->getChildObject('contact');
-                    if($contact->getData('phone') != '' || $contact->getData('phone_perso') != '' || $contact->getData('phone_mobile') != '')
-                        $html .= '<input type="hidden" name="phone_ok" value="1"/>';
+
+                    if (BimpObject::objectLoaded($contact)) {
+                        if ($contact->getData('phone') != '' || $contact->getData('phone_perso') != '' || $contact->getData('phone_mobile') != '') {
+                            $html .= '<input type="hidden" name="phone_ok" value="1"/>';
+                        }
+                    }
                 }
                 return $html;
             } else {
@@ -380,13 +382,12 @@ class savFormController extends BimpPublicController
                 $html .= $client->displayData('fk_typent', 'default', false, false);
                 $html .= '</div>';
 //                $html .= '</div>';
-
                 // N° SIRET: 
                 $html .= '<div class="col-xs-12 col-md-5" style="display: none">';
                 $html .= '<label>SIRET</label><br/>';
                 $html .= $client->getData('siret');
                 $html .= '</div>';
-                
+
                 $html .= '</div>';
             }
 
@@ -1100,8 +1101,8 @@ class savFormController extends BimpPublicController
         $msg .= '<b>Adresse du centre LDLC Apple : </b>' . "\n";
         $msg .= $centre['address'] . "\n";
         $msg .= $centre['zip'] . ' ' . $centre['town'] . "\n";
-        if($centre['infos'] != '')
-            $msg .= $centre['infos']."\n";
+        if ($centre['infos'] != '')
+            $msg .= $centre['infos'] . "\n";
         $msg .= "\n";
 
         if (is_a($dt_begin, 'DateTime')) {
@@ -1498,8 +1499,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     $reservationDate = $data['sav_slot'];
                 }
             }
-        }
-        else{
+        } else {
             $reservationDate = $data['sav_slot'];
         }
 
@@ -2286,8 +2286,8 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     $success_html .= '<p>Lieu: <b><br/>';
                     $success_html .= $centre['address'] . '<br/>';
                     $success_html .= $centre['zip'] . ' ' . $centre['town'] . '</b></p><br/>';
-                    if($centre['infos'] != '')
-                        $success_html .= $centre['infos'].'<br/>';
+                    if ($centre['infos'] != '')
+                        $success_html .= $centre['infos'] . '<br/>';
 
                     if ($email_client_ok) {
                         $success_html .= '<p>Un e-mail récapitulatif a été envoyé à <b>' . $email_client . '</b></p>';

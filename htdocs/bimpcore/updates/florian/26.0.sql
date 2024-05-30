@@ -1,0 +1,1 @@
+ALTER TABLE `llx_product` ADD `variable_pu_ht` tinyint(1) NOT NULL DEFAULT 0;

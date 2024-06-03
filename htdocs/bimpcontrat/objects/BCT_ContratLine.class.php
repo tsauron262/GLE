@@ -992,7 +992,7 @@ class BCT_ContratLine extends BimpObject
                 $dt = new DateTime($res[0]['max_date']);
                 $dt->add(new DateInterval('P1D'));
                 $new_date = $dt->format('Y-m-d');
-                $infos[] = 'Date dernière fac : ' . $new_date;
+                $infos[] = 'Date dernière fac + 1 jour : ' . $new_date;
             } elseif ($date_fac_start) {
                 $new_date = $date_fac_start;
                 $infos[] = 'Date fac start : ' . $new_date;
@@ -1032,20 +1032,20 @@ class BCT_ContratLine extends BimpObject
                 }
             }
 
-            if ($new_date && !(int) $this->getData('fac_term')) {
-                $date_fin = $this->getData('date_fin_validite');
-
-                if ($date_fin) {
-                    $date_fin = date('Y-m-d', strtotime($date_fin));
-
-                    if ($new_date > $date_fin) {
-                        $new_date = $date_fin;
-                        $infos[] = 'Terme échu - ajusté sur date fin : ' . $new_date;
-                    }
-                } else {
-                    $infos[] = 'date fin ok : ' . $date_fin;
-                }
-            }
+//            if ($new_date && !(int) $this->getData('fac_term')) {
+//                $date_fin = $this->getData('date_fin_validite');
+//
+//                if ($date_fin) {
+//                    $date_fin = date('Y-m-d', strtotime($date_fin));
+//
+//                    if ($new_date > $date_fin) {
+//                        $new_date = $date_fin;
+//                        $infos[] = 'Terme échu - ajusté sur date fin : ' . $new_date;
+//                    }
+//                } else {
+//                    $infos[] = 'date fin ok : ' . $date_fin;
+//                }
+//            }
 
             if ($new_date && $new_date != $date) {
                 $infos[] = 'NEW DATE SET : ' . $new_date;

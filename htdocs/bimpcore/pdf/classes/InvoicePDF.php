@@ -198,9 +198,9 @@ class InvoicePDF extends BimpCommDocumentPDF
 
                     case 'actimac':
                         if ($secteur === 'S') {
-                            $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
-                        } else {
                             $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac_sav.pdf";
+                        } else {
+                            $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
                         }
 
                         if ($cgv_file && file_exists($cgv_file)) {

@@ -203,7 +203,7 @@ class ActionsBimpcore
         global $user;
         $text = "Societe " . $soc1->getData('nom') . ' ' . $soc1->getData('code_client') . ' (' . $soc1->getData('code_compta') . ' || ' . $soc1->getData('code_compta_fournisseur') . ') fusionné dans ' . $soc2->getData('nom') . ' ' . $soc2->getData('code_client') . ' (' . $soc2->getData('code_compta') . ' || ' . $soc2->getData('code_compta_fournisseur') . ') par ' . $user->getNomUrl();
 
-        BimpTools::mailGrouper('tommy@bimp.fr, comptaolys@bimp.fr', null, $text);
+        BimpTools::mailGrouper(BimpCore::getConf('emails_notify_status_client_change', 'tommy@bimp.fr'), null, $text);
 //        mailSyn2('Fusion tier', 'tommy@bimp.fr, comptaolys@bimp.fr, a.delauzun@bimp.fr', null, $text);
 
         return 0;

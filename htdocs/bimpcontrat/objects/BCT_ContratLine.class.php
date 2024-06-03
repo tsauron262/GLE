@@ -2825,12 +2825,6 @@ class BCT_ContratLine extends BimpObject
 
                 if ((int) $this->getData('variable_qty')) {
                     $qties = $this->getCommandesFournData(true, 'qties');
-
-                    if (BimpCore::isUserDev()) {
-                        $html .= 'Qties : <pre>';
-                        $html .= print_r($qties, 1);
-                        $html .= '</pre>';
-                    }
                     
                     if ($qties['achat_qty']) {
                         $html .= '<div style="padding: 8px; margin-top: 10px; border: 1px solid #DCDCDC">';

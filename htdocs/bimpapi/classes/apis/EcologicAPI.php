@@ -317,7 +317,7 @@ www.opmconseil.com
                 $errors[] = $return['Message'];
         }
         if($response_code == 400){
-                $errors[] = 'Bad request';
+                $errors[] = 'Bad request ('.$request_name.')'.print_r($return,1);
         }
         
         if($response_code == 500){

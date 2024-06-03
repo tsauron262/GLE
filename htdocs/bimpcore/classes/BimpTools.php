@@ -1822,7 +1822,7 @@ class BimpTools
                 if (is_bool($value)) {
                     return $value;
                 }
-                
+
                 if (is_string($value)) {
                     if ($value == 'false') {
                         return 0;
@@ -3057,7 +3057,7 @@ class BimpTools
             $value_str = number_format($float_number, 8);
 
             if ($value_str) {
-                if (preg_match('/^(\d+)\.(\d*)0*$/U', $value_str, $matches)) {
+                if (preg_match('/^(\-?\d+)\.(\d*)0*$/U', $value_str, $matches)) {
                     return strlen($matches[2]);
                 }
             }
@@ -3212,7 +3212,7 @@ class BimpTools
         return $html;
     }
 
-    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true, $no_zeros_decimals = false)
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true, $no_zeros_decimals = false, $debug = false)
     {
         // $decimals: indiquer 'full' pour afficher toutes les décimales. 
 
@@ -3224,19 +3224,19 @@ class BimpTools
             return $value;
         }
 
-        $base_price = $value;
+        $base_value = $value;
         $code = '';
         $hasMoreDecimals = false;
 
         // Troncature: 
         if ($truncate) {
-            if ($value > 1000000000) {
+            if (abs($value) > 1000000000) {
                 $code = 'G';
                 $value = $value / 1000000000;
-            } elseif ($value > 1000000) {
+            } elseif (abs($value) > 1000000) {
                 $code = 'M';
                 $value = $value / 1000000;
-            } elseif ($value > 100000) {
+            } elseif (abs($value) > 100000) {
                 $code = 'K';
                 $value = $value / 1000;
             }
@@ -3255,7 +3255,7 @@ class BimpTools
         // Arrondi: 
         $value = round($value, (int) $decimals);
 
-        if ($value != round($base_price, 8)) {
+        if ($value != round($base_value, 8)) {
             $hasMoreDecimals = true;
         }
 
@@ -3285,7 +3285,7 @@ class BimpTools
             // popover: 
             if ($hasMoreDecimals) {
                 $html .= ' class="bs-popover"';
-                $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
+                $html .= BimpRender::renderPopoverData(number_format($base_value, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
             }
 
             $html .= '>';

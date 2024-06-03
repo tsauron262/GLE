@@ -2835,7 +2835,7 @@ class BCT_ContratLine extends BimpObject
                     if ($qties['achat_qty']) {
                         $html .= '<div style="padding: 8px; margin-top: 10px; border: 1px solid #DCDCDC">';
                         $html .= '<b>Qtés achetées: </b><br/>';
-                        $html .= 'Achats réguliers : <b>' . BimpTools::displayFloatValue($qties['achat_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';
+                        $html .= 'Achats réguliers : <b>' . BimpTools::displayFloatValue($qties['achat_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . ' (' . $qties['achat_qty'] . ')</b>';
 
                         if ($qties['regul_qty']) {
                             $html .= '<br/>Régularisations : <b>' . BimpTools::displayFloatValue($qties['regul_qty'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>';

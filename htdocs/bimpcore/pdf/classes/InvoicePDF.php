@@ -163,43 +163,50 @@ class InvoicePDF extends BimpCommDocumentPDF
                 }
 
                 $secteur = $this->bimpCommObject->getData('ef_type');
-                if (BimpCore::isEntity('bimp')) {
-                    // SAV
-                    if ($secteur == 'S') {
-                        $code_centre = $this->bimpCommObject->getData('centre');
-                        if ($code_centre == '') {
-//                        $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
-                        } else {
+                $entity = BimpCore::getExtendsEntity();
 
-                            $centres = BimpCache::getCentres();
-                            if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
-                                $centre = $centres[$code_centre];
-                                $this->fromCompany->address = $centre['address'];
-                                $this->fromCompany->zip = $centre['zip'];
-                                $this->fromCompany->town = $centre['town'];
-                                $this->fromCompany->phone = $centre['tel'];
-                                $this->fromCompany->email = $centre['mail'];
-                            } else {
-                                $this->errors[] = 'Centre ayant pour code' . $code_centre . ' absent de la liste des centres';
+                switch ($entity) {
+                    case 'bimp':
+                        // SAV
+                        if ($secteur == 'S') {
+                            $code_centre = $this->bimpCommObject->getData('centre');
+                            if ($code_centre) {
+                                $centres = BimpCache::getCentres();
+                                if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+                                    $centre = $centres[$code_centre];
+                                    $this->fromCompany->address = $centre['address'];
+                                    $this->fromCompany->zip = $centre['zip'];
+                                    $this->fromCompany->town = $centre['town'];
+                                    $this->fromCompany->phone = $centre['tel'];
+                                    $this->fromCompany->email = $centre['mail'];
+                                } else {
+                                    $this->errors[] = 'Centre ayant pour code' . $code_centre . ' absent de la liste des centres';
+                                }
                             }
+
+                            $this->fromCompany->name = "OLYS LDLC";
+
+                            // Éducation
+                        } elseif ($secteur == 'E') {
+                            $this->fromCompany->name = "OLYS BIMP.PRO";
+
+                            // PRO
+                        } elseif (!in_array($secteur, array('S', 'M'))) {
+                            $this->fromCompany->name = "OLYS BIMP.PRO";
+                        }
+                        break;
+
+                    case 'actimac':
+                        if ($secteur === 'S') {
+                            $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
+                        } else {
+                            $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac_sav.pdf";
                         }
 
-                        $this->fromCompany->name = "OLYS LDLC";
-
-                        // Éducation
-                    } elseif ($secteur == 'E') {
-                        $this->fromCompany->name = "OLYS BIMP.PRO";
-
-                        // PRO
-                    } elseif (!in_array($secteur, array('S', 'M'))) {
-                        $this->fromCompany->name = "OLYS BIMP.PRO";
-                    }
-                } elseif (BimpCore::isEntity('actimac') && $secteur != 'S') {
-                    $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
-
-                    if ($cgv_file && file_exists($cgv_file)) {
-                        $this->pdf->extra_concat_files[] = $cgv_file;
-                    }
+                        if ($cgv_file && file_exists($cgv_file)) {
+                            $this->pdf->extra_concat_files[] = $cgv_file;
+                        }
+                        break;
                 }
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
@@ -692,17 +699,17 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= $conf->global->INVOICE_FREE_TEXT;
             $html .= '</p>';
         }
-        
+
         if (isset($this->bimpCommObject) && $this->bimpCommObject->getData('zone_vente') == 2 && $this->bimpCommObject->getData('total_tva') == 0) {
             $html .= '<p style="font-size: 6px; font-style: italic">';
             $html .= '* Exonération de TVA liée à l’article 262 Ter du CGI';
             $html .= '</p>';
         }
-        
-        
+
+
         if ($html != '')
             $this->writeContent($html);
-        
+
         parent::renderAfterLines();
     }
 

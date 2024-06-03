@@ -3387,7 +3387,7 @@ class BCT_ContratLine extends BimpObject
                                     } elseif ($periods_data['nb_periods_tobill_today'] > 0 || ($canFactAvance && $periods_data['nb_periods_tobill_max'] > 0)) {
                                         $is_first_period = ($periods_data['date_next_period_tobill'] == $periods_data['date_first_period_start']);
                                         if ($is_first_period && $periods_data['first_period_prorata'] != 1) {
-                                            $msg .= BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
+                                            $msg = BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
                                             $msg .= 'Première période du <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_start']));
                                             $msg .= '</b> au <b>' . date('d / m / Y', strtotime($periods_data['date_first_period_end'])) . '</b>';
                                             $msg .= ' facturée à partir du <b>' . date('d / m / Y', strtotime($periods_data['date_fac_start'])) . '</b>';
@@ -3457,6 +3457,10 @@ class BCT_ContratLine extends BimpObject
                                                         $billed = $qties_data[$i]['billed'];
                                                         $diff = $bought - $billed;
                                                         $qty += ($diff > 0 ? $diff : $qty_per_period);
+
+                                                        if ($i === 1 && $is_first_period && ($qty == $qty_per_period)) {
+                                                            $qty *= $periods_data['first_period_prorata'];
+                                                        }
 
                                                         if ($i <= $periods_data['nb_periods_tobill_today']) {
                                                             $qty_total_today += $qty;
@@ -4238,11 +4242,11 @@ class BCT_ContratLine extends BimpObject
                 }
                 $html .= '</td>';
                 $html .= '<td  style="text-align: center">' . $achat['qty'] . '</td>';
-                
+
                 if ($variable_pu_ht) {
                     $html .= '<td  style="text-align: center">' . BimpTools::displayMoneyValue($achat['pa_ht']) . '</td>';
                 }
-                
+
                 $html .= '<td  style="text-align: center">';
                 $cf_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $achat['id_line']);
                 if (BimpObject::objectLoaded($cf_line)) {
@@ -7950,7 +7954,7 @@ class BCT_ContratLine extends BimpObject
                                 $errors[] = 'Le produit #' . $this->getData('fk_product') . ' n\'existe plus';
                             } else {
                                 $prod->isVendable($errors);
-                                
+
                                 if (!$prod->isAbonnement()) {
                                     $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas de type abonnement';
                                 }

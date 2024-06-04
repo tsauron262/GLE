@@ -1956,7 +1956,7 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm = new ActionComm($this->db->db);
 
                 $actioncomm->label = $fi->getRef();
-                $actioncomm->note = $fi->getData('description');
+                $actioncomm->note_private = $fi->getData('description');
                 $actioncomm->punctual = 1;
                 $actioncomm->userownerid = (int) BimpCore::getConf('default_id_user_actioncomm', null, 'bimptechnique');
                 $actioncomm->elementtype = 'fichinter';
@@ -3156,7 +3156,7 @@ class BT_ficheInter extends BimpDolObject
 
                 //$actioncomm->userassigned = Array($data->techs);
                 $actioncomm->label = "(PROV$this->id)";
-                $actioncomm->note = '';
+                $actioncomm->note_private = $this->getData('description');
                 $actioncomm->punctual = 1;
                 $actioncomm->userownerid = (int) $this->getData('fk_user_tech');
                 $actioncomm->elementtype = 'fichinter';
@@ -3208,6 +3208,7 @@ class BT_ficheInter extends BimpDolObject
         $init_commandes = $this->getInitData('commandes');
         $init_tickets = $this->getInitData('tickets');
         $init_id_tech = (int) $this->getInitData('fk_user_tech');
+        $init_desc = $this->getInitData('description');
         $init_date = $this->getInitData('datei');
         $init_time_from = $this->getInitData('time_from');
         $init_time_to = $this->getInitData('time_to');
@@ -3268,6 +3269,20 @@ class BT_ficheInter extends BimpDolObject
             $changement_de_tech = false;
             BimpTools::loadDolClass('comm/action/', 'actioncomm', 'ActionComm');
             $actionComm = new ActionComm($this->db->db);
+            //changement de desc
+            if($init_desc != $this->getData('description')){
+                $id_event = $this->getEventId();
+                if ($id_event > 0) {
+                    $actionComm->fetch($id_event);
+                    $actionComm->note_private = $this->getData('description');
+                    if ($actionComm->update($user) <= 0) {
+                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($actionComm), 'Echec maj de l\'événement agenda');
+                    }
+                }
+            }
+            
+            
+            
             // Changement de tech: 
             if ($init_id_tech !== (int) $this->getData('fk_user_tech')) {
                 $changement_de_tech = true;
@@ -3283,7 +3298,7 @@ class BT_ficheInter extends BimpDolObject
                         $actionComm->userassigned = Array();
                         $actionComm->otherassigned = Array();
                         if ($actionComm->update($user) <= 0) {
-                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec du changement d\'utilisateur dans l\'événement agenda');
+                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($actionComm), 'Echec du changement d\'utilisateur dans l\'événement agenda');
                         }
                     }
                 }
@@ -3316,7 +3331,7 @@ class BT_ficheInter extends BimpDolObject
                     $actionComm->datep = $dateTime_debut->getTimestamp();
                     $actionComm->datef = $dateTime_fin->getTimestamp();
                     if ($actionComm->update($user) <= 0) {
-                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec du changement d\'utilisateur dans l\'événement agenda');
+                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($actionComm), 'Echec du changement d\'utilisateur dans l\'événement agenda');
                     }
                 }
             }

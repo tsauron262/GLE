@@ -5129,6 +5129,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         $last_check_tms = BimpCore::getConf('commandes_marges_last_check_tms', '');
         if ($last_check_tms) {
+            if (BimpCore::isUserDev()) {
+                die('TMS : ' . $last_check_tms);
+            }
             $where = 'tms > \'' . $last_check_tms . '\'';
         } else {
             $where = 'tms > \'2024-05-22 00:00:00\''; // Jour de mise en place du cron sur Bimp

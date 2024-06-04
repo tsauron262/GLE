@@ -3438,7 +3438,7 @@ class BCT_ContratLine extends BimpObject
                                                         $bought = $qties_data[0]['bought'];
                                                         $billed = $qties_data[0]['billed'];
                                                         $diff = $bought - $billed;
-                                                        if ($diff != 0) {
+                                                        if (($qty_per_period > 0 && $diff > 0) || ($qty_per_period < 0 && $diff < 0)) {
                                                             $row_html .= '<span class="small">Qté achetée non facturée avant prochaine période facturée : <b>' . round($diff, 6) . '</b></span><br/>';
                                                         }
                                                     }
@@ -3449,14 +3449,14 @@ class BCT_ContratLine extends BimpObject
                                                         $row_html .= ' - <b>Période ' . $i . '</b> <span class="small">(' . $qties_data[$i]['dates'] . ')</span> : <br/>';
 
                                                         $qty = 0;
-                                                        if ($i === 1 && $diff != 0) {
+                                                        if ($i === 1 && (($qty_per_period > 0 && $diff > 0) || ($qty_per_period < 0 && $diff < 0))) {
                                                             $qty += $diff;
                                                         }
 
                                                         $bought = $qties_data[$i]['bought'];
                                                         $billed = $qties_data[$i]['billed'];
                                                         $diff = $bought - $billed;
-                                                        $qty += ($diff != 0 ? $diff : $qty_per_period);
+                                                        $qty += (($qty_per_period > 0 && $diff > 0) || ($qty_per_period < 0 && $diff < 0) ? $diff : $qty_per_period);
 
                                                         if ($i === 1 && $is_first_period && ($qty == $qty_per_period)) {
                                                             $qty *= $periods_data['first_period_prorata'];
@@ -3478,7 +3478,7 @@ class BCT_ContratLine extends BimpObject
                                                                     )
                                                                 )) . ($unit_label ? ' ' . $unit_label : '') . '&nbsp;&nbsp;&nbsp;&nbsp;';
 
-                                                        if ($diff != 0) {
+                                                        if (($qty_per_period > 0 && $diff > 0) || ($qty_per_period < 0 && $diff < 0)) {
                                                             $row_html .= '<span class="small success">(Qté achetée non facturée)</span>';
                                                         } else {
                                                             $row_html .= '<span class="small warning">(Qté par défaut)</span>';
@@ -3840,7 +3840,7 @@ class BCT_ContratLine extends BimpObject
                                                 $bought = $qties_data[0]['bought'];
                                                 $billed = $qties_data[0]['billed'];
                                                 $diff = $billed - $bought;
-                                                if ($diff != 0) {
+                                                if (($qty_per_period > 0 && $diff > 0) || ($qty_per_period < 0 && $diff < 0)) {
                                                     $row_html .= '<span class="small">Qté facturée non achetée avant prochaine période d\'achat : <b>' . round($diff, 6) . '</b></span><br/>';
                                                 }
                                             }
@@ -3851,14 +3851,14 @@ class BCT_ContratLine extends BimpObject
                                                 $row_html .= ' - <b>Période ' . $i . '</b> <span class="small">(' . $qties_data[$i]['dates'] . ')</span> : <br/>';
 
                                                 $qty = 0;
-                                                if ($i === 1 && $diff != 0) {
+                                                if ($i === 1 && ($qty_per_period > 0 && $diff > 0) || ($qty_per_period < 0 && $diff < 0)) {
                                                     $qty += $diff;
                                                 }
 
                                                 $bought = $qties_data[$i]['bought'];
                                                 $billed = $qties_data[$i]['billed'];
                                                 $diff = $billed - $bought;
-                                                $qty += ($diff != 0 ? $diff : $qty_per_period);
+                                                $qty += (($qty_per_period > 0 && $diff > 0) || ($qty_per_period < 0 && $diff < 0) ? $diff : $qty_per_period);
 
                                                 if ($i === 1 && $is_first_period && ($qty == $qty_per_period)) {
                                                     $qty *= $periods_data['first_period_prorata'];
@@ -3880,7 +3880,7 @@ class BCT_ContratLine extends BimpObject
                                                             )
                                                         )) . ($unit_label ? ' ' . $unit_label : '') . '&nbsp;&nbsp;';
 
-                                                if ($diff != 0) {
+                                                if (($qty_per_period > 0 && $diff > 0) || ($qty_per_period < 0 && $diff < 0)) {
                                                     $row_html .= '<span class="small success">(Qté facturée non achetée : ' . $qty . ')</span>';
                                                 } else {
                                                     $row_html .= '<span class="small warning">(Qté par défaut : ' . $qty_per_period . ')</span>';

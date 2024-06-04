@@ -4328,6 +4328,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
             'warnings' => $warnings
         );
     }
+    
+    public function isFileDeletable($file_name){
+        if($file_name == 'Paiement')
+            return 0;
+        return 1;
+    }
 
     public function actionPreuvePaiment($data, &$success)
     {

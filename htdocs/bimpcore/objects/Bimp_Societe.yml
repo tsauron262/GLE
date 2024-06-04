@@ -509,6 +509,16 @@ fields:
             callback: useEncours
         extra: 1
         extrafields: atradius
+            
+    outstanding_limit_manuel_old:    
+        label: Ancienne Limite Crédit Manuelle
+        type: money
+        history: 1
+        default_value: 0
+        show: 
+            callback: useEncours
+        extra: 1
+        extrafields: atradius
         
     date_check_credit_safe:
         label: Date de verification Crédit SAFE

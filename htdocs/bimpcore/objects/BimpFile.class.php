@@ -79,6 +79,13 @@ class BimpFile extends BimpObject
         if (!$force_delete && !(int) $this->getData('is_deletable')) {
             return 0;
         }
+        
+        
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent) && method_exists($parent, 'isFileDeletable')) {
+            return $parent->isFileDeletable($this->getData('file_name'));
+        }
 
         return (int) (!(int) $this->getData('deleted'));
     }

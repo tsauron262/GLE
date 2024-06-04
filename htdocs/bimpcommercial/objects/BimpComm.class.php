@@ -1558,6 +1558,52 @@ class BimpComm extends BimpDolObject
         return $return;
     }
 
+    public function getTx_margeListTotal($filters, $joins)
+    {
+        $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
+        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $res = $this->db->executeS($sql, 'array');
+
+        $tx = 0;
+
+        if (isset($res[0])) {
+            $res = $res[0];
+            $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
+            $achats = (float) BimpTools::getArrayValueFromPath($res, 'achats', 0);
+
+            if ($marge && $achats) {
+                $tx = ($marge / $achats) * 100;
+            }
+        }
+
+        return $tx;
+    }
+
+    public function getTx_marqueListTotal($filters, $joins)
+    {
+        $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
+        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $res = $this->db->executeS($sql, 'array');
+
+        $tx = 0;
+
+        if (isset($res[0])) {
+            $res = $res[0];
+            $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
+            $total = (float) BimpTools::getArrayValueFromPath($res, 'total', 0);
+
+            if ($marge && $total) {
+                $tx = ($marge / $total) * 100;
+            }
+        }
+
+        return $tx;
+    }
+
     public function getIdContact($type = 'external', $code = 'SHIPPING')
     {
         if ($this->isLoaded()) {

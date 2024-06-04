@@ -478,6 +478,19 @@ class Bimp_Client extends Bimp_Societe
             );
         }
 
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('solvabilite_status')) {
+            $actions[] = array(
+                'label'   => 'Editer limit manuel',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
+                    'field_name'   => 'outstanding_limit_manuel',
+                    'update_mode'  => 'update_field'
+                        ), array(
+                    'form_name' => 'bulk_edit_field'
+                ))
+            );
+        }
+
         if ($this->canSetAction('bulkEditField') && $this->canEditField('status')) {
             $actions[] = array(
                 'label'   => 'Editer statut',

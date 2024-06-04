@@ -484,8 +484,8 @@ class Bimp_Client extends Bimp_Societe
                 'icon'    => 'fas_pen',
                 'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
                     'field_name'   => 'outstanding_limit_manuel',
-                    'update_mode'  => 'update_field',
-                    'force_update' => 1
+                    'update_mode'  => 'update_object',
+//                    'force_update' => 1
                         ), array(
                     'form_name' => 'bulk_edit_field'
                 ))

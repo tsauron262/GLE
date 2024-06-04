@@ -27,6 +27,16 @@ fields:
         type: int
         values: 
             array: sens_list
+    type:
+        label: Type
+        type: select
+        values:
+            0: 
+            1: Demande d’information
+            2: Relance manuelle
+            3: Litiges
+            4: Relance automatique
+
  
     content: 
         label: Texte
@@ -45,6 +55,7 @@ filters_panel:
             content:
             id_societe:
             user_create: 
+            type:
                 
 lists: 
     globale: 
@@ -65,6 +76,7 @@ lists:
             user_create:
             mode:
             sens:
+            type:
             content:
                 
     default: 

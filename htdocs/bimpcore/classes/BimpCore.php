@@ -27,7 +27,7 @@ class BimpCore
             'filters'           => '/bimpcore/views/js/filters.js',
             'form'              => '/bimpcore/views/js/form.js',
             'list'              => '/bimpcore/views/js/list.js',
-            'graph'              => '/bimpcore/views/js/graph.js',
+            'graph'             => '/bimpcore/views/js/graph.js',
             'view'              => '/bimpcore/views/js/view.js',
             'viewsList'         => '/bimpcore/views/js/viewsList.js',
             'listCustom'        => '/bimpcore/views/js/listCustom.js',
@@ -38,7 +38,8 @@ class BimpCore
             'bimpcore'          => '/bimpcore/views/js/bimpcore.js',
             'bimp_api'          => '/bimpapi/views/js/bimp_api.js',
             'bimpDocumentation' => '/bimpcore/views/js/BimpDocumentation.js',
-            'bds_operations'    => '/bimpdatasync/views/js/operations.js'
+            'bds_operations'    => '/bimpdatasync/views/js/operations.js',
+            'touch_punch'       => '/bimpcore/views/js/jquery.ui.touch-punch.min.js'
         ),
         'css' => array(
             'fonts'          => '/bimpcore/views/css/fonts.css',
@@ -128,7 +129,7 @@ class BimpCore
         $layout->addJsVars(self::getJsVars());
 
         // Ajouts variables local: 
-        if(class_exists('Session')){
+        if (class_exists('Session')) {
             $layout->addLocalVars(array(
                 'bimp_hash' => Session::getHash()
             ));
@@ -142,7 +143,7 @@ class BimpCore
         global $user, $conf, $dolibarr_main_url_root;
         $vars = array(
             'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
-            'entity'    => $conf->entity,
+            'entity'          => $conf->entity,
             'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
             'bimp_context'    => '\'' . self::getContext() . '\'',
             'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
@@ -893,7 +894,7 @@ class BimpCore
         $id_conf = (int) $bdb->getValue('bimpcore_conf', 'id', 'module = \'' . $module . '\' AND name = \'' . $name . '\' AND entity = ' . $entity);
         if ($id_conf) {
             if ($bdb->delete('bimpcore_conf', 'id = ' . $id_conf) <= 0) {
-                $errors[] = 'Echec suppr. param "' . $name . '" - ' ;//. $this->db->err();
+                $errors[] = 'Echec suppr. param "' . $name . '" - '; //. $this->db->err();
             }
         }
 
@@ -1013,7 +1014,7 @@ class BimpCore
     public static function getExtendsEntity()
     {
         $entity = BimpCore::getConf('extends_entity', '');
-     
+
         if (!$entity && defined('BIMP_EXTENDS_ENTITY')) {
             return BIMP_EXTENDS_ENTITY;
         }
@@ -1024,7 +1025,7 @@ class BimpCore
     public static function getVersion()
     {
         $version = BimpCore::getConf('extends_version', '');
-     
+
         if (!$version && defined('BIMP_EXTENDS_VERSION')) {
             return BIMP_EXTENDS_VERSION;
         }
@@ -1204,7 +1205,7 @@ class BimpCore
                     $check = false;
                 }
             }
-            
+
             foreach (Bimp_Log::$exclude_msg_parts as $part) {
                 if (strpos($msg, $part) !== false) {
                     $check = false;

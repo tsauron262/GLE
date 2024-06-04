@@ -1013,11 +1013,14 @@ class Bimp_Client extends Bimp_Societe
 
     public function getAtradiusFileName($force = false, $show_ext = true, $forced_date = null)
     {
+        $prefName = 'icba_';
+        global $conf;
+        if($conf->entity > 1)
+            $prefName = $conf->entity.'_'.$prefName;
         if (is_null($forced_date))
-            $name = 'icba_' . date('Y-m-d', strtotime($this->getData('date_depot_icba')));
+            $name = $prefName . date('Y-m-d', strtotime($this->getData('date_depot_icba')));
         else
-            $name = 'icba_' . date('Y-m-d', strtotime($forced_date));
-
+            $name = $prefName . date('Y-m-d', strtotime($forced_date));
         $ext = '.pdf';
         if ($force || ($this->isLoaded() && file_exists($this->getFilesDir() . $name . $ext))) {
             if ($show_ext)
@@ -1029,8 +1032,9 @@ class Bimp_Client extends Bimp_Societe
             $date_plus_recente = null;
             $files = $this->getFilesArray();
             foreach ($files as $f) {
-                if (substr($f, 6, 5) == 'icba_') {
-                    $date_a_tester = date(substr($f, 11, 10));
+                $tmp = explode($prefName, $f);
+                if (isset($tmp[1])) {
+                    $date_a_tester = date(substr($tmp[1], 0, 10));
                     if ($date_plus_recente < $date_a_tester)
                         $date_plus_recente = $date_a_tester;
                 }
@@ -1038,11 +1042,11 @@ class Bimp_Client extends Bimp_Societe
 
             if (!is_null($date_plus_recente)) {
 //                die($date_plus_recente);
-                if (file_exists($this->getFilesDir() . 'icba_' . $date_plus_recente . $ext)) {
+                if (file_exists($this->getFilesDir() . $prefName . $date_plus_recente . $ext)) {
                     if ($show_ext)
-                        return 'icba_' . $date_plus_recente . $ext;
+                        return $prefName . $date_plus_recente . $ext;
                     else
-                        return 'icba_' . $date_plus_recente;
+                        return $prefName . $date_plus_recente;
                 }
             }
         }

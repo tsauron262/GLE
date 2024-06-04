@@ -4333,8 +4333,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         $errors = $warnings = array();
 
-        if (isset($data['file']) && $data['file'] != '')
+        if (isset($data['file']) && $data['file'] != ''){
             BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
+            $this->addLog('Preuve de paiement uploadé');
+        }
         else
             $errors[] = 'Aucun fichier uploadé';
 

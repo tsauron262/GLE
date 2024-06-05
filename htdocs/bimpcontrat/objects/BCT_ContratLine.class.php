@@ -7965,7 +7965,7 @@ class BCT_ContratLine extends BimpObject
                                     $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas de type abonnement';
                                 }
 
-                                if (!$this->isLoaded() || (int) $this->getData('fk_statut') == self::STATUS_INACTIVE) {
+                                if (!$this->isLoaded() || (int) $this->getData('statut') == self::STATUS_INACTIVE) {
                                     if ($fac_periodicity && !(int) $prod->getData('tosell')) {
                                         $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas en vente';
                                     }

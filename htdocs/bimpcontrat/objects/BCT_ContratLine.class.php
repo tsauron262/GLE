@@ -7965,12 +7965,14 @@ class BCT_ContratLine extends BimpObject
                                     $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas de type abonnement';
                                 }
 
-                                if ($fac_periodicity && !(int) $prod->getData('tosell')) {
-                                    $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas en vente';
-                                }
-                                
-                                if ($achat_periodicity && !(int) $prod->getData('tobuy')) {
-                                    $errors[] = 'Les achats du produit ' . $prod->getRef() . ' sont désactivés';
+                                if (!$this->isLoaded() || (int) $this->getData('fk_statut') == self::STATUS_INACTIVE) {
+                                    if ($fac_periodicity && !(int) $prod->getData('tosell')) {
+                                        $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas en vente';
+                                    }
+
+                                    if ($achat_periodicity && !(int) $prod->getData('tobuy')) {
+                                        $errors[] = 'Les achats du produit ' . $prod->getRef() . ' sont désactivés';
+                                    }
                                 }
 
                                 $is_bundle = $prod->isBundle();

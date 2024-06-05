@@ -7970,9 +7970,9 @@ class BCT_ContratLine extends BimpObject
                                         $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est pas en vente';
                                     }
 
-                                    if ($achat_periodicity && !(int) $prod->getData('tobuy')) {
-                                        $errors[] = 'Les achats du produit ' . $prod->getRef() . ' sont désactivés';
-                                    }
+//                                    if ($achat_periodicity && !(int) $prod->getData('tobuy')) {
+//                                        $errors[] = 'Les achats du produit ' . $prod->getRef() . ' sont désactivés';
+//                                    }
                                 }
 
                                 $is_bundle = $prod->isBundle();

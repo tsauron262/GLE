@@ -1,0 +1,1 @@
+ALTER table llx_bimpclient_suivi_recouv ADD type INT DEFAULT 0 NOT NULL;

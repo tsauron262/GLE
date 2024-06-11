@@ -2009,7 +2009,7 @@ class BContract_contrat extends BimpDolObject
             $id_client = (int) $this->getData('fk_soc');
         }
 
-        return BimpCache::getSocieteRibsArray($id_client, true);
+        return BimpCache::getSocieteRibsArray($id_client, true, $this->getData('entity'));
     }
 
     // Affichages: 

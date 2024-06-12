@@ -819,17 +819,22 @@ L’équipe BIMP";
                     $from = $centres[$centre]['mail'];
 
                 $to = BimpTools::cleanEmailsStr($email_client);
+                $to = 'f.martinez@bimp.fr';
+                
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
 
                 $bimpMail = new BimpMail((is_object($client) ? $client : 'none'), "Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient));
 
-                if (BimpCore::isEntity('bimp')) {
-                    $bimpMail->setFromType('ldlc');
+                $ext_entity = BimpCore::getExtendsEntity();
+                switch ($ext_entity) {
+                    case 'bimp': 
+                        $bimpMail->setFromType('ldlc');
+                        break;
                 }
                 $mail_errors = array();
 
                 if ($bimpMail->send($mail_errors)) {
-                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ', From : ' . $from . ')', $to, null, $resId);
+                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ', From : ' . $from . ' - Entité : ' . $ext_entity . ' - Titre mail : ' . $bimpMail->title . ')', $to, null, $resId);
                     $this->debug_content .= '<span class="success">OK</span>';
                 } else {
                     $this->debug_content .= '<span class="danger">ECHEC</span>';

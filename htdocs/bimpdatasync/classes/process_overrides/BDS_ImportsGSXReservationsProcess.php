@@ -819,7 +819,6 @@ L’équipe BIMP";
                     $from = $centres[$centre]['mail'];
 
                 $to = BimpTools::cleanEmailsStr($email_client);
-                $to = 'f.martinez@bimp.fr';
                 
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
 

@@ -2721,10 +2721,19 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         if (!count($errors)) {
             $ref = $this->getRef();
-            $subject = 'Votre commande N° ' . $ref . ' chez BIMP.PRO va bientôt être expédiée';
+            $date_livraison = $this->getData('date_livraison');
+
+            $subject = 'Votre commande n° ' . $ref . ' chez BIMP.PRO';
+
             $msg = 'Bonjour, <br/><br/>';
-            $msg .= 'Votre commande N° ' . $ref . ' chez BIMP.PRO va bientôt être expédiée.<br/><br/>';
-            $msg .= '<b>IMPORTANT - PROCEDURE DE RECEPTION :</b><br/><br/>';
+
+            if ($date_livraison) {
+                $msg .= 'La livraison de votre commande n° ' . $ref . ' est prévue le ' . date('d / m / Y', strtotime($date_livraison)) . '.';
+            } else {
+                $msg .= 'Votre commande N° ' . $ref . ' chez BIMP.PRO va bientôt être expédiée.';
+            }
+
+            $msg .= '<br/><br/><b>IMPORTANT - PROCEDURE DE RECEPTION :</b><br/><br/>';
             $msg .= "Nos envois font appel à des canaux multiples fiabilisés mais la responsabilité du transporteur prend fin dès lors qu'il vous a remis la marchandise.<br/><br/>";
             $msg .= "Il est IMPERATIF de suivre scrupuleusement  chez vous la procédure de réception ci dessous: <br/><br/>";
             $msg .= "A réception de votre commande, nous vous demandons de vérifier le nombre de colis, leur état extérieur mais aussi intérieur  en présence du transporteur, avant la validation de la réception.<br/><br/>";

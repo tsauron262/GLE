@@ -1,2 +1,5 @@
 
 - Ajout modèles e-mails clients pour LDLC 7 (Champagne)
+- Debug e-mail réservations SAV
+- Debug reste à payer factures avec prime écologique
+- Debug Bundles sur création d'avoir

@@ -774,6 +774,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                 
                 case 'champagne': 
                     $soc_name = 'LDLC';
+                    $from = 'sav_ch@ldlc.com';
                     break;
             }
 

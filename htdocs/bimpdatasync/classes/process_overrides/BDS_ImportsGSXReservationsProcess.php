@@ -240,15 +240,13 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                     foreach ($result['reservations'] as $reservation) {
                         if (isset($reservation['reservationId'])) {
                             $this->debug_content .= '<span class="bold">Réservation ' . $reservation['reservationId'] . ': <br/></span>';
-                            if($reservation['currentStatus'] == 'CANCELLED'){
-                                $sav = BimpObject::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('resgsx'=>$reservation['reservationId'], 'status'=>-1),1);
-                                if(is_object($sav) && $sav->isLoaded()){
+                            if ($reservation['currentStatus'] == 'CANCELLED') {
+                                $sav = BimpObject::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('resgsx' => $reservation['reservationId'], 'status' => -1), 1);
+                                if (is_object($sav) && $sav->isLoaded()) {
                                     $sav->updateField('status', -2);
                                     $sav->addNote('Annulé coté GSX le ' . date('d / m / Y à H:i'), BImpNote::BN_ALL);
                                 }
-                            }
-                            
-                            elseif ($this->reservationExists($reservation['reservationId'])) {
+                            } elseif ($this->reservationExists($reservation['reservationId'])) {
                                 $this->debug_content .= BimpRender::renderAlerts('Déjà enregistrée', 'success');
                             } else {
                                 $fetch_errors = array();
@@ -702,34 +700,33 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
 
             // Envoi e-mails users: 
-            $subject = 'Nouvelle Reservation SAV le ' . $dateBegin->format('d / m / Y') . ' à ' . $dateBegin->format('H\Hi');
-            $message = 'Bonjour,' . "\n\n";
-            $message .= 'Une nouvelle réservation SAV a été ajouté à votre agenda:' . "\n\n";
-
-            $message .= 'Un e-mail a été envoyé au client pour qu\'il finalise sa demande sur le site bimp.fr' . "\n\n";
-
-            $message .= "\t" . 'ID réservation: ' . $resId . "\n";
-            $message .= "\t" . 'Date: ' . $dateBegin->format('d/m/Y') . ' à ' . $dateBegin->format('H\Hi') . ".\n";
-
-            if (isset($data['product']['productCode']) && (string) $data['product']['productCode']) {
-                $message .= "\t" . 'Type de produit: ' . $data['product']['productCode'] . ".\n";
-            }
-
-            if (BimpObject::objectLoaded($client)) {
-                $message .= "\t" . 'Client : ' . $client->getLink() . "\n";
-                $message .= "\t" . 'E-mail client: ' . $client->getData('email') . "\n";
-            }
-
-            if (isset($data['notes']) && count($data['notes'])) {
-                $message .= "\n";
-                $message .= "\t" . 'Notes:' . "\n";
-                foreach ($data['notes'] as $note) {
-                    if (isset($note['note']) && (string) $note['note']) {
-                        $message .= "\t\t - " . $note['text'] . "\n";
-                    }
-                }
-            }
-
+//            $subject = 'Nouvelle Reservation SAV le ' . $dateBegin->format('d / m / Y') . ' à ' . $dateBegin->format('H\Hi');
+//            $message = 'Bonjour,' . "\n\n";
+//            $message .= 'Une nouvelle réservation SAV a été ajouté à votre agenda:' . "\n\n";
+//
+//            $message .= 'Un e-mail a été envoyé au client pour qu\'il finalise sa demande sur le site bimp.fr' . "\n\n";
+//
+//            $message .= "\t" . 'ID réservation: ' . $resId . "\n";
+//            $message .= "\t" . 'Date: ' . $dateBegin->format('d/m/Y') . ' à ' . $dateBegin->format('H\Hi') . ".\n";
+//
+//            if (isset($data['product']['productCode']) && (string) $data['product']['productCode']) {
+//                $message .= "\t" . 'Type de produit: ' . $data['product']['productCode'] . ".\n";
+//            }
+//
+//            if (BimpObject::objectLoaded($client)) {
+//                $message .= "\t" . 'Client : ' . $client->getLink() . "\n";
+//                $message .= "\t" . 'E-mail client: ' . $client->getData('email') . "\n";
+//            }
+//
+//            if (isset($data['notes']) && count($data['notes'])) {
+//                $message .= "\n";
+//                $message .= "\t" . 'Notes:' . "\n";
+//                foreach ($data['notes'] as $note) {
+//                    if (isset($note['note']) && (string) $note['note']) {
+//                        $message .= "\t\t - " . $note['text'] . "\n";
+//                    }
+//                }
+//            }
 //            $emails = '';
 //
 //            foreach ($users as $u) {
@@ -759,6 +756,28 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 //            }
             // Envoi e-mail client: 
             $email_client = '';
+            $soc_name = '';
+            $from_type = '';
+            $from = '';
+            $ext_entity = BimpCore::getExtendsEntity();
+
+            switch ($ext_entity) {
+                case 'bimp':
+                    $soc_name = 'LDLC APPLE';
+                    $from_type = 'ldlc';
+                    $from = 'savbimp@bimp.fr';
+                    break;
+                
+                case 'actimac': 
+                    $soc_name = 'Actimag';
+                    break;
+                
+                case 'champagne': 
+                    $soc_name = 'LDLC';
+                    $from = 'sav_ch@ldlc.com';
+                    break;
+            }
+
 
             if (BimpObject::objectLoaded($client)) {
                 $email_client = $client->getData('email');
@@ -803,9 +822,7 @@ La plupart de nos centres peuvent effectuer une réparation de votre écran d’
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.
 Bien cordialement
-L’équipe BIMP";
-
-                $from = 'savbimp@bimp.fr';
+L’équipe " . $soc_name;
 
                 $centre = '';
                 foreach ($users as $u) {
@@ -814,22 +831,26 @@ L’équipe BIMP";
                         break;
                     }
                 }
+
                 $centres = BimpCache::getCentres();
-                if (isset($centres[$centre]) && isset($centres[$centre]['mail']))
+                if (isset($centres[$centre]) && isset($centres[$centre]['mail'])) {
                     $from = $centres[$centre]['mail'];
+                }
 
                 $to = BimpTools::cleanEmailsStr($email_client);
+
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
 
-                $bimpMail = new BimpMail((is_object($client) ? $client : 'none'), "Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient));
+                $bimpMail = new BimpMail((is_object($client) ? $client : 'none'), "Votre rendez-vous SAV " . $soc_name, $to, $from, str_replace("\n", "<br/>", $messageClient));
 
-                if (BimpCore::isEntity('bimp')) {
-                    $bimpMail->setFromType('ldlc');
+                if ($from_type) {
+                    $bimpMail->setFromType($from_type);
                 }
+
                 $mail_errors = array();
 
                 if ($bimpMail->send($mail_errors)) {
-                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ', From : ' . $from . ')', $to, null, $resId);
+                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ', From : ' . $from . ' - Entité : ' . $ext_entity . ' - Titre mail : ' . $bimpMail->title . ')', $to, null, $resId);
                     $this->debug_content .= '<span class="success">OK</span>';
                 } else {
                     $this->debug_content .= '<span class="danger">ECHEC</span>';
@@ -859,7 +880,7 @@ L’équipe BIMP";
             foreach ($centres as $code_centre => $centre_data) {
                 $shipTo = BimpTools::getArrayValueFromPath($centre_data, 'shipTo', '');
 
-                if ($shipTo /*&& !in_array((int) $shipTo, GSX_v2::$oldShipTos)*/ && !in_array((int) $shipTo, $this->apple_ids) && $centre_data['active'] == 1) {
+                if ($shipTo /* && !in_array((int) $shipTo, GSX_v2::$oldShipTos) */ && !in_array((int) $shipTo, $this->apple_ids) && $centre_data['active'] == 1) {
                     $this->apple_ids[] = (int) $shipTo;
                 }
             }

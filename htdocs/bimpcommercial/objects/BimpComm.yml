@@ -911,10 +911,12 @@ lists_cols:
             callback: displayClientFact
     tx_marge: 
         label: Tx marge
+        total_type: percent
         value: 
             callback: displayTxMarge
     tx_marque: 
         label: Tx marque
+        total_type: percent
         value: 
             callback: displayTxMarque
             

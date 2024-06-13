@@ -5433,7 +5433,7 @@ class ObjectLine extends BimpObject
             if (is_array($data)) {
                 foreach ($data as $field => $params) {
                     $data_check = BimpTools::getArrayValueFromPath($params, 'check', 'restricthtml');
-                    
+
                     if (BimpTools::isSubmit($field)) {
                         $this->{$field} = BimpTools::getValue($field, null, $data_check);
                     } elseif (is_null($this->{$field}) && isset($params['default'])) {
@@ -5883,14 +5883,20 @@ class ObjectLine extends BimpObject
                     $fieldsCopy[$field] = $this->getData($field);
                 }
 
-                $nb_units = (float) $this->getData('abo_nb_units');
+                $nb_units = null;
+
+                if ($this->field_exists('abo_nb_units')) {
+                    $nb_units = (float) $this->getData('abo_nb_units');
+                } else {
+                    $nb_units = $this->qty;
+                }
+
                 $isAbonnement = $product->isAbonnement();
                 $main_prod_duration = $product->getData('duree');
                 if (!$main_prod_duration && $isAbonnement) {
                     $errors[] = 'Duréé unitaire du produit ' . $product->getLink() . ' non définie';
                     return;
                 }
-
 
                 //on ajoute les sous lignes et calcule le tot
                 $dol_object = $this->getChildObject('dol_line');
@@ -5910,6 +5916,7 @@ class ObjectLine extends BimpObject
                         }
 
                         $qty_ratio = 1;
+
                         $prod_duration = $prod->getData('duree');
 
                         if (!$prod_duration && $isAbonnement) {
@@ -5922,19 +5929,30 @@ class ObjectLine extends BimpObject
                         }
 
                         $newLn = null;
+
+                        $propertiesCopy = array(
+                            'id_product' => $child_prod->getData('fk_product_fils'),
+                        );
+
+                        $fieldsCopy = BimpTools::merge_array($fieldsCopy, array(
+                                    'abo_nb_units' => $child_prod->getData('qty') * $nb_units * $qty_ratio,
+                                    'editable'     => 0,
+                                    'deletable'    => 0,
+                                    'remisable'    => 2,
+                                        ), true);
+
+                        if ($this->field_exists('abo_nb_units')) {
+                            $fieldsCopy['abo_nb_units'] = $child_prod->getData('qty') * $nb_units * $qty_ratio;
+                        } else {
+                            $propertiesCopy['qty'] = $child_prod->getData('qty') * $this->qty;
+                        }
+
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
                                                 array(
                                                     'id_parent_line'     => $this->id,
                                                     'linked_id_object'   => $child_prod->id,
                                                     'linked_object_name' => 'bundle',
-                                                ), array(
-                                            'id_product' => $child_prod->getData('fk_product_fils'),
-                                                ), BimpTools::merge_array($fieldsCopy, array(
-                                                    'abo_nb_units' => $child_prod->getData('qty') * $nb_units * $qty_ratio,
-                                                    'editable'     => 0,
-                                                    'deletable'    => 0,
-                                                    'remisable'    => 2,
-                                                        ), true),
+                                                ), $propertiesCopy, $fieldsCopy,
                                                 $newLn));
 
                         $dol_child = $newLn->getChildObject('dol_line');

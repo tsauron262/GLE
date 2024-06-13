@@ -88,6 +88,17 @@
           return element;
         },
         eventAfterRender: function(calEvent, element) {
+            jQuery(".classfortooltip").tooltip({
+							show: { collision: "flipfit", effect:'toggle', delay:50 },
+                                                        container: 'body',
+                                                        html: 1,
+							hide: { delay: 50 }, 	/* If I enable effect:\'toggle\' here, a bug appears: the tooltip is shown when collpasing a new dir if it was shown before */
+							tooltipClass: "mytooltip",
+							content: function () {
+	              				return $(this).prop('title');		/* To force to get title as is */
+	          				}
+	            		});
+            
           return element;
         },
         eventRefresh: function(calEvent, element) {

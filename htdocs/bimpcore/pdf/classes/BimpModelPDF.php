@@ -592,6 +592,13 @@ Abstract class BimpModelPDF
 
     public static function cleanHtml($html)
     {
+        // Virer caractères invisibles : 
+        
+//        $html = str_replace('?', '[INTPOINT]', $html);
+//        $html = utf8_decode($html);
+//        $html = str_replace('?', '', $html);
+//        $html = str_replace('[INTPOINT]', '?', $html);
+        
         if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
 //            echo 'AVANT: <br/>'; 
 //            echo htmlentities($html);

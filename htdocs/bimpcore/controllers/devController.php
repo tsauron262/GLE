@@ -27,8 +27,13 @@ class devController extends BimpController
         if (!$this->can('view')) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
         }
+        
+        
 
         $html = '';
+        
+        $date = new DateTime();
+        $html .= 'Date serveur : '.$date->format('d / m / Y H:i:s');
 
         $html .= '<div class="container-fluid">';
 

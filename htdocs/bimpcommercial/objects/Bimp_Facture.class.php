@@ -6275,7 +6275,7 @@ class Bimp_Facture extends BimpComm
 
         $motif = (int) BimpTools::getPostFieldValue('motif', 0, 'int');
         $avoir_total = (int) BimpTools::getPostFieldValue('avoir_total', 0, 'int');
-        $comment = (string) BimpTools::getPostFieldValue('comment','', 'alphanohtml');
+        $comment = (string) BimpTools::getPostFieldValue('comment', '', 'alphanohtml');
         $join_files = (array) BimpTools::getPostFieldValue('join_files', array(), 'array');
         if ($avoir_total)
             $montant = (float) $this->dol_object->total_ttc;
@@ -6443,7 +6443,8 @@ class Bimp_Facture extends BimpComm
                     'inverse_qty'   => true,
                     'pa_editable'   => false,
                     'keep_links'    => true,
-                    'check_product' => false
+                    'check_product' => false,
+                    'no_maj_bundle' => true
                 ));
 
                 if (count($line_errors)) {
@@ -6519,7 +6520,8 @@ class Bimp_Facture extends BimpComm
                 $errors = $new_fac->createLinesFromOrigin($this, array(
                     'pa_editable'   => false,
                     'keep_links'    => true,
-                    'check_product' => false
+                    'check_product' => false,
+                    'no_maj_bundle' => true
                 ));
 
                 $new_fac->copyRemisesGlobalesFromOrigin($this, $errors, true);
@@ -6831,7 +6833,8 @@ class Bimp_Facture extends BimpComm
                             $line_errors = $this->createLinesFromOrigin($facture, array(
                                 'inverse_qty'   => true,
                                 'pa_editable'   => false,
-                                'check_product' => false
+                                'check_product' => false,
+                                'no_maj_bundle' => true
                             ));
                             if (count($line_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($line_errors);

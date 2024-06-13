@@ -1642,6 +1642,52 @@ class BimpComm extends BimpDolObject
         return $return;
     }
 
+    public function getTx_margeListTotal($filters, $joins)
+    {
+        $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
+        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $res = $this->db->executeS($sql, 'array');
+
+        $tx = 0;
+
+        if (isset($res[0])) {
+            $res = $res[0];
+            $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
+            $achats = (float) BimpTools::getArrayValueFromPath($res, 'achats', 0);
+
+            if ($marge && $achats) {
+                $tx = ($marge / $achats) * 100;
+            }
+        }
+
+        return $tx;
+    }
+
+    public function getTx_marqueListTotal($filters, $joins)
+    {
+        $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
+        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $res = $this->db->executeS($sql, 'array');
+
+        $tx = 0;
+
+        if (isset($res[0])) {
+            $res = $res[0];
+            $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
+            $total = (float) BimpTools::getArrayValueFromPath($res, 'total', 0);
+
+            if ($marge && $total) {
+                $tx = ($marge / $total) * 100;
+            }
+        }
+
+        return $tx;
+    }
+
     public function getIdContact($type = 'external', $code = 'SHIPPING')
     {
         if ($this->isLoaded()) {
@@ -3194,7 +3240,8 @@ class BimpComm extends BimpDolObject
                     'copy_remises_globales'     => false,
                     'qty_to_zero_sauf_acomptes' => false,
                     'keep_links'                => false,
-                    'check_product'             => true
+                    'check_product'             => true,
+                    'no_maj_bundle'             => false
                         ), $params);
 
         if (!BimpObject::objectLoaded($origin) || !is_a($origin, 'BimpComm')) {
@@ -3245,6 +3292,10 @@ class BimpComm extends BimpDolObject
             }
 
             $new_line = BimpObject::getInstance($this->module, $this->object_name . 'Line');
+            
+            if ($params['no_maj_bundle']) {
+                $new_line->no_maj_bundle = true;
+            }
 
             $data = $line->getDataArray();
             $data['id_obj'] = $this->id;

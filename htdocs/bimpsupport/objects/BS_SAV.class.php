@@ -1755,6 +1755,25 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return '';
     }
+    
+    public function getIdUserGroup()
+    {
+        $codeCentre = $this->getCodeCentre();
+
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+        global $tabCentre;
+        if (isset($tabCentre[$codeCentre])) {
+            if (isset($tabCentre[$codeCentre]['idGroup'])) {
+                return $tabCentre[$codeCentre]['idGroup'];
+            } else {
+                BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
+            }
+        } else {
+            BimpCore::addlog('Pas de centre dans centre.inc pour ' . $codeCentre);
+        }
+
+        return 0;
+    }
 
     // Affichage:
 
@@ -1968,13 +1987,33 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $html;
     }
 
+    public function displayLink()
+    {
+        $html = '';
+        
+        $url = self::getPublicBaseUrl(false).'fc=savForm';
+        $html .= BimpRender::renderButton(array(
+                            'label'       => 'Prise de RDV',
+                            'icon_before' => 'calendar-alt',
+                            'classes'     => array('btn btn-default'),
+                            'attr'        => array(
+                                    'onclick' => 'window.location = \'' . $url . '\''
+                            )
+                ));
+
+        $html = BimpRender::renderPanel('Liens ', $html, '', array('open' => 0));
+
+        return $html;
+    }
+
     public function displayHeaderListInfo()
     {
         $html = '<div class="row">';
-        $html .= '<div class="col_xs-6 col-sm-6 col-md-3">' . $this->displayMaxDiago(true) . '</div>';
-        $html .= '<div class="col_xs-6 col-sm-6 col-md-3">' . $this->displayMaxDiago(false) . '</div>';
-        $html .= '<div class="col_xs-6 col-sm-6 col-md-3">' . $this->displayMoySav(true) . '</div>';
-        $html .= '<div class="col_xs-6 col-sm-6 col-md-3">' . $this->displayMoySav(false) . '</div>';
+        $html .= '<div class="col_xs-5 col-sm-2 col-md-2">' . $this->displayLink() . '</div>';
+        $html .= '<div class="col_xs-5 col-sm-2 col-md-2">' . $this->displayMaxDiago(true) . '</div>';
+        $html .= '<div class="col_xs-5 col-sm-2 col-md-2">' . $this->displayMaxDiago(false) . '</div>';
+        $html .= '<div class="col_xs-5 col-sm-2 col-md-2">' . $this->displayMoySav(true) . '</div>';
+        $html .= '<div class="col_xs-5 col-sm-2 col-md-2">' . $this->displayMoySav(false) . '</div>';
         $html .= '<div style="clear:both;"></div>';
         $html .= '</div>';
         return $html;
@@ -6685,25 +6724,6 @@ ORDER BY a.val_max DESC");
             'warnings'         => array(),
             'success_callback' => $success_callback
         );
-    }
-
-    public function getIdUserGroup()
-    {
-        $codeCentre = $this->getCodeCentre();
-
-        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-        global $tabCentre;
-        if (isset($tabCentre[$codeCentre])) {
-            if (isset($tabCentre[$codeCentre]['idGroup'])) {
-                return $tabCentre[$codeCentre]['idGroup'];
-            } else {
-                BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
-            }
-        } else {
-            BimpCore::addlog('Pas de centre dans centre.inc pour ' . $codeCentre);
-        }
-
-        return 0;
     }
 
     public function addMailMsg($dst, $src, $subj, $txt)

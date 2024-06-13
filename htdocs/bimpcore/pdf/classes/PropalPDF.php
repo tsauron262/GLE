@@ -58,9 +58,15 @@ class PropalPDF extends BimpCommDocumentPDF
         } else {
             $this->errors[] = 'Aucune proposition commerciale spécifiée';
         }
+        
         $secteur = $this->bimpCommObject->getData('ef_type');
-        if(BimpCore::isEntity('actimac') && $secteur != 'S'){
-            $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
+
+        if (BimpCore::isEntity('actimac')) {
+            if ($secteur === 'S') {
+                $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac_sav.pdf";
+            } else {
+                $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
+            }
 
             if ($cgv_file && file_exists($cgv_file)) {
                 $this->pdf->extra_concat_files[] = $cgv_file;
@@ -92,7 +98,6 @@ class PropalPDF extends BimpCommDocumentPDF
         global $conf, $db;
 
         $html = '';
-
         $html .= '<div>';
 
         // Réf client: 
@@ -247,7 +252,7 @@ class PropalPDF extends BimpCommDocumentPDF
 
                     if (BimpObject::objectLoaded($contact)) {
                         $thirdparty = $this->thirdparty;
-                        
+
                         if ((int) $contact->getData('fk_soc') !== (int) $this->thirdparty->id) {
                             $client = $contact->getParentInstance();
                             if (BimpObject::objectLoaded($client)) {

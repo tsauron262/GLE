@@ -8,6 +8,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
     public static $label_prime = "Apport externe";
     public static $label_prime2 = "Apport externe2";
+    public static $label_prime3 = "Bonus réparation ";
     public static $use_cgv = true;
     public static $type = 'pdf';
 
@@ -373,6 +374,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
             $total_ht /= $this->nbPeriods;
         }
+        $total_ht -= $this->prime3;
 
         $html .= '<tr>';
         $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
@@ -577,7 +579,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                 // Total TTC
                 $total_ttc = ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $this->object->multicurrency_total_ttc : $this->object->total_ttc;
-                $total_ttc += $this->acompteTtc;
+                $total_ttc += $this->acompteTtc - $this->prime3;
 
                 if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
                     $total_ttc /= $this->nbPeriods;
@@ -627,6 +629,14 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 }
             }
         }
+        
+        if ($this->prime3 != 0) {
+            $html .= '<tr>';
+            $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime3 . '</td>';
+            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$this->prime3, '', 0, 0, 1, $modeDecimalTotal);
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
 
         if (method_exists($this->object, 'getSommePaiement')) {
             $deja_regle = $this->object->getSommePaiement(($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? 1 : 0);
@@ -649,7 +659,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         if (isset($this->object->paye) && $this->object->paye) {
             $resteapayer = 0;
         } else {
-            $resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount - $this->acompteTtc, 'MT');
+            $resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount - $this->acompteTtc + $this->prime3, 'MT');
         }
 
         $deja_regle = round($deja_regle, 2);
@@ -688,7 +698,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
         $resteapayer = round($resteapayer, 2);
 
-        if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
+        if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0 || $this->prime3) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
             $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . BimpTools::displayMoneyValue($resteapayer, '', 0, 0, 1) . '</td>';
@@ -813,8 +823,29 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         }
         $montantTotLineHide = round($montantTotLineHide, 4);
 
+        $this->prime3 = 0;
         if (is_array($this->object->lines) && !empty($this->object->lines)) {
             foreach ($this->object->lines as $line) {
+                
+                if (stripos($line->product_label, 'Bonus réparation') === 0) {
+    //                $acompteHt = $line->subprice * (float) $line->qty;
+    //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
+
+                    $this->prime3 += $line->total_ht;
+                    
+//                    $this->acompteHt -= $line->total_ht;
+//                    $this->acompteTtc -= $line->total_ttc;
+//
+//                    $this->acompteTva[$line->tva_tx] -= $line->total_tva;
+                    continue;
+                }
+                
+                
+                
+                
+                
+                
+                
                 $row = array();
                 $i++;
 

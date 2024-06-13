@@ -1,0 +1,2 @@
+- Debug : ID entité intialisé trop tardivement pour le multi-société
+

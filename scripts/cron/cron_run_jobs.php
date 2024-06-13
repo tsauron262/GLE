@@ -167,6 +167,10 @@ if (isset($argv[3]) && $argv[3]) {
 	$id = $argv[3];
 }
 
+if (isset($argv[4]) && $argv[4]) {
+	$force_entity = $argv[4];
+}
+
 // create a jobs object
 $object = new Cronjob($db);
 
@@ -178,6 +182,14 @@ if (!empty($id)) {
 		exit();
 	}
 	$filter['t.rowid'] = $id;
+}
+if (!empty($force_entity)) {
+	if (!is_numeric($force_entity)) {
+		echo "Error: Bad value for parameter job force_entity";
+		dol_syslog("cron_run_jobs.php Bad value for parameter job force_entity", LOG_WARNING);
+		exit();
+	}
+	$filter['t.entity'] = $force_entity;
 }
 
 $result = $object->fetchAll('ASC,ASC,ASC', 't.priority,t.entity,t.rowid', 0, 0, 1, $filter, 0);

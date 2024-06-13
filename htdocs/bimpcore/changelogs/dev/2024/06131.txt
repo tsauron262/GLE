@@ -1,0 +1,1 @@
+- Aj filtre entity pour les cron

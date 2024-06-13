@@ -1,22 +1,4 @@
 # Entité: bimp
-
-objects: 
-    demande_fin: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: BimpCommDemandeFin
-            id_object: 
-                field_value: id_demande_fin
-                
-fields: 
-    id_demande_fin:
-        label: Demande de location
-        type: id_object
-        object: demande_fin
-        default_value: 0
         
 forms:
     majDateFinSpare:

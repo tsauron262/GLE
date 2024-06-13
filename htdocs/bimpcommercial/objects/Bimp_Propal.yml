@@ -64,6 +64,16 @@ objects:
             id_object: 
                 field_value: id_signature
                 
+    demande_fin: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: BimpCommDemandeFin
+            id_object: 
+                field_value: id_demande_fin
+                
 fields:
     # Attention : total est devenu total_ttc
     libelle: 
@@ -170,6 +180,11 @@ fields:
         type: int
         values:
             array: contrats_status_list
+        default_value: 0
+    id_demande_fin:
+        label: Demande de location
+        type: id_object
+        object: demande_fin
         default_value: 0
     
 forms: 
@@ -580,6 +595,62 @@ forms:
                   type: custom
                   content: 
                       callback: renderContratAboInput
+                      
+    proposition_loc: 
+        msgs:
+            - type: warning
+              content: '<b>Attention : ceci est une simple simulation destinée à inciter le client à souscrire à une offre de location.<br/>Si vous souhaitez établir un véritable devis de location, veuillez plutôt cliquer sur "Demande de location"</b>'
+        rows: 
+            - custom: 1
+              label: Financeur
+              input_name: target
+              input: 
+                  type: select
+                  options: 
+                      callback: getBcdfTargetsArray
+            - custom: 1
+              label: Titre du document
+              input_name: title
+              input: 
+                  type: text
+              value: Proposition de location de vos équipements informatiques
+            - custom: 1
+              label: Contact client
+              input_name: id_contact
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: fk_soc
+                              - 1
+                              - Aucun (Utiliser l'adresse de la fiche client)
+                              - 1
+            - custom: 1
+              label: Durée totale de la location
+              input_name: duration
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFDurationsArray
+              depends_on: target
+            - custom: 1
+              label: Périodicité des loyers
+              input_name: periodicity
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFPeriodicitiesArray
+              depends_on: target
+            - custom: 1
+              label: Terme de paiement des loyers
+              input_name: mode_calcul
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFCalcModesArray
+              depends_on: target
                                 
 fields_tables: 
     infos: 

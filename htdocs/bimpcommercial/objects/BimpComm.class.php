@@ -515,7 +515,7 @@ class BimpComm extends BimpDolObject
     {
         $client = $this->getClientFacture();
         if (BimpObject::objectLoaded($client)) {
-            return BimpCache::getSocieteRibsArray($client->id, $include_empty, ($this->getData('entity')? $this->getData('entity') : 1));
+            return BimpCache::getSocieteRibsArray($client->id, $include_empty, ($this->getData('entity') ? $this->getData('entity') : 1));
         }
 
         return ($include_empty ? array(0 => '') : array());
@@ -1968,9 +1968,10 @@ class BimpComm extends BimpDolObject
 
         return BimpTools::displayMoneyValue($total, '', 0, 0, 0, 2, 1);
     }
-    
-    public function displayHelpForTvaAcompte(){
-        return 'TVA moyenne '.round($this->getData('total_tva') / $this->getData('total_ht')* 100). ' %';
+
+    public function displayHelpForTvaAcompte()
+    {
+        return 'TVA moyenne ' . round($this->getData('total_tva') / $this->getData('total_ht') * 100) . ' %';
     }
 
     public function displayCommercial()
@@ -2560,7 +2561,7 @@ class BimpComm extends BimpDolObject
 
         $html .= '<thead>';
         $html .= '<tr>';
-        
+
         if ($nature == 0) {
             $html .= '<th>Nature</th>';
         }
@@ -2689,13 +2690,13 @@ class BimpComm extends BimpDolObject
     }
 
     // Traitements:
-    
+
     public function onNewStatus($new_status, $current_status, $extra_data = array(), &$warnings = array())
     {
         // Pour surcharges. Ne surtout pas suppr. cette fonction
         return array();
     }
-    
+
     public function startLineTransaction()
     {
         static::$dont_check_parent_on_update = true;
@@ -2991,7 +2992,8 @@ class BimpComm extends BimpDolObject
                     'copy_remises_globales'     => false,
                     'qty_to_zero_sauf_acomptes' => false,
                     'keep_links'                => false,
-                    'check_product'             => true
+                    'check_product'             => true,
+                    'no_maj_bundle'             => false
                         ), $params);
 
         if (!BimpObject::objectLoaded($origin) || !is_a($origin, 'BimpComm')) {
@@ -3042,6 +3044,10 @@ class BimpComm extends BimpDolObject
             }
 
             $new_line = BimpObject::getInstance($this->module, $this->object_name . 'Line');
+            
+            if ($params['no_maj_bundle']) {
+                $new_line->no_maj_bundle = true;
+            }
 
             $data = $line->getDataArray();
             $data['id_obj'] = $this->id;
@@ -3555,7 +3561,7 @@ class BimpComm extends BimpDolObject
                         $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de l\'ajout de l\'acompte ' . $this->getLabel('to_the'));
                     }
                 }
-                
+
                 $idComm = $this->getIdCommercial();
                 $email = BimpTools::getUserEmailOrSuperiorEmail($idComm);
 
@@ -3566,7 +3572,7 @@ class BimpComm extends BimpDolObject
                 }
 
                 if (!empty($email)) {
-                    mailSyn2("Acompte sur ".$this->getName(true), $email, null, 'Bonjour, un acompte de '.$amount.' € a été ajouté à la ' . $this->getLink() . $infoClient);
+                    mailSyn2("Acompte sur " . $this->getName(true), $email, null, 'Bonjour, un acompte de ' . $amount . ' € a été ajouté à la ' . $this->getLink() . $infoClient);
                 }
 
                 addElementElement(static::$dol_module, $factureA->table_element, $this->id, $factureA->id);

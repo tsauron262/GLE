@@ -1755,6 +1755,25 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return '';
     }
+    
+    public function getIdUserGroup()
+    {
+        $codeCentre = $this->getCodeCentre();
+
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+        global $tabCentre;
+        if (isset($tabCentre[$codeCentre])) {
+            if (isset($tabCentre[$codeCentre]['idGroup'])) {
+                return $tabCentre[$codeCentre]['idGroup'];
+            } else {
+                BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
+            }
+        } else {
+            BimpCore::addlog('Pas de centre dans centre.inc pour ' . $codeCentre);
+        }
+
+        return 0;
+    }
 
     // Affichage:
 
@@ -6705,25 +6724,6 @@ ORDER BY a.val_max DESC");
             'warnings'         => array(),
             'success_callback' => $success_callback
         );
-    }
-
-    public function getIdUserGroup()
-    {
-        $codeCentre = $this->getCodeCentre();
-
-        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-        global $tabCentre;
-        if (isset($tabCentre[$codeCentre])) {
-            if (isset($tabCentre[$codeCentre]['idGroup'])) {
-                return $tabCentre[$codeCentre]['idGroup'];
-            } else {
-                BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
-            }
-        } else {
-            BimpCore::addlog('Pas de centre dans centre.inc pour ' . $codeCentre);
-        }
-
-        return 0;
     }
 
     public function addMailMsg($dst, $src, $subj, $txt)

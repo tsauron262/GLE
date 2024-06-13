@@ -1567,7 +1567,10 @@ class BimpCore
         $html .= '</div>';
 
         // Outils devs: 
-        if (BimpCore::isUserDev()) {
+        global $user;
+        $is_user_dev = BimpCore::isUserDev();
+        
+        if ($is_user_dev || $user->login == 's.lehalle') {
             $html .= '<div style="margin: 5px 0; text-align: center; color: #7F7F7F; font-size: 11px">----- OUTILS DEV ------</div>';
 
             $onclick = "bimpModal.loadAjaxContent($(this), 'loadChangeLog', {type: 'dev'}, 'ChangeLog DEV', 'Chargement', function (result, bimpAjax) {});";
@@ -1578,7 +1581,7 @@ class BimpCore
             $html .= '</span>';
             $html .= '</div>';
 
-            if (!BimpCore::isModeDev()) {
+            if (!BimpCore::isModeDev() && $is_user_dev) {
                 $html .= '<a class="btn btn-light-default" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_all.php?go=1&branche=master" target="_blank">';
                 $html .= BimpRender::renderIcon('fas_arrow-down', 'iconLeft') . 'GIT PULL ALL MASTER';
                 $html .= '</a>';

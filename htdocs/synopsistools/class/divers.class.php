@@ -28,6 +28,13 @@ class synopsisHook
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         }
+
+        if (BimpTools::isSubmit('entity')) {
+            $entity = (int) BimpTools::getValue('entity', 0, 'int');
+            if ($entity)
+                $conf->entity = $entity;
+        }
+
         BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
         //Pour les logiciel externe.

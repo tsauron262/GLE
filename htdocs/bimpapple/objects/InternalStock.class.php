@@ -181,7 +181,7 @@ class InternalStock extends PartStock
             $errors = $this->updateField('qty_to_receive', $qty_to_receive);
             if (!count($errors) && $qty_modif > 0) {
                 $date = date('Y-m-d');
-                $this->updateField('date_last_vente', $date);
+                $this->updateField('date_last_commande', $date);
             }
         }
 

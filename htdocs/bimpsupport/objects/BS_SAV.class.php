@@ -3147,6 +3147,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if (in_array($current_status, array(self::BS_SAV_FERME))) {
                     $errors[] = $errors[] = $error_msg . ' (statut actuel invalide)';
                 }
+                if (!count($errors)) {
+                    $this->addNote('Attente pièce depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                    $msg_type = 'commOk';
+                }
                 break;
 
             case self::BS_SAV_DEVIS_ACCEPTE:
@@ -6686,16 +6690,6 @@ ORDER BY a.val_max DESC");
 
         $warnings = array(); //mais de toute facon on n'en fait rien...
         $errors = $this->setNewStatus(self::BS_SAV_ATT_PIECE);
-
-        if (!count($errors)) {
-            global $user, $langs;
-
-            $this->addNote('Attente pièce depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
-
-            if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commOk'));
-            }
-        }
 
         return array(
             'errors'   => $errors,

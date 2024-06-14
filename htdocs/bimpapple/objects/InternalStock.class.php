@@ -177,6 +177,10 @@ class InternalStock extends PartStock
         if ($this->isLoaded($errors)) {
             $qty_to_receive = (int) $this->getData('qty_to_receive') + $qty_modif;
             $errors = $this->updateField('qty_to_receive', $qty_to_receive);
+            if (!count($errors)) {
+                $date = date('Y-m-d');
+                $this->updateField('date_last_vente', $date);
+            }
         }
 
         return $errors;

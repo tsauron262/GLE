@@ -107,7 +107,6 @@ class test_sav
     function mailLocalise()
     {
         $this->fetchLocalise();
-        die('fin'.$this->output);
         
         $errors = array();
         $sql = $this->db->query('SELECT DISTINCT a.id as id
@@ -400,7 +399,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
     function fetchLocalise(){
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         $filtre = array();
-        $filtre['custom'] = array('custom' => 'status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))))');
+        $filtre['custom'] = array('custom' => 'status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))');
         $rows = $equipment->getList($filtre, 50, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
         $this->fetchGsxInfo($rows);
@@ -462,7 +461,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                 if (!$r['serial']) {
                     continue;
                 }
-                $equipment->fetch($r['id']);
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $r['id']);
                 $errorsEq = $equipment->majWithGsx();
 
                 $this->output .= $r['serial'].'<br/>';

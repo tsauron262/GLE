@@ -112,7 +112,7 @@ class test_sav
         $sql = $this->db->query('SELECT DISTINCT a.id as id
 FROM llx_bs_sav a
 LEFT JOIN llx_be_equipment a___equipment ON a___equipment.id = a.id_equipment
-WHERE  a.status IN ("-1",0) AND a___equipment.status_gsx IN ("3")');
+WHERE  a.status IN (-1,0,1,2,3,4,5,6,7) AND a___equipment.status_gsx IN ("3")');
         while ($ln = $this->db->fetch_object($sql)) {
             $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
             $tmpErrors = $sav->sendMsg('localise');
@@ -400,7 +400,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         $filtre = array();
         $filtre['custom'] = array('custom' => 'status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))');
-        $rows = $equipment->getList($filtre, 50, 1, 'id', 'desc', 'array', array('id', 'serial'));
+        $rows = $equipment->getList($filtre, 200, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
         $this->fetchGsxInfo($rows);
     }

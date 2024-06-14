@@ -1,0 +1,1 @@
+- Correction bug envoie notification commande piéce manuel.

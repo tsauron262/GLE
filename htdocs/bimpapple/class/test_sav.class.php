@@ -107,7 +107,7 @@ class test_sav
     function mailLocalise()
     {
         $this->fetchLocalise();
-        
+        die('fin'.$this->output);
         
         $errors = array();
         $sql = $this->db->query('SELECT DISTINCT a.id as id

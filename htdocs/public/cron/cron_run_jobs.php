@@ -102,9 +102,9 @@ else
 }
 $id = GETPOST('id', 'alpha');	// We accept non numeric id. We will filter later.
 
-$filter_entity = GETPOST('filter_entity', 'int');	// We accept non numeric id. We will filter later.
+$filter_entity = GETPOST('filter_entity', 'int');
 
-
+die('ff'.$filter_entity);
 // create a jobs object
 $object = new Cronjob($db);
 

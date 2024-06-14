@@ -106,6 +106,9 @@ class test_sav
 
     function mailLocalise()
     {
+        $this->fetchLocalise();
+        
+        
         $errors = array();
         $sql = $this->db->query('SELECT DISTINCT a.id as id
 FROM llx_bs_sav a
@@ -393,75 +396,90 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
         return 0;
     }
+    
+    function fetchLocalise(){
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $filtre = array();
+        $filtre['custom'] = array('custom' => 'status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))))');
+        $rows = $equipment->getList($filtre, 50, 1, 'id', 'desc', 'array', array('id', 'serial'));
+
+        $this->fetchGsxInfo($rows);
+    }
 
     function fetchEquipmentsImei($nb = 1, $modeLabel = 0)
     {
         $errors = array();
-        if (!class_exists('GSX_v2')) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
-        }
-
-        $gsx = GSX_v2::getInstance(true);
-        $gsx->authenticate();
-
+        
         if ($nb < 1)
             $nb = 1;
 
-        if ($gsx->logged) {
-            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
 
-            if ($modeLabel)
-                $filtre = array(
-                    'id_product'    => 0,
-                    'product_label' => '',
-                    'status_gsx'    => array('operator' => '!=', 'value' => 2)
-                );
-            else
-                $filtre = array(
-                    'serial' => array(
-                        'operator' => '!=',
-                        'value'    => '0'
-                    )
-                );
-            if ($nb > 5) {//sinon c'est un test de reconnexion
+        if ($modeLabel)
+            $filtre = array(
+                'id_product'    => 0,
+                'product_label' => '',
+                'status_gsx'    => array('operator' => '!=', 'value' => 2)
+            );
+        else
+            $filtre = array(
+                'serial' => array(
+                    'operator' => '!=',
+                    'value'    => '0'
+                )
+            );
+        if ($nb > 5) {//sinon c'est un test de reconnexion
 //                $filtre['status_gsx'] = array(0,3);
-                if (!$modeLabel)
-                    $filtre['custom'] = array('custom' => '(status_gsx = 0)');// || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))))');
-                $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
-            } else {
-                $rows = $equipment->getList($filtre, $nb, 1, 'rand', 'asc', 'array', array('id', 'serial'));
-            }
-
-            if (!empty($rows)) {
-                foreach ($rows as $r) {
-                    if (!$gsx->logged) {
-                        break;
-                    }
-
-                    if (!$r['serial']) {
-                        continue;
-                    }
-                    $equipment->fetch($r['id']);
-                    $errorsEq = $equipment->majWithGsx();
-
-                    $this->output .= $r['serial'].'<br/>';
-                    if (count($errorsEq)) {
-//                        print_r($errors);
-                        $this->output .= 'Erreurs: <pre>' . print_r($errorsEq, 1) . '</pre>';
-                        if(isset($errorsEq[0]) && stripos($errorsEq[0], 'Un équipement existe') === false)
-                            break;
-                    }
-                    $errors = BimpTools::merge_array($errors, $errorsEq);
-
-                    $this->nbImei++;
-                }
-            }
+            if (!$modeLabel)
+                $filtre['custom'] = array('custom' => '(status_gsx = 0)');
+            $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
+        } else {
+            $rows = $equipment->getList($filtre, $nb, 1, 'rand', 'asc', 'array', array('id', 'serial'));
         }
 
-        if ($this->nbImei) {
-            $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
-        }
+        $this->fetchGsxInfo($rows);
+
 
         return 0;
+    }
+    
+    
+    public function fetchGsxInfo($rows){
+        
+        if (!class_exists('GSX_v2')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+        }
+        
+        $gsx = GSX_v2::getInstance(true);
+        $gsx->authenticate();
+
+        if ($gsx->logged && !empty($rows)) {
+            foreach ($rows as $r) {
+                if (!$gsx->logged) {
+                    break;
+                }
+
+                if (!$r['serial']) {
+                    continue;
+                }
+                $equipment->fetch($r['id']);
+                $errorsEq = $equipment->majWithGsx();
+
+                $this->output .= $r['serial'].'<br/>';
+                if (count($errorsEq)) {
+//                        print_r($errors);
+                    $this->output .= 'Erreurs: <pre>' . print_r($errorsEq, 1) . '</pre>';
+                    if(isset($errorsEq[0]) && stripos($errorsEq[0], 'Un équipement existe') === false)
+                        break;
+                }
+                $errors = BimpTools::merge_array($errors, $errorsEq);
+
+                $this->nbImei++;
+            }
+        }
+        
+        if ($this->nbImei) {
+            $this->output .= ' ' . $this->nbImei . ' n° equipements corrigé(s).';
+        }
     }
 }

@@ -63,11 +63,12 @@ class securLogSms
                 $dateFinBloquage = time() - (60 * 5);
 
                 $secondeRestante = (int) $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
-
-                if (!empty($code))
-                    $this->testCode($code);
-                elseif ($secondeRestante < 0)
+                
+                
+                if ((empty($code) && $secondeRestante < 0) || $this->user->array_options['options_code_sms'] == '')
                     $this->createSendCode();
+                elseif (!empty($code))
+                    $this->testCode($code);
                 else
                     $this->message[] = "Vous devez attendre " . date("i", $secondeRestante) . " minutes " . date("s", $secondeRestante) . " secondes pour avoir un nouveau code !";
             }

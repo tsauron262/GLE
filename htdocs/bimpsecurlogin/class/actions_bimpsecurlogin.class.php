@@ -123,7 +123,7 @@ class securLogSms
         global $conf;
         $int = 60 * 60 * 24 * 7;
         $_COOKIE[$this->nomCookie] = $codeR;
-        setcookie($this->nomCookie, $codeR, time() + $int, $conf->file->dol_url_root['main']);
+        setcookie($this->nomCookie, $codeR, time() + $int, $conf->file->dol_url_root['main'], '', true, true);
     }
 
     function asSecureCokie()

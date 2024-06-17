@@ -369,7 +369,7 @@ params:
         sub_params: 
             - if: 1
               params: 
-                  allow_df_from_propal_dev_only: 
+                  allow_df_from_commande_dev_only: 
                       label: Activer seulement pour les devs
                       type: bool
                       def: 0

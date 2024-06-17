@@ -488,8 +488,10 @@ class BCT_Contrat extends BimpDolObject
         if (!$id_client) {
             $id_client = (int) $this->getData('fk_soc');
         }
-        
-        return BimpCache::getSocieteRibsArray($id_client, true, $this->getData('entity'));
+        $entity = 1;
+        if($this->getData('entity') > 1)
+            $entity = $this->getData('entity');
+        return BimpCache::getSocieteRibsArray($id_client, true, $entity);
     }
 
     public function getContratsToMergeArray()

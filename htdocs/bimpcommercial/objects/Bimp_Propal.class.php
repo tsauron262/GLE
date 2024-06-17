@@ -701,6 +701,11 @@ class Bimp_Propal extends Bimp_PropalTemp
             return 0;
         }
 
+        if ((int) BimpCore::getConf('allow_df_from_propal_dev_only', null, 'bimpcommercial') && !BimpCore::isUserDev()) {
+            $errors[] = 'Demandes de location à partir des devis actives seulement pour les devs';
+            return 0;
+        }
+
         return 1;
     }
 

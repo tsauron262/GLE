@@ -353,12 +353,26 @@ params:
         type: bool
         cat: locations
         def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  allow_df_from_propal_dev_only: 
+                      label: Activer seulement pour les devs
+                      type: bool
+                      def: 0
         
     allow_df_from_commande: 
         label: Activer les demandes de location LDLC Pro Lease depuis les commandes
         type: bool
         cat: locations
         def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  allow_df_from_propal_dev_only: 
+                      label: Activer seulement pour les devs
+                      type: bool
+                      def: 0
         
     id_api_webservice_prolease: 
         label: ID API Webservice LDLC PRO LEASE

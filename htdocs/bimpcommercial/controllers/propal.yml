@@ -14,3 +14,22 @@ objects:
             bimp_object: Bimp_Propal
             id_object: 
                 request: id
+                
+                
+sections: 
+    0: 
+        tabs: 
+            default: 
+                sections: 
+                    1:
+                        nav_tabs: 
+                            5: 
+                                id: demande_financement_tab
+                                title: Demande de location
+                                show: 
+                                    field_value: 
+                                        object: propal
+                                        field_name: id_df_prolease
+                                ajax_render_method: 
+                                    object: propal
+                                    method: renderDemandeFinancementView

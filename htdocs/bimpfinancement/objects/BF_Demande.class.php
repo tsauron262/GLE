@@ -15,7 +15,7 @@ class BF_Demande extends BimpObject
     const STATUS_CANCELED_BY_SOURCE = 22;
 
     public static $status_list = array(
-        self::STATUS_NEW                => array('label' => 'Nouvelle demande', 'far_file', 'classes' => array('info')),
+        self::STATUS_NEW                => array('label' => 'Nouvelle demande', 'icon' => 'far_file', 'classes' => array('info')),
         self::STATUS_DRAFT              => array('label' => 'Brouillon', 'icon' => 'far_file', 'classes' => array('warning')),
         self::STATUS_VALIDATED          => array('label' => 'Demande refinanceur à effectuer', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::STATUS_ATTENTE            => array('label' => 'Acceptation refinanceur en attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),

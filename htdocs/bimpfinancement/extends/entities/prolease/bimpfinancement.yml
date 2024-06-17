@@ -17,6 +17,16 @@ params:
         def: 0
         required: 1
         
+    id_fourn_actimac: 
+        label: ID fournisseur Actimac
+        def: 0
+        required: 1
+        
+    id_api_webservice_actimac: 
+        label: ID API Webservice ACTIMAC
+        def: 0
+        required: 1
+        
 # Valeurs par défauts: 
     def_duration: 
         def: 36

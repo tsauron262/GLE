@@ -18,6 +18,20 @@ objects:
 sections: 
     0: 
         tabs: 
+            default: 
+                sections: 
+                    1:
+                        nav_tabs: 
+                            5: 
+                                id: demande_financement_tab
+                                title: Demande de location
+                                show:
+                                    field_value: 
+                                        object: commande
+                                        field_name: id_demande_fin
+                                ajax_render_method: 
+                                    object: commande
+                                    method: renderDemandeFinancementView
             logistic: 
                 label: Logistique
                 show: 

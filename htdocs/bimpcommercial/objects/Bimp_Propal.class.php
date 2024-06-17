@@ -1188,7 +1188,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 );
             }
 
-            if (!empty($signature_buttons)) {
+            if (!empty($df_buttons)) {
                 $buttons_groups[] = array(
                     'label'   => 'Location',
                     'icon'    => 'fas_hand-holding-usd',
@@ -1196,11 +1196,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                 );
             }
 
-            if (!empty($signature_buttons)) {
-                return array(
-                    'buttons_groups' => $buttons_groups
-                );
-            }
+            return array(
+                'buttons_groups' => $buttons_groups
+            );
         }
 
         return $buttons;

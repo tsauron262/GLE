@@ -1,32 +1,5 @@
-# Locations: 
-categories: 
-    locations: 
-        label: Demandes de location
-        
 # Entité : bimp
-params: 
-    allow_df_from_propal: 
-        label: Activer les demandes de location LDLC Pro Lease depuis les devis
-        type: bool
-        cat: locations
-        def: 0
-        
-    allow_df_from_commande: 
-        label: Activer les demandes de location LDLC Pro Lease depuis les commandes
-        type: bool
-        cat: locations
-        def: 0
-        
-    id_api_webservice_prolease: 
-        label: ID API Webservice LDLC PRO LEASE
-        cat: locations
-        def: 0
-        
-    demande_fin_target_prolease_id_client: 
-        label: ID client LDLC Pro Lease
-        cat: locations
-        def: 0
-        
+params:         
     prod_fdp_auto: 
         label: Produit frais de port auto
         def: 0

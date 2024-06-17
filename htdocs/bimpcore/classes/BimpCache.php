@@ -395,9 +395,9 @@ class BimpCache
             if ($instance->isDolObject()) {
                 $filters = $instance->checkSqlFilters($filters, $joins, 'a');
             }
-            
+
             global $conf;
-            if($conf->multicompany->enabled)
+            if ($conf->multicompany->enabled)
                 $instance->getEntityFilter($joins, $filters);
 
             $sql = BimpTools::getSqlSelect('a.' . $primary);
@@ -1291,7 +1291,7 @@ class BimpCache
 
         return $list;
     }
-    
+
     public static function getBimpObjectIds($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array(), $n = null)
     {
         $instance = BimpObject::getInstance($module, $object_name);
@@ -1309,7 +1309,7 @@ class BimpCache
             static::setCacheServeur($cacheKey, $rows);
         }
         $newRows = array();
-        foreach($rows as $r)
+        foreach ($rows as $r)
             $newRows[] = $r[$instance->getPrimary()];
         return $newRows;
     }
@@ -1941,11 +1941,11 @@ class BimpCache
             return ($include_empty ? array(0 => '') : array());
         }
 
-        $key = 'societe_' . $id_societe . '_ribs_array_'.$entity;
+        $key = 'societe_' . $id_societe . '_ribs_array_' . $entity;
 
         if (!isset(self::$cache[$key])) {
             self::$cache[$key] = array();
-            $result = self::getBdb()->getRows('societe_rib', '`fk_soc` =' . $id_societe . ' AND entity = '.$entity, null, 'object', null, 'default_rib', 'DESC');
+            $result = self::getBdb()->getRows('societe_rib', '`fk_soc` =' . $id_societe . ' AND entity = ' . $entity, null, 'object', null, 'default_rib', 'DESC');
 
             foreach ($result as $row) {
                 if ($row->default_rib) {
@@ -2820,7 +2820,7 @@ class BimpCache
                     'id_entrepot' => $centre[8],
                     'shipTo'      => $centre[4],
                     'active'      => (isset($centre[9]) ? $centre[9] : 1),
-                    'infos'      => (isset($centre['infos']) ? $centre['infos'] : '')
+                    'infos'       => (isset($centre['infos']) ? $centre['infos'] : '')
                 );
             }
         }

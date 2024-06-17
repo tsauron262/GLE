@@ -7,6 +7,8 @@ categories:
         label: Signatures
     rappels: 
         label: Envoi rappels
+    locations: 
+        label: Demandes de location
         
 params: 
     use_lock_num: 
@@ -344,3 +346,26 @@ params:
         label: Utiliser les multi onglet dans les fiches commercial
         def: 1
         type: bool
+        
+    # Locations : 
+    allow_df_from_propal: 
+        label: Activer les demandes de location LDLC Pro Lease depuis les devis
+        type: bool
+        cat: locations
+        def: 0
+        
+    allow_df_from_commande: 
+        label: Activer les demandes de location LDLC Pro Lease depuis les commandes
+        type: bool
+        cat: locations
+        def: 0
+        
+    id_api_webservice_prolease: 
+        label: ID API Webservice LDLC PRO LEASE
+        cat: locations
+        def: 0
+        
+    demande_fin_target_prolease_id_client: 
+        label: ID client LDLC Pro Lease
+        cat: locations
+        def: 0

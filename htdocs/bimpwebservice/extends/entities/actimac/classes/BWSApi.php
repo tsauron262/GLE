@@ -1,6 +1,6 @@
 <?php
 
-// Entité: bimp
+// Entité: actimac
 
 require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/classes/BWSDemandeLocOutAPI.php';
 

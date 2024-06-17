@@ -791,6 +791,7 @@ fields:
     id_atradius:
         label: Identifiant Atradius
         type: int   
+        default_value: 0
         show: 
             callback: useAtradius
         extra: 1

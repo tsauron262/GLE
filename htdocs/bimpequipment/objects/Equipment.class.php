@@ -1908,6 +1908,7 @@ class Equipment extends BimpObject
         $sc = '';
 
         $eqs_ids = BimpTools::getArrayValueFromPath($data, 'eqs_to_merge', array());
+        define('DONT_CHECK_SERIAL', true);
 
         if (empty($eqs_ids)) {
             $errors[] = 'Aucun équipement à fusionner sélectionné';

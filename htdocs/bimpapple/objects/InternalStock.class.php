@@ -127,6 +127,7 @@ class InternalStock extends PartStock
                 $html .= '<thead>';
                 $html .= '<tr>';
                 $html .= '<th>Réf. composant</th>';
+                $html .= '<th>Der. Commande</th>';
                 $html .= '<th style="text-align: center">Qté en attente de réception</th>';
                 $html .= '<th style="text-align: center">Qté reçue</th>';
                 $html .= '</tr>';
@@ -138,6 +139,7 @@ class InternalStock extends PartStock
                     $qty_to_receive = (int) $part->getData('qty_to_receive');
                     $html .= '<tr>';
                     $html .= '<td>' . $part->getData('part_number') . '</td>';
+                    $html .= '<td>' . $part->getData('date_last_commande') . '</td>';
                     $html .= '<td style="text-align: center">';
                     $html .= '<span class="badge badge-default">' . $qty_to_receive . '</span>';
                     $html .= '<span class="btn btn-default btn-small" style="float: right" onclick="';
@@ -177,6 +179,10 @@ class InternalStock extends PartStock
         if ($this->isLoaded($errors)) {
             $qty_to_receive = (int) $this->getData('qty_to_receive') + $qty_modif;
             $errors = $this->updateField('qty_to_receive', $qty_to_receive);
+            if (!count($errors) && $qty_modif > 0) {
+                $date = date('Y-m-d');
+                $this->updateField('date_last_commande', $date);
+            }
         }
 
         return $errors;

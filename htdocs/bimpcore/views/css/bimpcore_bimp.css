@@ -8206,6 +8206,13 @@ span.hover {
     transform: rotate(359deg); } }
 /*Styles génériques*/
 /* line 25, ../scss/bimpcore/_styles.scss */
+
+.cke_editable{
+    line-height: normal;
+}
+.cke_editable p{
+    margin: 2px;
+}
 .clearAfter:after {
   clear: right; }
 

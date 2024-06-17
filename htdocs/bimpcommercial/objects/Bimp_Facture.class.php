@@ -4641,7 +4641,7 @@ class Bimp_Facture extends BimpComm
             'datef'             => $this->getData('datef'),
             'fk_account'        => (int) $this->getData('fk_account'),
             'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
-            'fk_mode_reglement' => 1
+            'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement')
         ));
 
         $avoir->dol_object->fk_delivery_address = $this->dol_object->fk_delivery_address;

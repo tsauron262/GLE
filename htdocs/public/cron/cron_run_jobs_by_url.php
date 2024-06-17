@@ -121,6 +121,7 @@ $user->getrights();
 
 $id = GETPOST('id', 'alpha'); // We accept non numeric id. We will filter later.
 
+$filter_entity = GETPOST('filter_entity', 'int');
 
 // create a jobs object
 $object = new Cronjob($db);
@@ -133,6 +134,16 @@ if (!empty($id)) {
 		exit;
 	}
 	$filter['t.rowid'] = $id;
+}
+
+if (! empty($filter_entity)) {
+	if (! is_numeric($filter_entity))
+	{
+		echo "Error: Bad value for parameter job entity";
+		dol_syslog("cron_run_jobs.php Bad value for parameter job entity", LOG_WARNING);
+		exit;
+	}
+	$filter['t.entity']=$filter_entity;
 }
 
 $result = $object->fetchAll('ASC,ASC,ASC', 't.priority,t.entity,t.rowid', 0, 0, 1, $filter, 0);

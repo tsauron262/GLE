@@ -2378,7 +2378,7 @@ class BC_Vente extends BimpObject
         }
 
         if (!$id_mode_reglement) {
-            $id_mode_reglement = 61;
+            $id_mode_reglement = (int) BimpCore::getConf('id_cond_reglement_default', 0, 'bimpcaisse');;
         }
 
         $id_cond_reglement = (int) $this->getData('id_cond_reglement');

@@ -57,6 +57,9 @@ fields:
     date_last_vente: 
         label: Date dernière vente
         type: date
+    date_last_commande: 
+        label: Date dernière commande
+        type: date
         
 forms: 
     default: 
@@ -162,5 +165,5 @@ lists:
                 edit: 1
             do_not_order: 
                 edit: 1
-            date_last_vente:
+            date_last_commande:
             

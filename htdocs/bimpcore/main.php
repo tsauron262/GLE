@@ -11,7 +11,7 @@ if ($context == 'public') {
     define('XFRAMEOPTIONS_ALLOWALL', true);
     
     $sessionname = '__Host-publicerp';
-        session_set_cookie_params(array('SameSite' => 'Lax', 'Secure' => true, 'path' => '/', 'httponly' => false));
+        session_set_cookie_params(array('SameSite' => 'None', 'Secure' => true, 'path' => '/', 'httponly' => false));
 	session_name($sessionname);
         
         $test = session_id();

@@ -85,7 +85,7 @@ class securLogSms
 
     public function fetch($id_user)
     {
-        global $user;
+        global $user, $conf;
         if ($id_user == $user->id)
             $this->user = $user;
         elseif (is_int($id_user)) {

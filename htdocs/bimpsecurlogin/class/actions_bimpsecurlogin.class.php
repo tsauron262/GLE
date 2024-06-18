@@ -85,7 +85,7 @@ class securLogSms
 
     public function fetch($id_user)
     {
-        global $user;
+        global $user, $conf;
         if ($id_user == $user->id)
             $this->user = $user;
         elseif (is_int($id_user)) {
@@ -96,7 +96,7 @@ class securLogSms
         $this->user->oldcopy = clone $this->user;
         $this->ip = synopsisHook::getUserIp();
 
-        $this->nomCookie = "secu_erp" . $this->user->id . "_" . str_replace(".", "_", $this->ip);
+        $this->nomCookie = "__Host-secu_erp".str_replace('/', '', $conf->file->dol_url_root['main'])."_" . $this->user->id . "_" . str_replace(".", "_", $this->ip);
 
         $this->testSecur();
     }
@@ -123,7 +123,15 @@ class securLogSms
         global $conf;
         $int = 60 * 60 * 24 * 7;
         $_COOKIE[$this->nomCookie] = $codeR;
-        setcookie($this->nomCookie, $codeR, time() + $int, $conf->file->dol_url_root['main']);
+        $arr_cookie_options = array (
+            'expires' =>  time() + $int, 
+            'path' => '/',//$conf->file->dol_url_root['main'], 
+//            'domain' => '', // leading dot for compatibility or use subdomain
+            'secure' => true,     // or false
+            'httponly' => true,    // or false
+            'samesite' => 'Lax' // None || Lax  || Strict
+        );
+        setcookie($this->nomCookie, $codeR, $arr_cookie_options);
     }
 
     function asSecureCokie()

@@ -192,7 +192,15 @@ if (!function_exists('dol_loginfunction')) {
 		$prefix = dol_getprefix('');
 		$sessiontimeout = 'DOLSESSTIMEOUT_'.$prefix;
 		if (!empty($conf->global->MAIN_SESSION_TIMEOUT)) {
-			setcookie($sessiontimeout, $conf->global->MAIN_SESSION_TIMEOUT, 0, "/", null, (empty($dolibarr_main_force_https) ? false : true), true);
+                        $arr_cookie_options = array (
+                            'expires' =>  0, 
+                            'path' => "/", 
+//                            'domain' => '', // leading dot for compatibility or use subdomain
+                            'secure' => (empty($dolibarr_main_force_https) && !isHTTPS()) ? false : true,     // or false
+                            'httponly' => true,    // or false
+                            'samesite' => 'Lax' // None || Lax  || Strict
+                        );
+			setcookie($sessiontimeout, $conf->global->MAIN_SESSION_TIMEOUT, $arr_cookie_options);
 		}
 
 		if (GETPOST('urlfrom', 'alpha')) {

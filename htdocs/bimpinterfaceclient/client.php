@@ -55,7 +55,7 @@ if ($fc !== 'doc') {
     if (!isset($_REQUEST['ajax'])) {
         echo "<script>function testCookie(){"
         . "setTimeout(function() {"
-        . "if(document.cookie.match('publicerp') || window.self === window.top){ "
+        . "if(document.cookie.match('__Host-publicerp') || window.self === window.top){ "
         . "}else{ "
         . "window.open('" . $url . "', '_blank'); "
         . "if(window.location.href.indexOf('?') > 0 || window.location.href.indexOf('/b/') > 0 || window.location.href.indexOf('/a/') > 0) "

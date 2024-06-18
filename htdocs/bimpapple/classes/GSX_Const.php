@@ -199,13 +199,17 @@ class GSX_Const extends GSX_Const_entity
         'SDOA' => 'Stock dead on arrival'
     );
     public static $coverage_options = array(
-        ''               => '',
-        'BATTERY'        => array('label' => 'Billable battery repair', 'classes' => array('success')),
-        'DISPLAY'        => array('label' => 'Billable display repair', 'classes' => array('success')),
-        'VMI_YELLOW'     => array('label' => 'VMI Yellow, service price', 'classes' => array('warning')),
-        'APPLECARE_PLUS' => array('label' => 'AppleCare+ covered incident', 'classes' => array('success')),
-        'VMI_RED'        => array('label' => 'VMI Red, full price', 'classes' => array('danger')),
-        'VMI_GREEN'      => array('label' => 'VMI Green', 'classes' => array('success'))
+        ''                   => '',
+        'BATTERY'            => array('label' => 'Billable battery repair', 'classes' => array('success')),
+        'DISPLAY'            => array('label' => 'Billable display repair', 'classes' => array('success')),
+        'VMI_YELLOW'         => array('label' => 'VMI Yellow, service price', 'classes' => array('warning')),
+        'APPLECARE_PLUS'     => array('label' => 'AppleCare+ covered incident', 'classes' => array('success')),
+        'VMI_RED'            => array('label' => 'VMI Red, full price', 'classes' => array('danger')),
+        'VMI_GREEN'          => array('label' => 'VMI Green', 'classes' => array('success')),
+        // V6 : 
+//        'THEFTLOSS'          => array('label' => 'THEFTLOSS', 'classes' => array('info')),
+//        'DAMAGE_NOT_COVERED' => array('label' => 'Dégâts non couverts', 'classes' => array('danger')),
+//        'OTHER'              => array('label' => 'Autre', 'classes' => array('info')),
     );
     public static $loaner_return_dispositions = array(
         ''     => '',

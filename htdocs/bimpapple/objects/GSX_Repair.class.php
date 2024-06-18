@@ -34,7 +34,7 @@ class GSX_Repair extends BimpObject
     public static $repairTypes = array(
         'carry_in', 'repair_or_replace'
     );
-    public static $readyForPickupCodes = array('RFPU','USHP');
+    public static $readyForPickupCodes = array('RFPU', 'USHP');
     public static $cancelCodes = array('GX02', 'GX08', 'SCNC', 'CCAR', 'CCCR', 'CCNR');
     public static $closeCodes = array('SACM', 'SCOM', 'CFPH', 'CRCN', 'CRCP', 'CUNR', 'CRDE', 'SPCM');
 
@@ -165,7 +165,7 @@ class GSX_Repair extends BimpObject
 
                         if (isset($reason['messages']) && is_array($reason['messages'])) {
                             foreach ($reason['messages'] as $message) {
-                                if(is_array($message) && isset($message['description']))
+                                if (is_array($message) && isset($message['description']))
                                     $message = $message['description'];
                                 $msg .= ' - ' . $message . '<br/>';
                             }
@@ -190,6 +190,30 @@ class GSX_Repair extends BimpObject
                                     $msg .= '<br/>';
                                 }
                             }
+                        } elseif ($reason['type'] === 'COVERAGE_LIMITATIONS' && isset($reason['coverageLimitations'])) {
+                            if (isset($reason['coverageLimitations']['coverageOption']) && !empty($reason['coverageLimitations']['coverageOption'])) {
+                                $options = array();
+                                foreach ($reason['coverageLimitations']['coverageOption'] as $opt) {
+                                    $options[] = (isset(GSX_Const::$coverage_options[$opt]) ? GSX_Const::$coverage_options[$opt]['label'] : $opt);
+                                }
+
+                                if (!empty($options)) {
+                                    if (isset($reason['coverageLimitations']['partDetails']) && !empty($reason['coverageLimitations']['partDetails'])) {
+                                        $parts_numbers = array();
+                                        foreach ($reason['coverageLimitations']['partDetails'] as $part_detail) {
+                                            if (isset($part_detail['number'])) {
+                                                $parts_numbers[] = $part_detail['number'];
+                                            }
+                                        }
+
+                                        if (!empty($parts_numbers)) {
+                                            $msg .= 'Composant' . (count($parts_numbers) > 1 ? 's' : '') . ' ' . implode(', ', $parts_numbers) . ' - ';
+                                        }
+                                    }
+
+                                    $msg .= 'Option(s) de couverture disponible(s) : ' . implode(', ', $options);
+                                }
+                            }
                         }
                         $msgs[] = $msg;
                     }
@@ -208,9 +232,9 @@ class GSX_Repair extends BimpObject
     public function getActionsButtons()
     {
         $buttons = array();
-        
-        if(!count($this->repairLookUp))
-            $this->lookup ();
+
+        if (!count($this->repairLookUp))
+            $this->lookup();
 
         if ($this->isLoaded() && $this->use_gsx_v2) {
             if (!(int) $this->findInGsx && !(int) $this->getData('canceled')) {
@@ -260,8 +284,6 @@ class GSX_Repair extends BimpObject
 //                    'onclick' => $onclick
 //                );
 //            }
-            
-
             // doc repa: 
             $onclick = '';
             $filePath = $this->getDocRepaFilePath();
@@ -283,14 +305,12 @@ class GSX_Repair extends BimpObject
                     'onclick' => $onclick
                 );
             }
-            
-            
         }
 
         return $buttons;
     }
-    
-       public function getDocRepaFilePath()
+
+    public function getDocRepaFilePath()
     {
         if ($this->isLoaded()) {
             $dir = $this->getFilesDir();
@@ -313,7 +333,6 @@ class GSX_Repair extends BimpObject
 
         return '';
     }
-
 
     public function updatePartNumber($part_number, $kgb_number, $kbb_number, $sequence_number = 0, &$warnings = array())
     {
@@ -439,7 +458,7 @@ class GSX_Repair extends BimpObject
 
         return $errors;
     }
-    
+
     public function fetchDocRepa()
     {
         $errors = array();
@@ -454,7 +473,7 @@ class GSX_Repair extends BimpObject
                 $result = false;
 
                 if ($gsx->logged) {
-                    $result = $gsx->getDocRepa($this->getData('ship_to'),$this->getData('repair_number'));
+                    $result = $gsx->getDocRepa($this->getData('ship_to'), $this->getData('repair_number'));
                 }
 
                 if (!$result) {
@@ -1781,7 +1800,7 @@ class GSX_Repair extends BimpObject
 
                     $maj_required = false;
                     $codeReturnAttendKBB = array('KBB', 'ABU', 'NRET');
-                    
+
                     if ((!isset($part['returnStatusCode']) || in_array($part['returnStatusCode'], $codeReturnAttendKBB)) &&
                             (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
                         $maj_required = true;
@@ -1852,8 +1871,8 @@ class GSX_Repair extends BimpObject
 
                             foreach ($this->repairLookUp['parts'] as $repairPart) {
                                 $savPart = null;
-                                
-                                if(stripos($repairPart['number'], 'ACSH') !== false)
+
+                                if (stripos($repairPart['number'], 'ACSH') !== false)
                                     continue;
 
                                 if (isset($repairPart['number']) && $repairPart['number']) {
@@ -2410,7 +2429,7 @@ class GSX_Repair extends BimpObject
 
         return $this->close(true, $checkRepair);
     }
-        
+
     public function actionFetchDocRepa($data, &$success)
     {
         $errors = array();
@@ -2447,8 +2466,6 @@ class GSX_Repair extends BimpObject
             'success_callback' => $cb
         );
     }
-    
-    
 
     public function actionCancelRepair($data, &$success)
     {

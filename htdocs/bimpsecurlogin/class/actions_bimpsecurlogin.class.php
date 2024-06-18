@@ -96,7 +96,7 @@ class securLogSms
         $this->user->oldcopy = clone $this->user;
         $this->ip = synopsisHook::getUserIp();
 
-        $this->nomCookie = "secu_erp".$conf->file->dol_url_root['main']."_" . $this->user->id . "_" . str_replace(".", "_", $this->ip);
+        $this->nomCookie = "secu_erp".str_replace('/', '', $conf->file->dol_url_root['main'])."_" . $this->user->id . "_" . str_replace(".", "_", $this->ip);
 
         $this->testSecur();
     }

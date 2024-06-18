@@ -195,8 +195,8 @@ if (!function_exists('dol_loginfunction')) {
                         $arr_cookie_options = array (
                             'expires' =>  0, 
                             'path' => "/", 
-                            'domain' => '', // leading dot for compatibility or use subdomain
-                            'secure' => (empty($dolibarr_main_force_https && isHTTPS() === false) ? false : true),     // or false
+//                            'domain' => '', // leading dot for compatibility or use subdomain
+                            'secure' => true,//(empty($dolibarr_main_force_https && isHTTPS() === false) ? false : true),     // or false
                             'httponly' => true,    // or false
                             'samesite' => 'Lax' // None || Lax  || Strict
                         );

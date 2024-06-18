@@ -125,8 +125,8 @@ class securLogSms
         $_COOKIE[$this->nomCookie] = $codeR;
         $arr_cookie_options = array (
             'expires' =>  time() + $int, 
-            'path' => '',//$conf->file->dol_url_root['main'], 
-            'domain' => '', // leading dot for compatibility or use subdomain
+            'path' => '/',//$conf->file->dol_url_root['main'], 
+//            'domain' => '', // leading dot for compatibility or use subdomain
             'secure' => true,     // or false
             'httponly' => true,    // or false
             'samesite' => 'Lax' // None || Lax  || Strict

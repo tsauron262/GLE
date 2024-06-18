@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/functions/suppr_accent.php'
 class TRA_payInc {
     
     protected $ref;
-    protected BimpDb $db;
+    protected $db;
             
     function __construct($bimp_db) { $this->db = $bimp_db;}
     

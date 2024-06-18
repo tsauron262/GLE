@@ -69,6 +69,16 @@ objects:
             id_object: 
                 field_value: id_client_facture
                 
+    demande_fin: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: BimpCommDemandeFin
+            id_object: 
+                field_value: id_demande_fin
+                
 associations: 
     factures: 
         object: facture
@@ -271,6 +281,12 @@ fields:
     consigne_liv:
         label: Consigne de livraison
         type: text
+        
+    id_demande_fin:
+        label: Demande de location
+        type: id_object
+        object: demande_fin
+        default_value: 0
         
 fields_tables: 
     infos: 

@@ -788,7 +788,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderPopoverData($content, $placement = 'top', $html = 'false', $container = 'body', $toggle = 'popover', $trigger = 'hover')
+    public static function renderPopoverData($content, $placement = 'top', $html = 'false', $container = 'body', $toggle = 'popover', $trigger = 'hover', $viewport_selector = 'body')
     {
         $return = ' data-toggle="' . $toggle . '"';
         $return .= ' data-trigger="' . $trigger . '"';
@@ -796,7 +796,7 @@ class BimpRender
         $return .= ' data-placement="' . $placement . '"';
         $return .= ' data-content="' . htmlentities($content) . '"';
         $return .= ' data-html="' . (is_string($html) ? $html : ($html ? 'true' : 'false')) . '"';
-        $return .= ' data-viewport="' . htmlentities('{"selector": "body", "padding": 0}') . '"';
+        $return .= ' data-viewport="' . htmlentities('{"selector": "' . $viewport_selector . '", "padding": 0}') . '"';
 
         return $return;
     }
@@ -1019,13 +1019,13 @@ class BimpRender
         $html = '';
 
         $params = BimpTools::overrideArray(array(
-                    'no_html'   => false,
-                    'protect_html'=> false,
-                    'title'     => '',
-                    'foldable'  => 0,
-                    'open'      => 1,
-                    'nTabs'     => 0,
-                    'max_depth' => 100
+                    'no_html'      => false,
+                    'protect_html' => false,
+                    'title'        => '',
+                    'foldable'     => 0,
+                    'open'         => 1,
+                    'nTabs'        => 0,
+                    'max_depth'    => 100
                         ), $params);
 
         $no_html = $params['no_html'];
@@ -1060,16 +1060,16 @@ class BimpRender
                 foreach ($array as $label => $value) {
                     if (is_array($value)) {
                         $html .= self::renderRecursiveArrayContent($value, array(
-                                    'foldable'  => $foldable,
-                                    'title'     => $label,
-                                    'open'      => $open,
-                                    'max_depth' => ($max_depth - 1),
+                                    'foldable'     => $foldable,
+                                    'title'        => $label,
+                                    'open'         => $open,
+                                    'max_depth'    => ($max_depth - 1),
                                     'protect_html' => $params['protect_html']
                         ));
                     } else {
                         $html .= '<div class="array_content_row">';
                         $html .= '<span class="array_content_label">' . $label . ': </span>';
-                        if($params['protect_html'])
+                        if ($params['protect_html'])
                             $html .= '<span class="array_content_value">' . htmlentities($value) . '</code></span>';
                         else
                             $html .= '<span class="array_content_value">' . $value . '</span>';

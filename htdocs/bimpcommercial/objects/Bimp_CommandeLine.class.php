@@ -8155,7 +8155,7 @@ class Bimp_CommandeLine extends ObjectLine
                         ));
 
                         foreach ($fournLines as $line) {
-                            $max -= (float) $line->qty;
+                            $max -= (float) $line->getFullQty();
                         }
                     }
                 }

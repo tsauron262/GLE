@@ -3936,7 +3936,7 @@ class BCT_ContratLine extends BimpObject
                                                 'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
                                                 'data'        => array(
                                                     'data_type' => 'number',
-                                                    'decimals'  => 2
+                                                    'decimals'  => 5
                                                 )
                                     ));
                                     $row_html .= '<p class="small">' . $pa_label . '</p>';

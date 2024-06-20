@@ -4157,6 +4157,50 @@ class BimpTools
                 return $data;
         }
     }
+    
+    
+    /*
+     * Sécurité
+     */
+    public static function secuAddEchec($msg){
+        
+        $bdb = BimpCache::getBdb();
+        $bdb->insert('bimp_secu_ip', array('ip'=>static::getUserIp(), 'msg'=>$msg));    
+    }
+    
+    public static function secuGetNbEchec(){
+        $bdb = BimpCache::getBdb();
+        
+        $dt = new DateTime();
+//        $dt->sub(new DateInterval('P2D'));
+        return $bdb->getCount('bimp_secu_ip', "ip = '".static::getUserIp()."' AND tms > '".$dt->format('Y/m/d')."'");  
+    }
+    
+    public static function secuTestIp(){
+        if(static::secuGetNbEchec() > 5){
+            BimpCore::addlog('Activité anormal : '.static::getUserIp(), 4);
+            $msg = 'Une activité anormale a étais détecté sur votre connexion...';
+            $html = BimpRender::renderAlerts($msg);
+            header('HTTP/1.0 403 Forbidden');
+            die($html);
+        }
+        
+    }
+    
+    static function getUserIp()
+    {
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $tmp = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $ipUser = $tmp[0];
+        }
+        $tmp = explode(".", $ipUser);
+        if (count($tmp) < 4)
+            $ipUser = $_SERVER['REMOTE_ADDR'];
+        $tmp = explode(".", $ipUser);
+        if (count($tmp) < 4)
+            $ipUser = $_SERVER['HTTP_X_REAL_IP'];
+        return $ipUser;
+    }
 }
 
 if (!function_exists('mime_content_type')) {

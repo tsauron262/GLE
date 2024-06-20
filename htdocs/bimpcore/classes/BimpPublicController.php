@@ -528,7 +528,8 @@ class BimpPublicController extends BimpController
 
             if (!BimpObject::objectLoaded($userClient)) {
                 BimpTools::secuAddEchec('Echec login espace client');
-                $errors[] = 'Aucun compte client ne correspond à l\'identifiant "' . $email . '"';
+//                $errors[] = 'Aucun compte client ne correspond à l\'identifiant "' . $email . '"';
+                $errors[] = 'Login ou Mot de passe invalide';
                 unset($userClient);
                 $userClient = null;
             } else {
@@ -538,7 +539,7 @@ class BimpPublicController extends BimpController
                     $this->initUserClient();
                 } else {
                     BimpTools::secuAddEchec('Echec mdp espace client');
-                    $errors[] = 'Mot de passe invalide';
+                    $errors[] = 'Login ou Mot de passe invalide';
                 }
             }
         }
@@ -572,6 +573,7 @@ class BimpPublicController extends BimpController
                     $backUrl = BimpObject::getPublicBaseUrl();
                     if(isset($_SESSION['back_url']))
                         $backUrl = $_SESSION['back_url'];
+                    BimpTools::secuAddEchec('Reinit mdp espace client');
                     $this->displayPublicForm('reinitPw', array(
                         'success_msg' => 'Votre mot de passe a été réinitialisé avec succès.<br/>Veuillez consulter votre boîte mail pour l\'obtenir',
                         'back_url'    => $backUrl

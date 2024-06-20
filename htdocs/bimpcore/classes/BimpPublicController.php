@@ -368,6 +368,7 @@ class BimpPublicController extends BimpController
 
     public function displayLoginForm($errors = array())
     {
+        BimpTools::secuTestIp();
         $sub_title = '<div style="text-align: center">';
 
         $sub_title .= '<h5>';
@@ -526,6 +527,7 @@ class BimpPublicController extends BimpController
             ));
 
             if (!BimpObject::objectLoaded($userClient)) {
+                BimpTools::secuAddEchec('Echec login espace client');
                 $errors[] = 'Aucun compte client ne correspond à l\'identifiant "' . $email . '"';
                 unset($userClient);
                 $userClient = null;
@@ -535,6 +537,7 @@ class BimpPublicController extends BimpController
                     $_SESSION['userClient'] = $email;
                     $this->initUserClient();
                 } else {
+                    BimpTools::secuAddEchec('Echec mdp espace client');
                     $errors[] = 'Mot de passe invalide';
                 }
             }

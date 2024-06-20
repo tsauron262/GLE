@@ -256,7 +256,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public function getFullQty()
     {
-        return (float) $this->qty + (float) $this->GetData('qty_modif');
+        return (float) $this->qty + (float) $this->getData('qty_modif');
     }
 
     public function getReceivedQty($id_reception = null, $validated_reception = false)

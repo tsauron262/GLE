@@ -1,0 +1,32 @@
+table: bimp_secu_ip
+icon: fas_fail
+public_icon: pe_pen
+common_fields: 0
+
+    
+    
+labels:
+    name: echecIp
+    is_female: 0
+    
+
+                
+fields:     
+    tms: 
+        label: Date
+        type: datetime
+        
+    ip:
+        label: Ip
+        
+    msg:
+        label: Message
+        type: text
+     
+             
+lists: 
+    default: 
+        cols: 
+            tms: 
+            ip: 
+            msg: 

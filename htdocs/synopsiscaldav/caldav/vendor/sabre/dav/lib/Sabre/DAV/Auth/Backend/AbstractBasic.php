@@ -75,6 +75,7 @@ abstract class AbstractBasic implements BackendInterface {
 
         // Authenticates the user
         if (!$this->validateUserPass($userpass[0],$userpass[1])) {
+            \BimpTools::secuAddEchec('Auth caldav echec, login : '.$userpass[0]);
             $auth->requireLogin();
             throw new DAV\Exception\NotAuthenticated('Username or password does not match '.$userpass[0]." !! ".$userpass[1]);
         }

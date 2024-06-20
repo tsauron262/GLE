@@ -57,6 +57,7 @@ if(!file_exists(PROJECT_PATH_ROOT . 'vendor/')) {
 
 require PROJECT_PATH_ROOT . 'vendor/autoload.php';
 
+
 # Bootstraping Flake
 \Flake\Framework::bootstrap();
 # Bootstrapping Baïkal
@@ -90,5 +91,7 @@ $server->addPlugin(new \Sabre\DAV\Auth\Plugin($authBackend, BAIKAL_AUTH_REALM));
 $server->addPlugin(new \Sabre\DAVACL\Plugin());
 $server->addPlugin(new \Sabre\CalDAV\Plugin());
 
+if(class_exists('BimpTools'))
+    BimpTools::secuTestIp();
 # And off we go!
 $server->exec();

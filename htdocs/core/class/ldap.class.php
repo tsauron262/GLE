@@ -324,7 +324,7 @@ class Ldap
 			$return = $connected;
 			dol_syslog(get_class($this)."::connect_bind return=".$return, LOG_DEBUG);
 		} else {
-                    BimpTools::secuAddEchec("Login erreur");
+                    BimpTools::secuAddEchec("Login erreur : ".$this->searchUser);
 			$this->error = 'Failed to connect to LDAP'.($this->error ? ': '.$this->error : '');
 			$return = -1;
 			dol_syslog(get_class($this)."::connect_bind return=".$return.' - '.$this->error, LOG_WARNING);

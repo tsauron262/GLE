@@ -158,7 +158,7 @@ class BCT_ContratLine extends BimpObject
         }
 
 
-        if (in_array($field, array('achat_periodicity', 'variable_pu_ht'))) {
+        if (in_array($field, array('achat_periodicity', 'variable_qty', 'variable_pu_ht'))) {
             if ((int) $this->getData('fk_product')) {
                 $product = $this->getChildObject('product');
                 if (BimpObject::objectLoaded($product) && $product->isBundle()) {
@@ -8013,12 +8013,9 @@ class BCT_ContratLine extends BimpObject
                                 $errors[] = 'La périodicité de facturation ne peut pas être inférieure à la périodicité d\'achat';
                             }
                         }
-
-                        if ($this->getData('linked_object_name') === 'bundleCorrect') {
+                        
+                        if ($is_bundle || (int) $this->getData('id_parent_line')) {
                             $this->set('variable_qty', 0);
-                        } elseif (!$is_bundle && (int) $this->getData('id_parent_line')) {
-                            $variable_qty = (int) $this->db->getValue('contratdet', 'variable_qty', 'rowid = ' . (int) $this->getData('id_parent_line'));
-                            $this->set('variable_qty', $variable_qty);
                         }
                     }
                     break;

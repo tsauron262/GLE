@@ -250,11 +250,13 @@ function BimpContrat() {
                                     sub_line_subprice = 0;
                                     bimp_msg('Sous-ligne #' + id_sub_line + ' : prix de vente invalide', 'danger');
                                     has_errors = true;
-                                } else if (!sub_line_subprice) {
-                                    $sub_line_row.addClass('has_errors');
-                                    bimp_msg('Sous-ligne #' + id_sub_line + ' : Veuillez saisir un prix de vente à facturer supérieur à 0', 'danger');
-                                    has_errors = true;
-                                } else {
+                                }
+//                                else if (!sub_line_subprice) {
+//                                    $sub_line_row.addClass('has_errors');
+//                                    bimp_msg('Sous-ligne #' + id_sub_line + ' : Veuillez saisir un prix de vente à facturer supérieur à 0', 'danger');
+//                                    has_errors = true;
+//                                } 
+                                else {
                                     sub_line_data['subprice'] = sub_line_subprice;
                                 }
                             }

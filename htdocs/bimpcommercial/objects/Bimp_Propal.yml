@@ -191,7 +191,6 @@ forms:
     default: 
         on_save: redirect
         rows: 
-            - field: replaced_ref
             - custom: 1
               input_name: id_user_commercial
               label: Commercial suivi proposition

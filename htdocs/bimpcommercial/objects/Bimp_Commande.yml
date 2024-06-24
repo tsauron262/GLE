@@ -481,7 +481,6 @@ forms:
         msgs:
             callback: getCreateFromOriginCheckMsg
         rows: 
-            - field: replaced_ref
             - field: libelle
             - field: expertise
             - field: entrepot

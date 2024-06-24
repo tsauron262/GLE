@@ -7245,9 +7245,11 @@ class BCT_ContratLine extends BimpObject
 
                                 // Check subprice variable: 
                                 if ((int) $line->getData('variable_pu_ht')) {
-                                    $subprice = (float) BimpTools::getArrayValueFromPath($line_data, 'subprice', 0);
-                                    if (!$subprice) {
-                                        $process->Alert('ATTENTION : Prix de vente non défini ou égal à 0', $facture, $line_ref);
+                                    $subprice = BimpTools::getArrayValueFromPath($line_data, 'subprice', null);
+                                    if (is_null($subprice)) {
+                                        $process->Alert('ATTENTION : Prix de vente non défini', $facture, $line_ref);
+                                    } else {
+                                        $subprice = (float) $subprice;
                                     }
                                 }
 
@@ -7358,14 +7360,18 @@ class BCT_ContratLine extends BimpObject
                                             $sub_line_qty = round($sub_line_qty, 6);
                                             $sub_lines_data[$sub_line->id] = array(
                                                 'nb_periods' => $nb_periods,
-                                                'qty'        => $sub_line_qty
+                                                'qty'        => $sub_line_qty,
+                                                'editable'   => 0
                                             );
 
                                             if ((int) $sub_line->getData('variable_pu_ht')) {
-                                                $sub_lines_data[$sub_line->id]['subprice'] = (float) BimpTools::getArrayValueFromPath($line_data, 'sub_lines/' . $sub_line->id . '/subprice', 0);
+                                                $sub_lines_data[$sub_line->id]['subprice'] = BimpTools::getArrayValueFromPath($line_data, 'sub_lines/' . $sub_line->id . '/subprice', null);
+                                                $sub_lines_data[$sub_line->id]['editable'] = 1;
 
-                                                if (!$sub_lines_data[$sub_line->id]['subprice']) {
-                                                    $process->Alert('ATTENTION : Prix de vente non défini ou égal à 0', $facture, $line_ref . ' (Sous-ligne n°' . $sub_line->getData('rang') . ')');
+                                                if (is_null($sub_lines_data[$sub_line->id]['subprice'])) {
+                                                    $process->Alert('ATTENTION : Prix de vente non défini', $facture, $line_ref . ' (Sous-ligne n°' . $sub_line->getData('rang') . ')');
+                                                } else {
+                                                    $sub_lines_data[$sub_line->id]['subprice'] = (float) $sub_lines_data[$sub_line->id]['subprice'];
                                                 }
                                             }
                                         }
@@ -7374,7 +7380,8 @@ class BCT_ContratLine extends BimpObject
                                 if (!$has_sub_line_error) {
                                     $lines_data[$id_line] = array(
                                         'nb_periods' => $nb_periods,
-                                        'qty'        => $qty
+                                        'qty'        => $qty,
+                                        'editable'   => ($line->getData('variable_pu_ht') ? 1 : 0)
                                     );
 
                                     if (!is_null($subprice)) {
@@ -8013,7 +8020,7 @@ class BCT_ContratLine extends BimpObject
                                 $errors[] = 'La périodicité de facturation ne peut pas être inférieure à la périodicité d\'achat';
                             }
                         }
-                        
+
                         if ($is_bundle || (int) $this->getData('id_parent_line')) {
                             $this->set('variable_qty', 0);
                         }

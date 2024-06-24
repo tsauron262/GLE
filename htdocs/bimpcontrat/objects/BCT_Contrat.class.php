@@ -489,7 +489,7 @@ class BCT_Contrat extends BimpDolObject
             $id_client = (int) $this->getData('fk_soc');
         }
         $entity = 1;
-        if($this->getData('entity') > 1)
+        if ($this->getData('entity') > 1)
             $entity = $this->getData('entity');
         return BimpCache::getSocieteRibsArray($id_client, true, $entity);
     }
@@ -1475,7 +1475,7 @@ class BCT_Contrat extends BimpDolObject
                     'id_obj'             => (int) $facture->id,
                     'type'               => ($line->getData('fk_product') > 0 ? Bimp_FactureLine::LINE_PRODUCT : Bimp_FactureLine::LINE_FREE),
                     'remisable'          => 2,
-                    'editable'           => 0,
+                    'editable'           => (isset($line_data['editable']) ? (int) $line_data['editable'] : 0),
                     'pa_editable'        => 0,
                     'linked_id_object'   => (int) $line->id,
                     'linked_object_name' => 'contrat_line',

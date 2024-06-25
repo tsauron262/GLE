@@ -839,13 +839,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 //                    $this->acompteTva[$line->tva_tx] -= $line->total_tva;
                     continue;
                 }
-
-
-
-
-
-
-
+                
                 $row = array();
                 $i++;
 

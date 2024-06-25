@@ -54,7 +54,7 @@ class FixeTabs
     public function displayHead($echo = true)
     {
         $html = '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl('/bimpcore/views/css/fixeTabs.css') . '"/>';
-        $html .= '<script type="text/javascript" src="' . BimpCore::getFileUrl('/bimpcore/views/js/fixeTabs.js') . '"></script>';
+        $html .= '<script '.BimpTools::getScriptAttribut().' src="' . BimpCore::getFileUrl('/bimpcore/views/js/fixeTabs.js') . '"></script>';
 
         foreach ($this->objs as $obj) {
             $html .= $obj->displayHead();

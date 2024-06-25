@@ -4187,6 +4187,13 @@ class BimpTools
         
     }
     
+    public static function getScriptAttribut(){
+        $return = ' type="text/javascript"';
+        if(defined('csp_nonce'))
+            $return .= ' nonce="'.csp_nonce.'"';
+        return $return;
+    }
+    
     static function getUserIp()
     {
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {

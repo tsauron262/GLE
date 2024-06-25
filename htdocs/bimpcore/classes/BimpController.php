@@ -407,7 +407,7 @@ class BimpController
 
         $obj = $alert->getNextAlert();
         if ($obj)
-            echo '<script>$(document).ready(function () {' . $alert->getPopup($obj->id, $obj->getData('label')) . '});</script>';
+            echo '<script '.BimpTools::getScriptAttribut().'>$(document).ready(function () {' . $alert->getPopup($obj->id, $obj->getData('label')) . '});</script>';
 
         llxFooter();
     }
@@ -450,7 +450,7 @@ class BimpController
                         continue;
                     }
                 }
-                echo '<script type="text/javascript" src="' . BimpCore::getFileUrl($jsFile) . '"></script>';
+                echo '<script '.BimpTools::getScriptAttribut().' src="' . BimpCore::getFileUrl($jsFile) . '"></script>';
             }
         }
 

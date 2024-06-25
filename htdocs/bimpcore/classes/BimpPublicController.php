@@ -277,18 +277,18 @@ class BimpPublicController extends BimpController
 
         $url = BimpCore::getFileUrl('/includes/jquery/js/jquery.min.js');
         if ($url) {
-            $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
+            $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
         }
         
         $url = BimpCore::getFileUrl('/bimpinterfaceclient/views/js/public.js');
         if ($url) {
-            $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
+            $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
         }
 
         foreach ($params['js_files'] as $jsFile) {
             $url = BimpCore::getFileUrl($jsFile);
             if ($url) {
-                $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
+                $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
             }
         }
 

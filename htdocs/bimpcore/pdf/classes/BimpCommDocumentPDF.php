@@ -629,7 +629,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 }
             }
         }
-        
+
         if ($this->prime3 != 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime3 . '</td>';
@@ -826,26 +826,26 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         $this->prime3 = 0;
         if (is_array($this->object->lines) && !empty($this->object->lines)) {
             foreach ($this->object->lines as $line) {
-                
+
                 if (stripos($line->product_label, 'Bonus réparation') === 0) {
-    //                $acompteHt = $line->subprice * (float) $line->qty;
-    //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
+                    //                $acompteHt = $line->subprice * (float) $line->qty;
+                    //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
 
                     $this->prime3 += $line->total_ht;
-                    
+
 //                    $this->acompteHt -= $line->total_ht;
 //                    $this->acompteTtc -= $line->total_ttc;
 //
 //                    $this->acompteTva[$line->tva_tx] -= $line->total_tva;
                     continue;
                 }
-                
-                
-                
-                
-                
-                
-                
+
+
+
+
+
+
+
                 $row = array();
                 $i++;
 
@@ -870,7 +870,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 }
 
                 if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
-                    if ($montantTotLineHide == 0 || in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
+                    if (($montantTotLineHide > -0.009 && $montantTotLineHide < 0.009) || in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
                         if ((int) $bimpLine->getData('hide_in_pdf')) {
                             continue;
                         }

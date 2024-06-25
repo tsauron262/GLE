@@ -527,7 +527,7 @@ class BimpPublicController extends BimpController
             ));
 
             if (!BimpObject::objectLoaded($userClient)) {
-                BimpTools::secuAddEchec('Echec login espace client');
+                BimpTools::secuAddEchec('Echec login espace client : '.$email);
 //                $errors[] = 'Aucun compte client ne correspond à l\'identifiant "' . $email . '"';
                 $errors[] = 'Login ou Mot de passe invalide';
                 unset($userClient);

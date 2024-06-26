@@ -109,18 +109,21 @@ class BimpSignataire extends BimpObject
 
                 global $userClient;
 
-                if (!BimpObject::objectLoaded($userClient)) {
-                    return 0;
+                if (!isset($this->force_no_user_client) || !(int) $this->force_no_user_client) {
+                    if (!BimpObject::objectLoaded($userClient)) {
+                        return 0;
+                    }
+
+                    if ((int) $userClient->getData('id_client') !== (int) $this->getData('id_client')) {
+                        return 0;
+                    }
+
+                    $allowed = $this->getData('allowed_users_client');
+                    if (!is_array($allowed) || !in_array($userClient->id, $allowed)) {
+                        return 0;
+                    }
                 }
 
-                if ((int) $userClient->getData('id_client') !== (int) $this->getData('id_client')) {
-                    return 0;
-                }
-
-                $allowed = $this->getData('allowed_users_client');
-                if (!is_array($allowed) || !in_array($userClient->id, $allowed)) {
-                    return 0;
-                }
                 return 1;
         }
         return parent::canSetAction($action);
@@ -887,7 +890,7 @@ class BimpSignataire extends BimpObject
         return '';
     }
 
-    public function dispayPublicSign()
+    public function dispayPublicSign($large_buttons = false)
     {
         $html = '';
 
@@ -905,11 +908,11 @@ class BimpSignataire extends BimpObject
                         ));
                     }
 
-                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= '<span class="btn btn-default' . ($large_buttons ? ' btn-large' : '') . '" onclick="' . $onclick . '">';
                     $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Signer';
                     $html .= '</span>';
                 } else {
-                    $html .= '<span class="btn btn-default disabled bs-popover"';
+                    $html .= '<span class="btn btn-default' . ($large_buttons ? ' btn-large' : '') . ' disabled bs-popover"';
                     $html .= BimpRender::renderPopoverData('Vous n\'avez pas la permission');
                     $html .= '>';
                     $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Signer';
@@ -922,7 +925,7 @@ class BimpSignataire extends BimpObject
                     'form_name' => 'motif'
                 ));
 
-                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= '<span class="btn btn-default' . ($large_buttons ? ' btn-large' : '') . '" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Refuser';
                 $html .= '</span>';
             }

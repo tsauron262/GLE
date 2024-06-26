@@ -184,6 +184,10 @@ fields:
     code_sms_infos: 
         label: Données code SMS
         type: json
+        
+    security_code: 
+        label: Code de sécurité pour la signature électronique à distance
+        
             
 forms:
     edit: 

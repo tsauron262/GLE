@@ -419,7 +419,11 @@ class BimpSignature extends BimpObject
 
             case 'elec':
             default:
-                $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
+                $message .= 'Vous pouvez effectuer la signature électronique de ce document directement ';
+                if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+                    $message .= 'en suivant ce {LIEN_PAGE_SIGNATURE_PUBLIQUE} ou ';
+                }
+                $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
                 break;
 
             case 'papier':
@@ -1838,7 +1842,7 @@ class BimpSignature extends BimpObject
         return $errors;
     }
 
-    public function replaceEmailContentLabels($email_content)
+    public function replaceEmailContentLabels($email_content, $id_signataire)
     {
         $obj_label = '';
         $obj_ref = '';

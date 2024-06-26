@@ -256,7 +256,7 @@ forms:
               input_name: email_content
               input: 
                   type: html
-                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le document à signer sera automatiquement joint à l'email"
+                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE}, {LIEN_PAGE_SIGNATURE_PUBLIQUE} et {LIEN_ESPACE_CLIENT}.<br/>Le document à signer sera automatiquement joint à l'email"
               value: 
                   callback: 
                       method: getDefaultSignDistEmailContent

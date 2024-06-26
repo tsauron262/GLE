@@ -727,6 +727,22 @@ class BimpSignataire extends BimpObject
         return array();
     }
 
+    public function getSecurityCode()
+    {
+        if ($this->isLoaded()) {
+            $code = $this->getData('security_code');
+
+            if (!$code) {
+                $code = (string) random_int(111111, 999999);
+                $this->updateField('security_code', $code);
+            }
+
+            return $code;
+        }
+
+        return '';
+    }
+
     // Getters Array:
 
     public function getContactsArray($include_empty = true, $active_only = true)
@@ -1383,7 +1399,7 @@ class BimpSignataire extends BimpObject
                             $email_content = $signature->getDefaultSignDistEmailContent('elec');
                         }
 
-                        $email_content = $signature->replaceEmailContentLabels($email_content);
+                        $email_content = $signature->replaceEmailContentLabels($email_content, $this->id);
 
                         $from = ($use_comm_email_as_from ? $comm_email : '');
 
@@ -1578,7 +1594,7 @@ class BimpSignataire extends BimpObject
                 $subject = 'Signature en attente - Document: ' . $signature->displayDocTitle(true);
             }
 
-            $content = $signature->replaceEmailContentLabels($content);
+            $content = $signature->replaceEmailContentLabels($content, $this->id);
 
             $email = $this->getData('email');
             if (!$email) {

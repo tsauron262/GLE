@@ -84,8 +84,9 @@ class signatureController extends BimpPublicController
             $html .= '<div class="bimp_public_form">';
             $html .= '<div class="form_section" style="text-align: center">';
 
-            $doc_url = $signature->getDocumentUrl($is_signed, 'public');
+            $doc_url = $signature->getDocumentUrl($signataire->isSigned(), 'public');
             if ($doc_url) {
+                $doc_url .= '&ids=' . $signataire->id . '&sc=' . $code;
                 $html .= '<embed src="' . $doc_url . '" width="100%" height="650" type="application/pdf"/>';
             } else {
                 $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Aperçu du document non disponible</span>';

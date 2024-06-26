@@ -1411,7 +1411,7 @@ class BimpSignataire extends BimpObject
                             $email_content = $signature->getDefaultSignDistEmailContent('elec');
                         }
 
-                        $email_content = $signature->replaceEmailContentLabels($email_content, $this->id);
+                        $email_content = $signature->replaceEmailContentLabels($email_content, $this);
 
                         $from = ($use_comm_email_as_from ? $comm_email : '');
 

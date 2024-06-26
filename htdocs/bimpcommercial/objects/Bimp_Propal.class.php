@@ -3309,7 +3309,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     default:
                         $message .= 'Vous pouvez effectuer la signature électronique de ce document directement ';
                         if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
-                            $message .= 'en suivant ce {LIEN_PAGE_SIGNATURE_PUBLIQUE} ou ';
+                            $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
                         }
                         $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
                         break;

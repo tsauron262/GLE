@@ -2914,7 +2914,7 @@ class BimpCommDemandeFin extends BimpObject
                     default:
                         $message .= 'Vous pouvez effectuer la signature électronique du document correspondant à la proposition que aurez choisie ';
                         if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
-                            $message .= 'en suivant ce {LIEN_PAGE_SIGNATURE_PUBLIQUE} ou ';
+                            $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
                         }
                         $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner ce document signé';
                         $message .= ' par courrier ou par e-mail';
@@ -2939,7 +2939,7 @@ class BimpCommDemandeFin extends BimpObject
                     default:
                         $message .= 'Vous pouvez effectuer la signature électronique de ce document directement ';
                         if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
-                            $message .= 'en suivant ce {LIEN_PAGE_SIGNATURE_PUBLIQUE} ou ';
+                            $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
                         }
                         $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé';
                         if ($doc_type == 'contrat_fin') {

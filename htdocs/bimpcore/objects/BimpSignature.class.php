@@ -421,7 +421,7 @@ class BimpSignature extends BimpObject
             default:
                 $message .= 'Vous pouvez effectuer la signature électronique de ce document directement ';
                 if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
-                    $message .= 'en suivant ce {LIEN_PAGE_SIGNATURE_PUBLIQUE} ou ';
+                    $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
                 }
                 $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
                 break;
@@ -656,6 +656,18 @@ class BimpSignature extends BimpObject
                             $email_body = $obj->getDocuSignEmailContent($doc_type, $signataire);
                         } else {
                             $email_body = self::getDefaultSignDistEmailContent('docusign');
+                        }
+                    }
+
+                    if (BimpObject::objectLoaded($signataire) && (int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+                        if (preg_match('/\{LIEN_PAGE_SIGNATURE_PUBLIQUE\}/', $email_body)) {
+                            $url = $signataire->getPublicSignaturePageUrl($obj);
+                            $str = '';
+                            if ($url) {
+                                $str = 'en <a href="' . $url . '">cliquant ici</a> ou';
+                            }
+
+                            $email_body = str_replace('{LIEN_PAGE_SIGNATURE_PUBLIQUE}', $str, $email_body);
                         }
                     }
 
@@ -1842,7 +1854,7 @@ class BimpSignature extends BimpObject
         return $errors;
     }
 
-    public function replaceEmailContentLabels($email_content, $id_signataire)
+    public function replaceEmailContentLabels($email_content, $signataire)
     {
         $obj_label = '';
         $obj_ref = '';
@@ -1852,6 +1864,18 @@ class BimpSignature extends BimpObject
         if ($this->isObjectValid($errors, $obj)) {
             $obj_label = $obj->getLabel('the');
             $obj_ref = $obj->getRef();
+        }
+
+        if (BimpObject::objectLoaded($signataire) && (int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+            if (preg_match('/\{LIEN_PAGE_SIGNATURE_PUBLIQUE\}/', $email_content)) {
+                $url = $signataire->getPublicSignaturePageUrl($obj);
+                $str = '';
+                if ($url) {
+                    $str = 'en <a href="' . $url . '">cliquant ici</a> ou';
+                }
+
+                $email_content = str_replace('{LIEN_PAGE_SIGNATURE_PUBLIQUE}', $str, $email_content);
+            }
         }
 
         return str_replace(array(

@@ -1643,7 +1643,7 @@ class BS_SAV extends BimpObject
         $message = "Vous trouvez ci-joint le devis pour la réparation de votre '" . $this->getNomMachine() . ".<br/><br/>";
         $message .= 'Vous pouvez effectuer la signature électronique de ce document directement ';
         if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
-            $message .= 'en suivant ce {LIEN_PAGE_SIGNATURE_PUBLIQUE} ou ';
+            $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
         }
         $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
         $message .= "Si vous voulez des informations complémentaires, contactez le centre de service";

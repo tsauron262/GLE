@@ -743,6 +743,18 @@ class BimpSignataire extends BimpObject
         return '';
     }
 
+    public function getPublicSignaturePageUrl($obj)
+    {
+        $code = $this->getSecurityCode();
+        $url = self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj));
+
+        if ($url && $code) {
+            $url .= 'fc=signature&s=' . $this->id . '&c=' . $code;
+        }
+        
+        return $url;
+    }
+
     // Getters Array:
 
     public function getContactsArray($include_empty = true, $active_only = true)
@@ -1594,7 +1606,7 @@ class BimpSignataire extends BimpObject
                 $subject = 'Signature en attente - Document: ' . $signature->displayDocTitle(true);
             }
 
-            $content = $signature->replaceEmailContentLabels($content, $this->id);
+            $content = $signature->replaceEmailContentLabels($content, $this);
 
             $email = $this->getData('email');
             if (!$email) {

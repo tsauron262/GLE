@@ -136,7 +136,7 @@ class BimpLayout
 
         if (!empty($this->js_vars)) {
             $bimp_layout_js_vars .= "\n" . '<!-- VARS JS -->' . "\n";
-            $bimp_layout_js_vars .= '<script type="text/javascript">' . "\n";
+            $bimp_layout_js_vars .= '<script '.BimpTools::getScriptAttribut().'>' . "\n";
 
             foreach ($this->js_vars as $var_name => $var_value) {
                 $bimp_layout_js_vars .= "\t" . 'var ' . $var_name . ' = ';
@@ -180,7 +180,7 @@ class BimpLayout
         echo $this->renderModals();
 
         // Ce script doit figurer en toute fin de page (on cherche à être sûr que tout le js bimpcore est chargé): 
-        echo '<script type="text/javascript">';
+        echo '<script '.BimpTools::getScriptAttribut().'>';
         echo '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
         echo '</script>' . "\n\n";
     }

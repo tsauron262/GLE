@@ -108,7 +108,7 @@ class BC_Panel extends BimpComponent
         }
 
         $labels = $this->object->getLabels();
-        $html = '<script type="text/javascript">';
+        $html = '<script '.BimpTools::getScriptAttribut().'>';
         $html .= 'object_labels[\'' . $this->object->object_name . '\'] = ' . json_encode($labels);
         $html .= '</script>';
 

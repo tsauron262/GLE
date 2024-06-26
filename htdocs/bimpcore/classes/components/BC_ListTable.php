@@ -1245,8 +1245,8 @@ class BC_ListTable extends BC_List
             $dataGraph = $this->object->getInfoGraph($idGraph);
             $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartOption"></div>';
             $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartContainer" style="height: 800px; width: 100%;"></div>';
-            $html .= '<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
-            $html .= '<script>';
+            $html .= '<script '.BimpTools::getScriptAttribut().' src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
+            $html .= '<script '.BimpTools::getScriptAttribut().'>';
             $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \'' . $this->identifier . "')" . $actionRefresh . "});";
             if ($dataGraph['mode_data'] == 'objects')
                 $html .= "$('#" . $this->identifier . "').on('listRefresh', function(){" . $actionRefresh . "});";

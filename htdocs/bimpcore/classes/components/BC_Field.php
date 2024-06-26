@@ -692,7 +692,7 @@ class BC_Field extends BimpComponent
             }
 
             if (count($dependances)) {
-                $script .= '<script type="text/javascript">' . "\n";
+                $script .= '<script '.BimpTools::getScriptAttribut().'>' . "\n";
                 foreach ($dependances as $dependance) {
                     $script .= 'addInputEvent(\'' . $form_identifier . '\', \'' . $name_prefix . $dependance . '\', \'change\', function() {' . "\n";
                     $script .= '  var data = {};' . "\n";

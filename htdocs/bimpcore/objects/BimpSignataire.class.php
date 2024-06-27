@@ -47,6 +47,11 @@ class BimpSignataire extends BimpObject
 
     public function canClientView()
     {
+        if ($this->isLoaded() && $this->checkSignataireSecurityCode()) {
+            return 1;
+        }
+
+
         global $userClient;
 
         if (!BimpObject::objectLoaded($userClient)) {
@@ -75,11 +80,15 @@ class BimpSignataire extends BimpObject
                 return 0;
             }
 
-            global $userClient;
+            if (in_array($field_name, array('nom', 'fonction'))) {
+                if ($this->isLoaded() && $this->checkSignataireSecurityCode()) {
+                    return 1;
+                }
 
-            if (BimpObject::objectLoaded($userClient)) {
-                if ((int) $userClient->getData('id_client') === (int) $this->getData('id_client')) {
-                    if (in_array($field_name, array('nom', 'fonction'))) {
+                global $userClient;
+
+                if (BimpObject::objectLoaded($userClient)) {
+                    if ((int) $userClient->getData('id_client') === (int) $this->getData('id_client')) {
                         return 1;
                     }
                 }
@@ -106,23 +115,25 @@ class BimpSignataire extends BimpObject
 
             case 'signDist':
             case 'sendSmsCode':
+                if (!$this->checkSignataireSecurityCode()) {
+                    global $userClient;
 
-                global $userClient;
+                    if (!isset($this->force_no_user_client) || !(int) $this->force_no_user_client) {
+                        if (!BimpObject::objectLoaded($userClient)) {
+                            return 0;
+                        }
 
-                if (!isset($this->force_no_user_client) || !(int) $this->force_no_user_client) {
-                    if (!BimpObject::objectLoaded($userClient)) {
-                        return 0;
-                    }
+                        if ((int) $userClient->getData('id_client') !== (int) $this->getData('id_client')) {
+                            return 0;
+                        }
 
-                    if ((int) $userClient->getData('id_client') !== (int) $this->getData('id_client')) {
-                        return 0;
-                    }
-
-                    $allowed = $this->getData('allowed_users_client');
-                    if (!is_array($allowed) || !in_array($userClient->id, $allowed)) {
-                        return 0;
+                        $allowed = $this->getData('allowed_users_client');
+                        if (!is_array($allowed) || !in_array($userClient->id, $allowed)) {
+                            return 0;
+                        }
                     }
                 }
+
 
                 return 1;
         }
@@ -328,6 +339,27 @@ class BimpSignataire extends BimpObject
     public function showSignatureImage()
     {
         if ($this->isSigned() && in_array((int) $this->getData('type'), array(self::TYPE_DIST, self::TYPE_ELEC))) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function checkSignataireSecurityCode(&$errors = array())
+    {
+        if (BimpTools::isPostFieldSubmit('id_signataire') && BimpTools::isPostFieldSubmit('security_code')) {
+            $id_signataire = (int) BimpTools::getPostFieldValue('id_signataire', 0, 'int');
+            $code = (string) BimpTools::getPostFieldValue('security_code', 0, 'az09');
+
+            if (!$id_signataire || $id_signataire !== $this->id) {
+                $errors[] = 'Identifiant signataire invalide';
+                return 0;
+            }
+            if (!$code || $code != $this->getData('security_code')) {
+                $errors[] = 'Code de sécurité invalide';
+                return 0;
+            }
+
             return 1;
         }
 
@@ -751,7 +783,7 @@ class BimpSignataire extends BimpObject
         if ($url && $code) {
             $url .= 'fc=signature&s=' . $this->id . '&c=' . $code;
         }
-        
+
         return $url;
     }
 
@@ -918,7 +950,7 @@ class BimpSignataire extends BimpObject
         return '';
     }
 
-    public function dispayPublicSign($large_buttons = false)
+    public function dispayPublicSign($large_buttons = false, $extra_data = array())
     {
         $html = '';
 
@@ -931,7 +963,7 @@ class BimpSignataire extends BimpObject
                             'form_name' => 'sms_code'
                         ));
                     } else {
-                        $onclick = $this->getJsActionOnclick('signDist', array(), array(
+                        $onclick = $this->getJsActionOnclick('signDist', $extra_data, array(
                             'form_name' => 'sign_dist'
                         ));
                     }
@@ -949,7 +981,7 @@ class BimpSignataire extends BimpObject
             }
 
             if ($this->isActionAllowed('refuse') && $this->canSetAction('refuse')) {
-                $onclick = $this->getJsActionOnclick('refuse', array(), array(
+                $onclick = $this->getJsActionOnclick('refuse', $extra_data, array(
                     'form_name' => 'motif'
                 ));
 
@@ -1829,98 +1861,112 @@ class BimpSignataire extends BimpObject
                 global $userClient;
 
                 if (!BimpObject::objectLoaded($userClient)) {
-                    $errors[] = 'Aucun utilisateur connecté';
-                } else {
-                    $nom = BimpTools::getArrayValueFromPath($data, 'nom', $this->getData('nom'));
+                    if ($this->checkSignataireSecurityCode($errors)) {
+                        if ((int) $this->getData('id_contact')) {
+                            $id_user_client = (int) $this->db->getValue('bic_user', 'id', 'id_contact = ' . $this->getData('id_contact'));
 
-                    if (!$nom) {
-                        $errors[] = 'Veuillez saisir votre nom';
-                    }
-
-                    $fonction = '';
-
-                    if ($this->isClientCompany()) {
-                        $fonction = BimpTools::getArrayValueFromPath($data, 'fonction', $this->getData('fonction'));
-
-                        if (!$fonction) {
-                            $errors[] = 'Veuillez saisir votre fonction';
-                        }
-                    }
-
-                    $signature_image = BimpTools::getArrayValueFromPath($data, 'signature', '');
-
-                    if (!$signature_image) {
-                        $errors[] = 'Signature électronique absente';
-                    }
-
-                    $code_sms_infos = array();
-
-                    if ((int) $this->getData('need_sms_code')) {
-                        $code_sms_infos = $this->getData('code_sms_infos');
-                        $code = BimpTools::getArrayValueFromPath($data, 'code_sms', '');
-
-                        if (!$code) {
-                            $errors[] = 'Veuillez saisir votre reçu par SMS';
-                        } elseif ($code != $code_sms_infos['code']) {
-                            $errors[] = 'Code SMS invalide';
-                        } else {
-                            $code_sms_infos['dt_confirmed'] = date('Y-m-d H:i:s');
-                        }
-                    }
-
-                    $ville = BimpTools::getArrayValueFromPath($data, 'ville', '');
-                    if (!$ville && $this->isVilleRequired()) {
-                        $errors[] = 'Veuillez saisir le lieu de signature';
-                    }
-
-                    if ($signature->hasMultipleFiles()) {
-                        $selected_file = BimpTools::getArrayValueFromPath($data, 'selected_file', '');
-                        if (!$selected_file) {
-                            $errors[] = 'Veuillez sélectionner le document que vous souhaitez signer';
-                        } else {
-                            $file_errors = $signature->setSelectedFile($selected_file, $this, true);
-
-                            if (count($file_errors)) {
-                                $msg = 'La signature électronique du document que vous avez sélectionné n\'est pas possible.';
-                                $msg .= '<br/>Nous vous remercions de bien vouloir nous excuser pour ce désagrément ';
-                                $msg .= 'et de nous retourner le document signé par e-mail ou par courrier';
-                                $errors[] = $msg;
+                            if ($id_user_client) {
+                                $userClient = BimpCache::getBimpObjectInstance('bimpinterfaceclient', 'BCI_UserClient', $id_user_client);
                             }
                         }
+                    } else {
+                        $errors[] = 'Aucun utilisateur connecté';
                     }
+                }
+
+                $nom = BimpTools::getArrayValueFromPath($data, 'nom', $this->getData('nom'));
+
+                if (!$nom) {
+                    $errors[] = 'Veuillez saisir votre nom';
+                }
+
+                $fonction = '';
+
+                if ($this->isClientCompany()) {
+                    $fonction = BimpTools::getArrayValueFromPath($data, 'fonction', $this->getData('fonction'));
+
+                    if (!$fonction) {
+                        $errors[] = 'Veuillez saisir votre fonction';
+                    }
+                }
+
+                $signature_image = BimpTools::getArrayValueFromPath($data, 'signature', '');
+
+                if (!$signature_image) {
+                    $errors[] = 'Signature électronique absente';
+                }
+
+                $code_sms_infos = array();
+
+                if ((int) $this->getData('need_sms_code')) {
+                    $code_sms_infos = $this->getData('code_sms_infos');
+                    $code = BimpTools::getArrayValueFromPath($data, 'code_sms', '');
+
+                    if (!$code) {
+                        $errors[] = 'Veuillez saisir votre reçu par SMS';
+                    } elseif ($code != $code_sms_infos['code']) {
+                        $errors[] = 'Code SMS invalide';
+                    } else {
+                        $code_sms_infos['dt_confirmed'] = date('Y-m-d H:i:s');
+                    }
+                }
+
+                $ville = BimpTools::getArrayValueFromPath($data, 'ville', '');
+                if (!$ville && $this->isVilleRequired()) {
+                    $errors[] = 'Veuillez saisir le lieu de signature';
+                }
+
+                if ($signature->hasMultipleFiles()) {
+                    $selected_file = BimpTools::getArrayValueFromPath($data, 'selected_file', '');
+                    if (!$selected_file) {
+                        $errors[] = 'Veuillez sélectionner le document que vous souhaitez signer';
+                    } else {
+                        $file_errors = $signature->setSelectedFile($selected_file, $this, true);
+
+                        if (count($file_errors)) {
+                            $msg = 'La signature électronique du document que vous avez sélectionné n\'est pas possible.';
+                            $msg .= '<br/>Nous vous remercions de bien vouloir nous excuser pour ce désagrément ';
+                            $msg .= 'et de nous retourner le document signé par e-mail ou par courrier';
+                            $errors[] = $msg;
+                        }
+                    }
+                }
+
+                if (!count($errors)) {
+                    require_once DOL_DOCUMENT_ROOT . '/synopsistools/class/divers.class.php';
+                    $this->set('type_signature', self::TYPE_DIST);
+                    $this->set('status', self::STATUS_SIGNED);
+                    $this->set('date_signed', date('Y-m-d H:i:s'));
+                    $this->set('nom', $nom);
+                    $this->set('fonction', $fonction);
+                    $this->set('ville', $ville);
+                    $this->set('email', $userClient->getData('email'));
+                    $this->set('id_user_client_signataire', $userClient->id);
+                    $this->set('base_64_signature', $signature_image);
+                    $this->set('ip_signataire', synopsisHook::getUserIp());
+                    $this->set('code_sms_infos', $code_sms_infos);
+
+                    $errors = $this->update($warnings, true);
 
                     if (!count($errors)) {
-                        require_once DOL_DOCUMENT_ROOT . '/synopsistools/class/divers.class.php';
-                        $this->set('type_signature', self::TYPE_DIST);
-                        $this->set('status', self::STATUS_SIGNED);
-                        $this->set('date_signed', date('Y-m-d H:i:s'));
-                        $this->set('nom', $nom);
-                        $this->set('fonction', $fonction);
-                        $this->set('ville', $ville);
-                        $this->set('email', $userClient->getData('email'));
-                        $this->set('id_user_client_signataire', $userClient->id);
-                        $this->set('base_64_signature', $signature_image);
-                        $this->set('ip_signataire', synopsisHook::getUserIp());
-                        $this->set('code_sms_infos', $code_sms_infos);
+                        $doc_errors = $signature->writeSignatureOnDoc($this);
 
-                        $errors = $this->update($warnings, true);
+                        if (count($doc_errors)) {
+                            $warnings[] = 'Echec de l\'écriture de la signature sur le document PDF';
+                        } else {
+                            $url = $signature->getDocumentUrl(true, 'public');
 
-                        if (!count($errors)) {
-                            $doc_errors = $signature->writeSignatureOnDoc($this);
-
-                            if (count($doc_errors)) {
-                                $warnings[] = 'Echec de l\'écriture de la signature sur le document PDF';
-                            } else {
-                                $url = $signature->getDocumentUrl(true, 'public');
-
-                                if ($url) {
-                                    $success_callback = 'window.open(\'' . $url . '\');bimp_reloadPage();';
+                            if ($url) {
+                                if (!BimpTools::isPostFieldSubmit('id_signataire') && !BimpTools::isPostFieldSubmit('security_code')) {
+                                    $success_callback = 'window.open(\'' . $url . '\');';
                                 }
                             }
-
-                            $signature->checkStatus($warnings, $warnings);
-                            $this->sendOnSignedNotificationEmail('signed');
+                            
+                            $success_callback .= 'bimp_reloadPage();';
                         }
+
+                        $signature->checkStatus($warnings, $warnings);
+                        $this->sendOnSignedNotificationEmail('signed');
                     }
                 }
             }

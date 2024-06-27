@@ -100,7 +100,10 @@ class signatureController extends BimpPublicController
                 $html .= '<div class="form_section" style="text-align: center">';
 
                 $signataire->force_no_user_client = true;
-                $html .= $signataire->dispayPublicSign(true);
+                $html .= $signataire->dispayPublicSign(true, array(
+                    'id_signataire' => $signataire->id,
+                    'security_code' => $code
+                ));
 
                 $html .= '</div>';
                 $html .= '</div>';

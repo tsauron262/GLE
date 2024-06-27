@@ -109,18 +109,21 @@ class BimpSignataire extends BimpObject
 
                 global $userClient;
 
-                if (!BimpObject::objectLoaded($userClient)) {
-                    return 0;
+                if (!isset($this->force_no_user_client) || !(int) $this->force_no_user_client) {
+                    if (!BimpObject::objectLoaded($userClient)) {
+                        return 0;
+                    }
+
+                    if ((int) $userClient->getData('id_client') !== (int) $this->getData('id_client')) {
+                        return 0;
+                    }
+
+                    $allowed = $this->getData('allowed_users_client');
+                    if (!is_array($allowed) || !in_array($userClient->id, $allowed)) {
+                        return 0;
+                    }
                 }
 
-                if ((int) $userClient->getData('id_client') !== (int) $this->getData('id_client')) {
-                    return 0;
-                }
-
-                $allowed = $this->getData('allowed_users_client');
-                if (!is_array($allowed) || !in_array($userClient->id, $allowed)) {
-                    return 0;
-                }
                 return 1;
         }
         return parent::canSetAction($action);
@@ -724,6 +727,34 @@ class BimpSignataire extends BimpObject
         return array();
     }
 
+    public function getSecurityCode()
+    {
+        if ($this->isLoaded()) {
+            $code = $this->getData('security_code');
+
+            if (!$code) {
+                $code = (string) random_int(111111, 999999);
+                $this->updateField('security_code', $code);
+            }
+
+            return $code;
+        }
+
+        return '';
+    }
+
+    public function getPublicSignaturePageUrl($obj)
+    {
+        $code = $this->getSecurityCode();
+        $url = self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj));
+
+        if ($url && $code) {
+            $url .= 'fc=signature&s=' . $this->id . '&c=' . $code;
+        }
+        
+        return $url;
+    }
+
     // Getters Array:
 
     public function getContactsArray($include_empty = true, $active_only = true)
@@ -887,7 +918,7 @@ class BimpSignataire extends BimpObject
         return '';
     }
 
-    public function dispayPublicSign()
+    public function dispayPublicSign($large_buttons = false)
     {
         $html = '';
 
@@ -905,11 +936,11 @@ class BimpSignataire extends BimpObject
                         ));
                     }
 
-                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= '<span class="btn btn-default' . ($large_buttons ? ' btn-large' : '') . '" onclick="' . $onclick . '">';
                     $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Signer';
                     $html .= '</span>';
                 } else {
-                    $html .= '<span class="btn btn-default disabled bs-popover"';
+                    $html .= '<span class="btn btn-default' . ($large_buttons ? ' btn-large' : '') . ' disabled bs-popover"';
                     $html .= BimpRender::renderPopoverData('Vous n\'avez pas la permission');
                     $html .= '>';
                     $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Signer';
@@ -922,7 +953,7 @@ class BimpSignataire extends BimpObject
                     'form_name' => 'motif'
                 ));
 
-                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= '<span class="btn btn-default' . ($large_buttons ? ' btn-large' : '') . '" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Refuser';
                 $html .= '</span>';
             }
@@ -1380,7 +1411,7 @@ class BimpSignataire extends BimpObject
                             $email_content = $signature->getDefaultSignDistEmailContent('elec');
                         }
 
-                        $email_content = $signature->replaceEmailContentLabels($email_content);
+                        $email_content = $signature->replaceEmailContentLabels($email_content, $this);
 
                         $from = ($use_comm_email_as_from ? $comm_email : '');
 
@@ -1575,7 +1606,7 @@ class BimpSignataire extends BimpObject
                 $subject = 'Signature en attente - Document: ' . $signature->displayDocTitle(true);
             }
 
-            $content = $signature->replaceEmailContentLabels($content);
+            $content = $signature->replaceEmailContentLabels($content, $this);
 
             $email = $this->getData('email');
             if (!$email) {

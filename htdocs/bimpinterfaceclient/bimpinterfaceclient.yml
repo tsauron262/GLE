@@ -17,4 +17,9 @@ params:
     public_logo: 
         label: Noms fichiers logos
         help: 'Si plusieurs entités publiques, utiliser une syntaxe json : {"code_entite":"nom_fichier"}'
+        
+    allow_signature_public_page: 
+        label: activer la page de signature électronique à distance publique directe
+        type: bool
+        def: 0
   

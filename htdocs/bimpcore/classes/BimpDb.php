@@ -229,7 +229,7 @@ class BimpDb
             $sql .= ' LIMIT ' . $limit;
         }
         
-        echo $sql . '<br/><br/>';
+//        echo $sql . '<br/><br/>';
 
         return $this->executeS($sql, $return);
     }

@@ -1714,7 +1714,12 @@ class BCT_ContratLine extends BimpObject
     {
         $data = array();
 
-        $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
+//        $sel_nb_avoirs = '(SELECT COUNT(avl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_facture_line avl';
+//        $sel_nb_avoirs .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture av ON avl.id_obj = av.rowid';
+//        $sel_nb_avoirs .= ' WHERE avl.linked_object_name IN (\'contrat_line\'' . ($include_reguls ? ',\'contrat_line_regul\'' : '') . ')';
+//        $sel_nb_avoirs .= ' AND avl.id_linked_object = ' . $this->id;
+//        $sel_nb_avoirs .= ' AND av.fk_facture_source = f.rowid)';
+
         $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('f.rowid as id_facture', 'a.date_start', 'a.date_end', 'a.qty', 'fl.linked_object_name', 'a.subprice as pu_ht'), array(
                     'f.type'                => array(0, 1, 2),
                     'f.fk_statut'           => array(0, 1, 2),
@@ -1724,7 +1729,7 @@ class BCT_ContratLine extends BimpObject
                             0
                         )
                     ),
-                    $sel_nb_avoirs          => 0,
+//                    $sel_nb_avoirs          => 0,
                     'fl.linked_object_name' => ($include_reguls ? array('contrat_line', 'contrat_line_regul') : 'contrat_line'),
                     'fl.linked_id_object'   => $this->id
                         ), array(

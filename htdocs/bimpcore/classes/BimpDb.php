@@ -228,8 +228,6 @@ class BimpDb
         if (!is_null($limit)) {
             $sql .= ' LIMIT ' . $limit;
         }
-        
-//        echo $sql . '<br/><br/>';
 
         return $this->executeS($sql, $return);
     }

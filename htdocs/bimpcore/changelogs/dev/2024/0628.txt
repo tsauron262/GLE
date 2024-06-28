@@ -1,0 +1,2 @@
+
+- Ajout Fonction de rendu HTML pour masquer automatiquement une partie d'un texte long (avec bouton pour tout afficher) 

@@ -1503,6 +1503,26 @@ class BimpRender
         return $html;
     }
 
+    public static function renderExpandableText($text, $max_chars = 200)
+    {
+        if (strlen($text) <= $max_chars) {
+            return $text;
+        }
+
+        $html = '';
+        
+        $html .= '<div class="bimp_expandable_text closed">';
+        $html .= $text;
+        
+        $html .= '<div style="text-align: right">';
+        $html .= '<span class="expand_btn">';
+        $html .= 'Suite';
+        $html .= '</span>';
+        $html .= '</div>';
+        $html .= '</div>';
+        return $html;
+    }
+
     // Form elements: 
 
     public static function renderFormGroupMultiple($items_contents, $inputName, $title, $params = array())

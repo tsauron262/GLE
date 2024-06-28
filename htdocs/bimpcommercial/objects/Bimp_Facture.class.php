@@ -6833,6 +6833,7 @@ class Bimp_Facture extends BimpComm
                             $line_errors = $this->createLinesFromOrigin($facture, array(
                                 'inverse_qty'   => true,
                                 'pa_editable'   => false,
+                                'keep_links'    => true,
                                 'check_product' => false,
                                 'no_maj_bundle' => true
                             ));

@@ -71,7 +71,7 @@ class BCT_ContratLine extends BimpObject
                 return 1;
 
             case 'deactivate':
-                return ($user->admin || $user->login == 'a.remeur' ? 1 : 0);
+                return ($user->admin || in_array($user->login, array('a.remeur', 'p.bachorz')) ? 1 : 0);
 
             case 'addUnits':
                 return 1;

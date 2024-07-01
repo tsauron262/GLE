@@ -485,7 +485,7 @@ class Bimp_Client extends Bimp_Societe
                 'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
                     'field_name'   => 'outstanding_limit_manuel',
                     'update_mode'  => 'update_object',
-                    'single_action' => 'true',
+                    'single_action' => 'false',
 //                    'force_update' => 1
                         ), array(
                     'form_name' => 'bulk_edit_field'

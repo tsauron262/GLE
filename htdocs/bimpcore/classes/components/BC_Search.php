@@ -92,7 +92,7 @@ class BC_Search extends BimpComponent
             if ($this->object->fetch((int) $items[0])) {
                 $url = BimpObject::getInstanceUrl($this->object);
                 if ($url) {
-                    echo '<script>';
+                    echo '<script '.BimpTools::getScriptAttribut().'>';
                     echo 'window.location = \'' . $url . '\';';
                     echo '</script>';
                     exit;

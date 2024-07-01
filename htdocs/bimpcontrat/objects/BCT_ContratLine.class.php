@@ -958,7 +958,13 @@ class BCT_ContratLine extends BimpObject
         if (!$date || $date < $date_fac_start || $check_date) {
             $check_errors = array();
             $new_date = '';
-            $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
+//            $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
+
+            $sel_nb_avoirs = '(SELECT COUNT(avl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_facture_line avl';
+            $sel_nb_avoirs .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture av ON avl.id_obj = av.rowid';
+            $sel_nb_avoirs .= ' WHERE avl.linked_object_name = \'contrat_line\'';
+            $sel_nb_avoirs .= ' AND avl.linked_id_object = ' . $this->id;
+            $sel_nb_avoirs .= ' AND av.fk_facture_source = f.rowid)';
             $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('MAX(a.date_end) as max_date'), array(
                         'f.type'                => array(0, 1, 2),
                         'f.fk_statut'           => array(0, 1, 2),
@@ -1714,17 +1720,22 @@ class BCT_ContratLine extends BimpObject
     {
         $data = array();
 
-        $sel_nb_avoirs = '(SELECT COUNT(av.rowid) FROM ' . MAIN_DB_PREFIX . 'facture av WHERE av.fk_facture_source = f.rowid)';
+//        $sel_nb_avoirs = '(SELECT COUNT(avl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_facture_line avl';
+//        $sel_nb_avoirs .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture av ON avl.id_obj = av.rowid';
+//        $sel_nb_avoirs .= ' WHERE avl.linked_object_name IN (\'contrat_line\'' . ($include_reguls ? ',\'contrat_line_regul\'' : '') . ')';
+//        $sel_nb_avoirs .= ' AND avl.id_linked_object = ' . $this->id;
+//        $sel_nb_avoirs .= ' AND av.fk_facture_source = f.rowid)';
+
         $sql = BimpTools::getSqlFullSelectQuery('facturedet', array('f.rowid as id_facture', 'a.date_start', 'a.date_end', 'a.qty', 'fl.linked_object_name', 'a.subprice as pu_ht'), array(
                     'f.type'                => array(0, 1, 2),
                     'f.fk_statut'           => array(0, 1, 2),
-                    'f.fk_facture_source'   => array(
-                        'or_field' => array(
-                            'IS_NULL',
-                            0
-                        )
-                    ),
-                    $sel_nb_avoirs          => 0,
+//                    'f.fk_facture_source'   => array(
+//                        'or_field' => array(
+//                            'IS_NULL',
+//                            0
+//                        )
+//                    ),
+//                    $sel_nb_avoirs          => 0,
                     'fl.linked_object_name' => ($include_reguls ? array('contrat_line', 'contrat_line_regul') : 'contrat_line'),
                     'fl.linked_id_object'   => $this->id
                         ), array(
@@ -3936,7 +3947,7 @@ class BCT_ContratLine extends BimpObject
                                                 'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
                                                 'data'        => array(
                                                     'data_type' => 'number',
-                                                    'decimals'  => 2
+                                                    'decimals'  => 5
                                                 )
                                     ));
                                     $row_html .= '<p class="small">' . $pa_label . '</p>';
@@ -7245,9 +7256,11 @@ class BCT_ContratLine extends BimpObject
 
                                 // Check subprice variable: 
                                 if ((int) $line->getData('variable_pu_ht')) {
-                                    $subprice = (float) BimpTools::getArrayValueFromPath($line_data, 'subprice', 0);
-                                    if (!$subprice) {
-                                        $process->Alert('ATTENTION : Prix de vente non défini ou égal à 0', $facture, $line_ref);
+                                    $subprice = BimpTools::getArrayValueFromPath($line_data, 'subprice', null);
+                                    if (is_null($subprice)) {
+                                        $process->Alert('ATTENTION : Prix de vente non défini', $facture, $line_ref);
+                                    } else {
+                                        $subprice = (float) $subprice;
                                     }
                                 }
 
@@ -7358,14 +7371,18 @@ class BCT_ContratLine extends BimpObject
                                             $sub_line_qty = round($sub_line_qty, 6);
                                             $sub_lines_data[$sub_line->id] = array(
                                                 'nb_periods' => $nb_periods,
-                                                'qty'        => $sub_line_qty
+                                                'qty'        => $sub_line_qty,
+                                                'editable'   => 0
                                             );
 
                                             if ((int) $sub_line->getData('variable_pu_ht')) {
-                                                $sub_lines_data[$sub_line->id]['subprice'] = (float) BimpTools::getArrayValueFromPath($line_data, 'sub_lines/' . $sub_line->id . '/subprice', 0);
+                                                $sub_lines_data[$sub_line->id]['subprice'] = BimpTools::getArrayValueFromPath($line_data, 'sub_lines/' . $sub_line->id . '/subprice', null);
+                                                $sub_lines_data[$sub_line->id]['editable'] = 1;
 
-                                                if (!$sub_lines_data[$sub_line->id]['subprice']) {
-                                                    $process->Alert('ATTENTION : Prix de vente non défini ou égal à 0', $facture, $line_ref . ' (Sous-ligne n°' . $sub_line->getData('rang') . ')');
+                                                if (is_null($sub_lines_data[$sub_line->id]['subprice'])) {
+                                                    $process->Alert('ATTENTION : Prix de vente non défini', $facture, $line_ref . ' (Sous-ligne n°' . $sub_line->getData('rang') . ')');
+                                                } else {
+                                                    $sub_lines_data[$sub_line->id]['subprice'] = (float) $sub_lines_data[$sub_line->id]['subprice'];
                                                 }
                                             }
                                         }
@@ -7374,7 +7391,8 @@ class BCT_ContratLine extends BimpObject
                                 if (!$has_sub_line_error) {
                                     $lines_data[$id_line] = array(
                                         'nb_periods' => $nb_periods,
-                                        'qty'        => $qty
+                                        'qty'        => $qty,
+                                        'editable'   => ($line->getData('variable_pu_ht') ? 1 : 0)
                                     );
 
                                     if (!is_null($subprice)) {
@@ -8014,7 +8032,7 @@ class BCT_ContratLine extends BimpObject
                             }
                         }
 
-                        if ((int) $this->getData('id_parent_line')) {
+                        if ($is_bundle || (int) $this->getData('id_parent_line')) {
                             $this->set('variable_qty', 0);
                         }
                     }

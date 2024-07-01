@@ -186,7 +186,7 @@ class BimpCore
             $js_vars = self::getJsVars();
 
             if (!empty($js_vars)) {
-                $html .= "\n" . '<script type="text/javascript">' . "\n";
+                $html .= "\n" . '<script '.BimpTools::getScriptAttribut().'>' . "\n";
                 foreach ($js_vars as $var_name => $var_value) {
                     $html .= "\t" . 'var ' . $var_name . ' = ';
                     if (BimpTools::isNumericType($var_value)) {
@@ -202,7 +202,7 @@ class BimpCore
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
                 if ($url) {
-                    $html .= '<script type="text/javascript" src="' . $url . '"></script>' . "\n";
+                    $html .= '<script '.BimpTools::getScriptAttribut().' src="' . $url . '"></script>' . "\n";
                 }
             }
 
@@ -766,6 +766,12 @@ class BimpCore
 
     public static function getConf($name, $default = null, $module = 'bimpcore', &$source = '', $entity = null)
     {
+        if ($name == 'allow_signature_public_page') {
+            global $user;
+            if ($user->login == 'f.martinez') {
+                return 1;
+            }
+        }
         // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
         // passée en argument de la fonction. 
         // si cette argument est null on retourne la valeur par défaut définie dans le YML de la config du module (si elle est existe)

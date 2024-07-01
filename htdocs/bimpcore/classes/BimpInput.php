@@ -1143,7 +1143,7 @@ class BimpInput
         }
         $html .= '"/>';
         $html .= '<input type="text" class="form-control bs_datetimepicker" id="' . $input_id . '_bs_dt_picker" name="' . $input_name . '_picker"/>';
-        $html .= '<script type="text/javascript">';
+        $html .= '<script '.BimpTools::getScriptAttribut().'>';
         $html .= "$('#" . $input_id . "_bs_dt_picker').datetimepicker({";
         $html .= "locale: 'fr',";
         $html .= "format: '" . $display_js_format . "',";
@@ -1526,7 +1526,7 @@ class BimpInput
 
         $html .= '</div>';
 
-        $html .= '<script type="text/javascript">';
+        $html .= '<script '.BimpTools::getScriptAttribut().'>';
         $html .= '$(\'.' . $field_name . '_time_value\').each(function() {';
         $html .= '$(this).change(function() {';
         $html .= 'updateTimerInput($(this), \'' . $field_name . '\');';

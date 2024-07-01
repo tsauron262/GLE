@@ -277,18 +277,18 @@ class BimpPublicController extends BimpController
 
         $url = BimpCore::getFileUrl('/includes/jquery/js/jquery.min.js');
         if ($url) {
-            $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
+            $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
         }
         
         $url = BimpCore::getFileUrl('/bimpinterfaceclient/views/js/public.js');
         if ($url) {
-            $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
+            $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
         }
 
         foreach ($params['js_files'] as $jsFile) {
             $url = BimpCore::getFileUrl($jsFile);
             if ($url) {
-                $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
+                $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
             }
         }
 
@@ -368,6 +368,7 @@ class BimpPublicController extends BimpController
 
     public function displayLoginForm($errors = array())
     {
+        BimpTools::secuTestIp();
         $sub_title = '<div style="text-align: center">';
 
         $sub_title .= '<h5>';
@@ -526,7 +527,9 @@ class BimpPublicController extends BimpController
             ));
 
             if (!BimpObject::objectLoaded($userClient)) {
-                $errors[] = 'Aucun compte client ne correspond à l\'identifiant "' . $email . '"';
+                BimpTools::secuAddEchec('Echec login espace client : '.$email);
+//                $errors[] = 'Aucun compte client ne correspond à l\'identifiant "' . $email . '"';
+                $errors[] = 'Login ou Mot de passe invalide';
                 unset($userClient);
                 $userClient = null;
             } else {
@@ -535,7 +538,8 @@ class BimpPublicController extends BimpController
                     $_SESSION['userClient'] = $email;
                     $this->initUserClient();
                 } else {
-                    $errors[] = 'Mot de passe invalide';
+                    BimpTools::secuAddEchec('Echec mdp espace client : '.$email);
+                    $errors[] = 'Login ou Mot de passe invalide';
                 }
             }
         }
@@ -569,6 +573,7 @@ class BimpPublicController extends BimpController
                     $backUrl = BimpObject::getPublicBaseUrl();
                     if(isset($_SESSION['back_url']))
                         $backUrl = $_SESSION['back_url'];
+                    BimpTools::secuAddEchec('Reinit mdp espace client : '.$email);
                     $this->displayPublicForm('reinitPw', array(
                         'success_msg' => 'Votre mot de passe a été réinitialisé avec succès.<br/>Veuillez consulter votre boîte mail pour l\'obtenir',
                         'back_url'    => $backUrl

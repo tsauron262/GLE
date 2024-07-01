@@ -1,0 +1,2 @@
+
+- Contrats d'abonnement : implémentation des consommation variables sur les bundles. 

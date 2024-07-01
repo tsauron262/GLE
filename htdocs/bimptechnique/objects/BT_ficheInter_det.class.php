@@ -352,7 +352,7 @@ class BT_ficheInter_det extends BimpDolObject
 
             foreach ($contrat->dol_object->lines as $line) {
                 $bimpline = $contrat->getChildObject('lines', $line->id);
-                if ($bimpline->getData('product_type') == 1 && $bimpline->getData('statut') == 4) {
+                if ($bimpline->getData('product_type') == 1 && ($bimpline->getData('statut') == 4) || $contrat->getData('statut') == 2) {
                     $services['contrat_' . $line->id] = 'Intervention sous contrat (' . price($bimpline->getData('total_ht')) . '€) - <strong>' . $contrat->getRef() . '</strong> - ' . $line->description;
                 }
             }

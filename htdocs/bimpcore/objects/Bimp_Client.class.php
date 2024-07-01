@@ -487,6 +487,7 @@ class Bimp_Client extends Bimp_Societe
                     'update_mode'  => 'update_object',
 //                    'force_update' => 1
                         ), array(
+                    'single_action' => false,
                     'form_name' => 'bulk_edit_field'
                 ))
             );

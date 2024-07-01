@@ -30,10 +30,9 @@ class BS_SAV extends BimpObject
     const BS_SAV_ATT_CLIENT_ACTION = 7;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
-    
+
     public $isClosable = true;
     public $isRestituable = true;
-
     //reparation en magasin avec retour avant remplacement
     //pas de doublons Réf centre
     //923-00173
@@ -1006,7 +1005,7 @@ class BS_SAV extends BimpObject
                 if ($this->isActionAllowed('toRestitute')) {
                     if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
                         if (!is_null($propal) && $propal_status > 0) {
-                            if($this->isClosable){
+                            if ($this->isClosable) {
                                 $buttons[] = array(
                                     'label'   => 'Réparation terminée',
                                     'icon'    => 'check',
@@ -1056,13 +1055,13 @@ class BS_SAV extends BimpObject
 //                        }
 //                    }
 
-                        if($this->isRestituable){
+                        if ($this->isRestituable) {
                             $buttons[] = array(
                                 'label'   => 'Restituer (Payer)',
                                 'icon'    => 'times-circle',
                                 'onclick' => $this->getJsActionOnclick('close', array(
                                     'restitute' => 1,
-    //                            'cond_reglement' => $cond_reglement
+                                        //                            'cond_reglement' => $cond_reglement
                                         ), array(
                                     'form_name' => 'restitute'
                                 ))
@@ -1631,11 +1630,29 @@ class BS_SAV extends BimpObject
 
     public function getDefaultSignDistEmailContent()
     {
+        global $conf;
+
+        $tel = '';
+        $centre = $this->getCentreData();
+        if (isset($centre['tel'])) {
+            $tel = $centre['tel'];
+        }
+
         $message = 'Bonjour, <br/><br/>';
 
         $message = "Vous trouvez ci-joint le devis pour la réparation de votre '" . $this->getNomMachine() . ".<br/><br/>";
-        $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
-        $message .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).<br/><br/>";
+        $message .= 'Vous pouvez effectuer la signature électronique de ce document directement ';
+        if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+            $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
+        }
+        $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
+        $message .= "Si vous voulez des informations complémentaires, contactez le centre de service";
+
+        if ($tel) {
+            $message .= "par téléphone au " . $tel . " (Appel non surtaxé)";
+        }
+
+        $message .= ".<br/><br/>";
         $message .= 'Cordialement, <br/><br/>';
         $message .= 'L\'équipe ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
@@ -1660,7 +1677,7 @@ class BS_SAV extends BimpObject
                 return $url;
             }
         }
-        return BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . "a=ss&serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
+        return BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . "a = ss&serial = " . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav = " . $this->id . "&user_name = " . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
 //        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
     }
@@ -1755,7 +1772,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return '';
     }
-    
+
     public function getIdUserGroup()
     {
         $codeCentre = $this->getCodeCentre();
@@ -1990,16 +2007,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     public function displayLink()
     {
         $html = '';
-        
-        $url = self::getPublicBaseUrl(false).'fc=savForm';
+
+        $url = self::getPublicBaseUrl(false) . 'fc=savForm';
         $html .= BimpRender::renderButton(array(
-                            'label'       => 'Prise de RDV',
-                            'icon_before' => 'calendar-alt',
-                            'classes'     => array('btn btn-default'),
-                            'attr'        => array(
-                                    'onclick' => 'window.location = \'' . $url . '\''
-                            )
-                ));
+                    'label'       => 'Prise de RDV',
+                    'icon_before' => 'calendar-alt',
+                    'classes'     => array('btn btn-default'),
+                    'attr'        => array(
+                        'onclick' => 'window.location = \'' . $url . '\''
+                    )
+        ));
 
         $html = BimpRender::renderPanel('Liens ', $html, '', array('open' => 0));
 
@@ -3741,7 +3758,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 'remisable'          => 0,
                 'linked_id_object'   => (int) $this->id,
                 'linked_object_name' => 'sav_prioritaire',
-                'warranty'    => 0
+                'warranty'           => 0
             ));
 
             $line->desc = '';
@@ -3917,7 +3934,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $prod = $line->getChildObject('product');
                     if ($prod->isLoaded())
                         $prod_type = $prod->getData('fk_product_type');
-                    if($line->getData('warranty') == 1){
+                    if ($line->getData('warranty') == 1) {
                         if ($prod_type != 1) {
                             $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
                             $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
@@ -3927,8 +3944,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             $garantieTtcService += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
                             $garantiePaService += (float) $line->pa_ht * (float) $line->qty;
                         }
-                    }
-                    elseif($line->getData('warranty') == 2){
+                    } elseif ($line->getData('warranty') == 2) {
                         if ($prod_type != 1) {
                             $garantieHt2 += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
                             $garantieTtc2 += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
@@ -4063,11 +4079,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $line_errors = $line->delete($line_warnings, true);
             }
         }
-        
+
         /* GARANTIE LDLC
          * 
          */
-        
+
 
         $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
                     'id_obj'             => (int) $propal->id,
@@ -4350,7 +4366,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if (is_file($fileFact)) {
                         $files[] = array($fileFact, 'application/pdf', $facture->ref . '.pdf');
                     } else {
-                        $errors[] = 'Attention: PDF de la facture non trouvé et donc non envoyé au client ('.$dir.')';
+                        $errors[] = 'Attention: PDF de la facture non trouvé et donc non envoyé au client (' . $dir . ')';
                         dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi de la facture au client', LOG_ERR);
                         BimpCore::addlog('Echec envoi facture sav par e-mail au client - PDF non trouvé', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
                             'Fichier' => $fileFact
@@ -4515,7 +4531,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $mail_msg .= 'Merci de votre compréhension. <br/><br/>';
                 }
                 break;
-                
+
             case 'restitution':
                 $contact_pref = 1; // On force l'envoi par e-mail
 
@@ -4957,7 +4973,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             'linked_id_object'   => 0,
                             'linked_object_name' => '',
                             'id_reservation'     => 0,
-                            'warranty'    => 0,
+                            'warranty'           => 0,
                             'position'           => (int) $line['rang'],
                             'remisable'          => 0
                         );
@@ -5083,7 +5099,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             'linked_id_object'   => 0,
                             'linked_object_name' => '',
                             'id_reservation'     => 0,
-                            'warranty'    => 0,
+                            'warranty'           => 0,
                             'position'           => (int) $line['rang'],
                             'remisable'          => 1
                         );
@@ -6420,7 +6436,7 @@ ORDER BY a.val_max DESC");
                                                         $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $idAvoirFact);
                                                         if (BimpObject::objectLoaded($avoir)) {
                                                             $avoir_ref = $avoir->getRef();
-                                                            if ($avoir_ref && file_exists($avoir->getFilesDir(). '/' . $avoir_ref . '.pdf')) {
+                                                            if ($avoir_ref && file_exists($avoir->getFilesDir() . '/' . $avoir_ref . '.pdf')) {
                                                                 $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $avoir_ref . '/' . $avoir_ref . '.pdf');
                                                                 $success_callback .= 'window.open("' . $url . '");';
                                                             } else {

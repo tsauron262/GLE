@@ -11,7 +11,7 @@ if ($context == 'public') {
     define('XFRAMEOPTIONS_ALLOWALL', true);
     
     $sessionname = '__Host-publicerp';
-        session_set_cookie_params(array('SameSite' => 'None', 'Secure' => true, 'path' => '/', 'httponly' => true));
+        session_set_cookie_params(array('SameSite' => 'None', 'Secure' => true, 'path' => '/', 'httponly' => false/*pour test cookie dans iframe*/));
 	session_name($sessionname);
         
         $test = session_id();
@@ -62,4 +62,22 @@ if (isset($_REQUEST['ajax']) && $_REQUEST['ajax']) {
     }
 } else {
     require_once __DIR__ . "/../main.inc.php";
+    $cspJs = "'self' 'unsafe-inline' 'unsafe-eval'";
+    if(BimpCore::getConf('use_csp_nonce', false)){
+        if(!defined('csp_nonce'))
+            define('csp_nonce', randomPassword(10));
+        $cspJs .= " 'strict-dynamic' 'nonce-".csp_nonce."'";
+        
+    }
+    header("Content-Security-Policy: default-src 'self'; script-src ".$cspJs."; style-src 'self' 'unsafe-inline'");
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+
+
+function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+{
+    for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
+
+    }
+    return $s;
 }

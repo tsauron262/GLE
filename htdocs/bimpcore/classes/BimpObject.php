@@ -7840,7 +7840,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</span>';
 
             if (BimpTools::getValue('open', '', 'aZ09') == 'suivi_mail') {
-                $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
+                $html .= '<script '.BimpTools::getScriptAttribut().'>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
             }
 
             // Logs objet:
@@ -7907,7 +7907,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         $user->getrights('', true);
                         if ($objectTest->can('view')) {
                             $html .= BimpRender::renderAlerts('Changement d\'entité.........', "warning");
-                            $html .= '<script>location.reload();</script>';
+                            $html .= '<script '.BimpTools::getScriptAttribut().'>location.reload();</script>';
                         } else {//ca marche pas, onn reste sur l'entité curent
                             $ret = $mc->switchEntity($currentEntity);
                         }
@@ -11638,10 +11638,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($redirect && $url != "") {
                 $ob = ob_get_contents();
                 if ($ob != "")
-                    die("<script>window.location = '" . $url . "';</script>");
+                    die('<script '.BimpTools::getScriptAttribut().'>window.location = \'' . $url . "';</script>");
                 else {
                     header("location: " . $url);
-                    die("<script>window.location = '" . $url . "';</script>");
+                    die('<script '.BimpTools::getScriptAttribut().'>window.location = \'' . $url . "';</script>");
                 }
             } elseif ($btn && $url != "")
                 return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";

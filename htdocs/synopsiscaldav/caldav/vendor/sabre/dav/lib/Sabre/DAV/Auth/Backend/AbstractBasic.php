@@ -74,11 +74,25 @@ abstract class AbstractBasic implements BackendInterface {
         }
 
         // Authenticates the user
+        global $db;
+        $tmpuser = new \User($db);
         if (!$this->validateUserPass($userpass[0],$userpass[1])) {
+            \BimpTools::secuAddEchec('Auth caldav echec, login : '.$userpass[0]);
             $auth->requireLogin();
             throw new DAV\Exception\NotAuthenticated('Username or password does not match '.$userpass[0]." !! ".$userpass[1]);
         }
-        $this->currentUser = $userpass[0];
+        else{
+            $tmpuser->fetch('', $userpass[0]);
+            if($tmpuser->id < 1){
+                $tmpuser->fetch('', '','',0,-1, $userpass[0]);
+                if($tmpuser->id < 1){
+                    \BimpTools::secuAddEchec('Auth caldav echec (compte ok mais pas de compte gle), login : '.$userpass[0]);
+                    $auth->requireLogin();
+                    throw new DAV\Exception\NotAuthenticated('Username or password does not match '.$userpass[0]." !! ".$userpass[1]);
+                }
+            }
+        }
+        $this->currentUser = $tmpuser->login;
         
         
         /*md drsi*/

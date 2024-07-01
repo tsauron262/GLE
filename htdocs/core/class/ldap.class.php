@@ -322,7 +322,7 @@ class Ldap
 
 		if ($connected) {
 			$return = $connected;
-                        session_regenerate_id();
+//                        session_regenerate_id();
 			dol_syslog(get_class($this)."::connect_bind return=".$return, LOG_DEBUG);
 		} else {
                     BimpTools::secuAddEchec("Login erreur : ".$this->searchUser);

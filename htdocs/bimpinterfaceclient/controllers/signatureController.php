@@ -81,6 +81,20 @@ class signatureController extends BimpPublicController
         $html .= '</div>';
 
         if (empty($errors)) {
+            if (!$status) {
+                $html .= '<div class="bimp_public_form">';
+                $html .= '<div class="form_section" style="text-align: center">';
+
+                $signataire->force_no_user_client = true;
+                $html .= $signataire->dispayPublicSign(true, array(
+                    'id_signataire' => $signataire->id,
+                    'security_code' => $code
+                ));
+
+                $html .= '</div>';
+                $html .= '</div>';
+            }
+
             $html .= '<div class="bimp_public_form">';
             $html .= '<div class="form_section" style="text-align: center">';
 
@@ -94,17 +108,6 @@ class signatureController extends BimpPublicController
 
             $html .= '</div>';
             $html .= '</div>';
-
-            if (!$status) {
-                $html .= '<div class="bimp_public_form">';
-                $html .= '<div class="form_section" style="text-align: center">';
-
-                $signataire->force_no_user_client = true;
-                $html .= $signataire->dispayPublicSign(true);
-
-                $html .= '</div>';
-                $html .= '</div>';
-            }
         }
 
         if (!empty($errors)) {

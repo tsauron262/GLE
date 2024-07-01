@@ -10878,6 +10878,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
         $nOk = 0;
+        
+        
+        if ((!is_array($id_objects) || empty($id_objects)) && $this->isLoaded()) {
+            $id_objects[] = $this->id;
+        }
 
         if (!is_array($id_objects) || empty($id_objects)) {
             $errors[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' sélectionné' . $this->e();

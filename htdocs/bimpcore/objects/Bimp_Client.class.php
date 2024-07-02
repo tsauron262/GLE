@@ -488,7 +488,7 @@ class Bimp_Client extends Bimp_Societe
                     'outstanding_limit_manuel' => 0
 //                    'force_update' => 1
                         ), array(
-                    'confirm_msg'      => 'Mise à jour du champ "outstanding_limit_manuel" à la valeur 0 - Veuillez confirmer',
+                    'confirm_msg'      => 'Mise à jour du champ outstanding_limit_manuel à la valeur 0 - Veuillez confirmer',
                     'single_action'    => true,
                     'use_bimpdatasync' => true,
                     'use_report'       => true

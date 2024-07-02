@@ -430,7 +430,8 @@ class BDS_ConvertProcess extends BDSProcess
 
                     $this->incProcessed();
 
-                    $id_shipment_line = (int) $this->db->getValue('bl_shipment_line', 'id', 'id_shipment = ' . $id_shipment . ' AND id_commande_line = ' . $r['id']);
+//                    $id_shipment_line = (int) $this->db->getValue('bl_shipment_line', 'id', 'id_shipment = ' . $id_shipment . ' AND id_commande_line = ' . $r['id']);
+                    $id_shipment_line = 0;
 
                     if ($id_shipment_line) {
                         if ($this->db->update('bl_shipment_line', array(), 'id = ' . $id_shipment_line) <= 0) {

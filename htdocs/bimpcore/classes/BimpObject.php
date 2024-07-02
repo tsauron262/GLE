@@ -11114,10 +11114,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     // Actions BDS : 
     public function initBdsActionBulkEditField($process, &$action_data = array(), &$errors = array(), $extra_data = array())
     {
-        echo '<pre>';
-        print_r($extra_data);
-        exit;
-        
         $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
         if ($use_db_transactions) {
             $this->db->db->begin();

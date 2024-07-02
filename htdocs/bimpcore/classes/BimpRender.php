@@ -1503,17 +1503,17 @@ class BimpRender
         return $html;
     }
 
-    public static function renderExpandableText($text, $max_chars = 200)
+    public static function renderExpandableText($text, $max_chars = 200, $font_size = null)
     {
         if (strlen($text) <= $max_chars) {
             return $text;
         }
 
         $html = '';
-        
-        $html .= '<div class="bimp_expandable_text closed">';
+
+        $html .= '<div class="bimp_expandable_text closed"' . (!is_null($font_size) ? 'style="font-size: ' . $font_size . 'px!important"' : '') . '>';
         $html .= $text;
-        
+
         $html .= '<div style="text-align: right">';
         $html .= '<span class="expand_btn">';
         $html .= 'Suite';

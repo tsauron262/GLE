@@ -379,15 +379,17 @@ class BDS_ConvertProcess extends BDSProcess
 
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line');
-        $sql .= ' WHERE a.shipments != \'\' AND a.shipments != \'{}\'';
-        $sql .= ' AND ((SELECT SUM(sl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) != qty_total';
-        $sql .= ' OR (SELECT COUNT(sl.id) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) = 0)';
+        $sql .= ' WHERE a.shipments != \'\' AND a.shipments != \'{}\' AND a.qty_total != 0';
+        $sql .= ' AND (';
+        $sql .= '(SELECT COUNT(sl.id) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) = 0';
+        $sql .= ' OR (SELECT SUM(sl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) != a.qty_total';
+        $sql .= ')';
         $sql .= ' ORDER BY a.id asc';
 
         if ((int) $this->getOption('test_one', 0)) {
             $sql .= ' LIMIT 1';
         }
-        
+
         $this->debug_content .= 'SQL : ' . $sql;
 
         $rows = $this->db->executeS($sql, 'array');
@@ -426,52 +428,60 @@ class BDS_ConvertProcess extends BDSProcess
                         continue;
                     }
 
-                    if ((int) $this->db->getValue('bl_shipment_line', 'id', 'id_shipment = ' . $id_shipment . ' AND id_commande_line = ' . $r['id'])) {
-                        continue;
-                    }
-
                     $this->incProcessed();
 
-                    $id_shipment_line = $this->db->insert('bl_shipment_line', array(
-                        'id_shipment'      => $id_shipment,
-                        'id_commande_line' => $r['id'],
-                        'id_entrepot_dest' => (isset($shipment_data['id_entrepot']) ? (int) $shipment_data['id_entrepot'] : 0),
-                        'qty'              => $qty
-                            ), true);
+                    $id_shipment_line = (int) $this->db->getValue('bl_shipment_line', 'id', 'id_shipment = ' . $id_shipment . ' AND id_commande_line = ' . $r['id']);
 
-                    if ($id_shipment_line <= 0) {
-                        $this->incIgnored();
-                        $this->Error('Echec ajout de la ligne à l\'expédition #' . $id_shipment . ' - ' . $this->db->err(), $line);
+                    if ($id_shipment_line) {
+                        if ($this->db->update('bl_shipment_line', array(), 'id = ' . $id_shipment_line) <= 0) {
+                            $this->incIgnored();
+                            $this->Error('Echec màj qtés de la ligne pour l\'expédition #' . $id_shipment . ' - ' . $this->db->err(), $line);
+                            continue;
+                        } else {
+                            $this->Success('Màj qtés de la ligne d\'expédition OK pour exp #' . $id_shipment, $line);
+                            $this->incCreated();
+                        }
                     } else {
-                        $this->Success('Création de la ligne d\'expédition OK', $line);
-                        $this->incCreated();
+                        $id_shipment_line = $this->db->insert('bl_shipment_line', array(
+                            'id_shipment'      => $id_shipment,
+                            'id_commande_line' => $r['id'],
+                            'id_entrepot_dest' => (isset($shipment_data['id_entrepot']) ? (int) $shipment_data['id_entrepot'] : 0),
+                            'qty'              => $qty
+                                ), true);
 
-                        if (isset($shipment_data['equipments']) && !empty($shipment_data['equipments'])) {
-                            $base_data = array(
-                                'association'        => 'equipments',
-                                'src_object_module'  => 'bimplogistique',
-                                'src_object_name'    => 'BL_ShipmentLine',
-                                'src_object_type'    => 'bimp_object',
-                                'src_id_object'      => $id_shipment_line,
-                                'dest_object_module' => 'bimpequipment',
-                                'dest_object_name'   => 'Equipment',
-                                'dest_object_type'   => 'bimp_object'
-                            );
+                        if ($id_shipment_line <= 0) {
+                            $this->incIgnored();
+                            $this->Error('Echec ajout de la ligne à l\'expédition #' . $id_shipment . ' - ' . $this->db->err(), $line);
+                            continue;
+                        } else {
+                            $this->Success('Création de la ligne d\'expédition OK pour exp #' . $id_shipment, $line);
+                            $this->incCreated();
+                        }
+                    }
 
-//                            $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $id_shipment_line . ' AND dest_object_name = \'Equipment\'');
+                    if (isset($shipment_data['equipments']) && !empty($shipment_data['equipments'])) {
+                        $base_data = array(
+                            'association'        => 'equipments',
+                            'src_object_module'  => 'bimplogistique',
+                            'src_object_name'    => 'BL_ShipmentLine',
+                            'src_object_type'    => 'bimp_object',
+                            'src_id_object'      => $id_shipment_line,
+                            'dest_object_module' => 'bimpequipment',
+                            'dest_object_name'   => 'Equipment',
+                            'dest_object_type'   => 'bimp_object'
+                        );
 
-                            foreach ($shipment_data['equipments'] as $id_equipment) {
-                                if (!(int) $id_equipment) {
-                                    $this->Error('ID eq invalide', $line);
-                                    break;
-                                }
-                                $data = $base_data;
-                                $data['dest_id_object'] = $id_equipment;
-                                if ($this->db->insert('bimpcore_objects_associations', $data) <= 0) {
-                                    $this->Error('Echec asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' - ' . $this->db->err(), $line);
-                                } else {
-//                                    $this->Info('Aj asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' OK', $line);
-                                }
+                        $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $id_shipment_line . ' AND dest_object_name = \'Equipment\'');
+
+                        foreach ($shipment_data['equipments'] as $id_equipment) {
+                            if (!(int) $id_equipment) {
+                                $this->Error('ID eq invalide', $line);
+                                break;
+                            }
+                            $data = $base_data;
+                            $data['dest_id_object'] = $id_equipment;
+                            if ($this->db->insert('bimpcore_objects_associations', $data) <= 0) {
+                                $this->Error('Echec asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' - ' . $this->db->err(), $line);
                             }
                         }
                     }
@@ -490,9 +500,9 @@ class BDS_ConvertProcess extends BDSProcess
     {
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_fourn_line');
-        $sql .= ' WHERE a.receptions != \'\' AND a.receptions != \'{}\' > 0';
-//        $sql .= ' AND (SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) = 0';
-        $sql .= ' AND (SELECT SUM(rl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) != a.qty_total ';
+        $sql .= ' WHERE a.receptions != \'\' AND a.receptions != \'{}\'';
+        $sql .= ' AND ((SELECT SUM(rl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_line = a.id) != a.qty_total';
+        $sql .= ' OR (SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_line = a.id) = 0)';
         $sql .= ' ORDER BY a.id asc';
 
         if ((int) $this->getOption('test_one', 0)) {

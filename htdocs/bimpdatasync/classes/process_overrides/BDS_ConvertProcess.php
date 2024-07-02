@@ -549,7 +549,9 @@ class BDS_ConvertProcess extends BDSProcess
 
                     $this->incProcessed();
 
-                    $id_reception_line = (int) $this->db->getValue('bl_reception_line', 'id', 'id_reception = ' . $id_reception . ' AND id_commande_fourn_line = ' . $r['id']);
+//                    $id_reception_line = (int) $this->db->getValue('bl_reception_line', 'id', 'id_reception = ' . $id_reception . ' AND id_commande_fourn_line = ' . $r['id']);
+                    $id_reception_line = 0;
+                    
                     if ($id_reception_line) {
                         if ($this->db->update('bl_reception_line', array(
                                     'qty' => $qty

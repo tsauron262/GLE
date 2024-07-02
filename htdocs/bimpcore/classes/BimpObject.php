@@ -7840,7 +7840,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</span>';
 
             if (BimpTools::getValue('open', '', 'aZ09') == 'suivi_mail') {
-                $html .= '<script '.BimpTools::getScriptAttribut().'>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
+                $html .= '<script ' . BimpTools::getScriptAttribut() . '>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
             }
 
             // Logs objet:
@@ -7907,7 +7907,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         $user->getrights('', true);
                         if ($objectTest->can('view')) {
                             $html .= BimpRender::renderAlerts('Changement d\'entité.........', "warning");
-                            $html .= '<script '.BimpTools::getScriptAttribut().'>location.reload();</script>';
+                            $html .= '<script ' . BimpTools::getScriptAttribut() . '>location.reload();</script>';
                         } else {//ca marche pas, onn reste sur l'entité curent
                             $ret = $mc->switchEntity($currentEntity);
                         }
@@ -8360,25 +8360,25 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return $list->renderHtml();
     }
-    
+
     public function renderFunctions()
     {
         $html = '';
-        
+
         $functions = array('getLink', 'getFilesDir');
         $functions = BimpTools::merge_array($functions, $this->getConf('functions/', array()));
-        
-        foreach($functions as $data){
-            if(!is_array($data)){
-                $title = $data.'()';
-                eval ('$content = $this->'.$data.'();');
-                if(is_array($content))
-                    $content = '<pre>'.print_r($content,1).'</pre>';
+
+        foreach ($functions as $data) {
+            if (!is_array($data)) {
+                $title = $data . '()';
+                eval('$content = $this->' . $data . '();');
+                if (is_array($content))
+                    $content = '<pre>' . print_r($content, 1) . '</pre>';
                 $html .= BimpRender::renderPanel($title, $content);
             }
         }
-        
-        
+
+
         return $html;
     }
 
@@ -10878,8 +10878,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
         $nOk = 0;
-        
-        
+
         if ((!is_array($id_objects) || empty($id_objects)) && $this->isLoaded()) {
             $id_objects[] = $this->id;
         }
@@ -10904,17 +10903,16 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     }
 
                     if (!count($errors)) {
+                        $mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'udpate_object');
+                        $force_update = BimpTools::getArrayValueFromPath($data, 'force_update', false);
+                        $not_validate = BimpTools::getArrayValueFromPath($data, 'validate', false);
+
                         foreach ($id_objects as $id_object) {
                             $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_object);
 
                             if (!BimpObject::objectLoaded($instance)) {
                                 $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe plus';
                             } else {
-
-                                $mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'udpate_object');
-                                $force_update = BimpTools::getArrayValueFromPath($data, 'force_update', false);
-                                $not_validate = BimpTools::getArrayValueFromPath($data, 'validate', false);
-
                                 $obj_warnings = array();
                                 $obj_errors = array();
 
@@ -11111,6 +11109,144 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Actions BDS : 
+    public function initBdsActionBulkEditField($process, &$action_data = array(), &$errors = array(), $extra_data = array())
+    {
+        echo '<pre>';
+        print_r($extra_data);
+        exit;
+        
+        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
+        if ($use_db_transactions) {
+            $this->db->db->begin();
+        }
+
+        $field_name = BimpTools::getArrayValueFromPath($extra_data, 'field_name', '', $errors, true, 'Nom du champ à éditer absent');
+
+        if ($field_name) {
+            if (!$this->field_exists($field_name)) {
+                $errors[] = 'Le champ "' . $field_name . '" n\'existe pas dans l\'objet "' . BimpTools::ucfirst($this->getLabel()) . '"';
+            }
+
+            if (!$this->canEditField($field_name)) {
+                $errors[] = 'Vous n\'avez pas la permission d\'éditer le champ "' . $this->getConf('fields/' . $field_name . '/label', $field_name) . '"';
+            }
+
+            $value = BimpTools::getArrayValueFromPath($extra_data, $field_name, null);
+            if (is_null($value)) {
+                $errors[] = 'Nouvelle valeur du champ "' . $field_name . '" non définie';
+            }
+        }
+
+        $id_objects = BimpTools::getArrayValueFromPath($extra_data, 'id_objects', array());
+        if (!is_array($id_objects) || empty($id_objects)) {
+            $errors[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' sélectionné' . $this->e();
+        }
+
+        if (!count($errors)) {
+            $action_data['operation_title'] = 'Mise à jour en série du champ "' . $field_name . '"';
+            $action_data['steps'] = array(
+                'edit_field' => array(
+                    'label'                  => 'Mises à jour',
+                    'on_error'               => 'continue',
+                    'elements'               => $id_objects,
+                    'nbElementsPerIteration' => 100
+                )
+            );
+        }
+
+        if ($use_db_transactions) {
+            if (count($errors)) {
+                $this->db->db->rollback();
+            } else {
+                $this->db->db->commit();
+            }
+        }
+    }
+
+    public function executeBdsActionBulkEditField($process, $step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
+    {
+        if (empty($elements)) {
+            $errors[] = 'Aucune ligne de commande client à traiter';
+            return;
+        }
+
+        $use_db_transaction = (int) BimpCore::getConf('use_db_transactions');
+        if ($use_db_transaction) {
+            $this->db->db->commitAll();
+        }
+
+        $process->setCurrentObjectData($this->module, $this->object_name);
+
+        switch ($step_name) {
+            case 'edit_field':
+                $field_name = BimpTools::getArrayValueFromPath($action_extra_data, 'field_name', '', $errors, true, 'Nom du champ à éditer absent');
+
+                if ($field_name) {
+                    if (!$this->field_exists($field_name)) {
+                        $errors[] = 'Le champ "' . $field_name . '" n\'existe pas dans l\'objet "' . BimpTools::ucfirst($this->getLabel()) . '"';
+                    }
+
+                    if (!$this->canEditField($field_name)) {
+                        $errors[] = 'Vous n\'avez pas la permission d\'éditer le champ "' . $this->getConf('fields/' . $field_name . '/label', $field_name) . '"';
+                    }
+
+                    $value = BimpTools::getArrayValueFromPath($action_extra_data, $field_name, null);
+                    if (is_null($value)) {
+                        $errors[] = 'Nouvelle valeur du champ "' . $field_name . '" non définie';
+                    }
+                }
+
+                if (count($errors)) {
+                    break;
+                }
+
+                $mode = BimpTools::getArrayValueFromPath($action_extra_data, 'update_mode', 'udpate_object');
+                $force_update = BimpTools::getArrayValueFromPath($action_extra_data, 'force_update', false);
+                $not_validate = BimpTools::getArrayValueFromPath($action_extra_data, 'validate', false);
+
+                foreach ($elements as $id_object) {
+                    $process->incProcessed();
+
+                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_object);
+
+                    if (!BimpObject::objectLoaded($instance)) {
+                        $process->incIgnored();
+                        $process->Error(ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe plus', null, '#' . $id_object);
+                    } else {
+                        $obj_warnings = array();
+                        $obj_errors = array();
+
+                        switch ($mode) {
+                            case 'update_field':
+                                $obj_errors = $instance->updateField($field_name, $value, null, $force_update, $not_validate);
+                                break;
+
+                            case 'update_object':
+                            default:
+                                $instance->set($field_name, $value);
+                                $obj_errors = $instance->update($obj_warnings, $force_update);
+                                break;
+                        }
+
+
+                        if (count($obj_errors)) {
+                            $process->incIgnored();
+                            $process->Error($obj_errors, $instance);
+                        } else {
+                            $process->incUpdated();
+                            $process->Success('Màj champ "' . $field_name . '" OK', $instance);
+                        }
+
+                        if (count($obj_warnings)) {
+                            $process->Alert($obj_warnings, $instance);
+                        }
+                    }
+                }
+                break;
+        }
     }
 
     // Gestion statique des objets:
@@ -11643,10 +11779,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($redirect && $url != "") {
                 $ob = ob_get_contents();
                 if ($ob != "")
-                    die('<script '.BimpTools::getScriptAttribut().'>window.location = \'' . $url . "';</script>");
+                    die('<script ' . BimpTools::getScriptAttribut() . '>window.location = \'' . $url . "';</script>");
                 else {
                     header("location: " . $url);
-                    die('<script '.BimpTools::getScriptAttribut().'>window.location = \'' . $url . "';</script>");
+                    die('<script ' . BimpTools::getScriptAttribut() . '>window.location = \'' . $url . "';</script>");
                 }
             } elseif ($btn && $url != "")
                 return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";

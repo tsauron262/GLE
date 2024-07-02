@@ -485,9 +485,10 @@ class Bimp_Client extends Bimp_Societe
                 'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
                     'field_name'               => 'outstanding_limit_manuel',
                     'update_mode'              => 'update_object',
-                    'outstanding_limit_manuel' => 111
+                    'outstanding_limit_manuel' => 0
 //                    'force_update' => 1
                         ), array(
+                    'confirm_msg'      => 'Mise à jour du champ "outstanding_limit_manuel" à la valeur 0 - Veuillez confirmer',
                     'single_action'    => true,
                     'use_bimpdatasync' => true,
                     'use_report'       => true
@@ -519,7 +520,7 @@ class Bimp_Client extends Bimp_Societe
                 ))
             );
         }
-        
+
         if ($user->admin) {
             $actions[] = array(
                 'label'   => 'Condition/Mode réglement',

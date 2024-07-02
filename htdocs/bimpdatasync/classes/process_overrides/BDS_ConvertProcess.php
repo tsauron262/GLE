@@ -386,6 +386,8 @@ class BDS_ConvertProcess extends BDSProcess
         if ((int) $this->getOption('test_one', 0)) {
             $sql .= ' LIMIT 1';
         }
+        
+        $this->debug_content .= 'SQL : ' . $sql;
 
         $rows = $this->db->executeS($sql, 'array');
 

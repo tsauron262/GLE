@@ -483,11 +483,14 @@ class Bimp_Client extends Bimp_Societe
                 'label'   => 'Editer limit manuel',
                 'icon'    => 'fas_pen',
                 'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
-                    'field_name'   => 'outstanding_limit_manuel',
-                    'update_mode'  => 'update_object',
+                    'field_name'               => 'outstanding_limit_manuel',
+                    'update_mode'              => 'update_object',
+                    'outstanding_limit_manuel' => 0
 //                    'force_update' => 1
                         ), array(
-                    'form_name' => 'bulk_edit_field'
+                    'use_bimpdatasync' => true,
+                    'use_report'       => true
+//                    'form_name' => 'bulk_edit_field'
                 ))
             );
         }
@@ -1029,8 +1032,8 @@ class Bimp_Client extends Bimp_Societe
     {
         $prefName = 'icba_';
         global $conf;
-        if($conf->entity > 1)
-            $prefName = $conf->entity.'_'.$prefName;
+        if ($conf->entity > 1)
+            $prefName = $conf->entity . '_' . $prefName;
         if (is_null($forced_date))
             $name = $prefName . date('Y-m-d', strtotime($this->getData('date_depot_icba')));
         else

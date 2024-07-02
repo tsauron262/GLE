@@ -488,7 +488,7 @@ class Bimp_Client extends Bimp_Societe
                     'outstanding_limit_manuel' => 0
 //                    'force_update' => 1
                         ), array(
-                    'single_action' => false,
+                            'use_bimpdatasync' => true,
 //                    'form_name' => 'bulk_edit_field'
                 ))
             );

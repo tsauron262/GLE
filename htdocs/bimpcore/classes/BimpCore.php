@@ -766,12 +766,6 @@ class BimpCore
 
     public static function getConf($name, $default = null, $module = 'bimpcore', &$source = '', $entity = null)
     {
-        if ($name == 'allow_signature_public_page') {
-            global $user;
-            if ($user->login == 'f.martinez') {
-                return 1;
-            }
-        }
         // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
         // passée en argument de la fonction. 
         // si cette argument est null on retourne la valeur par défaut définie dans le YML de la config du module (si elle est existe)

@@ -109,9 +109,8 @@ class BContract_echeancier extends BimpObject
         return 0;
     }
 
-    public function isPeriodInvoiced($date_start, $date_end)
+    public function isPeriodInvoiced($date_start, $date_end, &$errors = array())
     {
-        $errors = Array();
         if (!strtotime($date_start)) {
             $errors[] = 'Date de début invalide';
         }
@@ -630,7 +629,7 @@ class BContract_echeancier extends BimpObject
         $html = '';
 
         $can_edit = $this->canEdit();
-        
+
         if (!$can_edit) {
             $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emise", 'info');
         }
@@ -651,7 +650,7 @@ class BContract_echeancier extends BimpObject
         $dateFin->sub(new DateInterval('P1D'));
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-        
+
         $can_create_next_facture = $can_edit;
 
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
@@ -1410,6 +1409,13 @@ class BContract_echeancier extends BimpObject
             }
         }
 
+//        global $user;
+//        if ($user->login == 'f.martinez') {
+//            echo '<pre>';
+//            print_r($data);
+//            exit;
+//        }
+
         $date_start = BimpTools::getArrayValueFromPath($data, 'date_start', '');
         $date_end = BimpTools::getArrayValueFromPath($data, 'date_end', '');
         $total_ht = (float) BimpTools::getArrayValueFromPath($data, 'total_ht', 0);
@@ -1422,7 +1428,7 @@ class BContract_echeancier extends BimpObject
         }
 
         if (BimpTools::isDateRangeValid($date_start, $date_end, $errors)) {
-            if ($this->isPeriodInvoiced($date_start, $date_end) && stripos($label_line, 'supplémentaire') === false) {
+            if ($this->isPeriodInvoiced($date_start, $date_end, $errors) && stripos($label_line, 'supplémentaire') === false) {
                 $errors[] = 'Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l\'échéancier';
             }
         }

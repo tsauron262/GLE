@@ -1513,7 +1513,7 @@ class BimpRender
 
         $html .= '<div class="bimp_expandable_text closed"' . (!is_null($font_size) ? 'style="font-size: ' . $font_size . 'px!important"' : '') . '>';
         $html .= substr($text, 0, $max_chars);
-        $html .= '<div class="bimp_expandable_text_points">&nbsp;[...]</div>';
+        $html .= '<div class="bimp_expandable_text_points"> [...]</div>';
         $html .= '<div class="bimp_expandable_text_hidden">';
         $html .= substr($text, $max_chars);
         $html .= '</div>';

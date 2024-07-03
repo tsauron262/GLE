@@ -1,1 +1,2 @@
-- Maj GSX v6 (Ajout options de couverture supplémentaires) 
+- Maj GSX v6 (Ajout options de couverture supplémentaires)
+

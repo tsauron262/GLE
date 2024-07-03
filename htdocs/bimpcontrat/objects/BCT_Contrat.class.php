@@ -936,7 +936,7 @@ class BCT_Contrat extends BimpDolObject
                             $description = $line->getData('description');
                             if ($description) {
 //                                $line_desc .= $description;
-                                $line_desc .= '<br/><div style="font-size: 11px!important; width: 180px">' . BimpRender::renderExpandableText(strip_tags($description), 120) . '</div>';
+                                $line_desc .= '<br/>' . BimpRender::renderExpandableText($description, 120, 11);
                             }
 
                             $lines_rows[] = array(

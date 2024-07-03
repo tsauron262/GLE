@@ -1505,28 +1505,39 @@ class BimpRender
 
     public static function renderExpandableText($text, $max_chars = 200, $font_size = null)
     {
-        if (strlen($text) <= $max_chars) {
-            return $text;
-        }
-
         $html = '';
 
-        $html .= '<div class="bimp_expandable_text closed"' . (!is_null($font_size) ? 'style="font-size: ' . $font_size . 'px!important"' : '') . '>';
-        $html .= substr($text, 0, $max_chars);
-        $html .= '<div class="bimp_expandable_text_points"> [...]</div>';
-        $html .= '<div class="bimp_expandable_text_hidden">';
-        $html .= substr($text, $max_chars);
-        $html .= '</div>';
+        if (!is_null($font_size)) {
+            $html .= '<div style="font-size: ' . $font_size . 'px!important">';
+        }
 
-        $html .= '<div class="bimp_expandable_text_buttons" style="text-align: right">';
-        $html .= '<span class="expand_btn" onclick="$(this).findParentByClass(\'bimp_expandable_text\').removeClass(\'closed\')">';
-        $html .= 'Suite ' . BimpRender::renderIcon('fas_plus-circle');
-        $html .= '</span>';
-        $html .= '<span class="collapse_btn" onclick="$(this).findParentByClass(\'bimp_expandable_text\').addClass(\'closed\')">';
-        $html .= 'Moins ' . BimpRender::renderIcon('fas_minus-circle');
-        $html .= '</span>';
-        $html .= '</div>';
-        $html .= '</div>';
+        $text = BimpTools::replaceBr($text);
+        $text = strip_tags($text);
+
+        if (strlen($text) <= $max_chars) {
+            $html .= $text;
+        } else {
+            $html .= '<div class="bimp_expandable_text closed"' . (!is_null($font_size) ? 'style="font-size: ' . $font_size . 'px!important"' : '') . '>';
+            $html .= substr($text, 0, $max_chars);
+            $html .= '<div class="bimp_expandable_text_points"> [...]</div>';
+            $html .= '<div class="bimp_expandable_text_hidden">';
+            $html .= substr($text, $max_chars);
+            $html .= '</div>';
+
+            $html .= '<div class="bimp_expandable_text_buttons" style="text-align: right">';
+            $html .= '<span class="expand_btn" onclick="$(this).findParentByClass(\'bimp_expandable_text\').removeClass(\'closed\')">';
+            $html .= 'Suite ' . BimpRender::renderIcon('fas_plus-circle');
+            $html .= '</span>';
+            $html .= '<span class="collapse_btn" onclick="$(this).findParentByClass(\'bimp_expandable_text\').addClass(\'closed\')">';
+            $html .= 'Moins ' . BimpRender::renderIcon('fas_minus-circle');
+            $html .= '</span>';
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        if (!is_null($font_size)) {
+            $html .= '</div>';
+        }
         return $html;
     }
 

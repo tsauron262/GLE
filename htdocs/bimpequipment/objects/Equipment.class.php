@@ -1691,10 +1691,10 @@ class Equipment extends BimpObject
         if ($this->isLoaded()) {
             if ($this->canSetAction('merge')) {
                 $serial = $this->getData('serial');
-                if(stripos($serial, 's') === 0)
-                        $serial2 = substr($serial, 1);
+                if (stripos($serial, 's') === 0)
+                    $serial2 = substr($serial, 1);
                 else
-                    $serial2 = 'S'.$serial;
+                    $serial2 = 'S' . $serial;
                 $id_product = (int) $this->getData('id_product');
 
                 $filters = array(
@@ -1776,10 +1776,10 @@ class Equipment extends BimpObject
             $serial = $this->getData('serial');
             $id_product = (int) $this->getData('id_product');
 
-            if(stripos($serial, 's') === 0)
-                    $serial2 = substr($serial, 1);
+            if (stripos($serial, 's') === 0)
+                $serial2 = substr($serial, 1);
             else
-                $serial2 = 'S'.$serial;
+                $serial2 = 'S' . $serial;
             $filters = array(
                 'serial' => array($serial, $serial2)
             );
@@ -1934,6 +1934,7 @@ class Equipment extends BimpObject
                 }
 
                 // Fusion des données : 
+                $fields_to_merge = array('old_serial');
                 $fields = $this->getFieldsList();
                 $merged_ids = $eq_to_keep->getData('merged_ids');
                 foreach ($eqs as $eq) {
@@ -1946,7 +1947,11 @@ class Equipment extends BimpObject
                     }
 
                     foreach ($fields as $field) {
-                        if (!$eq_to_keep->isDataDefined($field) && $eq->isDataDefined($field)) {
+                        if (in_array($field, $fields_to_merge)) {
+                            $val1 = (string) $eq_to_keep->getData($field);
+                            $val2 = (string) $eq->getData($field);
+                            $eq_to_keep->set($field, $val1 . ($val1 && $val2 ? '<br/>' : '') . $val2);
+                        } elseif (!$eq_to_keep->isDataDefined($field) && $eq->isDataDefined($field)) {
                             $eq_to_keep->set($field, $eq->getData($field));
                         }
                     }

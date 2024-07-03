@@ -1409,12 +1409,12 @@ class BContract_echeancier extends BimpObject
             }
         }
 
-//        global $user;
-//        if ($user->login == 'f.martinez') {
-//            echo '<pre>';
-//            print_r($data);
-//            exit;
-//        }
+        global $user;
+        if ($user->login == 'f.martinez') {
+            echo '<pre>';
+            print_r($data);
+            exit;
+        }
 
         $date_start = BimpTools::getArrayValueFromPath($data, 'date_start', '');
         $date_end = BimpTools::getArrayValueFromPath($data, 'date_end', '');

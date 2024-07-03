@@ -2668,7 +2668,7 @@ class Bimp_Client extends Bimp_Societe
 
                 $lines_headers = array(
                     'linked'  => array('label' => '', 'colspan' => 0),
-                    'n'       => array('label' => 'Ligne n°', 'colspan' => 2),
+                    'desc'    => array('label' => 'Ligne', 'colspan' => 2),
                     'statut'  => 'statut',
                     'dates'   => 'Dates',
                     'fac'     => 'Facturation',
@@ -2796,14 +2796,19 @@ class Bimp_Client extends Bimp_Societe
                                     }
                                 }
 
-                                $num = $line->getData('rang');
+                                $line_desc = '<b>N° ' . $line->getData('rang') . '</b>';
 
                                 $id_parent_line = (int) $line->getData('id_parent_line');
                                 if ($id_parent_line) {
                                     $parent_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_parent_line);
                                     if (BimpObject::objectLoaded($parent_line)) {
-                                        $num .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
+                                        $line_desc .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
                                     }
+                                }
+
+                                $description = $line->getData('description');
+                                if ($description) {
+                                    $line_desc .= '<br/>' . BimpRender::renderExpandableText($description, 120, 11, 180);
                                 }
 
                                 $buttons_html = '';
@@ -2814,7 +2819,7 @@ class Bimp_Client extends Bimp_Societe
 
                                 $lines_rows[] = array(
                                     'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
-                                    'n'         => array('content' => $num, 'colspan' => ($is_sub_line ? 1 : 2)),
+                                    'desc'      => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
                                     'linked'    => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
                                     'statut'    => $line->displayDataDefault('statut'),
                                     'dates'     => $dates,

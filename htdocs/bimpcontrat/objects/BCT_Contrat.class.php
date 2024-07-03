@@ -926,17 +926,16 @@ class BCT_Contrat extends BimpDolObject
                                     $line_desc .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
                                 }
                             }
+                            
+                            $description = $line->getData('description');
+                            if ($description) {
+                                $line_desc .= '<br/>' . BimpRender::renderExpandableText($description, 120, 11, 180);
+                            }
 
                             $buttons_html = '';
 
                             foreach ($line->getListExtraBtn() as $button) {
                                 $buttons_html .= BimpRender::renderRowButton($button['label'], $button['icon'], $button['onclick']);
-                            }
-
-                            $description = $line->getData('description');
-                            if ($description) {
-//                                $line_desc .= $description;
-                                $line_desc .= '<br/>' . BimpRender::renderExpandableText($description, 120, 11, 180);
                             }
 
                             $lines_rows[] = array(

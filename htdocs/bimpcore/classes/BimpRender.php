@@ -1503,12 +1503,12 @@ class BimpRender
         return $html;
     }
 
-    public static function renderExpandableText($text, $max_chars = 200, $font_size = null)
+    public static function renderExpandableText($text, $max_chars = 200, $font_size = null, $width = 200)
     {
         $html = '';
 
         if (!is_null($font_size)) {
-            $html .= '<div style="font-size: ' . $font_size . 'px!important">';
+            $html .= '<div style="' . ((int) $font_size ? 'font-size: ' . $font_size . 'px!important;' : '') . ($width ? 'width: ' . $width . 'px!important;' : '') . '">';
         }
 
         $text = BimpTools::replaceBr($text);

@@ -9408,17 +9408,52 @@ body.modal-open ul.ui-autocomplete {
   min-height: 0; }
 
 /* Expandable texts */
-/* line 1476, ../scss/bimpcore/_styles.scss */
+/* line 1477, ../scss/bimpcore/_styles.scss */
 .bimp_expandable_text {
-  overflow: hidden; }
-  /* line 1479, ../scss/bimpcore/_styles.scss */
-  .bimp_expandable_text.closed {
-    height: 45px;
-    box-shadow: inset 0 -5px -10px #fff; }
+  -webkit-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease; }
+  /* line 1480, ../scss/bimpcore/_styles.scss */
+  .bimp_expandable_text > .bimp_expandable_text_points {
+    display: none; }
   /* line 1484, ../scss/bimpcore/_styles.scss */
-  .bimp_expandable_text.open {
-    height: auto;
-    box-shadow: none; }
+  .bimp_expandable_text > .bimp_expandable_text_hidden {
+    display: inline-block; }
+  /* line 1488, ../scss/bimpcore/_styles.scss */
+  .bimp_expandable_text > .bimp_expandable_text_buttons {
+    margin-top: 10px; }
+    /* line 1491, ../scss/bimpcore/_styles.scss */
+    .bimp_expandable_text > .bimp_expandable_text_buttons > .collapse_btn, .bimp_expandable_text > .bimp_expandable_text_buttons > .expand_btn {
+      -webkit-transition: all 0.3s ease;
+      -o-transition: all 0.3s ease;
+      transition: all 0.3s ease;
+      color: #7B7B7B;
+      font-weight: bold; }
+      /* line 1497, ../scss/bimpcore/_styles.scss */
+      .bimp_expandable_text > .bimp_expandable_text_buttons > .collapse_btn:hover, .bimp_expandable_text > .bimp_expandable_text_buttons > .expand_btn:hover {
+        cursor: pointer;
+        color: #ed513b; }
+    /* line 1503, ../scss/bimpcore/_styles.scss */
+    .bimp_expandable_text > .bimp_expandable_text_buttons > .collapse_btn {
+      display: inline; }
+    /* line 1506, ../scss/bimpcore/_styles.scss */
+    .bimp_expandable_text > .bimp_expandable_text_buttons > .expand_btn {
+      display: none; }
+  /* line 1512, ../scss/bimpcore/_styles.scss */
+  .bimp_expandable_text.closed > .bimp_expandable_text_points {
+    display: inline-block; }
+  /* line 1516, ../scss/bimpcore/_styles.scss */
+  .bimp_expandable_text.closed > .bimp_expandable_text_hidden {
+    display: none; }
+  /* line 1520, ../scss/bimpcore/_styles.scss */
+  .bimp_expandable_text.closed > .bimp_expandable_text_buttons {
+    margin-top: 4px; }
+    /* line 1523, ../scss/bimpcore/_styles.scss */
+    .bimp_expandable_text.closed > .bimp_expandable_text_buttons > .collapse_btn {
+      display: none; }
+    /* line 1526, ../scss/bimpcore/_styles.scss */
+    .bimp_expandable_text.closed > .bimp_expandable_text_buttons > .expand_btn {
+      display: inline; }
 
 /* line 1, ../scss/bimpcore/_form.scss */
 *::-moz-placeholder {

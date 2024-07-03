@@ -889,7 +889,7 @@ class BCT_Contrat extends BimpDolObject
 
                             if ($line_statut > 0) {
                                 $dates .= 'Du <b>' . date('d / m / Y', strtotime($line->getData('date_ouverture'))) . '</b>';
-                                $dates .= ' au <b>' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . '</b>';
+                                $dates .= '<br/>Au <b>' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . '</b>';
 
                                 if (!(int) $line->getData('id_line_renouv')) {
                                     $date_fin = date('Y-m-d', strtotime($line->getData('date_fin_validite')));
@@ -935,8 +935,8 @@ class BCT_Contrat extends BimpDolObject
 
                             $description = $line->getData('description');
                             if ($description) {
-                                $line_desc .= $description;
-//                                $line_desc .= '<br/>' . BimpRender::renderExpandableText($description, 70);
+//                                $line_desc .= $description;
+                                $line_desc .= '<br/><div style="font-size: 11px!important; width: 180px">' . BimpRender::renderExpandableText(strip_tags($description), 120) . '</div>';
                             }
 
                             $lines_rows[] = array(

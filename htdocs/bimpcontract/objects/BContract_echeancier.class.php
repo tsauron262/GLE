@@ -140,14 +140,6 @@ class BContract_echeancier extends BimpObject
 
             $result = $this->db->getCount('facturedet', $where, 'rowid');
             
-            global $user;
-            if ($user->login == 'f.martinez') {
-                echo 'WHERE : ' . $where . '<br/><br/>';
-                echo 'RES <pre>';
-                print_r($result);
-                echo '</pre>';
-            }
-            
             if (is_null($result)) {
                 BimpCore::addlog('Erreur isPeriodInvoiced Echéancier contrats', 4, 'bimpcore', $this, array(
                     'Err SQL' => $this->db->err(),
@@ -1417,13 +1409,6 @@ class BContract_echeancier extends BimpObject
             if (!(int) $contrat->getData('entrepot') && $contrat->useEntrepot()) {
                 $errors[] = "La facture ne peut pas être créée car le contrat n'a pas d'entrepôt";
             }
-        }
-
-        global $user;
-        if ($user->login == 'f.martinez') {
-            echo '<pre>';
-            print_r($data);
-//            exit;
         }
 
         $date_start = BimpTools::getArrayValueFromPath($data, 'date_start', '');

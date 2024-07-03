@@ -430,8 +430,7 @@ class BDS_ConvertProcess extends BDSProcess
 
                     $this->incProcessed();
 
-//                    $id_shipment_line = (int) $this->db->getValue('bl_shipment_line', 'id', 'id_shipment = ' . $id_shipment . ' AND id_commande_line = ' . $r['id']);
-                    $id_shipment_line = 0;
+                    $id_shipment_line = (int) $this->db->getValue('bl_shipment_line', 'id', 'id_shipment = ' . $id_shipment . ' AND id_commande_line = ' . $r['id']);
 
                     if ($id_shipment_line) {
                         if ($this->db->update('bl_shipment_line', array(), 'id = ' . $id_shipment_line) <= 0) {
@@ -472,7 +471,7 @@ class BDS_ConvertProcess extends BDSProcess
                             'dest_object_type'   => 'bimp_object'
                         );
 
-//                        $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $id_shipment_line);
+                        $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $id_shipment_line);
 
                         foreach ($shipment_data['equipments'] as $id_equipment) {
                             if (!(int) $id_equipment) {
@@ -549,8 +548,7 @@ class BDS_ConvertProcess extends BDSProcess
 
                     $this->incProcessed();
 
-//                    $id_reception_line = (int) $this->db->getValue('bl_reception_line', 'id', 'id_reception = ' . $id_reception . ' AND id_commande_fourn_line = ' . $r['id']);
-                    $id_reception_line = 0;
+                    $id_reception_line = (int) $this->db->getValue('bl_reception_line', 'id', 'id_reception = ' . $id_reception . ' AND id_commande_fourn_line = ' . $r['id']);
                     
                     if ($id_reception_line) {
                         if ($this->db->update('bl_reception_line', array(

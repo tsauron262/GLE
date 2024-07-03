@@ -139,6 +139,15 @@ class BContract_echeancier extends BimpObject
             $where .= ' AND date_end >= \'' . $date_start . '\'';
 
             $result = $this->db->getCount('facturedet', $where, 'rowid');
+            
+            global $user;
+            if ($user->login == 'f.martinez') {
+                echo 'WHERE : ' . $where . '<br/><br/>';
+                echo 'RES <pre>';
+                print_r($result);
+                echo '</pre>';
+            }
+            
             if (is_null($result)) {
                 BimpCore::addlog('Erreur isPeriodInvoiced Echéancier contrats', 4, 'bimpcore', $this, array(
                     'Err SQL' => $this->db->err(),

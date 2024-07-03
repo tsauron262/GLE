@@ -153,6 +153,7 @@ class BContract_echeancier extends BimpObject
                     'Err SQL' => $this->db->err(),
                     'where'   => $where
                 ));
+                $errors[] = 'Echec vérification des facturations déjà faites - ' . $this->db->err();
                 return 1; // Pour ne pas facturer par erreur une période déjà facturée   
             }
             if ((int) $result > 0) {

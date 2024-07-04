@@ -446,6 +446,10 @@ class BS_ApplePart extends BimpObject
             return 107.5;
         }
 
+        if ($prix == 84.47) { // Batterie IPad
+            return (119 / 1.2);
+        }
+
         if ($prix == 79.93) {
             return (119 / 1.2);
         }
@@ -454,8 +458,16 @@ class BS_ApplePart extends BimpObject
             return 99.16667;
         }
 
+        if ($prix == 72.60) {
+            return (109 / 1.2);
+        }
+
         if ($prix == 65.87) {
             return 82.5;
+        }
+
+        if ($prix == 65.27) {
+            return (89 / 1.2);
         }
 
         if ($prix == 57.93) {

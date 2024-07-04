@@ -109,9 +109,8 @@ class BContract_echeancier extends BimpObject
         return 0;
     }
 
-    public function isPeriodInvoiced($date_start, $date_end)
+    public function isPeriodInvoiced($date_start, $date_end, &$errors = array())
     {
-        $errors = Array();
         if (!strtotime($date_start)) {
             $errors[] = 'Date de début invalide';
         }
@@ -140,11 +139,13 @@ class BContract_echeancier extends BimpObject
             $where .= ' AND date_end >= \'' . $date_start . '\'';
 
             $result = $this->db->getCount('facturedet', $where, 'rowid');
+            
             if (is_null($result)) {
                 BimpCore::addlog('Erreur isPeriodInvoiced Echéancier contrats', 4, 'bimpcore', $this, array(
                     'Err SQL' => $this->db->err(),
                     'where'   => $where
                 ));
+                $errors[] = 'Echec vérification des facturations déjà faites - ' . $this->db->err();
                 return 1; // Pour ne pas facturer par erreur une période déjà facturée   
             }
             if ((int) $result > 0) {
@@ -630,7 +631,7 @@ class BContract_echeancier extends BimpObject
         $html = '';
 
         $can_edit = $this->canEdit();
-        
+
         if (!$can_edit) {
             $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emise", 'info');
         }
@@ -651,7 +652,7 @@ class BContract_echeancier extends BimpObject
         $dateFin->sub(new DateInterval('P1D'));
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-        
+
         $can_create_next_facture = $can_edit;
 
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
@@ -1422,7 +1423,7 @@ class BContract_echeancier extends BimpObject
         }
 
         if (BimpTools::isDateRangeValid($date_start, $date_end, $errors)) {
-            if ($this->isPeriodInvoiced($date_start, $date_end) && stripos($label_line, 'supplémentaire') === false) {
+            if ($this->isPeriodInvoiced($date_start, $date_end, $errors) && stripos($label_line, 'supplémentaire') === false) {
                 $errors[] = 'Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l\'échéancier';
             }
         }

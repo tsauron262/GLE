@@ -1940,8 +1940,12 @@ class BimpSignataire extends BimpObject
                     $this->set('nom', $nom);
                     $this->set('fonction', $fonction);
                     $this->set('ville', $ville);
-                    $this->set('email', $userClient->getData('email'));
-                    $this->set('id_user_client_signataire', $userClient->id);
+
+                    if (BimpObject::objectLoaded($userClient)) {
+                        $this->set('email', $userClient->getData('email'));
+                        $this->set('id_user_client_signataire', $userClient->id);
+                    }
+
                     $this->set('base_64_signature', $signature_image);
                     $this->set('ip_signataire', synopsisHook::getUserIp());
                     $this->set('code_sms_infos', $code_sms_infos);
@@ -1961,7 +1965,7 @@ class BimpSignataire extends BimpObject
                                     $success_callback = 'window.open(\'' . $url . '\');';
                                 }
                             }
-                            
+
                             $success_callback .= 'bimp_reloadPage();';
                         }
 

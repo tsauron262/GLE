@@ -1,4 +1,3 @@
 - Cyber
 - Content-Security-Policy
 - Strict-Transport-Security
-

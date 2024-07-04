@@ -6894,7 +6894,8 @@ class Bimp_Facture extends BimpComm
                     if (BimpObject::objectLoaded($avoir_to_refacture)) {
                         $params = array(
                             'pa_editable'   => false,
-                            'check_product' => false
+                            'check_product' => false,
+                            'keep_links'    => true
                         );
 
                         if ($avoir_to_refacture->getData('datec') < '2020-09-24 00:00:00') { // Date d'inversion des qtés au lieu des prix dans les avoirs. 

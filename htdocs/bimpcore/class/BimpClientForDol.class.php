@@ -30,8 +30,8 @@ class BimpClientForDol extends Bimp_Client
                 $c->set('outstanding_limit_icba', 0);
                 if($c->getData('outstanding_limit_credit_check') > 0)
                     $c->set('outstanding_limit_credit_check', 0);
-                if($c->getData('outstanding_limit_atradius') > 0)
-                    $c->set('outstanding_limit_atradius', 0);
+//                if($c->getData('outstanding_limit_atradius') > 0)
+//                    $c->set('outstanding_limit_atradius', 0);
                 $warnings = array();
                 $c->update($warnings, true);
 

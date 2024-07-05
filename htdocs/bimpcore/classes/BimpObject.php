@@ -2695,10 +2695,17 @@ class BimpObject extends BimpCache
                             case 'date_create':
                             case 'date_update':
                                 if (!isset($value['to']) || !$value['to']) {
-                                    $value['to'] = date('Y-m-d H:i:s');
+                                    $value['to'] = date('Y-m-d') . ' 23:59:59';
                                 }
                                 if (!isset($value['from']) || !$value['from']) {
                                     $value['from'] = '0000-00-00 00:00:00';
+                                }
+
+                                if (preg_match('/^\d{4}-\d{2}\-\d{2}$/', $value['from'])) {
+                                    $value['from'] .= ' 00:00:00';
+                                }
+                                if (preg_match('/^\d{4}-\d{2}\-\d{2}$/', $value['to'])) {
+                                    $value['to'] .= ' 23:59:59';
                                 }
                                 $filters[$filter_key] = array(
                                     'min' => $value['from'],
@@ -2761,6 +2768,14 @@ class BimpObject extends BimpCache
                                         isset($value['to']) && $value['to'] &&
                                         isset($value['from']) && $value['from']) {
                                     if ($value['from'] <= $value['to']) {
+                                        if ($seach_data['search_type'] === 'datetime_range' || $bc_field->getParam('type', 'string') === 'datetime') {
+                                            if (preg_match('/^\d{4}-\d{2}\-\d{2}$/', $value['from'])) {
+                                                $value['from'] .= ' 00:00:00';
+                                            }
+                                            if (preg_match('/^\d{4}-\d{2}\-\d{2}$/', $value['to'])) {
+                                                $value['to'] .= ' 23:59:59';
+                                            }
+                                        }
                                         $filters[$filter_key] = array(
                                             'min' => $value['from'],
                                             'max' => $value['to']

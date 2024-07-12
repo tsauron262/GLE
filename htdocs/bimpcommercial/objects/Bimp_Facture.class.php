@@ -5302,7 +5302,8 @@ class Bimp_Facture extends BimpComm
                         }
                     }
                 } else {
-                    $fac_errors = BimpTools::getDolEventsMsgs(array('errors'));
+                    $fac_errors = BimpTools::getErrorsFromDolObject($this->dol_object);
+//                    $fac_errors = BimpTools::getDolEventsMsgs(array('errors'));
 
                     if (!count($fac_errors)) {
                         $fac_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e() . ' (Code retour : ' . $result . ')';

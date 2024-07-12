@@ -255,11 +255,6 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if (in_array($action, array('createOrder', 'createInvoice'))) {
                         if (!(int) $this->getData('id_demande_fin')) {
                             if ((int) BimpCore::getConf('propal_signature_required', 0, 'bimpcommercial')) {
-                                if ($status !== Propal::STATUS_SIGNED) {
-                                    $errors[] = 'Devis non signé';
-                                    return 0;
-                                }
-                            } else {
                                 if (!(int) $this->getData('id_signature')) {
                                     $errors[] = 'Fiche signature obligatoire';
                                     return 0;
@@ -271,6 +266,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                                     return 0;
                                 } elseif (!$signature->isSigned()) {
                                     $errors[] = 'Fiche signature non signée';
+                                    return 0;
+                                }
+                            } else {
+                                if ($status !== Propal::STATUS_SIGNED) {
+                                    $errors[] = 'Devis non signé';
                                     return 0;
                                 }
                             }

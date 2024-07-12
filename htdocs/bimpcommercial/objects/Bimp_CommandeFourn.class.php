@@ -293,6 +293,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         global $user;
         return (int) $user->rights->fournisseur->commande->creer;
     }
+
     public function canView()
     {
         global $user;
@@ -441,7 +442,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
     public function getDirOutput()
     {
         global $conf;
-        if($this->isLoaded() && $this->dol_object->entity > 0)
+        if ($this->isLoaded() && $this->dol_object->entity > 0)
             return $conf->fournisseur->commande->multidir_output[$this->dol_object->entity] . '/';
         else
             return $conf->fournisseur->commande->dir_output . '/';
@@ -811,7 +812,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
     public function getFactureReceptionsArray($id_facture = 0)
     {
-        if ($this->isLoaded() && BimpCore::isModuleActive('bimplogistique')){
+        if ($this->isLoaded() && BimpCore::isModuleActive('bimplogistique')) {
             BimpObject::loadClass('bimplogistique', 'BL_CommandeFournReception');
 
             $receptions = $this->getChildrenObjects('receptions', array(
@@ -894,7 +895,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
     public function getAdresseLivraison(&$warnings = array())
     {
         $result = array('name' => '', 'adress' => '', 'adress2' => '', 'adress3' => '', 'zip' => '', 'town' => '', 'contact' => '', 'country' => '');
-        
+
         switch ($this->getData('delivery_type')) {
             case Bimp_CommandeFourn::DELIV_ENTREPOT:
             default:
@@ -987,7 +988,8 @@ class Bimp_CommandeFourn extends BimpCommAchat
                       $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
                       if (count($dataAdd) == 4)
                       $result['country'] = $dataAdd[3];
-                      } */ else
+                      } */
+                    else
                         $warnings[] = "Impossible de parser l'adresse personalisée";
                     if (!is_array($tabZipTown)) {
                         $warnings[] = 'Consitution de l\'adresse incorrect';
@@ -1180,6 +1182,12 @@ class Bimp_CommandeFourn extends BimpCommAchat
             $html .= '<br/><span class="warning">' . BimpRender::renderIcon('fas_hourglass-start', 'iconLeft') . 'Attente Infos</span>';
         }
 
+        if ((int) $this->getData('closed')) {
+            $html .= '<br/><span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Fermée le ';
+            $html .= date('d / m / Y', strtotime($this->getData('date_closed')));
+            $html .= '</span>';
+        }
+
         $html .= parent::renderHeaderStatusExtra();
 
         return $html;
@@ -1226,10 +1234,12 @@ class Bimp_CommandeFourn extends BimpCommAchat
             }
         }
 
+        $this->checkClosedStatus();
+
         return $errors;
     }
 
-    public function checkReceptionStatus($log_change = false)
+    public function checkReceptionStatus($log_change = false, $check_closed_status = true)
     {
         $status_forced = $this->getData('status_forced');
 
@@ -1279,9 +1289,13 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 ));
             }
         }
+
+        if ($check_closed_status) {
+            $this->checkClosedStatus();
+        }
     }
 
-    public function checkInvoiceStatus($log_change = false)
+    public function checkInvoiceStatus($log_change = false, $check_closed_status = true)
     {
         if (!$this->isLoaded()) {
             return;
@@ -1299,8 +1313,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
         $lines = $this->getLines('not_text');
 
-        
-        if(BimpCore::isModuleActive('bimplogistique')){
+        if (BimpCore::isModuleActive('bimplogistique')) {
             $receptions = $this->getChildrenList('receptions', array(
                 'status'     => BL_CommandeFournReception::BLCFR_RECEPTIONNEE,
                 'id_facture' => array(
@@ -1359,6 +1372,58 @@ class Bimp_CommandeFourn extends BimpCommAchat
         if ((int) $all_billed !== (int) $this->getInitData('billed')) {
             $this->updateField('billed', (int) $all_billed);
         }
+
+        if ($check_closed_status) {
+            $this->checkClosedStatus();
+        }
+    }
+
+    public function checkClosedStatus()
+    {
+        if (!$this->isLoaded()) {
+            return;
+        }
+
+        $closed = 0;
+
+        $status = (int) $this->getData('fk_statut');
+        if (in_array($status, array(6, 7, 9))) {
+            $closed = 1;
+        } else {
+            $invoiced = false;
+            $received = false;
+
+            $status_forced = $this->getData('status_forced');
+            if (isset($status_forced['invoice']) && (int) $status_forced['invoice']) {
+                $invoiced = true;
+            } elseif ((int) $this->getData('invoice_status') === 2) {
+                $invoiced = true;
+            }
+
+            if (isset($status_forced['reception']) && (int) $status_forced['reception']) {
+                $received = true;
+            } elseif ($status === 5) {
+                $received = true;
+            }
+
+            if ($invoiced && $received) {
+                $closed = 1;
+            }
+        }
+
+        if ((int) $this->getData('closed') !== $closed) {
+            if ($closed) {
+                $this->db->update($this->getTable(), array(
+                    'closed'      => 1,
+                    'date_closed' => date('Y-m-d H:i:s')
+                        ), 'rowid = ' . $this->id);
+            } else {
+                $this->db->update($this->getTable(), array(
+                    'closed'      => 0,
+                    'date_closed' => null
+                        ), 'rowid = ' . $this->id);
+            }
+        }
     }
 
     public function onValidate(&$warnings = array())
@@ -1411,6 +1476,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
         return array();
     }
+
     // Actions:
 
     public function actionValidate($data, &$success)
@@ -1601,6 +1667,8 @@ class Bimp_CommandeFourn extends BimpCommAchat
         } else {
             $errors[] = 'Nouveau statut invalide';
         }
+
+        $this->checkClosedStatus();
 
         return array(
             'errors'           => $errors,
@@ -2122,8 +2190,9 @@ class Bimp_CommandeFourn extends BimpCommAchat
         }
 
         $errors = BimpTools::merge_array($errors, $this->updateField('status_forced', $status_forced));
-        $this->checkReceptionStatus();
-        $this->checkInvoiceStatus();
+        $this->checkReceptionStatus(false, false);
+        $this->checkInvoiceStatus(false, false);
+        $this->checkClosedStatus();
 
         $lines = $this->getLines('not_text');
         foreach ($lines as $line) {
@@ -2200,8 +2269,9 @@ class Bimp_CommandeFourn extends BimpCommAchat
             global $current_bc, $modeCSV;
             if ((is_null($current_bc) || !is_a($current_bc, 'BC_List')) &&
                     (is_null($modeCSV) || !$modeCSV)) {
-                $this->checkReceptionStatus(false);
-                $this->checkInvoiceStatus(false);
+                $this->checkReceptionStatus(false, false);
+                $this->checkInvoiceStatus(false, false);
+                $this->checkClosedStatus();
             }
         }
 

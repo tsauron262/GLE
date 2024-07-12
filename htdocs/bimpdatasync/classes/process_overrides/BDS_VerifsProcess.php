@@ -1286,7 +1286,7 @@ class BDS_VerifsProcess extends BDSProcess
 
     public function initCheckCommandesFournStatus(&$data, &$errors = array())
     {
-        $rows = $this->db->getRows('commande_fournisseur', 'fk_statut IN (3,4,5) AND invoice_status < 2', null, 'array', array('rowid'));
+        $rows = $this->db->getRows('commande_fournisseur', 'closed = 0 AND fk_statut IN (3,4,5) AND invoice_status < 2', null, 'array', array('rowid'));
 
         if (is_array($rows)) {
             foreach ($rows as $r) {

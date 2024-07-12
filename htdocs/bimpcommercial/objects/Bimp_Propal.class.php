@@ -254,18 +254,25 @@ class Bimp_Propal extends Bimp_PropalTemp
                 case 'addAcompte':
                     if (in_array($action, array('createOrder', 'createInvoice'))) {
                         if (!(int) $this->getData('id_demande_fin')) {
-                            if (!(int) $this->getData('id_signature')) {
-                                $errors[] = 'Fiche signature obligatoire';
-                                return 0;
-                            }
+                            if ((int) BimpCore::getConf('propal_signature_required', 0, 'bimpcommercial')) {
+                                if ($status !== Propal::STATUS_SIGNED) {
+                                    $errors[] = 'Devis non signé';
+                                    return 0;
+                                }
+                            } else {
+                                if (!(int) $this->getData('id_signature')) {
+                                    $errors[] = 'Fiche signature obligatoire';
+                                    return 0;
+                                }
 
-                            $signature = $this->getChildObject('signature');
-                            if (!BimpObject::objectLoaded($signature)) {
-                                $errors[] = 'Fiche signature invalide';
-                                return 0;
-                            } elseif (!$signature->isSigned()) {
-                                $errors[] = 'Fiche signature non signée';
-                                return 0;
+                                $signature = $this->getChildObject('signature');
+                                if (!BimpObject::objectLoaded($signature)) {
+                                    $errors[] = 'Fiche signature invalide';
+                                    return 0;
+                                } elseif (!$signature->isSigned()) {
+                                    $errors[] = 'Fiche signature non signée';
+                                    return 0;
+                                }
                             }
                         }
                     }

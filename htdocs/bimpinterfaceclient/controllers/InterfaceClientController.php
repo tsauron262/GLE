@@ -29,8 +29,12 @@ class InterfaceClientController extends BimpPublicController
                 'factures'   => array('url' => $base_url . 'tab=factures', 'label' => 'Mes factures', 'icon' => 'pe_file')
             );
 
-            if ((int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
-                $this->sideTabs['tickets'] = array('url' => $base_url . 'tab=tickets', 'label' => 'Support téléphonique', 'icon' => 'pe_headphones');
+//            if ((int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
+//                $this->sideTabs['tickets'] = array('url' => $base_url . 'tab=tickets', 'label' => 'Support téléphonique', 'icon' => 'pe_headphones');
+//            }
+
+            if (BimpCore::isEntity('bimp')) {
+                $this->sideTabs['hotline'] = array('url' => $base_url . 'tab=hotline', 'label' => 'Assistance Hotline', 'icon' => 'pe_headphones');
             }
 
             if ((int) BimpCore::getConf('use_sav', null, 'bimpsupport')) {
@@ -122,7 +126,7 @@ class InterfaceClientController extends BimpPublicController
 
         if (!$file_url) {
             $file_url = BimpTools::getMyCompanyLogoUrl($logo);
-            
+
             if (!$file_url) {
                 $file_url = BimpTools::getMyCompanyLogoUrl();
             }
@@ -832,6 +836,25 @@ class InterfaceClientController extends BimpPublicController
         } else {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
         }
+
+        return $html;
+    }
+
+    public function renderTabHotline()
+    {
+        $html = '';
+
+        $html .= '<h2>Contactez-nous</h2><br/>';
+
+        $html .= '<h4>Les techniciens BiMP sont là pour vous accompagner et résoudre vos problèmes matériels ou techniques</h4>';
+        $html .= '<h4 class="bold">Du lundi au vendredi de 09h à 18h</h4><br/>';
+
+        $html .= '<ul style="font-size: 14px">';
+        $html .= '<li>Par téléphone : <b>04 72 60 39 15</li>';
+        $html .= '<li>Par e-mail : <a href="mailto:hotline@bimp.fr">hotline@bimp.fr</a></li>';
+        $html .= '<li>Via le portail de ticketing : <a href="https://bimppro.freshdesk.com" target="_blank">https://bimppro.freshdesk.com</a><br/>';
+        $html .= '<span style="font-size: 13px; font-weight: normal">(Il vous suffira de vous connecter à votre compte ou d\'en créer un pour déposer une demande).</span>';
+        $html .= '</li>';
 
         return $html;
     }

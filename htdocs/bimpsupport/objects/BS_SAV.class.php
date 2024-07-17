@@ -4211,6 +4211,14 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $propal = $this->getChildObject('propal');
                 $propal->dol_object->closeProposal($user, 2, "Auto via SAV");
                 $this->createReservations();
+
+                $centre = $this->getCentreData();
+
+                if (isset($centre['mail']) && $centre['mail']) {
+                    $msg = 'Bonjour,<br/><br/>';
+                    $msg .= 'Le devis ' . $propal->getLink() . ' pour le SAV ' . $this->getLink() . ' a été accepté et signé par le client';
+                    mailSyn2('Devis ' . $propal->getRef() . ' signé par le client', $centre['mail'], '', $msg);
+                }
             }
         }
 

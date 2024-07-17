@@ -850,7 +850,7 @@ class InterfaceClientController extends BimpPublicController
         $html .= '<h4 class="bold">Du lundi au vendredi de 09h à 18h</h4><br/>';
 
         $html .= '<ul style="font-size: 14px">';
-        $html .= '<li>Par téléphone : <b>04 72 60 39 15</li>';
+        $html .= '<li>Par téléphone : <b>04 72 60 39 15</b></li>';
         $html .= '<li>Par e-mail : <a href="mailto:hotline@bimp.fr">hotline@bimp.fr</a></li>';
         $html .= '<li>Via le portail de ticketing : <a href="https://bimppro.freshdesk.com" target="_blank">https://bimppro.freshdesk.com</a><br/>';
         $html .= '<span style="font-size: 13px; font-weight: normal">(Il vous suffira de vous connecter à votre compte ou d\'en créer un pour déposer une demande).</span>';

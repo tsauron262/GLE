@@ -951,9 +951,9 @@ class Bimp_Societe extends BimpDolObject
             $sql .= ' WHERE r.entity = ' . $conf->entity;
             $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
             $sql .= ' AND r.fk_soc = ' . (int) $this->id;
-            
-            if($delaiYear > 0){
-                 $sql .= ' AND datec > DATE_SUB(NOW(),INTERVAL '.$delaiYear.' YEAR)';
+
+            if ($delaiYear > 0) {
+                $sql .= ' AND datec > DATE_SUB(NOW(),INTERVAL ' . $delaiYear . ' YEAR)';
             }
 
             if ($is_fourn) {
@@ -2783,7 +2783,11 @@ class Bimp_Societe extends BimpDolObject
                     if (!is_object($result)) {
                         $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                     } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                        $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                        if ($result->body->errors->errordetail->code == 130) {
+                            $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible. Le problèmeb est en cours de résolution.';
+                        } else {
+                            $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                        }
                     } else {
                         $ville = '';
                         $codeP = '';

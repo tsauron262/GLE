@@ -2784,7 +2784,7 @@ class Bimp_Societe extends BimpDolObject
                         $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                     } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
                         if ($result->body->errors->errordetail->code == 130) {
-                            $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible. Le problèmeb est en cours de résolution.';
+                            $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible. Le problème est en cours de résolution.';
                         } else {
                             $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
                         }

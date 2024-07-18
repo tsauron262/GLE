@@ -35,7 +35,7 @@ foreach (scandir($dir) as $f) {
     }
 
     echo '<br/>';
-    echo '<a href="' . DOL_URL_ROOT . 'document.php?modulepart=' . urlencode($dir) . '&file=' . urlencode($f) . '" target="_blank">' . $f . '</a>';
+    echo '<a href="' . DOL_URL_ROOT . 'document.php?modulepart=bimpcore&file=' . urlencode('apple_csv/2024/' . $f) . '" target="_blank">' . $f . '</a>';
 }
 
 echo '<br/>FIN';

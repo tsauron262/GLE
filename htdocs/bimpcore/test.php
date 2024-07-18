@@ -29,9 +29,14 @@ if (!$user->admin) {
 
 $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/2024/';
 
-echo '<pre>';
-print_r(scandir($dir));
-echo '</pre>';
+foreach (scandir($dir) as $f) {
+    if (in_array(f, array('.', '..'))) {
+        continue;
+    }
+
+    echo '<br/>';
+    echo '<a href="' . DOL_URL_ROOT . 'document.php?modulepart=' . urlencode($dir) . '&file=' . urlencode($f) . '" target="_blank">' . $f . '</a>';
+}
 
 echo '<br/>FIN';
 echo '</body></html>';

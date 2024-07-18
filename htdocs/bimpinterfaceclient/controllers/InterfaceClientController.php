@@ -165,6 +165,26 @@ class InterfaceClientController extends BimpPublicController
                 $html .= '<h5 style="margin: 0"><span style="font-size: 22px; vertical-align: middle;">';
                 $html .= BimpRender::renderIcon('pe_user', 'iconLeft') . '</span>';
                 $html .= $client->getRef() . ' - ' . $client->getName() . '</h5>';
+
+                $commercial = $client->getCommercial(true);
+
+                if (BimpObject::objectLoaded($commercial)) {
+                    $html .= '<div style="margin(top: 5px">';
+                    $html .= 'Votre interlocuteur : <b>' . $commercial->getName() . '</b>';
+
+                    $phone = $commercial->getData('office_phone');
+                    $email = $commercial->getData('email');
+
+                    if ($email) {
+                        $html .= ' - <a href="mailto: ' . $email . '">' . $email . '</a>';
+                    }
+
+                    if ($phone) {
+                        $html .= ' -  <b>' . $phone . '</b>';
+                    }
+                    $html .= '</div>';
+                }
+
                 $html .= '</div>';
             }
         }

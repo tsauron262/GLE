@@ -30,7 +30,7 @@ if (!$user->admin) {
 $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/2024/';
 
 foreach (scandir($dir) as $f) {
-    if (in_array(f, array('.', '..'))) {
+    if (in_array($f, array('.', '..'))) {
         continue;
     }
 

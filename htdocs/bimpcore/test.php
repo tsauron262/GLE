@@ -57,7 +57,7 @@ if ($ftp === false) {
             ftp_pasv($ftp, false);
         }
 
-        $ftp_dir = '/' . BimpCore::getConf('exports_ldlc_ftp_dir') . '/statsapple/' . date('Y') . '/';
+        $ftp_dir = '/' . BimpCore::getConf('exports_ldlc_ftp_dir') . '/statsapple/'. date('Y') . '/';
         $files = ftp_nlist($ftp, $ftp_dir);
 
         echo 'FICHIERS du dossier "' . $ftp_dir . '"';

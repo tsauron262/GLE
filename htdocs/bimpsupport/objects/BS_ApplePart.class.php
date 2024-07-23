@@ -13,7 +13,7 @@ class BS_ApplePart extends BimpObject
         "661-13574", "661-13569", "661-13624", //11   Prix a 84
         "661-17920", //12 pro
         "661-17939"); //12 mini
-    private static $tabRefCommenceBatterie14 = array('661-30397', '661-30382', '661-30394', '661-30373', /*new ref mais pas sur que ce soit des batterie*/ '661-35885', '661-37207', '661-35694', '661-36918'); //Iphone 14 prix à 109.00 TTC
+    private static $tabRefCommenceBatterie14 = array('661-30397', '661-30382', '661-30394', '661-30373', /* new ref mais pas sur que ce soit des batterie */ '661-35885', '661-37207', '661-35694', '661-36918'); //Iphone 14 prix à 109.00 TTC
     private static $tabRefCommencePrixEcran = array("661-30401" => array("489,00"), "661-36915" => array("489,00"), "661-29370" => array("405,00"), "661-30366" => array("339"), "661-36706" => array("339"), "661-04856" => array("229"), "661-13114" => array("339"), "661-07285" => array("185,00"), "661-07286" => array("185,00"), "661-07287" => array("185,00"), "661-07288" => array("185,00"), "661-07289" => array("209,00"), "661-07290" => array("209,00"), "661-07291" => array("209,00"), "661-07292" => array("209,00"), "661-07293" => array("185,00"), "661-07294" => array("185,00"), "661-07295" => array("185,00"), "661-07296" => array("185,00"), "661-07297" => array("209,00"), "661-07298" => array("209,00"), "661-07299" => array("209,00"), "661-07300" => array("209,00"), "661-08933" => array("185,00"), "661-08934" => array("185,00"), "661-09081" => array("185,00"), "661-10102" => array("185,00"), "661-09032" => array("209,00"), "661-09033" => array("209,00"), "661-09034" => array("209,00"), "661-10103" => array("209,00"), "661-09294" => array("339"), "661-10608" => array("339"), "661-30390" => array("405,00"), "661-11037" => array("405,00"), "661-37213" => array("405,00"), "661-35699" => array("405,00"), "661-11232 " => array("239,00"), "661-14098" => array("239,00"), "661-14096" => array("339"), "661-14099" => array("405,00"), "661-17940" => array("279,00"), "661-18503" => array("339"), "661-18504" => array("339"), "661-18466" => array("405,00"), "661-22311" => array("279,00"), "661-21988" => array("339"), "661-21993" => array("339"), "661-22309" => array("405,00"), "661-15743" => array("185,00"), "661-26353" => array("185,00"));
     public static $componentsTypes = array(
         0   => 'Général',
@@ -122,6 +122,7 @@ class BS_ApplePart extends BimpObject
                 "661-10103"),
             array("011-00213" => "SVC,TRACK USAGE,DOCK SCREWS", "011-00214" => "SVC,TRACK USAGE,PSA"))
     );
+    public static $back_glass_refs = array("661-35700", "661-36907", "661-36838", "661-37208", "661-35703", "661-36910", "661-30386", "661-30386", "661-36841", "661-37211", "661-36842", "661-37212", "661-30413", "661-30383", "661-35702", "661-36909", "661-36839", "661-37209", "661-30417", "661-30387", "661-30415", "661-30385", "661-30384", "661-30384", "661-35701", "661-36908", "661-30419", "661-36840", "661-37210", "661-30389");
     protected static $compTIACodes = null;
 
     // Droits user: 
@@ -207,7 +208,7 @@ class BS_ApplePart extends BimpObject
         }
 
 //        if ((float) $this->getData('exchange_price') === 0.0 || (int) $this->getData('no_order')) {
-        if((float) $this->getData('stock_price') > 0){
+        if ((float) $this->getData('stock_price') > 0) {
             $prices['STOCK'] = BimpTools::displayMoneyValue((float) $this->getData('stock_price'), 'EUR') . ' (Prix stock)';
         }
 
@@ -417,6 +418,13 @@ class BS_ApplePart extends BimpObject
 
     public static function convertPrixStatic($type, $prix, $ref, $isIphone, $price_type = 'STOCK')
     {
+        if (BimpCore::isEntity('actimac')) {
+            // modif demandée par Mickaël Muller pour actimac: 
+            if (in_array($ref, self::$back_glass_refs)) {
+                return 229 / 1.2;
+            }
+        }
+
         if ($prix < 1)
             return 0;
 
@@ -727,7 +735,7 @@ class BS_ApplePart extends BimpObject
                     'editable'           => 0,
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_apple_part',
-                    'warranty'    => (int) $this->getData('warranty'),
+                    'warranty'           => (int) $this->getData('warranty'),
                     'remisable'          => 1
                 ));
                 if (!count($line_errors)) {
@@ -854,7 +862,7 @@ class BS_ApplePart extends BimpObject
                     'editable'           => 0,
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_apple_part',
-                    'warranty'    => (int) $this->getData('warranty'),
+                    'warranty'           => (int) $this->getData('warranty'),
                     'remisable'          => 1
                 ));
 

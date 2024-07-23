@@ -854,7 +854,7 @@ class BimpRevalorisation extends BimpObject
                     $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                     if (($instance->getData('type') == 'crt' && $instance->getData('status') != 10) ||
                             ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)) {
-                        $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
+                        $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au statut ' . static::$status_list[$data['status']]['label'];
                     }
                     if (!$instance->isActionAllowed('process'))
                         $errors[] = ($nb + 1) . ' éme ligne séléctionné opération impossible';
@@ -867,7 +867,7 @@ class BimpRevalorisation extends BimpObject
                 }
             } elseif ($data['status'] == 0) {
                 if ($instance->getData('type') == 'applecare' && $instance->getData('status') != 20) {
-                    $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
+                    $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au statut ' . static::$status_list[$data['status']]['label'];
                 }
             } else {
                 $errors[] = 'Action non géré';

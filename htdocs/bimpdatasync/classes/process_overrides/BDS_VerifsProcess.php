@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 8;
+    public static $current_version = 9;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -1282,6 +1282,52 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
+    // Vérifs et correction des statuts abonnements dans les devis: 
+
+    public function initCheckCommandesFournStatus(&$data, &$errors = array())
+    {
+        $rows = $this->db->getRows('commande_fournisseur', 'closed = 0 AND fk_statut IN (3,4,5) AND invoice_status < 2', null, 'array', array('rowid'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $elements = array();
+
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['rowid'];
+                }
+
+                $data['steps']['process'] = array(
+                    'label'                  => 'Vérifs des statuts des commandes founisseur',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 1000
+                );
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCheckCommandesFournStatus($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcommercial', 'Bimp_CommandeFourn');
+            if (!empty($this->references)) {
+                foreach ($this->references as $id_cf) {
+                    // Le simple fait de fetcher déclenche la vérif du statut
+                    $cf = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_cf);
+
+                    if (!BimpObject::objectLoaded($cf)) {
+                        $this->Error('CF #' . $id_cf . ' inexistante');
+                        $this->incIgnored();
+                    } else {
+                        $this->incProcessed();
+                    }
+                }
+            }
+        }
+    }
+
     // Install: 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -1560,6 +1606,20 @@ class BDS_VerifsProcess extends BDSProcess
                     $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
                 }
             }
+        }
+
+        if ($cur_version < 9) {
+            // Opération "Vérif des marges des commandes": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Vérif des statuts des commandes fournisseur',
+                        'name'          => 'checkCommandesFournStatus',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
+                            ), true, $errors, $warnings);
         }
 
         return $errors;

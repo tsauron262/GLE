@@ -1,0 +1,2 @@
+- Ajout coordonées commerical dans interface client
+

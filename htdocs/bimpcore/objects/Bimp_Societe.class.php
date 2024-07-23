@@ -951,9 +951,9 @@ class Bimp_Societe extends BimpDolObject
             $sql .= ' WHERE r.entity = ' . $conf->entity;
             $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
             $sql .= ' AND r.fk_soc = ' . (int) $this->id;
-            
-            if($delaiYear > 0){
-                 $sql .= ' AND datec > DATE_SUB(NOW(),INTERVAL '.$delaiYear.' YEAR)';
+
+            if ($delaiYear > 0) {
+                $sql .= ' AND datec > DATE_SUB(NOW(),INTERVAL ' . $delaiYear . ' YEAR)';
             }
 
             if ($is_fourn) {
@@ -2762,7 +2762,8 @@ class Bimp_Societe extends BimpDolObject
 
 //                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
                 $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
-
+                
+                
                 if (isset($objReturn->GetDataResult) && !empty($objReturn->GetDataResult)) {
                     $returnData = $objReturn->GetDataResult;
                     //                $returnData = htmlspecialchars_decode($returnData);
@@ -2787,7 +2788,11 @@ class Bimp_Societe extends BimpDolObject
                     if (!is_object($result)) {
                         $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                     } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                        $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                        if ($result->body->errors->errordetail->code == 130) {
+                            $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible. Le problème est en cours de résolution.';
+                        } else {
+                            $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                        }
                     } else {
                         $ville = '';
                         $codeP = '';

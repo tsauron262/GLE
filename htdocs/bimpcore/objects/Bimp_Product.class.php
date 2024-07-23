@@ -1449,6 +1449,22 @@ class Bimp_Product extends BimpObject
         return $data;
     }
 
+    public function getAlertBundle()
+    {
+        $html = '';
+        if ($this->isBundle() && $this->isAbonnement()) {
+            $child_prods = $this->getChildrenObjects('child_products');
+            foreach ($child_prods as $child_prod) {
+                $prod = $child_prod->getChildObject('product_fils');
+                if ($prod->getData('duree') * $child_prod->getData('qty') != $this->getData('duree'))
+                    $html .= BimpRender::renderAlerts('Attention le bundle est mal configuré : ' . $prod->getLink() . ' durée total ' . ($prod->getData('duree') * $child_prod->getData('qty') . ' mois bundle ' . $this->getData('duree')));
+                if (!$prod->isAbonnement())
+                    $html .= BimpRender::renderAlerts('Attention le bundle est mal configuré : ' . $prod->getLink() . ' n\'est pas un abonnement ');
+            }
+        }
+        return $html;
+    }
+
     // Getters stocks:
 
     public function getStocksForEntrepot($id_entrepot, $type = 'virtuel') // $type : 'reel' / 'dispo' / 'virtuel'
@@ -1735,9 +1751,9 @@ class Bimp_Product extends BimpObject
 
     public function getCurrentPaHt($id_fourn = null, $with_default = true, $date = '')
     {
-        if($this->isBundle())
-                return $this->getPaBundle(false);
-        
+        if ($this->isBundle())
+            return $this->getPaBundle(false);
+
         if ((int) $this->getData('no_fixe_prices')) {
             return 0;
         }
@@ -2300,24 +2316,9 @@ class Bimp_Product extends BimpObject
             $html .= 'Validée le ' . BimpTools::printDate($this->getData('date_valid'), 'strong');
             $html .= '</div>';
         }
-        
+
         $html .= $this->getAlertBundle();
 
-        return $html;
-    }
-    
-    public function getAlertBundle(){
-        $html = '';
-        if($this->isBundle() && $this->isAbonnement()){
-            $child_prods = $this->getChildrenObjects('child_products');
-            foreach ($child_prods as $child_prod) {
-                $prod = $child_prod->getChildObject('product_fils');
-                if($prod->getData('duree') * $child_prod->getData('qty') != $this->getData('duree'))
-                    $html .= BimpRender::renderAlerts('Attention le bundle est mal configuré : '.$prod->getLink(). ' durée total '.($prod->getData('duree') * $child_prod->getData('qty'). ' mois bundle '.$this->getData('duree')));
-                if(!$prod->isAbonnement())
-                    $html .= BimpRender::renderAlerts('Attention le bundle est mal configuré : '.$prod->getLink(). ' n\'est pas un abonnement ');
-            } 
-        }
         return $html;
     }
 
@@ -4494,9 +4495,8 @@ class Bimp_Product extends BimpObject
         global $db;
         self::$stockDate = array();
         $bdb = BimpCache::getBdb();
-        $entrepot = $bdb->getValues('entrepot', 'rowid', 'entity IN ('.getEntity('entrepot').')');
-        
-        
+        $entrepot = $bdb->getValues('entrepot', 'rowid', 'entity IN (' . getEntity('entrepot') . ')');
+
         $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, ps.rowid FROM `" . MAIN_DB_PREFIX . "product_stock` ps WHERE fk_entrepot IN (" . implode(',', $entrepot) . ")"); // WHERE `fk_product` = ".$this->id);
         while ($ln = $db->fetch_object($sql)) {
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['rowid'] = $ln->rowid;

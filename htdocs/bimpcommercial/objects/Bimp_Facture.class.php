@@ -3672,6 +3672,10 @@ class Bimp_Facture extends BimpComm
                     $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Il semble que deux factures est été créer en même temp. Voir : ' . $obj->getLink() . '<br/>ATTENTION !!!!!!!!!!!!');
         }
 
+        if ($client->getData('solvabilite_status') > 0) {
+                    $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Le client est au status ' . $client->displayData('solvabilite_status') . '<br/>ATTENTION !!!!!!!!!!!!');
+        }
+
         return $html;
     }
 

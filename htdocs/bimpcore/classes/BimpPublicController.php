@@ -13,6 +13,12 @@ class BimpPublicController extends BimpController
 
     public function init()
     {
+        if (isset($_GET['entity'])) {
+            global $conf;
+            $conf->entity = $_GET['entity'];
+            $_SESSION['dol_entity'] = $_GET['entity'];
+        }
+
         global $public_entity;
         $public_entity = '';
         if (isset($_GET['e']) && (string) $_GET['e']) {
@@ -56,15 +62,7 @@ class BimpPublicController extends BimpController
             accessforbidden();
         }
 
-        if (isset($_GET['entity'])) {
-            global $conf;
-            $conf->entity = $_GET['entity'];
-            $_SESSION['dol_entity'] = $_GET['entity'];
-        }
-
         $this->initUserClient();
-
-        global $public_entity;
 
         $name = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
         if (strpos($name, '{') === 0) {
@@ -120,9 +118,8 @@ class BimpPublicController extends BimpController
                 $_SESSION['back_url'] = $_SERVER['REQUEST_URI'];
                 $this->displayChangePwForm(array(), (int) $userClient->getData('renew_required'));
                 exit;
-            }
-            elseif($this->back_url != ''){
-                header('Location: '.$this->back_url);
+            } elseif ($this->back_url != '') {
+                header('Location: ' . $this->back_url);
                 exit;
             }
         }
@@ -277,18 +274,18 @@ class BimpPublicController extends BimpController
 
         $url = BimpCore::getFileUrl('/includes/jquery/js/jquery.min.js');
         if ($url) {
-            $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
+            $html .= '<script ' . BimpTools::getScriptAttribut() . ' src = "' . $url . '"></script>';
         }
-        
+
         $url = BimpCore::getFileUrl('/bimpinterfaceclient/views/js/public.js');
         if ($url) {
-            $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
+            $html .= '<script ' . BimpTools::getScriptAttribut() . ' src = "' . $url . '"></script>';
         }
 
         foreach ($params['js_files'] as $jsFile) {
             $url = BimpCore::getFileUrl($jsFile);
             if ($url) {
-                $html .= '<script '.BimpTools::getScriptAttribut().' src = "' . $url . '"></script>';
+                $html .= '<script ' . BimpTools::getScriptAttribut() . ' src = "' . $url . '"></script>';
             }
         }
 
@@ -330,8 +327,8 @@ class BimpPublicController extends BimpController
             }
 
             $html .= $this->{$method}();
-            
-            if(isset($params['success_url']))
+
+            if (isset($params['success_url']))
                 $html .= '<input type="hidden" name="success_url" value="' . $params['success_url'] . '"/>';
 
             $html .= '<br/>';
@@ -394,7 +391,7 @@ class BimpPublicController extends BimpController
     {
         print_r($_SESSION);
         $backUrl = BimpObject::getPublicBaseUrl();
-        if(isset($_SESSION['back_url']))
+        if (isset($_SESSION['back_url']))
             $backUrl = $_SESSION['back_url'];
         $this->displayPublicForm('reinitPw', array(
             'main_title' => 'Réinitialisation de votre mot de passe',
@@ -410,7 +407,7 @@ class BimpPublicController extends BimpController
             'sub_title'      => ($required ? 'Le changement de votre mot de passe est requis' : 'Modifier votre mot de passe'),
             'submit_label'   => 'Changer mon mot de passe',
             'submit_enabled' => false,
-            'success_url'=> $_SERVER['REQUEST_URI'],
+            'success_url'    => $_SERVER['REQUEST_URI'],
             'back_url'       => BimpObject::getPublicBaseUrl() . ($required ? 'bic_logout=1' : 'tab=infos'),
             'back_label'     => ($required ? 'Déconnexion' : 'Retour')
                 ), $errors);
@@ -527,7 +524,7 @@ class BimpPublicController extends BimpController
             ));
 
             if (!BimpObject::objectLoaded($userClient)) {
-                BimpTools::secuAddEchec('Echec login espace client : '.$email);
+                BimpTools::secuAddEchec('Echec login espace client : ' . $email);
 //                $errors[] = 'Aucun compte client ne correspond à l\'identifiant "' . $email . '"';
                 $errors[] = 'Login ou Mot de passe invalide';
                 unset($userClient);
@@ -538,7 +535,7 @@ class BimpPublicController extends BimpController
                     $_SESSION['userClient'] = $email;
                     $this->initUserClient();
                 } else {
-                    BimpTools::secuAddEchec('Echec mdp espace client : '.$email);
+                    BimpTools::secuAddEchec('Echec mdp espace client : ' . $email);
                     $errors[] = 'Login ou Mot de passe invalide';
                 }
             }
@@ -571,9 +568,9 @@ class BimpPublicController extends BimpController
 
                 if (!count($errors)) {
                     $backUrl = BimpObject::getPublicBaseUrl();
-                    if(isset($_SESSION['back_url']))
+                    if (isset($_SESSION['back_url']))
                         $backUrl = $_SESSION['back_url'];
-                    BimpTools::secuAddEchec('Reinit mdp espace client : '.$email);
+                    BimpTools::secuAddEchec('Reinit mdp espace client : ' . $email);
                     $this->displayPublicForm('reinitPw', array(
                         'success_msg' => 'Votre mot de passe a été réinitialisé avec succès.<br/>Veuillez consulter votre boîte mail pour l\'obtenir',
                         'back_url'    => $backUrl
@@ -625,7 +622,7 @@ class BimpPublicController extends BimpController
 
                 if (!count($errors)) {
                     $backUrl = BimpObject::getPublicBaseUrl();
-                    if(isset($_SESSION['back_url']))
+                    if (isset($_SESSION['back_url']))
                         $backUrl = $_SESSION['back_url'];
                     $this->displayPublicForm('changePw', array(
                         'success_msg' => 'La mise à jour de votre mot de passe a été effectuée avec succès',

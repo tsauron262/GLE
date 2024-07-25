@@ -9932,8 +9932,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
     }
 
-    public static function getPublicBaseUrl($internal = true, $entity = '')
+    public static function getPublicBaseUrl($internal = true, $enseigne = '')
     {
+        // ATTENTION $enseigne = $public_entity (différent de $entity)
         if ($internal) {
             $url = BimpCore::getConf('public_base_url', '');
 
@@ -9950,8 +9951,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $url .= '?';
         }
 
-        if ($entity) {
-            $url .= 'e=' . $entity . '&';
+        if ($enseigne) {
+            $url .= 'e=' . $enseigne . '&';
         }
 
         return $url;

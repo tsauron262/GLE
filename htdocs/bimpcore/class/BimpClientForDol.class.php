@@ -242,7 +242,7 @@ class BimpClientForDol extends Bimp_Client
 
         $from = new DateTime();
 //        $from->sub(new DateInterval('PT1H')); TODO
-        $from->sub(new DateInterval('P5D'));
+        $from->sub(new DateInterval('P8D'));
 
         $nb_update = Bimp_Client::updateAllAtradius($from->format('Y-m-d\TH:i:s'), $errors, $warnings, $success);
         $this->output .= "Nombre de clients mis à jour : " . $nb_update . "<br/><br/>" . $success;

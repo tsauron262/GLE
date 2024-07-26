@@ -153,7 +153,7 @@ class BimpCommission extends BimpObject
 //            )
 //        );
 
-        if (BimpCore::isEntity('bimp')) {
+        if (in_array(BimpCore::getExtendsEntity(), array('bimp', 'actimac'))) {
             if ($this->canSetAction('generateFactureCommissions')) {
                 $buttons[] = array(
                     'label'   => 'Générer facture de commissionnement',
@@ -1115,7 +1115,7 @@ class BimpCommission extends BimpObject
                             }
 
                             BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
-                            
+
                             $facs_refs = array();
                             foreach ($elements as $line) {
                                 $process->setCurrentObjectData('bimpcommercial', 'Bimp_FactureLine');

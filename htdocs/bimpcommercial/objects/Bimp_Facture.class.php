@@ -6992,14 +6992,21 @@ class Bimp_Facture extends BimpComm
             ));
 
             if (!empty($revals)) {
+                $nOK = 0;
                 foreach ($revals as $reval) {
                     $w = array();
                     $reval_errors = $reval->delete($w, true);
 
                     if (!empty($reval_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($reval_errors, 'Echec suppression de la revalorisation #' . $reval->id);
+                    } else {
+                        $nOK++;
                     }
                 }
+
+                $warnings[] = $nOK . ' revalorisation(s) supprimée(s)';
+            } else {
+                $warnings[] = 'Aucune reval à suppr';
             }
         }
 

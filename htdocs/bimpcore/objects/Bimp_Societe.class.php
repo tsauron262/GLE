@@ -2222,7 +2222,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($this->getData('solvabilite_status') > 0) {
-                        $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Le client est au status ' . $this->displayData('solvabilite_status') . '<br/>ATTENTION !!!!!!!!!!!!');
+                $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Le client est au status ' . $this->displayData('solvabilite_status') . '<br/>ATTENTION !!!!!!!!!!!!');
             }
         }
 
@@ -2762,8 +2762,7 @@ class Bimp_Societe extends BimpDolObject
 
 //                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
                 $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
-                
-                
+
                 if (isset($objReturn->GetDataResult) && !empty($objReturn->GetDataResult)) {
                     $returnData = $objReturn->GetDataResult;
                     //                $returnData = htmlspecialchars_decode($returnData);
@@ -2788,10 +2787,22 @@ class Bimp_Societe extends BimpDolObject
                     if (!is_object($result)) {
                         $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                     } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                        if ($result->body->errors->errordetail->code == 130) {
-                            $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible. Le problème est en cours de résolution.';
-                        } else {
-                            $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                        switch ($result->body->errors->errordetail->code) {
+                            case 130:
+                                $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible (Compte invalide). Le problème est en cours de résolution.';
+                                break;
+
+                            case 132:
+                                $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible (Crédits épuisés). Le problème est en cours de résolution.';
+                                break;
+
+                            case 171:
+                                $warnings[] = 'Le n° ' . ($siret ? 'SIRET' : 'SIREN') . ' demandé n\'existe pas (' . ($siret ? $siret : $siren) . ')';
+                                break;
+
+                            default:
+                                $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                                break;
                         }
                     } else {
                         $ville = '';

@@ -170,7 +170,7 @@ class BimpCommission extends BimpObject
         return $buttons;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getName($withGeneric = true)
     {
@@ -839,7 +839,7 @@ class BimpCommission extends BimpObject
                 $id_fourn = 230496;
                 $nbElementsPerIteration = 1;
                 $cols = array(
-                    'ref_cf'            => array(2, 'Custpo Nbr'),
+                    'ref_piece'         => array(2, 'Custpo Nbr'),
                     'ref_prod'          => array(7, 'Ref fournisseur'),
                     'desc'              => array(8, 'Product Descr1'),
                     'desc_2'            => array(9, 'Product Descr2'),
@@ -946,7 +946,7 @@ class BimpCommission extends BimpObject
 
                         case 'ingram':
                             $cols = array(
-                                'ref_cf'            => array(2, 'Custpo Nbr'),
+                                'ref_piece'         => array(2, 'Custpo Nbr'),
                                 'ref_prod'          => array(7, 'Ref fournisseur'),
                                 'desc'              => array(8, 'Product Descr1'),
                                 'desc_2'            => array(9, 'Product Descr2'),
@@ -967,16 +967,29 @@ class BimpCommission extends BimpObject
                                 continue;
                             }
 
-                            $ref_cf = $line_data[$cols['ref_cf'][0]];
-                            if (!$ref_cf) {
+                            $type_piece = '';
+                            $id_piece = 0;
+
+                            $ref_piece = $line_data[$cols['ref_piece'][0]];
+                            if (!$ref_piece) {
                                 $line_errors[] = 'Ligne n° ' . $i . ' : référence de la commande fournisseur absente';
                                 continue;
                             }
 
-                            $id_cf = (int) $this->db->getValue('commande_fournisseur', 'rowid', 'ref = \'' . $ref_cf . '\'');
-                            if (!$id_cf) {
-                                $line_errors[] = 'Ligne n° ' . $i . ' : aucune commande fournisseur trouvée pour la référence ' . $ref_cf;
-                                continue;
+                            if (strpos($ref_piece, 'FA') === 0) {
+                                $type_piece = 'fac';
+                                $id_piece = (int) $this->db->getValue('facture', 'rowid', 'ref = \'' . $ref_piece . '\'');
+                                if (!$id_piece) {
+                                    $line_errors[] = 'Ligne n° ' . $i . ' : aucune facture client trouvée pour la référence ' . $ref_piece;
+                                    continue;
+                                }
+                            } else {
+                                $type_piece = 'cf';
+                                $id_piece = (int) $this->db->getValue('commande_fournisseur', 'rowid', 'ref = \'' . $ref_piece . '\'');
+                                if (!$id_piece) {
+                                    $line_errors[] = 'Ligne n° ' . $i . ' : aucune commande fournisseur trouvée pour la référence ' . $ref_piece;
+                                    continue;
+                                }
                             }
 
                             $qty = (int) $line_data[$cols['qty'][0]];
@@ -994,7 +1007,7 @@ class BimpCommission extends BimpObject
 
                             $price = ((float) str_replace(',', '.', preg_replace("/[^0-9\.,\-]+/", '', $line_data[$cols['total_ht'][0]]))) / $qty;
                             $comm_amount = ((float) str_replace(',', '.', preg_replace("/[^0-9\.,\-]+/", '', $line_data[$cols['total_comm_amount'][0]]))) / $qty;
-                            $elements[] = $i . ';' . $ref_cf . ';' . $id_cf . ';' . $ref_prod . ';' . $id_prod . ';' . $desc . ';' . $qty . ';' . $price . ';' . $comm_amount;
+                            $elements[] = $i . ';' . $ref_piece . ';' . $id_piece . ';' . $type_piece . ';' . $ref_prod . ';' . $id_prod . ';' . $desc . ';' . $qty . ';' . $price . ';' . $comm_amount;
                             break;
                     }
                 }
@@ -1102,14 +1115,15 @@ class BimpCommission extends BimpObject
                                 case 'ingram':
                                     $keys = array(
                                         'num'         => 0,
-                                        'ref_cf'      => 1,
-                                        'id_cf'       => 2,
-                                        'ref_prod'    => 3,
-                                        'id_prod'     => 4,
-                                        'desc'        => 5,
-                                        'qty'         => 6,
-                                        'price_ht'    => 7,
-                                        'comm_amount' => 8
+                                        'ref_piece'   => 1,
+                                        'id_piece'    => 2,
+                                        'type_piece'  => 3,
+                                        'ref_prod'    => 4,
+                                        'id_prod'     => 5,
+                                        'desc'        => 6,
+                                        'qty'         => 7,
+                                        'price_ht'    => 8,
+                                        'comm_amount' => 9
                                     );
                                     break;
                             }
@@ -1159,23 +1173,40 @@ class BimpCommission extends BimpObject
                                         $tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
                                         $line_desc = '<b>' . $line_data[$keys['desc']] . '</b><br/>';
                                         $line_desc .= 'Ref AppleCare: ' . $line_data[$keys['ref_prod']] . '<br/>';
-                                        $line_desc .= 'Ref CF : ' . $line_data[$keys['ref_cf']] . '<br/>';
+                                        $line_desc .= 'Ref pièce : ' . $line_data[$keys['ref_piece']] . '<br/>';
                                         $line_desc .= 'Montant initial HT : ' . $line_data[$keys['price_ht']];
 
-                                        $id_cf = (int) $line_data[$keys['id_cf']];
+                                        $type_piece = $line_data[$keys['type_piece']];
+                                        $id_piece = (int) $line_data[$keys['id_piece']];
                                         $id_prod = (int) $line_data[$keys['id_prod']];
                                         $ref_prod = $line_data[$keys['ref_prod']];
                                         $qty = (int) $line_data[$keys['qty']];
 
                                         // Recherche serials dans commande client: 
-                                        $where = 'a.id_obj = ' . $id_cf . ' AND cfl.fk_product = ' . $id_prod;
-                                        $rows = $this->db->getRows('bimp_commande_fourn_line a', $where, null, 'array', array('a.linked_object_name', 'a.linked_id_object'), null, null, array(
-                                            'cfl' => array(
-                                                'alias' => 'cfl',
-                                                'table' => 'commande_fournisseurdet',
-                                                'on'    => 'a.id_line = cfl.rowid'
-                                            )
-                                        ));
+                                        $rows = array();
+                                        switch ($type_piece) {
+                                            case 'cf':
+                                                $where = 'a.id_obj = ' . $id_piece . ' AND cfl.fk_product = ' . $id_prod;
+                                                $rows = $this->db->getRows('bimp_commande_fourn_line a', $where, null, 'array', array('a.linked_object_name', 'a.linked_id_object'), null, null, array(
+                                                    'cfl' => array(
+                                                        'alias' => 'cfl',
+                                                        'table' => 'commande_fournisseurdet',
+                                                        'on'    => 'a.id_line = cfl.rowid'
+                                                    )
+                                                ));
+                                                break;
+
+                                            case 'fac':
+                                                $where = 'a.id_obj = ' . $id_piece . ' AND fl.fk_product = ' . $id_prod;
+                                                $rows = $this->db->getRows('bimp_facture_line a', $where, null, 'array', array('a.linked_object_name', 'a.linked_id_object'), null, null, array(
+                                                    'fl' => array(
+                                                        'alias' => 'fl',
+                                                        'table' => 'facturedet',
+                                                        'on'    => 'a.id_line = fl.rowid'
+                                                    )
+                                                ));
+                                                break;
+                                        }
 
                                         if (!empty($rows)) {
                                             $serials_errors = array();

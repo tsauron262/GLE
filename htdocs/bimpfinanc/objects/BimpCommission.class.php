@@ -815,6 +815,17 @@ class BimpCommission extends BimpObject
 
         $file_name = BimpTools::getArrayValueFromPath($extra_data, 'file/0', '');
         $fourn = BimpTools::getArrayValueFromPath($extra_data, 'fourn', '');
+        $id_entrepot = 0;
+        switch (BimpCore::getExtendsEntity()) {
+            case 'bimp':
+                $id_entrepot = 50;
+                break;
+
+            case 'actimac':
+                $id_entrepot = 10;
+                break;
+        }
+
         $fourn_label = '';
         $id_fourn = 0;
         $nbElementsPerIteration = 10;
@@ -1056,7 +1067,7 @@ class BimpCommission extends BimpObject
                                 'model_pdf'      => 'bimpfact',
                                 'datef'          => date('Y-m-d'),
                                 'type'           => 0,
-                                'entrepot'       => 50,
+                                'entrepot'       => $id_entrepot,
                                 'ef_type'        => 'C',
                                 'applecare_data' => array(
                                     'totals_by_br' => $totals_by_br
@@ -1307,7 +1318,7 @@ class BimpCommission extends BimpObject
                                                                         $msg .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Verifier que le produit ci-dessous correspond bien à cet AppleCare';
                                                                         $msg .= ' (corriger les équipements si ce n\'est pas le cas) : <br/><br/>';
                                                                         $msg .= 'Libellé AppleCare: <b>' . $ac_prod->getName() . '<br/><br/>';
-                                                                        $msg .= 'Libellé Produit : <b>' . $prod->getName() .'<br/><br/>';
+                                                                        $msg .= 'Libellé Produit : <b>' . $prod->getName() . '<br/><br/>';
                                                                         $msg .= 'Produit: ' . $prod->getLink();
                                                                         $process->Info($msg, $facture, '');
                                                                         break;
@@ -1407,9 +1418,9 @@ class BimpCommission extends BimpObject
                                                                         $msg .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Verifier que le produit ci-dessous correspond bien à cet AppleCare';
                                                                         $msg .= ' (corriger les équipements si ce n\'est pas le cas) : <br/><br/>';
                                                                         $msg .= 'Libellé AppleCare: <b>' . $ac_prod->getName() . '<br/><br/>';
-                                                                        $msg .= 'Libellé Produit : <b>' . $prod->getName() .'<br/><br/>';
+                                                                        $msg .= 'Libellé Produit : <b>' . $prod->getName() . '<br/><br/>';
                                                                         $msg .= 'Produit: ' . $prod->getLink();
-                                                                        
+
                                                                         $process->Info($msg, $facture, '');
                                                                         break;
                                                                     }

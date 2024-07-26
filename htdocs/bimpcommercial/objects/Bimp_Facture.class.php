@@ -6984,13 +6984,13 @@ class Bimp_Facture extends BimpComm
     {
         $id = $this->id;
 
+        $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                    'id_facture' => $id
+        ));
+        
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors) && (int) $id) {
-            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
-                        'id_facture' => $id
-            ));
-
             if (!empty($revals)) {
                 $nOK = 0;
                 foreach ($revals as $reval) {

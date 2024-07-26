@@ -831,13 +831,13 @@ class BimpCommission extends BimpObject
                     'comm_amount' => array(11, 'AC+ Reseller Commission Value (LC)')
                 );
                 $fourn_label = 'TECHDATA';
-                
+
                 switch (BimpCore::getExtendsEntity()) {
-                    case 'bimp': 
+                    case 'bimp':
                         $id_fourn = 229890;
                         break;
-                    
-                    case 'actimac': 
+
+                    case 'actimac':
                         $id_fourn = 131068;
                         break;
                 }
@@ -846,11 +846,11 @@ class BimpCommission extends BimpObject
             case 'ingram':
                 $fourn_label = 'INGRAM MICRO';
                 switch (BimpCore::getExtendsEntity()) {
-                    case 'bimp': 
+                    case 'bimp':
                         $id_fourn = 230496;
                         break;
-                    
-                    case 'actimac': 
+
+                    case 'actimac':
                         $id_fourn = 132088;
                         break;
                 }
@@ -1215,7 +1215,7 @@ class BimpCommission extends BimpObject
 
                                             case 'fac':
                                                 $where = 'a.id_obj = ' . $id_piece . ' AND fl.fk_product = ' . $id_prod;
-                                                $rows = $this->db->getRows('bimp_facture_line a', $where, null, 'array', array('a.linked_object_name', 'a.linked_id_object'), null, null, array(
+                                                $rows = $this->db->getRows('bimp_facture_line a', $where, null, 'array', array('a.id', 'a.linked_object_name', 'a.linked_id_object'), null, null, array(
                                                     'fl' => array(
                                                         'alias' => 'fl',
                                                         'table' => 'facturedet',
@@ -1228,106 +1228,204 @@ class BimpCommission extends BimpObject
                                         if (!empty($rows)) {
                                             $serials_errors = array();
                                             foreach ($rows as $r) {
-                                                if ($r['linked_object_name'] !== 'commande_line' || !(int) $r['linked_id_object']) {
+                                                if ($r['linked_object_name'] === 'commande_line' && (int) $r['linked_id_object']) {
+                                                    $line_ac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $r['linked_id_object']);
+                                                    if (!BimpObject::objectLoaded($line_ac)) {
+                                                        $serials_errors[] = 'Ligne de commande client #' . $r['linked_id_object'] . ' non trouvée';
+                                                        continue;
+                                                    }
+
+                                                    $ac_prod = $line_ac->getProduct();
+                                                    if (!BimpObject::objectLoaded($ac_prod)) {
+                                                        $serials_errors[] = 'Produit AppleCare non trouvé';
+                                                        continue;
+                                                    }
+
+                                                    $id_commande = (int) $line_ac->getData('id_obj');
+                                                    if (!$id_commande) {
+                                                        $serials_errors[] = 'Commande client non trouvée';
+                                                        continue;
+                                                    }
+
+                                                    $sql = BimpTools::getSqlSelect('a.id');
+                                                    $sql .= BimpTools::getSqlFrom('bimp_commande_line', array(
+                                                                'cdet' => array(
+                                                                    'table' => 'commandedet',
+                                                                    'on'    => 'cdet.rowid = a.id_line'
+                                                                ),
+                                                                'pef'  => array(
+                                                                    'table' => 'product_extrafields',
+                                                                    'on'    => 'pef.fk_object = cdet.fk_product'
+                                                                )
+                                                    ));
+                                                    $sql .= BimpTools::getSqlWhere(array(
+                                                                'a.id_obj'                 => $id_commande,
+                                                                'a.position'               => array(
+                                                                    'operator' => '<',
+                                                                    'value'    => (int) $line_ac->getData('position')
+                                                                ),
+                                                                '(cdet.qty + a.qty_modif)' => $qty,
+                                                                'pef.serialisable'         => 1
+                                                    ));
+                                                    $sql .= BimpTools::getSqlOrderBy('a.position', 'DESC');
+
+//                                                $process->Info('SQL : ' . $sql);
+                                                    $comm_lines = $this->db->executeS($sql, 'array');
+
+                                                    if (is_array($comm_lines)) {
+                                                        $process->Info('LINES<pre>' . print_r($comm_lines, 1) . '</pre>');
+
+                                                        $lines_infos = '';
+                                                        foreach ($comm_lines as $comm_line) {
+                                                            $lines_infos .= 'Vérif ligne de commande #' . $comm_line['id'] . ': <br/>';
+                                                            $line_prod = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $comm_line['id']);
+
+                                                            if (!BimpObject::objectLoaded($line_prod)) {
+                                                                $lines_infos .= ' - non trouvée <br/><br/>';
+                                                                continue;
+                                                            }
+
+                                                            $line_eqs = $line_prod->getReservationsEquipmentsList();
+                                                            if (count($line_eqs) == $qty) {
+                                                                $lines_infos .= count($line_eqs) . ' équipements trouvés.<br/>';
+                                                                $prod = $line_prod->getProduct();
+                                                                if (BimpObject::objectLoaded($prod)) {
+                                                                    $eqs_check = true;
+                                                                    foreach ($line_eqs as $id_eq) {
+                                                                        $id_existing_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND equipments LIKE \'%[' . $id_eq . ']%\'');
+                                                                        if ($id_existing_fac) {
+                                                                            $lines_infos .= 'L\'équipement #' . $id_eq . ' est attribué à la facture #' . $id_existing_fac . '<br/><br/>';
+                                                                            $eqs_check = false;
+                                                                            break;
+                                                                        }
+                                                                    }
+
+                                                                    if ($eqs_check) {
+                                                                        $lines_infos .= 'Equipements OK<br/><br/>';
+                                                                        $equipments = $line_eqs;
+                                                                        $msg = count($equipments) . ' équipement(s) trouvé(s) pour ' . $ac_prod->getLink() . '<br/>';
+                                                                        $msg .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Verifier que le produit ci-dessous correspond bien à cet AppleCare';
+                                                                        $msg .= ' (corriger les équipements si ce n\'est pas le cas) : <br/><br/>';
+                                                                        $msg .= 'Libellé AppleCare: <b>' . $ac_prod->getName() . '<br/><br/>';
+                                                                        $msg .= 'Libellé Produit : <b>' . $prod->getName() .'<br/><br/>';
+                                                                        $msg .= 'Produit: ' . $prod->getLink();
+                                                                        $process->Info($msg, $facture, '');
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                $lines_infos .= ' le nombre d\'équipements ne correspond pas.<br/><br/>';
+                                                            }
+                                                        }
+                                                        $process->Info('TEST DES LIGNES DE COMMANDE : <br/><br/>' . $lines_infos, $facture, $ref_prod);
+                                                    } else {
+                                                        $process->Alert('Erreur SQL - ' . $this->db->err(), $facture, $ref_prod);
+                                                    }
+
+                                                    if (!empty($equipments)) {
+                                                        break;
+                                                    }
+                                                } elseif ($type_piece === 'cf') {
                                                     $serials_errors[] = 'Aucune ligne de commande client liée';
                                                     continue;
                                                 }
 
-                                                $line_ac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $r['linked_id_object']);
-                                                if (!BimpObject::objectLoaded($line_ac)) {
-                                                    $serials_errors[] = 'Ligne de commande client #' . $r['linked_id_object'] . ' non trouvée';
-                                                    continue;
-                                                }
+                                                if (empty($equipments) && $type_piece === 'fac') {
+                                                    $fac_line_ac = BimpCache::getBimpObjectInstance('bimpcommercial', 'bimp_facture_line', (int) $r['id']);
+                                                    if (!BimpObject::objectLoaded($fac_line_ac)) {
+                                                        $serials_errors[] = 'Ligne de facture client #' . $r['id'] . ' non trouvée';
+                                                        continue;
+                                                    }
 
-                                                $ac_prod = $line_ac->getProduct();
-                                                if (!BimpObject::objectLoaded($ac_prod)) {
-                                                    $serials_errors[] = 'Produit AppleCare non trouvé';
-                                                    continue;
-                                                }
+                                                    $ac_prod = $line_ac->getProduct();
+                                                    if (!BimpObject::objectLoaded($ac_prod)) {
+                                                        $serials_errors[] = 'Produit AppleCare non trouvé';
+                                                        continue;
+                                                    }
 
-                                                $id_commande = (int) $line_ac->getData('id_obj');
-                                                if (!$id_commande) {
-                                                    $serials_errors[] = 'Commande client non trouvée';
-                                                    continue;
-                                                }
+                                                    $id_fac = (int) $line_ac->getData('id_obj');
+                                                    if (!$id_fac) {
+                                                        $serials_errors[] = 'Facture client non trouvée';
+                                                        continue;
+                                                    }
 
-                                                $sql = BimpTools::getSqlSelect('a.id');
-                                                $sql .= BimpTools::getSqlFrom('bimp_commande_line', array(
-                                                            'cdet' => array(
-                                                                'table' => 'commandedet',
-                                                                'on'    => 'cdet.rowid = a.id_line'
-                                                            ),
-                                                            'pef'  => array(
-                                                                'table' => 'product_extrafields',
-                                                                'on'    => 'pef.fk_object = cdet.fk_product'
-                                                            )
-                                                ));
-                                                $sql .= BimpTools::getSqlWhere(array(
-                                                            'a.id_obj'                 => $id_commande,
-                                                            'a.position'               => array(
-                                                                'operator' => '<',
-                                                                'value'    => (int) $line_ac->getData('position')
-                                                            ),
-                                                            '(cdet.qty + a.qty_modif)' => $qty,
-                                                            'pef.serialisable'         => 1
-                                                ));
-                                                $sql .= BimpTools::getSqlOrderBy('a.position', 'DESC');
+                                                    $sql = BimpTools::getSqlSelect('a.id');
+                                                    $sql .= BimpTools::getSqlFrom('bimp_facture_line', array(
+                                                                'fdet' => array(
+                                                                    'table' => 'facturedet',
+                                                                    'on'    => 'fdet.rowid = a.id_line'
+                                                                ),
+                                                                'pef'  => array(
+                                                                    'table' => 'product_extrafields',
+                                                                    'on'    => 'pef.fk_object = fdet.fk_product'
+                                                                )
+                                                    ));
+                                                    $sql .= BimpTools::getSqlWhere(array(
+                                                                'a.id_obj'         => $id_fac,
+                                                                'a.position'       => array(
+                                                                    'operator' => '<',
+                                                                    'value'    => (int) $line_ac->getData('position')
+                                                                ),
+                                                                'fdet.qty'         => $qty,
+                                                                'pef.serialisable' => 1
+                                                    ));
+                                                    $sql .= BimpTools::getSqlOrderBy('a.position', 'DESC');
 
 //                                                $process->Info('SQL : ' . $sql);
-                                                $comm_lines = $this->db->executeS($sql, 'array');
+                                                    $fac_lines = $this->db->executeS($sql, 'array');
 
-                                                if (is_array($comm_lines)) {
-                                                    $process->Info('LINES<pre>' . print_r($comm_lines, 1) . '</pre>');
+                                                    if (is_array($fac_lines)) {
+                                                        $process->Info('FAC LINES<pre>' . print_r($fac_lines, 1) . '</pre>');
 
-                                                    $lines_infos = '';
-                                                    foreach ($comm_lines as $comm_line) {
-                                                        $lines_infos .= 'Vérif ligne de commande #' . $comm_line['id'] . ': <br/>';
-                                                        $line_prod = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $comm_line['id']);
+                                                        $lines_infos = '';
+                                                        foreach ($fac_lines as $fac_line) {
+                                                            $lines_infos .= 'Vérif ligne de facture #' . $fac_line['id'] . ': <br/>';
+                                                            $line_prod = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $fac_line['id']);
 
-                                                        if (!BimpObject::objectLoaded($line_prod)) {
-                                                            $lines_infos .= ' - non trouvée <br/><br/>';
-                                                            continue;
-                                                        }
+                                                            if (!BimpObject::objectLoaded($line_prod)) {
+                                                                $lines_infos .= ' - non trouvée <br/><br/>';
+                                                                continue;
+                                                            }
 
-                                                        $line_eqs = $line_prod->getReservationsEquipmentsList();
-                                                        if (count($line_eqs) == $qty) {
-                                                            $lines_infos .= count($line_eqs) . ' équipements trouvés.<br/>';
-                                                            $prod = $line_prod->getProduct();
-                                                            if (BimpObject::objectLoaded($prod)) {
-                                                                $eqs_check = true;
-                                                                foreach ($line_eqs as $id_eq) {
-                                                                    $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND equipments LIKE \'%[' . $id_eq . ']%\'');
-                                                                    if ($id_fac) {
-                                                                        $lines_infos .= 'L\'équipement #' . $id_eq . ' est attribué à la facture #' . $id_fac . '<br/><br/>';
-                                                                        $eqs_check = false;
+                                                            $eqs = $line_prod->getEquipmentsIds();
+                                                            if (!empty($eqs)) {
+                                                                $lines_infos .= count($eqs) . ' équipements trouvés.<br/>';
+                                                                $prod = $line_prod->getProduct();
+                                                                if (BimpObject::objectLoaded($prod)) {
+                                                                    foreach ($eqs as $id_eq) {
+                                                                        $id_existing_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND equipments LIKE \'%[' . $id_eq . ']%\'');
+                                                                        if ($id_existing_fac) {
+                                                                            $lines_infos .= 'L\'équipement #' . $id_eq . ' est attribué à la facture #' . $id_existing_fac . '<br/><br/>';
+                                                                        } else {
+                                                                            $equipments[] = $id_eq;
+                                                                        }
+                                                                    }
+
+                                                                    if (!empty($equipments)) {
+                                                                        $lines_infos .= count($equipments) . ' équipements OK<br/><br/>';
+                                                                        $msg = count($equipments) . ' équipement(s) trouvé(s) pour ' . $ac_prod->getLink() . '<br/>';
+                                                                        $msg .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Verifier que le produit ci-dessous correspond bien à cet AppleCare';
+                                                                        $msg .= ' (corriger les équipements si ce n\'est pas le cas) : <br/><br/>';
+                                                                        $msg .= 'Libellé AppleCare: <b>' . $ac_prod->getName() . '<br/><br/>';
+                                                                        $msg .= 'Libellé Produit : <b>' . $prod->getName() .'<br/><br/>';
+                                                                        $msg .= 'Produit: ' . $prod->getLink();
+                                                                        
+                                                                        $process->Info($msg, $facture, '');
                                                                         break;
                                                                     }
                                                                 }
-
-                                                                if ($eqs_check) {
-                                                                    $lines_infos .= 'Equipements OK<br/><br/>';
-                                                                    $equipments = $line_eqs;
-                                                                    $msg = count($equipments) . ' équipement(s) trouvé(s) pour ' . $ac_prod->getLink() . '<br/>';
-                                                                    $msg .= 'Libellé : <b>' . $ac_prod->getName() . '<br/><br/>';
-                                                                    $msg .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Verifier que le produit ci-dessous correspond bien à cet AppleCare';
-                                                                    $msg .= ' (corriger les équipements si ce n\'est pas le cas) : <br/>';
-                                                                    $msg .= 'Produit: ' . $prod->getLink() . '<br/>';
-                                                                    $msg .= 'Libellé : <b>' . $prod->getName();
-                                                                    $process->Info($msg, $facture, '');
-                                                                    break;
-                                                                }
+                                                            } else {
+                                                                $lines_infos .= ' aucun équipement trouvé.<br/><br/>';
                                                             }
-                                                        } else {
-                                                            $lines_infos .= ' le nombre d\'équipements ne correspond pas.<br/><br/>';
                                                         }
+                                                        $process->Info('TEST DES LIGNES DE FACTURE : <br/><br/>' . $lines_infos, $facture, $ref_prod);
+                                                    } else {
+                                                        $process->Alert('Erreur SQL - ' . $this->db->err(), $facture, $ref_prod);
                                                     }
-                                                    $process->Info('TEST DES LIGNES DE COMMANDE : <br/><br/>' . $lines_infos, $facture, $ref_prod);
-                                                } else {
-                                                    $process->Alert('Erreur SQL - ' . $this->db->err(), $facture, $ref_prod);
-                                                }
 
-                                                if (!empty($equipments)) {
-                                                    break;
+                                                    if (!empty($equipments)) {
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }

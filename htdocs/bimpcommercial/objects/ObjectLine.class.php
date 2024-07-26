@@ -1444,6 +1444,15 @@ class ObjectLine extends BimpObject
         return array();
     }
 
+    public function getEquipmentsIds()
+    {
+        if ($this->isLoaded() && static::$parent_comm_type) {
+            return $this->db->getValues('object_line_equipment', 'id_equipment', 'id_object_line = ' . (int) $this->id . ' AND ' . 'object_type = \'' . static::$parent_comm_type . '\'');
+        }
+
+        return array();
+    }
+
     public function getCurrentEquipmentsLinesData($equipments_list_only = false)
     {
         $data = array();

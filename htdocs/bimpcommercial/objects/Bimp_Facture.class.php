@@ -3673,7 +3673,7 @@ class Bimp_Facture extends BimpComm
         }
 
         if ($client->getData('solvabilite_status') > 0) {
-                    $html .= BimpRender::renderAlerts('ATTENTION !!<br/>Le client est au statut ' . $client->displayData('solvabilite_status') . '<br/>ATTENTION !!');
+            $html .= BimpRender::renderAlerts('ATTENTION !!<br/>Le client est au statut ' . $client->displayData('solvabilite_status') . '<br/>ATTENTION !!');
         }
 
         return $html;
@@ -6994,7 +6994,11 @@ class Bimp_Facture extends BimpComm
             if (!empty($revals)) {
                 foreach ($revals as $reval) {
                     $w = array();
-                    $reval->delete($w, true);
+                    $reval_errors = $reval->delete($w, true);
+
+                    if (!empty($reval_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($reval_errors, 'Echec suppression de la revalorisation #' . $reval->id);
+                    }
                 }
             }
         }

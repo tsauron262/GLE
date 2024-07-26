@@ -831,12 +831,29 @@ class BimpCommission extends BimpObject
                     'comm_amount' => array(11, 'AC+ Reseller Commission Value (LC)')
                 );
                 $fourn_label = 'TECHDATA';
-                $id_fourn = 229890;
+                
+                switch (BimpCore::getExtendsEntity()) {
+                    case 'bimp': 
+                        $id_fourn = 229890;
+                        break;
+                    
+                    case 'actimac': 
+                        $id_fourn = 131068;
+                        break;
+                }
                 break;
 
             case 'ingram':
                 $fourn_label = 'INGRAM MICRO';
-                $id_fourn = 230496;
+                switch (BimpCore::getExtendsEntity()) {
+                    case 'bimp': 
+                        $id_fourn = 230496;
+                        break;
+                    
+                    case 'actimac': 
+                        $id_fourn = 132088;
+                        break;
+                }
                 $nbElementsPerIteration = 1;
                 $cols = array(
                     'ref_piece'         => array(2, 'Custpo Nbr'),

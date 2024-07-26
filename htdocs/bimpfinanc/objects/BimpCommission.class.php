@@ -1328,9 +1328,9 @@ class BimpCommission extends BimpObject
                                                                 $lines_infos .= ' le nombre d\'équipements ne correspond pas.<br/><br/>';
                                                             }
                                                         }
-                                                        $process->Info('TEST DES LIGNES DE COMMANDE : <br/><br/>' . $lines_infos, $facture, $ref_prod);
+                                                        $process->Info('TEST DES LIGNES DE COMMANDE : <br/><br/>' . $lines_infos, $facture, 'Prod ' . $ref_prod .' - ' . $type_piece .' ' . $line_data[$keys['ref_piece']]);
                                                     } else {
-                                                        $process->Alert('Erreur SQL - ' . $this->db->err(), $facture, $ref_prod);
+                                                        $process->Alert('Erreur SQL - ' . $this->db->err(), $facture, 'Prod ' . $ref_prod .' - ' . $type_piece .' ' . $line_data[$keys['ref_piece']]);
                                                     }
 
                                                     if (!empty($equipments)) {
@@ -1429,9 +1429,9 @@ class BimpCommission extends BimpObject
                                                                 $lines_infos .= ' aucun équipement trouvé.<br/><br/>';
                                                             }
                                                         }
-                                                        $process->Info('TEST DES LIGNES DE FACTURE : <br/><br/>' . $lines_infos, $facture, $ref_prod);
+                                                        $process->Info('TEST DES LIGNES DE FACTURE : <br/><br/>' . $lines_infos, $facture, 'Prod ' . $ref_prod .' - ' . $type_piece .' ' . $line_data[$keys['ref_piece']]);
                                                     } else {
-                                                        $process->Alert('Erreur SQL - ' . $this->db->err(), $facture, $ref_prod);
+                                                        $process->Alert('Erreur SQL - ' . $this->db->err(), $facture, 'Prod ' . $ref_prod .' - ' . $type_piece .' ' . $line_data[$keys['ref_piece']]);
                                                     }
 
                                                     if (!empty($equipments)) {
@@ -1442,9 +1442,9 @@ class BimpCommission extends BimpObject
                                         }
 
                                         if (count($serials_errors)) {
-                                            $process->Alert(BimpTools::getMsgFromArray($serials_errors, 'Erreurs lors de la recherche des N° de série'), $facture, $ref_prod);
+                                            $process->Alert(BimpTools::getMsgFromArray($serials_errors, 'Erreurs lors de la recherche des N° de série'), $facture, 'Prod ' . $ref_prod .' - ' . $type_piece .' ' . $line_data[$keys['ref_piece']]);
                                         } elseif (empty($equipments)) {
-                                            $process->Alert('Aucun n° de série trouvé', $facture, $ref_prod);
+                                            $process->Alert('Aucun n° de série trouvé', $facture, 'Prod ' . $ref_prod .' - ' . $type_piece .' ' . $line_data[$keys['ref_piece']]);
                                         }
                                         break;
                                 }

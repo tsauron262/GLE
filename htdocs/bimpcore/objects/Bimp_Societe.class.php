@@ -2222,7 +2222,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($this->getData('solvabilite_status') > 0) {
-                $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Le client est au status ' . $this->displayData('solvabilite_status') . '<br/>ATTENTION !!!!!!!!!!!!');
+                $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Le client est au statut ' . $this->displayData('solvabilite_status') . '<br/>ATTENTION !!!!!!!!!!!!');
             }
         }
 

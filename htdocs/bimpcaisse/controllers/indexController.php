@@ -916,6 +916,7 @@ class indexController extends BimpController
                     $validate = (int) $vente->validateVente($validate_errors);
                     if (!$validate) {
                         $errors[] = 'Cette vente ne peut pas être validée';
+                        $errors = BimpTools::merge_array($validate_errors, $errors);
                     } else {
                         $ticket_html = $vente->renderTicketHtml($ticket_errors);
                     }

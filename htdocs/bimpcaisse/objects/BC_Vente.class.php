@@ -2066,7 +2066,7 @@ class BC_Vente extends BimpObject
         // Autres checks: 
         $data = $this->getAjaxData();
 
-        if (($has_equipment || $has_returns || (int) $data['paiement_differe']) && !BimpObject::objectLoaded($client)) {
+        if (($has_equipment || $has_returns || ((int) $data['paiement_differe'] && BimpCore::getConf('use_mode_reglement_caisse', null, 'bimpcaisse'))) && !BimpObject::objectLoaded($client)) {
             $errors[] = 'Compte client obligatoire pour cette vente';
             if($has_equipment)
                 $errors[] = 'Produit sérialisable';

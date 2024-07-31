@@ -2068,6 +2068,12 @@ class BC_Vente extends BimpObject
 
         if (($has_equipment || $has_returns || (int) $data['paiement_differe']) && !BimpObject::objectLoaded($client)) {
             $errors[] = 'Compte client obligatoire pour cette vente';
+            if($has_equipment)
+                $errors[] = 'Produit sérialisable';
+            if($has_returns)
+                $errors[] = 'Produit retourné';
+            if($data['paiement_differe'])
+                $errors[] = 'Paiment diféré';
         }
 
         if (!$data['paiement_differe'] && (float) $data['toPay'] > 0) {

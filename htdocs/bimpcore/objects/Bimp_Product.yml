@@ -717,6 +717,7 @@ forms:
             - field: accountancy_code_sell_export
             - field: price
             - field: tva_tx
+            - field: price_ttc
             - field: deee
             - field: rpcp
             - field: gamme

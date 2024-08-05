@@ -4441,7 +4441,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $lines = $this->getLines('not_text');
         foreach($lines as $line)
         {
-            $warnings[] = $line->id.' : '.$line->getMinQty();
             $data = array('qty_modified' => $line->getMinQty());
             $success = '';
             $line->actionModifyQty($data, $success);

@@ -275,6 +275,8 @@ class BimpCore
                     $prefixe = "";
                 elseif ($prefixe != "")
                     $prefixe .= "/";
+                elseif ($prefixe == "")
+                    $prefixe = "/";
 
                 return $prefixe . $url;
             }

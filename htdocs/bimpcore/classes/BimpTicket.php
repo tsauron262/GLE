@@ -80,7 +80,7 @@ class BimpTicket
             $html .= $this->renderHeader();
 
             if ($this->town) {
-                $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($this->town) . ', le ' . date('d / m / Y') . '</span>';
+                $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($this->town) . ', le ' . date('d / m / Y', $this->facture->date) . '</span>';
             }
 
             $html .= '<table id="ticket_lines">';

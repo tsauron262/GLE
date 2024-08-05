@@ -438,4 +438,9 @@ params:
                       label: Ne faire que logguer les valeurs invalides
                       type: bool
                       def: 1
+                      
+    apple_premium:
+        label: Apple premium reseller
+        type: bool
+        def: 0
         

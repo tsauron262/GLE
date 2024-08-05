@@ -3848,8 +3848,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $warnings = array();
         /* pour enregistré les valeur du form */
         $errors = $this->updateFields($data);
-        $this->db->db->commit();
-        $this->db->db->begin();
+        if(BimpCore::getConf('use_db_transactions')){
+            $this->db->db->commit();
+            $this->db->db->begin();
+        }
 
         $infos = array();
 

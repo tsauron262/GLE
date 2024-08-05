@@ -378,9 +378,11 @@ class BimpTicket
         $url = DOL_URL_ROOT . '/bimpequipment/img/apple_reseller.png';
         $html .= '<div class="ticket_footer">';
 
-        $html .= '<div class="footer_block">';
-        $html .= '<img src="' . $url . '"/>';
-        $html .= '</div>';
+        if(BimpCore::getConf('apple_premium')){
+            $html .= '<div class="footer_block">';
+            $html .= '<img src="' . $url . '"/>';
+            $html .= '</div>';
+        }
 
         $html .= '<div class="footer_block">';
         $html .= '<p style="font-weight: bold;">' . $this->facture->ref;

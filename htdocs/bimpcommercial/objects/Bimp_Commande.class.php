@@ -885,6 +885,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     );
                 }
             }
+            
+            
+                    $buttons[] = array(
+                        'label'   => 'Passer toutes les quantités au mini',
+                        'icon'    => 'ban',
+                        'onclick' => $this->getJsActionOnclick('allQtyToZero', array(), array(
+                            'confirm_msg' => strip_tags($langs->trans('Confirmer', $ref))
+                        ))
+                    );
 
 
 //
@@ -4416,6 +4425,26 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $lines = $this->getLines('not_text');
         foreach ($lines as $line) {
             $line->checkQties();
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function actionAllQtyToZero($data, &$success)
+    {
+        $errors = $warnings = array();
+
+        
+        $lines = $this->getLines('not_text');
+        foreach($lines as $line)
+        {
+            $warnings[] = $line->id.' : '.$line->getMinQty();
+            $data = array('qty_modified' => $line->getMinQty());
+            $success = '';
+            $line->actionModifyQty($data, $success);
         }
 
         return array(

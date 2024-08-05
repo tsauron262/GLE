@@ -456,7 +456,8 @@ class indexController extends BimpController
                 'operator' => '>',
                 'value'    => 0
             ));
-            $list->addFieldFilterValue('id_caisse_session', (int) $caisse->getData('id_current_session'));
+//            $list->addFieldFilterValue('id_caisse_session', (int) $caisse->getData('id_current_session'));
+            $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
 
             $html .= $list->renderHtml();
         }
@@ -674,7 +675,7 @@ class indexController extends BimpController
                 if (is_null($session) || !$session->isLoaded()) {
                     $errors[] = 'Session de caisse invalide';
                 } else {
-                    if (!count($errors)) {
+                    /*if (!count($errors)) {//pour ne pas fermer avec des ventes brouillon
                         if (1) {
                             $bc_vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente');
                             $filters = array();
@@ -687,7 +688,7 @@ class indexController extends BimpController
                             if ($nbBr > 0)
                                 $errors[] = "Abandonnez toutes les ventes à l’état brouillon au préalable. (" . $nbBr . ")";
                         }
-                    }
+                    }*/
 
 
 

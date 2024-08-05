@@ -1022,57 +1022,70 @@ class BC_Vente extends BimpObject
         // Boutons paiement:
         $html .= '<div id="ventePaiementButtons" class="row">';
 
-        $html .= '<div class="col-lg-4">';
-        $html .= '<button id="ventePaiementLiquideButton"type="button" class="ventePaiementButton btn btn-default btn-large"';
-        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="LIQ">';
-        $html .= '<i class="fa fa-money iconLeft"></i>Paiement Liquide';
-        $html .= '</button>';
-        $html .= '</div>';
-
-        $html .= '<div class="col-lg-4">';
-        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
-        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CB">';
-        $html .= '<i class="fa fa-credit-card iconLeft"></i>Paiement Carte Bancaire';
-        $html .= '</button>';
-        $html .= '</div>';
-
-        $html .= '<div class="col-lg-4">';
-        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
-        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CHQ">';
-        $html .= '<i class="fa fa-pencil iconLeft"></i>Paiement Chèque';
-        $html .= '</button>';
-        $html .= '</div>';
-
-        $html .= '<div class="col-lg-4">';
-        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
-        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="AE">';
-        $html .= '<i class="fa fa-cc-amex iconLeft"></i>Paiement American Express';
-        $html .= '</button>';
-        $html .= '</div>';
-
-        $html .= '<div class="col-lg-4">';
-        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
-        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CG">';
-        $html .= BimpRender::renderIcon('fas_money-check', 'iconLeft') . 'Chéque Galerie';
-        $html .= '</button>';
-        $html .= '</div>';
-
-        $html .= '<div class="col-lg-4">';
-        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
-        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="FIN">';
-        $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement';
-        $html .= '</button>';
-        $html .= '</div>';
-
-        if (BC_Caisse::$useYounited) {
-            $caisse = $this->getChildObject('caisse');
-            $html .= '<div class="col-lg-4">';
-            $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
-            $html .= ' onclick="displayNewPaiementForm($(this));" data-code="FIN_YC">';
-            $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement Younited';
-            $html .= '</button>';
-            $html .= '</div>';
+        $modeReg = self::getModeReglementsArray('code');
+//        print_r($modeReg);
+        foreach(BC_VentePaiement::$codes as $code => $infos){
+            if(isset($modeReg[$code])){
+                $html .= '<div class="col-lg-4">';
+                $html .= '<button id="ventePaiementLiquideButton"type="button" class="ventePaiementButton btn btn-default btn-large"';
+                $html .= ' onclick="displayNewPaiementForm($(this));" data-code="'.$code.'">';
+                $html .= ''.BimpRender::renderIcon($infos['icon'], 'iconLeft').''.$infos['label'];
+                $html .= '</button>';
+                $html .= '</div>';
+            }
         }
+        
+//        $html .= '<div class="col-lg-4">';
+//        $html .= '<button id="ventePaiementLiquideButton"type="button" class="ventePaiementButton btn btn-default btn-large"';
+//        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="LIQ">';
+//        $html .= '<i class="fa fa-money iconLeft"></i>Paiement Liquide';
+//        $html .= '</button>';
+//        $html .= '</div>';
+//
+//        $html .= '<div class="col-lg-4">';
+//        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+//        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CB">';
+//        $html .= '<i class="fa fa-credit-card iconLeft"></i>Paiement Carte Bancaire';
+//        $html .= '</button>';
+//        $html .= '</div>';
+//
+//        $html .= '<div class="col-lg-4">';
+//        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+//        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CHQ">';
+//        $html .= '<i class="fa fa-pencil iconLeft"></i>Paiement Chèque';
+//        $html .= '</button>';
+//        $html .= '</div>';
+//
+//        $html .= '<div class="col-lg-4">';
+//        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+//        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="AE">';
+//        $html .= '<i class="fa fa-cc-amex iconLeft"></i>Paiement American Express';
+//        $html .= '</button>';
+//        $html .= '</div>';
+//
+//        $html .= '<div class="col-lg-4">';
+//        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+//        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="CG">';
+//        $html .= BimpRender::renderIcon('fas_money-check', 'iconLeft') . 'Chéque Galerie';
+//        $html .= '</button>';
+//        $html .= '</div>';
+//
+//        $html .= '<div class="col-lg-4">';
+//        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+//        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="FIN">';
+//        $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement';
+//        $html .= '</button>';
+//        $html .= '</div>';
+//
+//        if (BC_Caisse::$useYounited) {
+//            $caisse = $this->getChildObject('caisse');
+//            $html .= '<div class="col-lg-4">';
+//            $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+//            $html .= ' onclick="displayNewPaiementForm($(this));" data-code="FIN_YC">';
+//            $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement Younited';
+//            $html .= '</button>';
+//            $html .= '</div>';
+//        }
 
         $html .= '</div>';
 

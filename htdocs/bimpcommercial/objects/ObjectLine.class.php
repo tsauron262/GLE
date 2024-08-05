@@ -4036,7 +4036,7 @@ class ObjectLine extends BimpObject
             ));
 
             $tabRang = array();
-            $tabTemp = $this->db->executeS('SELECT ' . $primary . ' as id, rang FROM llx_' . $table . ' WHERE ' . $this::$dol_line_parent_field . ' = ' . $parent->id, 'array');
+            $tabTemp = $this->db->executeS('SELECT ' . $primary . ' as id, rang FROM '.MAIN_DB_PREFIX . $table . ' WHERE ' . $this::$dol_line_parent_field . ' = ' . $parent->id, 'array');
 
             if (is_array($tabTemp)) {
                 foreach ($tabTemp as $lnTemp) {

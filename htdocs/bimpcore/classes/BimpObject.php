@@ -1391,7 +1391,7 @@ class BimpObject extends BimpCache
 
         if (!$check) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent (201)';
-            BimpCore::addlog('ID ' . $this->getLabel('of_the') . ' absent (201)',3);
+//            BimpCore::addlog('ID ' . $this->getLabel('of_the') . ' absent (201)',3);//trop trop lourd, arrive tous le temps
         }
 
         return $check;

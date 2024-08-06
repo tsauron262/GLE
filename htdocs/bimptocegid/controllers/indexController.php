@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/BTC_exportRibAndMandat.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
 
 class indexController extends BimpController
 {
@@ -90,7 +91,7 @@ class indexController extends BimpController
 
         $html .= '<br /><br /><br />';
 
-        $dir = PATH_TMP . '/exportCegid/BY_DATE';
+        $dir = bimptocegidLib::getDirOutput() . 'BY_DATE/';
         $scanned_directory_by_date = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
 
         $html .= '<h3>Liste des fichiers TRA par date</h3>';
@@ -149,7 +150,7 @@ class indexController extends BimpController
         }
         $html .= '</tbody></table>';
 
-        $dir = PATH_TMP . '/exportCegid/BY_REF';
+        $dir = bimptocegidLib::getDirOutput() . 'BY_REF';
 
         $scanned_directory_by_ref = array();
 
@@ -221,7 +222,7 @@ class indexController extends BimpController
         $html .= '</tbody></table>';
 
         if (GETPOST('detail') == 'true') {
-            $dir = PATH_TMP . '/exportCegid/BY_REF/imported';
+            $dir = bimptocegidLib::getDirOutput() . 'BY_REF/imported';
 
             $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
 
@@ -276,7 +277,7 @@ class indexController extends BimpController
                 $html .= '</tr>';
             }
 
-            $dir = PATH_TMP . '/exportCegid/BY_DATE/imported';
+            $dir = bimptocegidLib::getDirOutput() . 'BY_DATE/imported';
             $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
             if ($scanned_directory_by_ref) {
                 foreach ($scanned_directory_by_ref as $file => $name) {

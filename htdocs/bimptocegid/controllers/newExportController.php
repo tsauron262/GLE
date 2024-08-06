@@ -8,9 +8,9 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/cron.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpfinanc/objects/Bimp_ImportPaiement.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
 
 class newExportController extends BimpController {
-    private $dir = "/exportCegid/BY_DATE/";
     public function displayHeaderInterface() {
         
         global $db, $user;
@@ -36,7 +36,7 @@ class newExportController extends BimpController {
         
         if($_GET['PAYNI']) {
             $tra_constructor = new TRA_payInc($bdd);
-            $file = PATH_TMP . $this->dir . '/payni_no_exported_' . date('d-m-Y') . '.tra';
+            $file = bimptocegidLib::getDirOutput(). 'BY_DATE/payni_no_exported_' . date('d-m-Y') . '.tra';
             $exploded_payni = explode(';', $_GET['PAYNI']);
             $data = [];
             $i=1; $msg = 'Liste des pièces exportées manuellement par ' . $u->getName() . '<br /><br />';
@@ -71,7 +71,7 @@ class newExportController extends BimpController {
         }
         
         if($_GET['test'] == 'true') {
-            $TRA_Facture = new TRA_facture($bdd, PATH_TMP . "/exportCegid/TEST_TIERS.tra", true);
+            $TRA_Facture = new TRA_facture($bdd, bimptocegidLib::getDirOutput() . "TEST_TIERS.tra", true);
             if($_GET['facture']) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $_GET['facture']);
                 $html .= '<pre>';

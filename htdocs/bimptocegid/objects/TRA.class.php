@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/controle.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
 
 class TRA extends BimpObject {
     
@@ -189,7 +190,7 @@ class TRA extends BimpObject {
         
         $pattern_tiers  = 0 . '_' . BimpCore::getExtendsEntity() . '_(TIERS)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
         $pattern_ventes = 1 . '_' . BimpCore::getExtendsEntity() . '_(VENTES)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
-        $files = glob(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/' . $pattern_tiers);
+        $files = glob(bimptocegidLib::getDirOutput() . 'BY_DATE' . '/' . 'imported_auto' . '/' . $pattern_tiers);
         
         if($searchBy == 0) {
             foreach($files as $file) {
@@ -198,7 +199,7 @@ class TRA extends BimpObject {
                     $html .= $this->displayTraFile($file, $lineInBold);
                 }
             }
-            $files = glob(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/' . $pattern_ventes);
+            $files = glob(bimptocegidLib::getDirOutput() . 'BY_DATE' . '/' . 'imported_auto' . '/' . $pattern_ventes);
             foreach($files as $file) {
                 $lineInBold = $this->getLineInFileTiers($auxiliaire, $this->getLinesOfFile($file), 'facture');
                 if($lineInBold > 0) {

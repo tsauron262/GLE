@@ -356,6 +356,9 @@ class Bimp_Societe extends BimpDolObject
 
     public function isSirenRequired()
     {
+        if ($this->isAnonymised())
+            return 0;
+        
         if ($this->isFournisseur() && !$this->isClient()) {
             return 0;
         }

@@ -1,6 +1,7 @@
 <?php
 
 require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php');
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
 
 class BDS_ExportsComptaProcess extends BDSImportProcess
 {
@@ -181,7 +182,7 @@ class BDS_ExportsComptaProcess extends BDSImportProcess
             if ($ftp !== false) {
                 $this->Info("Connexion réussie", $this, "FTP");
                 $on_ftp_ldlc = ftp_nlist($ftp, $this->params['ftp_dir']);
-                $local_folder = PATH_TMP . '/exportCegid/BY_DATE/';
+                $local_folder = bimptocegidLib::getDirOutput() . 'BY_DATE/';
                 $this->Info($local_folder, $this, "LOCAL");
                 $scanned_directory = array_diff(scandir($local_folder), array('..', '.', 'imported', 'imported_auto', 'rollback'));
                 $this->Info(implode("<br />", $on_ftp_ldlc), $this, "FICHIERS DISTANT AVANT TRANSFERT");

@@ -62,10 +62,12 @@ class BCT_ContratLine extends BimpObject
                 return (int) ($user->admin || !empty($user->rights->bimpcontract->to_validate));
 
             case 'periodicFacProcess':
-                return 1;
+                return ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->creer)) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->facture->invoice_advance->validate)));
 
             case 'periodicAchatProcess':
-                return 1;
+                return ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->fournisseur->commande->creer)) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->fournisseur->supplier_order_advance->validate)));
 
             case 'renouv':
                 return 1;

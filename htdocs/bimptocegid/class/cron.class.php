@@ -88,7 +88,8 @@
             if(((defined('ID_ERP') && ID_ERP == 6) || $this->modeTest)) {
                 $this->export_class = new export($db);
                 if(!is_dir($this->local_path))
-                    mkdir($this->local_path);
+                    BimpTools::makeDirectories($this->local_path);
+//                    mkdir($this->local_path);
                 if(!is_dir($this->local_path))
                     die($this->local_path.' introuvable');
                 if(!count(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire))) {

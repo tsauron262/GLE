@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_revalorisation` (
   `id_facture_line` int(11) NOT NULL DEFAULT 0,
   `id_user` int(11) NOT NULL DEFAULT 0,
   `type` varchar(255) NOT NULL,
-  `date` date NOT NULL DEFAULT current_timestamp,
+  `date` datetime NOT NULL DEFAULT current_timestamp,
   `amount` decimal(24,8) NOT NULL DEFAULT 0,
   `status` int(11) NOT NULL DEFAULT 0,
   `applied` BOOLEAN NOT NULL DEFAULT FALSE

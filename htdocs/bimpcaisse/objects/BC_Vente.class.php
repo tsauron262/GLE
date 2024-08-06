@@ -1023,7 +1023,8 @@ class BC_Vente extends BimpObject
         $html .= '<div id="ventePaiementButtons" class="row">';
 
         $modeReg = self::getModeReglementsArray('code');
-//        print_r($modeReg);
+//        echo '<pre>';print_r($modeReg);
+        BimpObject::loadClass('bimpcaisse', 'BC_VentePaiement');
         foreach(BC_VentePaiement::$codes as $code => $infos){
             if(isset($modeReg[$code])){
                 $html .= '<div class="col-lg-4">';

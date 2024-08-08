@@ -5950,9 +5950,10 @@ class ObjectLine extends BimpObject
                                     'remisable'    => 2,
                                         ), true);
 
-                        if ($this->field_exists('abo_nb_units')) {
+                        if ($this->field_exists('abo_nb_units') && (float) $this->getData('abo_nb_units') != 0) {
                             $fieldsCopy['abo_nb_units'] = $child_prod->getData('qty') * $nb_units * $qty_ratio;
-                        } else {
+                        } 
+                        else {
                             $propertiesCopy['qty'] = $child_prod->getData('qty') * $this->qty;
                         }
 

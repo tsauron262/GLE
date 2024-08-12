@@ -57,11 +57,11 @@ class modBimpContrat extends DolibarrModules
 
         $this->rights = array();
         $r = 0;
-//        $this->rights[$r][0] = $this->numero + $r;
-//        $this->rights[$r][1] = 'Validation du contrat après la demande';
-//        $this->rights[$r][3] = 0;
-//        $this->rights[$r][4] = 'to_validate';
-//        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Facturation d\'avance';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'facturation_avance';
+        $r++;
 
         $this->menu = array();   // List of menus to add
         $r = 1;

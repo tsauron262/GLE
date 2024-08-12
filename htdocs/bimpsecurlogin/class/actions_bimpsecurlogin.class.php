@@ -373,7 +373,7 @@ class securLogSms
     {
 //        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `".MAIN_DB_PREFIX."events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
         $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `" . MAIN_DB_PREFIX . "bimp_secure_log` WHERE DATEDIFF(now(), tms ) <= 31 GROUP BY IP ORDER BY `nb` DESC");
-        $tabIp = array("78.195.193.207//flo", '91.164.189.142//tommy');
+        $tabIp = array("78.195.193.207//flo", '91.164.189.142//tommy', '88.169.107.149//burtommy');
         while ($ln = $this->db->fetch_object($sql))
             if ($ln->nb > 2)
                 $tabIp[] = $ln->ip;

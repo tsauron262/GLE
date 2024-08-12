@@ -58,7 +58,7 @@ class BCT_ContratLine extends BimpObject
         global $user;
         switch ($action) {
             case 'facturationAvance':
-                if ($user->rights->bimpcontrat->facturation_avance) {
+                if (!empty($user->rights->bimpcontrat->facturation_avance)) {
                     return 1;
                 }
                 

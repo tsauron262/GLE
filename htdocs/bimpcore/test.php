@@ -27,17 +27,7 @@ if (!$user->admin) {
     exit;
 }
 
-$refs = array(
-    'SERV-LIV',
-    'SERV-LIV-EDUC',
-    'SERV-LIV-EDUC01',
-    'SERV-LIV-EDUC02',
-    'SERV-PREST-TRANSFERT-ENI',
-    'SERV-REP-DIAGNOSTIC',
-    'SERV-SOF-DEP/PRESTA',
-    'SERV-TEAMWORKDISTANT',
-    'SERV-VPP-EDUC'
-);
+$refs = array();
 
 $w = array();
 foreach ($refs as $ref) {

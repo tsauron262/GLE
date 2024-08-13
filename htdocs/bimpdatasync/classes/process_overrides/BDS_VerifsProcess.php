@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 9;
+    public static $current_version = 10;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -1328,6 +1328,94 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
+    // Revalorisations PA factures: 
+
+    public function initFacsRevals(&$data, &$errors = array())
+    {
+        $date_from = $this->getOption('date_from', '');
+        $date_to = $this->getOption('date_to', '');
+
+        if ($date_from && $date_to) {
+            if ($date_from < $date_to) {
+                $errors[] = 'La date de fin ne peut pas être inférieure à la date de début';
+            }
+        }
+
+        $refs = explode(',', $this->getOption('refs_list', ''));
+
+        if (empty($refs)) {
+            $errors[] = 'Aucune référence indiquée';
+        }
+
+        if (!count($errors)) {
+            $prods = array();
+
+            foreach ($refs as $ref) {
+                $id_prod = (int) $this->db->getValue('product', 'rowid', 'ref = \'' . $ref . '\'');
+
+                if ($id_prod) {
+                    $prods[] = $id_prod;
+                } else {
+                    $errors[] = 'Aucun produit trouvé pour la référence "' . $ref . '"';
+                }
+            }
+
+            if (!count($errors)) {
+                $where = 'a.fk_product IN (' . implode(',', $prods) . ')';
+                $where .= ' AND f.type IN (0,1,2)';
+                $where .= ' AND f.fk_statut IN (0,1,2)';
+                if ($date_from) {
+                    $where .= ' AND f.datef >= \'' . date('Y-m-d', strtotime($date_from)) . '\'';
+                }
+                if ($date_to) {
+                    $where .= ' AND f.datef <= \'' . date('Y-m-d', strtotime($date_to)) . '\'';
+                }
+
+                $rows = $this->db->getRows('facturedet a', $where, null, 'array', array('a.rowid', 'a.fk_product'), null, null, array(
+                    'f' => array(
+                        'table' => 'facture',
+                        'on'    => 'f.rowid = a.fk_facture'
+                    )
+                ));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        $elements = array();
+
+                        foreach ($rows as $r) {
+                            $elements[] = (int) $r['fk_product'] . ';' . (int) $r['rowid'];
+                        }
+
+                        $data['steps']['process'] = array(
+                            'label'                  => 'Vérifs revalorisations prix d\'achat',
+                            'on_error'               => 'continue',
+                            'elements'               => $elements,
+                            'nbElementsPerIteration' => 10
+                        );
+                    }
+                } else {
+                    $errors[] = $this->db->err();
+                }
+            }
+        }
+    }
+
+    public function executeFacsRevals($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcommercial', 'Bimp_FactureLine');
+            if (!empty($this->references)) {
+//                echo '<pre>';
+//                print_r($this->references);
+//                exit;
+//
+//                foreach ($this->references as $ref) {
+//                    
+//                }
+            }
+        }
+    }
+
     // Install: 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -1620,6 +1708,48 @@ class BDS_VerifsProcess extends BDSProcess
                         'use_report'    => 1,
                         'reports_delay' => 30
                             ), true, $errors, $warnings);
+        }
+
+        if ($cur_version < 10) {
+            // Opération "Revalorisation PA factures": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Revalorisation PA factures',
+                        'name'          => 'facsRevals',
+                        'description'   => 'Génère des revalorisations du PA des factures créées depuis la date indiquée en fonction du PA actuel des réfs indiquées',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 90
+                            ), true, $errors, $warnings);
+
+            $op_options = array();
+
+            $id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'date_from\'');
+            if ($id_option) {
+                $op_options[] = $id_option;
+            }
+
+            $id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'date_to\'');
+            if ($id_option) {
+                $op_options[] = $id_option;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $id_process,
+                        'label'         => 'Liste des références',
+                        'name'          => 'refs_list',
+                        'info'          => 'Séparer chaque réf. par une virgule sans espace',
+                        'type'          => 'text',
+                        'default_value' => '',
+                        'required'      => 1
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $op_options[] = (int) $opt->id;
+            }
+
+            $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
         }
 
         return $errors;

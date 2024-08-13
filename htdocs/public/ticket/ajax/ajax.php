@@ -58,11 +58,11 @@ $email = GETPOST('email', 'custom', 0, FILTER_VALIDATE_EMAIL);
 
 
 if (!isModEnabled('ticket')) {
-	die('Module Ticket not enabled');
+	httponly_accessforbidden('Module Ticket not enabled');
 }
 
 if (!getDolGlobalString('TICKET_CREATE_THIRD_PARTY_WITH_CONTACT_IF_NOT_EXIST')) {
-	die('Option TICKET_CREATE_THIRD_PARTY_WITH_CONTACT_IF_NOT_EXIST of module ticket is not enabled');
+	httponly_accessforbidden('Option TICKET_CREATE_THIRD_PARTY_WITH_CONTACT_IF_NOT_EXIST of module ticket is not enabled');
 }
 
 

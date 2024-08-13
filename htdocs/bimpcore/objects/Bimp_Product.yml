@@ -211,6 +211,8 @@ fields:
         label: Pourcentage du coût de revient
         type: percent
         default_value: 0
+        values: 
+            callback: getCostPricePercentValues
         input:
               help: Si renseigné est prioritaire pour le calcul du prix de revient
         
@@ -1015,7 +1017,6 @@ fields_tables:
               value: 
                   callback: getRemiseBundle
         
-            
     prices_buy: 
         title: Prix d'achat
         icon: fas_euro-sign

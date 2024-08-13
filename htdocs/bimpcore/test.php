@@ -27,11 +27,16 @@ if (!$user->admin) {
     exit;
 }
 
-$refs = array();
+//$refs = array();
+$refs = file(DOL_DOCUMENT_ROOT . '/bimpcore/test.txt');
 
 $w = array();
 foreach ($refs as $ref) {
-    echo '<br/>' . $ref . ' : ';
+    $data = explode(';', $ref);
+
+    $ref = $data[0];
+    $tx = (float) $data[1];
+    echo '<br/>' . $ref . ' (' . $tx . ') : ';
 
     $p = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                 'ref' => $ref
@@ -45,13 +50,13 @@ foreach ($refs as $ref) {
     }
 
     echo $p->getLink() . ' - ';
-    
-    $ref = str_replace('SERV-', 'SERVEDUC-', $ref);
-    
-    $p->set('ref', $ref);
 
+//    $ref = str_replace('SERV-', 'SERVEDUC-', $ref);
+//    $p->set('ref', $ref);
 //    $p->set('tosell', 0);
 //    $p->set('tobuy', 0);
+
+    $p->set('cost_price_percent', $tx);
 
     $err = $p->update($w, true);
 

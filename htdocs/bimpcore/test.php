@@ -27,7 +27,17 @@ if (!$user->admin) {
     exit;
 }
 
-$refs = array();
+$refs = array(
+    'SERV-LIV',
+    'SERV-LIV-EDUC',
+    'SERV-LIV-EDUC01',
+    'SERV-LIV-EDUC02',
+    'SERV-PREST-TRANSFERT-ENI',
+    'SERV-REP-DIAGNOSTIC',
+    'SERV-SOF-DEP/PRESTA',
+    'SERV-TEAMWORKDISTANT',
+    'SERV-VPP-EDUC'
+);
 
 $w = array();
 foreach ($refs as $ref) {
@@ -43,12 +53,15 @@ foreach ($refs as $ref) {
         echo '</span>';
         continue;
     }
+
+    echo $p->getLink() . ' - ';
     
-    echo $p->getLink() .' - ';
+    $ref = str_replace('SERV-', 'SERVEDUC-', $ref);
+    
+    $p->set('ref', $ref);
 
-
-    $p->set('tosell', 0);
-    $p->set('tobuy', 0);
+//    $p->set('tosell', 0);
+//    $p->set('tobuy', 0);
 
     $err = $p->update($w, true);
 
@@ -57,7 +70,7 @@ foreach ($refs as $ref) {
     } else {
         echo 'OK';
     }
-    
+
 //    break;
 }
 

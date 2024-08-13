@@ -27,6 +27,40 @@ if (!$user->admin) {
     exit;
 }
 
+$refs = array();
+
+$w = array();
+foreach ($refs as $ref) {
+    echo '<br/>' . $ref . ' : ';
+
+    $p = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                'ref' => $ref
+    ));
+
+    if (!BimpObject::objectLoaded($p)) {
+        echo '<span class="danger">';
+        echo 'NON TROUVE';
+        echo '</span>';
+        continue;
+    }
+    
+    echo $p->getLink() .' - ';
+
+
+    $p->set('tosell', 0);
+    $p->set('tobuy', 0);
+
+    $err = $p->update($w, true);
+
+    if (!empty($err)) {
+        echo BimpRender::renderAlerts($err);
+    } else {
+        echo 'OK';
+    }
+    
+//    break;
+}
+
 echo '<br/>FIN';
 echo '</body></html>';
 

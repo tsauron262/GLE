@@ -1390,7 +1390,7 @@ class BDS_VerifsProcess extends BDSProcess
                             'label'                  => 'Vérifs revalorisations prix d\'achat',
                             'on_error'               => 'continue',
                             'elements'               => $elements,
-                            'nbElementsPerIteration' => 10
+                            'nbElementsPerIteration' => 100
                         );
                     }
                 } else {
@@ -1405,13 +1405,63 @@ class BDS_VerifsProcess extends BDSProcess
         if ($step_name == 'process') {
             $this->setCurrentObjectData('bimpcommercial', 'Bimp_FactureLine');
             if (!empty($this->references)) {
-//                echo '<pre>';
-//                print_r($this->references);
-//                exit;
-//
-//                foreach ($this->references as $ref) {
-//                    
-//                }
+                $prod = null;
+
+                foreach ($this->references as $ref) {
+                    $this->incProcessed();
+
+                    $data = explode(';', $ref);
+                    $id_prod = (int) $data[0];
+                    $id_line = (int) $data[1];
+
+                    if (!BimpObject::objectLoaded($prod) || $prod->id !== $id_prod) {
+                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+
+                        if (!BimpObject::objectLoaded($prod)) {
+                            $this->Error('Produit #' . $id_prod . ' non trouvé');
+                            $this->incIgnored();
+                            continue;
+                        }
+                    }
+
+                    $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                                'id_line' => $id_line
+                    ));
+
+                    if (!BimpObject::objectLoaded($fac_line)) {
+                        $this->Error('Aucune ligne de facture trouvée pour l\'ID ' . $id_line);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $facture = $fac_line->getParentInstance();
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $this->Error('Facture absente pour la ligne #' . $fac_line->id);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $cur_pa_ht = $prod->getCurrentPaHt();
+                    $line_pa_ht = $fac_line->getPaWithRevalorisations();
+
+                    if ($cur_pa_ht == $line_pa_ht) {
+                        $this->Info('PA revalorisé à jour (' . $line_pa_ht . ')', $fac_line);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $line_errors = $fac_line->updatePrixAchat($cur_pa_ht);
+
+                    if (count($line_errors)) {
+                        $this->Error(BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour du prix d\'achat'), $fac_line);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $this->Success('Màj PA ok (' . $cur_pa_ht . ')', $fac_line);
+                    $this->incUpdated();
+                    break;
+                }
             }
         }
     }

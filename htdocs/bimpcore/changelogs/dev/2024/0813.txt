@@ -1,2 +1,3 @@
 - Script désactivation services
 - Script changement de ref services
+- Blocage édition PA services sur pourcentages fixes

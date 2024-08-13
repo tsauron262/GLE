@@ -1460,7 +1460,6 @@ class BDS_VerifsProcess extends BDSProcess
 
                     $this->Success('Màj PA ok (' . $cur_pa_ht . ')', $fac_line);
                     $this->incUpdated();
-                    break;
                 }
             }
         }

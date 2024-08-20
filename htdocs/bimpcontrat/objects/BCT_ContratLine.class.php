@@ -119,9 +119,9 @@ class BCT_ContratLine extends BimpObject
 
             global $user;
 
-            if (!$user->admin && $this->getData('line_origin_type') == 'propal_line' && (int) $this->getData('id_line_origin') > 0) {
-                return 0;
-            }
+//            if (!$user->admin && $this->getData('line_origin_type') == 'propal_line' && (int) $this->getData('id_line_origin') > 0) {
+//                return 0;
+//            }
         }
 
         $status = (int) $this->getData('statut');

@@ -82,7 +82,7 @@ class BCT_Contrat extends BimpDolObject
                 if ($user->rights->bimpcontract->to_validate) {
                     return 1;
                 }
-                return 0;
+                return 1;
 
             case 'CorrectAbosStocksAll':
                 return ($user->admin ? 1 : 0);

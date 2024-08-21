@@ -1629,6 +1629,8 @@ cards:
                 field: code_compta
             code_compta_fournisseur: 
                 field: code_compta_fournisseur
+            siret: 
+                field: siret
             adress: 
                 label: Adresse
                 value: 

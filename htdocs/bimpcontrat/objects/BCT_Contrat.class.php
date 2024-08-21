@@ -569,7 +569,7 @@ class BCT_Contrat extends BimpDolObject
 
         BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
 
-        $fields = array('a.rowid as id_line', 'c.ref');
+        $fields = array('a.rowid as id_line', 'c.ref', 'c.label');
 
         if ($display_refs) {
             $fields[] = 'p.ref as prod_ref';
@@ -607,7 +607,13 @@ class BCT_Contrat extends BimpDolObject
             foreach ($rows as $r) {
                 $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $r['id_line']);
                 if (BimpObject::objectLoaded($line)) {
-                    $label = 'Contrat ' . $r['ref'] . ' - ligne n° ' . $line->getData('rang');
+                    $label = 'Contrat ' . $r['ref'];
+
+                    if ($r['label']) {
+                        $label .= ' (' . $r['label'] . ')';
+                    }
+
+                    $label .= ' - ligne n° ' . $line->getData('rang');
 
                     if ($display_refs) {
                         $label .= ' (' . $r['prod_ref'] . ')';

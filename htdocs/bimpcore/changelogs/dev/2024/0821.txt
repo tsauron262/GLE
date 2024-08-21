@@ -4,3 +4,4 @@
     - Ajouts boutons "Lignes" est "Synthèse" dans liste contrats
     - Ajout bouton "Message facturation"
     - Ajout libellé contrat dans select abonnement lié
+    - Ajout fonction déplacement des lignes d'un contrat vers un autre

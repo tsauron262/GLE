@@ -7440,37 +7440,37 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         if (isset($instance_def['name'])) {
                             $object_name = $instance_def['name'];
                         }
+                    }
 
-                        if ($module && $object_name) {
-                            $instance = BimpObject::getInstance($module, $object_name);
+                    if ($module && $object_name) {
+                        $instance = BimpObject::getInstance($module, $object_name);
 
-                            if (!$this->isChild($instance)) {
+                        if (!$this->isChild($instance)) {
+                            return;
+                        }
+
+                        if ($instance->params['positions']) {
+                            $parent_id_prop = $instance->getParentIdProperty();
+
+                            if (!(string) $parent_id_prop) {
                                 return;
                             }
+                            
+                            $table = $instance->getTable();
+                            $primary = $instance->getPrimary();
 
-                            if ($instance->params['positions']) {
-                                $parent_id_prop = $instance->getParentIdProperty();
+                            $items = $instance->getList(array(
+                                $parent_id_prop => (int) $this->id
+                                    ), null, null, $instance->position_field, 'asc', 'array', array($primary, $instance->position_field));
 
-                                if (!(string) $parent_id_prop) {
-                                    return;
+                            $i = 1;
+                            foreach ($items as $item) {
+                                if ((int) $item[$instance->position_field] !== (int) $i) {
+                                    $instance->db->update($table, array(
+                                        $instance->position_field => (int) $i
+                                            ), '`' . $primary . '` = ' . (int) $item[$primary]);
                                 }
-
-                                $table = $instance->getTable();
-                                $primary = $instance->getPrimary();
-
-                                $items = $instance->getList(array(
-                                    $parent_id_prop => (int) $this->id
-                                        ), null, null, $instance->position_field, 'asc', 'array', array($primary, $instance->position_field));
-
-                                $i = 1;
-                                foreach ($items as $item) {
-                                    if ((int) $item[$instance->position_field] !== (int) $i) {
-                                        $instance->db->update($table, array(
-                                            $instance->position_field => (int) $i
-                                                ), '`' . $primary . '` = ' . (int) $item[$primary]);
-                                    }
-                                    $i++;
-                                }
+                                $i++;
                             }
                         }
                     }

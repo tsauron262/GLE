@@ -27,47 +27,8 @@ if (!$user->admin) {
     exit;
 }
 
-//$refs = array();
-$refs = file(DOL_DOCUMENT_ROOT . '/bimpcore/test.txt');
-
-$w = array();
-foreach ($refs as $ref) {
-    $data = explode(';', $ref);
-
-    $ref = $data[0];
-    $tx = (float) $data[1];
-    echo '<br/>' . $ref . ' (' . $tx . ') : ';
-
-    $p = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
-                'ref' => $ref
-    ));
-
-    if (!BimpObject::objectLoaded($p)) {
-        echo '<span class="danger">';
-        echo 'NON TROUVE';
-        echo '</span>';
-        continue;
-    }
-
-    echo $p->getLink() . ' - ';
-
-//    $ref = str_replace('SERV-', 'SERVEDUC-', $ref);
-//    $p->set('ref', $ref);
-//    $p->set('tosell', 0);
-//    $p->set('tobuy', 0);
-
-    $p->set('cost_price_percent', $tx);
-
-    $err = $p->update($w, true);
-
-    if (!empty($err)) {
-        echo BimpRender::renderAlerts($err);
-    } else {
-        echo 'OK';
-    }
-
-//    break;
-}
+//$c = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', 13401);
+//$c->resetChildrenPositions('lines');
 
 echo '<br/>FIN';
 echo '</body></html>';

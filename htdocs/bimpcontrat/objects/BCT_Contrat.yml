@@ -586,6 +586,29 @@ views:
                 - type: custom
                   custom: 
                       callback: renderSyntheseTab
+                      
+    lines: 
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderChildrenList
+                          params: 
+                              - lines
+                              - contrat
+                              - 1
+                              
+    synthese: 
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderSyntheseTab
+                          params: 
+                              - 0
+                              
        
 filters_panels: 
     default: 
@@ -626,6 +649,8 @@ lists:
         edit_form: default
         delete_btn: 0
         page_btn: 1
+        extra_btn: 
+            callback: getListExtraButtons
         cols: 
             ref:
             statut:

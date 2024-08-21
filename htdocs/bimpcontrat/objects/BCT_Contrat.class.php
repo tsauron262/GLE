@@ -277,6 +277,27 @@ class BCT_Contrat extends BimpDolObject
         return $buttons;
     }
 
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $buttons[] = array(
+                'label'   => 'Lignes',
+                'icon'    => 'fas_bars',
+                'onclick' => $this->getJsLoadModalView('lines', 'Lignes du contrat ' . $this->getRef())
+            );
+
+            $buttons[] = array(
+                'label'   => 'Synthèse',
+                'icon'    => 'fas_list-alt',
+                'onclick' => $this->getJsLoadModalView('synthese', 'Synthèse du contrat ' . $this->getRef())
+            );
+        }
+
+        return $buttons;
+    }
+
     // Getters données : 
 
     public function getBimpObjectsLinked($not_for = '')
@@ -720,17 +741,19 @@ class BCT_Contrat extends BimpDolObject
         ));
     }
 
-    public function renderSyntheseTab()
+    public function renderSyntheseTab($refresh_btn = true)
     {
         $html = '';
 
-        $onclick = $this->getJsLoadCustomContent('renderSyntheseTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
+        if ($refresh_btn) {
+            $onclick = $this->getJsLoadCustomContent('renderSyntheseTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
-        $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
-        $html .= '<span class="btn btn-default refreshContratSyntheseButton" onclick="' . $onclick . '">';
-        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
-        $html .= '</span>';
-        $html .= '</div>';
+            $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
+            $html .= '<span class="btn btn-default refreshContratSyntheseButton" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
 
         $lines = $this->getLines('abo', false, array(
             'fk_product'    => array(
@@ -926,7 +949,7 @@ class BCT_Contrat extends BimpDolObject
                                     $line_desc .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
                                 }
                             }
-                            
+
                             $description = $line->getData('description');
                             if ($description) {
                                 $line_desc .= '<br/>' . BimpRender::renderExpandableText($description, 120, 11, 180);

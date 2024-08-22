@@ -2888,7 +2888,7 @@ class Bimp_Client extends Bimp_Societe
                         'buttons'   => $detail_btn
                     );
 
-                    $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= '<div class="prod_sublines_container" style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
                     $lines_content .= '<div style="margin-bottom: 5px;">';
                     $lines_content .= BimpInput::renderInput('check_list', 'prod_' . $prod->id . '_display_filters', array('active', 'inactive'), array(
                                 'items'              => array(

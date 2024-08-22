@@ -2744,6 +2744,7 @@ class Bimp_Client extends Bimp_Societe
                                 $qty = (float) $line->getData('qty');
                                 $nb_units = ($qty / $duration) * $prod_duration;
                                 $line_statut = (int) $line->getData('statut');
+                                $line_statut_code = '';
 
                                 switch ($line_statut) {
                                     case -2:
@@ -2751,16 +2752,19 @@ class Bimp_Client extends Bimp_Societe
                                     case 0:
                                         $units['inactive'] += $nb_units;
                                         $qties['inactive'] += $qty;
+                                        $line_statut_code = 'inactive';
                                         break;
 
                                     case 4:
                                         $units['active'] += $nb_units;
                                         $qties['active'] += $qty;
+                                        $line_statut_code = 'active';
                                         break;
 
                                     case 5:
                                         $units['closed'] += $nb_units;
                                         $qties['closed'] += $qty;
+                                        $line_statut_code = 'closed';
                                         break;
                                 }
 
@@ -2818,6 +2822,7 @@ class Bimp_Client extends Bimp_Societe
                                 }
 
                                 $lines_rows[] = array(
+                                    'show_tr'   => ($line_statut_code != 'closed' ? 1 : 0),
                                     'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
                                     'desc'      => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
                                     'linked'    => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
@@ -2883,6 +2888,19 @@ class Bimp_Client extends Bimp_Societe
                     );
 
                     $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= '<div style="margin-bottom: 5px;">';
+                    $lines_content .= BimpInput::renderInput('check_list', 'prod_' . $prod->id . '_display_filters', array('active', 'inactive'), array(
+                                'items'              => array(
+                                    'active'   => 'Actives',
+                                    'inactive' => 'Inactives',
+                                    'closed'   => 'Fermées'
+                                ),
+                                'search_input'       => 0,
+                                'select_all_buttons' => 0,
+                                'inline'             => 1,
+                                'onchange'           => 'BimpContrat.onSyntheseProdLineDisplayFilterChange($(this));'
+                    ));
+                    
                     $lines_content .= BimpRender::renderBimpListTable($lines_rows, $lines_headers, array(
                                 'is_sublist' => true
                     ));

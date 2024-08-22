@@ -1,3 +1,2 @@
-[FLORIAN] 
-    - Script correctif bundles contrats. 
-    - Affichage liste bundles invalides dans les contrats. 
+- Script correctif bundles contrats. 
+- Affichage liste bundles invalides dans les contrats. 

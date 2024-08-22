@@ -407,7 +407,7 @@ class BimpController
 
         $obj = $alert->getNextAlert();
         if ($obj)
-            echo '<script '.BimpTools::getScriptAttribut().'>$(document).ready(function () {' . $alert->getPopup($obj->id, $obj->getData('label')) . '});</script>';
+            echo '<script ' . BimpTools::getScriptAttribut() . '>$(document).ready(function () {' . $alert->getPopup($obj->id, $obj->getData('label')) . '});</script>';
 
         llxFooter();
     }
@@ -450,7 +450,7 @@ class BimpController
                         continue;
                     }
                 }
-                echo '<script '.BimpTools::getScriptAttribut().' src="' . BimpCore::getFileUrl($jsFile) . '"></script>';
+                echo '<script ' . BimpTools::getScriptAttribut() . ' src="' . BimpCore::getFileUrl($jsFile) . '"></script>';
             }
         }
 
@@ -3414,13 +3414,13 @@ class BimpController
 
         foreach ($files as $entry) {
             if (is_file($dir . $entry)) {
-                $days[substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2)] .= nl2br(file_get_contents($dir . $entry));
+                $days[substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2)] .= nl2br(trim(file_get_contents($dir . $entry)));
             }
         }
 
         foreach ($days as $date => $log) {
             $logs .= '<br/><b>Le ' . $date . ' : </b><br/>';
-            $logs .= $log;
+            $logs .= $log . '<br/>';
         }
 
         if (!$logs) {

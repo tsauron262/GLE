@@ -1,5 +1,6 @@
 - Ajout SIRET dans mini-fiche client
-- Contrats abonnement : 
+
+Contrats abonnement : 
     - Reprise du libellé contrat lors de la facturation
     - Ajouts boutons "Lignes" est "Synthèse" dans liste contrats
     - Ajout bouton "Message facturation"

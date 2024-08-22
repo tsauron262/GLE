@@ -1,4 +1,4 @@
-- Contrats abonnement : 
+Contrats abonnement : 
     - 2 décimales dans les PDF pour les qtés et unités si prorata
     - Commandes liées masquées dans l'en-tête si fermées
     - Filtres d'affichage dans synthèse abonnements selon statuts des sous-lignes

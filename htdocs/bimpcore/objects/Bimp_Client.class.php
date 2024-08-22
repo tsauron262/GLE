@@ -2822,18 +2822,19 @@ class Bimp_Client extends Bimp_Societe
                                 }
 
                                 $lines_rows[] = array(
-                                    'show_tr'   => ($line_statut_code != 'closed' ? 1 : 0),
-                                    'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
-                                    'desc'      => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
-                                    'linked'    => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
-                                    'statut'    => $line->displayDataDefault('statut'),
-                                    'dates'     => $dates,
-                                    'fac'       => $line->displayFacInfos(),
-                                    'achats'    => $line->displayAchatInfos(false),
-                                    'units'     => $nb_units,
-                                    'qty'       => $qty,
-                                    'pu_ht'     => $line->displayDataDefault('subprice'),
-                                    'buttons'   => $buttons_html
+                                    'show_tr'         => ($line_statut_code != 'closed' ? 1 : 0),
+                                    'row_style'       => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
+                                    'row_extra_class' => 'status_' . $line_statut_code,
+                                    'desc'            => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
+                                    'linked'          => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
+                                    'statut'          => $line->displayDataDefault('statut'),
+                                    'dates'           => $dates,
+                                    'fac'             => $line->displayFacInfos(),
+                                    'achats'          => $line->displayAchatInfos(false),
+                                    'units'           => $nb_units,
+                                    'qty'             => $qty,
+                                    'pu_ht'           => $line->displayDataDefault('subprice'),
+                                    'buttons'         => $buttons_html
                                 );
                             }
                         }
@@ -2900,7 +2901,7 @@ class Bimp_Client extends Bimp_Societe
                                 'inline'             => 1,
                                 'onchange'           => 'BimpContrat.onSyntheseProdLineDisplayFilterChange($(this));'
                     ));
-                    
+
                     $lines_content .= BimpRender::renderBimpListTable($lines_rows, $lines_headers, array(
                                 'is_sublist' => true
                     ));

@@ -54,16 +54,16 @@ class Bimp_Propal extends Bimp_PropalTemp
         4 => array('label' => 'Commande facturée', 'icon' => 'check', 'classes' => array('success')),
     );
 
-    const CONTRATS_STATUS_NONE = 0;
-    const CONTRATS_STATUS_TODO = 1;
-    const CONTRATS_STATUS_DONE = 2;
-    const CONTRATS_STATUS_DONE_FORCED = 3;
+    const PROCESS_STATUS_NONE = 0;
+    const PROCESS_STATUS_TODO = 1;
+    const PROCESS_STATUS_DONE = 2;
+    const PROCESS_STATUS_DONE_FORCED = 3;
 
-    public static $contrats_status_list = array(
-        self::CONTRATS_STATUS_NONE        => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
-        self::CONTRATS_STATUS_TODO        => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
-        self::CONTRATS_STATUS_DONE        => array('label' => 'Traités', 'icon' => 'fas_check', 'classes' => array('success')),
-        self::CONTRATS_STATUS_DONE_FORCED => array('label' => 'Traités (forcé)', 'icon' => 'fas_check', 'classes' => array('success'))
+    public static $processes_status_list = array(
+        self::PROCESS_STATUS_NONE        => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
+        self::PROCESS_STATUS_TODO        => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
+        self::PROCESS_STATUS_DONE        => array('label' => 'Traités', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::PROCESS_STATUS_DONE_FORCED => array('label' => 'Traités (forcé)', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $acomptes_allowed = true;
@@ -402,7 +402,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createContratAbo':
             case 'ForceContratsStatus':
-                if ((int) $this->getData('contrats_status') === self::CONTRATS_STATUS_DONE_FORCED) {
+                if ((int) $this->getData('contrats_status') === self::PROCESS_STATUS_DONE_FORCED) {
                     $errors[] = 'Le statut "Traités" a été forcé';
                     return 0;
                 }
@@ -1781,6 +1781,64 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     // Traitements: 
 
+    public function checkCommandeStatus($cur_status = null)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if (!$this->field_exists('commande_status')) {
+            $errors[] = 'statut commande non activé';
+            return $errors;
+        }
+
+        if ((int) $this->getData('commande_status') === self::PROCESS_STATUS_DONE_FORCED) {
+            return array();
+        }
+
+        $new_commande_status = self::PROCESS_STATUS_NONE;
+
+        if (is_null($cur_status)) {
+            $cur_status = (int) $this->getData('fk_statut');
+        }
+
+        if ($cur_status == 4) {
+            $new_commande_status = self::PROCESS_STATUS_DONE;
+        } elseif ($cur_status == 2) {
+            if (!empty(BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande')))) {
+                $new_commande_status = self::PROCESS_STATUS_DONE;
+            } else {
+                $lines = $this->getLines('not_text');
+
+                if (!empty($lines)) {
+                    foreach ($lines as $key => $line) {
+                        if ($line->isAbonnement()) {
+                            unset($lines[$key]);
+                        }
+                    }
+                }
+
+                if (!empty($lines)) {
+                    $new_commande_status = self::PROCESS_STATUS_TODO;
+                } else {
+                    $new_commande_status = self::PROCESS_STATUS_DONE;
+                }
+            }
+        }
+
+        if ($new_commande_status !== (int) $this->getData('commande_status')) {
+            $errors = $this->updateField('commande_status', $new_commande_status);
+
+            if (!count($errors)) {
+                $this->addObjectLog('Statut commande passé à ' . strip_tags($this->displayDataDefault('commande_status')));
+            }
+        }
+
+        return $errors;
+    }
+
     public function checkContratsStatus($cur_status = null)
     {
         $errors = array();
@@ -1794,11 +1852,11 @@ class Bimp_Propal extends Bimp_PropalTemp
             return $errors;
         }
 
-        if ((int) $this->getData('contrats_status') === self::CONTRATS_STATUS_DONE_FORCED) {
+        if ((int) $this->getData('contrats_status') === self::PROCESS_STATUS_DONE_FORCED) {
             return array();
         }
 
-        $new_contrats_status = self::CONTRATS_STATUS_NONE;
+        $new_contrats_status = self::PROCESS_STATUS_NONE;
 
         if (BimpCore::isModuleActive('bimpcontrat')) {
             if (is_null($cur_status)) {
@@ -1807,7 +1865,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             if (in_array($cur_status, array(2, 4))) {
                 if ($this->getData('date_valid') <= '2023-10-01 00:00:00') {
-                    $new_contrats_status = self::CONTRATS_STATUS_DONE;
+                    $new_contrats_status = self::PROCESS_STATUS_DONE;
                 } else {
                     $lines = $this->getAbonnementsLinesIds(true, true);
 
@@ -1832,9 +1890,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
 
                     if (!empty($lines)) {
-                        $new_contrats_status = self::CONTRATS_STATUS_TODO;
+                        $new_contrats_status = self::PROCESS_STATUS_TODO;
                     } else {
-                        $new_contrats_status = self::CONTRATS_STATUS_DONE;
+                        $new_contrats_status = self::PROCESS_STATUS_DONE;
                     }
                 }
             }
@@ -2865,7 +2923,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $warnings = array();
         $success = 'Enregistrement effectué';
 
-        $errors = $this->updateField('contrats_status', self::CONTRATS_STATUS_DONE_FORCED);
+        $errors = $this->updateField('contrats_status', self::PROCESS_STATUS_DONE_FORCED);
 
         return array(
             'errors'   => $errors,

@@ -969,27 +969,28 @@ forms:
               display_if: 
                   field_name: bon_resti_raison
                   show_values: 99
-            - custom: 1
-              label: Demander la signature du bon de restitution
-              input_name: create_signature_resti
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 1
-            - custom: 1
-              label: Contact signataire
-              input_name: id_contact_signataire
-              data_type: id
-              input: 
-                  type: select
-                  options: 
-                      array: client_contacts
-                  help: Obligatoire pour les clients pros
-              value: 
-                  field_value: id_contact
-              display_if: 
-                  field_name: create_signature_resti
-                  show_values: 1
+#            - custom: 1
+#              label: Demander la signature du bon de restitution
+#              input_name: create_signature_resti
+#              data_type: bool
+#              input: 
+#                  type: toggle
+#              value: 1
+#            - custom: 1
+#              label: Contact signataire
+#              input_name: id_contact_signataire
+#              data_type: id
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: client_contacts
+#                  help: Obligatoire pour les clients pros
+#              value: 
+#                  field_value: id_contact
+#              display_if: 
+#                  field_name: create_signature_resti
+#                  show_values: 1
+
               
     contact: 
         title: Recontacter

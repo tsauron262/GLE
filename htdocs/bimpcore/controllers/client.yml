@@ -13,7 +13,7 @@ js:
     - /bimpapple/views/js/gsx.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
-    - bimpcontrat/views/js/bimp_contrat.js
+    - /bimpcontrat/views/js/bimp_contrat.js
 #    - /bimpcontratauto/js/ajax.js
     
 css:

@@ -675,9 +675,9 @@ class BCT_Contrat extends BimpDolObject
                     $items = BimpTools::getDolObjectLinkedObjectsList($propal->dol_object, $this->db, array('commande'));
                     //                print_r($items);
                     foreach ($items as $id) {
-                        $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id['id_object']);
-                        if ($obj->isLoaded()) {
-                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $obj->getLink(), 'warning');
+                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id['id_object']);
+                        if ($commande->isLoaded() && in_array((int) $commande->getData('fk_statut'), array(1, 2, 3))) {
+                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $commande->getLink(), 'warning');
                         }
                     }
                 }

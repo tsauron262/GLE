@@ -992,7 +992,8 @@ class BCT_Contrat extends BimpDolObject
                             }
 
                             $lines_rows[] = array(
-                                'row_style'       => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px;' : '1px;') . ($line_statut_code == 'closed' ? ' display: none;' : ''),
+                                'show_tr'         => ($line_statut_code != 'closed' ? 1 : 0),
+                                'row_style'       => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px;' : '1px;'),
                                 'row_extra_class' => 'status_' . $line_statut_code,
                                 'desc'            => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
                                 'linked'          => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),

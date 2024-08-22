@@ -1658,8 +1658,11 @@ class BimpObject extends BimpCache
             return $this->data[$field];
         }
 
-        if ($default)
+        if ($default) {
             return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
+        }
+        
+        return null;
     }
 
     public function getInitData($field)
@@ -7455,7 +7458,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             if (!(string) $parent_id_prop) {
                                 return;
                             }
-                            
+
                             $table = $instance->getTable();
                             $primary = $instance->getPrimary();
 

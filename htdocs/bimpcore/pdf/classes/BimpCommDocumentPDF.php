@@ -839,7 +839,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 //                    $this->acompteTva[$line->tva_tx] -= $line->total_tva;
                     continue;
                 }
-                
+
                 $row = array();
                 $i++;
 
@@ -1001,6 +1001,10 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                     $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
+                    if (BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('abo_fac_periodicity')) {
+                        $row['qte'] = round($row['qte'], 2);
+                    }
+
                     if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
                         $row['progress'] = pdf_getlineprogress($this->object, $i, $this->langs);
                     }
@@ -1073,7 +1077,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                                             $nb_periods *= (int) $comm_line->getData('fac_nb_periods');
                                             $nb_month = round($nb_periods * (int) $comm_line->getData('fac_periodicity'));
-                                            $row['qte'] = round((float) $row['qte'], 6);
+                                            $row['qte'] = round((float) $row['qte'], 2);
                                             $row['qte'] .= '<br/>';
                                             $row['qte'] .= '(' . $nb_month . ' mois <br/>x ' . $comm_full_qty . ' unité' . ($comm_full_qty > 1 ? 's' : '') . ')';
                                         }

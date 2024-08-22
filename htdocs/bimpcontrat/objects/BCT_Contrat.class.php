@@ -914,6 +914,7 @@ class BCT_Contrat extends BimpDolObject
                             $qty = (float) $line->getData('qty');
                             $nb_units = ($qty / $duration) * $prod_duration;
                             $line_statut = (int) $line->getData('statut');
+                            $line_statut_code = '';
 
                             switch ($line_statut) {
                                 case -2:
@@ -921,16 +922,19 @@ class BCT_Contrat extends BimpDolObject
                                 case 0:
                                     $units['inactive'] += $nb_units;
                                     $qties['inactive'] += $qty;
+                                    $line_statut_code = 'inactive';
                                     break;
 
                                 case 4:
                                     $units['active'] += $nb_units;
                                     $qties['active'] += $qty;
+                                    $line_statut_code = 'active';
                                     break;
 
                                 case 5:
                                     $units['closed'] += $nb_units;
                                     $qties['closed'] += $qty;
+                                    $line_statut_code = 'closed';
                                     break;
                             }
 
@@ -988,17 +992,18 @@ class BCT_Contrat extends BimpDolObject
                             }
 
                             $lines_rows[] = array(
-                                'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
-                                'desc'      => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
-                                'linked'    => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
-                                'statut'    => $line->displayDataDefault('statut'),
-                                'dates'     => $dates,
-                                'fac'       => $line->displayFacInfos(),
-                                'achats'    => $line->displayAchatInfos(false),
-                                'units'     => $nb_units,
-                                'qty'       => $qty,
-                                'pu_ht'     => $line->displayDataDefault('subprice'),
-                                'buttons'   => $buttons_html
+                                'row_style'       => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px;' : '1px;') . ($line_statut_code == 'closed' ? ' display: none;' : ''),
+                                'row_extra_class' => 'status_' . $line_statut_code,
+                                'desc'            => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
+                                'linked'          => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
+                                'statut'          => $line->displayDataDefault('statut'),
+                                'dates'           => $dates,
+                                'fac'             => $line->displayFacInfos(),
+                                'achats'          => $line->displayAchatInfos(false),
+                                'units'           => $nb_units,
+                                'qty'             => $qty,
+                                'pu_ht'           => $line->displayDataDefault('subprice'),
+                                'buttons'         => $buttons_html
                             );
                         }
                     }
@@ -1051,7 +1056,21 @@ class BCT_Contrat extends BimpDolObject
                         'buttons'   => $detail_btn
                     );
 
-                    $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= '<div class="prod_sublines_container" style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= '<div style="margin-bottom: 5px;">';
+                    $lines_content .= BimpInput::renderInput('check_list', 'prod_' . $prod->id . '_display_filters', array('active', 'inactive'), array(
+                                'items'              => array(
+                                    'active'   => 'Actives',
+                                    'inactive' => 'Inactives',
+                                    'closed'   => 'Fermées'
+                                ),
+                                'search_input'       => 0,
+                                'select_all_buttons' => 0,
+                                'inline'             => 1,
+                                'onchange'           => 'BimpContrat.onSyntheseProdLineDisplayFilterChange($(this));'
+                    ));
+                    $lines_content .= '</div>';
+
                     $lines_content .= BimpRender::renderBimpListTable($lines_rows, $lines_headers, array(
                                 'is_sublist' => true
                     ));

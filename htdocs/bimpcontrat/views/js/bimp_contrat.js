@@ -412,6 +412,30 @@ function BimpContrat() {
         extra_data.lines = lines;
         return extra_data;
     };
+
+    // Synthèse : 
+    this.onSyntheseProdLineDisplayFilterChange = function ($input) {
+        if ($.isOk($input)) {
+            var checked = $input.prop('checked');
+            var status_code = $input.val();
+
+            var $container = $input.findParentByClass('prod_sublines_container');
+
+            if ($.isOk($container)) {
+                var $rows = $container.find('tr.status_' + status_code);
+
+                if ($rows.length) {
+                    if (checked) {
+                        bimp_msg('show : ' + status_code);
+                        $rows.show();
+                    } else {
+                        bimp_msg('hide : ' + status_code);
+                        $rows.hide();
+                    }
+                }
+            }
+        }
+    };
 }
 
 var BimpContrat = new BimpContrat();

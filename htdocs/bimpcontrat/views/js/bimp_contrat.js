@@ -426,10 +426,10 @@ function BimpContrat() {
 
                 if ($rows.length) {
                     if (checked) {
-                        bimp_msg('show : ' + status_code);
+//                        bimp_msg('show : ' + status_code);
                         $rows.show();
                     } else {
-                        bimp_msg('hide : ' + status_code);
+//                        bimp_msg('hide : ' + status_code);
                         $rows.hide();
                     }
                 }

@@ -8331,7 +8331,7 @@ class BCT_ContratLine extends BimpObject
                 if ($id_propal) {
                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
                     if (BimpObject::objectLoaded($propal)) {
-                        $propal->checkContratsStatus();
+                        $this->checkProcessesStatus();
                     }
                 }
             }

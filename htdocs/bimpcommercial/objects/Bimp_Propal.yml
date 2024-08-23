@@ -175,18 +175,18 @@ fields:
     signature_params: 
         label: Paramètres incrustation signature
         type: json
+    commande_status: 
+        label: Statut commande
+        type: int
+        values:
+            array: commande_status_list
+        default_value: 0
     contrats_status: 
         label: Statut contrats d'abonnement
         type: int
         values:
-            array: processes_status_list
+            array: contrats_status_list
         default_value: 0
-#    commande_status: 
-#        label: Statut commande
-#        type: int
-#        values:
-#            array: processes_status_list
-#        default_value: 0
     id_demande_fin:
         label: Demande de location
         type: id_object

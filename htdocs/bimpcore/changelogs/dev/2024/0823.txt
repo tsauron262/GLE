@@ -1,0 +1,2 @@
+- Ajout du champ "Statut commande" dans les devis
+- Process vérif statut commande pour tous les devis

@@ -1465,6 +1465,66 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
+    // Vérifs et correction des statuts commande dans les devis: 
+
+    public function initCheckPropalsCommandeStatus(&$data, &$errors = array())
+    {
+        $rows = $this->db->getRows('propal', 'commande_status = 1', null, 'array', array('rowid'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $elements = array();
+
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['rowid'];
+                }
+
+//                die('N : ' . count($elements));
+
+                $data['steps']['process'] = array(
+                    'label'                  => 'Vérifs des statuts commande',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 1
+                );
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCheckPropalsCommandeStatus($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcommercial', 'Bimp_Propal');
+            if (!empty($this->references)) {
+                foreach ($this->references as $id_propal) {
+                    $this->incProcessed();
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+
+                    if (!BimpObject::objectLoaded($propal)) {
+                        $this->Error('Propal #' . $id_propal . ' inexistante');
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $cur_status = (int) $propal->getData('commande_status');
+                    $err = $propal->checkCommandeStatus(null);
+                    $new_status = (int) $propal->getData('commande_status');
+
+                    $this->Info('New : ' . $new_status . ' - old : ' . $cur_status, $propal);
+
+                    if (!empty($err)) {
+                        $this->Error($err, $propal);
+                        $this->incIgnored();
+                    } elseif ($cur_status !== $new_status) {
+                        $this->incUpdated();
+                    }
+                }
+            }
+        }
+    }
+    
     // Install: 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -1799,6 +1859,20 @@ class BDS_VerifsProcess extends BDSProcess
             }
 
             $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
+        }
+        
+        if ($cur_version < 11) {
+            // Opération "Vérif des statuts commande des propales": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Vérif des statuts commande des propales',
+                        'name'          => 'checkPropalsCommandeStatus',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
+                            ), true, $errors, $warnings);
         }
 
         return $errors;

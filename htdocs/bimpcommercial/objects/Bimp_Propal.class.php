@@ -68,8 +68,8 @@ class Bimp_Propal extends Bimp_PropalTemp
     public static $commande_status_list = array(
         self::PROCESS_STATUS_NONE        => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
         self::PROCESS_STATUS_TODO        => array('label' => 'A créer', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
-        self::PROCESS_STATUS_DONE        => array('label' => 'Créée', 'icon' => 'fas_check', 'classes' => array('success')),
-        self::PROCESS_STATUS_DONE_FORCED => array('label' => 'Créée (forcé)', 'icon' => 'fas_check', 'classes' => array('success'))
+        self::PROCESS_STATUS_DONE        => array('label' => 'Créé(e)', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::PROCESS_STATUS_DONE_FORCED => array('label' => 'Créé(e) (forcé)', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $acomptes_allowed = true;
@@ -1496,7 +1496,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         if (in_array((int) $this->getData('fk_statut'), array(Propal::STATUS_SIGNED, Propal::STATUS_BILLED))) {
             if ($this->field_exists('commande_status')) {
-                $html .= '<br/>Commande : ' . $this->displayDataDefault('commande_status');
+                $html .= '<br/>Commande  / contrat standard : ' . $this->displayDataDefault('commande_status');
             }
             if (BimpCore::isModuleActive('bimpcontrat') && $this->field_exists('contrats_status')) {
                 $html .= '<br/>Contrats d\'abonnement : ' . $this->displayDataDefault('contrats_status');

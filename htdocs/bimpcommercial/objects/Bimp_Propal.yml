@@ -176,7 +176,7 @@ fields:
         label: Paramètres incrustation signature
         type: json
     commande_status: 
-        label: Statut commande
+        label: Statut commande / contrat standard
         type: int
         values:
             array: commande_status_list

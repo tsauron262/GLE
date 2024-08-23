@@ -1,2 +1,4 @@
-- Ajout du champ "Statut commande" dans les devis
+Devis : 
+- Ajout du champ "Statut commande"
 - Process vérif statut commande pour tous les devis
+- Ajout action "Forcer le statut commande créée"

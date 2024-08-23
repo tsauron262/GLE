@@ -1857,40 +1857,42 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         $new_commande_status = self::PROCESS_STATUS_NONE;
 
-        if (is_null($cur_status)) {
-            $cur_status = (int) $this->getData('fk_statut');
-        }
-
-        if ($cur_status == 4) {
-            $new_commande_status = self::PROCESS_STATUS_DONE;
-        } elseif ($cur_status == 2) {
-            $commandes_ids = array();
-
-            foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande')) as $item) {
-                if (!in_array((int) $item['id_object'], $commandes_ids)) {
-                    if ((int) $this->db->getValue('commande', 'rowid', 'rowid  = ' . $item['id_object']) > 0) {
-                        $commandes_ids[] = (int) $item['id_object'];
-                    }
-                }
+        if (!(int) $this->getIdSav()) {
+            if (is_null($cur_status)) {
+                $cur_status = (int) $this->getData('fk_statut');
             }
 
-            if (!empty($commandes_ids)) {
+            if ($cur_status == 4) {
                 $new_commande_status = self::PROCESS_STATUS_DONE;
-            } else {
-                $lines = $this->getLines('not_text');
+            } elseif ($cur_status == 2) {
+                $commandes_ids = array();
 
-                if (!empty($lines)) {
-                    foreach ($lines as $key => $line) {
-                        if ($line->isAbonnement()) {
-                            unset($lines[$key]);
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande')) as $item) {
+                    if (!in_array((int) $item['id_object'], $commandes_ids)) {
+                        if ((int) $this->db->getValue('commande', 'rowid', 'rowid  = ' . $item['id_object']) > 0) {
+                            $commandes_ids[] = (int) $item['id_object'];
                         }
                     }
                 }
 
-                if (!empty($lines)) {
-                    $new_commande_status = self::PROCESS_STATUS_TODO;
-                } else {
+                if (!empty($commandes_ids)) {
                     $new_commande_status = self::PROCESS_STATUS_DONE;
+                } else {
+                    $lines = $this->getLines('not_text');
+
+                    if (!empty($lines)) {
+                        foreach ($lines as $key => $line) {
+                            if ($line->isAbonnement()) {
+                                unset($lines[$key]);
+                            }
+                        }
+                    }
+
+                    if (!empty($lines)) {
+                        $new_commande_status = self::PROCESS_STATUS_TODO;
+                    } else {
+                        $new_commande_status = self::PROCESS_STATUS_DONE;
+                    }
                 }
             }
         }

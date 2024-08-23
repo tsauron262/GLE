@@ -2,3 +2,6 @@ Devis :
 - Ajout du champ "Statut commande"
 - Process vérif statut commande pour tous les devis
 - Ajout action "Forcer le statut commande créée"
+
+Emplacements équipements: 
+- Ajout type "SAV - Non restitué"

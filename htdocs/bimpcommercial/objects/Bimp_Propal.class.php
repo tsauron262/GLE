@@ -1874,8 +1874,17 @@ class Bimp_Propal extends Bimp_PropalTemp
                         }
                     }
                 }
+                
+                $contrats_ids = array();
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('contrat')) as $item) {
+                    if (!in_array((int) $item['id_object'], $commandes_ids)) {
+                        if ((int) $this->db->getValue('contrat', 'rowid', 'rowid  = ' . $item['id_object'] . ' AND version = 1') > 0) {
+                            $contrats_ids[] = (int) $item['id_object'];
+                        }
+                    }
+                }
 
-                if (!empty($commandes_ids)) {
+                if (!empty($commandes_ids) || !empty($contrats_ids)) {
                     $new_commande_status = self::PROCESS_STATUS_DONE;
                 } else {
                     $lines = $this->getLines('not_text');

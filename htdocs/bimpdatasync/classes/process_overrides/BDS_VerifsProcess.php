@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 10;
+    public static $current_version = 11;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 

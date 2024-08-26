@@ -4012,7 +4012,7 @@ class BimpTools
     }
 
     public static function sleppIfBloqued($type, $nb = 0)
-    {
+    {        
         $nb++;
         $fichierBloquant = static::isBloqued($type);
         if ($fichierBloquant) {

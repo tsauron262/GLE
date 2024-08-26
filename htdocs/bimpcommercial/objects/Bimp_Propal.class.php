@@ -1597,7 +1597,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         ));
 
                         $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                        $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter les lignes à un contrat d\'abonnement';
+                        $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Traiter les lignes d\'abonnement';
                         $msg .= '</span>';
 
                         if ($this->isActionAllowed('ForceContratsStatus') && $this->canSetAction('ForceContratsStatus')) {

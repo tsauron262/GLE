@@ -203,8 +203,10 @@ class BL_CommandeShipment extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
-        if ($this->getData('status') === self::BLCS_BROUILLON && $this->getTotalHT() == 0)
+        if ((int) $this->getData('status') === self::BLCS_BROUILLON && !$this->getTotalHT()) {
             return 1;
+        }
+
         return 0;
     }
 
@@ -915,7 +917,7 @@ class BL_CommandeShipment extends BimpObject
                     'confirm_msg' => 'Veuillez confirmer'
                 ));
 
-                if((int) $this->getData('id_signature') === -1){
+                if ((int) $this->getData('id_signature') === -1) {
                     $html .= '<span class="warning">Non applicable</span>';
                     $html .= '&nbsp;&nbsp;';
                 }
@@ -955,8 +957,7 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '</div>';
                 }
             }
-        }
-        else{
+        } else {
             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
                 $onclick = $this->getJsActionOnclick('createSignature', array('redirect' => 0), array(
                     'confirm_msg' => 'Veuillez confirmer'

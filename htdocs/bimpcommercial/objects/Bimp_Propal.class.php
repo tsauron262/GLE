@@ -1622,7 +1622,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
             }
 
-            if ($this->field_exists('commande_status') && (int) $this->getData('commande_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('ForceCommandeStatus')) {
+            if ($this->field_exists('commande_status') && (int) $this->getData('commande_status') === self::PROCESS_STATUS_TODO) {
                 $msg .= 'Aucune commande faite depuis ce devis';
 
                 if ($this->isActionAllowed('ForceCommandeStatus') && $this->canSetAction('ForceCommandeStatus')) {

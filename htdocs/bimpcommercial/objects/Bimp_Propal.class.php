@@ -1584,39 +1584,41 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             $this->checkProcessesStatus();
 
-            if ($this->field_exists('contrats_status') && (int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) {
+            if ($this->field_exists('contrats_status')) {
                 $nb_abos = $this->getNbAbonnements(true);
                 if ($nb_abos > 0) {
-                    $s = ($nb_abos > 1 ? 's' : '');
-                    $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
+                    if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || ($user->login == 'e.amadei')) {
+                        $s = ($nb_abos > 1 ? 's' : '');
+                        $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
-                    if ($this->canSetAction('createContratAbo')) {
-                        $msg .= '<div class="buttonsContainer" style="text-align: right">';
-                        $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
-                            'form_name' => 'contrat_abo'
-                        ));
-
-                        $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                        $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Traiter les lignes d\'abonnement';
-                        $msg .= '</span>';
-
-                        if ($this->isActionAllowed('ForceContratsStatus') && $this->canSetAction('ForceContratsStatus')) {
-                            $onclick = $this->getJsActionOnclick('ForceContratsStatus', array(), array(
-                                'confirm_msg' => 'Veuillez confirmer'
+                        if ($this->canSetAction('createContratAbo')) {
+                            $msg .= '<div class="buttonsContainer" style="text-align: right">';
+                            $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
+                                'form_name' => 'contrat_abo'
                             ));
 
                             $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                            $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Traités"';
+                            $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Traiter les lignes d\'abonnement';
+                            $msg .= '</span>';
+
+                            if ($this->isActionAllowed('ForceContratsStatus') && $this->canSetAction('ForceContratsStatus')) {
+                                $onclick = $this->getJsActionOnclick('ForceContratsStatus', array(), array(
+                                    'confirm_msg' => 'Veuillez confirmer'
+                                ));
+
+                                $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                                $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Traités"';
+                                $msg .= '</span>';
+                            }
+
+                            $msg .= '</div>';
+                        } else {
+                            $msg .= '<span class="danger">';
+                            $msg .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Vous n\'avez pas la permission de créer le contrat d\'abonnement';
                             $msg .= '</span>';
                         }
-
-                        $msg .= '</div>';
-                    } else {
-                        $msg .= '<span class="danger">';
-                        $msg .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Vous n\'avez pas la permission de créer le contrat d\'abonnement';
-                        $msg .= '</span>';
+                        $html .= BimpRender::renderAlerts($msg, 'warning');
                     }
-                    $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
             }
 
@@ -1874,7 +1876,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         }
                     }
                 }
-                
+
                 $contrats_ids = array();
                 foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('contrat')) as $item) {
                     if (!in_array((int) $item['id_object'], $commandes_ids)) {

@@ -1619,11 +1619,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                             $msg .= '</span>';
                         }
                         $html .= BimpRender::renderAlerts($msg, 'warning');
-                    } else {
-                        $html .= 'KO';
                     }
-                } else {
-                    $html .= 'NO ABOS';
                 }
             }
 

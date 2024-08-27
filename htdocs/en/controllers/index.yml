@@ -1,0 +1,72 @@
+bootstrap: 1
+title: Factures clients
+
+#js: 
+#    - /bimpcommercial/views/js/facture.js
+
+objects:     
+    commandes: 
+        instance:
+            bimp_object:  
+                module: en
+                name: en_cmd
+    eqLogic: 
+        instance:
+            bimp_object:  
+                module: en
+                name: en_eqLogic
+    histo: 
+        instance:
+            bimp_object:  
+                module: en
+                name: en_histo
+    histo2: 
+        instance:
+            bimp_object:  
+                module: en
+                name: en_histo2
+            
+sections: 
+    - type: tabs
+      tabs: 
+        default:
+            label: Commandes
+            sections: 
+                - type: list
+                  list: 
+                      object: commandes
+        eqLogic:
+            label: Objets
+            sections: 
+                - type: list
+                  list: 
+                      object: eqLogic
+        histo:
+            label: Historique
+            sections: 
+                - type: list
+                  list: 
+                      object: histo
+        histo2:
+            label: Historique calc
+            sections: 
+                - type: list
+                  list: 
+                      object: histo2
+        histoGraph:
+            label: Graphique
+            sections: 
+                - type: graph
+                  graph: 
+                      object: histo2
+                      name: conso
+                - type: graph
+                  graph: 
+                      object: histo2
+                      name: rep_prod
+                - type: graph
+                  graph: 
+                      object: histo2
+                      name: rep_conso
+        
+       

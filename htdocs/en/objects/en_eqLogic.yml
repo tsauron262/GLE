@@ -1,0 +1,21 @@
+table: en_eqLogic
+common_fields: 0
+
+labels: 
+    name: Objet
+                    
+fields: 
+    name:
+        label: Nom
+    
+        
+            
+lists:
+    default:
+        delete_btn: 1
+        update_btn: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            name: 

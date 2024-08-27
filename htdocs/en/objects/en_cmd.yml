@@ -1,0 +1,95 @@
+table: en_cmd
+common_fields: 0
+
+labels: 
+    name: Commandes
+    
+    
+
+parent_module: en
+parent_object: en_eqLogic
+parent_id_property: eqLogic_id
+
+extrafields: 
+    cmd_infos: 
+        table: en_cmd_infos
+        id_prop: id_cmd
+        delete_db_row: 1
+    
+objects:     
+    eqLogic: 
+        instance:
+            bimp_object:  
+                module: en
+                name: en_eqLogic
+            id_object: 
+                field_value: eqLogic_id
+    cmd_parent: 
+        instance:
+            bimp_object:  
+                module: en
+                name: en_cmd
+            id_object: 
+                field_value: id_cmd_parent
+                    
+fields: 
+    name:
+        label: Nom
+    generic_type:
+        label: Type générique
+    eqType:
+        label: Module
+    eqLogic_id:
+        label: Objet
+        type: id_object
+        object: eqLogic
+    role:
+        label: Role
+        type: select
+        values:
+            0: 
+            1: Conso
+            2: Prod
+            3: Inject
+        extra: 1
+        extrafields: cmd_infos
+    id_cmd_parent:
+        label: Sous compteur de
+        type: id_object
+        object: cmd_parent
+        extra: 1
+        extrafields: cmd_infos
+        
+    
+        
+            
+lists:
+    default:
+        title: Commandes
+        filters_panel: default
+        delete_btn: 1
+        update_btn: 1
+        add_btn: 1
+        add_form_name: default
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            id:
+            eqLogic_id:
+            name: 
+                edit: 1
+            generic_type:
+                edit: 1 
+            eqType:
+            role:
+                edit: 1
+            id_cmd_parent:
+                edit: 1
+                
+                       
+filters_panels: 
+    default: 
+        filters: 
+            name:
+            generic_type:

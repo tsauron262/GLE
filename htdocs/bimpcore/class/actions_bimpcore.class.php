@@ -61,6 +61,9 @@ class ActionsBimpcore
     var $bimp_fixe_tabs = null;
     var $resprints = '';
     var $priority = 1;
+    var $error = '';
+    var $errors = array();
+    var $results = array();
 
     function bimpcoreInit($parameters, &$object, &$action, $hookmanager)
     {

@@ -1,0 +1,140 @@
+table: en_historyArch2
+common_fields: 0
+
+labels: 
+    name: Historique Calc
+    
+    
+
+parent_module: en
+parent_object: en_cmd
+parent_id_property: cmd_id
+    
+objects:     
+    cmd: 
+        instance:
+            bimp_object:  
+                module: en
+                name: en_cmd
+            id_object: 
+                field_value: cmd_id
+                    
+fields: 
+    cmd_id:
+        label: Commande
+        type: id_object
+        object: cmd
+    date:
+        label: Date
+        type: date
+    value:
+        label: Valeur
+    
+graph:
+    conso:
+        title: Consomations
+        relative: 1
+        xDateConfig:
+            field: date
+            params: 
+                - month 
+                - day
+                - week
+            date1: 1
+            date2: 2
+            def: 1year
+        y: Wh
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getFieldsGraphConso
+    rep_prod:
+        mode: doughnut
+        relative: 1
+        title: Repartition Production
+        xDateConfig:
+            field: date
+            date1: 1
+            date2: 2
+            def: 1year
+        y: Wh
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getFieldsGraphRepProd
+    rep_conso:
+        mode: doughnut
+        relative: 1
+        title: Repartition Conso
+        xDateConfig:
+            field: date
+            date1: 1
+            date2: 2
+            def: 1year
+        y: Wh
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getFieldsGraphRepConso
+                
+                
+#graph:
+#    parDay:
+#        title: Nb Piéces / CA
+#        xDateConfig:
+#            field: date_commande
+#            params: 
+#                - month 
+#                - day
+#            date1: 1
+#            date2: 2
+#            def: 1year
+#        y: ggt
+#        yConfig:
+#            fields:
+#                nb:
+#                    title: Nombre de piéces
+#                    field: rowid
+#                    calc: COUNT
+#                total_ht:
+#                    title: CA ht
+#                    field: total_ht
+#                    calc: SUM
+#        data_callback: getGraphConsoDatas
+#        options:
+#            type:
+#                name: Type de graph
+#                type: select
+#                values: 
+#                    columnArea: Bar et Air empiler
+#                    column: Colonne
+#                    area: Air
+#                    stackedColumn: Colonne emplier
+#                    stackedArea: Air empiler
+#                value: columnArea
+#            dif:
+#                name: Diférence
+#                type: switch
+#                value: 1
+        
+            
+lists:
+    default:
+        filters_panel: default
+        delete_btn: 1
+        update_btn: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            cmd_id: 
+            date:
+            value:
+                
+                       
+filters_panels: 
+    default: 
+        filters: 
+            cmd_id:
+            date:
+            value:

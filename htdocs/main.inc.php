@@ -1532,12 +1532,6 @@ $hookmanager->initHooks(array('bimpcoreInit'));
 $hookmanager->executeHooks('bimpcoreInit', array());
 /*fmoddrsi*/
 
-/*moddrsi*/
-// Initialisation BimpCore
-$hookmanager->initHooks(array('bimpcoreInit'));
-$hookmanager->executeHooks('bimpcoreInit', array());
-/*fmoddrsi*/
-
 // Init menu manager
 if (!defined('NOREQUIREMENU')) {
 	if (empty($user->socid)) {    // If internal user or not defined
@@ -2487,6 +2481,8 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
                     $toprightmenu .= top_menu_user();
 
 		$toprightmenu .= '</div>';
+//                }
+                /*fmoddrsi*/
 
 		$toprightmenu .= '</div>'."\n";
 
@@ -3341,6 +3337,9 @@ function left_menu($menu_array_before, $helppagename = '', $notused = '', $menu_
 			$form = new Form($db);
 		}
 		$selected = -1;
+                /*mod drsi*/
+                $searchform.=$form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
+                /*
 		if (!getDolGlobalString('MAIN_USE_TOP_MENU_SEARCH_DROPDOWN')) {
 			// Select with select2 is awful on smartphone. TODO Is this still true with select2 v4 ?
 			if ($conf->browser->layout == 'phone') {

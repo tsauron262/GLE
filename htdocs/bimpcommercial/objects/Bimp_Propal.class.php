@@ -1517,9 +1517,9 @@ class Bimp_Propal extends Bimp_PropalTemp
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le <strong>' . BimpTools::printDate($this->getData('datec'), 'strong') . '</strong>';
 
-            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author_id);
-            if (BimpObject::objectLoaded($user)) {
-                $html .= ' par ' . $user->getLink();
+            $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author_id);
+            if (BimpObject::objectLoaded($u)) {
+                $html .= ' par ' . $u->getLink();
             }
 
             $html .= '</div>';
@@ -1529,9 +1529,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée le <strong>' . BimpTools::printDate($this->dol_object->datev, 'strong') . '</strong>';
 
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid_id);
-                if (BimpObject::objectLoaded($user)) {
-                    $html .= ' par ' . $user->getLink();
+                $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid_id);
+                if (BimpObject::objectLoaded($u)) {
+                    $html .= ' par ' . $u->getLink();
                 }
 
                 $html .= '</div>';
@@ -1543,9 +1543,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $html .= '<div class="object_header_infos">';
                     $html .= 'Fermée le <strong>' . date('d / m / Y', BimpTools::getDateTms($date_cloture)) . '</strong>';
 
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_close_id);
-                    if (BimpObject::objectLoaded($user)) {
-                        $html .= ' par ' . $user->getLink();
+                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_close_id);
+                    if (BimpObject::objectLoaded($u)) {
+                        $html .= ' par ' . $u->getLink();
                     }
 
                     $html .= '</div>';
@@ -1587,7 +1587,8 @@ class Bimp_Propal extends Bimp_PropalTemp
             if ($this->field_exists('contrats_status')) {
                 $nb_abos = $this->getNbAbonnements(true);
                 if ($nb_abos > 0) {
-                    if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || ($user->login == 'e.amadei')) {
+                    global $user;
+                    if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || (in_array($user->login, array('e.amadei', 'f.martinez')))) {
                         $s = ($nb_abos > 1 ? 's' : '');
                         $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
@@ -1618,7 +1619,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                             $msg .= '</span>';
                         }
                         $html .= BimpRender::renderAlerts($msg, 'warning');
+                    } else {
+                        $html .= 'KO';
                     }
+                } else {
+                    $html .= 'NO ABOS';
                 }
             }
 

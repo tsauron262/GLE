@@ -175,7 +175,7 @@ fields_tables:
             - field: txt
             - field: ok_metier
               show:
-                  callback: is_dev
+                  callback: isDev
               edit: 1
                   
             - field: url
@@ -207,7 +207,7 @@ forms:
             - field: url
             - field: ok_metier
               show:
-                  callback: is_dev
+                  callback: isDev
             
     add:
         rows:

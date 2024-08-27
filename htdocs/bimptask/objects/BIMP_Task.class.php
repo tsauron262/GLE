@@ -47,7 +47,7 @@ class BIMP_Task extends BimpAbstractFollow
     // Droits users: 
     
     public function isDev(){
-        return ($this->getData('type_manuel') == 'devvv');
+        return ($this->getData('type_manuel') == 'dev');
     }
 
     public function canView()

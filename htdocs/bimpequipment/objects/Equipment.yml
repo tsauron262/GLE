@@ -337,6 +337,11 @@ fields:
         type: items_list
         item_data_type: id
         use_braces: 1
+        
+    cout_repa: 
+        label: Coût réparation (SAV non restitué)
+        type: money
+        default_value: 0
 
 fields_tables: 
     default: 
@@ -363,6 +368,7 @@ fields_tables:
             - field: prix_achat
             - field: achat_tva_tx
             - field: prix_vente_except 
+            - field: cout_repa
             - field: warranty_type
             - field: date_warranty_end
             - field: note

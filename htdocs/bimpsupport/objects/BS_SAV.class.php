@@ -457,6 +457,19 @@ class BS_SAV extends BimpObject
                 }
                 return 1;
 
+            case 'notRestituted':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                $restituted = (int) $this->getData('restituted');
+                if ((!$restituted && $status == self::BS_SAV_A_RESTITUER) || ($restituted && $status == self::BS_SAV_FERME)) {
+                    return 1;
+                }
+
+                $errors[] = $status_error;
+                return 0;
+
             case 'createSignaturePC':
                 if (!$this->isLoaded($errors)) {
                     return 0;
@@ -508,7 +521,7 @@ class BS_SAV extends BimpObject
                     return 0;
                 }
 
-                if ($status !== 999) {
+                if ($status !== self::BS_SAV_FERME) {
                     $errors[] = 'Ce SAV n\'est pas fermé';
                     return 0;
                 }
@@ -915,7 +928,9 @@ class BS_SAV extends BimpObject
                     $buttons[] = array(
                         'label'   => 'Devis accepté',
                         'icon'    => 'check',
-                        'onclick' => $this->getJsActionOnclick('propalAccepted')
+                        'onclick' => $this->getJsActionOnclick('propalAccepted', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer l\'acceptation du devis par le client sans signature'
+                        ))
                     );
                 }
 
@@ -933,7 +948,9 @@ class BS_SAV extends BimpObject
                     $buttons[] = array(
                         'label'   => 'Devis refusé',
                         'icon'    => 'times',
-                        'onclick' => $this->getJsActionOnclick('propalRefused')
+                        'onclick' => $this->getJsActionOnclick('propalRefused', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer le refus du devis par le client'
+                        ))
                     );
                 }
 
@@ -1009,7 +1026,9 @@ class BS_SAV extends BimpObject
                                 $buttons[] = array(
                                     'label'   => 'Réparation terminée',
                                     'icon'    => 'check',
-                                    'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                                    'onclick' => $this->getJsActionOnclick('toRestitute', array(), array(
+                                        'form_name' => 'resolution'
+                                    ))
                                 );
                             }
                         }
@@ -1021,17 +1040,17 @@ class BS_SAV extends BimpObject
                             $frais = 0;
                             foreach ($propal->dol_object->lines as $line) {
                                 if ($line->desc === 'Acompte') {
-                                    $frais = -$line->total_ttc;
+                                    $frais -= $line->total_ttc;
                                 }
                             }
 
                             $buttons[] = array(
-                                'label'   => 'Fermer le SAV',
+                                'label'   => 'A restituer',
                                 'icon'    => 'times-circle',
                                 'onclick' => $this->getJsActionOnclick('toRestitute', array(
                                     'frais' => $frais
                                         ), array(
-                                    'form_name' => 'close_refused'
+                                    'form_name' => 'to_restitute_refused'
                                 ))
                             );
                         }
@@ -1039,9 +1058,9 @@ class BS_SAV extends BimpObject
                 }
 
                 // Restituer (payer) 
-                if ($this->isActionAllowed('close')) {
-                    if (!is_null($propal)) {
-//                    $cond_reglement = 0;
+                if ($this->isRestituable) {
+                    if ($this->isActionAllowed('close')) {
+                        //                    $cond_reglement = 0;
 //
 //                    if (BimpObject::objectLoaded($propal)) {
 //                        $cond_reglement = (int) $propal->getData('fk_cond_reglement');
@@ -1055,25 +1074,58 @@ class BS_SAV extends BimpObject
 //                        }
 //                    }
 
-                        if ($this->isRestituable) {
-                            $buttons[] = array(
-                                'label'   => 'Restituer (Payer)',
-                                'icon'    => 'times-circle',
-                                'onclick' => $this->getJsActionOnclick('close', array(
-                                    'restitute' => 1,
-                                        //                            'cond_reglement' => $cond_reglement
-                                        ), array(
-                                    'form_name' => 'restitute'
-                                ))
-                            );
-                        }
-                    } else {
                         $buttons[] = array(
-                            'label'   => 'Restituer',
-                            'icon'    => 'times-circle',
-                            'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array())
+                            'label'   => 'Restituer (Payer)',
+                            'icon'    => 'fas_share-square',
+                            'onclick' => $this->getJsActionOnclick('close', array(
+                                'restitute' => 1,
+                                    //                            'cond_reglement' => $cond_reglement
+                                    ), array(
+                                'form_name' => 'restitute'
+                            ))
                         );
                     }
+
+//                    if ($this->isActionAllowed('notRestituted') && $this->canSetAction('notRestituted')) {
+//                        $onclick = '';
+//
+//                        if ($status == self::BS_SAV_A_RESTITUER) {
+//                            if ((int) $this->getData('propal_refused')) {
+//                                $onclick = $this->getJsActionOnclick('close', array(
+//                                    'restitute'      => 1,
+//                                    'not_restituted' => 1
+//                                        ), array(
+//                                    'confirm_msg' => 'Veuillez confirmer la fermeture du SAV sans restitution'
+//                                ));
+//                            } else {
+//                                $frais = 0;
+//
+//                                if (BimpObject::objectLoaded($propal)) {
+//                                    foreach ($propal->dol_object->lines as $line) {
+//                                        if ($line->desc === 'Acompte') {
+//                                            $frais -= $line->total_ttc;
+//                                        }
+//                                    }
+//                                }
+//
+//                                $onclick = $this->getJsActionOnclick('notRestituted', array(
+//                                    'frais' => $frais
+//                                        ), array(
+//                                    'form_name' => 'not_restituted'
+//                                ));
+//                            }
+//                        } elseif ($status == self::BS_SAV_FERME) {
+//                            $onclick = $this->getJsActionOnclick('notRestituted', array(), array(
+//                                'confirm_msg' => 'Veuillez confirmer la non restitution du matériel'
+//                            ));
+//                        }
+//
+//                        $buttons[] = array(
+//                            'label'   => 'Non restitué',
+//                            'icon'    => 'fas_times-circle',
+//                            'onclick' => $onclick
+//                        );
+//                    }
                 }
 
                 //Générer devis 
@@ -2057,6 +2109,25 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     }
 
     // Rendus HTML:
+
+    public function renderHeaderStatusExtra()
+    {
+        $html = '';
+
+        if ((int) $this->getData('propal_refused') && (int) $this->getData('status') !== self::BS_SAV_DEVIS_REFUSE) {
+            $html .= '<br/><span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Devis refusé</span>';
+        }
+
+        if ((int) $this->getData('status') === self::BS_SAV_FERME) {
+            if ((int) $this->getData('restituted')) {
+                $html .= '<br/><span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Matériel restitué</span>';
+            } else {
+                $html .= '<br/><span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Matériel non restitué</span>';
+            }
+        }
+
+        return $html;
+    }
 
     public function renderHeaderExtraLeft()
     {
@@ -5727,6 +5798,7 @@ ORDER BY a.val_max DESC");
         $warnings = array();
 
         $errors = $this->setNewStatus(self::BS_SAV_DEVIS_REFUSE);
+        $this->updateField('propal_refused', 1);
 
         if (!count($errors)) {
             global $user, $langs;
@@ -5777,6 +5849,12 @@ ORDER BY a.val_max DESC");
         $warnings = array();
 
         $errors = $this->reviewPropal($warnings);
+
+        if (!count($errors)) {
+            if ((int) $this->getData('propal_refused')) {
+                $this->updateField('propal_refused', 0);
+            }
+        }
 
         return array(
             'errors'   => $errors,
@@ -5839,7 +5917,7 @@ ORDER BY a.val_max DESC");
                     }
 
                     if (!count($errors)) {
-                        $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                        $this->addNote('Mise à restituer après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                         $client = $this->getChildObject('client');
 
                         if (is_null($client) || !$client->isLoaded()) {
@@ -5879,8 +5957,6 @@ ORDER BY a.val_max DESC");
                                 $error_label = 'mise à jour';
                                 $line_errors = $line->update($line_warnings, true);
                             }
-
-
 
 //                            $new_propal->dol_object->addline(
 //                                    "Machine(s) : " . $this->getNomMachine() .
@@ -5966,6 +6042,8 @@ ORDER BY a.val_max DESC");
         $success = 'SAV Fermé avec succès';
         $success_callback = '';
 
+        $not_restituted = (int) BimpTools::getArrayValueFromPath($data, 'not_restituted', 0);
+
         $id_client_sav = (int) $this->getData('id_client');
 
 //        $id_client_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_client', $this->getData('id_client'));
@@ -6013,63 +6091,65 @@ ORDER BY a.val_max DESC");
         }
 
         // Vérif contact signataire: 
-        if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0, 'int')) {
-            if (!(int) BimpTools::getPostFieldValue('id_contact_signataire', 0, 'int')) {
-                $client_sav = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_sav);
-                if (BimpObject::objectLoaded($client_sav) && $client_sav->isCompany()) {
-                    $errors[] = 'Veuillez sélectionner le contact signataire (obligatoire pour les clients pros)';
-                }
-            }
-        }
-
-        // Vérifs paiements: 
-        $caisse = null;
-        $payment_1_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
-        $payment_2_set = (isset($data['paid2']) && (float) $data['paid2'] > 0);
-        if ($payment_1_set || $payment_2_set) {
-            if ($this->useCaisseForPayments) {
-                global $user;
-
-                $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
-                $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
-                if (!$id_caisse) {
-                    $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
-                } else {
-                    $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-                    if (!BimpObject::objectLoaded($caisse)) {
-                        $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
-                    } else {
-                        $caisse->isValid($errors);
+        if (!$not_restituted) {
+            if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0, 'int')) {
+                if (!(int) BimpTools::getPostFieldValue('id_contact_signataire', 0, 'int')) {
+                    $client_sav = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_sav);
+                    if (BimpObject::objectLoaded($client_sav) && $client_sav->isCompany()) {
+                        $errors[] = 'Veuillez sélectionner le contact signataire (obligatoire pour les clients pros)';
                     }
                 }
             }
 
-            $type_paiement = '';
+            // Vérifs paiements: 
+            $caisse = null;
+            $payment_1_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
+            $payment_2_set = (isset($data['paid2']) && (float) $data['paid2'] > 0);
+            if ($payment_1_set || $payment_2_set) {
+                if ($this->useCaisseForPayments) {
+                    global $user;
 
-            if ($payment_1_set) {
-                $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
-            }
+                    $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+                    $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+                    if (!$id_caisse) {
+                        $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
+                    } else {
+                        $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                        if (!BimpObject::objectLoaded($caisse)) {
+                            $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                        } else {
+                            $caisse->isValid($errors);
+                        }
+                    }
+                }
 
-            if ($payment_2_set && $type_paiement !== 'VIR') {
-                $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement2']);
-            }
+                $type_paiement = '';
 
-            if ($type_paiement === 'VIR') {
-                BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
-                if (!Bimp_Paiement::canCreateVirement()) {
-                    $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
+                if ($payment_1_set) {
+                    $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
+                }
+
+                if ($payment_2_set && $type_paiement !== 'VIR') {
+                    $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement2']);
+                }
+
+                if ($type_paiement === 'VIR') {
+                    BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
+                    if (!Bimp_Paiement::canCreateVirement()) {
+                        $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
+                    }
                 }
             }
-        }
 
-        if (count($errors)) {
-            return array('errors' => $errors, 'warnings' => $warnings);
+            if (count($errors)) {
+                return array('errors' => $errors, 'warnings' => $warnings);
+            }
         }
 
         $current_status = (int) $this->getInitData('status');
 
         if ((int) $this->getData('id_propal')) {
-            if (!isset($data['restitute']) || !$data['restitute']) {
+            if ((!isset($data['restitute']) || !$data['restitute']) && !isset($data['not_restituted'])) {
                 $errors[] = 'Vous devez utiliser le bouton "Restituer" pour fermer ce SAV';
             }
 
@@ -6149,54 +6229,83 @@ ORDER BY a.val_max DESC");
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
 
                             if (BimpObject::objectLoaded($equipment)) {
-                                $cur_place = $equipment->getCurrentPlace();
-                                if (BimpObject::objectLoaded($cur_place) && (int) $cur_place->getData('type') === BE_Place::BE_PLACE_SAV && (int) $cur_place->getData('id_entrepot') === (int) $this->getData('id_entrepot')) {
-                                    $prev_place = BimpCache::findBimpObjectInstance('bimpequipment', 'BE_Place', array(
+                                if ($not_restituted) {
+                                    $cur_place = $equipment->getCurrentPlace();
+
+                                    // Mise en non restitué : 
+                                    if ($cur_place->getData('type') != BE_Place::BE_PLACE_NOT_RESTIT || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
+                                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                                        $place_errors = $place->validateArray(array(
+                                            'id_equipment' => (int) $this->getData('id_equipment'),
+                                            'type'         => BE_Place::BE_PLACE_NOT_RESTIT,
+                                            'id_entrepot'  => $id_entrepot,
+                                            'infos'        => 'Matériel non réclamé par le client (' . $this->getData('ref') . ')',
+                                            'date'         => date('Y-m-d H:i:s'),
+                                            'code_mvt'     => $codemove . 'NOT_RESTITUTED_EQ' . (int) $this->getData('id_equipment'),
+                                            'origin'       => 'sav',
+                                            'id_origin'    => (int) $this->id
+                                        ));
+                                        if (!count($place_errors)) {
+                                            $place_errors = $place->create($w, true);
+                                        }
+                                        if (count($place_errors)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                                        }
+                                    }
+
+                                    $equipment->updateField('cout_repa', 0); // si on est ici c'est que devis refusé
+                                    $this->updateField('restituted', 0);
+                                } else {
+                                    $this->updateField('restituted', 1);
+                                    $cur_place = $equipment->getCurrentPlace();
+                                    if (BimpObject::objectLoaded($cur_place) && (int) $cur_place->getData('type') === BE_Place::BE_PLACE_SAV && (int) $cur_place->getData('id_entrepot') === (int) $this->getData('id_entrepot')) {
+                                        $prev_place = BimpCache::findBimpObjectInstance('bimpequipment', 'BE_Place', array(
+                                                    'id_equipment' => (int) $this->getData('id_equipment'),
+                                                    'position'     => 2
+                                        ));
+
+                                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+
+                                        $w = array();
+                                        if (BimpObject::objectLoaded($prev_place) && isset($data['put_equipment_on_prev_place']) && (int) $data['put_equipment_on_prev_place']) {
+                                            $place_errors = $place->validateArray(array(
                                                 'id_equipment' => (int) $this->getData('id_equipment'),
-                                                'position'     => 2
-                                    ));
-
-                                    $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-
-                                    $w = array();
-                                    if (BimpObject::objectLoaded($prev_place) && isset($data['put_equipment_on_prev_place']) && (int) $data['put_equipment_on_prev_place']) {
-                                        $place_errors = $place->validateArray(array(
-                                            'id_equipment' => (int) $this->getData('id_equipment'),
-                                            'type'         => $prev_place->getData('type'),
-                                            'id_client'    => (int) $prev_place->getData('id_client'),
-                                            'id_contact'   => (int) $prev_place->getData('id_contact'),
-                                            'id_entrepot'  => (int) $prev_place->getData('id_entrepot'),
-                                            'id_user'      => (int) $prev_place->getData('id_user'),
-                                            'code_centre'  => $prev_place->getData('code_centre'),
-                                            'place_name'   => $prev_place->getData('place_name'),
-                                            'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise dans l\'emplacement précédant)',
-                                            'date'         => date('Y-m-d H:i:s'),
-                                            'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
-                                            'origin'       => 'sav',
-                                            'id_origin'    => (int) $this->id
-                                        ));
-                                        if (!count($place_errors)) {
-                                            $place_errors = $place->create($w, true);
-                                        }
-                                        if (count($place_errors)) {
-                                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
-                                        }
-                                    } else {
-                                        $place_errors = $place->validateArray(array(
-                                            'id_equipment' => (int) $this->getData('id_equipment'),
-                                            'type'         => BE_Place::BE_PLACE_CLIENT,
-                                            'id_client'    => $id_client_sav,
-                                            'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise au client)',
-                                            'date'         => date('Y-m-d H:i:s'),
-                                            'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
-                                            'origin'       => 'sav',
-                                            'id_origin'    => (int) $this->id
-                                        ));
-                                        if (!count($place_errors)) {
-                                            $place_errors = $place->create($w, true);
-                                        }
-                                        if (count($place_errors)) {
-                                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                                                'type'         => $prev_place->getData('type'),
+                                                'id_client'    => (int) $prev_place->getData('id_client'),
+                                                'id_contact'   => (int) $prev_place->getData('id_contact'),
+                                                'id_entrepot'  => (int) $prev_place->getData('id_entrepot'),
+                                                'id_user'      => (int) $prev_place->getData('id_user'),
+                                                'code_centre'  => $prev_place->getData('code_centre'),
+                                                'place_name'   => $prev_place->getData('place_name'),
+                                                'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise dans l\'emplacement précédant)',
+                                                'date'         => date('Y-m-d H:i:s'),
+                                                'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
+                                                'origin'       => 'sav',
+                                                'id_origin'    => (int) $this->id
+                                            ));
+                                            if (!count($place_errors)) {
+                                                $place_errors = $place->create($w, true);
+                                            }
+                                            if (count($place_errors)) {
+                                                $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                                            }
+                                        } else {
+                                            $place_errors = $place->validateArray(array(
+                                                'id_equipment' => (int) $this->getData('id_equipment'),
+                                                'type'         => BE_Place::BE_PLACE_CLIENT,
+                                                'id_client'    => $id_client_sav,
+                                                'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise au client)',
+                                                'date'         => date('Y-m-d H:i:s'),
+                                                'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
+                                                'origin'       => 'sav',
+                                                'id_origin'    => (int) $this->id
+                                            ));
+                                            if (!count($place_errors)) {
+                                                $place_errors = $place->create($w, true);
+                                            }
+                                            if (count($place_errors)) {
+                                                $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                                            }
                                         }
                                     }
                                 }
@@ -6492,38 +6601,42 @@ ORDER BY a.val_max DESC");
         }
 
         if (!count($errors)) {
-            if (isset($data['restitute']) && (int) $data['restitute']) {
-                $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
-            } else {
-                $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
-            }
-
             $errors = $this->setNewStatus(self::BS_SAV_FERME);
 
-            // Génération bon de restitution:
-            $pdf_errors = $this->generateRestitutionPdf();
-
-            if (count($pdf_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du Bon de restitution');
+            if ($not_restituted) {
+                $this->addNote('Fermé sans restitution le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             } else {
-                if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0, 'int')) {
-                    // Création signature: 
-                    $signature_errors = $this->createSignature('sav_resti', BimpTools::getPostFieldValue('id_contact_signataire', 0, 'int'));
+                if (isset($data['restitute']) && (int) $data['restitute']) {
+                    $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                } else {
+                    $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                }
 
-                    if (count($signature_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
-                    } else {
-                        $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
-                                    'id_signature' => $this->getData('id_signature_resti'),
-                                    'code'         => 'default'
-                                        ), true);
+                // Génération bon de restitution:
+                $pdf_errors = $this->generateRestitutionPdf();
 
-                        if (BimpObject::objectLoaded($signataire) && $signataire->isActionAllowed('signElec')) {
-                            $success_callback .= 'setTimeout(function() {' . $signataire->getJsActionOnclick('signElec', array(), array(
-                                        'form_name'   => 'sign_elec',
-                                        'no_button'   => true,
-                                        'modal_title' => 'Signature électronique du bon de restitution "BR-' . $this->getRef() . '"'
-                                    )) . '}, 500);';
+                if (count($pdf_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du Bon de restitution');
+                } else {
+                    if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0, 'int')) {
+                        // Création signature: 
+                        $signature_errors = $this->createSignature('sav_resti', BimpTools::getPostFieldValue('id_contact_signataire', 0, 'int'));
+
+                        if (count($signature_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
+                        } else {
+                            $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
+                                        'id_signature' => $this->getData('id_signature_resti'),
+                                        'code'         => 'default'
+                                            ), true);
+
+                            if (BimpObject::objectLoaded($signataire) && $signataire->isActionAllowed('signElec')) {
+                                $success_callback .= 'setTimeout(function() {' . $signataire->getJsActionOnclick('signElec', array(), array(
+                                            'form_name'   => 'sign_elec',
+                                            'no_button'   => true,
+                                            'modal_title' => 'Signature électronique du bon de restitution "BR-' . $this->getRef() . '"'
+                                        )) . '}, 500);';
+                            }
                         }
                     }
                 }
@@ -6581,6 +6694,259 @@ ORDER BY a.val_max DESC");
             }
         } elseif (!$use_db_transactions) {
             $this->setNewStatus($current_status);
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionNotRestituted($data, &$success)
+    {
+        global $langs, $user;
+        $status = (int) $this->getData('status');
+        if ($status !== self::BS_SAV_FERME && (int) $this->getData('propal_refused')) {
+            return $this->actionClose(array(
+                        'not_restituted' => 1
+                            ), $success);
+        }
+
+        $errors = array();
+        $warnings = array();
+        $success = 'Non restitution enregistrée';
+        $success_callback = '';
+
+        $propal = $this->getChildObject('propal');
+
+        if ($status !== self::BS_SAV_FERME) {
+            $frais = (float) BimpTools::getArrayValueFromPath($data, 'frais', 0);
+            // Création de la facture : 
+            if ($frais) {
+                if ((int) $this->getData('id_facture')) {
+                    $errors[] = 'Une facture a déjà été créée pour ce SAV';
+                } else {
+                    $user->rights->facture->creer = 1;
+
+                    $id_client_fac = (int) $this->getData('id_client');
+                    $id_contact_fac = (int) $this->getData('id_contact');
+                    $id_bank_account = (int) BimpCore::getConf('id_default_bank_account');
+                    $ref_client = '';
+
+                    if (BimpObject::objectLoaded($propal)) {
+                        if ((int) $propal->dol_object->fk_account) {
+                            $id_bank_account = (int) $propal->dol_object->fk_account;
+                        }
+                        $ref_client = $propal->getData('ref_client');
+                    }
+
+                    $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+
+                    $facture->validateArray(array(
+                        'fk_soc'     => $id_client_fac,
+                        'ref_client' => $ref_client,
+                        'fk_account' => $id_bank_account,
+                        'ef_type'    => 'S',
+                        'entrepot'   => (int) $this->getData('id_entrepot'),
+                        'centre'     => $this->getData('code_centre'),
+                        'expertise'  => 90,
+                        'datef'      => date('Y-m-d'),
+                        'model_pdf'  => self::$facture_model_pdf
+                    ));
+
+                    $facture->dol_object->contact_id = $id_contact_fac;
+
+                    $fac_warnings = array();
+                    $fac_errors = $facture->create($fac_warnings, true);
+
+                    if (count($fac_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($fac_warnings, 'Erreurs lors de la création de la facture');
+                    }
+
+                    if (count($fac_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                    } else {
+                        $up_errors = $this->updateField('id_facture', (int) $facture->id);
+
+                        if (count($up_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $facture->id . ')');
+                        }
+
+                        // Ajout du commercial: 
+                        $id_commercial = (int) $this->getData('id_user_tech');
+                        if (!$id_commercial) {
+                            $id_commercial = (int) $user->id;
+                        }
+
+                        if ($id_commercial) {
+                            $facture->dol_object->add_contact($id_commercial, 'SALESREPFOLL', 'internal');
+                        }
+
+                        // Création li'gnes d'acompte : 
+                        $propal_lines = $propal->getLines('not_text');
+                        $prev_propal_status = (int) $propal->getData('fk_statut');
+                        $propal->dol_object->statut = 0;
+                        $propal->dol_object->brouillon = 1;
+                        $acompte_deleted = false;
+
+                        foreach ($propal_lines as $propal_line) {
+                            if ($propal_line->desc === 'Acompte') {
+                                $line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+
+                                $data = $propal_line->getDataArray();
+                                $data['id_obj'] = $facture->id;
+                                unset($data['id_line']);
+                                unset($data['id_parent_line']);
+
+                                foreach ($data as $field => $value) {
+                                    if (!$line->field_exists($field)) {
+                                        unset($data[$field]);
+                                    }
+                                }
+
+                                $line->validateArray($data);
+
+                                $line->desc = $propal_line->desc;
+                                $line->tva_tx = $propal_line->tva_tx;
+                                $line->qty = (float) $propal_line->getFullQty();
+                                $line->pu_ht = $propal_line->pu_ht;
+                                $line->pa_ht = $propal_line->pa_ht;
+                                $line->id_remise_except = $propal_line->id_remise_except;
+
+                                $line_warnings = array();
+                                $line_errors = $line->create($line_warnings, true);
+
+                                if (count($line_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne d\'acompte à la facture');
+                                } else {
+                                    $line_errors = $propal_line->delete($line_warnings, true);
+
+                                    if (count($line_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la suppression de l\'acompte du devis');
+                                    } else {
+                                        $acompte_deleted = true;
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($acompte_deleted) {
+                            $propal->dol_object->fetch_lines();
+                            $propal->dol_object->update_price();
+                        }
+
+                        $propal->dol_object->statut = $prev_propal_status;
+                        $propal->dol_object->brouillon = 0;
+
+                        // Ajout ligne Frais: 
+                        $line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                        $line->validateArray(array(
+                            'id_obj'    => (int) $facture->id,
+                            'type'      => Bimp_FactureLine::LINE_PRODUCT,
+                            'deletable' => 1,
+                            'editable'  => 0,
+                            'remisable' => 0,
+                        ));
+
+                        $line->desc = "Machine(s) : " . $this->getNomMachine() .
+                                "\n" . "Frais de gestion matériel non restitué.";
+                        $line->id_product = (int) BimpCore::getConf('id_prod_refus', '', 'bimpsupport');
+                        $line->pu_ht = $frais / 1.20;
+                        $line->pa_ht = (float) 0;
+                        $line->qty = 1;
+                        $line->tva_tx = 20;
+
+                        $line_warnings = array();
+                        $line_errors = $line->create($line_warnings, true);
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne de frais à la facture');
+                        }
+
+                        if (!count($errors)) {
+                            $facture->dol_object->fetch_lines();
+
+                            // Validation de la facture : 
+                            if ($facture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
+                                $validate_errors = BimpTools::getErrorsFromDolObject($facture->dol_object);
+
+                                if (empty($validate_errors)) {
+                                    $validate_errors[] = 'Erreur inconnue';
+                                }
+
+                                $msg = BimpTools::getMsgFromArray($validate_errors, 'Echec de la validation de la facture');
+                                $errors[] = $msg;
+                            } else {
+                                $facture->checkIsPaid();
+                                $facture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
+
+                                $url = $facture->getUrl();
+                                if ($url) {
+                                    $success_callback .= 'window.opn(\'' . $url . '\');';
+                                }
+
+                                $errors = $this->setNewStatus(self::BS_SAV_FERME);
+
+                                if (!count($errors)) {
+                                    $this->updateField('id_facture', $facture->id);
+                                    $this->addNote('Fermé sans restitution le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        if (!count($errors)) {
+            // Emplacement et coût répa équipement : 
+            if ((int) $this->getData('id_equipment')) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
+
+                if (BimpObject::objectLoaded($equipment)) {
+                    $cout_repa = 0;
+                    if (!(int) $this->getData('propal_refused')) {
+                        if (BimpObject::objectLoaded($propal)) {
+                            foreach ($propal->getLines('not_text') as $propal_line) {
+                                if ($propal_line->desc != 'Acompte') {
+                                    $cout_repa += $propal_line->pa_ht;
+                                }
+                            }
+                        }
+                    }
+
+                    $equipment->updateField('cout_repa', $cout_repa);
+
+                    $cur_place = $equipment->getCurrentPlace();
+                    $centre_data = $this->getCentreData(true);
+                    $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', 0);
+
+                    // Mise en non restitué : 
+                    if ($cur_place->getData('type') != BE_Place::BE_PLACE_NOT_RESTIT || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => (int) $this->getData('id_equipment'),
+                            'type'         => BE_Place::BE_PLACE_NOT_RESTIT,
+                            'id_entrepot'  => $id_entrepot,
+                            'infos'        => 'Matériel non réclamé par le client (' . $this->getData('ref') . ')',
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => 'SAV_' . $this->id . '_NOT_RESTITUTED_EQ' . (int) $this->getData('id_equipment'),
+                            'origin'       => 'sav',
+                            'id_origin'    => (int) $this->id
+                        ));
+                        if (!count($place_errors)) {
+                            $w = array();
+                            $place_errors = $place->create($w, true);
+                        }
+                        if (count($place_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                        }
+                    }
+                }
+            }
+
+            $this->updateField('restituted', 0);
         }
 
         return array(

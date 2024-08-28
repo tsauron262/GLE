@@ -27,9 +27,6 @@ if (!$user->admin) {
     exit;
 }
 
-//$c = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', 13401);
-//$c->resetChildrenPositions('lines');
-
 echo '<br/>FIN';
 echo '</body></html>';
 

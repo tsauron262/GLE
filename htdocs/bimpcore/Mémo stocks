@@ -29,6 +29,7 @@ Packages:
 SAV:
 - Création SAV{id_sav}_CREATE_EQ{id_equipment}
 - Restitution: SAV{id_sav}_CLOSE_EQ{id_equipment}
+- Non restitué: SAV{id_sav}_NOT_RESTITUTED_EQ{id_equipment}
 - Vente Non serial: SAV{id_SAV}_LN{id_bimp_propal_line}
 - Vente Serial: SAV{id_sav}_LN{id_bimp_propal_line}_EQ{id_equipment}
 

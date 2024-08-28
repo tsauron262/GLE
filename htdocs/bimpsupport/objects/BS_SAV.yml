@@ -587,6 +587,14 @@ fields:
         label: Alerte de non restitution envoyée au client
         type: bool
         default_value: 0
+    restituted: 
+        label: Matériel restitué
+        type: bool
+        default_value: 0
+    propal_refused: 
+        label: Devis refusé
+        type: bool
+        default_value: 0
         
 forms: 
     default:
@@ -812,69 +820,29 @@ forms:
                   field_name: send_msg
                   show_values: 1
         
-    restitute:
-        title: Restituer
+    resolution: 
         rows: 
-            # Pour plus tard: 
-#            - field: id_client
-#              label: Client facturation
-#            - field: id_contact
-#              label: Contact facturation
             - custom: 1
-              label: Mode de paiement
-              input_name: mode_paiement
-              input: 
-                  type: select_payment
-                  include_empty: 1
-              value: 6
+              input_name: inut2
+              content:
+                   callback: renderAlertDiago
+            - field: resolution
             - custom: 1
-              label: Montant payé
-              input_name: paid
-              data_type: money
-              input: 
-                  type: text
-              value: 
-                  callback: getFactureAmountToPay
-            - custom: 1
-              label: Mode de deuxième paiement
-              input_name: mode_paiement2
-              input: 
-                  type: select_payment
-                  include_empty: 1
-              value: 4
-            - custom: 1
-              label: Montant payé deuxième paiement
-              input_name: paid2
-              data_type: money
-              input: 
-                  type: text
+              label: Dispo sous
+              input_name: nbJours
+              data_type: int
+              min: 0
               value: 0
-            - custom: 1
-              label: RIB Client
-              input_name: rib_client
-              data_type: id_object
-              object: rib_client 
               input: 
-                  type: select
-                  options: 
-                      callback: 
-                          method: getSocieteRibsArray
-                          params: 
-                              - field_value: id_client
-                              - 1
-                  help: Le RIB du client est obligatoire pour le mode de paiement indiqué dans le devis.<br/>Si aucun RIB n\'est disponible, veuillez en créer un depuis la fiche client ou modifier le mode de réglement du devis.
-              show: 
-                  callback: isRibClientRequired
-              display_if: 
-                  field_name: paid
-                  show_values: 0
+                  addon_right: 
+                      text: jour(s)
             - custom: 1
-              label: Notifier le client
-              input_name: send_msg
               data_type: bool
               input: 
                   type: toggle
+              label: Notifier le client
               value: 1
+              input_name: send_msg
             - custom: 1
               label: Contact à notifier
               input_name: id_contact_notif
@@ -889,34 +857,26 @@ forms:
                   field_name: send_msg
                   show_values: 1
             - custom: 1
-              label: Replacer l'équipement dans son emplacement précédent
-              input_name: put_equipment_on_prev_place
-              data_type: bool
+              label: Montant facture
+              input_name: inut
               content: 
-                  callback: renderEquipmentPlaceOptionInput
+                  callback: displayFactureAmountToPay
+            - field: bon_resti_raison
+              show:
+                  callback: isGratuit
             - custom: 1
-              label: Demander la signature du bon de restitution
-              input_name: create_signature_resti
-              data_type: bool
+              label: Raison détail
+              input_name: bon_resti_raison_detail
+              data_type: text
               input: 
-                  type: toggle
-              value: 1
-            - custom: 1
-              label: Contact signataire
-              input_name: id_contact_signataire
-              data_type: id
-              input: 
-                  type: select
-                  options: 
-                      array: client_contacts
-                  help: Obligatoire pour les clients pros
-              value: 
-                  field_value: id_contact
+                  type: textarea
               display_if: 
-                  field_name: create_signature_resti
-                  show_values: 1
+                  field_name: bon_resti_raison
+                  show_values: 99
+              show:
+                  callback: isGratuit
                   
-    close_refused: 
+    to_restitute_refused: 
         title: Fermeture
         rows: 
             - custom: 1
@@ -968,7 +928,95 @@ forms:
                   type: textarea
               display_if: 
                   field_name: bon_resti_raison
-                  show_values: 99
+                  show_values: 99        
+        
+    restitute:
+        title: Restituer
+        rows: 
+            - custom: 1
+              label: Mode de paiement
+              input_name: mode_paiement
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              value: 6
+              show: 
+                  field_value: id_propal
+            - custom: 1
+              label: Montant payé
+              input_name: paid
+              data_type: money
+              input: 
+                  type: text
+              value: 
+                  callback: getFactureAmountToPay
+              show: 
+                  field_value: id_propal
+            - custom: 1
+              label: Mode de deuxième paiement
+              input_name: mode_paiement2
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              value: 4
+              show: 
+                  field_value: id_propal
+            - custom: 1
+              label: Montant payé deuxième paiement
+              input_name: paid2
+              data_type: money
+              input: 
+                  type: text
+              value: 0
+              show: 
+                  field_value: id_propal
+            - custom: 1
+              label: RIB Client
+              input_name: rib_client
+              data_type: id_object
+              object: rib_client 
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteRibsArray
+                          params: 
+                              - field_value: id_client
+                              - 1
+                  help: Le RIB du client est obligatoire pour le mode de paiement indiqué dans le devis.<br/>Si aucun RIB n\'est disponible, veuillez en créer un depuis la fiche client ou modifier le mode de réglement du devis.
+              show: 
+                  callback: isRibClientRequired
+              display_if: 
+                  field_name: paid
+                  show_values: 0
+              show: 
+                  field_value: id_propal
+            - custom: 1
+              label: Notifier le client
+              input_name: send_msg
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Contact à notifier
+              input_name: id_contact_notif
+              value: 
+                  field_value: id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client   
+              display_if: 
+                  field_name: send_msg
+                  show_values: 1
+            - custom: 1
+              label: Replacer l'équipement dans son emplacement précédent
+              input_name: put_equipment_on_prev_place
+              data_type: bool
+              content: 
+                  callback: renderEquipmentPlaceOptionInput
             - custom: 1
               label: Demander la signature du bon de restitution
               input_name: create_signature_resti
@@ -990,7 +1038,18 @@ forms:
               display_if: 
                   field_name: create_signature_resti
                   show_values: 1
-              
+          
+    not_restituted: 
+        rows: 
+            - custom: 1
+              label: Frais de gestion
+              input_name: frais
+              data_type: money
+              input: 
+                  type: text
+              value:
+                  request: frais
+            
     contact: 
         title: Recontacter
         rows: 
@@ -1074,62 +1133,6 @@ forms:
               display_if: 
                   field_name: create_signature
                   show_values: 1
-            
-    resolution: 
-        rows: 
-            - custom: 1
-              input_name: inut2
-              content:
-                   callback: renderAlertDiago
-            - field: resolution
-            - custom: 1
-              label: Dispo sous
-              input_name: nbJours
-              data_type: int
-              min: 0
-              value: 0
-              input: 
-                  addon_right: 
-                      text: jour(s)
-            - custom: 1
-              data_type: bool
-              input: 
-                  type: toggle
-              label: Notifier le client
-              value: 1
-              input_name: send_msg
-            - custom: 1
-              label: Contact à notifier
-              input_name: id_contact_notif
-              value: 
-                  field_value: id_contact
-              input: 
-                  type: select
-                  options: 
-                      array: client_contacts
-                  help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client   
-              display_if: 
-                  field_name: send_msg
-                  show_values: 1
-            - custom: 1
-              label: Montant facture
-              input_name: inut
-              content: 
-                  callback: displayFactureAmountToPay
-            - field: bon_resti_raison
-              show:
-                  callback: isGratuit
-            - custom: 1
-              label: Raison détail
-              input_name: bon_resti_raison_detail
-              data_type: text
-              input: 
-                  type: textarea
-              display_if: 
-                  field_name: bon_resti_raison
-                  show_values: 99
-              show:
-                  callback: isGratuit
               
     equipment: 
         rows: 

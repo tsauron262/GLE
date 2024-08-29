@@ -304,6 +304,7 @@ class Bimp_Facture extends BimpComm
     public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array(
+                    'id_client_final',
                     'statut_export', 'douane_number',
                     'note_public', 'note_private',
                     'remain_to_pay', 'paiement_status',

@@ -7153,7 +7153,7 @@ class BCT_ContratLine extends BimpObject
             foreach ($id_lines as $id_line) {
                 if ($this->db->update('contratdet', array(
                             'fk_contrat' => $id_contrat_dest
-                                ), 'rowid = ' . $id_line . ' AND fk_contrat = ' . $id_contrat_src) <= 0) {
+                                ), '(rowid = ' . $id_line . ' OR id_parent_line = ' . $id_line . ') AND fk_contrat = ' . $id_contrat_src) <= 0) {
                     $errors[] = 'Ligne #' . $id_line . ' : Echec du déplacement - ' . $this->db->err();
                 } else {
                     $nOk++;

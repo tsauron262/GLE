@@ -4080,7 +4080,7 @@ class Bimp_Societe extends BimpDolObject
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;
-            if (!$user->admin && $user->id != 1499) {
+            if (!$user->admin && $user->id != 73) {
                 return array('Vous n\'avez pas la permission de passer le statut solvabilité à "Client à surveiller (forcé)"');
             }
         }

@@ -23,7 +23,7 @@ class CepaPDF extends BimpModelPDF
         $this->typeObject = 'societe';
 
         $this->propal = new Propal($db);
-        
+
         $this->pdf->topMargin = 10;
     }
 
@@ -76,7 +76,12 @@ class CepaPDF extends BimpModelPDF
             $html .= 'Compte client : <b>' . $this->client->getRef() . '</b><br/><br/>';
         }
 
-        $date_prelevement = BimpCore::getConf('sepa_date_prelevement', null, 'bimpcommercial');
+        if (isset($this->object->sepa_date_prelevement)) {
+            $date_prelevement = $this->object->sepa_date_prelevement;
+        } else {
+            $date_prelevement = BimpCore::getConf('sepa_date_prelevement', null, 'bimpcommercial');
+        }
+
         if ($date_prelevement) {
             $html .= 'Date de prélèvement : <b>' . $date_prelevement . '</b><br/><br/>';
         }
@@ -90,7 +95,7 @@ class CepaPDF extends BimpModelPDF
         $html .= '</ul>';
         $html .= 'Vos droits concernant le présent mandat sont expliqués dans un document que vous pouvez obtenir auprès de votre banque.';
 
-        $html .= '<br/><br/><span style="color: #'.$this->primary.'">Référence Unique Mandat (RUM)</span>';
+        $html .= '<br/><br/><span style="color: #' . $this->primary . '">Référence Unique Mandat (RUM)</span>';
 
         $rum = '';
         if (BimpObject::objectLoaded($this->rib)) {

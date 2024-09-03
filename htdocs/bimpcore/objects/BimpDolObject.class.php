@@ -1059,6 +1059,11 @@ class BimpDolObject extends BimpObject
                     if ($this->field_exists('model_pdf'))
                         $this->updateField('model_pdf', $data['model']);
                 }
+
+                if (isset($data['date_prelev_sepa'])) {
+                    $this->dol_object->sepa_date_prelevement = $data['date_prelev_sepa'];
+                }
+
                 global $langs;
                 $this->dol_object->error = '';
                 $this->dol_object->errors = array();
@@ -1301,10 +1306,10 @@ class BimpDolObject extends BimpObject
                                 if (is_numeric($type_contact)) {
                                     $type_contact = $this->db->getValue('c_type_contact', 'code', 'rowid = ' . $type_contact);
                                 }
-                                
+
                                 if ($type_contact == 'CLIFINAL' && $this->field_exists('id_client_final')) {
                                     $id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
-                                    
+
                                     if ($id_client && $id_client !== (int) $this->getData('fk_soc')) {
                                         $this->updateField('id_client_final', $id_client);
                                     }

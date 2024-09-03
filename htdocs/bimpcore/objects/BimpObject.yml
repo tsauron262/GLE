@@ -465,13 +465,15 @@ forms:
         title: Générer un document PDF
         icon: fas_sync
         rows: 
-            - custom: 1
-              label: Modèle
-              input_name: model
-              input: 
-                  type: select
-                  options: 
-                      array: modelsPdf
+            modele: 
+                custom: 1
+                label: Modèle
+                input_name: model
+                input: 
+                    type: select
+                    options: 
+                        array: modelsPdf
+                  
                       
     bulk_edit_field: 
         title: Edition en série

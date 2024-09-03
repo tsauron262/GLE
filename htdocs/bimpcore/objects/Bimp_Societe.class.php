@@ -1751,6 +1751,17 @@ class Bimp_Societe extends BimpDolObject
 
         return ModeleThirdPartyDoc::liste_modeles($this->db->db);
     }
+    
+    public function getSepaDatesPrelevArray()
+    {
+        $dates = array();
+        
+        foreach (explode(',', BimpCore::getConf('sepa_date_prelevement', null, 'bimpcommercial')) as $date) {
+            $dates[$date] = $date;
+        }
+        
+        return $dates;
+    }
 
     // Affichages: 
 

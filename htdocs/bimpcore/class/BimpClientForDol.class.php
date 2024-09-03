@@ -94,8 +94,6 @@ class BimpClientForDol extends Bimp_Client
 
     public function rappelICBA($days)
     {
-        mailSyn2('EXEC CRON rappelICBA', 'f.martinez@bimp.fr', '', 'Heure: ' . date('d / m / Y H:i:s') . '<br/>SERVER : ' . print_r($_SERVER, 1));
-
         $this->error = '';
         $clients = $this->getClientsFinValiditeICBA($days);
 

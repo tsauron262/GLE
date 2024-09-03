@@ -687,11 +687,11 @@ class BCT_Contrat extends BimpDolObject
         return $html;
     }
 
-    public function renderLinkedObjectsTable($htmlP = '')
+    public function renderLinkedObjectsTable($htmlP = '', $excluded_types = array())
     {
         $this->dol_object->element = 'bimp_contrat';
 
-        $html = parent::renderLinkedObjectsTable($htmlP);
+        $html = parent::renderLinkedObjectsTable($htmlP, array('facture', 'order_supplier'));
 
         $this->dol_object->element = 'contrat';
 

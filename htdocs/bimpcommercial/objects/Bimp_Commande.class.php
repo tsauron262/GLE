@@ -2369,7 +2369,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return $html;
     }
 
-    public function renderLinkedObjectsTable($htmlP = '')
+    public function renderLinkedObjectsTable($htmlP = '', $excluded_types = array())
     {
         $htmlP = "";
         $db = $this->db->db;

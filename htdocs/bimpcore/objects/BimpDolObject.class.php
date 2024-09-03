@@ -604,7 +604,7 @@ class BimpDolObject extends BimpObject
         return $html;
     }
 
-    public function renderLinkedObjectsTable($htmlP = '')
+    public function renderLinkedObjectsTable($htmlP = '', $excluded_types = array())
     {
         $html = '';
         if ($this->isLoaded()) {
@@ -617,6 +617,10 @@ class BimpDolObject extends BimpObject
                 $commande_instance = null;
                 $commande_fourn_instance = null;
                 foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+                    if (in_array($item['type'], $excluded_types)) {
+                        continue;
+                    }
+
                     $collection[$item['type']][] = $item['id_object'];
                 }
             }
@@ -1038,7 +1042,7 @@ class BimpDolObject extends BimpObject
 
         return $html;
     }
-    
+
     // Actions: 
 
     public function actionGeneratePdf($data, &$success = '', $errors = array(), $warnings = array())

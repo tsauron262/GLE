@@ -1297,6 +1297,18 @@ class BimpDolObject extends BimpObject
                         if (!count($errors)) {
                             if ($this->dol_object->add_contact($id_contact, $type_contact, 'external') <= 0) {
                                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            } else {
+                                if (is_numeric($type_contact)) {
+                                    $type_contact = $this->db->getValue('c_type_contact', 'code', 'rowid = ' . $type_contact);
+                                }
+                                
+                                if ($type_contact == 'CLIFINAL' && $this->field_exists('id_client_final')) {
+                                    $id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
+                                    
+                                    if ($id_client && $id_client !== (int) $this->getData('fk_soc')) {
+                                        $this->updateField('id_client_final', $id_client);
+                                    }
+                                }
                             }
                         }
                         break;

@@ -1611,15 +1611,15 @@ class BimpComm extends BimpDolObject
 
     public function getTotal_paListTotal($filters = array(), $joins = array(), $main_alias = 'a')
     {
-        $return = array(
+        return array(
             'data_type' => 'money',
-            'value'     => 0
+            'value'     => 'n/c'
         );
 
-        $line = $this->getLineInstance();
-
-        if (is_a($line, 'ObjectLine')) {
-            return 'n/c';
+//        $line = $this->getLineInstance();
+//
+//        if (is_a($line, 'ObjectLine')) {
+//            return 'n/c';
 //            TODO fait bloqué le serveur 
 //            $line_alias = $main_alias . '___det';
 //            $joins[$line_alias] = array(
@@ -1637,20 +1637,15 @@ class BimpComm extends BimpDolObject
 //            if (isset($result[0]['total'])) {
 //                $return['value'] = (float) $result[0]['total'];
 //            }
-        }
+//        }
 
-        return $return;
+//        return $return;
     }
 
     public function getTx_margeListTotal($filters, $joins)
     {
-        if (isset($filters['a.datec'])) {
-            $filters['a.date_creation'] = $filters['a.datec'];
-            unset($filters['a.datec']);
-        }
-
         $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
-        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlFrom($this->getTable(), $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
         $res = $this->db->executeS($sql, 'array');
@@ -1673,7 +1668,7 @@ class BimpComm extends BimpDolObject
     public function getTx_marqueListTotal($filters, $joins)
     {
         $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
-        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlFrom($this->getTable(), $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
         $res = $this->db->executeS($sql, 'array');

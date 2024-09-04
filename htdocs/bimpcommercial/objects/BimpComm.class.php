@@ -1644,6 +1644,11 @@ class BimpComm extends BimpDolObject
 
     public function getTx_margeListTotal($filters, $joins)
     {
+        if (isset($filters['a.datec'])) {
+            $filters['a.date_creation'] = $filters['a.datec'];
+            unset($filters['a.datec']);
+        }
+
         $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
         $sql .= BimpTools::getSqlFrom('commande', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
@@ -3292,7 +3297,7 @@ class BimpComm extends BimpDolObject
             }
 
             $new_line = BimpObject::getInstance($this->module, $this->object_name . 'Line');
-            
+
             if ($params['no_maj_bundle']) {
                 $new_line->no_maj_bundle = true;
             }

@@ -709,7 +709,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $totVendu = $totRealise = 0;
         foreach ($this->getLines('product') as $line) {
             $prod = $line->getProduct();
-            if ($prod->isInter()) {
+            if (BimpCore::isModuleActive('bimptechnique') && $prod->isInter()) {
                 $totVendu += $line->getTotalHt(true);
                 $duree = $this->db->getValue('fichinterdet', 'SUM(duree)', '`id_line_commande` = ' . $line->id);
                 $dureeProd = $prod->getData('duree_i');

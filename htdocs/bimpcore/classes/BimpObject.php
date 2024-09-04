@@ -1661,7 +1661,7 @@ class BimpObject extends BimpCache
         if ($default) {
             return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
         }
-        
+
         return null;
     }
 
@@ -6464,7 +6464,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     'Erreur SQL'    => $this->db->err(),
                     'Champs suppl.' => $bimpObjectFields,
                     'Result'        => $result,
-                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $where, print_r($bimpObjectFields, 1)))
+                    'Where'         => $where
                 ));
             }
         }

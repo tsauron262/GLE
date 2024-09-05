@@ -265,7 +265,6 @@ class BimpDb
 
         $result = $this->db->query($sql);
         
-        echo $sql .' <br/>';
         if ($result && $this->db->num_rows($result)) {
             if ($return === 'object') {
                 $obj = $this->db->fetch_object($result);

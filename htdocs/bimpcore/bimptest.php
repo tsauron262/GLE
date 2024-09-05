@@ -38,6 +38,10 @@ foreach (array() as $old => $new) {
     }
 }
 
+$rib = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount', 289);
+
+$rib->printData();
+
 echo '<br/>FIN';
 echo '</body></html>';
 

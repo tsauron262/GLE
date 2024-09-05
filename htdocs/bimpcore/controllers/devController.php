@@ -45,8 +45,8 @@ class devController extends BimpController
 //            $html .= '</a>';
 //        }
 
-        if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/test.php')) {
-            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/test.php" target="_blank">';
+        if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/bimptest.php')) {
+            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/bimptest.php" target="_blank">';
             $html .= 'TESTS' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
         }

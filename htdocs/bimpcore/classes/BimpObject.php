@@ -6445,10 +6445,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!empty($bimpObjectFields)) {
             $where = '`' . $this->getPrimary() . '` = ' . (int) $id;
-            if ($this->checkEntity && BimpTools::isModuleDoliActif('MULTICOMPANY')) {
-                if ($this->getEntity_name())
-                    $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ', 0)';
-            }
+//            if ($this->checkEntity && BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+//                if ($this->getEntity_name())
+//                    $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ', 0)';
+//            }
             $result = $this->db->getRow($this->getTable(), $where, $bimpObjectFields, 'array');
             if (!is_null($result)) {
                 foreach ($bimpObjectFields as $field_name) {
@@ -6459,7 +6459,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $this->checkFieldValueType($field_name, $value);
                     $this->data[$field_name] = $value;
                 }
-            } else {
+            } else {                
                 BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Erreur SQL'    => $this->db->err(),
                     'Champs suppl.' => $bimpObjectFields,

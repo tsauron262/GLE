@@ -264,7 +264,6 @@ class BimpDb
         $sql .= ' LIMIT 1';
 
         $result = $this->db->query($sql);
-        
         if ($result && $this->db->num_rows($result)) {
             if ($return === 'object') {
                 $obj = $this->db->fetch_object($result);
@@ -272,6 +271,7 @@ class BimpDb
                 $obj = $this->db->fetch_array($result);
             }
             $this->db->free($result);
+            return $obj;
         }
 
         if ($result) {

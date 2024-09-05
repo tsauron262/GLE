@@ -3885,8 +3885,12 @@ class BimpComm extends BimpDolObject
         $lines = $this->getLines('no_text');
 
         foreach ($lines as $line) {
+            if ((int) $line->id_remise_except && $line->tva_tx) {
+                $line->pu_ht *= (1 + $line->tva_tx / 100);
+            }
+            
             $line->tva_tx = 0;
-            $line_errors = $line->update();
+            $line_errors = $line->update($w, true);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
             }

@@ -602,6 +602,7 @@ forms:
     validate: 
         title: Validation
         rows: 
+            - field: datef
             - custom: 1
               label: Informations
               input_name: validation_type

@@ -5464,6 +5464,10 @@ class Bimp_Facture extends BimpComm
         $success_callback = '';
         $modal_html = '';
 
+        if (isset($data['datef']) && $data['datef']) {
+            $this->updateField('datef', $data['datef']);
+        }
+
         if (!isset($data['force_validate']) || !(int) $data['force_validate']) {
             $lines_errors = array();
             if (!$this->checkEquipmentsAttribution($lines_errors)) {

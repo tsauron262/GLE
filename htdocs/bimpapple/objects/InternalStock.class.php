@@ -352,7 +352,7 @@ class InternalStock extends PartStock
             $qty_received = (int) BimpTools::getArrayValueFromPath($data, 'qty_received', 0);
 
             if (!$qty_received) {
-                $errors = 'Veillez saisir une quantité supérieure à 0';
+                $errors[] = 'Veillez saisir une quantité supérieure à 0';
             } else {
                 $errors = $this->setReceivedQty($qty_received, $reception_number);
 

@@ -1961,6 +1961,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                         }
 
                         foreach ($lines as $id_line => $id_product) {
+                            if (!(int) $id_product) {
+                                continue;
+                            }
                             foreach ($commandes_ids as $id_commande) {
                                 if ((int) $this->db->getCount('commandedet', 'fk_commande = ' . $id_commande . ' AND fk_product = ' . $id_product, 'rowid')) {
                                     unset($lines[$id_line]);

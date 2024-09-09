@@ -169,6 +169,13 @@ class GSX_Repair extends BimpObject
                                 if (is_array($message) && isset($message['description']))
                                     $message = $message['description'];
                                 $msg .= ' - ' . $message . '<br/>';
+                                if (is_array($message) && isset($message['id'])){
+                                    if($action == 'ACKNOWLEDGE'){
+                                        $msg .= BimpInput::renderInput('hidden', 'actions_'.$NbACKNOWLEDGE.'_id', $message['id']);
+                                        $msg .= BimpInput::renderInput('select', 'actions_'.$NbACKNOWLEDGE.'_value', '', array('values'=>array('N'=>'Non', 'Y'=>'Oui')));
+                                        $NbACKNOWLEDGE++;
+                                    }
+                                }
                             }
                         }
 
@@ -222,10 +229,6 @@ class GSX_Repair extends BimpObject
                         $warnings[] = BimpTools::getMsgFromArray($msgs, $action);
                     } else {
                         $errors[] = BimpTools::getMsgFromArray($msgs, $action);
-                        if($action == 'ACKNOWLEDGE'){
-                            $errors[] = BimpInput::renderInput('text', 'actions_'.$NbACKNOWLEDGE.'_value', '', array('values'=>array('N'=>'Non', 'Y'=>'Oui')));
-                            $NbACKNOWLEDGE++;
-                        }
                     }
                 }
             }

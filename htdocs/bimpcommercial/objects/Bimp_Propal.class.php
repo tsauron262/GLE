@@ -1894,7 +1894,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                     if (!empty($lines)) {
                         foreach ($lines as $key => $line) {
-                            if ($line->isAbonnement()) {
+                            if ($line->isAbonnement() || (int) $line->id_remise_except) {
                                 unset($lines[$key]);
                             }
                         }

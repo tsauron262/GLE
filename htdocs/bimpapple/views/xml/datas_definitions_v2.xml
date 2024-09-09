@@ -256,7 +256,7 @@
     <def name="questions" type="custom_full_content">
         <label>Questions</label>
     </def>
-    <def name="actions" type="custom_full_content">
+    <def name="actions" type="datasGroup">
         <label>Reponse</label>
     </def>
 </root>

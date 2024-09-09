@@ -167,8 +167,9 @@ class GSX_Repair extends BimpObject
                         if (isset($reason['messages']) && is_array($reason['messages'])) {
                             foreach ($reason['messages'] as $message) {
                                 if (is_array($message) && isset($message['description']))
-                                    $message = $message['description'];
-                                $msg .= ' - ' . $message . '<br/>';
+                                    $msg .= ' - ' . $message['description'] . '<br/>';
+                                else
+                                    $msg .= ' - ' . $message . '<br/>';
                                 if (is_array($message) && isset($message['id'])){
                                     if($action == 'ACKNOWLEDGE'){
                                         $msg .= BimpInput::renderInput('hidden', 'actions_'.$NbACKNOWLEDGE.'_id', $message['id']);

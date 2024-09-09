@@ -688,7 +688,8 @@ class gsxController extends BimpController
                 }
                 for($i=1; $i<10;$i++){
                     if(BimpTools::getValue('actions_id_'.$i, '') != ''){
-                        $result['actions'][$i]['id'] = BimpTools::getValue('actions_id_'.$i);
+                        $result['actions'][$i-1]['id'] = BimpTools::getValue('actions_id_'.$i);
+                        $result['actions'][$i-1]['value'] = BimpTools::getValue('actions_value_'.$i);
                     }
                     else
                         break;

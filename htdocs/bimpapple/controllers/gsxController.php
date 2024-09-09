@@ -686,10 +686,13 @@ class gsxController extends BimpController
                         }
                     }
                 }
-//                print_r($result);
-//                if(isset($result['actions'])){
-//                    die('oui');
-//                }
+                for($i=1; $i<10;$i++){
+                    if(BimpTools::getValue('actions_id_'.$i, '') != ''){
+                        $result['actions'][$i]['id'] = BimpTools::getValue('actions_id_'.$i);
+                    }
+                    else
+                        break;
+                }
                 break;
         }
 

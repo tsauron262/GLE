@@ -173,7 +173,7 @@ class GSX_Repair extends BimpObject
                                 if (is_array($message) && isset($message['id'])){
                                     if($action == 'ACKNOWLEDGE'){
                                         $msg .= BimpInput::renderInput('hidden', 'actions_'.$NbACKNOWLEDGE.'_id', $message['id']);
-                                        $msg .= BimpInput::renderInput('select', 'actions_'.$NbACKNOWLEDGE.'_value', '', array('values'=>array('N'=>'Non', 'Y'=>'Oui')));
+                                        $msg .= BimpInput::renderInput('select', 'actions_'.$NbACKNOWLEDGE.'_value', '', array('options'=>array('N'=>'Non', 'Y'=>'Oui')));
                                         $NbACKNOWLEDGE++;
                                     }
                                 }

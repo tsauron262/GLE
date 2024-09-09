@@ -686,9 +686,9 @@ class gsxController extends BimpController
                         }
                     }
                 }
-                print_r($params);
-                if(isset($params['actions'])){
-                    
+                print_r($result);
+                if(isset($result['actions'])){
+                    die('oui');
                 }
                 break;
         }

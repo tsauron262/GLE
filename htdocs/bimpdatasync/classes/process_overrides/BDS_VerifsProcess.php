@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 9;
+    public static $current_version = 11;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -1328,6 +1328,203 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
+    // Revalorisations PA factures: 
+
+    public function initFacsRevals(&$data, &$errors = array())
+    {
+        $date_from = $this->getOption('date_from', '');
+        $date_to = $this->getOption('date_to', '');
+
+        if ($date_from && $date_to) {
+            if ($date_from < $date_to) {
+                $errors[] = 'La date de fin ne peut pas être inférieure à la date de début';
+            }
+        }
+
+        $refs = explode(',', $this->getOption('refs_list', ''));
+
+        if (empty($refs)) {
+            $errors[] = 'Aucune référence indiquée';
+        }
+
+        if (!count($errors)) {
+            $prods = array();
+
+            foreach ($refs as $ref) {
+                $id_prod = (int) $this->db->getValue('product', 'rowid', 'ref = \'' . $ref . '\'');
+
+                if ($id_prod) {
+                    $prods[] = $id_prod;
+                } else {
+                    $errors[] = 'Aucun produit trouvé pour la référence "' . $ref . '"';
+                }
+            }
+
+            if (!count($errors)) {
+                $where = 'a.fk_product IN (' . implode(',', $prods) . ')';
+                $where .= ' AND f.type IN (0,1,2)';
+                $where .= ' AND f.fk_statut IN (0,1,2)';
+                if ($date_from) {
+                    $where .= ' AND f.datef >= \'' . date('Y-m-d', strtotime($date_from)) . '\'';
+                }
+                if ($date_to) {
+                    $where .= ' AND f.datef <= \'' . date('Y-m-d', strtotime($date_to)) . '\'';
+                }
+
+                $rows = $this->db->getRows('facturedet a', $where, null, 'array', array('a.rowid', 'a.fk_product'), null, null, array(
+                    'f' => array(
+                        'table' => 'facture',
+                        'on'    => 'f.rowid = a.fk_facture'
+                    )
+                ));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        $elements = array();
+
+                        foreach ($rows as $r) {
+                            $elements[] = (int) $r['fk_product'] . ';' . (int) $r['rowid'];
+                        }
+
+                        $data['steps']['process'] = array(
+                            'label'                  => 'Vérifs revalorisations prix d\'achat',
+                            'on_error'               => 'continue',
+                            'elements'               => $elements,
+                            'nbElementsPerIteration' => 100
+                        );
+                    }
+                } else {
+                    $errors[] = $this->db->err();
+                }
+            }
+        }
+    }
+
+    public function executeFacsRevals($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcommercial', 'Bimp_FactureLine');
+            if (!empty($this->references)) {
+                $prod = null;
+
+                foreach ($this->references as $ref) {
+                    $this->incProcessed();
+
+                    $data = explode(';', $ref);
+                    $id_prod = (int) $data[0];
+                    $id_line = (int) $data[1];
+
+                    if (!BimpObject::objectLoaded($prod) || $prod->id !== $id_prod) {
+                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+
+                        if (!BimpObject::objectLoaded($prod)) {
+                            $this->Error('Produit #' . $id_prod . ' non trouvé');
+                            $this->incIgnored();
+                            continue;
+                        }
+                    }
+
+                    $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                                'id_line' => $id_line
+                    ));
+
+                    if (!BimpObject::objectLoaded($fac_line)) {
+                        $this->Error('Aucune ligne de facture trouvée pour l\'ID ' . $id_line);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $facture = $fac_line->getParentInstance();
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $this->Error('Facture absente pour la ligne #' . $fac_line->id);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $cur_pa_ht = $prod->getCurrentPaHt();
+                    $line_pa_ht = $fac_line->getPaWithRevalorisations();
+
+                    if ($cur_pa_ht == $line_pa_ht) {
+                        $this->Info('PA revalorisé à jour (' . $line_pa_ht . ')', $fac_line);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $line_errors = $fac_line->updatePrixAchat($cur_pa_ht);
+
+                    if (count($line_errors)) {
+                        $this->Error(BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour du prix d\'achat'), $fac_line);
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $this->Success('Màj PA ok (' . $cur_pa_ht . ')', $fac_line);
+                    $this->incUpdated();
+                }
+            }
+        }
+    }
+
+    // Vérifs et correction des statuts commande dans les devis: 
+
+    public function initCheckPropalsCommandeStatus(&$data, &$errors = array())
+    {
+        $rows = $this->db->getRows('propal', 'commande_status = 1', null, 'array', array('rowid'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $elements = array();
+
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['rowid'];
+                }
+
+//                die('N : ' . count($elements));
+
+                $data['steps']['process'] = array(
+                    'label'                  => 'Vérifs des statuts commande',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 100
+                );
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCheckPropalsCommandeStatus($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcommercial', 'Bimp_Propal');
+            if (!empty($this->references)) {
+                foreach ($this->references as $id_propal) {
+                    $this->incProcessed();
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+
+                    if (!BimpObject::objectLoaded($propal)) {
+                        $this->Error('Propal #' . $id_propal . ' inexistante');
+                        $this->incIgnored();
+                        continue;
+                    }
+
+                    $cur_status = (int) $propal->getData('commande_status');
+                    $err = $propal->checkCommandeStatus(null);
+                    $new_status = (int) $propal->getData('commande_status');
+
+                    $this->Info('New : ' . $new_status . ' - old : ' . $cur_status, $propal);
+
+                    if (!empty($err)) {
+                        $this->Error($err, $propal);
+                        $this->incIgnored();
+                    } elseif ($cur_status !== $new_status) {
+                        $this->incUpdated();
+                    }
+                }
+            }
+        }
+    }
+    
     // Install: 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -1614,6 +1811,62 @@ class BDS_VerifsProcess extends BDSProcess
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des statuts des commandes fournisseur',
                         'name'          => 'checkCommandesFournStatus',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
+                            ), true, $errors, $warnings);
+        }
+
+        if ($cur_version < 10) {
+            // Opération "Revalorisation PA factures": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Revalorisation PA factures',
+                        'name'          => 'facsRevals',
+                        'description'   => 'Génère des revalorisations du PA des factures créées depuis la date indiquée en fonction du PA actuel des réfs indiquées',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 90
+                            ), true, $errors, $warnings);
+
+            $op_options = array();
+
+            $id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'date_from\'');
+            if ($id_option) {
+                $op_options[] = $id_option;
+            }
+
+            $id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'date_to\'');
+            if ($id_option) {
+                $op_options[] = $id_option;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $id_process,
+                        'label'         => 'Liste des références',
+                        'name'          => 'refs_list',
+                        'info'          => 'Séparer chaque réf. par une virgule sans espace',
+                        'type'          => 'text',
+                        'default_value' => '',
+                        'required'      => 1
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $op_options[] = (int) $opt->id;
+            }
+
+            $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
+        }
+        
+        if ($cur_version < 11) {
+            // Opération "Vérif des statuts commande des propales": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Vérif des statuts commande des propales',
+                        'name'          => 'checkPropalsCommandeStatus',
                         'description'   => '',
                         'warning'       => '',
                         'active'        => 1,

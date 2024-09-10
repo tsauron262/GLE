@@ -54,16 +54,22 @@ class Bimp_Propal extends Bimp_PropalTemp
         4 => array('label' => 'Commande facturée', 'icon' => 'check', 'classes' => array('success')),
     );
 
-    const CONTRATS_STATUS_NONE = 0;
-    const CONTRATS_STATUS_TODO = 1;
-    const CONTRATS_STATUS_DONE = 2;
-    const CONTRATS_STATUS_DONE_FORCED = 3;
+    const PROCESS_STATUS_NONE = 0;
+    const PROCESS_STATUS_TODO = 1;
+    const PROCESS_STATUS_DONE = 2;
+    const PROCESS_STATUS_DONE_FORCED = 3;
 
     public static $contrats_status_list = array(
-        self::CONTRATS_STATUS_NONE        => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
-        self::CONTRATS_STATUS_TODO        => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
-        self::CONTRATS_STATUS_DONE        => array('label' => 'Traités', 'icon' => 'fas_check', 'classes' => array('success')),
-        self::CONTRATS_STATUS_DONE_FORCED => array('label' => 'Traités (forcé)', 'icon' => 'fas_check', 'classes' => array('success'))
+        self::PROCESS_STATUS_NONE        => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
+        self::PROCESS_STATUS_TODO        => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
+        self::PROCESS_STATUS_DONE        => array('label' => 'Traités', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::PROCESS_STATUS_DONE_FORCED => array('label' => 'Traités (forcé)', 'icon' => 'fas_check', 'classes' => array('success'))
+    );
+    public static $commande_status_list = array(
+        self::PROCESS_STATUS_NONE        => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => array('info')),
+        self::PROCESS_STATUS_TODO        => array('label' => 'A créer', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
+        self::PROCESS_STATUS_DONE        => array('label' => 'Créé(e)', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::PROCESS_STATUS_DONE_FORCED => array('label' => 'Créé(e) (forcé)', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $acomptes_allowed = true;
@@ -143,6 +149,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return $this->can("edit");
 
             case 'createOrder':
+            case 'ForceCommandeStatus':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                 return $commande->can("create") /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */;
 
@@ -188,6 +195,9 @@ class Bimp_Propal extends Bimp_PropalTemp
             case 'redownloadSignature':
             case 'createSignatureDocuSign':
                 return $user->admin;
+
+            case 'CheckfProcessesStatus':
+                return (int) $user->admin;
         }
 
         return parent::canSetAction($action);
@@ -245,6 +255,18 @@ class Bimp_Propal extends Bimp_PropalTemp
                         }
                     }
                     break;
+
+                case 'ForceCommandeStatus':
+                    if (!$this->field_exists('commande_status')) {
+                        $errors[] = 'Champ statut commande désactivé';
+                        return 0;
+                    }
+
+                    if ((int) $this->getData('commande_status') !== self::PROCESS_STATUS_TODO) {
+                        $errors[] = 'Le statut commande n\'est pas à "A traiter"';
+                        return 0;
+                    }
+                    return 1;
 
                 case 'createOrder':
                 case 'createInvoice':
@@ -402,7 +424,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createContratAbo':
             case 'ForceContratsStatus':
-                if ((int) $this->getData('contrats_status') === self::CONTRATS_STATUS_DONE_FORCED) {
+                if ((int) $this->getData('contrats_status') === self::PROCESS_STATUS_DONE_FORCED) {
                     $errors[] = 'Le statut "Traités" a été forcé';
                     return 0;
                 }
@@ -1161,11 +1183,19 @@ class Bimp_Propal extends Bimp_PropalTemp
                     );
                 }
 
-                if ($user->admin) { // Mettre ça dans canSetAction()
+                if ($user->admin) {
                     // Téléchargement des fichiers
                     if (!isset($signature) || !BimpObject::objectLoaded($signature)) {
                         $signature = $this->getChildObject('signature');
                     }
+                }
+
+                if ($this->isActionAllowed('CheckfProcessesStatus') && $this->canSetAction('CheckfProcessesStatus')) {
+                    $buttons[] = array(
+                        'label'   => 'Vérif statuts',
+                        'icon'    => 'fas_check',
+                        'onclick' => $this->getJsActionOnclick('CheckfProcessesStatus', array(), array())
+                    );
                 }
             }
         }
@@ -1464,9 +1494,15 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        if (BimpCore::isModuleActive('bimpcontrat') && $this->field_exists('contrats_status') && in_array((int) $this->getData('fk_statut'), array(Propal::STATUS_SIGNED, Propal::STATUS_BILLED))) {
-            $html .= '<br/>Contrats d\'abonnement : ' . $this->displayDataDefault('contrats_status');
+        if (in_array((int) $this->getData('fk_statut'), array(Propal::STATUS_SIGNED, Propal::STATUS_BILLED))) {
+            if ($this->field_exists('commande_status')) {
+                $html .= '<br/>Commande  / contrat standard : ' . $this->displayDataDefault('commande_status');
+            }
+            if (BimpCore::isModuleActive('bimpcontrat') && $this->field_exists('contrats_status')) {
+                $html .= '<br/>Contrats d\'abonnement : ' . $this->displayDataDefault('contrats_status');
+            }
         }
+
 
         $html .= parent::renderHeaderStatusExtra();
 
@@ -1481,9 +1517,9 @@ class Bimp_Propal extends Bimp_PropalTemp
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le <strong>' . BimpTools::printDate($this->getData('datec'), 'strong') . '</strong>';
 
-            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author_id);
-            if (BimpObject::objectLoaded($user)) {
-                $html .= ' par ' . $user->getLink();
+            $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author_id);
+            if (BimpObject::objectLoaded($u)) {
+                $html .= ' par ' . $u->getLink();
             }
 
             $html .= '</div>';
@@ -1493,9 +1529,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée le <strong>' . BimpTools::printDate($this->dol_object->datev, 'strong') . '</strong>';
 
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid_id);
-                if (BimpObject::objectLoaded($user)) {
-                    $html .= ' par ' . $user->getLink();
+                $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid_id);
+                if (BimpObject::objectLoaded($u)) {
+                    $html .= ' par ' . $u->getLink();
                 }
 
                 $html .= '</div>';
@@ -1507,9 +1543,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $html .= '<div class="object_header_infos">';
                     $html .= 'Fermée le <strong>' . date('d / m / Y', BimpTools::getDateTms($date_cloture)) . '</strong>';
 
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_close_id);
-                    if (BimpObject::objectLoaded($user)) {
-                        $html .= ' par ' . $user->getLink();
+                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_close_id);
+                    if (BimpObject::objectLoaded($u)) {
+                        $html .= ' par ' . $u->getLink();
                     }
 
                     $html .= '</div>';
@@ -1546,40 +1582,64 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
             }
 
-            if ($this->isActionAllowed('createContratAbo')) {
+            $this->checkProcessesStatus();
+
+            if ($this->field_exists('contrats_status')) {
                 $nb_abos = $this->getNbAbonnements(true);
                 if ($nb_abos > 0) {
-                    $s = ($nb_abos > 1 ? 's' : '');
-                    $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
+                    global $user;
+                    if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || (in_array($user->login, array('e.amadei', 'f.martinez')))) {
+                        $s = ($nb_abos > 1 ? 's' : '');
+                        $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
-                    if ($this->canSetAction('createContratAbo')) {
-                        $msg .= '<div class="buttonsContainer" style="text-align: right">';
-                        $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
-                            'form_name' => 'contrat_abo'
-                        ));
-
-                        $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                        $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter les lignes à un contrat d\'abonnement';
-                        $msg .= '</span>';
-
-                        if ($this->isActionAllowed('ForceContratsStatus') && $this->canSetAction('ForceContratsStatus')) {
-                            $onclick = $this->getJsActionOnclick('ForceContratsStatus', array(), array(
-                                'confirm_msg' => 'Veuillez confirmer'
+                        if ($this->canSetAction('createContratAbo')) {
+                            $msg .= '<div class="buttonsContainer" style="text-align: right">';
+                            $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
+                                'form_name' => 'contrat_abo'
                             ));
 
                             $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                            $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Traités"';
+                            $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Traiter les lignes d\'abonnement';
+                            $msg .= '</span>';
+
+                            if ($this->isActionAllowed('ForceContratsStatus') && $this->canSetAction('ForceContratsStatus')) {
+                                $onclick = $this->getJsActionOnclick('ForceContratsStatus', array(), array(
+                                    'confirm_msg' => 'Veuillez confirmer'
+                                ));
+
+                                $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                                $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Traités"';
+                                $msg .= '</span>';
+                            }
+
+                            $msg .= '</div>';
+                        } else {
+                            $msg .= '<span class="danger">';
+                            $msg .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Vous n\'avez pas la permission de créer le contrat d\'abonnement';
                             $msg .= '</span>';
                         }
-
-                        $msg .= '</div>';
-                    } else {
-                        $msg .= '<span class="danger">';
-                        $msg .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Vous n\'avez pas la permission de créer le contrat d\'abonnement';
-                        $msg .= '</span>';
+                        $html .= BimpRender::renderAlerts($msg, 'warning');
                     }
-                    $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
+            }
+
+            if ($this->field_exists('commande_status') && (int) $this->getData('commande_status') === self::PROCESS_STATUS_TODO) {
+                $msg .= 'Aucune commande faite depuis ce devis';
+
+                if ($this->isActionAllowed('ForceCommandeStatus') && $this->canSetAction('ForceCommandeStatus')) {
+                    $msg .= '<div class="buttonsContainer" style="text-align: right">';
+                    $onclick = $this->getJsActionOnclick('ForceCommandeStatus', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer'
+                    ));
+
+                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Commande créée"';
+                    $msg .= '</span>';
+                    $msg .= '</div>';
+                }
+
+
+                $html .= BimpRender::renderAlerts($msg, 'warning');
             }
         }
 
@@ -1781,6 +1841,85 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     // Traitements: 
 
+    public function checkCommandeStatus($cur_status = null)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if (!$this->field_exists('commande_status')) {
+            $errors[] = 'statut commande non activé';
+            return $errors;
+        }
+
+        if ((int) $this->getData('commande_status') === self::PROCESS_STATUS_DONE_FORCED) {
+            return array();
+        }
+
+        $new_commande_status = self::PROCESS_STATUS_NONE;
+
+        if (!(int) $this->getIdSav()) {
+            if (is_null($cur_status)) {
+                $cur_status = (int) $this->getData('fk_statut');
+            }
+
+            if ($cur_status == 4) {
+                $new_commande_status = self::PROCESS_STATUS_DONE;
+            } elseif ($cur_status == 2) {
+                $commandes_ids = array();
+
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande')) as $item) {
+                    if (!in_array((int) $item['id_object'], $commandes_ids)) {
+                        if ((int) $this->db->getValue('commande', 'rowid', 'rowid  = ' . $item['id_object']) > 0) {
+                            $commandes_ids[] = (int) $item['id_object'];
+                        }
+                    }
+                }
+
+                $contrats_ids = array();
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('contrat')) as $item) {
+                    if (!in_array((int) $item['id_object'], $commandes_ids)) {
+                        if ((int) $this->db->getValue('contrat', 'rowid', 'rowid  = ' . $item['id_object'] . ' AND version = 1') > 0) {
+                            $contrats_ids[] = (int) $item['id_object'];
+                        }
+                    }
+                }
+
+                if (!empty($commandes_ids) || !empty($contrats_ids)) {
+                    $new_commande_status = self::PROCESS_STATUS_DONE;
+                } else {
+                    $lines = $this->getLines('not_text');
+
+                    if (!empty($lines)) {
+                        foreach ($lines as $key => $line) {
+                            if ($line->isAbonnement()) {
+                                unset($lines[$key]);
+                            }
+                        }
+                    }
+
+                    if (!empty($lines)) {
+                        $new_commande_status = self::PROCESS_STATUS_TODO;
+                    } else {
+                        $new_commande_status = self::PROCESS_STATUS_DONE;
+                    }
+                }
+            }
+        }
+
+        if ($new_commande_status !== (int) $this->getData('commande_status')) {
+            $errors = $this->updateField('commande_status', $new_commande_status);
+
+            if (!count($errors)) {
+                $this->addObjectLog('Statut commande passé à ' . strip_tags($this->displayDataDefault('commande_status')));
+            }
+        }
+
+        return $errors;
+    }
+
     public function checkContratsStatus($cur_status = null)
     {
         $errors = array();
@@ -1794,11 +1933,11 @@ class Bimp_Propal extends Bimp_PropalTemp
             return $errors;
         }
 
-        if ((int) $this->getData('contrats_status') === self::CONTRATS_STATUS_DONE_FORCED) {
+        if ((int) $this->getData('contrats_status') === self::PROCESS_STATUS_DONE_FORCED) {
             return array();
         }
 
-        $new_contrats_status = self::CONTRATS_STATUS_NONE;
+        $new_contrats_status = self::PROCESS_STATUS_NONE;
 
         if (BimpCore::isModuleActive('bimpcontrat')) {
             if (is_null($cur_status)) {
@@ -1807,7 +1946,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             if (in_array($cur_status, array(2, 4))) {
                 if ($this->getData('date_valid') <= '2023-10-01 00:00:00') {
-                    $new_contrats_status = self::CONTRATS_STATUS_DONE;
+                    $new_contrats_status = self::PROCESS_STATUS_DONE;
                 } else {
                     $lines = $this->getAbonnementsLinesIds(true, true);
 
@@ -1832,9 +1971,9 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
 
                     if (!empty($lines)) {
-                        $new_contrats_status = self::CONTRATS_STATUS_TODO;
+                        $new_contrats_status = self::PROCESS_STATUS_TODO;
                     } else {
-                        $new_contrats_status = self::CONTRATS_STATUS_DONE;
+                        $new_contrats_status = self::PROCESS_STATUS_DONE;
                     }
                 }
             }
@@ -1851,17 +1990,23 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $errors;
     }
 
+    public function checkProcessesStatus($cur_status = null)
+    {
+        $this->checkContratsStatus($cur_status);
+        $this->checkCommandeStatus($cur_status);
+    }
+
     public function onValidate(&$warnings = array())
     {
         $errors = parent::onValidate($warnings);
-        $this->checkContratsStatus(1);
+        $this->checkProcessesStatus(1);
         return $errors;
     }
 
     public function onUnvalidate(&$warnings = array())
     {
         $errors = parent::onUnvalidate($warnings);
-        $this->checkContratsStatus();
+        $this->checkProcessesStatus(0);
         return $errors;
     }
 
@@ -1869,7 +2014,7 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
         $errors = parent::onNewStatus($new_status, $current_status, $extra_data, $warnings);
 
-        $this->checkContratsStatus($new_status);
+        $this->checkProcessesStatus($new_status);
 
         return $errors;
     }
@@ -2231,7 +2376,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        $this->checkContratsStatus();
+        $this->checkProcessesStatus(3);
     }
 
     public function onDocFinancementSigned($doc_type)
@@ -2770,7 +2915,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        $this->checkContratsStatus();
+        $this->checkProcessesStatus();
 
         $no_bundle_lines_process = false;
 
@@ -2865,7 +3010,21 @@ class Bimp_Propal extends Bimp_PropalTemp
         $warnings = array();
         $success = 'Enregistrement effectué';
 
-        $errors = $this->updateField('contrats_status', self::CONTRATS_STATUS_DONE_FORCED);
+        $errors = $this->updateField('contrats_status', self::PROCESS_STATUS_DONE_FORCED);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionForceCommandeStatus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Enregistrement effectué';
+
+        $errors = $this->updateField('commande_status', self::PROCESS_STATUS_DONE_FORCED);
 
         return array(
             'errors'   => $errors,
@@ -3019,6 +3178,20 @@ class Bimp_Propal extends Bimp_PropalTemp
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $sc
+        );
+    }
+
+    public function actionCheckfProcessesStatus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Vérif ok';
+
+        $this->checkProcessesStatus();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 
@@ -3422,7 +3595,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        $this->checkContratsStatus();
+        $this->checkProcessesStatus(Propal::STATUS_SIGNED);
 
         return $errors;
     }
@@ -3433,7 +3606,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             $errors = $this->updateField('fk_statut', Propal::STATUS_NOTSIGNED);
         }
 
-        $this->checkContratsStatus();
+        $this->checkProcessesStatus();
 
         return $errors;
     }
@@ -3444,7 +3617,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             $errors = $this->updateField('fk_statut', Propal::STATUS_VALIDATED);
         }
 
-        $this->checkContratsStatus();
+        $this->checkProcessesStatus();
 
         return $errors;
     }

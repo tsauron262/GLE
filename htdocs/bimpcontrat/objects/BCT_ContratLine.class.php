@@ -61,7 +61,7 @@ class BCT_ContratLine extends BimpObject
                 if (!empty($user->rights->bimpcontrat->facturation_avance)) {
                     return 1;
                 }
-                
+
             case 'activate':
                 return (int) ($user->admin || !empty($user->rights->bimpcontract->to_validate));
 
@@ -82,6 +82,9 @@ class BCT_ContratLine extends BimpObject
 
             case 'checkDateNextFac':
                 return BimpCore::isUserDev();
+
+            case 'MoveToOtherContrat':
+                return 1;
         }
         return parent::canSetAction($action);
     }
@@ -119,9 +122,9 @@ class BCT_ContratLine extends BimpObject
 
             global $user;
 
-            if (!$user->admin && $this->getData('line_origin_type') == 'propal_line' && (int) $this->getData('id_line_origin') > 0) {
-                return 0;
-            }
+//            if (!$user->admin && $this->getData('line_origin_type') == 'propal_line' && (int) $this->getData('id_line_origin') > 0) {
+//                return 0;
+//            }
         }
 
         $status = (int) $this->getData('statut');
@@ -657,7 +660,7 @@ class BCT_ContratLine extends BimpObject
             }
         }
 
-        if (in_array($list_name, array('contrat'))) {
+        if (in_array($list_name, array('contrat')) && $id_contrat) {
             if ($this->canSetAction('addUnits')) {
                 $actions[] = array(
                     'label'   => 'Ajouter / retirer des unités aux lignes sélectionnées',
@@ -679,6 +682,18 @@ class BCT_ContratLine extends BimpObject
                         'fk_contrat' => $id_contrat
                             ), array(
                         'form_name' => 'bulk_renouvellement'
+                    ))
+                );
+            }
+
+            if ($this->canSetAction('MoveToOtherContrat')) {
+                $actions[] = array(
+                    'label'   => 'Déplacer vers un autre contrat',
+                    'icon'    => 'fas_sign-out-alt',
+                    'onclick' => $this->getJsBulkActionOnclick('MoveToOtherContrat', array(
+                        'id_contrat_src' => $id_contrat
+                            ), array(
+                        'form_name' => 'move'
                     ))
                 );
             }
@@ -2084,6 +2099,8 @@ class BCT_ContratLine extends BimpObject
             case 'data':
                 $fields = array(
                     'DISTINCT a.rowid as id_line',
+                    'c.rowid as id_contrat',
+                    'c.label as libelle_contrat',
                     'c.fk_soc as id_client',
                     'c.fk_soc_facturation as id_client_facture',
                     'cef.entrepot as id_entrepot',
@@ -2128,6 +2145,8 @@ class BCT_ContratLine extends BimpObject
                         }
 
                         $lines[$id_client][(int) $r['id_line']] = array(
+                            'id_contrat'        => (int) $r['id_contrat'],
+                            'libelle_contrat'   => $r['libelle_contrat'],
                             'id_entrepot'       => (int) $r['id_entrepot'],
                             'secteur'           => $r['secteur'],
                             'id_mode_reglement' => $r['id_mode_reglement'],
@@ -3146,8 +3165,16 @@ class BCT_ContratLine extends BimpObject
 
             foreach ($lines_by_clients as $id_client => $lines) {
                 $clients_factures[$id_client] = array();
+                $contrats_libelles = array();
 
                 foreach ($lines as $id_line => $line_data) {
+                    $id_contrat = (int) BimpTools::getArrayValueFromPath($line_data, 'id_contrat', 0);
+                    if ($id_contrat && !isset($contrats_libelles[$id_contrat])) {
+                        $libelle_contrat = BimpTools::getArrayValueFromPath($line_data, 'libelle_contrat', '');
+                        if ($libelle_contrat) {
+                            $contrats_libelles[$id_contrat] = $libelle_contrat;
+                        }
+                    }
                     $check = false;
 
                     foreach ($clients_factures[$id_client] as $idx => $cf_data) {
@@ -3161,6 +3188,7 @@ class BCT_ContratLine extends BimpObject
 
                     if (!$check) {
                         $clients_factures[$id_client][] = array(
+                            'contrats_libelles' => $contrats_libelles,
                             'id_entrepot'       => $line_data['id_entrepot'],
                             'secteur'           => $line_data['secteur'],
                             'expertise'         => $line_data['expertise'],
@@ -3281,7 +3309,12 @@ class BCT_ContratLine extends BimpObject
                         }
                     }
 
-                    $fac_libelle = 'Facturation abonnement' . ($facture_data['lines'] > 1 ? 's' : '');
+                    $fac_libelle = '';
+                    if (isset($facture_data['contrats_libelles']) && count($facture_data['contrats_libelles']) == 1) {
+                        $fac_libelle = array_shift($facture_data['contrats_libelles']);
+                    } else {
+                        $fac_libelle = 'Facturation abonnement' . ($facture_data['lines'] > 1 ? 's' : '');
+                    }
 
                     $html .= '<div class="fac_libelle_container" style="margin-top: 10px">';
                     $html .= '<span class="small bold">Libellé facture : </span>';
@@ -5136,6 +5169,50 @@ class BCT_ContratLine extends BimpObject
         if (count($errors)) {
             $html .= BimpRender::renderAlerts($errors);
         }
+        return $html;
+    }
+
+    public function renderMoveToOtherContratInput()
+    {
+        $html = '';
+
+        $id_contrat = (int) BimpTools::getPostFieldValue('id_contrat_src', 0);
+
+        if ($id_contrat) {
+            $id_client = (int) $this->db->getValue('contrat', 'fk_soc', 'rowid = ' . $id_contrat);
+
+            if ($id_client) {
+                $where = 'fk_soc = ' . $id_client . ' AND version = 2 AND rowid != ' . $id_contrat;
+                $rows = $this->db->getRows('contrat', $where, null, 'array', array(
+                    'rowid',
+                    'ref',
+                    'label'
+                        ), 'rowid', 'desc');
+
+                $contrats = array();
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        $label = 'Contrat ' . $r['ref'];
+
+                        if ($r['label']) {
+                            $label .= ' - ' . $r['label'];
+                        }
+
+                        $contrats[(int) $r['rowid']] = $label;
+                    }
+
+                    $html .= BimpInput::renderInput('select', 'id_contrat_dest', '', array(
+                                'options' => $contrats
+                    ));
+                }
+            } else {
+                $html .= BimpRender::renderAlerts('ID du client absent');
+            }
+        } else {
+            $html .= BimpRender::renderAlerts('ID du contrat absent');
+        }
+
         return $html;
     }
 
@@ -7036,6 +7113,69 @@ class BCT_ContratLine extends BimpObject
         );
     }
 
+    public function actionMoveToOtherContrat($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+        $id_contrat_src = (int) BimpTools::getArrayValueFromPath($data, 'id_contrat_src', 0);
+        if (!$id_contrat_src) {
+            $errors[] = 'ID du contrat source absent';
+        } else {
+            $contrat_src = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat_src);
+
+            if (!BimpObject::objectLoaded($contrat_src)) {
+                $errors[] = 'Le contrat source #' . $id_contrat_src . ' n\'existe plus';
+            }
+        }
+
+        $id_contrat_dest = (int) BimpTools::getArrayValueFromPath($data, 'id_contrat_dest', 0);
+        if (!$id_contrat_dest) {
+            $errors[] = 'ID du contrat de destination absent';
+        } else {
+            $contrat_dest = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', $id_contrat_dest);
+
+            if (!BimpObject::objectLoaded($contrat_dest)) {
+                $errors[] = 'Le contrat de destination #' . $id_contrat_dest . ' n\'existe plus';
+            }
+        }
+
+        $id_lines = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        if (empty($id_lines)) {
+            $errors[] = 'Aucune ligne à déplacer sélectionnée';
+        }
+
+        if (!count($errors)) {
+            $nOk = 0;
+
+            foreach ($id_lines as $id_line) {
+                if ($this->db->update('contratdet', array(
+                            'fk_contrat' => $id_contrat_dest
+                                ), '(rowid = ' . $id_line . ' OR id_parent_line = ' . $id_line . ') AND fk_contrat = ' . $id_contrat_src) <= 0) {
+                    $errors[] = 'Ligne #' . $id_line . ' : Echec du déplacement - ' . $this->db->err();
+                } else {
+                    $nOk++;
+                }
+            }
+
+            if ($nOk) {
+                $s = ($nOk > 1 ? 's' : '');
+                $success .= $nOk . ' ligne' . $s . ' déplacée' . $s . ' vers le contrat ' . $contrat_dest->getLink() . ' avec succès';
+                $sc = 'window.open(\'' . $contrat_dest->getUrl() . '\');';
+
+                $contrat_src->resetChildrenPositions('lines');
+                $contrat_dest->resetChildrenPositions('lines');
+            }
+        }
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
     // Actions BimpDataSync:
 
     public function initBdsActionPeriodicFacProcess($process, &$action_data = array(), &$errors = array(), $extra_data = array())
@@ -8191,7 +8331,7 @@ class BCT_ContratLine extends BimpObject
                 if ($id_propal) {
                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
                     if (BimpObject::objectLoaded($propal)) {
-                        $propal->checkContratsStatus();
+                        $propal->checkProcessesStatus();
                     }
                 }
             }

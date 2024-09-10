@@ -792,7 +792,9 @@ class BimpInput
                                 'select_all_buttons' => 1,
                                 'max'                => 'none',
                                 'max_input_name'     => '',
-                                'max_input_abs'      => 0
+                                'max_input_abs'      => 0,
+                                'onchange'           => '',
+                                'inline'             => false
                                     ), $options);
 
                     $nb_selected = 0;
@@ -801,6 +803,9 @@ class BimpInput
                     $html .= ' data-max="' . $options['max'] . '"';
                     $html .= ' data-max_input_name="' . $options['max_input_name'] . '"';
                     $html .= ' data-max_input_abs="' . $options['max_input_abs'] . '"';
+                    if ((int) $options['inline']) {
+                        $html .= ' style="display: inline-block"';
+                    }
                     $html .= '>';
                     if (count($options['items']) > 1) {
                         if ((int) $options['search_input']) {
@@ -815,7 +820,8 @@ class BimpInput
                     }
                     $i = 1;
                     foreach ($options['items'] as $idx => $item) {
-                        $html .= self::renderCheckListItem($field_name, $input_id, $i, $idx, $item, $nb_selected, $value);
+                        $child_selected = false;
+                        $html .= self::renderCheckListItem($field_name, $input_id, $i, $idx, $item, $nb_selected, $value, $child_selected, $options);
                     }
 
                     if ($options['max'] !== 'none' || $options['max_input_name']) {
@@ -1143,7 +1149,7 @@ class BimpInput
         }
         $html .= '"/>';
         $html .= '<input type="text" class="form-control bs_datetimepicker" id="' . $input_id . '_bs_dt_picker" name="' . $input_name . '_picker"/>';
-        $html .= '<script '.BimpTools::getScriptAttribut().'>';
+        $html .= '<script ' . BimpTools::getScriptAttribut() . '>';
         $html .= "$('#" . $input_id . "_bs_dt_picker').datetimepicker({";
         $html .= "locale: 'fr',";
         $html .= "format: '" . $display_js_format . "',";
@@ -1526,7 +1532,7 @@ class BimpInput
 
         $html .= '</div>';
 
-        $html .= '<script '.BimpTools::getScriptAttribut().'>';
+        $html .= '<script ' . BimpTools::getScriptAttribut() . '>';
         $html .= '$(\'.' . $field_name . '_time_value\').each(function() {';
         $html .= '$(this).change(function() {';
         $html .= 'updateTimerInput($(this), \'' . $field_name . '\');';
@@ -1809,7 +1815,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderCheckListItem($field_name, $input_id, &$i, $idx, $item, &$nb_selected, $values = array(), &$child_selected = false)
+    public static function renderCheckListItem($field_name, $input_id, &$i, $idx, $item, &$nb_selected, $values = array(), &$child_selected = false, $options = array())
     {
         $html = '';
 
@@ -1834,7 +1840,7 @@ class BimpInput
 
             $has_child_selected = false;
             foreach ($item_children as $child_idx => $child_item) {
-                $children_html .= self::renderCheckListItem($field_name, $input_id, $i, $child_idx, $child_item, $nb_selected, $values, $has_child_selected);
+                $children_html .= self::renderCheckListItem($field_name, $input_id, $i, $child_idx, $child_item, $nb_selected, $values, $has_child_selected, $options);
             }
 
             if ($has_child_selected) {
@@ -1870,14 +1876,18 @@ class BimpInput
             $html .= '</div>';
             $html .= '</div>';
         } else {
-            $html .= '<div class="check_list_item">';
+            $html .= '<div class="check_list_item"' . (isset($options['inline']) && (int) $options['inline'] ? ' style="display: inline-block; margin-left: 12px"' : '') . '>';
             $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
             if (in_array($item_value, $values)) {
                 $child_selected = true;
                 $nb_selected++;
                 $html .= ' checked';
             }
-            $html .= ' class="' . $field_name . '_check check_list_item_input"/>';
+            $html .= ' class="' . $field_name . '_check check_list_item_input"';
+            if (isset($options['onchange']) && $options['onchange']) {
+                $html .= ' onchange="' . $options['onchange'] . '"';
+            }
+            $html .= '/>';
             $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
             $html .= $item_label;
             $html .= '</label>';

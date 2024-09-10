@@ -651,7 +651,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $errors[] = 'Demandes de location à partir des commandes désactivées';
             return 0;
         }
-        
+
         if ((int) BimpCore::getConf('allow_df_from_commande_dev_only', null, 'bimpcommercial') && !BimpCore::isUserDev()) {
             $errors[] = 'Demandes de location à partir des commandes actives seulement pour les devs';
             return 0;
@@ -885,16 +885,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     );
                 }
             }
-            
-            
-                    $buttons[] = array(
-                        'label'   => 'Passer toutes les quantités au mini',
-                        'icon'    => 'ban',
-                        'onclick' => $this->getJsActionOnclick('allQtyToZero', array(), array(
-                            'confirm_msg' => strip_tags($langs->trans('Confirmer', $ref))
-                        ))
-                    );
 
+
+            $buttons[] = array(
+                'label'   => 'Passer toutes les quantités au mini',
+                'icon'    => 'ban',
+                'onclick' => $this->getJsActionOnclick('allQtyToZero', array(), array(
+                    'confirm_msg' => strip_tags($langs->trans('Confirmer', $ref))
+                ))
+            );
 
 //
 //            // Créer contrat
@@ -3848,7 +3847,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $warnings = array();
         /* pour enregistré les valeur du form */
         $errors = $this->updateFields($data);
-        if(BimpCore::getConf('use_db_transactions')){
+        if (BimpCore::getConf('use_db_transactions')) {
             $this->db->db->commit();
             $this->db->db->begin();
         }
@@ -4434,15 +4433,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
             'warnings' => $warnings
         );
     }
-    
+
     public function actionAllQtyToZero($data, &$success)
     {
         $errors = $warnings = array();
 
-        
         $lines = $this->getLines('not_text');
-        foreach($lines as $line)
-        {
+        foreach ($lines as $line) {
             $data = array('qty_modified' => $line->getMinQty());
             $success = '';
             $line->actionModifyQty($data, $success);
@@ -4857,6 +4854,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             }
                         }
                     }
+
+                    $propal->checkProcessesStatus();
                 }
             }
 
@@ -4886,6 +4885,35 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
         }
 
+        return $errors;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $propales = array();
+
+        if ($this->isLoaded()) {
+            foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('propal')) as $item) {
+                if (!in_array((int) $item['id_object'], $propales)) {
+                    $propales[] = (int) $item['id_object'];
+                }
+            }
+        }
+        
+        $errors = parent::delete($warnings, $force_delete);
+        
+        if (!count($errors)) {
+            if (!empty($propales)) {
+                foreach ($propales as $id_propal) {
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+                    
+                    if (BimpObject::objectLoaded($propal)) {
+                        $propal->checkProcessesStatus();
+                    }
+                }
+            }
+        }
+        
         return $errors;
     }
 

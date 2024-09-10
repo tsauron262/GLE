@@ -578,26 +578,26 @@ class Bimp_PropalLine extends ObjectLine
                         if ($data['first_period_prorata'] != 1) {
                             $html .= 'Facturation : ' . $this->displayDataDefault('abo_fac_periodicity') . '<br/>';
                             $html .= '1 facturation de <b>';
-                            $html .= BimpTools::displayFloatValue($data['qty_per_period'] * $data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1);
+                            $html .= BimpTools::displayFloatValue($data['qty_per_period'] * $data['first_period_prorata'], 2, ',', 0, 0, 0, 0, 1, 1);
                             $html .= '</b> unité(s)';
 
                             $html .= ' <span style="font-style: italic">(';
 
                             if ($prod_duration) {
                                 $nb_prod_periods = $periodicity / $prod_duration;
-                                $html .= 'soit <b>' . BimpTools::displayFloatValue($nb_units, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods != 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 4, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . ' ';
+                                $html .= 'soit <b>' . BimpTools::displayFloatValue($nb_units, 2, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods != 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 2, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . ' ';
                             }
 
-                            $html .= 'au prorata de <b>' . BimpTools::displayFloatValue($data['first_period_prorata'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b>)</span>';
+                            $html .= 'au prorata de <b>' . BimpTools::displayFloatValue($data['first_period_prorata'], 4, ',', 0, 0, 0, 0, 1, 1) . '</b>)</span>';
 
                             if ($nb_periods > 1) {
                                 $html .= '<br/>Suivie de ' . ($nb_periods - 1) . ' facturation' . ($nb_periods - 1 > 1 ? 's' : '') . ' de <b>';
-                                $html .= BimpTools::displayFloatValue($data['qty_per_period'], 6, ',', 0, 0, 0, 0, 1, 1);
+                                $html .= BimpTools::displayFloatValue($data['qty_per_period'], 2, ',', 0, 0, 0, 0, 1, 1);
                                 $html .= '</b> unité(s)';
 
                                 if ($prod_duration && $periodicity != $prod_duration) {
                                     $nb_prod_periods = ($duration - $periodicity) / $prod_duration;
-                                    $html .= ' <span style="font-style: italic">(soit ' . ($nb_periods > 2 ? 'au total ' : '') . '<b>' . BimpTools::displayFloatValue($nb_units, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods != 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 4, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . ')</span>';
+                                    $html .= ' <span style="font-style: italic">(soit ' . ($nb_periods > 2 ? 'au total ' : '') . '<b>' . BimpTools::displayFloatValue($nb_units, 2, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods != 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 2, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . ')</span>';
                                 }
                             }
                         } else {
@@ -608,11 +608,11 @@ class Bimp_PropalLine extends ObjectLine
                                 $html .= 'facturation ' . $this->displayDataDefault('abo_fac_periodicity') . ' ';
                             }
 
-                            $html .= 'de <b>' . BimpTools::displayFloatValue($data['qty_per_period'], 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s)';
+                            $html .= 'de <b>' . BimpTools::displayFloatValue($data['qty_per_period'], 2, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s)';
 
                             if ($prod_duration && $periodicity != $prod_duration) {
                                 $nb_prod_periods = $duration / $prod_duration;
-                                $html .= '<br/><span style="font-style: italic">Soit  ' . ($nb_periods > 2 ? 'au total ' : '') . ': <b>' . BimpTools::displayFloatValue($nb_units, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $prod_duration . '</b> mois ' . ($nb_prod_periods > 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 4, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . '</span>';
+                                $html .= '<br/><span style="font-style: italic">Soit  ' . ($nb_periods > 2 ? 'au total ' : '') . ': <b>' . BimpTools::displayFloatValue($nb_units, 2, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $prod_duration . '</b> mois ' . ($nb_prod_periods > 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 2, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . '</span>';
                             }
                         }
                     }
@@ -629,7 +629,7 @@ class Bimp_PropalLine extends ObjectLine
                             $html .= 'facturation ' . $this->displayDataDefault('abo_fac_periodicity') . ' ';
                         }
 
-                        $html .= 'de <b>' . BimpTools::displayFloatValue($this->qty / $nb_periods, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s)';
+                        $html .= 'de <b>' . BimpTools::displayFloatValue($this->qty / $nb_periods, 2, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s)';
 
                         $prod = $this->getProduct();
                         if (BimpObject::objectLoaded($prod)) {
@@ -637,7 +637,7 @@ class Bimp_PropalLine extends ObjectLine
 
                             if ($prod_duration && $periodicity != $prod_duration) {
                                 $nb_prod_periods = $duration / $prod_duration;
-                                $html .= '<br/><span style="font-style: italic">Soit ' . ($nb_periods > 2 ? 'au total ' : '') . ': <b>' . BimpTools::displayFloatValue($nb_units, 6, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $prod_duration . '</b> mois ' . ($nb_prod_periods > 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 4, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . '</span>';
+                                $html .= '<br/><span style="font-style: italic">Soit ' . ($nb_periods > 2 ? 'au total ' : '') . ': <b>' . BimpTools::displayFloatValue($nb_units, 2, ',', 0, 0, 0, 0, 1, 1) . '</b> unité(s) de <b>' . $prod_duration . '</b> mois ' . ($nb_prod_periods > 1 ? ' x <b>' . BimpTools::displayFloatValue($nb_prod_periods, 2, ',', 0, 0, 0, 0, 1, 1) . '</b>' : '') . '</span>';
                             }
                         }
                     }

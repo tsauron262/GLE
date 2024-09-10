@@ -175,6 +175,12 @@ fields:
     signature_params: 
         label: Paramètres incrustation signature
         type: json
+    commande_status: 
+        label: Statut commande / contrat standard
+        type: int
+        values:
+            array: commande_status_list
+        default_value: 0
     contrats_status: 
         label: Statut contrats d'abonnement
         type: int

@@ -1375,7 +1375,16 @@ class BimpRender
         // Lignes: 
         foreach ($rows as $row) {
             $html .= '<tr class="bimp_list_table_row' . (isset($row['row_extra_class']) ? ' ' . $row['row_extra_class'] : '') . '"';
-            $html .= (isset($row['tr_style']) ? ' style="' . $row['tr_style'] . '"' : '');
+            $html .= ' style="';
+            if (isset($row['tr_style']) && $row['tr_style']) {
+                $html .= (isset($row['tr_style']) ? $row['tr_style'] . ';' : '');
+            }
+            if (isset($row['show_tr']) && !(int) $row['show_tr']) {
+                $html .= ' display: none;';
+            }
+
+            $html .= '"';
+
             $html .= (isset($row['row_data']) ? BimpRender::renderTagData($row['row_data']) : '');
             $html .= '>';
 

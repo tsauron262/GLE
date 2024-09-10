@@ -355,6 +355,17 @@ class Bimp_Product extends BimpObject
         return (int) parent::isActionAllowed($action, $errors);
     }
 
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        if ($field === 'cost_price' && $this->isTypeService()) {
+            if (!empty(BimpCore::getConf('services_limited_pa_percent'))) {
+                return 0;
+            }
+        }
+
+        return parent::isFieldEditable($field, $force_edit);
+    }
+
     public function isTypeProduct()
     {
         if ((int) $this->getData('fk_product_type') === 0) {
@@ -1463,6 +1474,26 @@ class Bimp_Product extends BimpObject
             }
         }
         return $html;
+    }
+
+    public function getCostPricePercentValues()
+    {
+        if (!$this->isTypeService()) {
+            return null;
+        }
+        
+        $values = BimpCore::getConf('services_limited_pa_percent');
+
+        if (!empty($values)) {
+            $return = array();
+            foreach (explode(',', $values) as $val) {
+                $return[(float) $val] = BimpTools::displayFloatValue($val, 6, ',', 0, 0, 0, 0, 1, 1) . ' %';
+            }
+
+            return $return;
+        }
+
+        return null;
     }
 
     // Getters stocks:
@@ -4388,11 +4419,11 @@ class Bimp_Product extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        if((float) BimpTools::getPostFieldValue('price_ttc') > 0 || (float) BimpTools::getPostFieldValue('price_ttc') < 0)
+        if ((float) BimpTools::getPostFieldValue('price_ttc') > 0 || (float) BimpTools::getPostFieldValue('price_ttc') < 0)
             $this->set('price', BimpTools::calculatePriceTaxEx(BimpTools::getPostFieldValue('price_ttc'), (float) BimpTools::getPostFieldValue('tva_tx')));
-        
-        
-        
+
+
+
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {

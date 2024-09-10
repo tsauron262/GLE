@@ -11,7 +11,7 @@ class modBimpContrat extends DolibarrModules
 
         $this->db = $db;
         $this->numero = 3505000;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
-        $this->rights_class = 'bimpcontract';
+        $this->rights_class = 'bimpcontrat';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page

@@ -1,0 +1,1 @@
+- Ajout alerte client non solvable à la validation d'une facture

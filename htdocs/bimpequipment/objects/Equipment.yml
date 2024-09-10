@@ -702,6 +702,7 @@ lists:
 
     client: 
         configurable: 1
+        filters_panel: default
         sort_field: date_create
         sort_way: desc
         n: 10

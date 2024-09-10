@@ -1,1 +1,2 @@
 - Ajout alerte client non solvable à la validation d'une facture
+- Blocage validation des expéditions si client non solvable

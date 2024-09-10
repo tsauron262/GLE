@@ -76,7 +76,7 @@ class BimpPDF extends TCPDF
             $folder = str_replace($nomPure, "", $filename);
 
             if (!is_dir($folder))
-                if (!mkdir($folder)) {
+                if (BimpTools::makeDirectories($folder, '/')) {
                     if (!BimpTools::isSubmit('ajax')) {
                         die("Le dossier " . $folder . " n'existe pas et ne peut être créé");
                     } else {
@@ -470,9 +470,17 @@ class BimpConcatPdf extends Fpdi
                             $params['height'] = $info[1];
                         }
                     }
+                    
+                    $output_file = DOL_DATA_ROOT.'/tmp.png'; 
+                        
+                     /*modtommy bug base 64*/   
+                    $ifp = fopen( $output_file, 'wb' ); 
+                    $data = explode( ',', $base64_image );
+                    fwrite( $ifp, base64_decode( $data[ 1 ] ) );
+                    fclose( $ifp );
+                    /*fmod tommy*/
 
-
-                    $this->Image($base64_image, $params['x_pos'], $params['y_pos'], $params['width'], $params['height'], $params['type']);
+                    $this->Image($output_file, $params['x_pos'], $params['y_pos'], $params['width'], $params['height'], $params['type']);
 
                     if (!empty($extra_texts)) {
                         $this->SetFont('Arial', '', 7);

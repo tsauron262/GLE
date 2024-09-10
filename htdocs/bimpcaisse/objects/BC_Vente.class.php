@@ -1788,7 +1788,7 @@ class BC_Vente extends BimpObject
         $sql = 'SELECT p.rowid as id, p.label, p.ref, pe.serialisable FROM ' . MAIN_DB_PREFIX . 'product p ';
         $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields pe ';
         $sql .= ' ON p.rowid = pe.fk_object';
-        $sql .= ' WHERE (p.barcode = "' . $search . '" OR p.ref LIKE "%' . $search . '%") AND tosell = 1';
+        $sql .= ' WHERE (p.barcode = "' . $search . '" OR p.ref LIKE "%' . $search . '%" OR p.label LIKE "%' . $search . '%") AND tosell = 1';
 
 //        echo $sql;
 //        exit;

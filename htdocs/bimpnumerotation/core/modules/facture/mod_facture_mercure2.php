@@ -42,7 +42,7 @@ class mod_facture_mercure2 extends ModeleNumRefFactures
      *
      *  @return     string      Texte descripif
      */
-    function info()
+    function info($langs)
     {
         global $conf, $langs;
 

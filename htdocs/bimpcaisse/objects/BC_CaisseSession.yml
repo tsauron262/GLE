@@ -97,7 +97,7 @@ fields_tables:
 views: 
     default: 
         title: 
-            callback: displaySessionName
+            callback: getName
         objects_change_reload: BC_Vente,Bimp_Paiement
         rows: 
             - cols: 

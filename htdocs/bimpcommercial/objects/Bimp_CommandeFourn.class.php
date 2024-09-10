@@ -2305,6 +2305,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         $new_data['date_valid'] = null;
         $new_data['date_approve'] = null;
         $new_data['date_approve2'] = null;
+        $new_data['date_closed'] = null;
 
         $new_data['fk_user_author'] = 0;
         $new_data['fk_user_modif'] = 0;

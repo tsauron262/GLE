@@ -18,9 +18,9 @@ class BS_SAV_ExtVersion extends BS_SAV
         1000 => array('label' => 'Payée', 'icon' => 'arrow-right', 'classes' => array('success'))
     );
 
-    public function actionClose($data, &$success)
+    public function actionRestitute($data, &$success)
     {
-        $return = parent::actionClose($data, $success);
+        $return = parent::actionRestitute($data, $success);
         if (!count($return['errors'])) {
             if ($this->asProdEcologic()) {
                 $this->updateField('status_ecologic', 1);

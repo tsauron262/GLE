@@ -785,10 +785,11 @@ class BimpRevalorisation extends BimpObject
 
                 if ($this->isLoaded()) {
                     $where .= ' AND id != ' . $this->id;
-                    if($this->getData('qty') > 0)
-                        $where .= ' qty > 0';
-                    else
-                        $where .= ' qty < 0';
+                    if ($this->getData('qty') > 0) {
+                        $where .= ' AND qty > 0';
+                    } else {
+                        $where .= ' AND qty < 0';
+                    }
                 }
 
                 $id = $this->db->getValue('bimp_revalorisation', 'id', $where);

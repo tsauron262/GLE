@@ -443,19 +443,27 @@ class BS_SAV extends BimpObject
                 }
                 return 1;
 
-            case 'close':
+            case 'restitute':
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
-                if (is_null($propal) && $status === self::BS_SAV_FERME) {
-                    $errors[] = 'Ce SAV est déjà fermé';
-                    return 0;
+
+                $restituted = (int) $this->getData('restituted');
+
+                if (is_null($propal)) {
+                    if ($status === self::BS_SAV_FERME && $restituted) {
+                        $errors[] = 'Ce SAV est déjà fermé et le matériel a été restitué';
+                        return 0;
+                    }
+                    return 1;
                 }
-                if (!is_null($propal) && $status !== self::BS_SAV_A_RESTITUER) {
-                    $errors[] = $status_error;
-                    return 0;
+
+                if ($status === self::BS_SAV_A_RESTITUER || ($status === self::BS_SAV_FERME && !$restituted)) {
+                    return 1;
                 }
-                return 1;
+
+                $errors[] = $status_error;
+                return 0;
 
             case 'notRestituted':
                 if (!$this->isLoaded($errors)) {
@@ -929,7 +937,7 @@ class BS_SAV extends BimpObject
                         'label'   => 'Devis accepté',
                         'icon'    => 'check',
                         'onclick' => $this->getJsActionOnclick('propalAccepted', array(), array(
-                            'confirm_msg' => 'Veuillez confirmer l\'acceptation du devis par le client sans signature'
+                            'confirm_msg' => 'Veuillez confirmer l\\\'acceptation du devis par le client sans signature'
                         ))
                     );
                 }
@@ -1059,73 +1067,70 @@ class BS_SAV extends BimpObject
 
                 // Restituer (payer) 
                 if ($this->isRestituable) {
-                    if ($this->isActionAllowed('close')) {
-                        //                    $cond_reglement = 0;
-//
-//                    if (BimpObject::objectLoaded($propal)) {
-//                        $cond_reglement = (int) $propal->getData('fk_cond_reglement');
-//                    }
-//
-//                    if (!$cond_reglement) {
-//                        $client = $this->getChildObject('client');
-//
-//                        if (BimpObject::objectLoaded($client)) {
-//                            $cond_reglement = (int) $client->getData('cond_reglement');
-//                        }
-//                    }
+                    if ($this->isActionAllowed('restitute')) {
+                        $form_name = 'restitute';
+                        $with_paiement = true;
+
+                        if (is_null($propal)) {
+                            $with_paiement = false;
+                        }
+
+                        if ((int) $this->getData('propal_refused') && $status === self::BS_SAV_FERME) {
+                            $form_name = 'restitute_no_facture';
+                            $with_paiement = false;
+                        }
 
                         $buttons[] = array(
-                            'label'   => 'Restituer (Payer)',
+                            'label'   => 'Restituer' . ($with_paiement ? ' (Payer)' : ''),
                             'icon'    => 'fas_share-square',
-                            'onclick' => $this->getJsActionOnclick('close', array(
-                                'restitute' => 1,
-                                    //                            'cond_reglement' => $cond_reglement
+                            'onclick' => $this->getJsActionOnclick('restitute', array(
+                                'restitute' => 1
                                     ), array(
-                                'form_name' => 'restitute'
+                                'form_name' => $form_name
                             ))
                         );
                     }
 
-//                    if ($this->isActionAllowed('notRestituted') && $this->canSetAction('notRestituted')) {
-//                        $onclick = '';
-//
-//                        if ($status == self::BS_SAV_A_RESTITUER) {
-//                            if ((int) $this->getData('propal_refused')) {
-//                                $onclick = $this->getJsActionOnclick('close', array(
-//                                    'restitute'      => 1,
-//                                    'not_restituted' => 1
-//                                        ), array(
-//                                    'confirm_msg' => 'Veuillez confirmer la fermeture du SAV sans restitution'
-//                                ));
-//                            } else {
-//                                $frais = 0;
-//
-//                                if (BimpObject::objectLoaded($propal)) {
-//                                    foreach ($propal->dol_object->lines as $line) {
-//                                        if ($line->desc === 'Acompte') {
-//                                            $frais -= $line->total_ttc;
-//                                        }
-//                                    }
-//                                }
-//
-//                                $onclick = $this->getJsActionOnclick('notRestituted', array(
-//                                    'frais' => $frais
-//                                        ), array(
-//                                    'form_name' => 'not_restituted'
-//                                ));
-//                            }
-//                        } elseif ($status == self::BS_SAV_FERME) {
-//                            $onclick = $this->getJsActionOnclick('notRestituted', array(), array(
-//                                'confirm_msg' => 'Veuillez confirmer la non restitution du matériel'
-//                            ));
-//                        }
-//
-//                        $buttons[] = array(
-//                            'label'   => 'Non restitué',
-//                            'icon'    => 'fas_times-circle',
-//                            'onclick' => $onclick
-//                        );
-//                    }
+                    if ($this->isActionAllowed('notRestituted') && $this->canSetAction('notRestituted')) {
+                        $onclick = '';
+
+                        if ($status == self::BS_SAV_A_RESTITUER) {
+                            if ((int) $this->getData('propal_refused')) {
+                                $onclick = $this->getJsActionOnclick('restitute', array(
+                                    'restitute'      => 1,
+                                    'not_restituted' => 1
+                                        ), array(
+                                    'confirm_msg' => 'Veuillez confirmer la fermeture du SAV sans restitution'
+                                ));
+                            } else {
+                                $frais = 0;
+
+                                if (BimpObject::objectLoaded($propal)) {
+                                    foreach ($propal->dol_object->lines as $line) {
+                                        if ($line->desc === 'Acompte') {
+                                            $frais -= $line->total_ttc;
+                                        }
+                                    }
+                                }
+
+                                $onclick = $this->getJsActionOnclick('notRestituted', array(
+                                    'frais' => $frais
+                                        ), array(
+                                    'form_name' => 'not_restituted'
+                                ));
+                            }
+                        } elseif ($status == self::BS_SAV_FERME) {
+                            $onclick = $this->getJsActionOnclick('notRestituted', array(), array(
+                                'confirm_msg' => 'Veuillez confirmer la non restitution du matériel'
+                            ));
+                        }
+
+                        $buttons[] = array(
+                            'label'   => 'Non restitué',
+                            'icon'    => 'fas_times-circle',
+                            'onclick' => $onclick
+                        );
+                    }
                 }
 
                 //Générer devis 
@@ -1250,7 +1255,7 @@ class BS_SAV extends BimpObject
         }
 
         global $user;
-        if (($user->admin || $user->id == 60 || $user->id == 282 || $user->id == 78) && BimpObject::objectLoaded($propal)) {
+        if (($user->admin || in_array($user->login, array('jc.cannet', 'tbazin', 'k.ayari'))) && BimpObject::objectLoaded($propal)) {
             $propal->module = 'bimpcommercial';
             $buttons[] = array(
                 'label'   => 'Fiche Propale ' . $propal->id,
@@ -1614,17 +1619,39 @@ class BS_SAV extends BimpObject
 
     public function getFactureAmountToPay()
     {
-        if ((int) $this->getData('id_facture')) {
-            $facture = $this->getChildObject('facture');
-            if (BimpObject::objectLoaded($facture)) {
-                return $facture->getRemainToPay();
-            }
-        }
+        if ((int) $this->getData('status') === self::BS_SAV_FERME && !(int) $this->getData('restituted')) {
+            $amount = 0;
 
-        if ((int) $this->getData('id_propal')) {
-            $propal = $this->getChildObject('propal');
-            if (BimpObject::objectLoaded($propal)) {
-                return (float) round($propal->dol_object->total_ttc, 2);
+            if (!(int) $this->getData('propal_refused')) {
+                if ((int) $this->getData('id_propal')) {
+                    $propal = $this->getChildObject('propal');
+                    if (BimpObject::objectLoaded($propal)) {
+                        $amount += round($propal->dol_object->total_ttc, 2);
+                    }
+                }
+
+                if ((int) $this->getData('id_facture')) {
+                    $facture = $this->getChildObject('facture');
+                    if (BimpObject::objectLoaded($facture)) {
+                        $amount -= $facture->dol_object->total_ttc;
+                    }
+                }
+            }
+
+            return round($amount, 2);
+        } else {
+            if ((int) $this->getData('id_facture')) {
+                $facture = $this->getChildObject('facture');
+                if (BimpObject::objectLoaded($facture)) {
+                    return $facture->getRemainToPay();
+                }
+            }
+
+            if ((int) $this->getData('id_propal')) {
+                $propal = $this->getChildObject('propal');
+                if (BimpObject::objectLoaded($propal)) {
+                    return (float) round($propal->dol_object->total_ttc, 2);
+                }
             }
         }
 
@@ -6034,7 +6061,7 @@ ORDER BY a.val_max DESC");
         );
     }
 
-    public function actionClose($data, &$success)
+    public function actionRestitute($data, &$success) // Anciennement actionClose()
     {
         global $user, $langs;
         $errors = array();
@@ -6043,62 +6070,53 @@ ORDER BY a.val_max DESC");
         $success_callback = '';
 
         $not_restituted = (int) BimpTools::getArrayValueFromPath($data, 'not_restituted', 0);
-
+        $current_status = (int) $this->getInitData('status');
+        $propal_refused = (int) $this->getData('propal_refused');
         $id_client_sav = (int) $this->getData('id_client');
-
-//        $id_client_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_client', $this->getData('id_client'));
-//        $id_contact_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
-
         $id_client_fac = (int) $this->getData('id_client');
         $id_contact_fac = (int) $this->getData('id_contact');
-
-        $client_fac = null;
         $propal = $this->getChildObject('propal');
-        $impayee = $propal->dol_object->total_ttc - (float) BimpTools::getArrayValueFromPath($data, 'paid', 0) - (float) BimpTools::getArrayValueFromPath($data, 'paid2', 0);
+        $client_fac = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_fac);
 
-        // Vérification du client facturé: 
-        if (!$id_client_fac) {
-            $errors[] = 'Aucun client de facturation sélectionné';
-        } else {
-            $client_fac = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_fac);
+        $create_facture = true;
 
-            if ($id_client_fac !== $id_client_sav) {
-                if (!BimpObject::objectLoaded($client_fac)) {
-                    $errors[] = 'Le client de facturation sélectionné n\'existe plus';
-                } else {
-                    if (!(int) $client_fac->getData('status')) {
-                        $errors[] = 'Ce client est désactivé';
-                    } elseif (!$client_fac->isSolvable($this->object_name, $warnings)) {
-                        $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+        if ($current_status === self::BS_SAV_FERME && $propal_refused) {
+            $create_facture = false;
+        }
+
+        if ($create_facture) {
+            $impayee = $propal->dol_object->total_ttc - (float) BimpTools::getArrayValueFromPath($data, 'paid', 0) - (float) BimpTools::getArrayValueFromPath($data, 'paid2', 0);
+
+            // Vérification du client facturé: 
+            if (!$id_client_fac) {
+                $errors[] = 'Aucun client de facturation sélectionné';
+            } else {
+                if ($id_client_fac !== $id_client_sav) {
+                    if (!BimpObject::objectLoaded($client_fac)) {
+                        $errors[] = 'Le client de facturation sélectionné n\'existe plus';
+                    } else {
+                        if (!(int) $client_fac->getData('status')) {
+                            $errors[] = 'Ce client est désactivé';
+                        } elseif (!$client_fac->isSolvable($this->object_name, $warnings)) {
+                            $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+                        }
+                    }
+                }
+
+                if ($impayee > 1) {
+                    //on vérifie encours
+                    $encoursActu = $client_fac->getAllEncoursForSiret(true)['total'];
+                    $authorisation = ($client_fac->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
+                    $besoin = $encoursActu + $impayee;
+
+                    if ($besoin > $authorisation) {
+                        $errors[] = 'Le client doit payer comptant, son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
                     }
                 }
             }
 
-            if ($impayee > 1) {
-                //on vérifie encours
-                $encoursActu = $client_fac->getAllEncoursForSiret(true)['total'];
-                $authorisation = ($client_fac->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
-                $besoin = $encoursActu + $impayee;
-
-                if ($besoin > $authorisation) {
-                    $errors[] = 'Le client doit payer comptant, son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
-                }
-            }
-        }
-
-        if (count($errors)) {
-            return array('errors' => $errors, 'warnings' => $warnings);
-        }
-
-        // Vérif contact signataire: 
-        if (!$not_restituted) {
-            if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0, 'int')) {
-                if (!(int) BimpTools::getPostFieldValue('id_contact_signataire', 0, 'int')) {
-                    $client_sav = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_sav);
-                    if (BimpObject::objectLoaded($client_sav) && $client_sav->isCompany()) {
-                        $errors[] = 'Veuillez sélectionner le contact signataire (obligatoire pour les clients pros)';
-                    }
-                }
+            if (count($errors)) {
+                return array('errors' => $errors, 'warnings' => $warnings);
             }
 
             // Vérifs paiements: 
@@ -6140,40 +6158,55 @@ ORDER BY a.val_max DESC");
                     }
                 }
             }
+        }
 
-            if (count($errors)) {
-                return array('errors' => $errors, 'warnings' => $warnings);
+        // Vérif contact signataire: 
+        if (!$not_restituted) {
+            if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0, 'int')) {
+                if (!(int) BimpTools::getPostFieldValue('id_contact_signataire', 0, 'int')) {
+                    $client_sav = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_sav);
+                    if (BimpObject::objectLoaded($client_sav) && $client_sav->isCompany()) {
+                        $errors[] = 'Veuillez sélectionner le contact signataire (obligatoire pour les clients pros)';
+                    }
+                }
             }
         }
 
-        $current_status = (int) $this->getInitData('status');
+        if (count($errors)) {
+            return array('errors' => $errors, 'warnings' => $warnings);
+        }
 
         if ((int) $this->getData('id_propal')) {
             if ((!isset($data['restitute']) || !$data['restitute']) && !isset($data['not_restituted'])) {
                 $errors[] = 'Vous devez utiliser le bouton "Restituer" pour fermer ce SAV';
             }
 
-            if (is_null($propal) || !$propal->isLoaded()) {
-                $errors[] = 'La propale n\'existe plus';
-            } elseif ($propal->dol_object->total_ttc > 0) {
-                if (!isset($data['mode_paiement']) || !$data['mode_paiement']) {
-                    $errors[] = 'Attention, ' . price($propal->dol_object->total_ttc) . ' &euro; à payer, merci de sélectionner le moyen de paiement';
+            if ($create_facture) {
+                if (is_null($propal) || !$propal->isLoaded()) {
+                    $errors[] = 'La propale n\'existe plus';
+                } elseif ($propal->dol_object->total_ttc > 0) {
+                    if (!isset($data['mode_paiement']) || !$data['mode_paiement']) {
+                        $errors[] = 'Attention, ' . price($propal->dol_object->total_ttc) . ' &euro; à payer, merci de sélectionner le moyen de paiement';
+                    }
                 }
-            }
 
-            if ($this->needEquipmentAttribution()) {
-                $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
+                if ($this->needEquipmentAttribution()) {
+                    $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
+                }
             }
 
             if (!count($errors)) {
                 $propal_status = (int) $propal->getData('fk_statut');
 
                 if ($propal_status >= 2) {
-                    $res_errors = $this->setReservationsStatus(304);
+                    if (!$not_restituted) {
+                        $res_errors = $this->setReservationsStatus(304);
 
-                    if (count($res_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits');
+                        if (count($res_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits');
+                        }
                     }
+
 
                     if (!count($errors)) {
                         // Gestion des stocks et emplacements: 
@@ -6196,7 +6229,12 @@ ORDER BY a.val_max DESC");
                                             if (!BimpObject::objectLoaded($equipment)) {
                                                 $eq_line_errors[] = 'Erreur: cet équipment n\'existe plus';
                                             }
-                                            $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, (int) $id_client_sav, $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Vente ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
+
+                                            if ($not_restituted) {
+                                                $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_NOT_RESTIT, (int) $id_entrepot, $codemove . 'NOT_RESTITUTED_LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Non restitution ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
+                                            } else {
+                                                $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, (int) $id_client_sav, $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Vente ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
+                                            }
                                         }
                                     }
                                     if (count($eq_line_errors)) {
@@ -6207,12 +6245,19 @@ ORDER BY a.val_max DESC");
                                         ));
                                     }
                                 } else {
-                                    $stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'LN' . $line->id, 'Vente ' . $this->getRef(), 'sav', (int) $this->id);
-                                    if (count($stock_errors)) {
-                                        $warnings[] = BimpTools::getMsgFromArray($stock_errors);
+                                    if ($current_status < self::BS_SAV_FERME) {
+                                        if ($not_restituted) {
+                                            $stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'NOT_RESTITUTED_LN' . $line->id, 'Non restitution ' . $this->getRef(), 'sav', (int) $this->id);
+                                        } else {
+                                            $stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'LN' . $line->id, 'Vente ' . $this->getRef(), 'sav', (int) $this->id);
+                                        }
+
+                                        if (count($stock_errors)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($stock_errors);
+                                        }
                                     }
                                 }
-                            } elseif ($line->getData('linked_object_name') == 'internal_stock' && (int) $line->getData('linked_id_object')) {
+                            } elseif ($create_facture && $line->getData('linked_object_name') == 'internal_stock' && (int) $line->getData('linked_id_object')) {
                                 $internal_stock = BimpCache::getBimpObjectInstance('bimpapple', 'InternalStock', (int) $line->getData('linked_id_object'));
 
                                 if (BimpObject::objectLoaded($internal_stock)) {
@@ -6258,7 +6303,7 @@ ORDER BY a.val_max DESC");
                                 } else {
                                     $this->updateField('restituted', 1);
                                     $cur_place = $equipment->getCurrentPlace();
-                                    if (BimpObject::objectLoaded($cur_place) && (int) $cur_place->getData('type') === BE_Place::BE_PLACE_SAV && (int) $cur_place->getData('id_entrepot') === (int) $this->getData('id_entrepot')) {
+                                    if (BimpObject::objectLoaded($cur_place) && in_array((int) $cur_place->getData('type'), array(BE_Place::BE_PLACE_SAV, BE_Place::BE_PLACE_NOT_RESTIT)) && (int) $cur_place->getData('id_entrepot') === (int) $this->getData('id_entrepot')) {
                                         $prev_place = BimpCache::findBimpObjectInstance('bimpequipment', 'BE_Place', array(
                                                     'id_equipment' => (int) $this->getData('id_equipment'),
                                                     'position'     => 2
@@ -6313,280 +6358,329 @@ ORDER BY a.val_max DESC");
                         }
 
                         // Création de la facture:
-                        $total_ttc_wo_discounts = (float) $propal->getTotalTtcWithoutDiscountsAbsolutes();
-                        $lines = $propal->getLines('not_text');
+                        if ($create_facture) {
+                            $total_ttc_wo_discounts = (float) $propal->getTotalTtcWithoutDiscountsAbsolutes();
+                            $lines = $propal->getLines('not_text');
 
-                        $has_amounts_lines = false;
+                            $has_amounts_lines = false;
 
-                        foreach ($lines as $line) {
-                            if (round((float) $line->getTotalTTC(), 2)) {
-                                $has_amounts_lines = true;
-                                break;
+                            foreach ($lines as $line) {
+                                if (round((float) $line->getTotalTTC(), 2)) {
+                                    $has_amounts_lines = true;
+                                    break;
+                                }
                             }
-                        }
 
-                        if (!round($total_ttc_wo_discounts, 2) && !$has_amounts_lines) {
-//                            $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav=' . $this->id;
-                        } else {
-                            if ((int) $this->getData('id_facture')) {
-                                $warnings[] = 'Une facture a déjà été créée pour ce SAV';
-                            } else {
-                                require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
-                                global $db;
-                                $facture = new Facture($db);
+                            if (round($total_ttc_wo_discounts, 2) || $has_amounts_lines) {
+                                $init_fac = null;
 
-                                $cond_reglement = null;
+                                if ((int) $this->getData('id_facture')) {
+                                    $init_fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('id_facture'));
+                                }
 
-                                if ((int) $propal->dol_object->cond_reglement_id) {
-                                    $cond_reglement = (int) $propal->dol_object->cond_reglement_id;
+                                if ($current_status < self::BS_SAV_FERME && BimpObject::objectLoaded($init_fac)) {
+                                    $warnings[] = 'Une facture a déjà été créée pour ce SAV';
                                 } else {
-                                    if (BimpObject::objectLoaded($client_fac)) {
-                                        $cond_reglement = (int) $client_fac->getData('cond_reglement');
-                                    }
-                                }
+                                    require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+                                    global $db;
+                                    $facture = new Facture($db);
 
-                                if (!$cond_reglement) {
-                                    $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
-                                }
+                                    $cond_reglement = null;
 
-                                $mode_reglement = null;
-
-                                if ($payment_1_set) {
-                                    $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
-                                } else {
-                                    $mode_reglement = (int) $propal->dol_object->mode_reglement_id;
-                                }
-
-                                if (!$mode_reglement) {
-                                    $mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', null, 'bimpsupport');
-                                }
-
-                                $facture->date = dol_now();
-                                $facture->source = 0;
-                                $facture->socid = $id_client_fac;
-                                $facture->fk_project = $propal->dol_object->fk_project;
-                                $facture->cond_reglement_id = $cond_reglement;
-                                $facture->mode_reglement_id = $mode_reglement;
-                                $facture->availability_id = $propal->dol_object->availability_id;
-                                $facture->demand_reason_id = $propal->dol_object->demand_reason_id;
-                                $facture->date_livraison = $propal->dol_object->date_livraison;
-                                $facture->fk_delivery_address = $propal->dol_object->fk_delivery_address;
-                                $facture->contact_id = $id_contact_fac;
-                                $facture->ref_client = $propal->dol_object->ref_client;
-                                $facture->note_private = '';
-                                $facture->note_public = '';
-
-                                $facture->origin = $propal->dol_object->element;
-                                $facture->origin_id = $propal->id;
-
-                                $facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : (int) BimpCore::getConf('id_default_bank_account'));
-
-                                // get extrafields from original line
-                                $propal->dol_object->fetch_optionals($propal->id);
-
-                                foreach ($propal->dol_object->array_options as $options_key => $value)
-                                    $facture->array_options[$options_key] = $value;
-
-                                $facture->modelpdf = self::$facture_model_pdf;
-                                $facture->array_options['options_type'] = "S";
-                                $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
-                                $facture->array_options['options_centre'] = $this->getData('code_centre');
-                                $facture->array_options['options_expertise'] = 90;
-
-                                if (in_array($mode_reglement, explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial')))) {
-                                    $facture->array_options['options_rib_client'] = (int) BimpTools::getArrayValueFromPath($data, 'rib_client', 0);
-                                }
-
-                                $facture->linked_objects[$facture->origin] = $facture->origin_id;
-                                if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {
-                                    $facture->linked_objects = BimpTools::merge_array($facture->linked_objects, $propal->dol_object->other_linked_objects);
-                                }
-
-                                global $user;
-                                $user->rights->facture->creer = 1;
-
-                                $id_facture = $facture->create($user);
-                                if ($id_facture <= 0) {
-                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
-                                    return array('errors' => $errors);
-                                } else {
-                                    $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture->id);
-
-                                    if (!BimpObject::objectLoaded($bimpFacture)) {
-                                        $errors[] = 'La facture semble ne pas avoir été créée correctement';
+                                    if ((int) $propal->dol_object->cond_reglement_id) {
+                                        $cond_reglement = (int) $propal->dol_object->cond_reglement_id;
                                     } else {
-                                        // Ajout du commercial: 
-                                        $id_commercial = (int) $this->getData('id_user_tech');
-                                        if (!$id_commercial) {
-                                            $id_commercial = (int) $user->id;
+                                        if (BimpObject::objectLoaded($client_fac)) {
+                                            $cond_reglement = (int) $client_fac->getData('cond_reglement');
                                         }
+                                    }
 
-                                        if ($id_commercial) {
-                                            $bimpFacture->dol_object->add_contact($id_commercial, 'SALESREPFOLL', 'internal');
-                                        }
+                                    if (!$cond_reglement) {
+                                        $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
+                                    }
 
-                                        // Création des lignes: 
-                                        $lines_errors = $bimpFacture->createLinesFromOrigin($propal, array(
-                                            'check_product' => false
-                                        ));
+                                    $mode_reglement = null;
 
-                                        if (count($lines_errors)) {
-                                            $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de l\'ajout des lignes à la facture');
+                                    if ($payment_1_set) {
+                                        $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
+                                    } else {
+                                        $mode_reglement = (int) $propal->dol_object->mode_reglement_id;
+                                    }
+
+                                    if (!$mode_reglement) {
+                                        $mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', null, 'bimpsupport');
+                                    }
+
+                                    $facture->date = dol_now();
+                                    $facture->source = 0;
+                                    $facture->socid = $id_client_fac;
+                                    $facture->fk_project = $propal->dol_object->fk_project;
+                                    $facture->cond_reglement_id = $cond_reglement;
+                                    $facture->mode_reglement_id = $mode_reglement;
+                                    $facture->availability_id = $propal->dol_object->availability_id;
+                                    $facture->demand_reason_id = $propal->dol_object->demand_reason_id;
+                                    $facture->date_livraison = $propal->dol_object->date_livraison;
+                                    $facture->fk_delivery_address = $propal->dol_object->fk_delivery_address;
+                                    $facture->contact_id = $id_contact_fac;
+                                    $facture->ref_client = $propal->dol_object->ref_client;
+                                    $facture->note_private = '';
+                                    $facture->note_public = '';
+
+                                    $facture->origin = $propal->dol_object->element;
+                                    $facture->origin_id = $propal->id;
+
+                                    $facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : (int) BimpCore::getConf('id_default_bank_account'));
+
+                                    // get extrafields from original line
+                                    $propal->dol_object->fetch_optionals($propal->id);
+
+                                    foreach ($propal->dol_object->array_options as $options_key => $value)
+                                        $facture->array_options[$options_key] = $value;
+
+                                    $facture->modelpdf = self::$facture_model_pdf;
+                                    $facture->array_options['options_type'] = "S";
+                                    $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
+                                    $facture->array_options['options_centre'] = $this->getData('code_centre');
+                                    $facture->array_options['options_expertise'] = 90;
+
+                                    if (in_array($mode_reglement, explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial')))) {
+                                        $facture->array_options['options_rib_client'] = (int) BimpTools::getArrayValueFromPath($data, 'rib_client', 0);
+                                    }
+
+                                    $facture->linked_objects[$facture->origin] = $facture->origin_id;
+                                    if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {
+                                        $facture->linked_objects = BimpTools::merge_array($facture->linked_objects, $propal->dol_object->other_linked_objects);
+                                    }
+
+                                    global $user;
+                                    $user->rights->facture->creer = 1;
+
+                                    $id_facture = $facture->create($user);
+                                    if ($id_facture <= 0) {
+                                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
+                                        return array('errors' => $errors);
+                                    } else {
+                                        $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture->id);
+
+                                        if (!BimpObject::objectLoaded($bimpFacture)) {
+                                            $errors[] = 'La facture semble ne pas avoir été créée correctement';
                                         } else {
-                                            $bimpFacture->fetch($bimpFacture->id);
-                                            $bimpFacture->dol_object->addline("Résolution: " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-
-                                            // Copie des remises globales: 
-                                            $rg_warnings = array();
-                                            $rg_errors = $bimpFacture->copyRemisesGlobalesFromOrigin($propal, $rg_warnings);
-
-                                            if (count($rg_errors)) {
-                                                $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Attention: échec de la copie des remises globales');
-                                                BimpCore::addlog('Echec copie des remises globales (Facture SAV)', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $bimpFacture, array(
-                                                    'Erreurs'  => $rg_errors,
-                                                    'Warnings' => (!empty($rg_warnings) ? $rg_warnings : 'Aucuns')
-                                                ));
+                                            // Ajout du commercial: 
+                                            $id_commercial = (int) $this->getData('id_user_tech');
+                                            if (!$id_commercial) {
+                                                $id_commercial = (int) $user->id;
                                             }
 
-                                            if (count($rg_warnings)) {
-                                                $warnings[] = BimpTools::getMsgFromArray($rg_warnings, 'Attention: errreurs lors de la copie des remises globales pour chaque lignes');
+                                            if ($id_commercial) {
+                                                $bimpFacture->dol_object->add_contact($id_commercial, 'SALESREPFOLL', 'internal');
                                             }
 
-                                            if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
-                                                $validate_errors = BimpTools::getErrorsFromDolObject($bimpFacture->dol_object);
-//                                                $validate_errors = BimpTools::merge_array($validate_errors, BimpTools::getErrorsFromDolObject($bimpFacture->dol_object));
+                                            // Création des lignes: 
+                                            $lines_errors = $bimpFacture->createLinesFromOrigin($propal, array(
+                                                'check_product' => false
+                                            ));
 
-                                                if (empty($validate_errors)) {
-                                                    $validate_errors[] = 'Erreur inconnue';
+                                            if (count($lines_errors)) {
+                                                $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de l\'ajout des lignes à la facture');
+                                            } else {
+                                                $bimpFacture->fetch($bimpFacture->id);
+                                                $bimpFacture->dol_object->addline("Résolution: " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+
+                                                // Copie des remises globales: 
+                                                $rg_warnings = array();
+                                                $rg_errors = $bimpFacture->copyRemisesGlobalesFromOrigin($propal, $rg_warnings);
+
+                                                if (count($rg_errors)) {
+                                                    $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Attention: échec de la copie des remises globales');
+                                                    BimpCore::addlog('Echec copie des remises globales (Facture SAV)', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $bimpFacture, array(
+                                                        'Erreurs'  => $rg_errors,
+                                                        'Warnings' => (!empty($rg_warnings) ? $rg_warnings : 'Aucuns')
+                                                    ));
                                                 }
 
-                                                $msg = BimpTools::getMsgFromArray($validate_errors, 'Echec de la validation de la facture');
-                                                $errors[] = $msg;
+                                                if (count($rg_warnings)) {
+                                                    $warnings[] = BimpTools::getMsgFromArray($rg_warnings, 'Attention: errreurs lors de la copie des remises globales pour chaque lignes');
+                                                }
+
+                                                if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
+                                                    $validate_errors = BimpTools::getErrorsFromDolObject($bimpFacture->dol_object);
+//                                                $validate_errors = BimpTools::merge_array($validate_errors, BimpTools::getErrorsFromDolObject($bimpFacture->dol_object));
+
+                                                    if (empty($validate_errors)) {
+                                                        $validate_errors[] = 'Erreur inconnue';
+                                                    }
+
+                                                    $msg = BimpTools::getMsgFromArray($validate_errors, 'Echec de la validation de la facture');
+                                                    $errors[] = $msg;
 
 //                                                BimpCore::addlog('Erreur validation facture SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
 //                                                    'Erreurs' => $validate_errors
 //                                                ));
-                                            } else {
-                                                $bimpFacture->fetch($facture->id);
+                                                } else {
+                                                    $bimpFacture->fetch($facture->id);
 
-                                                // Ajout du paiement: 
-                                                if ($payment_1_set) {
-                                                    require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-                                                    $payement = new Paiement($this->db->db);
-                                                    $payement->amounts = array($facture->id => (float) $data['paid']);
-                                                    $payement->datepaye = dol_now();
-                                                    $payement->paiementid = (int) $data['mode_paiement'];
-                                                    if ($payement->create($user) <= 0) {
-                                                        $warnings[] = 'Echec de l\'ajout du paiement de la facture';
-                                                    } else {
-                                                        // Ajout du paiement au compte bancaire: 
-                                                        if ($this->useCaisseForPayments) {
-                                                            $id_account = (int) $caisse->getData('id_account');
+                                                    // Ajout du paiement: 
+                                                    if ($payment_1_set) {
+                                                        require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                                                        $payement = new Paiement($this->db->db);
+                                                        $payement->amounts = array($facture->id => (float) $data['paid']);
+                                                        $payement->datepaye = dol_now();
+                                                        $payement->paiementid = (int) $data['mode_paiement'];
+                                                        if ($payement->create($user) <= 0) {
+                                                            $warnings[] = 'Echec de l\'ajout du paiement de la facture';
                                                         } else {
-                                                            $id_account = (int) BimpCore::getConf('id_default_bank_account');
-                                                        }
-                                                        if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                                                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
-                                                        }
-
-                                                        if ($this->useCaisseForPayments) {
-                                                            $warnings = BimpTools::merge_array($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
-                                                        }
-                                                    }
-                                                }
-
-                                                // Ajout deuxième paiement
-
-                                                if ($payment_2_set) {
-                                                    require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-                                                    $payement = new Paiement($this->db->db);
-                                                    $payement->amounts = array($facture->id => (float) $data['paid2']);
-                                                    $payement->datepaye = dol_now();
-                                                    $payement->paiementid = (int) $data['mode_paiement2'];
-                                                    if ($payement->create($user) <= 0) {
-                                                        $warnings[] = 'Echec de l\'ajout du paiement de la facture';
-                                                    } else {
-                                                        // Ajout du paiement au compte bancaire: 
-                                                        if ($this->useCaisseForPayments) {
-                                                            $id_account = (int) $caisse->getData('id_account');
-                                                        } else {
-                                                            $id_account = (int) BimpCore::getConf('id_default_bank_account');
-                                                        }
-                                                        if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                                                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
-                                                        }
-
-                                                        if ($this->useCaisseForPayments) {
-                                                            $warnings = BimpTools::merge_array($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
-                                                        }
-                                                    }
-                                                }
-
-                                                $bimpFacture->checkIsPaid();
-
-                                                $propal->dol_object->closeProposal($user, 4, "Auto via SAV");
-
-                                                //Generation
-                                                $up_errors = $this->updateField('id_facture', (int) $bimpFacture->id);
-
-                                                if (count($up_errors)) {
-                                                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
-                                                }
-
-                                                $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
-
-                                                $ref = $bimpFacture->getData('ref');
-                                                if (file_exists($bimpFacture->getFilesDir() . '/' . $ref . '.pdf')) {
-                                                    $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
-                                                    $success_callback .= 'window.open("' . $url . '");';
-                                                }
-
-                                                global $idAvoirFact;
-                                                if (isset($idAvoirFact) && (int) $idAvoirFact) {
-                                                    $up_errors = $this->updateField("id_facture_avoir", $idAvoirFact);
-                                                    if (count($up_errors)) {
-                                                        $idAvoirFact = 0;
-                                                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de l\'avoir (' . $idAvoirFact . ')');
-                                                    }
-
-                                                    if ($idAvoirFact) {
-                                                        $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $idAvoirFact);
-                                                        if (BimpObject::objectLoaded($avoir)) {
-                                                            $avoir_ref = $avoir->getRef();
-                                                            if ($avoir_ref && file_exists($avoir->getFilesDir() . '/' . $avoir_ref . '.pdf')) {
-                                                                $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $avoir_ref . '/' . $avoir_ref . '.pdf');
-                                                                $success_callback .= 'window.open("' . $url . '");';
+                                                            // Ajout du paiement au compte bancaire: 
+                                                            if ($this->useCaisseForPayments) {
+                                                                $id_account = (int) $caisse->getData('id_account');
                                                             } else {
-                                                                $warnings[] = 'Echec de la génération du PDF de l\'avoir';
+                                                                $id_account = (int) BimpCore::getConf('id_default_bank_account');
+                                                            }
+                                                            if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
+                                                            }
+
+                                                            if ($this->useCaisseForPayments) {
+                                                                $warnings = BimpTools::merge_array($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
                                                             }
                                                         }
                                                     }
 
-                                                    $idAvoirFact = 0;
-                                                }
+                                                    // Ajout deuxième paiement
 
-                                                if (isset($data['send_msg']) && $data['send_msg']) {
-                                                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Facture', false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null)));
+                                                    if ($payment_2_set) {
+                                                        require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                                                        $payement = new Paiement($this->db->db);
+                                                        $payement->amounts = array($facture->id => (float) $data['paid2']);
+                                                        $payement->datepaye = dol_now();
+                                                        $payement->paiementid = (int) $data['mode_paiement2'];
+                                                        if ($payement->create($user) <= 0) {
+                                                            $warnings[] = 'Echec de l\'ajout du paiement de la facture';
+                                                        } else {
+                                                            // Ajout du paiement au compte bancaire: 
+                                                            if ($this->useCaisseForPayments) {
+                                                                $id_account = (int) $caisse->getData('id_account');
+                                                            } else {
+                                                                $id_account = (int) BimpCore::getConf('id_default_bank_account');
+                                                            }
+                                                            if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
+                                                            }
+
+                                                            if ($this->useCaisseForPayments) {
+                                                                $warnings = BimpTools::merge_array($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
+                                                            }
+                                                        }
+                                                    }
+
+                                                    // Annulation de la facture précédente (si fermeture du SAV pour non restitution) et utilisation avoir : 
+                                                    if (BimpObject::objectLoaded($init_fac)) {
+                                                        $fac_cancel = null;
+                                                        $fac_cancel_errors = $init_fac->cancelAndRefacture(array(
+                                                            'cancel_only' => true
+                                                                ), $fac_cancel);
+
+                                                        if (!count($fac_cancel_errors)) {
+                                                            if (!BimpObject::objectLoaded($fac_cancel)) {
+                                                                $fac_cancel_errors[] = 'Echec de la créatio de l\'avoir d\'annulation de la facture initiale pour une raison inconnue';
+                                                            } else {
+                                                                $fac_cancel->fetch($fac_cancel->id);
+                                                                $fac_cancel->dol_object->fetch_lines();
+                                                                $fac_cancel->dol_object->update_price(1);
+                                                                $fac_cancel->checkIsPaid();
+
+                                                                // conversion avoir client en remise et application dans la nouvelle facture : 
+                                                                if ($fac_cancel->getRemainToPay(true, false) < 0) {
+                                                                    $conv_errors = $fac_cancel->convertToRemise();
+
+                                                                    if (count($conv_errors)) {
+                                                                        $fac_cancel_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
+                                                                    } else {
+                                                                        BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                                                                        $cancel_discount = new DiscountAbsolute($this->db->db);
+                                                                        $cancel_discount->fetch(0, $fac_cancel->id);
+
+                                                                        if (BimpObject::objectLoaded($cancel_discount)) {
+                                                                            if ($cancel_discount->link_to_invoice(0, $bimpFacture->id) <= 0) {
+                                                                                $fac_cancel_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $bimpFacture->getLabel('to') . ' d\'origine');
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+
+                                                        if (count($fac_cancel_errors)) {
+                                                            $errors[] = BimpTools::getMsgFromArray($fac_cancel_errors, 'Echec de la création de l\'avoir d\'annulation de la facture initiale');
+                                                        }
+                                                    }
+
+                                                    if (!count($errors)) {
+                                                        $bimpFacture->checkIsPaid();
+
+                                                        $propal->dol_object->closeProposal($user, 4, "Auto via SAV");
+
+                                                        $up_errors = $this->updateField('id_facture', (int) $bimpFacture->id);
+
+                                                        if (count($up_errors)) {
+                                                            $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $bimpFacture->id . ')');
+                                                        }
+
+                                                        $bimpFacture->dol_object->generateDocument(self::$facture_model_pdf, $langs);
+
+                                                        $ref = $bimpFacture->getData('ref');
+                                                        if (file_exists($bimpFacture->getFilesDir() . '/' . $ref . '.pdf')) {
+                                                            $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
+                                                            $success_callback .= 'window.open("' . $url . '");';
+                                                        }
+
+                                                        global $idAvoirFact;
+                                                        if (isset($idAvoirFact) && (int) $idAvoirFact) {
+                                                            $up_errors = $this->updateField("id_facture_avoir", $idAvoirFact);
+                                                            if (count($up_errors)) {
+                                                                $idAvoirFact = 0;
+                                                                $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de l\'avoir (' . $idAvoirFact . ')');
+                                                            }
+
+                                                            if ($idAvoirFact) {
+                                                                $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $idAvoirFact);
+                                                                if (BimpObject::objectLoaded($avoir)) {
+                                                                    $avoir_ref = $avoir->getRef();
+                                                                    if ($avoir_ref && file_exists($avoir->getFilesDir() . '/' . $avoir_ref . '.pdf')) {
+                                                                        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $avoir_ref . '/' . $avoir_ref . '.pdf');
+                                                                        $success_callback .= 'window.open("' . $url . '");';
+                                                                    } else {
+                                                                        $warnings[] = 'Echec de la génération du PDF de l\'avoir';
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            $idAvoirFact = 0;
+                                                        }
+
+                                                        if (isset($data['send_msg']) && $data['send_msg']) {
+                                                            $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Facture', false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null)));
+                                                        }
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        // Changement date dernière vente des stocks internes:                                        
-                                        $parts = $this->getChildrenObjects('apple_parts');
-                                        $code_centre = (string) $this->getData('code_centre_repa');
-                                        if (!$code_centre) {
-                                            $code_centre = (string) $this->getData('code_centre');
-                                        }
+                                            // Changement date dernière vente des stocks internes:                                        
+                                            $parts = $this->getChildrenObjects('apple_parts');
+                                            $code_centre = (string) $this->getData('code_centre_repa');
+                                            if (!$code_centre) {
+                                                $code_centre = (string) $this->getData('code_centre');
+                                            }
 
-                                        $date = date('Y-m-d');
-                                        BimpObject::loadClass('bimpapple', 'InternalStock');
+                                            $date = date('Y-m-d');
+                                            BimpObject::loadClass('bimpapple', 'InternalStock');
 
-                                        foreach ($parts as $part) {
+                                            foreach ($parts as $part) {
 
-                                            $internal_stock = InternalStock::getStockInstance($code_centre, $part->getData('part_number'));
+                                                $internal_stock = InternalStock::getStockInstance($code_centre, $part->getData('part_number'));
 
-                                            if (BimpObject::objectLoaded($internal_stock)) {
-                                                $internal_stock->updateField('date_last_vente', $date);
+                                                if (BimpObject::objectLoaded($internal_stock)) {
+                                                    $internal_stock->updateField('date_last_vente', $date);
+                                                }
                                             }
                                         }
                                     }
@@ -6595,23 +6689,13 @@ ORDER BY a.val_max DESC");
                         }
                     }
                 } else {
-                    $errors[] = 'Statut de la proposition commerciale invalide';
+                    $errors[] = 'Statut du devis invalide';
                 }
             }
         }
 
         if (!count($errors)) {
-            $errors = $this->setNewStatus(self::BS_SAV_FERME);
-
-            if ($not_restituted) {
-                $this->addNote('Fermé sans restitution le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
-            } else {
-                if (isset($data['restitute']) && (int) $data['restitute']) {
-                    $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
-                } else {
-                    $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
-                }
-
+            if (!$not_restituted) {
                 // Génération bon de restitution:
                 $pdf_errors = $this->generateRestitutionPdf();
 
@@ -6640,6 +6724,22 @@ ORDER BY a.val_max DESC");
                         }
                     }
                 }
+            }
+
+            if ($current_status !== self::BS_SAV_FERME) {
+                $errors = $this->setNewStatus(self::BS_SAV_FERME);
+
+                if ($not_restituted) {
+                    $this->addNote('Fermé sans restitution le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                } else {
+                    if (isset($data['restitute']) && (int) $data['restitute']) {
+                        $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                    } else {
+                        $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                    }
+                }
+            } elseif (!$not_restituted) {
+                $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             }
         }
 
@@ -6708,7 +6808,7 @@ ORDER BY a.val_max DESC");
         global $langs, $user;
         $status = (int) $this->getData('status');
         if ($status !== self::BS_SAV_FERME && (int) $this->getData('propal_refused')) {
-            return $this->actionClose(array(
+            return $this->actionRestitute(array(
                         'not_restituted' => 1
                             ), $success);
         }
@@ -6719,6 +6819,8 @@ ORDER BY a.val_max DESC");
         $success_callback = '';
 
         $propal = $this->getChildObject('propal');
+        $centre_data = $this->getCentreData(true);
+        $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', (int) $this->getData('id_entrepot'));
 
         if ($status !== self::BS_SAV_FERME) {
             $frais = (float) BimpTools::getArrayValueFromPath($data, 'frais', 0);
@@ -6882,7 +6984,7 @@ ORDER BY a.val_max DESC");
 
                                 $url = $facture->getUrl();
                                 if ($url) {
-                                    $success_callback .= 'window.opn(\'' . $url . '\');';
+                                    $success_callback .= 'window.open(\'' . $url . '\');';
                                 }
 
                                 $errors = $this->setNewStatus(self::BS_SAV_FERME);
@@ -6898,35 +7000,66 @@ ORDER BY a.val_max DESC");
             }
         }
 
-
         if (!count($errors)) {
-            // Emplacement et coût répa équipement : 
-            if ((int) $this->getData('id_equipment')) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
+            // Calcul coût répa et stocks devis 
+            if (!(int) $this->getData('propal_refused')) {
+                if (BimpObject::objectLoaded($propal)) {
+                    foreach ($propal->getLines('not_text') as $propal_line) {
+                        if ($propal_line->desc != 'Acompte') {
+                            $cout_repa += $propal_line->pa_ht;
 
-                if (BimpObject::objectLoaded($equipment)) {
-                    $cout_repa = 0;
-                    if (!(int) $this->getData('propal_refused')) {
-                        if (BimpObject::objectLoaded($propal)) {
-                            foreach ($propal->getLines('not_text') as $propal_line) {
-                                if ($propal_line->desc != 'Acompte') {
-                                    $cout_repa += $propal_line->pa_ht;
+                            $product = $propal_line->getProduct();
+                            if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
+                                if ($product->isSerialisable()) {
+                                    $eq_lines = $propal_line->getEquipmentLines();
+                                    $eq_line_errors = array();
+                                    foreach ($eq_lines as $eq_line) {
+                                        if (!(int) $eq_line->getData('id_equipment')) {
+                                            $eq_line_errors[] = 'Equipement non attribué';
+                                        } else {
+                                            $equipment = $eq_line->getChildObject('equipment');
+                                            if (!BimpObject::objectLoaded($equipment)) {
+                                                $eq_line_errors[] = 'Erreur: cet équipment n\'existe plus';
+                                            } else {
+                                                $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_NOT_RESTIT, $id_entrepot, 'SAV_' . $this->id . '_NOT_RESTITUTED_LN' . $propal_line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Non restitution ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
+                                            }
+                                        }
+                                    }
+                                    if (count($eq_line_errors)) {
+                                        $error_msg = 'Echec de la mise à jour de l\'emplacement pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
+                                        $errors[] = BimpTools::getMsgFromArray($eq_line_errors, $error_msg);
+                                    }
+                                } else {
+                                    if ($status !== self::BS_SAV_FERME) { // Si fermé stocks déjà sortis. 
+                                        $stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, 'SAV_' . $this->id . '_NOT_RESTITUTED_LN' . $propal_line->id, 'Non restitution ' . $this->getRef(), 'sav', (int) $this->id);
+                                        if (count($stock_errors)) {
+                                            $errors[] = BimpTools::getMsgFromArray($stock_errors);
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
 
+
+        if (!count($errors)) {
+            // Emplacements et coût répa équipement : 
+
+            if ((int) $this->getData('id_equipment')) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
+
+                if (BimpObject::objectLoaded($equipment)) {
                     $equipment->updateField('cout_repa', $cout_repa);
-
                     $cur_place = $equipment->getCurrentPlace();
-                    $centre_data = $this->getCentreData(true);
-                    $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', 0);
 
                     // Mise en non restitué : 
                     if ($cur_place->getData('type') != BE_Place::BE_PLACE_NOT_RESTIT || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
                         $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                         $place_errors = $place->validateArray(array(
-                            'id_equipment' => (int) $this->getData('id_equipment'),
+                            'id_equipment' => $equipment->id,
                             'type'         => BE_Place::BE_PLACE_NOT_RESTIT,
                             'id_entrepot'  => $id_entrepot,
                             'infos'        => 'Matériel non réclamé par le client (' . $this->getData('ref') . ')',
@@ -6947,6 +7080,54 @@ ORDER BY a.val_max DESC");
             }
 
             $this->updateField('restituted', 0);
+
+            // Fermeture Répas: 
+            $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
+            if ($use_db_transactions) {
+                if (count($errors)) {
+                    $this->db->db->rollback();
+                } else {
+                    if (!$this->db->db->commit()) {
+                        $errors[] = 'Une erreur inconnue est survenue - opération annulée';
+                    }
+                }
+            }
+
+            // Opération hors transactions: 
+            if (!count($errors)) {
+                // Fermeture des réparations GSX: 
+                $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+                $list = $repair->getList(array(
+                    'id_sav'            => (int) $this->id,
+                    'ready_for_pick_up' => 1
+                        ), null, null, 'id', 'asc', 'array', array('id'));
+
+                if (!is_null($list)) {
+                    foreach ($list as $item) {
+                        $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
+                        if ($repair->isLoaded()) {
+                            if ($repair->getData('ready_for_pick_up'))
+                                $tmp = $repair->close(true, false);
+                            else//on passe d'abord en RFPU
+                                $rep_errors = $repair->updateStatus();
+                            if (isset($tmp['errors']))
+                                $rep_errors = $tmp['errors'];
+                            else {
+                                $rep_errors = $tmp;
+                            }
+                        } else {
+                            $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
+                        }
+                        if (count($rep_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (1) d\'ID ' . $item['id']);
+                        }
+                    }
+                }
+            }
+
+            if ($use_db_transactions) {
+                $this->db->db->begin();
+            }
         }
 
         return array(

@@ -2078,7 +2078,10 @@ class Equipment extends BimpObject
 
         if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {
             // Pas de correction du id_product pour l'instant car trop dangereux (stocks, incohérences commandes / factures, etc.)
-            if (preg_match('/^.+(.{4})$/', $serial, $matches)) {
+            
+            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');            
+            
+            if ($prod_instance->field_exists('code_config') && preg_match('/^.+(.{4})$/', $serial, $matches)) {
                 $apple_product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                             'code_config' => $matches[1],
                             'ref'         => array(

@@ -1751,6 +1751,17 @@ class Bimp_Societe extends BimpDolObject
 
         return ModeleThirdPartyDoc::liste_modeles($this->db->db);
     }
+    
+    public function getSepaDatesPrelevArray()
+    {
+        $dates = array();
+        
+        foreach (explode(',', BimpCore::getConf('sepa_date_prelevement', null, 'bimpcommercial')) as $date) {
+            $dates[$date] = $date;
+        }
+        
+        return $dates;
+    }
 
     // Affichages: 
 
@@ -4080,7 +4091,7 @@ class Bimp_Societe extends BimpDolObject
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;
-            if (!$user->admin && $user->id != 1499) {
+            if (!$user->admin && $user->id != 73) {
                 return array('Vous n\'avez pas la permission de passer le statut solvabilité à "Client à surveiller (forcé)"');
             }
         }

@@ -1611,15 +1611,15 @@ class BimpComm extends BimpDolObject
 
     public function getTotal_paListTotal($filters = array(), $joins = array(), $main_alias = 'a')
     {
-        $return = array(
+        return array(
             'data_type' => 'money',
-            'value'     => 0
+            'value'     => 'n/c'
         );
 
-        $line = $this->getLineInstance();
-
-        if (is_a($line, 'ObjectLine')) {
-            return 'n/c';
+//        $line = $this->getLineInstance();
+//
+//        if (is_a($line, 'ObjectLine')) {
+//            return 'n/c';
 //            TODO fait bloqué le serveur 
 //            $line_alias = $main_alias . '___det';
 //            $joins[$line_alias] = array(
@@ -1637,15 +1637,15 @@ class BimpComm extends BimpDolObject
 //            if (isset($result[0]['total'])) {
 //                $return['value'] = (float) $result[0]['total'];
 //            }
-        }
+//        }
 
-        return $return;
+//        return $return;
     }
 
     public function getTx_margeListTotal($filters, $joins)
     {
         $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
-        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlFrom($this->getTable(), $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
         $res = $this->db->executeS($sql, 'array');
@@ -1668,7 +1668,7 @@ class BimpComm extends BimpDolObject
     public function getTx_marqueListTotal($filters, $joins)
     {
         $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
-        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlFrom($this->getTable(), $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
         $res = $this->db->executeS($sql, 'array');
@@ -3292,7 +3292,7 @@ class BimpComm extends BimpDolObject
             }
 
             $new_line = BimpObject::getInstance($this->module, $this->object_name . 'Line');
-            
+
             if ($params['no_maj_bundle']) {
                 $new_line->no_maj_bundle = true;
             }
@@ -3885,8 +3885,12 @@ class BimpComm extends BimpDolObject
         $lines = $this->getLines('no_text');
 
         foreach ($lines as $line) {
+            if ((int) $line->id_remise_except && $line->tva_tx) {
+                $line->pu_ht *= (1 + $line->tva_tx / 100);
+            }
+            
             $line->tva_tx = 0;
-            $line_errors = $line->update();
+            $line_errors = $line->update($w, true);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
             }

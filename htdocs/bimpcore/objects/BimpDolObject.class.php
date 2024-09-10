@@ -604,7 +604,7 @@ class BimpDolObject extends BimpObject
         return $html;
     }
 
-    public function renderLinkedObjectsTable($htmlP = '')
+    public function renderLinkedObjectsTable($htmlP = '', $excluded_types = array())
     {
         $html = '';
         if ($this->isLoaded()) {
@@ -617,6 +617,10 @@ class BimpDolObject extends BimpObject
                 $commande_instance = null;
                 $commande_fourn_instance = null;
                 foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+                    if (in_array($item['type'], $excluded_types)) {
+                        continue;
+                    }
+
                     $collection[$item['type']][] = $item['id_object'];
                 }
             }
@@ -1038,7 +1042,7 @@ class BimpDolObject extends BimpObject
 
         return $html;
     }
-    
+
     // Actions: 
 
     public function actionGeneratePdf($data, &$success = '', $errors = array(), $warnings = array())
@@ -1055,6 +1059,11 @@ class BimpDolObject extends BimpObject
                     if ($this->field_exists('model_pdf'))
                         $this->updateField('model_pdf', $data['model']);
                 }
+
+                if (isset($data['date_prelev_sepa'])) {
+                    $this->dol_object->sepa_date_prelevement = $data['date_prelev_sepa'];
+                }
+
                 global $langs;
                 $this->dol_object->error = '';
                 $this->dol_object->errors = array();
@@ -1293,6 +1302,18 @@ class BimpDolObject extends BimpObject
                         if (!count($errors)) {
                             if ($this->dol_object->add_contact($id_contact, $type_contact, 'external') <= 0) {
                                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            } else {
+                                if (is_numeric($type_contact)) {
+                                    $type_contact = $this->db->getValue('c_type_contact', 'code', 'rowid = ' . $type_contact);
+                                }
+
+                                if ($type_contact == 'CLIFINAL' && $this->field_exists('id_client_final')) {
+                                    $id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
+
+                                    if ($id_client && $id_client !== (int) $this->getData('fk_soc')) {
+                                        $this->updateField('id_client_final', $id_client);
+                                    }
+                                }
                             }
                         }
                         break;

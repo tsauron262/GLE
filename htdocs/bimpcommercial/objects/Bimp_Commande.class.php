@@ -709,7 +709,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $totVendu = $totRealise = 0;
         foreach ($this->getLines('product') as $line) {
             $prod = $line->getProduct();
-            if ($prod->isInter()) {
+            if (BimpCore::isModuleActive('bimptechnique') && $prod->isInter()) {
                 $totVendu += $line->getTotalHt(true);
                 $duree = $this->db->getValue('fichinterdet', 'SUM(duree)', '`id_line_commande` = ' . $line->id);
                 $dureeProd = $prod->getData('duree_i');
@@ -2369,7 +2369,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return $html;
     }
 
-    public function renderLinkedObjectsTable($htmlP = '')
+    public function renderLinkedObjectsTable($htmlP = '', $excluded_types = array())
     {
         $htmlP = "";
         $db = $this->db->db;
@@ -3114,6 +3114,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         $commandes_assos = array();
+        $new_fac_lines = array();
+        $new_fac_sub_lines = array();
 
         foreach ($lines_data as $id_commande => $commande_lines_data) {
             $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
@@ -3175,6 +3177,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
 
                     $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                    $fac_line->no_maj_bundle = true;
                     if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
                         // Création d'une ligne de texte: 
                         $fac_line->validateArray(array(
@@ -3247,6 +3250,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         $fac_line->updateField('deletable', 0);
                     }
                 } else {
+                    $fac_line->no_maj_bundle = true;
                     if ($new_qties) {
                         $line_qty += (float) $fac_line->qty;
 
@@ -3299,6 +3303,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
 
                 if (!count($line_errors) && BimpObject::objectLoaded($fac_line)) {
+                    $cmde_line_id_parent = (int) $line->getData('id_parent_line');
+                    if ($cmde_line_id_parent) {
+                        $new_fac_sub_lines[$fac_line->id] = $cmde_line_id_parent;
+                    }
+                    $new_fac_lines[$line->id] = $fac_line->id;
                     // Assignation des équipements à la ligne de facture: 
                     $equipments_set = array();
                     if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
@@ -3349,6 +3358,16 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                 if ($has_line_ok) {
                     $commande->processFacturesRemisesGlobales();
+                }
+            }
+        }
+
+        // Attribution des lignes parentes: 
+        foreach ($new_fac_sub_lines as $id_fac_line => $id_cmde_parent_line) {
+            if (isset($new_fac_lines[$id_cmde_parent_line])) {
+                $new_fac_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', $id_fac_line);
+                if (BimpObject::objectLoaded($new_fac_line)) {
+                    $new_fac_line->updateField('id_parent_line', $new_fac_lines[$id_cmde_parent_line]);
                 }
             }
         }
@@ -4899,21 +4918,21 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
             }
         }
-        
+
         $errors = parent::delete($warnings, $force_delete);
-        
+
         if (!count($errors)) {
             if (!empty($propales)) {
                 foreach ($propales as $id_propal) {
                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
-                    
+
                     if (BimpObject::objectLoaded($propal)) {
                         $propal->checkProcessesStatus();
                     }
                 }
             }
         }
-        
+
         return $errors;
     }
 

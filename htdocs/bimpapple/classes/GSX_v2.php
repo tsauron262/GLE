@@ -433,7 +433,7 @@ class GSX_v2 extends GSX_Const
 
         if (is_array($users) && in_array($user->id, $users)) {
             BimpCore::setConf('nb_gsx_beta', "++", 'bimpapple');
-            return 5;
+            return 6;
         } else
             return BimpCore::getConf('gsx_version', 0, 'bimpapple');
     }

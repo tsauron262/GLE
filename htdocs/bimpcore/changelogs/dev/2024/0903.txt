@@ -1,0 +1,2 @@
+- Factures : Màj auto client final
+- Clients: Ajout choix date de prélèvement pour les mandats SEPA

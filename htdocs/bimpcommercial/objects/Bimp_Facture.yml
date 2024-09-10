@@ -81,6 +81,8 @@ fields:
         label: Client final
         type: id_object
         object: client_final
+        input: 
+            help: laisser vide si même client
         default_value: 0
     exported:
         label: Etat comptable
@@ -363,6 +365,8 @@ forms:
                 field: replaced_ref
             soc: 
                 field: fk_soc
+            client_final: 
+                field: id_client_final
             ref_client: 
                 field: ref_client
             type: 
@@ -598,6 +602,7 @@ forms:
     validate: 
         title: Validation
         rows: 
+            - field: datef
             - custom: 1
               label: Informations
               input_name: validation_type

@@ -999,11 +999,11 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                     $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, $modeDecimal);
 
-                    $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
-
                     if (BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('abo_fac_periodicity')) {
-                        $row['qte'] = round($row['qte'], 2);
+                        $this->object->lines[$i]->qty = round($this->object->lines[$i]->qty, 2);
                     }
+                    
+                    $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
                     if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
                         $row['progress'] = pdf_getlineprogress($this->object, $i, $this->langs);

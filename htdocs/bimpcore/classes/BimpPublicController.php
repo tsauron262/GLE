@@ -21,7 +21,7 @@ class BimpPublicController extends BimpController
 
         global $public_entity;
         $public_entity = '';
-        if (isset($_GET['e']) && (string) $_GET['e']) {
+        if (isset($_GET['e']) && !is_int($_GET['e']) && (string) $_GET['e']) {
             $public_entity = $_GET['e'];
             $_SESSION['public_entity'] = $public_entity;
         } else {

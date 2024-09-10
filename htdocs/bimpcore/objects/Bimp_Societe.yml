@@ -1454,6 +1454,20 @@ forms:
               input: 
                   type: date
                   
+    generate_pdf: 
+        rows: 
+            sepa_date: 
+                custom: 1
+                label: Date de prélèvement SEPA
+                input_name: date_prelev_sepa
+                input: 
+                    type: select
+                    options: 
+                        callback: getSepaDatesPrelevArray
+                display_if: 
+                    field_name: model
+                    show_values: cepa
+                  
              
 filters: 
     accounting_account:

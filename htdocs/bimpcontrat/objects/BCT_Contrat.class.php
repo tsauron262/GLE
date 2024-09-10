@@ -676,7 +676,7 @@ class BCT_Contrat extends BimpDolObject
                     //                print_r($items);
                     foreach ($items as $id) {
                         $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id['id_object']);
-                        if ($commande->isLoaded() && in_array((int) $commande->getData('fk_statut'), array(1, 2, 3))) {
+                        if ($commande->isLoaded() && in_array((int) $commande->getData('fk_statut'), array(0, 1, 2))) {
                             $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $commande->getLink(), 'warning');
                         }
                     }
@@ -687,11 +687,11 @@ class BCT_Contrat extends BimpDolObject
         return $html;
     }
 
-    public function renderLinkedObjectsTable($htmlP = '')
+    public function renderLinkedObjectsTable($htmlP = '', $excluded_types = array())
     {
         $this->dol_object->element = 'bimp_contrat';
 
-        $html = parent::renderLinkedObjectsTable($htmlP);
+        $html = parent::renderLinkedObjectsTable($htmlP, array('facture', 'order_supplier'));
 
         $this->dol_object->element = 'contrat';
 

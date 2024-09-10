@@ -73,7 +73,7 @@ sections:
                     name: propal
                     
           - id: gsx
-            title: <i class="fa fa-apple iconLeft"></i>GSX
+            title: <i class="fab fa-apple iconLeft"></i>GSX
             content: 
                 callback: renderGsx
           - id: files

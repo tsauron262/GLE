@@ -648,20 +648,20 @@ forms:
                       hide_values: 0
             - custom: 1
               hidden: 1
-              input_name: hide_force_validation
+              input_name: show_force_validation
               data_type: bool
               input: 
                   type: hidden
               value: 
-                  callback: checkEquipmentsAttribution
+                  callback: showForceValidation
             - custom: 1
               label: Forcer la validation
               input_name: force_validate
               content: 
                   callback: renderForceValidationInput
               display_if: 
-                  field_name: hide_force_validation
-                  hide_values: 1
+                  field_name: show_force_validation
+                  show_values: 1
                   
     add_to_commission: 
         title: Ajout à une commission

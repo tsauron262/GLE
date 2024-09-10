@@ -1027,7 +1027,7 @@ class Bimp_Facture extends BimpComm
 
         $client = $this->getChildObject('client');
         if (BimpObject::objectLoaded($client)) {
-            if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER))) {
+            if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
                 $errors[] = 'ATTENTION : le client est au statut ' . $client->displayDataDefault('solvabilite_status');
                 $show = 1;
             }
@@ -5496,7 +5496,7 @@ class Bimp_Facture extends BimpComm
             }
 
             if (BimpObject::objectLoaded($client)) {
-                if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER))) {
+                if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
                     $errors[] = 'Le client est au statut ' . $client->displayDataDefault('solvabilite_status');
                 }
             }

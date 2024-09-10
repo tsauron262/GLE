@@ -26,7 +26,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         'ArtLastPA'     => 'cur_pa_ht',
         'ArtIsSupp'     => 'crt',
         'weight'        => 'weight',
-        'description'        => 'description'
+        'description'   => 'description'
     );
     public static $prices_keys = array(
         'code produit' => 'ref_fourn',
@@ -647,14 +647,14 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                                 ), true);
                 if (!BimpObject::objectLoaded($opt)) {
                     BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
-                                'id_process'    => $id_process,
-                                'label'         => 'Délimiteur',
-                                'name'          => 'delimiteur',
-                                'info'          => 'Délimiteur utilisé dans les fichiers csv',
-                                'type'          => 'text',
-                                'default_value' => 'tab',
-                                'required'      => 0
-                                    ), true, $errors, $warnings);
+                        'id_process'    => $id_process,
+                        'label'         => 'Délimiteur',
+                        'name'          => 'delimiteur',
+                        'info'          => 'Délimiteur utilisé dans les fichiers csv',
+                        'type'          => 'text',
+                        'default_value' => 'tab',
+                        'required'      => 0
+                            ), true, $errors, $warnings);
                 }
 
 

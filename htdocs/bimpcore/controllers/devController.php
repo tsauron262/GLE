@@ -28,7 +28,7 @@ class devController extends BimpController
             return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
         }
 
-
+        global $conf;
 
         $html = '';
 
@@ -135,7 +135,7 @@ class devController extends BimpController
             foreach ($rows as $r) {
                 $html .= '<li>';
                 $html .= '<a href="' . DOL_URL_ROOT . '/cron/card.php?id=' . $r['rowid'] . '" target="_blank">' . $r['label'] . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
-                $html .= '<span style="display: inline-block; margin-left: 15px" class="btn btn-default btn-small" onclick="window.open(\'' . DOL_URL_ROOT . '/cron/card.php?action=execute&fc&id=' . $r['rowid'] . '\')">';
+                $html .= '<span style="display: inline-block; margin-left: 15px" class="btn btn-default btn-small" onclick="window.open(\'' . DOL_URL_ROOT . '/cron/card.php?action=execute&fc&id=' . $r['rowid'] . '&token=' . newToken() . (empty($conf->global->CRON_KEY) ? '' : '&securitykey=' . $conf->global->CRON_KEY) . '\')">';
                 $html .= 'Relancer';
                 $html .= '</span>';
                 $html .= '</li>';

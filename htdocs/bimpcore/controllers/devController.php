@@ -29,6 +29,7 @@ class devController extends BimpController
         }
 
         global $conf;
+        $bdb = BimpCache::getBdb();
 
         $html = '';
 
@@ -96,6 +97,29 @@ class devController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
+        // Vérifs comptes user bloqués: 
+        $rows = $bdb->getRows('user_extrafields', 'echec_auth >= 3', null, 'array', array(
+            'fk_object as id_user'
+        ));
+
+        if (!empty($rows)) {
+            $html .= '<h4 class="danger">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' compte(s) utilisateur bloqués';
+            $html .= '</h4>';
+
+            $html .= '<ul>';
+            foreach ($rows as $r) {
+                $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $r['id_user']);
+                $html .= '<li>';
+                $html .= $u->getLink();
+                $html .= '<span style="display: inline-block; margin-left: 15px" class="btn btn-default btn-small" onclick="' . $u->getJsActionOnclick('unlock') . '">';
+                $html .= BimpRender::renderIcon('fas_unlock-alt', 'iconLeft') . 'Débloquer';
+                $html .= '</span>';
+                $html .= '</li>';
+            }
+            $html .= '</ul>';
+        }
+
         // Vérif des versions vérouillée: 
         if ((int) BimpCore::getConf('check_versions_lock')) {
             $html .= '<h4 class="danger">';
@@ -127,7 +151,7 @@ class devController extends BimpController
         }
 
         // Crons en erreur: 
-        $rows = BimpCache::getBdb()->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
+        $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
         if (!empty($rows)) {
             $html .= '<div class="row" style="margin-bottom: 30px">';
             $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' tâche(s) cron en erreur</h4>';

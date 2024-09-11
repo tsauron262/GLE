@@ -2113,8 +2113,6 @@ class BL_CommandeFournReception extends BimpObject
                         }
                     }
                 }
-                
-                $errors[] = 'TEST';
                 break;
 
             case 'process_lines_serials':

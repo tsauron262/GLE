@@ -27,13 +27,13 @@ class devController extends BimpController
         if (!$this->can('view')) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
         }
-        
-        
+
+
 
         $html = '';
-        
+
         $date = new DateTime();
-        $html .= 'Date serveur : '.$date->format('d / m / Y H:i:s');
+        $html .= 'Date serveur : ' . $date->format('d / m / Y H:i:s');
 
         $html .= '<div class="container-fluid">';
 
@@ -111,8 +111,7 @@ class devController extends BimpController
             $html .= '</div>';
         }
 
-        // vérif des pull vérouillés: 
-
+        // vérif des pull vérouillés:
         $lock_msg = BimpCore::getConf('git_pull_lock_msg');
         if ($lock_msg) {
             $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'GIT PULL vérouillés</h4>';
@@ -136,6 +135,9 @@ class devController extends BimpController
             foreach ($rows as $r) {
                 $html .= '<li>';
                 $html .= '<a href="' . DOL_URL_ROOT . '/cron/card.php?id=' . $r['rowid'] . '" target="_blank">' . $r['label'] . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+                $html .= '<span style="display: inline-block; margin-left: 15px" class="btn btn-default btn-small" onclick="window.open(\'' . DOL_URL_ROOT . '/cron/card.php?action=execute&fc&id=' . $r['rowid'] . '\')">';
+                $html .= 'Relancer';
+                $html .= '</span>';
                 $html .= '</li>';
             }
             $html .= '</ul>';

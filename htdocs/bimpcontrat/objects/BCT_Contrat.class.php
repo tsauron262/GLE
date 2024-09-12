@@ -2500,7 +2500,7 @@ class BCT_Contrat extends BimpDolObject
             } else {
                 $out .= count($rows) . ' alerte' . (count($rows) > 1 ? 's' : '') . ' à envoyer.<br/>';
                 foreach ($rows as $r) {
-                    $out = '<br/>';
+                    $out .= '<br/>';
                     $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_facture']);
                     if (BimpObject::objectLoaded($fac)) {
                         $out .= $fac->getLink();

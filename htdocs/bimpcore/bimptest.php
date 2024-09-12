@@ -28,7 +28,7 @@ if (!$user->admin) {
 }
 
 BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
-BCT_Contrat::sendAlertUnpaidFacsAbo();
+echo BCT_Contrat::sendAlertUnpaidFacsAbo();
 
 echo '<br/>FIN';
 echo '</body></html>';

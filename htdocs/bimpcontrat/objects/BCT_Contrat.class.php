@@ -2526,11 +2526,6 @@ class BCT_Contrat extends BimpDolObject
                         if (mailSyn2($subject, $email, '', $msg)) {
                             $out .= '[OK]';
                             $err = $fac->updateField('alert_abonnement_unpaid_send', 1);
-                            if (count($err)) {
-                                echo 'ERR<pre>';
-                                print_r($err);
-                                echo '</pre>';
-                            }
                         } else {
                             $out .= '[ECHEC]';
                         }

@@ -104,15 +104,17 @@ class devController extends BimpController
 
         if (!empty($rows)) {
             $html .= '<h4 class="danger">';
-            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' compte(s) utilisateur bloqués';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' compte(s) utilisateur bloqué(s)';
             $html .= '</h4>';
 
             $html .= '<ul>';
             foreach ($rows as $r) {
                 $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $r['id_user']);
-                $html .= '<li>';
+                $html .= '<li id="user_' . $u->id . '_unlock_container">';
                 $html .= $u->getLink();
-                $html .= '<span style="display: inline-block; margin-left: 15px" class="btn btn-default btn-small" onclick="' . $u->getJsActionOnclick('unlock') . '">';
+                $html .= '<span style="display: inline-block; margin-left: 15px" class="btn btn-default btn-small" onclick="' . $u->getJsActionOnclick('unlock', array(), array(
+                            'success_callback' => 'function() {$(\'#user_' . $u->id . '_unlock_container\').slideUp(250, function() {$(this).remove();})}'
+                        )) . '">';
                 $html .= BimpRender::renderIcon('fas_unlock-alt', 'iconLeft') . 'Débloquer';
                 $html .= '</span>';
                 $html .= '</li>';

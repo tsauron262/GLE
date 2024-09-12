@@ -5162,7 +5162,7 @@ class BimpComm extends BimpDolObject
                     if (!empty($remises_globales)) {
                         foreach ($remises_globales as $rg) {
                             $rem_data = $rg->getDataArray(false);
-                            $rem_data['obj_typ'] = static::$element_name;
+                            $rem_data['obj_type'] = static::$element_name;
                             $rem_data['id_obj'] = (int) $this->id;
 
                             BimpObject::createBimpObject('bimpcommercial', 'RemiseGlobale', $rem_data, true, $warnings);

@@ -11132,6 +11132,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Actions BDS : 
+    
     public function initBdsActionBulkEditField($process, &$action_data = array(), &$errors = array(), $extra_data = array())
     {
         $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');

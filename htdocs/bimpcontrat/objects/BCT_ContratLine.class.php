@@ -1077,10 +1077,10 @@ class BCT_ContratLine extends BimpObject
                 $check_errors = $this->updateField('date_next_facture', date('Y-m-d', strtotime($new_date)));
 
                 if (!count($check_errors)) {
-                    BimpCore::addlog('Correction automatique de la date de prochaine facturation d\'un abonnement', Bimp_Log::BIMP_LOG_NOTIF, 'contrat', $this, array(
-                        'Ancienne date' => $date,
-                        'Nouvelle date' => $new_date
-                    ));
+//                    BimpCore::addlog('Correction automatique de la date de prochaine facturation d\'un abonnement', Bimp_Log::BIMP_LOG_NOTIF, 'contrat', $this, array(
+//                        'Ancienne date' => $date,
+//                        'Nouvelle date' => $new_date
+//                    ));
 
                     $date = $new_date;
                 }

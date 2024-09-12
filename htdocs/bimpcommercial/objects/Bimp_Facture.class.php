@@ -1017,6 +1017,25 @@ class Bimp_Facture extends BimpComm
         return 1;
     }
 
+    public function showForceValidation(&$errors = array())
+    {
+        $show = 0;
+
+        if (!$this->checkEquipmentsAttribution($errors)) {
+            $show = 1;
+        }
+
+        $client = $this->getChildObject('client');
+        if (BimpObject::objectLoaded($client)) {
+            if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
+                $errors[] = 'ATTENTION : le client est au statut ' . $client->displayDataDefault('solvabilite_status');
+                $show = 1;
+            }
+        }
+
+        return $show;
+    }
+
     // Getters params:
 
     public function getActionsButtons()
@@ -3786,8 +3805,8 @@ class Bimp_Facture extends BimpComm
         $html = '';
         $errors = array();
 
-        if (!$this->checkEquipmentsAttribution($errors)) {
-            $html .= BimpRender::renderAlerts($errors, 'warning');
+        if ($this->showForceValidation($errors)) {
+            $html .= BimpRender::renderAlerts($errors, 'danger');
             $html .= '<p>Valider quand même ?</p>';
             $html .= BimpInput::renderInput('toggle', 'force_validate', 0);
         }
@@ -5468,10 +5487,18 @@ class Bimp_Facture extends BimpComm
             $this->updateField('datef', $data['datef']);
         }
 
+        $client = $this->getChildObject('client');
+
         if (!isset($data['force_validate']) || !(int) $data['force_validate']) {
             $lines_errors = array();
             if (!$this->checkEquipmentsAttribution($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors);
+            }
+
+            if (BimpObject::objectLoaded($client)) {
+                if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
+                    $errors[] = 'Le client est au statut ' . $client->displayDataDefault('solvabilite_status');
+                }
             }
         }
 
@@ -5545,7 +5572,6 @@ class Bimp_Facture extends BimpComm
                     }
                 } else {
                     $fac_errors = BimpTools::getErrorsFromDolObject($this->dol_object);
-//                    $fac_errors = BimpTools::getDolEventsMsgs(array('errors'));
 
                     if (!count($fac_errors)) {
                         $fac_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e() . ' (Code retour : ' . $result . ')';

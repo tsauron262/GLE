@@ -6987,16 +6987,18 @@ ORDER BY a.val_max DESC");
                                     $success_callback .= 'window.open(\'' . $url . '\');';
                                 }
 
-                                $errors = $this->setNewStatus(self::BS_SAV_FERME);
-
                                 if (!count($errors)) {
                                     $this->updateField('id_facture', $facture->id);
-                                    $this->addNote('Fermé sans restitution le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            if (!count($errors)) {
+                $errors = $this->setNewStatus(self::BS_SAV_FERME);
+                $this->addNote('Fermé sans restitution le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             }
         }
 

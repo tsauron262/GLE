@@ -1,1 +1,1 @@
--- UPDATE `llx_propal` SET `commande_status` = 0 WHERE fk_statut = 2 AND (SELECT COUNT(s.id) FROM llx_bs_sav s WHERE s.id_propal = rowid) > 0;
+UPDATE `llx_propal` SET `commande_status` = 0 WHERE fk_statut = 2 AND (SELECT COUNT(s.id) FROM llx_bs_sav s WHERE s.id_propal = rowid) > 0;

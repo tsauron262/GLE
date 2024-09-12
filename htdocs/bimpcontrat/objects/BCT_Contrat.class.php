@@ -2524,10 +2524,10 @@ class BCT_Contrat extends BimpDolObject
                         $msg .= '<br/><br/>Par conséquent, vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.';
 
                         if (mailSyn2($subject, $email, '', $msg)) {
-                            $out .= '[OK]';
-                            $err = $fac->updateField('alert_abonnement_unpaid_send', 1);
+                            $out .= ' [OK]';
+                            $fac->updateField('alert_abonnement_unpaid_send', 1);
                         } else {
-                            $out .= '[ECHEC]';
+                            $out .= ' [ECHEC]';
                         }
                     } else {
                         $out .= '<span class="danger">Fac #' . (int) $r['id_facture'] . ' non trouvée</span>';

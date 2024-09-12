@@ -50,6 +50,10 @@ class BimpContratCronProcess extends BimpCron
         // Tâches renouvellements manuels: 
         $this->output .= '<br/><br/>***** Alerte ligne inactive *****<br/>';
         $this->output .= BCT_Contrat::checkInactivesLines();
+        
+        // Alertes factures impayées: 
+        $this->output .= '<br/><br/>***** Alertes factures impayées *****<br/>';
+        $this->output .= BCT_Contrat::sendAlertUnpaidFacsAbo();
 
         return 0;
     }

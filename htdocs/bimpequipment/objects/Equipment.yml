@@ -500,6 +500,7 @@ forms:
             - field: type
             - field: date_purchase
             - field: prix_achat
+            - field: cout_repa
             - field: achat_tva_tx
             - field: prix_vente_except
             - field: vente_tva_tx

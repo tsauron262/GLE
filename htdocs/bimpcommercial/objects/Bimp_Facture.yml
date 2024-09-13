@@ -135,6 +135,7 @@ fields:
             field_name: ef_type
             show_values: S
         default_value: ''
+        
     # Anciennement "total"    
     total_ht: 
         label: Total HT
@@ -300,6 +301,10 @@ fields:
         history: 1
     pdf_hide_livraisons: 
         label: Masquer l'adresse de livraison dans le PDF
+        type: bool
+        default_value: 0
+    alert_abonnement_unpaid_send: 
+        label: Alerte non paiement des abonnements envoyée
         type: bool
         default_value: 0
     

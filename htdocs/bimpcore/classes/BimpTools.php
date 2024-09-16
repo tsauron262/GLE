@@ -7,7 +7,7 @@ class BimpTools
     public static $currencies = array(
         'EUR' => array(
             'label'   => 'euro',
-            'icon'    => 'euro',
+            'icon'    => 'euro-sign',
             'html'    => '&euro;',
             'no_html' => '€'
         ),

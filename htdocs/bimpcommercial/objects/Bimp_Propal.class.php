@@ -1590,6 +1590,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if ($nb_abos > 0) {
                         global $user;
                         if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || (in_array($user->login, array('e.amadei', 'f.martinez')))) {
+                            if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
+                                $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé. Celui-ci doit donc obligatoirement être payé à l\'avance via un accompte';
+                                $html .= BimpRender::renderAlerts($msg, 'warning');
+                            }
+
                             $s = ($nb_abos > 1 ? 's' : '');
                             $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
@@ -1641,14 +1646,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 
                     $html .= BimpRender::renderAlerts($msg, 'warning');
-                }
-            } elseif ($status === Propal::STATUS_DRAFT) {
-                if ($this->getNbAbonnements() > 0) {
-                    $client = $this->getChildObject('client');
-                    if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
-                        $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé. Celui-ci doit donc obligatoirement être payé à l\'avance via un accompte';
-                        $html .= BimpRender::renderAlerts($msg, 'warning');
-                    }
                 }
             }
         }
@@ -2513,13 +2510,6 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-//        if ($this->getNbAbonnements() > 0) {
-//            $client = $this->getChildObject('client');
-//            if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
-//                $errors[] = 'Attention : ce ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé. Celui-ci doit donc obligatoirement être payé à l\'avance via un accompte';
-//            }
-//        }
-
         if (count($errors)) {
             return array(
                 'errors'   => $errors,
@@ -2736,6 +2726,13 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         if (!count($errors) && empty($contrats)) {
             $errors[] = 'Il n\'y a aucune ligne à ajouter à un contrat d\'abonnement';
+        } else {
+            if ($this->getNbAbonnements() > 0) {
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
+                    $errors[] = 'Le client n\'a pas d\'encours autorisé. Le devis doit donc obligatoirement être payé à l\'avance via un accompte';
+                }
+            }
         }
 
         if (!count($errors)) {

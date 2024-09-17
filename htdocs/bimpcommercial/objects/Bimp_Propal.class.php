@@ -1593,7 +1593,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                             if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
                                 if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
                                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé.<br/>';
-                                    $msg .= 'Celui-ci doit donc soit être payé à l\'avance via un accompte, soit être passé en mode de réglement par prélèvement à date de facture';
+                                    $msg .= 'Celui-ci doit donc être soit payé à l\'avance via un accompte, soit passé en mode de réglement par prélèvement à date de facture';
                                     $html .= BimpRender::renderAlerts($msg, 'warning');
                                 }
                             }
@@ -2734,7 +2734,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $client = $this->getChildObject('client');
                 if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
                     if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
-                        $errors[] = 'Le client n\'a pas d\'encours autorisé. Le devis doit donc soit être payé à l\'avance via un accompte, soit être passé en mode de réglement par prélèvement à date de facture';
+                        $errors[] = 'Le client n\'a pas d\'encours autorisé. Ce devis doit donc être soit payé à l\'avance via un accompte, soit passé en mode de réglement par prélèvement à date de facture';
                     }
                 }
             }

@@ -1,0 +1,1 @@
+- Blocage validation commande si remise CRT et type éducation client non renseigné

@@ -1591,8 +1591,11 @@ class Bimp_Propal extends Bimp_PropalTemp
                         global $user;
                         if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || (in_array($user->login, array('e.amadei', 'f.martinez')))) {
                             if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
-                                $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé. Celui-ci doit donc obligatoirement être payé à l\'avance via un accompte';
-                                $html .= BimpRender::renderAlerts($msg, 'warning');
+                                if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
+                                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé.<br/>';
+                                    $msg .= 'Celui-ci doit donc soit être payé à l\'avance via un accompte, soit être passé en mode de réglement par prélèvement à date de facture';
+                                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                                }
                             }
 
                             $s = ($nb_abos > 1 ? 's' : '');
@@ -2730,7 +2733,9 @@ class Bimp_Propal extends Bimp_PropalTemp
             if ($this->getNbAbonnements() > 0) {
                 $client = $this->getChildObject('client');
                 if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
-                    $errors[] = 'Le client n\'a pas d\'encours autorisé. Le devis doit donc obligatoirement être payé à l\'avance via un accompte';
+                    if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
+                        $errors[] = 'Le client n\'a pas d\'encours autorisé. Le devis doit donc soit être payé à l\'avance via un accompte, soit être passé en mode de réglement par prélèvement à date de facture';
+                    }
                 }
             }
         }

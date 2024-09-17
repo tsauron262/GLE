@@ -2513,12 +2513,12 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        if ($this->getNbAbonnements() > 0) {
-            $client = $this->getChildObject('client');
-            if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
-                $errors[] = 'Attention : ce ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé. Celui-ci doit donc obligatoirement être payé à l\'avance via un accompte';
-            }
-        }
+//        if ($this->getNbAbonnements() > 0) {
+//            $client = $this->getChildObject('client');
+//            if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
+//                $errors[] = 'Attention : ce ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé. Celui-ci doit donc obligatoirement être payé à l\'avance via un accompte';
+//            }
+//        }
 
         if (count($errors)) {
             return array(

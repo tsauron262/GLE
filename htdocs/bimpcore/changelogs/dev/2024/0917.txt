@@ -1,1 +1,2 @@
 - Blocage validation commande si remise CRT et type éducation client non renseigné
+- Blocage validation devis avec abonnements si client sans encours et pas de paiement d'avance

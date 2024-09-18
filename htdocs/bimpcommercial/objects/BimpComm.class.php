@@ -1638,7 +1638,6 @@ class BimpComm extends BimpDolObject
 //                $return['value'] = (float) $result[0]['total'];
 //            }
 //        }
-
 //        return $return;
     }
 
@@ -2107,7 +2106,13 @@ class BimpComm extends BimpDolObject
 
     public function displayHelpForTvaAcompte()
     {
-        return 'TVA moyenne ' . round($this->getData('total_tva') / $this->getData('total_ht') * 100) . ' %';
+        $total_ht = (float) $this->getData('total_ht');
+
+        if ($total_ht) {
+            return 'TVA moyenne ' . round($this->getData('total_tva') / $total_ht * 100) . ' %';
+        }
+
+        return '';
     }
 
     public function displayCommercial()
@@ -3888,7 +3893,7 @@ class BimpComm extends BimpDolObject
             if ((int) $line->id_remise_except && $line->tva_tx) {
                 $line->pu_ht *= (1 + $line->tva_tx / 100);
             }
-            
+
             $line->tva_tx = 0;
             $line_errors = $line->update($w, true);
             if (count($line_errors)) {

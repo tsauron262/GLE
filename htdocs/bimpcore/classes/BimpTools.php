@@ -3054,7 +3054,7 @@ class BimpTools
     public static function getDecimalesNumber($float_number)
     {
         if (is_numeric($float_number)) {
-            $value_str = number_format($float_number, 8);
+            $value_str = number_format($float_number, 8, '.', '');
 
             if ($value_str) {
                 if (preg_match('/^(\-?\d+)\.(\d*)0*$/U', $value_str, $matches)) {
@@ -3076,9 +3076,14 @@ class BimpTools
         return '<span class="badge badge-pill badge-' . $style . (($popover != '') ? ' bs-popover' : '') . '" ' . (($popover != '') ? BimpRender::renderPopoverData($popover) : '') . ' style="size:' . $size . '">' . $text . '</span>';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true, $max_decimales = 8)
     {
-        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+        // $decimals: indiquer 'full' pour afficher toutes les décimales jusqu'à $max_decimales
+
+        if ($max_decimales < 2) {
+            $max_decimales = 2;
+        }
+
         global $modeCSV;
         if ($modeCSV)
             return str_replace(".", ",", $value);
@@ -3134,8 +3139,8 @@ class BimpTools
 
         if ((int) $decimals < 2) {
             $decimals = 2;
-        } elseif ((int) $decimals > 8) {
-            $decimals = 8;
+        } elseif ((int) $decimals > $max_decimales) {
+            $decimals = $max_decimales;
         }
 
         // Arrondi: 
@@ -4012,7 +4017,7 @@ class BimpTools
     }
 
     public static function sleppIfBloqued($type, $nb = 0)
-    {        
+    {
         $nb++;
         $fichierBloquant = static::isBloqued($type);
         if ($fichierBloquant) {
@@ -4157,43 +4162,45 @@ class BimpTools
                 return $data;
         }
     }
-    
-    
     /*
      * Sécurité
      */
-    public static function secuAddEchec($msg){
-        
+
+    public static function secuAddEchec($msg)
+    {
+
         $bdb = BimpCache::getBdb();
-        $bdb->insert('bimp_secu_ip', array('ip'=>static::getUserIp(), 'msg'=>$msg));    
+        $bdb->insert('bimp_secu_ip', array('ip' => static::getUserIp(), 'msg' => $msg));
     }
-    
-    public static function secuGetNbEchec(){
+
+    public static function secuGetNbEchec()
+    {
         $bdb = BimpCache::getBdb();
-        
+
         $dt = new DateTime();
 //        $dt->sub(new DateInterval('P2D'));
-        return $bdb->getCount('bimp_secu_ip', "ip = '".static::getUserIp()."' AND tms > '".$dt->format('Y/m/d')."'");  
+        return $bdb->getCount('bimp_secu_ip', "ip = '" . static::getUserIp() . "' AND tms > '" . $dt->format('Y/m/d') . "'");
     }
-    
-    public static function secuTestIp(){
-        if(static::secuGetNbEchec() > 20){
-            BimpCore::addlog('Activité anormal : '.static::getUserIp(), 4);
+
+    public static function secuTestIp()
+    {
+        if (static::secuGetNbEchec() > 20) {
+            BimpCore::addlog('Activité anormal : ' . static::getUserIp(), 4);
             $msg = 'Une activité anormale a étais détecté sur votre connexion...';
             $html = BimpRender::renderAlerts($msg);
             header('HTTP/1.0 403 Forbidden');
             die($html);
         }
-        
     }
-    
-    public static function getScriptAttribut(){
+
+    public static function getScriptAttribut()
+    {
         $return = ' type="text/javascript"';
-        if(defined('csp_nonce'))
-            $return .= ' nonce="'.csp_nonce.'"';
+        if (defined('csp_nonce'))
+            $return .= ' nonce="' . csp_nonce . '"';
         return $return;
     }
-    
+
     static function getUserIp()
     {
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {

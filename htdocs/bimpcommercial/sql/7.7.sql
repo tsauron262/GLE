@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` CHANGE `relance_active` `relance_active` BOOLEAN NOT NULL DEFAULT 1;

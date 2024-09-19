@@ -2716,6 +2716,7 @@ class BimpComm extends BimpDolObject
         }
 
         if ($this->getData($statutField) > 0) {
+            require_once DOL_DOCUMENT_ROOT.'/bimptocegid/class/viewEcriture.class.php';
             viewEcriture::setCurrentObject($this);
             $html .= viewEcriture::display();
         } else {

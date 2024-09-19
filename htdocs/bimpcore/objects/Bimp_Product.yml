@@ -128,6 +128,12 @@ fields:
         user_edit: 1
         hashtags: 1
         
+    description_strong: 
+        label: Description
+        type: html
+        user_edit: 1
+        dol_extra_field: 1
+        
     url: 
         label: URL publique
         
@@ -707,6 +713,7 @@ forms:
             - field: code_config
             - field: label
             - field: description
+            - field: description_strong
             - field: fk_product_type
             - field: type2
             - field: type_compta
@@ -760,7 +767,8 @@ forms:
               show: 
                   callback: isLoaded
             - field: label
-            - field: description  
+            - field: description 
+            - field: description_strong
             - field: fk_product_type
             - field: type2           
             - field: no_fixe_prices
@@ -926,6 +934,7 @@ fields_tables:
             - field: accountancy_code_sell_intra
             - field: accountancy_code_sell_export
             - field: description
+            - field: description_strong
             - field: note
             - field: url
             

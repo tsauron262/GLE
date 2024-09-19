@@ -1,0 +1,2 @@
+- Amélioration de la gestion des décimales sur les PDF
+- Ajout calculareur fonds de caisse à l'ouverture des caisses

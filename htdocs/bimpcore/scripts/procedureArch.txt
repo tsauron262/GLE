@@ -1,0 +1,48 @@
+Procédure archivage données.
+
+
+Dump de la table dans PROD.
+Impmort de la table ARCH
+
+SI OK !!!!!!
+
+
+PROD : DELETE FROM llx_bimpcore_note WHERE date_create < '2024-01-01';
+ARCH : DELETE FROM llx_bimpcore_note WHERE date_create >= '2024-01-01';
+
+
+
+
+
+
+
+PROD : DELETE FROM llx_blockedlog WHERE date_creation < '2024-01-01';
+ARCH : DELETE FROM llx_blockedlog WHERE date_creation >= '2024-01-01';
+
+
+
+
+
+PROD : DELETE FROM llx_actioncomm WHERE datec < '2024-01-01';
+ARCH : DELETE FROM llx_actioncomm WHERE datec >= '2024-01-01';
+
+
+PROD : DELETE FROM llx_synopsiscaldav_event WHERE fk_object NOT IN (SELECT id FROM llx_actioncomm);
+ARCH : DELETE FROM llx_synopsiscaldav_event WHERE fk_object NOT IN (SELECT id FROM llx_actioncomm);
+
+
+PROD : DELETE FROM llx_bimpcore_signature WHERE datec < '2024-01-01';
+ARCH : DELETE FROM llx_bimpcore_signature WHERE datec >= '2024-01-01';
+
+
+PROD : DELETE FROM llx_bimpcore_signature_signataire WHERE id_signature NOT IN (SELECT id FROM llx_bimpcore_signature);
+ARCH : DELETE FROM llx_bimpcore_signature_signataire WHERE id_signature NOT IN (SELECT id FROM llx_bimpcore_signature);
+
+
+
+llx_bimpcore_signature_signataire.ibd        │  2000M
+llx_facturedet.ibd                           │  1044M
+llx_stock_mouvement.ibd                      │905216K
+llx_propaldet.ibd                            │872448K
+llx_bimpcore_object_log.ibd                  │774144K
+llx_bimpcore_signature.ibd                   │667648K

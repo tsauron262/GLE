@@ -128,6 +128,7 @@ class InternalStock extends PartStock
                 $html .= '<tr>';
                 $html .= '<th>Réf. composant</th>';
                 $html .= '<th>Der. Commande</th>';
+                $html .= '<th>Libellé produit</th>';
                 $html .= '<th style="text-align: center">Qté en attente de réception</th>';
                 $html .= '<th style="text-align: center">Qté reçue</th>';
                 $html .= '</tr>';
@@ -140,6 +141,7 @@ class InternalStock extends PartStock
                     $html .= '<tr>';
                     $html .= '<td>' . $part->getData('part_number') . '</td>';
                     $html .= '<td>' . $part->getData('date_last_commande') . '</td>';
+                    $html .= '<td>' . $part->getData('product_label') . '</td>';
                     $html .= '<td style="text-align: center">';
                     $html .= '<span class="badge badge-default">' . $qty_to_receive . '</span>';
                     $html .= '<span class="btn btn-default btn-small" style="float: right" onclick="';

@@ -1582,64 +1582,74 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
             }
 
-            $this->checkProcessesStatus();
+            if (in_array($status, array(Propal::STATUS_SIGNED, Propal::STATUS_BILLED))) {
+                $this->checkProcessesStatus();
 
-            if ($this->field_exists('contrats_status')) {
-                $nb_abos = $this->getNbAbonnements(true);
-                if ($nb_abos > 0) {
-                    global $user;
-                    if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || (in_array($user->login, array('e.amadei', 'f.martinez')))) {
-                        $s = ($nb_abos > 1 ? 's' : '');
-                        $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
+                if ($this->field_exists('contrats_status')) {
+                    $nb_abos = $this->getNbAbonnements(true);
+                    if ($nb_abos > 0) {
+                        global $user;
+                        if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || (in_array($user->login, array('e.amadei', 'f.martinez')))) {
+                            if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
+                                if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
+                                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé.<br/>';
+                                    $msg .= 'Celui-ci doit donc être soit payé à l\'avance via un accompte, soit passé en mode de réglement par prélèvement à date de facture';
+                                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                                }
+                            }
 
-                        if ($this->canSetAction('createContratAbo')) {
-                            $msg .= '<div class="buttonsContainer" style="text-align: right">';
-                            $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
-                                'form_name' => 'contrat_abo'
-                            ));
+                            $s = ($nb_abos > 1 ? 's' : '');
+                            $msg = BimpTools::ucfirst($this->getLabel('this')) . ' contient <b>' . $nb_abos . ' ligne' . $s . '</b> devant donner lieu à un contrat d\'abonnement.<br/>';
 
-                            $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                            $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Traiter les lignes d\'abonnement';
-                            $msg .= '</span>';
-
-                            if ($this->isActionAllowed('ForceContratsStatus') && $this->canSetAction('ForceContratsStatus')) {
-                                $onclick = $this->getJsActionOnclick('ForceContratsStatus', array(), array(
-                                    'confirm_msg' => 'Veuillez confirmer'
+                            if ($this->canSetAction('createContratAbo')) {
+                                $msg .= '<div class="buttonsContainer" style="text-align: right">';
+                                $onclick = $this->getJsActionOnclick('createContratAbo', array(), array(
+                                    'form_name' => 'contrat_abo'
                                 ));
 
                                 $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                                $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Traités"';
+                                $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Traiter les lignes d\'abonnement';
+                                $msg .= '</span>';
+
+                                if ($this->isActionAllowed('ForceContratsStatus') && $this->canSetAction('ForceContratsStatus')) {
+                                    $onclick = $this->getJsActionOnclick('ForceContratsStatus', array(), array(
+                                        'confirm_msg' => 'Veuillez confirmer'
+                                    ));
+
+                                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Traités"';
+                                    $msg .= '</span>';
+                                }
+
+                                $msg .= '</div>';
+                            } else {
+                                $msg .= '<span class="danger">';
+                                $msg .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Vous n\'avez pas la permission de créer le contrat d\'abonnement';
                                 $msg .= '</span>';
                             }
-
-                            $msg .= '</div>';
-                        } else {
-                            $msg .= '<span class="danger">';
-                            $msg .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Vous n\'avez pas la permission de créer le contrat d\'abonnement';
-                            $msg .= '</span>';
+                            $html .= BimpRender::renderAlerts($msg, 'warning');
                         }
-                        $html .= BimpRender::renderAlerts($msg, 'warning');
                     }
                 }
-            }
 
-            if ($this->field_exists('commande_status') && (int) $this->getData('commande_status') === self::PROCESS_STATUS_TODO) {
-                $msg .= 'Aucune commande faite depuis ce devis';
+                if ($this->field_exists('commande_status') && (int) $this->getData('commande_status') === self::PROCESS_STATUS_TODO) {
+                    $msg .= 'Aucune commande faite depuis ce devis';
 
-                if ($this->isActionAllowed('ForceCommandeStatus') && $this->canSetAction('ForceCommandeStatus')) {
-                    $msg .= '<div class="buttonsContainer" style="text-align: right">';
-                    $onclick = $this->getJsActionOnclick('ForceCommandeStatus', array(), array(
-                        'confirm_msg' => 'Veuillez confirmer'
-                    ));
+                    if ($this->isActionAllowed('ForceCommandeStatus') && $this->canSetAction('ForceCommandeStatus')) {
+                        $msg .= '<div class="buttonsContainer" style="text-align: right">';
+                        $onclick = $this->getJsActionOnclick('ForceCommandeStatus', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer'
+                        ));
 
-                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Commande créée"';
-                    $msg .= '</span>';
-                    $msg .= '</div>';
+                        $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer le statut "Commande créée"';
+                        $msg .= '</span>';
+                        $msg .= '</div>';
+                    }
+
+
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
                 }
-
-
-                $html .= BimpRender::renderAlerts($msg, 'warning');
             }
         }
 
@@ -2472,6 +2482,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     public function actionValidate($data, &$success)
     {
+        $errors = array();
+
         $use_signature = (int) BimpCore::getConf('propal_use_signatures', null, 'bimpcommercial');
         $id_contact_signature = 0;
 
@@ -2487,16 +2499,10 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                     if ($init_docusign || $open_public_access) {
                         if (!$id_contact_signature) {
-                            return array(
-                                'errors'   => array('Contact signataire obligatoire pour la signature à distance'),
-                                'warnings' => array()
-                            );
+                            $errors[] = 'Contact signataire obligatoire pour la signature à distance';
                         }
                     } else {
-                        return array(
-                            'errors'   => array('Merci de choisir une méthode de signatre à distance'),
-                            'warnings' => array()
-                        );
+                        $errors[] = 'Merci de choisir une méthode de signature à distance';
                     }
                 } else {
                     $id_contact_signature = 0;
@@ -2505,6 +2511,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $email_content = '';
                 }
             }
+        }
+
+        if (count($errors)) {
+            return array(
+                'errors'   => $errors,
+                'warnings' => array()
+            );
         }
 
         $result = parent::actionValidate($data, $success);
@@ -2716,6 +2729,15 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         if (!count($errors) && empty($contrats)) {
             $errors[] = 'Il n\'y a aucune ligne à ajouter à un contrat d\'abonnement';
+        } else {
+            if ($this->getNbAbonnements() > 0) {
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
+                    if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
+                        $errors[] = 'Le client n\'a pas d\'encours autorisé. Ce devis doit donc être soit payé à l\'avance via un accompte, soit passé en mode de réglement par prélèvement à date de facture';
+                    }
+                }
+            }
         }
 
         if (!count($errors)) {

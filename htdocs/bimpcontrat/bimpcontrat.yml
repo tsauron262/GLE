@@ -26,3 +26,8 @@ params:
         label: Délai pour tâches renouvellements manuels.
         info: Nombre de jours avant la date de fin de validité pour déclencher la création d'une tâche pour renouvellement manuels</br>Mettre 0 pour désactiver ces tâches
         def: 0
+        
+    unpaid_factures_abonnement_notification_email: 
+        label: Adresse e-mail pour la notification des factures d'abonnement impayées
+        info: E-mail envoyé 3 mois après la 1ère relance. Laisser vide pour désactiver cette notification
+        def: ''

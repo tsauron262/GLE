@@ -2,6 +2,8 @@ table: bv_rule
 icon: fas_sliders-h
 common_fields: 1
 
+entity_name: bimpvalidation
+
 labels: 
     name: règle de validation
     name_plur: règles de validation

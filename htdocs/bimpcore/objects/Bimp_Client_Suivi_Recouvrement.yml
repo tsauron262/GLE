@@ -59,6 +59,15 @@ filters_panel:
             user_create: 
             type:
                 
+forms:
+    default:
+        rows: 
+            - field: mode
+            - field: sens 
+            - field: type
+            - field: content
+        
+                
 lists: 
     globale: 
         filters_panel: default

@@ -1,5 +1,7 @@
 table: bimpclient_suivi_recouv
 
+entity_name: recouv
+
 common_fields: 1
 icon: fas_sticky-note
 

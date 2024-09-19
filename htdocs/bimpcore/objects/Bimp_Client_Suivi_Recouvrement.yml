@@ -62,6 +62,8 @@ filters_panel:
 forms:
     default:
         rows: 
+            - field: id_societe
+              edit: 0
             - field: mode
             - field: sens 
             - field: type

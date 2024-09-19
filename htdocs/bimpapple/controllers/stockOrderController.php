@@ -70,7 +70,7 @@ class stockOrderController extends gsxController
                                 )),
                                 'price'   => $part['stockPrice'].' €',
                                 'buttons' => $button_html,
-                                'photo' => '<img src="'.$part['imageUrl'].'"/>'
+                                'photo' => '<img src="'.$part['imageUrl'].'" style="max-height: 100px;"/>'
                             );
                         }
 

@@ -129,7 +129,7 @@ fields:
         hashtags: 1
         
     description_strong: 
-        label: Description
+        label: Description longue
         type: html
         user_edit: 1
         dol_extra_field: 1

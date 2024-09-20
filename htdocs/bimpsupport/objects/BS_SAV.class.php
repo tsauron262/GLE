@@ -6697,7 +6697,6 @@ ORDER BY a.val_max DESC");
 
         if (!count($errors)) {
             if (!$not_restituted) {
-                $this->testtest = 'dhkgdfjhg';
                 // Génération bon de restitution:
                 $pdf_errors = $this->generateRestitutionPdf();
 
@@ -6726,10 +6725,6 @@ ORDER BY a.val_max DESC");
                         }
                     }
                 }
-                
-                echo '<pre>';
-                print_r($this->data);
-                exit;
             }
 
             if ($current_status !== self::BS_SAV_FERME) {

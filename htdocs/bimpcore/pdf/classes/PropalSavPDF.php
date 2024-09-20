@@ -25,9 +25,12 @@ class PropalSavPDF extends PropalPDF
 
     public function init($object)
     {
-        if (!is_null($object) && is_a($object, 'Propal') && (int) $object->id) {
-            $this->sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-            if (!$this->sav->find(array('id_propal' => (int) $object->id))) {
+        if (is_null($this->sav) && !is_null($object) && is_a($object, 'Propal') && (int) $object->id) {
+            $this->sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array(
+                        'id_propal' => (int) $object->id
+            ));
+
+            if (!BimpObject::objectLoaded($this->sav)) {
                 unset($this->sav);
                 $this->sav = null;
                 $this->errors[] = 'Aucun SAV associé à cette propale trouvé';

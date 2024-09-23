@@ -14,7 +14,7 @@ function widget_recherchePropale() {
 
     $table ="<p>";
 
-    if ($conf->propal->enabled && $user->rights->propale->lire)
+    if ($conf->propal->enabled && $user->rights->propal->lire)
     {
       $table .= '<form method="POST" name="jj" action="'.DOL_URL_ROOT.'/comm/propal/list.php">';
       $table .= '<table class="noborder" width="100%">';

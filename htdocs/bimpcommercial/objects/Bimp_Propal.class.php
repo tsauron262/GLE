@@ -123,7 +123,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 0;
 
             case 'addContact':
-                if (!empty($user->rights->propale->creer)) {
+                if (!empty($user->rights->propal->creer)) {
                     return 1;
                 }
                 return 0;

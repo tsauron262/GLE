@@ -53,7 +53,7 @@ function llxHeader1($head = "")
       $menu->add_submenu(DOL_URL_ROOT."/comm/clients.php",$langs->trans("Customers"));
       $menu->add_submenu(DOL_URL_ROOT."/comm/prospect/prospects.php",$langs->trans("Prospects"));
 
-      if ($user->rights->propale->lire)
+      if ($user->rights->propal->lire)
         {
     $langs->load("propal");
     $menu->add_submenu(DOL_URL_ROOT."/comm/propal.php", $langs->trans("Prop"));

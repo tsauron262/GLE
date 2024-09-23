@@ -20,7 +20,7 @@ function widget_listPropaleFinancement() {
   $table = '<p>';
   $table2 = '<p>';
 
-if ( $user->rights->propale->lire == 1)
+if ( $user->rights->propal->lire == 1)
 {
     $sql = "SELECT fk_soc,
                    rowid,

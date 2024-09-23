@@ -4,8 +4,6 @@
 
 19.0 => 20.0
 
-* Properties ->date_update and ->date_modification were merged into date_modification.
-* The parameter $filter of method fetchAll does not accept array of SQL but must be a string of an Universal Search Filter syntax.
 * Use of dol_eval with parameter $returnvalue=0 is deprecated.
 * The signature for all ->delete() method has been modified to match the modulebuilder template (so first param is now always $user), except
   the delete for thirdparty (still accept the id of thirdparty to delete as first parameter). Will probably be modified into another version.
@@ -46,9 +44,8 @@
 
 * Core has introduced a Universal Filter Syntax for search criteria. Example: ((((field1:=:value1) OR (field2:in:1,2,3)) AND ...). In rare case, some filters
   could be provided by URL parameters. For such cases (societe/ajax/company.php), use of Universal Filter Syntax become mandatory.
-* The signature of method getNomUrl() of class ProductFournisseur has been modified to match the signature of method Product->getNomUrl()
-* All functions fetch_all() have been set to deprecated for naming consistency, use fetchAll() instead.
-* Code standardization: '$user->rights->propale' is now '$user->rights->propal' everywhere.
+
+
 * Deprecated method set_billed() on shipment and reception class has been removed. Use setBilled() instead.
 * Tables llx_prelevement_facture and llx_prelevement_facture_demande have been renamed into llx_prelevement and llx_prelevement_demande.
 * Renamed MAIN_LIST_ALLOW_NOTES into MAIN_LIST_HIDE_NOTES and renamed MAIN_LIST_ALLOW_PRIVATE_NOTES into MAIN_LIST_HIDE_PRIVATE_NOTES
@@ -59,3 +56,9 @@
 ----- FAIT -----
 
 * Ldap class methods connect_bind() & dump_content() have been renamed
+* Properties ->date_update and ->date_modification were merged into date_modification. [NO CHANGES]
+* The parameter $filter of method fetchAll does not accept array of SQL but must be a string of an Universal Search Filter syntax. [NO CHANGES]
+* The signature of method getNomUrl() of class ProductFournisseur has been modified to match the signature of method Product->getNomUrl(). [NO CHANGES]
+* All functions fetch_all() have been set to deprecated for naming consistency, use fetchAll() instead. [NO CHANGES]
+* Code standardization: '$user->rights->propale' is now '$user->rights->propal' everywhere.
+

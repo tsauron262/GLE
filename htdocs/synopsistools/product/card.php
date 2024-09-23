@@ -2259,7 +2259,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status) {
     print '<table width="100%" class="noborder">';
 
     // Propals
-    if (!empty($conf->propal->enabled) && $user->rights->propale->creer) {
+    if (!empty($conf->propal->enabled) && $user->rights->propal->creer) {
         $propal = new Propal($db);
 
         $langs->load("propal");

@@ -126,7 +126,7 @@ function widget_listRetard() {
     }
 
 // Number of commercial proposals opened (expired)
-    if (!empty($conf->propal->enabled) && $user->rights->propale->lire) {
+    if (!empty($conf->propal->enabled) && $user->rights->propal->lire) {
         $langs->load("propal");
 
         include_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
@@ -141,7 +141,7 @@ function widget_listRetard() {
     }
 
 // Number of commercial proposals CLOSED signed (billed)
-    if (!empty($conf->propal->enabled) && $user->rights->propale->lire) {
+    if (!empty($conf->propal->enabled) && $user->rights->propal->lire) {
         $langs->load("propal");
 
         include_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';

@@ -187,7 +187,7 @@ print "</div>";
 
     if ($affaire->societe->prospect || $affaire->societe->client)
     {
-        if ($key == 'propal' && $conf->propal->enabled && $user->rights->propale->creer)
+        if ($key == 'propal' && $conf->propal->enabled && $user->rights->propal->creer)
         {
             print '<a class="butAction" href="'.DOL_URL_ROOT.'/comm/addpropal.php?socid='.$affaire->societe->id.'&amp;action=create&amp;projetid='.$affaire->id.'">'.$langs->trans("AddProp").'</a>';
         }

@@ -4,7 +4,6 @@
 
 19.0 => 20.0
 
-* Ldap class methods connect_bind() & dump_content() have been renamed
 * Properties ->date_update and ->date_modification were merged into date_modification.
 * The parameter $filter of method fetchAll does not accept array of SQL but must be a string of an Universal Search Filter syntax.
 * Use of dol_eval with parameter $returnvalue=0 is deprecated.
@@ -55,3 +54,8 @@
 * Renamed MAIN_LIST_ALLOW_NOTES into MAIN_LIST_HIDE_NOTES and renamed MAIN_LIST_ALLOW_PRIVATE_NOTES into MAIN_LIST_HIDE_PRIVATE_NOTES
 * Making a global search is sending the parameter using always the name search_all (instead of sometimes sall and search_all)
 * The property $url_last_version must be public if defined into module descriptor files;
+
+
+----- FAIT -----
+
+* Ldap class methods connect_bind() & dump_content() have been renamed

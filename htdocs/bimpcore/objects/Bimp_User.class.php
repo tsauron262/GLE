@@ -1018,7 +1018,7 @@ class Bimp_User extends BimpObject
 
         if ($conf->global->LDAP_SERVER_TYPE == "activedirectory") {
                 $ldap = new Ldap();
-                $result = $ldap->connect_bind();
+                $result = $ldap->connectBind();
                 if ($result > 0) {
                         $userSID = $ldap->getObjectSid($object->login);
                 }
@@ -1075,7 +1075,7 @@ class Bimp_User extends BimpObject
 
         // Lecture LDAP
         $ldap = new Ldap();
-        $result = $ldap->connect_bind();
+        $result = $ldap->connectBind();
         if ($result > 0) {
                 $info = $object->_load_ldap_info();
                 $dn = $object->_load_ldap_dn($info, 1);

@@ -1,0 +1,57 @@
+
+
+------ A TRAITER -----
+
+19.0 => 20.0
+
+* Ldap class methods connect_bind() & dump_content() have been renamed
+* Properties ->date_update and ->date_modification were merged into date_modification.
+* The parameter $filter of method fetchAll does not accept array of SQL but must be a string of an Universal Search Filter syntax.
+* Use of dol_eval with parameter $returnvalue=0 is deprecated.
+* The signature for all ->delete() method has been modified to match the modulebuilder template (so first param is now always $user), except
+  the delete for thirdparty (still accept the id of thirdparty to delete as first parameter). Will probably be modified into another version.
+* Route for API /thirdparties/gateways has been renamed into /thirdparties/accounts to better match the api object name.
+* The AGENDA_ENABLE_DONEBY hidden option has been removed. So $userdoneid in actioncomm class is deprecated. Please use $userownerid instead. Also,
+  the deprecated field $fk_user_done in actioncomm table is removed. Please use $fk_user_action instead.
+* Renamings in expedition line table and class, fk_origin_line is now fk_elementdet in table and class.
+* The signature of method fetch() of class CompanyBankAccount has been modified to match the signature of method Account->fetch()
+
+18.0 => 19.0
+
+* The hook changeHelpURL is replaced by llxHeader
+* The property ->brouillon has been removed from all classes. It was not reliable and was a duplicate of ->status == self::STATUS_DRAFT.
+* The duplicated and deprecated property ->date_livraison that was renamed into ->delivery_date has been completely removed.
+* The property ->user_close to store ID of closing user has been renamed into ->user_closing_id.
+* The property ->user_validation to store ID of user validating has been renamed into ->user_validation_id.
+* The property ->user_creation to store ID of user of creation has been renamed into ->user_creation_id.
+* The property ->user_modification to store ID of user of modification has been renamed into ->user_modification_id.
+* The private array ->status_short, ->statuts and ->status_long are now array ->labelStatusShort and ->labelStatus everywhere.
+* The duplicate property ->user_creat, ->date_creat, ->date_valid have been removed (use instead user_creation, date_creation, date_validation).
+* The method get_substitutionarray_shipment_lines() has been removed. Use the generic get_substitutionarray_lines() instead.
+* The method ProductcustomerPrice->fetch_all_log() has been renamed into camel case ->fetchAllLog()
+* It was possible to use a variable $soc or $right inside a PHP code condition of some extrafields properties, this is no more true (this 2 variables are no more global variables).
+* New hook files of modules actions_mymodule.class.php should now "extends CommonHookActions"
+* Hidden option ACCOUNTANCY_AUTOFIX_MISSING_LINK_TO_USER_ON_SALARY_BANK_PAYMENT has been renamed into ACCOUNTANCY_AUTOFIX_MISSING_LINK_TO_USER_ON_SALARY_BANK_PAYMENT
+* The delete() method of AdherentType, Contact, Delivery, MultiCurrency, CurrencyRate now need $user as first parameter.
+* The load of hook context productdao has been removed before calling loadvirtualstock. Modules must use the context of main parent page or 'all' for all cases.
+
+17.0 => 18.0
+
+* The deprecated method "escapeunderscore()" of database handlers has been removed. You must use "escapeforlike()" instead.
+* Revert default type of hooks. Default is now 'addreplace' hooks (and exception become 'output' hooks, that become deprecated).
+* Deprecated property libelle removed from entrepot class.
+* The type 'text' in ->fields property does not accept html content anymore. Use the type 'html' for that.
+* The method htmlPrintOnlinePaymentFooter() used for public footer pages has been renamed into htmlPrintOnlineFooter() and moved into company.lib.php
+
+16.0 => 17.0
+
+* Core has introduced a Universal Filter Syntax for search criteria. Example: ((((field1:=:value1) OR (field2:in:1,2,3)) AND ...). In rare case, some filters
+  could be provided by URL parameters. For such cases (societe/ajax/company.php), use of Universal Filter Syntax become mandatory.
+* The signature of method getNomUrl() of class ProductFournisseur has been modified to match the signature of method Product->getNomUrl()
+* All functions fetch_all() have been set to deprecated for naming consistency, use fetchAll() instead.
+* Code standardization: '$user->rights->propale' is now '$user->rights->propal' everywhere.
+* Deprecated method set_billed() on shipment and reception class has been removed. Use setBilled() instead.
+* Tables llx_prelevement_facture and llx_prelevement_facture_demande have been renamed into llx_prelevement and llx_prelevement_demande.
+* Renamed MAIN_LIST_ALLOW_NOTES into MAIN_LIST_HIDE_NOTES and renamed MAIN_LIST_ALLOW_PRIVATE_NOTES into MAIN_LIST_HIDE_PRIVATE_NOTES
+* Making a global search is sending the parameter using always the name search_all (instead of sometimes sall and search_all)
+* The property $url_last_version must be public if defined into module descriptor files;

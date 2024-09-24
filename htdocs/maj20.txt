@@ -2,28 +2,14 @@
 
 ------ A TRAITER -----
 
-19.0 => 20.0
-
-
-* Renamings in expedition line table and class, fk_origin_line is now fk_elementdet in table and class.
-* The signature of method fetch() of class CompanyBankAccount has been modified to match the signature of method Account->fetch()
-
-18.0 => 19.0
 
 * It was possible to use a variable $soc or $right inside a PHP code condition of some extrafields properties, this is no more true (this 2 variables are no more global variables).
 * New hook files of modules actions_mymodule.class.php should now "extends CommonHookActions"
 * The load of hook context productdao has been removed before calling loadvirtualstock. Modules must use the context of main parent page or 'all' for all cases.
-
-17.0 => 18.0
-
 * Revert default type of hooks. Default is now 'addreplace' hooks (and exception become 'output' hooks, that become deprecated).
-
-16.0 => 17.0
-
 * Core has introduced a Universal Filter Syntax for search criteria. Example: ((((field1:=:value1) OR (field2:in:1,2,3)) AND ...). In rare case, some filters
   could be provided by URL parameters. For such cases (societe/ajax/company.php), use of Universal Filter Syntax become mandatory.
 * Making a global search is sending the parameter using always the name search_all (instead of sometimes sall and search_all)
-
 
 
 ----- FAIT -----
@@ -58,3 +44,4 @@
 * The signature for all ->delete() method has been modified to match the modulebuilder template (so first param is now always $user), except [NO CHANGES]
 * The AGENDA_ENABLE_DONEBY hidden option has been removed. So $userdoneid in actioncomm class is deprecated. Please use $userownerid instead. Also,
   the deprecated field $fk_user_done in actioncomm table is removed. Please use $fk_user_action instead.
+* The signature of method fetch() of class CompanyBankAccount has been modified to match the signature of method Account->fetch() [NO CHANGES]

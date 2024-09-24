@@ -4446,6 +4446,11 @@ class Bimp_Product extends BimpObject
                 }
             }
         }
+        if (!count($errors)) {
+            $qty = (int) BimpTools::getPostFieldValue('qty', 0, 'int');
+            if($qty > 0)
+                $errors = BimpTools::merge_array($errors, $this->correctStocks((int) BimpTools::getPostFieldValue('id_entrepot', 0, 'int'), $qty, 0, 'mouvement_manuel', 'Mouvement manuel ' . BimpTools::getPostFieldValue('comment', '', 'alphanohtml'), 'user', $user->id));
+        }
 
         return $errors;
     }

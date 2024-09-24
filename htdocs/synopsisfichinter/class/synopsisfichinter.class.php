@@ -208,7 +208,7 @@ class Synopsisfichinter extends Fichinter {
         $sql .= ", description  = '" . addslashes($this->description) . "'";
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;
-        $sql .= ", fk_statut = " . $this->statut;
+        $sql .= ", fk_statut = " . $this->status;
         $sql .= ", note_public = '" . addslashes($this->note_public)."'";
         $sql .= ", note_private = '" . addslashes($this->note_private)."'";
         $sql .= ", fk_contrat = '" . $this->fk_contrat . "'";
@@ -273,6 +273,7 @@ class Synopsisfichinter extends Fichinter {
                 $tmpSoc = new Societe($this->db);
                 $tmpSoc->fetch($obj->fk_soc);
                 $this->societe = $tmpSoc;
+                $this->status = $obj->fk_statut;
                 $this->statut = $obj->fk_statut;
                 $this->date = $this->db->jdate($obj->di);
                 $this->di = $obj->di;
@@ -289,8 +290,8 @@ class Synopsisfichinter extends Fichinter {
                 $tabDi = $this->getDI();
                 $this->fk_ref = ((isset($tabDi[0])) ? $tabDi[0] : 0);
 
-                if ($this->statut == 0)
-                    $this->brouillon = 1;
+//                if ($this->statut == 0)
+//                    $this->brouillon = 1; // removed
 
                 $this->db->free($resql);
                 return 1;
@@ -395,7 +396,7 @@ class Synopsisfichinter extends Fichinter {
      *    \return     string      Libelle
      */
     function getLibStatut($mode = 0) {
-        return $this->LibStatut($this->statut, $mode);
+        return $this->LibStatut($this->status, $mode);
     }
 
     /**
@@ -405,7 +406,7 @@ class Synopsisfichinter extends Fichinter {
      */
     function LibStatut($statut, $mode = 0) {
         if ($mode == 0) {
-            return $this->statuts[$statut];
+            return $this->statuss[$statut];
         }
         if ($mode == 1) {
             return $this->statuts_short[$statut];
@@ -803,7 +804,7 @@ class Synopsisfichinter extends Fichinter {
         global $user;
         dol_syslog("Fichinter::Addline $fichinterid, $desc, $date_intervention, $duration");
 
-        if ($this->statut == 0) {
+        if ($this->status == 0) {
             $this->db->begin();
 
             // Insertion ligne
@@ -1377,7 +1378,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
     
     function delete_line() {
         global $user, $langs, $conf;
-        if ($this->statut == 0) {
+        if ($this->status == 0) {
             dol_syslog("FichinterLigne::delete_line lineid=" . $this->rowid);
             $this->db->begin();
 

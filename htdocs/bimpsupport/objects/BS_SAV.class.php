@@ -6889,8 +6889,9 @@ ORDER BY a.val_max DESC");
                         // Création li'gnes d'acompte : 
                         $propal_lines = $propal->getLines('not_text');
                         $prev_propal_status = (int) $propal->getData('fk_statut');
-                        $propal->dol_object->statut = 0;
-                        $propal->dol_object->brouillon = 1;
+                        $propal->dol_object->statut = 0; // déprécié
+                        $propal->dol_object->status = 0;
+//                        $propal->dol_object->brouillon = 1; // prop removed
                         $acompte_deleted = false;
 
                         foreach ($propal_lines as $propal_line) {
@@ -6940,7 +6941,8 @@ ORDER BY a.val_max DESC");
                         }
 
                         $propal->dol_object->statut = $prev_propal_status;
-                        $propal->dol_object->brouillon = 0;
+                        $propal->dol_object->status = $prev_propal_status;
+//                        $propal->dol_object->brouillon = 0; prop removed
 
                         // Ajout ligne Frais: 
                         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');

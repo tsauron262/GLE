@@ -15,8 +15,8 @@
 
 18.0 => 19.0
 
-* The hook changeHelpURL is replaced by llxHeader
-* The property ->brouillon has been removed from all classes. It was not reliable and was a duplicate of ->status == self::STATUS_DRAFT.
+
+
 * The duplicated and deprecated property ->date_livraison that was renamed into ->delivery_date has been completely removed.
 * The property ->user_close to store ID of closing user has been renamed into ->user_closing_id.
 * The property ->user_validation to store ID of user validating has been renamed into ->user_validation_id.
@@ -35,10 +35,6 @@
 17.0 => 18.0
 
 * Revert default type of hooks. Default is now 'addreplace' hooks (and exception become 'output' hooks, that become deprecated).
-
-
-* The type 'text' in ->fields property does not accept html content anymore. Use the type 'html' for that.
-* The method htmlPrintOnlinePaymentFooter() used for public footer pages has been renamed into htmlPrintOnlineFooter() and moved into company.lib.php
 
 16.0 => 17.0
 
@@ -62,4 +58,7 @@
 * The property $url_last_version must be public if defined into module descriptor files [NO CHANGES]
 * The deprecated method "escapeunderscore()" of database handlers has been removed. You must use "escapeforlike()" instead. [NO CHANGES]
 * Deprecated property libelle removed from entrepot class.
+* The method htmlPrintOnlinePaymentFooter() used for public footer pages has been renamed into htmlPrintOnlineFooter() and moved into company.lib.php [NO CHANGES]
+* The hook changeHelpURL is replaced by llxHeader [NO CHANGES]
+* The property ->brouillon has been removed from all classes. It was not reliable and was a duplicate of ->status == self::STATUS_DRAFT.
 

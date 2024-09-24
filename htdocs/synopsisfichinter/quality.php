@@ -161,7 +161,7 @@ if ($_REQUEST["id"] > 0) {
     // Date
     print '<tr><th class="ui-widget-header ui-state-default">';
     print $langs->trans('Date');
-    if ($_REQUEST['action'] != 'editdate_delivery' && $fichinter->brouillon) print '<a href="'.$_SERVER["PHP_SELF"].'?action=editdate_delivery&amp;id='.$fichinter->id.'">'.img_edit($langs->trans('SetDateCreate'),1).'</a>';
+    if ($_REQUEST['action'] != 'editdate_delivery' && $fichinter->status == 0) print '<a href="'.$_SERVER["PHP_SELF"].'?action=editdate_delivery&amp;id='.$fichinter->id.'">'.img_edit($langs->trans('SetDateCreate'),1).'</a>';
     print '</th><td colspan="3" class="ui-widget-content">';
     if ($_REQUEST['action'] == 'editdate_delivery')
     {

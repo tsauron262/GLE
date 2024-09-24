@@ -240,6 +240,7 @@ class Synopsisdemandeinterv extends CommonObject {
         $result = $soc->fetch($this->socid);
         $this->soc = $soc;
         $this->verifyNumRef();
+        $this->status = 0;
         $this->statut = 0;
 
         $sql = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisdemandeinterv (fk_soc, datec, ref, fk_user_author, description, model_pdf, note_public, note_private";
@@ -324,7 +325,7 @@ class Synopsisdemandeinterv extends CommonObject {
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;
         $sql .= ", fk_user_prisencharge = " . $this->fk_user_prisencharge;
-        $sql .= ", fk_statut = " . $this->statut;
+        $sql .= ", fk_statut = " . $this->status;
         $sql .= ", fk_commande = '" . $this->fk_commande."'";
         $sql .= ", fk_contrat = '" . $this->fk_contrat."'";
         $sql .= " WHERE rowid = " . $id;
@@ -378,6 +379,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $this->societe = $tmpSoc;
                 }
                 $this->statut = $obj->fk_statut;
+                $this->status = $obj->fk_statut;
                 $this->date_valid = $obj->date_valid;
                 $this->date = $this->db->jdate($obj->di);
                 $this->duree = $obj->duree;
@@ -396,9 +398,9 @@ class Synopsisdemandeinterv extends CommonObject {
                 $this->user_author_id = $obj->fk_user_author;
                 $this->fk_user_author = $obj->fk_user_author;
 
-                if ($this->statut == 0)
-                    $this->brouillon = 1;
-
+//                if ($this->status == 0){
+//                    $this->brouillon = 1; // removed 
+//                }
                 $this->db->free($resql);
                 return $this->id;
 //            } else {
@@ -820,7 +822,7 @@ class Synopsisdemandeinterv extends CommonObject {
      *    \return     string      Libelle
      */
     function getLibStatut($mode = 0) {
-        return $this->LibStatut($this->statut, $mode);
+        return $this->LibStatut($this->status, $mode);
     }
 
     /**
@@ -1078,7 +1080,7 @@ class Synopsisdemandeinterv extends CommonObject {
     function set_date_delivery($user, $date_delivery, $no_trigger = false) {
         global $langs, $conf;
 
-        if (1 || (isset($user->rights) && isset($user->rights->synopsisdemandeinterv) && $user->rights->synopsisdemandeinterv->creer/* && $this->statut == 0*/)) {
+        if (1 || (isset($user->rights) && isset($user->rights->synopsisdemandeinterv) && $user->rights->synopsisdemandeinterv->creer/* && $this->status == 0*/)) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
@@ -1171,7 +1173,7 @@ class Synopsisdemandeinterv extends CommonObject {
     function addline($synopsisdemandeintervid, $desc, $date_intervention, $duration, $typeinterv, $qte = 1, $pu_ht = 0, $isForfait = 0, $fk_commandedet = false, $fk_contratdet = false) {
         dol_syslog("synopsisdemandeinterv::Addline $synopsisdemandeintervid, $desc, $date_intervention, $duration");
 
-        if ($this->statut == 0) {
+        if ($this->status == 0) {
             $this->db->begin();
 
             // Insertion ligne
@@ -1713,7 +1715,7 @@ class synopsisdemandeintervLigne {
     }
     function delete_line() {
         global $user, $langs, $conf;
-        if ($this->statut == 0) {
+        if ($this->status == 0) {
             dol_syslog("synopsisdemandeintervLigne::delete_line lineid=" . $this->rowid);
             $this->db->begin();
 

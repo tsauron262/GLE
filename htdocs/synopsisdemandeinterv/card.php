@@ -1238,7 +1238,7 @@ EOF;
     // Date
     print '<tr><th class="ui-widget-header ui-state-default">';
     print $langs->trans('Date');
-    if (isset($_REQUEST["action"]) && $_REQUEST['action'] != 'editdate_delivery' && $synopsisdemandeinterv->brouillon)
+    if (isset($_REQUEST["action"]) && $_REQUEST['action'] != 'editdate_delivery' && $synopsisdemandeinterv->status == 0)
         print '<a href="' . $_SERVER["PHP_SELF"] . '?action=editdate_delivery&amp;id=' . $synopsisdemandeinterv->id . '">' . img_edit($langs->trans('SetDateCreate'), 1) . '</a>';
     print '</th>';
     print '</td><td colspan="3" class="ui-widget-content">';
@@ -1276,14 +1276,14 @@ EOF;
 //            print '</td></tr></table>';
             print '<td class="ui-widget-content" colspan=3>';
             print $langs->trans("NoProject") . '&nbsp;&nbsp;';
-            if ($synopsisdemandeinterv->brouillon)
+            if ($synopsisdemandeinterv->status == 0)
                 print '<a class="butAction" href=../DOL3.5.2projet/card.php?socid=' . $societe->id . '&action=create>' . $langs->trans('AddProject') . '</a>';
             print '</td>';
         } else {
             if ($synopsisdemandeinterv->statut == 0 && $user->rights->synopsisdemandeinterv->creer) {
-                if ($_REQUEST['action'] != 'classer' && $synopsisdemandeinterv->brouillon)
+                if ($_REQUEST['action'] != 'classer' && $synopsisdemandeinterv->status == 0)
                     print '<a href="' . $_SERVER['PHP_SELF'] . '?action=classer&amp;id=' . $synopsisdemandeinterv->id . '">' . img_edit($langs->trans('SetProject'), 1) . '</a></th>';
-//                if ($_REQUEST['action'] != 'classer' && $synopsisdemandeinterv->brouillon) print '<a href="'.$_SERVER["PHP_SELF"].'?action=classer&amp;id='.$synopsisdemandeinterv->id.'">'.img_edit($langs->trans('SetDescription'),1).'</a>';
+//                if ($_REQUEST['action'] != 'classer' && $synopsisdemandeinterv->status == 0) print '<a href="'.$_SERVER["PHP_SELF"].'?action=classer&amp;id='.$synopsisdemandeinterv->id.'">'.img_edit($langs->trans('SetDescription'),1).'</a>';
                 print '<td colspan="3" class="ui-widget-content">';
                 if ($_REQUEST['action'] == 'classer') {
                     $html->form_project($_SERVER['PHP_SELF'] . '?id=' . $synopsisdemandeinterv->id, $synopsisdemandeinterv->socid, $synopsisdemandeinterv->projetidp, 'projetidp');
@@ -1323,7 +1323,7 @@ EOF;
     // Description
     print '<tr><th class="ui-widget-header ui-state-default">';
     print $langs->trans('Description');
-    if (isset($_REQUEST["action"]) && $_REQUEST['action'] != 'editdescription' && $synopsisdemandeinterv->brouillon)
+    if (isset($_REQUEST["action"]) && $_REQUEST['action'] != 'editdescription' && $synopsisdemandeinterv->status == 0)
         print '<a href="' . $_SERVER["PHP_SELF"] . '?action=editdescription&amp;id=' . $synopsisdemandeinterv->id . '">' . img_edit($langs->trans('SetDescription'), 1) . '</a>';
     print '</td><td colspan="3" class="ui-widget-content">';
     if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editdescription') {

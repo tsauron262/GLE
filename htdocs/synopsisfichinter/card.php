@@ -1217,7 +1217,7 @@ EOF;
     // Date
     print '<tr><th class="ui-widget-header ui-state-default">';
     print '<span style="color:red">' . $langs->trans('Date du rapport d interv.') . '</span>';
-    if ((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editdate_delivery') && $fichinter->brouillon)
+    if ((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editdate_delivery') && $fichinter->status == 0)
         print '<a href="' . $_SERVER["PHP_SELF"] . '?action=editdate_delivery&amp;id=' . $fichinter->id . '">' . img_edit($langs->trans('SetDateCreate'), 1) . '</a>';
     print '</th><td colspan="1" class="ui-widget-content">';
     if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdate_delivery') {
@@ -1261,7 +1261,7 @@ EOF;
             print '</td>';
         } else {
             if (($fichinter->statut == 0 || $user->rights->synopsisficheinter->modifAfterValid) && $user->rights->synopsisficheinter->creer) {
-                if ((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'classer') && $fichinter->brouillon)
+                if ((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'classer') && $fichinter->status == 0)
                     print '<a href="' . $_SERVER['PHP_SELF'] . '?action=classer&amp;id=' . $fichinter->id . '">' . img_edit($langs->trans('SetProject'), 1) . '</a>';
                 print '</th><td colspan="3" class="ui-widget-content">';
                 if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'classer') {
@@ -1300,7 +1300,7 @@ EOF;
     // Description
     print '<tr><th class="ui-widget-header ui-state-default">';
     print $langs->trans('Titre');
-    if ((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editdescription') && $fichinter->brouillon)
+    if ((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editdescription') && $fichinter->status == 0)
         print '<a href="' . $_SERVER["PHP_SELF"] . '?action=editdescription&amp;id=' . $fichinter->id . '">' . img_edit($langs->trans('SetDescription'), 1) . '</a>';
     print '</th><td colspan="3" class="ui-widget-content">';
     if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdescription') {
@@ -1325,7 +1325,7 @@ EOF;
     // Description 2 debmod
     print '<tr><th class="ui-widget-header ui-state-default">';
     print $langs->trans('Description: non imprimable');
-    if ((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editdescription2') && $fichinter->brouillon)
+    if ((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editdescription2') && $fichinter->status == 0)
         print '<a href="' . $_SERVER["PHP_SELF"] . '?action=editdescription2&amp;id=' . $fichinter->id . '">' . img_edit($langs->trans('SetDescriptionP'), 1) . '</a>';
     print '</th><td colspan="3" class="ui-widget-content">';
     if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdescription2') {

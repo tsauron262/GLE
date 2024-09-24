@@ -164,7 +164,7 @@ fields:
         default_value: 0
     fk_user_cloture: 
         label: Fermée par
-        dol_prop: user_close_id
+        dol_prop: user_closing_id
         type: id_object
         object: user_close
         input: 

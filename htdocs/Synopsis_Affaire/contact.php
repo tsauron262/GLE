@@ -424,7 +424,7 @@ if ($_REQUEST["action"] == 'deleteline' && $user->rights->affaire->creer)
 
             // Icon update et delete
             print '<td align="center" nowrap '.$bc[$var].'>';
-            if ($user->rights->propale->creer)
+            if ($user->rights->propal->creer)
             {
 //TODO>supprimer si droit de modifier le contact
                 print '&nbsp;';
@@ -517,7 +517,7 @@ if ($_REQUEST["action"] == 'deleteline' && $user->rights->affaire->creer)
 
                 // Icon update et delete
                 print '<td align="center" nowrap '.$bc[$var].'>';
-                if ($user->rights->propale->creer)
+                if ($user->rights->propal->creer)
                 {
 //TODO>supprimer si droit de modifier le contact
                     print '&nbsp;';

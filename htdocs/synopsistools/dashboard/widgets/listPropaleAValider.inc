@@ -20,7 +20,7 @@ function widget_listPropaleAValider() {
   $table = '<p>';
   $table2 = '<p>';
 
-if ( $user->rights->propale->valider == 1)
+if ( $user->rights->propal->valider == 1)
 {
     $sql = "SELECT fk_soc,
                    rowid,

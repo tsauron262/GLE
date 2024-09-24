@@ -169,7 +169,7 @@ else
 
 
 $ldap = new Ldap();
-$result = $ldap->connect_bind();
+$result = $ldap->connectBind();
 if ($result >= 0)
 {
 	$justthese=array();

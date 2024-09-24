@@ -49,7 +49,8 @@ class stockOrderController extends gsxController
                             'desc'    => 'Désignation',
                             'qty'     => 'Qté à commander',
                             'price'     => 'Prix Stock',
-                            'buttons' => ''
+                            'buttons' => '',
+                            'photo' => 'Photo'
                         );
 
                         $i = 0;
@@ -68,7 +69,8 @@ class stockOrderController extends gsxController
                                     'extra_class' => 'part_qty'
                                 )),
                                 'price'   => $part['stockPrice'].' €',
-                                'buttons' => $button_html
+                                'buttons' => $button_html,
+                                'photo' => '<img src="'.$part['imageUrl'].'" style="max-height: 100px;"/>'
                             );
                         }
 

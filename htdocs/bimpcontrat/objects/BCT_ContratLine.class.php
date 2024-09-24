@@ -1077,10 +1077,10 @@ class BCT_ContratLine extends BimpObject
                 $check_errors = $this->updateField('date_next_facture', date('Y-m-d', strtotime($new_date)));
 
                 if (!count($check_errors)) {
-                    BimpCore::addlog('Correction automatique de la date de prochaine facturation d\'un abonnement', Bimp_Log::BIMP_LOG_NOTIF, 'contrat', $this, array(
-                        'Ancienne date' => $date,
-                        'Nouvelle date' => $new_date
-                    ));
+//                    BimpCore::addlog('Correction automatique de la date de prochaine facturation d\'un abonnement', Bimp_Log::BIMP_LOG_NOTIF, 'contrat', $this, array(
+//                        'Ancienne date' => $date,
+//                        'Nouvelle date' => $new_date
+//                    ));
 
                     $date = $new_date;
                 }
@@ -3404,7 +3404,7 @@ class BCT_ContratLine extends BimpObject
                                     $row_html .= '<td>';
                                     $product = $line->getChildObject('product');
                                     if (BimpObject::objectLoaded($product)) {
-                                        $nb_decimals = (int) $product->getData('variable_qty_decimals');
+//                                        $nb_decimals = (int) $product->getData('variable_qty_decimals');
                                         $row_html .= $product->getLink() . '<br/>';
                                         $row_html .= $product->getName() . '<br/>';
                                         $row_html .= $line->displayPeriodicity(false, array('fac'));
@@ -3815,7 +3815,7 @@ class BCT_ContratLine extends BimpObject
                             $row_html .= '<td>';
                             $product = $line->getChildObject('product');
                             if (BimpObject::objectLoaded($product)) {
-                                $nb_decimals = (int) $product->getData('variable_qty_decimals');
+//                                $nb_decimals = (int) $product->getData('variable_qty_decimals');
                                 $row_html .= $product->getLink() . '<br/>';
                                 $row_html .= $product->getName() . '<br/>';
                             }

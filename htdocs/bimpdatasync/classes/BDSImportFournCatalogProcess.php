@@ -83,10 +83,10 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             $this->params_ok = false;
         }
 
-        if (!$this->local_dir) {
-            $errors[] = 'Paramètre "Dossier local" absent';
-            $this->params_ok = false;
-        }
+//        if (!$this->local_dir) {
+//            $errors[] = 'Paramètre "Dossier local" absent';
+//            $this->params_ok = false;
+//        }
 
         return parent::initOperation($id_operation, $errors);
     }

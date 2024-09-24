@@ -2062,7 +2062,7 @@ class BL_CommandeFournReception extends BimpObject
         if (!empty($not_serialized_lines)) {
             $steps['process_not_serialized_lines'] = array(
                 'label'                  => 'Traitement des produits non sérialisés',
-                'on_error'               => 'continue',
+                'on_error'               => 'stop',
                 'elements'               => $not_serialized_lines,
                 'nbElementsPerIteration' => 50
             );
@@ -2070,7 +2070,7 @@ class BL_CommandeFournReception extends BimpObject
         if (!empty($lines_serials)) {
             $steps['process_lines_serials'] = array(
                 'label'                  => 'Traitement des produits sérialisés',
-                'on_error'               => 'continue',
+                'on_error'               => 'stop',
                 'elements'               => $lines_serials,
                 'nbElementsPerIteration' => 10
             );
@@ -2078,7 +2078,7 @@ class BL_CommandeFournReception extends BimpObject
         if (!empty($lines_return_equipments)) {
             $steps['process_return_equipments'] = array(
                 'label'                  => 'Traitement des retours d\'équipements',
-                'on_error'               => 'continue',
+                'on_error'               => 'stop',
                 'elements'               => $lines_return_equipments,
                 'nbElementsPerIteration' => 10
             );

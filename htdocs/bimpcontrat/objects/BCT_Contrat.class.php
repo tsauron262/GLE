@@ -2459,4 +2459,85 @@ class BCT_Contrat extends BimpDolObject
 
         return $nOk . ' alerte(s) créées';
     }
+
+    public static function sendAlertUnpaidFacsAbo()
+    {
+        if (!(int) BimpCore::getConf('use_relances_paiements_clients', null, 'bimpcommercial')) {
+            return '';
+        }
+
+        $email = BimpCore::getConf('unpaid_factures_abonnement_notification_email', null, 'bimpcontrat');
+
+        if (!$email) {
+            return '';
+        }
+
+        $out = '';
+        $bdb = self::getBdb();
+        $date_lim = new DateTime();
+        $date_lim->sub(new DateInterval('P3M'));
+
+        $rows = $bdb->executeS(BimpTools::getSqlFullSelectQuery('facture', array('a.rowid as id_facture'), array(
+                    'fk_statut'       => 1,
+                    'type'            => array(0, 1),
+                    'paye'            => 0,
+                    'paiement_status' => array(
+                        'operator' => '!=',
+                        'value'    => 2
+                    ),
+                    'alert_abonnement_unpaid_send' => 0,
+                    'has_abo'         => array(
+                        'custom' => '(SELECT COUNT(fl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_facture_line fl WHERE fl.id_obj = a.rowid AND fl.linked_object_name = \'contrat_line\') > 0'
+                    ),
+                    'relance_date'    => array(
+                        'custom' => '(SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_relance_clients_line rl WHERE rl.relance_idx = 1 AND rl.date_send <= \'' . $date_lim->format('Y-m-d') . '\' AND rl.factures LIKE CONCAT(\'%[\', a.rowid, \']%\')) > 0'
+                    )
+                )), 'array');
+
+        if (is_array($rows)) {
+            if (empty($rows)) {
+                $out .= 'Aucune alerte à envoyer';
+            } else {
+                $out .= count($rows) . ' alerte' . (count($rows) > 1 ? 's' : '') . ' à envoyer.<br/>';
+                foreach ($rows as $r) {
+                    $out .= '<br/>';
+                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_facture']);
+                    if (BimpObject::objectLoaded($fac)) {
+                        $out .= $fac->getLink();
+                        
+                        $client = $fac->getChildObject('client');
+                        $subject = 'Facture ' . $fac->getRef() . ' impayée non régularisée';
+                        $msg = 'Bonjour,<br/><br/>';
+                        $msg .= 'Le client ' . $client->getLink() . ' n\'a pas régularisé la facture ' . $fac->getLink() . '<br/><br/>';
+                        $msg .= 'Relance(s) effectuée(s) :';
+
+                        $relances = $bdb->getRows('bimp_relance_clients_line', 'factures LIKE \'%[' . $fac->id . ']%\' AND status IN(10,11)', null, 'array', array('date_send'), 'date_send', 'asc');
+
+                        if (!empty($relances)) {
+                            foreach ($relances as $relance) {
+                                $msg .= '<br/> - Le ' . date('d / m / Y', strtotime($relance['date_send']));
+                            }
+                        } else {
+                            $msg .= 'Aucune';
+                            break;
+                        }
+                        $msg .= '<br/><br/>Par conséquent, vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.';
+
+                        if (mailSyn2($subject, $email, '', $msg)) {
+                            $out .= ' [OK]';
+                            $fac->updateField('alert_abonnement_unpaid_send', 1);
+                        } else {
+                            $out .= ' [ECHEC]';
+                        }
+                    } else {
+                        $out .= '<span class="danger">Fac #' . (int) $r['id_facture'] . ' non trouvée</span>';
+                    }
+                }
+            }
+        } else {
+            $out .= 'Erreur SQL - ' . $bdb->err();
+        }
+
+        return $out;
+    }
 }

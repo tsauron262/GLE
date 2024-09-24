@@ -804,11 +804,19 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         $total_ht_without_remises = 0;
         $total_ttc_without_remises = 0;
 
-        $lines_remise_global_amount_ht = 0;
-        $lines_remise_global_amount_ttc = 0;
-
         $sub_total_ht = 0;
         $sub_total_ttc = 0;
+
+        $nb_max_decimales = 0;
+        $nb_max_decimales_total = 0;
+
+        if (isset($this->object->array_options['options_pdf_nb_decimal']) && $this->object->array_options['options_pdf_nb_decimal'] > 0) {
+            $nb_max_decimales = $this->object->array_options['options_pdf_nb_decimal'];
+            $nb_max_decimales_total = $this->object->array_options['options_pdf_nb_decimal'];
+        } else {
+            $nb_max_decimales = (int) BimpCore::getConf('pdf_pu_nb_decimales', null, 'bimpcommercial');
+            $nb_max_decimales_total = (int) BimpCore::getConf('pdf_total_nb_decimales', null, 'bimpcommercial');
+        }
 
         $montantTotLineHide = 0;
         if (is_array($this->object->lines) && !empty($this->object->lines)) {
@@ -896,7 +904,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                         $fl = true;
                         $desc .= '<span style="font-size: 9px; font-style: italic">';
 
-                        if (count($serials) > (int) $this->max_line_serials/* && (int) $user->id === 1 */) {
+                        if (count($serials) > (int) $this->max_line_serials) {
                             $desc .= 'voir annexe';
                             if (!isset($this->annexe_listings['serials'])) {
                                 $this->annexe_listings['serials'] = array(
@@ -985,24 +993,12 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                         $pu_ht = $line->subprice;
                     }
 
-                    if ($this->object->array_options['options_pdf_nb_decimal'] > 0) {
-                        $modeDecimal = $this->object->array_options['options_pdf_nb_decimal'];
-                        $modeDecimalTotal = $this->object->array_options['options_pdf_nb_decimal'];
-                    } else {
-                        $modeDecimal = (int) BimpCore::getConf('pdf_pu_nb_decimales', null, 'bimpcommercial');
-                        if (!$modeDecimal) {
-                            $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
-                            $modeDecimal = ($nbDecimalPu > 3 ? 'full' : 2);
-                        }
-                        $modeDecimalTotal = (int) BimpCore::getConf('pdf_total_nb_decimales', null, 'bimpcommercial');
-                    }
-
-                    $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, $modeDecimal);
+                    $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales);
 
                     if (BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('abo_fac_periodicity')) {
                         $this->object->lines[$i]->qty = round($this->object->lines[$i]->qty, 2);
                     }
-                    
+
                     $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
                     if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
@@ -1030,13 +1026,13 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     $sub_total_ht += $row_total_ht;
                     $sub_total_ttc += $row_total_ttc;
 
-                    $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '', 0, 0, 1, $modeDecimalTotal);
+                    $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales_total);
 
                     if (!$this->hideTtc) {
-                        $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '', 0, 0, 1, $modeDecimalTotal);
+                        $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales_total);
                     }
                     if (!$this->hideReduc) {
-                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 1, $modeDecimal);
+                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales);
                     }
 
                     $total_ht_without_remises += $line->subprice * (float) $line->qty;
@@ -1045,19 +1041,19 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     if (isset($bimpLines[$line->id])) {
                         if ($bimpLine->getData("force_qty_1") && (float) $row['qte'] != 0) {
                             if ($row['qte'] > 0) {
-                                $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, $modeDecimal);
+                                $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
                                 if (isset($row['pu_remise'])) {
-                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * $row['qte'], "", 0, 0, 1, $modeDecimal);
+                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * $row['qte'], "", 0, 0, 1, 'full', false, ',', true, $nb_max_decimales);
                                 }
                                 $row['qte'] = 1;
                             } elseif ($row['qte'] < 0) {
-                                $row['pu_ht'] = BimpTools::displayMoneyValue((float) str_replace(",", ".", $row['pu_ht']) * ((float) $row['qte'] * -1), '', 0, 0, 1, $modeDecimal);
+                                $row['pu_ht'] = BimpTools::displayMoneyValue((float) str_replace(",", ".", $row['pu_ht']) * ((float) $row['qte'] * -1), '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * ((float) $row['qte'] * -1);
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ((float) $row['qte'] * -1);
                                 if (isset($row['pu_remise'])) {
-                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * ((float) $row['qte'] * -1), "", 0, 0, 1, $modeDecimal);
+                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * ((float) $row['qte'] * -1), "", 0, 0, 1, 'full', false, ',', true, $nb_max_decimales);
                                 }
                                 $row['qte'] = -1;
                             }
@@ -1135,15 +1131,16 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                         'desc'     => $remise_label,
                         'qte'      => '',
                         'tva'      => '',
-                        'pu_ht'    => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, ''),
-                        'total_ht' => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, '')
+                        'pu_ht'    => '',
+                        'total_ht' => ''
                     );
-                    if (!$this->hideTtc)
-                        $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1);
-                    if (isset($remises_globalesHt[$id_rg]))
-                        $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '', 0, 0, 1);
-                    //                if (!$this->hideReduc)
-                    //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
+                    
+                    if (!$this->hideTtc) {
+                        $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales_total);
+                    }
+                    if (isset($remises_globalesHt[$id_rg])) {
+                        $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales_total);
+                    }
 
                     if ($this->hide_pu) {
                         unset($row['pu_ht']);

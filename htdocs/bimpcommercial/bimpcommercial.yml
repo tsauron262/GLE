@@ -132,12 +132,11 @@ params:
         type: bool
         def: 0
     pdf_pu_nb_decimales: 
-        label: Nombre de décimales sur les PDF pour les PU
+        label: Nombre max de décimales sur les PDF pour les PU
         cat: pdfs
-        def: 0
-        info: Laisser 0 pour un affichage automatique
+        def: 2
     pdf_total_nb_decimales: 
-        label: Nombre de décimales sur les PDF pour les totaux
+        label: Nombre max de décimales sur les PDF pour les totaux
         cat: pdfs
         def: 2
     new_bank_account_date: 

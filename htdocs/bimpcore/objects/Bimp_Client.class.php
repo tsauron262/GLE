@@ -3567,7 +3567,7 @@ class Bimp_Client extends Bimp_Societe
         $buyers = $api->getMyBuyer2($filters, $errors);
 
         foreach ($buyers['data'] as $b) {
-            $id_client = (int) self::getBdb()->getValue('societe', 'rowid', 'id_atradius = ' . $b['buyerId']);
+            $id_client = (int) self::getBdb()->getValue('societe_atradius', 'id_soc', 'id_atradius = ' . $b['buyerId']);
             $c = BimpObject::getInstance('bimpcore', 'Bimp_Client', $id_client);
 
             if ($c->isLoaded()) {

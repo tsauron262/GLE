@@ -91,4 +91,6 @@ phpstan_custom.neon
 /.php-cs-fixer.cache
 /.php_cs.cache
 /.cache
-/htdocs/includes/
+
+
+/htdocs/bimpcore/views/.sass-cache/

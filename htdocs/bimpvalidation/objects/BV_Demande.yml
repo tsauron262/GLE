@@ -2,6 +2,9 @@ table: bv_demande
 icon: far_check-circle
 common_fields: 1
 
+
+entity_name: bimpvalidation
+
 labels: 
     name: demande de validation
     name_plur: demandes de validations

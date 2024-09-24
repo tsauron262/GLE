@@ -1,5 +1,7 @@
 table: bimpclient_suivi_recouv
 
+entity_name: recouv
+
 common_fields: 1
 icon: fas_sticky-note
 
@@ -56,6 +58,17 @@ filters_panel:
             id_societe:
             user_create: 
             type:
+                
+forms:
+    default:
+        rows: 
+            - field: id_societe
+              edit: 0
+            - field: mode
+            - field: sens 
+            - field: type
+            - field: content
+        
                 
 lists: 
     globale: 

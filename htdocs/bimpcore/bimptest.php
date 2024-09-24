@@ -27,16 +27,8 @@ if (!$user->admin) {
     exit;
 }
 
-foreach (array() as $old => $new) {
-    echo '<br/>Up : ' . $old . ' => ' . $new . ' : ';
-    if ($bdb->update('be_equipment', array(
-                'serial' => $new
-                    ), 'serial = \'' . $old . '\'') <= 0) {
-        echo 'FAIL - ' . $bdb->err();
-    } else {
-        echo 'OK';
-    }
-}
+BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
+echo BCT_Contrat::sendAlertUnpaidFacsAbo();
 
 echo '<br/>FIN';
 echo '</body></html>';

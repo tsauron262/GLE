@@ -1843,6 +1843,10 @@ class BimpObject extends BimpCache
                 $data['entity'] = $this->getData('entity');
             else
                 $data['entity'] = $conf->entity;
+            $this->set('entity', $data['entity']);
+            if($this->isDolObject())
+                $this->dol_object->entity = $data['entity'];
+                
         }
 
         return $data;

@@ -46,8 +46,8 @@
   could be provided by URL parameters. For such cases (societe/ajax/company.php), use of Universal Filter Syntax become mandatory.
 
 
-* Deprecated method set_billed() on shipment and reception class has been removed. Use setBilled() instead.
-* Tables llx_prelevement_facture and llx_prelevement_facture_demande have been renamed into llx_prelevement and llx_prelevement_demande.
+
+
 * Renamed MAIN_LIST_ALLOW_NOTES into MAIN_LIST_HIDE_NOTES and renamed MAIN_LIST_ALLOW_PRIVATE_NOTES into MAIN_LIST_HIDE_PRIVATE_NOTES
 * Making a global search is sending the parameter using always the name search_all (instead of sometimes sall and search_all)
 * The property $url_last_version must be public if defined into module descriptor files;
@@ -61,4 +61,6 @@
 * The signature of method getNomUrl() of class ProductFournisseur has been modified to match the signature of method Product->getNomUrl(). [NO CHANGES]
 * All functions fetch_all() have been set to deprecated for naming consistency, use fetchAll() instead. [NO CHANGES]
 * Code standardization: '$user->rights->propale' is now '$user->rights->propal' everywhere.
+* Deprecated method set_billed() on shipment and reception class has been removed. Use setBilled() instead. [NO CHANGES]
+* Tables llx_prelevement_facture and llx_prelevement_facture_demande have been renamed into llx_prelevement and llx_prelevement_demande.
 

@@ -330,13 +330,13 @@ if (!empty($_COOKIE[$sessiontimeout])) {
 
 // Init the 5 global objects, this include will make the 'new Xxx()' and set properties for: $conf, $db, $langs, $user, $mysoc
 require_once 'master.inc.php';
-/* Mod drsi */
+/* moddrsi (20.2) */
 if(!defined('NOREQUIREDB')){
     include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
     $synopsisHook = new synopsisHook();
     global $synopsisHook; //Pour vision global de l'objet
 }
-/* FMod Drsi */
+/* fmoddrsi */
 
 // If software has been locked. Only login $conf->global->MAIN_ONLY_LOGIN_ALLOWED is allowed.
 if (!empty($conf->global->MAIN_ONLY_LOGIN_ALLOWED)) {
@@ -1291,13 +1291,7 @@ if (empty($conf->browser->firefox)) {
 
 $heightforframes = 50;
 
-/*moddrsi*/
-// Initialisation BimpCore
-$hookmanager->initHooks(array('bimpcoreInit'));
-$hookmanager->executeHooks('bimpcoreInit', array());
-/*fmoddrsi*/
-
-/*moddrsi*/
+/*moddrsi (20.2)*/
 // Initialisation BimpCore
 $hookmanager->initHooks(array('bimpcoreInit'));
 $hookmanager->executeHooks('bimpcoreInit', array());
@@ -1832,7 +1826,7 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
 			}
                         
                         
-                        /*moddrsi*/
+                        /*moddrsi (20.2)*/
                         global $bimp_layout_js_vars; 
                         if ($bimp_layout_js_vars) {
                             print $bimp_layout_js_vars;
@@ -1935,11 +1929,11 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 		$menumanager->showmenu('top', array('searchform'=>$searchform)); // This contains a \n
 		print "</div>\n";
 
-		// Define link to login card
-                // moddrsi
+                // Define link to login card
+                /* moddrsi (20.2)*/
 //		$appli = constant('DOL_APPLICATION_TITLE');
-//		if (!empty($conf->global->MAIN_APPLICATION_TITLE)) {
-//			$appli = $conf->global->MAIN_APPLICATION_TITLE;
+//		if (getDolGlobalString('MAIN_APPLICATION_TITLE')) {
+//			$appli = getDolGlobalString('MAIN_APPLICATION_TITLE');
 //			if (preg_match('/\d\.\d/', $appli)) {
 //				if (!preg_match('/'.preg_quote(DOL_VERSION).'/', $appli)) {
 //					$appli .= " (".DOL_VERSION.")"; // If new title contains a version that is different than core
@@ -1950,6 +1944,8 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 //		} else {
 //			$appli .= " ".DOL_VERSION;
 //		}
+                /* fmoddrsi */
+
 
 		if (getDolGlobalInt('MAIN_FEATURES_LEVEL')) {
 			$appli .= "<br>".$langs->trans("LevelOfFeature").': '.getDolGlobalInt('MAIN_FEATURES_LEVEL');
@@ -2074,7 +2070,7 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 			$toprightmenu .= $form->textwithtooltip('', $appli, 2, 1, $text, 'login_block_elem', 2);
 		}
 
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
 //                if (class_exists('BimpCore')) {
 //                    $toprightmenu .= BimpCore::renderUserTopAccountHtml();
 //                } else {
@@ -2841,7 +2837,7 @@ function left_menu($menu_array_before, $helppagename = '', $notused = '', $menu_
 			$form = new Form($db);
 		}
 		$selected = -1;
-                /*mod drsi*/
+                /*moddrsi (20.2)*/
                 $searchform.=$form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
                 /*
 		if (empty($conf->global->MAIN_USE_TOP_MENU_SEARCH_DROPDOWN)) {
@@ -2884,7 +2880,7 @@ function left_menu($menu_array_before, $helppagename = '', $notused = '', $menu_
 				$searchform .= '</div>';
 			}
 		}
-                 * Fmoddrsi
+                 * fmoddrsi
                  */
 
 		// Left column
@@ -3436,7 +3432,7 @@ if (!function_exists("llxFooter")) {
 		}
                 
                 
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
                 if (class_exists('BimpLayout') && BimpLayout::hasInstance()) {
                     BimpLayout::getInstance()->end();
                 }

@@ -351,7 +351,7 @@ Abstract class BimpModelPDF
 
         if (BimpObject::objectLoaded($entrepot)) {
             $html .= '<span style="font-size: 10px; font-weight: bold;">';
-            $html .= $entrepot->libelle . ' - ' . $entrepot->lieu;
+            $html .= $entrepot->label . ' - ' . $entrepot->lieu;
             $html .= '</span><br/>';
 
             $html .= '<span style="font-size: 9px;">';

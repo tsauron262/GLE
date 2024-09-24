@@ -74,7 +74,7 @@ if ($action == 'add' && $user->rights->stock->creer)
 {
 	$object->ref         = GETPOST("ref");
 	$object->fk_parent   = GETPOST("fk_parent");
-	$object->libelle     = GETPOST("libelle");
+	$object->label     = GETPOST("label");
 	$object->description = GETPOST("desc");
 	$object->statut      = GETPOST("statut");
 	$object->lieu        = GETPOST("lieu");
@@ -83,7 +83,7 @@ if ($action == 'add' && $user->rights->stock->creer)
 	$object->town        = GETPOST("town");
 	$object->country_id  = GETPOST("country_id");
 
-	if (! empty($object->libelle))
+	if (! empty($object->label))
 	{
 		$id = $object->create($user);
 		if ($id > 0)
@@ -137,7 +137,7 @@ if ($action == 'update' && $cancel <> $langs->trans("Cancel"))
 {
 	if ($object->fetch($id))
 	{
-		$object->libelle     = GETPOST("libelle");
+		$object->label     = GETPOST("label");
 		$object->fk_parent   = GETPOST("fk_parent");
 		$object->description = GETPOST("desc");
 		$object->statut      = GETPOST("statut");
@@ -190,7 +190,7 @@ if ($action == 'create')
 {
 	print load_fiche_titre($langs->trans("NewWarehouse"));
 
-	dol_set_focus('input[name="libelle"]');
+	dol_set_focus('input[name="label"]');
 
 	print '<form action="'.$_SERVER["PHP_SELF"].'" method="post">'."\n";
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -202,7 +202,7 @@ if ($action == 'create')
 	print '<table class="border" width="100%">';
 
 	// Ref
-	print '<tr><td class="titlefieldcreate fieldrequired">'.$langs->trans("Ref").'</td><td><input name="libelle" size="20" value=""></td></tr>';
+	print '<tr><td class="titlefieldcreate fieldrequired">'.$langs->trans("Ref").'</td><td><input name="label" size="20" value=""></td></tr>';
 
 	print '<tr><td>'.$langs->trans("LocationSummary").'</td><td><input name="lieu" size="40" value="'.(!empty($object->lieu)?$object->lieu:'').'"></td></tr>';
 
@@ -291,7 +291,7 @@ else
 			// Confirm delete third party
 			if ($action == 'delete')
 			{
-				$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$object->id,$langs->trans("DeleteAWarehouse"),$langs->trans("ConfirmDeleteWarehouse",$object->libelle),"confirm_delete",'',0,2);
+				$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$object->id,$langs->trans("DeleteAWarehouse"),$langs->trans("ConfirmDeleteWarehouse",$object->label),"confirm_delete",'',0,2);
 			}
 
 			if (! $formconfirm) {
@@ -314,7 +314,7 @@ else
             $shownav = 1;
             if ($user->societe_id && ! in_array('stock', explode(',',$conf->global->MAIN_MODULES_FOR_EXTERNAL))) $shownav=0;
 
-        	dol_banner_tab($object, 'id', $linkback, $shownav, 'rowid', 'libelle', $morehtmlref);
+        	dol_banner_tab($object, 'id', $linkback, $shownav, 'rowid', 'label', $morehtmlref);
 
         	print '<div class="fichecenter">';
         	print '<div class="fichehalfleft">';
@@ -727,7 +727,7 @@ else
 			print '<table class="border" width="100%">';
 
 			// Ref
-			print '<tr><td class="titlefieldcreate fieldrequired">'.$langs->trans("Ref").'</td><td><input name="libelle" size="20" value="'.$object->libelle.'"></td></tr>';
+			print '<tr><td class="titlefieldcreate fieldrequired">'.$langs->trans("Ref").'</td><td><input name="label" size="20" value="'.$object->label.'"></td></tr>';
 
 			print '<tr><td>'.$langs->trans("LocationSummary").'</td><td><input name="lieu" size="40" value="'.$object->lieu.'"></td></tr>';
 

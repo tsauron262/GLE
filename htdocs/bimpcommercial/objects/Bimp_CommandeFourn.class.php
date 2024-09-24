@@ -799,7 +799,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 $label = $reception->getData('num_reception') . ' - ' . $reception->getData('ref');
                 $entrepot = $reception->getChildObject('entrepot');
                 if (BimpObject::objectLoaded($entrepot)) {
-                    $label .= ' (' . $entrepot->libelle . ')';
+                    $label .= ' (' . $entrepot->label . ')';
                 } else {
                     $label .= ' (Entrepôt invalide)';
                 }

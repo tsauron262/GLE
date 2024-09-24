@@ -34,9 +34,9 @@
 
 17.0 => 18.0
 
-* The deprecated method "escapeunderscore()" of database handlers has been removed. You must use "escapeforlike()" instead.
 * Revert default type of hooks. Default is now 'addreplace' hooks (and exception become 'output' hooks, that become deprecated).
-* Deprecated property libelle removed from entrepot class.
+
+
 * The type 'text' in ->fields property does not accept html content anymore. Use the type 'html' for that.
 * The method htmlPrintOnlinePaymentFooter() used for public footer pages has been renamed into htmlPrintOnlineFooter() and moved into company.lib.php
 
@@ -44,13 +44,8 @@
 
 * Core has introduced a Universal Filter Syntax for search criteria. Example: ((((field1:=:value1) OR (field2:in:1,2,3)) AND ...). In rare case, some filters
   could be provided by URL parameters. For such cases (societe/ajax/company.php), use of Universal Filter Syntax become mandatory.
-
-
-
-
-* Renamed MAIN_LIST_ALLOW_NOTES into MAIN_LIST_HIDE_NOTES and renamed MAIN_LIST_ALLOW_PRIVATE_NOTES into MAIN_LIST_HIDE_PRIVATE_NOTES
 * Making a global search is sending the parameter using always the name search_all (instead of sometimes sall and search_all)
-* The property $url_last_version must be public if defined into module descriptor files;
+
 
 
 ----- FAIT -----
@@ -63,4 +58,8 @@
 * Code standardization: '$user->rights->propale' is now '$user->rights->propal' everywhere.
 * Deprecated method set_billed() on shipment and reception class has been removed. Use setBilled() instead. [NO CHANGES]
 * Tables llx_prelevement_facture and llx_prelevement_facture_demande have been renamed into llx_prelevement and llx_prelevement_demande.
+* Renamed MAIN_LIST_ALLOW_NOTES into MAIN_LIST_HIDE_NOTES and renamed MAIN_LIST_ALLOW_PRIVATE_NOTES into MAIN_LIST_HIDE_PRIVATE_NOTES. [NO CHANGES]
+* The property $url_last_version must be public if defined into module descriptor files [NO CHANGES]
+* The deprecated method "escapeunderscore()" of database handlers has been removed. You must use "escapeforlike()" instead. [NO CHANGES]
+* Deprecated property libelle removed from entrepot class.
 

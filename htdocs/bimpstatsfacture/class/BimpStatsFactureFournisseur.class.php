@@ -261,7 +261,7 @@ class BimpStatsFactureFournisseur {
             if (isset($h['fk_entrepot']) && $h['fk_entrepot'] != '') {
                 $entrepot = new Entrepot($this->db);
                 $entrepot->id = $h['fk_entrepot'];
-                $entrepot->libelle = $allEntrepots[$h['fk_entrepot']];
+                $entrepot->label = $allEntrepots[$h['fk_entrepot']];
                 if ($this->mode == 'd')
                     $hash[$ind]['centre_url'] = $entrepot->getNomUrl(1);
                 $hash[$ind]['centre'] = $allEntrepots[$h['fk_entrepot']];

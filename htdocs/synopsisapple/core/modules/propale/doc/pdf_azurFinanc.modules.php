@@ -318,7 +318,7 @@ class pdf_azurFinanc extends ModelePDFPropales
                                 
                                 
                                 
-                                /*mod drsi*/
+                                /*moddrsi (20.2)*/
                                 global $accTht, $accTtva;
                                 $accTht = $accTtva = 0;
                                 /*fmoddrsi*/
@@ -328,7 +328,7 @@ class pdf_azurFinanc extends ModelePDFPropales
 				{
                                     
                                     
-                                        /*mod drsi*/
+                                        /*moddrsi (20.2)*/
                                         if($object->lines[$i]->desc == "Acompte"){
                                             $accTht = $object->lines[$i]->total_ht;
                                             $accTtva = $object->lines[$i]->total_tva;
@@ -694,7 +694,7 @@ class pdf_azurFinanc extends ModelePDFPropales
 			$lib_condition_paiement=str_replace('\n',"\n",$lib_condition_paiement);
                         
                         
-                        /*mod drsi*/
+                        /*moddrsi (20.2)*/
                         global $db;
                         require_once (DOL_DOCUMENT_ROOT . "/synopsisfinanc/class/synopsisfinancement.class.php");
                         $valfinance = new Synopsisfinancement($db);
@@ -712,7 +712,7 @@ class pdf_azurFinanc extends ModelePDFPropales
                         }else{
                             $lib_condition_paiement="Vous n'avez pas configurer le financement.";
                         }
-                        /*fmod drsi*/
+                        /*fmoddrsi*/
 			$pdf->MultiCell(150, 4, $lib_condition_paiement,0,'L');
 
 			$posy=$pdf->GetY()+3;
@@ -850,11 +850,11 @@ class pdf_azurFinanc extends ModelePDFPropales
 		// Total HT
 		$pdf->SetFillColor(255,255,255);
 		$pdf->SetXY($col1x, $tab2_top + 0);
-                /*mod drsi*/global $accTht, $accTtva;/*fmod drsi*/
+                /*moddrsi (20.2)*/global $accTht, $accTtva;/*fmoddrsi*/
 		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalHT"), 0, 'L', 1);
 
 		$pdf->SetXY($col2x, $tab2_top + 0);
-		$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ht + (! empty($object->remise)?$object->remise:0)/*mod drsi*/-$accTht/*fmod drsi*/, 0, $outputlangs), 0, 'R', 1);
+		$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ht + (! empty($object->remise)?$object->remise:0)/*moddrsi (20.2)*/-$accTht/*fmoddrsi*/, 0, $outputlangs), 0, 'R', 1);
 
 		// Show VAT by rates and total
 		$pdf->SetFillColor(248,248,248);
@@ -1035,9 +1035,9 @@ class pdf_azurFinanc extends ModelePDFPropales
 				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
 
 				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc/*mod drsi*/-$accTht -$accTtva/*fmod drsi*/, 0, $outputlangs), $useborder, 'R', 1);
+				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc/*moddrsi (20.2)*/-$accTht -$accTtva/*fmoddrsi*/, 0, $outputlangs), $useborder, 'R', 1);
                                 
-                                 /*mod drsi*/
+                                 /*moddrsi (20.2)*/
                                 if(-$accTht > 0){
                                         $pdf->SetFillColor(248,248,248);
                                         $index++;
@@ -1046,7 +1046,7 @@ class pdf_azurFinanc extends ModelePDFPropales
                                         $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
                                         $pdf->MultiCell($largcol2, $tab2_hl, price(-($accTht+$accTtva), 0, $outputlangs), 0, 'R', 0);
                                 }
-                                /*fmod drsi*/
+                                /*fmoddrsi*/
 			}
 		}
 

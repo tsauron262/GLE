@@ -3866,7 +3866,7 @@ class ContratLigne extends CommonObjectLine
 	}
         
         
-        /*mod drsi*/
+        /*moddrsi*/
         
 	public function delete()
 	{
@@ -3874,7 +3874,7 @@ class ContratLigne extends CommonObjectLine
 
 		$error = 0;
 
-		if ($this->statut >= 0) {
+		if ($this->status >= 0) {
 			// Call trigger
 			$result = $this->call_trigger('LINECONTRACT_DELETE', $user);
 			if ($result < 0) {

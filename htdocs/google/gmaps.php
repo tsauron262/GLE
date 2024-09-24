@@ -147,7 +147,7 @@ if (empty($conf->global->SOCIETE_DISABLE_STATE)) print '<tr><td>'.$langs->trans(
 print '</table>';
 
 
-/* mod drsi*/
+/* moddrsi (20.2)*/
 $address = virerCedex($address);
 function virerCedex($str){
     $str = preg_replace("/BP( )*[0-9]{1,10}/i", " ", $str);
@@ -160,7 +160,8 @@ function virerCedex($str){
     
     return $str;
 }
-/*fmod drsi*/
+/*fmoddrsi*/
+
 
 
 // Show maps

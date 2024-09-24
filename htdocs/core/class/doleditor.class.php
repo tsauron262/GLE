@@ -47,7 +47,7 @@ class DolEditor
 	public $posx;
 	public $posy;
 
-        /*moddrsi*/
+        /*moddrsi (20.2)*/
         var $extra_class = '';
         /*fmoddrsi*/
         
@@ -74,7 +74,7 @@ class DolEditor
 	public function __construct($htmlname, $content, $width = '', $height = 200, $toolbarname = 'Basic', $toolbarlocation = 'In', $toolbarstartexpanded = false, $uselocalbrowser = 1, $okforextendededitor = true, $rows = 0, $cols = 0, $readonly = 0, $poscursor = array())
 	{
 		global $conf, $langs;
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
                 $toolbarname = 'Full';
                 /*fmoddrsi*/
 		dol_syslog(get_class($this)."::DolEditor htmlname=".$htmlname." width=".$width." height=".$height." toolbarname=".$toolbarname);
@@ -153,7 +153,7 @@ class DolEditor
 			//$out.= '<textarea id="'.$this->htmlname.'" name="'.$this->htmlname.'" '.($this->readonly?' disabled':'').' rows="'.$this->rows.'"'.(preg_match('/%/',$this->cols)?' style="margin-top: 5px; width: '.$this->cols.'"':' cols="'.$this->cols.'"').' class="flat">';
 			// TODO We do not put the 'disabled' tag because on a read form, it change style with grey.
 			//print $this->content;
-			$out .= '<textarea id="'.$this->htmlname.'" name="'.$this->htmlname.'" rows="'.$this->rows.'"'.(preg_match('/%/', $this->cols) ? ' style="margin-top: 5px; width: '.$this->cols.'"' : ' cols="'.$this->cols.'"').' '.($moreparam ? $moreparam : '').' class="flat './*moddrsi*/($this->extra_class ? $this->extra_class . (strpos($this->extra_class, 'allow_hashtags ') !== false ? 'html_editor_hashtags ' : ''): '')/*fmoddrsi*/.$morecss.'">';
+			$out .= '<textarea id="'.$this->htmlname.'" name="'.$this->htmlname.'" rows="'.$this->rows.'"'.(preg_match('/%/', $this->cols) ? ' style="margin-top: 5px; width: '.$this->cols.'"' : ' cols="'.$this->cols.'"').' '.($moreparam ? $moreparam : '').' class="flat './*moddrsi (20.2)*/($this->extra_class ? $this->extra_class . (strpos($this->extra_class, 'allow_hashtags ') !== false ? 'html_editor_hashtags ' : ''): '')/*fmoddrsi*/.$morecss.'">';
 			$out .= htmlspecialchars($this->content);
 			$out .= '</textarea>';
 
@@ -233,7 +233,7 @@ class DolEditor
 					// To use filemanager with old fckeditor (GPL)
 					$out .= '    filebrowserBrowseUrl : ckeditorFilebrowserBrowseUrl,';
 					$out .= '    filebrowserImageBrowseUrl : ckeditorFilebrowserImageBrowseUrl,';
-                                        /*moddrsi*/
+                                        /*moddrsi (20.2)*/
 					$out.= '    filebrowserUploadUrl : \''.DOL_URL_ROOT.'/bimpcore/ajax/upload.php?type=media\',';
 					$out.= '    filebrowserImageUploadUrl : \''.DOL_URL_ROOT.'/bimpcore/ajax/upload.php?type=mediaImg\',';
                                         /*fmoddrsi*/

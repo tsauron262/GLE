@@ -136,7 +136,7 @@ if ($id > 0 || !empty($ref)) {
 
 
 
-/*moddrsi   pour utilisé la mise en stock que si pas de commande  */
+/*moddrsi (20.2) pour utilisé la mise en stock que si pas de commande */
 if($object->id > 0){
     $conf->global->STOCK_CALCULATE_ON_BILL = true;
     $object->fetchObjectLinked();

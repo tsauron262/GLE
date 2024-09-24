@@ -475,6 +475,9 @@ class Commande extends CommonOrder
 
 		// Define new ref
 		if (!$error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
+                        /*moddrsi (20.2)*/ // => /!\ A checker
+                        BimpTools::lockNum("numCommande");
+                        /*fmoddrsi*/
 			$num = $this->getNextNumRef($soc);
 		} else {
 			$num = $this->ref;

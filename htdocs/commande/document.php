@@ -184,7 +184,7 @@ if ($id > 0 || !empty($ref)) {
 		$param = '&id='.$object->id.'&entity='.(empty($object->entity) ? $conf->entity : $object->entity);
 		include DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_post_headers.tpl.php';
                 
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
                 // A intégrer ? 
 //                $oldObj = $object;
 //                $object->fetchObjectLinked();

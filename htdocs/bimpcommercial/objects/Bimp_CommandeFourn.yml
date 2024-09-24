@@ -125,6 +125,7 @@ fields:
     date_valid: 
         label: Validée le
         type: datetime
+        dol_prop: date_validation
     date_approve: 
         label: 1ère approbation le
         type: datetime

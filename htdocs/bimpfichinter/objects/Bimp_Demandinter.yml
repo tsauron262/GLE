@@ -139,6 +139,7 @@ fields:
     date_valid:
         label: Date de validation
         type: date
+        dol_prop: date_validation
         
     fk_user_author:
         label: Créateur

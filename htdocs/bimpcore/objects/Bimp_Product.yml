@@ -742,6 +742,11 @@ forms:
             - field: 2hotline
             - field: duree
             - field: duree_i
+            - object: files
+              multiple: 1
+            - object: fourn_prices
+              multiple: 1
+              form_name: create_prod
         
     card:
         extends: default

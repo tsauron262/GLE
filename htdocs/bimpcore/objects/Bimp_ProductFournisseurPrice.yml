@@ -120,6 +120,10 @@ forms:
               display_if: 
                   field_name: is_cur_pa
                   show_values: 1
+    create_prod:
+        extends: default
+        rows:
+            0: unset
               
 fields_table: 
     default: 

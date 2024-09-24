@@ -23,8 +23,8 @@ ARCH : DELETE FROM llx_blockedlog WHERE date_creation >= '2024-01-01';
 
 
 
-PROD : DELETE FROM llx_actioncomm WHERE datec < '2024-01-01';
-ARCH : DELETE FROM llx_actioncomm WHERE datec >= '2024-01-01';
+PROD : DELETE FROM llx_actioncomm WHERE datec < '2024-01-01' AND datep < '2024-01-01';
+ARCH : DELETE FROM llx_actioncomm WHERE datec >= '2024-01-01'OR dateP >= '2024-01-01';
 
 
 PROD : DELETE FROM llx_synopsiscaldav_event WHERE fk_object NOT IN (SELECT id FROM llx_actioncomm);

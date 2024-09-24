@@ -139,6 +139,7 @@ fields:
     date_livraison: 
         label: Date prévue de livraison
         type: date
+        dol_prop: delivery_date
     fk_user_approve: 
         label: Approuvée par
         dol_prop: user_approve_id

@@ -3379,7 +3379,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         } else {
             $date = '';
         }
-        if ($date !== $this->dol_object->date_livraison) {
+        if ($date !== $this->dol_object->delivery_date) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();
 

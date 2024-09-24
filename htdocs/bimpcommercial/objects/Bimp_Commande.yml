@@ -150,6 +150,7 @@ fields:
     date_livraison: 
         label: Date de livraison souhaitée
         type: date
+        dol_prop: delivery_date
         
     total_ttc: 
         label: Total TTC

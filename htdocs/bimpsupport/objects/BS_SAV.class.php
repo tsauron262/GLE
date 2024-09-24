@@ -6420,7 +6420,7 @@ ORDER BY a.val_max DESC");
                                     $facture->mode_reglement_id = $mode_reglement;
                                     $facture->availability_id = $propal->dol_object->availability_id;
                                     $facture->demand_reason_id = $propal->dol_object->demand_reason_id;
-                                    $facture->date_livraison = $propal->dol_object->date_livraison;
+                                    $facture->delivery_date = $propal->dol_object->delivery_date;
                                     $facture->fk_delivery_address = $propal->dol_object->fk_delivery_address;
                                     $facture->contact_id = $id_contact_fac;
                                     $facture->ref_client = $propal->dol_object->ref_client;

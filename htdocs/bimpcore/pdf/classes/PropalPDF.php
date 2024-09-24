@@ -148,9 +148,9 @@ class PropalPDF extends BimpCommDocumentPDF
         $html .= '<table style="width: 100%" cellpadding="5">';
 
         // Date de livraison
-        if (!empty($this->object->date_livraison)) {
+        if (!empty($this->object->delivery_date)) {
             $html .= '<tr><td>';
-            $html .= dol_print_date($this->object->date_livraison, "daytext", false, $this->langs, true) . '<br/>';
+            $html .= dol_print_date($this->object->delivery_date, "daytext", false, $this->langs, true) . '<br/>';
             $html .= '</td></tr>';
         } elseif ($this->object->availability_code || (isset($this->object->availability) && $this->object->availability)) {
             $html .= '<tr><td>';

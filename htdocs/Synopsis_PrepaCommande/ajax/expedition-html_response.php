@@ -161,7 +161,7 @@ if ($_REQUEST["id"] > 0) {
             print '<button onClick="validateDateLiv();" class="butAction" >OK</button>';
             //print '</form>';
         } else {
-            print htmlentities(utf8_decode(dol_print_date($commande->date_livraison, 'day')));
+            print htmlentities(utf8_decode(dol_print_date($commande->delivery_date, 'day')));
         }
         print '</td>';
 

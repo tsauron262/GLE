@@ -650,7 +650,7 @@ class pdf_azurFinanc extends ModelePDFPropales
 		$posxval=52;
 
         // Show shipping date
-        if (! empty($object->date_livraison))
+        if (! empty($object->delivery_date))
 		{
             $outputlangs->load("sendings");
 			$pdf->SetFont('','B', $default_font_size - 2);
@@ -659,7 +659,7 @@ class pdf_azurFinanc extends ModelePDFPropales
 			$pdf->MultiCell(80, 4, $titre, 0, 'L');
 			$pdf->SetFont('','', $default_font_size - 2);
 			$pdf->SetXY($posxval, $posy);
-			$dlp=dol_print_date(strtotime($object->date_livraison),"daytext",false,$outputlangs,true);
+			$dlp=dol_print_date(strtotime($object->delivery_date),"daytext",false,$outputlangs,true);
 			$pdf->MultiCell(80, 4, $dlp, 0, 'L');
 
             $posy=$pdf->GetY()+1;

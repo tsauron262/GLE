@@ -134,7 +134,7 @@ print '<input type="text" class="flat" name="search_project" value="'.$search_pr
 print '</td>';
 print '<td class="liste_titre">';
 $listofstatus=array(-1=>'&nbsp;');
-foreach($projectstatic->statuts_short as $key => $val) $listofstatus[$key]=$langs->trans($val);
+foreach($projectstatic->labelStatusShort as $key => $val) $listofstatus[$key]=$langs->trans($val);
 print $form->selectarray('search_status', $listofstatus, $search_status);
 print '</td>';
 print '<td class="liste_titre" colspan="7">';

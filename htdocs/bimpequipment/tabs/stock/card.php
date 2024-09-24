@@ -239,7 +239,7 @@ if ($action == 'create')
 	// Status
 	print '<tr><td>'.$langs->trans("Status").'</td><td>';
 	print '<select name="statut" class="flat">';
-	foreach ($object->statuts as $key => $value)
+	foreach ($object->labelStatus as $key => $value)
 	{
 		if ($key == 1)
 		{
@@ -764,7 +764,7 @@ else
 
 			print '<tr><td>'.$langs->trans("Status").'</td><td>';
 			print '<select name="statut" class="flat">';
-			foreach ($object->statuts as $key => $value)
+			foreach ($object->labelStatus as $key => $value)
 			{
 				if ($key == $object->statut)
 				{

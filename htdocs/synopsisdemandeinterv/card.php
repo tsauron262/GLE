@@ -1364,7 +1364,7 @@ EOF;
         print '</td></tr>';
     }
     print '<tr><th class="ui-widget-header ui-state-default">Attribu&eacute; &agrave;';
-//    if ($synopsisdemandeinterv->statuts == 0 || $user->rights->synopsisdemandeinterv->prisencharge)
+//    if ($synopsisdemandeinterv->status == 0 || $user->rights->synopsisdemandeinterv->prisencharge)
     if ($synopsisdemandeinterv->statut < 2)
         print '<a href="' . $_SERVER['PHP_SELF'] . '?action=editAttrib&id=' . $_REQUEST['id'] . '">' . img_edit($langs->trans('Changer Attribution'), 1) . '</a>';
 
@@ -1385,7 +1385,7 @@ EOF;
         print "Personne";
 
     print '<th class="ui-widget-header ui-state-default">Effectu&eacute; par :';
-    if ($synopsisdemandeinterv->statuts == 0 || $user->rights->synopsisdemandeinterv->prisencharge)
+    if ($synopsisdemandeinterv->status == 0 || $user->rights->synopsisdemandeinterv->prisencharge)
         print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $_REQUEST['id'] . '&action=editEffPar">' . img_edit($langs->trans('Changer intervenant'), 1) . '</a>';
 
     print '</th><td  colspan=1 class="ui-widget-content">';

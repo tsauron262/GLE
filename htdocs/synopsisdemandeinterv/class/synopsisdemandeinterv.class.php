@@ -84,14 +84,14 @@ class Synopsisdemandeinterv extends CommonObject {
         $this->projet_id = 0;
 
         // Statut 0=brouillon, 1=valide
-        $this->statuts[0] = $langs->trans("Draft");
-        $this->statuts[1] = $langs->trans("Validated");
-        $this->statuts[2] = $langs->trans("En cours");
-        $this->statuts[3] = $langs->trans("Cl&ocirc;turé");
-        $this->statuts_short[0] = $langs->trans("Draft");
-        $this->statuts_short[1] = $langs->trans("Validated");
-        $this->statuts_short[2] = $langs->trans("En cours");
-        $this->statuts_short[3] = $langs->trans("Cl&ocirc;turé");
+        $this->labelStatus[0] = $langs->trans("Draft");
+        $this->labelStatus[1] = $langs->trans("Validated");
+        $this->labelStatus[2] = $langs->trans("En cours");
+        $this->labelStatus[3] = $langs->trans("Cl&ocirc;turé");
+        $this->labelStatusShort[0] = $langs->trans("Draft");
+        $this->labelStatusShort[1] = $langs->trans("Validated");
+        $this->labelStatusShort[2] = $langs->trans("En cours");
+        $this->labelStatusShort[3] = $langs->trans("Cl&ocirc;turé");
     }
 
     /*
@@ -832,50 +832,50 @@ class Synopsisdemandeinterv extends CommonObject {
      */
     function LibStatut($statut, $mode = 0) {
         if ($mode == 0) {
-            return $this->statuts[$statut];
+            return $this->labelStatus[$statut];
         }
         if ($mode == 1) {
-            return $this->statuts_short[$statut];
+            return $this->labelStatusShort[$statut];
         }
         if ($mode == 2) {
             if ($statut == 0)
-                return img_picto($this->statuts_short[$statut], 'statut0') . ' ' . $this->statuts_short[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut0') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 1)
-                return img_picto($this->statuts_short[$statut], 'statut1') . ' ' . $this->statuts_short[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut1') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 2)
-                return img_picto($this->statuts_short[$statut], 'statut3') . ' ' . $this->statuts_short[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut3') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 3)
-                return img_picto($this->statuts_short[$statut], 'statut6') . ' ' . $this->statuts_short[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut6') . ' ' . $this->labelStatusShort[$statut];
         }
         if ($mode == 3) {
             if ($statut == 0)
-                return img_picto($this->statuts_short[$statut], 'statut0');
+                return img_picto($this->labelStatusShort[$statut], 'statut0');
             if ($statut == 1)
-                return img_picto($this->statuts_short[$statut], 'statut1');
+                return img_picto($this->labelStatusShort[$statut], 'statut1');
             if ($statut == 2)
-                return img_picto($this->statuts_short[$statut], 'statut3');
+                return img_picto($this->labelStatusShort[$statut], 'statut3');
             if ($statut == 3)
-                return img_picto($this->statuts_short[$statut], 'statut6');
+                return img_picto($this->labelStatusShort[$statut], 'statut6');
         }
         if ($mode == 4) {
             if ($statut == 0)
-                return img_picto($this->statuts_short[$statut], 'statut0') . ' ' . $this->statuts[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut0') . ' ' . $this->labelStatus[$statut];
             if ($statut == 1)
-                return img_picto($this->statuts_short[$statut], 'statut1') . ' ' . $this->statuts[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut1') . ' ' . $this->labelStatus[$statut];
             if ($statut == 2)
-                return img_picto($this->statuts_short[$statut], 'statut3') . ' ' . $this->statuts[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut3') . ' ' . $this->labelStatus[$statut];
             if ($statut == 3)
-                return img_picto($this->statuts_short[$statut], 'statut6') . ' ' . $this->statuts[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut6') . ' ' . $this->labelStatus[$statut];
         }
         if ($mode == 5) {
             if ($statut == 0)
-                return $this->statuts_short[$statut] . ' ' . img_picto($this->statuts_short[$statut], 'statut0');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($this->labelStatusShort[$statut], 'statut0');
             if ($statut == 1)
-                return $this->statuts_short[$statut] . ' ' . img_picto($this->statuts_short[$statut], 'statut1');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($this->labelStatusShort[$statut], 'statut1');
             if ($statut == 2)
-                return $this->statuts_short[$statut] . ' ' . img_picto($this->statuts_short[$statut], 'statut3');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($this->labelStatusShort[$statut], 'statut3');
             if ($statut == 3)
-                return $this->statuts_short[$statut] . ' ' . img_picto($this->statuts_short[$statut], 'statut6');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($this->labelStatusShort[$statut], 'statut6');
         }
     }
 

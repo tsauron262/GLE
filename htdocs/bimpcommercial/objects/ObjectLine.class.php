@@ -4518,7 +4518,7 @@ class ObjectLine extends BimpObject
                             $min = 'none';
                         }
 
-                        $value = round($value, $decimals);
+                        $value = round((float) $value, $decimals);
                         $html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
                                     'data' => array(
                                         'data_type' => 'number',

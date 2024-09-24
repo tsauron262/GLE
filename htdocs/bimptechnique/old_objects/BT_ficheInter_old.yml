@@ -100,7 +100,7 @@ fields:
         object: contrat
     fk_user_author:
         label: Intervenant
-        dol_prop: user_creation
+        dol_prop: user_creation_id
         type: id_object
         object: userUpdate
         input:

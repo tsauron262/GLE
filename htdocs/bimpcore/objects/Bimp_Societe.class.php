@@ -2150,8 +2150,8 @@ class Bimp_Societe extends BimpDolObject
                 $class = ($dt->getTimestamp() >= $date_regle_encoure->getTimestamp()) ? " class='danger'" : "";
                 $html .= "<strong" . $class . ">" . $dt->format('d / m / Y') . "</strong>";
 
-                if ((int) $this->dol_object->user_creation) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_creation);
+                if ((int) $this->dol_object->user_creation_id) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_creation_id);
                     if (BimpObject::objectLoaded($user)) {
                         $html .= ' par ' . $user->getLink();
                     }
@@ -2167,8 +2167,8 @@ class Bimp_Societe extends BimpDolObject
                 $html .= 'Dernière mise à jour le ' . $dt->format('d / m / Y');
 
                 // User pas toujours juste...
-//                 if ((int) $this->dol_object->user_modification) {
-//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_modification);
+//                 if ((int) $this->dol_object->user_modification_id) {
+//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_modification_id);
 //                    if (BimpObject::objectLoaded($user)) {
 //                        $html .= ' par ' . $user->getLink();
 //                    }

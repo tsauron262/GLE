@@ -957,11 +957,13 @@ class Synopsisdemandeinterv extends CommonObject {
                 $cuser = new User($this->db);
                 $cuser->fetch($obj->fk_user_author);
                 $this->user_creation = $cuser;
+                $this->user_creation_id = $cuser->id;
 
                 if ($obj->fk_user_valid) {
                     $vuser = new User($this->db);
                     $vuser->fetch($obj->fk_user_valid);
                     $this->user_validation = $vuser;
+                    $this->user_validation_id = $vuser->id;
                 }
 
                 if ($obj->fk_user_target) {

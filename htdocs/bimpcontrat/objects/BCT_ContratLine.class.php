@@ -3404,7 +3404,7 @@ class BCT_ContratLine extends BimpObject
                                     $row_html .= '<td>';
                                     $product = $line->getChildObject('product');
                                     if (BimpObject::objectLoaded($product)) {
-                                        $nb_decimals = (int) $product->getData('variable_qty_decimals');
+//                                        $nb_decimals = (int) $product->getData('variable_qty_decimals');
                                         $row_html .= $product->getLink() . '<br/>';
                                         $row_html .= $product->getName() . '<br/>';
                                         $row_html .= $line->displayPeriodicity(false, array('fac'));
@@ -3815,7 +3815,7 @@ class BCT_ContratLine extends BimpObject
                             $row_html .= '<td>';
                             $product = $line->getChildObject('product');
                             if (BimpObject::objectLoaded($product)) {
-                                $nb_decimals = (int) $product->getData('variable_qty_decimals');
+//                                $nb_decimals = (int) $product->getData('variable_qty_decimals');
                                 $row_html .= $product->getLink() . '<br/>';
                                 $row_html .= $product->getName() . '<br/>';
                             }

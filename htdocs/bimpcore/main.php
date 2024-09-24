@@ -69,7 +69,7 @@ if (isset($_REQUEST['ajax']) && $_REQUEST['ajax']) {
         $cspJs .= " 'strict-dynamic' 'nonce-".csp_nonce."'";
         
     }
-    header("Content-Security-Policy: default-src 'self'; script-src ".$cspJs."; style-src 'self' 'unsafe-inline'");
+    header("Content-Security-Policy: default-src 'self' https://cdsassets.apple.com; script-src ".$cspJs."; style-src 'self' 'unsafe-inline'");
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 }
 

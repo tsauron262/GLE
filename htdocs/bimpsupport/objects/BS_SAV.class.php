@@ -5415,6 +5415,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                 global $db;
                 $pdf = new SavRestitutePDF($db);
+                $pdf->sav = $this;
 
                 $pdf->init($propal->dol_object);
 

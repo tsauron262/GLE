@@ -18,7 +18,7 @@ header_edit_form: edit
 public_header_edit_form: public_edit
 
 header_btn: 
-    callback: getViewExtraBtn
+    callback: getActionsButtons
         
 nom_url: 
     with_status: 1

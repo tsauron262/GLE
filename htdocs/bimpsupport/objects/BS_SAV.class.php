@@ -535,6 +535,19 @@ class BS_SAV extends BimpObject
                 }
 
                 return 1;
+                
+            case 'reopen': 
+                if ($status !== self::BS_SAV_FERME) {
+                    $errors[] = 'Ce SAV n\'est pas fermé';
+                    return 0;
+                }
+                
+                if ((int) $this->getData('restituted')) {
+                    $errors[] = 'Le matériel a été restitué';
+                    return 0;
+                }
+                
+                return 1;
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -880,7 +893,7 @@ class BS_SAV extends BimpObject
         return $buttons;
     }
 
-    public function getViewExtraBtn()
+    public function getActionsButtons()
     {
         $buttons = array();
 
@@ -1888,7 +1901,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $html .= $this->displayData('status');
         $html .= '</div>';
 
-        $buttons = $this->getViewExtraBtn();
+        $buttons = $this->getActionsButtons();
 
         if (count($buttons)) {
             $html .= '<div style="text-align: right; margin-top: 5px">';

@@ -97,7 +97,7 @@ class DoliDBMysqliC extends DoliDB
 
     public $transaction_opened;
 
-    /* moddrsi */
+    /* moddrsi (20.2)*/
     public $countReq = 0;
     public $countReq2 = 0;
     public $timeReconnect = 0;
@@ -106,7 +106,6 @@ class DoliDBMysqliC extends DoliDB
     
     public $timeDebReq = 0;
     public $timeDebReq2 = 0;
-
     /* fmoddrsi */
 
     /**
@@ -972,7 +971,7 @@ class DoliDBMysqliC extends DoliDB
                 $debugTime = true;
         }
 */
-        /* moddrsi */
+        /* moddrsi (20.2)*/
         $this->countReq ++;
         $timestamp_debut = microtime(true);
         if ($debugTime) {
@@ -1062,7 +1061,7 @@ class DoliDBMysqliC extends DoliDB
             $this->connected = FALSE;        
         }
 */        
-        /* moddrsi */
+        /* moddrsi (20.2)*/
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;
         if ($debugTime) {
@@ -1582,6 +1581,38 @@ class DoliDBMysqliC extends DoliDB
         }
         return $listtables;
     }
+    
+    // phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
+	/**
+	 *  List tables into a database
+	 *
+	 *  @param	string		$database	Name of database
+	 *  @param	string		$table		Name of table filter ('xxx%')
+	 *  @return	array					List of tables in an array
+	 */
+	public function DDLListTablesFull($database, $table = '')
+	{
+		// phpcs:enable
+		$listtables = array();
+
+		$like = '';
+		if ($table) {
+			$tmptable = preg_replace('/[^a-z0-9\.\-\_%]/i', '', $table);
+
+			$like = "LIKE '".$this->escape($tmptable)."'";
+		}
+		$tmpdatabase = preg_replace('/[^a-z0-9\.\-\_]/i', '', $database);
+
+		$sql = "SHOW FULL TABLES FROM `".$tmpdatabase."` ".$like.";";
+
+		$result = $this->query($sql);
+		if ($result) {
+			while ($row = $this->fetch_row($result)) {
+				$listtables[] = $row;
+			}
+		}
+		return $listtables;
+        }
 
     /**
 	 *	List information of columns into a table.
@@ -2053,7 +2084,7 @@ class DoliDBMysqliC extends DoliDB
         return $result;
     }
     
-    /* moddrsi */
+    /* moddrsi (20.2)*/
 
     public function begin($textinlog = '')
     {

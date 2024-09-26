@@ -92,7 +92,7 @@ if (getDolGlobalString('MAIN_APPLICATION_TITLE')) {
 
 llxHeader('', $title);
 
-/*moddrsi*/$cache = cachePage("index?user=".$user->id, "1", /*isset($_REQUEST['action'])*/1);
+/*moddrsi (20.2)*/$cache = cachePage("index?user=".$user->id, "1", /*isset($_REQUEST['action'])*/1);
 if(!$cache){/*fmoddrsi*/
     
 
@@ -808,7 +808,7 @@ print '</div>';
 //print 'mem='.memory_get_usage().' - '.memory_get_peak_usage();
     
 
-/*moddrsi*/
+/*moddrsi (20.2)*/
     cachePage("index?user=".$user->id);
 }
 global $logLongTime;

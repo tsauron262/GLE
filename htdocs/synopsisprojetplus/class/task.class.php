@@ -39,7 +39,7 @@ class TaskP extends CommonObject
 {
     
     
-    /*mod drsi*/
+    /*moddrsi (20.2)*/
     private $contactsoftask = false;
     public $occupation = 100;
     function verifUser($idUser){

@@ -40,6 +40,12 @@ function dol_ftp_connect($ftp_server, $ftp_port, $ftp_user, $ftp_password, $sect
 {
 	global $langs, $conf;
 
+        /*moddrsi (20.2)*/
+        if (defined('FTP_SORTANT_MODE_PASSIF')) {
+            $ftp_passive = FTP_SORTANT_MODE_PASSIF;
+        }
+        /*fmoddrsi*/
+        
 	$ok = 1;
 	$error = 0;
 	$connect_id = null;

@@ -131,7 +131,7 @@ div#topmenu-quickadd-dropdown a::after, div#topmenu-bookmark-dropdown a::after {
 }
 
 
-/*moddrsi .dropdown-toggle::after {
+/*moddrsi (20.2) .dropdown-toggle::after {
 	font-family: "Font Awesome 5 Free";
 	font-size: 0.7em;
 	font-weight: 900;

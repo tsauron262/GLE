@@ -712,7 +712,7 @@ function dol_ftp_connect($ftp_server, $ftp_port, $ftp_user, $ftp_password, $sect
 {
 	global $langs, $conf;
         
-        /*moddrsi*/
+        /*moddrsi (20.2 => transféré dans ftp.lib.php)*/
         if (defined('FTP_SORTANT_MODE_PASSIF')) {
             $ftp_passive = FTP_SORTANT_MODE_PASSIF;
         }

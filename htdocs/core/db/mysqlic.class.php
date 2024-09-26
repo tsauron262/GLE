@@ -97,7 +97,7 @@ class DoliDBMysqliC extends DoliDB
 
     public $transaction_opened;
 
-    /* moddrsi */
+    /* moddrsi (20.2)*/
     public $countReq = 0;
     public $countReq2 = 0;
     public $timeReconnect = 0;
@@ -106,7 +106,6 @@ class DoliDBMysqliC extends DoliDB
     
     public $timeDebReq = 0;
     public $timeDebReq2 = 0;
-
     /* fmoddrsi */
 
     /**
@@ -972,7 +971,7 @@ class DoliDBMysqliC extends DoliDB
                 $debugTime = true;
         }
 */
-        /* moddrsi */
+        /* moddrsi (20.2)*/
         $this->countReq ++;
         $timestamp_debut = microtime(true);
         if ($debugTime) {
@@ -1062,7 +1061,7 @@ class DoliDBMysqliC extends DoliDB
             $this->connected = FALSE;        
         }
 */        
-        /* moddrsi */
+        /* moddrsi (20.2)*/
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;
         if ($debugTime) {
@@ -2053,7 +2052,7 @@ class DoliDBMysqliC extends DoliDB
         return $result;
     }
     
-    /* moddrsi */
+    /* moddrsi (20.2)*/
 
     public function begin($textinlog = '')
     {

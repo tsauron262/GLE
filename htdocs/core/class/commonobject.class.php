@@ -6349,7 +6349,7 @@ if($obj->up == null)
 				$attributeKey = substr($key, 8); // Remove 'options_' prefix
 				// Add field of attribute
 				if ($extrafields->attributes[$this->table_element]['type'][$attributeKey] != 'separate') { // Only for other type than separator)
-                                        /*moddrsi*/
+                                        /*moddrsi (20.2 - removed)*/
                                         // A switcher? 
 					if ($new_array_options[$key] != '' || $new_array_options[$key] == '0') { // Version Dol16
 //                                        if (isset($new_array_options[$key]) && !is_null($new_array_options[$key])) { // => version Master 

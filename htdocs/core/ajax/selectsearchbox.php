@@ -190,7 +190,7 @@ $arrayresult = dol_sort_array($arrayresult, 'position' );
 
 
 
-/*mod drsi pour le trie*/
+/*moddrsi pour le trie (20.2) */
 //print_r($arrayresult);
 
 if(strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16 && stripos($search_boxvalue, " ") === false && isset($arrayresult["searchintosn"]))
@@ -219,7 +219,7 @@ if(stripos($search_boxvalue, "fi") === 0 && isset($arrayresult["searchintointerv
         $arrayresult=array_merge(array($arrayresult['searchintointervention']), $arrayresult);
 if(stripos($search_boxvalue, "sac") === 0 && isset($arrayresult["searchintosac"]))
         $arrayresult=array_merge(array($arrayresult['searchintosac']), $arrayresult);
-/*fmod drsi*/
+/*fmoddrsi*/
 
 
 

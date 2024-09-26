@@ -2184,7 +2184,7 @@ if ($action == 'create') {
 }
 
 
-/*moddrsi*/
+/*moddrsi (20.2)*/
         $header .= '<script>
                     userId = "' . $user->id . '";
                         idContratCurrent = "' . $id . '";

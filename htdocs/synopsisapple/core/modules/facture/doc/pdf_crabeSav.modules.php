@@ -308,7 +308,7 @@ class pdf_crabeSav extends ModelePDFFactures
 				$curY = $tab_top + 7;
 				$nexY = $tab_top + 7;
                                 
-                                /*mod drsi*/
+                                /*moddrsi (20.2)*/
                                 global $accTht, $accTtva;
                                 $accTht = $accTtva = 0;
                                 /*fmoddrsi*/
@@ -318,7 +318,7 @@ class pdf_crabeSav extends ModelePDFFactures
 				for ($i = 0; $i < $nblignes; $i++)
 				{
                                     
-                                        /*mod drsi*/
+                                        /*moddrsi (20.2)*/
                                         if($object->lines[$i]->desc == "Acompte" && $object->lines[$i]->total < 0){
                                             $accTht = $object->lines[$i]->total_ht;
                                             $accTtva = $object->lines[$i]->total_tva;
@@ -387,7 +387,7 @@ class pdf_crabeSav extends ModelePDFFactures
 					$pdf->SetFont('','', $default_font_size - 1);   // On repositionne la police par defaut
 
                                         
-                                        /*mod drsi*/if($object->lines[$i]->product_type < 100){
+                                        /*moddrsi (20.2)*/if($object->lines[$i]->product_type < 100){
 					// VAT Rate
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
 					{
@@ -462,7 +462,7 @@ class pdf_crabeSav extends ModelePDFFactures
 						$pdf->line($this->marge_gauche, $nexY+1, $this->page_largeur - $this->marge_droite, $nexY+1);
 						$pdf->SetLineStyle(array('dash'=>0));
 					}
-                                        }/*f mod drsi*/
+                                        }/*fmoddrsi*/
 
 					$nexY+=2;    // Passe espace entre les lignes
 
@@ -529,7 +529,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                 
                                 
                                                
-                                /*mod drsi ajout signature*/
+                                /*moddrsi (20.2) ajout signature*/
                                 if(stripos($object->ref, "FA") !== false){
                                     $pdf->SetFont('','', $default_font_size);
                                     $pdf->SetXY("90", "230");
@@ -920,8 +920,8 @@ class pdf_crabeSav extends ModelePDFFactures
 		$pdf->SetXY($col1x, $tab2_top + 0);
 		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalHT"), 0, 'L', 1);
 		$pdf->SetXY($col2x, $tab2_top + 0);
-                /*mod drsi*/global $accTht, $accTtva;/*fmod drsi*/
-		$pdf->MultiCell($largcol2, $tab2_hl, price($sign * ($object->total_ht + (! empty($object->remise)?$object->remise:0))/*mod drsi*/-$accTht/*fmod drsi*/, 0, $outputlangs), 0, 'R', 1);
+                /*moddrsi (20.2)*/global $accTht, $accTtva;/*fmoddrsi*/
+		$pdf->MultiCell($largcol2, $tab2_hl, price($sign * ($object->total_ht + (! empty($object->remise)?$object->remise:0))/*moddrsi (20.2)*/-$accTht/*fmoddrsi*/, 0, $outputlangs), 0, 'R', 1);
 //print_r($object);die;
 		// Show VAT by rates and total
 		$pdf->SetFillColor(248,248,248);
@@ -1115,9 +1115,9 @@ class pdf_crabeSav extends ModelePDFFactures
 				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
 
 				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($largcol2, $tab2_hl, price($sign * $object->total_ttc /*mod drsi*/-$accTht -$accTtva/*fmod drsi*/, 0, $outputlangs), $useborder, 'R', 1);
+				$pdf->MultiCell($largcol2, $tab2_hl, price($sign * $object->total_ttc /*moddrsi (20.2)*/-$accTht -$accTtva/*fmoddrsi*/, 0, $outputlangs), $useborder, 'R', 1);
                                 
-                                /*mod drsi*/
+                                /*moddrsi (20.2)*/
                                 if(-$accTht > 0){
                                         $pdf->SetFillColor(248,248,248);
                                         $index++;
@@ -1126,7 +1126,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                         $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
                                         $pdf->MultiCell($largcol2, $tab2_hl, price(-($accTht+$accTtva), 0, $outputlangs), 0, 'R', 0);
                                 }
-                                /*fmod drsi*/
+                                /*fmoddrsi*/
                                 
 			}
 		}
@@ -1141,7 +1141,7 @@ class pdf_crabeSav extends ModelePDFFactures
                 
 		if ($object->paye) $resteapayer=0;
 
-		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0  /*moddrs*/|| -$accTht > 0/*fmoddrsi*/)
+		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0  /*moddrsi (20.2)*/|| -$accTht > 0/*fmoddrsi*/)
 		{
 			// Already paid + Deposits
                     if(($deja_regle + $depositsamount) > 0){

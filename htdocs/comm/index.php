@@ -27,13 +27,13 @@
  *	\brief		Home page of commercial area
  */
 
-/* Début mod DRSI */
+/* moddrsi (20.2)*/
 require '../main.inc.php';
 if(isset($conf->global->MAIN_MODULE_BIMPCOMMERCIAL) and $conf->global->MAIN_MODULE_BIMPCOMMERCIAL) {
     header('Location:'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=');
     die();
 }
-/* Fin mod DRSI */
+/* fmoddrsi */
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/agenda.lib.php';

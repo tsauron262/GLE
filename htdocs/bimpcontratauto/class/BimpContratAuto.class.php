@@ -190,7 +190,7 @@ class BimpContratAuto {
                 } 
                 
                 if ($date_ouverture) {
-                    $statut = $this->checkStatut($line->statut, dol_time_plus_duree(/*moddrsi*//*$line->date_ouverture*/$date_ouverture/*fmoddrsi*/, $nb, $unite));
+                    $statut = $this->checkStatut($line->statut, dol_time_plus_duree(/*$line->date_ouverture*/$date_ouverture, $nb, $unite));
                 } else {
                     $statut = 1;
                 }

@@ -1410,9 +1410,11 @@ class Bimp_Propal extends Bimp_PropalTemp
             0 => 'Nouveau contrat'
         );
 
-        if ((int) $this->getData('fk_soc')) {
+        $id_client = (int) $this->getData('fk_soc');
+
+        if ($id_client) {
             foreach (BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_Contrat', array(
-                'fk_soc'  => (int) $this->getData('fk_soc'),
+                'fk_soc'  => $id_client,
                 'statut'  => array(0, 1),
                 'version' => 2
             )) as $contrat) {
@@ -2727,11 +2729,14 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         $contrats = $this->getAbonnementLines(true, $errors, true);
 
+        $id_client_facturation = (int) $this->getData('id_client_facture');
+        $id_client = (int) $this->getData('fk_soc');
+
         if (!count($errors) && empty($contrats)) {
             $errors[] = 'Il n\'y a aucune ligne à ajouter à un contrat d\'abonnement';
         } else {
             if ($this->getNbAbonnements() > 0) {
-                $client = $this->getChildObject('client');
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', ($id_client_facturation ? $id_client_facturation : $id_client));
                 if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
                     if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
                         $errors[] = 'Le client n\'a pas d\'encours autorisé. Ce devis doit donc être soit payé à l\'avance via un accompte, soit passé en mode de réglement par prélèvement à date de facture';
@@ -2757,12 +2762,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
                 } else {
                     $contrat = BimpObject::createBimpObject('bimpcontrat', 'BCT_Contrat', array(
-                                'fk_soc'    => (int) $this->getData('fk_soc'),
-                                'entrepot'  => (int) $this->getData('entrepot'),
-                                'secteur'   => $this->getData('ef_type'),
-                                'expertise' => $this->getData('expertise'),
-                                'moderegl'  => BimpTools::getArrayValueFromPath($data, 'fk_mode_reglement', $this->getData('fk_mode_reglement')),
-                                'condregl'  => BimpTools::getArrayValueFromPath($data, 'fk_cond_reglement', $this->getData('fk_cond_reglement'))
+                                'fk_soc'             => $id_client,
+                                'fk_soc_facturation' => $id_client_facturation,
+                                'entrepot'           => (int) $this->getData('entrepot'),
+                                'secteur'            => $this->getData('ef_type'),
+                                'expertise'          => $this->getData('expertise'),
+                                'moderegl'           => BimpTools::getArrayValueFromPath($data, 'fk_mode_reglement', $this->getData('fk_mode_reglement')),
+                                'condregl'           => BimpTools::getArrayValueFromPath($data, 'fk_cond_reglement', $this->getData('fk_cond_reglement'))
                                     ), true, $errors, $warnings);
 
                     if (!count($errors)) {

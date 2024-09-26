@@ -3333,6 +3333,7 @@ class Bimp_Client extends Bimp_Societe
                                 self::updateAtradiusValue($this, 'outstanding_limit_atradius', 0);
 //                            if ($this->getData('outstanding_limit_icba') > 0)
 //                                self::updateAtradiusValue($this, 'outstanding_limit_icba', 0);
+                            $this->updateField('date_atradius', null);
                             $success = 'Pas de couverture';
                         } else {
                             // Crédit Check

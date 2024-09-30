@@ -231,7 +231,7 @@ class BimpTools
             if ($name_dest == null) {
                 $name_dest = $file;
             }
-            $file = $user->id . "_" . $file;
+//            $file = $user->id . "_" . $file;
 
             if (pathinfo($name_dest, PATHINFO_EXTENSION) == '') {
                 $extension = pathinfo($file, PATHINFO_EXTENSION);

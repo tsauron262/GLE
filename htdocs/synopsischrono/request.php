@@ -72,7 +72,7 @@ if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCent
     }
 } else {
     $tel = "N/C";
-    $fromMail = "SAV BIMP<no-replay@bimp.fr>";
+    $fromMail = "SAV BIMP<no-reply@bimp.fr>";
 }
 
 

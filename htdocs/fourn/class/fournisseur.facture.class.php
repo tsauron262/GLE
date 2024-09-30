@@ -2241,7 +2241,7 @@ class FactureFournisseur extends CommonInvoice
 				}
 
 				// Mise a jour informations denormalisees au niveau de la facture meme
-                                /*moddrsi*/
+                                /* moddrsi (20.2)*/
                                 BimpObject::loadClass('bimpcommercial', 'BimpComm');
                                 if(!BimpComm::$dont_check_parent_on_update) {
                                     $result = $this->update_price(1, 'auto', 0, $this->thirdparty); // The addline method is designed to add line from user input so total calculation with update_price must be done using 'auto' mode.

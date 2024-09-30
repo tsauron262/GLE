@@ -2940,7 +2940,7 @@ div.login_block span.aversion {
 	filter: contrast(0.7);
 }
 div.login_block table {
-	/*moddrsi display: inline;*/
+	/*moddrsi (20.2) display: inline;*/
 }
 div.login {
 	white-space:nowrap;
@@ -2970,7 +2970,7 @@ div.login_block_other {
 	padding-top: 0;
 	text-align: right;
 	margin-right: 8px;
-	/*moddrsi max-width: 200px;*/
+	/*moddrsi (20.2) max-width: 200px;*/
 }
 
 .login_block_elem {
@@ -4907,7 +4907,7 @@ div#card-errors {
 .ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front.ui-draggable {
 	/*z-index: 1002 !important;		 Default 101 with ui-jquery, top menu have a z-index of 1000 */
         
-        /*moddrsi important pour compatibilité avec les modales*/
+        /*moddrsi (20.2 => removed) important pour compatibilité avec les modales*/
         z-index: 12000 !important; 
         /*fmoddrsi*/
 }
@@ -6056,7 +6056,7 @@ span#select2-taskid-container[title^='--'] {
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
-    /*moddrsi*/
+    /*moddrsi (20.2)*/
 /*	background-color: var(--colorbackhmenu1);
 	color: var(--colortextbackhmenu);*/
         background-color: #5897FB;

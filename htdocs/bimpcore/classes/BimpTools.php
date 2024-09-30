@@ -238,7 +238,7 @@ class BimpTools
                 $name_dest .= '.' . $extension;
             }
             if (!file_exists($dir . '/' . $file)) {
-                $errors[] = 'Le fichier "' . $file . '" n\'existe passs';
+                $errors[] = 'Le fichier "' . $dir . '/' . $file . '" n\'existe passs';
             } elseif (!rename($dir . '/' . $file, $dir_dest . '/' . $name_dest)) {
                 $errors[] = 'Echec du déplacement du fichier "' . $name_dest . '" dans le dossier de destination';
             }

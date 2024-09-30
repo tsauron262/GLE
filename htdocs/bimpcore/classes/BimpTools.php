@@ -223,7 +223,9 @@ class BimpTools
             mkdir($dir_dest);
 
         $dir = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir();
-        $file = $user->id . "_" . BimpTools::getAjaxFileName($field_name);
+        $files = $user->id . "_" . BimpTools::getAjaxFileName($field_name);
+        if(!is_array($files))
+            $files = array($files);
 
         if ($name_dest == null) {
             $name_dest = BimpTools::getAjaxFileName($field_name);
@@ -234,10 +236,12 @@ class BimpTools
             $name_dest .= '.' . $extension;
         }
 
-        if (!file_exists($dir . '/' . $file)) {
-            $errors[] = 'Le fichier "' . $file . '" n\'existe pas';
-        } elseif (!rename($dir . '/' . $file, $dir_dest . '/' . $name_dest)) {
-            $errors[] = 'Echec du déplacement du fichier "' . $name_dest . '" dans le dossier de destination';
+        foreach($files as $file){
+            if (!file_exists($dir . '/' . $file)) {
+                $errors[] = 'Le fichier "' . $file . '" n\'existe pas';
+            } elseif (!rename($dir . '/' . $file, $dir_dest . '/' . $name_dest)) {
+                $errors[] = 'Echec du déplacement du fichier "' . $name_dest . '" dans le dossier de destination';
+            }
         }
     }
 

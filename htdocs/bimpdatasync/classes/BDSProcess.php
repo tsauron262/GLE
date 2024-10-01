@@ -37,6 +37,7 @@ abstract class BDSProcess
         'ref'      => null,
         'increase' => false
     );
+    public $data_persistante = array();
 
     public function __construct(BDS_Process $process, $options = array(), $references = array())
     {
@@ -133,9 +134,24 @@ abstract class BDSProcess
     }
 
     // Déclenchement des opération: 
+    
+    public function gestionPersistance($id_operation, $debut = true, $erase = false){
+        global $user;
+        $uniqKey = 'data_persistante'.$this->process->id.$id_operation.$user->id;
+        if($debut){
+            $this->data_persistante = $_SESSION[$uniqKey];
+        }
+        elseif(!$erase){
+            $_SESSION[$uniqKey] = $this->data_persistante;
+        }
+        else{
+            unset($_SESSION[$uniqKey]);
+        }
+    }
 
     public function initOperation($id_operation, &$errors)
     {
+        $this->gestionPersistance($id_operation);
         $data = array(
             'id_process'      => $this->process->id,
             'id_operation'    => $id_operation,
@@ -221,51 +237,58 @@ abstract class BDSProcess
             $html = BimpRender::renderFoldableContainer('[INITIALISATION]', $this->debug_content, array('open' => 0, 'offset_left' => true));
             $data['debug_content'] = $html;
         }
+        
+        $this->gestionPersistance($id_operation, false);
 
         return $data;
     }
 
-    public function finalizeOperation($id_operation, $id_report, $extra_data = array(), &$errors = array())
+    public function finalizeOperation($id_operation, $id_report, $extra_data = array(), &$errors = array(), $has_finalization = false)
     {
+        
+        $this->gestionPersistance($id_operation);
+        
         $result = array();
 
-        if (BimpObject::objectLoaded($this->process)) {
-            if ((int) $id_report && (!BimpObject::objectLoaded($this->report) || $this->report != $id_report)) {
-                $this->report = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Report', (int) $id_report);
-            }
+        if($has_finalization){
+            if (BimpObject::objectLoaded($this->process)) {
+                if ((int) $id_report && (!BimpObject::objectLoaded($this->report) || $this->report != $id_report)) {
+                    $this->report = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Report', (int) $id_report);
+                }
 
-            $operation = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', (int) $id_operation);
-            if (!BimpObject::objectLoaded($operation)) {
-                $msg = 'Erreur technique : l\'opération d\'ID ' . $id_operation . ' n\'existe plus';
-                $errors[] = $msg;
-            } else {
-                // Vérification des options: 
-                $options = $operation->getAssociatesObjects('options');
-                foreach ($options as $option) {
-                    if (!isset($this->options[$option->getData('name')])) {
-                        if ((int) $option->getData('required')) {
-                            $errors[] = 'Option obligatoire non spécifiée: "' . $option->getData('label') . '"';
-                            $this->options_ok = false;
+                $operation = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', (int) $id_operation);
+                if (!BimpObject::objectLoaded($operation)) {
+                    $msg = 'Erreur technique : l\'opération d\'ID ' . $id_operation . ' n\'existe plus';
+                    $errors[] = $msg;
+                } else {
+                    // Vérification des options: 
+                    $options = $operation->getAssociatesObjects('options');
+                    foreach ($options as $option) {
+                        if (!isset($this->options[$option->getData('name')])) {
+                            if ((int) $option->getData('required')) {
+                                $errors[] = 'Option obligatoire non spécifiée: "' . $option->getData('label') . '"';
+                                $this->options_ok = false;
+                            }
+                        }
+                    }
+
+                    if ($this->options_ok) {
+                        // Finalisation de l'opération: 
+                        $method = 'finalize';
+                        $words = explode('_', $operation->getData('name'));
+                        foreach ($words as $word) {
+                            $method .= ucfirst($word);
+                        }
+                        if (!method_exists($this, $method)) {
+                            $errors[] = 'Erreur technique - Méthode "' . $method . '" inexistante';
+                        } else {
+                            $result = $this->{$method}($errors, $extra_data);
                         }
                     }
                 }
-
-                if ($this->options_ok) {
-                    // Finalisation de l'opération: 
-                    $method = 'finalize';
-                    $words = explode('_', $operation->getData('name'));
-                    foreach ($words as $word) {
-                        $method .= ucfirst($word);
-                    }
-                    if (!method_exists($this, $method)) {
-                        $errors[] = 'Erreur technique - Méthode "' . $method . '" inexistante';
-                    } else {
-                        $result = $this->{$method}($errors, $extra_data);
-                    }
-                }
+            } else {
+                $errors[] = 'Erreur technique: Définitions du processus absentes';
             }
-        } else {
-            $errors[] = 'Erreur technique: Définitions du processus absentes';
         }
 
         if (count($errors)) {
@@ -278,6 +301,7 @@ abstract class BDSProcess
             $result['debug_content'] = BimpRender::renderFoldableContainer('[FINALISATION]', $this->debug_content, array('open' => false, 'offset_left' => true));
         }
 
+        $this->gestionPersistance($id_operation, false, true);
         return $result;
     }
 
@@ -457,6 +481,8 @@ abstract class BDSProcess
 
     public function executeOperationStep($id_operation, $step_name, $id_report = 0, $iteration = 0, $extra_data = array())
     {
+        
+        $this->gestionPersistance($id_operation);
         $result = array();
         $errors = array();
 
@@ -534,6 +560,9 @@ abstract class BDSProcess
         }
 
         $result['errors'] = array_merge($result['errors'], $errors);
+        
+        
+        $this->gestionPersistance($id_operation, false);
         return $result;
     }
 

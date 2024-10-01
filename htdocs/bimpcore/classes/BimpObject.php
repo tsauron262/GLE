@@ -5593,6 +5593,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $this->config->setCurrentPath($prev_path);
         return $errors;
     }
+    
+    public function appendField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
+    {
+        $oldValue = $this->getData($field);
+        $newValue = BimpTools::merge_array($oldValue, $value);
+        $this->updateField($field, $newValue, $id_object, $force_update, $do_not_validate, $no_triggers);
+    }
 
     public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
     {

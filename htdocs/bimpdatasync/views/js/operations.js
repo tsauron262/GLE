@@ -539,6 +539,7 @@ function BDS_ProcessOperation(data, options) {
             if (operation.has_finalization) {
                 operation.finalize();
             } else {
+                operation.finalize();
                 operation.setSuccess('Opération terminée');
             }
             return;
@@ -723,7 +724,8 @@ function BDS_ProcessOperation(data, options) {
             'use_report': operation.report.use,
             'id_report': operation.report.id,
             'options': operation.options,
-            'operation_data': operation.operation_data
+            'operation_data': operation.operation_data,
+            'has_finalization': operation.has_finalization
         };
 
         BimpAjax('bds_finalizeOperationStep', data, operation.$notification, {

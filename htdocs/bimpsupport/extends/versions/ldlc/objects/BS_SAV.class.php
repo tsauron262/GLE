@@ -395,9 +395,9 @@ class BS_SAV_ExtVersion extends BS_SAV
             return $tabCentre[$this->getData('code_centre')][11];
     }
 
-    public function getViewExtraBtn()
+    public function getActionsButtons()
     {
-        $btn = parent::getViewExtraBtn();
+        $btn = parent::getActionsButtons();
         if ($this->asProdEcologic() && in_array($this->getData('status_ecologic'), array(1, 0))) {
             if ($this->getStatus() == 999)
                 $btn[] = array(

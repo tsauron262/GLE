@@ -3866,7 +3866,7 @@ class ContratLigne extends CommonObjectLine
 	}
         
         
-        /*moddrsi*/
+        /*moddrsi (20.2)*/ 
         
 	public function delete()
 	{

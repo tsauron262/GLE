@@ -62,6 +62,7 @@ fields_tables:
               label: APE
             - field: idprof4
               label: RCS
+            - field: rpps
               
     atradius:
         panel: 1

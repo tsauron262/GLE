@@ -742,11 +742,45 @@ forms:
             - field: 2hotline
             - field: duree
             - field: duree_i
-            - object: files
+            
+    create:
+        extends: default
+        rows:
+          files:
+              object: files
               multiple: 1
-            - object: fourn_prices
+          fourn_prices:
+              object: fourn_prices
               multiple: 1
               form_name: create_prod
+          qty:
+              custom: 1
+              label: Quantité en stock
+              input_name: qty
+              data_type: int
+              min: 1
+              input: 
+                  type: qty
+          id_entrepot:
+              custom: 1
+              input_name: id_entrepot
+              label: Entrepôt
+              dol_extra_field: 1
+              type: id_object
+              object: entrepot
+              required: 
+                  callback: useEntrepot
+              input: 
+                  type: search_entrepot
+              default_value: 
+                  callback: getDefaultEntrepot
+          comment:
+              custom: 1
+              input_name: comment
+              label: Infos
+              input: 
+                  type: text
+              value: Stock initial
         
     card:
         extends: default
@@ -1378,7 +1412,7 @@ lists:
         edit_btn: 1
         delete_btn: 1
         edit_form: card
-        add_form_name: card
+        add_form_name: create
         modal_view: default
         extra_btn: 
             callback: getListsButtons

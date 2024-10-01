@@ -47,7 +47,8 @@ class Bimp_Log extends BimpObject
         'Tentative d\'authentificatio',
         'reauthentification',
         'signe.pdf introuvable',
-        'API Ecologic'
+        'API Ecologic',
+        'use near \'?\'\'?(""'
     );
 
 //    public function getInfoGraph($graphName = '', $options = array())
@@ -94,7 +95,6 @@ class Bimp_Log extends BimpObject
 //
 //        return $result;
 //    }
-
     // Droits user: 
 
     public function canView()

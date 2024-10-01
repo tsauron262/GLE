@@ -95,7 +95,7 @@ abstract class AbstractBasic implements BackendInterface {
         $this->currentUser = $tmpuser->login;
         
         
-        /*md drsi*/
+        /*moddrsi (20.2 ??)*/
         if(isset($_SERVER['PATH_INFO'])){
             $tabT = explode("/", $_SERVER['PATH_INFO']);
             $userCalendar = strtolower($tabT[2]);
@@ -113,7 +113,7 @@ abstract class AbstractBasic implements BackendInterface {
 //            echo "<pre>";
 //            print_r($user);die;
         }
-        /*fmod drsi*/
+        /*fmoddrsi*/
         
         
 

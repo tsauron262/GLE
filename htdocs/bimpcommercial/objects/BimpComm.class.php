@@ -313,7 +313,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (in_array((int) $this->getData('fk_mode_reglement'), explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial'))) && $this->extrafieldsIsConfig('rib_client')) {
-            if ($this->getData('rib_client') < 1)
+            if ((int) $this->getData('rib_client') < 1)
                 $errors[] = 'Pour les prélèvements SEPA, le RIB est obligatoire';
             else {
                 $rib = $this->getChildObject('rib_client');

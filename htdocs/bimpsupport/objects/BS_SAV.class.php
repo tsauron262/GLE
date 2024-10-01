@@ -535,6 +535,23 @@ class BS_SAV extends BimpObject
                 }
 
                 return 1;
+
+            case 'reopen':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                if ($status !== self::BS_SAV_FERME) {
+                    $errors[] = 'Ce SAV n\'est pas fermé';
+                    return 0;
+                }
+
+                if ((int) $this->getData('restituted')) {
+                    $errors[] = 'Le matériel a été restitué';
+                    return 0;
+                }
+
+                return 1;
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -880,7 +897,7 @@ class BS_SAV extends BimpObject
         return $buttons;
     }
 
-    public function getViewExtraBtn()
+    public function getActionsButtons()
     {
         $buttons = array();
 
@@ -1131,6 +1148,18 @@ class BS_SAV extends BimpObject
                             'onclick' => $onclick
                         );
                     }
+                }
+
+                // Réouverture si fermé et non restitué : 
+
+                if ($this->isActionAllowed('reopen') && $this->canSetAction('reopen')) {
+                    $buttons[] = array(
+                        'label'   => 'Réouvrir ce SAV',
+                        'icon'    => 'fas_undo',
+                        'onclick' => $this->getJsActionOnclick('reopen', array(), array(
+                            'confirm_msg' => 'veuillez confirmer'
+                        ))
+                    );
                 }
 
                 //Générer devis 
@@ -1888,7 +1917,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $html .= $this->displayData('status');
         $html .= '</div>';
 
-        $buttons = $this->getViewExtraBtn();
+        $buttons = $this->getActionsButtons();
 
         if (count($buttons)) {
             $html .= '<div style="text-align: right; margin-top: 5px">';
@@ -4298,7 +4327,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            if (!in_array((int) $this->getData('status'), array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_FERME))) {
+            if (!in_array((int) $this->getData('status'), array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_FERME, self::BS_SAV_A_RESTITUER))) {
                 $errors = $this->updateField('status', self::BS_SAV_DEVIS_ACCEPTE);
             }
 
@@ -7069,7 +7098,7 @@ ORDER BY a.val_max DESC");
                             'id_entrepot'  => $id_entrepot,
                             'infos'        => 'Matériel non réclamé par le client (' . $this->getData('ref') . ')',
                             'date'         => date('Y-m-d H:i:s'),
-                            'code_mvt'     => 'SAV_' . $this->id . '_NOT_RESTITUTED_EQ' . (int) $this->getData('id_equipment'),
+                            'code_mvt'     => 'SAV' . $this->id . '_NOT_RESTITUTED_EQ' . (int) $this->getData('id_equipment'),
                             'origin'       => 'sav',
                             'id_origin'    => (int) $this->id
                         ));
@@ -7802,6 +7831,88 @@ ORDER BY a.val_max DESC");
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionReopen($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Réouverture effectuée';
+
+        $errors = $this->updateField('status', 9);
+
+        if (!count($errors)) {
+            $propal = $this->getChildObject('propal');
+            $centre_data = $this->getCentreData(true);
+            $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', (int) $this->getData('id_entrepot'));
+
+            if (!(int) $this->getData('propal_refused')) {
+                if (BimpObject::objectLoaded($propal)) {
+                    foreach ($propal->getLines('not_text') as $propal_line) {
+                        if ($propal_line->desc != 'Acompte') {
+                            $product = $propal_line->getProduct();
+                            if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
+                                if ($product->isSerialisable()) {
+                                    $eq_lines = $propal_line->getEquipmentLines();
+                                    $eq_line_errors = array();
+                                    foreach ($eq_lines as $eq_line) {
+                                        if ((int) $eq_line->getData('id_equipment')) {
+                                            $equipment = $eq_line->getChildObject('equipment');
+                                            if (!BimpObject::objectLoaded($equipment)) {
+                                                $eq_line_errors[] = 'Erreur: cet équipment n\'existe plus';
+                                            } else {
+                                                $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_SAV, $id_entrepot, 'SAV_' . $this->id . '_REOPEN_LN' . $propal_line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Réouverture ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
+                                            }
+                                        }
+                                    }
+                                    if (count($eq_line_errors)) {
+                                        $error_msg = 'Echec de la mise à jour de l\'emplacement pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
+                                        $errors[] = BimpTools::getMsgFromArray($eq_line_errors, $error_msg);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Emplacement équipement : 
+            if ((int) $this->getData('id_equipment')) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
+
+                if (BimpObject::objectLoaded($equipment)) {
+                    $equipment->updateField('cout_repa', 0);
+                    $cur_place = $equipment->getCurrentPlace();
+
+                    // Mise en non restitué : 
+                    if ($cur_place->getData('type') != BE_Place::BE_PLACE_SAV || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => $equipment->id,
+                            'type'         => BE_Place::BE_PLACE_SAV,
+                            'id_entrepot'  => $id_entrepot,
+                            'infos'        => 'Réouverture ' . $this->getRef(),
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => 'SAV' . $this->id . '_REOPEN_EQ' . $equipment->id,
+                            'origin'       => 'sav',
+                            'id_origin'    => (int) $this->id
+                        ));
+                        if (!count($place_errors)) {
+                            $w = array();
+                            $place_errors = $place->create($w, true);
+                        }
+                        if (count($place_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

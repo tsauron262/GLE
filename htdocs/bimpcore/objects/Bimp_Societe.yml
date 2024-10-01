@@ -179,6 +179,10 @@ fields:
         type: bool
         dol_extra_field: 1
         
+    rpps:
+        label: RPPS
+        dol_extra_field: 1
+        
     is_salarie:
         label: Client salarié
         type: bool
@@ -988,6 +992,7 @@ fields_tables:
             - field: idprof4
             - field: idprof5
             - field: idprof6
+            - field: rpps
             
     notes: 
         title: Notes
@@ -1115,6 +1120,11 @@ forms:
                     show_values: 1
             siren: 
                 field: siren
+                display_if: 
+                    field_name: is_company
+                    show_values: 1
+            rpps:
+                field: rpps
                 display_if: 
                     field_name: is_company
                     show_values: 1
@@ -1513,6 +1523,7 @@ filters_panels:
             code_fournisseur:
             siren:
             siret:
+            rpps:
             ape:
             code_compta:
             code_compta_fournisseur:

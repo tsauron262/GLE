@@ -430,7 +430,7 @@ else
                         
                         
                         
-                        /*moddrsi
+                        /*
                          * 
                          * Selection de la date
                          * 
@@ -492,7 +492,7 @@ else
 				while ($i < $num)
 				{
 					$objp = $db->fetch_object($resql);
-                                        /*moddri*/
+                                        
                                         //Todo recup des transferer depuis date
                                         //
                                         if($objp->rowid > 0 && isset($_REQUEST['dateStock'])){
@@ -503,7 +503,6 @@ else
                                             }
                                         }
                                         
-                                        /*fmoddrsi*/
                                         if($objp->value <> 0){
 					// Multilangs
 					if (! empty($conf->global->MAIN_MULTILANGS)) // si l'option est active
@@ -571,7 +570,6 @@ else
                         print '</td>';
                     }
                     
-                    /*mod drsi*/
                         $sql = $db->query("SELECT SUM(qty) as nb FROM `".MAIN_DB_PREFIX."facturedet` fd, `".MAIN_DB_PREFIX."facture` f WHERE f.rowid = fd.`fk_facture` AND fk_statut > 0 ".(isset($_REQUEST['dateStock'])? "AND f.datef < '".$_REQUEST['dateStock']."'" : "")." AND `fk_product` = ".$productstatic->id);
                             $ln = $db->fetch_object($sql);
                             $nb = $ln->nb;

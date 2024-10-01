@@ -681,7 +681,8 @@ class StockOrder extends BimpObject
                         $stock->updateField('last_pa', $part_data['desc']);
                     } else {
                         $eeeCode = '';
-//
+                        $product_label = '';
+//TODO pourquoi sait commenté, on a besoin de recup le eeeCode et le productlabel...
 //                            $result2 = $gsx->stockingOrderPartsSummary(array(
 //                                'partNumber' => $part_number
 //                            ));
@@ -707,7 +708,8 @@ class StockOrder extends BimpObject
                             'qty'            => 0,
                             'qty_to_receive' => (int) $part_data['qty'],
                             'last_pa'        => $part_data['price'],
-                            'product_label'  => $part_data['desc'],
+                            'description'  => $part_data['desc'],
+                            'product_label'  => $product_label,
                             'code_eee'       => $eeeCode
                                 ), true, $stock_errors);
                     }

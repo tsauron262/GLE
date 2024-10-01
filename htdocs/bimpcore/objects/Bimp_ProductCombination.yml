@@ -40,19 +40,13 @@ fields:
         
     variation_price: 
         label: Variation du prix
-        type: money
+        type: float
         default_value: 0
-        display_if: 
-            field_name: variation_price_type
-            show_values: amount
         
     variation_price_percentage: 
-        label: Pourcentage de variation du prix
-        type: percent
+        label: Variation du prix en pourcentage
+        type: bool
         default_value: 0
-        display_if: 
-            field_name: variation_price_type
-            show_values: percent
     
     variation_weight: 
         label: Variation du poids (Kg)
@@ -70,16 +64,8 @@ forms:
               hidden: 1
               input: 
                   type: hidden
-            - custom: 1
-              label: Type de variation du prix
-              input_name: variation_price_type
-              input: 
-                  type: select
-                  options: 
-                      amount: Montant fixe
-                      percent: Pourcentage
-            - field: variation_price
             - field: variation_price_percentage
+            - field: variation_price
             - field: variation_weight
             - field: variation_ref_ext
             
@@ -107,9 +93,9 @@ lists:
             fk_product_parent: 
             fk_product_child: 
             combination: 
-            variation_price: 
+            variation_price_percentage:
                 edit: 1
-            variation_price_percentage: 
+            variation_price: 
                 edit: 1
             variation_weight: 
                 edit: 1

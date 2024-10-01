@@ -421,11 +421,6 @@ class BimpObject extends BimpCache
                     'values'   => array(
                         'array' => 'entitiesCache'
                     ),
-                    //            array: condReglements
-                    //        input: 
-                    //            type: select_cond_reglement
-                    //        default_value: 
-                    //            callback: getCondReglementBySociete
                     'editable' => 1
                 )
                     ), 'initial');
@@ -1844,9 +1839,8 @@ class BimpObject extends BimpCache
             else
                 $data['entity'] = $conf->entity;
             $this->set('entity', $data['entity']);
-            if($this->isDolObject())
+            if ($this->isDolObject())
                 $this->dol_object->entity = $data['entity'];
-                
         }
 
         return $data;
@@ -6188,6 +6182,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if (!$this->isFieldActivated($field)) {
                 continue;
             }
+
             $value = null;
             if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
                 if (preg_match('/^ef_(.*)$/', $field, $matches)) {
@@ -6272,16 +6267,16 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     }
                 }
             } else {
+                if (isset($this->dol_object->id) && (int) $this->dol_object->id) {
+                    $id = (int) $this->dol_object->id;
+                } else {
+                    $id = $result;
+                }
+
                 if (!empty($bimpObjectFields)) {
                     $fields = array();
                     foreach ($bimpObjectFields as $field_name => $value) {
                         $fields[] = $field_name;
-                    }
-
-                    if (isset($this->dol_object->id) && (int) $this->dol_object->id) {
-                        $id = (int) $this->dol_object->id;
-                    } else {
-                        $id = $result;
                     }
 
                     $data = $this->getDbData($fields);
@@ -6463,7 +6458,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $this->checkFieldValueType($field_name, $value);
                     $this->data[$field_name] = $value;
                 }
-            } else {                
+            } else {
                 BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Erreur SQL'    => $this->db->err(),
                     'Champs suppl.' => $bimpObjectFields,
@@ -6481,7 +6476,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $this->data[$field_name] = $value;
             }
         }
-
+        
         $this->initData = $this->data;
 
         if (!count($errors)) {
@@ -6974,14 +6969,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function can($right)
     {
-//        echo '<pre>'. get_class($this);
-        if (!BimpCore::isContextPublic() && isset($this->dol_object)) {//peut être un peut lourd, mais plus safe...
+        if (!BimpCore::isContextPublic() && isset($this->dol_object) && (!isset($this->no_dol_right_check) || !$this->no_dol_right_check)) {//peut être un peut lourd, mais plus safe...
             $return = BimpCache::dol_can($this->dol_object);
             if (!$return)
                 return 0;
         }
-//        print_r($this->dol_object);
-//        echo('rrr');
+
         switch ($right) {
             case "view" :
                 if (BimpCore::isContextPublic()) {
@@ -11136,7 +11129,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     }
 
     // Actions BDS : 
-    
+
     public function initBdsActionBulkEditField($process, &$action_data = array(), &$errors = array(), $extra_data = array())
     {
         $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');

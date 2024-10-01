@@ -27,8 +27,13 @@ if (!$user->admin) {
     exit;
 }
 
-BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
-echo BCT_Contrat::sendAlertUnpaidFacsAbo();
+global $conf;
+
+if (isset($conf->variants)) {
+    echo '<pre>';
+    print_r($conf->variants);
+    exit;
+}
 
 echo '<br/>FIN';
 echo '</body></html>';

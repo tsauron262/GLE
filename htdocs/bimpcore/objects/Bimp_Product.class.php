@@ -585,6 +585,13 @@ class Bimp_Product extends BimpObject
         return !$this->isBundle();
     }
 
+    public function useVariants()
+    {
+        global $conf;
+
+        return (int) (isset($conf->variants->enabled) && $conf->variants->enabled);
+    }
+
     // Getters array: 
 
     public function getProductsArrayByType2($type2, $include_empty = true, $with_price = true)
@@ -1481,7 +1488,7 @@ class Bimp_Product extends BimpObject
         if (!$this->isTypeService()) {
             return null;
         }
-        
+
         $values = BimpCore::getConf('services_limited_pa_percent');
 
         if (!empty($values)) {
@@ -2664,6 +2671,7 @@ class Bimp_Product extends BimpObject
 
     public function renderCardView()
     {
+        global $conf;
         $html = '';
 
         $tabs = array();
@@ -2684,6 +2692,16 @@ class Bimp_Product extends BimpObject
                 'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements',
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#equipments_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
+            );
+        }
+
+        if ($conf->variants->enabled) {
+            // Déclinaisons: 
+            $tabs[] = array(
+                'id'            => 'variants_tab',
+                'title'         => BimpRender::renderIcon('fas_sitemap', 'iconLeft') . 'Déclinaisons',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#variants_tab .nav_tab_ajax_result\')', array('variants'), array('button' => ''))
             );
         }
 
@@ -2826,6 +2844,7 @@ class Bimp_Product extends BimpObject
 
     public function renderLinkedObjectsList($list_type)
     {
+        global $conf;
         $errors = array();
         if (!$this->isLoaded($errors)) {
             return BimpRender::renderAlerts($errors);
@@ -2856,6 +2875,14 @@ class Bimp_Product extends BimpObject
                     $list->addFieldFilterValue('epl.position', 1);
                     $list->addFieldFilterValue('epl.type', BE_Place::BE_PLACE_ENTREPOT);
                     $list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
+                }
+                break;
+
+            case 'variants':
+                if (!$conf->variants->enabled) {
+                    $html .= BimpRender::renderAlerts('Les déclinaisons ne sont par actives', 'warning');
+                } else {
+                    $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_ProductCombination'), 'product', 1, $this->id, 'Déclinaisons', 'fas_sitemap');
                 }
                 break;
 
@@ -4448,7 +4475,7 @@ class Bimp_Product extends BimpObject
         }
         if (!count($errors)) {
             $qty = (int) BimpTools::getPostFieldValue('qty', 0, 'int');
-            if($qty > 0)
+            if ($qty > 0)
                 $errors = BimpTools::merge_array($errors, $this->correctStocks((int) BimpTools::getPostFieldValue('id_entrepot', 0, 'int'), $qty, 0, 'mouvement_manuel', 'Mouvement manuel ' . BimpTools::getPostFieldValue('comment', '', 'alphanohtml'), 'user', $user->id));
         }
 

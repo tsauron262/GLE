@@ -1,5 +1,7 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/variants/class/ProductCombination2ValuePair.class.php';
+
 class Bimp_ProductCombination extends BimpObject
 {
 
@@ -39,5 +41,33 @@ class Bimp_ProductCombination extends BimpObject
         }
 
         return $buttons;
+    }
+
+    // Getters données : 
+    public function getCombinations()
+    {
+        $comb2val = new ProductCombination2ValuePair($this->db->db);
+        return  $comb2val->fetchByFkCombination($this->id);
+    }
+
+    // Affichages : 
+
+    public function displayCombination()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $combinations = $this->getCombinations();
+            $iMax = count($combinations);
+
+            for ($i = 0; $i < $iMax; $i++) {
+                $html .= dol_htmlentities($combinations[$i]);
+                if ($i !== ($iMax - 1)) {
+                    $html .= '<br/>';
+                }
+            }
+        }
+
+        return $html;
     }
 }

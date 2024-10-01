@@ -82,6 +82,13 @@ forms:
             - field: variation_price_percentage
             - field: variation_weight
             - field: variation_ref_ext
+            
+lists_cols: 
+    combination: 
+        label: Combinaison
+        value: 
+            callback: displayCombination
+            
 lists: 
     default: 
         title: Déclinaisons
@@ -99,6 +106,7 @@ lists:
         cols:
             fk_product_parent: 
             fk_product_child: 
+            combination: 
             variation_price: 
                 edit: 1
             variation_price_percentage: 
@@ -106,6 +114,10 @@ lists:
             variation_weight: 
                 edit: 1
             variation_ref_ext: 
+                edit: 1
+            product_child:tosell: 
+                edit: 1
+            product_child:tobuy: 
                 edit: 1
                 
     product: 

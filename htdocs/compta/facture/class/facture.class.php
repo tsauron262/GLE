@@ -3271,7 +3271,7 @@ class Facture extends CommonInvoice
 			}
 		}
 
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
                 if (!defined('BIMP_LIB')) {
                     require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
                 }
@@ -3333,7 +3333,7 @@ class Facture extends CommonInvoice
 			}
                         
                         
-                        /*moddrsi*/
+                        /*moddrsi (20.2)*/
                         BimpTools::lockNum("numFact");
                         /*fmoddrsi*/
 			$num = $this->getNextNumRef($this->thirdparty);
@@ -3972,7 +3972,7 @@ class Facture extends CommonInvoice
 			$this->line->desc = $desc;
 			$this->line->ref_ext = $ref_ext;
 
-			/*moddrsi*/
+			/*moddrsi (20.2)*/
                         // ATTENTION MODIF TRES IMPORTANTE
                         // Pas chez nous...
 //			$this->line->qty=            ($this->type==self::TYPE_CREDIT_NOTE?abs($qty):$qty);	    // For credit note, quantity is always positive and unit price negative
@@ -3988,7 +3988,7 @@ class Facture extends CommonInvoice
 			$this->line->localtax1_type = empty($localtaxes_type[0]) ? 0 : $localtaxes_type[0];
 			$this->line->localtax2_type = empty($localtaxes_type[2]) ? 0 : $localtaxes_type[2];
 
-			/*moddrsi*/
+			/*moddrsi (20.2)*/
                         // ATTENTION MODIF TRES IMPORTANTE
                         // Pas chez nous non-plus...
 //			$this->line->total_ht=       (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ht):$total_ht);    // For credit note and if qty is negative, total is negative
@@ -4248,7 +4248,7 @@ class Facture extends CommonInvoice
 			$this->line->label = $label;
 			$this->line->desc = $desc;
 			$this->line->ref_ext = $ref_ext;
-			/*moddrsi*/
+			/*moddrsi (20.2)*/
 //			$this->line->qty				= ($this->type==self::TYPE_CREDIT_NOTE?abs($qty):$qty);	// For credit note, quantity is always positive and unit price negative
                         $this->line->qty				= $qty;
                         /*fmoddrsi*/
@@ -4261,13 +4261,13 @@ class Facture extends CommonInvoice
 			$this->line->localtax2_type		= empty($localtaxes_type[2]) ? 0 : $localtaxes_type[2];
 
 			$this->line->remise_percent		= $remise_percent;
-			/*moddrsi*/
+			/*moddrsi (20.2)*/
 //			$this->line->subprice			= ($this->type==2?-abs($pu_ht):$pu_ht); // For credit note, unit price always negative, always positive otherwise
                         $this->line->subprice			= $pu_ht;
                         /*fmoddrsi*/
 			$this->line->date_start = $date_start;
 			$this->line->date_end			= $date_end;
-			/*moddrsi*/
+			/*moddrsi (20.2)*/
 //			$this->line->total_ht			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ht):$total_ht);  // For credit note and if qty is negative, total is negative
 //			$this->line->total_tva			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_tva):$total_tva);
                         $this->line->total_ht			= $total_ht;
@@ -4275,7 +4275,7 @@ class Facture extends CommonInvoice
                         /*fmoddrsi*/
 			$this->line->total_localtax1	= $total_localtax1;
 			$this->line->total_localtax2	= $total_localtax2;
-			/*moddrsi*/
+			/*moddrsi (20.2)*/
 //			$this->line->total_ttc			= (($this->type==self::TYPE_CREDIT_NOTE||$qty<0)?-abs($total_ttc):$total_ttc);
                         $this->line->total_ttc			= $total_ttc;
                         /*fmoddrsi*/

@@ -71,15 +71,15 @@ class Fichinter extends CommonObject
 		$this->statut = 0;
 
 		// List of language codes for status
-		$this->statuts[0]='Draft';
-		$this->statuts[1]='Validated';
-		$this->statuts[2]='StatusInterInvoiced';
-		$this->statuts_short[0]='Draft';
-		$this->statuts_short[1]='Validated';
-		$this->statuts_short[2]='StatusInterInvoiced';
-		$this->statuts_logo[0]='statut0';
-		$this->statuts_logo[1]='statut4';
-		$this->statuts_logo[2]='statut6';
+		$this->labelStatus[0]='Draft';
+		$this->labelStatus[1]='Validated';
+		$this->labelStatus[2]='StatusInterInvoiced';
+		$this->labelStatus_short[0]='Draft';
+		$this->labelStatus_short[1]='Validated';
+		$this->labelStatus_short[2]='StatusInterInvoiced';
+		$this->labelStatus_logo[0]='statut0';
+		$this->labelStatus_logo[1]='statut4';
+		$this->labelStatus_logo[2]='statut6';
 	}
 
 
@@ -512,19 +512,19 @@ class Fichinter extends CommonObject
 			return $langs->trans($this->statuts[$statut]);
 
 		if ($mode == 1)
-			return $langs->trans($this->statuts_short[$statut]);
+			return $langs->trans($this->labelStatusShort[$statut]);
 
 		if ($mode == 2)
-			return img_picto($langs->trans($this->statuts_short[$statut]), $this->statuts_logo[$statut]).' '.$langs->trans($this->statuts_short[$statut]);
+			return img_picto($langs->trans($this->labelStatusShort[$statut]), $this->statuts_logo[$statut]).' '.$langs->trans($this->labelStatusShort[$statut]);
 
 		if ($mode == 3)
-			return img_picto($langs->trans($this->statuts_short[$statut]), $this->statuts_logo[$statut]);
+			return img_picto($langs->trans($this->labelStatusShort[$statut]), $this->statuts_logo[$statut]);
 
 		if ($mode == 4)
-			return img_picto($langs->trans($this->statuts_short[$statut]),$this->statuts_logo[$statut]).' '.$langs->trans($this->statuts[$statut]);
+			return img_picto($langs->trans($this->labelStatusShort[$statut]),$this->statuts_logo[$statut]).' '.$langs->trans($this->labelStatus[$statut]);
 
 		if ($mode == 5)
-			return '<span class="hideonsmartphone">'.$langs->trans($this->statuts_short[$statut]).' </span>'.img_picto($langs->trans($this->statuts_short[$statut]),$this->statuts_logo[$statut]);
+			return '<span class="hideonsmartphone">'.$langs->trans($this->labelStatusShort[$statut]).' </span>'.img_picto($langs->trans($this->labelStatusShort[$statut]),$this->statuts_logo[$statut]);
 
 	}
 
@@ -652,18 +652,21 @@ class Fichinter extends CommonObject
 				$cuser = new User($this->db);
 				$cuser->fetch($obj->fk_user_author);
 				$this->user_creation     = $cuser;
+                                $this->user_creation_id = $cuser->id;
 
 				if ($obj->fk_user_valid)
 				{
 					$vuser = new User($this->db);
 					$vuser->fetch($obj->fk_user_valid);
 					$this->user_validation     = $vuser;
+                                        $this->user_validation_id = $vuser->id;
 				}
 				if ($obj->fk_user_modification)
 				{
 					$muser = new User($this->db);
 					$muser->fetch($obj->fk_user_modification);
 					$this->user_modification   = $muser;
+                                        $this->user_modification_id = $muser->id;
 				}
 
 			}

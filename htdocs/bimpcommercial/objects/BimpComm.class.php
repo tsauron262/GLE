@@ -4974,20 +4974,23 @@ class BimpComm extends BimpDolObject
         $success = 'Vérification du total effectuée';
 
         if (method_exists($this->dol_object, 'update_price')) {
-            $initial_brouillon = null;
+            $initial_status = null;
 
             if ($this->object_name !== 'Bimp_Facture') {
-                $initial_brouillon = isset($this->dol_object->brouillon) ? $this->dol_object->brouillon : null;
-                $this->dol_object->brouillon = 1;
+                $initial_status = (isset($this->dol_object->status) ? $this->dol_object->status : (isset($this->dol_object->statut) ? isset($this->dol_object->statut) : null));
+                $this->dol_object->statut = 0; // Laissé mais déprécié
+                $this->dol_object->status = 0;
             }
 
             $this->dol_object->update_price();
 
             if ($this->object_name !== 'Bimp_Facture') {
-                if (is_null($initial_brouillon)) {
-                    unset($this->dol_object->brouillon);
+                if (is_null($initial_status)) {
+                    unset($this->dol_object->statut); 
+                    unset($this->dol_object->status);
                 } else {
-                    $this->dol_object->brouillon = $initial_brouillon;
+                    $this->dol_object->statut = $initial_status;
+                    $this->dol_object->status = $initial_status;
                 }
             }
         } else {

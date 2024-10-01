@@ -2150,8 +2150,8 @@ class Bimp_Societe extends BimpDolObject
                 $class = ($dt->getTimestamp() >= $date_regle_encoure->getTimestamp()) ? " class='danger'" : "";
                 $html .= "<strong" . $class . ">" . $dt->format('d / m / Y') . "</strong>";
 
-                if ((int) $this->dol_object->user_creation) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_creation);
+                if ((int) $this->dol_object->user_creation_id) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_creation_id);
                     if (BimpObject::objectLoaded($user)) {
                         $html .= ' par ' . $user->getLink();
                     }
@@ -2167,8 +2167,8 @@ class Bimp_Societe extends BimpDolObject
                 $html .= 'Dernière mise à jour le ' . $dt->format('d / m / Y');
 
                 // User pas toujours juste...
-//                 if ((int) $this->dol_object->user_modification) {
-//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_modification);
+//                 if ((int) $this->dol_object->user_modification_id) {
+//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_modification_id);
 //                    if (BimpObject::objectLoaded($user)) {
 //                        $html .= ' par ' . $user->getLink();
 //                    }
@@ -2478,13 +2478,11 @@ class Bimp_Societe extends BimpDolObject
                 $object = $this->dol_object;
 
                 // Code repris tel quel depuis societe/card.php: 
-
-                /* moddrsi */
+                
                 $sql = $db->query('SELECT Count(*) as nb, `ref_fourn`, `fk_product` FROM `llx_product_fournisseur_price` WHERE `fk_soc` IN (' . $soc_origin_id . ', ' . $object->id . ') GROUP BY `ref_fourn`, `fk_product` HAVING nb > 1');
                 while ($ln = $db->fetch_object($sql)) {
                     $db->query('UPDATE `llx_product_fournisseur_price` SET ref_fourn = CONCAT(ref_fourn, "-B") WHERE fk_product = ' . $ln->fk_product . ' AND ref_fourn = "' . $ln->ref_fourn . '" AND fk_soc = ' . $soc_origin_id . ' ');
                 }
-                /* fmoddrsi */
 
 
                 if ($import_soc_to_merge_data) {

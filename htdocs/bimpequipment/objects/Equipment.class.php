@@ -1352,7 +1352,7 @@ class Equipment extends BimpObject
                         $entrepot = new Entrepot($this->db->db);
                         $entrepot->fetch($id_entrepot);
                         if (BimpObject::objectLoaded($entrepot)) {
-                            $label = '"' . $entrepot->libelle . '"';
+                            $label = '"' . $entrepot->label . '"';
                         } else {
                             $label = 'sélectionné';
                         }

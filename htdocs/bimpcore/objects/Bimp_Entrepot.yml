@@ -25,7 +25,7 @@ labels:
 fields: 
     ref: 
         label: Référence
-        dol_prop: libelle
+        dol_prop: label
         required: 1
     
     lieu: 

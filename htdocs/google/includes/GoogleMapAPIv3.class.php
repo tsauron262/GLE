@@ -484,7 +484,7 @@ class GoogleMapAPI
 			if (! empty($elem->url)) $html.= '<a href="'.$elem->url.'">'.$elem->url.'</a><br/>';
 			$html.= '<br/>'.$lienGmaps.'<br/>';
                         
-                        /* mod drsi(Momo) */
+                        /* moddrsi (20.2) */
                         if(isset($user->rights->synopsispanier) && $user->rights->synopsispanier->read){
                             $present = $panier->getPresenceDB ($elem->id);
 
@@ -493,7 +493,7 @@ class GoogleMapAPI
                                 $html .= "<br/><a ".($present?"style='display:none;'":"")." class= 'ajPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'add');$(this).hide();$(this).parent().find('.supPan').show();\">Ajouter au Panier.</a>";
 
                                 $html .= "<a ".(!$present?"style='display:none;'":"")." class= 'supPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'sup');$(this).hide();$(this).parent().find('.ajPan').show();\">Retirer du Panier.</a>";
-                                $html .= "<a href= '".DOL_URL_ROOT."/synopsispanier/affichePanier.php?idReferent=".$idReferent."&type=".$type."'> Afficher le Panier.</a>";/*fmod drsi*/
+                                $html .= "<a href= '".DOL_URL_ROOT."/synopsispanier/affichePanier.php?idReferent=".$idReferent."&type=".$type."'> Afficher le Panier.</a>";
 
 
                             if ($present)
@@ -501,7 +501,7 @@ class GoogleMapAPI
                             else
                                 $icon = false;
                         }
-                        /*fmod drsi(Momo) */
+                        /*fmoddrsi*/
 			if(isset($elem->latitude) && isset($elem->longitude)) {
 				$this->addMarkerByCoords($elem->latitude, $elem->longitude, $elem->name, $html, '', $icon);
 			}
@@ -656,9 +656,9 @@ class GoogleMapAPI
 		$this->content .= "\t\t\t" . 'position: latlng' . "\n";
 		$this->content .= "\t\t" . '});' . "\n";
                 
-                /*mod drsi*/$this->content .= "google.maps.event.addListenerOnce(marker, 'click', function(){
+                /*moddrsi (20.2)*/$this->content .= "google.maps.event.addListenerOnce(marker, 'click', function(){
                 markerActif = this;"
-                ."});";/*fmod drsi*/
+                ."});";/*fmoddrsi*/
 
 		// Display direction inputs in the info window
 		if ($this->displayDirectionFields == true) {

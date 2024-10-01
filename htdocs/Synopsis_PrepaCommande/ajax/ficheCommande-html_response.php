@@ -224,7 +224,7 @@ EOF;
         print '<tr><th height="10" class="ui-state-default ui-widget-header">';
         print $langs->trans('DeliveryDate');
         print '</th><td colspan="3" class="ui-widget-content">';
-        print $commande->date_livraison ? htmlentities(utf8_decode(dol_print_date($commande->date_livraison, 'day'))) : '&nbsp;';
+        print $commande->delivery_date ? htmlentities(utf8_decode(dol_print_date($commande->delivery_date, 'day'))) : '&nbsp;';
         print '</td>';
 
         $arrGrpTmp = $commande->listGroupMember();

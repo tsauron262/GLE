@@ -536,8 +536,8 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetFont(''/* 'Arial' */, 'B', 9);
                 $pdf->Write(6, "Date d'installation: ");
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, dol_print_date(strtotime($propal->date_livraison)), 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
-                //$pdf->Write(6, dol_print_date($propal->date_livraison));
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, dol_print_date(strtotime($propal->delivery_date)), 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
+                //$pdf->Write(6, dol_print_date($propal->delivery_date));
                 //$Y = $Y + 6;
                 //$pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6,"", 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
                 //$pdf->SetX($X);

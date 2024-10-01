@@ -3290,7 +3290,7 @@ div.login_block span.aversion {
 	filter: contrast(0.7);
 }
 div.login_block table {
-	/*moddrsi display: inline;*/
+	/*moddrsi (20.2) display: inline;*/
 }
 div.login {
 	white-space:nowrap;
@@ -3320,7 +3320,7 @@ div.login_block_other {
 	padding-top: 0;
 	text-align: right;
 	margin-right: 8px;
-	/*moddrsi max-width: 200px;*/
+	/*moddrsi (20.2) max-width: 200px;*/
 }
 
 .login_block_elem {
@@ -6643,7 +6643,7 @@ span#select2-taskid-container[title^='--'] {
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
-    /*moddrsi*/
+    /*moddrsi (20.2)*/
 /*	background-color: var(--colorbackhmenu1);
 	color: var(--colortextbackhmenu);*/
         background-color: #5897FB;

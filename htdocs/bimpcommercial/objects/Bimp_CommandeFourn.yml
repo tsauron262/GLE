@@ -125,6 +125,7 @@ fields:
     date_valid: 
         label: Validée le
         type: datetime
+        dol_prop: date_validation
     date_approve: 
         label: 1ère approbation le
         type: datetime
@@ -139,6 +140,7 @@ fields:
     date_livraison: 
         label: Date prévue de livraison
         type: date
+        dol_prop: delivery_date
     fk_user_approve: 
         label: Approuvée par
         dol_prop: user_approve_id

@@ -562,7 +562,7 @@ abstract class CommonInvoice extends CommonObject
                 if ($user->id == 270)
                     return 1;
                 
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
                 global $rgpd_delete;
                 if ($rgpd_delete) return 1;
                 /*fmoddrsi*/

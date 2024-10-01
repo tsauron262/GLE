@@ -37,11 +37,11 @@ objects:
             id_object: 
                 field_value: fk_user_mod
                 
-    user_done: 
-        extends: user
-        instance: 
-            id_object: 
-                field_value: fk_user_done
+#    user_done: 
+#        extends: user
+#        instance: 
+#            id_object: 
+#                field_value: fk_user_done
                 
     societe: 
         instance: 
@@ -153,14 +153,14 @@ fields:
         input: 
             type: search_user
         
-    fk_user_done: 
-        label: Traité par
-        type: id_object
-        object: user_done
-        dol_prop: userdoneid
-        search: 
-            input: 
-                type: search_user
+#    fk_user_done: (removed) 
+#        label: Traité par
+#        type: id_object
+#        object: user_done
+#        dol_prop: userdoneid
+#        search: 
+#            input: 
+#                type: search_user
         
     fk_soc: 
         label: Société
@@ -399,8 +399,8 @@ fields_tables:
               display: nom_url
             - field: fk_user_action
               display: nom_url
-            - field: fk_user_done
-              display: nom_url
+#            - field: fk_user_done
+#              display: nom_url
               
 views: 
     default: 
@@ -425,8 +425,8 @@ filters:
         type: user
     fk_user_action: 
         type: user
-    fk_user_done: 
-        type: user
+#    fk_user_done: 
+#        type: user
     propal: 
         label: Proposition commerciale
         type: value
@@ -460,7 +460,7 @@ filters_panels:
             datep2: 
             fk_user_author: 
             fk_user_action: 
-            fk_user_done: 
+#            fk_user_done: 
                 
     soc: 
         extends: default

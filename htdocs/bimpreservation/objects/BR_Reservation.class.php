@@ -615,7 +615,7 @@ class BR_Reservation extends BimpObject
                                     $entrepot = $commande->getChildObject('entrepot');
 
                                     $buttons[] = array(
-                                        'label'   => 'Déplacer les quantités vers l\'entrepôt de la commande' . (BimpObject::objectLoaded($entrepot) ? ' (' . $entrepot->libelle . ' - ' . $entrepot->lieu . ')' : ''),
+                                        'label'   => 'Déplacer les quantités vers l\'entrepôt de la commande' . (BimpObject::objectLoaded($entrepot) ? ' (' . $entrepot->label . ' - ' . $entrepot->lieu . ')' : ''),
                                         'icon'    => 'fas_arrow-right',
                                         'onclick' => $this->getJsActionOnclick('moveToEntrepotCommande', array(), array(
                                             'confirm_msg' => 'Veuillez confirmer (action irréversible)'

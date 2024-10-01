@@ -191,8 +191,8 @@ class OrderFournPDF extends BimpCommDocumentPDF
         }
 
         // Date de livraison: 
-        if (!empty($this->commande->date_livraison)) {
-            $html .= '<span style="font-weight: bold;">Date de livraison: </span>' . dol_print_date($this->commande->date_livraison, "day", false, $this->langs) . '<br/>';
+        if (!empty($this->commande->delivery_date)) {
+            $html .= '<span style="font-weight: bold;">Date de livraison: </span>' . dol_print_date($this->commande->delivery_date, "day", false, $this->langs) . '<br/>';
         }
 
         // Code fournisseur: 

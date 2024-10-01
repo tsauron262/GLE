@@ -969,7 +969,7 @@ class ExtraFields
 
 		// We should not have several time this request. If we have, there is some optimization to do by calling a simple $extrafields->fetch_optionals() in top of code and not into subcode
                 
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
                 if ($elementtype && defined('BIMP_LIB') && (int) BimpCore::getConf('use_cache_for_extrafields')) {
                     $cache_key = 'dol_object_' . $elementtype . '_extrafields_' . $conf->entity;
                     
@@ -1064,7 +1064,7 @@ class ExtraFields
 			if ($elementtype) {
 				$this->attributes[$elementtype]['loaded'] = 1; // If nothing found, we also save tag 'loaded'
                                 
-                                /*moddrsi*/
+                                /*moddrsi (20.2)*/
                                 if (isset($this->attributes[$elementtype]) && defined('BIMP_LIB') && (int) BimpCore::getConf('use_cache_for_extrafields')) {
                                     if (!BimpCache::cacheServerExists($cache_key)) {
                                         $rows = array(); 

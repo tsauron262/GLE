@@ -10417,8 +10417,8 @@ class Bimp_CommandeLine extends ObjectLine
         if (BimpObject::objectLoaded($commande)) {
             if ((int) $commande->getData('fk_statut') === 1) {
                 $prev_commande_status = 1;
-                $commande->dol_object->statut = 0;
-                $commande->dol_object->brouillon = 1;
+                $commande->dol_object->statut = 0; // Laissé mais déprécié
+                $commande->dol_object->status = 0;
             }
         }
 
@@ -10431,7 +10431,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         if (!is_null($prev_commande_status)) {
             $commande->dol_object->statut = $prev_commande_status;
-            $commande->dol_object->brouillon = 0;
+            $commande->dol_object->status = $prev_commande_status;
         }
 
         if (BimpObject::objectLoaded($commande) && (int) $commande->getData('fk_statut') === 1) {

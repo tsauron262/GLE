@@ -1070,7 +1070,7 @@ class Product extends CommonObject
 	 * @param  boolean $updatetype  Update product type
 	 * @return int                  1 if OK, -1 if ref already exists, -2 if other error
 	 */
-	public function update($id, $user, $notrigger = false, $action = 'update', $updatetype = /*moddrsi*/true/*fmoddrsi*/)
+	public function update($id, $user, $notrigger = false, $action = 'update', $updatetype = /*moddrsi (20.2)*/true/*fmoddrsi*/)
 	{
 		global $langs, $conf, $hookmanager;
 

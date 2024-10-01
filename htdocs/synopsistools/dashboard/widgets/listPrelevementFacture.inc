@@ -33,7 +33,7 @@ function widget_listPrelevementFacture() {
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
         $sql .= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."societe as s";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-        $sql .= " , ".MAIN_DB_PREFIX."prelevement_facture_demande as pfd";
+        $sql .= " , ".MAIN_DB_PREFIX."prelevement_demande as pfd";
         $sql .= " WHERE s.rowid = f.fk_soc";
         $sql .= " AND pfd.traite = 0 AND pfd.fk_facture = f.rowid LIMIT 50";
 

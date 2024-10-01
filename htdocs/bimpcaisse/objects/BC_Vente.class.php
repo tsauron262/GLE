@@ -1703,7 +1703,7 @@ class BC_Vente extends BimpObject
 
                         $entrepot = BimpCache::getDolObjectInstance((int) $this->getData('id_entrepot'), 'product/stock', 'entrepot');
                         if (BimpObject::ObjectLoaded($entrepot)) {
-                            $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->libelle . "\n";
+                            $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->label . "\n";
                         }
 
                         $place = $equipment->getCurrentPlace();
@@ -2363,13 +2363,13 @@ class BC_Vente extends BimpObject
         }
 
         $note = 'Vente en caisse. Vente n°' . $this->id;
-        $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->libelle . ')"';
+        $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->label . ')"';
         $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
 
         $note = 'Vente en caisse ' . $this->getLink(array(
                     'syntaxe' => '<ref>'
                 )) . "\n";
-        $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->libelle . ')"' . "\n";
+        $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->label . ')"' . "\n";
         $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
 
         if ($this->getData('note_plus') != "")

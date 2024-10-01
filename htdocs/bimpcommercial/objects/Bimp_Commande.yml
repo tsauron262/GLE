@@ -135,6 +135,7 @@ fields:
     date_valid: 
         label: Validée le
         type: datetime
+        dol_prop: date_validation
         
     date_cloture: 
         label: Fermée le
@@ -150,6 +151,7 @@ fields:
     date_livraison: 
         label: Date de livraison souhaitée
         type: date
+        dol_prop: delivery_date
         
     total_ttc: 
         label: Total TTC

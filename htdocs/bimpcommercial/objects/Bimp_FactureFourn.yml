@@ -126,6 +126,7 @@ fields:
         type: date
     date_valid: 
         type: date
+        dol_prop: date_validation
     fk_user_author: 
         dol_prop: unset
     fk_user_valid: 

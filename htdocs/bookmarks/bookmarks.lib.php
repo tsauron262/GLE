@@ -31,7 +31,7 @@ function printDropdownBookmarksList()
 {
 	global $conf, $user, $db, $langs, $sortfield, $sortorder;
         
-        /*moddrsi*/
+        /*moddrsi (20.2)*/
         if ($conf->theme == "BimpTheme") {
             $init_MAIN_OPTIMIZEFORTEXTBROWSER = $conf->global->MAIN_OPTIMIZEFORTEXTBROWSER;
             $conf->global->MAIN_OPTIMIZEFORTEXTBROWSER = 1;
@@ -241,7 +241,7 @@ function printDropdownBookmarksList()
 				</script>';
 	}
 
-        /*moddrsi*/
+        /*moddrsi (20.2)*/
         if ($conf->theme == "BimpTheme") {
             $conf->global->MAIN_OPTIMIZEFORTEXTBROWSER = $init_MAIN_OPTIMIZEFORTEXTBROWSER;
         }

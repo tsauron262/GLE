@@ -84,14 +84,14 @@ class Synopsisdemandeinterv extends CommonObject {
         $this->projet_id = 0;
 
         // Statut 0=brouillon, 1=valide
-        $this->statuts[0] = $langs->trans("Draft");
-        $this->statuts[1] = $langs->trans("Validated");
-        $this->statuts[2] = $langs->trans("En cours");
-        $this->statuts[3] = $langs->trans("Cl&ocirc;turé");
-        $this->statuts_short[0] = $langs->trans("Draft");
-        $this->statuts_short[1] = $langs->trans("Validated");
-        $this->statuts_short[2] = $langs->trans("En cours");
-        $this->statuts_short[3] = $langs->trans("Cl&ocirc;turé");
+        $this->labelStatus[0] = $langs->trans("Draft");
+        $this->labelStatus[1] = $langs->trans("Validated");
+        $this->labelStatus[2] = $langs->trans("En cours");
+        $this->labelStatus[3] = $langs->trans("Cl&ocirc;turé");
+        $this->labelStatusShort[0] = $langs->trans("Draft");
+        $this->labelStatusShort[1] = $langs->trans("Validated");
+        $this->labelStatusShort[2] = $langs->trans("En cours");
+        $this->labelStatusShort[3] = $langs->trans("Cl&ocirc;turé");
     }
 
     /*
@@ -240,6 +240,7 @@ class Synopsisdemandeinterv extends CommonObject {
         $result = $soc->fetch($this->socid);
         $this->soc = $soc;
         $this->verifyNumRef();
+        $this->status = 0;
         $this->statut = 0;
 
         $sql = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisdemandeinterv (fk_soc, datec, ref, fk_user_author, description, model_pdf, note_public, note_private";
@@ -324,7 +325,7 @@ class Synopsisdemandeinterv extends CommonObject {
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;
         $sql .= ", fk_user_prisencharge = " . $this->fk_user_prisencharge;
-        $sql .= ", fk_statut = " . $this->statut;
+        $sql .= ", fk_statut = " . $this->status;
         $sql .= ", fk_commande = '" . $this->fk_commande."'";
         $sql .= ", fk_contrat = '" . $this->fk_contrat."'";
         $sql .= " WHERE rowid = " . $id;
@@ -378,6 +379,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $this->societe = $tmpSoc;
                 }
                 $this->statut = $obj->fk_statut;
+                $this->status = $obj->fk_statut;
                 $this->date_valid = $obj->date_valid;
                 $this->date = $this->db->jdate($obj->di);
                 $this->duree = $obj->duree;
@@ -396,9 +398,9 @@ class Synopsisdemandeinterv extends CommonObject {
                 $this->user_author_id = $obj->fk_user_author;
                 $this->fk_user_author = $obj->fk_user_author;
 
-                if ($this->statut == 0)
-                    $this->brouillon = 1;
-
+//                if ($this->status == 0){
+//                    $this->brouillon = 1; // removed 
+//                }
                 $this->db->free($resql);
                 return $this->id;
 //            } else {
@@ -820,7 +822,7 @@ class Synopsisdemandeinterv extends CommonObject {
      *    \return     string      Libelle
      */
     function getLibStatut($mode = 0) {
-        return $this->LibStatut($this->statut, $mode);
+        return $this->LibStatut($this->status, $mode);
     }
 
     /**
@@ -830,50 +832,50 @@ class Synopsisdemandeinterv extends CommonObject {
      */
     function LibStatut($statut, $mode = 0) {
         if ($mode == 0) {
-            return $this->statuts[$statut];
+            return $this->labelStatus[$statut];
         }
         if ($mode == 1) {
-            return $this->statuts_short[$statut];
+            return $this->labelStatusShort[$statut];
         }
         if ($mode == 2) {
             if ($statut == 0)
-                return img_picto($this->statuts_short[$statut], 'statut0') . ' ' . $this->statuts_short[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut0') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 1)
-                return img_picto($this->statuts_short[$statut], 'statut1') . ' ' . $this->statuts_short[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut1') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 2)
-                return img_picto($this->statuts_short[$statut], 'statut3') . ' ' . $this->statuts_short[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut3') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 3)
-                return img_picto($this->statuts_short[$statut], 'statut6') . ' ' . $this->statuts_short[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut6') . ' ' . $this->labelStatusShort[$statut];
         }
         if ($mode == 3) {
             if ($statut == 0)
-                return img_picto($this->statuts_short[$statut], 'statut0');
+                return img_picto($this->labelStatusShort[$statut], 'statut0');
             if ($statut == 1)
-                return img_picto($this->statuts_short[$statut], 'statut1');
+                return img_picto($this->labelStatusShort[$statut], 'statut1');
             if ($statut == 2)
-                return img_picto($this->statuts_short[$statut], 'statut3');
+                return img_picto($this->labelStatusShort[$statut], 'statut3');
             if ($statut == 3)
-                return img_picto($this->statuts_short[$statut], 'statut6');
+                return img_picto($this->labelStatusShort[$statut], 'statut6');
         }
         if ($mode == 4) {
             if ($statut == 0)
-                return img_picto($this->statuts_short[$statut], 'statut0') . ' ' . $this->statuts[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut0') . ' ' . $this->labelStatus[$statut];
             if ($statut == 1)
-                return img_picto($this->statuts_short[$statut], 'statut1') . ' ' . $this->statuts[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut1') . ' ' . $this->labelStatus[$statut];
             if ($statut == 2)
-                return img_picto($this->statuts_short[$statut], 'statut3') . ' ' . $this->statuts[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut3') . ' ' . $this->labelStatus[$statut];
             if ($statut == 3)
-                return img_picto($this->statuts_short[$statut], 'statut6') . ' ' . $this->statuts[$statut];
+                return img_picto($this->labelStatusShort[$statut], 'statut6') . ' ' . $this->labelStatus[$statut];
         }
         if ($mode == 5) {
             if ($statut == 0)
-                return $this->statuts_short[$statut] . ' ' . img_picto($this->statuts_short[$statut], 'statut0');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($this->labelStatusShort[$statut], 'statut0');
             if ($statut == 1)
-                return $this->statuts_short[$statut] . ' ' . img_picto($this->statuts_short[$statut], 'statut1');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($this->labelStatusShort[$statut], 'statut1');
             if ($statut == 2)
-                return $this->statuts_short[$statut] . ' ' . img_picto($this->statuts_short[$statut], 'statut3');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($this->labelStatusShort[$statut], 'statut3');
             if ($statut == 3)
-                return $this->statuts_short[$statut] . ' ' . img_picto($this->statuts_short[$statut], 'statut6');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($this->labelStatusShort[$statut], 'statut6');
         }
     }
 
@@ -955,11 +957,13 @@ class Synopsisdemandeinterv extends CommonObject {
                 $cuser = new User($this->db);
                 $cuser->fetch($obj->fk_user_author);
                 $this->user_creation = $cuser;
+                $this->user_creation_id = $cuser->id;
 
                 if ($obj->fk_user_valid) {
                     $vuser = new User($this->db);
                     $vuser->fetch($obj->fk_user_valid);
                     $this->user_validation = $vuser;
+                    $this->user_validation_id = $vuser->id;
                 }
 
                 if ($obj->fk_user_target) {
@@ -1078,7 +1082,7 @@ class Synopsisdemandeinterv extends CommonObject {
     function set_date_delivery($user, $date_delivery, $no_trigger = false) {
         global $langs, $conf;
 
-        if (1 || (isset($user->rights) && isset($user->rights->synopsisdemandeinterv) && $user->rights->synopsisdemandeinterv->creer/* && $this->statut == 0*/)) {
+        if (1 || (isset($user->rights) && isset($user->rights->synopsisdemandeinterv) && $user->rights->synopsisdemandeinterv->creer/* && $this->status == 0*/)) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
@@ -1171,7 +1175,7 @@ class Synopsisdemandeinterv extends CommonObject {
     function addline($synopsisdemandeintervid, $desc, $date_intervention, $duration, $typeinterv, $qte = 1, $pu_ht = 0, $isForfait = 0, $fk_commandedet = false, $fk_contratdet = false) {
         dol_syslog("synopsisdemandeinterv::Addline $synopsisdemandeintervid, $desc, $date_intervention, $duration");
 
-        if ($this->statut == 0) {
+        if ($this->status == 0) {
             $this->db->begin();
 
             // Insertion ligne
@@ -1713,7 +1717,7 @@ class synopsisdemandeintervLigne {
     }
     function delete_line() {
         global $user, $langs, $conf;
-        if ($this->statut == 0) {
+        if ($this->status == 0) {
             dol_syslog("synopsisdemandeintervLigne::delete_line lineid=" . $this->rowid);
             $this->db->begin();
 

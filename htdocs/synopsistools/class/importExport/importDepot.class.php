@@ -34,7 +34,7 @@ class importDepot extends import8sens {
                 $entrepot->update($entrepot->id, $user);
             }
             else{
-                $entrepot->libelle = $ln['DepCode'];
+                $entrepot->label = $ln['DepCode'];
                 $entrepot->create($user);
             }
         }

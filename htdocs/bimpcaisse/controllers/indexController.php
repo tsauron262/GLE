@@ -114,7 +114,7 @@ class indexController extends BimpController
                 $html .= '<i class="fa fa-building"></i>';
                 $html .= '<div class="headerBlockTitle">Centre:</div>';
                 $html .= '<div class="headerBlockContent">';
-                $html .= $entrepot->libelle;
+                $html .= $entrepot->label;
                 $html .= '</div>';
                 $html .= '</div>';
             }

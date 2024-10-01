@@ -1537,13 +1537,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '</div>';
             }
 
-            if ($status >= 2 && (int) $this->dol_object->user_close_id) {
+            if ($status >= 2 && (int) $this->dol_object->user_closing_id) {
                 $date_cloture = $this->db->getValue('propal', 'date_cloture', '`rowid` = ' . (int) $this->id);
                 if (!is_null($date_cloture) && $date_cloture) {
                     $html .= '<div class="object_header_infos">';
                     $html .= 'Fermée le <strong>' . date('d / m / Y', BimpTools::getDateTms($date_cloture)) . '</strong>';
 
-                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_close_id);
+                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_closing_id);
                     if (BimpObject::objectLoaded($u)) {
                         $html .= ' par ' . $u->getLink();
                     }
@@ -3379,7 +3379,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         } else {
             $date = '';
         }
-        if ($date !== $this->dol_object->date_livraison) {
+        if ($date !== $this->dol_object->delivery_date) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();
 

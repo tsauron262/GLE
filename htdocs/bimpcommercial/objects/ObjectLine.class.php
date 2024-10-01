@@ -2788,10 +2788,12 @@ class ObjectLine extends BimpObject
             $object->errors = array();
 
             $result = null;
+            $initial_status = null;
 
             if ($force_create) {
-                $initial_brouillon = isset($object->brouillon) ? $object->brouillon : null;
-                $object->brouillon = 1;
+                $initial_status = (isset($object->status) ? $object->status : (isset($object->statut) ? $object->statut : null));
+                $object->statut = 0; // déprécié
+                $object->status = 0;
             }
 
             switch ((int) $this->getData('type')) {
@@ -2911,10 +2913,12 @@ class ObjectLine extends BimpObject
             }
 
             if ($force_create) {
-                if (is_null($initial_brouillon)) {
-                    unset($object->brouillon);
+                if (is_null($initial_status)) {
+                    unset($object->statut);
+                    unset($object->status);
                 } else {
-                    $object->brouillon = $initial_brouillon;
+                    $object->statut = $initial_status;
+                    $object->status = $initial_status;
                 }
             }
         }
@@ -2948,11 +2952,12 @@ class ObjectLine extends BimpObject
             $object->error = '';
             $object->errors = array();
 
-            $initial_brouillon = null;
+            $initial_status = null;
 
             if ($force_update) {
-                $initial_brouillon = isset($object->brouillon) ? $object->brouillon : null;
-                $object->brouillon = 1;
+                $initial_status = (isset($object->status) ? $object->status : (isset($object->statut) ? $object->statut : null));
+                $object->statut = 0;
+                $object->status = 0;
             }
 
             $result = null;
@@ -3058,10 +3063,12 @@ class ObjectLine extends BimpObject
             }
 
             if ($force_update) {
-                if (is_null($initial_brouillon)) {
-                    unset($object->brouillon);
+                if (is_null($initial_status)) {
+                    unset($object->statut);
+                    unset($object->status);
                 } else {
-                    $object->brouillon = $initial_brouillon;
+                    $object->statut = $initial_status;
+                    $object->status = $initial_status;
                 }
             }
         }
@@ -5745,8 +5752,9 @@ class ObjectLine extends BimpObject
             if (BimpObject::objectLoaded($parent)) {
                 if ((int) $parent->getData('fk_statut') !== 0) {
                     $prev_parent_status = (int) $parent->getData('fk_statut');
-                    $parent->dol_object->statut = 0;
-                    $parent->dol_object->brouillon = 1;
+                    $parent->dol_object->statut = 0; // déprécié
+                    $parent->dol_object->status = 0;
+//                    $parent->dol_object->brouillon = 1; // prop removed
                 }
             }
         }
@@ -5852,7 +5860,8 @@ class ObjectLine extends BimpObject
 
         if (!is_null($prev_parent_status)) {
             $parent->dol_object->statut = $prev_parent_status;
-            $parent->dol_object->brouillon = 0;
+            $parent->dol_object->status = $prev_parent_status;
+//            $parent->dol_object->brouillon = 0; // prop removed
         }
 
         //gestion bundle
@@ -6131,8 +6140,9 @@ class ObjectLine extends BimpObject
                 if (BimpObject::objectLoaded($parent)) {
                     if ((int) $parent->getData('fk_statut') !== 0) {
                         $prev_parent_status = (int) $parent->getData('fk_statut');
-                        $parent->dol_object->statut = 0;
-                        $parent->dol_object->brouillon = 1;
+                        $parent->dol_object->statut = 0; // déprécié
+                        $parent->dol_object->status = 0;
+//                        $parent->dol_object->brouillon = 1; // prop removed
                     }
                 }
             }
@@ -6155,7 +6165,8 @@ class ObjectLine extends BimpObject
 
             if (!is_null($prev_parent_status)) {
                 $parent->dol_object->statut = $prev_parent_status;
-                $parent->dol_object->brouillon = 0;
+                $parent->dol_object->status = $prev_parent_status;
+//                $parent->dol_object->brouillon = 0; // prop removed
             }
 
             if (!count($errors)) {

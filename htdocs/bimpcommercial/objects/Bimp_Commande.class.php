@@ -2917,7 +2917,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $facture->dol_object->mode_reglement_id = $this->dol_object->mode_reglement_id;
         $facture->dol_object->availability_id = $this->dol_object->availability_id;
         $facture->dol_object->demand_reason_id = $this->dol_object->demand_reason_id;
-        $facture->dol_object->date_livraison = $this->dol_object->date_livraison;
+        $facture->dol_object->delivery_date = $this->dol_object->delivery_date;
         $facture->dol_object->fk_delivery_address = $this->dol_object->fk_delivery_address;
         $facture->dol_object->contact_id = $id_contact;
         $facture->dol_object->ref_client = $this->dol_object->ref_client;

@@ -26,7 +26,7 @@ class entrepotController extends equipmentController
         $html = '';
 
         $html .= '<div class="page_content container-fluid">';
-        $html .= '<h1>Liste des équipements pour l\'entrepôt "' . $entrepot->libelle . ($entrepot->description ? ' - ' . $entrepot->description : '') . '"</h1>';
+        $html .= '<h1>Liste des équipements pour l\'entrepôt "' . $entrepot->label . ($entrepot->description ? ' - ' . $entrepot->description : '') . '"</h1>';
 
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';

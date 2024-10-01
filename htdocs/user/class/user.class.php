@@ -2663,10 +2663,10 @@ class User extends CommonObject
 			$mesg .= $outputlangs->transnoentitiesnoconv("ForgetIfNothing")."<br>\n<br>\n";
 		}
                 
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
                 if(isset($this->array_options['options_mail_sec']) && $this->array_options['options_mail_sec'] != "")
                     $this->email .= ",".$this->array_options['options_mail_sec'];
-                /*fmod drsi*/
+                /*fmoddrsi*/
 
 		$trackid = 'use'.$this->id;
 		$sendcontext = 'password';
@@ -3548,7 +3548,7 @@ class User extends CommonObject
 			$info[getDolGlobalString('LDAP_FIELD_HOMEDIRECTORY')] = "{$conf->global->LDAP_FIELD_HOMEDIRECTORYPREFIX}/$this->login";
 		}
                 
-                /*mod drsi*/
+                /*moddrsi (20.2)*/
 //                if(!empty($conf->global->LDAP_FIELD_PASSWORD_CRYPTED))
 //                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{MD5}".base64_encode( pack( 'H*' , $this->pass_indatabase_crypted));
 //                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);

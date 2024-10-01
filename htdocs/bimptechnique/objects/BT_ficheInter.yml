@@ -166,7 +166,7 @@ fields:
         
     fk_user_author:
         label: Créée par
-        dol_prop: user_creation
+        dol_prop: user_creation_id
         type: id_object
         object: userCreate
         input:

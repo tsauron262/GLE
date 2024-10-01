@@ -130,7 +130,7 @@ if ($mode=='thirdparty')
     
     
     
-    /* mod drsi*/
+    /* moddrsi (20.2)*/
 $para = "idReferent=" . $_REQUEST['idReferent']."&type=".$_REQUEST['type'];
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 $htmlother=new FormOther($db);
@@ -159,7 +159,7 @@ $htmlother=new FormOther($db);
 		print $moreforfilter;
 		print '</div>';
 	}
-    /*f mod drsi*/
+    /*fmoddrsi*/
     
     
     
@@ -187,14 +187,14 @@ $htmlother=new FormOther($db);
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c ON s.fk_pays = c.rowid";
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."google_maps as g ON s.rowid = g.fk_object and g.type_object='".$type."'";
 	if ($search_sale || (!$user->rights->societe->client->voir && !$socid)) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-        /*mod drsi*/ 
+        /*moddrsi (20.2)*/ 
         if($search_categ > 0)
             $sql .= ", ".MAIN_DB_PREFIX."categorie_societe as cat";
         if($search_categ2 > 0)
             $sql .= ", ".MAIN_DB_PREFIX."categorie_fournisseur as cat2";
 	$sql.= " WHERE s.status = 1";
 //        $sql.= " AND s.rowid > 135195 ";// 135179 ";//152697";
-        /*mod drsi*/ 
+        /*fmoddrsi*/ 
         if($search_categ > 0)
             $sql .= " AND cat.fk_soc = s.rowid AND cat.fk_categorie = '".$search_categ."'";
         elseif($search_categ == -2)
@@ -298,7 +298,7 @@ if ($resql)
 
 		$addresstosearch=dol_format_address($obj,1," ");
 		$address=dol_format_address($obj,1,", ");	// address to show
-/*mod drsi */
+                /*moddrsi (20.2)*/
                 if($mode=='thirdparty')
                     $object=new Societe($db);
                 else
@@ -311,7 +311,7 @@ if ($resql)
                     $object->name=$object->getNomUrl(1);
                 
                 $addresstosearch = virerCedex($addresstosearch);
-/*fmod drsi */
+                /*fmoddrsi */
 		$object->latitude = $obj->latitude;
 		$object->longitude = $obj->longitude;
 		$object->address = $address;
@@ -385,10 +385,10 @@ if ($resql)
 					$error='Quota reached';
 					$googlemaps->result_code='OVER_QUERY_LIMIT';
 					$googlemaps->result_label=$error;
-                                        /*mod drsi*/
+                                        /*moddrsi (20.2)*/
                                         $MAXADDRESS = $countgeoencoding;
                                         echo "Quota Google Atteind !!! <br/><br/>";
-                                        /*f mod drsi*/
+                                        /*fmoddrsi*/
 				}
 				else
 				{
@@ -665,7 +665,7 @@ function googlegetURLContent($url,$postorget='GET',$param='')
 	return $rep;
 }
 
-/*drsi*/
+/*moddrsi (20.2)*/
 function virerCedex($str){
     $str = preg_replace("/BP( )*[0-9]{1,10}/i", " ", $str);
     
@@ -677,4 +677,5 @@ function virerCedex($str){
     
     return $str;
 }
+/*fmoddrsi*/
 ?>

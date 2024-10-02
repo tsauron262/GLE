@@ -759,12 +759,16 @@ class BimpComm extends BimpDolObject
             if ((int) $this->getData('fk_statut') === 0) {
                 $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
+                if(BimpCore::getConf('use_light_fourn', 0, 'bimpcommercial'))
+                    $form = 'lightFourn';
+                else
+                    $form = 'create';
                 $buttons[] = array(
                     'label'       => 'Créer un produit',
                     'icon_before' => 'fas_box',
                     'classes'     => array('btn', 'btn-default'),
                     'attr'        => array(
-                        'onclick' => $product->getJsLoadModalForm('lightFourn', 'Nouveau produit')
+                        'onclick' => $product->getJsLoadModalForm($form, 'Nouveau produit')
                     )
                 );
                 $productFourn = BimpObject::getInstance('bimpcore', 'Bimp_Product_Ldlc');

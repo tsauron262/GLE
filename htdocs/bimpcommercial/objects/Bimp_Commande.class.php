@@ -482,7 +482,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
                 global $user;
-                if (BimpCore::isModuleActive('bimpvalidation') && $client_facture->getData('outstanding_limit') < 1 && $this->getData('ef_type') != 'S' /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->asPreuvePaiment()) {
+                if (BimpCore::isModuleActive('bimpvalidation') && $client_facture->getData('outstanding_limit') < 1 && $this->getData('ef_type') != 'S' /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->hasPreuvePaiment()) {
                     if (!in_array($user->id, array(232, 97, 1566, 512, 40, 242))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
                         if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
@@ -641,7 +641,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return 0;
     }
 
-    public function asPreuvePaiment()
+    public function hasPreuvePaiment()
     {
         $files = $this->getFilesArray();
         foreach ($files as $file) {
@@ -819,10 +819,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     );
                 }
             }
-            if ($status === 0 && !$this->asPreuvePaiment())
+
+            if ($status === 0 && !$this->hasPreuvePaiment())
                 $buttons[] = array(
                     'label'   => 'Télécharger la preuve de paiement',
-                    'icon'    => 'dollar',
+                    'icon'    => 'fas_file-download',
                     'onclick' => $this->getJsActionOnclick('preuvePaiment', array(), array(
                         'form_name' => 'preuve_paiement'
                     ))
@@ -4488,11 +4489,18 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         $errors = $warnings = array();
 
-        if (isset($data['file']) && $data['file'] != '') {
-            BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
+        $files = BimpTools::getArrayValueFromPath($data, 'file', array());
+
+        if (empty($files)) {
+            $errors[] = 'Aucun fichier ajouté';
+        } else {
+            BimpTools::moveTmpFiles($errors, $files, $this->getFilesDir(), 'Paiement');
             $this->addLog('Preuve de paiement uploadé');
-        } else
-            $errors[] = 'Aucun fichier uploadé';
+        }
+
+//        if (isset($data['file']) && $data['file'] != '') {
+//            BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
+//        }
 
         return array(
             'errors'   => $errors,

@@ -365,7 +365,7 @@ fields_tables:
                   callback: 
                     method: displayBool
                     params:
-                        - asPreuvePaiment
+                        - hasPreuvePaiment
             - custom: 1
               label: Rentabilitées technique
               value:

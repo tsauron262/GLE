@@ -383,3 +383,7 @@ params:
         label: ID client LDLC Pro Lease
         cat: locations
         def: 0
+        
+    use_light_fourn:
+        label: Utiliser le formulaire de création simplifié
+        def: 0

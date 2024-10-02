@@ -4488,6 +4488,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function actionPreuvePaiment($data, &$success)
     {
         $errors = $warnings = array();
+        $success = 'Preuve de paiement enregistrée avec succès';
 
         $files = BimpTools::getArrayValueFromPath($data, 'file', array());
 

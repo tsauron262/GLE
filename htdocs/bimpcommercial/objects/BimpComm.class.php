@@ -762,7 +762,7 @@ class BimpComm extends BimpDolObject
                 if(BimpCore::getConf('use_light_fourn', 0, 'bimpcommercial'))
                     $form = 'lightFourn';
                 else
-                    $form = 'default';
+                    $form = 'create';
                 $buttons[] = array(
                     'label'       => 'Créer un produit',
                     'icon_before' => 'fas_box',

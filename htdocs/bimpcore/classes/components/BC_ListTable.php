@@ -108,7 +108,7 @@ class BC_ListTable extends BC_List
                 $this->params['add_object_row'] = 0;
             }
             if (!(int) $this->object->can("view")) {
-                $this->errors[] = 's Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
+                $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur') . ' - ' . get_class($this->object);
             }
             if (!(int) $this->object->can("edit")) {
                 $this->params['enable_edit'] = 0;
@@ -772,6 +772,8 @@ class BC_ListTable extends BC_List
         foreach ($this->items as $item) {
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
             if (BimpObject::objectLoaded($object)) {
+//                $object->printData();
+//                exit;
                 $this->object = $object;
                 $item_errors = array();
                 $item_params = self::fetchParamsStatic($object->config, $this->config_path, self::$item_params, $item_errors, true);
@@ -1245,8 +1247,8 @@ class BC_ListTable extends BC_List
             $dataGraph = $this->object->getInfoGraph($idGraph);
             $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartOption"></div>';
             $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartContainer" style="height: 800px; width: 100%;"></div>';
-            $html .= '<script '.BimpTools::getScriptAttribut().' src="'.BimpCore::getFileUrl('bimpcore/views/js/jquery.canvasjs.min.js').'"></script>';
-            $html .= '<script '.BimpTools::getScriptAttribut().'>';
+            $html .= '<script ' . BimpTools::getScriptAttribut() . ' src="' . BimpCore::getFileUrl('bimpcore/views/js/jquery.canvasjs.min.js') . '"></script>';
+            $html .= '<script ' . BimpTools::getScriptAttribut() . '>';
             $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \'' . $this->identifier . "')" . $actionRefresh . "});";
             if ($dataGraph['mode_data'] == 'objects')
                 $html .= "$('#" . $this->identifier . "').on('listRefresh', function(){" . $actionRefresh . "});";
@@ -1618,7 +1620,7 @@ class BC_ListTable extends BC_List
 
         if ((int) $this->params['add_object_row'] && !is_null($this->config_path)) {
             $html .= '<tr id="' . $this->identifier . '_addObjectRow" class="addObjectRow inputsRow" style="' . ($this->params['add_object_row_open'] ? '' : 'display: none;') . '">';
-            $html .= '<td colspan="2"><i class="fa fa-plus-circle"></i></td>';
+            $html .= '<td colspan="2">' . BimpRender::renderIcon('fas_plus-circle') . '</td>';
 
             if ($this->params['total_row']) {
                 $html .= '<td style="width: 45px; min-width: 45px"></td>';

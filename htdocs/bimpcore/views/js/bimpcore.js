@@ -801,5 +801,3 @@ $(document).ready(function () {
         }
     });
 });
-
-bimp_msg('DJHHSKJD');

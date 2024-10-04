@@ -295,7 +295,7 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'mouvement':
-                if ((int) !$this->getData('validate')) {
+                if ((int) !$this->isValidate()) {
                     $errors[] = 'Ce produit n\'est pas validé';
                     return 0;
                 }
@@ -306,6 +306,8 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'validate':
+                if(!BimpCore::getConf('validation_produit'))
+                    return 0; 
                 if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
@@ -364,7 +366,7 @@ class Bimp_Product extends BimpObject
                     $errors[] = 'Déclinaisons non actives';
                     return 0;
                 }
-                if (!(int) $this->getData('validate')) {
+                if (!(int) $this->isValidate()) {
                     $errors[] = 'Produit non validé';
                     return 0;
                 }
@@ -515,11 +517,17 @@ class Bimp_Product extends BimpObject
 
         return (int) isset(self::$ventes[$dateMin . '-' . $dateMax]);
     }
+    
+    public function isValidate(){
+        if(!BimpCore::getConf('validation_produit'))
+            return 1;
+        return $this->getData('validate');
+    }
 
     public function isVendable(&$errors, $urgent = false, $mail = true)
     {
         if ((int) BimpCore::getConf('use_valid_product') && $this->dol_field_exists('validate')) {
-            if (!(int) $this->getData('validate')) {
+            if (!(int) $this->isValidate()) {
                 $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
                 if ($mail) {
                     $this->db->db->rollback();
@@ -2417,8 +2425,8 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
 
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('validate')) {
+        if ($this->isLoaded() && BimpCore::getConf('validation_produit')) {
+            if ((int) $this->isValidate()) {
                 $html .= '<span class="success">';
                 $html .= BimpRender::renderIcon('fas_check', 'iconLeft');
                 $html .= 'Validé';

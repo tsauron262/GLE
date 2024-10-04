@@ -2386,6 +2386,7 @@ class Bimp_Product extends BimpObject
 
     public function renderHeaderExtraLeft()
     {
+        global $conf;
         $html = '';
 
         $url = $this->getData('url');
@@ -2414,6 +2415,14 @@ class Bimp_Product extends BimpObject
             $html .= '<div class="object_header_infos">';
             $html .= 'Validée le ' . BimpTools::printDate($this->getData('date_valid'), 'strong');
             $html .= '</div>';
+        }
+        
+        if($conf->variants->enabled){
+            $parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child'=>$this->id));
+            if($parentCombinaison->isLoaded()){
+                $parentProduct = $parentCombinaison->getParent();
+                $html .= 'Déclinaison de '.$parentProduct->getLink();
+            }
         }
 
         $html .= $this->getAlertBundle();
@@ -2943,6 +2952,9 @@ class Bimp_Product extends BimpObject
                 if (!$conf->variants->enabled) {
                     $html .= BimpRender::renderAlerts('Les déclinaisons ne sont par actives', 'warning');
                 } else {
+                    $parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child'=>$this->id));
+                    if($parentCombinaison->isLoaded())
+                        $html .= BimpRender::renderAlerts ('Attention ce produit est déja une déclinaison');
                     $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_ProductCombination'), 'product', 1, $this->id, 'Déclinaisons', 'fas_sitemap');
                 }
                 break;

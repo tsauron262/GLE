@@ -2420,7 +2420,7 @@ class Bimp_Product extends BimpObject
         if($conf->variants->enabled){
             $parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child'=>$this->id));
             if($parentCombinaison && $parentCombinaison->isLoaded()){
-                $parentProduct = $parentCombinaison->getParent();
+                $parentProduct = $parentCombinaison->getParentInstance();
                 $html .= 'Déclinaison de '.$parentProduct->getLink();
             }
         }

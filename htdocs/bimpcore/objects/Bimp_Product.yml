@@ -954,25 +954,10 @@ forms:
     combination: 
         rows: 
             - custom: 1
-              label: Attribut
-              data_type: id
-              input_name: id_attribute
-              input: 
-                  type: select
-                  options: 
-                      array: productAttributes
-            - custom: 1
-              label: Valeur
-              data_type: id
-              input_name: id_value
-              input: 
-                  type: select
-                  options: 
-                      array: productAttributeValues
-              display_if: 
-                  field_name: id_attribute
-                  hide_values: 0
-              depends_on: id_attribute
+              label: Attributs et valeurs
+              input_name: features
+              content: 
+                  callback: renderCombinationFeaturesInput
             - custom: 1
               label: Référence
               input_name: combination_ref
@@ -980,16 +965,6 @@ forms:
                   type: text
               value: 
                    callback: getNewCombinationRef
-              display_if: 
-                  field_name: id_attribute
-                  hide_values: 0
-              depends_on: id_attribute,id_value
-              display_if: 
-                  fields_names: id_attribute,id_value
-                  id_attribute: 
-                      hide_values: 0
-                  id_value: 
-                      hide_values: 0
             - custom: 1
               label: Impact sur le prix en pourcentage
               input_name: variation_price_percent
@@ -1015,10 +990,6 @@ forms:
                   addon_right: 
                       text: Kg
               value: 0
-              
-              
-              
-                      
             
 fields_tables: 
     infos: 

@@ -306,8 +306,8 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'validate':
-                if(!BimpCore::getConf('validation_produit'))
-                    return 0; 
+                if (!BimpCore::getConf('validation_produit'))
+                    return 0;
                 if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
@@ -517,9 +517,10 @@ class Bimp_Product extends BimpObject
 
         return (int) isset(self::$ventes[$dateMin . '-' . $dateMax]);
     }
-    
-    public function isValidate(){
-        if(!BimpCore::getConf('validation_produit'))
+
+    public function isValidate()
+    {
+        if (!BimpCore::getConf('validation_produit'))
             return 1;
         return $this->getData('validate');
     }
@@ -664,9 +665,11 @@ class Bimp_Product extends BimpObject
         return Bimp_ProductAttribute::getAttributesArray();
     }
 
-    public function getProductAttributeValuesArray()
+    public function getProductAttributeValuesArray($id_attribute = null)
     {
-        $id_attribute = (int) BimpTools::getPostFieldValue('id_attribute', 0, 'int');
+        if (!$id_attribute) {
+            $id_attribute = (int) BimpTools::getPostFieldValue('id_attribute', 0, 'int');
+        }
 
         if ($id_attribute) {
             BimpObject::loadClass('bimpcore', 'Bimp_ProductAttributeValue');
@@ -1551,17 +1554,26 @@ class Bimp_Product extends BimpObject
     public function getNewCombinationRef()
     {
         if ($this->isLoaded()) {
-            $id_attr = (int) BimpTools::getPostFieldValue('id_attribute', 0, 'int');
-            $id_value = (int) BimpTools::getPostFieldValue('id_value', 0, 'int');
+            $ref = $this->getRef();
+            $features = BimpTools::getPostFieldValue('features', array(), 'array');
 
-            if ($id_attr && $id_value) {
-                $attr_ref = $this->db->getValue('product_attribute', 'ref', 'rowid = ' . $id_attr);
-                $value = $this->db->getValue('product_attribute_value', 'value', 'rowid = ' . $id_value);
-                return $this->getRef() . '-' . $attr_ref . '-' . $value;
+            foreach ($features as $feature) {
+                if ($feature) {
+                    $data = explode('-', $feature);
+                    if (isset($data[1])) {
+                        $id_value = (int) $data[1];
+                    }
+                }
+                if ($id_value) {
+                    $val_ref = $this->db->getValue('product_attribute_value', 'ref', 'rowid = ' . $id_value);
+                    if ((string) $val_ref) {
+                        $ref .= '-' . $val_ref;
+                    }
+                }
             }
         }
 
-        return '';
+        return $ref;
     }
 
     // Getters stocks:
@@ -2416,12 +2428,12 @@ class Bimp_Product extends BimpObject
             $html .= 'Validée le ' . BimpTools::printDate($this->getData('date_valid'), 'strong');
             $html .= '</div>';
         }
-        
-        if($conf->variants->enabled){
-            $parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child'=>$this->id));
-            if($parentCombinaison && $parentCombinaison->isLoaded()){
+
+        if ($conf->variants->enabled) {
+            $parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child' => $this->id));
+            if ($parentCombinaison && $parentCombinaison->isLoaded()) {
                 $parentProduct = $parentCombinaison->getParentInstance();
-                $html .= 'Déclinaison de '.$parentProduct->getLink();
+                $html .= 'Déclinaison de ' . $parentProduct->getLink();
             }
         }
 
@@ -2952,9 +2964,9 @@ class Bimp_Product extends BimpObject
                 if (!$conf->variants->enabled) {
                     $html .= BimpRender::renderAlerts('Les déclinaisons ne sont par actives', 'warning');
                 } else {
-                    $parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child'=>$this->id));
-                    if($parentCombinaison && $parentCombinaison->isLoaded())
-                        $html .= BimpRender::renderAlerts ('Attention ce produit est déja une déclinaison');
+                    $parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child' => $this->id));
+                    if ($parentCombinaison && $parentCombinaison->isLoaded())
+                        $html .= BimpRender::renderAlerts('Attention ce produit est déja une déclinaison');
                     $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_ProductCombination'), 'product', 1, $this->id, 'Déclinaisons', 'fas_sitemap');
                 }
                 break;
@@ -3267,6 +3279,44 @@ class Bimp_Product extends BimpObject
         $commandeController = BimpController::getInstance('bimpcommercial', 'commandes');
         return $commandeController->renderPeriodsTab(array(
                     'id_product' => $this->id
+        ));
+    }
+
+    public function renderCombinationFeaturesInput()
+    {
+        $features = array();
+
+        $attributes = $this->getProductAttributesArray();
+
+        foreach ($attributes as $id_attr => $attr_label) {
+            $attr_options = array(
+                'label'   => '<b>' . $attr_label . '</b>',
+                'options' => array()
+            );
+
+            $values = $this->getProductAttributeValuesArray($id_attr);
+
+            foreach ($values as $id_value => $value_label) {
+                if (!(int) $id_value) {
+                    continue;
+                }
+                $attr_options['options'][$id_attr . '-' . $id_value] = '<b>' . $attr_label . '</b> : ' . $value_label;
+            }
+
+            $features[] = array(
+                'group' => $attr_options
+            );
+        }
+
+
+        $input = BimpInput::renderInput('select', 'features_add_value', '', array(
+                    'options' => $features
+        ));
+
+        $content = BimpInput::renderMultipleValuesInput(null, 'features', $input, array());
+
+        return BimpInput::renderInputContainer('features', '', $content, '', 1, 1, '', array(
+                    'values_field' => 'features'
         ));
     }
 
@@ -4490,14 +4540,9 @@ class Bimp_Product extends BimpObject
         $success = 'Combinaison créée avec succès';
         $sc = 'triggerObjectChange(\'bimpcore\', \'Bimp_ProductCombination\');';
 
-        $id_attribute = BimpTools::getArrayValueFromPath($data, 'id_attribute', 0);
-        if (!$id_attribute) {
+        $features_str = BimpTools::getArrayValueFromPath($data, 'features', array());
+        if (empty($features_str)) {
             $errors[] = 'Aucun attribut sélectionné';
-        }
-
-        $id_value = BimpTools::getArrayValueFromPath($data, 'id_value', 0);
-        if (!$id_value) {
-            $errors[] = 'Aucune valeur d\'attribut sélectionnée';
         }
 
         $ref = BimpTools::getArrayValueFromPath($data, 'combination_ref', '');
@@ -4510,9 +4555,12 @@ class Bimp_Product extends BimpObject
         $variation_weight = BimpTools::getArrayValueFromPath($data, 'variation_weight', 0);
 
         if (!count($errors)) {
-            $features = array(
-                $id_attribute => $id_value
-            );
+            $features = array();
+            foreach ($features_str as $str) {
+                $data = explode('-', $str);
+                $features[$data[0]] = $data[1];
+            }
+
             BimpObject::loadClass('bimpcore', 'Bimp_ProductCombination');
             $prodcomb = new ProductCombination($this->db->db);
 

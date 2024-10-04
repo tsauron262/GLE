@@ -66,7 +66,7 @@ class Bimp_ProductAttribute extends BimpObject
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][(int) $r['rowid']] = $r['ref'] . ' - ' . $r['label'];
+                    self::$cache[$cache_key][(int) $r['rowid']] = $r['label'];
                 }
             }
         }

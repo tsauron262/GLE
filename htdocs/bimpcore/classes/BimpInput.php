@@ -1571,7 +1571,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none', $items_options = array())
+    public static function renderMultipleValuesList($object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none', $items_options = array())
     {
         if (is_null($values) || $values === '') {
             $values = array();

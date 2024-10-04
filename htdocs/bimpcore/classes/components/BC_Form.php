@@ -114,7 +114,7 @@ class BC_Form extends BC_Panel
         if (!is_null($on_save)) {
             $this->params['on_save'] = $on_save;
         }
-        
+
         if ($object->config->isDefined('forms/' . $name . '/rows_callback')) {
             $method = $object->config->get('forms/' . $name . '/rows_callback', '');
             if ($method && method_exists($object, $method)) {
@@ -813,6 +813,7 @@ class BC_Form extends BC_Panel
         }
 
         if (isset($this->params['values']['fields'][$params['input_name']])) {
+            
             $params['value'] = $this->params['values']['fields'][$params['input_name']];
         }
 

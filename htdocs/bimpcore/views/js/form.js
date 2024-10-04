@@ -1383,6 +1383,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
                     setInputsEvents($valuesList);
                 }
                 checkMultipleValues();
+                bimp_msg('LA : ' + values_field_name);
                 $('body').trigger($.Event('inputMultipleValuesChange', {
                     input_name: values_field_name,
                     $container: $container

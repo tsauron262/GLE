@@ -224,10 +224,10 @@ class BimpTools
 
         $dir = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir();
         $files = BimpTools::getAjaxFileName($field_name);
-        if(!is_array($files))
+        if (!is_array($files))
             $files = array($files);
 
-        foreach($files as $file){
+        foreach ($files as $file) {
             if ($name_dest == null) {
                 $name_dest = $file;
             }
@@ -238,7 +238,7 @@ class BimpTools
                 $name_dest .= '.' . $extension;
             }
             if (!file_exists($dir . '/' . $file)) {
-                $errors[] = 'Le fichier "' . $dir . '/' . $file . '" n\'existe passs';
+                $errors[] = 'Le fichier "' . $dir . '/' . $file . '" n\'existe pas';
             } elseif (!rename($dir . '/' . $file, $dir_dest . '/' . $name_dest)) {
                 $errors[] = 'Echec du déplacement du fichier "' . $name_dest . '" dans le dossier de destination';
             }
@@ -258,17 +258,19 @@ class BimpTools
         $dir = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir() . '/';
 
         $i = 0;
+
         foreach ($files as $file_name) {
             $i++;
             if (!file_exists($dir . $file_name)) {
                 $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas dans le dossier de téléchargement temporaire';
             } else {
+                $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
                 $file_dest = $dir_dest . '/';
                 if ($name_dest) {
                     if (count($files) > 1) {
-                        $file_dest .= pathinfo($name_dest, PATHINFO_FILENAME) . '_' . $i . '.' . pathinfo($name_dest, PATHINFO_EXTENSION);
+                        $file_dest .= pathinfo($name_dest, PATHINFO_FILENAME) . '_' . $i . '.' . $file_ext;
                     } else {
-                        $file_dest .= $name_dest;
+                        $file_dest .= pathinfo($name_dest, PATHINFO_FILENAME) . '.' . $file_ext;
                     }
                 } else {
                     if (preg_match('/^(.+)_tms[0-9]+(\..+)$/', $file_name, $matches)) {
@@ -282,7 +284,7 @@ class BimpTools
                 $file_dest_tmp = $file_dest;
                 while (file_exists($file_dest_tmp)) {
                     $i++;
-                    $file_dest_tmp = pathinfo($file_dest, PATHINFO_DIRNAME) . '/' . pathinfo($file_dest, PATHINFO_FILENAME) . '_' . $i . '.' . pathinfo($file_dest, PATHINFO_EXTENSION);
+                    $file_dest_tmp = pathinfo($file_dest, PATHINFO_DIRNAME) . '/' . pathinfo($file_dest, PATHINFO_FILENAME) . '_' . $i . '.' . $file_ext;
                 }
                 $file_dest = $file_dest_tmp;
 

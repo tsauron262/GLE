@@ -53,6 +53,27 @@ class Bimp_ProductAttribute extends BimpObject
         return $buttons;
     }
 
+    // Getters arrays: 
+
+    public static function getAttributesArray($include_empty = true)
+    {
+        $cache_key = 'product_attributes_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $rows = self::getBdb()->getRows('product_attribute', '1', null, 'array', array('rowid', 'ref', 'label'), 'position', 'asc');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['rowid']] = $r['ref'] . ' - ' . $r['label'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
     // Affichages : 
 
     public function displayNbValues()

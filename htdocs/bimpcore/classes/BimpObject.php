@@ -4569,7 +4569,7 @@ class BimpObject extends BimpCache
     public function displayBool($method)
     {
         if (method_exists($this, $method))
-            return ($this->$method() ? '<span class="success">OUI</span>' : '<span class="error">NON</span>');
+            return ($this->$method() ? '<span class="success">OUI</span>' : '<span class="danger">NON</span>');
         else
             return $method . ' n\'existe pas';
     }

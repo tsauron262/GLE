@@ -327,7 +327,7 @@ class DoliDBMysqli extends DoliDB
         /* fmoddrsi */
 
 
-        /*moddrsi (20.2 => A checker !!)*/
+        /*moddrsi (20.2)*/
         $this->countReq ++;
         $timestamp_debut = microtime(true);
         if ($debugTime) {

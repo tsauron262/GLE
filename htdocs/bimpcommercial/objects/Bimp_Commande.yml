@@ -365,7 +365,7 @@ fields_tables:
                   callback: 
                     method: displayBool
                     params:
-                        - asPreuvePaiment
+                        - hasPreuvePaiment
             - custom: 1
               label: Rentabilitées technique
               value:
@@ -818,7 +818,7 @@ forms:
               input_name: file
               label: Fichier
               input:
-                  type: file_upload
+                  type: drop_files
             
     
 filters_panels: 

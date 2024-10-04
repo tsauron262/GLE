@@ -207,6 +207,10 @@ class Bimp_Product extends BimpObject
 
             case 'updatePrice':
                 return ($this->canValidate() && $this->canEditPrices());
+
+            case 'createCombination':
+                $combination = BimpObject::getInstance('bimpcore', 'Bimp_ProductCombination');
+                return $combination->can('create');
         }
 
         return parent::canSetAction($action);
@@ -289,6 +293,7 @@ class Bimp_Product extends BimpObject
         switch ($action) {
             case 'generateEtiquettes':
                 return 1;
+
             case 'mouvement':
                 if ((int) !$this->getData('validate')) {
                     $errors[] = 'Ce produit n\'est pas validé';
@@ -315,6 +320,7 @@ class Bimp_Product extends BimpObject
                     return 0;
                 }
                 return 1;
+
             case 'merge':
                 if (!$this->isEditable())
                     return 0;
@@ -322,6 +328,7 @@ class Bimp_Product extends BimpObject
                     return 0;
                 }
                 return 1;
+
             case 'refuse':
                 if (!$this->isEditable())
                     return 0;
@@ -347,6 +354,18 @@ class Bimp_Product extends BimpObject
             case 'duplicate':
                 if (!(int) BimpCore::getConf('allow_duplicate_products')) {
                     $errors[] = 'La copie des produits n\'est pas activée';
+                    return 0;
+                }
+                return 1;
+
+            case 'createCombination':
+                global $conf;
+                if (!$conf->variants->enabled) {
+                    $errors[] = 'Déclinaisons non actives';
+                    return 0;
+                }
+                if (!(int) $this->getData('validate')) {
+                    $errors[] = 'Produit non validé';
                     return 0;
                 }
                 return 1;
@@ -592,7 +611,7 @@ class Bimp_Product extends BimpObject
         return (int) (isset($conf->variants->enabled) && $conf->variants->enabled);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getProductsArrayByType2($type2, $include_empty = true, $with_price = true)
     {
@@ -629,6 +648,24 @@ class Bimp_Product extends BimpObject
         }
 
         return $result;
+    }
+
+    public function getProductAttributesArray()
+    {
+        BimpObject::loadClass('bimpcore', 'Bimp_ProductAttribute');
+        return Bimp_ProductAttribute::getAttributesArray();
+    }
+
+    public function getProductAttributeValuesArray()
+    {
+        $id_attribute = (int) BimpTools::getPostFieldValue('id_attribute', 0, 'int');
+
+        if ($id_attribute) {
+            BimpObject::loadClass('bimpcore', 'Bimp_ProductAttributeValue');
+            return Bimp_ProductAttributeValue::getAttributeValuesArray($id_attribute);
+        }
+
+        return array();
     }
 
     // Getters codes comptables: 
@@ -1501,6 +1538,22 @@ class Bimp_Product extends BimpObject
         }
 
         return null;
+    }
+
+    public function getNewCombinationRef()
+    {
+        if ($this->isLoaded()) {
+            $id_attr = (int) BimpTools::getPostFieldValue('id_attribute', 0, 'int');
+            $id_value = (int) BimpTools::getPostFieldValue('id_value', 0, 'int');
+
+            if ($id_attr && $id_value) {
+                $attr_ref = $this->db->getValue('product_attribute', 'ref', 'rowid = ' . $id_attr);
+                $value = $this->db->getValue('product_attribute_value', 'value', 'rowid = ' . $id_value);
+                return $this->getRef() . '-' . $attr_ref . '-' . $value;
+            }
+        }
+
+        return '';
     }
 
     // Getters stocks:
@@ -4399,6 +4452,57 @@ class Bimp_Product extends BimpObject
 
             if ($url) {
                 $sc = 'window.open(\'' . $url . '\');';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    public function actionCreateCombination($data, &$success)
+    {
+        global $user;
+        $errors = array();
+        $warnings = array();
+        $success = 'Combinaison créée avec succès';
+        $sc = 'triggerObjectChange(\'bimpcore\', \'Bimp_ProductCombination\');';
+
+        $id_attribute = BimpTools::getArrayValueFromPath($data, 'id_attribute', 0);
+        if (!$id_attribute) {
+            $errors[] = 'Aucun attribut sélectionné';
+        }
+
+        $id_value = BimpTools::getArrayValueFromPath($data, 'id_value', 0);
+        if (!$id_value) {
+            $errors[] = 'Aucune valeur d\'attribut sélectionnée';
+        }
+
+        $ref = BimpTools::getArrayValueFromPath($data, 'combination_ref', '');
+        if (!$ref) {
+            $errors[] = 'Référence absente';
+        }
+
+        $variation_price_percent = BimpTools::getArrayValueFromPath($data, 'variation_price_percent', 0);
+        $variation_price = BimpTools::getArrayValueFromPath($data, 'variation_price', 0);
+        $variation_weight = BimpTools::getArrayValueFromPath($data, 'variation_weight', 0);
+
+        if (!count($errors)) {
+            $features = array(
+                $id_attribute => $id_value
+            );
+            BimpObject::loadClass('bimpcore', 'Bimp_ProductCombination');
+            $prodcomb = new ProductCombination($this->db->db);
+
+            if (!$prodcomb->fetchByProductCombination2ValuePairs($this->id, $features)) {
+                $result = $prodcomb->createProductCombination($user, $this->dol_object, $features, array(), $variation_price_percent, $variation_price, $variation_weight, $ref);
+                if ($result <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($prodcomb), 'Echec de la création de la combinaison');
+                }
+            } else {
+                $errors[] = 'Cette déclinaison existe déjà';
             }
         }
 

@@ -7873,6 +7873,13 @@ ORDER BY a.val_max DESC");
                         }
                     }
                 }
+                
+                if ((int) $this->getData('id_facture')) {
+                    $this->updateField('id_facture', 0);
+                }
+                if ((int) $this->getData('id_facture_avoir')) {
+                    $this->updateField('id_facture_avoir', 0);
+                }
             }
 
             // Emplacement équipement : 

@@ -146,7 +146,7 @@ class Bimp_User extends BimpObject
 
         switch ($action) {
             case 'unlock':
-                if ((int) $this->getData('echec_auth') >= 3) {
+                if ((int) $this->getData('echec_auth') < 3) {
                     $errors[] = 'Compte non bloqué';
                     return 0;
                 }

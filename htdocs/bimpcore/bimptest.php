@@ -27,13 +27,16 @@ if (!$user->admin) {
     exit;
 }
 
-global $conf;
+global $user;
+$user->fetch(1926);
 
-if (isset($conf->variants)) {
-    echo '<pre>';
-    print_r($conf->variants);
-    exit;
-}
+echo 'TEST ' . $user->getFullName() .' : <br/>';
+
+$centres = BimpCache::getUserCentresArray();
+
+echo '<pre>';
+print_r($centres);
+echo '</pre>';
 
 echo '<br/>FIN';
 echo '</body></html>';

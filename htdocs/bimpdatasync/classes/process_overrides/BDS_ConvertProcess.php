@@ -379,10 +379,10 @@ class BDS_ConvertProcess extends BDSProcess
 
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line');
-        $sql .= ' WHERE a.shipments != \'\' AND a.shipments != \'{}\' AND a.qty_total != 0';
+        $sql .= ' WHERE a.shipments != \'\' AND a.shipments != \'{}\' AND a.qty_shipped != 0';
         $sql .= ' AND (';
         $sql .= '(SELECT COUNT(sl.id) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) = 0';
-        $sql .= ' OR (SELECT SUM(sl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) != a.qty_total';
+        $sql .= ' OR (SELECT SUM(sl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) != a.qty_shipped';
         $sql .= ')';
         $sql .= ' ORDER BY a.id asc';
 
@@ -441,7 +441,7 @@ class BDS_ConvertProcess extends BDSProcess
                             continue;
                         } else {
                             $this->Success('Màj qtés de la ligne d\'expédition OK pour exp #' . $id_shipment, $line);
-                            $this->incCreated();
+                            $this->incUpdated();
                         }
                     } else {
                         $id_shipment_line = $this->db->insert('bl_shipment_line', array(
@@ -502,10 +502,10 @@ class BDS_ConvertProcess extends BDSProcess
     {
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_fourn_line');
-        $sql .= ' WHERE a.receptions != \'\' AND a.receptions != \'{}\' AND a.qty_total != 0';
+        $sql .= ' WHERE a.receptions != \'\' AND a.receptions != \'{}\' AND a.qty_received != 0';
         $sql .= ' AND (';
         $sql .= '(SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) = 0';
-        $sql .= ' OR (SELECT SUM(rl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) != a.qty_total';
+        $sql .= ' OR (SELECT SUM(rl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) != a.qty_received';
         $sql .= ')';
         $sql .= ' ORDER BY a.id asc';
 

@@ -1672,7 +1672,7 @@ class BS_SAV extends BimpObject
             if ((int) $this->getData('id_facture')) {
                 $facture = $this->getChildObject('facture');
                 if (BimpObject::objectLoaded($facture)) {
-                    return $facture->getRemainToPay();
+//                    return $facture->getRemainToPay();
                 }
             }
 

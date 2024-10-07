@@ -30,9 +30,9 @@ if (!$user->admin) {
 global $user, $langs;
 $user->fetch(1926);
 
-echo 'TEST ' . $user->getFullName() .' : <br/>';
+echo 'TEST ' . $user->getFullName($langs) .' : <br/>';
 
-$centres = BimpCache::getUserCentresArray($langs);
+$centres = BimpCache::getUserCentresArray();
 
 echo '<pre>';
 print_r($centres);

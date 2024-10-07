@@ -1576,6 +1576,34 @@ class Bimp_Product extends BimpObject
         return $ref;
     }
 
+    public function getCombinationFormValues()
+    {
+        $values = array(
+            'objects' => array(
+                'fourn_prices' => array()
+            )
+        );
+
+        if ($this->isLoaded()) {
+            $id_cur_pfp = $this->getCurrentFournPriceId(null, true);
+            foreach ($this->getChildrenObjects('fourn_prices') as $fourn_price) {
+                $values['objects']['fourn_prices'][] = array(
+                    'fields' => array(
+                        'fk_soc'    => $fourn_price->getData('fk_soc'),
+//                        'ref_fourn' => $fourn_price->getData('ref_fourn'),
+                        'ref_fourn' => '',
+                        'price'     => $fourn_price->getData('price'),
+                        'tva_tx'    => $fourn_price->getData('tva_tx'),
+                        'is_cur_pa' => ($fourn_price->id == $id_cur_pfp ? 1 : 0)
+                    )
+                );
+            }
+        }
+
+
+        return $values;
+    }
+
     // Getters stocks:
 
     public function getStocksForEntrepot($id_entrepot, $type = 'virtuel') // $type : 'reel' / 'dispo' / 'virtuel'
@@ -4557,8 +4585,8 @@ class Bimp_Product extends BimpObject
         if (!count($errors)) {
             $features = array();
             foreach ($features_str as $str) {
-                $data = explode('-', $str);
-                $features[$data[0]] = $data[1];
+                $feature_data = explode('-', $str);
+                $features[$feature_data[0]] = $feature_data[1];
             }
 
             BimpObject::loadClass('bimpcore', 'Bimp_ProductCombination');
@@ -4568,6 +4596,48 @@ class Bimp_Product extends BimpObject
                 $result = $prodcomb->createProductCombination($user, $this->dol_object, $features, array(), $variation_price_percent, $variation_price, $variation_weight, $ref);
                 if ($result <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($prodcomb), 'Echec de la création de la combinaison');
+                } else {
+                    $post_temp = $_POST;
+                    $new_id_product = $result;
+
+                    $i = 0;
+                    while (1) {
+                        $i++;
+                        $key = 'fourn_prices_' . $i . '_';
+                        if (!isset($data[$key . 'fk_soc'])) {
+                            break;
+                        }
+
+                        $_POST = array();
+
+                        $pfp_data = array(
+                            'fk_product' => $new_id_product
+                        );
+
+                        foreach (array(
+                    'fk_soc',
+                    'ref_fourn',
+                    'price',
+                    'tva'
+                        ) as $field_name) {
+                            if (isset($data[$key . $field_name])) {
+                                $pfp_data[$field_name] = $data[$key . $field_name];
+                            }
+                        }
+
+                        if ((int) BimpTools::getArrayValueFromPath($data, $key . 'is_cur_pa', 0)) {
+                            $_POST['is_cur_pa'] = 1;
+                        }
+
+                        $pfp_errors = array();
+                        BimpObject::createBimpObject('bimpcore', 'Bimp_ProductFournisseurPrice', $pfp_data, true, $pfp_errors);
+
+                        if (count($pfp_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($pfp_errors, 'Echec de la création du prix d\'achat fournisseur #' . $i);
+                        }
+                    }
+
+                    $_POST = $post_temp;
                 }
             } else {
                 $errors[] = 'Cette déclinaison existe déjà';

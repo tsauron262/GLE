@@ -789,7 +789,6 @@ class BimpStorage {
 }
 
 
-
 $(document).ready(function () {
     $('body').on('formLoaded', function (e) {
         if ($.isOk(e.$form)) {

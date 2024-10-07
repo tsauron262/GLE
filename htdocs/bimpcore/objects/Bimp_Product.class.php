@@ -306,8 +306,10 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'validate':
-                if (!BimpCore::getConf('validation_produit'))
+                if (!(int) BimpCore::getConf('use_valid_product')) {
                     return 0;
+                }
+
                 if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
@@ -520,8 +522,10 @@ class Bimp_Product extends BimpObject
 
     public function isValidate()
     {
-        if (!BimpCore::getConf('validation_produit'))
+        if (!(int) BimpCore::getConf('use_valid_product')) {
             return 1;
+        }
+        
         return $this->getData('validate');
     }
 
@@ -2442,7 +2446,6 @@ class Bimp_Product extends BimpObject
             $html .= '"/>';
         }
 
-
         $html .= '<div class="object_header_infos">';
         $html .= 'Créée le ' . BimpTools::printDate($this->getData('datec'), 'strong');
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
@@ -2474,7 +2477,7 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
 
-        if ($this->isLoaded() && BimpCore::getConf('validation_produit')) {
+        if ($this->isLoaded() && (int) BimpCore::getConf('use_valid_product')) {
             if ((int) $this->isValidate()) {
                 $html .= '<span class="success">';
                 $html .= BimpRender::renderIcon('fas_check', 'iconLeft');

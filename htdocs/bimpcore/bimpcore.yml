@@ -449,8 +449,3 @@ params:
         type: bool
         def: 0
         
-    validation_produit:
-        label: Les produit necessite une validation
-        type: bool
-        def: 0
-        

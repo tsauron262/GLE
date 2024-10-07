@@ -952,6 +952,8 @@ forms:
                   type: text
                   
     combination: 
+        values: 
+            callback: getCombinationFormValues
         rows: 
             - custom: 1
               label: Attributs et valeurs
@@ -990,6 +992,13 @@ forms:
                   addon_right: 
                       text: Kg
               value: 0
+#            - title: Prix d'achat fournisseur(s)'
+            - object: fourn_prices
+              label: Prix d'achat fournisseur
+              on_edit: 1
+              multiple: 1
+              form_name: create_prod
+            
             
 fields_tables: 
     infos: 

@@ -39,7 +39,7 @@ UPDATE `llx_bimpcore_conf` SET `name` = 'id_user_mail_comm_line_expire', `module
 UPDATE `llx_bimpcore_conf` SET `name` = 'tva_tx_for_acomptes', `module` = 'bimpcommercial' WHERE `name` = 'tva_acompte' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf` SET `name` = 'user_as_default_commercial', `module` = 'bimpcommercial' WHERE `name` = 'user_as_default_commercial' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf` SET `name` = 'contact_facturation_required_for_commandes', `module` = 'bimpcommercial', `value` = '0' WHERE `name` = 'NOT_FORCE_CONTACT' AND `module` = 'bimpcore' AND `value` = '1';
-UPDATE `llx_bimpcore_conf` SET `name` = 'contact_facturation_required_for_commandes', `module` = 'bimpcommercial', `value` = '1' WHERE `name` = 'NOT_FORCE_C`ONTACT' AND `module` = 'bimpcore' AND `value` = '0';
+UPDATE `llx_bimpcore_conf` SET `name` = 'contact_facturation_required_for_commandes', `module` = 'bimpcommercial', `value` = '1' WHERE `name` = 'NOT_FORCE_CONTACT' AND `module` = 'bimpcore' AND `value` = '0';
 UPDATE `llx_bimpcore_conf` SET `name` = 'default_relance_paiements_delay_days', `module` = 'bimpcommercial' WHERE `name` = 'relance_paiements_facture_delay_days' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf` SET `name` = 'allow_pdf_regeneration_after_validation', `module` = 'bimpcommercial', `value` = '0' WHERE `name` = 'BLOQUE_GENERATE_FACT_PDF' AND `module` = 'bimpcore' AND `value` = '1';
 UPDATE `llx_bimpcore_conf` SET `name` = 'allow_pdf_regeneration_after_validation', `module` = 'bimpcommercial', `value` = '1' WHERE `name` = 'BLOQUE_GENERATE_FACT_PDF' AND `module` = 'bimpcore' AND `value` = '0';

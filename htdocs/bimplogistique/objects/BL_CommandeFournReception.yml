@@ -183,19 +183,19 @@ forms:
 #              required: 1
 #          ****************
 
-#            - custom: 1
-#              show: 
-#                  callback: canEditStockOut
-#              label: Stocks boutiques
-#              input_name: stock_out
-#              input: 
-#                  type: select
-#                  options:
-#                      '': ''
-#                      oui: OUI
-#                      non: NON
-#              required: 1
-#              value: ''
+            - custom: 1
+              show: 
+                  callback: canEditStockOut
+              label: Stocks boutiques
+              input_name: stock_out
+              input: 
+                  type: select
+                  options:
+                      '': ''
+                      oui: OUI
+                      non: NON
+              required: 1
+              value: ''
 
             - custom: 1
               show: 

@@ -33,8 +33,11 @@ class BL_CommandeFournReception extends BimpObject
 
     public function canEditStockOut()
     {
+        if (!BimpCore::isEntity('bimp')) {
+            return 0;
+        }
+        
         global $user;
-
         return (int) $user->rights->bimpcommercial->br_stock_out;
     }
 

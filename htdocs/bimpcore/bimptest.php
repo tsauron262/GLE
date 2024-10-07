@@ -27,12 +27,12 @@ if (!$user->admin) {
     exit;
 }
 
-global $user;
+global $user, $langs;
 $user->fetch(1926);
 
 echo 'TEST ' . $user->getFullName() .' : <br/>';
 
-$centres = BimpCache::getUserCentresArray();
+$centres = BimpCache::getUserCentresArray($langs);
 
 echo '<pre>';
 print_r($centres);

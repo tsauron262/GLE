@@ -414,7 +414,7 @@ class BDS_ConvertProcess extends BDSProcess
             $this->setCurrentObjectData('bimplogistique', 'BL_ShipmentLine');
             $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
             foreach ($rows as $r) {
-                $this->db->delete('bl_shipment_line', 'id_commande_line = ' . (int) $r['id']);
+//                $this->db->delete('bl_shipment_line', 'id_commande_line = ' . (int) $r['id']);
 
                 $line->id = (int) $r['id'];
                 $shipments = json_decode($r['shipments'], 1);
@@ -433,7 +433,9 @@ class BDS_ConvertProcess extends BDSProcess
                     $id_shipment_line = (int) $this->db->getValue('bl_shipment_line', 'id', 'id_shipment = ' . $id_shipment . ' AND id_commande_line = ' . $r['id']);
 
                     if ($id_shipment_line) {
-                        if ($this->db->update('bl_shipment_line', array(), 'id = ' . $id_shipment_line) <= 0) {
+                        if ($this->db->update('bl_shipment_line', array(
+                            'qty'              => $qty
+                        ), 'id = ' . $id_shipment_line) <= 0) {
                             $this->incIgnored();
                             $this->Error('Echec màj qtés de la ligne pour l\'expédition #' . $id_shipment . ' - ' . $this->db->err(), $line);
                             continue;
@@ -533,7 +535,7 @@ class BDS_ConvertProcess extends BDSProcess
             $this->setCurrentObjectData('bimplogistique', 'BL_ReceptionLine');
             $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
             foreach ($rows as $r) {
-                $this->db->delete('bl_reception_line', 'id_commande_fourn_line = ' . (int) $r['id']);
+//                $this->db->delete('bl_reception_line', 'id_commande_fourn_line = ' . (int) $r['id']);
                 $line->id = (int) $r['id'];
                 $receptions = json_decode($r['receptions'], 1);
 

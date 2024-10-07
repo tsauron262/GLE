@@ -5911,6 +5911,12 @@ ORDER BY a.val_max DESC");
             if ((int) $this->getData('propal_refused')) {
                 $this->updateField('propal_refused', 0);
             }
+            if ((int) $this->getData('id_facture')) {
+                $this->updateField('id_facture', 0);
+            }
+            if ((int) $this->getData('id_facture_avoir')) {
+                $this->updateField('id_facture_avoir', 0);
+            }
         }
 
         return array(
@@ -7873,7 +7879,7 @@ ORDER BY a.val_max DESC");
                         }
                     }
                 }
-                
+
                 if ((int) $this->getData('id_facture')) {
                     $this->updateField('id_facture', 0);
                 }

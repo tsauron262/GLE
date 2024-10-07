@@ -1,1 +1,1 @@
--- ALTER TABLE `llx_bimpcore_objects_associations` ADD INDEX( `association`, `src_object_name`, `src_id_object`, `dest_object_name`);
+ALTER TABLE `llx_bimpcore_objects_associations` ADD INDEX( `association`, `src_object_name`, `src_id_object`, `dest_object_name`);

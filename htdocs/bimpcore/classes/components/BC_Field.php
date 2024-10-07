@@ -294,7 +294,7 @@ class BC_Field extends BimpComponent
             $field_params = $this->params;
             $field_params['type'] = $this->getParam('items_data_type', 'string');
             $bc_display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $field_params);
-            $bc_display->no_html = ($this->no_html || $this->params['no_html'])? 1 : 0;
+            $bc_display->no_html = ($this->no_html || $this->params['no_html']) ? 1 : 0;
             $bc_display->protect_html = $this->params['protect_html'];
             $bc_display->setDisplayOptions($this->display_options);
 
@@ -383,7 +383,7 @@ class BC_Field extends BimpComponent
         }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/displays/' . $this->display_name, $this->name, $this->params, $this->value);
-        $display->no_html = ($this->no_html || $this->params['no_html'])? 1 : 0;
+        $display->no_html = (($this->no_html || $this->params['no_html']) ? 1 : 0);
         $display->protect_html = $this->params['protect_html'];
         $display->setDisplayOptions($this->display_options);
         $html .= $display->renderHtml();
@@ -692,7 +692,7 @@ class BC_Field extends BimpComponent
             }
 
             if (count($dependances)) {
-                $script .= '<script '.BimpTools::getScriptAttribut().'>' . "\n";
+                $script .= '<script ' . BimpTools::getScriptAttribut() . '>' . "\n";
                 foreach ($dependances as $dependance) {
                     $script .= 'addInputEvent(\'' . $form_identifier . '\', \'' . $name_prefix . $dependance . '\', \'change\', function() {' . "\n";
                     $script .= '  var data = {};' . "\n";

@@ -591,7 +591,7 @@ class BDS_ConvertProcess extends BDSProcess
                         'dest_object_type'   => 'bimp_object'
                     );
 
-                    $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ReceptionLine\' AND src_id_object = ' . $id_reception_line . ' AND dest_object_name = \'Equipment\'');
+                    $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ReceptionLine\' AND src_id_object = ' . $id_reception_line);
 
                     if (isset($reception_data['equipments']) && !empty($reception_data['equipments'])) {
                         foreach ($reception_data['equipments'] as $id_equipment => $eq_data) {

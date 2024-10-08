@@ -27,17 +27,6 @@ if (!$user->admin) {
     exit;
 }
 
-global $user, $langs;
-$user->fetch(1926);
-
-echo 'TEST ' . $user->getFullName($langs) .' : <br/>';
-
-$centres = BimpCache::getUserCentresArray();
-
-echo '<pre>';
-print_r($centres);
-echo '</pre>';
-
 echo '<br/>FIN';
 echo '</body></html>';
 

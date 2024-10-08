@@ -374,6 +374,9 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findShipmentsToConvert(&$errors = array())
     {
+        // Suppr. assos équipements
+//        DELETE FROM llx_bimpcore_objects_associations WHERE association = 'equipments' AND src_object_name = 'BL_ShipmentLine';
+        
 //        $errors[] = 'Script Désactivé';
 //        return array();
 
@@ -527,6 +530,9 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findReceptionsToConvert(&$errors = array())
     {
+        // Suppr. assos équipements
+//        DELETE FROM llx_bimpcore_objects_associations WHERE association = 'equipments' AND src_object_name = 'BL_ReceptionLine';
+        
         $last_process_tms = BimpCore::getConf('bds_last_commande_fourn_receptions_lines_process_tms', '');
 
         $sql = BimpTools::getSqlSelect(array('a.id'));

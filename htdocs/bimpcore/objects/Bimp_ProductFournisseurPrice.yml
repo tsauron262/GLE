@@ -98,32 +98,41 @@ fields:
 forms: 
     default: 
         rows: 
-            - field: fk_product
-            - field: fk_soc
-            - field: ref_fourn
-            - field: price
-            - field: tva_tx
-            - custom: 1
-              label: Définir comme prix d'achat actuel du produit
-              input_name: is_cur_pa
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 1
-            - custom: 1
-              label: Mettre à jour les prix d'achats des commandes fournisseurs pour les unités non réceptionnées
-              input_name: update_comm_fourn
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 0
-              display_if: 
-                  field_name: is_cur_pa
-                  show_values: 1
+            prod: 
+                field: fk_product
+            soc: 
+                field: fk_soc
+            ref_fourn: 
+                field: ref_fourn
+            price: 
+                field: price
+            tva: 
+                field: tva_tx
+            is_cur_pa: 
+                custom: 1
+                label: Définir comme prix d'achat actuel du produit
+                input_name: is_cur_pa
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            update_comm_fourn: 
+                custom: 1
+                label: Mettre à jour les prix d'achats des commandes fournisseurs pour les unités non réceptionnées
+                input_name: update_comm_fourn
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 0
+                display_if: 
+                    field_name: is_cur_pa
+                    show_values: 1
+                  
     create_prod:
         extends: default
         rows:
-            0: unset
+            prod: unset
+            update_comm_fourn: unset
               
 fields_table: 
     default: 

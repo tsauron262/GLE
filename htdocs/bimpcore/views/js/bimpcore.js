@@ -720,58 +720,73 @@ function getBadge(text, size, style) {
     return '<span class="badge badge-pill badge-' + style + '" style="size:' + size + '">' + text + '</span>';
 }
 
+// Produits : 
 
+function onProductionAddCombinationFormLoaded($form) {
+    $('body').on('inputMultipleValuesChange', function (e) {
+        if ($.isOk(e.$container) && e.$container.data('field_name') === 'features') {
+            var $f = e.$container.findParentByClass('Bimp_Product_form_combination');
+
+            if ($.isOk($f)) {
+                reloadObjectInput($f.attr('id'), 'combination_ref', {
+                    'features': getInputValue(e.$container.findParentByClass('inputContainer'))
+                }, 0);
+            }
+        }
+    });
+}
 
 class BimpStorage {
     constructor(type = 'text') {
         this.type = type;
-      }
+    }
 
     getFullKey(key) {
-        return dol_url_root+'_'+entity+'_' + key;
+        return dol_url_root + '_' + entity + '_' + key;
     }
 
     get(key, type = 'text') {
 //        console.log(this.getFullKey(key));
         var value = localStorage.getItem(this.getFullKey(key));
-        if(this.type == 'obj'){
+        if (this.type == 'obj') {
             var obj = JSON.parse(value);
 
             // Is an object
             if (typeof obj === 'object' && obj !== null)
                 return obj;
-    }
+        }
 
         return value;
-    };
-    set(key, value, add = false) {
+    }
+    ;
+            set(key, value, add = false) {
         // Est un object
-        if(add){
+        if (add) {
             var oldValue = this.get(key);
-            if(typeof oldValue === 'object' && typeof value === 'object'){
+            if (typeof oldValue === 'object' && typeof value === 'object') {
 //                console.log('concat response', oldValue, value);
                 value = {
                     ...oldValue,
                     ...value
                 };
 //                console.log('result', value);
-            }
-            else
+            } else
                 console.log('oups concat impossible');
-                
+
         }
-        
-        
+
+
         if (typeof value === 'object' && value !== null)
             return localStorage.setItem(this.getFullKey(key), JSON.stringify(value));
 
         return localStorage.setItem(this.getFullKey(key), value);
-    };
-    remove(key) {
+    }
+    ;
+            remove(key) {
         localStorage.removeItem(this.getFullKey(key));
-    };
+    }
+    ;
 }
-
 
 
 $(document).ready(function () {
@@ -779,6 +794,8 @@ $(document).ready(function () {
         if ($.isOk(e.$form)) {
             if (e.$form.hasClass('Bimp_Client_form') || e.$form.hasClass('Bimp_Fournisseur_form') || e.$form.hasClass('Bimp_Societe_form')) {
                 onSocieteFormLoaded(e.$form);
+            } else if (e.$form.hasClass('Bimp_Product_form_combination')) {
+                onProductionAddCombinationFormLoaded(e.$form);
             }
         }
     });

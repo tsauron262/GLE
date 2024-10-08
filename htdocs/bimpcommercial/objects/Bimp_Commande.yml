@@ -617,15 +617,15 @@ forms:
                   callback: renderFacturesInput
               hidden: 
                   request_field: new_facture
-            - custom: 1
-              label: Référence facture remplacée
-              input_name: replaced_ref
-              input: 
-                  type: text
-                  help: Utiliser ce champ si perte des données de la facture remplacée
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
+#            - custom: 1
+#              label: Référence facture remplacée
+#              input_name: replaced_ref
+#              input: 
+#                  type: text
+#                  help: Utiliser ce champ si perte des données de la facture remplacée
+#              display_if: 
+#                  field_name: id_facture
+#                  show_values: 0
             - custom: 1
               label: Client
               input_name: id_client_facture

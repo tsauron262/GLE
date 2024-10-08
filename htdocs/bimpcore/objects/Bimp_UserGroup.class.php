@@ -60,7 +60,7 @@ class Bimp_UserGroup extends BimpObject
         if($field == 'data_revue')
             return 0;
         
-        parent::isFieldEditable($field, $force_edit);
+        return parent::isFieldEditable($field, $force_edit);
     }
     
     public function canViewField($field_name) {

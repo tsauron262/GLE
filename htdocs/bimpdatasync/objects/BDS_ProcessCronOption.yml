@@ -43,10 +43,10 @@ fields:
                 callback: renderValueInput
         display_if: 
             field_name: id_option
-            hide_values: ,0
+            hide_values: 0,''
         depends_on: id_option
         
-lists: 
+lists:
     default: 
         title: Options de la tâche planifiée
         icon: far_check-square

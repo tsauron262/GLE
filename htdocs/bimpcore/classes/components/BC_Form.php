@@ -114,7 +114,7 @@ class BC_Form extends BC_Panel
         if (!is_null($on_save)) {
             $this->params['on_save'] = $on_save;
         }
-        
+
         if ($object->config->isDefined('forms/' . $name . '/rows_callback')) {
             $method = $object->config->get('forms/' . $name . '/rows_callback', '');
             if ($method && method_exists($object, $method)) {
@@ -668,7 +668,6 @@ class BC_Form extends BC_Panel
         } else {
             $title = BimpTools::ucfirst(BimpObject::getInstanceLabel($object));
         }
-
         $html .= '<h3>' . $title . '</h3>';
         $html .= '</div>';
         $html .= '</div>';
@@ -712,7 +711,7 @@ class BC_Form extends BC_Panel
                     $nb_items++;
 
                     $form->object->reset();
-                    $form->params['values'] = array();
+                    $form->params['values'] = array();                    
                     $form->setValues($params['form_values']);
                     $form->setValues($object_values);
 
@@ -813,6 +812,7 @@ class BC_Form extends BC_Panel
         }
 
         if (isset($this->params['values']['fields'][$params['input_name']])) {
+
             $params['value'] = $this->params['values']['fields'][$params['input_name']];
         }
 

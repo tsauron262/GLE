@@ -532,7 +532,7 @@ class BDS_ConvertProcess extends BDSProcess
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_fourn_line');
 
-        $sql .= 'WHERE ';
+        $sql .= ' WHERE ';
         if ($last_process_tms) {
             $sql .= 'a.tms > \'' . $last_process_tms . '\'';
         } else {

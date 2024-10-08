@@ -376,7 +376,6 @@ class BDS_ConvertProcess extends BDSProcess
     {
         // Suppr. assos équipements
 //        DELETE FROM llx_bimpcore_objects_associations WHERE association = 'equipments' AND src_object_name = 'BL_ShipmentLine';
-        
 //        $errors[] = 'Script Désactivé';
 //        return array();
 
@@ -435,10 +434,13 @@ class BDS_ConvertProcess extends BDSProcess
                 $this->DebugData($shipments, 'LIGNE #' . $r['id']);
 
                 $cur_shipments_lines = array();
-                $lines_rows = $this->db->getRows('bl_shipment_line', 'id_commande_line = ' . $r['id'], null, 'array', array('id', 'id_shipment'));
+                $lines_rows = $this->db->getRows('bl_shipment_line', 'id_commande_line = ' . $r['id'], null, 'array', array('id', 'id_shipment', 'qty'));
                 if (is_array($lines_rows)) {
                     foreach ($lines_rows as $lr) {
-                        $cur_shipments_lines[$lr['id_shipment']] = $lr['id'];
+                        $cur_shipments_lines[$lr['id_shipment']] = array(
+                            'id_shipment_line' => $lr['id'],
+                            'qty'              => $lr['qty']
+                        );
                     }
                 }
 
@@ -451,22 +453,27 @@ class BDS_ConvertProcess extends BDSProcess
 
                     $this->incProcessed();
 
+                    $cur_qty = null;
+
                     if (isset($cur_shipments_lines[$id_shipment])) {
-                        $id_shipment_line = $cur_shipments_lines[$id_shipment];
+                        $id_shipment_line = $cur_shipments_lines[$id_shipment]['id_shipment_line'];
+                        $cur_qty = $cur_shipments_lines[$id_shipment]['qty'];
                         unset($cur_shipments_lines[$id_shipment]);
                         $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $id_shipment_line);
                     }
 
                     if ($id_shipment_line) {
-                        if ($this->db->update('bl_shipment_line', array(
-                                    'qty' => $qty
-                                        ), 'id = ' . $id_shipment_line) <= 0) {
-                            $this->incIgnored();
-                            $this->Error('Echec màj qtés de la ligne pour l\'expédition #' . $id_shipment . ' - ' . $this->db->err(), $line);
-                            continue;
-                        } else {
-                            $this->Success('Màj qtés de la ligne d\'expédition OK pour exp #' . $id_shipment, $line);
-                            $this->incUpdated();
+                        if (is_null($cur_qty) || (float) $cur_qty !== (float) $qty) {
+                            if ($this->db->update('bl_shipment_line', array(
+                                        'qty' => $qty
+                                            ), 'id = ' . $id_shipment_line) <= 0) {
+                                $this->incIgnored();
+                                $this->Error('Echec màj qtés de la ligne pour l\'expédition #' . $id_shipment . ' - ' . $this->db->err(), $line);
+                                continue;
+                            } else {
+                                $this->Success('Màj qtés de la ligne d\'expédition OK pour exp #' . $id_shipment, $line);
+                                $this->incUpdated();
+                            }
                         }
                     } else {
                         $id_shipment_line = $this->db->insert('bl_shipment_line', array(
@@ -513,9 +520,12 @@ class BDS_ConvertProcess extends BDSProcess
                 }
 
                 if (!empty($cur_shipments_lines)) {
-                    foreach ($cur_shipments_lines as $id_shipment => $id_sshipment_line) {
-                        $this->db->delete('bl_shipment_line', 'id = ' . $id_sshipment_line);
-                        $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $id_shipment_line);
+                    foreach ($cur_shipments_lines as $id_shipment => $shipment_line_data) {
+                        $this->db->delete('bl_shipment_line', 'id = ' . $shipment_line_data['id_shipment_line']);
+                        $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $shipment_line_data['id_shipment_line']);
+
+                        $this->Alert('Suppr. ligne d\'expédition #' . $shipment_line_data['id_shipment_line'], null);
+                        $this->incDeleted();
                     }
                 }
             }
@@ -532,7 +542,7 @@ class BDS_ConvertProcess extends BDSProcess
     {
         // Suppr. assos équipements
 //        DELETE FROM llx_bimpcore_objects_associations WHERE association = 'equipments' AND src_object_name = 'BL_ReceptionLine';
-        
+
         $last_process_tms = BimpCore::getConf('bds_last_commande_fourn_receptions_lines_process_tms', '');
 
         $sql = BimpTools::getSqlSelect(array('a.id'));

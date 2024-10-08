@@ -521,11 +521,16 @@ class BDS_ConvertProcess extends BDSProcess
 
                 if (!empty($cur_shipments_lines)) {
                     foreach ($cur_shipments_lines as $id_shipment => $shipment_line_data) {
-                        $this->db->delete('bl_shipment_line', 'id = ' . $shipment_line_data['id_shipment_line']);
-                        $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $shipment_line_data['id_shipment_line']);
+                        if ($this->db->delete('bl_shipment_line', 'id = ' . $shipment_line_data['id_shipment_line']) <= 0) {
+                            $this->Error('Echec suppr. ligne d\'expédition #' . $id_equipment . ' - ' . $this->db->err());
+                        } else {
+                            $this->Alert('Suppr. ligne d\'expédition #' . $shipment_line_data['id_shipment_line']);
+                            $this->incDeleted();
+                        }
 
-                        $this->Alert('Suppr. ligne d\'expédition #' . $shipment_line_data['id_shipment_line'], null);
-                        $this->incDeleted();
+                        if ($this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ShipmentLine\' AND src_id_object = ' . $shipment_line_data['id_shipment_line']) <= 0) {
+                            $this->Error('Echec suppr assos equipement pour ligne d\'expédition #' . $shipment_line_data['id_shipment_line'] . ' - ' . $this->db->err(), $line);
+                        }
                     }
                 }
             }

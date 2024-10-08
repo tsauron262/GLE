@@ -424,7 +424,7 @@ class DoliDBMysqli extends DoliDB
                     return 0;
                 }
                 if(!$ret){
-                    $this->catch ($query, $ret);
+                    $this->catch($query, $ret);
                     return 0;
                 }
 //		try {
@@ -1406,6 +1406,85 @@ class DoliDBMysqli extends DoliDB
 
 		return $result;
 	}
+        
+        /*moddrsi (20.2)*/
+        public function catch($query, $ret, $e = null)
+        {
+            $deadLock = false;
+            $classLog = 'sql';
+            $this->lastqueryerror = $query;
+            $this->lasterror = $this->error();
+            $this->lasterrno = $this->errno();
+
+            if (stripos($this->lasterror, 'Deadlock') !== false || stripos($this->lasterrno, '1213') !== false) {
+                $deadLock = true;
+                $classLog = 'deadLock';
+            } elseif ($e && (stripos($e->getMessage(), 'Deadlock') !== false || stripos($e->getMessage(), '1213') !== false)) {
+                $deadLock = true;
+                $classLog = 'deadLock';
+            } elseif (stripos($this->lasterrno, 'DB_ERROR_RECORD_ALREADY_EXISTS') !== false) {
+                $classLog = 'sql_duplicate';
+            }
+
+            if (class_exists('synopsisHook'))
+                $timer = synopsisHook::getTime();
+
+            $msg = get_class($this) . "::query SQL Error message: ";
+            $msg .= '<br/>Lasterrno : ' . $this->lasterrno;
+            $msg .= '<br/>Lasterror : ' . $this->lasterror;
+            if ($e)
+                $msg .= '<br/>Exception msg : ' . $e->getMessage();
+            $msg .= '<br/>Serveur : ' . $this->database_host;
+            $msg .= '<br/>Query : ' . $query;
+            if ($this->timeDebReq > 0)
+                $msg .= '<br/>Time Req : ' . (microtime(true) - $this->timeDebReq);
+            if ($this->timeDebReq2 > 0)
+                $msg .= '<br/>Time Req2 : ' . (microtime(true) - $this->timeDebReq2);
+            if (class_exists('synopsisHook'))
+                $msg .= '<br/>Time Depuis déb : ' . $timer;
+
+            dol_syslog($msg, LOG_ERR);
+
+            if (class_exists('BimpCore')) {
+                $log = true;
+                if (in_array($this->lasterrno, array('DB_ERROR_1205'))) {
+                    $log = false;
+                } elseif ($classLog == 'deadLock' && !(int) BimpCore::getConf('log_sql_dealocks')) {
+                    $log = false;
+                } /* elseif ($classLog == 'sql_duplicate' && !(int) BimpCore::getConf('log_sql_duplicate')) {
+                  $log = false;
+                  } */
+
+                if ($log) {
+                    $extra_data = array(
+                        'Code erreur' => $this->lasterrno,
+                        'Erreur SQL'  => $this->lasterror,
+                        'Serveur'     => $this->database_host,
+                        'Timer'       => $timer
+                    );
+
+                    if ($this->timeDebReq > 0) {
+                        $extra_data['Durée req 1'] = (microtime(true) - $this->timeDebReq);
+                    }
+
+                    if ($this->timeDebReq2 > 0) {
+                        $extra_data['Durée req 2'] = (microtime(true) - $this->timeDebReq2);
+                    }
+
+                    $extra_data['Requête'] = '<br/><br/>' . BimpRender::renderSql($query) . '<br/><br/>';
+
+                    BimpCore::addlog('ERREUR SQL - ' . $this->lasterror, Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);
+                }
+            } else {
+                dol_syslog('Erreur sql BimpCore non loadé', LOG_ERR);
+            }
+
+            if ($deadLock) {
+                $this->transaction_opened = 0;
+                static::stopAll('catch');
+            }
+        }
+        /*fmoddrsi*/
 }
 
 /**

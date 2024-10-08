@@ -453,6 +453,7 @@ class BDS_ConvertProcess extends BDSProcess
 
                     $this->incProcessed();
 
+                    $id_shipment_line = 0;
                     $cur_qty = null;
 
                     if (isset($cur_shipments_lines[$id_shipment])) {
@@ -615,6 +616,8 @@ class BDS_ConvertProcess extends BDSProcess
                     }
 
                     $this->incProcessed();
+                    
+                    $id_reception_line = 0;
 
                     if (isset($cur_receptions_lines[$id_reception])) {
                         $id_reception_line = $cur_receptions_lines[$id_reception];

@@ -384,7 +384,7 @@ class BDS_ConvertProcess extends BDSProcess
         $sql .= ' WHERE ';
 
         if ($last_process_tms) {
-            $sql .= 'a.tms > ' . $last_process_tms;
+            $sql .= 'a.tms > \'' . $last_process_tms . '\'';
         } else {
             $sql .= 'a.shipments != \'\' AND a.shipments != \'{}\'';
             $sql .= 'AND a.qty_shipped != 0';
@@ -407,7 +407,7 @@ class BDS_ConvertProcess extends BDSProcess
         $elems = array();
         if (is_array($rows)) {
             BimpCore::setConf('bds_last_commande_shipments_lines_process_tms', date('Y-m-d H:i:s'));
-            
+
             foreach ($rows as $r) {
                 $elems[] = (int) $r['id'];
             }

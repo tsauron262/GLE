@@ -432,7 +432,6 @@ class BDS_ConvertProcess extends BDSProcess
                 $this->DebugData($shipments, 'LIGNE #' . $r['id']);
 
                 $cur_shipments_lines = array();
-
                 $lines_rows = $this->db->getRows('bl_shipment_line', 'id_commande_line = ' . $r['id'], null, 'array', array('id', 'id_shipment'));
                 if (is_array($lines_rows)) {
                     foreach ($lines_rows as $lr) {
@@ -528,13 +527,22 @@ class BDS_ConvertProcess extends BDSProcess
 
     public function findReceptionsToConvert(&$errors = array())
     {
+        $last_process_tms = BimpCore::getConf('bds_last_commande_fourn_receptions_lines_process_tms', '');
+
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_fourn_line');
-        $sql .= ' WHERE a.receptions != \'\' AND a.receptions != \'{}\' AND a.qty_received != 0';
-        $sql .= ' AND (';
-        $sql .= '(SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) = 0';
-        $sql .= ' OR (SELECT SUM(rl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) != a.qty_received';
-        $sql .= ')';
+
+        $sql .= 'WHERE ';
+        if ($last_process_tms) {
+            $sql .= 'a.tms > \'' . $last_process_tms . '\'';
+        } else {
+            $sql .= 'a.receptions != \'\' AND a.receptions != \'{}\' AND a.qty_received != 0';
+            $sql .= ' AND (';
+            $sql .= '(SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) = 0';
+            $sql .= ' OR (SELECT SUM(rl.qty) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) != a.qty_received';
+            $sql .= ')';
+        }
+
         $sql .= ' ORDER BY a.id asc';
 
         if ((int) $this->getOption('test_one', 0)) {
@@ -545,6 +553,8 @@ class BDS_ConvertProcess extends BDSProcess
 
         $elems = array();
         if (is_array($rows)) {
+            BimpCore::setConf('bds_last_commande_fourn_receptions_lines_process_tms', date('Y-m-d H:i:s'));
+
             foreach ($rows as $r) {
                 $elems[] = (int) $r['id'];
             }
@@ -563,11 +573,18 @@ class BDS_ConvertProcess extends BDSProcess
             $this->setCurrentObjectData('bimplogistique', 'BL_ReceptionLine');
             $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
             foreach ($rows as $r) {
-//                $this->db->delete('bl_reception_line', 'id_commande_fourn_line = ' . (int) $r['id']);
                 $line->id = (int) $r['id'];
                 $receptions = json_decode($r['receptions'], 1);
 
                 $this->DebugData($receptions, 'LIGNE #' . $r['id']);
+
+                $cur_receptions_lines = array();
+                $lines_rows = $this->db->getRows('bl_reception_line', 'id_commande_fourn_line = ' . $r['id'], null, 'array', array('id', 'id_reception'));
+                if (is_array($lines_rows)) {
+                    foreach ($lines_rows as $lr) {
+                        $cur_receptions_lines[$lr['id_reception']] = $lr['id'];
+                    }
+                }
 
                 foreach ($receptions as $id_reception => $reception_data) {
                     $qty = (isset($reception_data['qty']) ? (float) $reception_data['qty'] : (isset($reception_data['equipments']) ? count($reception_data['equipments']) : 0));
@@ -578,7 +595,11 @@ class BDS_ConvertProcess extends BDSProcess
 
                     $this->incProcessed();
 
-                    $id_reception_line = (int) $this->db->getValue('bl_reception_line', 'id', 'id_reception = ' . $id_reception . ' AND id_commande_fourn_line = ' . $r['id']);
+                    if (isset($cur_receptions_lines[$id_reception])) {
+                        $id_reception_line = $cur_receptions_lines[$id_reception];
+                        unset($cur_receptions_lines[$id_reception]);
+                        $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ReceptionLine\' AND src_id_object = ' . $id_reception_line);
+                    }
 
                     if ($id_reception_line) {
                         if ($this->db->update('bl_reception_line', array(
@@ -619,8 +640,6 @@ class BDS_ConvertProcess extends BDSProcess
                         'dest_object_type'   => 'bimp_object'
                     );
 
-                    $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ReceptionLine\' AND src_id_object = ' . $id_reception_line);
-
                     if (isset($reception_data['equipments']) && !empty($reception_data['equipments'])) {
                         foreach ($reception_data['equipments'] as $id_equipment => $eq_data) {
                             if (!(int) $id_equipment) {
@@ -645,6 +664,13 @@ class BDS_ConvertProcess extends BDSProcess
                                 $this->Error('Echec asso equipement #' . $id_equipment . ' pour la récep #' . $id_reception . ' - ' . $this->db->err(), $line);
                             }
                         }
+                    }
+                }
+
+                if (!empty($cur_receptions_lines)) {
+                    foreach ($cur_receptions_lines as $id_reception => $id_reception_line) {
+                        $this->db->delete('bl_reception_line', 'id = ' . $id_reception_line);
+                        $this->db->delete('bimpcore_objects_associations', 'association = \'equipments\' AND src_object_name = \'BL_ReceptionLine\' AND src_id_object = ' . $id_reception_line);
                     }
                 }
             }

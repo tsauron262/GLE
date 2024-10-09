@@ -1,0 +1,14 @@
+
+fields: 
+    type: 
+        label: Type
+        
+    hook: 
+        label: Hook
+        
+    params: 
+        label: Paramètres
+        
+    id_owner: 
+        label: Propriétaire
+           

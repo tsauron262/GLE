@@ -27,6 +27,14 @@ if (!$user->admin) {
     exit;
 }
 
+BC_V2\BC_Form::getDefinitions();
+BC_V2\BC_Panel::getDefinitions();
+BC_V2\BimpComponent::getDefinitions();
+
+BC_V2\BC_Form::printDefinitions();
+BC_V2\BC_Panel::printDefinitions();
+BC_V2\BimpComponent::printDefinitions();
+
 echo '<br/>FIN';
 echo '</body></html>';
 

@@ -356,6 +356,9 @@ class Bimp_Societe extends BimpDolObject
 
     public function isSirenRequired()
     {
+        if ($this->isAnonymised())
+            return 0;
+        
         if ($this->isFournisseur() && !$this->isClient()) {
             return 0;
         }
@@ -951,9 +954,9 @@ class Bimp_Societe extends BimpDolObject
             $sql .= ' WHERE r.entity = ' . $conf->entity;
             $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
             $sql .= ' AND r.fk_soc = ' . (int) $this->id;
-            
-            if($delaiYear > 0){
-                 $sql .= ' AND datec > DATE_SUB(NOW(),INTERVAL '.$delaiYear.' YEAR)';
+
+            if ($delaiYear > 0) {
+                $sql .= ' AND datec > DATE_SUB(NOW(),INTERVAL ' . $delaiYear . ' YEAR)';
             }
 
             if ($is_fourn) {
@@ -1748,6 +1751,17 @@ class Bimp_Societe extends BimpDolObject
 
         return ModeleThirdPartyDoc::liste_modeles($this->db->db);
     }
+    
+    public function getSepaDatesPrelevArray()
+    {
+        $dates = array();
+        
+        foreach (explode(',', BimpCore::getConf('sepa_date_prelevement', null, 'bimpcommercial')) as $date) {
+            $dates[$date] = $date;
+        }
+        
+        return $dates;
+    }
 
     // Affichages: 
 
@@ -2220,6 +2234,10 @@ class Bimp_Societe extends BimpDolObject
                 }
                 $html .= '</div>';
             }
+
+            if ($this->getData('solvabilite_status') > 0) {
+                $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Le client est au statut ' . $this->displayData('solvabilite_status') . '<br/>ATTENTION !!!!!!!!!!!!');
+            }
         }
 
         return $html;
@@ -2461,12 +2479,10 @@ class Bimp_Societe extends BimpDolObject
 
                 // Code repris tel quel depuis societe/card.php: 
 
-                /* moddrsi */
                 $sql = $db->query('SELECT Count(*) as nb, `ref_fourn`, `fk_product` FROM `llx_product_fournisseur_price` WHERE `fk_soc` IN (' . $soc_origin_id . ', ' . $object->id . ') GROUP BY `ref_fourn`, `fk_product` HAVING nb > 1');
                 while ($ln = $db->fetch_object($sql)) {
                     $db->query('UPDATE `llx_product_fournisseur_price` SET ref_fourn = CONCAT(ref_fourn, "-B") WHERE fk_product = ' . $ln->fk_product . ' AND ref_fourn = "' . $ln->ref_fourn . '" AND fk_soc = ' . $soc_origin_id . ' ');
                 }
-                /* fmoddrsi */
 
 
                 if ($import_soc_to_merge_data) {
@@ -2783,7 +2799,23 @@ class Bimp_Societe extends BimpDolObject
                     if (!is_object($result)) {
                         $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                     } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                        $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                        switch ($result->body->errors->errordetail->code) {
+                            case 130:
+                                $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible (Compte invalide). Le problème est en cours de résolution.';
+                                break;
+
+                            case 132:
+                                $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible (Crédits épuisés). Le problème est en cours de résolution.';
+                                break;
+
+                            case 171:
+                                $warnings[] = 'Le n° ' . ($siret ? 'SIRET' : 'SIREN') . ' demandé n\'existe pas (' . ($siret ? $siret : $siren) . ')';
+                                break;
+
+                            default:
+                                $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                                break;
+                        }
                     } else {
                         $ville = '';
                         $codeP = '';
@@ -4057,7 +4089,7 @@ class Bimp_Societe extends BimpDolObject
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;
-            if (!$user->admin && $user->id != 1499) {
+            if (!$user->admin && $user->id != 73) {
                 return array('Vous n\'avez pas la permission de passer le statut solvabilité à "Client à surveiller (forcé)"');
             }
         }

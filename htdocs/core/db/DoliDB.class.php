@@ -72,7 +72,7 @@ abstract class DoliDB implements Database
 	/** @var string */
 	public $error;
 
-        /* moddrsi */
+        /*moddrsi (20.2)*/
         public $has_rollback = false;
         public $noTransaction = false;
         /* fmoddrsi */
@@ -177,7 +177,7 @@ abstract class DoliDB implements Database
 	 */
 	public function begin($textinlog = '')
 	{
-                /*moddrsi*/
+                /*moddrsi (20.2)*/
                 if (!$this->noTransaction && defined('BIMP_LIB') && BimpDebug::isActive()) {
                     $content = '<span class="info">BEGIN #' . ($this->transaction_opened + 1). '</span><br/><br/>';
                     BimpDebug::addDebug('sql', '', $content, array(
@@ -194,7 +194,7 @@ abstract class DoliDB implements Database
 				dol_syslog("BEGIN Transaction".($textinlog ? ' '.$textinlog : ''), LOG_DEBUG);
 				dol_syslog('', 0, 1);
 			} else {
-                            /*moddrsi*/
+                            /*moddrsi (20.2)*/
                             if (defined('BIMP_LIB') && BimpDebug::isActive()) {
                                 $content = BimpRender::renderAlerts('Echec BEGIN - ' . $this->lasterror());
                                 BimpDebug::addDebug('sql', '', $content, array(
@@ -220,7 +220,7 @@ abstract class DoliDB implements Database
 	public function commit($log = '')
 	{
             dol_syslog('', 0, -1);
-            /*moddrsi*/ 
+            /*moddrsi (20.2)*/
 //                
 //		if ($this->transaction_opened <= 1) {
 //			$ret = $this->query("COMMIT");
@@ -236,14 +236,12 @@ abstract class DoliDB implements Database
 //			return 1;
 //		}
                 
-            /*moddrsi*/
             if (!$this->noTransaction && defined('BIMP_LIB') && BimpDebug::isActive()) {
                 $content = '<span class="success">COMMIT #' . ($this->transaction_opened). '</span><br/><br/>';
                 BimpDebug::addDebug('sql', '', $content, array(
                     'foldable' => false
                 ));
             }
-            /*fmoddrsi*/
                 
             if ($this->transaction_opened==1 && !$this->noTransaction) {
                 if ($this->has_rollback) {
@@ -300,7 +298,7 @@ abstract class DoliDB implements Database
 	{
 		dol_syslog('', 0, -1);
                 
-                /*moddrsi*/ 
+                /*moddrsi (20.2)*/
                 
 //		if ($this->transaction_opened <= 1) {
 //			$ret = $this->query("ROLLBACK");
@@ -537,7 +535,7 @@ abstract class DoliDB implements Database
 	}
         
         
-    // moddrsi : Ajouts
+    // moddrsi (20.2) : Ajouts
         
     public function commitAll()
     {

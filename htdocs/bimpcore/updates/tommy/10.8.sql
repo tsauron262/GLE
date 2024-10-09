@@ -16,7 +16,7 @@ CREATE TABLE llx_societe_atradius (
 entity INT default 1
 ) ENGINE=InnoDB;
 
-ALTER table llx_bimpcore_history ADD filters text DEFAULT '[]';
+ALTER table llx_bimpcore_history ADD filters varchar(255) DEFAULT '[]';
 
 
 

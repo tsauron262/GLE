@@ -482,7 +482,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
                 global $user;
-                if (BimpCore::isModuleActive('bimpvalidation') && $client_facture->getData('outstanding_limit') < 1 && $this->getData('ef_type') != 'S' /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->asPreuvePaiment()) {
+                if (BimpCore::isModuleActive('bimpvalidation') && $client_facture->getData('outstanding_limit') < 1 && $this->getData('ef_type') != 'S' /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->hasPreuvePaiment()) {
                     if (!in_array($user->id, array(232, 97, 1566, 512, 40, 242))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
                         if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
@@ -501,6 +501,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
             if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))) {
                 if (!$this->dol_object->getIdContact('external', 'SHIPPING')) {
                     $errors[] = 'Pour les livraisons directes le contact client est obligatoire';
+                }
+            }
+
+            if ($this->hasRemiseCRT()) {
+                if (!$client->getData('type_educ')) {
+                    $errors[] = 'Cette commande contient une remise CRT or le type éducation n\'est pas renseigné pour ce client, veuillez corriger la fiche client avant validation de cette commande';
+                } elseif ($client->getData('type_educ') == 'E4') {
+                    $date_fin_validite = $client->getData('type_educ_fin_validite');
+
+                    if (!$date_fin_validite) {
+                        $errors[] = 'Cette commande contient une remise CRT or la date de fin de validité du statut enseignant / étudiant n\'est pas renseigné. Veuillez corriger la fiche client avant validation de la commande';
+                    } elseif ($date_fin_validite < date('Y-m-d')) {
+                        $errors[] = 'Validation impossible : cette commande contient une remise CRT or la date de fin de validité du statut enseignant / étudiant du client est dépassée.';
+                    }
                 }
             }
         }
@@ -627,7 +641,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return 0;
     }
 
-    public function asPreuvePaiment()
+    public function hasPreuvePaiment()
     {
         $files = $this->getFilesArray();
         foreach ($files as $file) {
@@ -651,7 +665,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $errors[] = 'Demandes de location à partir des commandes désactivées';
             return 0;
         }
-        
+
         if ((int) BimpCore::getConf('allow_df_from_commande_dev_only', null, 'bimpcommercial') && !BimpCore::isUserDev()) {
             $errors[] = 'Demandes de location à partir des commandes actives seulement pour les devs';
             return 0;
@@ -709,7 +723,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $totVendu = $totRealise = 0;
         foreach ($this->getLines('product') as $line) {
             $prod = $line->getProduct();
-            if ($prod->isInter()) {
+            if (BimpCore::isModuleActive('bimptechnique') && $prod->isInter()) {
                 $totVendu += $line->getTotalHt(true);
                 $duree = $this->db->getValue('fichinterdet', 'SUM(duree)', '`id_line_commande` = ' . $line->id);
                 $dureeProd = $prod->getData('duree_i');
@@ -805,10 +819,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     );
                 }
             }
-            if ($status === 0 && !$this->asPreuvePaiment())
+
+            if ($status === 0 && !$this->hasPreuvePaiment())
                 $buttons[] = array(
                     'label'   => 'Télécharger la preuve de paiement',
-                    'icon'    => 'dollar',
+                    'icon'    => 'fas_file-download',
                     'onclick' => $this->getJsActionOnclick('preuvePaiment', array(), array(
                         'form_name' => 'preuve_paiement'
                     ))
@@ -886,6 +901,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
             }
 
+
+            $buttons[] = array(
+                'label'   => 'Passer toutes les quantités au mini',
+                'icon'    => 'ban',
+                'onclick' => $this->getJsActionOnclick('allQtyToZero', array(), array(
+                    'confirm_msg' => strip_tags($langs->trans('Confirmer', $ref))
+                ))
+            );
 
 //
 //            // Créer contrat
@@ -2361,7 +2384,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return $html;
     }
 
-    public function renderLinkedObjectsTable($htmlP = '')
+    public function renderLinkedObjectsTable($htmlP = '', $excluded_types = array())
     {
         $htmlP = "";
         $db = $this->db->db;
@@ -3106,6 +3129,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         $commandes_assos = array();
+        $new_fac_lines = array();
+        $new_fac_sub_lines = array();
 
         foreach ($lines_data as $id_commande => $commande_lines_data) {
             $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
@@ -3167,6 +3192,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
 
                     $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                    $fac_line->no_maj_bundle = true;
                     if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
                         // Création d'une ligne de texte: 
                         $fac_line->validateArray(array(
@@ -3239,6 +3265,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         $fac_line->updateField('deletable', 0);
                     }
                 } else {
+                    $fac_line->no_maj_bundle = true;
                     if ($new_qties) {
                         $line_qty += (float) $fac_line->qty;
 
@@ -3291,6 +3318,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
 
                 if (!count($line_errors) && BimpObject::objectLoaded($fac_line)) {
+                    $cmde_line_id_parent = (int) $line->getData('id_parent_line');
+                    if ($cmde_line_id_parent) {
+                        $new_fac_sub_lines[$fac_line->id] = $cmde_line_id_parent;
+                    }
+                    $new_fac_lines[$line->id] = $fac_line->id;
                     // Assignation des équipements à la ligne de facture: 
                     $equipments_set = array();
                     if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
@@ -3341,6 +3373,16 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                 if ($has_line_ok) {
                     $commande->processFacturesRemisesGlobales();
+                }
+            }
+        }
+
+        // Attribution des lignes parentes: 
+        foreach ($new_fac_sub_lines as $id_fac_line => $id_cmde_parent_line) {
+            if (isset($new_fac_lines[$id_cmde_parent_line])) {
+                $new_fac_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', $id_fac_line);
+                if (BimpObject::objectLoaded($new_fac_line)) {
+                    $new_fac_line->updateField('id_parent_line', $new_fac_lines[$id_cmde_parent_line]);
                 }
             }
         }
@@ -3839,8 +3881,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $warnings = array();
         /* pour enregistré les valeur du form */
         $errors = $this->updateFields($data);
-        $this->db->db->commit();
-        $this->db->db->begin();
+        if (BimpCore::getConf('use_db_transactions')) {
+            $this->db->db->commit();
+            $this->db->db->begin();
+        }
 
         $infos = array();
 
@@ -4424,15 +4468,40 @@ class Bimp_Commande extends Bimp_CommandeTemp
         );
     }
 
-    public function actionPreuvePaiment($data, &$success)
+    public function actionAllQtyToZero($data, &$success)
     {
         $errors = $warnings = array();
 
-        if (isset($data['file']) && $data['file'] != '') {
-            BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
+        $lines = $this->getLines('not_text');
+        foreach ($lines as $line) {
+            $data = array('qty_modified' => $line->getMinQty());
+            $success = '';
+            $line->actionModifyQty($data, $success);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionPreuvePaiment($data, &$success)
+    {
+        $errors = $warnings = array();
+        $success = 'Preuve de paiement enregistrée avec succès';
+
+        $files = BimpTools::getArrayValueFromPath($data, 'file', array());
+
+        if (empty($files)) {
+            $errors[] = 'Aucun fichier ajouté';
+        } else {
+            BimpTools::moveTmpFiles($errors, $files, $this->getFilesDir(), 'Paiement');
             $this->addLog('Preuve de paiement uploadé');
-        } else
-            $errors[] = 'Aucun fichier uploadé';
+        }
+
+//        if (isset($data['file']) && $data['file'] != '') {
+//            BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
+//        }
 
         return array(
             'errors'   => $errors,
@@ -4827,6 +4896,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             }
                         }
                     }
+
+                    $propal->checkProcessesStatus();
                 }
             }
 
@@ -4853,6 +4924,35 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('entrepot');
                 $sql .= ' WHERE `id_commande_client` = ' . (int) $this->id . ' AND `id_entrepot` = ' . $init_entrepot . ' AND `status` < 200';
                 $this->db->db->query($sql);
+            }
+        }
+
+        return $errors;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $propales = array();
+
+        if ($this->isLoaded()) {
+            foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('propal')) as $item) {
+                if (!in_array((int) $item['id_object'], $propales)) {
+                    $propales[] = (int) $item['id_object'];
+                }
+            }
+        }
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            if (!empty($propales)) {
+                foreach ($propales as $id_propal) {
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+
+                    if (BimpObject::objectLoaded($propal)) {
+                        $propal->checkProcessesStatus();
+                    }
+                }
             }
         }
 

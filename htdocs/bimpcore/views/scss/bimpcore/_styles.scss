@@ -471,17 +471,17 @@ i.iconRight {
         text-align: left;
         .small-action {
             margin-right: 12px;
-        }        
+        }
     }
     &.align-right {
         .small-action {
             margin-left: 12px;
-        }        
+        }
     }
     &.align-center {
         .small-action {
             margin: 0 12px;
-        }        
+        }
     }
 }
 
@@ -890,7 +890,7 @@ i.iconRight {
         margin-bottom: 3px;
 
         &.grey_bk {
-            background-color: #F0F0F0;   
+            background-color: #F0F0F0;
         }
 
         cursor: pointer;
@@ -988,19 +988,19 @@ i.iconRight {
                     opacity: 1;
                 }
             }
-        }  
-    } 
+        }
+    }
 
     &.open {
         & > thead tr:first-child .foldable-caret:before {
             content: '\f0d8';
-        }  
+        }
     }
 
     &.closed:first-child {
         & > thead tr:first-child .foldable-caret:before {
-            content: '\f0d7'; 
-        } 
+            content: '\f0d7';
+        }
     }
 }
 
@@ -1077,7 +1077,7 @@ i.iconRight {
 
             & > .array_content {
                 display: none;
-            }   
+            }
         }
     }
 }
@@ -1165,7 +1165,7 @@ i.iconRight {
     }
 }
 
-/*Bimp Timer*/ 
+/*Bimp Timer*/
 
 .bimp_timer {
     background-color: #fff;
@@ -1251,7 +1251,7 @@ i.iconRight {
 
 #page_notifications {
     display: none;
-    position: fixed; 
+    position: fixed;
     z-index: 99999;
     background-color: transparent;
     padding: 0 30px;
@@ -1298,7 +1298,7 @@ i.iconRight {
 }
 
 
-/*Popup login*/ 
+/*Popup login*/
 
 #bimp_login_popup {
     position: fixed;
@@ -1414,7 +1414,7 @@ i.iconRight {
         color: #fff!important;
 
         span {
-            color: #fff!important;    
+            color: #fff!important;
         }
     }
 }
@@ -1470,4 +1470,63 @@ body.modal-open ul.ui-autocomplete{
 .bimp_drop_files_container.allPage .bimp_drop_files_area .drop_files  {
     padding: 0;
     min-height: 0;
+}
+
+/* Expandable texts */
+
+.bimp_expandable_text {
+    @include transition(all 0.3s ease);
+
+    & > .bimp_expandable_text_points {
+        font-weight: bold;
+        display: none;
+    }
+
+    & > .bimp_expandable_text_hidden {
+        display: inline-block;
+    }
+
+    & > .bimp_expandable_text_buttons {
+        margin-top: 10px;
+
+        & > .collapse_btn,
+        & > .expand_btn {
+            @include transition(all 0.3s ease);
+            color: #7B7B7B;
+            font-weight: bold;
+
+            &:hover {
+                cursor: pointer;
+                color: $primary;
+            }
+        }
+
+        & > .collapse_btn {
+            display: inline;
+        }
+        & > .expand_btn {
+            display: none;
+        }
+    }
+
+    &.closed {
+        & > .bimp_expandable_text_points {
+            display: inline-block;
+        }
+
+        & > .bimp_expandable_text_hidden {
+            display: none;
+        }
+
+        & > .bimp_expandable_text_buttons {
+            margin-top: 4px;
+
+            & > .collapse_btn {
+                display: none;
+            }
+            & > .expand_btn {
+                display: inline;
+            }
+        }
+    }
 }

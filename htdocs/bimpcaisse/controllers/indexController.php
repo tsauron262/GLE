@@ -292,16 +292,18 @@ class indexController extends BimpController
             $html .= '<div class="freeFormRow">';
             $html .= '<div class="freeFormLabel">Montant du fonds de caisse: </div>';
             $html .= '<div class="freeFormInput">';
+            
+            $html .= BimpRender::renderCompteurCaisse('fonds');
 
-            $html .= BimpInput::renderInput('text', 'fonds', '', array(
-                        'data'        => array(
-                            'data_type' => 'number',
-                            'decimals'  => 2,
-                            'min'       => 0,
-                            'unsigned'  => 1
-                        ),
-                        'addon_right' => '<i class="fa fa-euro"></i>'
-            ));
+//            $html .= BimpInput::renderInput('text', 'fonds', '', array(
+//                        'data'        => array(
+//                            'data_type' => 'number',
+//                            'decimals'  => 2,
+//                            'min'       => 0,
+//                            'unsigned'  => 1
+//                        ),
+//                        'addon_right' => '<i class="fa fa-euro"></i>'
+//            ));
 
             $html .= '</div>';
             $html .= '</div>';
@@ -456,7 +458,8 @@ class indexController extends BimpController
                 'operator' => '>',
                 'value'    => 0
             ));
-            $list->addFieldFilterValue('id_caisse_session', (int) $caisse->getData('id_current_session'));
+//            $list->addFieldFilterValue('id_caisse_session', (int) $caisse->getData('id_current_session'));
+            $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
 
             $html .= $list->renderHtml();
         }
@@ -674,7 +677,7 @@ class indexController extends BimpController
                 if (is_null($session) || !$session->isLoaded()) {
                     $errors[] = 'Session de caisse invalide';
                 } else {
-                    if (!count($errors)) {
+                    /*if (!count($errors)) {//pour ne pas fermer avec des ventes brouillon
                         if (1) {
                             $bc_vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente');
                             $filters = array();
@@ -687,7 +690,7 @@ class indexController extends BimpController
                             if ($nbBr > 0)
                                 $errors[] = "Abandonnez toutes les ventes à l’état brouillon au préalable. (" . $nbBr . ")";
                         }
-                    }
+                    }*/
 
 
 
@@ -916,6 +919,7 @@ class indexController extends BimpController
                     $validate = (int) $vente->validateVente($validate_errors);
                     if (!$validate) {
                         $errors[] = 'Cette vente ne peut pas être validée';
+                        $errors = BimpTools::merge_array($validate_errors, $errors);
                     } else {
                         $ticket_html = $vente->renderTicketHtml($ticket_errors);
                     }

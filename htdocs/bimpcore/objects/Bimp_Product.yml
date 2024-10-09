@@ -128,6 +128,12 @@ fields:
         user_edit: 1
         hashtags: 1
         
+    description_strong: 
+        label: Description longue
+        type: html
+        user_edit: 1
+        dol_extra_field: 1
+        
     url: 
         label: URL publique
         
@@ -211,6 +217,8 @@ fields:
         label: Pourcentage du coût de revient
         type: percent
         default_value: 0
+        values: 
+            callback: getCostPricePercentValues
         input:
               help: Si renseigné est prioritaire pour le calcul du prix de revient
         
@@ -705,6 +713,7 @@ forms:
             - field: code_config
             - field: label
             - field: description
+            - field: description_strong
             - field: fk_product_type
             - field: type2
             - field: type_compta
@@ -717,6 +726,7 @@ forms:
             - field: accountancy_code_sell_export
             - field: price
             - field: tva_tx
+            - field: price_ttc
             - field: deee
             - field: rpcp
             - field: gamme
@@ -732,6 +742,45 @@ forms:
             - field: 2hotline
             - field: duree
             - field: duree_i
+            
+    create:
+        extends: default
+        rows:
+          files:
+              object: files
+              multiple: 1
+          fourn_prices:
+              object: fourn_prices
+              multiple: 1
+              form_name: create_prod
+          qty:
+              custom: 1
+              label: Quantité en stock
+              input_name: qty
+              data_type: int
+              min: 1
+              input: 
+                  type: qty
+          id_entrepot:
+              custom: 1
+              input_name: id_entrepot
+              label: Entrepôt
+              dol_extra_field: 1
+              type: id_object
+              object: entrepot
+              required: 
+                  callback: useEntrepot
+              input: 
+                  type: search_entrepot
+              default_value: 
+                  callback: getDefaultEntrepot
+          comment:
+              custom: 1
+              input_name: comment
+              label: Infos
+              input: 
+                  type: text
+              value: Stock initial
         
     card:
         extends: default
@@ -757,7 +806,8 @@ forms:
               show: 
                   callback: isLoaded
             - field: label
-            - field: description  
+            - field: description 
+            - field: description_strong
             - field: fk_product_type
             - field: type2           
             - field: no_fixe_prices
@@ -900,6 +950,55 @@ forms:
               label: Infos
               input: 
                   type: text
+                  
+    combination: 
+        values: 
+            callback: getCombinationFormValues
+        rows: 
+            - custom: 1
+              label: Attributs et valeurs
+              input_name: features
+              content: 
+                  callback: renderCombinationFeaturesInput
+            - custom: 1
+              label: Référence
+              input_name: combination_ref
+              input: 
+                  type: text
+              value: 
+                   callback: getNewCombinationRef
+            - custom: 1
+              label: Impact sur le prix en pourcentage
+              input_name: variation_price_percent
+              data_type: bool
+              value: 0
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Impact sur le prix
+              input_name: variation_price
+              data_type: float
+              decimals: 6
+              input: 
+                  type: text
+              value: 0
+            - custom: 1
+              label: Impact sur le poids
+              input_name: variation_weight
+              data_type: float
+              decimals: 6
+              input: 
+                  type: text
+                  addon_right: 
+                      text: Kg
+              value: 0
+#            - title: Prix d'achat fournisseur(s)'
+            - object: fourn_prices
+              label: Prix d'achat fournisseur
+              on_edit: 1
+              multiple: 1
+              form_name: create_prod
+            
             
 fields_tables: 
     infos: 
@@ -923,6 +1022,7 @@ fields_tables:
             - field: accountancy_code_sell_intra
             - field: accountancy_code_sell_export
             - field: description
+            - field: description_strong
             - field: note
             - field: url
             
@@ -1014,7 +1114,6 @@ fields_tables:
               value: 
                   callback: getRemiseBundle
         
-            
     prices_buy: 
         title: Prix d'achat
         icon: fas_euro-sign
@@ -1362,7 +1461,7 @@ lists:
         edit_btn: 1
         delete_btn: 1
         edit_form: card
-        add_form_name: card
+        add_form_name: create
         modal_view: default
         extra_btn: 
             callback: getListsButtons

@@ -166,7 +166,7 @@ class BTC_exportRibAndMandat extends BTC_export {
         $warnings = Array();
         $errors = Array();
         
-        $export_dir = PATH_TMP  ."/" . 'exportCegid' . '/BY_MY/' ;
+        $export_dir = bimptocegidLib::getDirOutput() . '/BY_MY/' ;
         $client = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_Societe');
         
         $ecriture = $this->head_tra();

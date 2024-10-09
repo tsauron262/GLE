@@ -203,8 +203,10 @@ class BL_CommandeShipment extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
-        if ($this->getData('status') === self::BLCS_BROUILLON && $this->getTotalHT() == 0)
+        if ((int) $this->getData('status') === self::BLCS_BROUILLON && !$this->getTotalHT()) {
             return 1;
+        }
+
         return 0;
     }
 
@@ -915,7 +917,7 @@ class BL_CommandeShipment extends BimpObject
                     'confirm_msg' => 'Veuillez confirmer'
                 ));
 
-                if((int) $this->getData('id_signature') === -1){
+                if ((int) $this->getData('id_signature') === -1) {
                     $html .= '<span class="warning">Non applicable</span>';
                     $html .= '&nbsp;&nbsp;';
                 }
@@ -955,8 +957,7 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '</div>';
                 }
             }
-        }
-        else{
+        } else {
             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
                 $onclick = $this->getJsActionOnclick('createSignature', array('redirect' => 0), array(
                     'confirm_msg' => 'Veuillez confirmer'
@@ -2534,15 +2535,42 @@ class BL_CommandeShipment extends BimpObject
 
     public function actionValidateShipment($data, &$success)
     {
+        $errors = array();
         $warnings = array();
         $success = 'Expédition validée avec succès';
 
-        $date_shipped = (isset($data['date_shipped']) ? $data['date_shipped'] : '');
-        $pdf_chiffre = (int) BimpTools::getArrayValueFromPath($data, 'pdf_chiffre', 1);
-        $pdf_detail = (int) BimpTools::getArrayValueFromPath($data, 'pdf_detail', 1);
-        $create_signature = (int) BimpTools::getArrayValueFromPath($data, 'create_signature', 1);
+        $commande = $this->getParentInstance();
+        if (BimpObject::objectLoaded($commande)) {
+            $id_client = (int) $commande->getData('fk_soc');
+            if ((int) $commande->getData('id_client_facture')) {
+                $id_client = (int) $commande->getData('id_client_facture');
+            }
 
-        $errors = $this->validateShipment($warnings, $date_shipped, $pdf_chiffre, $pdf_detail, $create_signature);
+            if (!$id_client) {
+                $errors[] = 'ID du client absent';
+            } else {
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+
+                if (!BimpObject::objectLoaded($client)) {
+                    $errors[] = 'Le client #' . $id_client . ' n\'existe plus';
+                } else {
+                    if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
+                        $errors[] = 'Le client ' . $client->getLink() . ' est au statut ' . $client->displayDataDefault('solvabilite_status') . ' - Il n\'est pas possible de valider cette expédition';
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Commande absente';
+        }
+
+        if (!count($errors)) {
+            $date_shipped = (isset($data['date_shipped']) ? $data['date_shipped'] : '');
+            $pdf_chiffre = (int) BimpTools::getArrayValueFromPath($data, 'pdf_chiffre', 1);
+            $pdf_detail = (int) BimpTools::getArrayValueFromPath($data, 'pdf_detail', 1);
+            $create_signature = (int) BimpTools::getArrayValueFromPath($data, 'create_signature', 1);
+
+            $errors = $this->validateShipment($warnings, $date_shipped, $pdf_chiffre, $pdf_detail, $create_signature);
+        }
 
         return array(
             'errors'   => $errors,

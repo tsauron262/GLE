@@ -1,0 +1,2 @@
+- Processus d'édition d'un champ en série (BulkEditField) via BimpDataSync
+- Mise à jour du processus d'alimentation des tables bl_shipment_line et bl_reception_line

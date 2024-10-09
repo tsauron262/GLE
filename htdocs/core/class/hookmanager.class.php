@@ -57,7 +57,7 @@ class HookManager
 	// Nb of qualified hook ran
 	public $resNbOfHooks = 0;
 
-        /* moddris*/
+        /*moddrsi (20.2)*/
         // Correctif pour gros bug Dolibarr : $ResPrint peut être écrasé si 2 executehook() emboîté l'un dans l'autre (vu que $hookmanager est une instance unique globale) 
         public $resPrintsArray = array();
         /*fmoddrsi*/ 
@@ -244,7 +244,7 @@ class HookManager
 		}
 
 		// Init return properties
-                /*moddrsi*/
+                /*moddrsi (20.2 - removed)*/
                 $this->resPrint = '';
 		$this->resPrintsArray[$method] = '';
                 /*fmoddrsi*/
@@ -308,13 +308,13 @@ class HookManager
 						}
 						if (!empty($actionclassinstance->resprints)) {
 							if ($resactiontmp > 0) {
-                                                            /*moddrsi*/
+                                                            /*moddrsi (20.2 - removed)*/
                                                             // $this->resPrint = $actionclassinstance->resprints;
                                                             $this->resPrintsArray[$method] = $actionclassinstance->resprints;
                                                             /*fmoddrsi*/
 								
 							} else {
-                                                                /*moddrsi*/
+                                                                /*moddrsi (20.2 - removed)*/
                                                                 // $this->resPrint .= $actionclassinstance->resprints;
                                                                 $this->resPrintsArray[$method] .= $actionclassinstance->resprints;
                                                                 /*fmoddrsi*/
@@ -336,7 +336,7 @@ class HookManager
 							$this->resArray = array_merge($this->resArray, $actionclassinstance->results);
 						}
 						if (!empty($actionclassinstance->resprints)) {
-							/*moddrsi*/
+							/*moddrsi (20.2 - removed)*/
                                                         // $this->resPrint .= $actionclassinstance->resprints;
                                                         $this->resPrintsArray[$method] .= $actionclassinstance->resprints;
                                                         /*fmoddrsi*/
@@ -352,7 +352,7 @@ class HookManager
 						if (!is_array($resactiontmp) && !is_numeric($resactiontmp)) {
 							dol_syslog('Error: Bug into hook '.$method.' of module class '.get_class($actionclassinstance).'. Method must not return a string but an int (0=OK, 1=Replace, -1=KO) and set string into ->resprints', LOG_ERR);
 							if (empty($actionclassinstance->resprints)) {
-                                                                /*moddrsi*/
+                                                                /*moddrsi (20.2 - removed)*/
                                                                 // $this->resPrint .= $resactiontmp;
                                                                 $this->resPrintsArray[$method] .= $resactiontmp;
                                                                 /*fmoddrsi*/
@@ -368,7 +368,7 @@ class HookManager
 			}
 		}
 
-                /*moddrsi*/
+                /*moddrsi (20.2 - removed)*/
                 $this->resPrint = $this->resPrintsArray[$method];
 		unset($this->resPrintsArray[$method]);
                 /*fmoddrsi*/

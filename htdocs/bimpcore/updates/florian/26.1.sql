@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_signature_signataire` ADD `security_code` VARCHAR(6) NOT NULL DEFAULT '';

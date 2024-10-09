@@ -223,21 +223,25 @@ class BimpTools
             mkdir($dir_dest);
 
         $dir = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir();
-        $file = $user->id . "_" . BimpTools::getAjaxFileName($field_name);
+        $files = BimpTools::getAjaxFileName($field_name);
+        if (!is_array($files))
+            $files = array($files);
 
-        if ($name_dest == null) {
-            $name_dest = BimpTools::getAjaxFileName($field_name);
-        }
+        foreach ($files as $file) {
+            if ($name_dest == null) {
+                $name_dest = $file;
+            }
+//            $file = $user->id . "_" . $file;
 
-        if (pathinfo($name_dest, PATHINFO_EXTENSION) == '') {
-            $extension = pathinfo($file, PATHINFO_EXTENSION);
-            $name_dest .= '.' . $extension;
-        }
-
-        if (!file_exists($dir . '/' . $file)) {
-            $errors[] = 'Le fichier "' . $file . '" n\'existe pas';
-        } elseif (!rename($dir . '/' . $file, $dir_dest . '/' . $name_dest)) {
-            $errors[] = 'Echec du déplacement du fichier "' . $name_dest . '" dans le dossier de destination';
+            if (pathinfo($name_dest, PATHINFO_EXTENSION) == '') {
+                $extension = pathinfo($file, PATHINFO_EXTENSION);
+                $name_dest .= '.' . $extension;
+            }
+            if (!file_exists($dir . '/' . $file)) {
+                $errors[] = 'Le fichier "' . $dir . '/' . $file . '" n\'existe pas';
+            } elseif (!rename($dir . '/' . $file, $dir_dest . '/' . $name_dest)) {
+                $errors[] = 'Echec du déplacement du fichier "' . $name_dest . '" dans le dossier de destination';
+            }
         }
     }
 
@@ -254,17 +258,19 @@ class BimpTools
         $dir = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir() . '/';
 
         $i = 0;
+
         foreach ($files as $file_name) {
             $i++;
             if (!file_exists($dir . $file_name)) {
                 $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas dans le dossier de téléchargement temporaire';
             } else {
+                $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
                 $file_dest = $dir_dest . '/';
                 if ($name_dest) {
                     if (count($files) > 1) {
-                        $file_dest .= pathinfo($name_dest, PATHINFO_FILENAME) . '_' . $i . '.' . pathinfo($name_dest, PATHINFO_EXTENSION);
+                        $file_dest .= pathinfo($name_dest, PATHINFO_FILENAME) . '_' . $i . '.' . $file_ext;
                     } else {
-                        $file_dest .= $name_dest;
+                        $file_dest .= pathinfo($name_dest, PATHINFO_FILENAME) . '.' . $file_ext;
                     }
                 } else {
                     if (preg_match('/^(.+)_tms[0-9]+(\..+)$/', $file_name, $matches)) {
@@ -278,7 +284,7 @@ class BimpTools
                 $file_dest_tmp = $file_dest;
                 while (file_exists($file_dest_tmp)) {
                     $i++;
-                    $file_dest_tmp = pathinfo($file_dest, PATHINFO_DIRNAME) . '/' . pathinfo($file_dest, PATHINFO_FILENAME) . '_' . $i . '.' . pathinfo($file_dest, PATHINFO_EXTENSION);
+                    $file_dest_tmp = pathinfo($file_dest, PATHINFO_DIRNAME) . '/' . pathinfo($file_dest, PATHINFO_FILENAME) . '_' . $i . '.' . $file_ext;
                 }
                 $file_dest = $file_dest_tmp;
 
@@ -3054,7 +3060,7 @@ class BimpTools
     public static function getDecimalesNumber($float_number)
     {
         if (is_numeric($float_number)) {
-            $value_str = number_format($float_number, 8);
+            $value_str = number_format($float_number, 8, '.', '');
 
             if ($value_str) {
                 if (preg_match('/^(\-?\d+)\.(\d*)0*$/U', $value_str, $matches)) {
@@ -3076,9 +3082,14 @@ class BimpTools
         return '<span class="badge badge-pill badge-' . $style . (($popover != '') ? ' bs-popover' : '') . '" ' . (($popover != '') ? BimpRender::renderPopoverData($popover) : '') . ' style="size:' . $size . '">' . $text . '</span>';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true, $max_decimales = 8)
     {
-        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+        // $decimals: indiquer 'full' pour afficher toutes les décimales jusqu'à $max_decimales
+
+        if ($max_decimales < 2) {
+            $max_decimales = 2;
+        }
+
         global $modeCSV;
         if ($modeCSV)
             return str_replace(".", ",", $value);
@@ -3134,8 +3145,8 @@ class BimpTools
 
         if ((int) $decimals < 2) {
             $decimals = 2;
-        } elseif ((int) $decimals > 8) {
-            $decimals = 8;
+        } elseif ((int) $decimals > $max_decimales) {
+            $decimals = $max_decimales;
         }
 
         // Arrondi: 
@@ -4157,43 +4168,45 @@ class BimpTools
                 return $data;
         }
     }
-    
-    
     /*
      * Sécurité
      */
-    public static function secuAddEchec($msg){
-        
+
+    public static function secuAddEchec($msg)
+    {
+
         $bdb = BimpCache::getBdb();
-        $bdb->insert('bimp_secu_ip', array('ip'=>static::getUserIp(), 'msg'=>$msg));    
+        $bdb->insert('bimp_secu_ip', array('ip' => static::getUserIp(), 'msg' => $msg));
     }
-    
-    public static function secuGetNbEchec(){
+
+    public static function secuGetNbEchec()
+    {
         $bdb = BimpCache::getBdb();
-        
+
         $dt = new DateTime();
 //        $dt->sub(new DateInterval('P2D'));
-        return $bdb->getCount('bimp_secu_ip', "ip = '".static::getUserIp()."' AND tms > '".$dt->format('Y/m/d')."'");  
+        return $bdb->getCount('bimp_secu_ip', "ip = '" . static::getUserIp() . "' AND tms > '" . $dt->format('Y/m/d') . "'");
     }
-    
-    public static function secuTestIp(){
-        if(static::secuGetNbEchec() > 20){
-            BimpCore::addlog('Activité anormal : '.static::getUserIp(), 4);
+
+    public static function secuTestIp()
+    {
+        if (static::secuGetNbEchec() > 20) {
+            BimpCore::addlog('Activité anormal : ' . static::getUserIp(), 4);
             $msg = 'Une activité anormale a étais détecté sur votre connexion...';
             $html = BimpRender::renderAlerts($msg);
             header('HTTP/1.0 403 Forbidden');
             die($html);
         }
-        
     }
-    
-    public static function getScriptAttribut(){
+
+    public static function getScriptAttribut()
+    {
         $return = ' type="text/javascript"';
-        if(defined('csp_nonce'))
-            $return .= ' nonce="'.csp_nonce.'"';
+        if (defined('csp_nonce'))
+            $return .= ' nonce="' . csp_nonce . '"';
         return $return;
     }
-    
+
     static function getUserIp()
     {
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {

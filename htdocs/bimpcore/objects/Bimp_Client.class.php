@@ -478,16 +478,21 @@ class Bimp_Client extends Bimp_Societe
             );
         }
 
-        if ($this->canSetAction('bulkEditField') && $this->canEditField('solvabilite_status')) {
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('outstanding_limit_manuel')) {
             $actions[] = array(
                 'label'   => 'Editer limit manuel',
                 'icon'    => 'fas_pen',
                 'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
-                    'field_name'   => 'outstanding_limit_manuel',
-                    'update_mode'  => 'update_object',
+                    'field_name'               => 'outstanding_limit_manuel',
+                    'update_mode'              => 'update_object',
+                    'outstanding_limit_manuel' => 0
 //                    'force_update' => 1
                         ), array(
-                    'form_name' => 'bulk_edit_field'
+                    'confirm_msg'      => 'Mise à jour du champ outstanding_limit_manuel à la valeur 0 - Veuillez confirmer',
+                    'single_action'    => true,
+                    'use_bimpdatasync' => true,
+                    'use_report'       => true
+//                    'form_name' => 'bulk_edit_field'
                 ))
             );
         }
@@ -515,6 +520,7 @@ class Bimp_Client extends Bimp_Societe
                 ))
             );
         }
+
         if ($user->admin) {
             $actions[] = array(
                 'label'   => 'Condition/Mode réglement',
@@ -1029,8 +1035,8 @@ class Bimp_Client extends Bimp_Societe
     {
         $prefName = 'icba_';
         global $conf;
-        if($conf->entity > 1)
-            $prefName = $conf->entity.'_'.$prefName;
+        if ($conf->entity > 1)
+            $prefName = $conf->entity . '_' . $prefName;
         if (is_null($forced_date))
             $name = $prefName . date('Y-m-d', strtotime($this->getData('date_depot_icba')));
         else
@@ -2662,7 +2668,7 @@ class Bimp_Client extends Bimp_Societe
 
                 $lines_headers = array(
                     'linked'  => array('label' => '', 'colspan' => 0),
-                    'n'       => array('label' => 'Ligne n°', 'colspan' => 2),
+                    'desc'    => array('label' => 'Ligne', 'colspan' => 2),
                     'statut'  => 'statut',
                     'dates'   => 'Dates',
                     'fac'     => 'Facturation',
@@ -2738,6 +2744,7 @@ class Bimp_Client extends Bimp_Societe
                                 $qty = (float) $line->getData('qty');
                                 $nb_units = ($qty / $duration) * $prod_duration;
                                 $line_statut = (int) $line->getData('statut');
+                                $line_statut_code = '';
 
                                 switch ($line_statut) {
                                     case -2:
@@ -2745,16 +2752,19 @@ class Bimp_Client extends Bimp_Societe
                                     case 0:
                                         $units['inactive'] += $nb_units;
                                         $qties['inactive'] += $qty;
+                                        $line_statut_code = 'inactive';
                                         break;
 
                                     case 4:
                                         $units['active'] += $nb_units;
                                         $qties['active'] += $qty;
+                                        $line_statut_code = 'active';
                                         break;
 
                                     case 5:
                                         $units['closed'] += $nb_units;
                                         $qties['closed'] += $qty;
+                                        $line_statut_code = 'closed';
                                         break;
                                 }
 
@@ -2790,14 +2800,19 @@ class Bimp_Client extends Bimp_Societe
                                     }
                                 }
 
-                                $num = $line->getData('rang');
+                                $line_desc = '<b>N° ' . $line->getData('rang') . '</b>';
 
                                 $id_parent_line = (int) $line->getData('id_parent_line');
                                 if ($id_parent_line) {
                                     $parent_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_parent_line);
                                     if (BimpObject::objectLoaded($parent_line)) {
-                                        $num .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
+                                        $line_desc .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
                                     }
+                                }
+
+                                $description = $line->getData('description');
+                                if ($description) {
+                                    $line_desc .= '<br/>' . BimpRender::renderExpandableText($description, 120, 11, 180);
                                 }
 
                                 $buttons_html = '';
@@ -2807,17 +2822,19 @@ class Bimp_Client extends Bimp_Societe
                                 }
 
                                 $lines_rows[] = array(
-                                    'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
-                                    'n'         => array('content' => $num, 'colspan' => ($is_sub_line ? 1 : 2)),
-                                    'linked'    => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
-                                    'statut'    => $line->displayDataDefault('statut'),
-                                    'dates'     => $dates,
-                                    'fac'       => $line->displayFacInfos(),
-                                    'achats'    => $line->displayAchatInfos(false),
-                                    'units'     => $nb_units,
-                                    'qty'       => $qty,
-                                    'pu_ht'     => $line->displayDataDefault('subprice'),
-                                    'buttons'   => $buttons_html
+                                    'show_tr'         => ($line_statut_code != 'closed' ? 1 : 0),
+                                    'row_style'       => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
+                                    'row_extra_class' => 'status_' . $line_statut_code,
+                                    'desc'            => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
+                                    'linked'          => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
+                                    'statut'          => $line->displayDataDefault('statut'),
+                                    'dates'           => $dates,
+                                    'fac'             => $line->displayFacInfos(),
+                                    'achats'          => $line->displayAchatInfos(false),
+                                    'units'           => $nb_units,
+                                    'qty'             => $qty,
+                                    'pu_ht'           => $line->displayDataDefault('subprice'),
+                                    'buttons'         => $buttons_html
                                 );
                             }
                         }
@@ -2871,7 +2888,20 @@ class Bimp_Client extends Bimp_Societe
                         'buttons'   => $detail_btn
                     );
 
-                    $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= '<div class="prod_sublines_container" style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= '<div style="margin-bottom: 5px;">';
+                    $lines_content .= BimpInput::renderInput('check_list', 'prod_' . $prod->id . '_display_filters', array('active', 'inactive'), array(
+                                'items'              => array(
+                                    'active'   => 'Actives',
+                                    'inactive' => 'Inactives',
+                                    'closed'   => 'Fermées'
+                                ),
+                                'search_input'       => 0,
+                                'select_all_buttons' => 0,
+                                'inline'             => 1,
+                                'onchange'           => 'BimpContrat.onSyntheseProdLineDisplayFilterChange($(this));'
+                    ));
+
                     $lines_content .= BimpRender::renderBimpListTable($lines_rows, $lines_headers, array(
                                 'is_sublist' => true
                     ));
@@ -3303,6 +3333,7 @@ class Bimp_Client extends Bimp_Societe
                                 self::updateAtradiusValue($this, 'outstanding_limit_atradius', 0);
 //                            if ($this->getData('outstanding_limit_icba') > 0)
 //                                self::updateAtradiusValue($this, 'outstanding_limit_icba', 0);
+                            $this->updateField('date_atradius', null);
                             $success = 'Pas de couverture';
                         } else {
                             // Crédit Check
@@ -3537,7 +3568,7 @@ class Bimp_Client extends Bimp_Societe
         $buyers = $api->getMyBuyer2($filters, $errors);
 
         foreach ($buyers['data'] as $b) {
-            $id_client = (int) self::getBdb()->getValue('societe', 'rowid', 'id_atradius = ' . $b['buyerId']);
+            $id_client = (int) self::getBdb()->getValue('societe_atradius', 'id_soc', 'id_atradius = ' . $b['buyerId']);
             $c = BimpObject::getInstance('bimpcore', 'Bimp_Client', $id_client);
 
             if ($c->isLoaded()) {

@@ -355,9 +355,8 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             // Recherche via UserClient: 
             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                         'email_custom' => array(
-                            'custom' => 'LOWER(email) = \'' . strtolower($email) . '\''
+                            'custom' => 'LOWER(a.email) = \'' . strtolower($email) . '\''
                         )
-//                        'email' => $email
                             ), true);
 
             if (BimpObject::objectLoaded($userClient)) {

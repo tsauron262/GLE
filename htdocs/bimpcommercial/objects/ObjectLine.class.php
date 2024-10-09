@@ -1444,6 +1444,15 @@ class ObjectLine extends BimpObject
         return array();
     }
 
+    public function getEquipmentsIds()
+    {
+        if ($this->isLoaded() && static::$parent_comm_type) {
+            return $this->db->getValues('object_line_equipment', 'id_equipment', 'id_object_line = ' . (int) $this->id . ' AND ' . 'object_type = \'' . static::$parent_comm_type . '\'');
+        }
+
+        return array();
+    }
+
     public function getCurrentEquipmentsLinesData($equipments_list_only = false)
     {
         $data = array();
@@ -4027,7 +4036,7 @@ class ObjectLine extends BimpObject
             ));
 
             $tabRang = array();
-            $tabTemp = $this->db->executeS('SELECT ' . $primary . ' as id, rang FROM llx_' . $table . ' WHERE ' . $this::$dol_line_parent_field . ' = ' . $parent->id, 'array');
+            $tabTemp = $this->db->executeS('SELECT ' . $primary . ' as id, rang FROM '.MAIN_DB_PREFIX . $table . ' WHERE ' . $this::$dol_line_parent_field . ' = ' . $parent->id, 'array');
 
             if (is_array($tabTemp)) {
                 foreach ($tabTemp as $lnTemp) {
@@ -4509,7 +4518,7 @@ class ObjectLine extends BimpObject
                             $min = 'none';
                         }
 
-                        $value = round($value, $decimals);
+                        $value = round((float) $value, $decimals);
                         $html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
                                     'data' => array(
                                         'data_type' => 'number',
@@ -5941,9 +5950,10 @@ class ObjectLine extends BimpObject
                                     'remisable'    => 2,
                                         ), true);
 
-                        if ($this->field_exists('abo_nb_units')) {
+                        if ($this->field_exists('abo_nb_units') && (float) $this->getData('abo_nb_units') != 0) {
                             $fieldsCopy['abo_nb_units'] = $child_prod->getData('qty') * $nb_units * $qty_ratio;
-                        } else {
+                        } 
+                        else {
                             $propertiesCopy['qty'] = $child_prod->getData('qty') * $this->qty;
                         }
 
@@ -6229,7 +6239,7 @@ class ObjectLine extends BimpObject
 
         if ((int) $this->id_product) {
             $product = $this->getProduct();
-            if (BimpObject::objectLoaded($product) && $product->getData('type2') == 20) {
+            if (BimpObject::objectLoaded($product) && $product->isBundle()) {
                 $this->deleteSousLigne($errors, $warnings);
             }
         }

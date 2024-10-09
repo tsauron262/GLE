@@ -3,3 +3,4 @@
 - Ajout date derniére commande dans stock interne
 - Ajout fetch GSX avant mail localisé
 - Correction erreur merge equipment sans produits
+

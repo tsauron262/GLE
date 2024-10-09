@@ -132,12 +132,11 @@ params:
         type: bool
         def: 0
     pdf_pu_nb_decimales: 
-        label: Nombre de décimales sur les PDF pour les PU
+        label: Nombre max de décimales sur les PDF pour les PU
         cat: pdfs
-        def: 0
-        info: Laisser 0 pour un affichage automatique
+        def: 2
     pdf_total_nb_decimales: 
-        label: Nombre de décimales sur les PDF pour les totaux
+        label: Nombre max de décimales sur les PDF pour les totaux
         cat: pdfs
         def: 2
     new_bank_account_date: 
@@ -157,6 +156,7 @@ params:
         info: 'Ajoute la mention "NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus"'
     sepa_date_prelevement: 
         label: Mention "Date de prélèvement" dans les mandats SEPA
+        info: Si plusieurs valeurs possibles, séparer par une virgule
         def: 30 jours net date de facture
     
     # Relances: 
@@ -382,4 +382,8 @@ params:
     demande_fin_target_prolease_id_client: 
         label: ID client LDLC Pro Lease
         cat: locations
+        def: 0
+        
+    use_light_fourn:
+        label: Utiliser le formulaire de création simplifié
         def: 0

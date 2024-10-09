@@ -4,6 +4,7 @@
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';    
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/controle.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
 //    ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
 //error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
@@ -22,7 +23,7 @@
         protected $ldlc_ftp_user = '';
         protected $ldlc_ftp_pass = '';
         protected $ldlc_ftp_path = ''; 
-        protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
+        protected $local_path    = '';
         protected $size_vide_tra = 149;
         protected $rollback = false;
         protected $copyErrors = Array();
@@ -48,6 +49,7 @@
         
         public function __construct() {// Bien penssé a changer pour les test à /accountingtest/
             $this->ldlc_ftp_path = "/".BimpCore::getConf('exports_ldlc_ftp_dir').'/accounting';
+            $this->local_path = bimptocegidLib::getDirOutput().'BY_DATE/';
             $this->ldlc_ftp_host = BimpCore::getConf('exports_ldlc_ftp_serv');
             $this->ldlc_ftp_user = BimpCore::getConf('exports_ldlc_ftp_user');
             $this->ldlc_ftp_pass = BimpCore::getConf('exports_ldlc_ftp_mdp');
@@ -86,7 +88,8 @@
             if(((defined('ID_ERP') && ID_ERP == 6) || $this->modeTest)) {
                 $this->export_class = new export($db);
                 if(!is_dir($this->local_path))
-                    mkdir($this->local_path);
+                    echo BimpTools::makeDirectories($this->local_path, '/');
+//                    mkdir($this->local_path);
                 if(!is_dir($this->local_path))
                     die($this->local_path.' introuvable');
                 if(!count(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire))) {
@@ -462,7 +465,7 @@
             
             $this->output .= $logs;
             
-            $filePath = PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/';
+            $filePath = bimptocegidLib::getDirOutput() . 'rapports' . '/';
             if(!is_dir($filePath))
                 mkdir($filePath);
             $fileName = date('d_m_Y') . '_'.$this->export_class->moment.'.log';

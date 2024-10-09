@@ -9,6 +9,7 @@
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_deplacementPaiement.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_bordereauCHK.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/functions/sizing.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
     
     class export {
         
@@ -21,7 +22,6 @@
         private $TRA_importPaiement;
         private $TRA_factureFournisseur;
         private $TRA_bordereauCHK;
-        private $dir = "/exportCegid/BY_DATE/";
         public $fails = Array();
         public $good = Array();
         public $warn = Array();
@@ -36,11 +36,11 @@
             $this->yesterday = $hier->sub(new DateInterval("P1D"));
             $this->lastDateExported = new DateTime(BimpCore::getConf("last_export_date", null, "bimptocegid"));
             $this->bdb = new BimpDb($db);
-            $this->TRA_facture = new TRA_facture($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
-            $this->TRA_factureFournisseur = new TRA_factureFournisseur($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
+            $this->TRA_facture = new TRA_facture($this->bdb, bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("tiers"));
+            $this->TRA_factureFournisseur = new TRA_factureFournisseur($this->bdb, bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("tiers"));
             $this->TRA_payInc = new TRA_payInc($this->bdb);
-            $this->TRA_paiement = new TRA_paiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
-            $this->TRA_deplacementPaiement = new TRA_deplacementPaiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
+            $this->TRA_paiement = new TRA_paiement($this->bdb, bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("tiers"));
+            $this->TRA_deplacementPaiement = new TRA_deplacementPaiement($this->bdb, bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("tiers"));
             $this->TRA_importPaiement = new TRA_importPaiement($this->bdb);
             $this->TRA_bordereauCHK = new TRA_bordereauCHK($this->bdb);
         }
@@ -51,7 +51,7 @@
             
             $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datef   >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00")'.$this->getEntityFilter());
             
-            $file = PATH_TMP . $this->dir . $this->getMyFile("achats");
+            $file = bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("achats");
             if(count($list) > 0) {
                 foreach($list as $facture) {
                     $ecriture = "";
@@ -79,7 +79,7 @@
             $errors = [];
             $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef > "2023-01-01" AND (datef >= "'.$this->lastDateExported->format('Y-m-d').'")'.$this->getEntityFilter());
                                     
-            $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
+            $file = bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("ventes");
             if(count($list) > 0) {
                 foreach($list as $facture) {
                     $ecriture = "";
@@ -94,8 +94,8 @@
                             $ecriture_rib = $ribANDmandat->export_rib($instance, $societe);
                             $ecriture_mdt = $ribANDmandat->export_mandat($instance, $societe);
                             if(!empty($ecriture_mdt) && !empty($ecriture_rib)) {
-                                $this->write_tra($ecriture_rib, PATH_TMP . $this->dir . $this->getMyFile("ribs"));
-                                $this->write_tra($ecriture_mdt, PATH_TMP . $this->dir . $this->getMyFile("mandats"));
+                                $this->write_tra($ecriture_rib, bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("ribs"));
+                                $this->write_tra($ecriture_mdt, bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("mandats"));
                                 $ribANDmandat->passTo_exported($instance);
                             }
                         }  else {
@@ -127,7 +127,7 @@
             if(count($list) > 0) {
                 foreach($list as $import) {
                     $instance->fetch($import['id']);
-                    $file = PATH_TMP . $this->dir . 'IP' . $instance->getParentId() . '-' . $instance->id . '.tra';
+                    $file = bimptocegidLib::getDirOutput() . 'BY_DATE/' . 'IP' . $instance->getParentId() . '-' . $instance->id . '.tra';
                     if(!file_exists($file)) $this->createFile ($file);
 
                     if($this->write_tra($this->TRA_importPaiement->constructTRA($instance), $file)) {
@@ -147,7 +147,7 @@
             
             global $db;
             $errors = [];
-            $file = PATH_TMP . $this->dir . $this->getMyFile('deplacementPaiements');
+            $file = bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile('deplacementPaiements');
             
             $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date >= "'.$this->lastDateExported->format('Y-m-d').'"'.$this->getEntityFilter());
             
@@ -180,7 +180,7 @@
         public function exportBordereauxCHK($ref = '', $want = Array()) {
             global $db;
             $errors = [];
-            $file = PATH_TMP . $this->dir . $this->getMyFile('bordereauxCHK');
+            $file = bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile('bordereauxCHK');
             
             $bordereaux = $this->bdb->getRows('bordereau_cheque', 'exported = 0'.$this->getEntityFilter());
             
@@ -202,7 +202,7 @@
         public function exportPaiement($ref = '', $want = Array()):void  {
             global $db;
             $errors = [];
-            $file = PATH_TMP . $this->dir . $this->getMyFile("paiements");
+            $file = bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("paiements");
             $list = $this->bdb->getRows('paiement', 'exported = 0  AND datep >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"'.$this->getEntityFilter());
 
             foreach($list as $pay) {
@@ -231,7 +231,7 @@
         public function exportPayInc():void {
             $errors = [];
             $list = $this->TRA_payInc->getAllForThisDay();
-            $file = PATH_TMP . $this->dir . $this->getMyFile("payni");
+            $file = bimptocegidLib::getDirOutput() . 'BY_DATE/' . $this->getMyFile("payni");
             $ecriture  = "";
             if(count($list) > 0) {
                 foreach($list as $infos) {
@@ -285,7 +285,7 @@
             $year           = $dateTime->format('Y');
             $version_tra    = BimpCore::getConf('version_tra', null, "bimptocegid");
             $extention      = ".tra";
-            $files_dir      = PATH_TMP . $this->dir;
+            $files_dir      = bimptocegidLib::getDirOutput() . 'BY_DATE/';
             $number         = null;
             
             switch ($type) {
@@ -306,7 +306,7 @@
         
         public function createFile($file):void {
             
-            $files_dir = PATH_TMP . $this->dir;
+            $files_dir = bimptocegidLib::getDirOutput() . 'BY_DATE/';
             
             if(!is_dir($files_dir)) {
                 mkdir($files_dir, 0777, true);
@@ -324,7 +324,7 @@
         
         public function create_daily_files():void {
 
-            $files_dir = PATH_TMP . $this->dir;
+            $files_dir = bimptocegidLib::getDirOutput() . 'BY_DATE/';
             
             if(!is_dir($files_dir)) {
                 mkdir($files_dir, 0777, true);

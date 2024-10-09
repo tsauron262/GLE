@@ -506,15 +506,38 @@ class BV_Demande extends BimpObject
 
         if (!count($errors)) {
             $this->addObjectLog('Demande acceptée', 'ACCEPTED');
+            $obj = $this->getObjInstance();
+            $user_demande = $this->getChildObject('user_demande');
+
+            if (BimpObject::objectLoaded($user_demande) && $user_demande->id !== $user->id && BimpObject::objectLoaded($obj)) {
+                $email = BimpTools::cleanEmailsStr($user_demande->getData('email'));
+                if ($email) {
+                    global $langs;
+
+                    $validation_type = $this->displayValidationType();
+                    $subject = $this->getObjLabel(true) . ' - Validation ' . $validation_type . ' acceptée';
+
+                    $msg = 'Bonjour,<br/><br/>';
+                    $msg .= 'La validation ' . $validation_type . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
+                    $msg .= ' a été acceptée par ' . $user->getFullName($langs) . '<br/><br/>';
+
+                    if (mailSyn2($subject, $email, '', $msg)) {
+                        if (is_a($obj, 'BimpObject')) {
+                            $obj->addObjectLog('Notification de validation ' . $validation_type . ' envoyée à "' . $email . '"');
+                        }
+                    } else {
+                        if (is_a($obj, 'BimpObject')) {
+                            $obj->addObjectLog('Echec de l\'envoi de la notification de validation ' . $validation_type . ' à "' . $email . '"');
+                        }
+                    }
+                }
+            }
 
             if ($check_object) {
-                $obj = $this->getObjInstance();
-
                 $validation_success = '';
                 $validation_errors = BimpValidation::checkObjectValidations($obj, $this->getData('type_object'), $validation_success);
 
                 if (count($validation_errors)) {
-//                    $warnings[] = BimpTools::getMsgFromArray($validation_errors, 'Erreurs lors de la tentative de validation ' . (BimpObject::objectLoaded($obj) ? $obj->getLabel('of_the') : 'de l\'objet lié'));
                     $msg = 'Acceptation de la demande de validation effectuée mais échec de la validation ' . $obj->getLabel('of_the');
                     $msg .= '<br/>Veuillez tenter une validation manuelle : ' . $obj->getLink();
                     $obj_validation_errors[] = $msg;
@@ -696,42 +719,8 @@ class BV_Demande extends BimpObject
         $obj_validation_errors = array();
         $errors = $this->setAccepted(true, $warnings, $success, $obj_validation_errors);
 
-        global $user;
-        if (!count($errors)) {
-            $this->addObjectLog('Demande accepté', 'ACCEPTED');
-
-            $user_demande = $this->getChildObject('user_demande');
-            $obj = $this->getObjInstance();
-
-            if (BimpObject::objectLoaded($user_demande) && BimpObject::objectLoaded($obj)) {
-                $email = BimpTools::cleanEmailsStr($user_demande->getData('email'));
-                if ($email) {
-                    global $langs;
-
-                    $validation_type = $this->displayValidationType();
-                    $subject = $this->getObjLabel(true) . ' - Validation ' . $validation_type . ' acceptée';
-
-                    $msg = 'Bonjour,<br/><br/>';
-                    $msg .= 'La validation ' . $validation_type . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
-                    $msg .= ' a été acceptée par ' . $user->getFullName($langs) . '<br/><br/>';
-
-                    $object = $this->getObjInstance();
-
-                    if (mailSyn2($subject, $email, '', $msg)) {
-                        if (is_a($object, 'BimpObject')) {
-                            $object->addObjectLog('Notification de validation ' . $validation_type . ' envoyée à "' . $email . '"');
-                        }
-                    } else {
-                        if (is_a($object, 'BimpObject')) {
-                            $object->addObjectLog('Echec de l\'envoi de la notification de validation ' . $validation_type . ' à "' . $email . '"');
-                        }
-                    }
-                }
-            }
-            
-            if (count($obj_validation_errors)) {
-                $errors[] = BimpTools::merge_array($errors, $obj_validation_errors);
-            }
+        if (count($obj_validation_errors)) {
+            $errors[] = BimpTools::merge_array($errors, $obj_validation_errors);
         }
 
         return array(

@@ -3,7 +3,8 @@
 class docController extends BimpPublicController
 {
 
-    public static $user_client_required = true;
+    public static $user_client_required = false;
+    public $signataire = null;
 
     public function display()
     {
@@ -24,8 +25,21 @@ class docController extends BimpPublicController
         }
 
         global $userClient;
+        $view_right_ok = false;
 
-        if (!BimpObject::objectLoaded($userClient)) {
+        $id_signataire = (int) BimpTools::getValue('ids', 0, 'int');
+        if ($id_signataire) {
+            $code = BimpTools::getValue('sc', '', 'aZ09');
+            $signataire = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignataire', $id_signataire);
+            if ($code && BimpObject::objectLoaded($signataire)) {
+                if ($signataire->getSecurityCode() == $code) {
+                    $view_right_ok = true;
+                    $this->signataire = $signataire;
+                }
+            }
+        }
+
+        if (!$view_right_ok && !BimpObject::objectLoaded($userClient)) {
             $this->errors[] = 'Vous n\'avez pas la permission d\'accéder à ce document';
         }
 
@@ -42,7 +56,7 @@ class docController extends BimpPublicController
                         $this->errors[] = 'Identifiant du document invalide';
                     } elseif ($shipment->getData('num_livraison') != $ref) {
                         $this->errors[] = 'Référence du document invalide';
-                    } elseif (!$shipment->can('view')) {
+                    } elseif (!$view_right_ok && !$shipment->can('view')) {
                         $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
                     }
 
@@ -66,7 +80,7 @@ class docController extends BimpPublicController
                         $this->errors[] = 'Identifiant du document invalide';
                     } elseif ($propal_ref != $ref) {
                         $this->errors[] = 'Référence du document invalide';
-                    } elseif (!$propal->can('view')) {
+                    } elseif (!$view_right_ok && !$propal->can('view')) {
                         $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
                     }
 
@@ -94,7 +108,7 @@ class docController extends BimpPublicController
                         $this->errors[] = 'Identifiant du document invalide';
                     } elseif ($sav_ref != $ref) {
                         $this->errors[] = 'Référence du document invalide';
-                    } elseif (!$sav->can('view')) {
+                    } elseif (!$view_right_ok && !$sav->can('view')) {
                         $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
                     }
 
@@ -138,7 +152,7 @@ class docController extends BimpPublicController
                         $this->errors[] = 'Identifiant du document invalide';
                     } elseif ($bcdf_ref != $ref) {
                         $this->errors[] = 'Référence du document invalide';
-                    } elseif (!$bcdf->can('view')) {
+                    } elseif (!$view_right_ok && !$bcdf->can('view')) {
                         $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
                     }
 
@@ -173,7 +187,7 @@ class docController extends BimpPublicController
                         $this->errors[] = 'Identifiant du document invalide';
                     } elseif ($df_ref != $ref) {
                         $this->errors[] = 'Référence du document invalide';
-                    } elseif (!$df->can('view')) {
+                    } elseif (!$view_right_ok && !$df->can('view')) {
                         $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
                     }
 
@@ -215,7 +229,7 @@ class docController extends BimpPublicController
         // Code repris depuis document.php (Epuré: les contrôles de sécurité ont déjà été fait)
         global $userClient, $conf;
 
-        if (!BimpObject::objectLoaded($userClient)) {
+        if (!BimpObject::objectLoaded($userClient) && !BimpObject::objectLoaded($this->signataire)) {
             $this->errors[] = 'Aucun utilisateur connecté';
             return false;
         }

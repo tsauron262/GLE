@@ -55,6 +55,22 @@ class Bimp_UserGroup extends BimpObject
 
         return parent::canSetAction($action);
     }
+    
+    public function isFieldEditable($field, $force_edit = false) {
+        if($field == 'data_revue')
+            return 0;
+        
+        return parent::isFieldEditable($field, $force_edit);
+    }
+    
+    public function canViewField($field_name) {
+        global $user;
+        if($field_name == 'data_revue')
+            return ($user->admin);
+        
+        
+        return parent::canViewField($field_name);
+    }
 
     // Getters booléens: 
 

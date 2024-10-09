@@ -1,9 +1,7 @@
 <?php
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
 
 class controlleController extends BimpController {
-
-    private $dir = PATH_TMP . '/exportCegid/BY_DATE/';
-
     public function renderHtml() {
         
         if(isset($_REQUEST['user'])) {
@@ -19,7 +17,7 @@ class controlleController extends BimpController {
         
         if (isset($_REQUEST['tra']) && $_REQUEST['tra']) {
             set_time_limit(100);
-            $tra = $this->dir . $_REQUEST['tra'];
+            $tra = bimptocegidLib::getDirOutput() . 'BY_DATE/' . $_REQUEST['tra'];
             if (file_exists($tra)) {
                 $extention = substr($tra, strlen($tra) - 3);
                 if ($extention == 'tra') {

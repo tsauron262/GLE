@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/cron.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/controle.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/objects/TRA.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimpcore/classes/BimpDocumentation.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
 
 class cegidController extends BimpController {
     
@@ -201,7 +202,7 @@ class cegidController extends BimpController {
         $html = '';
         
         $tra = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA');
-        $this->local_path = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/';
+        $this->local_path = bimptocegidLib::getDirOutput() . 'BY_DATE/' . 'imported_auto' . '/';
         $open = false;
         
         if($type != '') {
@@ -222,7 +223,7 @@ class cegidController extends BimpController {
             }
         } else {
             $open = true;
-            $this->local_path = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
+            $this->local_path = bimptocegidLib::getDirOutput() . 'BY_DATE/';
             $pattern = '*' . '.tra';
         }
         

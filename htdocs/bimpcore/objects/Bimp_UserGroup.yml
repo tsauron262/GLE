@@ -37,6 +37,13 @@ objects:
             bimp_object:
                 module: bimpcore
                 name: Bimp_UserGroupRight
+    resp_user:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: user
+            id_object: 
+                field_value: fk_user
     files:
         relation: hasMany
         delete: 1
@@ -84,6 +91,18 @@ fields:
         values: 
             array: secteurs
 
+
+    fk_user: 
+        label: Responsable
+        type: id_object
+        object: resp_user
+        dol_extra_field: 1
+        input: 
+            type: search_user
+    data_revue: 
+        label: Données de revue d'acces
+        type: json
+        dol_extra_field: 1
 forms: 
     add_user: 
         rows: 
@@ -105,6 +124,7 @@ fields_tables:
             - field: alias
             - field: secteur
             - field: note
+            - field: fk_user
 
 views:
     default: 

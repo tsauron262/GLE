@@ -1,0 +1,1 @@
+- API Credit Safe : amélioration de la remontée des erreurs retournées

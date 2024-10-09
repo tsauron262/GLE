@@ -1,0 +1,2 @@
+ALTER TABLE llx_bimp_commande_line ADD`tms` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp();
+ALTER TABLE llx_bimp_commande_fourn_line ADD`tms` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp();

@@ -247,9 +247,10 @@ class processController extends BimpController
 
             if (!is_null($bds_process)) {
                 $id_report = (int) BimpTools::getPostFieldValue('id_report', 0, 'int');
+                $has_finalization = (int) BimpTools::getPostFieldValue('has_finalization', 0, 'int');
                 $operation_data = BimpTools::getPostFieldValue('operation_data', array(), 'array');
 
-                $result = $bds_process->finalizeOperation($id_operation, $id_report, $operation_data, $errors);
+                $result = $bds_process->finalizeOperation($id_operation, $id_report, $operation_data, $errors, $has_finalization);
             }
         }
 

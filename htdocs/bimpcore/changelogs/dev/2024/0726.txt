@@ -1,0 +1,1 @@
+- Mise à jour du process de création des factures de commissionnement AppleCare pour Ingram (Ajout du retraçage des serials via les factures clients)

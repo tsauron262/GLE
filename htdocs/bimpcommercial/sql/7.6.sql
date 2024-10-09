@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `alert_abonnement_unpaid_send` tinyint(1) NOT NULL DEFAULT 0;

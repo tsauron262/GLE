@@ -11,7 +11,7 @@ class modBimpContrat extends DolibarrModules
 
         $this->db = $db;
         $this->numero = 3505000;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
-        $this->rights_class = 'bimpcontract';
+        $this->rights_class = 'bimpcontrat';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page
@@ -57,11 +57,11 @@ class modBimpContrat extends DolibarrModules
 
         $this->rights = array();
         $r = 0;
-//        $this->rights[$r][0] = $this->numero + $r;
-//        $this->rights[$r][1] = 'Validation du contrat après la demande';
-//        $this->rights[$r][3] = 0;
-//        $this->rights[$r][4] = 'to_validate';
-//        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Facturation d\'avance';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'facturation_avance';
+        $r++;
 
         $this->menu = array();   // List of menus to add
         $r = 1;

@@ -126,6 +126,7 @@ fields:
     test_ferme:
         label: Test pour Fermeture
         type: text
+        no_strip_tags: 1
         
     auto:
         label: Tâche automatique
@@ -153,7 +154,6 @@ fields:
     ok_metier: 
         label: Acceptation métier
         type: bool
-        
  
 fields_tables:
     default: 

@@ -292,6 +292,7 @@ class Ldap
 							if ($this->result) {
 								$this->bind = $this->result;
 								$connected = 2;
+                                                                session_regenerate_id();
 								$this->connectedServer = $host;
 								break;
 							} else {
@@ -322,7 +323,6 @@ class Ldap
 
 		if ($connected) {
 			$return = $connected;
-                        session_regenerate_id();
 			dol_syslog(get_class($this)."::connect_bind return=".$return, LOG_DEBUG);
 		} else {
                     BimpTools::secuAddEchec("Login erreur : ".$this->searchUser);
@@ -784,7 +784,7 @@ class Ldap
 		*/
 
 		// Use the method fsockopen to test tcp connect. No way to ignore ssl certificate errors with this method !
-                /*moddrsi
+                /*moddrsi (20.2)
 		$op = @fsockopen($host, $port, $errno, $errstr, $timeout);
                 */
                 $context = stream_context_create([
@@ -794,7 +794,7 @@ class Ldap
                     ]
                 ]);
                 $op = stream_socket_client($host.':'.$port, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $context);
-                /*fmod drsi*/
+                /*fmoddrsi*/
 
 		//var_dump($op);
 		if (!$op) {

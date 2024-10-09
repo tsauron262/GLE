@@ -14,6 +14,7 @@ class BE_Place extends BimpObject
     const BE_PLACE_PRET = 7;
     const BE_PLACE_SAV = 8;
     const BE_PLACE_INTERNE = 9;
+    const BE_PLACE_NOT_RESTIT = 10;
     const BE_PLACE_ENQUETE = 90;
 
     public static $types = array(
@@ -26,6 +27,7 @@ class BE_Place extends BimpObject
         7  => 'Matériel de prêt',
         8  => 'SAV',
         9  => 'Utilisation interne',
+        10 => 'SAV - non restitué',
         90 => 'Enquête'
     );
     public static $origins = array(
@@ -43,7 +45,7 @@ class BE_Place extends BimpObject
         'inventory2'     => 'Inventaire',
         'pret'           => 'Prêt'
     );
-    public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE, self::BE_PLACE_ENQUETE);
+    public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE, self::BE_PLACE_NOT_RESTIT, self::BE_PLACE_ENQUETE);
     public static $immos_types = array(self::BE_PLACE_USER, self::BE_PLACE_INTERNE);
 
     // Getters booléens:
@@ -60,11 +62,11 @@ class BE_Place extends BimpObject
             $errors[] = 'ID de l\'équipement absent';
             return 0;
         }
-        
-        
+
+
         $product = $equipment->getChildObject('bimp_product');
-        if(BimpObject::objectLoaded($product) && !$product->getData('serialisable')){
-            $errors[] = 'Le produit n\'est pas serialisable déplacement impossible '.$equipment->getData('serial');
+        if (BimpObject::objectLoaded($product) && !$product->getData('serialisable')) {
+            $errors[] = 'Le produit n\'est pas serialisable déplacement impossible ' . $equipment->getData('serial');
             return 0;
         }
 
@@ -139,6 +141,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_SAV:
                 case self::BE_PLACE_PRET:
                 case self::BE_PLACE_INTERNE:
+                case self::BE_PLACE_NOT_RESTIT:
                 case self::BE_PLACE_ENQUETE:
                     $entrepot = $this->getChildObject('entrepot');
                     if (BimpObject::ObjectLoaded($entrepot)) {
@@ -159,6 +162,12 @@ class BE_Place extends BimpObject
                                 break;
                             case self::BE_PLACE_INTERNE:
                                 $name .= ' (Utilisation interne)';
+                                break;
+                            case self::BE_PLACE_NOT_RESTIT:
+                                $name .= ' (SAV - Non restitué)';
+                                break;
+                            case self::BE_PLACE_ENQUETE:
+                                $name .= ' (Enquête)';
                                 break;
                         }
                     }
@@ -203,6 +212,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_SAV:
                 case self::BE_PLACE_PRET:
                 case self::BE_PLACE_INTERNE:
+                case self::BE_PLACE_NOT_RESTIT:
                 case self::BE_PLACE_ENQUETE:
                     if ($with_type) {
                         $html .= 'Entrepôt: ';
@@ -224,6 +234,12 @@ class BE_Place extends BimpObject
                                 break;
                             case self::BE_PLACE_INTERNE:
                                 $html .= ' (Utilisation interne)';
+                                break;
+                            case self::BE_PLACE_NOT_RESTIT:
+                                $name .= ' (SAV - Non restitué)';
+                                break;
+                            case self::BE_PLACE_ENQUETE:
+                                $name .= ' (Enquête)';
                                 break;
                         }
                     }
@@ -378,6 +394,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_INTERNE:
                 case self::BE_PLACE_VOL:
                 case self::BE_PLACE_SAV:
+                case self::BE_PLACE_NOT_RESTIT:
                 case self::BE_PLACE_ENQUETE:
                     $id_entrepot = $this->getData('id_entrepot');
                     if (is_null($id_entrepot) || !$id_entrepot) {

@@ -273,8 +273,11 @@ class BimpDb
             $this->db->free($result);
             return $obj;
         }
-        if ($result)
+
+        if ($result) {
             $this->db->free($result);
+        }
+
         return null;
     }
 
@@ -297,11 +300,11 @@ class BimpDb
     public function getValue($table, $field, $where = '1', $order_by = '', $order_way = 'DESC')
     {
         $sql = 'SELECT ';
-        if(stripos($field, '(') === false)
-            $sql .=  '`' . $field . '`';
+        if (stripos($field, '(') === false)
+            $sql .= '`' . $field . '`';
         else
             $sql .= $field;
-        
+
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
         if ($order_by) {
             $sql .= ' ORDER BY `' . $order_by . '` ' . $order_way;
@@ -333,7 +336,7 @@ class BimpDb
 
         return null;
     }
-    
+
     public function getMin($table, $field, $where = '1')
     {
         $sql = 'SELECT MIN(`' . $field . '`) as min FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
@@ -378,7 +381,7 @@ class BimpDb
 
 
         $sql .= ' WHERE ' . $where;
-        
+
         $result = $this->executeS($sql, 'array');
 
         if (isset($result[0]['nb_rows'])) {

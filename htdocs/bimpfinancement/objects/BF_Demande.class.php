@@ -6139,7 +6139,11 @@ class BF_Demande extends BimpObject
 
                 switch ($signature_type) {
                     case 'elec':
-                        $message .= 'Vous pouvez effectuer la signature électronique du document correspondant à la proposition que aurez choisie depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner ce document signé';
+                        $message .= 'Vous pouvez effectuer la signature électronique du document correspondant à la proposition que aurez choisie ';
+                        if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+                            $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
+                        }
+                        $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner ce document signé';
                         $message .= ' par courrier ou par e-mail';
                         $message .= '.<br/><br/>';
                         break;
@@ -6161,7 +6165,11 @@ class BF_Demande extends BimpObject
 
                     case 'elec':
                     default:
-                        $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé';
+                        $message .= 'Vous pouvez effectuer la signature électronique de ce document directement ';
+                        if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+                            $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
+                        }
+                        $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé';
                         if ($doc_type == 'contrat') {
                             $message .= ' <b>(par courrier uniquement)</b>';
                         } else {

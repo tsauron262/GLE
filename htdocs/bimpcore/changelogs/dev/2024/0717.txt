@@ -1,0 +1,2 @@
+- Envoi e-mail de notification au centre SAV suite à la signature du devis SAV par le client
+- Ajout de l'onglet "Assistance Hotline" dans l'espace client

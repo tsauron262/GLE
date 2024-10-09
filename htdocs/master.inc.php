@@ -163,7 +163,7 @@ if (!defined('NOREQUIREDB')) {
 }
 
 
-/*moddrsi*/
+/*moddrsi (20.2)*/
 if (!defined('NOSESSION')) {
 	if (PHP_VERSION_ID < 70300) {
 		session_set_cookie_params(0, '/', null, ((empty($dolibarr_main_force_https) && isHTTPS() === false) ? false : true), true); // Add tag secure and httponly on session cookie (same as setting session.cookie_httponly into php.ini). Must be called before the session_start.

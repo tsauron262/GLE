@@ -848,7 +848,7 @@ class UserGroup extends CommonObject
 			foreach ($this->members as $key => $val) {    // This is array of users for group into dolibarr database.
 				$muser = new User($this->db);
 				$muser->fetch($val->id);
-                                /*mod drsi*/
+                                /*moddrsi (20.2)*/
                                 if($muser->statut == 1){
                                     if(defined('LDAP_MOD_AD')){
                                         $dnT = $muser->getReal_ldap_dn();
@@ -867,7 +867,7 @@ class UserGroup extends CommonObject
                                         }
                                     }
                                 }
-                                /*fmod drsi*/
+                                /*fmoddrsi*/
 			}
 			$info[$conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS] = (!empty($valueofldapfield) ? $valueofldapfield : '');
 		}
@@ -875,7 +875,7 @@ class UserGroup extends CommonObject
 			$info[$conf->global->LDAP_GROUP_FIELD_GROUPID] = $this->id;
 		}
                 
-                /*mod drsi*/
+                /*moddrsi (20.2)*/
                 
                 
                 
@@ -955,7 +955,7 @@ class UserGroup extends CommonObject
                     }
                     
                 }
-                /*fmod drsi*/
+                /*fmoddrsi*/
 //                echo "<pre>"; print_r($info); die;
 		return $info;
 	}

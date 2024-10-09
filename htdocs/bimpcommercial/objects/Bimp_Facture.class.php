@@ -304,6 +304,7 @@ class Bimp_Facture extends BimpComm
     public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array(
+                    'id_client_final',
                     'statut_export', 'douane_number',
                     'note_public', 'note_private',
                     'remain_to_pay', 'paiement_status',
@@ -361,11 +362,11 @@ class Bimp_Facture extends BimpComm
         if ($this->hasRemiseCRT()) {
             if (!$client->getData('type_educ')) {
                 $errors[] = 'Cette facture contient une remise CRT or le type éducation n\'est pas renseigné pour ce client, veuillez corriger la fiche client avant validation de cette facture';
-            } elseif ($this->getData('type_educ') == 'E4') {
+            } elseif ($client->getData('type_educ') == 'E4') {
                 $date_fin_validite = $client->getData('type_educ_fin_validite');
 
                 if (!$date_fin_validite) {
-                    $errors[] = 'Cette facture contient une remise CRT or date de fin de validité du statut enseignant / étudiant n\'est pas renseigné. Veuillez corriger la fiche client avant validation de la facture';
+                    $errors[] = 'Cette facture contient une remise CRT or la date de fin de validité du statut enseignant / étudiant n\'est pas renseigné. Veuillez corriger la fiche client avant validation de la facture';
                 } elseif ($date_fin_validite < date('Y-m-d')) {
                     $errors[] = 'Validation impossible : cette facture contient une remise CRT or la date de fin de validité du statut enseignant / étudiant du client est dépassée.';
                 }
@@ -1014,6 +1015,25 @@ class Bimp_Facture extends BimpComm
         }
 
         return 1;
+    }
+
+    public function showForceValidation(&$errors = array())
+    {
+        $show = 0;
+
+        if (!$this->checkEquipmentsAttribution($errors)) {
+            $show = 1;
+        }
+
+        $client = $this->getChildObject('client');
+        if (BimpObject::objectLoaded($client)) {
+            if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
+                $errors[] = 'ATTENTION : le client est au statut ' . $client->displayDataDefault('solvabilite_status');
+                $show = 1;
+            }
+        }
+
+        return $show;
     }
 
     // Getters params:
@@ -3665,11 +3685,24 @@ class Bimp_Facture extends BimpComm
             }
         }
 
-        if (1) {
-            $result = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('fk_soc' => $this->getData('fk_soc'), 'type' => $this->getData('type'), 'datec' => array('custom' => 'datec < DATE_ADD("' . $this->getData('datec') . '", INTERVAL 2 MINUTE) AND datec > DATE_ADD("' . $this->getData('datec') . '", INTERVAL -2 MINUTE)')));
-            foreach ($result as $obj)
-                if ($obj->id != $this->id)
-                    $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Il semble que deux factures est été créer en même temp. Voir : ' . $obj->getLink() . '<br/>ATTENTION !!!!!!!!!!!!');
+        $result = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array(
+                    'rowid'  => array(
+                        'operator' => '!=',
+                        'value'    => $this->id
+                    ),
+                    'fk_soc' => $this->getData('fk_soc'),
+                    'type'   => $this->getData('type'),
+                    'datec'  => array(
+                        'custom' => 'datec < DATE_ADD("' . $this->getData('datec') . '", INTERVAL 2 MINUTE) AND datec > DATE_ADD("' . $this->getData('datec') . '", INTERVAL -2 MINUTE)')
+                        )
+        );
+        foreach ($result as $obj) {
+            $html .= BimpRender::renderAlerts('ATTENTION !!!!!!!!!!!!<br/>Il semble que deux factures est été créer en même temp. Voir : ' . $obj->getLink() . '<br/>ATTENTION !!!!!!!!!!!!');
+        }
+
+
+        if ($client->getData('solvabilite_status') > 0) {
+            $html .= BimpRender::renderAlerts('ATTENTION !!<br/>Le client est au statut ' . $client->displayData('solvabilite_status') . '<br/>ATTENTION !!');
         }
 
         return $html;
@@ -3781,8 +3814,8 @@ class Bimp_Facture extends BimpComm
         $html = '';
         $errors = array();
 
-        if (!$this->checkEquipmentsAttribution($errors)) {
-            $html .= BimpRender::renderAlerts($errors, 'warning');
+        if ($this->showForceValidation($errors)) {
+            $html .= BimpRender::renderAlerts($errors, 'danger');
             $html .= '<p>Valider quand même ?</p>';
             $html .= BimpInput::renderInput('toggle', 'force_validate', 0);
         }
@@ -4635,13 +4668,16 @@ class Bimp_Facture extends BimpComm
             'entrepot'          => (int) $this->getData('entrepot'),
             'libelle'           => $this->getData('libelle'),
             'ef_type'           => $this->getData('ef_type'),
-            'fk_soc'            => $this->getData('fk_soc'),
+            'fk_soc'            => (int) $this->getData('fk_soc'),
+            'id_client_final'   => (int) $this->getData('id_client_final'),
             'centre'            => $this->getData('centre'),
             'ref_client'        => $this->getData('ref_client'),
             'datef'             => $this->getData('datef'),
             'fk_account'        => (int) $this->getData('fk_account'),
             'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
-            'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement')
+            'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
+            'zone_vente'        => $this->getData('zone_vente'),
+            'rib_client'        => (int) $this->getData('rib_client')
         ));
 
         $avoir->dol_object->fk_delivery_address = $this->dol_object->fk_delivery_address;
@@ -5216,6 +5252,239 @@ class Bimp_Facture extends BimpComm
         $errors = BimpTools::merge_array($errors, createFactureAttachment($this->db->db, $this, 'facture', $file_type, $warnings));
     }
 
+    public function cancelAndRefacture($params = array(), &$fac_cancel = null, &$new_fac = null, &$warnings = array(), &$success = '')
+    {
+        $errors = array();
+        $params = BimpTools::overrideArray(array(
+                    'id_new_facture' => 0,
+                    'cancel_only'    => false
+                        ), $params);
+
+        global $user;
+
+        $fac_data = array(
+            'fk_soc'              => $this->getData('fk_soc'),
+            'id_client_final'     => $this->getData('id_client_final'),
+            'type'                => Facture::TYPE_STANDARD,
+            'libelle'             => $this->getData('libelle'),
+            'ef_type'             => $this->getData('ef_type'),
+            'expertise'           => $this->getData('expertise'),
+            'entrepot'            => $this->getData('entrepot'),
+            'fk_cond_reglement'   => $this->getData('fk_cond_reglement'),
+            'fk_mode_reglement'   => $this->getData('fk_mode_reglement'),
+            'note_private'        => $this->getData('note_private'),
+            'note_public'         => $this->getData('note_public'),
+            'zone_vente'          => $this->getData('zone_vente'),
+            'prime'               => $this->getData('prime'),
+            'prime2'              => $this->getData('prime2'),
+            'rib_client'          => $this->getData('rib_client'),
+            'datef'               => $this->getData('datef'),
+            'fk_account'          => $this->getData('fk_account'),
+            'centre'              => $this->getData('centre'),
+            'pdf_hide_pu'         => $this->getData('pdf_hide_pu'),
+            'pdf_nb_decimal'      => $this->getData('pdf_nb_decimal'),
+            'pdf_hide_ref'        => $this->getData('pdf_hide_ref'),
+            'pdf_hide_livraisons' => $this->getData('pdf_hide_livraisons')
+        );
+
+        $fac_cancel = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+
+        $errors = $fac_cancel->validateArray($fac_data);
+
+        if (!count($errors)) {
+            $linked_objects = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db);
+
+            foreach ($linked_objects as $item) {
+                if (!isset($fac_cancel->dol_object->linked_objects[$item['type']])) {
+                    $fac_cancel->dol_object->linked_objects[$item['type']] = array();
+                } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
+                    $fac_cancel->dol_object->linked_objects[$item['type']] = array($fac_cancel->dol_object->linked_objects[$item['type']]);
+                }
+
+                if (!in_array((int) $item['id_object'], $fac_cancel->dol_object->linked_objects[$item['type']])) {
+                    $fac_cancel->dol_object->linked_objects[$item['type']][] = (int) $item['id_object'];
+                }
+            }
+
+            $errors = $fac_cancel->create($warnings, true);
+
+            if (!count($errors)) {
+                if ((int) $this->getData('type') === Facture::TYPE_STANDARD) {
+                    $fac_cancel->set('type', Facture::TYPE_CREDIT_NOTE);
+                }
+
+                $success .= 'Création ' . $fac_cancel->getLabel('of_the') . ' d\'annulation effectuée avec succès.<br/>';
+                $fac_cancel->updateField('fk_facture_source', (int) $this->id);
+
+                $line_errors = $fac_cancel->createLinesFromOrigin($this, array(
+                    'inverse_qty'   => true,
+                    'pa_editable'   => false,
+                    'keep_links'    => true,
+                    'check_product' => false,
+                    'no_maj_bundle' => true
+                ));
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la copie des lignes pour ' . $fac_cancel->getLabel('the') . ' d\'annulation');
+                } else {
+                    $fac_cancel->copyRemisesGlobalesFromOrigin($this, $errors, true);
+                    $fac_cancel->copyContactsFromOrigin($this, $errors);
+                }
+
+                if (!count($errors)) {
+                    if ($fac_cancel->dol_object->validate($user) <= 0) {
+                        $validate_errors = BimpTools::getErrorsFromDolObject($fac_cancel->dol_object);
+
+                        if (empty($validate_errors)) {
+                            $validate_errors[] = 'Erreur inconnue';
+                        }
+
+                        $errors[] = BimpTools::getMsgFromArray($validate_errors, 'Echec de la validation ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
+                    }
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if (!$params['cancel_only']) {
+                $id_new_facture = (int) $params['id_new_facture'];
+                if ($id_new_facture) {
+                    $new_fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_new_facture);
+
+                    if (!BimpObject::objectLoaded($new_fac)) {
+                        $errors[] = 'La facture #' . $id_new_facture . ' n\'existe plus';
+                    } elseif ((int) $new_fac->getData('fk_statut')) {
+                        $errors[] = ucfirst($new_fac->getLabel('the')) . ' ' . $new_fac->getLink() . ' n\'est plus au statut brouillon';
+                    } else {
+                        addElementElement('facture', 'facture', $this->id, $new_fac->id);
+                    }
+                } else {
+                    $new_fac = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+
+                    $errors = $new_fac->validateArray($fac_data);
+
+                    if (!count($errors)) {
+                        $linked_objects = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db);
+
+                        foreach ($linked_objects as $item) {
+                            if (!isset($new_fac->dol_object->linked_objects[$item['type']])) {
+                                $new_fac->dol_object->linked_objects[$item['type']] = array();
+                            } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
+                                $new_fac->dol_object->linked_objects[$item['type']] = array($new_fac->dol_object->linked_objects[$item['type']]);
+                            }
+
+                            if (!in_array((int) $item['id_object'], $new_fac->dol_object->linked_objects[$item['type']])) {
+                                $new_fac->dol_object->linked_objects[$item['type']][] = (int) $item['id_object'];
+                            }
+                        }
+
+                        if (!isset($new_fac->dol_object->linked_objects['facture'])) {
+                            $new_fac->dol_object->linked_objects['facture'] = array();
+                        }
+
+                        $new_fac->dol_object->linked_objects['facture'][] = $this->id;
+                        $new_fac->dol_object->linked_objects['facture'][] = $fac_cancel->id;
+
+                        $errors = $new_fac->create($warnings, true);
+
+                        if (!count($errors)) {
+                            $success .= 'Création ' . $new_fac->getLabel('of_the') . ' de correction effectuée avec succès.<br/>';
+                        }
+                    }
+                }
+
+                if (!count($errors)) {
+                    $errors = $new_fac->createLinesFromOrigin($this, array(
+                        'pa_editable'   => false,
+                        'keep_links'    => true,
+                        'check_product' => false,
+                        'no_maj_bundle' => true
+                    ));
+
+                    $new_fac->copyRemisesGlobalesFromOrigin($this, $errors, true);
+                    $new_fac->copyContactsFromOrigin($this, $errors);
+                }
+
+                if (!count($errors)) {
+                    $remises_errors = array();
+
+                    // Pour être sûr d'être à jour dans les données: 
+                    $fac_cancel->fetch($fac_cancel->id);
+                    $new_fac->fetch($new_fac->id);
+
+                    $fac_cancel->dol_object->fetch_lines();
+                    $new_fac->dol_object->fetch_lines();
+
+                    // Recalcul des prix totaux.
+                    $fac_cancel->dol_object->update_price(1);
+                    $new_fac->dol_object->update_price(1);
+
+                    // Création et applications des remises :
+                    $this->checkIsPaid();
+
+                    $cancel_discount = null;
+                    if ($fac_cancel->getRemainToPay(true, false) < 0) {
+                        $conv_errors = $fac_cancel->convertToRemise();
+
+                        if (count($conv_errors)) {
+                            $remises_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
+                        } else {
+                            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                            $cancel_discount = new DiscountAbsolute($this->db->db);
+                            $cancel_discount->fetch(0, $fac_cancel->id);
+
+                            if ($this->getRemainToPay(true, false) > 0 && BimpObject::objectLoaded($cancel_discount)) {
+                                if ($cancel_discount->link_to_invoice(0, $this->id) <= 0) {
+                                    $remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' d\'origine');
+                                } else {
+                                    $cancel_discount = null;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!count($remises_errors)) {
+                        $fac_discount = null;
+                        if ($this->getRemainToPay(true, false) < 0) {
+                            $conv_errors = $this->convertToRemise();
+
+                            if (count($conv_errors)) {
+                                $remises_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $this->getLabel('of_the') . ' d\'origine');
+                            } else {
+                                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                                $fac_discount = new DiscountAbsolute($this->db->db);
+                                $fac_discount->fetch(0, $this->id);
+                            }
+                        }
+
+                        if (!count($remises_errors)) {
+                            if (BimpObject::objectLoaded($cancel_discount)) {
+                                if ($cancel_discount->link_to_invoice(0, $new_fac->id) <= 0) {
+                                    $remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' de correction');
+                                }
+                            }
+                            if (BimpObject::objectLoaded($fac_discount)) {
+                                if ($fac_discount->link_to_invoice(0, $new_fac->id) <= 0) {
+                                    $remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($fac_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' de correction');
+                                }
+                            }
+                        }
+                    }
+
+                    if (count($remises_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($remises_errors);
+                    }
+
+                    $this->checkIsPaid();
+                    $fac_cancel->checkIsPaid();
+                    $new_fac->checkIsPaid();
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions - Overrides BimpComm:
 
     public function actionValidate($data, &$success)
@@ -5226,10 +5495,22 @@ class Bimp_Facture extends BimpComm
         $success_callback = '';
         $modal_html = '';
 
+        if (isset($data['datef']) && $data['datef']) {
+            $this->updateField('datef', $data['datef']);
+        }
+
+        $client = $this->getChildObject('client');
+
         if (!isset($data['force_validate']) || !(int) $data['force_validate']) {
             $lines_errors = array();
             if (!$this->checkEquipmentsAttribution($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors);
+            }
+
+            if (BimpObject::objectLoaded($client)) {
+                if (!in_array((int) $client->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
+                    $errors[] = 'Le client est au statut ' . $client->displayDataDefault('solvabilite_status');
+                }
             }
         }
 
@@ -5302,10 +5583,10 @@ class Bimp_Facture extends BimpComm
                         }
                     }
                 } else {
-                    $fac_errors = BimpTools::getDolEventsMsgs(array('errors'));
+                    $fac_errors = BimpTools::getErrorsFromDolObject($this->dol_object);
 
                     if (!count($fac_errors)) {
-                        $fac_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
+                        $fac_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e() . ' (Code retour : ' . $result . ')';
                     }
                     $errors[] = BimpTools::getMsgFromArray($fac_errors);
                 }
@@ -6383,245 +6664,33 @@ class Bimp_Facture extends BimpComm
         $warnings = array();
         $success = '';
 
-        global $user;
+        $id_new_facture = (int) BimpTools::getArrayValueFromPath($data, 'id_facture', 0);
+        $fac_cancel = null;
+        $new_fac = null;
 
-        $fac_data = array(
-            'fk_soc'              => $this->getData('fk_soc'),
-            'id_client_final'     => $this->getData('id_client_final'),
-            'type'                => Facture::TYPE_STANDARD,
-            'libelle'             => $this->getData('libelle'),
-            'ef_type'             => $this->getData('ef_type'),
-            'expertise'           => $this->getData('expertise'),
-            'entrepot'            => $this->getData('entrepot'),
-            'fk_cond_reglement'   => $this->getData('fk_cond_reglement'),
-            'fk_mode_reglement'   => $this->getData('fk_mode_reglement'),
-            'note_private'        => $this->getData('note_private'),
-            'note_public'         => $this->getData('note_public'),
-            'zone_vente'          => $this->getData('zone_vente'),
-            'prime'               => $this->getData('prime'),
-            'prime2'              => $this->getData('prime2'),
-            'rib_client'          => $this->getData('rib_client'),
-            'datef'               => $this->getData('datef'),
-            'fk_account'          => $this->getData('fk_account'),
-            'centre'              => $this->getData('centre'),
-            'pdf_hide_pu'         => $this->getData('pdf_hide_pu'),
-            'pdf_nb_decimal'      => $this->getData('pdf_nb_decimal'),
-            'pdf_hide_ref'        => $this->getData('pdf_hide_ref'),
-            'pdf_hide_livraisons' => $this->getData('pdf_hide_livraisons')
-        );
-
-        $fac_cancel = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-
-        $errors = $fac_cancel->validateArray($fac_data);
+        $errors = $this->cancelAndRefacture(array(
+            'id_new_facture' => $id_new_facture
+                ), $fac_cancel, $new_fac, $warnings, $success);
 
         if (!count($errors)) {
-            $linked_objects = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db);
+            $scb = '';
+            if (BimpObject::objectLoaded($fac_cancel)) {
+                $url = $fac_cancel->getUrl();
 
-            foreach ($linked_objects as $item) {
-                if (!isset($fac_cancel->dol_object->linked_objects[$item['type']])) {
-                    $fac_cancel->dol_object->linked_objects[$item['type']] = array();
-                } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
-                    $fac_cancel->dol_object->linked_objects[$item['type']] = array($fac_cancel->dol_object->linked_objects[$item['type']]);
-                }
-
-                if (!in_array((int) $item['id_object'], $fac_cancel->dol_object->linked_objects[$item['type']])) {
-                    $fac_cancel->dol_object->linked_objects[$item['type']][] = (int) $item['id_object'];
+                if ($url) {
+                    $scb .= 'window.open(\'' . $url . '\');';
                 }
             }
 
-            $errors = $fac_cancel->create($warnings, true);
+            if (BimpObject::objectLoaded($new_fac)) {
+                $url = $new_fac->getUrl();
 
-            if (!count($errors)) {
-                if ((int) $this->getData('type') === Facture::TYPE_STANDARD) {
-                    $fac_cancel->set('type', Facture::TYPE_CREDIT_NOTE);
-                }
-
-                $success .= 'Création ' . $fac_cancel->getLabel('of_the') . ' d\'annulation effectuée avec succès.<br/>';
-                $fac_cancel->updateField('fk_facture_source', (int) $this->id);
-
-                $line_errors = $fac_cancel->createLinesFromOrigin($this, array(
-                    'inverse_qty'   => true,
-                    'pa_editable'   => false,
-                    'keep_links'    => true,
-                    'check_product' => false,
-                    'no_maj_bundle' => true
-                ));
-
-                if (count($line_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la copie des lignes pour ' . $fac_cancel->getLabel('the') . ' d\'annulation');
-                } else {
-                    $fac_cancel->copyRemisesGlobalesFromOrigin($this, $errors, true);
-                    $fac_cancel->copyContactsFromOrigin($this, $errors);
-                }
-
-                if (!count($errors)) {
-                    if ($fac_cancel->dol_object->validate($user) <= 0) {
-                        $validate_errors = BimpTools::getErrorsFromDolObject($fac_cancel->dol_object);
-
-                        if (empty($validate_errors)) {
-                            $validate_errors[] = 'Erreur inconnue';
-                        }
-
-                        $errors[] = BimpTools::getMsgFromArray($validate_errors, 'Echec de la validation ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
-                    }
+                if ($url) {
+                    $scb .= 'window.open(\'' . $url . '\');';
                 }
             }
         }
 
-        if (!count($errors)) {
-            $id_new_facture = (int) BimpTools::getArrayValueFromPath($data, 'id_facture', 0);
-
-            if ($id_new_facture) {
-                $new_fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_new_facture);
-
-                if (!BimpObject::objectLoaded($new_fac)) {
-                    $errors[] = 'La facture #' . $id_new_facture . ' n\'existe plus';
-                } elseif ((int) $new_fac->getData('fk_statut')) {
-                    $errors[] = ucfirst($new_fac->getLabel('the')) . ' ' . $new_fac->getLink() . ' n\'est plus au statut brouillon';
-                } else {
-                    addElementElement('facture', 'facture', $this->id, $new_fac->id);
-                }
-            } else {
-                $new_fac = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-
-                $errors = $new_fac->validateArray($fac_data);
-
-                if (!count($errors)) {
-                    $linked_objects = BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db);
-
-                    foreach ($linked_objects as $item) {
-                        if (!isset($new_fac->dol_object->linked_objects[$item['type']])) {
-                            $new_fac->dol_object->linked_objects[$item['type']] = array();
-                        } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
-                            $new_fac->dol_object->linked_objects[$item['type']] = array($new_fac->dol_object->linked_objects[$item['type']]);
-                        }
-
-                        if (!in_array((int) $item['id_object'], $new_fac->dol_object->linked_objects[$item['type']])) {
-                            $new_fac->dol_object->linked_objects[$item['type']][] = (int) $item['id_object'];
-                        }
-                    }
-
-                    if (!isset($new_fac->dol_object->linked_objects['facture'])) {
-                        $new_fac->dol_object->linked_objects['facture'] = array();
-                    }
-
-                    $new_fac->dol_object->linked_objects['facture'][] = $this->id;
-                    $new_fac->dol_object->linked_objects['facture'][] = $fac_cancel->id;
-
-                    $errors = $new_fac->create($warnings, true);
-
-                    if (!count($errors)) {
-                        $success .= 'Création ' . $new_fac->getLabel('of_the') . ' de correction effectuée avec succès.<br/>';
-                    }
-                }
-            }
-
-            if (!count($errors)) {
-                $errors = $new_fac->createLinesFromOrigin($this, array(
-                    'pa_editable'   => false,
-                    'keep_links'    => true,
-                    'check_product' => false,
-                    'no_maj_bundle' => true
-                ));
-
-                $new_fac->copyRemisesGlobalesFromOrigin($this, $errors, true);
-                $new_fac->copyContactsFromOrigin($this, $errors);
-            }
-
-            if (!count($errors)) {
-                $remises_errors = array();
-
-                // Pour être sûr d'être à jour dans les données: 
-                $fac_cancel->fetch($fac_cancel->id);
-                $new_fac->fetch($new_fac->id);
-
-                $fac_cancel->dol_object->fetch_lines();
-                $new_fac->dol_object->fetch_lines();
-
-                // Recalcul des prix totaux.
-                $fac_cancel->dol_object->update_price(1);
-                $new_fac->dol_object->update_price(1);
-
-                // Création et applications des remises :
-                $this->checkIsPaid();
-
-//                addElementElement('facture', 'facture', $idS, $idD);
-
-                $cancel_discount = null;
-                if ($fac_cancel->getRemainToPay(true, false) < 0) {
-                    $conv_errors = $fac_cancel->convertToRemise();
-
-                    if (count($conv_errors)) {
-                        $remises_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
-                    } else {
-                        BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-                        $cancel_discount = new DiscountAbsolute($this->db->db);
-                        $cancel_discount->fetch(0, $fac_cancel->id);
-
-                        if ($this->getRemainToPay(true, false) > 0 && BimpObject::objectLoaded($cancel_discount)) {
-                            if ($cancel_discount->link_to_invoice(0, $this->id) <= 0) {
-                                $remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' d\'origine');
-                            } else {
-                                $cancel_discount = null;
-                            }
-                        }
-                    }
-                }
-
-                if (!count($remises_errors)) {
-                    $fac_discount = null;
-                    if ($this->getRemainToPay(true, false) < 0) {
-                        $conv_errors = $this->convertToRemise();
-
-                        if (count($conv_errors)) {
-                            $remises_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $this->getLabel('of_the') . ' d\'origine');
-                        } else {
-                            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-                            $fac_discount = new DiscountAbsolute($this->db->db);
-                            $fac_discount->fetch(0, $this->id);
-                        }
-                    }
-
-                    if (!count($remises_errors)) {
-                        if (BimpObject::objectLoaded($cancel_discount)) {
-                            if ($cancel_discount->link_to_invoice(0, $new_fac->id) <= 0) {
-                                $remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' de correction');
-                            }
-                        }
-                        if (BimpObject::objectLoaded($fac_discount)) {
-                            if ($fac_discount->link_to_invoice(0, $new_fac->id) <= 0) {
-                                $remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($fac_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' de correction');
-                            }
-                        }
-                    }
-                }
-
-                if (count($remises_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($remises_errors);
-                }
-
-                $this->checkIsPaid();
-                $fac_cancel->checkIsPaid();
-                $new_fac->checkIsPaid();
-            }
-        }
-
-        $scb = '';
-        if (BimpObject::objectLoaded($fac_cancel)) {
-            $url = $fac_cancel->getUrl();
-
-            if ($url) {
-                $scb .= 'window.open(\'' . $url . '\');';
-            }
-        }
-
-        if (BimpObject::objectLoaded($new_fac)) {
-            $url = $new_fac->getUrl();
-
-            if ($url) {
-                $scb .= 'window.open(\'' . $url . '\');';
-            }
-        }
 
         return array(
             'errors'           => $errors,
@@ -6833,6 +6902,7 @@ class Bimp_Facture extends BimpComm
                             $line_errors = $this->createLinesFromOrigin($facture, array(
                                 'inverse_qty'   => true,
                                 'pa_editable'   => false,
+                                'keep_links'    => true,
                                 'check_product' => false,
                                 'no_maj_bundle' => true
                             ));
@@ -6893,7 +6963,8 @@ class Bimp_Facture extends BimpComm
                     if (BimpObject::objectLoaded($avoir_to_refacture)) {
                         $params = array(
                             'pa_editable'   => false,
-                            'check_product' => false
+                            'check_product' => false,
+                            'keep_links'    => true
                         );
 
                         if ($avoir_to_refacture->getData('datec') < '2020-09-24 00:00:00') { // Date d'inversion des qtés au lieu des prix dans les avoirs. 
@@ -6977,18 +7048,29 @@ class Bimp_Facture extends BimpComm
     {
         $id = $this->id;
 
+        $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                    'id_facture' => $id
+        ));
+
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors) && (int) $id) {
-            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
-                        'id_facture' => $id
-            ));
-
             if (!empty($revals)) {
+                $nOK = 0;
                 foreach ($revals as $reval) {
                     $w = array();
-                    $reval->delete($w, true);
+                    $reval_errors = $reval->delete($w, true);
+
+                    if (!empty($reval_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($reval_errors, 'Echec suppression de la revalorisation #' . $reval->id);
+                    } else {
+                        $nOK++;
+                    }
                 }
+
+                $warnings[] = $nOK . ' revalorisation(s) supprimée(s)';
+            } else {
+                $warnings[] = 'Aucune reval à suppr';
             }
         }
 

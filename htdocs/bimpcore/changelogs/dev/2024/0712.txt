@@ -1,0 +1,2 @@
+- Ajout du statut "Fermée" pour les commandes fournisseurs et de la date de fermeture
+- Script d'alimentation de ces 2 champs pour les anciennces commandes fournisseur. 

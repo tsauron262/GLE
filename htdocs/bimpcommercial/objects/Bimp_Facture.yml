@@ -81,6 +81,8 @@ fields:
         label: Client final
         type: id_object
         object: client_final
+        input: 
+            help: laisser vide si même client
         default_value: 0
     exported:
         label: Etat comptable
@@ -133,6 +135,7 @@ fields:
             field_name: ef_type
             show_values: S
         default_value: ''
+        
     # Anciennement "total"    
     total_ht: 
         label: Total HT
@@ -300,6 +303,10 @@ fields:
         label: Masquer l'adresse de livraison dans le PDF
         type: bool
         default_value: 0
+    alert_abonnement_unpaid_send: 
+        label: Alerte non paiement des abonnements envoyée
+        type: bool
+        default_value: 0
     
     # Validation d'avoir
     valid_avoir_fichier_joints:
@@ -363,6 +370,8 @@ forms:
                 field: replaced_ref
             soc: 
                 field: fk_soc
+            client_final: 
+                field: id_client_final
             ref_client: 
                 field: ref_client
             type: 
@@ -598,6 +607,7 @@ forms:
     validate: 
         title: Validation
         rows: 
+            - field: datef
             - custom: 1
               label: Informations
               input_name: validation_type
@@ -643,20 +653,20 @@ forms:
                       hide_values: 0
             - custom: 1
               hidden: 1
-              input_name: hide_force_validation
+              input_name: show_force_validation
               data_type: bool
               input: 
                   type: hidden
               value: 
-                  callback: checkEquipmentsAttribution
+                  callback: showForceValidation
             - custom: 1
               label: Forcer la validation
               input_name: force_validate
               content: 
                   callback: renderForceValidationInput
               display_if: 
-                  field_name: hide_force_validation
-                  hide_values: 1
+                  field_name: show_force_validation
+                  show_values: 1
                   
     add_to_commission: 
         title: Ajout à une commission

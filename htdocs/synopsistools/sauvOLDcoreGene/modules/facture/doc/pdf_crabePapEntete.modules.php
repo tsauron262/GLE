@@ -391,7 +391,7 @@ class pdf_crabePapEntete extends ModelePDFFactures
 				$curY = $tab_top + 7;
 				$nexY = $tab_top + 7;
                                 
-                                /*mod drsi*/
+                                /*moddrsi (20.2)*/
                                 global $accTht, $accTtva;
                                 $accTht = $accTtva = 0;
                                 /*fmoddrsi*/
@@ -401,7 +401,7 @@ class pdf_crabePapEntete extends ModelePDFFactures
 				for ($i = 0; $i < $nblignes; $i++)
 				{
                                     
-                                        /*mod drsi*/
+                                        /*moddrsi (20.2)*/
                                         if($object->lines[$i]->desc == "Acompte" && $object->lines[$i]->total < 0){
                                             $accTht = $object->lines[$i]->total_ht;
                                             $accTtva = $object->lines[$i]->total_tva;
@@ -497,7 +497,7 @@ class pdf_crabePapEntete extends ModelePDFFactures
 					$pdf->SetFont('','', $default_font_size - 1);   // On repositionne la police par defaut
 
                                         
-                                        /*mod drsi*/if($object->lines[$i]->product_type < 100){
+                                        /*moddrsi (20.2)*/if($object->lines[$i]->product_type < 100){
 					// VAT Rate
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
 					{
@@ -1257,7 +1257,7 @@ class pdf_crabePapEntete extends ModelePDFFactures
                 
 		if ($object->paye) $resteapayer=0;
 
-		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0  /*moddrs*/|| -$accTht > 0/*fmoddrsi*/)
+		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0  /*moddrs (20.2)*/|| -$accTht > 0/*fmoddrsi*/)
 		{
 			// Already paid + Deposits
                     if(($deja_regle + $depositsamount) > 0){

@@ -40,7 +40,7 @@ class BC_Graph extends BC_Panel
         $html = '';
         $html .= '<div class="chartOption"></div>';
         $html .= '<div class="chartContainer" style="height: 800px; width: 100%;"></div>';
-        $html .= '<script '.BimpTools::getScriptAttribut().' src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
+        $html .= '<script '.BimpTools::getScriptAttribut().' src="'.BimpCore::getFileUrl('bimpcore/views/js/jquery.canvasjs.min.js').'"></script>';
 
         return $html;
     }

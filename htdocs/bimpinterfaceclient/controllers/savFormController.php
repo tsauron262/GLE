@@ -37,7 +37,6 @@ class savFormController extends BimpPublicController
         $errors = array();
 
         if ($res_id) {
-
             if (!$shipto) {
                 $errors[] = 'Identifiant du centre LDLC Apple absent';
             } elseif (!count($errors)) {
@@ -115,6 +114,7 @@ class savFormController extends BimpPublicController
                 }
             }
         }
+        
         $html = '';
 
 //        if (!is_null($reservation)) {

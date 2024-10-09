@@ -144,6 +144,7 @@ class GSX_Repair extends BimpObject
 
     public static function processRepairRequestOutcome($result, &$warnings = array(), $excluded_msgs_types = array())
     {
+        $NbACKNOWLEDGE = 0;
         $errors = array();
         if (isset($result['outcome'])) {
             if (isset($result['outcome']['reasons']))
@@ -166,8 +167,16 @@ class GSX_Repair extends BimpObject
                         if (isset($reason['messages']) && is_array($reason['messages'])) {
                             foreach ($reason['messages'] as $message) {
                                 if (is_array($message) && isset($message['description']))
-                                    $message = $message['description'];
-                                $msg .= ' - ' . $message . '<br/>';
+                                    $msg .= ' - ' . $message['description'] . '<br/>';
+                                else
+                                    $msg .= ' - ' . $message . '<br/>';
+                                if (is_array($message) && isset($message['id'])){
+                                    if($action == 'ACKNOWLEDGE'){
+                                        $NbACKNOWLEDGE++;
+                                        $msg .= BimpInput::renderInput('hidden', 'actions_id_'.$NbACKNOWLEDGE, $message['id']);
+                                        $msg .= BimpInput::renderInput('select', 'actions_value_'.$NbACKNOWLEDGE, '', array('options'=>array('N'=>'Non', 'Y'=>'Oui')));
+                                    }
+                                }
                             }
                         }
 

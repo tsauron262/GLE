@@ -313,7 +313,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (in_array((int) $this->getData('fk_mode_reglement'), explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial'))) && $this->extrafieldsIsConfig('rib_client')) {
-            if ($this->getData('rib_client') < 1)
+            if ((int) $this->getData('rib_client') < 1)
                 $errors[] = 'Pour les prélèvements SEPA, le RIB est obligatoire';
             else {
                 $rib = $this->getChildObject('rib_client');
@@ -759,12 +759,16 @@ class BimpComm extends BimpDolObject
             if ((int) $this->getData('fk_statut') === 0) {
                 $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
+                if(BimpCore::getConf('use_light_fourn', 0, 'bimpcommercial'))
+                    $form = 'lightFourn';
+                else
+                    $form = 'create';
                 $buttons[] = array(
                     'label'       => 'Créer un produit',
                     'icon_before' => 'fas_box',
                     'classes'     => array('btn', 'btn-default'),
                     'attr'        => array(
-                        'onclick' => $product->getJsLoadModalForm('lightFourn', 'Nouveau produit')
+                        'onclick' => $product->getJsLoadModalForm($form, 'Nouveau produit')
                     )
                 );
                 $productFourn = BimpObject::getInstance('bimpcore', 'Bimp_Product_Ldlc');
@@ -1611,15 +1615,15 @@ class BimpComm extends BimpDolObject
 
     public function getTotal_paListTotal($filters = array(), $joins = array(), $main_alias = 'a')
     {
-        $return = array(
+        return array(
             'data_type' => 'money',
-            'value'     => 0
+            'value'     => 'n/c'
         );
 
-        $line = $this->getLineInstance();
-
-        if (is_a($line, 'ObjectLine')) {
-            return 'n/c';
+//        $line = $this->getLineInstance();
+//
+//        if (is_a($line, 'ObjectLine')) {
+//            return 'n/c';
 //            TODO fait bloqué le serveur 
 //            $line_alias = $main_alias . '___det';
 //            $joins[$line_alias] = array(
@@ -1637,15 +1641,14 @@ class BimpComm extends BimpDolObject
 //            if (isset($result[0]['total'])) {
 //                $return['value'] = (float) $result[0]['total'];
 //            }
-        }
-
-        return $return;
+//        }
+//        return $return;
     }
 
     public function getTx_margeListTotal($filters, $joins)
     {
         $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
-        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlFrom($this->getTable(), $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
         $res = $this->db->executeS($sql, 'array');
@@ -1668,7 +1671,7 @@ class BimpComm extends BimpDolObject
     public function getTx_marqueListTotal($filters, $joins)
     {
         $sql = 'SELECT SUM(a.marge) as marge, SUM(a.total_ht - a.marge) as achats';
-        $sql .= BimpTools::getSqlFrom('commande', $joins);
+        $sql .= BimpTools::getSqlFrom($this->getTable(), $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
         $res = $this->db->executeS($sql, 'array');
@@ -1756,7 +1759,12 @@ class BimpComm extends BimpDolObject
         foreach ($this->getLines('not_text') as $line) {
             $product = $line->getProduct();
             if (BimpObject::objectLoaded($product)) {
-                $weight += $product->getData('weight') * $line->qty;
+                if($product->getData('weight_units') == -3)
+                    $weight += $product->getData('weight') * $line->qty / 1000;
+                elseif($product->getData('weight_units') == -6)
+                    $weight += $product->getData('weight') * $line->qty / 1000 / 1000;
+                else
+                    $weight += $product->getData('weight') * $line->qty;
             }
         }
         return $weight;
@@ -2107,7 +2115,13 @@ class BimpComm extends BimpDolObject
 
     public function displayHelpForTvaAcompte()
     {
-        return 'TVA moyenne ' . round($this->getData('total_tva') / $this->getData('total_ht') * 100) . ' %';
+        $total_ht = (float) $this->getData('total_ht');
+
+        if ($total_ht) {
+            return 'TVA moyenne ' . round($this->getData('total_tva') / $total_ht * 100) . ' %';
+        }
+
+        return '';
     }
 
     public function displayCommercial()
@@ -2711,6 +2725,7 @@ class BimpComm extends BimpDolObject
         }
 
         if ($this->getData($statutField) > 0) {
+            require_once DOL_DOCUMENT_ROOT.'/bimptocegid/class/viewEcriture.class.php';
             viewEcriture::setCurrentObject($this);
             $html .= viewEcriture::display();
         } else {
@@ -3292,7 +3307,7 @@ class BimpComm extends BimpDolObject
             }
 
             $new_line = BimpObject::getInstance($this->module, $this->object_name . 'Line');
-            
+
             if ($params['no_maj_bundle']) {
                 $new_line->no_maj_bundle = true;
             }
@@ -3885,8 +3900,12 @@ class BimpComm extends BimpDolObject
         $lines = $this->getLines('no_text');
 
         foreach ($lines as $line) {
+            if ((int) $line->id_remise_except && $line->tva_tx) {
+                $line->pu_ht *= (1 + $line->tva_tx / 100);
+            }
+
             $line->tva_tx = 0;
-            $line_errors = $line->update();
+            $line_errors = $line->update($w, true);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
             }
@@ -5158,7 +5177,7 @@ class BimpComm extends BimpDolObject
                     if (!empty($remises_globales)) {
                         foreach ($remises_globales as $rg) {
                             $rem_data = $rg->getDataArray(false);
-                            $rem_data['obj_typ'] = static::$element_name;
+                            $rem_data['obj_type'] = static::$element_name;
                             $rem_data['id_obj'] = (int) $this->id;
 
                             BimpObject::createBimpObject('bimpcommercial', 'RemiseGlobale', $rem_data, true, $warnings);

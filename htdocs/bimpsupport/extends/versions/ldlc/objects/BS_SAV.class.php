@@ -18,9 +18,9 @@ class BS_SAV_ExtVersion extends BS_SAV
         1000 => array('label' => 'Payée', 'icon' => 'arrow-right', 'classes' => array('success'))
     );
 
-    public function actionClose($data, &$success)
+    public function actionRestitute($data, &$success)
     {
-        $return = parent::actionClose($data, $success);
+        $return = parent::actionRestitute($data, $success);
         if (!count($return['errors'])) {
             if ($this->asProdEcologic()) {
                 $this->updateField('status_ecologic', 1);
@@ -395,9 +395,9 @@ class BS_SAV_ExtVersion extends BS_SAV
             return $tabCentre[$this->getData('code_centre')][11];
     }
 
-    public function getViewExtraBtn()
+    public function getActionsButtons()
     {
-        $btn = parent::getViewExtraBtn();
+        $btn = parent::getActionsButtons();
         if ($this->asProdEcologic() && in_array($this->getData('status_ecologic'), array(1, 0))) {
             if ($this->getStatus() == 999)
                 $btn[] = array(

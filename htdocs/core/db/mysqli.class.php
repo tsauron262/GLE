@@ -49,7 +49,7 @@ class DoliDBMysqli extends DoliDB
     private $_results;
 
 
-    /*moddrsi */
+    /*moddrsi (20.2)*/
     public $countReq = 0;
     public $countReq2 = 0;
     public $timeDebReq = 0;
@@ -314,7 +314,7 @@ class DoliDBMysqli extends DoliDB
             $debugTime = true;
         }
 
-        /* moddrsi */
+        /*moddrsi (20.2 - removed)*/
         $tabRemplacement = array(
 //            "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid" =>
 //                "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a ",
@@ -324,9 +324,10 @@ class DoliDBMysqli extends DoliDB
         foreach ($tabRemplacement as $old => $new) {
             $query = str_replace($old, $new, $query);
         }
+        /* fmoddrsi */
 
 
-
+        /*moddrsi (20.2)*/
         $this->countReq ++;
         $timestamp_debut = microtime(true);
         if ($debugTime) {

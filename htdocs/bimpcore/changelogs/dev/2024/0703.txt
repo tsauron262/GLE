@@ -1,0 +1,3 @@
+- Debug échéanciers contrats standards
+- Maj fusions équipements
+

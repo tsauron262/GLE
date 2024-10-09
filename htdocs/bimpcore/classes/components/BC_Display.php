@@ -825,7 +825,7 @@ class BC_Display extends BimpComponent
                     } else {
                         $array = array();
                     }
-
+                    
                     $check = false;
 
                     if (isset($array[$this->value])) {
@@ -833,7 +833,7 @@ class BC_Display extends BimpComponent
                             $data = $array[$this->value];
 
                             if ($this->no_html) {
-                                if (isset($data['display_label'])) {
+                                if (isset($data['label'])) {
                                     $html .= $data['label'];
                                     $check = true;
                                 }

@@ -225,6 +225,7 @@ class BCT_Contrat extends BimpDolObject
         }
         $id_group = BimpCore::getUserGroupId('console');
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
+
         if ($id_group) {
             $buttons[] = array(
                 'label'   => 'Message console',
@@ -237,6 +238,25 @@ class BCT_Contrat extends BimpDolObject
                     "type_dest"     => $note::BN_DEST_GROUP,
                     "fk_group_dest" => $id_group,
                     "content"       => ""
+                        ), array(
+                    'form_name' => 'rep'
+                ))
+            );
+        }
+
+        $id_group = BimpCore::getUserGroupId('facturation');
+        if ($id_group) {
+            $buttons[] = array(
+                'label'   => 'Message facturation',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array(
+                    "obj_type"      => "bimp_object",
+                    "obj_module"    => $this->module,
+                    "obj_name"      => $this->object_name,
+                    "id_obj"        => $this->id,
+                    "type_dest"     => $note::BN_DEST_GROUP,
+                    "fk_group_dest" => $id_group,
+                    "content"       => ''
                         ), array(
                     'form_name' => 'rep'
                 ))
@@ -271,6 +291,27 @@ class BCT_Contrat extends BimpDolObject
                 'label'   => 'Corriger stocks abos (Admin)',
                 'icon'    => 'fas_cogs',
                 'onclick' => $this->getJsActionOnclick('CorrectAbosStocksAll', array(), array())
+            );
+        }
+
+        return $buttons;
+    }
+
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $buttons[] = array(
+                'label'   => 'Lignes',
+                'icon'    => 'fas_bars',
+                'onclick' => $this->getJsLoadModalView('lines', 'Lignes du contrat ' . $this->getRef())
+            );
+
+            $buttons[] = array(
+                'label'   => 'Synthèse',
+                'icon'    => 'fas_list-alt',
+                'onclick' => $this->getJsLoadModalView('synthese', 'Synthèse du contrat ' . $this->getRef())
             );
         }
 
@@ -528,7 +569,7 @@ class BCT_Contrat extends BimpDolObject
 
         BimpObject::loadClass('bimpcontrat', 'BCT_ContratLine');
 
-        $fields = array('a.rowid as id_line', 'c.ref');
+        $fields = array('a.rowid as id_line', 'c.ref', 'c.label');
 
         if ($display_refs) {
             $fields[] = 'p.ref as prod_ref';
@@ -566,7 +607,13 @@ class BCT_Contrat extends BimpDolObject
             foreach ($rows as $r) {
                 $line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $r['id_line']);
                 if (BimpObject::objectLoaded($line)) {
-                    $label = 'Contrat ' . $r['ref'] . ' - ligne n° ' . $line->getData('rang');
+                    $label = 'Contrat ' . $r['ref'];
+
+                    if ($r['label']) {
+                        $label .= ' (' . $r['label'] . ')';
+                    }
+
+                    $label .= ' - ligne n° ' . $line->getData('rang');
 
                     if ($display_refs) {
                         $label .= ' (' . $r['prod_ref'] . ')';
@@ -628,9 +675,9 @@ class BCT_Contrat extends BimpDolObject
                     $items = BimpTools::getDolObjectLinkedObjectsList($propal->dol_object, $this->db, array('commande'));
                     //                print_r($items);
                     foreach ($items as $id) {
-                        $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id['id_object']);
-                        if ($obj->isLoaded()) {
-                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $obj->getLink(), 'warning');
+                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id['id_object']);
+                        if ($commande->isLoaded() && in_array((int) $commande->getData('fk_statut'), array(0, 1, 2))) {
+                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $commande->getLink(), 'warning');
                         }
                     }
                 }
@@ -640,11 +687,11 @@ class BCT_Contrat extends BimpDolObject
         return $html;
     }
 
-    public function renderLinkedObjectsTable($htmlP = '')
+    public function renderLinkedObjectsTable($htmlP = '', $excluded_types = array())
     {
         $this->dol_object->element = 'bimp_contrat';
 
-        $html = parent::renderLinkedObjectsTable($htmlP);
+        $html = parent::renderLinkedObjectsTable($htmlP, array('facture', 'order_supplier'));
 
         $this->dol_object->element = 'contrat';
 
@@ -720,17 +767,19 @@ class BCT_Contrat extends BimpDolObject
         ));
     }
 
-    public function renderSyntheseTab()
+    public function renderSyntheseTab($refresh_btn = true)
     {
         $html = '';
 
-        $onclick = $this->getJsLoadCustomContent('renderSyntheseTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
+        if ($refresh_btn) {
+            $onclick = $this->getJsLoadCustomContent('renderSyntheseTab', '$(this).findParentByClass(\'nav_tab_ajax_result\')', array(), array('button' => '$(this)'));
 
-        $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
-        $html .= '<span class="btn btn-default refreshContratSyntheseButton" onclick="' . $onclick . '">';
-        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
-        $html .= '</span>';
-        $html .= '</div>';
+            $html .= '<div class="buttonsContainer align-right" style="margin-bottom: 10px">';
+            $html .= '<span class="btn btn-default refreshContratSyntheseButton" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
 
         $lines = $this->getLines('abo', false, array(
             'fk_product'    => array(
@@ -796,7 +845,7 @@ class BCT_Contrat extends BimpDolObject
 
                 $lines_headers = array(
                     'linked'  => array('label' => '', 'colspan' => 0),
-                    'n'       => array('label' => 'Ligne n°', 'colspan' => 2),
+                    'desc'    => array('label' => 'Ligne', 'colspan' => 2),
                     'statut'  => 'statut',
                     'dates'   => 'Dates',
                     'fac'     => 'Facturation',
@@ -865,6 +914,7 @@ class BCT_Contrat extends BimpDolObject
                             $qty = (float) $line->getData('qty');
                             $nb_units = ($qty / $duration) * $prod_duration;
                             $line_statut = (int) $line->getData('statut');
+                            $line_statut_code = '';
 
                             switch ($line_statut) {
                                 case -2:
@@ -872,16 +922,19 @@ class BCT_Contrat extends BimpDolObject
                                 case 0:
                                     $units['inactive'] += $nb_units;
                                     $qties['inactive'] += $qty;
+                                    $line_statut_code = 'inactive';
                                     break;
 
                                 case 4:
                                     $units['active'] += $nb_units;
                                     $qties['active'] += $qty;
+                                    $line_statut_code = 'active';
                                     break;
 
                                 case 5:
                                     $units['closed'] += $nb_units;
                                     $qties['closed'] += $qty;
+                                    $line_statut_code = 'closed';
                                     break;
                             }
 
@@ -889,7 +942,7 @@ class BCT_Contrat extends BimpDolObject
 
                             if ($line_statut > 0) {
                                 $dates .= 'Du <b>' . date('d / m / Y', strtotime($line->getData('date_ouverture'))) . '</b>';
-                                $dates .= ' au <b>' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . '</b>';
+                                $dates .= '<br/>Au <b>' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . '</b>';
 
                                 if (!(int) $line->getData('id_line_renouv')) {
                                     $date_fin = date('Y-m-d', strtotime($line->getData('date_fin_validite')));
@@ -917,14 +970,19 @@ class BCT_Contrat extends BimpDolObject
                                 }
                             }
 
-                            $num = $line->getData('rang');
+                            $line_desc = '<b>N° ' . $line->getData('rang') . '</b>';
 
                             $id_parent_line = (int) $line->getData('id_parent_line');
                             if ($id_parent_line) {
                                 $parent_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_parent_line);
                                 if (BimpObject::objectLoaded($parent_line)) {
-                                    $num .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
+                                    $line_desc .= '<br/><span class="small" style="color: #888888">(Bundle l. n° ' . $parent_line->getData('rang') . ')</span>';
                                 }
+                            }
+
+                            $description = $line->getData('description');
+                            if ($description) {
+                                $line_desc .= '<br/>' . BimpRender::renderExpandableText($description, 120, 11, 180);
                             }
 
                             $buttons_html = '';
@@ -934,17 +992,19 @@ class BCT_Contrat extends BimpDolObject
                             }
 
                             $lines_rows[] = array(
-                                'row_style' => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px' : '1px'),
-                                'n'         => array('content' => $num, 'colspan' => ($is_sub_line ? 1 : 2)),
-                                'linked'    => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
-                                'statut'    => $line->displayDataDefault('statut'),
-                                'dates'     => $dates,
-                                'fac'       => $line->displayFacInfos(),
-                                'achats'    => $line->displayAchatInfos(false),
-                                'units'     => $nb_units,
-                                'qty'       => $qty,
-                                'pu_ht'     => $line->displayDataDefault('subprice'),
-                                'buttons'   => $buttons_html
+                                'show_tr'         => ($line_statut_code != 'closed' ? 1 : 0),
+                                'row_style'       => 'border-bottom-color: #' . ($is_last ? '595959' : 'ccc') . ';border-bottom-width: ' . ($is_last ? '2px;' : '1px;'),
+                                'row_extra_class' => 'status_' . $line_statut_code,
+                                'desc'            => array('content' => $line_desc, 'colspan' => ($is_sub_line ? 1 : 2)),
+                                'linked'          => array('content' => ($is_sub_line ? $linked_icon : ''), 'colspan' => ($is_sub_line ? 1 : 0)),
+                                'statut'          => $line->displayDataDefault('statut'),
+                                'dates'           => $dates,
+                                'fac'             => $line->displayFacInfos(),
+                                'achats'          => $line->displayAchatInfos(false),
+                                'units'           => $nb_units,
+                                'qty'             => $qty,
+                                'pu_ht'           => $line->displayDataDefault('subprice'),
+                                'buttons'         => $buttons_html
                             );
                         }
                     }
@@ -997,7 +1057,21 @@ class BCT_Contrat extends BimpDolObject
                         'buttons'   => $detail_btn
                     );
 
-                    $lines_content .= '<div style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= '<div class="prod_sublines_container" style="padding: 10px 15px; margin-left: 15px; border-left: 3px solid #777">';
+                    $lines_content .= '<div style="margin-bottom: 5px;">';
+                    $lines_content .= BimpInput::renderInput('check_list', 'prod_' . $prod->id . '_display_filters', array('active', 'inactive'), array(
+                                'items'              => array(
+                                    'active'   => 'Actives',
+                                    'inactive' => 'Inactives',
+                                    'closed'   => 'Fermées'
+                                ),
+                                'search_input'       => 0,
+                                'select_all_buttons' => 0,
+                                'inline'             => 1,
+                                'onchange'           => 'BimpContrat.onSyntheseProdLineDisplayFilterChange($(this));'
+                    ));
+                    $lines_content .= '</div>';
+
                     $lines_content .= BimpRender::renderBimpListTable($lines_rows, $lines_headers, array(
                                 'is_sublist' => true
                     ));
@@ -2384,5 +2458,86 @@ class BCT_Contrat extends BimpDolObject
         }
 
         return $nOk . ' alerte(s) créées';
+    }
+
+    public static function sendAlertUnpaidFacsAbo()
+    {
+        if (!(int) BimpCore::getConf('use_relances_paiements_clients', null, 'bimpcommercial')) {
+            return '';
+        }
+
+        $email = BimpCore::getConf('unpaid_factures_abonnement_notification_email', null, 'bimpcontrat');
+
+        if (!$email) {
+            return '';
+        }
+
+        $out = '';
+        $bdb = self::getBdb();
+        $date_lim = new DateTime();
+        $date_lim->sub(new DateInterval('P3M'));
+
+        $rows = $bdb->executeS(BimpTools::getSqlFullSelectQuery('facture', array('a.rowid as id_facture'), array(
+                    'fk_statut'       => 1,
+                    'type'            => array(0, 1),
+                    'paye'            => 0,
+                    'paiement_status' => array(
+                        'operator' => '!=',
+                        'value'    => 2
+                    ),
+                    'alert_abonnement_unpaid_send' => 0,
+                    'has_abo'         => array(
+                        'custom' => '(SELECT COUNT(fl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_facture_line fl WHERE fl.id_obj = a.rowid AND fl.linked_object_name = \'contrat_line\') > 0'
+                    ),
+                    'relance_date'    => array(
+                        'custom' => '(SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_relance_clients_line rl WHERE rl.relance_idx = 1 AND rl.date_send <= \'' . $date_lim->format('Y-m-d') . '\' AND rl.factures LIKE CONCAT(\'%[\', a.rowid, \']%\')) > 0'
+                    )
+                )), 'array');
+
+        if (is_array($rows)) {
+            if (empty($rows)) {
+                $out .= 'Aucune alerte à envoyer';
+            } else {
+                $out .= count($rows) . ' alerte' . (count($rows) > 1 ? 's' : '') . ' à envoyer.<br/>';
+                foreach ($rows as $r) {
+                    $out .= '<br/>';
+                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_facture']);
+                    if (BimpObject::objectLoaded($fac)) {
+                        $out .= $fac->getLink();
+                        
+                        $client = $fac->getChildObject('client');
+                        $subject = 'Facture ' . $fac->getRef() . ' impayée non régularisée';
+                        $msg = 'Bonjour,<br/><br/>';
+                        $msg .= 'Le client ' . $client->getLink() . ' n\'a pas régularisé la facture ' . $fac->getLink() . '<br/><br/>';
+                        $msg .= 'Relance(s) effectuée(s) :';
+
+                        $relances = $bdb->getRows('bimp_relance_clients_line', 'factures LIKE \'%[' . $fac->id . ']%\' AND status IN(10,11)', null, 'array', array('date_send'), 'date_send', 'asc');
+
+                        if (!empty($relances)) {
+                            foreach ($relances as $relance) {
+                                $msg .= '<br/> - Le ' . date('d / m / Y', strtotime($relance['date_send']));
+                            }
+                        } else {
+                            $msg .= 'Aucune';
+                            break;
+                        }
+                        $msg .= '<br/><br/>Par conséquent, vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.';
+
+                        if (mailSyn2($subject, $email, '', $msg)) {
+                            $out .= ' [OK]';
+                            $fac->updateField('alert_abonnement_unpaid_send', 1);
+                        } else {
+                            $out .= ' [ECHEC]';
+                        }
+                    } else {
+                        $out .= '<span class="danger">Fac #' . (int) $r['id_facture'] . ' non trouvée</span>';
+                    }
+                }
+            }
+        } else {
+            $out .= 'Erreur SQL - ' . $bdb->err();
+        }
+
+        return $out;
     }
 }

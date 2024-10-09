@@ -11,15 +11,15 @@ class BS_SavPropal extends Bimp_Propal
             'bimpdevissav' => 'Devis SAV'
         );
     }
-    
+
     public function getObjectForEmailsLogs()
     {
         $sav = $this->getSav();
-        
+
         if (BimpObject::objectLoaded($sav)) {
             return $sav;
         }
-        
+
         return $this;
     }
 
@@ -74,3 +74,8 @@ class BS_SavPropal extends Bimp_Propal
         return array();
     }
 }
+
+BS_SavPropal::$status_list[1]['label'] = 'Validé';
+BS_SavPropal::$status_list[2]['label'] = 'Accepté';
+BS_SavPropal::$status_list[3]['label'] = 'Refusé';
+BS_SavPropal::$status_list[4]['label'] = 'Fermé';

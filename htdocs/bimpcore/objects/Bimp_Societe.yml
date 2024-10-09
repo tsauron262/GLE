@@ -179,6 +179,10 @@ fields:
         type: bool
         dol_extra_field: 1
         
+    rpps:
+        label: RPPS
+        dol_extra_field: 1
+        
     is_salarie:
         label: Client salarié
         type: bool
@@ -988,6 +992,7 @@ fields_tables:
             - field: idprof4
             - field: idprof5
             - field: idprof6
+            - field: rpps
             
     notes: 
         title: Notes
@@ -1115,6 +1120,11 @@ forms:
                     show_values: 1
             siren: 
                 field: siren
+                display_if: 
+                    field_name: is_company
+                    show_values: 1
+            rpps:
+                field: rpps
                 display_if: 
                     field_name: is_company
                     show_values: 1
@@ -1454,6 +1464,20 @@ forms:
               input: 
                   type: date
                   
+    generate_pdf: 
+        rows: 
+            sepa_date: 
+                custom: 1
+                label: Date de prélèvement SEPA
+                input_name: date_prelev_sepa
+                input: 
+                    type: select
+                    options: 
+                        callback: getSepaDatesPrelevArray
+                display_if: 
+                    field_name: model
+                    show_values: cepa
+                  
              
 filters: 
     accounting_account:
@@ -1499,6 +1523,7 @@ filters_panels:
             code_fournisseur:
             siren:
             siret:
+            rpps:
             ape:
             code_compta:
             code_compta_fournisseur:
@@ -1629,6 +1654,9 @@ cards:
                 field: code_compta
             code_compta_fournisseur: 
                 field: code_compta_fournisseur
+            siret: 
+                field: siret
+                label: SIRET
             adress: 
                 label: Adresse
                 value: 

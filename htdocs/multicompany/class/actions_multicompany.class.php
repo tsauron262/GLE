@@ -4887,7 +4887,7 @@ class ActionsMulticompany
 		$element = str_replace(MAIN_DB_PREFIX, '', $element);
 
 		if (in_array($element, $this->addzero)) {
-			if (($element == 'user') && !empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE)) {
+			if (($element == 'user' || $element == 'usergroup') && !empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE)) {
 				return '0,1';				// In transverse mode all users except superadmin and groups are in entity 1
 			} else {
 				if ($element == 'usergroup' && $conf->entity == 1 && empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE) && !empty($user->admin) && empty($user->entity)) {

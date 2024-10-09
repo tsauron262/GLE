@@ -739,6 +739,7 @@ lists:
         edit_form: edit
         modal_view: default
         objects_change_reload: BR_Reservation,BimpSignature
+        delete_btn: 1
         extra_btn: 
             callback: getExtraBtn
         cols:

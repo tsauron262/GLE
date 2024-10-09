@@ -792,6 +792,15 @@ forms:
                       method: renderLinkedLinesCheckInputs
                       params: 
                           - setResiliateDate
+                          
+    move: 
+        title: Déplacer vers un autre contrat du même client
+        rows: 
+            - custom: 1
+              label: Contrat du même client vers lequel déplacer les lignes sélectionnées
+              input_name: id_contrat_dest
+              content: 
+                  callback: renderMoveToOtherContratInput
               
 fields_tables: 
     infos: 

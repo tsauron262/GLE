@@ -1,0 +1,1 @@
+- Mise en place d'une page publique pour signature des documents sans connexion à l'espace client

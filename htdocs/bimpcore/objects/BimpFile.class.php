@@ -79,8 +79,8 @@ class BimpFile extends BimpObject
         if (!$force_delete && !(int) $this->getData('is_deletable')) {
             return 0;
         }
-        
-        
+
+
         $parent = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($parent) && method_exists($parent, 'isFileDeletable')) {
@@ -223,13 +223,6 @@ class BimpFile extends BimpObject
             }
         }
         return $buttons;
-    }
-
-    public function actionResize($data, &$success = '')
-    {
-        $success = 'Fichier redimesionné';
-        $this->resize($data['new_size']);
-        return array('errors' => array(), 'warnings' => array());
     }
 
     public function resize($sizeMo)
@@ -678,6 +671,15 @@ class BimpFile extends BimpObject
         }
 
         return $errors;
+    }
+
+    // Actions : 
+
+    public function actionResize($data, &$success = '')
+    {
+        $success = 'Fichier redimesionné';
+        $this->resize($data['new_size']);
+        return array('errors' => array(), 'warnings' => array());
     }
 
     // Overrides: 

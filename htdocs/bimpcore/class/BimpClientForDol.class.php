@@ -30,8 +30,8 @@ class BimpClientForDol extends Bimp_Client
                 $c->set('outstanding_limit_icba', 0);
                 if($c->getData('outstanding_limit_credit_check') > 0)
                     $c->set('outstanding_limit_credit_check', 0);
-                if($c->getData('outstanding_limit_atradius') > 0)
-                    $c->set('outstanding_limit_atradius', 0);
+//                if($c->getData('outstanding_limit_atradius') > 0)
+//                    $c->set('outstanding_limit_atradius', 0);
                 $warnings = array();
                 $c->update($warnings, true);
 
@@ -94,8 +94,6 @@ class BimpClientForDol extends Bimp_Client
 
     public function rappelICBA($days)
     {
-        mailSyn2('EXEC CRON rappelICBA', 'f.martinez@bimp.fr', '', 'Heure: ' . date('d / m / Y H:i:s') . '<br/>SERVER : ' . print_r($_SERVER, 1));
-
         $this->error = '';
         $clients = $this->getClientsFinValiditeICBA($days);
 
@@ -242,7 +240,7 @@ class BimpClientForDol extends Bimp_Client
 
         $from = new DateTime();
 //        $from->sub(new DateInterval('PT1H')); TODO
-        $from->sub(new DateInterval('P5D'));
+        $from->sub(new DateInterval('P8D'));
 
         $nb_update = Bimp_Client::updateAllAtradius($from->format('Y-m-d\TH:i:s'), $errors, $warnings, $success);
         $this->output .= "Nombre de clients mis à jour : " . $nb_update . "<br/><br/>" . $success;

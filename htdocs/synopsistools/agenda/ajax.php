@@ -4,25 +4,26 @@ require_once('../../main.inc.php');
 require_once("libAgenda.php");
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 
-
 if ($_REQUEST['id'] > 0) {
     $actioncomm = new ActionComm($db);
     $actioncomm->fetch($_REQUEST['id']);
-    $actioncomm->fetch_userassigned();
-    
-    if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $actioncomm->userownerid)){
-        //pas le droit
-    }else{
+
+    if ((int) $actioncomm->id) {
+        $actioncomm->fetch_userassigned();
+
+        if (!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $actioncomm->userownerid)) {
+            //pas le droit
+        } else {
 //    $actioncomm->userownerid = $newTabUser2[$_REQUEST['setUser']];
-    $actioncomm->datep = $_REQUEST['start'] / 1000;
-    $actioncomm->datef = ($_REQUEST['end'] / 1000) - 60;
-    if($_REQUEST['clone'] == "true"){
-        $actioncomm->fetch_optionals($actioncomm->id);
+            $actioncomm->datep = $_REQUEST['start'] / 1000;
+            $actioncomm->datef = ($_REQUEST['end'] / 1000) - 60;
+            if ($_REQUEST['clone'] == "true") {
+                $actioncomm->fetch_optionals($actioncomm->id);
 //        $actioncomm->array_options['options_uri'] = "";
-        $actioncomm->create($user);
-    }
-    else
-        $actioncomm->update($user);
+                $actioncomm->create($user);
+            } else
+                $actioncomm->update($user);
+        }
     }
 }
 

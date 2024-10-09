@@ -184,6 +184,10 @@ fields:
         user_edit: 1
         hashtags: 1
         
+    rpps:
+        label: RPPS
+        dol_extra_field: 1
+        
 #Champs non gérés:
 #    ref_ext
 #    statut
@@ -227,6 +231,8 @@ forms:
                 field: fax
             poste: 
                 field: poste
+            rpps:
+                field: rpps
                 
     public_edit:
         extends: public_create
@@ -255,6 +261,7 @@ fields_tables:
             - field: phone_mobile
             - field: fax
             - field: jabberid
+            - field: rpps
 #            - field: skype
             
     address:

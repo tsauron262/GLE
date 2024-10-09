@@ -419,7 +419,11 @@ class BimpSignature extends BimpObject
 
             case 'elec':
             default:
-                $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
+                $message .= 'Vous pouvez effectuer la signature électronique de ce document directement ';
+                if ((int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+                    $message .= '{LIEN_PAGE_SIGNATURE_PUBLIQUE} ';
+                }
+                $message .= 'depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
                 break;
 
             case 'papier':
@@ -655,16 +659,30 @@ class BimpSignature extends BimpObject
                         }
                     }
 
+                    if (BimpObject::objectLoaded($signataire) && (int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+                        if (strpos($email_body, '{LIEN_PAGE_SIGNATURE_PUBLIQUE}') !== false) {
+                            $url = $signataire->getPublicSignaturePageUrl($obj);
+                            $str = '';
+                            if ($url) {
+                                $str = 'en <a href="' . $url . '">cliquant ici</a> ou';
+                            }
+
+                            $email_body = str_replace('{LIEN_PAGE_SIGNATURE_PUBLIQUE}', $str, $email_body);
+                        }
+                    }
+
                     $email_body = str_replace(array(
                         '{NOM_DOCUMENT}',
                         '{NOM_PIECE}',
                         '{REF_PIECE}',
-                        '{LIEN_ESPACE_CLIENT}'
+                        '{LIEN_ESPACE_CLIENT}',
+                        '{LIEN_PAGE_SIGNATURE_PUBLIQUE}'
                             ), array(
                         $doc_title,
                         ucfirst($nom_piece),
                         $ref_piece,
-                        $lien_espace_client
+                        $lien_espace_client,
+                                ''
                             ), $email_body);
 
                     $font_size = BimpTools::getArrayValueFromPath($signature_params, 'fs', 'Size9');
@@ -1838,7 +1856,7 @@ class BimpSignature extends BimpObject
         return $errors;
     }
 
-    public function replaceEmailContentLabels($email_content)
+    public function replaceEmailContentLabels($email_content, $signataire)
     {
         $obj_label = '';
         $obj_ref = '';
@@ -1850,16 +1868,30 @@ class BimpSignature extends BimpObject
             $obj_ref = $obj->getRef();
         }
 
+        if (BimpObject::objectLoaded($signataire) && (int) BimpCore::getConf('allow_signature_public_page', null, 'bimpinterfaceclient')) {
+            if (strpos($email_content, '{LIEN_PAGE_SIGNATURE_PUBLIQUE}') !== false) {
+                $url = $signataire->getPublicSignaturePageUrl($obj);
+                $str = '';
+                if ($url) {
+                    $str = 'en <a href="' . $url . '">cliquant ici</a> ou';
+                }
+
+                $email_content = str_replace('{LIEN_PAGE_SIGNATURE_PUBLIQUE}', $str, $email_content);
+            }
+        }
+
         return str_replace(array(
             '{NOM_DOCUMENT}',
             '{NOM_PIECE}',
             '{REF_PIECE}',
-            '{LIEN_ESPACE_CLIENT}'
+            '{LIEN_ESPACE_CLIENT}',
+            '{LIEN_PAGE_SIGNATURE_PUBLIQUE}'
                 ), array(
             $this->displayDocTitle(),
             $obj->getLabel('the'),
             $obj->getRef(),
-            '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>'
+            '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>',
+                    ''
                 ), $email_content);
     }
 

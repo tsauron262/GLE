@@ -5278,7 +5278,7 @@ class Bimp_Facture extends BimpComm
             'prime'               => $this->getData('prime'),
             'prime2'              => $this->getData('prime2'),
             'rib_client'          => $this->getData('rib_client'),
-            'datef'               => $this->getData('datef'),
+            'datef'               => date('Y-m-d'),
             'fk_account'          => $this->getData('fk_account'),
             'centre'              => $this->getData('centre'),
             'pdf_hide_pu'         => $this->getData('pdf_hide_pu'),

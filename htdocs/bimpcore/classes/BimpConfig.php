@@ -44,6 +44,11 @@ class BimpConfig
         return new BimpConfig($module, '', $module, $instance);
     }
 
+    public static function getComponentConfigInstance(BimpComponent $component)
+    {
+        return new BimpConfig('bimpcore', 'components' . ($component->subdir ? '/' . $component->subdir : ''), get_class($component), $component);
+    }
+
     public function __construct($module, $module_dir, $file_name, $instance = null)
     {
         $this->errors = array();
@@ -207,8 +212,13 @@ class BimpConfig
                         } else {
                             $errors[] = 'Nom du fichier d\'extension absent dans le fichier "' . $file . '"';
                         }
-                    } elseif (is_string($params['extends']) && isset($this->instance->module)) {
-                        $extends_module = $this->instance->module;
+                    } elseif (is_string($params['extends']) && (isset($this->instance->module) || $this->module)) {
+                        if (isset($this->instance->module)) {
+                            $extends_module = $this->instance->module;
+                        } else {
+                            $extends_module = $this->module;
+                        }
+
                         $extends_object = $params['extends'];
                     } else {
                         $errors[] = 'Nom du module absent du fichier de configuration "' . $file . '"';
@@ -1142,7 +1152,7 @@ class BimpConfig
             if (isset($params['default_value'])) {
                 $default_value = $this->getvalue($params['default_value'], $path . '/default_value');
             }
-            
+
             if (isset($params['check'])) {
                 $check = $params['check'];
             }

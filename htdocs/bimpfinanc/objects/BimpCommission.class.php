@@ -818,7 +818,7 @@ class BimpCommission extends BimpObject
         $id_entrepot = 0;
         switch (BimpCore::getExtendsEntity()) {
             case 'bimp':
-                $id_entrepot = 50;
+                $id_entrepot = 516;
                 break;
 
             case 'actimac':

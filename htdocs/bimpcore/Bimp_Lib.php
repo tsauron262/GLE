@@ -61,6 +61,8 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'components/BC_Input.php';
     require_once $dir . 'components/BC_Page.php';
     require_once $dir . 'components/BC_Graph.php';
+    
+//    require_once __DIR__ . '/components/BCV2_Lib.php';
 
     require_once $dir . 'BimpStruct.php';
     require_once $dir . 'BimpAssociation.php';

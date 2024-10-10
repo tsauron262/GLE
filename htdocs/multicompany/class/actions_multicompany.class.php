@@ -640,13 +640,13 @@ class ActionsMulticompany
 			if (is_array($externalmodules) && !empty($externalmodules)) {
 				foreach($externalmodules as $params) {
 					if (is_array($params) && !empty($params)) {
-						if (is_array($params['addzero']) && !empty($params['addzero'])) {
+						if (isset($params['addzero']) && is_array($params['addzero']) && !empty($params['addzero'])) {
 							array_push($this->addzero, $params['addzero']);
 						}
 						if (is_array($params['sharingelements']) && !empty($params['sharingelements'])) {
 							$this->sharingelements = array_merge($this->sharingelements, $params['sharingelements']);
 						}
-						if (is_array($params['sharingmodulename']) && !empty($params['sharingmodulename'])) {
+						if (isset($params['sharingmodulename']) && is_array($params['sharingmodulename']) && !empty($params['sharingmodulename'])) {
 							$this->sharingmodulename = array_merge($this->sharingmodulename, $params['sharingmodulename']);
 						}
 					}

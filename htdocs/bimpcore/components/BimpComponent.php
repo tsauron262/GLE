@@ -6,13 +6,14 @@ class BimpComponent
 {
 
     protected static $definitions = null;
+    public static $debug = true;
     public static $component_name = 'BimpComponent';
     public static $subdir = '';
     public static $is_grid_element = false;
 
     // Gestion définitions : 
 
-    public static function areDefinitionsInit()
+    protected static function areDefinitionsInit()
     {
         return (!is_null(static::$definitions));
     }
@@ -39,6 +40,7 @@ class BimpComponent
     public static function getParamDefinitions($param_name)
     {
         $defs = self::getDefinitions();
+
         return (isset($defs['params'][$param_name]) ? $defs['params'][$param_name] : array());
     }
 
@@ -51,43 +53,79 @@ class BimpComponent
 
     // Gestion paramètres : 
 
-    public static function getParam($param_name, $params, $default_value = null)
+    protected static function getParam($param_name, $params, $default_value = null, $defs = null)
     {
-        $defs = self::getParamDefinitions($param_name);
-
-        if (isset($params[$param_name])) {
-            $value = $params[$param_name];
-        } elseif (!is_null($default_value)) {
-            $value = $default_value;
-        } else {
-            if (isset($defs['required']) && $defs['required']) {
-                \BimpCore::addlog('Paramètre composant obligatoire absent', 3, 'bimpcore', null, array(
-                    'Composant' => static::$component_name,
-                    'Param'     => $param_name
-                ));
-            }
-            if (isset($defs['default'])) {
-                $value = $defs['default'];
-            }
+        if (is_null($defs)) {
+            $defs = self::getParamDefinitions($param_name);
         }
 
-        if (!is_null($value)) {
-            $errors = array();
-            if (!\BimpTools::checkValueByType((isset($defs['data_type']) ? $defs['data_type'] : 'string'), $value, $errors)) {
-                if (count($errors)) {
-                    \BimpCore::addlog('Paramètre composant : valeur invalide', 3, 'bimpcore', null, array(
-                        'Composant' => static::$component_name,
-                        'Param'     => $param_name,
-                        'valeur'    => $value
-                    ));
+        $type = (isset($defs['type']) ? $defs['type'] : '');
+
+        switch ($type) {
+            default:
+                if (isset($params[$param_name])) {
+                    $value = $params[$param_name];
+                } elseif (!is_null($default_value)) {
+                    $value = $default_value;
+                } else {
+                    if (isset($defs['required']) && $defs['required']) {
+                        \BimpCore::addlog('Paramètre composant obligatoire absent', 3, 'bimpcore', null, array(
+                            'Composant' => static::$component_name,
+                            'Param'     => $param_name
+                        ));
+                    }
+                    if (isset($defs['default'])) {
+                        $value = $defs['default'];
+                    }
                 }
-            }
-        }
 
-        return $value;
+                if (!is_null($value)) {
+                    $errors = array();
+                    if (!\BimpTools::checkValueByType((isset($defs['data_type']) ? $defs['data_type'] : 'string'), $value, $errors)) {
+                        if (count($errors)) {
+                            \BimpCore::addlog('Paramètre composant : valeur invalide', 3, 'bimpcore', null, array(
+                                'Composant' => static::$component_name,
+                                'Param'     => $param_name,
+                                'valeur'    => $value
+                            ));
+                        }
+                    }
+                }
+
+                return $value;
+
+            case 'params':
+                $params_defs = BC_Definitions::getComponentDefinitions($defs['params_name'], array(), true);                
+                if (isset($defs['multiple']) && (int) $defs['multiple']) {
+                    $return = array();
+                    if (isset($params[$param_name])) {
+                        foreach ($params[$param_name] as $item_params) {
+                            $item = array();
+                            foreach ($params_defs as $sub_param_name => $sub_param_defs) {
+                                $item[$sub_param_name] = self::getParam($sub_param_name, $item_params, null, $sub_param_defs);
+                            }
+                            $return[] = $item;
+                        }
+
+                        return $return;
+                    }
+                } elseif (isset($params[$param_name])) {
+                    $return = array();
+                    foreach ($params_defs as $sub_param_name => $sub_param_defs) {
+                        $return[$sub_param_name] = self::getParam($sub_param_name, $params[$param_name], null, $sub_param_defs);
+                    }
+                    return $return;
+                }
+
+                if (!is_null($default_value)) {
+                    return $default_value;
+                }
+
+                return array();
+        }
     }
 
-    public static function getGridColsValues($params)
+    protected static function getGridColsValues($params)
     {
         if (static::$is_grid_element) {
             return array(
@@ -144,7 +182,10 @@ class BimpComponent
 
         $objects_change_reload = self::getParam('objects_change_reload', $params, array());
         if (!empty($objects_change_reload)) {
-            self::addData($attributes, 'objects_change_reload', implode(',', $objects_change_reload), true, ',');
+            if (is_array($objects_change_reload)) {
+                $objects_change_reload = implode(',', $objects_change_reload);
+            }
+            self::addData($attributes, 'objects_change_reload', $objects_change_reload, true, ',');
         }
 
         $extra_data = self::getParam('extra_data', $params);
@@ -193,7 +234,11 @@ class BimpComponent
             $attributes['data'] = array();
         }
 
-        if ($extends && isset($attributes['data'][$data_name]) && $attributes['data'][$data_name]) {
+        if (is_array($value)) {
+            $value = htmlentities(json_encode($value));
+        }
+
+        if ($extends && isset($attributes['data'][$data_name]) && !empty($attributes['data'][$data_name])) {
             $attributes['data'][$data_name] .= $extend_separator . $value;
         } else {
             $attributes['data'][$data_name] = $value;
@@ -211,13 +256,15 @@ class BimpComponent
 
     // Rendu HTML : 
 
-    public static function render($params, $content = '')
+    protected static function renderHtml($params, $content = '', &$errors = array())
     {
-        if (!self::getParam('show', $params)) {
+        $html = '';
+
+        $show = self::getParam('show', $params);
+
+        if (!self::$debug && !$show) {
             return '';
         }
-
-        $html = '';
 
         $content_only = self::getParam('content_only', $params);
 
@@ -227,15 +274,38 @@ class BimpComponent
             $html .= '<div' . \BimpRender::renderTagAttrs($attributes) . '>';
         }
 
-        $html .= self::getParam('before_content', $params);
-        $html .= $content;
-        $html .= self::getParam('after_content', $params);
+        if (self::$debug) {
+            $html .= \BimpRender::renderFoldableContainer('Définitions', '<pre>' . print_r(self::getDefinitions(), 1) . '</pre>', array('open' => false));
+            $html .= \BimpRender::renderFoldableContainer('Paramètres', '<pre>' . print_r($params, 1) . '</pre>', array('open' => false));
+
+            if (!$show) {
+                $html .= '<span class="danger">Non affiché</span>';
+            }
+        }
+
+        if ($show) {
+            if (count($errors)) {
+                $html .= \BimpRender::renderAlerts($errors);
+            }
+
+            $html .= self::getParam('before_content', $params);
+            $html .= $content;
+            $html .= self::getParam('after_content', $params);
+        }
 
         if (!$content_only) {
             $html .= '</div>';
         }
 
         return $html;
+    }
+
+    public static function render($params)
+    {
+//        self::$debug = (\BimpCore::isUserDev() && (int) \BimpCore::getConf('components_debug'));
+
+        $errors = array();
+        return static::renderHtml($params, '', $errors);
     }
 
     // Divers : 

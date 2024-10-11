@@ -79,6 +79,12 @@ Button:
             label: Icône
         onclick: 
             label: Onclick
+        disabled: 
+            label: Désactivé
+            data_type: bool
+            default: 0
+        popover: 
+            label: Popover
 
 Msg: 
     labels: 
@@ -92,8 +98,13 @@ Msg:
                 warning: Alerte
                 danger: Erreur
             default: info
+        content: 
+            label: Contenu
         
 BC_Panel: 
+    extends: BimpComponent
+    labels: 
+        name: panel
     params: 
         title: 
             label: Titre
@@ -119,23 +130,23 @@ BC_Panel:
                 large: Grand
             default: medium
         msgs: 
-            type: component
-            component: Msg
-            mutliple: 1
+            type: params
+            params_name: Msg
+            multiple: 1
         header_buttons: 
             label: Boutons en en-tête
-            type: component
-            component: Button
+            type: params
+            params_name: Button
             multiple: 1
         header_icons: 
             label: Boutons en en-tête
-            type: component
-            component: Button
+            type: params
+            params_name: Button
             multiple: 1
         footer_extra_btn: 
             label: Boutons supplémentaires dans le pieds-de-page
-            type: component
-            component: Button
+            type: params
+            params_name: Button
             multiple: 1
         footer_extra_content: 
             label: Contenu supplémentaire en pied-de-page
@@ -148,6 +159,8 @@ forms:
     BC_Form: 
         extends: BC_Panel
         params: 
+            icon: 
+                default: fas_edit
             on_save: 
                 label: Après enregistrement
                 values: 
@@ -175,7 +188,7 @@ forms:
 #            rows_callback: 
 #                label: Callback avant chargement des lignes
             force_edit:
-                label: Forcer la validation
+                label: Mode forcé
                 data_type: bool
                 default: 0
             elements: 

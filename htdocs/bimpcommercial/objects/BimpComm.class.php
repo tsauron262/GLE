@@ -762,7 +762,7 @@ class BimpComm extends BimpDolObject
                 if(BimpCore::getConf('use_light_fourn', 0, 'bimpcommercial'))
                     $form = 'lightFourn';
                 else
-                    $form = 'default';
+                    $form = 'create';
                 $buttons[] = array(
                     'label'       => 'Créer un produit',
                     'icon_before' => 'fas_box',
@@ -1759,7 +1759,12 @@ class BimpComm extends BimpDolObject
         foreach ($this->getLines('not_text') as $line) {
             $product = $line->getProduct();
             if (BimpObject::objectLoaded($product)) {
-                $weight += $product->getData('weight') * $line->qty;
+                if($product->getData('weight_units') == -3)
+                    $weight += $product->getData('weight') * $line->qty / 1000;
+                elseif($product->getData('weight_units') == -6)
+                    $weight += $product->getData('weight') * $line->qty / 1000 / 1000;
+                else
+                    $weight += $product->getData('weight') * $line->qty;
             }
         }
         return $weight;

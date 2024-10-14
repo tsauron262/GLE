@@ -56,7 +56,7 @@ class BC_Form extends BC_Panel
         'on_create'   => array('data_type' => 'bool', 'default' => 1),
         'on_edit'     => array('data_type' => 'bool', 'default' => 0)
     );
-
+    
     public function __construct(BimpObject $object, $id_parent = null, $name = '', $level = 1, $content_only = false, $on_save = null)
     {
         $this->params_def['rows_callback'] = array();
@@ -64,7 +64,7 @@ class BC_Form extends BC_Panel
         $this->params_def['values'] = array('data_type' => 'array', 'request' => true, 'json' => true);
         $this->params_def['associations_params'] = array('data_type' => 'array', 'request' => true, 'json' => true);
         $this->params_def['on_save'] = array('default' => 'close');
-        $this->params_def['sub_objects'] = array('type' => 'keys');
+//        $this->params_def['sub_objects'] = array('type' => 'keys');
         $this->params_def['no_auto_submit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['force_edit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['cancel_btn'] = array('data_type' => 'bool', 'default' => 1);
@@ -114,7 +114,7 @@ class BC_Form extends BC_Panel
         if (!is_null($on_save)) {
             $this->params['on_save'] = $on_save;
         }
-        
+
         if ($object->config->isDefined('forms/' . $name . '/rows_callback')) {
             $method = $object->config->get('forms/' . $name . '/rows_callback', '');
             if ($method && method_exists($object, $method)) {
@@ -668,7 +668,6 @@ class BC_Form extends BC_Panel
         } else {
             $title = BimpTools::ucfirst(BimpObject::getInstanceLabel($object));
         }
-
         $html .= '<h3>' . $title . '</h3>';
         $html .= '</div>';
         $html .= '</div>';
@@ -712,7 +711,7 @@ class BC_Form extends BC_Panel
                     $nb_items++;
 
                     $form->object->reset();
-                    $form->params['values'] = array();
+                    $form->params['values'] = array();                    
                     $form->setValues($params['form_values']);
                     $form->setValues($object_values);
 
@@ -813,6 +812,7 @@ class BC_Form extends BC_Panel
         }
 
         if (isset($this->params['values']['fields'][$params['input_name']])) {
+
             $params['value'] = $this->params['values']['fields'][$params['input_name']];
         }
 

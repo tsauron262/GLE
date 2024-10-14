@@ -1,0 +1,330 @@
+BimpComponent: 
+    labels: 
+        name: composant
+    params: 
+        module: 
+            label: Module
+            in_data: 1
+        object_name: 
+            label: Objet
+            in_data: 1
+        id_object: 
+            label: ID Objet
+            data_type: int
+            default: 0
+            in_data: 1
+        show: 
+            label: Afficher
+            info: Si Non, l'élément ne sera pas inclus dans le contenu HTML
+            data_type: bool
+            default: 1
+        content_only: 
+            label: Générer seulement le contenu (sans le container)
+            data_type: bool
+            default: 0
+        before_content: 
+            label: Contenu avant
+        after_content: 
+            label: Contenu après
+        on_loaded: 
+            label: Callback JS après chargement
+        no_reload: 
+            label: Reload ajax désactivés
+            data_type: bool
+            default: 0
+        objects_change_reload: 
+            label: Liste des objets déclanchant un reload
+            data_type: array
+        extra_classes: 
+            label: Classes HTML supplémentaires
+            data_type: array
+        extra_data: 
+            label: Data HTML supplémentaires
+            data_type: array
+        extra_styles: 
+            label: Styles CSS supplémentaires
+            data_type: array''
+     
+GridElement: 
+    labels: 
+        name: élément de grille bootstrap
+        name_plur: éléments de grille bootstrap
+    params: 
+        col_sm: 
+            label: Taille col sm
+            data_type: int
+            min: 1
+            max: 12
+            default: 12
+        col_md: 
+            label: Taille col md
+            data_type: int
+            min: 1
+            max: 12
+            default: 12
+        col_lg: 
+            label: Taille col lg
+            data_type: int
+            min: 1
+            max: 12
+            default: 12
+            
+Button: 
+    labels: 
+        name: Bouton
+    params: 
+        label: 
+            label: Libellé
+        icon: 
+            label: Icône
+        onclick: 
+            label: Onclick
+
+Msg: 
+    labels: 
+        name: message
+    params: 
+        type: 
+            label: Type
+            values: 
+                info: Info
+                success: Succès
+                warning: Alerte
+                danger: Erreur
+            default: info
+        
+BC_Panel: 
+    params: 
+        title: 
+            label: Titre
+        icon: 
+            label: Icône
+            default: fas_edit
+        panel_header: 
+            label: Afficher l'en-tête
+            data_type: bool
+            default: 1
+        panel_footer: 
+            label: Afficher le footer
+            data_type: bool
+            default: 1
+        no_borders: 
+            label: Sans bordure
+            data_type: bool
+        modal_format: 
+            label: Format de la modale
+            values: 
+                small: Petit
+                medium: Moyen
+                large: Grand
+            default: medium
+        msgs: 
+            type: component
+            component: Msg
+            mutliple: 1
+        header_buttons: 
+            label: Boutons en en-tête
+            type: component
+            component: Button
+            multiple: 1
+        header_icons: 
+            label: Boutons en en-tête
+            type: component
+            component: Button
+            multiple: 1
+        footer_extra_btn: 
+            label: Boutons supplémentaires dans le pieds-de-page
+            type: component
+            component: Button
+            multiple: 1
+        footer_extra_content: 
+            label: Contenu supplémentaire en pied-de-page
+        open: 
+            label: Ouvert
+            data_type: bool
+            default: 1
+            
+forms: 
+    BC_Form: 
+        extends: BC_Panel
+        params: 
+            on_save: 
+                label: Après enregistrement
+                values: 
+                    close: Fermer le fomulaire
+                    reload: Recharger le formulaire
+                    redirect: Rediriger sur l'url fournie
+                    open: Ouvrir l'url fournie dans un nouvel onglet
+                    none: Ne rien faire
+            on_submit: 
+                label: Callback JS avant soumission
+            on_success: 
+                label: Callback JS après enregistrement effectué avec succès
+            no_auto_submit: 
+                label: Pas de soumissions automatique
+                data_type: bool
+                default: 0
+            cancel_btn: 
+                label: Afficher le bouton "Annuler"
+                data_type: bool
+                default: 1
+#            all_fields: 
+#                label: Intégrer automatiquement les inputs pour tous les champs de l'objet
+#                data_type: bool
+#                default: 0
+#            rows_callback: 
+#                label: Callback avant chargement des lignes
+            force_edit:
+                label: Forcer la validation
+                data_type: bool
+                default: 0
+            elements: 
+                type: component
+                component: BC_FormElement
+                multiple: 1
+                
+    BC_FormElement: 
+        labels: 
+            name: élément de formulaire
+            name_plur: éléments de formulaire
+        params: 
+            type: 
+                type: component_name
+                label: Type
+                values: 
+                    - BC_FormFieldInput
+                    - BC_FormCustomInput
+                    - BC_FormSection
+                    - BC_FormObjectInput
+                    - BC_FormAssoInput
+            hidden: 
+                label: Masqué
+                info: Si Non, l'élément sera inclus dans le formulaire mais non visible
+                data_type: bool
+                default: 0
+            display_if: 
+                label: Afficher si
+                data_type: array
+            depends_on: 
+                label: Dépendances
+                data_type: array
+            keep_new_value:
+                label: Conserver la nouvelle valeur lors du rechargement de l'input
+                data_type: bool
+                default: 0
+                display_if: 
+                    field_name: depends_on
+                    hide_values: ''
+                    
+    BC_FormSection: 
+        extends: forms/BC_FormElement
+        includes: 
+            - GridElement
+        labels: 
+            name: section de formualaire
+            name_plur: sections de formualaire
+            is_female: 1
+            title: 
+                label: Titre
+            icon: 
+                label: Icône
+            elements: 
+                label: Sous-élements
+                type: component
+                component: BC_FormElement
+                multiple: 1
+            
+    BC_FormInput: 
+        extends: forms/BC_FormElement
+        labels: 
+            name: Input
+        params: 
+            display_mode: 
+                label: Mode d'affichage
+                values: 
+                    row: Ligne entière
+                    inline: Bloc de ligne
+            label: 
+                label: Libellé
+            required: 
+                label: Obligatoire
+                data_type: bool
+                default: 0
+            value: 
+                label: Valeur prédéfinie
+                
+    BC_FormFieldInput: 
+        extends: forms/BC_Input
+        labels: 
+            name: Input d'un champ objet
+            name_plur: Inputs de champs objet
+        params: 
+            field: 
+                label: Nom du champ
+            edit: 
+                label: Autoriser l'édition du champ
+                data_type: bool
+                default: 1
+            create_form: 
+                label: Formualaire de création (si data_type = id_object)
+            create_form_values: 
+                label: Données prédéfinies du formualaire de création
+                data_type: array
+                display_if: 
+                    field_name: create_form
+                    hide_value: ''
+            create_form_label: 
+                label: Libellé formulaire de création
+                display_if: 
+                    field_name: create_form
+                    hide_value: ''
+            edit_form: 
+                label: Formualaire d'édition (si data_type = id_object)
+            edit_form_values: 
+                label: Données prédéfinies du formualaire d'édition
+                data_type: array
+                display_if: 
+                    field_name: edit_form
+                    hide_value: ''
+            edit_form_label: 
+                label: Libellé formulaire d'édition
+                display_if: 
+                    field_name: edit_form
+                    hide_value: ''
+    
+    BC_FormCustomInput: 
+        extends: forms/BC_Input
+        labels: 
+            name: Input personnalisé
+            name_plur: Inputs personnalisés
+            
+    BC_FormAssoInput: 
+        extends: forms/BC_Input
+        labels: 
+            name: Input d'association d'objets
+            name_plur: Inputs d'associations d'objets
+        
+    BC_FormObjectInput: 
+        extends: forms/BC_Input
+        labels: 
+            name: Input objet lié
+            name_plur: Inpus objets liés
+        params: 
+            form_name: 
+                label: Nom du formulaire
+                default: default
+            form_values: 
+                label: Valeurs prédéfinies du formlaire
+                data_type: array
+            multiple: 
+                label: Autoriser l'ajout de plusieurs objets
+                data_type: bool
+                default: 0
+            on_create: 
+                label: Sur création de l'objet parent
+                data_type: bool
+                default: 1
+            on_edit: 
+                label: Sur édition de l'objet parent
+                data_type: bool
+                default: 0

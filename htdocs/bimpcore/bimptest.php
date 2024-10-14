@@ -26,9 +26,7 @@ if (!$user->admin) {
     echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
     exit;
 }
-
-BimpObject::loadClass('bimpcontrat', 'BCT_Contrat');
-echo BCT_Contrat::sendAlertUnpaidFacsAbo();
+echo 'heyyy'; 
 
 echo '<br/>FIN';
 echo '</body></html>';

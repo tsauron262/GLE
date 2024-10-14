@@ -332,7 +332,64 @@ class DoliDBMysqli extends DoliDB
 	 */
 	public function query($query, $usesavepoint = 0, $type = 'auto', $result_mode = 0)
 	{
-		global $dolibarr_main_db_readonly;
+		global $dolibarr_main_db_readonly, $user;
+                
+                /* moddrsi (20.2)*/
+                global $debugTime, $timestamp_debut;
+                
+                if (defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST != $this->database_host && (!defined('BDD_3_HOST') || BDD_3_HOST != $this->database_host)) {
+                    $d1 = new Datetime();
+                    if (stripos(trim($query), "SELECT") === 0) {
+                        if (!isset($_SESSION['dateOldModif']) || $_SESSION['dateOldModif'] < ($d1->format('U') - 8)) {
+                            if (stripos(trim($query), "MAX") === false) {
+                                $testPlusPetitQueDix = rand(3, 12); //rand(6,15);
+                                if (1) {
+
+                                    global $dbRead;
+                                    if (!$dbRead) {
+                                        $servRead = BDD_2_HOST;
+                                        if (defined('BDD_3_HOST')) {
+                                            $testPlusPetitQueDix = rand(5, 14); //rand(6,15);
+                                            if ($testPlusPetitQueDix < 10)
+                                                $servRead = BDD_3_HOST;
+                                        }
+                                        $dbRead = new DoliDBMysqli('mysql', $servRead, $this->database_user, $this->database_pass, $this->database_name);
+                                    }
+
+                                    if ($dbRead) {//on peut passer sur serveur 2
+                                        $this->countReq2 ++;
+                                        $ret = $dbRead->query($query);
+                                        if ($ret) {
+                                            $this->_results = $ret;
+                                            return $ret;
+                                        } else {
+                                            define('OFF_MULTI_SQL', 1);
+                                        }
+                                    }
+                                }
+                            } else {
+                                //req de recherche de dernier ref on reste pour cette requete sur le princ
+                            }
+                        } else {//modifs récente on reste encore sur le princ
+                            define('OFF_MULTI_SQL', 1);
+                        }
+                    } else {
+                        //modifs on reste pour toujours sur le serveur princ
+                        define('OFF_MULTI_SQL', 1);
+                        $d1 = new Datetime();
+                        $_SESSION['dateOldModif'] = $d1->format('U');
+                    }
+                }
+                
+                $this->countReq ++;
+                $timestamp_debut = microtime(true);
+                if ($debugTime) {
+                    if (!isset($this->timestamp_debut)) {
+                        $this->timestamp_debut = $timestamp_debut;
+                        $this->timestamp_derfin = $timestamp_debut;
+                    }
+                }
+                /* fmoddrsi */
 
 		$query = trim($query);
 
@@ -353,12 +410,30 @@ class DoliDBMysqli extends DoliDB
 			}
 		}
 
-		try {
-			$ret = $this->db->query($query, $result_mode);
-		} catch (Exception $e) {
-			dol_syslog(get_class($this)."::query Exception in query instead of returning an error: ".$e->getMessage(), LOG_ERR);
-			$ret = false;
-		}
+                /*moddrsi*/
+                try {
+                    if (!$this->database_name) {
+                        // Ordre SQL ne necessitant pas de connexion a une base (exemple: CREATE DATABASE)
+                        $ret = $this->db->query($query);
+                    } else {
+                        $ret = $this->db->query($query);
+                    }
+                } catch (Exception $e) {
+                    $this->catch($query, $ret, $e);
+                    $this->timeDebReq = 0;
+                    return 0;
+                }
+                if(!$ret){
+                    $this->catch($query, $ret);
+                    return 0;
+                }
+//		try {
+//			$ret = $this->db->query($query, $result_mode);
+//		} catch (Exception $e) {
+//			dol_syslog(get_class($this)."::query Exception in query instead of returning an error: ".$e->getMessage(), LOG_ERR);
+//			$ret = false;
+//		}
+                /*fmoddrsi*/
 
 		if (!preg_match("/^COMMIT/i", $query) && !preg_match("/^ROLLBACK/i", $query)) {
 			// Si requete utilisateur, on la sauvegarde ainsi que son resultset
@@ -379,7 +454,6 @@ class DoliDBMysqli extends DoliDB
                 
                 
                 /* moddrsi */
-                global $debugTime, $timestamp_debut;
                 $timestamp_fin = microtime(true);
                 $difference_ms = $timestamp_fin - $timestamp_debut;
                 if ($debugTime) {
@@ -1332,6 +1406,85 @@ class DoliDBMysqli extends DoliDB
 
 		return $result;
 	}
+        
+        /*moddrsi (20.2)*/
+        public function catch($query, $ret, $e = null)
+        {
+            $deadLock = false;
+            $classLog = 'sql';
+            $this->lastqueryerror = $query;
+            $this->lasterror = $this->error();
+            $this->lasterrno = $this->errno();
+
+            if (stripos($this->lasterror, 'Deadlock') !== false || stripos($this->lasterrno, '1213') !== false) {
+                $deadLock = true;
+                $classLog = 'deadLock';
+            } elseif ($e && (stripos($e->getMessage(), 'Deadlock') !== false || stripos($e->getMessage(), '1213') !== false)) {
+                $deadLock = true;
+                $classLog = 'deadLock';
+            } elseif (stripos($this->lasterrno, 'DB_ERROR_RECORD_ALREADY_EXISTS') !== false) {
+                $classLog = 'sql_duplicate';
+            }
+
+            if (class_exists('synopsisHook'))
+                $timer = synopsisHook::getTime();
+
+            $msg = get_class($this) . "::query SQL Error message: ";
+            $msg .= '<br/>Lasterrno : ' . $this->lasterrno;
+            $msg .= '<br/>Lasterror : ' . $this->lasterror;
+            if ($e)
+                $msg .= '<br/>Exception msg : ' . $e->getMessage();
+            $msg .= '<br/>Serveur : ' . $this->database_host;
+            $msg .= '<br/>Query : ' . $query;
+            if ($this->timeDebReq > 0)
+                $msg .= '<br/>Time Req : ' . (microtime(true) - $this->timeDebReq);
+            if ($this->timeDebReq2 > 0)
+                $msg .= '<br/>Time Req2 : ' . (microtime(true) - $this->timeDebReq2);
+            if (class_exists('synopsisHook'))
+                $msg .= '<br/>Time Depuis déb : ' . $timer;
+
+            dol_syslog($msg, LOG_ERR);
+
+            if (class_exists('BimpCore')) {
+                $log = true;
+                if (in_array($this->lasterrno, array('DB_ERROR_1205'))) {
+                    $log = false;
+                } elseif ($classLog == 'deadLock' && !(int) BimpCore::getConf('log_sql_dealocks')) {
+                    $log = false;
+                } /* elseif ($classLog == 'sql_duplicate' && !(int) BimpCore::getConf('log_sql_duplicate')) {
+                  $log = false;
+                  } */
+
+                if ($log) {
+                    $extra_data = array(
+                        'Code erreur' => $this->lasterrno,
+                        'Erreur SQL'  => $this->lasterror,
+                        'Serveur'     => $this->database_host,
+                        'Timer'       => $timer
+                    );
+
+                    if ($this->timeDebReq > 0) {
+                        $extra_data['Durée req 1'] = (microtime(true) - $this->timeDebReq);
+                    }
+
+                    if ($this->timeDebReq2 > 0) {
+                        $extra_data['Durée req 2'] = (microtime(true) - $this->timeDebReq2);
+                    }
+
+                    $extra_data['Requête'] = '<br/><br/>' . BimpRender::renderSql($query) . '<br/><br/>';
+
+                    BimpCore::addlog('ERREUR SQL - ' . $this->lasterror, Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);
+                }
+            } else {
+                dol_syslog('Erreur sql BimpCore non loadé', LOG_ERR);
+            }
+
+            if ($deadLock) {
+                $this->transaction_opened = 0;
+                static::stopAll('catch');
+            }
+        }
+        /*fmoddrsi*/
 }
 
 /**

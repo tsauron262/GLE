@@ -950,6 +950,55 @@ forms:
               label: Infos
               input: 
                   type: text
+                  
+    combination: 
+        values: 
+            callback: getCombinationFormValues
+        rows: 
+            - custom: 1
+              label: Attributs et valeurs
+              input_name: features
+              content: 
+                  callback: renderCombinationFeaturesInput
+            - custom: 1
+              label: Référence
+              input_name: combination_ref
+              input: 
+                  type: text
+              value: 
+                   callback: getNewCombinationRef
+            - custom: 1
+              label: Impact sur le prix en pourcentage
+              input_name: variation_price_percent
+              data_type: bool
+              value: 0
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Impact sur le prix
+              input_name: variation_price
+              data_type: float
+              decimals: 6
+              input: 
+                  type: text
+              value: 0
+            - custom: 1
+              label: Impact sur le poids
+              input_name: variation_weight
+              data_type: float
+              decimals: 6
+              input: 
+                  type: text
+                  addon_right: 
+                      text: Kg
+              value: 0
+#            - title: Prix d'achat fournisseur(s)'
+            - object: fourn_prices
+              label: Prix d'achat fournisseur
+              on_edit: 1
+              multiple: 1
+              form_name: create_prod
+            
             
 fields_tables: 
     infos: 

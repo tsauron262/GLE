@@ -40,7 +40,14 @@ class BDS_ProcessCronOption extends BimpObject
             $option = $this->getChildObject('option');
 
             if (BimpObject::objectLoaded($option)) {
-                $html .= $option->renderOptionInput(0, 'value', $this->getData('value'));
+                $id_operation = 0;
+                
+                if ((int) $this->getData('id_cron')) {
+                    $cron = $this->getParentInstance();
+                    $id_operation = (int) $cron->getData('id_operation');
+                }
+                
+                $html .= $option->renderOptionInput($id_operation, 'value', $this->getData('value'));
             } else {
                 $html .= '<span class="warning">L\'option #' . $this->getData('id_option') . ' n\'existe pas</span><input type="hidden" value="' . $this->getData('value') . '" name="value"/>';
             }

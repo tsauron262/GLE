@@ -1,0 +1,114 @@
+dol_object: 
+    instance: 
+        dol_object: 
+            module: variants
+            file: ProductCombination
+        
+    
+table: product_attribute_combination
+primary: rowid
+icon: fas_sitemap
+common_fields: 0
+
+parent_module: bimpcore
+parent_object: Bimp_Product
+parent_id_property: fk_product_parent
+
+labels: 
+    name: déclinaison
+    is_female: 1
+    
+objects: 
+    product_child: 
+        relation: hasOne
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: fk_product_child
+                
+fields: 
+    fk_product_parent: 
+        label: Produit père
+        type: id_parent
+        
+    fk_product_child: 
+        label: Produit fils
+        type: id_object
+        object: product_child
+        
+    variation_price: 
+        label: Variation du prix
+        type: float
+        default_value: 0
+        
+    variation_price_percentage: 
+        label: Variation du prix en pourcentage
+        type: bool
+        default_value: 0
+    
+    variation_weight: 
+        label: Variation du poids (Kg)
+        type: float
+        default_value: 0
+        
+    variation_ref_ext: 
+        label: Variation de la réf. externe
+    
+        
+forms: 
+    default: 
+        rows: 
+            - field: fk_product_parent
+              hidden: 1
+              input: 
+                  type: hidden
+            - field: variation_price_percentage
+            - field: variation_price
+            - field: variation_weight
+            - field: variation_ref_ext
+            
+lists_cols: 
+    combination: 
+        label: Combinaison
+        value: 
+            callback: displayCombination
+            
+lists: 
+    default: 
+        title: Déclinaisons
+        checkboxes: 1
+        page_btn: 0
+        edit_btn: 1
+        delete_btn: 1
+        sort_field: position
+        sort_way: asc
+        n: 50
+        bulk_actions:
+            - label: Supprimer les déclinaisons sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        cols:
+            fk_product_parent: 
+            fk_product_child: 
+            combination: 
+            variation_price_percentage:
+                edit: 1
+            variation_price: 
+                edit: 1
+            variation_weight: 
+                edit: 1
+            variation_ref_ext: 
+                edit: 1
+            product_child:tosell: 
+                edit: 1
+            product_child:tobuy: 
+                edit: 1
+                
+    product: 
+        extends: default
+        header_buttons: 
+            callback: getProductListHeaderButtons
+        cols: 
+            fk_product_parent: unset

@@ -57,6 +57,10 @@ objects:
         instance: 
             bimp_object: Bimp_ProductRA
             
+    product_attribute: 
+        instance: 
+            bimp_object: Bimp_ProductAttribute
+            
 sections:
     - type: tabs
       tabs: 
@@ -68,6 +72,16 @@ sections:
                       panel: 1
                       object: product
                       name: default
+                      
+        attributes: 
+            label: Attributs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: product_attribute
+                      name: default
+                      
         equipments:
             label: Equipements
             show: 

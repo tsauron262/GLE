@@ -324,6 +324,7 @@ stats_lists:
             - nature
             - famille
             - gamme
+            - date_my
         cols: 
             tot_qty: 
             tot_brouillon:

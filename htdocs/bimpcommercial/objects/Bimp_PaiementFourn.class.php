@@ -268,6 +268,38 @@ class Bimp_PaiementFourn extends BimpObject
 
         return $html;
     }
+    
+    
+    public function validatePost()
+    {
+        $errors = parent::validatePost();
+
+        if (BimpTools::isSubmit('id_mode_paiement')) {
+            $id_paiement = BimpTools::getValue('id_mode_paiement', 0, 'aZ09');
+            if (is_string($id_paiement)) {
+                if (preg_match('/^\d+$/', $id_paiement)) {
+                    $id_paiement = (int) $id_paiement;
+                } else {
+                    $id_paiement = (int) dol_getIdFromCode($this->db->db, $id_paiement, 'c_paiement', 'code', 'id');
+                }
+            }
+            $this->dol_object->paiementid = (int) $id_paiement;
+        }
+
+//        if (BimpTools::isSubmit('id_account')) {
+//            $this->dol_object->fk_account = (int) BimpTools::getValue('id_account', 0, 'int');
+//        }
+
+        if (!(int) $this->dol_object->paiementid) {
+            $errors[] = 'Mode de paiement absent';
+        }
+
+//        if (!(int) $this->dol_object->fk_account) {
+//            $errors[] = 'Compte financier absent';
+//        }
+
+        return $errors;
+    }
 
     // Overrides: 
 

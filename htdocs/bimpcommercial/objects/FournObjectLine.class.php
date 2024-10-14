@@ -129,6 +129,15 @@ class FournObjectLine extends ObjectLine
             case 'tva_tx':
                 // ATTENTION $value contient la TVA du produit si celui-ci est sélectionné. 
                 if (is_null($value) && !$this->isLoaded()) {
+                    $id_product = (int) $this->getIdProductFromPost();
+                    if($id_product){
+                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+                        if($prod && $prod->isLoaded()){
+                            $value = $prod->getData('tva_tx');
+                        }
+                    }
+                }
+                if (is_null($value) && !$this->isLoaded()) {
                     $value = BimpCache::cacheServeurFunction('getDefaultTva');
                 }
 

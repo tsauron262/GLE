@@ -13,9 +13,25 @@ primary: rowid
 labels: 
     name: paiement
     
+    
+    
+objects: 
+    user_creat: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_author
 fields: 
     amount: 
         dol_prop: montant
+    fk_user_creat:
+        uneset: 1
+    fk_user_author:
+        label: Créé par
+        type: id_object
+        object: user_creat
+        input: 
+            type: search_user
         
 forms:
     default:

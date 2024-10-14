@@ -268,6 +268,15 @@ class Bimp_PaiementFourn extends BimpObject
 
         return $html;
     }
+
+    // Affichages: 
+
+    public function displayType()
+    {
+        if ($this->isLoaded()) {
+            return $this->displayData('fk_paiement');
+        }
+    }
     
     
     public function validatePost()

@@ -448,7 +448,7 @@ class Bimp_PaiementFourn extends BimpObject
                     $this->dol_object->errors = array();
                     $label = 'Paiement facture fournisseur';
 
-                    if ($this->dol_object->addPaymentToBank($user, 'payment', $label, $this->dol_object->fk_account, $nom_emetteur, $banque_emetteur) <= 0) {
+                    if ($this->dol_object->addPaymentToBank($user, 'payment_supplier', $label, $this->dol_object->fk_account, $nom_emetteur, $banque_emetteur) <= 0) {
                         $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du paiement au compte bancaire "' . $account->bank . '"');
                     }
                 }

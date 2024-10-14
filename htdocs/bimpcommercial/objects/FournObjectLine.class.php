@@ -124,6 +124,28 @@ class FournObjectLine extends ObjectLine
         }
 
         $html = '';
+        
+        
+        
+        if (BimpTools::isSubmit('new_values/' . $this->id . '/' . $field)) {
+            $value = BimpTools::getValue('new_values/' . $this->id . '/' . $field, null, $data_check);
+        } elseif ($field === 'id_product') {
+            $value = (int) $this->id_product;
+        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'pa_ht', 'remisable', 'desc'))) {
+            $value = $this->getValueByProduct($field);
+        } else {
+            if (BimpTools::isSubmit($field)) {
+                $value = BimpTools::getValue($field, null, $data_check);
+            } elseif (BimpTools::isSubmit('fields/' . $field)) {
+                $value = BimpTools::getValue('fields/' . $field, null, $data_check);
+            } else {
+                if (isset($this->{$field})) {
+                    $value = $this->{$field};
+                } elseif ($this->field_exists($field)) {
+                    $value = $this->getData($field);
+                }
+            }
+        }
 
         switch ($field) {
             case 'tva_tx':

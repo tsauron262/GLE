@@ -450,7 +450,7 @@ params:
         def: 0
         
     trace_for_sql:
-        label: Apple premium reseller
+        label: BackTrace des req sql
         type: bool
         def: 0
         

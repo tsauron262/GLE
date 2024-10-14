@@ -3,7 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Paiement.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 
-class Bimp_PaiementFourn extends Bimp_Paiement
+class Bimp_PaiementFourn extends BimpObject
 {
 
     public static $paiement_factures_types = array(FactureFournisseur::TYPE_STANDARD, FactureFournisseur::TYPE_DEPOSIT, FactureFournisseur::TYPE_REPLACEMENT, FactureFournisseur::TYPE_SITUATION);

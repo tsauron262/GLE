@@ -3331,15 +3331,6 @@ class BimpObject extends BimpCache
     {
         $error = '';
         $sqlKey = '';
-        
-        /*
-         * todo, surment pas a la bonne place, pour BC_vente group by product:categorie
-         */
-        if(!$child_name && stripos($field, ':') > 0){
-            $tabT = explode(':', $field);
-            $field = str_replace($tabT[0].':', '', $field);
-            $child_name = $tabT[0];
-        }
 
         if (!is_null($child_name) && $child_name) {
             // Champ d'un objet enfant: 

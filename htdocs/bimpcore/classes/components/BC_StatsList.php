@@ -187,7 +187,8 @@ class BC_StatsList extends BC_List
                     $label = $this->object->getConf('fields/' . $gb['value'] . '/label', '');
                     $this->cols[$gb['value']] = array(
                         'label' => $label,
-                        'field' => $gb['value']
+                        'field' => $gb['value'],
+                        'child' =>$gb['child']
                     );
 
                     if ((int) $gb['section']) {
@@ -312,6 +313,14 @@ class BC_StatsList extends BC_List
                     'value'   => $this->object->getPrimary(),
                     'section' => 0
                 );
+            }
+            foreach($this->groupBy as $i => $info){
+                $this->groupBy[$i]['child'] = null;
+                if(stripos($info['value'], ':') > 0){
+                    $tabT = explode(':', $info['value']);
+                    $this->groupBy[$i]['value'] = $tabT[1];
+                    $this->groupBy[$i]['child'] = $tabT[0];
+                }
             }
         }
     }
@@ -446,7 +455,7 @@ class BC_StatsList extends BC_List
                 if ($group_by === $primary) {
                     $group_by_key = 'a.' . $primary;
                 } else {
-                    $group_by_key = $this->object->getFieldSqlKey($group_by, 'a', null, $filters, $joins, $this->errors);
+                    $group_by_key = $this->object->getFieldSqlKey($group_by, 'a', $gb['child'], $filters, $joins, $this->errors);
                 }
 
                 if ($group_by_key) {
@@ -626,7 +635,7 @@ class BC_StatsList extends BC_List
                     $fl = false;
                 }
 
-                $sql .= $this->object->getFieldSqlKey($group_by['field'], 'a', null, $filters, $joins, $this->errors);
+                $sql .= $group_by['alias'];
             }
 
 //            if ($having_sql) {
@@ -662,7 +671,7 @@ class BC_StatsList extends BC_List
                         } else {
                             $fl = false;
                         }
-                        $key .= $r[$gb['field']];
+                        $key .= $r[$gb['alias']];
                     }
 
                     $data[$key] = $r;

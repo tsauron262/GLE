@@ -449,3 +449,8 @@ params:
         type: bool
         def: 0
         
+    trace_for_sql:
+        label: BackTrace des req sql
+        type: bool
+        def: 0
+        

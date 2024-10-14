@@ -180,6 +180,17 @@ class Bimp_Achat extends BimpObject
 
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
+        $modificateur = $this->getConf('fields/' . $field . '/modificateur', null);
+        if($modificateur != null){
+            $fields = explode(',', $this->getConf('fields/' . $field . '/fields'));
+            foreach($fields as $fieldT){
+//                die('goo  od');
+                $modificateur = str_replace($fieldT, $this->getExtraFieldFilterKey($fieldT, $joins, $main_alias, $filters), $modificateur);
+            }
+//                die('rrrrrr'.$modificateur);
+            return $modificateur;
+        }
+        
         if (array_key_exists($field, self::$facture_fields)) {
             $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture_fourn';
             $joins[$join_alias] = array(

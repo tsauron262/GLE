@@ -1010,7 +1010,7 @@ class Bimp_Paiement extends BimpObject
 
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode paiement invalide';
-        } elseif (!$use_caisse && $type_paiement === 'LIQ') {
+        } elseif (!$use_caisse && $type_paiement === 'LIQ' && (int) BimpTools::getValue('use_caisse', 0, 'int')) {
             $errors[] = 'Le réglement en espèce n\'est possible que pour un paiement en caisse';
         } elseif ($type_paiement === 'VIR' && !$this->canCreateVirement()) {
             $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
@@ -1125,7 +1125,7 @@ class Bimp_Paiement extends BimpObject
                                         break;
 
                                     case 'return':
-                                        if (!$use_caisse) {
+                                        if (!$use_caisse && (int) BimpTools::getValue('use_caisse', 0, 'int')) {
                                             $errors[] = 'Le rendu monnaie du trop perçu n\'est possible que pour un paiement en caisse';
                                             break 2;
                                         }

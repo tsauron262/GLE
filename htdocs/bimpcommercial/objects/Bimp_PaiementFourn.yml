@@ -24,8 +24,7 @@ objects:
 fields: 
     amount: 
         dol_prop: montant
-    fk_user_creat:
-        uneset: 1
+    fk_user_creat: unset
     fk_user_author:
         label: Créé par
         type: id_object

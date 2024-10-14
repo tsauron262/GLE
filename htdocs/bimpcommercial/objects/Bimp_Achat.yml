@@ -166,6 +166,12 @@ fields:
                 method: getProductsTagsByTypeArray
                 params:
                     - gamme
+    date_my:
+        label: Mois année facturation
+        extra: 1
+        type: text
+        fields: date
+        modificateur: CONCAT(MONTH(date), CONCAT('/', YEAR(date)))
         
 fields_tables: 
     infos: 

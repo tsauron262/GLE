@@ -365,7 +365,8 @@ class Bimp_PaiementFourn extends BimpObject
             $banque_emetteur = BimpTools::getPostFieldValue('banque_emetteur', '', 'alphanohtml');
         }
 
-        $this->dol_object->datepaye = dol_now();
+//        $this->dol_object->datepaye = dol_now();
+        $this->dol_object->datepaye = strtotime($this->getData('datep'));
         $this->dol_object->fk_account = (int) $account->id;
 
         $i = 1;

@@ -363,7 +363,7 @@ class BC_Panel extends BimpComponent
 
     public function addIdentifierSuffix($suffix)
     {
-        $this->identifier .= '_' . $suffix;
+        $this->identifier .= '_' . preg_replace('/[^A-Za-z0-9\-]/', '', $suffix);
         $this->data['identifier'] = $this->identifier;
     }
 

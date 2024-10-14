@@ -140,12 +140,6 @@ fields:
         object: user_commercial
         values: 
             array: users
-            
-    secteur:
-        label: Canal de vente
-        extra: 1
-        values: 
-            array: secteurs
         
     marque: 
         label: Marque
@@ -229,7 +223,6 @@ fields_tables:
               display: nom_url
             - field: id_entrepot
               display: nom_url
-            - field: secteur
             - field: id_user
               display: nom_url
             - field: id_client
@@ -277,7 +270,6 @@ filters_panels:
             id_client:
             date: 
             id_entrepot: 
-            secteur: 
             parent:fk_statut:
             id_user: 
             id_commercial:
@@ -334,10 +326,6 @@ lists:
             type_materiel:           
 
 stats_lists_cols: 
-    nb_secteurs: 
-        label: Nb Canaux de vente
-        type: count_distinct
-        field: secteur
     tot_qty: 
         label: Qté totale
         type: sum
@@ -387,10 +375,9 @@ stats_lists:
         filters_panel: default
         group_by_options: 
             - id_entrepot
-            - secteur
             - fk_product
+            - product:categorie
         cols: 
-            nb_secteurs:
             tot_qty: 
             tot_brouillon:
             tot_valide:

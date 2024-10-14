@@ -376,6 +376,7 @@ stats_lists:
         group_by_options: 
             - id_entrepot
             - fk_product
+            - product:categorie
         cols: 
             tot_qty: 
             tot_brouillon:

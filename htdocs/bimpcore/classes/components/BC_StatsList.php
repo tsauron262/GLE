@@ -450,8 +450,10 @@ class BC_StatsList extends BC_List
                 }
 
                 if ($group_by_key) {
+                    $tabT = explode(':', $group_by);
                     $groups_by[] = array(
                         'field' => $group_by,
+                        'alias' => $tabT[count($tabT)-1],
                         'key'   => $group_by_key
                     );
                 }
@@ -527,7 +529,7 @@ class BC_StatsList extends BC_List
         $total_fields = array();
 
         foreach ($groups_by as $group_by) {
-            $request_fields[] = $group_by['key'] . ' as ' . $group_by['field'];
+            $request_fields[] = $group_by['key'] . ' as ' . $group_by['alias'];
         }
 
         // SQL Filtres sur les champs calculés: 
@@ -624,7 +626,7 @@ class BC_StatsList extends BC_List
                     $fl = false;
                 }
 
-                $sql .= $group_by['field'];
+                $sql .= $this->object->getFieldSqlKey($group_by['field'], 'a', null, $filters, $joins, $this->errors);
             }
 
 //            if ($having_sql) {
@@ -1080,13 +1082,13 @@ class BC_StatsList extends BC_List
 
             foreach ($this->params['group_by_options'] as $groupByOption) {
                 if (is_string($groupByOption)) {
-                    if ($this->object->field_exists($groupByOption)) {
+//                    if ($this->object->field_exists($groupByOption)) {
                         $label = $this->object->getConf('fields/' . $groupByOption . '/label', $groupByOption);
                         $group_by_options[$groupByOption] = array(
                             'label' => $label,
                             'data'  => $data
                         );
-                    }
+//                    }
                 }
             }
 

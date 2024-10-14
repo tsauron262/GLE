@@ -1,0 +1,28 @@
+fields:       
+    secteur:
+        label: Canal de vente
+        extra: 1
+        values: 
+            array: secteurs
+fields_tables: 
+    infos: 
+        rows: 
+            - field: secteur
+        
+filters_panels: 
+    default: 
+        filters:  
+            secteur:           
+
+stats_lists_cols: 
+    nb_secteurs: 
+        label: Nb Canaux de vente
+        type: count_distinct
+        field: secteur
+                 
+stats_lists: 
+    default: 
+        group_by_options: 
+            - secteur
+        cols: 
+            nb_secteurs:

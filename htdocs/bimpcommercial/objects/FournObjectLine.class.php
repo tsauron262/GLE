@@ -363,6 +363,20 @@ class FournObjectLine extends ObjectLine
                                         if (!$this->canEditPrixAchat()) {
                                             $errors[] = 'Aucun prix d\'achat fournisseur enregistré pour ce produit et ce fournisseur';
                                         }
+                                        else{
+                                            if (is_null($this->tva_tx) && !$this->isLoaded()) {
+                                                $id_product = (int) $this->getIdProductFromPost();
+                                                if($id_product){
+                                                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+                                                    if($prod && $prod->isLoaded()){
+                                                        $this->tva_tx = $prod->getData('tva_tx');
+                                                    }
+                                                }
+                                            }
+                                            if (is_null($this->tva_tx) && !$this->isLoaded()) {
+                                                $this->tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
+                                            }
+                                        }
                                     }
                                 }
                             }

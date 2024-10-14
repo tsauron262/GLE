@@ -1612,7 +1612,13 @@ class BC_StatsList extends BC_List
 
                 foreach ($this->nextGroupBy['filters'] as $filter_field) {
                     $filterDisplayedValue = '';
-                    $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', null, $filters, $joins);
+                    $child_name = null;
+                    if(stripos($filter_field, ':') > 0){
+                        $tabT = explode(':', $filter_field);
+                        $filter_field = str_replace($tabT[0].':', '', $filter_field);
+                        $child_name = $tabT[0];
+                    }
+                    $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', $child_name, $filters, $joins);
 
                     if (isset($filters[$filter_key])) {
                         $this->object->set($filter_field, $filters[$filter_key]);
@@ -1623,7 +1629,12 @@ class BC_StatsList extends BC_List
                     } elseif (isset($row[$filter_field]) && !is_null($row[$filter_field])) {
                         $filters[$filter_key] = $row[$filter_field];
                         $this->object->set($filter_field, $row[$filter_field]);
-                        $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
+                        if(isset($child_name)){
+                            $obj = $this->object->getChildObject($child_name);
+                            $filterDisplayedValue = $obj->displayData($filter_field, 'default', false, true);
+                        }
+                        else
+                            $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
                         if (!$filterDisplayedValue) {
                             $filterDisplayedValue = $row[$filter_field];
                         }

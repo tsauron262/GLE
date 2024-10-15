@@ -851,6 +851,9 @@ class BimpDebug
                 break;
             }
         }
+        
+        if(BimpCore::getConf('trace_for_sql', 0))
+                $content .= BimpRender::renderDebugInfo(BimpTools::displayBacktrace());
 
         self::addDebug('sql', $title, $content, array(
             'open' => false

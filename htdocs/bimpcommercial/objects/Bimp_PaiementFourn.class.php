@@ -3,7 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Paiement.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 
-class Bimp_PaiementFourn extends Bimp_Paiement
+class Bimp_PaiementFourn extends BimpObject
 {
 
     public static $paiement_factures_types = array(FactureFournisseur::TYPE_STANDARD, FactureFournisseur::TYPE_DEPOSIT, FactureFournisseur::TYPE_REPLACEMENT, FactureFournisseur::TYPE_SITUATION);
@@ -269,6 +269,47 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         return $html;
     }
 
+    // Affichages: 
+
+    public function displayType()
+    {
+        if ($this->isLoaded()) {
+            return $this->displayData('fk_paiement');
+        }
+    }
+    
+    
+    public function validatePost()
+    {
+        $errors = parent::validatePost();
+
+        if (BimpTools::isSubmit('id_mode_paiement')) {
+            $id_paiement = BimpTools::getValue('id_mode_paiement', 0, 'aZ09');
+            if (is_string($id_paiement)) {
+                if (preg_match('/^\d+$/', $id_paiement)) {
+                    $id_paiement = (int) $id_paiement;
+                } else {
+                    $id_paiement = (int) dol_getIdFromCode($this->db->db, $id_paiement, 'c_paiement', 'code', 'id');
+                }
+            }
+            $this->dol_object->paiementid = (int) $id_paiement;
+        }
+
+//        if (BimpTools::isSubmit('id_account')) {
+//            $this->dol_object->fk_account = (int) BimpTools::getValue('id_account', 0, 'int');
+//        }
+
+        if (!(int) $this->dol_object->paiementid) {
+            $errors[] = 'Mode de paiement absent';
+        }
+
+//        if (!(int) $this->dol_object->fk_account) {
+//            $errors[] = 'Compte financier absent';
+//        }
+
+        return $errors;
+    }
+
     // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)
@@ -324,7 +365,8 @@ class Bimp_PaiementFourn extends Bimp_Paiement
             $banque_emetteur = BimpTools::getPostFieldValue('banque_emetteur', '', 'alphanohtml');
         }
 
-        $this->dol_object->datepaye = dol_now();
+//        $this->dol_object->datepaye = dol_now();
+        $this->dol_object->datepaye = strtotime($this->getData('datep'));
         $this->dol_object->fk_account = (int) $account->id;
 
         $i = 1;
@@ -407,7 +449,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
                     $this->dol_object->errors = array();
                     $label = 'Paiement facture fournisseur';
 
-                    if ($this->dol_object->addPaymentToBank($user, 'payment', $label, $this->dol_object->fk_account, $nom_emetteur, $banque_emetteur) <= 0) {
+                    if ($this->dol_object->addPaymentToBank($user, 'payment_supplier', $label, $this->dol_object->fk_account, $nom_emetteur, $banque_emetteur) <= 0) {
                         $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du paiement au compte bancaire "' . $account->bank . '"');
                     }
                 }

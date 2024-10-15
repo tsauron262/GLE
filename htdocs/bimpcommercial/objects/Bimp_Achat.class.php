@@ -32,10 +32,11 @@ class Bimp_Achat extends BimpObject
             $fac = $this->getChildObject('facture_fourn');
 
             if (BimpObject::objectLoaded($fac)) {
-                return $fac->getRef() . ' - Ligne n°' . $this->getData('rang');
+                $soc = $fac->getChildObject('fournisseur');
+                return (BimpObject::objectLoaded($soc) ? $soc->getRef() .'<br/>' : '' ) . $fac->getRef() . ' - Ln°' . $this->getData('rang');
             }
 
-            $html = 'Facture #' . (int) $this->getData('fk_facture_fourn') . ' - Ligne n°' . $this->getData('rang');
+            $html = 'Facture #' . (int) $this->getData('fk_facture_fourn') . ' - Ln°' . $this->getData('rang');
 
             return $html;
         }
@@ -49,8 +50,9 @@ class Bimp_Achat extends BimpObject
             $fac = $this->getChildObject('facture_fourn');
 
             if (BimpObject::objectLoaded($fac)) {
-                $params['label_extra'] = 'Ligne n°' . $this->getData('rang');
-                return $fac->getLink($params);
+                $soc = $fac->getChildObject('fournisseur');
+                $params['label_extra'] = 'Ln°' . $this->getData('rang');
+                return (BimpObject::objectLoaded($soc) ? $soc->getLink().'<br/>' : '' ) .$fac->getLink($params);
             }
 
             $html = 'Ligne de facture #' . $this->id;
@@ -178,6 +180,17 @@ class Bimp_Achat extends BimpObject
 
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
+        $modificateur = $this->getConf('fields/' . $field . '/modificateur', null);
+        if($modificateur != null){
+            $fields = explode(',', $this->getConf('fields/' . $field . '/fields'));
+            foreach($fields as $fieldT){
+//                die('goo  od');
+                $modificateur = str_replace($fieldT, $this->getExtraFieldFilterKey($fieldT, $joins, $main_alias, $filters), $modificateur);
+            }
+//                die('rrrrrr'.$modificateur);
+            return $modificateur;
+        }
+        
         if (array_key_exists($field, self::$facture_fields)) {
             $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture_fourn';
             $joins[$join_alias] = array(

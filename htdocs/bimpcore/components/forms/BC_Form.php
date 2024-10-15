@@ -4,16 +4,23 @@ namespace BC_V2;
 
 class BC_Form extends BC_Panel
 {
+
     protected static $definitions = null;
     public static $component_name = 'BC_Form';
     public static $subdir = 'forms';
-    
-    public static function renderHtml(BC_Data $data, $content = '')
+
+    public static function setAttributes($params, &$attributes = array())
     {
-        $html = '';
+        parent::setAttributes($params, $attributes);
+        self::addClass($attributes, self::$component_name);
         
-        $errors = array();
         
-        return $html;
+    }
+
+    protected static function renderHtml($params, $content = '', &$errors = array())
+    {
+        $html = 'JE SUIS UN FORM';
+        
+        return parent::renderHtml($params, $html, $errors);
     }
 }

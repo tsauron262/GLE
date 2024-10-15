@@ -2793,6 +2793,11 @@ class BC_ListTable extends BC_List
                                         }
                                     }
                                 }
+                                
+
+                                if (is_array($value)) {//champ json
+                                    $value = implode("\n", $value);
+                                }
 
                                 if (is_string($value)) {
                                     $value = BimpTools::replaceBr($value);

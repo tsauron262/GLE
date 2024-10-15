@@ -1155,22 +1155,19 @@ class BC_Field extends BimpComponent
         if (isset($this->value)) {
             if ($this->params['type'] === 'items_list' && is_string($this->value)) {
                 if ((int) $this->params['items_braces']) {
-                    $this->value = str_replace('][
-
-', ',
-                ', $this->value);
+                    $this->value = str_replace('][', ',', $this->value);
                     $this->value = str_replace('[', '', $this->value);
                     $this->value = str_replace(']', '', $this->value);
-                    $this->value = explode(', ', $this->value);
+                    $this->value = explode(',', $this->value);
                 } else {
-                    $this->value = explode($this->getParam('items_delimiter', ', '), $this->value);
+                    $this->value = explode($this->getParam('items_delimiter', ','), $this->value);
                 }
             }
 
             if (isset($this->params['values']) && !empty($this->params['values'])) {
                 if (is_array($this->value)) {
                     foreach ($this->value as $valTmp) {
-                        $value .= ($value ? ' -  ' : ' ');
+                        $value .= ($value ? ' - ' : '');
                         switch ($option) {
                             case 'key_label':
                                 $value .= $valTmp . ' ';

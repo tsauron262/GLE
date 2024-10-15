@@ -16,6 +16,7 @@
  * Copyright (C) 2024		Noé Cendrier				<noe.cendrier@altairis.fr>
  * Copyright (C) 2024		Benjamin Falière			<benjamin.faliere@altairis.fr>
  * Copyright (C) 2024		Alexandre Spangaro			<alexandre@inovea-conseil.com>
+ * Copyright (C) 2024		William Mead			    <william.mead@manchenumerique.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,6 +128,11 @@ $search_fk_cond_reglement = GETPOST('search_fk_cond_reglement', 'intcomma');
 $search_fk_shipping_method = GETPOST('search_fk_shipping_method', 'intcomma');
 $search_fk_mode_reglement = GETPOST('search_fk_mode_reglement', 'intcomma');
 $search_fk_input_reason = GETPOST('search_fk_input_reason', 'intcomma');
+
+$search_option = GETPOST('search_option', 'alpha');
+if ($search_option == 'late') {
+	$search_status = '-2';
+}
 
 $diroutputmassaction = $conf->commande->multidir_output[$conf->entity].'/temp/massgeneration/'.$user->id;
 
@@ -318,6 +324,7 @@ if (empty($reshook)) {
 		$search_fk_shipping_method = '';
 		$search_fk_mode_reglement = '';
 		$search_fk_input_reason = '';
+		$search_option = '';
 	}
 	if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')
 		|| GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha')) {
@@ -644,6 +651,9 @@ if (empty($reshook)) {
 			if ($search_status != '') {
 				$param .= '&search_status='.urlencode($search_status);
 			}
+			if ($search_option) {
+				$param .= "&search_option=".urlencode($search_option);
+			}
 			if ($search_orderday) {
 				$param .= '&search_orderday='.urlencode($search_orderday);
 			}
@@ -941,7 +951,9 @@ if ($search_status != '') {
 		$sql .= ' AND (c.fk_statut IN (1,2,3))'; // validated, in process or closed
 	}
 }
-
+if ($search_option == 'late') {
+	$sql .= " AND c.date_commande < '".$db->idate(dol_now() - $conf->commande->client->warning_delay)."'";
+}
 if ($search_datecloture_start) {
 	$sql .= " AND c.date_cloture >= '".$db->idate($search_datecloture_start)."'";
 }
@@ -1230,6 +1242,9 @@ if ($socid > 0) {
 }
 if ($search_status != '') {
 	$param .= '&search_status='.urlencode($search_status);
+}
+if ($search_option) {
+	$param .= "&search_option=".urlencode($search_option);
 }
 if ($search_datecloture_start) {
 	$param .= '&search_datecloture_startday='.dol_print_date($search_datecloture_start, '%d').'&search_datecloture_startmonth='.dol_print_date($search_datecloture_start, '%m').'&search_datecloture_startyear='.dol_print_date($search_datecloture_start, '%Y');
@@ -1532,6 +1547,7 @@ if (isModEnabled('stock') && getDolGlobalString('WAREHOUSE_ASK_WAREHOUSE_DURING_
 	$moreforfilter .= img_picto($tmptitle, 'stock', 'class="pictofixedwidth"').$formproduct->selectWarehouses($search_warehouse, 'search_warehouse', '', 1, 0, 0, $tmptitle, 0, 0, array(), 'maxwidth250 widthcentpercentminusx');
 	$moreforfilter .= '</div>';
 }
+
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 if (empty($reshook)) {
@@ -2271,7 +2287,7 @@ while ($i < $imaxinloop) {
 
 		// Alias name
 		if (!empty($arrayfields['s.name_alias']['checked'])) {
-			print '<td class="nocellnopadd tdoverflowmax125" title="'.dolPrintHTMLForTextArea($obj->alias).'">';
+			print '<td class="nocellnopadd tdoverflowmax100" title="'.dolPrintHTMLForTextArea($obj->alias).'">';
 			print dolPrintLabel($obj->alias);
 			print '</td>';
 			if (!$i) {
@@ -2302,7 +2318,7 @@ while ($i < $imaxinloop) {
 
 		// Town
 		if (!empty($arrayfields['s.town']['checked'])) {
-			print '<td class="tdoverflowmax100">';
+			print '<td class="tdoverflowmax100" title="'.dolPrintHTMLForTextArea($obj->town).'">';
 			print dolPrintLabel($obj->town);
 			print '</td>';
 			if (!$i) {
@@ -2312,7 +2328,7 @@ while ($i < $imaxinloop) {
 
 		// Zip
 		if (!empty($arrayfields['s.zip']['checked'])) {
-			print '<td class="nocellnopadd">';
+			print '<td class="tdoverflowmax100" title="'.dolPrintHTMLForTextArea($obj->zip).'">';
 			print dolPrintLabel($obj->zip);
 			print '</td>';
 			if (!$i) {
@@ -2322,7 +2338,7 @@ while ($i < $imaxinloop) {
 
 		// State
 		if (!empty($arrayfields['state.nom']['checked'])) {
-			print "<td>".dolPrintLabel($obj->state_name)."</td>\n";
+			print '<td class="tdoverflowmax100" title="'.dolPrintHTMLForTextArea($obj->state_name).'">'.dolPrintLabel($obj->state_name)."</td>\n";
 			if (!$i) {
 				$totalarray['nbfield']++;
 			}
@@ -2345,7 +2361,7 @@ while ($i < $imaxinloop) {
 			if (empty($typenArray)) {
 				$typenArray = $formcompany->typent_array(1);
 			}
-			print $typenArray[$obj->typent_code];
+			print $typenArray[$obj->typent_code]??'';
 			print '</td>';
 			if (!$i) {
 				$totalarray['nbfield']++;
@@ -2596,6 +2612,11 @@ while ($i < $imaxinloop) {
 			if (!$i) {
 				$totalarray['pos'][$totalarray['nbfield']] = 'total_margin';
 			}
+
+			if (!isset($totalarray['val']['total_margin'])) {
+				$totalarray['val']['total_margin'] = 0;
+			}
+
 			$totalarray['val']['total_margin'] += $marginInfo['total_margin'];
 		}
 
@@ -2759,6 +2780,21 @@ while ($i < $imaxinloop) {
 							}
 						}
 					}
+
+					// Call Hook modifyTextInfo
+					$parameters = array('textinfo' => $text_info);
+					$reshook = $hookmanager->executeHooks('modifyTextInfo', $parameters, $object, $action);
+					if ($reshook == 1) {
+						// for add information
+						$text_info .= $hookmanager->resPrint;
+					} elseif ($reshook == 0) {
+						// for replace information
+						$text_info = $hookmanager->resPrint;
+					} elseif ($reshook == -1) {
+						// for errors
+						setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+					}
+
 					if ($notshippable == 0) {
 						$text_icon = img_picto('', 'dolly', '', false, 0, 0, '', 'green paddingleft');
 						$text_info = $text_icon.' '.$langs->trans('Shippable').'<br>'.$text_info;

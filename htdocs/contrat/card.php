@@ -1734,7 +1734,7 @@ if ($action == 'create') {
 						$line = new ContratLigne($db);
 						$line->id = $objp->rowid;
 						$line->fetch_optionals();
-						print $line->showOptionals($extrafields, 'view', array('class' => 'oddeven', 'style' => $moreparam, 'colspan' => $colspan), '', '', 1);
+						print $line->showOptionals($extrafields, 'view', array('class' => 'oddeven', 'style' => $moreparam, 'colspan' => $colspan, 'tdclass' => 'notitlefieldcreate'), '', '', 1);
 					}
 				} else {
 					// Line in mode update
@@ -1840,7 +1840,8 @@ if ($action == 'create') {
 						$line = new ContratLigne($db);
 						$line->id = $objp->rowid;
 						$line->fetch_optionals();
-						print $line->showOptionals($extrafields, 'edit', array('style' => 'class="oddeven"', 'colspan' => $colspan), '', '', 1);
+
+						print $line->showOptionals($extrafields, 'edit', array('style' => 'class="oddeven"', 'colspan' => $colspan, 'tdclass' => 'notitlefieldcreate'), '', '', 1);
 					}
 				}
 

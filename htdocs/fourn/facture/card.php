@@ -139,6 +139,7 @@ $permissionnote = $usercancreate; // Used by the include of actions_setnotes.inc
 $permissiondellink = $usercancreate; // Used by the include of actions_dellink.inc.php
 $permissiontoedit = $usercancreate; // Used by the include of actions_lineupdown.inc.php
 $permissiontoadd = $usercancreate; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $usercandelete;
 
 $error = 0;
 
@@ -184,7 +185,7 @@ if (empty($reshook)) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_lineupdown.inc.php'; // Must be include, not include_once
 
 	// Link invoice to order
-	if (GETPOST('linkedOrder') && empty($cancel) && $id > 0) {
+	if (GETPOST('linkedOrder') && empty($cancel) && $id > 0 && $permissiontoadd) {
 		$object->fetch($id);
 		$object->fetch_thirdparty();
 		$result = $object->add_object_linked('order_supplier', GETPOST('linkedOrder'));
@@ -267,7 +268,7 @@ if (empty($reshook)) {
 				}
 			}
 		}
-	} elseif ($action == 'confirm_delete' && $confirm == 'yes') {
+	} elseif ($action == 'confirm_delete' && $confirm == 'yes' && $permissiontodelete) {
 		$object->fetch($id);
 		$object->fetch_thirdparty();
 
@@ -352,7 +353,7 @@ if (empty($reshook)) {
 		if ($result < 0) {
 			setEventMessages($object->error, $object->errors, 'errors');
 		}
-	} elseif ($action == 'confirm_paid_partially' && $confirm == 'yes') {
+	} elseif ($action == 'confirm_paid_partially' && $confirm == 'yes' && $usercancreate) {
 		// Classif "paid partially"
 		$object->fetch($id);
 		$close_code = GETPOST("close_code", 'restricthtml');
@@ -365,7 +366,7 @@ if (empty($reshook)) {
 		} else {
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Reason")), null, 'errors');
 		}
-	} elseif ($action == 'confirm_canceled' && $confirm == 'yes') {
+	} elseif ($action == 'confirm_canceled' && $confirm == 'yes' && $usercancreate) {
 		// Classify "abandoned"
 		$object->fetch($id);
 		$close_code = GETPOST("close_code", 'restricthtml');
@@ -445,7 +446,7 @@ if (empty($reshook)) {
 		} else {
 			$db->commit();
 		}
-	} elseif ($action == 'set_incoterms' && isModEnabled('incoterm')) {
+	} elseif ($action == 'set_incoterms' && isModEnabled('incoterm') && $usercancreate) {
 		// Set incoterm
 		$result = $object->setIncoterms(GETPOSTINT('incoterm_id'), GETPOSTINT('location_incoterms'));
 	} elseif ($action == 'setmode' && $usercancreate) {
@@ -456,7 +457,7 @@ if (empty($reshook)) {
 		$result = $object->setMulticurrencyCode(GETPOST('multicurrency_code', 'alpha'));
 	} elseif ($action == 'setmulticurrencyrate' && $usercancreate) {
 		// Multicurrency rate
-		$result = $object->setMulticurrencyRate(price2num(GETPOSTINT('multicurrency_tx')), GETPOSTINT('calculation_mode'));
+		$result = $object->setMulticurrencyRate(price2num(GETPOST('multicurrency_tx', 'alpha')), GETPOSTINT('calculation_mode'));
 	} elseif ($action == 'setbankaccount' && $usercancreate) {
 		// bank account
 		$result = $object->setBankAccount(GETPOSTINT('fk_account'));
@@ -466,7 +467,7 @@ if (empty($reshook)) {
 		$result = $object->setVATReverseCharge($vatreversecharge);
 	}
 
-	if ($action == 'settransportmode' && ($user->hasRight("fournisseur", "facture", "creer") || $user->hasRight("supplier_invoice", "creer"))) {
+	if ($action == 'settransportmode' && $usercancreate) {
 		// transport mode
 		$result = $object->setTransportMode(GETPOSTINT('transport_mode_id'));
 	} elseif ($action == 'setlabel' && $usercancreate) {
@@ -1973,7 +1974,7 @@ if (empty($reshook)) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_builddoc.inc.php';
 
 	// Make calculation according to calculationrule
-	if ($action == 'calculate') {
+	if ($action == 'calculate' && $usercancreate) {
 		$calculationrule = GETPOST('calculationrule');
 
 		$object->fetch($id);
@@ -1984,7 +1985,7 @@ if (empty($reshook)) {
 			exit;
 		}
 	}
-	if ($action == 'update_extras') {
+	if ($action == 'update_extras' && $usercancreate) {
 		$object->oldcopy = dol_clone($object, 2);
 
 		// Fill array 'array_options' with data from add form

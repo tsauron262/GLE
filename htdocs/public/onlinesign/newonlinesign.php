@@ -24,6 +24,8 @@
  *		\ingroup    core
  *		\brief      File to offer a way to make an online signature for a particular Dolibarr entity
  *					Example of URL: https://localhost/public/onlinesign/newonlinesign.php?ref=PR...
+ *
+ *					The signature is added by calling the file /htdocs/core/ajax/onlinSign.php
  */
 
 if (!defined('NOLOGIN')) {
@@ -769,7 +771,7 @@ if ($action == "dosign" && empty($cancel)) {
 						"entity" : \''.dol_escape_htmltag($entity).'\',
 					},
 					success: function(response) {
-						if (response == "success"){
+						if (response.trim() === "success") {
 							console.log("Success on saving signature");
 							window.location.replace("'.$_SERVER["PHP_SELF"].'?ref='.urlencode($ref).'&source='.urlencode($source).'&message=signed&securekey='.urlencode($SECUREKEY).(isModEnabled('multicompany') ? '&entity='.(int) $entity : '').'");
 						} else {

@@ -1112,6 +1112,14 @@ class BC_Field extends BimpComponent
                     }
                     break;
 
+                case 'int':
+                    $options = array(
+                        'number'             => 'Valeur numérique',
+                        'timer_witouht_days' => 'Durée (Heures / min / sec)',
+                        'timer_with_days'    => 'Durée (Jours / Heures / min / sec)'
+                    );
+                    break;
+
                 case 'money':
                 case 'percent':
                 case 'float':
@@ -1147,19 +1155,22 @@ class BC_Field extends BimpComponent
         if (isset($this->value)) {
             if ($this->params['type'] === 'items_list' && is_string($this->value)) {
                 if ((int) $this->params['items_braces']) {
-                    $this->value = str_replace('][', ',', $this->value);
+                    $this->value = str_replace('][
+
+', ',
+                ', $this->value);
                     $this->value = str_replace('[', '', $this->value);
                     $this->value = str_replace(']', '', $this->value);
-                    $this->value = explode(',', $this->value);
+                    $this->value = explode(', ', $this->value);
                 } else {
-                    $this->value = explode($this->getParam('items_delimiter', ','), $this->value);
+                    $this->value = explode($this->getParam('items_delimiter', ', '), $this->value);
                 }
             }
 
-            if (isset($this->params['values']) && !empty($this->params['values'])) {
+            if (isset($this->params['values  ']) && !empty($this->params['  values  '])) {
                 if (is_array($this->value)) {
                     foreach ($this->value as $valTmp) {
-                        $value .= ($value ? ' - ' : '');
+                        $value .= ($value ? ' -  ' : ' ');
                         switch ($option) {
                             case 'key_label':
                                 $value .= $valTmp . ' ';
@@ -1301,6 +1312,16 @@ class BC_Field extends BimpComponent
                                     }
                                 }
                                 break;
+                        }
+                        break;
+
+                    case 'int':
+                        if ($option === 'timer_with_days') {
+                            $value = BimpTools::displayTimefromSeconds($this->value, true);
+                        } elseif ($option === 'timer_witouht_days') {
+                            $value = BimpTools::displayTimefromSeconds($this->value, false);
+                        } else {
+                            $value = $this->value;
                         }
                         break;
 

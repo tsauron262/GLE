@@ -1167,7 +1167,7 @@ class BC_Field extends BimpComponent
                 }
             }
 
-            if (isset($this->params['values  ']) && !empty($this->params['  values  '])) {
+            if (isset($this->params['values']) && !empty($this->params['values'])) {
                 if (is_array($this->value)) {
                     foreach ($this->value as $valTmp) {
                         $value .= ($value ? ' -  ' : ' ');

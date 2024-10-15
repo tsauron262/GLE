@@ -2391,7 +2391,7 @@ class BC_ListTable extends BC_List
     }
 
     public function renderCsvContent($separator, $col_options, $headers = true, $light_export = false, &$errors = array())
-    {
+    {        
         set_time_limit(0);
         BimpCore::setMaxExecutionTime(12000);
         BimpCore::setMemoryLimit(8192);

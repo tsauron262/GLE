@@ -270,7 +270,7 @@ abstract class BDSImportProcess extends BDSProcess
 
             $rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-            $this->DebugData($rows, 'Lignes fichier');
+//            $this->DebugData($rows, 'Lignes fichier');
 
             $cols_idx = array();
 
@@ -319,7 +319,7 @@ abstract class BDSImportProcess extends BDSProcess
                 }
             }
 
-            $this->DebugData($cols_idx, 'Indexes colonnes');
+//            $this->DebugData($cols_idx, 'Indexes colonnes');
 
             if (!count($errors)) {
                 for ($i = $firstDataRowIndex; $i < count($rows); $i++) {
@@ -367,7 +367,7 @@ abstract class BDSImportProcess extends BDSProcess
             $errors[] = 'Le fichier "' . pathinfo($file, PATHINFO_FILENAME) . '" n\'existe pas : ' . $file;
         }
 
-        $this->DebugData($data, 'Données fichier');
+//        $this->DebugData($data, 'Données fichier');
 
         return $data;
     }

@@ -1060,11 +1060,13 @@ class savFormController extends BimpPublicController
         } elseif (BimpObject::objectLoaded($sav)) {
             $msg .= 'Nous vous confirmons l\'enregistrement de votre dossier SAV dans notre centre de Services Agrée Apple.' . "\n";
             $msg .= 'Aucun rendez-vous n\'a été fixé.' . "\n";
-            $msg .= 'Vous pouvez donc déposer votre matériel dans notre Centre de Service Agréé Apple de ' . $centre['town'] . ' quand vous le souhaitez.' . "\n";
+            $msg .= 'Nous vous invitons à nous contacter afin de trouver la solution la plus adaptée';
+//            $msg .= 'Vous pouvez donc déposer votre matériel dans notre Centre de Service Agréé Apple de ' . $centre['town'] . ' quand vous le souhaitez.' . "\n";
         } else {
             $msg .= 'En raison d\'un problème technique, votre dossier SAV n\'a pas pu être enregistré.' . "\n";
             $msg .= 'Toutefois, les techniciens du Centre de Service Agréé Apple de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.' . "\n";
-            $msg .= 'Vous pouvez donc passer à notre agence quand vous le souhaitez pour déposer votre matériel.' . "\n";
+            $msg .= 'nous vous invitons à nous contacter afin de trouver la solution la plus adaptée';
+//            $msg .= 'Vous pouvez donc passer à notre agence quand vous le souhaitez pour déposer votre matériel.' . "\n";
         }
 
         $msg .= "\n";

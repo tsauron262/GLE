@@ -102,10 +102,16 @@ class favoriCli
         $obj = $tabResult[0];
         $tabMenu = $tabResult[1];
         if ($obj) {
-            $sysLogActive = $conf->syslog->enabled;
-            $conf->syslog->enabled = 0;
+            $sysLogActive = 0;
+            if (isset($conf->syslog->enabled)) {
+                $sysLogActive = $conf->syslog->enabled;
+                $conf->syslog->enabled = 0;
+            }
             $result = $obj->fetch($res->element_id);
-            $conf->syslog->enabled = $sysLogActive;
+            if (isset($conf->syslog->enabled)) {
+                $conf->syslog->enabled = $sysLogActive;
+            }
+
             if ($result > 0 && $obj->ref . "x" != "x") {
 //                $replace = ($tabMenu[0] ? '&mainmenu=' . $tabMenu[0] : '') . ($tabMenu[1] ? '&leftmenu=' . $tabMenu[1] : '') . '">';
                 if ($res->element_type == "propal")
@@ -146,10 +152,9 @@ class favoriCli
         if (isset($element_id) && isset($element_type) && $element_type != '' && $element_id > 0) {
             $obj = self::getObj($element_type);
             if ($obj) {
-                if(is_a($obj, 'BimpObject')){
+                if (is_a($obj, 'BimpObject')) {
                     $obj = BimpCache::getBimpObjectInstance($obj->module, $obj->object_name, $element_id);
-                }
-                else{
+                } else {
                     $obj->fetch($element_id);
                 }
                 $ref = $obj->ref;

@@ -160,9 +160,9 @@ fields:
     fax: 
         label: Fax
         user_edit: 1
-    jabberid:
-        label: Messagerie instantanée
-        user_edit: 1
+#    jabberid: (suppr dans 13.0) 
+#        label: Messagerie instantanée
+#        user_edit: 1
 #    skype: 
 #        label: Identifiant Skype
 #        user_edit: 1
@@ -260,7 +260,7 @@ fields_tables:
             - field: phone_perso
             - field: phone_mobile
             - field: fax
-            - field: jabberid
+#            - field: jabberid
             - field: rpps
 #            - field: skype
             
@@ -330,7 +330,7 @@ filters_panel:
             phone_perso: 
             phone_mobile:
             fax: 
-            jabberid:
+#            jabberid:
 #            skype: 
                 
 lists_cols: 

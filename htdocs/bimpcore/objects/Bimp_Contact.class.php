@@ -7,7 +7,7 @@ class Bimp_Contact extends BimpObject
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-    public static $anonymization_fields = array('lastname', 'firstname', 'address', 'zip', 'town', 'email', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'jabberid', 'skype', 'birthday');
+    public static $anonymization_fields = array('lastname', 'firstname', 'address', 'zip', 'town', 'email', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'skype', 'birthday');
 
     // Getters booléens: 
 

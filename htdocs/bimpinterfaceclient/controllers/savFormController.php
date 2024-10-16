@@ -114,7 +114,7 @@ class savFormController extends BimpPublicController
                 }
             }
         }
-        
+
         $html = '';
 
 //        if (!is_null($reservation)) {
@@ -1026,7 +1026,7 @@ class savFormController extends BimpPublicController
 
     // Traitements:
 
-    public function sendRDVEmailToClient($email, $reservationId, $dt_begin, $sav, $centre, $serial, $reservation_exists = false)
+    public function sendRDVEmailToClient($email, $contact_name, $reservationId, $dt_begin, $sav, $centre, $eq_data, $reservation_exists = false)
     {
         $files = array();
 
@@ -1047,24 +1047,26 @@ class savFormController extends BimpPublicController
             }
         }
 
-        $msg = 'Bonjour,' . "\n\n";
+        $object = 'Confirmation de l\'enregistrement de votre dossier SAV - Centre de Service Agréé Apple de ' . $centre['town'];
+
+        $msg = 'Bonjour' . ($contact_name ? ' ' . $contact_name : '') . ",\n\n";
 
         if ($reservationId) {
-            $msg .= 'Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, ';
-
             if ($reservation_exists) {
-                $msg .= 'nous vous confirmons l\'enregistrement des informations complémentaires que vous nous avez fournies.' . "\n";
+                $msg .= 'Nous vous confirmons l\'enregistrement des informations complémentaires que vous nous avez fournies pour votre rendez-vous dans notre centre de Services Agrée Apple.' . "\n";
             } else {
-                $msg .= 'nous vous confirmons la prise en compte de votre réservation.' . "\n";
+                $msg .= 'Nous vous confirmons l\'enregistrement de votre dossier SAV dans notre centre de Services Agrée Apple.' . "\n";
             }
         } elseif (BimpObject::objectLoaded($sav)) {
             $msg .= 'Nous vous confirmons l\'enregistrement de votre dossier SAV dans notre centre de Services Agrée Apple.' . "\n";
             $msg .= 'Aucun rendez-vous n\'a été fixé.' . "\n";
-            $msg .= 'Vous pouvez donc déposer votre matériel dans notre centre LDLC Apple quand vous le souhaitez.' . "\n";
+            $msg .= 'Nous vous invitons à nous contacter afin de trouver la solution la plus adaptée';
+//            $msg .= 'Vous pouvez donc déposer votre matériel dans notre Centre de Service Agréé Apple de ' . $centre['town'] . ' quand vous le souhaitez.' . "\n";
         } else {
             $msg .= 'En raison d\'un problème technique, votre dossier SAV n\'a pas pu être enregistré.' . "\n";
-            $msg .= 'Toutefois, les techniciens du centre LDLC Apple de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.' . "\n";
-            $msg .= 'Vous pouvez donc passer à notre agence LDLC Apple quand vous le souhaitez pour déposer votre matériel.' . "\n";
+            $msg .= 'Toutefois, les techniciens du Centre de Service Agréé Apple de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.' . "\n";
+            $msg .= 'nous vous invitons à nous contacter afin de trouver la solution la plus adaptée';
+//            $msg .= 'Vous pouvez donc passer à notre agence quand vous le souhaitez pour déposer votre matériel.' . "\n";
         }
 
         $msg .= "\n";
@@ -1077,90 +1079,78 @@ class savFormController extends BimpPublicController
 
             if (file_exists($dir . $file_name)) {
                 $files[] = array($dir . $file_name, 'image/png', $file_name);
-//                $tabFile[] = $dir . $file_name;
-//                $tabFile2[] = 'image/png';
-//                $tabFile3[] = $file_name;
-//                $file_url = 'https://erp2.bimp.fr/' . $sav->getFileUrl($file_name, 'viewimage');
-//                $file_url = 'http://10.192.20.122/' . $sav->getFileUrl($file_name, 'viewimage');
-//                $msg .= '<img src="' . $file_url . '"/><br/>';
-//
-//                $fp = fopen($dir . $file_name, "rb");
-//                $fichierattache = fread($fp, filesize($dir . $file_name));
-//                fclose($fp);
-//                $fichierattache = chunk_split(base64_encode($fichierattache));
-//                $msg .= '--' . $boundary . "\r\n";
-//                $msg .= "Content-Type: application/octet-stream; name=\"$dir . $file_name\"\r\n";
-//                $msg .= "Content-Transfer-Encoding: base64\r\n";
-//                $msg .= "Content-ID: <entete>\r\n";
-//                $msg .= "\r\n";
-//                $msg .= $fichierattache;
-//                $msg .= "\r\n\r\n";
-//                $msg .= '<p style="font-size: 10px; font-style: italic;">Présentez ce QR Code le jour de votre rendez-vous pour faciliter la prise en charge de votre matériel.</p>';
             }
         }
-        $msg .= '<b>Adresse du centre LDLC Apple : </b>' . "\n";
+
+
+        if ($eq_data['serial'] || $eq_data['product_label'] || $eq_data['symptomes'] || is_a($dt_begin, 'DateTime') || BimpObject::objectLoaded($sav)) {
+            $msg .= '<br/><span style="font-size: 14px; font-weight: bold">Détails de votre rendez-vous :</span><br/><br/>';
+            if ($eq_data['serial'] || $eq_data['product_label'] || $eq_data['symptomes'] || is_a($dt_begin, 'DateTime') || BimpObject::objectLoaded($sav)) {
+                if ($eq_data['product_label']) {
+                    $msg .= '<b>Matériel concerné : </b>' . $eq_data['product_label'] . '<br/>';
+                }
+                if ($eq_data['serial']) {
+                    $msg .= '<b>N° de série : </b>' . $eq_data['serial'] . '<br/>';
+                }
+                if ($eq_data['symptomes']) {
+                    $msg .= '<b>Descriptif de la panne : </b>' . $eq_data['symptomes'] . '<br/>';
+                }
+                $msg .= '<br/>';
+            }
+
+            if (is_a($dt_begin, 'DateTime')) {
+                $msg .= '<b>Date et heure du rendez-vous: </b>';
+                $msg .= 'Le ' . $dt_begin->format('d / m / Y à H:i') . '<br/>';
+            }
+            if (BimpObject::objectLoaded($sav)) {
+                $msg .= '<b>Référence de votre dossier SAV :</b> ' . $sav->getRef() . '<br/>';
+            }
+            $msg .= '<br/>';
+        }
+
+        $msg .= '<br/><span style="font-size: 14px; font-weight: bold">Coordonnées du centre :</span><br/><br/>';
+        $msg .= '<b>Nom du site : </b>' . $centre['label'] . '<br/><br/>';
+        $msg .= '<b>Adresse : </b><br/>';
         $msg .= $centre['address'] . "\n";
-        $msg .= $centre['zip'] . ' ' . $centre['town'] . "\n";
-        if ($centre['infos'] != '')
-            $msg .= $centre['infos'] . "\n";
-        $msg .= "\n";
-
-        if (is_a($dt_begin, 'DateTime')) {
-            $msg .= '<b>Date du rendez-vous: </b>' . "\n";
-            $msg .= 'Le ' . $dt_begin->format('d / m / Y à H:i') . "\n\n";
+        $msg .= $centre['zip'] . ' ' . $centre['town'] . '<br/>';
+        if (isset($centre['info']) && $centre['infos'] != '') {
+            $msg .= $centre['infos'] . '<br/>';
         }
 
-        if (BimpObject::objectLoaded($sav)) {
-            $msg .= '<b>Référence SAV :</b> ' . $sav->getRef() . "\n";
-        }
-        $msg .= '<b>N° de série du matériel concerné : </b>' . $serial;
-
-        $msg .= "\n\n";
-
-        if ($reservation_exists) {
-            $msg .= '<b>Rappel: </b>' . "\n";
-        }
-
-        $msg .= "Afin de préparer au mieux votre prise en charge, nous souhaitons attirer votre attention sur les points suivants :
-- Vous devez sauvegarder vos données car nous serons peut-être amenés à les effacer de votre appareil.
-
-- Vous devez désactiver la fonction « localiser » dans le menu iCloud avec l'aide de votre mot de passe.
-
-- Le délai de traitement des réparations est habituellement de 7 jours.
-
-
-Conditions particulières aux iPhones
-
-
-- Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés).
-
-La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation consultez notre site internet.
-
-
-Si votre produit à plus de cinq ans, il est possible que celui-ci soit classé « obsolète » par Apple et que nous ne puissions pas réparer une panne matériel. 
-Nous pourrons toutefois vous proposer, si cela est nécessaire et possible, une  récupération, transfert ou sauvegarde de vos données.
-
-Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
-Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.\n\n";
-
-        $msg .= 'Lors du dépôt de votre matériel dans notre centre SAV, un acompte de 49 euros vous sera demandé si votre matériel est hors garantie ou si la garantie ne peut être applicable.
-Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit IOS.
-
- Cet acompte sera déduit de la réparation en cas d’accord sur le devis ou considéré comme frais de diagnostic en cas de refus.' . "\n\n";
+        $msg .= '<br/><b>Téléphone : </b>' . $centre['tel'].'<br/>';
+        $msg .= '<b>E-mail : </b><a href="mailto: ' . $centre['mail'] . '">' . $centre['mail'] . '</a><br/>';
 
         if ($cancel_url) {
-            $msg .= 'Vous pouvez annuler cette demande de prise en charge depuis votre <a href="' . $base_url . '">espace personnel</a>';
-            $msg .= ' ou en suivant <a href="' . $cancel_url . '">ce lien</a>' . "\n\n";
+            $msg .= '<br/>';
+            $msg .= '<br/><span style="font-size: 14px; font-weight: bold">Annulation ou modification de votre RDV : </span><br/><br/>';
+            $msg .= 'En cas d\'empêchement, vous pouvez annuler ou modifier votre rendez-vous depuis votre <a href="' . $base_url . '">espace personnel</a>';
+            $msg .= ' ou en suivant <a href="' . $cancel_url . '">ce lien</a>' . '<br/>';
         }
 
-        $msg .= 'Bien cordialement' . "\n\n";
-        $msg .= 'L\'équipe BIMP' . "\n\n";
+        $msg .= '<br/><br/><span style="font-size: 14px; font-weight: bold">Préparation avant de déposer votre matériel : </span><br/>';
+
+        $msg .= '<ul>';
+        $msg .= '<li><b>Sauvegardez vos données : </b> certaines réparations peuvent impliquer l’effacement complet du matériel.</li>';
+        $msg .= '<li><b>Accessoires et câbles : </b> apportez tous les accessoires et câbles nécessaires, en particulier si vous pensez qu\'ils peuvent être liés au problème.</li>';
+        $msg .= '<li>Désactivez la fonction « Localiser » sur votre appareil : <a href="https://support.apple.com/en-gb/guide/icloud/mmdc23b125f6/icloud?">Guide de désactivation</a></li>';
+        $msg .= '<li><b>Délais de réparation :</b><br/><b> - Mac : </b> en moyenne 5 jours ouvrés.<br/><b> - iPhone : </b>quelques heures.</li>';
+        $msg .= '</ul>';
+
+        $msg .= '<br/><br/><span style="font-size: 14px; font-weight: bold">Cas particulier iPhone : </span><br/><br/>';
+        $msg .= 'Certaine panne sur un iPhone impose des délai de réparation de plusieurs jours. Vous pouvez contacter notre centre de services pour plus d’informations.<br/>';
+
+        $msg .= '<br/><br/><span style="font-size: 14px; font-weight: bold">Casse d’écran ou changement de la batterie : </span><br/><br/>';
+        $msg .= 'Nous faisons en sorte de vous rendre votre matériel dans la journée si les pièces sont disponibles.<br/>';
+
+        $msg .= '<br/><br/><span style="font-size: 14px; font-weight: bold">Acompte : </span><br/><br/>';
+        $msg .= 'Lors du dépôt de votre matériel dans notre centre SAV, un acompte de 49 euros vous sera demandé si votre Mac est hors garantie ou si la garantie ne peut être applicable. Cet acompte sera de 29 euros si votre matériel concerne un iPhone, iPad ou un produit iOS.<br/>';
+
+        $msg .= '<br/><br/>Cordialement' . '<br/><br/>';
+        $msg .= 'Votre centre de services Agrée Apple' . '<br/><br/>';
 
         $msg .= '<p style="font-size: 10px; font-style: italic;">Présentez le QR Code en pièce-jointe le jour de votre rendez-vous pour faciliter la prise en charge de votre matériel:</p>' . "\n";
 
-//        $email = BimpTools::cleanEmailsStr($email);
-//        return mailSyn2('RDV SAV LDLC Apple - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
-        $bimpMail = new BimpMail($sav, 'Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
+        $bimpMail = new BimpMail($sav, $object, $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
         $bimpMail->addFiles($files);
         return $bimpMail->send();
     }
@@ -1853,7 +1843,6 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                         'email_custom' => array(
                                             'custom' => 'LOWER(a.email) = \'' . strtolower($data['client_email']) . '\''
                                         )
-//                                        'email' => $data['client_email']
                                             ), true);
 
                             if (!BimpObject::objectLoaded($userClient)) {
@@ -2256,7 +2245,17 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                     // Envoi e-mail client: 
                     $email_client = BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email'];
-                    $email_client_ok = $this->sendRDVEmailToClient($email_client, $reservationId, $dateBegin, $sav, $centre, $data['eq_serial'], $reservation_exists);
+                    $contact_name = '';
+                    if (BimpObject::objectLoaded($contact)) {
+                        $contact_name = $contact->getName();
+                    } else {
+                        $contact_name = strtoupper($data['client_lastname']) . ' ' . BimpTools::ucfirst(strtolower($data['client_firstname']));
+                    }
+                    $email_client_ok = $this->sendRDVEmailToClient($email_client, $contact_name, $reservationId, $dateBegin, $sav, $centre, array(
+                        'serial'        => $data['eq_serial'],
+                        'product_label' => $data['eq_type'],
+                        'symptomes'     => $data['eq_symptomes'],
+                            ), $reservation_exists);
 
                     // HTML Succès: 
                     $success_html = '<div class="form_section" id="client_email" style="text-align: center">';

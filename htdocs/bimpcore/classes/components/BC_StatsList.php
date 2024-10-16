@@ -187,7 +187,8 @@ class BC_StatsList extends BC_List
                     $label = $this->object->getConf('fields/' . $gb['value'] . '/label', '');
                     $this->cols[$gb['value']] = array(
                         'label' => $label,
-                        'field' => $gb['value']
+                        'field' => $gb['value'],
+                        'child' =>$gb['child']
                     );
 
                     if ((int) $gb['section']) {
@@ -312,6 +313,14 @@ class BC_StatsList extends BC_List
                     'value'   => $this->object->getPrimary(),
                     'section' => 0
                 );
+            }
+            foreach($this->groupBy as $i => $info){
+                $this->groupBy[$i]['child'] = null;
+                if(stripos($info['value'], ':') > 0){
+                    $tabT = explode(':', $info['value']);
+                    $this->groupBy[$i]['value'] = $tabT[1];
+                    $this->groupBy[$i]['child'] = $tabT[0];
+                }
             }
         }
     }
@@ -446,12 +455,14 @@ class BC_StatsList extends BC_List
                 if ($group_by === $primary) {
                     $group_by_key = 'a.' . $primary;
                 } else {
-                    $group_by_key = $this->object->getFieldSqlKey($group_by, 'a', null, $filters, $joins, $this->errors);
+                    $group_by_key = $this->object->getFieldSqlKey($group_by, 'a', $gb['child'], $filters, $joins, $this->errors);
                 }
 
                 if ($group_by_key) {
+                    $tabT = explode(':', $group_by);
                     $groups_by[] = array(
                         'field' => $group_by,
+                        'alias' => $tabT[count($tabT)-1],
                         'key'   => $group_by_key
                     );
                 }
@@ -527,7 +538,7 @@ class BC_StatsList extends BC_List
         $total_fields = array();
 
         foreach ($groups_by as $group_by) {
-            $request_fields[] = $group_by['key'] . ' as ' . $group_by['field'];
+            $request_fields[] = $group_by['key'] . ' as ' . $group_by['alias'];
         }
 
         // SQL Filtres sur les champs calculés: 
@@ -624,7 +635,7 @@ class BC_StatsList extends BC_List
                     $fl = false;
                 }
 
-                $sql .= $group_by['field'];
+                $sql .= $group_by['alias'];
             }
 
 //            if ($having_sql) {
@@ -660,7 +671,7 @@ class BC_StatsList extends BC_List
                         } else {
                             $fl = false;
                         }
-                        $key .= $r[$gb['field']];
+                        $key .= $r[$gb['alias']];
                     }
 
                     $data[$key] = $r;
@@ -1080,13 +1091,13 @@ class BC_StatsList extends BC_List
 
             foreach ($this->params['group_by_options'] as $groupByOption) {
                 if (is_string($groupByOption)) {
-                    if ($this->object->field_exists($groupByOption)) {
+//                    if ($this->object->field_exists($groupByOption)) {
                         $label = $this->object->getConf('fields/' . $groupByOption . '/label', $groupByOption);
                         $group_by_options[$groupByOption] = array(
                             'label' => $label,
                             'data'  => $data
                         );
-                    }
+//                    }
                 }
             }
 
@@ -1601,7 +1612,13 @@ class BC_StatsList extends BC_List
 
                 foreach ($this->nextGroupBy['filters'] as $filter_field) {
                     $filterDisplayedValue = '';
-                    $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', null, $filters, $joins);
+                    $child_name = null;
+                    if(stripos($filter_field, ':') > 0){
+                        $tabT = explode(':', $filter_field);
+                        $filter_field = str_replace($tabT[0].':', '', $filter_field);
+                        $child_name = $tabT[0];
+                    }
+                    $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', $child_name, $filters, $joins);
 
                     if (isset($filters[$filter_key])) {
                         $this->object->set($filter_field, $filters[$filter_key]);
@@ -1612,7 +1629,12 @@ class BC_StatsList extends BC_List
                     } elseif (isset($row[$filter_field]) && !is_null($row[$filter_field])) {
                         $filters[$filter_key] = $row[$filter_field];
                         $this->object->set($filter_field, $row[$filter_field]);
-                        $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
+                        if(isset($child_name)){
+                            $obj = $this->object->getChildObject($child_name);
+                            $filterDisplayedValue = $obj->displayData($filter_field, 'default', false, true);
+                        }
+                        else
+                            $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
                         if (!$filterDisplayedValue) {
                             $filterDisplayedValue = $row[$filter_field];
                         }

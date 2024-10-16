@@ -1132,7 +1132,7 @@ class savFormController extends BimpPublicController
         $msg .= '<ul>';
         $msg .= '<li><b>Sauvegardez vos données : </b> certaines réparations peuvent impliquer l’effacement complet du matériel.</li>';
         $msg .= '<li><b>Accessoires et câbles : </b> apportez tous les accessoires et câbles nécessaires, en particulier si vous pensez qu\'ils peuvent être liés au problème.</li>';
-        $msg .= '<li>Désactivez la fonction « Localiser » sur votre appareil : <a href="https://support.apple.com/en-gb/guide/icloud/mmdc23b125f6/icloud?">Guide de désactivation</a></li>';
+        $msg .= '<li>Désactivez la fonction « Localiser » sur votre appareil : <a href="https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud?">Guide de désactivation</a></li>';
         $msg .= '<li><b>Délais de réparation :</b><br/><b> - Mac : </b> en moyenne 5 jours ouvrés.<br/><b> - iPhone : </b>quelques heures.</li>';
         $msg .= '</ul>';
 

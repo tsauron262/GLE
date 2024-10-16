@@ -112,7 +112,11 @@ class InterfaceMulticompanyPMP extends DolibarrTriggers
 
 				} else {
 
-					$oldpmp = $this->db->fetch_object($ret)->pmp;
+                                        /*moddrsi (20.2)*/
+                                        // Correction bug
+//                                        $oldpmp = $this->db->fetch_object($ret)->pmp;
+					$oldpmp = $this->db->fetch_object($resql)->pmp;
+                                        /*fmoddrsi*/
 
 					$newstock = intval($product->stock_reel); // var $newstock not use !
 					$oldstock = intval($product->stock_reel) + (intval($object->qty) * (-1));

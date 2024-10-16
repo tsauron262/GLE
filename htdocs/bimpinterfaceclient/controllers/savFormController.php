@@ -1150,7 +1150,7 @@ class savFormController extends BimpPublicController
 
         $msg .= '<p style="font-size: 10px; font-style: italic;">Présentez le QR Code en pièce-jointe le jour de votre rendez-vous pour faciliter la prise en charge de votre matériel:</p>' . "\n";
 
-        $bimpMail = new BimpMail($sav, $object, $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
+        $bimpMail = new BimpMail($sav, $object, $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''), 'f.martinez@bimp.fr');
         $bimpMail->addFiles($files);
         return $bimpMail->send();
     }

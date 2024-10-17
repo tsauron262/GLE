@@ -6134,6 +6134,7 @@ class BCT_ContratLine extends BimpObject
         $propal_line_errors = $propal_line->validateArray(array(
             'id_obj'                 => $propal->id,
             'type'                   => 1,
+            'abo_nb_units'           => $this->getNbUnits(),
             'abo_fac_periodicity'    => $this->getData('fac_periodicity'),
             'abo_duration'           => $this->getData('duration'),
             'abo_fac_term'           => $this->getData('fac_term'),

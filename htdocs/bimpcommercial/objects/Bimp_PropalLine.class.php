@@ -960,7 +960,7 @@ class Bimp_PropalLine extends ObjectLine
 
                 if (!count($errors)) {
                     if ($data['first_period_prorata'] !== 1) {
-                        if (round($data['total_qty'], 6) !== round($this->qty, 6)) {
+                        if (round($data['total_qty'], 5) !== round($this->qty, 5)) {
                             $propal = $this->getParentInstance();
                             if (!in_array($propal->id, array(1208752))) {
                                 BimpCore::addlog('Abonnement avec prorata : qté totale enregistrée invalide - A vérifier', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $propal, array(

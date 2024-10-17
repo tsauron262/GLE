@@ -213,7 +213,7 @@ fields:
             type: user
     fk_user_valid: 
         label: Validée par
-        dol_prop: user_valid_id
+        dol_prop: user_validation_id
         type: id_object
         object: user_valid
         input: 

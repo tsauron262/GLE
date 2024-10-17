@@ -11,7 +11,7 @@ header("Content-Type: application/json");
 //    $_POST = json_decode($_POST, 1);
 //}
 
-if (isset($_GET['debug']) && (int) $_GET['debug']) {
+if (BimpCore::isEntity('actimac') || (isset($_GET['debug']) && (int) $_GET['debug'])) {
     $response = array(
 //        'server' => $_SERVER,
         'post' => $_POST,

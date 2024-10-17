@@ -1,0 +1,2 @@
+ALTER TABLE llx_propal DROP CONSTRAINT fk_propal_fk_user_valid;
+ALTER TABLE llx_societe_remise_except DROP CONSTRAINT fk_soc_remise_fk_soc;

@@ -94,6 +94,8 @@ class DoliDBMysqliC extends DoliDBMysqli
      */
     function __construct($type, $host, $user, $pass, $name = '', $port = 0)
     {
+//        ini_set('display_errors', 1);
+
         global $conf, $langs;
 
         // Note that having "static" property for "$forcecharset" and "$forcecollate" will make error here in strict mode, so they are not static
@@ -132,70 +134,70 @@ class DoliDBMysqliC extends DoliDBMysqli
         $this->ok = false;
         $this->database_selected = false;
 
-//      define('CONSUL_SERVERS', serialize (array("http://10.192.20.115:8300", "http://10.192.20.116:8300", "http://10.192.20.117:8300")));
+        //      define('CONSUL_SERVERS', serialize (array("http://10.192.20.115:8300", "http://10.192.20.116:8300", "http://10.192.20.117:8300")));
         if (!defined('CONSUL_SERVERS')) {
             dol_syslog("Constante CONSUL_SERVERS non definie", LOG_ERR);
             return FALSE;
         } else
             $this->CONSUL_SERVERS = unserialize(CONSUL_SERVERS);
 
-//      define('CONSUL_SERVICE_DATABASE', "bderpdev");
+        //      define('CONSUL_SERVICE_DATABASE', "bderpdev");
         if (!defined('CONSUL_SERVICE_DATABASE')) {
             dol_syslog("Constante CONSUL_SERVICE_DATABASE non definie", LOG_ERR);
             return FALSE;
         } else
             $this->CONSUL_SERVICE_DATABASE = CONSUL_SERVICE_DATABASE;
 
-//  define('CONSUL_SERVICES_USE_FOR_WRITE', 1);
+        //  define('CONSUL_SERVICES_USE_FOR_WRITE', 1);
         if (!defined('CONSUL_SERVICES_USE_FOR_WRITE')) {
             dol_syslog("Constante CONSUL_SERVICES_USE_FOR_WRITE non definie", LOG_WARNING);
             $this->CONSUL_SERVICES_USE_FOR_WRITE = 1; // Default to 1
         } else
             $this->CONSUL_SERVICES_USE_FOR_WRITE = CONSUL_SERVICES_USE_FOR_WRITE;
 
-//  define('CONSUL_SERVICES_USE_FOR_READ', 2);
+        //  define('CONSUL_SERVICES_USE_FOR_READ', 2);
         if (!defined('CONSUL_SERVICES_USE_FOR_READ')) {
             dol_syslog("Constante CONSUL_SERVICES_USE_FOR_READ non definie", LOG_WARNING);
             $this->CONSUL_SERVICES_USE_FOR_READ = 1; // Default to 1
         } else
             $this->CONSUL_SERVICES_USE_FOR_READ = CONSUL_SERVICES_USE_FOR_READ;
 
-//      define('CONSUL_USE_REDIS_CACHE', true);
+        //      define('CONSUL_USE_REDIS_CACHE', true);
         if (!defined('CONSUL_USE_REDIS_CACHE')) {
             dol_syslog("Constante CONSUL_USE_REDIS_CACHE non definie", LOG_WARNING);
             $this->CONSUL_USE_REDIS_CACHE = FALSE;
         } else
             $this->CONSUL_USE_REDIS_CACHE = CONSUL_USE_REDIS_CACHE;
 
-//      define('REDIS_USE_LOCALHOST', true);
+        //      define('REDIS_USE_LOCALHOST', true);
         if (!defined('REDIS_USE_LOCALHOST')) {
             dol_syslog("Constante REDIS_USE_LOCALHOST non definie", LOG_WARNING);
             $this->REDIS_USE_LOCALHOST = true;
         } else
             $this->REDIS_USE_LOCALHOST = REDIS_USE_LOCALHOST;
 
-//      define('REDIS_LOCALHOST_SOCKET', "/var/run/redis/redis.sock");
+        //      define('REDIS_LOCALHOST_SOCKET', "/var/run/redis/redis.sock");
         if (!defined('REDIS_LOCALHOST_SOCKET')) {
             dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", LOG_WARNING);
             $this->REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
         } else
             $this->REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
 
-//      define('CONSUL_REDIS_CACHE_TTL', 120);  // Seconds
+        //      define('CONSUL_REDIS_CACHE_TTL', 120);  // Seconds
         if (!defined('CONSUL_REDIS_CACHE_TTL')) {
             dol_syslog("Constante CONSUL_REDIS_CACHE_TTL non definie", LOG_WARNING);
             $this->CONSUL_REDIS_CACHE_TTL = 120;
         } else
             $this->CONSUL_REDIS_CACHE_TTL = CONSUL_REDIS_CACHE_TTL;
 
-//      define('CONSUL_READ_FROM_WRITE_DB_HOST', true);
+        //      define('CONSUL_READ_FROM_WRITE_DB_HOST', true);
         if (!defined('CONSUL_READ_FROM_WRITE_DB_HOST')) {
             dol_syslog("Constante CONSUL_READ_FROM_WRITE_DB_HOST non definie", LOG_WARNING);
             $this->CONSUL_READ_FROM_WRITE_DB_HOST = TRUE; // Default to TRUE
         } else
             $this->CONSUL_READ_FROM_WRITE_DB_HOST = CONSUL_READ_FROM_WRITE_DB_HOST;
 
-//      define('CONSUL_READ_FROM_WRITE_DB_HOST_TIME', 120);    // Seconds
+        //      define('CONSUL_READ_FROM_WRITE_DB_HOST_TIME', 120);    // Seconds
         if (!defined('CONSUL_READ_FROM_WRITE_DB_HOST_TIME')) {
             dol_syslog("Constante CONSUL_READ_FROM_WRITE_DB_HOST_TIME non definie", LOG_WARNING);
             $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME = 120; // Default to 120
@@ -286,7 +288,7 @@ class DoliDBMysqliC extends DoliDBMysqli
         if ($num_svc_all === 0)
             return FALSE;
 
-//  define('CONSUL_SERVICES_PRIORITY_WRITE', serialize (array(2,1,3)));
+        //  define('CONSUL_SERVICES_PRIORITY_WRITE', serialize (array(2,1,3)));
         if (!defined('CONSUL_SERVICES_PRIORITY_WRITE')) {
             dol_syslog("Constante CONSUL_SERVICES_PRIORITY_WRITE non definie", LOG_WARNING);
             // Default to the original index
@@ -321,7 +323,7 @@ class DoliDBMysqliC extends DoliDBMysqli
             }
         }
 
-//  define('CONSUL_SERVICES_PRIORITY_READ', serialize (array(1,3,2)));
+        //  define('CONSUL_SERVICES_PRIORITY_READ', serialize (array(1,3,2)));
         if (!defined('CONSUL_SERVICES_PRIORITY_READ')) {
             dol_syslog("Constante CONSUL_SERVICES_PRIORITY_READ non definie", LOG_WARNING);
             // Default to the original index

@@ -186,7 +186,7 @@ class BimpCore
             $js_vars = self::getJsVars();
 
             if (!empty($js_vars)) {
-                $html .= "\n" . '<script '.BimpTools::getScriptAttribut().'>' . "\n";
+                $html .= "\n" . '<script ' . BimpTools::getScriptAttribut() . '>' . "\n";
                 foreach ($js_vars as $var_name => $var_value) {
                     $html .= "\t" . 'var ' . $var_name . ' = ';
                     if (BimpTools::isNumericType($var_value)) {
@@ -202,7 +202,7 @@ class BimpCore
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
                 if ($url) {
-                    $html .= '<script '.BimpTools::getScriptAttribut().' src="' . $url . '"></script>' . "\n";
+                    $html .= '<script ' . BimpTools::getScriptAttribut() . ' src="' . $url . '"></script>' . "\n";
                 }
             }
 
@@ -749,17 +749,19 @@ class BimpCore
 
             $rows = BimpCache::getBdb()->getRows('bimpcore_conf');
 
-            foreach ($rows as $r) {
-                $module = $r->module;
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $module = $r->module;
 
-                if (!$module) {
-                    $module = 'bimpcore';
+                    if (!$module) {
+                        $module = 'bimpcore';
+                    }
+
+                    if (isset($r->entity))
+                        self::$conf_cache[$r->entity][$module][$r->name] = $r->value;
+                    else
+                        self::$conf_cache[0][$module][$r->name] = $r->value;
                 }
-
-                if (isset($r->entity))
-                    self::$conf_cache[$r->entity][$module][$r->name] = $r->value;
-                else
-                    self::$conf_cache[0][$module][$r->name] = $r->value;
             }
         }
 
@@ -1157,6 +1159,7 @@ class BimpCore
     {
         // $bimp_logs_locked: Eviter boucles infinies
 
+        $errors = array();
         global $bimp_logs_locked, $user;
 
         if (is_null($bimp_logs_locked)) {
@@ -1198,8 +1201,6 @@ class BimpCore
             if (!(int) BimpCore::getConf('use_bimp_logs') && !(int) BimpTools::getValue('use_logs', 0, 'int')) {
                 return array();
             }
-
-            $errors = array();
 
             $check = true;
             foreach (Bimp_Log::$exclude_msg_prefixes as $prefixe) {
@@ -1571,7 +1572,7 @@ class BimpCore
         // Outils devs: 
         global $user;
         $is_user_dev = BimpCore::isUserDev();
-        
+
         if ($is_user_dev || $user->login == 's.lehalle') {
             $html .= '<div style="margin: 5px 0; text-align: center; color: #7F7F7F; font-size: 11px">----- OUTILS DEV ------</div>';
 

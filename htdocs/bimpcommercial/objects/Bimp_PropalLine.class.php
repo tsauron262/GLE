@@ -962,10 +962,12 @@ class Bimp_PropalLine extends ObjectLine
                     if ($data['first_period_prorata'] !== 1) {
                         if (round($data['total_qty'], 6) !== round($this->qty, 6)) {
                             $propal = $this->getParentInstance();
-                            BimpCore::addlog('Abonnement avec prorata : qté totale enregistrée invalide - A vérifier', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $propal, array(
-                                'Qté théorique'   => $data['total_qty'],
-                                'Qté enregistrée' => $this->qty
-                            ));
+                            if (!in_array($propal->id, array(1208752))) {
+                                BimpCore::addlog('Abonnement avec prorata : qté totale enregistrée invalide - A vérifier', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $propal, array(
+                                    'Qté théorique'   => $data['total_qty'],
+                                    'Qté enregistrée' => $this->qty
+                                ));
+                            }
                         }
                     }
                 }
@@ -1115,7 +1117,7 @@ class Bimp_PropalLine extends ObjectLine
                     $contrat_line->update($w, true);
                 }
             }
-            
+
             $this->checkAboQty();
         }
 

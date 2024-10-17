@@ -981,6 +981,7 @@ class Bimp_PropalLine extends ObjectLine
     {
         if ($context === 'fetch') {
             $this->checkAboData();
+            $this->checkAboQty();
         }
         parent::checkObject($context, $field);
     }
@@ -1114,6 +1115,8 @@ class Bimp_PropalLine extends ObjectLine
                     $contrat_line->update($w, true);
                 }
             }
+            
+            $this->checkAboQty();
         }
 
         return $errors;

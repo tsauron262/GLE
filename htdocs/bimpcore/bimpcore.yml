@@ -104,6 +104,7 @@ params:
         label: Ip Admin (pour fermeture ERP)
     git_branch:
         label: Branche GIT
+        def: master
     cronjob_debug: 
         label: Activer le débug des tâches CRON
         type: bool

@@ -27,21 +27,30 @@ if (!$user->admin) {
     exit;
 }
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/components/BCV2_Lib.php';
-echo BC_V2\BC_Form::render(array(
-    'title'                => 'HOLA',
-    'icon'                 => 'fas_check',
-    'header_icons'         => array(
-        array(
-            'label'    => 'TEST',
-            'icon'     => 'fas_check',
-            'onclick'  => 'alert(\'OK !!\')',
-            'disabled' => 1,
-            'popover'  => 'Hello !!'
-        )
-    ),
-    'footer_extra_content' => 'TEST'
-));
+//require_once DOL_DOCUMENT_ROOT . '/bimpcore/components/BCV2_Lib.php';
+//echo BC_V2\BC_Form::render(array(
+//    'title'                => 'HOLA',
+//    'icon'                 => 'fas_check',
+//    'header_icons'         => array(
+//        array(
+//            'label'    => 'TEST',
+//            'icon'     => 'fas_check',
+//            'onclick'  => 'alert(\'OK !!\')',
+//            'disabled' => 1,
+//            'popover'  => 'Hello !!'
+//        )
+//    ),
+//    'footer_extra_content' => 'TEST'
+//));
+
+$url = 'https://erp.bimp.fr/actimac/bimpwebservice/request.php';
+$ch = curl_init($url);
+$response = curl_exec($ch);
+
+echo 'RESp<pre>';
+print_r($response);
+exit;
+
 
 echo '<br/>FIN';
 echo '</body></html>';

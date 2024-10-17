@@ -43,9 +43,9 @@ if (!$user->admin) {
 //    'footer_extra_content' => 'TEST'
 //));
 
-$url = 'https://erpi.bimp.fr/actimac/bimpwebservice/request.php';
-$ch = curl_init($url);
-$response = curl_exec($ch);
+//$url = 'https://erpi.bimp.fr/actimac/bimpwebservice/request.php';
+//$ch = curl_init($url);
+//$response = curl_exec($ch);
 
 
 echo '<br/>FIN';

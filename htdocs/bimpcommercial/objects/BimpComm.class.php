@@ -3809,7 +3809,7 @@ class BimpComm extends BimpDolObject
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                 $discount = new DiscountAbsolute($this->db->db);
                 $discount->description = "Acompte";
-                $discount->fk_soc = $factureA->socid;
+                $discount->socid = $factureA->socid;
                 $discount->fk_facture_source = $factureA->id;
                 $discount->amount_ht = $ht;
                 $discount->amount_ttc = $amount;

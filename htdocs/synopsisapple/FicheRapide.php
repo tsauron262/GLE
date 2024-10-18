@@ -217,7 +217,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
                             $discount = new DiscountAbsolute($db);
                             $discount->description = "Acompte";
-                            $discount->fk_soc = $factureA->socid;
+                            $discount->socid = $factureA->socid;
                             $discount->fk_facture_source = $factureA->id;
                             $discount->amount_ht = $acompte / 1.2;
                             $discount->amount_ttc = $acompte;

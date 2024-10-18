@@ -3442,7 +3442,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                     $discount = new DiscountAbsolute($this->db->db);
                     $discount->description = "Acompte";
-                    $discount->fk_soc = $factureA->socid;
+                    $discount->socid = $factureA->socid;
                     $discount->fk_facture_source = $factureA->id;
                     $discount->amount_ht = $acompte / 1.2;
                     $discount->amount_ttc = $acompte;

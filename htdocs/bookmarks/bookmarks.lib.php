@@ -146,7 +146,7 @@ function printDropdownBookmarksList()
 			}
 			$i = 0;
 			while ((!getDolGlobalString('BOOKMARKS_SHOW_IN_MENU') || $i < getDolGlobalInt('BOOKMARKS_SHOW_IN_MENU')) && $obj = $db->fetch_object($resql)) {
-				$searchForm .= '<option name="bookmark'.$obj->rowid.'" value="'.$obj->rowid.'" '.($obj->target == 1 ? ' target="_blank" rel="noopener noreferrer"' : '').' rel="'.dol_escape_htmltag($obj->url).'" >';
+				$searchForm .= '<option name="bookmark'.$obj->rowid.'" value="'.$obj->rowid.'" '.($obj->target == 1 ? ' target="_blank" relINUT="noopener noreferrer"' : '').' rel="'.dol_escape_htmltag($obj->url).'" >';
 				$searchForm .= dol_escape_htmltag($obj->title);
 				$searchForm .= '</option>';
 				$i++;

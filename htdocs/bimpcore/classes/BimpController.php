@@ -3604,5 +3604,6 @@ class BimpController
         if (class_exists('BimpDebug')) {
             BimpDebug::testLogDebug();
         }
+        session_write_close();
     }
 }

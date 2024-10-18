@@ -30,7 +30,6 @@ abstract class BimpAPI
     public $last_request_errors = array();
     public $debug_content = '';
     public $is_default_user = false;
-    
     public static $asUser = true;
 
     // Gestion instance:
@@ -43,7 +42,7 @@ abstract class BimpAPI
         $this->apiObject = BimpCache::findBimpObjectInstance('bimpapi', 'API_Api', array(
                     'name'    => static::$name,
                     'api_idx' => $api_idx,
-                    'entity'  => $conf->entity/*todo devrait être géré dans findbimpobjectinstance*/
+                    'entity'  => $conf->entity/* todo devrait être géré dans findbimpobjectinstance */
                         ), false);
 
         if ($this->isApiOk($this->errors)) {
@@ -70,9 +69,9 @@ abstract class BimpAPI
 
     public function isUserAccountOk(&$errors = array())
     {
-        if(!static::$asUser)
+        if (!static::$asUser)
             return true;
-        
+
         if (!BimpObject::objectLoaded($this->userAccount)) {
             $errors[] = 'Compte utilisateur absent';
             return 0;
@@ -257,7 +256,7 @@ abstract class BimpAPI
 
     public function isLogged()
     {
-        if(!static::$asUser)
+        if (!static::$asUser)
             return true;
         if ($this->isUserAccountOk()) {
             return $this->userAccount->isLogged();
@@ -367,8 +366,10 @@ abstract class BimpAPI
 
     public function execCurl($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1)
     {
-        if(BimpCore::getConf('desactive_api'))
+        if (BimpCore::getConf('desactive_api')) {
             die('desactivé');
+        }
+        
         $return = '';
 
         $request_label = BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/label', $request_name);
@@ -467,17 +468,17 @@ abstract class BimpAPI
                     $curl_options_str = array();
                     $curl_options[CURLOPT_RETURNTRANSFER] = true;
                     $curl_options_str['CURLOPT_RETURNTRANSFER'] = true;
-                    
+
                     $curl_options[CURLOPT_CONNECTTIMEOUT] = $this->options['connect_timeout'];
                     $curl_options_str['CURLOPT_CONNECTTIMEOUT'] = $this->options['connect_timeout'];
-                    
+
                     $curl_options[CURLOPT_TIMEOUT] = $this->options['timeout'];
                     $curl_options_str['CURLOPT_TIMEOUT'] = $this->options['timeout'];
 
                     if ($params['header_out']) {
                         $curl_options[CURLINFO_HEADER_OUT] = true;
                         $curl_options_str['CURLINFO_HEADER_OUT'] = true;
-                        
+
                         $curl_options[CURLOPT_HEADER] = true;
                         $curl_options_str['CURLOPT_HEADER'] = true;
                     }
@@ -524,7 +525,7 @@ abstract class BimpAPI
                         case 'PUT':
                             $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
                             $curl_options_str['CURLOPT_CUSTOMREQUEST'] = 'PUT';
-                            
+
                             $curl_options[CURLOPT_HTTPHEADER][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
                             $curl_options_str['CURLOPT_HTTPHEADER'][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
                             break;

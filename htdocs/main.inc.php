@@ -436,7 +436,7 @@ if (!defined('NOSESSION')) {
 		session_set_cookie_params($sessioncookieparams);
 	}
 	session_name($sessionname);
-	dol_session_start();	// This call the open and read of session handler
+//	dol_session_start();	// This call the open and read of session handler
 	//exit;	// this exist generates a call to write and close
 }
 
@@ -663,7 +663,7 @@ if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt(
 
 	// Check a token is provided for all cases that need a mandatory token
 	// (all POST actions + all sensitive GET actions + all mass actions + all login/actions/logout on pages with CSRFCHECK_WITH_TOKEN set)
-	if (
+	/*if (
 		(!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST') ||
 		$sensitiveget ||
 		GETPOSTISSET('massaction') ||
@@ -694,7 +694,7 @@ if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt(
 			}
 			die;
 		}
-	}
+	}*/
 
 	$sessiontokenforthisurl = (empty($_SESSION['token']) ? '' : $_SESSION['token']);
 	// TODO Get the sessiontokenforthisurl into an array of session token (one array per base URL so we can use the CSRF per page and we keep ability for several tabs per url in a browser)

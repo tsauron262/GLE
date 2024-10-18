@@ -1585,8 +1585,8 @@ class BimpCore
             $html .= '</div>';
 
             if (!BimpCore::isModeDev() && $is_user_dev) {
-                $html .= '<a class="btn btn-light-default" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_all.php?go=1&branche=master" target="_blank">';
-                $html .= BimpRender::renderIcon('fas_arrow-down', 'iconLeft') . 'GIT PULL ALL MASTER';
+                $html .= '<a class="btn btn-light-default" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_all.php?go=1" target="_blank">';
+                $html .= BimpRender::renderIcon('fas_arrow-down', 'iconLeft') . 'GIT PULL ALL';
                 $html .= '</a>';
             }
         }

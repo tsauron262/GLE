@@ -4801,7 +4801,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $smsfile = new CSMSFile($to, $fromsms, $sms);
                     if (!$smsfile->sendfile()) {
                         $errors[] = 'Echec de l\'envoi du sms';
-                    }else {
+                    } else {
                         $success .= ($success ? '<br/>' : 'Envoi SMS au n° ' . $to . ' OK');
                     }
                 }
@@ -5591,6 +5591,17 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $errors;
     }
 
+    public function addMailMsg($dst, $src, $subj, $txt)
+    {
+        $idGroup = $this->getIdUserGroup();
+        $errors = $this->addNote('Message de : ' . $src . '<br/>' . 'Sujet : ' . $subj . '<br/>' . $txt, 20, 0, 1, $src, 2, 4, $idGroup, 0, 0, $this->getData('id_client'));
+        if (count($errors))
+            BimpCore::addlog('Erreur création mailMsg sav', 1, 'sav', $this, $errors);
+        else
+            return 1;
+        return 0;
+    }
+
     // Actions:
 
     public function actionWaitClient($data, &$success)
@@ -5937,7 +5948,7 @@ ORDER BY a.val_max DESC");
         if (!isset($data['msg_type']) || !$data['msg_type']) {
             $errors[] = 'Aucun type de notification sélectionné';
         } else {
-            $errors = $this->sendMsg($data['msg_type'], false, BimpTools::getArrayValueFromPath($data, 'id_contact', null));
+            $errors = $this->sendMsg($data['msg_type'], false, BimpTools::getArrayValueFromPath($data, 'id_contact', null), $success);
         }
 
         return array('errors' => $errors, 'warnings' => array());
@@ -7332,17 +7343,6 @@ ORDER BY a.val_max DESC");
             'warnings'         => array(),
             'success_callback' => $success_callback
         );
-    }
-
-    public function addMailMsg($dst, $src, $subj, $txt)
-    {
-        $idGroup = $this->getIdUserGroup();
-        $errors = $this->addNote('Message de : ' . $src . '<br/>' . 'Sujet : ' . $subj . '<br/>' . $txt, 20, 0, 1, $src, 2, 4, $idGroup, 0, 0, $this->getData('id_client'));
-        if (count($errors))
-            BimpCore::addlog('Erreur création mailMsg sav', 1, 'sav', $this, $errors);
-        else
-            return 1;
-        return 0;
     }
 
     public function actionAddAcompte($data, &$success)

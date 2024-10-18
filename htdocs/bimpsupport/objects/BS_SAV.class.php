@@ -4695,11 +4695,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             return $errors;
         }
 
-        global $user;
-        if ($user->login == 'f.martinez') {
-            $sms_only = 1;
-        }
-
         if (!$sms_only) {
             if ($mail_msg) {
                 $toMail = '';
@@ -4743,6 +4738,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $toMail = BimpTools::cleanEmailsStr($toMail);
 
                 if (BimpValidate::isEmail($toMail)) {
+
                     $bimpMail = new BimpMail($this, $subject, $toMail, $fromMail, $mail_msg);
                     $bimpMail->addFiles($files);
                     $bimpMail->setFromType('ldlc');
@@ -4752,7 +4748,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if (count($mail_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail');
                     } else {
-                        $success .= ($success ? '<br/>' : 'Envoi e-mail à ' . $toMail . ' OK');
+                        $success .= ($success ? '<br/>' : '') . 'Envoi e-mail à ' . $toMail . ' OK';
+                        die($success);
                     }
                 } else {
                     $errors[] = "Adresse e-mail invalide : " . $toMail;
@@ -4761,7 +4758,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $errors[] = 'pas de message';
             }
         }
-
 
         if ($contact_pref === 3 && $sms) {
             if (!empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
@@ -4802,7 +4798,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if (!$smsfile->sendfile()) {
                         $errors[] = 'Echec de l\'envoi du sms';
                     } else {
-                        $success .= ($success ? '<br/>' : 'Envoi SMS au n° ' . $to . ' OK');
+                        $success .= ($success ? '<br/>' : '') . 'Envoi SMS au n° ' . $to . ' OK';
                     }
                 }
             }
@@ -5645,7 +5641,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $this->updateField('id_user_tech', (int) $user->id, null, true);
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debDiago', false, BimpTools::getArrayValueFromPath($data, 'id_contact', null)));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debDiago', false, BimpTools::getArrayValueFromPath($data, 'id_contact', null), $success));
                 }
             }
         }
@@ -5804,7 +5800,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if ((int) $id_contact != (int) $id_contact_notif) {
                         $sms_only = false;
                     }
-                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis', $sms_only, $id_contact_notif));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis', $sms_only, $id_contact_notif, $success));
                     if (!$sms_only)
                         $this->addNote('Devis envoyé via e-mail le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                 } else {
@@ -5866,7 +5862,7 @@ ORDER BY a.val_max DESC");
 
     public function actionPropalRefused($data, &$success)
     {
-        $success = 'Statut du SAV Mis à jour avec succès';
+        $success = 'Refus du devis enregistré avec succès';
         $warnings = array();
 
         $errors = $this->setNewStatus(self::BS_SAV_DEVIS_REFUSE);
@@ -5880,7 +5876,7 @@ ORDER BY a.val_max DESC");
             $this->removeReservations();
 
             if ((int) BimpTools::getValue('send_msg', 0, 'int')) {
-                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
+                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'), false, null, $success);
             }
 
             if ((int) $propal->getData('id_signature')) {
@@ -6098,7 +6094,7 @@ ORDER BY a.val_max DESC");
 
             if (!count($errors)) {
                 if ($msg_type && isset($data['send_msg']) && $data['send_msg']) {
-                    $warnings = $this->sendMsg($msg_type, false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null));
+                    $warnings = $this->sendMsg($msg_type, false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null, $success));
                 }
             }
             if (!count($errors))
@@ -6709,7 +6705,7 @@ ORDER BY a.val_max DESC");
                                                         }
 
                                                         if (isset($data['send_msg']) && $data['send_msg']) {
-                                                            $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Facture', false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null)));
+                                                            $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Facture', false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null), $success));
                                                         }
                                                     }
                                                 }

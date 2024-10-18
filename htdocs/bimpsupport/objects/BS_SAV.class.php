@@ -2281,7 +2281,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $signature_propal = $propal->getChildObject('signature');
 
             if (BimpObject::objectLoaded($signature_propal)) {
-                $alertes = $signature_propal->renderSignatureAlertes(true, true, true, '<b>(Et donc devis non envoyé par e-mail)</b>');
+                $alertes = $signature_propal->renderSignatureAlertes(true, true, true, '(Et donc devis non envoyé par e-mail)');
                 if ($alertes) {
                     $html .= '<div style="margin-top: 10px">';
                     $html .= $alertes;

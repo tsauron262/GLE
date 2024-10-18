@@ -5949,6 +5949,10 @@ ORDER BY a.val_max DESC");
             $errors[] = 'Aucun type de notification sélectionné';
         } else {
             $errors = $this->sendMsg($data['msg_type'], false, BimpTools::getArrayValueFromPath($data, 'id_contact', null), $success);
+            
+            if (!count($errors)) {
+                $errors[] = 'OK';
+            }
         }
 
         return array('errors' => $errors, 'warnings' => array());

@@ -203,11 +203,11 @@ $arrayresult = dol_sort_array($arrayresult, 'position' );
 
 
 /*moddrsi pour le trie (20.2) */
-if ($user->login == 'f.martinez') {
-    echo '<pre>';
-    print_r($arrayresult);
-    echo '</pre>';
-}
+//if ($user->login == 'f.martinez') {
+//    echo '<pre>';
+//    print_r($arrayresult);
+//    echo '</pre>';
+//}
 
 if(strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16 && stripos($search_boxvalue, " ") === false && isset($arrayresult["searchintosn"]))
 	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);

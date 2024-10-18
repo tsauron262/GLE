@@ -682,7 +682,7 @@ class BimpSignature extends BimpObject
                         ucfirst($nom_piece),
                         $ref_piece,
                         $lien_espace_client,
-                                ''
+                        ''
                             ), $email_body);
 
                     $font_size = BimpTools::getArrayValueFromPath($signature_params, 'fs', 'Size9');
@@ -1142,7 +1142,7 @@ class BimpSignature extends BimpObject
         return '';
     }
 
-    public function displayNoPublicAccessWarnings()
+    public function displayNoPublicAccessWarnings($no_puplic_access_extra_msg)
     {
         $html = '';
 
@@ -1167,7 +1167,7 @@ class BimpSignature extends BimpObject
         }
 
         if (count($missings)) {
-            $msg .= '<b>Attention : aucune demande de signature à distance effectuée ';
+            $msg .= '<b>Attention : aucune demande de signature à distance effectuée ' . ($no_puplic_access_extra_msg ? $no_puplic_access_extra_msg . ' ' : '');
 
             if (count($missings) > 1) {
                 $msg .= 'pour les signataires :';
@@ -1287,7 +1287,7 @@ class BimpSignature extends BimpObject
         return '';
     }
 
-    public function renderSignatureAlertes($include_link = true, $include_actions = true, $sign_dist_warning = true)
+    public function renderSignatureAlertes($include_link = true, $include_actions = true, $sign_dist_warning = true, $no_puplic_access_extra_msg = '')
     {
         $html = '';
 
@@ -1309,7 +1309,7 @@ class BimpSignature extends BimpObject
             }
 
             if ($sign_dist_warning) {
-                $msg .= $this->displayNoPublicAccessWarnings();
+                $msg .= $this->displayNoPublicAccessWarnings($no_puplic_access_extra_msg);
             }
 
             if ($include_actions) {
@@ -1891,7 +1891,7 @@ class BimpSignature extends BimpObject
             $obj->getLabel('the'),
             $obj->getRef(),
             '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>',
-                    ''
+            ''
                 ), $email_content);
     }
 

@@ -212,6 +212,7 @@ fields:
         label: Prix de revient
         type: money
         default_value: 0
+        history: 1
         
     cost_price_percent:
         label: Pourcentage du coût de revient
@@ -221,6 +222,7 @@ fields:
             callback: getCostPricePercentValues
         input:
               help: Si renseigné est prioritaire pour le calcul du prix de revient
+        history: 1
         
     cur_pa_origin: 
         label: Type origine pa

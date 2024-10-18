@@ -84,8 +84,9 @@ class Bimp_Vente extends BimpObject
             $fac = $this->getChildObject('facture');
 
             if (BimpObject::objectLoaded($fac)) {
+                $soc = $fac->getChildObject('client');
                 $params['label_extra'] = 'Ligne n°' . $this->getData('rang');
-                return $fac->getLink($params);
+                return (BimpObject::objectLoaded($soc) ? $soc->getLink().'<br/>' : '' ) .$fac->getLink($params);
             }
 
             $html = 'Ligne de facture #' . $this->id;

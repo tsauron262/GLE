@@ -950,12 +950,40 @@ class Bimp_PropalLine extends ObjectLine
         return $errors;
     }
 
+    public function checkAboQty()
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ($this->isAbonnement()) {
+                $data = $this->getAboFacData($errors);
+
+                if (!count($errors)) {
+                    if ($data['first_period_prorata'] !== 1) {
+                        if (round($data['total_qty'], 5) !== round($this->qty, 5)) {
+                            $propal = $this->getParentInstance();
+                            if (!in_array($propal->id, array(1208752)) && in_array($propal->getData('contrats_status'), array(0, 1))) {
+                                BimpCore::addlog('Abonnement avec prorata : qté totale enregistrée invalide - A vérifier', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $propal, array(
+                                    'Qté théorique'   => $data['total_qty'],
+                                    'Qté enregistrée' => $this->qty
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Overrides : 
 
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
             $this->checkAboData();
+            $this->checkAboQty();
         }
         parent::checkObject($context, $field);
     }
@@ -995,6 +1023,8 @@ class Bimp_PropalLine extends ObjectLine
 
                         if (!count($err)) {
                             $total_qty = $periods_data['total_qty'];
+                        } else {
+                            $errors[] = BimpTools::getMsgFromArray($err, 'Impossible de calculer la quantité totale avec prorata');
                         }
                     }
                 }
@@ -1087,6 +1117,8 @@ class Bimp_PropalLine extends ObjectLine
                     $contrat_line->update($w, true);
                 }
             }
+
+            $this->checkAboQty();
         }
 
         return $errors;

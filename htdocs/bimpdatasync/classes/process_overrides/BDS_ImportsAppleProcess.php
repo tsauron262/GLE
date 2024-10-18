@@ -349,6 +349,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                                     case 'ecotaxe':
                                     case 'cur_pa':
                                     case 'crt':
+                                    case 'weight': 
                                         $value = str_replace(' ', '', $value);
                                         $value = (float) str_replace(',', '.', $value);
                                         break;

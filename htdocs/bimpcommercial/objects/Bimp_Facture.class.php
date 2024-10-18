@@ -4887,7 +4887,7 @@ class Bimp_Facture extends BimpComm
         elseif ($type == Facture::TYPE_STANDARD || $type == Facture::TYPE_REPLACEMENT || $type == Facture::TYPE_SITUATION)
             $discount->description = '(EXCESS RECEIVED)';
 
-        $discount->fk_soc = (int) $this->getData('fk_soc');
+        $discount->socid = (int) $this->getData('fk_soc');
         $discount->fk_facture_source = $this->id;
 
         if ($type == Facture::TYPE_STANDARD || $type == Facture::TYPE_CREDIT_NOTE) {

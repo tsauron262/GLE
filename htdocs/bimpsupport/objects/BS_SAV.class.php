@@ -4727,7 +4727,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 if (!$toMail) {
-                    $toMail = $client->dol_object->email;
+                    $toMail = $client->getData('email');
                 }
 
                 if (!$toMail) {
@@ -4755,7 +4755,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $success .= ($success ? '<br/>' : 'Envoi e-mail à ' . $toMail . ' OK');
                     }
                 } else {
-                    $errors[] = "Pas d'email correct " . $toMail;
+                    $errors[] = "Adresse e-mail invalide : " . $toMail;
                 }
             } elseif (!count($errors)) {
                 $errors[] = 'pas de message';

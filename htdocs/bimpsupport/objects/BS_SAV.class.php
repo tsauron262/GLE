@@ -4749,7 +4749,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail');
                     } else {
                         $success .= ($success ? '<br/>' : '') . 'Envoi e-mail à ' . $toMail . ' OK';
-                        die($success);
                     }
                 } else {
                     $errors[] = "Adresse e-mail invalide : " . $toMail;

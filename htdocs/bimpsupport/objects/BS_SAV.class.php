@@ -4352,7 +4352,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $errors;
     }
 
-    public function sendMsg($msg_type = '', $sms_only = false, $id_contact = null)
+    public function sendMsg($msg_type = '', $sms_only = false, $id_contact = null, &$success = '')
     {
         global $langs;
 
@@ -4751,6 +4751,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                     if (count($mail_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail');
+                    } else {
+                        $success .= ($success ? '<br/>' : 'Envoi e-mail à ' . $toMail . ' OK');
                     }
                 } else {
                     $errors[] = "Pas d'email correct " . $toMail;
@@ -4799,6 +4801,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $smsfile = new CSMSFile($to, $fromsms, $sms);
                     if (!$smsfile->sendfile()) {
                         $errors[] = 'Echec de l\'envoi du sms';
+                    }else {
+                        $success .= ($success ? '<br/>' : 'Envoi SMS au n° ' . $to . ' OK');
                     }
                 }
             }
@@ -6978,7 +6982,6 @@ ORDER BY a.val_max DESC");
                         $propal->dol_object->statut = $prev_propal_status;
                         $propal->dol_object->status = $prev_propal_status;
 //                        $propal->dol_object->brouillon = 0; prop removed
-
                         // Ajout ligne Frais: 
                         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
                         $line->validateArray(array(

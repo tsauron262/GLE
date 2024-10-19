@@ -37,6 +37,8 @@ forms:
             marche: unset
             mode_reglement: unset
             cond_reglement: unset
+            code_fournisseur:
+                value: auto
             
     default: 
         rows: 

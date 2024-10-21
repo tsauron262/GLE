@@ -94,9 +94,9 @@ if (GETPOST('dol_use_jmobile')) {
 
 // Destroy session
 dol_syslog("End of session ".session_id());
-if (session_status() === PHP_SESSION_ACTIVE) {
+//if (session_status() === PHP_SESSION_ACTIVE) {
 	session_destroy();
-}
+//}
 
 
 // Not sure this is required

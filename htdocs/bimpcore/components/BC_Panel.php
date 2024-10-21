@@ -8,13 +8,13 @@ class BC_Panel extends BimpComponent
     protected static $definitions = null;
     public static $component_name = 'BC_Panel';
 
-    public static function setAttributes($params, &$attributes = array())
+    public static function setAttributes(&$params, &$attributes = array())
     {
         parent::setAttributes($params, $attributes);
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml($params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array())
     {
         $html = '';
 
@@ -36,6 +36,8 @@ class BC_Panel extends BimpComponent
         $panel_content .= static::renderAfterPanelContentHtml($params, $errors);
         $panel_content .= '</div>';
 
+//        $panel_content = 'TEST';
+
         $title = self::getParam('title', $params);
         $footer = static::renderPanelHtmlFooter($params, $errors);
 
@@ -54,17 +56,17 @@ class BC_Panel extends BimpComponent
         return parent::renderHtml($params, $html, $errors);
     }
 
-    protected static function renderBeforePanelContentHtml($params, &$errors = array())
+    protected static function renderBeforePanelContentHtml(&$params, &$errors = array())
     {
         return '';
     }
 
-    protected static function renderAfterPanelContentHtml($params, &$errors = array())
+    protected static function renderAfterPanelContentHtml(&$params, &$errors = array())
     {
         return '';
     }
 
-    protected static function renderPanelHtmlFooter($params, &$errors = array())
+    protected static function renderPanelHtmlFooter(&$params, &$errors = array())
     {
         $html = '<div class="panelFooterButtons" style="text-align: right">';
         $html .= self::renderPanelFooterExtraBtn($params, $errors);
@@ -74,7 +76,7 @@ class BC_Panel extends BimpComponent
         return $html;
     }
 
-    protected static function renderPanelFooterExtraBtn($params, &$errors = array())
+    protected static function renderPanelFooterExtraBtn(&$params, &$errors = array())
     {
         $buttons = self::getParam('footer_extra_btn', $params);
         if (!empty($buttons)) {
@@ -99,12 +101,12 @@ class BC_Panel extends BimpComponent
         return '';
     }
 
-    protected static function getPanelHeaderButtons($params, &$errors = array())
+    protected static function getPanelHeaderButtons(&$params, &$errors = array())
     {
         return self::getParam('header_buttons', $params, array());
     }
 
-    protected static function getPanelHeaderIcons($params, &$errors = array())
+    protected static function getPanelHeaderIcons(&$params, &$errors = array())
     {
         return self::getParam('header_icons', $params, array());
     }

@@ -2,12 +2,11 @@
 
 namespace BC_V2;
 
-class BC_Form extends BC_Panel
+class BC_SelectInput extends BC_Input
 {
 
     protected static $definitions = null;
-    public static $component_name = 'BC_Form';
-    public static $subdir = 'forms';
+    public static $component_name = 'BC_SelectInput';
 
     public static function setAttributes(&$params, &$attributes = array())
     {
@@ -17,8 +16,10 @@ class BC_Form extends BC_Panel
 
     protected static function renderHtml(&$params, $content = '', &$errors = array())
     {
-        $html .= self::renderComponent('elements', $params);        
-        
-        return parent::renderHtml($params, $html, $errors);
+        if (!$content) {
+            $content = 'Je suis un ' . self::$component_name;
+        }
+
+        return parent::renderHtml($params, $content, $errors);
     }
 }

@@ -15,10 +15,10 @@ class BC_Definitions
 
             if (\BimpCache::cacheServerExists($key)) {
                 self::$definitions = \BimpCache::getCacheServeur($key);
+            } else {
+                self::$definitions = spyc_load_file(DOL_DOCUMENT_ROOT . '/bimpcore/components/components.yml');
+                \BimpCache::setCacheServeur($key, self::$definitions);
             }
-
-            self::$definitions = spyc_load_file(DOL_DOCUMENT_ROOT . '/bimpcore/components/components.yml');
-            \BimpCache::setCacheServeur($key, self::$definitions);
         }
     }
 
@@ -55,7 +55,7 @@ class BC_Definitions
         if (!empty($override_params)) {
             $defs['params'] = \BimpTools::overrideArray($defs['params'], $override_params, false, true);
         }
-        
+
         if ($params_only) {
             return $defs['params'];
         }

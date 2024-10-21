@@ -1793,7 +1793,7 @@ class Bimp_User extends BimpObject
             case 'filters_configs':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'FiltersConfig'), 'default', 1, null, 'Liste des configuration de filtres de "' . $user_label . '"', 'fas_cog');
                 $list->addIdentifierSuffix('user_' . $this->id);
-                $list->addFieldFilterValue('owner_type', ListTableConfig::OWNER_TYPE_USER);
+                $list->addFieldFilterValue('owner_type', FiltersConfig::OWNER_TYPE_USER);
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
 

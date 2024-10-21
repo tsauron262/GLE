@@ -174,7 +174,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     }
 
                     if (typeof (result.data.alert) === 'string' && result.data.alert) {
-                        alert(result.data.alert)
+                        alert(result.data.alert);
                     }
                 }
             },

@@ -30,9 +30,9 @@ class synopsisHook
         }
 
         if (BimpTools::isSubmit('entity')) {
-            $entity = (int) BimpTools::getValue('entity', 0, 'int');
-            if ($entity)
-                $conf->entity = $entity;
+//            $entity = (int) BimpTools::getValue('entity', 0, 'int');
+//            if ($entity)
+//                $conf->entity = $entity;
         }
 
         BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');

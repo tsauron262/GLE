@@ -1112,6 +1112,14 @@ class BC_Field extends BimpComponent
                     }
                     break;
 
+                case 'int':
+                    $options = array(
+                        'number'             => 'Valeur numérique',
+                        'timer_witouht_days' => 'Durée (Heures / min / sec)',
+                        'timer_with_days'    => 'Durée (Jours / Heures / min / sec)'
+                    );
+                    break;
+
                 case 'money':
                 case 'percent':
                 case 'float':
@@ -1301,6 +1309,16 @@ class BC_Field extends BimpComponent
                                     }
                                 }
                                 break;
+                        }
+                        break;
+
+                    case 'int':
+                        if ($option === 'timer_with_days') {
+                            $value = BimpTools::displayTimefromSeconds($this->value, true);
+                        } elseif ($option === 'timer_witouht_days') {
+                            $value = BimpTools::displayTimefromSeconds($this->value, false);
+                        } else {
+                            $value = $this->value;
                         }
                         break;
 

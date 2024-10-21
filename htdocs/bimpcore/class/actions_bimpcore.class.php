@@ -119,8 +119,8 @@ class ActionsBimpcore
                     $tabObj = array("bimpcommercial", "Bimp_CommandeFourn");
             elseif(stripos($url, '/fourn/facture/') !== false)
                     $tabObj = array("bimpcommercial", "Bimp_FactureFourn", 'facid');
-            elseif(stripos($url, '/fourn/') !== false)
-                    $tabObj = array("bimpcore", "Bimp_Fournisseur");
+//            elseif(stripos($url, '/fourn/') !== false)
+//                    $tabObj = array("bimpcore", "Bimp_Fournisseur");
 
             if(stripos($url, 'product/stock/movement_list.php') !== false)
                     $tabObj = array("bimpcore", "BimpProductMouvement");
@@ -136,7 +136,7 @@ class ActionsBimpcore
             if(stripos($url, '/synopsisdemandeinterv/') !== false || stripos($url, '/synopsisfichinter/') !== false)
                     $tabObj = array("bimptechnique", "BT_ficheInter");
 
-            if(stripos($url, '/user/') !== false && !stripos($url, 'create'))
+            if(stripos($url, '/user/') !== false && !stripos($url, 'create') && !stripos($url, 'logout'))
                     $tabObj = array("bimpcore", "Bimp_User");
             if(stripos($url, '/user/group/') !== false)
                     $tabObj = array("bimpcore", "Bimp_UserGroup");

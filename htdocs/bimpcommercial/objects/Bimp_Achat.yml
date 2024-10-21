@@ -166,6 +166,12 @@ fields:
                 method: getProductsTagsByTypeArray
                 params:
                     - gamme
+    date_my:
+        label: Mois année facturation
+        extra: 1
+        type: text
+        fields: date
+        modificateur: DATE_FORMAT(date, '%Y/%m')
         
 fields_tables: 
     infos: 
@@ -318,6 +324,7 @@ stats_lists:
             - nature
             - famille
             - gamme
+            - date_my
         cols: 
             tot_qty: 
             tot_brouillon:

@@ -1,6 +1,8 @@
 <?php
 
 define('NOLOGIN', 1);
+global $dolibarr_nocsrfcheck;
+$dolibarr_nocsrfcheck = 1;
 require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/BWS_Lib.php';

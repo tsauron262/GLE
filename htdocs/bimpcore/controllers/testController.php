@@ -183,7 +183,7 @@ class testController extends BimpController
             )
         );
 
-        $html = BC_V2\BC_Form::render($params);
+//        $html = BC_V2\BC_Form::render($params);
 
         return $html;
     }

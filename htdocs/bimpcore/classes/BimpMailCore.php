@@ -66,10 +66,6 @@ class BimpMailCore
         $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $msg);
         $msg = BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
 //        $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg); // Ne pas utiliser cette méthode => pose problème si DOL_URL_ROOT == '/bimp' 
-
-        if ($user->login == 'f.martinez') {
-            $to = 'f.martinez@bimp.fr';
-        }
         
         if (BimpTools::cleanEmailsStr($to) == '') {
             BimpCore::addlog('Echec envoi email sans destinatiare ', Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(

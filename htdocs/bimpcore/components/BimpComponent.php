@@ -303,7 +303,13 @@ class BimpComponent
         $errors = array();
         self::compileParams($params);
 
-        return static::renderHtml($params, '', $errors);
+        $mem = memory_get_usage();
+        $html = static::renderHtml($params, '', $errors);
+        
+        $html .= '<div>';
+        $html .= 'RENDER ' . static::$component_name.' (' . round((memory_get_usage() - $mem) / 1000, 3) . ')';
+        $html .= '</div>';
+        return $html;
     }
 
     protected static function renderComponent($param_name, &$params, &$errors = array())

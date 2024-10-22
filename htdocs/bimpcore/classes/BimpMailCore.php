@@ -62,41 +62,13 @@ class BimpMailCore
         $subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $subject);
         $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
 
-        if ($user->login == 'f.martinez') {
-            echo 'dol url root : ' . DOL_URL_ROOT . '<br/><br/>';
-            echo 'main url root : ' . $dolibarr_main_url_root . '<br/><br/>';
-            echo 'MSG Before : ' . $msg . '<br/><br/>';
-        }
-
         $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $msg);
-
+        
         if ($user->login == 'f.martinez') {
-            echo 'MSG after 1 : ' . $msg . '<br/><br/>';
+            BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
+            exit;
         }
-
-        if ($user->login == 'f.martinez') {
-            echo 'MSG after 2 : ' . preg_replace('/^(' . preg_quote(DOL_URL_ROOT) . ')(.*)$/', $dolibarr_main_url_root . '$2', $msg) . '<br/><br/>';
-
-            echo 'Pattern : /^(' . preg_quote(DOL_URL_ROOT, '/') . ')(.*)$/<br/><br/>';
-
-            if (preg_match('/^(' . preg_quote(DOL_URL_ROOT, '/') . ')(.*)$/', $msg, $matches)) {
-                echo 'MATCHES<pre>';
-                print_r($matches);
-                echo '</pre>';
-            } else {
-                echo 'NO MATCHES 1 <br/><br/>';
-                if (preg_match('/^(' . preg_quote(DOL_URL_ROOT, '/') . ')(.*)/', $msg, $matches)) {
-                    echo 'MATCHES<pre>';
-                    print_r($matches);
-                    echo '</pre>';
-                } else {
-                    echo 'NO MATCHES 2<br/><br/>';
-                }
-            }
-
-            die('');
-        }
-
+        
         $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
 
         if (BimpTools::cleanEmailsStr($to) == '') {

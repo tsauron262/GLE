@@ -16,19 +16,16 @@ class BC_FormInput extends BC_FormElement
 
     protected static function renderHtml(&$params, $content = '', &$errors = array())
     {
-        $display_mode = self::getParam('display_mode', $params);
-        $label .= self::getParam('label', $params);
-        $help = self::getParam('help', $params, '');
         $input = self::renderComponent('input', $params);
         $required = (isset($params['input']['required']) ? $params['input']['required'] : 0);
 
         $html = '';
-        switch ($display_mode) {
+        switch ($params['display_mode']) {
             default:
             case 'row':
                 $html .= '<div class="formRow row">';
                 $html .= '<div class="inputLabel col-xs-12 col-sm-3">';
-                $html .= $label;
+                $html .= $params['label'];
                 if ($required) {
                     $html .= '&nbsp;*';
                 }
@@ -37,9 +34,9 @@ class BC_FormInput extends BC_FormElement
                 $html .= '<div class="formRowInput field col-xs-12 col-sm-9">';
                 $html .= $input;
                 
-                if ($help) {
+                if ($params['help']) {
                     $html .= '<div class="inputHelp">';
-                    $html .= $help;
+                    $html .= $params['help'];
                     $html .= '</div>';
                 }
                 $html .= '</div>';

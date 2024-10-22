@@ -7,6 +7,7 @@ class BimpComponent
 
     protected static $definitions = null;
     public static $debug = false;
+    public static $debug_data = array();
     public static $component_name = 'BimpComponent';
     public static $subdir = '';
     public static $is_grid_element = false;
@@ -51,6 +52,7 @@ class BimpComponent
 
         switch ($type) {
             default:
+                $value = null;
                 if (isset($params[$param_name])) {
                     $value = $params[$param_name];
                 } elseif (!is_null($default_value)) {
@@ -78,7 +80,7 @@ class BimpComponent
                             }
                         }
                     }
-
+//
                     if (count($errors)) {
                         \BimpCore::addlog('Paramètre composant : valeur invalide', 3, 'bimpcore', null, array(
                             'Composant' => static::$component_name,
@@ -286,9 +288,16 @@ class BimpComponent
 
     public static function render(&$params)
     {
+        $html = '';
 //        self::$debug = (\BimpCore::isUserDev() && (int) \BimpCore::getConf('components_debug'));
 
+        $mem = memory_get_usage();
         self::initDefinitions();
+        $new_mem = memory_get_usage();
+        $diff = $new_mem - $mem;
+        $html .= '<div>';
+        $html .= 'INIT DEFS ' . static::$component_name . ' - ' . round($new_mem / 1000, 1) . ' (' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1) . ')';
+        $html .= '</div>';
 
         if (isset(static::$definitions['component_name_param']) && static::$definitions['component_name_param']) {
             $component_name = self::getParam(static::$definitions['component_name_param'], $params);
@@ -301,15 +310,23 @@ class BimpComponent
         }
 
         $errors = array();
+        
+        
+        $mem = memory_get_usage();
         self::compileParams($params);
+        $new_mem = memory_get_usage();
+        $diff = $new_mem - $mem;
+        $html .= '<div>';
+        $html .= 'COMPILE PARAMS ' . static::$component_name . ' - ' . round($new_mem / 1000, 1) . ' (' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1) . ')';
+        $html .= '</div>';
 
         $mem = memory_get_usage();
-        $html = static::renderHtml($params, '', $errors);
+        $html .= static::renderHtml($params, '', $errors);
 
         $new_mem = memory_get_usage();
         $diff = $new_mem - $mem;
         $html .= '<div>';
-        $html .= 'RENDER ' . static::$component_name . ' - ' . round($new_mem / 1000, 1). ' (' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1) . ')';
+        $html .= 'RENDER ' . static::$component_name . ' - ' . round($new_mem / 1000, 1) . ' (' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1) . ')';
         $html .= '</div>';
         return $html;
     }

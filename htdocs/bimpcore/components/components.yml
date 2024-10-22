@@ -34,7 +34,7 @@ BimpComponent:
             data_type: array
         extra_styles: 
             label: Styles CSS supplémentaires
-            data_type: array''
+            data_type: array
      
 ObjectData: 
     labels: 

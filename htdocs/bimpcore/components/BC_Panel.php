@@ -21,10 +21,8 @@ class BC_Panel extends BimpComponent
         $panel_content = '';
         $panel_content .= '<div class="container-fluid">';
 
-        $msgs = self::getParam('msgs', $params);
-
-        if (!empty($msgs)) {
-            foreach ($msgs as $msg) {
+        if (!empty($params['msgs'])) {
+            foreach ($params['msgs'] as $msg) {
                 if ($msg['content']) {
                     $panel_content .= \BimpRender::renderAlerts($msg['content'], $msg['type']);
                 }
@@ -36,21 +34,18 @@ class BC_Panel extends BimpComponent
         $panel_content .= static::renderAfterPanelContentHtml($params, $errors);
         $panel_content .= '</div>';
 
-//        $panel_content = 'TEST';
-
-        $title = self::getParam('title', $params);
         $footer = static::renderPanelHtmlFooter($params, $errors);
 
-        $html .= \BimpRender::renderPanel($title, $panel_content, $footer, array(
+        $html .= \BimpRender::renderPanel($params['title'], $panel_content, $footer, array(
                     'type'           => 'secondary',
                     'foldable'       => true,
-                    'icon'           => self::getParam('icon', $params),
+                    'icon'           => $params['icon'],
                     'header_buttons' => static::getPanelHeaderButtons($params, $errors),
                     'header_icons'   => static::getPanelHeaderIcons($params, $errors),
-                    'no_header'      => (int) !self::getParam('panel_header', $params),
-                    'no_footer'      => (int) !self::getParam('panel_footer', $params),
-                    'no_borders'     => (int) self::getParam('no_borders', $params),
-                    'open'           => (int) self::getParam('open', $params)
+                    'no_header'      => !$params['panel_header'],
+                    'no_footer'      => !$params['panel_footer'],
+                    'no_borders'     => $params['no_borders'],
+                    'open'           => $params['open']
         ));
 
         return parent::renderHtml($params, $html, $errors);
@@ -70,7 +65,9 @@ class BC_Panel extends BimpComponent
     {
         $html = '<div class="panelFooterButtons" style="text-align: right">';
         $html .= self::renderPanelFooterExtraBtn($params, $errors);
-        $html .= self::getParam('footer_extra_content', $params, '');
+        if ($params['footer_extra_content']) {
+            $html .= $params['footer_extra_content'];
+        }
         $html .= '</div>';
 
         return $html;
@@ -78,11 +75,10 @@ class BC_Panel extends BimpComponent
 
     protected static function renderPanelFooterExtraBtn(&$params, &$errors = array())
     {
-        $buttons = self::getParam('footer_extra_btn', $params);
-        if (!empty($buttons)) {
+        if (!empty($params['footer_extra_btn'])) {
             $items = array();
 
-            foreach ($buttons as $btn_params) {
+            foreach ($params['footer_extra_btn'] as $btn_params) {
                 $btn_params['type'] = 'light-default';
                 $items[] = \BimpRender::renderButton($btn_params, 'button');
             }
@@ -103,11 +99,11 @@ class BC_Panel extends BimpComponent
 
     protected static function getPanelHeaderButtons(&$params, &$errors = array())
     {
-        return self::getParam('header_buttons', $params, array());
+        return $params['header_buttons'];
     }
 
     protected static function getPanelHeaderIcons(&$params, &$errors = array())
     {
-        return self::getParam('header_icons', $params, array());
+        return $params['header_icons'];
     }
 }

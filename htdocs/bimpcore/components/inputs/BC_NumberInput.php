@@ -16,10 +16,20 @@ class BC_NumberInput extends BC_TextInput
 
     protected static function renderHtml(&$params, $content = '', &$errors = array())
     {
-        if (!$content) {
-            $content = 'Je suis un ' . self::$component_name;
+        $html = '';
+
+        if ($params['min_label'] && $params['min'] !== 'none') {
+            $html .= '<div style="display: inline-block">';
+            $html .= '&nbsp;&nbsp;<span class="small min_label">Min: ' . $params['min'] . '</span>';
+            $html .= '</div>';
         }
 
-        return parent::renderHtml($params, $content, $errors);
+        if ($params['max_label'] && $params['max'] !== 'none') {
+            $html .= '<div style="display: inline-block">';
+            $html .= '&nbsp;&nbsp;<span class="small max_label">Max :' . $params['max'] . '</span>';
+            $html .= '</div>';
+        }
+
+        return parent::renderHtml($params, $html, $errors);
     }
 }

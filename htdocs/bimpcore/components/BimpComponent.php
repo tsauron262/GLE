@@ -87,8 +87,9 @@ class BimpComponent
                             'valeur'    => $value
                         ));
                     }
+                } elseif ($defs['data_type'] === 'array') {
+                    $value = array();
                 }
-
 
                 return $value;
 
@@ -123,17 +124,18 @@ class BimpComponent
         }
     }
 
-    protected static function getGridColsValues(&$params)
+    protected static function compileParams(&$params)
     {
-        if (static::$is_grid_element) {
-            return array(
-                'col_sm' => self::getParam('col_sm', $params),
-                'col_md' => self::getParam('col_md', $params),
-                'col_lg' => self::getParam('col_lg', $params)
-            );
-        }
+        self::initDefinitions();
 
-        return array();
+        if (isset(static::$definitions['params'])) {
+            foreach (static::$definitions['params'] as $param_name => $param_defs) {
+                if (isset($param_defs['type']) && $param_defs['type'] === 'component') {
+                    continue;
+                }
+                $params[$param_name] = self::getParam($param_name, $params, null, $param_defs);
+            }
+        }
     }
 
     // Gestion Attributs HTML : 
@@ -146,15 +148,10 @@ class BimpComponent
 
         self::addClass($attributes, self::$component_name);
 
-        $cols = self::getGridColsValues($params);
-        if (!empty($cols)) {
-            self::addClass($attributes, 'col-sm-' . $cols['col_sm']);
-            self::addClass($attributes, 'col-md-' . $cols['col_md']);
-            self::addClass($attributes, 'col-lg-' . $cols['col_lg']);
-        }
-
-        if ((int) self::getParam('no_reload', $params)) {
-            self::addClass($attributes, 'no_reload');
+        if (static::$is_grid_element) {
+            self::addClass($attributes, 'col-sm-' . $params['col_sm']);
+            self::addClass($attributes, 'col-md-' . $params['col_md']);
+            self::addClass($attributes, 'col-lg-' . $params['col_lg']);
         }
 
         $extra_classes = self::getParam('extra_classes', $params);
@@ -168,38 +165,22 @@ class BimpComponent
         if (isset(static::$definitions['params'])) {
             foreach (static::$definitions['params'] as $param_name => $param_defs) {
                 if (isset($param_defs['in_data']) && (int) $param_defs['in_data']) {
-                    $val = self::getParam($param_name, $params);
-                    if (!is_null($val) && $val !== '') {
-                        self::addData($attributes, $param_name, $val);
+                    if (!is_null($params[$param_name]) && $params[$param_name] !== '' && (!is_array($params[$param_name]) || count($params[$param_name]))) {
+                        self::addData($attributes, $param_name, $params[$param_name]);
                     }
                 }
             }
         }
 
-        $on_loaded = self::getParam('on_loaded', $params);
-        if ($on_loaded) {
-            self::addData($attributes, 'on_loaded', $on_loaded, true);
-        }
-
-        $objects_change_reload = self::getParam('objects_change_reload', $params, array());
-        if (!empty($objects_change_reload)) {
-            if (is_array($objects_change_reload)) {
-                $objects_change_reload = implode(',', $objects_change_reload);
-            }
-            self::addData($attributes, 'objects_change_reload', $objects_change_reload, true, ',');
-        }
-
-        $extra_data = self::getParam('extra_data', $params);
-        if (!empty($extra_data)) {
-            foreach ($extra_data as $data_name => $value) {
+        if (!empty($params['extra_data'])) {
+            foreach ($params['extra_data'] as $data_name => $value) {
                 self::addData($attributes, $data_name, $value, false);
             }
         }
 
         // Styles: 
-        $extra_styles = self::getParam('extra_styles', $params);
-        if (!empty($extra_styles)) {
-            foreach ($extra_styles as $style_name => $value) {
+        if (!empty($params['extra_styles'])) {
+            foreach ($params['extra_styles'] as $style_name => $value) {
                 self::addStyle($attributes, $style_name, $value);
             }
         }
@@ -261,15 +242,11 @@ class BimpComponent
     {
         $html = '';
 
-        $show = self::getParam('show', $params);
-
-        if (!self::$debug && !$show) {
+        if (!self::$debug && !$params['show']) {
             return '';
         }
 
-        $content_only = self::getParam('content_only', $params);
-
-        if (!$content_only) {
+        if (!$params['content_only']) {
             $attributes = array();
             static::setAttributes($params, $attributes);
             $html .= '<div' . \BimpRender::renderTagAttrs($attributes) . '>';
@@ -279,22 +256,28 @@ class BimpComponent
             $html .= \BimpRender::renderFoldableContainer('Définitions', '<pre>' . print_r(static::$definitions, 1) . '</pre>', array('open' => false));
             $html .= \BimpRender::renderFoldableContainer('Paramètres', '<pre>' . print_r($params, 1) . '</pre>', array('open' => false));
 
-            if (!$show) {
+            if (!$params['show']) {
                 $html .= '<span class="danger">Non affiché</span>';
             }
         }
 
-        if ($show) {
+        if ($params['show']) {
             if (count($errors)) {
                 $html .= \BimpRender::renderAlerts($errors);
             }
 
-            $html .= self::getParam('before_content', $params);
+            if ($params['before_content']) {
+                $html .= $params['before_content'];
+            }
+
             $html .= $content;
-            $html .= self::getParam('after_content', $params);
+
+            if ($params['after_content']) {
+                $html .= $params['after_content'];
+            }
         }
 
-        if (!$content_only) {
+        if (!$params['content_only']) {
             $html .= '</div>';
         }
 
@@ -318,6 +301,8 @@ class BimpComponent
         }
 
         $errors = array();
+        self::compileParams($params);
+
         return static::renderHtml($params, '', $errors);
     }
 
@@ -360,6 +345,11 @@ class BimpComponent
     }
 
     // Divers : 
+
+    public static function is_a($class_name)
+    {
+        return is_a('BC_V2\\' . static::$component_name, 'BC_V2\\' . $class_name, true);
+    }
 
     public static function getLabel($type = '', $ucfirst = false)
     {

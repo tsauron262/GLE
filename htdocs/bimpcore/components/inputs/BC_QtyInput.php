@@ -14,10 +14,10 @@ class BC_QtyInput extends BC_NumberInput
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
-    {
-        $html = 'Je suis un ' . self::$component_name;
-        
-        return parent::renderHtml($params, $html, $errors);
-    }
+//    protected static function renderHtml(&$params, $content = '', &$errors = array())
+//    {
+//        $html = 'Je suis un ' . self::$component_name;
+//        
+//        return parent::renderHtml($params, $html, $errors);
+//    }
 }

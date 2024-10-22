@@ -2,17 +2,6 @@ BimpComponent:
     labels: 
         name: composant
     params: 
-        module: 
-            label: Module
-            in_data: 1
-        object_name: 
-            label: Objet
-            in_data: 1
-        id_object: 
-            label: ID Objet
-            data_type: int
-            default: 0
-            in_data: 1
         show: 
             label: Afficher
             info: Si Non, l'élément ne sera pas inclus dans le contenu HTML
@@ -28,13 +17,15 @@ BimpComponent:
             label: Contenu après
         on_loaded: 
             label: Callback JS après chargement
+            in_data: 1
         no_reload: 
             label: Reload ajax désactivés
             data_type: bool
-            default: 0
+            in_data: 1
         objects_change_reload: 
             label: Liste des objets déclanchant un reload
             data_type: array
+            in_data: 1
         extra_classes: 
             label: Classes HTML supplémentaires
             data_type: array
@@ -45,6 +36,23 @@ BimpComponent:
             label: Styles CSS supplémentaires
             data_type: array''
      
+ObjectData: 
+    labels: 
+        name: données objet
+        name_plur: données objets
+        is_female: 1
+    params: 
+        module: 
+            label: Module
+            in_data: 1
+        object_name: 
+            label: Objet
+            in_data: 1
+        id_object: 
+            label: ID Objet
+            data_type: int
+            in_data: 1
+        
 GridElement: 
     labels: 
         name: élément de grille bootstrap
@@ -103,6 +111,8 @@ Msg:
         
 BC_Panel: 
     extends: BimpComponent
+    includes: 
+        - ObjectData
     labels: 
         name: panel
     params: 
@@ -311,7 +321,7 @@ inputs:
                     custom: BC_CustomInput
                 array_value: 1
                 default: text
-            input_name: 
+            name: 
                 label: Nom input
                 required: 1
             required: 
@@ -324,6 +334,12 @@ inputs:
                 default: 0
             value: 
                 label: Valeur prédéfinie
+            input_classes: 
+                label: Classes de l'input
+                data_type: array
+            input_styles: 
+                label: Styles css de l'input
+                data_type: array
     
     BC_TextInput: 
         extends: inputs/BC_Input
@@ -354,11 +370,20 @@ inputs:
             max_chars: 
                 label: Nombre de caractères max
                 data_type: int
+                in_data: 1
             regex: 
                 label: Expression régulière à vérifier
+                in_data: 1
+            no_autocorrect: 
+                label: Désactiver l'auto-correction
+                data_type: bool
+                default: 0
+            possible_values: 
+                label: valeurs possibles
+                data_type: array
                 
     BC_PasswordInput: 
-        extends: inputs/BC_TextInput
+        extends: inputs/BC_Input
         labels: 
             name: mot de passe
             name_plur: mots de passe
@@ -367,18 +392,22 @@ inputs:
                 label: Longueur min
                 data_type: int
                 default: 12
+                in_data: 1
             special_required: 
                 label: Caractère spécial obligatoire
                 data_type: bool
                 default: 1
+                in_data: 1
             maj_required: 
                 label: Caractère en majuscule obligatoire
                 data_type: bool
                 default: 1
+                in_data: 1
             num_required: 
                 label: Caractère numérique obligatoire
                 data_type: bool
                 default: 1
+                in_data: 1
                 
     BC_NumberInput: 
         extends: inputs/BC_TextInput
@@ -387,18 +416,22 @@ inputs:
         params: 
             min: 
                 label: valeur minimale
-                data_type: float
+                data_type: any
+                in_data: 1
             max: 
                 label: valeur maximale
-                data_type: float
+                data_type: any
+                in_data: 1
             unsigned: 
                 label: Valeurs positives uniquement
                 data_type: bool
                 default: 0
+                in_data: 1
             decimals: 
                 label: Nombre de décimales autorisées
                 data_type: int
                 default: 0
+                in_data: 1
             min_label: 
                 label: Afficher la valeur minimale
                 data_type: bool
@@ -407,9 +440,6 @@ inputs:
                 label: Afficher la valeur maximale
                 data_type: bool
                 default: 0
-            possible_values: 
-                label: valeurs possibles
-                data_type: array
                 
     BC_QtyInput: 
         extends: inputs/BC_NumberInput
@@ -421,6 +451,7 @@ inputs:
                 label: Valeur incrémentale
                 data_type: float
                 default: 1
+                in_data: 1
                 
     BC_TextareaInput: 
         extends: inputs/BC_Input
@@ -450,15 +481,8 @@ inputs:
             name: Editeur HTML
             name_plur: Editeurs HTML
         params: 
-            max_chars: 
-                label: Nombre de caractères max
-                data_type: int
             hashtags: 
                 label: Hashtags activés
-                data_type: bool
-                default: 0
-            scanner: 
-                label: Scanner activé
                 data_type: bool
                 default: 0
             

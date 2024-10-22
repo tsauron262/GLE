@@ -11,6 +11,9 @@ class testController extends BimpController
 
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/components/BCV2_Lib.php';
 
+        global $bimp_logs_locked;
+        $bimp_logs_locked = 1;
+        
         $params = array(
             'title'                => 'Hello',
             'icon'                 => 'fas_check',

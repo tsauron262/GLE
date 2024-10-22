@@ -61,8 +61,23 @@ class BimpMailCore
 
         $subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $subject);
         $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
+        
+        if ($user->login == 'f.martinez') {
+            echo 'MSG Before : ' . $msg . '<br/><br/>';
+        }
+        
         $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $msg);
+        
+        if ($user->login == 'f.martinez') {
+            echo 'MSG after 1 : ' . $msg . '<br/><br/>';
+        }
+        
         $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
+        
+        if ($user->login == 'f.martinez') {
+            echo 'MSG after 2 : ' . $msg . '<br/><br/>';
+            die('');
+        }
 
         if (BimpTools::cleanEmailsStr($to) == '') {
             BimpCore::addlog('Echec envoi email sans destinatiare ', Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(

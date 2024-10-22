@@ -63,7 +63,7 @@ class BimpMailCore
         $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
 
         if ($user->login == 'f.martinez') {
-            echo 'dol url root : ' . $dolibarr_main_url_root . '<br/><br/>';
+            echo 'dol url root : ' . DOL_URL_ROOT . '<br/><br/>';
             echo 'main url root : ' . $dolibarr_main_url_root . '<br/><br/>';
             echo 'MSG Before : ' . $msg . '<br/><br/>';
         }

@@ -77,9 +77,10 @@ class BimpMailCore
         if ($user->login == 'f.martinez') {
             echo 'MSG after 2 : ' . preg_replace('/^(' . preg_quote(DOL_URL_ROOT) . ')(.*)$/', $dolibarr_main_url_root . '$2', $msg) . '<br/><br/>';
             
+            echo 'Pattern : /^(' . preg_quote(DOL_URL_ROOT) . ')(.*)$/<br/><br/>';
+            
             if (preg_match('/^(' . preg_quote(DOL_URL_ROOT) . ')(.*)$/', $msg, $matches)) {
-                echo 'Pattern : /^(' . preg_quote(DOL_URL_ROOT) . ')(.*)$/';
-                echo '<br/><br/>MATCHES<pre>';
+                echo 'MATCHES<pre>';
                 print_r($matches);
                 echo '</pre>';
             } else {

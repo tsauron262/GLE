@@ -111,75 +111,75 @@ class testController extends BimpController
                         'value'   => 1
                     )
                 ),
-                array(
-                    'label' => 'toggle',
-                    'input' => array(
-                        'type'       => 'toggle',
-                        'value'      => 1,
-                        'toggle_off' => 'NO',
-                        'toggle_on'  => 'YES'
-                    )
-                ),
-                array(
-                    'label' => 'check_list',
-                    'input' => array(
-                        'type' => 'check_list'
-                    )
-                ),
-                array(
-                    'label' => 'select_user',
-                    'input' => array(
-                        'type' => 'select_user'
-                    )
-                ),
-                array(
-                    'label' => 'ziptown',
-                    'input' => array(
-                        'type' => 'ziptown'
-                    )
-                ),
-                array(
-                    'label' => 'search_object',
-                    'input' => array(
-                        'type' => 'search_object'
-                    )
-                ),
-                array(
-                    'label' => 'object_filters',
-                    'input' => array(
-                        'type' => 'object_filters'
-                    )
-                ),
-                array(
-                    'label' => 'signature_pad',
-                    'input' => array(
-                        'type' => 'signature_pad'
-                    )
-                ),
-                array(
-                    'label' => 'drop_files',
-                    'input' => array(
-                        'type' => 'drop_files'
-                    )
-                ),
-                array(
-                    'label' => 'file_upload',
-                    'input' => array(
-                        'type' => 'file_upload'
-                    )
-                ),
-                array(
-                    'label' => 'hidden',
-                    'input' => array(
-                        'type' => 'hidden'
-                    )
-                ),
-                array(
-                    'label' => 'custom',
-                    'input' => array(
-                        'type' => 'custom'
-                    )
-                )
+//                array(
+//                    'label' => 'toggle',
+//                    'input' => array(
+//                        'type'       => 'toggle',
+//                        'value'      => 1,
+//                        'toggle_off' => 'NO',
+//                        'toggle_on'  => 'YES'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'check_list',
+//                    'input' => array(
+//                        'type' => 'check_list'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'select_user',
+//                    'input' => array(
+//                        'type' => 'select_user'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'ziptown',
+//                    'input' => array(
+//                        'type' => 'ziptown'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'search_object',
+//                    'input' => array(
+//                        'type' => 'search_object'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'object_filters',
+//                    'input' => array(
+//                        'type' => 'object_filters'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'signature_pad',
+//                    'input' => array(
+//                        'type' => 'signature_pad'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'drop_files',
+//                    'input' => array(
+//                        'type' => 'drop_files'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'file_upload',
+//                    'input' => array(
+//                        'type' => 'file_upload'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'hidden',
+//                    'input' => array(
+//                        'type' => 'hidden'
+//                    )
+//                ),
+//                array(
+//                    'label' => 'custom',
+//                    'input' => array(
+//                        'type' => 'custom'
+//                    )
+//                )
             )
         );
 

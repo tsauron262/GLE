@@ -43,6 +43,16 @@ class BC_PasswordInput extends BC_Input
         }
         $html .= '</p>';
 
+        for ($i = 0; $i < 10000; $i++) {
+            $html .= self::test($params);
+        }
+
         return parent::renderHtml($params, $html, $errors);
+    }
+
+    protected static function test(&$params)
+    {
+        self::initDefinitions();
+        return '';
     }
 }

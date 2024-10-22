@@ -42,6 +42,12 @@ class testController extends BimpController
                     )
                 ),
                 array(
+                    'label' => 'password',
+                    'input' => array(
+                        'type' => 'password',
+                    )
+                ),
+                array(
                     'label' => 'number',
                     'input' => array(
                         'addon_left'  => 'A partir de',

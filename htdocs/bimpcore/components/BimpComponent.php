@@ -305,9 +305,11 @@ class BimpComponent
 
         $mem = memory_get_usage();
         $html = static::renderHtml($params, '', $errors);
-        
+
+        $new_mem = memory_get_usage();
+        $diff = $new_mem - $mem;
         $html .= '<div>';
-        $html .= 'RENDER ' . static::$component_name.' (' . round((memory_get_usage() - $mem) / 1000, 3) . ')';
+        $html .= 'RENDER ' . static::$component_name . ' - ' . $new_mem . ' ('($diff > 0 ? '+' : '') . round($diff / 1000, 3) . ')';
         $html .= '</div>';
         return $html;
     }

@@ -60,17 +60,17 @@ class BimpMailCore
         }
 
         $subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $subject);
-        $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
+        $subject = BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
+//        $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject); // Ne pas utiliser cette méthode => pose problème si DOL_URL_ROOT == '/bimp' 
 
         $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $msg);
-        
+        $msg = BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
+//        $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg); // Ne pas utiliser cette méthode => pose problème si DOL_URL_ROOT == '/bimp' 
+
         if ($user->login == 'f.martinez') {
-            BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
-            exit;
+            $to = 'f.martinez@bimp.fr';
         }
         
-        $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
-
         if (BimpTools::cleanEmailsStr($to) == '') {
             BimpCore::addlog('Echec envoi email sans destinatiare ', Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
                 'Destinataire' => $to,

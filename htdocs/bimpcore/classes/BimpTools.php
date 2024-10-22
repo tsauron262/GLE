@@ -2823,13 +2823,8 @@ class BimpTools
         if (!preg_match('/.+\/$/', $new_root)) {
             $new_root .= '/';
         }
-
-        echo 'OLD ROOT : ' . $old_root .'<br/>';
-        echo 'NEW ROOT : ' . $new_root . '<br/><br/>';
         
-        echo 'BEFORE : ' . $text;
-        echo '<br/><br/>AFTER : ' .str_replace($old_root, $new_root, $text);
-        die('');
+        return str_replace($old_root, $new_root, $text);
     }
 
     // Traitements sur des array: 

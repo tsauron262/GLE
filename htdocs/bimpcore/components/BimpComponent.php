@@ -6,7 +6,8 @@ class BimpComponent
 {
 
     protected static $definitions = null;
-    public static $debug = true;
+    public static $debug = false;
+    public static $debug_data = array();
     public static $component_name = 'BimpComponent';
     public static $subdir = '';
     public static $is_grid_element = false;
@@ -18,30 +19,18 @@ class BimpComponent
         return (!is_null(static::$definitions));
     }
 
-    public static function getDefinitions()
+    public static function initDefinitions()
     {
         if (is_null(static::$definitions)) {
             static::$definitions = BC_Definitions::getComponentDefinitions((static::$subdir ? static::$subdir . '/' : '') . static::$component_name);
         }
-
-        return static::$definitions;
-    }
-
-    public static function getParamsDefinitions()
-    {
-        $defs = self::getDefinitions();
-        if (isset($defs['params'])) {
-            return $defs['params'];
-        }
-
-        return array();
     }
 
     public static function getParamDefinitions($param_name)
     {
-        $defs = self::getDefinitions();
+        self::initDefinitions();
 
-        return (isset($defs['params'][$param_name]) ? $defs['params'][$param_name] : array());
+        return (isset(static::$definitions['params'][$param_name]) ? static::$definitions['params'][$param_name] : array());
     }
 
     public static function printDefinitions()
@@ -53,7 +42,7 @@ class BimpComponent
 
     // Gestion paramètres : 
 
-    protected static function getParam($param_name, $params, $default_value = null, $defs = null)
+    protected static function getParam($param_name, &$params, $default_value = null, $defs = null)
     {
         if (is_null($defs)) {
             $defs = self::getParamDefinitions($param_name);
@@ -63,6 +52,7 @@ class BimpComponent
 
         switch ($type) {
             default:
+                $value = null;
                 if (isset($params[$param_name])) {
                     $value = $params[$param_name];
                 } elseif (!is_null($default_value)) {
@@ -81,21 +71,32 @@ class BimpComponent
 
                 if (!is_null($value)) {
                     $errors = array();
-                    if (!\BimpTools::checkValueByType((isset($defs['data_type']) ? $defs['data_type'] : 'string'), $value, $errors)) {
-                        if (count($errors)) {
-                            \BimpCore::addlog('Paramètre composant : valeur invalide', 3, 'bimpcore', null, array(
-                                'Composant' => static::$component_name,
-                                'Param'     => $param_name,
-                                'valeur'    => $value
-                            ));
+                    if (\BimpTools::checkValueByType((isset($defs['data_type']) ? $defs['data_type'] : 'string'), $value, $errors)) {
+                        if (isset($defs['values'])) {
+                            if (!isset($defs['values'][$value])) {
+                                $errors[] = 'Valeur non autorisée pour ce paramètre';
+                            } elseif (isset($defs['array_value']) && (int) $defs['array_value']) {
+                                $value = $defs['values'][$value];
+                            }
                         }
                     }
+//
+                    if (count($errors)) {
+                        \BimpCore::addlog('Paramètre composant : valeur invalide', 3, 'bimpcore', null, array(
+                            'Composant' => static::$component_name,
+                            'Param'     => $param_name,
+                            'Erreurs'   => $errors,
+                            'valeur'    => $value
+                        ));
+                    }
+                } elseif ($defs['data_type'] === 'array') {
+                    $value = array();
                 }
 
                 return $value;
 
             case 'params':
-                $params_defs = BC_Definitions::getComponentDefinitions($defs['params_name'], array(), true);                
+                $params_defs = BC_Definitions::getComponentDefinitions($defs['params_name'], array(), true);
                 if (isset($defs['multiple']) && (int) $defs['multiple']) {
                     $return = array();
                     if (isset($params[$param_name])) {
@@ -125,36 +126,34 @@ class BimpComponent
         }
     }
 
-    protected static function getGridColsValues($params)
+    protected static function compileParams(&$params)
     {
-        if (static::$is_grid_element) {
-            return array(
-                'col_sm' => self::getParam('col_sm', $params),
-                'col_md' => self::getParam('col_md', $params),
-                'col_lg' => self::getParam('col_lg', $params)
-            );
-        }
+        self::initDefinitions();
 
-        return array();
+        if (isset(static::$definitions['params'])) {
+            foreach (static::$definitions['params'] as $param_name => $param_defs) {
+                if (isset($param_defs['type']) && $param_defs['type'] === 'component') {
+                    continue;
+                }
+                $params[$param_name] = self::getParam($param_name, $params, null, $param_defs);
+            }
+        }
     }
 
     // Gestion Attributs HTML : 
 
-    public static function setAttributes($params, &$attributes = array())
+    public static function setAttributes(&$params, &$attributes = array())
     {
+        self::initDefinitions();
+
         // Classes : 
 
         self::addClass($attributes, self::$component_name);
 
-        $cols = self::getGridColsValues($params);
-        if (!empty($cols)) {
-            self::addClass($attributes, 'col-sm-' . $cols['col_sm']);
-            self::addClass($attributes, 'col-md-' . $cols['col_md']);
-            self::addClass($attributes, 'col-lg-' . $cols['col_lg']);
-        }
-
-        if ((int) self::getParam('no_reload', $params)) {
-            self::addClass($attributes, 'no_reload');
+        if (static::$is_grid_element) {
+            self::addClass($attributes, 'col-sm-' . $params['col_sm']);
+            self::addClass($attributes, 'col-md-' . $params['col_md']);
+            self::addClass($attributes, 'col-lg-' . $params['col_lg']);
         }
 
         $extra_classes = self::getParam('extra_classes', $params);
@@ -165,40 +164,25 @@ class BimpComponent
         }
 
         // Data :
-        $defs = self::getDefinitions();
-        foreach ($defs['params'] as $param_name => $param_defs) {
-            if (isset($param_defs['in_data']) && (int) $param_defs['in_data']) {
-                $val = self::getParam($param_name, $params);
-                if (!is_null($val) && $val !== '') {
-                    self::addData($attributes, $param_name, $val);
+        if (isset(static::$definitions['params'])) {
+            foreach (static::$definitions['params'] as $param_name => $param_defs) {
+                if (isset($param_defs['in_data']) && (int) $param_defs['in_data']) {
+                    if (!is_null($params[$param_name]) && $params[$param_name] !== '' && (!is_array($params[$param_name]) || count($params[$param_name]))) {
+                        self::addData($attributes, $param_name, $params[$param_name]);
+                    }
                 }
             }
         }
 
-        $on_loaded = self::getParam('on_loaded', $params);
-        if ($on_loaded) {
-            self::addData($attributes, 'on_loaded', $on_loaded, true);
-        }
-
-        $objects_change_reload = self::getParam('objects_change_reload', $params, array());
-        if (!empty($objects_change_reload)) {
-            if (is_array($objects_change_reload)) {
-                $objects_change_reload = implode(',', $objects_change_reload);
-            }
-            self::addData($attributes, 'objects_change_reload', $objects_change_reload, true, ',');
-        }
-
-        $extra_data = self::getParam('extra_data', $params);
-        if (!empty($extra_data)) {
-            foreach ($extra_data as $data_name => $value) {
+        if (!empty($params['extra_data'])) {
+            foreach ($params['extra_data'] as $data_name => $value) {
                 self::addData($attributes, $data_name, $value, false);
             }
         }
 
         // Styles: 
-        $extra_styles = self::getParam('extra_styles', $params);
-        if (!empty($extra_styles)) {
-            foreach ($extra_styles as $style_name => $value) {
+        if (!empty($params['extra_styles'])) {
+            foreach ($params['extra_styles'] as $style_name => $value) {
                 self::addStyle($attributes, $style_name, $value);
             }
         }
@@ -256,68 +240,150 @@ class BimpComponent
 
     // Rendu HTML : 
 
-    protected static function renderHtml($params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array())
     {
         $html = '';
 
-        $show = self::getParam('show', $params);
-
-        if (!self::$debug && !$show) {
+        if (!self::$debug && !$params['show']) {
             return '';
         }
 
-        $content_only = self::getParam('content_only', $params);
-
-        if (!$content_only) {
+        if (!$params['content_only']) {
             $attributes = array();
             static::setAttributes($params, $attributes);
             $html .= '<div' . \BimpRender::renderTagAttrs($attributes) . '>';
         }
 
         if (self::$debug) {
-            $html .= \BimpRender::renderFoldableContainer('Définitions', '<pre>' . print_r(self::getDefinitions(), 1) . '</pre>', array('open' => false));
+            $html .= \BimpRender::renderFoldableContainer('Définitions', '<pre>' . print_r(static::$definitions, 1) . '</pre>', array('open' => false));
             $html .= \BimpRender::renderFoldableContainer('Paramètres', '<pre>' . print_r($params, 1) . '</pre>', array('open' => false));
 
-            if (!$show) {
+            if (!$params['show']) {
                 $html .= '<span class="danger">Non affiché</span>';
             }
         }
 
-        if ($show) {
+        if ($params['show']) {
             if (count($errors)) {
                 $html .= \BimpRender::renderAlerts($errors);
             }
 
-            $html .= self::getParam('before_content', $params);
+            if ($params['before_content']) {
+                $html .= $params['before_content'];
+            }
+
             $html .= $content;
-            $html .= self::getParam('after_content', $params);
+
+            if ($params['after_content']) {
+                $html .= $params['after_content'];
+            }
         }
 
-        if (!$content_only) {
+        if (!$params['content_only']) {
             $html .= '</div>';
         }
 
         return $html;
     }
 
-    public static function render($params)
+    public static function render(&$params)
     {
+        $html = '';
 //        self::$debug = (\BimpCore::isUserDev() && (int) \BimpCore::getConf('components_debug'));
 
+        $mem = memory_get_usage();
+        self::initDefinitions();
+        $new_mem = memory_get_usage();
+        $diff = $new_mem - $mem;
+        $html .= '<div>';
+        $html .= 'INIT DEFS ' . static::$component_name . ' - ' . round($new_mem / 1000, 1) . ' (' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1) . ')';
+        $html .= '</div>';
+
+        if (isset(static::$definitions['component_name_param']) && static::$definitions['component_name_param']) {
+            $component_name = self::getParam(static::$definitions['component_name_param'], $params);
+            if ($component_name) {
+                $component_name = 'BC_V2\\' . $component_name;
+                if (class_exists($component_name)) {
+                    return $component_name::render($params);
+                }
+            }
+        }
+
         $errors = array();
-        return static::renderHtml($params, '', $errors);
+        
+        
+        $mem = memory_get_usage();
+        self::compileParams($params);
+        $new_mem = memory_get_usage();
+        $diff = $new_mem - $mem;
+        $html .= '<div>';
+        $html .= 'COMPILE PARAMS ' . static::$component_name . ' - ' . round($new_mem / 1000, 1) . ' (' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1) . ')';
+        $html .= '</div>';
+
+        $mem = memory_get_usage();
+        $html .= static::renderHtml($params, '', $errors);
+
+        $new_mem = memory_get_usage();
+        $diff = $new_mem - $mem;
+        $html .= '<div>';
+        $html .= 'RENDER ' . static::$component_name . ' - ' . round($new_mem / 1000, 1) . ' (' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1) . ')';
+        $html .= '</div>';
+        return $html;
+    }
+
+    protected static function renderComponent($param_name, &$params, &$errors = array())
+    {
+        $html = '';
+
+//        if (isset($params[$param_name])) {
+        $defs = self::getParamDefinitions($param_name);
+
+        if (isset($defs['type']) && $defs['type'] === 'component') {
+            $component_name = (isset($defs['component']) ? $defs['component'] : '');
+            $multiple = (int) (isset($defs['multiple']) ? $defs['multiple'] : '');
+
+            if ($component_name) {
+                $component_name = 'BC_V2\\' . $component_name;
+                if (class_exists($component_name)) {
+                    $elements = array();
+
+                    if ($multiple) {
+                        $elements = (isset($params[$param_name]) ? $params[$param_name] : array());
+                    } else {
+                        if (isset($params[$param_name])) {
+                            $elements = array($params[$param_name]);
+                        } else {
+                            $elements[] = array();
+                        }
+                    }
+
+                    foreach ($elements as $element_key => &$element_params) {
+                        $html .= $component_name::render($element_params);
+                    }
+                }
+            }
+        }
+//        }
+
+
+        return $html;
     }
 
     // Divers : 
+
+    public static function is_a($class_name)
+    {
+        return is_a('BC_V2\\' . static::$component_name, 'BC_V2\\' . $class_name, true);
+    }
 
     public static function getLabel($type = '', $ucfirst = false)
     {
         $label = '';
 
-        $defs = self::getDefinitions();
+        self::initDefinitions();
 
-        if (isset($defs['labels']['name'])) {
-            $labels = $defs['labels'];
+        if (isset(static::$definitions['labels']['name'])) {
+            $labels = static::$definitions['labels'];
 
             $component_name = $labels['name'];
 

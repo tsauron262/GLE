@@ -78,6 +78,8 @@ class BimpCore
             if ($noBootstrap) {
                 self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
             }
+            
+//            $use_css_v2 = (int) self::getConf('use_css_v2');
 
             if (self::isContextPrivate()) {
                 if ($extends_entity) {
@@ -115,7 +117,7 @@ class BimpCore
         }
     }
 
-    // Gestion Layout / js / css: 
+    // Gestion Layout / js / css:
 
     public static function initLayout()
     {

@@ -1,0 +1,13 @@
+@import "variables";
+
+:root {
+    --bimp_primary-color: $primary;
+    --bimp_secondary-color: $secondary;
+    --bimp_success-color: $success;
+    --bimp_info-color: $info;
+    --bimp_warning-color: $warning;
+    --bimp_danger-color: $danger;
+    --bimp_important-color: $important;
+    --bimp_selection-color: $selection;
+    --bimp-debug-color: #BF3427;
+}

@@ -14,7 +14,7 @@ class BC_TextareaInput extends BC_Input
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
         $is_context_private = \BimpCore::isContextPrivate();
 
@@ -67,6 +67,6 @@ class BC_TextareaInput extends BC_Input
                     )
                 )) . '/>' . $params['value'] . '</textarea>';
 
-        return parent::renderHtml($params, $html, $errors);
+        return parent::renderHtml($params, $html, $errors, $debug);
     }
 }

@@ -14,7 +14,7 @@ class BC_SelectInput extends BC_Input
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
         $html = '';
         $value = $params['value'];
@@ -53,7 +53,7 @@ class BC_SelectInput extends BC_Input
             $html .= '<p class="alert alert-warning">Aucune option disponible</p>';
         }
 
-        return parent::renderHtml($params, $html, $errors);
+        return parent::renderHtml($params, $html, $errors, $debug);
     }
 
     protected static function renderSelectOption($option_value, $option, $value)

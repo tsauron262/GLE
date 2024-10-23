@@ -1,0 +1,12 @@
+/* Couleurs principales */
+/* line 3, ../../../scss/entities/default/css_vars.scss */
+:root {
+  --bimp_primary-color: #335899;
+  --bimp_secondary-color: #363D49;
+  --bimp_success-color: #348C41;
+  --bimp_info-color: #3B6EA0;
+  --bimp_warning-color: #E69900;
+  --bimp_danger-color: #A00000;
+  --bimp_important-color: #963E96;
+  --bimp_selection-color: #5897FB;
+  --bimp-debug-color: #BF3427; }

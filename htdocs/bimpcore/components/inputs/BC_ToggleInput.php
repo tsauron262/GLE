@@ -14,7 +14,7 @@ class BC_ToggleInput extends BC_Input
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
         $html = '';
 
@@ -35,6 +35,6 @@ class BC_ToggleInput extends BC_Input
 
         $html .= '</div>';
 
-        return parent::renderHtml($params, $html, $errors);
+        return parent::renderHtml($params, $html, $errors, $debug);
     }
 }

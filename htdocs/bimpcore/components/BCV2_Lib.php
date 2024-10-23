@@ -20,8 +20,6 @@ require_once __DIR__ . '/inputs/BC_QtyInput.php';
 require_once __DIR__ . '/inputs/BC_TextareaInput.php';
 require_once __DIR__ . '/inputs/BC_HtmlInput.php';
 require_once __DIR__ . '/inputs/BC_DatetimeInput.php';
-require_once __DIR__ . '/inputs/BC_DateInput.php';
-require_once __DIR__ . '/inputs/BC_TimeInput.php';
 require_once __DIR__ . '/inputs/BC_TimerInput.php';
 require_once __DIR__ . '/inputs/BC_SelectInput.php';
 require_once __DIR__ . '/inputs/BC_SelectUserInput.php';

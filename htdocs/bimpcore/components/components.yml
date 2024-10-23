@@ -7,25 +7,10 @@ BimpComponent:
             info: Si Non, l'élément ne sera pas inclus dans le contenu HTML
             data_type: bool
             default: 1
-        content_only: 
-            label: Générer seulement le contenu (sans le container)
-            data_type: bool
-            default: 0
         before_content: 
             label: Contenu avant
         after_content: 
             label: Contenu après
-        on_loaded: 
-            label: Callback JS après chargement
-            in_data: 1
-        no_reload: 
-            label: Reload ajax désactivés
-            data_type: bool
-            in_data: 1
-        objects_change_reload: 
-            label: Liste des objets déclanchant un reload
-            data_type: array
-            in_data: 1
         extra_classes: 
             label: Classes HTML supplémentaires
             data_type: array
@@ -35,6 +20,10 @@ BimpComponent:
         extra_styles: 
             label: Styles CSS supplémentaires
             data_type: array
+        inline: 
+            label: Affichage en ligne
+            data_type: bool
+            default: 0
      
 ObjectData: 
     labels: 
@@ -51,6 +40,24 @@ ObjectData:
         id_object: 
             label: ID Objet
             data_type: int
+            in_data: 1
+            
+LoadingData: 
+    labels: 
+        name: données de chargement
+        name_plur: données de chargement
+        is_female: 1
+    params: 
+        on_loaded: 
+            label: Callback JS après chargement
+            in_data: 1
+        no_reload: 
+            label: Reload ajax désactivés
+            data_type: bool
+            in_data: 1
+        objects_change_reload: 
+            label: Liste des objets déclanchant un reload
+            data_type: array
             in_data: 1
         
 GridElement: 
@@ -340,6 +347,8 @@ inputs:
             input_styles: 
                 label: Styles css de l'input
                 data_type: array
+            onchange: 
+                label: Callback JS onchange
     
     BC_TextInput: 
         extends: inputs/BC_Input
@@ -501,27 +510,16 @@ inputs:
                 label: Intervalle
                 data_type: bool
                 default: 0
-            format: 
-                label: Format
-                default: Y-m-d H:i:s
-                
-    BC_DateInput: 
-        extends: inputs/BC_DatetimeInput
-        labels: 
-            name: date
-            is_female: 1
-        params: 
-            format: 
-                default: Y-m-d
-                
-    BC_TimeInput:
-        extends: inputs/BC_DatetimeInput
-        labels: 
-            name: heure
-            is_female: 1
-        params: 
-            format: 
-                default: H:i:s
+            subtype: 
+                label: Sous-Type
+                values: 
+                    datetime: Date et Heure
+                    date: Date seulement
+                    time: Heure seulement
+                default: datetime
+            with_seconds: 
+                label: Inclure les secondes
+                default: 1
                 
     BC_TimerInput: 
         extends: inputs/BC_Input
@@ -530,14 +528,6 @@ inputs:
         params: 
             with_days: 
                 label: Inclure le nombre de jours
-                data_type: bool
-                default: 1
-            with_hours: 
-                label: Inclure le nombre d'heures
-                data_type: bool
-                default: 1
-            with_minutes: 
-                label: Inclure le nombre de minutes
                 data_type: bool
                 default: 1
             with_secondes: 
@@ -627,10 +617,17 @@ inputs:
                 label: Nombre max d'éléments sélectionnables
                 data_type: any
                 default: none
+                in_data: 1
             max_input_name: 
                 label: Nom du champ contenant le nombre max d'éléments sélectionnables
+                in_data: 1
             max_input_abs: 
                 label: Prendre la valeur absolue du champ contenant le nombre max d'éléments sélectionnables
+                in_data: 1
+                data_type: bool
+                default: 0
+            items_inline: 
+                label: Afficher les éléments en ligne
                 data_type: bool
                 default: 0
             

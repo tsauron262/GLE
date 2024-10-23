@@ -14,7 +14,7 @@ class BC_PasswordInput extends BC_Input
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
         $html = '<input ' . \Bimprender::renderTagAttrs(array(
                     'attr'    => array(
@@ -47,7 +47,7 @@ class BC_PasswordInput extends BC_Input
             $html .= self::test($params);
         }
 
-        return parent::renderHtml($params, $html, $errors);
+        return parent::renderHtml($params, $html, $errors, $debug);
     }
 
     protected static function test(&$params)

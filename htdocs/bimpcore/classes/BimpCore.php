@@ -71,25 +71,35 @@ class BimpCore
 
             global $noBootstrap;
 
-            BimpDebug::addDebugTime('Début affichage page');
+            $extends_entity = BimpCore::getExtendsEntity();
 
-            // Commenté car pose problème
-//            if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
-//                self::setContext("private"); // Todo: trouver meilleure solution (Le contexte privé / public doit être indépendant du module) 
-//            }
+            BimpDebug::addDebugTime('Début affichage page');
 
             if ($noBootstrap) {
                 self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
             }
 
             if (self::isContextPrivate()) {
-                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css';
+                if ($extends_entity) {
+//                    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/entities/' . $extends_entity . '/css_vars.css')) {
+//                        self::$files['css']['css_vars'] = '/bimpcore/views/css/entities/' . $extends_entity . '/css_vars.css';
+//                    } else {
+//                        self::$files['css']['css_vars'] = '/bimpcore/views/css/entities/default/css_vars.css';
+//                    }
+                    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css';
+                    }
                 }
                 self::$files['js'][] = '/bimpcore/views/js/notification.js';
             } else {
-                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css';
+//                if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/entities/' . $extends_entity . '/css_vars_public.css')) {
+//                    self::$files['css']['css_vars'] = '/bimpcore/views/css/entities/' . $extends_entity . '/css_vars_public.css';
+//                } else {
+//                    self::$files['css']['css_vars'] = '/bimpcore/views/css/entities/default/css_vars_public.css';
+//                }
+
+                if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css';
                 } else {
                     self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
                 }
@@ -186,7 +196,7 @@ class BimpCore
             $js_vars = self::getJsVars();
 
             if (!empty($js_vars)) {
-                $html .= "\n" . '<script '.BimpTools::getScriptAttribut().'>' . "\n";
+                $html .= "\n" . '<script ' . BimpTools::getScriptAttribut() . '>' . "\n";
                 foreach ($js_vars as $var_name => $var_value) {
                     $html .= "\t" . 'var ' . $var_name . ' = ';
                     if (BimpTools::isNumericType($var_value)) {
@@ -202,7 +212,7 @@ class BimpCore
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
                 if ($url) {
-                    $html .= '<script '.BimpTools::getScriptAttribut().' src="' . $url . '"></script>' . "\n";
+                    $html .= '<script ' . BimpTools::getScriptAttribut() . ' src="' . $url . '"></script>' . "\n";
                 }
             }
 
@@ -1571,7 +1581,7 @@ class BimpCore
         // Outils devs: 
         global $user;
         $is_user_dev = BimpCore::isUserDev();
-        
+
         if ($is_user_dev || $user->login == 's.lehalle') {
             $html .= '<div style="margin: 5px 0; text-align: center; color: #7F7F7F; font-size: 11px">----- OUTILS DEV ------</div>';
 

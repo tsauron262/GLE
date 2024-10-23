@@ -22,12 +22,12 @@ class BC_Input extends BimpComponent
         }
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
         if (!$content) {
             $content = 'Je suis un ' . self::$component_name;
         }
 
-        return parent::renderHtml($params, $content, $errors);
+        return parent::renderHtml($params, $content, $errors, $debug);
     }
 }

@@ -14,7 +14,7 @@ class BC_FormInput extends BC_FormElement
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
         $input = self::renderComponent('input', $params);
         $required = (isset($params['input']['required']) ? $params['input']['required'] : 0);
@@ -47,6 +47,6 @@ class BC_FormInput extends BC_FormElement
                 break;
         }
 
-        return parent::renderHtml($params, $html, $errors);
+        return parent::renderHtml($params, $html, $errors, $debug);
     }
 }

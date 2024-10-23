@@ -2236,19 +2236,26 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             if (BimpObject::objectLoaded($signature_pc)) {
                 if (!$signature_pc->isSigned()) {
-                    $html .= '<div style="margin-top: 10px">';
-                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                    $msg .= '<a href="' . $signature_pc->getUrl() . '" target="_blank">Signature du bon de prise en charge en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
-
-                    $btn_html = $signature_pc->renderSignButtonsGroup();
-                    if ($btn_html) {
-                        $msg .= '<div style="margin-top: 8px; text-align: right">';
-                        $msg .= $btn_html;
-                        $msg .= '</div>';
+                    $alertes = $signature_pc->renderSignatureAlertes();
+                    if ($alertes) {
+                        $html .= '<div style="margin-top: 10px">';
+                        $html .= $alertes;
+                        $html .= '</div>';
                     }
 
-                    $html .= BimpRender::renderAlerts($msg, 'warning');
-                    $html .= '</div>';
+//                    $html .= '<div style="margin-top: 10px">';
+//                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+//                    $msg .= '<a href="' . $signature_pc->getUrl() . '" target="_blank">Signature du bon de prise en charge en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+//
+//                    $btn_html = $signature_pc->renderSignButtonsGroup();
+//                    if ($btn_html) {
+//                        $msg .= '<div style="margin-top: 8px; text-align: right">';
+//                        $msg .= $btn_html;
+//                        $msg .= '</div>';
+//                    }
+//
+//                    $html .= BimpRender::renderAlerts($msg, 'warning');
+//                    $html .= '</div>';
                 }
             } elseif ($this->isActionAllowed('createSignaturePC')) {
                 $html .= '<div style="margin-top: 10px">';
@@ -2275,21 +2282,28 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $signature_propal = $propal->getChildObject('signature');
 
             if (BimpObject::objectLoaded($signature_propal)) {
-                if (!$signature_propal->isSigned()) {
+                $alertes = $signature_propal->renderSignatureAlertes(true, true, true, '(Et donc devis non envoyé par e-mail)');
+                if ($alertes) {
                     $html .= '<div style="margin-top: 10px">';
-                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                    $msg .= '<a href="' . $signature_propal->getUrl() . '" target="_blank">Signature du devis en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
-
-                    $btn_html = $signature_propal->renderSignButtonsGroup();
-                    if ($btn_html) {
-                        $msg .= '<div style="margin-top: 8px; text-align: right">';
-                        $msg .= $btn_html;
-                        $msg .= '</div>';
-                    }
-
-                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= $alertes;
                     $html .= '</div>';
                 }
+
+//                if (!$signature_propal->isSigned()) {
+//                    $html .= '<div style="margin-top: 10px">';
+//                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+//                    $msg .= '<a href="' . $signature_propal->getUrl() . '" target="_blank">Signature du devis en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+//
+//                    $btn_html = $signature_propal->renderSignButtonsGroup();
+//                    if ($btn_html) {
+//                        $msg .= '<div style="margin-top: 8px; text-align: right">';
+//                        $msg .= $btn_html;
+//                        $msg .= '</div>';
+//                    }
+//
+//                    $html .= BimpRender::renderAlerts($msg, 'warning');
+//                    $html .= '</div>';
+//                }
             }
         }
 
@@ -2298,21 +2312,28 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $signature_resti = $this->getChildObject('signature_resti');
 
             if (BimpObject::objectLoaded($signature_resti)) {
-                if (!$signature_resti->isSigned()) {
+                $alertes = $signature_resti->renderSignatureAlertes();
+                if ($alertes) {
                     $html .= '<div style="margin-top: 10px">';
-                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                    $msg .= '<a href="' . $signature_resti->getUrl() . '" target="_blank">Signature du bon de restitution en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
-
-                    $btn_html = $signature_resti->renderSignButtonsGroup();
-                    if ($btn_html) {
-                        $msg .= '<div style="margin-top: 8px; text-align: right">';
-                        $msg .= $btn_html;
-                        $msg .= '</div>';
-                    }
-
-                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= $alertes;
                     $html .= '</div>';
                 }
+
+//                if (!$signature_resti->isSigned()) {
+//                    $html .= '<div style="margin-top: 10px">';
+//                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+//                    $msg .= '<a href="' . $signature_resti->getUrl() . '" target="_blank">Signature du bon de restitution en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+//
+//                    $btn_html = $signature_resti->renderSignButtonsGroup();
+//                    if ($btn_html) {
+//                        $msg .= '<div style="margin-top: 8px; text-align: right">';
+//                        $msg .= $btn_html;
+//                        $msg .= '</div>';
+//                    }
+//
+//                    $html .= BimpRender::renderAlerts($msg, 'warning');
+//                    $html .= '</div>';
+//                }
             } elseif ($this->isActionAllowed('createSignatureRestitution')) {
                 $html .= '<div style="margin-top: 10px">';
                 $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');

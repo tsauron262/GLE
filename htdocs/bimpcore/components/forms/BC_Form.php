@@ -15,10 +15,10 @@ class BC_Form extends BC_Panel
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
         $html .= self::renderComponent('elements', $params);        
         
-        return parent::renderHtml($params, $html, $errors);
+        return parent::renderHtml($params, $html, $errors, $debug);
     }
 }

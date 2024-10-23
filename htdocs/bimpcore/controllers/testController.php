@@ -13,7 +13,7 @@ class testController extends BimpController
 
         global $bimp_logs_locked;
         $bimp_logs_locked = 1;
-        
+
         $params = array(
             'title'                => 'Hello',
             'icon'                 => 'fas_check',
@@ -88,25 +88,39 @@ class testController extends BimpController
                 array(
                     'label' => 'datetime',
                     'input' => array(
-                        'type' => 'datetime'
+                        'name'        => 'datetime',
+                        'type'        => 'datetime',
+                        'display_now' => 1,
+                        'range'       => 1
                     )
                 ),
                 array(
                     'label' => 'date',
                     'input' => array(
-                        'type' => 'date'
+                        'name'        => 'date',
+                        'type'        => 'datetime',
+                        'subtype'     => 'date',
+                        'display_now' => 1,
+                        'range'       => 1
                     )
                 ),
                 array(
                     'label' => 'time',
                     'input' => array(
-                        'type' => 'time'
+                        'name'         => 'time',
+                        'type'         => 'datetime',
+                        'subtype'      => 'time',
+                        'with_seconds' => 0,
+                        'display_now'  => 1,
+                        'range'        => 1
                     )
                 ),
                 array(
                     'label' => 'timer',
                     'input' => array(
-                        'type' => 'timer'
+                        'name'  => 'timer',
+                        'type'  => 'timer',
+                        'value' => '165432'
                     )
                 ),
                 array(
@@ -132,7 +146,14 @@ class testController extends BimpController
                 array(
                     'label' => 'check_list',
                     'input' => array(
-                        'type' => 'check_list'
+                        'name'  => 'checklist',
+                        'type'  => 'check_list',
+                        'items' => array(
+                            0 => 'TEST 1',
+                            1 => 'TEST 2',
+                            2 => 'TEST 3'
+                        ),
+                        'value' => '1,2'
                     )
                 ),
                 array(
@@ -192,7 +213,19 @@ class testController extends BimpController
             )
         );
 
-        $html = BC_V2\BC_Form::render($params);
+        $mem = memory_get_usage();
+        $content = BC_V2\BC_Form::render($params);
+
+        $new_mem = memory_get_usage();
+        $diff = $new_mem - $mem;
+        $html .= '<div>';
+        $html .= 'BC_Form::render - Mém : ' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1);
+        $html .= '</div>';
+        $html .= $content;
+
+//        $html .= 'PARAMS : <pre>';
+//        $html .= print_r($params, 1);
+//        $html .= '</pre>';
 
         return $html;
     }

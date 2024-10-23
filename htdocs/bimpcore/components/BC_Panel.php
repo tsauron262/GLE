@@ -14,7 +14,7 @@ class BC_Panel extends BimpComponent
         self::addClass($attributes, self::$component_name);
     }
 
-    protected static function renderHtml(&$params, $content = '', &$errors = array())
+    protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
         $html = '';
 
@@ -48,7 +48,7 @@ class BC_Panel extends BimpComponent
                     'open'           => $params['open']
         ));
 
-        return parent::renderHtml($params, $html, $errors);
+        return parent::renderHtml($params, $html, $errors, $debug);
     }
 
     protected static function renderBeforePanelContentHtml(&$params, &$errors = array())

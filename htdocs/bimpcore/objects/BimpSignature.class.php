@@ -1142,7 +1142,7 @@ class BimpSignature extends BimpObject
         return '';
     }
 
-    public function displayNoPublicAccessWarnings($no_puplic_access_extra_msg)
+    public function displayNoPublicAccessWarnings($no_puplic_access_extra_msg = '')
     {
         $html = '';
 

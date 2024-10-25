@@ -53,19 +53,15 @@ class BimpRender
         if (isset($params['id'])) {
             $html .= ' id="' . $params['id'] . '"';
         }
+        
+        if (isset($params['attr'])) {
+            foreach ($params['attr'] as $name => $value) {
+                $html .= ' ' . $name . '="' . $value . '"';
+            }
+        }
 
         if (isset($params['classes'])) {
-            $html .= ' class="';
-            $first_loop = true;
-            foreach ($params['classes'] as $class) {
-                if (!$first_loop) {
-                    $html .= ' ';
-                } else {
-                    $first_loop = false;
-                }
-                $html .= $class;
-            }
-            $html .= '"';
+            $html .= ' class="' . implode(' ', $params['classes']) . '"';
         }
 
         if (isset($params['data'])) {
@@ -74,18 +70,12 @@ class BimpRender
             }
         }
 
-        if (isset($params['styles'])) {
+        if (isset($params['styles']) && !empty($params['styles'])) {
             $html .= ' style="';
             foreach ($params['styles'] as $name => $value) {
                 $html .= $name . ': ' . $value . '; ';
             }
             $html .= '"';
-        }
-
-        if (isset($params['attr'])) {
-            foreach ($params['attr'] as $name => $value) {
-                $html .= ' ' . $name . '="' . $value . '"';
-            }
         }
 
         return $html;

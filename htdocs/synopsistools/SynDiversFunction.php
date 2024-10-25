@@ -666,8 +666,11 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     $subject = str_replace($tabOldDebLien, DOL_URL_ROOT, $subject);
     $msg = str_replace($tabOldDebLien, DOL_URL_ROOT, $msg);
     
-    $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
-    $msg = str_replace(DOL_URL_ROOT . "/", $dolibarr_main_url_root . "/", $msg);
+//    $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);    
+    $subject = BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
+    
+//    $msg = str_replace(DOL_URL_ROOT . "/", $dolibarr_main_url_root . "/", $msg);
+    $msg = BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
 
     $mailOk = true;
 

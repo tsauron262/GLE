@@ -8045,6 +8045,10 @@ class BCT_ContratLine extends BimpObject
 
     public function validatePost()
     {
+        // temp : 
+        if (isset($_POST['date_ouverture_prevue']) && !is_null($_POST['date_ouverture_prevue']) && $_POST['date_ouverture_prevue'] !== '') {
+            $_POST['date_ouverture_prevue'] = date('Y-m-d', strtotime($_POST['date_ouverture_prevue'])) . ' 00:00:00';
+        }
         $errors = parent::validatePost();
 
         if (!count($errors)) {

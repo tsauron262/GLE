@@ -5,7 +5,7 @@ title: Fiches inter
 #    0: /bimptechnique/views/js/chart.js
 
 objects: 
-    fi: 
+    fichinter: 
         instance: 
             bimp_object: BT_ficheInter
     fi_det:
@@ -49,13 +49,13 @@ sections:
                               title: Fiches d'interventions (nouvelle version)
                               name: default
                               panel: 1
-                              object: fi
+                              object: fichinter
                         - type: list
                           list: 
                               title: Fiches d'interventions (Historique)
                               name: historique
                               panel: 1
-                              object: fi
+                              object: fichinter
                 
         stats:
             label: Liste des lignes des FIs

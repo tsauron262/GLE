@@ -6,7 +6,7 @@ class BimpComponent
 {
 
     protected static $definitions = null;
-    public static $debug = 0;
+    public static $debug = 1;
     public static $component_name = 'BimpComponent';
     public static $subdir = '';
     public static $is_grid_element = false;

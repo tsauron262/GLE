@@ -161,19 +161,13 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                         if (method_exists($this->object, 'fetch_optionals')) {
                             $this->object->fetch_optionals();
-                            if (isset($this->object->array_options['options_type']) && (string) $this->object->array_options['options_type']) {
-                                $secteur = $this->object->array_options['options_type'];
-                                if ($secteur == 'S') {
-                                    // DOCS SAV : 
-                                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
-                                        $entrepot = new Entrepot($this->db);
-                                        $entrepot->fetch($this->object->array_options['options_entrepot']);
-                                        if ($entrepot->address != "" && $entrepot->town != "") {
-                                            $this->fromCompany->zip = $entrepot->zip;
-                                            $this->fromCompany->address = $entrepot->address;
-                                            $this->fromCompany->town = $entrepot->town;
-                                        }
-                                    }
+                            if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
+                                $entrepot = new Entrepot($this->db);
+                                $entrepot->fetch($this->object->array_options['options_entrepot']);
+                                if ($entrepot->address != "" && $entrepot->town != "") {
+                                    $this->fromCompany->zip = $entrepot->zip;
+                                    $this->fromCompany->address = $entrepot->address;
+                                    $this->fromCompany->town = $entrepot->town;
                                 }
                             }
                         }

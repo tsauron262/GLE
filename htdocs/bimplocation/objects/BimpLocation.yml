@@ -1,0 +1,87 @@
+table: bimp_location
+#controller: sav
+icon: fas_business-time
+#public_icon: pe_tools
+
+#list_page_url: 
+#    controller: index
+#    url_params: 
+#        tab: sav
+#        id_entrepot: 
+#            field_value: id_entrepot
+            
+#header_list_name: default
+#header_edit_form: edit
+
+#public_header_edit_form: public_edit
+
+header_btn: 
+    callback: getActionsButtons
+        
+nom_url: 
+    with_status: 1
+    syntaxe: <ref>
+    card: default
+    
+labels:
+    name: location
+    is_female: 1
+    
+objects: 
+    contact_facturation: 
+        extends: contact
+        instance: 
+            id_object: 
+                field_value: id_contact_facturation
+    
+    facture_acompte: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture_acompte
+                
+    lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimplocations
+                name: BimpLocationLine
+                
+fields: 
+    ref: 
+        label: Référence
+        
+    status: 
+        label: Status
+        type: int
+        values: 
+            array: status_list
+            
+    id_client: 
+        label: Client
+        type: id_object
+        object: client
+        
+    id_contact_facturation: 
+        label: Contact facturation
+        type: id_object
+        object: contact_facturation
+        
+    id_facture_acompte: 
+        label: Facture d'acompte
+        type: id_object
+        object: facture_acompte
+        
+    date_from: 
+        label: Du
+        type: date
+        required: 1
+        
+    date_to: 
+        label: Au
+        type: date
+        required: 1
+        
+        
+    

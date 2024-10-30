@@ -4694,8 +4694,6 @@ class Bimp_Product extends BimpObject
         if ((float) BimpTools::getPostFieldValue('price_ttc') > 0 || (float) BimpTools::getPostFieldValue('price_ttc') < 0)
             $this->set('price', BimpTools::calculatePriceTaxEx(BimpTools::getPostFieldValue('price_ttc'), (float) BimpTools::getPostFieldValue('tva_tx')));
 
-
-
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {

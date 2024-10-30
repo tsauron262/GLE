@@ -33,7 +33,9 @@ if (is_array($rows)) {
     foreach ($rows as $r) {
         if (preg_match('/^(.+)_A$/', $r['ref'], $matches)) {
             $ref = $matches[1] . '/A';
-            if ($bdb->update('product', array(), 'rowid = ' . $r['rowid']) <= 0) {
+            if ($bdb->update('product', array(
+                        'ref' => $ref
+                            ), 'rowid = ' . $r['rowid']) <= 0) {
                 echo 'FAIL : ' . $ref . '<br/>';
             } else {
                 echo 'OK ' . $ref . '<br/>';

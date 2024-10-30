@@ -176,11 +176,12 @@ function BimpContrat() {
                             total_qty = 0;
                             bimp_msg('Ligne #' + id_line + ' : Quantité totale à facturer invalide', 'danger');
                             has_errors = true;
-                        } else if (!total_qty) {
-                            $line_row.addClass('has_errors');
-                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité totale à facturer supérieure à 0', 'danger');
-                            has_errors = true;
-                        }
+                        } 
+//                        else if (!total_qty) {
+//                            $line_row.addClass('has_errors');
+//                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité totale à facturer supérieure à 0', 'danger');
+//                            has_errors = true;
+//                        }
                     }
                     $input = $line_row.find($('input[name="line_' + id_line + '_subprice"]'));
                     if ($input.length) {
@@ -233,11 +234,13 @@ function BimpContrat() {
                                     total_qty = 0;
                                     bimp_msg('Sous-ligne #' + id_sub_line + ' : Quantité totale à facturer invalide', 'danger');
                                     has_errors = true;
-                                } else if (!sub_line_total_qty) {
-                                    $sub_line_row.addClass('has_errors');
-                                    bimp_msg('Sous-ligne #' + id_line + ' : Veuillez saisir une quantité totale à facturer supérieure à 0', 'danger');
-                                    has_errors = true;
-                                } else {
+                                } 
+//                                else if (!sub_line_total_qty) {
+//                                    $sub_line_row.addClass('has_errors');
+//                                    bimp_msg('Sous-ligne #' + id_line + ' : Veuillez saisir une quantité totale à facturer supérieure à 0', 'danger');
+//                                    has_errors = true;
+//                                } 
+                                else {
                                     sub_line_data['total_qty'] = sub_line_total_qty;
                                 }
                             }

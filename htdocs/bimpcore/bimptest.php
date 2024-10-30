@@ -27,23 +27,21 @@ if (!$user->admin) {
     exit;
 }
 
-foreach (BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Product', array(
-    'ref' => array(
-        'part_type' => 'end',
-        'part'      => '_A'
-    )
-)) as $p) {
-    $ref = $p->getRef();
+$rows = $bdb->getRows('product', '', null, 'array', array('rowid', 'ref'));
 
-    if (preg_match('/^(.+)_A$/', $ref, $matches)) {
-        $ref = $matches[1] . '/A';
-        if ($bdb->update('product', array(), 'rowid = ' . $p->id) <= 0) {
-            echo 'FAIL : ' . $ref . '<br/>';
-        } else {
-            echo 'OK ' . $ref . '<br/>';
+if (is_array($rows)) {
+    foreach ($rows as $r) {
+        if (preg_match('/^(.+)_A$/', $r['ref'], $matches)) {
+            $ref = $matches[1] . '/A';
+            if ($bdb->update('product', array(), 'rowid = ' . $r['rowid']) <= 0) {
+                echo 'FAIL : ' . $ref . '<br/>';
+            } else {
+                echo 'OK ' . $ref . '<br/>';
+            }
         }
     }
 }
+
 
 echo '<br/>FIN';
 echo '</body></html>';

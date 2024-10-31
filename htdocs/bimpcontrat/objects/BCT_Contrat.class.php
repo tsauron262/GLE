@@ -1512,9 +1512,9 @@ class BCT_Contrat extends BimpDolObject
                 $line_warnings = array();
                 $line_qty = (float) $line_data['qty'];
 
-                if (!$line_qty) {
-                    continue;
-                }
+//                if (!$line_qty) {
+//                    continue;
+//                }
 
                 $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
                 if ((int) $line->getData('line_type') === BCT_ContratLine::TYPE_TEXT) {

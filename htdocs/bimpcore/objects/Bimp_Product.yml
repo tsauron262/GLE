@@ -1000,8 +1000,7 @@ forms:
               label: Prix d'achat fournisseur
               on_edit: 1
               multiple: 1
-              form_name: create_prod
-            
+              form_name: create_prod          
             
 fields_tables: 
     infos: 

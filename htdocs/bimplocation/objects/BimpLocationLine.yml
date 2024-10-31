@@ -1,0 +1,50 @@
+table: bimp_location_line
+icon: fas_bars
+common_fields: 0
+
+header_btn: 
+    callback: getActionsButtons
+    
+labels:
+    name: ligne de location
+    name_plur: lignes de location
+    is_female: 1
+    
+parent_module: bimplocation
+parent_object: BimpLocation
+parent_id_property: id_location
+
+objects: 
+    forfait: 
+        extends: product
+        instance: 
+            id_object: id_forfait
+                
+fields: 
+    id_location: 
+        label: Location
+        type: id_parent
+        
+    id_equipment: 
+        label: Equipement
+        type: id_object
+        object: equipment
+        
+    id_forfait: 
+        label: Forfait
+        type: id_object
+        object: forfait
+        
+    date_from: 
+        label: Du
+        type: date
+        required: 1
+        
+    date_to: 
+        label: Au
+        type: date
+        required: 1
+        
+    infos: 
+        label: Infos
+        type: text

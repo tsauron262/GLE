@@ -194,11 +194,7 @@ fields:
     fac_periodicity: 
         label: Périodicité de facturation
         values: 
-            array: 
-        input: 
-            type: select
-            options: 
-                callback: getInputPeriodicities
+            array: periodicities
         default_value: 0
         depends_on: fk_product,id_linked_line
         displays: 

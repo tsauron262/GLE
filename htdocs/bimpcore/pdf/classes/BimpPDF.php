@@ -165,9 +165,9 @@ class BimpConcatPdf extends Fpdi
             $this->useTemplate($tplidx);
         }
         $file = DOL_DATA_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
-        if (!is_file($file)){
+        if (!is_file($file)) {
             $file = DOL_DATA_ROOT . "/bimpcore/pdf/cgv.pdf";
-            if (!is_file($file)){
+            if (!is_file($file)) {
                 $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
                 if (!is_file($file))
                     $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
@@ -268,7 +268,7 @@ class BimpConcatPdf extends Fpdi
 
         $this->AddPage();
         $this->page = $file1_page_start;
-        
+
         $pagecount1 = $this->setSourceFile($file1);
         for ($i = 1; $i <= $pagecount1; $i++) {
             if ($i > 1) {
@@ -470,15 +470,15 @@ class BimpConcatPdf extends Fpdi
                             $params['height'] = $info[1];
                         }
                     }
-                    
-                    $output_file = DOL_DATA_ROOT.'/tmp.png'; 
-                        
-                     /*modtommy bug base 64*/   
-                    $ifp = fopen( $output_file, 'wb' ); 
-                    $data = explode( ',', $base64_image );
-                    fwrite( $ifp, base64_decode( $data[ 1 ] ) );
-                    fclose( $ifp );
-                    /*fmod tommy*/
+
+                    $output_file = DOL_DATA_ROOT . '/tmp.png';
+
+                    /* modtommy bug base 64 */
+                    $ifp = fopen($output_file, 'wb');
+                    $data = explode(',', $base64_image);
+                    fwrite($ifp, base64_decode($data[1]));
+                    fclose($ifp);
+                    /* fmod tommy */
 
                     $this->Image($output_file, $params['x_pos'], $params['y_pos'], $params['width'], $params['height'], $params['type']);
 

@@ -2440,6 +2440,14 @@ class BCT_ContratLine extends BimpObject
 
         return $propales;
     }
+    
+    public function getInputPeriodicitiesArray()
+    {
+        $values = self::$periodicities;
+        $values[0] = '';
+        
+        return $values;
+    }
 
     // Affichage:
 

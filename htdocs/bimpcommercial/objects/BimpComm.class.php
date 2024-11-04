@@ -2264,10 +2264,11 @@ class BimpComm extends BimpDolObject
         $lines = $this->getLines('not_text');
         $n = 0;
         foreach ($lines as $line) {
-            if ($line->getTotalTTC(true) > 0) {
-                if ($line->getMargeFinalePrevue() < 0) {
-                    $n++;
-                }
+            $line_total_ttc = $line->getTotalTTC(true);
+            $line_marge = $line->getMargeFinalePrevue();
+
+            if (($line_total_ttc > 0 && $line_marge < 0) || ($line_total_ttc < 0 && $line_marge < $line_total_ttc)) {
+                $n++;
             }
         }
 

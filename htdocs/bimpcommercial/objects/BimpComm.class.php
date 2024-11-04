@@ -759,7 +759,7 @@ class BimpComm extends BimpDolObject
             if ((int) $this->getData('fk_statut') === 0) {
                 $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
-                if(BimpCore::getConf('use_light_fourn', 0, 'bimpcommercial'))
+                if (BimpCore::getConf('use_light_fourn', 0, 'bimpcommercial'))
                     $form = 'lightFourn';
                 else
                     $form = 'create';
@@ -1759,9 +1759,9 @@ class BimpComm extends BimpDolObject
         foreach ($this->getLines('not_text') as $line) {
             $product = $line->getProduct();
             if (BimpObject::objectLoaded($product)) {
-                if($product->getData('weight_units') == -3)
+                if ($product->getData('weight_units') == -3)
                     $weight += $product->getData('weight') * $line->qty / 1000;
-                elseif($product->getData('weight_units') == -6)
+                elseif ($product->getData('weight_units') == -6)
                     $weight += $product->getData('weight') * $line->qty / 1000 / 1000;
                 else
                     $weight += $product->getData('weight') * $line->qty;
@@ -2261,6 +2261,21 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        $lines = $this->getLines('not_text');
+        $n = 0;
+        foreach ($lines as $line) {
+            if ($line->getTotalTTC(true) > 0) {
+                if ($line->getMargeFinalePrevue() < 0) {
+                    $n++;
+                }
+            }
+        }
+
+        if ($n) {
+            $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : marge finale négative pour ' . $n . ' ligne' . ($n > 1 ? 's' : '');
+            $html .= BimpRender::renderAlerts($msg, 'warning');
+        }
+
         return $html;
     }
 
@@ -2725,7 +2740,7 @@ class BimpComm extends BimpDolObject
         }
 
         if ($this->getData($statutField) > 0) {
-            require_once DOL_DOCUMENT_ROOT.'/bimptocegid/class/viewEcriture.class.php';
+            require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
             viewEcriture::setCurrentObject($this);
             $html .= viewEcriture::display();
         } else {

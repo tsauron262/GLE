@@ -1419,5 +1419,5 @@ if (is_array($tabCentre)) {
 
 function sortBimpTasksByDateCreate($a, $b)
 {
-    return ($a['date_create'] < $b['date_create'] ? -1 : ($a['date_create'] > $b['date_create'] ? 1 : 0));
+    return ($a['date_create'] > $b['date_create'] ? -1 : ($a['date_create'] < $b['date_create'] ? 1 : 0));
 }

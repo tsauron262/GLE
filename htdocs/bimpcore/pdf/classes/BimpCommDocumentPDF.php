@@ -1134,7 +1134,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                         'pu_ht'    => '',
                         'total_ht' => ''
                     );
-                    
+
                     if (!$this->hideTtc) {
                         $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales_total);
                     }
@@ -1175,12 +1175,16 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
             if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && (static::$use_cgv || is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF'))) {
                 $html .= '<span style="font-weight: bold;">';
-                if (is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF')) {
-                    $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et en boutique pour les particuliers.';
-                } elseif ($this->pdf->addCgvPages) {
-                    $html .= 'Le présent devis est soumis aux conditions générales de ventes annexées et consultables sur le site (<a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)'; //'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
-                } else {
-                    $html .= 'Le présent devis est soumis aux conditions générales de ventes (<a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)'; //Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                global $user;
+
+                if ($user->login !== 'f.martinez') {
+                    if (is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF')) {
+                        $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et en boutique pour les particuliers.';
+                    } elseif ($this->pdf->addCgvPages) {
+                        $html .= 'Le présent devis est soumis aux conditions générales de ventes annexées et consultables sur le site (<a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)'; //'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                    } else {
+                        $html .= 'Le présent devis est soumis aux conditions générales de ventes (<a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)'; //Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf">www.bimp-pro.fr/wp-content/uploads/2024/02/CGV-BIMP.pdf</a>';// pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                    }
                 }
                 $html .= "</span>";
                 $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.

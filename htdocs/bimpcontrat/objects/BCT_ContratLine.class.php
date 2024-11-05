@@ -2440,12 +2440,12 @@ class BCT_ContratLine extends BimpObject
 
         return $propales;
     }
-    
+
     public function getInputPeriodicitiesArray()
     {
         $values = self::$periodicities;
         $values[0] = '';
-        
+
         return $values;
     }
 
@@ -8349,5 +8349,14 @@ class BCT_ContratLine extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function deleteProcess()
+    {
+        if ($this->isLoaded()) {
+            return $this->db->delete($this->getTable(), 'rowid = ' . $this->id);
+        }
+
+        return 0;
     }
 }

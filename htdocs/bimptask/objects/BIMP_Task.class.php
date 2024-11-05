@@ -100,6 +100,7 @@ class BIMP_Task extends BimpAbstractFollow
             case 'id_user_owner':
             case 'id_task':
                 return $this->canAttribute();
+                
             case 'ok_metier':
                 return ($user->admin && !BimpCore::isUserDev());
         }

@@ -22,3 +22,11 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_location_line` (
     `date_to` date default null,
     `infos` TEXT NOT NULL DEFAULT ''
 );
+
+-- CREATE TABLE IF NOT EXISTS `llx_bimp_location_product_forfait` (
+--     `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+--     `id_product` int(11) NOT NULL DEFAULT 0,
+--     `id_forfait` int(11) NOT NULL DEFAULT 0
+-- );
+-- 
+-- CREATE UNIQUE INDEX `produit_forfait` ON `llx_bimp_location_product_forfait` (`id_product`, `id_forfait`);

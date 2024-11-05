@@ -15,6 +15,7 @@ class BE_Place extends BimpObject
     const BE_PLACE_SAV = 8;
     const BE_PLACE_INTERNE = 9;
     const BE_PLACE_NOT_RESTIT = 10;
+    const BE_PLACE_LOCATION = 11;
     const BE_PLACE_ENQUETE = 90;
 
     public static $types = array(
@@ -28,6 +29,7 @@ class BE_Place extends BimpObject
         8  => 'SAV',
         9  => 'Utilisation interne',
         10 => 'SAV - non restitué',
+        11 => 'Location',
         90 => 'Enquête'
     );
     public static $origins = array(
@@ -142,6 +144,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_PRET:
                 case self::BE_PLACE_INTERNE:
                 case self::BE_PLACE_NOT_RESTIT:
+                case self::BE_PLACE_LOCATION:
                 case self::BE_PLACE_ENQUETE:
                     $entrepot = $this->getChildObject('entrepot');
                     if (BimpObject::ObjectLoaded($entrepot)) {
@@ -165,6 +168,9 @@ class BE_Place extends BimpObject
                                 break;
                             case self::BE_PLACE_NOT_RESTIT:
                                 $name .= ' (SAV - Non restitué)';
+                                break;
+                            case self::BE_PLACE_LOCATION:
+                                $name .= ' (Location)';
                                 break;
                             case self::BE_PLACE_ENQUETE:
                                 $name .= ' (Enquête)';
@@ -237,6 +243,9 @@ class BE_Place extends BimpObject
                                 break;
                             case self::BE_PLACE_NOT_RESTIT:
                                 $name .= ' (SAV - Non restitué)';
+                                break;
+                            case self::BE_PLACE_LOCATION:
+                                $name .= ' (Location)';
                                 break;
                             case self::BE_PLACE_ENQUETE:
                                 $name .= ' (Enquête)';
@@ -364,6 +373,15 @@ class BE_Place extends BimpObject
                         return BimpRender::renderAlerts('Le prêt d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
                     }
                     break;
+
+                case 'location':
+                    $loc = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocation', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($loc)) {
+                        return $loc->getLink();
+                    } else {
+                        return BimpRender::renderAlerts('La location #' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
             }
         }
 
@@ -395,6 +413,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_VOL:
                 case self::BE_PLACE_SAV:
                 case self::BE_PLACE_NOT_RESTIT:
+                case self::BE_PLACE_LOCATION:
                 case self::BE_PLACE_ENQUETE:
                     $id_entrepot = $this->getData('id_entrepot');
                     if (is_null($id_entrepot) || !$id_entrepot) {

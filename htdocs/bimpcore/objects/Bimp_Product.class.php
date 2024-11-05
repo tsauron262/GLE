@@ -373,6 +373,13 @@ class Bimp_Product extends BimpObject
                     return 0;
                 }
                 return 1;
+
+            case 'addForfaitLocation':
+                if (!(int) $this->getData('to_rent')) {
+                    $errors[] = 'Ce produit n\'est pas à louer';
+                    return 0;
+                }
+                return 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -525,7 +532,7 @@ class Bimp_Product extends BimpObject
         if (!(int) BimpCore::getConf('use_valid_product')) {
             return 1;
         }
-        
+
         return $this->getData('validate');
     }
 
@@ -654,10 +661,15 @@ class Bimp_Product extends BimpObject
     public function getSousTypesArray()
     {
         $result = array();
+        $prod_type = (int) $this->getData('fk_product_type');
         foreach (static::$sousTypes as $type => $values) {
-            if ($type == -1 || !$this->isLoaded() || $type == $this->getData('fk_product_type')) {
+            if ($type == -1 || !$this->isLoaded() || $type == $prod_type) {
                 $result = BimpTools::merge_array($result, $values, true);
             }
+        }
+
+        if ($prod_type == 1 && BimpCore::isModuleActive('bimplocation')) {
+            $result[30] = 'Forfait location';
         }
 
         return $result;
@@ -681,6 +693,41 @@ class Bimp_Product extends BimpObject
         }
 
         return array();
+    }
+
+    public function getForfaitsLocationList()
+    {
+        if ($this->isLoaded()) {
+            return $this->db->getValues('bimp_location_product_forfait', 'id_forfait', 'id_product = ' . $this->id);
+        }
+
+        return array();
+    }
+
+    public function getAvailableForfaitsLocationArray()
+    {
+        $where = 'ef.type2 = 30';
+
+        $forfaits = $this->getData('forfaits_location');
+        if (!empty($forfaits)) {
+            $where .= ' AND rowid NOT IN(' . implode(',', $forfaits) . ')';
+        }
+
+        $rows = $this->db->getRows('product a', $where, null, 'array', array('a.rowid', 'a.ref', 'a.label'), null, null, array(
+            'ef' => array(
+                'table' => 'product_extrafields',
+                'on'    => 'ef.fk_object = a.rowid'
+            )
+        ));
+
+        $prods = array();
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $prods[(int) $r['rowid']] = $r['ref'] . ' - ' . $r['label'];
+            }
+        }
+
+        return $prods;
     }
 
     // Getters codes comptables: 
@@ -2426,6 +2473,22 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
+//    public function displayForfaitsLocation($with_buttons = true)
+//    {
+//        $html = '';
+//
+//        if ($with_buttons) {
+//            $onclick = $this->getJsLoadModalForm('add_forfait', 'Ajouter un forfait de location');
+//            
+//            $html .= '<div class="buttonsContainer align-right">';
+//            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+//            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter un forfait';
+//            $html .= '</span>';
+//            $html .= '</div>';
+//        }
+//
+//        return $html;
+//    }
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -3415,7 +3478,7 @@ class Bimp_Product extends BimpObject
             $errors[] = "Ce produit est déjà validé";
         }
 
-        if (!$this->isBundle() && $this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true) && !$this->getData('no_fixe_prices')) {
+        if (!$this->isBundle() && !(int) $this->getData('to_rent') && $this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true) && !$this->getData('no_fixe_prices')) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
         }
 
@@ -3423,8 +3486,12 @@ class Bimp_Product extends BimpObject
                 (int) $this->getData('serialisable') == 1)
             $errors[] = "Un service ne peut pas être sérialisé.";
 
-        if ((int) $this->getData('tosell') != 1)
-            $errors[] = "Ce produit n'est pas disponible à la vente";
+        if (!(int) $this->getData('to_rent')) {
+            if (!(int) $this->getData('tosell')) {
+                $errors[] = "Ce produit n'est pas disponible à la vente";
+            }
+        }
+
 
         if (count($errors)) {
             return $errors;
@@ -4046,6 +4113,27 @@ class Bimp_Product extends BimpObject
         return $new_prod;
     }
 
+    public function validateValue($field, $value, $forbidden_chars = array())
+    {
+        if ($field == 'cost_price_percent') {
+            if ($value > 0 && $value != $this->getData('cost_price_percent') || $this->getData('cost_price_percent') > 0) {
+                if ($value != '')
+                    $this->updateField('cost_price', $this->getData('price') * $value / 100);
+            }
+        } elseif ($field == 'cost_price') {
+            if ($value > 0)
+                $this->setCurrentPaHt($value, 0, 'cost_price');
+            elseif ($this->getInitData('cost_price') > 0) {//repassser a zero si pa actuel = prix de revient
+                $paO = $this->getCurrentPaObject();
+                if ($paO && $paO->getData('origin') == 'cost_price') {
+                    $this->setCurrentPaHt($value, 0, 'cost_price');
+                }
+            }
+        }
+
+        return parent::validateValue($field, $value, $forbidden_chars);
+    }
+
     // Stats
 
     function load_stats_propale($socid = 0)
@@ -4517,27 +4605,6 @@ class Bimp_Product extends BimpObject
         );
     }
 
-    public function validateValue($field, $value, $forbidden_chars = array())
-    {
-        if ($field == 'cost_price_percent') {
-            if ($value > 0 && $value != $this->getData('cost_price_percent') || $this->getData('cost_price_percent') > 0) {
-                if ($value != '')
-                    $this->updateField('cost_price', $this->getData('price') * $value / 100);
-            }
-        } elseif ($field == 'cost_price') {
-            if ($value > 0)
-                $this->setCurrentPaHt($value, 0, 'cost_price');
-            elseif ($this->getInitData('cost_price') > 0) {//repassser a zero si pa actuel = prix de revient
-                $paO = $this->getCurrentPaObject();
-                if ($paO && $paO->getData('origin') == 'cost_price') {
-                    $this->setCurrentPaHt($value, 0, 'cost_price');
-                }
-            }
-        }
-
-        return parent::validateValue($field, $value, $forbidden_chars);
-    }
-
     public function actionDuplicate($data, &$success)
     {
         $errors = array();
@@ -4676,6 +4743,16 @@ class Bimp_Product extends BimpObject
     public function validate()
     {
         $errors = parent::validate();
+
+        if (BimpCore::isModuleActive('bimplocation')) {
+            if ((int) $this->getData('to_rent')) {
+                $this->set('tosell', 0);
+            } elseif ((int) $this->getData('tosell')) {
+                $this->set('to_rent', 0);
+            }
+        } else {
+            $this->set('to_rent', 0);
+        }
 
         if ($this->isAbonnement()) {
             $fac_per = (int) $this->getData('fac_periodicity');

@@ -44,6 +44,10 @@ fields:
         label: Type
         values: 
             array: types
+        input: 
+            type: select
+            options: 
+                callback: getTypesArray
     
     id_client:
         label: Client

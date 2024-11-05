@@ -90,6 +90,17 @@ class BE_Place extends BimpObject
         return 1;
     }
 
+    public function getTypesArray()
+    {
+        $types = self::$types;
+        
+        if (!BimpCore::isModuleActive('bimplocation')) {
+            unset(self::$types[self::BE_PLACE_LOCATION]);
+        }
+        
+        return $types;
+    }
+    
     public function getContactsArray()
     {
         $contacts = array();

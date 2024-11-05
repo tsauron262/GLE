@@ -36,6 +36,9 @@ class notif_task extends AbstractNotification {
             html += '<td style="width: 30%">';
             html += 'Tâches en cours';
             html += this.getBoutonReload(this.dropdown_id);
+
+
+
             html += '</td>';
             html += '<td style="width: 70%; text-align: right">';
             html += '<a href="' + DOL_URL_ROOT + '/bimpcore/index.php?fc=user&id=' + id_user + '&navtab-maintabs=tasks&navtab-tasks=my_tasks"><i class="fas fa5-tasks iconLeft"></i>Toutes mes tâches</a>';
@@ -167,6 +170,10 @@ class notif_task extends AbstractNotification {
             html += '<div class="task_src">' + element.src + '</div>';
         } else if (element.author) {
             html += '<div class="task_src">' + element.author + '</div>';
+        }
+
+        if (element.dest) {
+            html += '<div class="task_dest">Destinataire : ' + element.dest + '</div>';
         }
 
         if (element.parent_task) {

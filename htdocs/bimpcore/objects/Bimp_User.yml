@@ -259,6 +259,15 @@ fields:
     datepreviouslogin:
         label: Connexion précédente
         type: datetime
+    delegations: 
+        label: Délégations
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: user
+        input:
+            type: search_user
+            help: Les utilisateurs sélectionnés aurons accès à vos messages et à vos tâches
         
 forms:
     light: 
@@ -400,6 +409,10 @@ forms:
               input: 
                   type: date
                   display_now: 1
+                  
+    delegations: 
+        rows: 
+            - field: delegations
               
 fields_tables: 
     identity:
@@ -458,6 +471,9 @@ fields_tables:
             - label: Jours off
               value: 
                   callback: displayDaysOff
+            - label: Délégations
+              value: 
+                  callback: displayDelegations
         
     notes: 
         title: Notes
@@ -634,7 +650,6 @@ lists:
             job:
             email: 
             office_phone:
-                
                 
 lists_cols: 
     groups_secu: 

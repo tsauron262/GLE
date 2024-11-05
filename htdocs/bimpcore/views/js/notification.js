@@ -160,6 +160,10 @@ class AbstractNotification {
     }
 
     traiteStorage() {
+        if (!this.use_localStorage) {
+            return;
+        }
+        
         var content = bimp_storage.get(this.id_notification + "_content");
         if (content !== null) {
             this.content = [];

@@ -588,37 +588,34 @@ class BIMP_Task extends BimpAbstractFollow
         $tasks['nb_my'] = $nb_my;
         $tasks['unaffected_task'] = $nb_unaffected;
 
-        if ($user->login == 'f.martinez') {
-            $users_delegations = $this->db->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+        $users_delegations = $this->db->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
 
-            if (!empty($users_delegations)) {
-                $taks_ids = array();
+        if (!empty($users_delegations)) {
+            $taks_ids = array();
 
-                foreach ($tasks['content'] as &$task) {
-                    $taks_ids[] = $task['id'];
-                }
+            foreach ($tasks['content'] as &$task) {
+                $taks_ids[] = $task['id'];
+            }
 
-                foreach ($users_delegations as $id_user_delegation) {
-                    $user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
-                    $user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
-                    $user_tasks = $this->getTaskForUser($id_user_delegation, $id_max, $errors, $taks_ids, true);
+            foreach ($users_delegations as $id_user_delegation) {
+                $user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
+                $user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
+                $user_tasks = $this->getTaskForUser($id_user_delegation, $id_max, $errors, $taks_ids, true);
 
-                    if (!empty($user_tasks)) {
-                        foreach ($user_tasks['content'] as &$task) {
-                            $taks_ids[] = $task['id'];
-                            $task['dest'] = $user_name;
-                        }
-
-                        $tasks['content'] = BimpTools::merge_array($tasks['content'], $user_tasks['content']);
-                        $tasks['nb_my'] += $user_tasks['nb_my'];
-                        $tasks['unaffected_task'] += $user_tasks['unaffected_task'];
+                if (!empty($user_tasks)) {
+                    foreach ($user_tasks['content'] as &$task) {
+                        $taks_ids[] = $task['id'];
+                        $task['dest'] = $user_name;
                     }
+
+                    $tasks['content'] = BimpTools::merge_array($tasks['content'], $user_tasks['content']);
+                    $tasks['nb_my'] += $user_tasks['nb_my'];
+                    $tasks['unaffected_task'] += $user_tasks['unaffected_task'];
                 }
             }
         }
-        
-        uasort($tasks['content'], 'sortBimpTasksByDateCreate');
 
+        usort($tasks['content'], 'sortBimpTasksByDateCreate');
         return $tasks;
     }
 

@@ -180,23 +180,23 @@ class AbstractNotification {
         var notif = this;
 
 
-        content = content.sort(function compare(a, b) {
-            if (notif.isNew(a) < notif.isNew(b))
-                return -1;
-            if (notif.isNew(a) > notif.isNew(b))
-                return 1;
-            if (a.position !== undefined) {
-                if (a.position > b.position)
-                    return -1;
-                if (a.position < b.position)
-                    return 1;
-            }
-            if (a.id < b.id)
-                return -1;
-            if (a.id > b.id)
-                return 1;
-            return 0;
-        });
+//        content = content.sort(function compare(a, b) {
+//            if (notif.isNew(a) < notif.isNew(b))
+//                return -1;
+//            if (notif.isNew(a) > notif.isNew(b))
+//                return 1;
+//            if (a.position !== undefined) {
+//                if (a.position > b.position)
+//                    return -1;
+//                if (a.position < b.position)
+//                    return 1;
+//            }
+//            if (a.id < b.id)
+//                return -1;
+//            if (a.id > b.id)
+//                return 1;
+//            return 0;
+//        });
 
 //        content = Object.fromEntries(content);
 

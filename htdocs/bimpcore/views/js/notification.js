@@ -19,9 +19,7 @@
  */
 
 class AbstractNotification {
-    /**
-     * Méthode doit être appelée avec super()
-     */
+
     constructor(id_notification) {
         if (this.constructor == AbstractNotification) {
             throw new Error('La classe abstraite "AbstractNotification" ne peut être instanciée.');
@@ -32,11 +30,9 @@ class AbstractNotification {
         this.use_localStorage = false;
         this.id_notification = id_notification;
         this.content = [];
-//        this.nom = nom;
         this.ptr = 'notificationActive[' + this.id_notification + '].obj';
         this.dropdown_id = 'dropdown_' + this.id_notification;
-        // Aussi dans BimpNotification
-//        this.parent_selector = 'div.dropdown.modifDropdown:last';
+
         this.parent_selector = 'div.login_block_other';
 //        this.display_notification = true;
 //        if (bimp_storage.get(this.id_notification) === null)
@@ -47,14 +43,13 @@ class AbstractNotification {
 
     init(an) {
         var instance = this;
-        // Animation ouverture des notifs
+
         $('#' + an.dropdown_id).click(function (e) {
             an.expand();
             e.stopPropagation();
 
         });
 
-        // Fermeture des dropdown lors de cliques à côté
         $(document).click(function (e) {
             if (!$('#page_modal').hasClass('in') && $(e.target).attr('id') != 'page_modal') {
                 var $target = $(e.target);
@@ -63,7 +58,6 @@ class AbstractNotification {
             }
         });
 
-        // Click recharger la notif
         $('span[name="reload_notif"][dropdown_id="' + instance.dropdown_id + '"]').click(function () {
             instance.reloadNotif();
         });
@@ -138,26 +132,29 @@ class AbstractNotification {
         });
     }
 
-    /**
-     * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
-     */
     addElement(element) {
-//        console.log(element);
-//            console.log(typeof element.content, this.id_notification + "_content", element.content.length);
-        if (typeof element.content === "object" && (element.content.length > 0 || Object.keys(element.content).length > 0)) {
+        /**
+         * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
+         */
 
-            //this.content = this.content.concat(element.content);
+        console.log(element);
+        console.log(typeof element.content, this.id_notification + "_content", element.content.length);
+
+        if (typeof element.content === "object" && (element.content.length > 0 || Object.keys(element.content).length > 0)) {
 
             if (this.id_max == 0)
                 var add = 0;
             else
                 var add = 1;
+
             if (this.use_localStorage) {
                 console.log('storage');
                 bimp_storage.set(this.id_notification + "_content", element.content, add);
                 this.traiteStorage();
-            } else
+            } else {
+                console.log('no_storage');
                 this.traiteElement(element.content);
+            }
         }
 
     }
@@ -233,7 +230,6 @@ class AbstractNotification {
 
             // Augmentation du nombre dans le span rouge
             if (is_new === 1) {
-
                 // Affichage dans la notification
                 if (!is_multiple) {
                     var id_max_os = parseInt(bimp_storage.get(this.id_notification + 'id_max_notif_os'));

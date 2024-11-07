@@ -328,7 +328,7 @@ class devController extends BimpController
                         if(!$start && $id == $matches[1])
                             $start = true;
                         elseif($id == $matches[2])
-                            continue;
+                            break;
                         
                         
                         if($start){

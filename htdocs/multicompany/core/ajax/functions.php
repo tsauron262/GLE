@@ -280,7 +280,7 @@ if (!empty($action) && is_numeric($id)) {
 			)
 		);
 	}
-	$db->close();
+//	$db->close();
 } else {
     $db->close();
     http_response_code(403);

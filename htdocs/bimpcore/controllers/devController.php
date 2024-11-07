@@ -325,15 +325,13 @@ class devController extends BimpController
                     $content = $matches[1].'<br/>'.$matches[2];
                     $start = false;
                     foreach($tabPull as $id => $pull){
+                        if($start){
+                            $content .= '<br/><br/>'.str_replace('\n', '<br>', $pull);
+                        }
                         if(!$start && $id == $matches[1])
                             $start = true;
                         elseif($id == $matches[2])
                             break;
-                        
-                        
-                        if($start){
-                            $content .= '<br/><br/>'.str_replace('\n', '<br>', $pull);
-                        }
                     }
                     
                 }

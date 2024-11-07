@@ -312,7 +312,12 @@ class devController extends BimpController
     {
         $dirLogs = PATH_TMP.'/git_logs/';
         $files = scandir($dirLogs);
-        $html = print_r($files,1);
+        foreach($files as $file){
+            if($file != '.' && $file != '..'){
+                $timeSt = str_replace('.logs', '', $file);
+                $html .= BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), file_get_contents($dirLogs.$file), '', array('open'=>false));
+            }
+        }
         return $html;
     }
 

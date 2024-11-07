@@ -310,6 +310,11 @@ class devController extends BimpController
     
     public function renderPullTab()
     {
+        $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
+        $pulls = explode('commit ', $pulls);
+        foreach($pulls as $pull){
+            $tabPull[substr($pull, 0, 11)] = $pull;
+        }
         $dirLogs = PATH_TMP.'/git_logs/';
         $files = scandir($dirLogs);
         foreach($files as $file){
@@ -318,6 +323,19 @@ class devController extends BimpController
                 $content = file_get_contents($dirLogs.$file);
                 if(preg_match('/bimp-erp[ \n]*([0-9a-z]*)\.\.([0-9a-z]*)[ \n]*master/', $content, $matches)){
                     $content = $matches[1].'<br/>'.$matches[2];
+                    $start = false;
+                    foreach($tabPull as $id => $pull){
+                        if(!$start && $id == $matches[1])
+                            $start = true;
+                        elseif($id == $matches[2])
+                            continue;
+                        
+                        
+                        if($start){
+                            $content .= '<br/><br/>'.str_replace('\n', '<br>', $pull);
+                        }
+                    }
+                    
                 }
                 else {
                     $content = 'Alredy up to date';

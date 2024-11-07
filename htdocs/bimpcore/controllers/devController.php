@@ -317,10 +317,10 @@ class devController extends BimpController
                 $timeSt = str_replace('.logs', '', $file);
                 $content = file_get_contents($dirLogs.$file);
                 if(preg_match('/bimp-erp[ \n]*([0-9a-z]*)\.\.([0-9a-z]*)[ \n]*master/', $content, $matches)){
-                    $content = $matches[1].'\n'.$matches[2];
+                    $content = $matches[1].'<br/>'.$matches[2];
                 }
                 else {
-//                    $content = 'Alredy up to date';
+                    $content = 'Alredy up to date';
                 }
                 
                 

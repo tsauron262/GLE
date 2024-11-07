@@ -316,8 +316,8 @@ class devController extends BimpController
             if($file != '.' && $file != '..'){
                 $timeSt = str_replace('.logs', '', $file);
                 $content = file_get_contents($dirLogs.$file);
-                if(preg_match('bimp-erp ([0-9a-z]*)\.\.([0-9a-z]*) master', $content, $matches)){
-                    $content = $matches[0].'\n'.$matches[1];
+                if(preg_match('/bimp-erp ([0-9a-z]*)\.\.([0-9a-z]*) master/', $content, $matches)){
+                    $content = $matches[1].'\n'.$matches[2];
                 }
                 else {
                     $content = 'Alredy up to date';

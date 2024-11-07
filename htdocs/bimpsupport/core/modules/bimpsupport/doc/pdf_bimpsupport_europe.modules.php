@@ -489,14 +489,27 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                     
                     
                     //signature tech
-                    $sign = $sav->getChildObject('user_tech')->getData('signature_papier');
-                    if($sign && strlen($sign) > 10000){
-                        $sign = $sav->getChildObject('user_tech')->getData('signature_papier');
+                    $userTech = $sav->getChildObject('user_tech');
+                    
+                    if (BimpObject::objectLoaded($userTech)) {
+                        $sign = $userTech->getData('signature_papier');
+                        if($sign && strlen($sign) > 10000){
+                            $base64_image = $userTech->getData('signature_papier');
 
-                        $pdf->Image($sign, 20, 198, 50, 28);
-                    }
-                    else{
-                        $this->error = 'LE technicien n\'a pas de signature';
+                            $output_file = DOL_DATA_ROOT . '/tmp.png';
+                            $ifp = fopen($output_file, 'wb');
+                            $data = explode(',', $base64_image);
+                            fwrite($ifp, base64_decode($data[1]));
+                            fclose($ifp);
+                            
+                            $pdf->Image($output_file, 20, 198, 50, 28);
+                        }
+                        else{
+                            $this->error = 'Le technicien n\'a pas de signature';
+                            return 0;
+                        }   
+                    } else {
+                        $this->error = 'Technicien absent';
                         return 0;
                     }
                 }

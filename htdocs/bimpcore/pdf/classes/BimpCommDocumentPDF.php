@@ -158,6 +158,19 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                     case 'champagne':
                         $this->fromCompany->name = 'LDLC APPLE';
+
+                        if (method_exists($this->object, 'fetch_optionals')) {
+                            $this->object->fetch_optionals();
+                            if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
+                                $entrepot = new Entrepot($this->db);
+                                $entrepot->fetch($this->object->array_options['options_entrepot']);
+                                if ($entrepot->address != "" && $entrepot->town != "") {
+                                    $this->fromCompany->zip = $entrepot->zip;
+                                    $this->fromCompany->address = $entrepot->address;
+                                    $this->fromCompany->town = $entrepot->town;
+                                }
+                            }
+                        }
                         break;
                 }
 
@@ -1134,7 +1147,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                         'pu_ht'    => '',
                         'total_ht' => ''
                     );
-                    
+
                     if (!$this->hideTtc) {
                         $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales_total);
                     }

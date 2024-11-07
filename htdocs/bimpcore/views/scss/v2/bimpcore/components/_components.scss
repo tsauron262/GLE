@@ -1,0 +1,27 @@
+
+.BimpComponent.BCV2.debug {
+    border: 2px solid var(--bimp-debug-color);
+    padding: 0 10px 10px 10px;
+    margin: 2px;
+    
+    .debugContainer {
+        margin: 0 -10px 10px -10px;
+        font-size: 11px;
+    }
+    .debugCaption {
+        color: #fff;
+        background-color: var(--bimp-debug-color);
+        padding: 5px;
+        margin: 0;
+        
+        .foldable-caret {
+            font-size: 11px;
+            display: inline-block;
+        }
+    }
+    .debugContent {
+        padding: 5px;
+        display: none;
+        background-color: #DCDCDC;
+    }
+}

@@ -67,34 +67,53 @@ class BimpCore
     public static function init()
     {
         if (!self::$is_init) {
+            BimpDebug::addDebugTime('Début affichage page');
+
             self::$is_init = true;
 
             global $noBootstrap;
 
-            BimpDebug::addDebugTime('Début affichage page');
-
-            // Commenté car pose problème
-//            if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
-//                self::setContext("private"); // Todo: trouver meilleure solution (Le contexte privé / public doit être indépendant du module) 
-//            }
+            $extends_entity = BimpCore::getExtendsEntity();
+            $use_css_v2 = (int) self::getConf('use_css_v2');
+            $is_context_private = self::isContextPrivate();
 
             if ($noBootstrap) {
                 self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
             }
 
-            if (self::isContextPrivate()) {
-                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css';
-                }
-                self::$files['js'][] = '/bimpcore/views/js/notification.js';
-            } else {
-                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css';
+            // Traitements CSS : 
+            if ($use_css_v2) {
+                if ($is_context_private) {
+                    if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css';
+                    } else {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/default/bimpcore.css';
+                    }
                 } else {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+                    if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore_public.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore_public.css';
+                    } else {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/default/bimpcore_public.css';
+                    }
+                }
+            } else {
+                if ($is_context_private) {
+                    if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css';
+                    }
+                } else {
+                    if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css';
+                    } else {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+                    }
                 }
             }
 
+            // Traitements JS : 
+            if ($is_context_private) {
+                self::$files['js']['notification'] = '/bimpcore/views/js/notification.js';
+            }
             if (!self::isModuleActive('bimpdatasync')) {
                 unset(self::$files['css']['bds_operations']);
                 unset(self::$files['js']['bds_operations']);
@@ -105,7 +124,7 @@ class BimpCore
         }
     }
 
-    // Gestion Layout / js / css: 
+    // Gestion Layout / js / css:
 
     public static function initLayout()
     {

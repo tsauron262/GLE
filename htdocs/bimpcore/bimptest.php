@@ -27,25 +27,22 @@ if (!$user->admin) {
     exit;
 }
 
-//require_once DOL_DOCUMENT_ROOT . '/bimpcore/components/BCV2_Lib.php';
-//echo BC_V2\BC_Form::render(array(
-//    'title'                => 'HOLA',
-//    'icon'                 => 'fas_check',
-//    'header_icons'         => array(
-//        array(
-//            'label'    => 'TEST',
-//            'icon'     => 'fas_check',
-//            'onclick'  => 'alert(\'OK !!\')',
-//            'disabled' => 1,
-//            'popover'  => 'Hello !!'
-//        )
-//    ),
-//    'footer_extra_content' => 'TEST'
-//));
+$rows = $bdb->getRows('product', '', null, 'array', array('rowid', 'ref'));
 
-//$url = 'https://erpi.bimp.fr/actimac/bimpwebservice/request.php';
-//$ch = curl_init($url);
-//$response = curl_exec($ch);
+if (is_array($rows)) {
+    foreach ($rows as $r) {
+        if (preg_match('/^(.+)_A$/', $r['ref'], $matches)) {
+            $ref = $matches[1] . '/A';
+            if ($bdb->update('product', array(
+                        'ref' => $ref
+                            ), 'rowid = ' . $r['rowid']) <= 0) {
+                echo 'FAIL : ' . $ref . '<br/>';
+            } else {
+                echo 'OK ' . $ref . '<br/>';
+            }
+        }
+    }
+}
 
 
 echo '<br/>FIN';

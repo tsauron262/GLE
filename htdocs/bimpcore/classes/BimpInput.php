@@ -362,7 +362,7 @@ class BimpInput
                 break;
 
             case 'toggle':
-                $display_labels = isset($options['display_label']) ? (int) $options['display_labels'] : 1;
+                $display_labels = isset($options['display_labels']) ? (int) $options['display_labels'] : 1;
 
                 if ($display_labels) {
                     if (!isset($options['toggle_on']) || !$options['toggle_on']) {

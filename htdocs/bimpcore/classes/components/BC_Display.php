@@ -914,6 +914,7 @@ class BC_Display extends BimpComponent
                     $spaces = (int) $this->getParam('spaces', ($type === 'money' ? 1 : 0));
                     $red = (int) $this->getParam('red_if_neg', 0);
                     $truncate = (int) $this->getParam('truncate', 0);
+                    $no_zeros_decimals = (int) $this->getParam('no_zero_decimals', ($type == 'money' ? 0 : 1));
                     $sep = (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('separator', '.') : '.');
                     $decimals = (int) (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('decimals', 2) : 0);
                     $symbole = (int) (in_array($type, array('percent', 'money')) ? $this->getParam('symbole', 1) : 0);
@@ -925,7 +926,8 @@ class BC_Display extends BimpComponent
 
                         case 'decimal':
                         case 'percent':
-                            $html .= BimpTools::displayFloatValue($this->value, $decimals, $sep, $red, $truncate, $this->no_html, $round_points, $spaces);
+                            $no_zeros_decimals = (int) $this->getParam('no_zero_decimals', 1);
+                            $html .= BimpTools::displayFloatValue($this->value, $decimals, $sep, $red, $truncate, $this->no_html, $round_points, $spaces, $no_zeros_decimals);
 
                             if ($type === 'percent' && $symbole) {
                                 $html .= ' %';

@@ -2440,6 +2440,14 @@ class BCT_ContratLine extends BimpObject
 
         return $propales;
     }
+    
+    public function getInputPeriodicitiesArray()
+    {
+        $values = self::$periodicities;
+        $values[0] = '';
+        
+        return $values;
+    }
 
     // Affichage:
 
@@ -7369,6 +7377,7 @@ class BCT_ContratLine extends BimpObject
                                     continue;
                                 }
 
+                                $variable_qty = (int) $line->getData('variable_qty');
                                 $contrat = $line->getParentInstance();
                                 $line_ref = (BimpObject::objectLoaded($contrat) ? 'Contrat {{Contrat2:' . $contrat->id . '}} - Ligne n° ' . $line->getData('rang') : 'Ligne #' . $line->id);
                                 $product = $line->getChildObject('product');
@@ -7410,7 +7419,7 @@ class BCT_ContratLine extends BimpObject
                                 }
 
                                 $qty = 0;
-                                if ((int) $line->getData('variable_qty')) {
+                                if ($variable_qty) {
                                     $qty = (float) BimpTools::getArrayValueFromPath($line_data, 'total_qty', 0);
                                 } else {
                                     $qty_per_period = $line->getFacQtyPerPeriod();
@@ -7427,7 +7436,7 @@ class BCT_ContratLine extends BimpObject
                                     }
                                 }
 
-                                if (!$qty) {
+                                if (!$qty && !$variable_qty) {
                                     $process->incIgnored();
                                     $process->Alert('Ligne ignorée (Aucune quantité à facturer)', $facture, $line_ref);
                                     continue;
@@ -7489,6 +7498,7 @@ class BCT_ContratLine extends BimpObject
 
                                             $sub_line_qty = 0;
                                             $sub_line_qty_per_period = 0;
+                                            $sub_line_variable_qty = (int) $sub_line->getData('variable_pu_ht');
 
                                             if (isset($line_data['sub_lines'][$sub_line->id]['total_qty'])) {
                                                 $sub_line_qty = $line_data['sub_lines'][$sub_line->id]['total_qty'];
@@ -7507,7 +7517,7 @@ class BCT_ContratLine extends BimpObject
                                                 }
                                             }
 
-                                            if (!$sub_line_qty) {
+                                            if (!$sub_line_qty && !$sub_line_variable_qty) {
                                                 $process->incIgnored();
                                                 $process->Alert('Ligne ignorée (Aucune quantité à facturer)', $facture, $line_ref . ' (Sous-ligne n°' . $sub_line->getData('rang') . ')');
                                                 continue;
@@ -7520,7 +7530,7 @@ class BCT_ContratLine extends BimpObject
                                                 'editable'   => 0
                                             );
 
-                                            if ((int) $sub_line->getData('variable_pu_ht')) {
+                                            if ($sub_line_variable_qty) {
                                                 $sub_lines_data[$sub_line->id]['subprice'] = BimpTools::getArrayValueFromPath($line_data, 'sub_lines/' . $sub_line->id . '/subprice', null);
                                                 $sub_lines_data[$sub_line->id]['editable'] = 1;
 
@@ -8045,6 +8055,10 @@ class BCT_ContratLine extends BimpObject
 
     public function validatePost()
     {
+        // temp : 
+        if (isset($_POST['date_ouverture_prevue']) && !is_null($_POST['date_ouverture_prevue']) && $_POST['date_ouverture_prevue'] !== '') {
+            $_POST['date_ouverture_prevue'] = date('Y-m-d', strtotime($_POST['date_ouverture_prevue'])) . ' 00:00:00';
+        }
         $errors = parent::validatePost();
 
         if (!count($errors)) {

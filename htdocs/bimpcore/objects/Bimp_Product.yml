@@ -929,8 +929,9 @@ forms:
             - custom: 1
               label: Quantité
               input_name: qty
-              data_type: int
-              min: 1
+              data_type: float
+              min: 0
+              decimals: 6
               input: 
                   type: qty
                   
@@ -999,8 +1000,7 @@ forms:
               label: Prix d'achat fournisseur
               on_edit: 1
               multiple: 1
-              form_name: create_prod
-            
+              form_name: create_prod          
             
 fields_tables: 
     infos: 

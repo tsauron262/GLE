@@ -316,8 +316,8 @@ class devController extends BimpController
         $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs_old.logs');
         $pulls = explode('commit ', $pulls);
         $pulls2 = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
-        $pulls2 = explode('commit ', $pulls);
-        $html = count($pulls).' commit(s)';
+        $pulls2 = explode('commit ', $pulls2);
+        $html = (count($pulls)+count($pulls2)).' commit(s)';
         foreach($pulls as $pull){
             $tabPull[substr($pull, 0, 18)] = $pull;
         }

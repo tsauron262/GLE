@@ -310,10 +310,18 @@ class devController extends BimpController
     
     public function renderPullTab()
     {
-        $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
+        /*
+         * git log --reverse > /GLE-data/bimp163/tmp/git_logs_commit/logs.logs
+         */
+        $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs_old.logs');
         $pulls = explode('commit ', $pulls);
+        $pulls2 = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
+        $pulls2 = explode('commit ', $pulls);
         $html = count($pulls).' commit(s)';
         foreach($pulls as $pull){
+            $tabPull[substr($pull, 0, 18)] = $pull;
+        }
+        foreach($pulls2 as $pull){
             $tabPull[substr($pull, 0, 18)] = $pull;
         }
 //        $html .= '<pre>'.print_r($tabPull,1).'</pre>';

@@ -307,6 +307,14 @@ class devController extends BimpController
 
         return $html;
     }
+    
+    public function renderPullTab()
+    {
+        $dirLogs = PATH_TMP.'/git_logs/';
+        $files = scandir($dirLogs);
+        $html = print_r($files,1);
+        return $html;
+    }
 
     public function renderYmlTab()
     {

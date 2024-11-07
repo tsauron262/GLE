@@ -315,7 +315,16 @@ class devController extends BimpController
         foreach($files as $file){
             if($file != '.' && $file != '..'){
                 $timeSt = str_replace('.logs', '', $file);
-                $html .= BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), file_get_contents($dirLogs.$file), '', array('open'=>false));
+                $content = file_get_contents($dirLogs.$file);
+                if(preg_match('bimp-erp ([0-9a-z]*)\.\.([0-9a-z]*) master', $content, $matches)){
+                    $content = $matches[0].'\n'.$matches[1];
+                }
+                else {
+                    $content = 'Alredy up to date';
+                }
+                
+                
+                $html .= BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), $content, '', array('open'=>false));
             }
         }
         return $html;

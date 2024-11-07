@@ -613,9 +613,9 @@ class BIMP_Task extends BimpAbstractFollow
                     $tasks['unaffected_task'] += $user_tasks['unaffected_task'];
                 }
             }
-        }
 
-        usort($tasks['content'], 'sortBimpTasksByDateCreate');
+            usort($tasks['content'], 'sortBimpTasksByDateCreate');
+        }
         return $tasks;
     }
 

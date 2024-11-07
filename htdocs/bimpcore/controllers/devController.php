@@ -314,9 +314,9 @@ class devController extends BimpController
         $pulls = explode('commit ', $pulls);
         $html = count($pulls).' commit(s)';
         foreach($pulls as $pull){
-            $tabPull[substr($pull, 0, 11)] = $pull;
+            $tabPull[substr($pull, 0, 18)] = $pull;
         }
-        $html .= '<pre>'.print_r($tabPull,1).'</pre>';
+//        $html .= '<pre>'.print_r($tabPull,1).'</pre>';
         $dirLogs = PATH_TMP.'/git_logs/';
         $files = scandir($dirLogs);
         foreach($files as $file){
@@ -330,7 +330,7 @@ class devController extends BimpController
                         if($start){
                             $content .= '<br/><br/>'.str_replace('\n', '<br>', $pull);
                         }
-                        if(!$start && $id == $matches[1])
+                        if(!$start && stripos($id, $matches[1]) === 0)
                             $start = true;
                         elseif($id == $matches[2])
                             break;

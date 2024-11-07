@@ -95,8 +95,10 @@ fields:
     
     value:
         label: Quantité
-        type: int
+        type: float
         has_total: 1
+        no_zero_decimals: 1
+        decimals: 6
     
     inventorycode:
         label: Code inventaire

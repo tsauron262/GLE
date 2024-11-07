@@ -122,14 +122,20 @@ class Bimp_User extends BimpObject
 
     public function canEditField($field_name)
     {
+        global $user;
+
         switch ($field_name) {
             case 'extra_materiel':
-                global $user;
-
                 if ($user->admin || $user->login == 'l.gay') {
                     return 1;
                 }
                 return 0;
+
+            case 'delegations':
+                if (!$this->isLoaded()) {
+                    return 0;
+                }
+                return (int) ($user->id == $this->id);
         }
         return parent::canEditField($field_name);
     }
@@ -532,7 +538,7 @@ class Bimp_User extends BimpObject
                 ))
             );
         }
-        
+
         if ($this->isActionAllowed('unlock') && $this->canSetAction('unlock')) {
             $buttons[] = array(
                 'label'   => 'Débloquer',
@@ -833,6 +839,37 @@ class Bimp_User extends BimpObject
             $html .= '<div style="margin-top: 10px; text-align: right">';
             $html .= '<span class="btn btn-default" onclick="' . $this->getJsLoadModalForm('day_off', 'Modifier vos jours off') . '">';
             $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
+    public function displayDelegations()
+    {
+        $html = '';
+
+        $delegations = $this->getData('delegations');
+
+        if (!empty($delegations)) {
+            $msg = '';
+            if (count($delegations) > 1) {
+                $msg .= 'Les utilisateurs ci-dessous ont ';
+            } else {
+                $msg .= 'L\'utilisateur ci-dessous a ';
+            }
+            $msg .= 'accès à vos messages et vos tâches';
+            $html .= BimpRender::renderAlerts($msg, 'warning');
+            $html .= $this->displayDataDefault('delegations');
+        } else {
+            $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Aucune délégation</span>';
+        }
+
+        if ($this->canEditField('delegations')) {
+            $html .= '<div class="buttonsContainer align-right">';
+            $html .= '<span class="btn btn-default" onclick="' . $this->getJsLoadModalForm('delegations', 'Modifier vos délégations') . '">';
+            $html .= BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Gérer';
             $html .= '</span>';
             $html .= '</div>';
         }
@@ -2725,15 +2762,15 @@ class Bimp_User extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
+
     public function actionUnlock($data, &$success)
     {
         $errors = array();
         $warnings = array();
         $success = 'Compte débloqué';
-        
+
         $errors = $this->updateField('echec_auth', 0);
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -2741,6 +2778,26 @@ class Bimp_User extends BimpObject
     }
 
     // Overrides: 
+
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if ($this->isLoaded()) {
+            $delegations = $this->getData('delegations');
+            if (!empty($delegations)) {
+                foreach ($delegations as $idx => $id_user) {
+                    if ($id_user == $this->id) {
+                        unset($delegations[$idx]);
+                    }
+                }
+                
+                $this->set('delegations', $delegations);
+            }
+        }
+
+        return $errors;
+    }
 
     public function onSave(&$errors = array(), &$warnings = array())
     {

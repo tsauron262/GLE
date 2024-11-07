@@ -11903,43 +11903,43 @@ table.objectFieldHistoryTable > tbody > tr > td {
   border-bottom: 1px solid #f1f1f1; }
 
 /* Fin Autre que BimpTheme */
-/* line 53, ../scss/bimpcore/_notifications.scss */
+/* line 56, ../scss/bimpcore/_notifications.scss */
 .dropdown-menu.dropdown-menu-right.notification-dropdown {
   min-width: 250px;
   max-height: 500px;
   overflow-y: scroll;
   border: 1px solid #999 !important; }
 
-/* line 60, ../scss/bimpcore/_notifications.scss */
+/* line 63, ../scss/bimpcore/_notifications.scss */
 .modifDropdown > a {
   margin-right: 10px; }
 
-/* line 64, ../scss/bimpcore/_notifications.scss */
+/* line 67, ../scss/bimpcore/_notifications.scss */
 a.nav-link.dropdown-toggle:not(.notif_white) > i {
   color: black !important; }
 
-/* line 68, ../scss/bimpcore/_notifications.scss */
+/* line 71, ../scss/bimpcore/_notifications.scss */
 .list_notification {
   line-height: 22px;
   font-size: 12px; }
-  /* line 72, ../scss/bimpcore/_notifications.scss */
+  /* line 75, ../scss/bimpcore/_notifications.scss */
   .list_notification .list_part {
     border-bottom: 1px solid #ccc;
     padding: 4px 10px 15px 10px;
     min-width: 320px;
     max-width: 800px; }
-    /* line 78, ../scss/bimpcore/_notifications.scss */
+    /* line 81, ../scss/bimpcore/_notifications.scss */
     .list_notification .list_part:first-child {
       border-top: 1px solid #ccc; }
-    /* line 82, ../scss/bimpcore/_notifications.scss */
+    /* line 85, ../scss/bimpcore/_notifications.scss */
     .list_notification .list_part:hover {
       border-left: 5px solid #C11F2A;
       padding-left: 5px;
       background-color: #f5f5f5; }
-    /* line 88, ../scss/bimpcore/_notifications.scss */
+    /* line 91, ../scss/bimpcore/_notifications.scss */
     .list_notification .list_part.notif_link:hover {
       cursor: pointer; }
-    /* line 92, ../scss/bimpcore/_notifications.scss */
+    /* line 95, ../scss/bimpcore/_notifications.scss */
     .list_notification .list_part .part_list_header {
       text-align: left;
       background-color: #F7F7F7;
@@ -11948,20 +11948,20 @@ a.nav-link.dropdown-toggle:not(.notif_white) > i {
       margin-right: -10px;
       margin-bottom: 0;
       padding: 0 10px; }
-      /* line 101, ../scss/bimpcore/_notifications.scss */
+      /* line 104, ../scss/bimpcore/_notifications.scss */
       .list_notification .list_part .part_list_header span {
         display: inline-block;
         margin-right: 3px; }
-    /* line 107, ../scss/bimpcore/_notifications.scss */
+    /* line 110, ../scss/bimpcore/_notifications.scss */
     .list_notification .list_part .date_notif {
       color: #4D4C4C;
       font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
       font-size: 11px;
       text-align: left; }
-    /* line 114, ../scss/bimpcore/_notifications.scss */
+    /* line 117, ../scss/bimpcore/_notifications.scss */
     .list_notification .list_part .hashtag_src {
       font-weight: bold; }
-    /* line 118, ../scss/bimpcore/_notifications.scss */
+    /* line 121, ../scss/bimpcore/_notifications.scss */
     .list_notification .list_part .hashtag_content {
       margin: 5px;
       padding: 5px;
@@ -11971,21 +11971,21 @@ a.nav-link.dropdown-toggle:not(.notif_white) > i {
       box-shadow: 0 0 2px #787878; }
 
 /* Demande de validations */
-/* line 130, ../scss/bimpcore/_notifications.scss */
+/* line 133, ../scss/bimpcore/_notifications.scss */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_demande_valid_comm"] {
   min-width: 300px !important; }
 
 /* Bimp message */
-/* line 135, ../scss/bimpcore/_notifications.scss */
+/* line 138, ../scss/bimpcore/_notifications.scss */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_bimp_note"] {
   min-width: 400px !important; }
 
-/* line 139, ../scss/bimpcore/_notifications.scss */
+/* line 142, ../scss/bimpcore/_notifications.scss */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_task"] {
   min-width: 800px !important; }
 
 /* style general chat */
-/* line 144, ../scss/bimpcore/_notifications.scss */
+/* line 147, ../scss/bimpcore/_notifications.scss */
 .msg_cotainer {
   border-radius: 25px;
   background-color: #E6E1E0;
@@ -11999,25 +11999,25 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_tas
   font-size: 1.3em;
   line-height: normal; }
 
-/* line 158, ../scss/bimpcore/_notifications.scss */
+/* line 161, ../scss/bimpcore/_notifications.scss */
 .justify-content-end .msg_cotainer {
   background-color: #78e08f; }
 
-/* line 161, ../scss/bimpcore/_notifications.scss */
+/* line 164, ../scss/bimpcore/_notifications.scss */
 .justify-content-start .msg_cotainer {
   background-color: #82ccdd; }
 
-/* line 165, ../scss/bimpcore/_notifications.scss */
+/* line 168, ../scss/bimpcore/_notifications.scss */
 .justify-content-end {
   -ms-flex-pack: end !important;
   justify-content: flex-end !important; }
 
-/* line 169, ../scss/bimpcore/_notifications.scss */
+/* line 172, ../scss/bimpcore/_notifications.scss */
 .d-flex {
   display: -ms-flexbox !important;
   display: flex !important; }
 
-/* line 173, ../scss/bimpcore/_notifications.scss */
+/* line 176, ../scss/bimpcore/_notifications.scss */
 .msg_time {
   position: absolute;
   left: 25px;
@@ -12025,21 +12025,21 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_tas
   color: rgba(0, 0, 0, 0.5);
   font-size: 10px; }
 
-/* line 180, ../scss/bimpcore/_notifications.scss */
+/* line 183, ../scss/bimpcore/_notifications.scss */
 .justify-content-end .msg_time {
   left: auto;
   right: 25px; }
 
 /* plus spécifique*/
-/* line 187, ../scss/bimpcore/_notifications.scss */
+/* line 190, ../scss/bimpcore/_notifications.scss */
 .img-circle {
   margin: 5px; }
 
-/* line 190, ../scss/bimpcore/_notifications.scss */
+/* line 193, ../scss/bimpcore/_notifications.scss */
 .nonLu {
   opacity: 0.4; }
 
-/* line 193, ../scss/bimpcore/_notifications.scss */
+/* line 196, ../scss/bimpcore/_notifications.scss */
 .nonLu.my {
   opacity: 1;
   animation: colorblink 2s infinite; }
@@ -12048,57 +12048,63 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_tas
   50% {
     opacity: 0; } }
 /* petit */
-/* line 205, ../scss/bimpcore/_notifications.scss */
+/* line 209, ../scss/bimpcore/_notifications.scss */
 .petit .msg_cotainer {
   font-size: 1em; }
 
-/* line 208, ../scss/bimpcore/_notifications.scss */
+/* line 212, ../scss/bimpcore/_notifications.scss */
 .petit.justify-content-end {
   -ms-flex-pack: start !important;
   justify-content: flex-start !important; }
 
 /* menu */
-/* line 215, ../scss/bimpcore/_notifications.scss */
+/* line 219, ../scss/bimpcore/_notifications.scss */
 .lnMsg {
   border-bottom: 1px dotted #B3A9A9; }
 
-/* line 219, ../scss/bimpcore/_notifications.scss */
+/* line 223, ../scss/bimpcore/_notifications.scss */
 .titreFilMsg {
   font-size: 1.4em; }
 
 /* Bimp task */
-/* line 225, ../scss/bimpcore/_notifications.scss */
+/* line 229, ../scss/bimpcore/_notifications.scss */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_task"] {
   width: auto;
   min-width: 800px;
   overflow-y: scroll; }
 
-/* line 231, ../scss/bimpcore/_notifications.scss */
+/* line 236, ../scss/bimpcore/_notifications.scss */
 div.tabs-animated {
   width: auto;
   max-height: auto;
   overflow-y: scroll; }
 
-/* line 237, ../scss/bimpcore/_notifications.scss */
+/* line 242, ../scss/bimpcore/_notifications.scss */
 div.task_panel {
   max-height: auto;
   overflow-y: scroll;
   padding: 0px;
   line-height: 22px;
   width: 800px; }
-  /* line 244, ../scss/bimpcore/_notifications.scss */
+  /* line 249, ../scss/bimpcore/_notifications.scss */
   div.task_panel .task_src {
     font-size: 11px;
     font-style: italic;
     color: #006AFF; }
-  /* line 250, ../scss/bimpcore/_notifications.scss */
+  /* line 255, ../scss/bimpcore/_notifications.scss */
+  div.task_panel .task_dest {
+    font-size: 11px;
+    font-style: italic;
+    color: #A00000;
+    font-weight: bold; }
+  /* line 262, ../scss/bimpcore/_notifications.scss */
   div.task_panel .parent_task {
     margin: 5px 0;
     font-style: italic; }
-  /* line 255, ../scss/bimpcore/_notifications.scss */
+  /* line 267, ../scss/bimpcore/_notifications.scss */
   div.task_panel .task_subj {
     font-weight: bold; }
-  /* line 259, ../scss/bimpcore/_notifications.scss */
+  /* line 271, ../scss/bimpcore/_notifications.scss */
   div.task_panel .task_txt {
     margin: 5px;
     padding: 5px;
@@ -12108,38 +12114,38 @@ div.task_panel {
     box-shadow: 0 0 2px #787878; }
 
 /*BimpValidation*/
-/* line 271, ../scss/bimpcore/_notifications.scss */
+/* line 283, ../scss/bimpcore/_notifications.scss */
 div.bv_demandes_panel {
   max-height: auto;
   overflow-y: scroll;
   padding: 0px;
   line-height: 22px;
   width: 800px; }
-  /* line 278, ../scss/bimpcore/_notifications.scss */
+  /* line 290, ../scss/bimpcore/_notifications.scss */
   div.bv_demandes_panel .user_demande {
     font-size: 11px;
     font-style: italic;
     color: #006AFF; }
 
 /* Les onglets */
-/* line 286, ../scss/bimpcore/_notifications.scss */
+/* line 298, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li {
   width: 48%; }
 
-/* line 290, ../scss/bimpcore/_notifications.scss */
+/* line 302, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li.reload {
   width: 2%; }
 
-/* line 294, ../scss/bimpcore/_notifications.scss */
+/* line 306, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a {
   padding-left: 0px;
   padding-right: 0px; }
 
-/* line 299, ../scss/bimpcore/_notifications.scss */
+/* line 311, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a > span {
   margin: 0px; }
 
-/* line 303, ../scss/bimpcore/_notifications.scss */
+/* line 315, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a:hover {
   background-color: unset !important;
   border-top-color: white;

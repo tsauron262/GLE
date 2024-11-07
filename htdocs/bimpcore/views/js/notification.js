@@ -19,42 +19,37 @@
  */
 
 class AbstractNotification {
-    /**
-     * Méthode doit être appelée avec super()
-     */
+
     constructor(id_notification) {
         if (this.constructor == AbstractNotification) {
             throw new Error('La classe abstraite "AbstractNotification" ne peut être instanciée.');
             return;
         }
-        
+
         this.id_max = 0;
         this.use_localStorage = false;
         this.id_notification = id_notification;
         this.content = [];
-//        this.nom = nom;
         this.ptr = 'notificationActive[' + this.id_notification + '].obj';
         this.dropdown_id = 'dropdown_' + this.id_notification;
-        // Aussi dans BimpNotification
-//        this.parent_selector = 'div.dropdown.modifDropdown:last';
+
         this.parent_selector = 'div.login_block_other';
 //        this.display_notification = true;
 //        if (bimp_storage.get(this.id_notification) === null)
 //            bimp_storage.set(this.id_notification, this.id_max);
-        
+
         this.init();
     }
 
     init(an) {
         var instance = this;
-        // Animation ouverture des notifs
+
         $('#' + an.dropdown_id).click(function (e) {
             an.expand();
             e.stopPropagation();
 
         });
 
-        // Fermeture des dropdown lors de cliques à côté
         $(document).click(function (e) {
             if (!$('#page_modal').hasClass('in') && $(e.target).attr('id') != 'page_modal') {
                 var $target = $(e.target);
@@ -63,7 +58,6 @@ class AbstractNotification {
             }
         });
 
-        // Click recharger la notif
         $('span[name="reload_notif"][dropdown_id="' + instance.dropdown_id + '"]').click(function () {
             instance.reloadNotif();
         });
@@ -138,67 +132,74 @@ class AbstractNotification {
         });
     }
 
-    /**
-     * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
-     */
     addElement(element) {
-//        console.log(element);
-//            console.log(typeof element.content, this.id_notification + "_content", element.content.length);
+        /**
+         * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
+         */
+
+        console.log(element);
+        console.log(typeof element.content, this.id_notification + "_content", element.content.length);
+
         if (typeof element.content === "object" && (element.content.length > 0 || Object.keys(element.content).length > 0)) {
 
-            //this.content = this.content.concat(element.content);
-            
-            if(this.id_max == 0)
+            if (this.id_max == 0)
                 var add = 0;
             else
                 var add = 1;
-            if(this.use_localStorage){
+
+            if (this.use_localStorage) {
+                console.log('storage');
                 bimp_storage.set(this.id_notification + "_content", element.content, add);
                 this.traiteStorage();
-            }
-            else
+            } else {
+                console.log('no_storage');
                 this.traiteElement(element.content);
+            }
         }
 
     }
-    
-    traiteStorage(){
+
+    traiteStorage() {
+        if (!this.use_localStorage) {
+            return;
+        }
+        
         var content = bimp_storage.get(this.id_notification + "_content");
-        if (content !== null){
+        if (content !== null) {
             this.content = [];
             this.id_max = 0;
             this.emptyNotifs();
             this.traiteElement(content);
         }
     }
-    
-    traiteElement(content){
-        content = Object.keys(content).map(function(cle) {
+
+    traiteElement(content) {
+        content = Object.keys(content).map(function (cle) {
             return content[cle];
         });
         var notif = this;
-        
-        
-        content = content.sort(function compare(a, b) {
-            if (notif.isNew(a) < notif.isNew(b))
-               return -1;
-            if (notif.isNew(a) > notif.isNew(b))
-               return 1;
-            if(a.position !== undefined){
-                if (a.position > b.position)
-                   return -1;
-                if (a.position < b.position)
-                   return 1;
-            }
-            if (a.id < b.id)
-               return -1;
-            if (a.id > b.id )
-               return 1;
-            return 0;
-        });
-        
+
+
+//        content = content.sort(function compare(a, b) {
+//            if (notif.isNew(a) < notif.isNew(b))
+//                return -1;
+//            if (notif.isNew(a) > notif.isNew(b))
+//                return 1;
+//            if (a.position !== undefined) {
+//                if (a.position > b.position)
+//                    return -1;
+//                if (a.position < b.position)
+//                    return 1;
+//            }
+//            if (a.id < b.id)
+//                return -1;
+//            if (a.id > b.id)
+//                return 1;
+//            return 0;
+//        });
+
 //        content = Object.fromEntries(content);
-        
+
         var nb_unread = 0;
         var id_max_changed = 0;
         var to_display = '';
@@ -206,7 +207,7 @@ class AbstractNotification {
 //        if (content !== null && this.isMultiple(content))
 //            var is_multiple = true;
 //        else
-            var is_multiple = false;
+        var is_multiple = false;
 
         for (var i in content) {
 
@@ -215,8 +216,7 @@ class AbstractNotification {
                 if (parseInt(content[i].tms) > this.id_max) {
                     this.id_max = parseInt(content[i].tms);
                 }
-            }
-            else{
+            } else {
                 if (parseInt(content[i].id) > this.id_max) {
                     this.id_max = parseInt(content[i].id);
                 }
@@ -234,12 +234,11 @@ class AbstractNotification {
 
             // Augmentation du nombre dans le span rouge
             if (is_new === 1) {
-
                 // Affichage dans la notification
                 if (!is_multiple) {
-                    var id_max_os = parseInt(bimp_storage.get(this.id_notification+'id_max_notif_os'));
+                    var id_max_os = parseInt(bimp_storage.get(this.id_notification + 'id_max_notif_os'));
                     if (isNaN(id_max_os) || id_max_os < this.id_max) {
-                        bimp_storage.set(this.id_notification+'id_max_notif_os', this.id_max);
+                        bimp_storage.set(this.id_notification + 'id_max_notif_os', this.id_max);
                         this.displayNotification(content[i]);
                     }
                 }
@@ -249,10 +248,10 @@ class AbstractNotification {
         }
 
         if (is_multiple) {
-            var id_max_os = parseInt(bimp_storage.get(this.id_notification+'id_max_notif_os'));
+            var id_max_os = parseInt(bimp_storage.get(this.id_notification + 'id_max_notif_os'));
             if (isNaN(id_max_os) || id_max_os < this.id_max) {
                 console.log('notifiii');
-                bimp_storage.set(this.id_notification+'id_max_notif_os', this.id_max);
+                bimp_storage.set(this.id_notification + 'id_max_notif_os', this.id_max);
                 this.displayMultipleNotification(content, nb_unread);
             }
         }
@@ -471,7 +470,7 @@ function BimpNotification() {
             }
 
             data.date_start = date_start;
-           
+
 
             BimpAjax('getNotification', data, null, {
                 display_success: false,
@@ -502,7 +501,7 @@ function BimpNotification() {
                         bn.iterate();
                 }
             });
-        }
+    }
     };
 
     this.iterate = function () {
@@ -623,14 +622,13 @@ function BimpNotification() {
 
         }
 
-        setTimeout(function(){
-            if(localStorageOk){
+        setTimeout(function () {
+            if (localStorageOk) {
 //                console.log('storage ok');
-                setTimeout(function(){
+                setTimeout(function () {
                     bn.iterate();
                 }, 15000);
-            }
-            else{
+            } else {
 //                console.log('storage off');
                 bn.iterate();
             }

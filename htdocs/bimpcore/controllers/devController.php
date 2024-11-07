@@ -349,7 +349,7 @@ class devController extends BimpController
             $htmlT = '';
             foreach($datas as $m => $datas2){
                 $htmlT2 = '';
-                foreach($datas as $pull){
+                foreach($datas2 as $pull){
                     $htmlT2 .= $pull;
                 }
                 $htmlT .= BimpRender::renderPanel($m, $htmlT2, '', array('open'=>false));

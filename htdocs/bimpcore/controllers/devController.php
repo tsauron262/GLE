@@ -332,7 +332,7 @@ class devController extends BimpController
                         }
                         if(!$start && stripos($id, $matches[1]) === 0)
                             $start = true;
-                        elseif($id == $matches[2])
+                        elseif(stripos($id, $matches[2]) === 0)
                             break;
                     }
                     

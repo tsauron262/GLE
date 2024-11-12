@@ -753,7 +753,7 @@ class ProductCombination
 	 * @param string 	    	$ref_ext            External reference
 	 * @return int<-1,1>							Return integer <0 KO, >0 OK
 	 */
-	public function createProductCombination(User $user, Product $product, array $combinations, array $variations, $price_var_percent = false, $forced_pricevar = false, $forced_weightvar = false, $forced_refvar = false, $ref_ext = '')
+	public function createProductCombination(User $user, Product $product, array $combinations, array $variations, $price_var_percent = false, $forced_pricevar = false, $forced_weightvar = false, $forced_refvar = false, $ref_ext = '', $barcode = '')
 	{
 		global $conf;
 
@@ -902,7 +902,10 @@ class ProductCombination
 			$newproduct->price_min_ttc = 0;
 
 			// A new variant must use a new barcode (not same product)
-			$newproduct->barcode = -1;
+                        /*$mod drsi*/
+//			$newproduct->barcode = -1;
+                $newproduct->barcode = $barcode;
+                /*fmoddrsi*/
 			$result = $newproduct->create($user);
 
 			if ($result < 0) {
@@ -944,6 +947,9 @@ class ProductCombination
 				}
 			}
 		} else {
+                        /*$mod drsi*/
+                        $newproduct->barcode = $barcode;
+                /*fmoddrsi*/
 			$result = $newproduct->update($newproduct->id, $user);
 			if ($result < 0) {
 				$this->db->rollback();

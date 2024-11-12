@@ -278,6 +278,17 @@ class modBimplocation extends DolibarrModules
     public function init($options = '')
     {
         $sql = array();
+
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        $name = 'module_version_' . strtolower($this->name);
+        
+        if (BimpCore::getConf($name, '') === "") {
+            BimpCore::setConf($name, floatval($this->version));
+            $bdb = BimpCache::getBdb();
+            if (!$bdb->executeFile(DOL_DOCUMENT_ROOT . '/' . strtolower($this->name) . '/sql/install.sql')) {
+                setEventMessage('Echec exécution du fichier install.sql - ' . $bdb->err(), 'errors');
+            }
+        }
         return $this->_init($sql, $options);
     }
 

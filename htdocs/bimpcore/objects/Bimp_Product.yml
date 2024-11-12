@@ -280,6 +280,12 @@ fields:
         user_edit: 1
         default_value: 1
         
+    to_rent: 
+        label: En location
+        type: bool
+        user_edit: 1
+        default_value: 0
+        
     customcode: 
         label: Code douane
         user_edit: 1
@@ -705,6 +711,22 @@ fields:
         type: bool
         default_value: 0
         
+    forfaits_location: 
+        label: Forfaits location
+        type: items_list
+        items_data_type: id_object
+        object: product
+        items_braces: 1
+        input: 
+            type: select
+            options: 
+                callback: getAvailableForfaitsLocationArray
+                
+    min_qty: 
+        label: Quantité minimale
+        type: int
+        default_value: 0
+        
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
@@ -744,6 +766,9 @@ forms:
             - field: 2hotline
             - field: duree
             - field: duree_i
+            - field: forfaits_location
+              show: 
+                  is_module_active: bimplocation
             
     create:
         extends: default
@@ -1000,7 +1025,11 @@ forms:
               label: Prix d'achat fournisseur
               on_edit: 1
               multiple: 1
-              form_name: create_prod          
+              form_name: create_prod     
+              
+    add_forfait: 
+        rows: 
+            - field: forfaits_location
             
 fields_tables: 
     infos: 
@@ -1038,6 +1067,14 @@ fields_tables:
               edit: 1
             - field: tobuy
               edit: 1
+            - field: to_rent
+              edit: 1
+              show: 
+                  is_module_active: bimplocation
+            - field: min_qty
+              edit: 1
+              show: 
+                  is_module_active: bimplocation
             - field: remisable
               edit: 1
             - field: no_fixe_prices
@@ -1101,6 +1138,10 @@ fields_tables:
             - field: deee
             - field: rpcp
             - field: type_remise_arr
+            - field: forfaits_location
+              show: 
+                  is_module_active: bimplocation
+            
             
     prices_bundle:
         title: Prix d'achat

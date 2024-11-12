@@ -1,0 +1,33 @@
+
+title: Locations
+bootstrap: 1
+    
+    
+objects: 
+    locations:
+        instance: 
+            bimp_object: BimpLocation
+    locations_lines:
+        instance: 
+            bimp_object: BimpLocationLine
+        
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Toutes les locations
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: locations
+                      name: default
+                      
+        lines: 
+            label: Equipements en location
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: locations_lines
+                      name: default

@@ -218,5 +218,13 @@ sections:
                   custom: 
                       callback: renderBimpThemeMenuList
                                     
+        pull: 
+            label: Logs Pull
+            icon: fas_logs
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderPullTab
+                                    
                             
                       

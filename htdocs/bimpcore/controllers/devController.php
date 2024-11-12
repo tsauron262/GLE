@@ -307,6 +307,45 @@ class devController extends BimpController
 
         return $html;
     }
+    
+    public function renderPullTab()
+    {
+        $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
+        $pulls = explode('commit ', $pulls);
+        $html = count($pulls).' commit(s)';
+        foreach($pulls as $pull){
+            $tabPull[substr($pull, 0, 11)] = $pull;
+        }
+        $dirLogs = PATH_TMP.'/git_logs/';
+        $files = scandir($dirLogs);
+        foreach($files as $file){
+            if($file != '.' && $file != '..'){
+                $timeSt = str_replace('.logs', '', $file);
+                $content = file_get_contents($dirLogs.$file);
+                if(preg_match('/bimp-erp[ \n]*([0-9a-z]*)\.\.([0-9a-z]*)[ \n]*master/', $content, $matches)){
+                    $content = $matches[1].'<br/>'.$matches[2];
+                    $start = false;
+                    foreach($tabPull as $id => $pull){
+                        if($start){
+                            $content .= '<br/><br/>'.str_replace('\n', '<br>', $pull);
+                        }
+                        if(!$start && $id == $matches[1])
+                            $start = true;
+                        elseif($id == $matches[2])
+                            break;
+                    }
+                    
+                }
+                else {
+                    $content = 'Alredy up to date';
+                }
+                
+                
+                $html .= BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), $content, '', array('open'=>false));
+            }
+        }
+        return $html;
+    }
 
     public function renderYmlTab()
     {

@@ -1,0 +1,1 @@
+ALTER TABLE llx_user ADD `delegations` TEXT NOT NULL DEFAULT '';

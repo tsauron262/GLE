@@ -108,7 +108,7 @@ class BTC_export_facture_fourn extends BTC_export {
             case 3: // Achat export
                 $use_tva = false;
                 $use_d3e = false;
-                $use_autoliquidation = false;
+                $use_autoliquidation = true;
                 $compte_achat_produit = BimpCore::getConf('achat_produit_ex', null, 'bimptocegid');
                 $compte_achat_service = BimpCore::getConf('achat_service_ex', null, 'bimptocegid');
                 $compte_frais_de_port = BimpCore::getConf('frais_de_port_achat_ex', null, 'bimptocegid');

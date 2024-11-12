@@ -4644,6 +4644,7 @@ class Bimp_Product extends BimpObject
         }
 
         $ref = BimpTools::getArrayValueFromPath($data, 'combination_ref', '');
+        $barcode = BimpTools::getArrayValueFromPath($data, 'barcode', '');
         if (!$ref) {
             $errors[] = 'Référence absente';
         }
@@ -4663,7 +4664,7 @@ class Bimp_Product extends BimpObject
             $prodcomb = new ProductCombination($this->db->db);
 
             if (!$prodcomb->fetchByProductCombination2ValuePairs($this->id, $features)) {
-                $result = $prodcomb->createProductCombination($user, $this->dol_object, $features, array(), $variation_price_percent, $variation_price, $variation_weight, $ref);
+                $result = $prodcomb->createProductCombination($user, $this->dol_object, $features, array(), $variation_price_percent, $variation_price, $variation_weight, $ref, '', $barcode);
                 if ($result <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($prodcomb), 'Echec de la création de la combinaison');
                 } else {

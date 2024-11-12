@@ -1019,13 +1019,19 @@ forms:
                   type: text
                   addon_right: 
                       text: Kg
-              value: 0
+              value: 0  
+              
+            - custom: 1
+              input_name: barcode
+              input: 
+                  type: text
+              label: Code-barres
 #            - title: Prix d'achat fournisseur(s)'
             - object: fourn_prices
               label: Prix d'achat fournisseur
               on_edit: 1
               multiple: 1
-              form_name: create_prod     
+              form_name: create_prod 
               
     add_forfait: 
         rows: 

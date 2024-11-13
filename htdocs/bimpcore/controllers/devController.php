@@ -310,12 +310,21 @@ class devController extends BimpController
     
     public function renderPullTab()
     {
-        $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
+        /*
+         * git log --reverse > /GLE-data/bimp163/tmp/git_logs_commit/logs.logs
+         */
+        $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs_old.logs');
         $pulls = explode('commit ', $pulls);
-        $html = count($pulls).' commit(s)';
+        $pulls2 = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
+        $pulls2 = explode('commit ', $pulls2);
+        $html = (count($pulls)+count($pulls2)).' commit(s)';
         foreach($pulls as $pull){
-            $tabPull[substr($pull, 0, 11)] = $pull;
+            $tabPull[substr($pull, 0, 18)] = $pull;
         }
+        foreach($pulls2 as $pull){
+            $tabPull[substr($pull, 0, 18)] = $pull;
+        }
+//        $html .= '<pre>'.print_r($tabPull,1).'</pre>';
         $dirLogs = PATH_TMP.'/git_logs/';
         $files = scandir($dirLogs);
         foreach($files as $file){
@@ -329,9 +338,9 @@ class devController extends BimpController
                         if($start){
                             $content .= '<br/><br/>'.str_replace('\n', '<br>', $pull);
                         }
-                        if(!$start && $id == $matches[1])
+                        if(!$start && stripos($id, $matches[1]) === 0)
                             $start = true;
-                        elseif($id == $matches[2])
+                        elseif(stripos($id, $matches[2]) === 0)
                             break;
                     }
                     
@@ -341,8 +350,19 @@ class devController extends BimpController
                 }
                 
                 
-                $html .= BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), $content, '', array('open'=>false));
+                $tabHtml[date("Y", $timeSt)][date("m", $timeSt)][] = BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), $content, '', array('open'=>false));
             }
+        }
+        foreach($tabHtml as $y => $datas){
+            $htmlT = '';
+            foreach($datas as $m => $datas2){
+                $htmlT2 = '';
+                foreach($datas2 as $pull){
+                    $htmlT2 .= $pull;
+                }
+                $htmlT .= BimpRender::renderPanel($m, $htmlT2, '', array('open'=>false));
+            }
+            $html .= BimpRender::renderPanel($y, $htmlT, '', array('open'=>false));
         }
         return $html;
     }

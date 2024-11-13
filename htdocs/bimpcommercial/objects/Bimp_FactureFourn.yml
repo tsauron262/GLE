@@ -320,6 +320,8 @@ lists:
         bulk_actions:
             delete: 
                 label: supprimer les factures fournisseurs sélectionnées
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
         sort_field: datec
         sort_way: desc
         cols: 

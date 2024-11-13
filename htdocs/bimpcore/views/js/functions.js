@@ -259,24 +259,17 @@ function resetPopovers($container) {
 // Notifs navigateur: 
 
 function BimpBrowserNotification(title, content, onclick) {
-//    bimp_msg('DISPLAY NOTIF NAVIGATEUR ' + title);
-
     if (window.Notification && Notification.permission === "granted") {
-//        bimp_msg('GRANTED');
+        var data = {
+            body: content.replace(/(<([^>]+)>)/gi, ""),
+            icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
+        };
 
-//        var data = {
-//            body: content.replace(/(<([^>]+)>)/gi, ""),
-//            icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
-//        };
-//
-//        if (typeof (onclick) === 'function') {
-//            data.onclick = onclick;
-//        }
-//
-//        var n = new Notification(title, data);
-        var n = new Notification(title, {});
-    } else {
-        bimp_msg('NOT GRANTED', 'danger', null, true);
+        if (typeof (onclick) === 'function') {
+            data.onclick = onclick;
+        }
+
+        var n = new Notification(title, data);
     }
 }
 

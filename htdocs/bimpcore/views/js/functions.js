@@ -256,6 +256,31 @@ function resetPopovers($container) {
     });
 }
 
+// Notifs navigateur: 
+
+function BimpBrowserNotification(title, content, onclick) {
+    bimp_msg('DISPLAY NOTIF NAVIGATEUR ' + title);
+
+    if (window.Notification && Notification.permission === "granted") {
+        bimp_msg('GRANTED');
+
+        var data = {
+            body: content.replace(/(<([^>]+)>)/gi, ""),
+            icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
+        };
+
+        if (typeof (onclick) === 'function') {
+            data.onclick = onclick;
+        }
+
+        var n = new Notification(title, data);
+        n.
+        console.log(n);
+    } else {
+        bimp_msg('NOT GRANTED');
+    }
+}
+
 // Navtabs: 
 
 function loadNavtabContent($link) {

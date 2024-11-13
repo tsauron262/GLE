@@ -264,18 +264,19 @@ function BimpBrowserNotification(title, content, onclick) {
     if (window.Notification && Notification.permission === "granted") {
 //        bimp_msg('GRANTED');
 
-        var data = {
-            body: content.replace(/(<([^>]+)>)/gi, ""),
-            icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
-        };
-
-        if (typeof (onclick) === 'function') {
-            data.onclick = onclick;
-        }
-
-        var n = new Notification(title, data);
+//        var data = {
+//            body: content.replace(/(<([^>]+)>)/gi, ""),
+//            icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
+//        };
+//
+//        if (typeof (onclick) === 'function') {
+//            data.onclick = onclick;
+//        }
+//
+//        var n = new Notification(title, data);
+        var n = new Notification(title, {});
     } else {
-//        bimp_msg('NOT GRANTED');
+        bimp_msg('NOT GRANTED', 'danger', null, true);
     }
 }
 

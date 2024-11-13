@@ -274,8 +274,6 @@ function BimpBrowserNotification(title, content, onclick) {
         }
 
         var n = new Notification(title, data);
-        n.
-        console.log(n);
     } else {
 //        bimp_msg('NOT GRANTED');
     }

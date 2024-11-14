@@ -27,8 +27,6 @@ if (!$user->admin) {
     exit;
 }
 
-//BimpNote::cronNonLu();
-
 echo '<br/>FIN';
 echo '</body></html>';
 

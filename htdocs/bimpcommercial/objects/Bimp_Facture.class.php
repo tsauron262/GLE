@@ -4494,6 +4494,17 @@ class Bimp_Facture extends BimpComm
                 if ($client->isAdministration()) {
                     $this->updateField('chorus_status', 0);
                 }
+                
+                $client->setActivity('Validation ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
+            }
+            
+            $id_client_final = (int) $this->getData('id_client_final');
+            if ($id_client_final && $id_client_final !== $client->id) {
+                $client_final = $this->getChildObject('client_final');
+
+                if (BimpObject::objectLoaded($client_final)) {
+                    $client_final->setActivity('Validation ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
+                }
             }
         }
 
@@ -7007,6 +7018,20 @@ class Bimp_Facture extends BimpComm
                             unset($asso);
                         }
                     }
+                }
+            }
+            
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
+            }
+            
+            $id_client_final = (int) $this->getData('id_client_final');
+            if ($id_client_final && $id_client_final !== $client->id) {
+                $client_final = $this->getChildObject('client_final');
+
+                if (BimpObject::objectLoaded($client_final)) {
+                    $client_final->setActivity('Création ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
                 }
             }
         }

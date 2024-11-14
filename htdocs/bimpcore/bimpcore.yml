@@ -216,7 +216,7 @@ params:
     use_browser_local_storage: 
         label: Activer le stockage local navigateur
         type: bool
-        def: 0
+        def: 1
         cat: perfs
         sub_params: 
             - if: 1

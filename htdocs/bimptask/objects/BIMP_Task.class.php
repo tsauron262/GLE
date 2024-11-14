@@ -44,8 +44,9 @@ class BIMP_Task extends BimpAbstractFollow
     );
 
     // Droits users: 
-    
-    public function isDev(){
+
+    public function isDev()
+    {
         return ($this->getData('type_manuel') == 'dev');
     }
 
@@ -335,16 +336,16 @@ class BIMP_Task extends BimpAbstractFollow
 
     public function getSous_type_list_taskArray()
     {
-        if(!$this->isLoaded()){
+        if (!$this->isLoaded()) {
             $sT = array();
-            foreach(self::$sous_types as $datas){
-                foreach($datas as $code => $values){
+            foreach (self::$sous_types as $datas) {
+                foreach ($datas as $code => $values) {
                     $sT[$code] = $values;
                 }
             }
             return $sT;
         }
-        
+
         $type = BimpTools::getPostFieldValue('type_manuel', $this->getData('type_manuel'), 'alphanohtml');
 
         if (isset($type) && self::$sous_types[$type])
@@ -386,22 +387,21 @@ class BIMP_Task extends BimpAbstractFollow
     public function getListFiltre($type = "normal", $title = 'Toutes')
     {
         global $user;
-        
+
         $listName = 'default';
-        
-        if($type == 'orgaDev')
+
+        if ($type == 'orgaDev')
             $listName = 'sortable';
-        
+
         $list = new BC_ListTable($this, $listName, 1, null, $title);
         $list->addIdentifierSuffix($type);
 
         if ($type == 'byMy')
             $list->addFieldFilterValue('user_create', (int) $user->id);
-        elseif ($type == "orgaDev"){
+        elseif ($type == "orgaDev") {
             $list->addFieldFilterValue('type_manuel', 'dev');
-            $list->addFieldFilterValue('status', array(0,1,2,3));
-        }  
-        elseif ($type == "my")
+            $list->addFieldFilterValue('status', array(0, 1, 2, 3));
+        } elseif ($type == "my")
             $list->addFieldFilterValue('id_user_owner', (int) $user->id);
         else
             $list->addFieldFilterValue('fgdg_dst', array(
@@ -1166,7 +1166,7 @@ class BIMP_Task extends BimpAbstractFollow
         if (!BimpObject::objectLoaded($bimp_user)) {
             return $data;
         }
-        
+
         $bimp_user->dol_object->loadRights();
 
         $filters = array();
@@ -1202,15 +1202,20 @@ class BIMP_Task extends BimpAbstractFollow
         );
 
         $affected_elements = self::getNewTasks($filters, 'affected');
-        
-        unset($filters['or_user']);
-        $filters['id_user_owner'] = 0;
-        $filters['status'] = array(0, 1, 3);
-        $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($bimp_user->dol_object));
-        
-        $unaffected_elements = self::getNewTasks($filters, 'unaffected');
 
-        $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
+        $filters_rights = self::getFiltreRightArray($bimp_user->dol_object);
+
+        if (!empty($filters_rights)) {
+            unset($filters['or_user']);
+            $filters['id_user_owner'] = 0;
+            $filters['status'] = array(0, 1, 3);
+            $filters = BimpTools::merge_array($filters, $filters_rights);
+
+            $unaffected_elements = self::getNewTasks($filters, 'unaffected');
+            $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
+        } else {
+            $data['elements'] = $affected_elements;
+        }        
 
         if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
             $bdb = self::getBdb();
@@ -1251,7 +1256,7 @@ class BIMP_Task extends BimpAbstractFollow
     {
         $filtre = array();
         $tabFiltre = self::getFiltreDstRight($user);
-        
+
         if (count($tabFiltre[1])) {
             $filtre['dst_par_type'] = array(
                 'or' => array(
@@ -1275,7 +1280,7 @@ class BIMP_Task extends BimpAbstractFollow
     public static function getTableSqlDroitPasDroit($user)
     {
         $tabDroit = $tabPasDroit = $tabTous = array();
-        
+
         foreach (self::getTypeArray() as $src => $nom) {
             if ($src != "other") {
                 if ($user->rights->bimptask->$src->read)
@@ -1291,7 +1296,7 @@ class BIMP_Task extends BimpAbstractFollow
     public static function getFiltreDstRight($user)
     {
         $tabT = self::getTableSqlDroitPasDroit($user);
-        
+
         if ($user->rights->bimptask->other->read)
             return array("not_in", $tabT[1]);
         else

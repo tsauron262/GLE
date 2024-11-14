@@ -129,6 +129,23 @@ a.nav-link.dropdown-toggle:not(.notif_white) > i {
     }
 }
 
+.reload_notif_btn {
+    margin-left: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    
+    &:hover {
+        color: $primary;
+    }
+}
+
+.reload_notif_spinner {
+    display: none;
+    margin-left: 12px;
+    font-size: 12px;
+    color: #006AFF;
+}
+
 /* Demande de validations */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_demande_valid_comm"] {
     min-width: 300px!important;

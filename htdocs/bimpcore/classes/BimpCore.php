@@ -149,7 +149,7 @@ class BimpCore
 
         // Ajouts variables local: 
         if (class_exists('Session')) {
-            $layout->addLocalVars(array(
+            $layout->addJsLocalVars(array(
                 'bimp_hash' => Session::getHash()
             ));
         }
@@ -161,16 +161,20 @@ class BimpCore
     {
         global $user, $conf, $dolibarr_main_url_root;
         $vars = array(
-            'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
-            'entity'          => $conf->entity,
-            'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
-            'bimp_context'    => '\'' . self::getContext() . '\'',
-            'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
-            'sessionHideMenu' => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0)
+            'dol_url_root'               => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
+            'entity'                     => $conf->entity,
+            'id_user'                    => (BimpObject::objectLoaded($user) ? $user->id : 0),
+            'bimp_context'               => '\'' . self::getContext() . '\'',
+            'theme'                      => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
+            'sessionHideMenu'            => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0),
+            'bimp_use_local_storage'     => (int) BimpCore::getConf('use_browser_local_storage'),
+            'bimp_local_storage_prefixe' => '\'' . BimpCore::getConf('bimp_local_storage_prefixe') . '\'',
+            'bimp_debug_local_storage'   => (int) BimpCore::getConf('js_debug_local_storage'),
+            'bimp_debug_notifs'          => (int) BimpCore::getConf('js_debug_notifs')
         );
 
         $notifs = '{';
-        if (self::isContextPrivate()) {
+        if (self::isContextPrivate() && BimpObject::objectLoaded($user)) {
             $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
             $config_notification = $notification->getList(array('active' => 1));
 
@@ -180,13 +184,14 @@ class BimpCore
                     $notifs .= "nom: '" . $cn['nom'] . "', ";
                     $notifs .= "id_notification: '" . $cn['id'] . "', ";
                     $notifs .= "module: '" . $cn['module'] . "', ";
+                    $notifs .= "storage_key: '" . 'user_' . $user->id . '_' . $cn['nom'] . '\',';
                     $notifs .= "obj: null},";
                 }
             }
         }
         $notifs .= '}';
 
-        $vars['notificationActive'] = $notifs;
+        $vars['bimp_notifications_actives'] = $notifs;
 
         return $vars;
     }
@@ -1283,7 +1288,6 @@ class BimpCore
                         exit;
                     }
                 } else {
-                    // Ca prend trop de ressources pour pas grand chose... //oui, mais sinon, on perd toute notion de logs qui revient ou non...
                     if (BimpDebug::isActive()) {
                         BimpDebug::incCacheInfosCount('logs', false);
                     }
@@ -1295,27 +1299,29 @@ class BimpCore
                     $warnings = array();
                     $errUpdate = $log->update($warnings, true);
 
-                    $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
+                    if ((int) BimpCore::getConf('save_similar_logs_as_note')) {
+                        $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
 
-                    if (defined('ID_ERP')) {
-                        $data['ID ERP'] = ID_ERP;
+                        if (defined('ID_ERP')) {
+                            $data['ID ERP'] = ID_ERP;
+                        }
+
+                        if (BimpObject::objectLoaded($user)) {
+                            $data['User'] = '#' . $user->id;
+                        }
+
+                        if (BimpObject::objectLoaded($object)) {
+                            $data['Objet'] = BimpObject::getInstanceNomUrl($object);
+                        }
+
+                        if (count($errUpdate)) {
+                            $data['Erreurs Màj log'] = $errUpdate;
+                        }
+
+                        $data['GET'] = BimpTools::htmlentities_array($_GET);
+                        $data['POST'] = BimpTools::htmlentities_array($_POST);
+                        $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                     }
-
-                    if (BimpObject::objectLoaded($user)) {
-                        $data['User'] = '#' . $user->id;
-                    }
-
-                    if (BimpObject::objectLoaded($object)) {
-                        $data['Objet'] = BimpObject::getInstanceNomUrl($object);
-                    }
-
-                    if (count($errUpdate)) {
-                        $data['Erreurs Màj log'] = $errUpdate;
-                    }
-
-                    $data['GET'] = BimpTools::htmlentities_array($_GET);
-                    $data['POST'] = BimpTools::htmlentities_array($_POST);
-                    $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                 }
             }
 

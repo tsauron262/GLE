@@ -824,47 +824,6 @@ class BimpController
 
     // Traitements Ajax:
 
-    public function ajaxProcessNotificationAction()
-    {
-        $errors = array();
-
-        $id_notif = (int) BimpTools::getvalue('id_notification', 0, 'int');
-
-        if ($id_notif) {
-            $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', $id_notif);
-
-            if (is_object($notif) && $notif->isLoaded()) {
-                $id_obj = (int) BimpTools::getvalue('id', 0, 'int');
-
-                if ($id_obj) {
-                    $obj = $notif->getObject($id_obj);
-
-                    if (BimpObject::objectLoaded($obj)) {
-                        $methode = 'action' . ucfirst(BimpTools::getvalue('actionNotif', '', 'aZ09'));
-                        if (method_exists($obj, $methode)) {
-                            $success = '';
-                            $return = $obj->$methode($_REQUEST, $success);
-                            $return['success'] = $success;
-                            return $return;
-                        } else {
-                            $errors[] = 'Methode ' . $methode . ' n\'existe pas dans ' . get_class($obj);
-                        }
-                    } else {
-                        $errors[] = 'Objet introuvable pour notification ' . $id_notif . ' id ' . $id_obj;
-                    }
-                } else {
-                    $errors = 'ID objet absent';
-                }
-            } else {
-                $errors[] = 'Notification introuvable ' . $id_notif;
-            }
-        } else {
-            $errors = 'ID notification absent';
-        }
-
-        return array('errors' => $errors);
-    }
-
     protected function ajaxProcess()
     {
         header('Content-Type: application/json');
@@ -913,9 +872,9 @@ class BimpController
                     $result['warnings'] = array();
                 }
 
-
-                if (class_exists('Session'))
+                if (class_exists('Session')) {
                     $result['bimp_hash'] = Session::getHash();
+                }
 
                 $result['warnings'] = BimpTools::merge_array($result['warnings'], static::getAndResetAjaxWarnings());
 
@@ -3344,8 +3303,77 @@ class BimpController
         );
     }
 
-    // Divers: 
+    // Gestion des notifications : 
 
+    protected function ajaxProcessGetUserNotifications()
+    {
+        global $user;
+        $errors = array();
+        $notifs_for_user = array();
+        BimpDebug::$active = false;
+
+        $notifs_data = BimpTools::getPostFieldValue('notifs_data', array(), 'array');
+
+        if (!empty($notifs_data)) {
+            BimpObject::loadClass('bimpcore', 'BimpNotification');
+            $notifs_for_user = BimpNotification::getNotificationsForUser((int) $user->id, $notifs_data);
+        }
+
+        return array(
+            'errors'        => $errors,
+            'notifications' => $notifs_for_user,
+            'request_id'    => BimpTools::getValue('request_id', 0, 'int')
+        );
+    }
+    
+    protected function ajaxProcessNotificationAction()
+    {
+        $errors = array();
+
+        $id_notif = (int) BimpTools::getvalue('id_notification', 0, 'int');
+
+        if ($id_notif) {
+            $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', $id_notif);
+
+            if (BimpObject::objectLoaded($notif)) {
+                $id_obj = (int) BimpTools::getvalue('id', 0, 'int');
+
+                if ($id_obj) {
+                    $obj = $notif->getNotifObject($id_obj);
+
+                    if (BimpObject::objectLoaded($obj)) {
+                        $methode = 'action' . ucfirst(BimpTools::getvalue('actionNotif', '', 'aZ09'));
+                        if (method_exists($obj, $methode)) {
+                            $success = '';
+                            $return = $obj->$methode($_REQUEST, $success);
+                            $return['success'] = $success;
+                            $return['request_id'] = BimpTools::getValue('request_id', 0, 'int');
+                            return $return;
+                        } else {
+                            $errors[] = 'Methode ' . $methode . ' n\'existe pas dans ' . get_class($obj);
+                        }
+                    } else {
+                        $errors[] = 'Objet introuvable pour notification ' . $id_notif . ' id ' . $id_obj;
+                    }
+                } else {
+                    $errors = 'ID objet absent';
+                }
+            } else {
+                $errors[] = 'Notification introuvable ' . $id_notif;
+            }
+        } else {
+            $errors = 'ID notification absent';
+        }
+
+        return array(
+            'errors'     => $errors,
+            'warnings'   => array(),
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
+        );
+    }
+
+    // Divers: 
+    
     protected function ajaxProcessLoadDocumentation()
     {
         $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', '', 'alphanohtml'), 'modal', BimpTools::getValue('idSection', 'princ', 'alphanohtml'));
@@ -3528,27 +3556,6 @@ class BimpController
             'errors'     => $errors,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0, 'int')
-        );
-    }
-
-    protected function ajaxProcessGetNotification()
-    {
-        global $user;
-        $errors = array();
-        $notifs_for_user = array();
-        BimpDebug::$active = false;
-
-        $notifs = BimpTools::getPostFieldValue('notificationActive', array(), 'array');
-
-        if (!empty($notifs)) {
-            $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-            $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
-        }
-
-        return array(
-            'errors'        => $errors,
-            'notifications' => $notifs_for_user,
-            'request_id'    => BimpTools::getValue('request_id', 0, 'int')
         );
     }
 

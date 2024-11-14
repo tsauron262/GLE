@@ -850,28 +850,45 @@ class Bimp_User extends BimpObject
     {
         $html = '';
 
-        $delegations = $this->getData('delegations');
+        if ($this->isLoaded()) {
+            $delegations = $this->getData('delegations');
 
-        if (!empty($delegations)) {
-            $msg = '';
-            if (count($delegations) > 1) {
-                $msg .= 'Les utilisateurs ci-dessous ont ';
+            if (!empty($delegations)) {
+                $msg = '';
+                if (count($delegations) > 1) {
+                    $msg .= 'Les utilisateurs ci-dessous ont ';
+                } else {
+                    $msg .= 'L\'utilisateur ci-dessous a ';
+                }
+                $msg .= 'accès à vos messages et vos tâches';
+                $html .= BimpRender::renderAlerts($msg, 'warning');
+                $html .= $this->displayDataDefault('delegations');
             } else {
-                $msg .= 'L\'utilisateur ci-dessous a ';
+                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Aucune délégation</span>';
             }
-            $msg .= 'accès à vos messages et vos tâches';
-            $html .= BimpRender::renderAlerts($msg, 'warning');
-            $html .= $this->displayDataDefault('delegations');
-        } else {
-            $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Aucune délégation</span>';
-        }
 
-        if ($this->canEditField('delegations')) {
-            $html .= '<div class="buttonsContainer align-right">';
-            $html .= '<span class="btn btn-default" onclick="' . $this->getJsLoadModalForm('delegations', 'Modifier vos délégations') . '">';
-            $html .= BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Gérer';
-            $html .= '</span>';
-            $html .= '</div>';
+            if ($this->canEditField('delegations')) {
+                $html .= '<div class="buttonsContainer align-right">';
+                $html .= '<span class="btn btn-default" onclick="' . $this->getJsLoadModalForm('delegations', 'Modifier vos délégations') . '">';
+                $html .= BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Gérer';
+                $html .= '</span>';
+                $html .= '</div>';
+            }
+
+            $users = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_User', array(
+                        'delegations' => array(
+                            'part'      => '[' . $this->id . ']',
+                            'part_type' => 'middle'
+                        )
+            ));
+
+            if (!empty($users)) {
+                $html .= '<div style="margin-top: 15xp">';
+                foreach ($users as $u) {
+                    $html .= BimpRender::renderAlerts('L\'utilisateur ' . $u->getLink() . ' vous a accordé l\'accès à ses messages et tâches', 'info');
+                }
+                $html .= '</div>';
+            }
         }
 
         return $html;
@@ -2791,7 +2808,7 @@ class Bimp_User extends BimpObject
                         unset($delegations[$idx]);
                     }
                 }
-                
+
                 $this->set('delegations', $delegations);
             }
         }

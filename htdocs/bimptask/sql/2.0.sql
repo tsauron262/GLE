@@ -1,0 +1,1 @@
+ALTER TABLE llx_bimp_task ADD `tms` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp();

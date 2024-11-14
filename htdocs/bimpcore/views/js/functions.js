@@ -256,6 +256,23 @@ function resetPopovers($container) {
     });
 }
 
+// Notifs navigateur: 
+
+function BimpBrowserNotification(title, content, onclick) {
+    if (window.Notification && Notification.permission === "granted") {
+        var data = {
+            body: content.replace(/(<([^>]+)>)/gi, ""),
+            icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
+        };
+
+        if (typeof (onclick) === 'function') {
+            data.onclick = onclick;
+        }
+
+        var n = new Notification(title, data);
+    }
+}
+
 // Navtabs: 
 
 function loadNavtabContent($link) {

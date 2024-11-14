@@ -4490,7 +4490,7 @@ class Bimp_Facture extends BimpComm
 
             $client = $this->getChildObject('client');
 
-            if (BimpObject::objectLoaded($client)) {
+            if (BimpObject::objectLoaded($client) && $this->getData('paye') == 0 && $this->getTotalTtc() > 0) {
                 if ($client->isAdministration()) {
                     $this->updateField('chorus_status', 0);
                 }

@@ -135,7 +135,7 @@ class Bimp_User extends BimpObject
                 if (!$this->isLoaded()) {
                     return 0;
                 }
-                return (int) ($user->id == $this->id);
+                return (int) ($user->admin || ($user->id == $this->id));
         }
         return parent::canEditField($field_name);
     }
@@ -1092,14 +1092,14 @@ class Bimp_User extends BimpObject
         print '</tr>';
 
         if ($conf->global->LDAP_SERVER_TYPE == "activedirectory") {
-                $ldap = new Ldap();
-                $result = $ldap->connectBind();
-                if ($result > 0) {
-                        $userSID = $ldap->getObjectSid($object->login);
-                }
-                print '<tr><td class="valigntop">'.$langs->trans("SID").'</td>';
-                print '<td>'.$userSID.'</td>';
-                print "</tr>\n";
+            $ldap = new Ldap();
+            $result = $ldap->connectBind();
+            if ($result > 0) {
+                $userSID = $ldap->getObjectSid($object->login);
+            }
+            print '<tr><td class="valigntop">' . $langs->trans("SID") . '</td>';
+            print '<td>' . $userSID . '</td>';
+            print "</tr>\n";
         }
 
         // LDAP DN
@@ -2833,6 +2833,7 @@ class Bimp_User extends BimpObject
             $this->dol_object->oldcopy = clone $this->dol_object;
         }
 
+        $init_delegations = $this->getInitData('delegations');
         $init_statut = (int) $this->getInitData('statut');
         $statut = (int) $this->getData('statut');
 
@@ -2841,6 +2842,21 @@ class Bimp_User extends BimpObject
         if (!count($errors)) {
             if ($init_statut !== $statut) {
                 $this->updateField('statut', $statut);
+            }
+
+            $delegations = $this->getData('delegations');
+            foreach ($delegations as $id_user) {
+                if (!in_array($id_user, $init_delegations)) {
+                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                    $this->addObjectLog('Délégation attribuée à ' . (BimpObject::objectLoaded($u) ? $u->getName() : 'l\'utilisateur #' . $id_user));
+                }
+            }
+            
+            foreach ($init_delegations as $id_user) {
+                if (!in_array($id_user, $delegations)) {
+                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                    $this->addObjectLog('Délégation retirée à ' . (BimpObject::objectLoaded($u) ? $u->getName() : 'l\'utilisateur #' . $id_user));
+                }
             }
         }
 

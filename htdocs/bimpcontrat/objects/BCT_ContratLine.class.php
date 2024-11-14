@@ -5550,7 +5550,7 @@ class BCT_ContratLine extends BimpObject
                     }
 
                     if ($fac_ended && $achat_ended && $date_fin_validite < date('Y-m-d') . ' 00:00:00') {
-                        $new_status = 5;
+                        $new_status = self::STATUS_CLOSED;
                     }
 
                     if ($new_status != $status) {

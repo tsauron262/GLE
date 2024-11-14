@@ -2511,10 +2511,13 @@ class BCT_ContratLine extends BimpObject
                 return $this->getData('qty');
 
             case self::TYPE_ABO:
+                global $user;
                 $date_cloture = $this->getData('date_cloture');
 
                 if ($date_cloture) {
                     $html .= '<span style="display: inline-block" class="danger">' . BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Résiliation le ' . date('d / m / Y', strtotime($date_cloture)) . '</span><br/>';
+                } elseif ($user->login == 'f.martinez') {
+                    $html .= 'DATE CLOTURE : ' . $date_cloture.'<br/>';
                 }
 
                 $id_line_renouv_origin = (int) $this->db->getValue('contratdet', 'rowid', 'id_line_renouv = ' . $this->id);

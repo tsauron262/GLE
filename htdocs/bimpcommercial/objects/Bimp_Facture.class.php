@@ -4490,7 +4490,7 @@ class Bimp_Facture extends BimpComm
 
             $client = $this->getChildObject('client');
 
-            if (BimpObject::objectLoaded($client)) {
+            if (BimpObject::objectLoaded($client) && $this->getData('paye') == 0 && $this->getTotalTtc() > 0) {
                 if ($client->isAdministration()) {
                     $this->updateField('chorus_status', 0);
                 }
@@ -7388,7 +7388,7 @@ class Bimp_Facture extends BimpComm
 
         BimpObject::loadClass('bimptask', 'BIMP_Task');
 
-        $factures = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('chorus_status' => array(0, 1), 'fk_statut' => array(1, 2)));
+        $factures = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('chorus_status' => array(0, 1), 'fk_statut' => array(1, 2), 'paye' => 0));
 
         if (empty($factures)) {
             return 'Aucune facture en attente d\'export CHORUS';
@@ -7398,7 +7398,7 @@ class Bimp_Facture extends BimpComm
             $out .= ' - ' . $fact->getLink() . '<br/>';
             $sujet = 'Facture en attente d\'export Chorus ' . $fact->getRef();
             $msg = 'La facture {{Facture:' . $fact->id . '}} est en attente d\'export chorus';
-            BIMP_Task::addAutoTask('facturation', $sujet, $msg, "facture_extrafields:fk_object=" . $fact->id . ' AND chorus_status > 1');
+            BIMP_Task::addAutoTask('facturation', $sujet, $msg, "facture_extrafields:fk_object=" . $fact->id . ' AND (chorus_status > 1 OR paye = 1)');
         }
 
         return $out;

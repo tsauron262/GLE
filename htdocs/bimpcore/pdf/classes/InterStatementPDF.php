@@ -157,12 +157,22 @@ class InterStatementPDF extends BimpCommDocumentPDF
             
             foreach($inters_valid as $data) {
                 $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['rowid']);
+                $duree = $instance->getData('duree');
                 
-                $this->total_time += $instance->getData('duree');
                 
                 if($instance->getData('fk_contrat')){
                     $this->contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $instance->getData('fk_contrat'));
+                    if(isset($this->filters['fk_contrat']) && $this->filters['fk_contrat'] > 0 && $this->filters['fk_contrat'] == $instance->getData('fk_contrat')){
+                        $duree = 0;
+                        $lines = $instance->getChildrenObjects('inters');
+                        foreach($lines as $line){
+                            if($line->getData('id_line_contrat') > 0 || $line->getData('type') == 5)
+                                $duree += $line->getData('duree');
+                        }
+                    }
                 }
+                
+                $this->total_time += $duree;
                 
                 $table->rows[] = array(
                     'ref'           => $instance->getRef(),
@@ -170,7 +180,7 @@ class InterStatementPDF extends BimpCommDocumentPDF
                     'tech'          => $instance->displayData('fk_user_tech', 'default', false, true),
                     'date'          => $instance->displayData('datei', 'default', false, true),
                     'urgent'        => $instance->displayData('urgent', 'default', false, true),
-                    'temps_passer'  => BimpTools::displayTimefromSeconds($instance->getData('duree'), '', 0, 0, 1, 2),
+                    'temps_passer'  => BimpTools::displayTimefromSeconds($duree, '', 0, 0, 1, 2),
                 );
                 $this->contrat = null;
             }

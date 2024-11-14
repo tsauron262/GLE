@@ -677,6 +677,7 @@ class BT_ficheInter_det extends BimpDolObject
 
     private function adjustCalendar($delete = false)
     {
+        global $user;
         $errors = array();
         $parent = $this->getParentInstance();
         BimpTools::loadDolClass("comm/action", "actioncomm");
@@ -691,7 +692,7 @@ class BT_ficheInter_det extends BimpDolObject
                 if ($id_actionComm > 0) {
                     $actionCommClass->fetch($id_actionComm);
                     if ($actionCommClass->id > 0)
-                        $actionCommClass->delete();
+                        $actionCommClass->delete($user);
                 }
             }
         }

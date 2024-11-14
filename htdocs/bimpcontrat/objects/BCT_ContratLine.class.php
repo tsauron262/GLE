@@ -365,7 +365,7 @@ class BCT_ContratLine extends BimpObject
     {
         if ((int) $this->getData('statut') > 0) {
             $date_cloture = $this->getData('date_cloture');
-            if ($date_cloture && $date_cloture < $this->getData('date_fin_validite')) {
+            if ($date_cloture && $date_cloture <= $this->getData('date_fin_validite')) {
                 return 1;
             }
         }

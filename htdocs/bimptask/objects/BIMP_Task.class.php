@@ -1162,10 +1162,10 @@ class BIMP_Task extends BimpAbstractFollow
             'elements' => array()
         );
         
-        global $user;
-        if ($user->login !== 'f.martinez') {
-            return $data;
-        }
+//        global $user;
+//        if ($user->login !== 'f.martinez') {
+//            return $data;
+//        }
 
         $bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
         if (!BimpObject::objectLoaded($bimp_user)) {
@@ -1211,15 +1211,10 @@ class BIMP_Task extends BimpAbstractFollow
         $filters['status'] = array(0, 1, 3);
         $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($bimp_user->dol_object));
 
-        global $user;
-        if ($user->login === 'f.martinez') {
-            echo '<pre>';
-            print_r($filters);
-            exit;
-        }
-        $unaffected_elements = self::getNewTasks($filters, 'unaffected');
+//        $unaffected_elements = self::getNewTasks($filters, 'unaffected');
 
-        $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
+//        $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
+        $data['elements'] = $affected_elements;
 
         if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
             $bdb = self::getBdb();

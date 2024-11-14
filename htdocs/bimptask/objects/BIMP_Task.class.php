@@ -1153,7 +1153,6 @@ class BIMP_Task extends BimpAbstractFollow
 
     public static function getTaskForUser($id_user, $tms = '', $options = array(), &$errors = array())
     {
-        global $user;
         if ((int) BimpCore::getConf('mode_eco')) {
             return array();
         }
@@ -1167,6 +1166,8 @@ class BIMP_Task extends BimpAbstractFollow
         if (!BimpObject::objectLoaded($bimp_user)) {
             return $data;
         }
+        
+        $bimp_user->dol_object->loadRights();
 
         $filters = array();
 
@@ -1201,47 +1202,47 @@ class BIMP_Task extends BimpAbstractFollow
         );
 
         $affected_elements = self::getNewTasks($filters, 'affected');
-
+        
         unset($filters['or_user']);
         $filters['id_user_owner'] = 0;
         $filters['status'] = array(0, 1, 3);
-        $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($user));
+        $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($bimp_user->dol_object));
         
         $unaffected_elements = self::getNewTasks($filters, 'unaffected');
 
         $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
 
-//        if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
-//            $bdb = self::getBdb();
-//            $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
-//
-//            if (!empty($users_delegations)) {
-//                $taks_ids = array();
-//
-//                foreach ($data['elements'] as &$task) {
-//                    $taks_ids[] = $task['id'];
-//                }
-//
-//                foreach ($users_delegations as $id_user_delegation) {
-//                    $user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
-//                    $user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
-//
-//                    $user_tasks = self::getTaskForUser($id_user_delegation, $tms, array(
-//                                'excluded_tasks'      => $taks_ids,
-//                                'include_delegations' => 0
-//                                    ), $errors);
-//
-//                    if (!empty($user_tasks)) {
-//                        foreach ($user_tasks['elements'] as &$task) {
-//                            $taks_ids[] = $task['id'];
-//                            $task['dest'] = $user_name;
-//                        }
-//
-//                        $data['elements'] = BimpTools::merge_array($data['elements'], $user_tasks['elements']);
-//                    }
-//                }
-//            }
-//        }
+        if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
+            $bdb = self::getBdb();
+            $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+
+            if (!empty($users_delegations)) {
+                $taks_ids = array();
+
+                foreach ($data['elements'] as &$task) {
+                    $taks_ids[] = $task['id'];
+                }
+
+                foreach ($users_delegations as $id_user_delegation) {
+                    $user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
+                    $user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
+
+                    $user_tasks = self::getTaskForUser($id_user_delegation, $tms, array(
+                                'excluded_tasks'      => $taks_ids,
+                                'include_delegations' => 0
+                                    ), $errors);
+
+                    if (!empty($user_tasks)) {
+                        foreach ($user_tasks['elements'] as &$task) {
+                            $taks_ids[] = $task['id'];
+                            $task['dest'] = $user_name;
+                        }
+
+                        $data['elements'] = BimpTools::merge_array($data['elements'], $user_tasks['elements']);
+                    }
+                }
+            }
+        }
 
         return $data;
     }

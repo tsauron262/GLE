@@ -5367,9 +5367,10 @@ class BCT_ContratLine extends BimpObject
 
                         if (!$this->getData('date_fac_start') || $this->getData('date_fac_start') < $date_ouverture) {
                             $this->set('date_fac_start', $dt->format('Y-m-d'));
-                        } else {
-                            $date_debut = $this->getData('date_fac_start');
-                        }
+                        } 
+//                        else {
+//                            $date_debut = $this->getData('date_fac_start');
+//                        }
 
                         if (!$this->getData('date_achat_start') || $this->getData('date_achat_start') < $date_ouverture) {
                             $this->set('date_achat_start', $dt->format('Y-m-d'));

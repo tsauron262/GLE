@@ -1153,6 +1153,7 @@ class BIMP_Task extends BimpAbstractFollow
 
     public static function getTaskForUser($id_user, $tms = '', $options = array(), &$errors = array())
     {
+        global $user;
         if ((int) BimpCore::getConf('mode_eco')) {
             return array();
         }
@@ -1209,7 +1210,7 @@ class BIMP_Task extends BimpAbstractFollow
         unset($filters['or_user']);
         $filters['id_user_owner'] = 0;
         $filters['status'] = array(0, 1, 3);
-        $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($bimp_user->dol_object));
+        $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($user));
 
         global $user;
         if ($user->login !== 'f.martinez') {

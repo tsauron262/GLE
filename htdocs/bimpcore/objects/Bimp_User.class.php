@@ -1029,40 +1029,65 @@ class Bimp_User extends BimpObject
 
     public function renderTasksView()
     {
-        $tabs = array();
-
-        $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
-        $filtres = BIMP_Task::getFiltreDstRight($this->dol_object);
-
-        // Liste mes tâches assignées
-        $list = new BC_ListTable($task, 'default', 1, null, 'Mes tâches assignées');
-        $list->addIdentifierSuffix('my_tasks');
-
-        $list->addFieldFilterValue('id_user_owner', (int) $this->id);
-        if (count($filtres[1]) > 0) {
-            $list->addFieldFilterValue('dst', array(
-                $filtres[0] => $filtres[1]
-            ));
+        if (!$this->isLoaded()) {
+            return '';
         }
 
-        $tabs[] = array(
-            'id'      => 'my_tasks',
-            'title'   => 'Mes tâches assignées',
-            'content' => $list->renderHtml()
-        );
+        $contents = array();
 
-//        // Liste mes tâches créées
-        $list = new BC_ListTable($task, 'default', 1, null, 'Mes tâches créées');
-        $list->addIdentifierSuffix('by_me');
-        $list->addFieldFilterValue('user_create', (int) $this->id);
+        $users = array($this->id);
 
-        $tabs[] = array(
-            'id'      => 'tasks_by_me',
-            'title'   => 'Mes tâches crées',
-            'content' => $list->renderHtml()
-        );
+        $users_delegations = $this->db->getValues('user', 'rowid', 'delegations LIKE \'%[' . $this->id . ']%\'');
+        if (!empty($users_delegations)) {
+            $users = BimpTools::merge_array($users, $users_delegations);
+        }
 
-        return BimpRender::renderNavTabs($tabs, 'tasks');
+        global $user;
+
+        foreach ($users as $id_user) {
+            $user_tabs = array();
+            $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
+            $tabList = array(
+                "my"      => ($user->id == $id_user ? 'Mes tâches' : 'Tâches') . ' assignées',
+                "byMy"    => ($user->id == $id_user ? 'Mes tâches' : 'Tâches') . ' créées',
+                "all"     => 'Toutes',
+                "orgaDev" => 'Organisation dév'
+            );
+
+            $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+
+            if (BimpObject::objectLoaded($u)) {
+                foreach ($tabList as $name => $title) {
+                    $list = $task->getListFiltre($name, $title, $u->dol_object);
+
+                    $user_tabs[] = array(
+                        'id'      => 'user_' . $id_user . '_' . $name,
+                        'title'   => $title,
+                        'content' => $list->renderHtml()
+                    );
+                }
+
+                $contents[$id_user] = BimpRender::renderNavTabs($user_tabs, 'user_' . $id_user . '_tasks');
+            }
+        }
+
+
+        $tabs = array();
+
+        foreach ($contents as $id_user => $content) {
+            if (count($contents) <= 1) {
+                return $content;
+            }
+
+            $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+            $tabs[] = array(
+                'id'      => 'user_' . $id_user . '_tasks_tab',
+                'title'   => (BimpObject::objectLoaded($u) ? $u->getName() : 'Utilisateur #' . $id_user),
+                'content' => $content
+            );
+        }
+
+        return BimpRender::renderNavTabs($tabs, 'users_tasks');
     }
 
     public function renderLdapView()
@@ -2851,7 +2876,7 @@ class Bimp_User extends BimpObject
                     $this->addObjectLog('Délégation attribuée à ' . (BimpObject::objectLoaded($u) ? $u->getName() : 'l\'utilisateur #' . $id_user));
                 }
             }
-            
+
             foreach ($init_delegations as $id_user) {
                 if (!in_array($id_user, $delegations)) {
                     $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);

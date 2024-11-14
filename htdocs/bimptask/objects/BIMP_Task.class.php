@@ -1285,7 +1285,7 @@ class BIMP_Task extends BimpAbstractFollow
         }
         
         echo '3<pre>';
-        print_r($tabFiltre);
+        print_r($filtre);
         echo '</pre>';
 
         return $filtre;

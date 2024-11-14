@@ -1212,7 +1212,7 @@ class BIMP_Task extends BimpAbstractFollow
         $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($bimp_user->dol_object));
 
         global $user;
-        if ($user-login !== 'f.martinez') {
+        if ($user->login !== 'f.martinez') {
             $data['elements'] = $affected_elements;
             return $data;
         }

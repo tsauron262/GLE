@@ -1294,6 +1294,10 @@ class BIMP_Task extends BimpAbstractFollow
     public static function getTableSqlDroitPasDroit($user)
     {
         $tabDroit = $tabPasDroit = $tabTous = array();
+        echo '0<pre>';
+        print_r(self::getTypeArray());
+        echo '</pre>';
+        
         foreach (self::getTypeArray() as $src => $nom) {
             if ($src != "other") {
                 if ($user->rights->bimptask->$src->read)

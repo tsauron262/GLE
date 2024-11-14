@@ -1210,7 +1210,6 @@ class BIMP_Task extends BimpAbstractFollow
         $unaffected_elements = self::getNewTasks($filters, 'unaffected');
 
         $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
-        $data['elements'] = $affected_elements;
 
 //        if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
 //            $bdb = self::getBdb();

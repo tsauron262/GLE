@@ -206,6 +206,10 @@
         .bimpTopMenuRight {
             margin-left: auto;
             float: right;
+            
+            .login_block_other {
+                max-width: 300px!important;
+            }
         }
 
         .top-menu {

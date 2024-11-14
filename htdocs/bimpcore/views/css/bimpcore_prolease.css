@@ -13242,7 +13242,10 @@ ul#nav_task > li.reload {
   #BimpThemeWrapper .header-top .bimpTopMenuRight {
     margin-left: auto;
     float: right; }
-  /* line 212, ../scss/bimpcore/_bimptheme.scss */
+    /* line 210, ../scss/bimpcore/_bimptheme.scss */
+    #BimpThemeWrapper .header-top .bimpTopMenuRight .login_block_other {
+      max-width: 300px !important; }
+  /* line 216, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .header-top .top-menu .header-icon, #BimpThemeWrapper .header-top .top-menu .header-icon > a {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -13254,38 +13257,38 @@ ul#nav_task > li.reload {
     cursor: pointer;
     border: none !important;
     line-height: 28px; }
-    /* line 222, ../scss/bimpcore/_bimptheme.scss */
+    /* line 226, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-top .top-menu .header-icon > i, #BimpThemeWrapper .header-top .top-menu .header-icon > a > i {
       color: #212121;
       font-size: 16px; }
-    /* line 227, ../scss/bimpcore/_bimptheme.scss */
+    /* line 231, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-top .top-menu .header-icon:hover, #BimpThemeWrapper .header-top .top-menu .header-icon:hover > i, #BimpThemeWrapper .header-top .top-menu .header-icon > a:hover, #BimpThemeWrapper .header-top .top-menu .header-icon > a:hover > i {
       background-color: transparent;
       text-decoration: none !important;
       color: #C11F2A; }
-    /* line 233, ../scss/bimpcore/_bimptheme.scss */
+    /* line 237, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-top .top-menu .header-icon .bg-danger, #BimpThemeWrapper .header-top .top-menu .header-icon:hover .bg-danger, #BimpThemeWrapper .header-top .top-menu .header-icon > a .bg-danger, #BimpThemeWrapper .header-top .top-menu .header-icon > a:hover .bg-danger {
       color: #fff !important;
       background-color: #F5365C !important; }
-  /* line 240, ../scss/bimpcore/_bimptheme.scss */
+  /* line 244, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .header-top .top-menu .select2 {
     margin-left: 25px;
     margin-top: 2px; }
-  /* line 245, ../scss/bimpcore/_bimptheme.scss */
+  /* line 249, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .header-top .top-menu .dropdown .dropdown-menu {
     margin-top: 14px;
     width: auto;
     height: auto; }
-    /* line 250, ../scss/bimpcore/_bimptheme.scss */
+    /* line 254, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-top .top-menu .dropdown .dropdown-menu .dropdown-item {
       padding: 5px 15px;
       border-radius: 0px;
       margin-left: 25px;
       margin-right: 20px; }
-      /* line 256, ../scss/bimpcore/_bimptheme.scss */
+      /* line 260, ../scss/bimpcore/_bimptheme.scss */
       #BimpThemeWrapper .header-top .top-menu .dropdown .dropdown-menu .dropdown-item:hover, #BimpThemeWrapper .header-top .top-menu .dropdown .dropdown-menu .dropdown-item:focus {
         background-color: #fff !important; }
-  /* line 262, ../scss/bimpcore/_bimptheme.scss */
+  /* line 266, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .header-top .top-menu .modifDropdown {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -13293,7 +13296,7 @@ ul#nav_task > li.reload {
     display: inline-block;
     line-height: 22px;
     margin-left: 30px !important; }
-    /* line 268, ../scss/bimpcore/_bimptheme.scss */
+    /* line 272, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-top .top-menu .modifDropdown img {
       display: inline-block;
       line-height: 28px;
@@ -13301,99 +13304,99 @@ ul#nav_task > li.reload {
       height: 28px !important;
       width: auto !important;
       margin-right: 8px; }
-  /* line 278, ../scss/bimpcore/_bimptheme.scss */
+  /* line 282, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .header-top .top-menu span.select2-container {
     min-width: 240px; }
-  /* line 283, ../scss/bimpcore/_bimptheme.scss */
+  /* line 287, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .header-top .top-menu .userHistoContent div, #BimpThemeWrapper .header-top .top-menu .userHistoContent span, #BimpThemeWrapper .header-top .top-menu .userHistoContent a, #BimpThemeWrapper .header-top .top-menu .userHistoContent i {
     line-height: 18px !important;
     font-size: 12px !important; }
-  /* line 289, ../scss/bimpcore/_bimptheme.scss */
+  /* line 293, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .header-top .top-menu #allow_notif i {
     color: #f5365c !important; }
-    /* line 292, ../scss/bimpcore/_bimptheme.scss */
+    /* line 296, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-top .top-menu #allow_notif i:hover {
       color: #FF0033 !important; }
-  /* line 299, ../scss/bimpcore/_bimptheme.scss */
+  /* line 303, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .lnMsg {
     background-color: #fff; }
-  /* line 303, ../scss/bimpcore/_bimptheme.scss */
+  /* line 307, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .footer {
     background-color: #fff; }
-  /* line 308, ../scss/bimpcore/_bimptheme.scss */
+  /* line 312, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .bimptheme_menu_extra_sections_title {
     color: #fff;
     margin: 10px;
     padding-top: 10px;
     border-top: 1px solid #9FADC4; }
-  /* line 315, ../scss/bimpcore/_bimptheme.scss */
+  /* line 319, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .bimptheme_menu_extra_section {
     padding-top: 6px 10px;
     margin: 10px;
     color: #fff; }
-    /* line 320, ../scss/bimpcore/_bimptheme.scss */
+    /* line 324, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .bimptheme_menu_extra_section .title {
       color: #fff;
       font-weight: bold; }
-    /* line 325, ../scss/bimpcore/_bimptheme.scss */
+    /* line 329, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .bimptheme_menu_extra_section a {
       cursor: pointer;
       color: #fff !important; }
-      /* line 329, ../scss/bimpcore/_bimptheme.scss */
+      /* line 333, ../scss/bimpcore/_bimptheme.scss */
       #BimpThemeWrapper .bimptheme_menu_extra_section a:hover {
         color: #fff !important;
         text-decoration: underline !important; }
-    /* line 335, ../scss/bimpcore/_bimptheme.scss */
+    /* line 339, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .bimptheme_menu_extra_section select.boxcombo,
     #BimpThemeWrapper .bimptheme_menu_extra_section .select2-container {
       width: 210px !important; }
-  /* line 342, ../scss/bimpcore/_bimptheme.scss */
+  /* line 346, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper #showDetailChrono2 {
     cursor: pointer;
     color: #fff !important; }
-    /* line 346, ../scss/bimpcore/_bimptheme.scss */
+    /* line 350, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper #showDetailChrono2:hover {
       color: #fff !important;
       text-decoration: underline !important; }
-  /* line 357, ../scss/bimpcore/_bimptheme.scss */
+  /* line 361, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .boxstatscontent {
     padding: 0; }
-  /* line 361, ../scss/bimpcore/_bimptheme.scss */
+  /* line 365, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .boxstats130 {
     width: 168px;
     height: 58px; }
-  /* line 370, ../scss/bimpcore/_bimptheme.scss */
+  /* line 374, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .wc-header .wc-user-header a, #BimpThemeWrapper .wc-header .wc-user-header {
     height: 110px;
     width: 90px; }
   @media (max-device-width: 940px) {
-    /* line 376, ../scss/bimpcore/_bimptheme.scss */
+    /* line 380, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper a img, #BimpThemeWrapper td img {
       height: 25px !important;
       width: auto !important; }
-    /* line 380, ../scss/bimpcore/_bimptheme.scss */
+    /* line 384, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .footer {
       background-color: #fff; } }
   @media only screen and (min-width: 1024px) {
-    /* line 387, ../scss/bimpcore/_bimptheme.scss */
+    /* line 391, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .mobile-visible {
       display: none; } }
   @media only screen and (max-width: 1023px) {
-    /* line 393, ../scss/bimpcore/_bimptheme.scss */
+    /* line 397, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .mobile-hidden {
       display: none; }
-    /* line 397, ../scss/bimpcore/_bimptheme.scss */
+    /* line 401, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .modifDropdown {
       margin-left: 10px !important; }
-    /* line 401, ../scss/bimpcore/_bimptheme.scss */
+    /* line 405, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-icon, #BimpThemeWrapper .header-icon > a {
       margin: 0 2px; } }
   @media only screen and (max-width: 650px) {
-    /* line 407, ../scss/bimpcore/_bimptheme.scss */
+    /* line 411, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .login_block_other {
       display: none; } }
 
 @media (max-width: 940px), (max-device-width: 940px) {
-  /* line 414, ../scss/bimpcore/_bimptheme.scss */
+  /* line 418, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper #id-right {
     position: relative !important; } }

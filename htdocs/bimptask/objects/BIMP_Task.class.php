@@ -1161,6 +1161,11 @@ class BIMP_Task extends BimpAbstractFollow
             'tms'      => date('Y-m-d H:i:s'),
             'elements' => array()
         );
+        
+        global $user;
+        if ($user->login !== 'f.martinez') {
+            return $data;
+        }
 
         $bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
         if (!BimpObject::objectLoaded($bimp_user)) {

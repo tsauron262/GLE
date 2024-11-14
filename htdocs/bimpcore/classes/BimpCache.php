@@ -1304,17 +1304,34 @@ class BimpCache
             return array();
         }
 
-        $use_cache_serveur = $instance->getConf('in_cache_serveur', 0, false, 'bool');
         $cacheKey = 'BimpObjectObjects_' . $module . '_' . $object_name . '_' . json_encode($filters) . '_' . $n . '_' . $order_by . '_' . $sortorder . '_' . getEntity('', 0);
-        if ($use_cache_serveur && static::cacheServerExists($cacheKey)) {
-            $rows = static::getCacheServeur($cacheKey);
-        } else {
-            $rows = $instance->getList($filters, $n, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
-            static::setCacheServeur($cacheKey, $rows);
+        $use_cache_server = (int) $instance->getConf('in_cache_serveur', 0, false, 'bool');
+
+        if ($use_cache_server && static::cacheServerExists($cacheKey)) {
+            return static::getCacheServeur($cacheKey);
         }
+        
+        // Surtout pas de cache local pour l'instant (dangereux => la liste peut être modifiée entre 2 appels)
+//        elseif (!$use_cache_server && isset(self::$cache[$cacheKey])) { 
+//            return self::$cache[$cacheKey];
+//        }
+
+        $rows = $instance->getList($filters, $n, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
+
         $newRows = array();
-        foreach ($rows as $r)
-            $newRows[] = $r[$instance->getPrimary()];
+        $primary = $instance->getPrimary();
+
+        foreach ($rows as $r) {
+            $newRows[] = $r[$primary];
+        }
+
+        if ($use_cache_server) {
+            static::setCacheServeur($cacheKey, $newRows);
+        }
+//        else {
+//            self::$cache[$cacheKey] = $newRows;
+//        }
+
         return $newRows;
     }
 
@@ -1322,6 +1339,7 @@ class BimpCache
     {
         $items = array();
         $rows = self::getBimpObjectIds($module, $object_name, $filters, $order_by, $sortorder, $joins, $n);
+        
         foreach ($rows as $r) {
             $item = self::getBimpObjectInstance($module, $object_name, (int) $r);
             if (BimpObject::objectLoaded($item)) {

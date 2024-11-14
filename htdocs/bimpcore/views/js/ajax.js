@@ -74,14 +74,14 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.error = function () {
     };
-    
+
     this.addBimpHash = function () {
-        if (typeof bimpAjax.bimp_storage.get('bimp_hash') !== 'undefined'){
+        if (typeof bimpAjax.bimp_storage.get('bimp_hash') !== 'undefined') {
             var bimp_hash = bimpAjax.bimp_storage.get('bimp_hash');
         }
 
         if (typeof (bimp_hash) !== 'undefined' && bimp_hash) {
-            if(typeof (data.append) == 'function')
+            if (typeof (data.append) == 'function')
                 data.append("bimp_hash", bimpAjax.bimp_storage.get('bimp_hash'));
             else
                 data['bimp_hash'] = bimp_hash;
@@ -109,7 +109,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     if (typeof (bimp_context) !== 'undefined' && bimp_context) {
         bimpAjax.url += "&bimp_context=" + bimp_context;
     }
-    
+
     bimpAjax.addBimpHash();
 
     // Affichage du message de chargement ou suppression du contenu actuel si nécessaire
@@ -290,15 +290,15 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             contentType: bimpAjax.contentType,
             processData: bimpAjax.processData,
             success: function (result) {
-                if(typeof (result.bimp_hash) !== 'undefined') {
-                    bimpAjax.bimp_storage.set('bimp_hash', result.bimp_hash);
-                }
-                
                 if (typeof (result.request_id) !== 'undefined') {
                     bimpAjax = bimp_requests[parseInt(result.request_id)];
                 } else {
                     bimp_msg('Erreur: ID de requête invalide', 'danger', null, true);
                     return;
+                }
+
+                if (typeof (result.bimp_hash) !== 'undefined') {
+                    bimpAjax.bimp_storage.set('bimp_hash', result.bimp_hash);
                 }
 
                 if (typeof (result.nologged) !== 'undefined') {

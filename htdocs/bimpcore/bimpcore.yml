@@ -2,6 +2,10 @@
 categories: 
     defaults: 
         label: Valeurs par défaut
+    perfs: 
+        label: Performances
+    debug: 
+        label: Debug
     emails: 
         label: E-mails
     products: 
@@ -25,10 +29,9 @@ categories:
         
 params: 
     # Principaux:
-    mode_eco: 
-        label: Activer mode éco
-        type: bool
-        def: 0
+    erp_name: 
+        label: Nom ERP
+        def: ''
     check_versions_lock: 
         label: Vérouillage des mises à jours automatiques
         info: Indispensable pour éviter l'exécution multiple des màj
@@ -44,23 +47,6 @@ params:
         type: bool
         info: Désactive tous les envois de SMS (modules BIMP uniquement, sauf page de test)
         def: 1
-    use_bimp_object_instances_clones: 
-        label: cloner les instances de base des BimpObject
-        type: bool
-        def: 1
-    use_files_tms: 
-        label: Inclure les timestamps dans les fichiers js et css
-        type: bool
-        def: 1
-    use_db_transactions: 
-        label: Utiliser les transactions DB
-        type: bool
-        def: 0
-    use_objects_locks: 
-        label: Activer le vérouillage des objets
-        type: bool
-        def: 1
-        info: Permet d'éviter 2 opérations ajax simultanées sur un même objet
     USE_ENTREPOT: 
         label: Utiliser les entrepôts
         type: bool
@@ -200,6 +186,57 @@ params:
         cat: defaults
         def: 0
         
+    # Performance: 
+    mode_eco: 
+        label: Activer mode éco
+        type: bool
+        def: 0
+        cat: perfs
+    use_bimp_object_instances_clones: 
+        label: cloner les instances de base des BimpObject
+        type: bool
+        def: 1
+        cat: perfs
+    use_files_tms: 
+        label: Inclure les timestamps dans les fichiers js et css
+        type: bool
+        def: 1
+        cat: perfs
+    use_db_transactions: 
+        label: Utiliser les transactions DB
+        type: bool
+        def: 0
+        cat: perfs
+    use_objects_locks: 
+        label: Activer le vérouillage des objets
+        type: bool
+        def: 1
+        info: Permet d'éviter 2 opérations ajax simultanées sur un même objet
+        cat: perfs
+    use_browser_local_storage: 
+        label: Activer le stockage local navigateur
+        type: bool
+        def: 0
+        cat: perfs
+        sub_params: 
+            - if: 1
+              params: 
+                  bimp_local_storage_prefixe: 
+                      label: Préfixe pour les clés su stockage local
+                      def: ''    
+    
+    # Debugs: 
+    js_debug_local_storage: 
+        label: Activer le debug JS du stockage local
+        type: bool
+        def: 0
+        cat: debug
+    js_debug_notifs: 
+        label: Activer le debug JS des notifications
+        type: bool
+        def: 0
+        cat: debug
+    
     # E-mails: 
     devs_email: 
         label: Adresse e-mail tous les devs
@@ -392,6 +429,10 @@ params:
         sub_params: 
             - if: 1
               params: 
+                  save_similar_logs_as_note: 
+                      label: Enregistrer les logs similaires en tant que notes
+                      type: bool
+                      def: 0
                   bimp_log_urgent_send_email: 
                       label: Envoyer un e-mail aux devs pour chaque nouveau log urgent
                       type: bool

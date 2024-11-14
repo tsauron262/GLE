@@ -1211,6 +1211,12 @@ class BIMP_Task extends BimpAbstractFollow
         $filters['status'] = array(0, 1, 3);
         $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($bimp_user->dol_object));
 
+        global $user;
+        if ($user-login !== 'f.martinez') {
+            $data['elements'] = $affected_elements;
+            return $data;
+        }
+        
 //        $unaffected_elements = self::getNewTasks($filters, 'unaffected');
 
 //        $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
@@ -1255,6 +1261,11 @@ class BIMP_Task extends BimpAbstractFollow
     {
         $filtre = array();
         $tabFiltre = self::getFiltreDstRight($user);
+        
+        echo '2<pre>';
+        print_r($tabFiltre);
+        echo '</pre>';
+        
         if (count($tabFiltre[1])) {
             $filtre['dst_par_type'] = array(
                 'or' => array(
@@ -1272,6 +1283,10 @@ class BIMP_Task extends BimpAbstractFollow
                     )
             ));
         }
+        
+        echo '3<pre>';
+        print_r($tabFiltre);
+        echo '</pre>';
 
         return $filtre;
     }
@@ -1294,6 +1309,11 @@ class BIMP_Task extends BimpAbstractFollow
     public static function getFiltreDstRight($user)
     {
         $tabT = self::getTableSqlDroitPasDroit($user);
+        
+        echo '1<pre>';
+        print_r($tabT);
+        echo '</pre>';
+        
         if ($user->rights->bimptask->other->read)
             return array("not_in", $tabT[1]);
         else

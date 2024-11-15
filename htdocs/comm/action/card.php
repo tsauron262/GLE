@@ -2652,7 +2652,10 @@ if ($id > 0) {
 			print '</div></div>';
 		}
 	}
-}
+        
+/*moddrsi 20.2*/
+//}
+/*fmoddrsi*/
 
 // End of page
 llxFooter();

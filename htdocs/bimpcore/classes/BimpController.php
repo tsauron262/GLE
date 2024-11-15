@@ -3377,7 +3377,7 @@ class BimpController
     protected function ajaxProcessLoadDocumentation()
     {
         $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', '', 'alphanohtml'), 'modal', BimpTools::getValue('idSection', 'princ', 'alphanohtml'));
-        if (BimpTools::getValue('mode', '', alphanohtml) == 'edit')
+        if (BimpTools::getValue('mode', '', 'alphanohtml') == 'edit')
             $html = $BimpDocumentation->getDoc();
         else
             $html = $BimpDocumentation->displayDoc();

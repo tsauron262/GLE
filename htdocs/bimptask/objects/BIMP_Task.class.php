@@ -384,31 +384,39 @@ class BIMP_Task extends BimpAbstractFollow
         return $status;
     }
 
-    public function getListFiltre($type = "normal", $title = 'Toutes')
+    public function getListFiltre($type = "normal", $title = 'Toutes', $tasks_user = null)
     {
-        global $user;
+        if (is_null($tasks_user)) {
+            global $user;
+            $tasks_user = $user;
+        } else {
+            $tasks_user->loadRights();
+        }
 
         $listName = 'default';
 
-        if ($type == 'orgaDev')
+        if ($type == 'orgaDev') {
             $listName = 'sortable';
+        }
 
         $list = new BC_ListTable($this, $listName, 1, null, $title);
-        $list->addIdentifierSuffix($type);
+        $list->addIdentifierSuffix('user_' . $tasks_user->id . '_' . $type);
 
-        if ($type == 'byMy')
-            $list->addFieldFilterValue('user_create', (int) $user->id);
-        elseif ($type == "orgaDev") {
+        if ($type == 'byMy') {
+            $list->addFieldFilterValue('user_create', (int) $tasks_user->id);
+        } elseif ($type == "orgaDev") {
             $list->addFieldFilterValue('type_manuel', 'dev');
             $list->addFieldFilterValue('status', array(0, 1, 2, 3));
-        } elseif ($type == "my")
-            $list->addFieldFilterValue('id_user_owner', (int) $user->id);
-        else
+        } elseif ($type == "my") {
+            $list->addFieldFilterValue('id_user_owner', (int) $tasks_user->id);
+        } else {
             $list->addFieldFilterValue('fgdg_dst', array(
                 ($type == "my" ? 'and_fields' : 'or') => BimpTools::merge_array(array(
-                    'id_user_owner' => $user->id
-                        ), self::getFiltreRightArray($user))
+                    'id_user_owner' => $tasks_user->id
+                        ), self::getFiltreRightArray($tasks_user))
             ));
+        }
+
         return $list;
     }
 
@@ -1215,7 +1223,7 @@ class BIMP_Task extends BimpAbstractFollow
             $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
         } else {
             $data['elements'] = $affected_elements;
-        }        
+        }
 
         if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
             $bdb = self::getBdb();

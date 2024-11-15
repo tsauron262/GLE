@@ -2073,6 +2073,9 @@ class Bimp_Propal extends Bimp_PropalTemp
         $new_data['fk_user_cloture'] = 0;
         $new_data['id_signature'] = 0;
         $new_data['signature_params'] = array();
+        $new_data['id_signature'] = 0;
+        $new_data['commande_status'] = 0;
+        $new_data['contrats_status'] = 0;
 
         foreach ($new_data as $field => $value) {
             $new_propal->set($field, $value);
@@ -2450,6 +2453,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $new_data['fin_validite'] = BimpTools::getDateFromTimestamp($fin_validite);
         $new_data['id_signature'] = 0;
         $new_data['signature_params'] = array();
+        $new_data['commande_status'] = 0;
         $new_data['contrats_status'] = 0;
 
         $errors = parent::duplicate($new_data, $warnings, $force_create);

@@ -1255,7 +1255,7 @@ class Ldap
 //			return -1;
 //		}
 //
-//		$info = @ldap_get_entries($this->connection, $this->result);
+		$info = @ldap_get_entries($this->connection, $this->result);
 
 		// Warning: Dans info, les noms d'attributs sont en minuscule meme si passe
 		// a ldap_search en majuscule !!!

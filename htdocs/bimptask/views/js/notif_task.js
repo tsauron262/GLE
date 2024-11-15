@@ -280,7 +280,7 @@ class notif_task extends AbstractNotification {
 
         var html = 'Mes tâches <span class="badge badge-' + (this.nb_affected > 0 ? 'info' : 'danger') + '" style="margin-left: 6px; font-size: 10px">' + this.nb_affected + '</span>';
         if (this.nb_affectd_msgs) {
-            html += ' (' + this.nb_affectd_msgs + ' message' + (this.nb_affectd_msgs > 1 ? 's' : '') + ' non lu' + (this.nb_affectd_msgs > 1 ? 's' : '') + ')';
+            html += '&nbsp;&nbsp;<span style="font-size: 11px; font-style: italic">(' + this.nb_affectd_msgs + ' message' + (this.nb_affectd_msgs > 1 ? 's' : '') + ' non lu' + (this.nb_affectd_msgs > 1 ? 's' : '') + ')</span>';
         }
         $nav.html(html);
 
@@ -293,7 +293,7 @@ class notif_task extends AbstractNotification {
 
         html = 'Tâches non attribuées <span class="badge badge-' + (this.nb_unaffected > 0 ? 'info' : 'danger') + '" style="margin-left: 6px; font-size: 10px">' + this.nb_unaffected + '</span>';
         if (this.nb_unaffectd_msgs) {
-            html += ' (' + this.nb_unaffectd_msgs + ' message' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ' non lu' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ')';
+            html += '&nbsp;&nbsp;<span style="font-size: 11px; font-style: italic">(' + this.nb_unaffectd_msgs + ' message' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ' non lu' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ')</span>';
         }
         $nav.html(html);
     }

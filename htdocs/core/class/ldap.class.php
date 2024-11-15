@@ -1222,7 +1222,33 @@ class Ldap
                 
                 
                 $info = array();
+                
+/*
+ * moddrsi pour arricher plus de 2000 users
+ */
+                $cookie = '';
+                $errcode = '';
+                do {
+                    $attributeArray = array_values($attributeArray);
+                    $this->result = ldap_search(
+                        $this->connection, $userDn, $filter, $attributeArray, 0, 0, 0, LDAP_DEREF_NEVER,
+                        [['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 750, 'cookie' => $cookie]]]
+                    );
+                    ldap_parse_result($this->connection, $this->result, $errcode , $matcheddn , $errmsg , $referrals, $controls);
+                    // To keep the example short errors are not tested
+                    $entries = ldap_get_entries($this->connection, $this->result);
+                    $info = array_merge ($info, $entries);
+                    if (isset($controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'])) {
+                        // You need to pass the cookie from the last call to the next one
+                        $cookie = $controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'];
+                    } else {
+                        die('ffffff');
+                        $cookie = '';
+                    }
+                    // Empty cookie means last page
+                } while (!empty($cookie));
 
+                /*
 		if (is_array($attributeArray)) {
 			// Return list with required fields
 			$attributeArray = array_values($attributeArray); // This is to force to have index reordered from 0 (not make ldap_search fails)
@@ -1257,6 +1283,9 @@ class Ldap
 //
 		$info = @ldap_get_entries($this->connection, $this->result);
 
+                 * fmoddrsi
+                 *                  */
+                
 		// Warning: Dans info, les noms d'attributs sont en minuscule meme si passe
 		// a ldap_search en majuscule !!!
 		//print_r($info);

@@ -44,10 +44,13 @@ if (!$user->admin) {
 //    }
 //}$
 
+if (BimpTools::getValue('reset', 0, 'int')) {
+    $_SESSION['dol_tz_string'] = '';
+}
+
 echo '<pre>';
 print_r($_SESSION);
 echo '</pre>';
-
 
 echo '<br/>FIN';
 echo '</body></html>';

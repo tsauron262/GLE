@@ -3251,10 +3251,6 @@ function dol_strftime($fmt, $ts = false, $is_gmt = false)
  */
 function dol_print_date($time, $format = '', $tzoutput = 'auto', $outputlangs = null, $encodetooutput = false)
 {
-    global $user; 
-    if ($user->login === 'f.martinez') {
-        $_SESSION['dol_tz_string'] = 'Europe/Paris';
-    }
 	global $conf, $langs;
 
 	// If date undefined or "", we return ""

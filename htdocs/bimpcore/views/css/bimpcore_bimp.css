@@ -9505,7 +9505,8 @@ body.modal-open ul.ui-autocomplete {
 /* Agenda */
 /* line 1535, ../scss/bimpcore/_styles.scss */
 .wc-user-header.ui-state-active {
-  background-color: transparent !important; }
+  background-color: transparent !important;
+  color: #000 !important; }
 
 /* line 1, ../scss/bimpcore/_form.scss */
 *::-moz-placeholder {

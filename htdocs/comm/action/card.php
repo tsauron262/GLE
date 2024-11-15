@@ -2066,7 +2066,9 @@ if ($id > 0) {
 			print '</div>';
 			print '</td>';
 			print '</tr>';
+                        /*moddrsi 20.2*/
 //                        }
+                        /*fmoddrsi*/
 		}
 
 		// Project

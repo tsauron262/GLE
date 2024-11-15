@@ -47,6 +47,9 @@ params:
         type: bool
         info: Désactive tous les envois de SMS (modules BIMP uniquement, sauf page de test)
         def: 1
+    main_timezone: 
+        label: Timezone principale
+        def: Europe/Paris
     USE_ENTREPOT: 
         label: Utiliser les entrepôts
         type: bool
@@ -142,7 +145,6 @@ params:
         label: Désactiver les API
         type: bool
         def: 0
-        
     exports_ldlc_ftp_serv:
         label: Serveur FTP pour les exports LDLC
         def: 'ftp-edi.groupe-ldlc.com'

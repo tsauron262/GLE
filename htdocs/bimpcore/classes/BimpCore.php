@@ -67,10 +67,7 @@ class BimpCore
     public static function init()
     {
         if (!self::$is_init) {
-            global $user;
-            if ($user->login === 'f.martinez') {
-                $_SESSION['dol_tz_string'] = 'Europe/Paris';
-            }
+            $_SESSION['dol_tz_string'] = BimpCore::getConf('main_timezone');
 
             BimpDebug::addDebugTime('Début affichage page');
 

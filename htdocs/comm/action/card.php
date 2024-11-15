@@ -2066,7 +2066,7 @@ if ($id > 0) {
 			print '</div>';
 			print '</td>';
 			print '</tr>';
-                        }
+//                        }
 		}
 
 		// Project
@@ -2653,9 +2653,7 @@ if ($id > 0) {
 		}
 	}
         
-/*moddrsi 20.2*/
-//}
-/*fmoddrsi*/
+}
 
 // End of page
 llxFooter();

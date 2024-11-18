@@ -193,10 +193,11 @@ class BimpNote extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    public function isUserDest($users_delegations = array())
+    public function isUserDest($users_delegations = null)
     {
         global $user;
-        if ($this->getData("type_dest") == self::BN_DEST_USER && $this->getData("fk_user_dest") == $user->id) {
+
+        if ($this->getData("type_dest") == self::BN_DEST_USER && (int) $this->getData("fk_user_dest") === $user->id) {
             return 1;
         }
 
@@ -204,6 +205,10 @@ class BimpNote extends BimpObject
 
         if ($this->getData("type_dest") == self::BN_DEST_GROUP && in_array($this->getData("fk_group_dest"), $listIdGr)) {
             return 1;
+        }
+
+        if (is_null($users_delegations)) {
+            $users_delegations = $this->db->getValues('user', 'rowid', 'delegations LIKE \'%[' . $user->id . ']%\'');
         }
 
         if (!empty($users_delegations)) {

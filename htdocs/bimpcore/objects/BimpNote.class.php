@@ -197,13 +197,13 @@ class BimpNote extends BimpObject
     {
         global $user;
 
-        if ($this->getData("type_dest") == self::BN_DEST_USER && (int) $this->getData("fk_user_dest") === $user->id) {
+        if ($this->getData("type_dest") == self::BN_DEST_USER && (int) $this->getData("fk_user_dest") == $user->id) {
             return 1;
         }
 
         $listIdGr = self::getUserUserGroupsList($user->id);
 
-        if ($this->getData("type_dest") == self::BN_DEST_GROUP && in_array($this->getData("fk_group_dest"), $listIdGr)) {
+        if ($this->getData("type_dest") == self::BN_DEST_GROUP && in_array((int) $this->getData("fk_group_dest"), $listIdGr)) {
             return 1;
         }
 

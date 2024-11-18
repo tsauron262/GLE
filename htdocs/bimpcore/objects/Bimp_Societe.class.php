@@ -2080,14 +2080,9 @@ class Bimp_Societe extends BimpDolObject
         $debug = '';
 
         $encours = $this->getAllEncoursForSiret(true, false, $debug);
-
-//        if($encours['factures']['total'] != 0){
+        
         $html .= '<b>Encours sur factures restant dues</b> : ' . BimpTools::displayMoneyValue($encours['factures']['total']) . ' TTC<br/><br/>';
-//        }
-//        if($encours['commandes']['socs'][$this->id] != 0){
         $html .= '<b>Encours sur les commandes non facturées</b> : ' . BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]) . ' TTC<br/>';
-//        }
-//        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]).' TTC';
 
 
         if (count($encours['commandes']['socs']) > 1) {

@@ -80,6 +80,8 @@ class DoliDBMysqliC extends DoliDBMysqli
     public $database_pass;
     public $thread_id = 0;
     public $timeReconnect = 0;
+    
+    public $useMysqlic = false;
 
     /**
      * 	Constructor.
@@ -97,6 +99,15 @@ class DoliDBMysqliC extends DoliDBMysqli
 //        ini_set('display_errors', 1);
 
         global $conf, $langs;
+        
+        
+        
+        if (empty($conf->db->dolibarr_main_db_collation)) {//old install 
+                $conf->db->dolibarr_main_db_collation = 'utf8_unicode_ci'; // Old installation
+        }
+        if (empty($conf->db->dolibarr_main_db_character_set)) {
+                $conf->db->dolibarr_main_db_character_set = 'utf8'; // Old installation
+        }
 
         // Note that having "static" property for "$forcecharset" and "$forcecollate" will make error here in strict mode, so they are not static
         if (!empty($conf->db->character_set))
@@ -204,9 +215,18 @@ class DoliDBMysqliC extends DoliDBMysqli
         } else
             $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME = CONSUL_READ_FROM_WRITE_DB_HOST_TIME;
 
-        if (!$this->discover_svc()) {
-            $this->error = "Cannot discover database servers";
-            dol_syslog(get_class($this) . "::DoliDBMysqliC Connect error: " . $this->error, LOG_ERR);
+        if(!$this->CONSUL_USE_REDIS_CACHE){
+//            $this->error = "Cannot use Mysqlic with !CONSUL_USE_REDIS_CACHE";
+            dol_syslog(get_class($this) . "::DoliDBMysqliC Connect error: Cannot use Mysqlic with !CONSUL_USE_REDIS_CACHE", LOG_ERR);
+            return parent::__construct('mysqli', $host, $user, $pass, $name, $port);
+        }
+        elseif (!$this->discover_svc()) {
+//            $this->error = "Cannot discover database servers";
+            dol_syslog(get_class($this) . "::DoliDBMysqliC Connect error: Cannot discover database servers", LOG_ERR);
+            return parent::__construct('mysqli', $host, $user, $pass, $name, $port);
+        }
+        else{
+            $this->useMysqlic = true;
         }
     }
     /*
@@ -752,6 +772,8 @@ class DoliDBMysqliC extends DoliDBMysqli
      */
     function query($query, $usesavepoint = 0, $type = 'auto', $result_mode = 0)
     {
+        if(!$this->useMysqlic)
+            return parent::query($query, $usesavepoint, $type, $result_mode);
         $this->timeDebReq = microtime(true);
 //    	global $conf, $user;
         global $user;

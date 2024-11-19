@@ -79,8 +79,10 @@ class AbstractNotification {
     // Gestion des élements: 
 
     setNewElements(data, full = false) {
-        console.log('new elems');
-        console.log(data);
+        if (bimp_debug_notifs) {
+            console.log('new elems');
+            console.log(data);
+        }
 
         if (typeof (data.tms) !== 'undefined') {
             this.tms = data.tms;

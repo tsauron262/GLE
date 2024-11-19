@@ -2756,7 +2756,9 @@ function top_menu_user($hideloginname = 0, $urllogout = '')
 	            jQuery("#topmenu-login-dropdown .dropdown-toggle").on("click", function(event) {
 					console.log("Click on #topmenu-login-dropdown .dropdown-toggle");
 					event.preventDefault();
-	                jQuery("#topmenu-login-dropdown").toggleClass("open");
+                        /*moddrsi 20.2*/
+	                /*jQuery("#topmenu-login-dropdown").toggleClass("open");*/
+                        /*fmoddrsi 20.2*/
 	            });
 
 	            jQuery("#topmenulogincompanyinfo-btn").on("click", function() {
@@ -3124,7 +3126,9 @@ function top_menu_bookmark()
 
 	            var openBookMarkDropDown = function(event) {
 	                event.preventDefault();
-	                jQuery("#topmenu-bookmark-dropdown").toggleClass("open");
+                        /*moddrsi 20.2*/
+	                /*jQuery("#topmenu-bookmark-dropdown").toggleClass("open");*/
+                        /*fmoddrsi 20.2*/
 	                jQuery("#top-bookmark-search-input").focus();
 	            }
 

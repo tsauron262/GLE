@@ -396,6 +396,8 @@ class BimpLocationLine extends BimpObject
             }
         }
 
+        $html .= $this->renderAvailablitiesAlerts(false);
+
         return $html;
     }
 
@@ -425,9 +427,13 @@ class BimpLocationLine extends BimpObject
 
         if (!count($errors)) {
             if ($this->isEquipmentAvailable((int) $this->getData('id_equipment'), $date_from, $date_to, (int) $loc->getData('id_entrepot'), $errors)) {
-                return BimpInput::renderInput('select', 'id_forfait', (int) $this->getData('id_forfait'), array(
+                $html .= $this->renderAvailablitiesAlerts(false);
+
+                $html .= BimpInput::renderInput('select', 'id_forfait', (int) $this->getData('id_forfait'), array(
                             'options' => $this->getSelectForfaitsArray()
                 ));
+
+                return $html;
             }
         }
 
@@ -437,9 +443,81 @@ class BimpLocationLine extends BimpObject
         return $html;
     }
 
-    public function renderAvailablitiesAlerts()
+    public function renderAvailablitiesAlerts($icon_only = true)
     {
         $html = '';
+
+        $date_from = $this->getData('date_from');
+        $date_to = $this->getData('date_to');
+        $id_eq = (int) $this->getData('id_equipment');
+
+        $warnings = array();
+
+        if ($date_from && $date_to && $id_eq) {
+            $dt = new DateTime($date_from);
+            $dt->sub(new DateInterval('P15D'));
+            $where = 'l.status >= 0 AND a.cancelled = 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_to < \'' . $date_from . '\'';
+            $where .= ' AND a.date_to >= \'' . $dt->format('Y-m-d') . '\'';
+
+            if ($this->isLoaded()) {
+                $where .= ' AND a.id != ' . $this->id;
+            }
+
+            $rows = $this->db->getRows('bimp_location_line a', $where, 1, 'array', array('a.id', 'a.id_location', 'a.date_to'), 'a.date_to', 'desc', array(
+                'l' => array(
+                    'table' => 'bimp_location',
+                    'on'    => 'l.id = a.id_location'
+                )
+            ));
+
+            if (isset($rows[0])) {
+                $dt = new DateTime($rows[0]['date_to']);
+                $dt->add(new DateInterval('P1D'));
+                $loc = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocation', (int) $rows[0]['id_location']);
+                $warnings[] = 'Equipement disponible à partir du <b>' . $dt->format('d / m / Y') . '</b>' . (BimpObject::objectLoaded($loc) ? ' : ' . $loc->getRef() : '');
+            }
+
+
+            $dt = new DateTime($date_to);
+            $dt->add(new DateInterval('P15D'));
+            $where = 'l.status >= 0 AND a.cancelled = 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_from > \'' . $date_to . '\'';
+            $where .= ' AND a.date_from <= \'' . $dt->format('Y-m-d') . '\'';
+
+            if ($this->isLoaded()) {
+                $where .= ' AND a.id != ' . $this->id;
+            }
+
+            $rows = $this->db->getRows('bimp_location_line a', $where, 1, 'array', array('a.id', 'a.id_location', 'a.date_from'), 'a.date_from', 'asc', array(
+                'l' => array(
+                    'table' => 'bimp_location',
+                    'on'    => 'l.id = a.id_location'
+                )
+            ));
+
+            if (isset($rows[0])) {
+                $dt = new DateTime($rows[0]['date_from']);
+                $dt->sub(new DateInterval('P1D'));
+                $loc = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocation', (int) $rows[0]['id_location']);
+                $warnings[] = 'Equipement disponible jusqu\'au <b>' . $dt->format('d / m / Y') . '</b>' . (BimpObject::objectLoaded($loc) ? ' : ' . $loc->getRef() : '');
+            }
+        }
+
+        if (!empty($warnings)) {
+            if ($icon_only) {
+                $msg = '<ul>';
+                foreach ($warnings as $warning) {
+                    $msg .= '<li>';
+                    $msg .= '<span class="warning">' . $warning . '</span>';
+                    $msg .= '</li>';
+                }
+                $msg .= '</ul>';
+                $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg, 'top', true) . ' style="margin: 12px; font-size: 16px">';
+                $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                $html .= '</span>';
+            } else {
+                $html .= BimpRender::renderAlerts($warnings, 'warning');
+            }
+        }
 
         return $html;
     }
@@ -473,9 +551,9 @@ class BimpLocationLine extends BimpObject
                 if (!(float) $this->getData('tva_tx')) {
                     $this->set('tva_tx', $forfait->getData('tva_tx'));
                 }
-                
+
                 $location = $this->getParentInstance();
-                
+
                 $this->isEquipmentAvailable(0, '', '', $location->getData('id_entrepot'), $errors);
             }
         }

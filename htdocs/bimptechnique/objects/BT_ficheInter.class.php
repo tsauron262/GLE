@@ -3379,7 +3379,7 @@ class BT_ficheInter extends BimpDolObject
 
             foreach ($actionCommList as $index => $object) {
                 $actionCommClass->fetch($object->id);
-                $actionCommClass->delete();
+                $actionCommClass->delete($user);
             }
 
             global $rgpd_processing;

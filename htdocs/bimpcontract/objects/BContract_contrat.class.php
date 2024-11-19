@@ -197,6 +197,15 @@ class BContract_contrat extends BimpDolObject
 
     // Droirs users: 
 
+    public function canCreate()
+    {
+        global $user;
+        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+            return 0;
+        }
+        
+        return parent::canCreate();
+    }
     public function canSetAction($action)
     {
 
@@ -4819,7 +4828,14 @@ class BContract_contrat extends BimpDolObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $errors = [];
+        $errors = array();
+        
+        global $user;
+        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+            $errors[] = 'Ce module de contrat n\'est plus maintenu, vous êtes invités à créer un contrat d\'abonnement ou une commande. Contactez le groupe Consoles si vous avez besoin d\'assistance';
+            return $errors;
+        }
+
 
         if (BimpTools::getValue('use_syntec', 0, 'int') && !BimpTools::getValue('syntec', '', 'alphanohtml')) {
             $errors[] = 'Vous devez rensseigner un indice syntec';

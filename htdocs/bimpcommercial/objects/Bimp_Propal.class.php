@@ -1090,11 +1090,16 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                     // Créer un contrat
                     if (1) {
+                        $form_name = 'contrat';
+                        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+                            $form_name = 'contrat_disabled';
+                        }
+
                         $buttons[] = array(
                             'label'   => 'Créer un contrat',
                             'icon'    => 'fas_file-signature',
                             'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
-                                'form_name' => "contrat"
+                                'form_name' => $form_name
                             ))
                         );
                     }
@@ -2653,62 +2658,68 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
         $warnings = [];
         $errors = [];
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
-        $autre_erreurs = true;
-        $id_new_contrat = 0;
 
-        if ($data['objet_contrat'] != 'CDP') {
-            $arrayServiceDelegation = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3');
-            foreach ($this->dol_object->lines as $line) {
-                if ($line->fk_product) {
-                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                    if ($product->isAbonnement()) {
-                        continue;
-                    }
-                    if (in_array($product->getRef(), $arrayServiceDelegation)) {
-                        $errors[] = 'Vous ne pouvez pas mettre le code service ' . $product->getRef() . ' dans un autre contrat que dans un contrat de délégation.';
+        global $user;
+        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+            $errors[] = 'Ce module de contrat n\'est plus maintenu, vous êtes invités à créer un contrat d\'abonnement ou une commande. Contactez le groupe Consoles si vous avez besoin d\'assistance';
+        } else {
+            $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
+            $autre_erreurs = true;
+            $id_new_contrat = 0;
+
+            if ($data['objet_contrat'] != 'CDP') {
+                $arrayServiceDelegation = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3');
+                foreach ($this->dol_object->lines as $line) {
+                    if ($line->fk_product) {
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                        if ($product->isAbonnement()) {
+                            continue;
+                        }
+                        if (in_array($product->getRef(), $arrayServiceDelegation)) {
+                            $errors[] = 'Vous ne pouvez pas mettre le code service ' . $product->getRef() . ' dans un autre contrat que dans un contrat de délégation.';
+                        }
                     }
                 }
             }
-        }
-
-        if (!count($errors)) {
-            if (count($data) == 0) {
-                $autre_erreurs = false;
-                $errors[] = "La création du contrat est impossible en l'état. Si cela est une erreur merci d'envoyer un mail à debugerp@bimp.fr. Cordialement.";
-            }
-
-            $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
-            if (!$client->getData('contact_default') && $autre_erreurs) {
-                //$errors[] = "Pour créer le contrat le client doit avoir un contact par défaut <br /> Client : " . $client->getNomUrl();
-                $errors[] = "Le Contact email facturation par défaut doit exister dans la fiche client <br /> Client : <a href='" . $client->getUrl() . "' target='_blank' >" . $client->getData('code_client') . "</a> ";
-            }
-
-            if ($data['re_new'] == 0 && $autre_erreurs) {
-                $errors[] = "Vous devez obligatoirement choisir un type de renouvellement.";
-            }
 
             if (!count($errors)) {
-                $id_new_contrat = $instance->createFromPropal($this, $data);
-                if ($id_new_contrat > 0) {
-                    if ($this->getData('fk_statut') < 2)
-                        $this->updateField('fk_statut', 2);
-                    $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
+                if (count($data) == 0) {
+                    $autre_erreurs = false;
+                    $errors[] = "La création du contrat est impossible en l'état. Si cela est une erreur merci d'envoyer un mail à debugerp@bimp.fr. Cordialement.";
+                }
 
-                    $signature = $this->getChildObject('signature');
+                $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+                if (!$client->getData('contact_default') && $autre_erreurs) {
+                    //$errors[] = "Pour créer le contrat le client doit avoir un contact par défaut <br /> Client : " . $client->getNomUrl();
+                    $errors[] = "Le Contact email facturation par défaut doit exister dans la fiche client <br /> Client : <a href='" . $client->getUrl() . "' target='_blank' >" . $client->getData('code_client') . "</a> ";
+                }
 
-                    if (BimpObject::objectLoaded($signature)) {
-                        $cancel_errors = $signature->cancelAllSignatures();
+                if ($data['re_new'] == 0 && $autre_erreurs) {
+                    $errors[] = "Vous devez obligatoirement choisir un type de renouvellement.";
+                }
 
-                        if (count($cancel_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($cancel_errors, 'Echec de l\'annulation de la signature');
+                if (!count($errors)) {
+                    $id_new_contrat = $instance->createFromPropal($this, $data);
+                    if ($id_new_contrat > 0) {
+                        if ($this->getData('fk_statut') < 2)
+                            $this->updateField('fk_statut', 2);
+                        $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
+
+                        $signature = $this->getChildObject('signature');
+
+                        if (BimpObject::objectLoaded($signature)) {
+                            $cancel_errors = $signature->cancelAllSignatures();
+
+                            if (count($cancel_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($cancel_errors, 'Echec de l\'annulation de la signature');
+                            }
                         }
-                    }
-                } else {
-                    if ($client->getData('solvabilite_status') > 1) {
-                        $errors[] = "Le contrat ne peut pas être créé car le client est bloqué";
                     } else {
-                        $errors[] = "Le contrat n'a pas été créé";
+                        if ($client->getData('solvabilite_status') > 1) {
+                            $errors[] = "Le contrat ne peut pas être créé car le client est bloqué";
+                        } else {
+                            $errors[] = "Le contrat n'a pas été créé";
+                        }
                     }
                 }
             }

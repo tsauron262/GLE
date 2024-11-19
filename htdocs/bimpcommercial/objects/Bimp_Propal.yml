@@ -484,6 +484,17 @@ forms:
               show:
                   callback: isServiceAutorisedInContrat
                   
+    contrat_disabled:
+        title: création contrat
+        rows: 
+            - custom: 1
+              label: Information
+              input_name: info
+              input: 
+                  type: custom
+                  content: <div class="alert alert-danger">Ce module de contrat n'est plus maintenu, vous êtes invités à créer un contrat d'abonnement ou une commande. Contactez le groupe Consoles si vous avez besoin d'assistance</div>
+                  
+                  
     create_signature:
         title: Création de la signature
         extends: validate

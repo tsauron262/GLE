@@ -26,6 +26,12 @@ class indexController extends BimpController
 
     public function renderContractsTab()
     {
+        $html = '';
+        
+        if (BimpCore::isEntity('bimp')) {
+            $html .= BimpRender::renderAlerts(BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') .  'Ce module de contrat n\'est plus maintenu, vous êtes invités à créer un contrat d\'abonnement ou une commande. Contacter le groupe Consoles si vous avez besoin d\'assistance', 'warning');
+        }
+        
         $this->getSocid();
         $list = 'default';
         $titre = 'Contrats';
@@ -47,7 +53,10 @@ class indexController extends BimpController
             $list->addFieldFilterValue('fk_soc', (int) $societe->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $societe->id;
         }
-        return $list->renderHtml();
+        
+        $html .= $list->renderHtml();
+        
+        return $html;
     }
 
     public function renderTimeTableTab()

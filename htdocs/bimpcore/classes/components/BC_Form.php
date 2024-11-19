@@ -242,7 +242,7 @@ class BC_Form extends BC_Panel
     }
 
     public function renderHtmlContent($form_tag = true)
-    {
+    {        
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;

@@ -99,6 +99,9 @@ class BimpTools
                 $val_temp = str_replace('"', 'ù£ù', $val_temp);
                 $val_temp = self::sanitizeVal($val_temp, $check, $filter, $options, $value);
                 $val_temp = str_replace('ù£ù', '"', $val_temp);
+                
+                $val_temp = str_replace(' <br>', '<br>', $val_temp);
+                $value = str_replace(' <br>', '<br>', $value);
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
@@ -2611,7 +2614,7 @@ class BimpTools
 
     public static function replaceBr($text, $replacement = "\n")
     {
-        $text = preg_replace('/  /', ' ', $text);
+//        $text = preg_replace('/  /', ' ', $text);//pose probléme notament dans mdp avec deux espaces.
         return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
     }
 

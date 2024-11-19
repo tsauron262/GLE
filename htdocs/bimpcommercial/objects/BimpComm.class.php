@@ -5191,18 +5191,21 @@ class BimpComm extends BimpDolObject
             if ($origin && $origin_id) {
                 $errors = BimpTools::merge_array($errors, $this->createLinesFromOrigin($origin_object, array(), $warnings));
                 if (is_a($origin_object, 'BimpComm') && static::$remise_globale_allowed && $origin_object::$remise_globale_allowed) {
-                    $remises_globales = $origin_object->getRemisesGlobales();
-
-                    if (!empty($remises_globales)) {
-                        foreach ($remises_globales as $rg) {
-                            $rem_data = $rg->getDataArray(false);
-                            $rem_data['obj_type'] = static::$element_name;
-                            $rem_data['id_obj'] = (int) $this->id;
-
-                            BimpObject::createBimpObject('bimpcommercial', 'RemiseGlobale', $rem_data, true, $warnings);
-                        }
-                        $this->processRemisesGlobales();
-                    }
+                    
+                    // Copie des remises globales: 
+                    $this->copyRemisesGlobalesFromOrigin($origin_object, $warnings);
+//                    $remises_globales = $origin_object->getRemisesGlobales();
+//
+//                    if (!empty($remises_globales)) {
+//                        foreach ($remises_globales as $rg) {
+//                            $rem_data = $rg->getDataArray(false);
+//                            $rem_data['obj_type'] = static::$element_name;
+//                            $rem_data['id_obj'] = (int) $this->id;
+//
+//                            BimpObject::createBimpObject('bimpcommercial', 'RemiseGlobale', $rem_data, true, $warnings);
+//                        }
+//                        $this->processRemisesGlobales();
+//                    }
                 }
             }
 

@@ -6960,7 +6960,7 @@ class Bimp_Facture extends BimpComm
                                 $this->dol_object->linked_objects[$item['type']] = array();
                             }
 
-                            if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
+                            if (!is_array($this->dol_object->linked_objects[$item['type']]) || !in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
                                 $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
                             }
                         }

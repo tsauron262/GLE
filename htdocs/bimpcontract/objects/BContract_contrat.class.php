@@ -197,6 +197,15 @@ class BContract_contrat extends BimpDolObject
 
     // Droirs users: 
 
+    public function canCreate()
+    {
+        global $user;
+        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+            return 0;
+        }
+        
+        return parent::canCreate();
+    }
     public function canSetAction($action)
     {
 

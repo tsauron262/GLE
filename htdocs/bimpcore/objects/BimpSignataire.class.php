@@ -349,7 +349,7 @@ class BimpSignataire extends BimpObject
     {
         if (BimpTools::isPostFieldSubmit('id_signataire') && BimpTools::isPostFieldSubmit('security_code')) {
             $id_signataire = (int) BimpTools::getPostFieldValue('id_signataire', 0, 'int');
-            $code = (string) BimpTools::getPostFieldValue('security_code', 0, 'az09');
+            $code = (string) BimpTools::getPostFieldValue('security_code', 0, 'aZ09');
 
             if (!$id_signataire || $id_signataire !== $this->id) {
                 $errors[] = 'Identifiant signataire invalide';

@@ -2462,7 +2462,7 @@
         disabledDates: false,
         enabledDates: false,
         icons: {
-            time: 'fa fa-clock-o',
+            time: 'fa fa-clock',
             date: 'fa fa-calendar',
             up: 'fa fa-chevron-up',
             down: 'fa fa-chevron-down',

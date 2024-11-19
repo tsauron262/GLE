@@ -85,7 +85,7 @@ fields:
         default_value: 10
     content: 
         label: Texte
-        type: text
+        type: html
         hashtags: 1
         no_strip_tags: 1
         input: 

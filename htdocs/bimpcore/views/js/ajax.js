@@ -52,6 +52,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.use_refresh_idx = true; // Si $resultContainer non null
     this.remove_current_content = true; // Si append_html true
     this.append_html_transition = true; // Si append_html true
+    this.eraseResultButton = false; // Bouton pour effacer le contenu du résultat
 
     this.processing_msg = 'Traitement en cours';
     this.success_msg = 'Opération effectuée avec succès';
@@ -121,7 +122,13 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 process_html += '<p class="loading-text">' + this.processing_msg + '</p>';
             }
             process_html += '</div>';
-            this.$resultContainer.html(process_html).find('.content-loading').show();
+
+            if (this.remove_current_content) {
+                this.$resultContainer.html(process_html);
+            } else {
+                this.$resultContainer.prepend(process_html);
+            }
+            this.$resultContainer.find('.content-loading').show();
             this.$resultContainer.show();
         } else {
             bimp_msg(this.processing_msg, 'info', null, true);
@@ -331,7 +338,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 }
 
                 if (bimpAjax.display_processing && bimpAjax.$resultContainer) {
-                    bimpAjax.$resultContainer.html('').slideUp(250);
+                    if (bimpAjax.remove_current_content) {
+                        bimpAjax.$resultContainer.html('').slideUp(250);
+                    } else {
+                        bimpAjax.$resultContainer.find('.content-loading').remove();
+                    }
                 }
                 if ((typeof (result.errors) !== 'undefined') && result.errors && result.errors.length) {
                     bimpAjax.display_result_errors(result.errors);
@@ -424,6 +435,18 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 }
                 if ((typeof (result.infos) !== 'undefined') && result.infos && result.infos.length) {
                     bimpAjax.display_result_infos(result.infos);
+                }
+
+                if (bimpAjax.eraseResultButton && $.isOk(bimpAjax.$resultContainer)) {
+                    if (bimpAjax.$resultContainer.html() && !bimpAjax.$resultContainer.find('.eraseAjaxResultBtn').length) {
+                        var btn_html = '<div style="margin: 10px 0; text-align: center">';
+                        btn_html += '<span class="btn btn-default eraseAjaxResultBtn" onclick="$(this).parent().parent().html(\'\')">';
+                        btn_html += '<i class="fas fa5-times iconLeft"></i>Tout effacer';
+                        btn_html += '</span>';
+                        btn_html += '</div>';
+
+                        bimpAjax.$resultContainer.prepend(btn_html);
+                    }
                 }
 
                 if (bimpAjax.modal_scroll_bottom) {

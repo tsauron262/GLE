@@ -1,5 +1,6 @@
 // Notifications:
 var bimp_msg_enable = true;
+var bimp_sound_enable = false;
 var ctrl_down = false;
 var shift_down = false;
 var text_input_focused = false;
@@ -11,7 +12,7 @@ var notifications_remove_delay = 3000;
 
 var BimpDebugModal = false;
 
-function bimp_msg(msg, className, $container, auto_hide) {
+function bimp_msg(msg, className, $container, auto_hide, play_sound) {
     if (!bimp_msg_enable) {
         return;
     }
@@ -22,6 +23,10 @@ function bimp_msg(msg, className, $container, auto_hide) {
 
     if (typeof (auto_hide) === 'undefined') {
         auto_hide = false;
+    }
+    
+    if (typeof (play_sound) === 'undefined') {
+        sound = false;
     }
 
     var html = '<div class="bimp_msg alert alert-' + className + '">';
@@ -67,6 +72,15 @@ function bimp_msg(msg, className, $container, auto_hide) {
                 }
             }
         });
+    }
+    
+    if (play_sound && bimp_sound_enable) {
+        switch(className) {
+            case 'success': 
+            case 'danger': 
+                BimpSound.play(className);
+                break;
+        }
     }
 }
 
@@ -1449,6 +1463,7 @@ function selectElementText($element) {
 function bimp_htmlentities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
 // Ajouts jQuery:
 
 $.fn.tagName = function () {
@@ -1521,6 +1536,29 @@ function findParentByClass($element, className) {
 function findParentByTag($element, tag) {
     return $element.findParentByTag(tag);
 }
+
+// Audio : 
+
+function BimpSound() {
+    this.sounds = [];
+
+    this.play = function (type) {
+        if (typeof (type) === 'undefined') {
+            type = 'danger';
+        }
+
+        if (typeof (this.sounds[type]) === 'undefined') {
+            this.sounds[type] = new Audio(DOL_URL_ROOT + '/bimpcore/views/sound/bip_' + type + '.mp3');
+            this.sounds[type].addEventListener('canplaythrough', function (e) {
+                BimpSound.sounds[type].play();
+            });
+        } else {
+            this.sounds[type].play();
+        }
+    };
+}
+
+var BimpSound = new BimpSound();
 
 /*
  * simpleUpload.js v.1.1

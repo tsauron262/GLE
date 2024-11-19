@@ -3659,6 +3659,47 @@ function setInputsEvents($container) {
             checkPasswordInput($(this));
         });
     });
+    $container.find('input.table_row_selector[type="checkbox"]').each(function () {
+        if (!parseInt($(this).data('row_selector_input_events_init'))) {
+            $(this).change(function () {
+                var $td = $(this).findParentByTag('td');
+
+                if ($.isOk($td)) {
+                    var $row = null;
+
+                    var nb_row = 1;
+                    var rowspan = parseInt($td.attr('rowspan'));
+
+                    if (!isNaN(rowspan) && rowspan > 1) {
+                        nb_row = rowspan;
+                    }
+
+                    while (nb_row >= 1) {
+                        nb_row--;
+
+                        if ($.isOk($row)) {
+                            $row = $row.next('tr');
+                        } else {
+                            $row = $td.findParentByTag('tr');
+                        }
+
+                        if ($.isOk($row)) {
+                            if ($(this).prop('checked')) {
+                                $row.removeClass('deactivated').addClass('selected');
+                            } else {
+                                $row.removeClass('selected').addClass('deactivated');
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            });
+
+            $(this).change();
+            $(this).data('row_selector_input_events_init', 1);
+        }
+    });
 }
 
 function setInputEvents($form, $input) {

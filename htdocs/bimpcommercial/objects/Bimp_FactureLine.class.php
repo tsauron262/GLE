@@ -415,6 +415,14 @@ class Bimp_FactureLine extends ObjectLine
                         $commLine->checkPeriodicityData('fac');
                     }
                 }
+            } elseif ($this->getData('linked_object_name') === 'location_line' && (int) $this->getData('linked_id_object')) {
+                $location_line = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocationLine', (int) $this->getData('linked_id_object'));
+                if (BimpObject::objectLoaded($location_line)) {
+                    $location = $location_line->getParentInstance();
+                    if (BimpObject::objectLoaded($location)) {
+                        $location->checkStatus();
+                    }
+                }
             }
 
             $this->checkPrixAchat();
@@ -841,6 +849,7 @@ class Bimp_FactureLine extends ObjectLine
     {
         $commLine = null;
         $contratLine = null;
+        $location_line = null;
         $id_facture = (int) $this->getData('id_obj');
 
         if ($this->isLoaded()) {
@@ -849,6 +858,9 @@ class Bimp_FactureLine extends ObjectLine
             }
             if ($this->getData('linked_object_name') === 'contrat_line' && (int) $this->getData('linked_id_object')) {
                 $contratLine = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('linked_id_object'));
+            }
+            if ($this->getData('linked_object_name') === 'location_line' && (int) $this->getData('linked_id_object')) {
+                $location_line = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocationLine', (int) $this->getData('linked_id_object'));
             }
         }
 
@@ -864,6 +876,13 @@ class Bimp_FactureLine extends ObjectLine
 
             if (BimpObject::objectLoaded($contratLine)) {
                 $contratLine->onFactureDelete($id_facture);
+            }
+
+            if (BimpObject::objectLoaded($location_line)) {
+                $location = $location_line->getParentInstance();
+                if (BimpObject::objectLoaded($location)) {
+                    $location->checkStatus();
+                }
             }
 
             $this->isDeleting = $prevDeleting;

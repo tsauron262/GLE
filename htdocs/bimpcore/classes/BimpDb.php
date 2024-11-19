@@ -350,9 +350,30 @@ class BimpDb
         return null;
     }
 
-    public function getSum($table, $field, $where = '1')
+    public function getSum($table, $field, $where = '1', $joins = array())
     {
-        $sql = 'SELECT SUM(`' . $field . '`) as sum FROM ' . MAIN_DB_PREFIX . $table;
+        $sql = 'SELECT SUM(';
+
+        if (strpos($field, '.') !== false) {
+            $sql .= $field;
+        } else {
+            $sql .= '`' . $field . '`';
+        }
+
+        $sql .= ') as sum FROM ' . MAIN_DB_PREFIX . $table;
+
+        if (!empty($joins)) {
+            foreach ($joins as $key => $join) {
+                $table = (isset($join['table']) ? $join['table'] : '');
+                $on = (isset($join['on']) ? $join['on'] : '');
+
+                if ($table && $on) {
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $table . ' ' . (isset($join['alias']) ? $join['alias'] : $key) . ' ON ' . $on;
+                }
+            }
+        }
+
+
         $sql .= ' WHERE ' . $where;
 
         $result = $this->executeS($sql, 'array');
@@ -367,7 +388,7 @@ class BimpDb
     public function getCount($table, $where = '1', $primary = 'id', $joins = array())
     {
         $sql = 'SELECT COUNT(DISTINCT `' . $primary . '`) as nb_rows FROM ' . MAIN_DB_PREFIX . $table;
-
+        
         if (!empty($joins)) {
             foreach ($joins as $key => $join) {
                 $table = (isset($join['table']) ? $join['table'] : '');
@@ -404,10 +425,13 @@ class BimpDb
         return null;
     }
 
-    public function getValues($table, $field, $where, $limit = null)
+    public function getValues($table, $field, $where, $limit = null, $order_by = '', $order_way = 'ASC')
     {
         $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
 
+        if ($order_by) {
+            $sql .= ' ORDER BY `' . $order_by . '` '. $order_way;
+        }
         if (!is_null($limit)) {
             $sql .= ' LIMIT ' . $limit;
         }

@@ -11,3 +11,7 @@ params:
     id_cond_reglement_default: 
         label: ID conditions de réglements par défaut
         def: 0
+    sounds_on: 
+        label: Sons activés
+        type: bool
+        def: 1

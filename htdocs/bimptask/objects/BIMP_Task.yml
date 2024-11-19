@@ -150,6 +150,7 @@ fields:
                 label: Avec lien
                 type: callback
                 method: displayPageLink
+        type: html
         
     ok_metier: 
         label: Acceptation métier

@@ -161,7 +161,7 @@ class DoliDBMysqli extends DoliDB
 						$collation = 'utf8_unicode_ci';
 					}
 
-					if (!preg_match('/general/', $collation) && $collection != '') {
+					if (!preg_match('/general/', $collation)) {
 						$this->db->query("SET collation_connection = ".$collation);
 					}
 				}

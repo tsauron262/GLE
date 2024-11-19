@@ -3,10 +3,12 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_location` (
     `ref` VARCHAR(255) NOT NULL DEFAULT '',
     `status` int(11) NOT NULL DEFAULT 0,
     `id_client` int(11) NOT NULL DEFAULT 0,
+    `id_entrepot` int(11) NOT NULL DEFAULT 0,
     `id_contact_facturation` int(11) NOT NULL DEFAULT 0,
     `id_facture_acompte` int(11) NOT NULL DEFAULT 0,
     `date_from` date default null,
     `date_to` date default null,
+    `id_cur_vente` int(11) NOT NULL DEFAULT 0,
     `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
     `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -15,12 +17,17 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_location` (
 
 CREATE TABLE IF NOT EXISTS `llx_bimp_location_line` (
     `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `position` int(11) NOT NULL DEFAULT 0,
     `id_location` int(11) NOT NULL DEFAULT 0,
     `id_equipment` int(11) NOT NULL DEFAULT 0,
     `id_forfait` int(11) NOT NULL DEFAULT 0,
+    `pu_ht` DECIMAL(24,8) NOT NULL DEFAULT 0,
+    `tva_tx` DECIMAL(24,8) NOT NULL DEFAULT 0,
+    `remise` DECIMAL(24,8) NOT NULL DEFAULT 0,
     `date_from` date default null,
     `date_to` date default null,
-    `infos` TEXT NOT NULL DEFAULT ''
+    `infos` TEXT NOT NULL DEFAULT '',
+    `cancelled` tinyint(1) NOT NULL DEFAULT 0
 );
 
 -- CREATE TABLE IF NOT EXISTS `llx_bimp_location_product_forfait` (
@@ -28,5 +35,5 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_location_line` (
 --     `id_product` int(11) NOT NULL DEFAULT 0,
 --     `id_forfait` int(11) NOT NULL DEFAULT 0
 -- );
--- 
 -- CREATE UNIQUE INDEX `produit_forfait` ON `llx_bimp_location_product_forfait` (`id_product`, `id_forfait`);
+ 

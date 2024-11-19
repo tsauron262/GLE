@@ -1,6 +1,7 @@
 /*NE PAS MODIFIER LES FICHIERS CSS => ILS SONT COMPILES A PARTIR DES FICHIERS SCSS*/
-/*+ d'infos: f.martinez@bimp.fr*/ 
+/*+ d'infos: f.martinez@bimp.fr*/
 @import "../../../bimpcore/views/scss/bootstrap/mixins";
+@import "../../../bimpcore/views/scss/entities/bimp/variables";
 @import "../../../bimpcore/views/scss/bootstrap/variables";
 
 @mixin transition($transition...) {
@@ -82,7 +83,7 @@ $article_color: #004264;
             i {
                 @include transition(all 0.3s ease);
                 font-size: 32px;
-                line-height: 32px;    
+                line-height: 32px;
                 color: #FFA84B;
             }
 
@@ -124,7 +125,7 @@ $article_color: #004264;
                 margin: 10px 10px 10px 5px;
                 i {
                     font-size: 26px;
-                    line-height: 28px;    
+                    line-height: 28px;
                 }
             }
         }
@@ -165,7 +166,7 @@ $article_color: #004264;
 #closeCaisseButton,
 #disconnectUserButton {
     @media (min-width: 800px) {
-        float: right;   
+        float: right;
     }
 }
 
@@ -186,7 +187,7 @@ $article_color: #004264;
 }
 
 #curVenteGlobal {
-    background-color: #DCDCDC;
+    /*background-color: #DCDCDC;*/
 }
 
 #currentVenteContainer {
@@ -205,9 +206,13 @@ $article_color: #004264;
 }
 
 #currenVenteContent {
-    background-color: #dcdcdc;
+    /*    background-color: #dcdcdc;*/
     padding: 15px;
-    border: 1px solid #dcdcdc;
+    /*border: 1px solid #dcdcdc;*/
+}
+
+.venteSection {
+    box-shadow: 4px 4px 12px 0px #ccc;
 }
 
 #bc_main_container.fullScreen {
@@ -256,7 +261,7 @@ $article_color: #004264;
     }
 
     #listVentesContainer,
-    #clients, 
+    #clients,
     #mvt_fonds,
     #paiements {
         position: absolute;
@@ -280,7 +285,7 @@ $article_color: #004264;
         padding: 8px 12px;
     }
     .venteSectionBody {
-        padding: 30px;
+        padding: 20px;
         background-color: #fff;
     }
 
@@ -321,7 +326,7 @@ $article_color: #004264;
     background-color: #fff;
     padding: 10px;
     margin-bottom: 15px;
-    
+
     .curVenteInfo {
         display: inline-block;
         margin-bottom: 2px;
@@ -339,7 +344,7 @@ $article_color: #004264;
         {
             display: none!important;
         }
-        
+
         .spinner {
             position: absolute;
             top: 17px;
@@ -434,7 +439,7 @@ $article_color: #004264;
 
         i {
             @include transition(all 0.3s ease);
-            float: right; 
+            float: right;
             margin-right: -30px;
             margin-top: 2px;
             color: #b4b4b4;
@@ -453,14 +458,25 @@ $article_color: #004264;
     }
 }
 
-#ventePanierTotal {
+#ventePanierTotal,
+#venteLocationsTotal {
     text-align: center;
-    background-color: #DCDCDC;
-    border: 1px solid $secondary;
+    background-color: #CCE6FF;
+    /*border: 1px solid $secondary;*/
     color: $gray-darker;
     font-weight: bold;
     font-size: 24px;
     padding: 10px;
+}
+
+#venteLocationsContent {
+    .select2 {
+        width: 100% !important;
+    }
+
+    .vente_loc_table td {
+        background-color: #F0F0F0 !important;
+    }
 }
 
 #venteNbArticles {
@@ -473,7 +489,7 @@ $article_color: #004264;
 #loadRemiseFormButton {
 }
 
-#venteToPay, 
+#venteToPay,
 #venteToReturn,
 #venteAvoir {
     text-align: center;
@@ -484,8 +500,8 @@ $article_color: #004264;
 
 #venteToPay {
     color: $gray_darker;
-    background-color: #DCDCDC;
-    border: 1px solid $secondary;
+    background-color: #CCE6FF;
+    /*border: 1px solid $secondary;*/
 }
 
 #venteToReturn {
@@ -611,9 +627,11 @@ $article_color: #004264;
 
 #customerDiscountsContainer {
     margin: 30px 0 20px;
+    padding: 10px;
+    border: 1px solid #DCDCDC;
 
     #customerDiscounts {
-        max-width: 450px;
+        /*max-width: 450px;*/
         margin: 0 30px;
     }
 
@@ -646,7 +664,8 @@ $article_color: #004264;
 }
 
 #ventePanierLines .cartArticleLine,
-#curVenteRetours .returnLine {
+#curVenteRetours .returnLine,
+#venteLocationsContent .cartLocationLine {
     padding-top: 10px;
     margin-top: 10px;
     border-top: 1px solid $gray;
@@ -668,6 +687,20 @@ $article_color: #004264;
 
             &:hover {
                 color: $danger;
+            }
+        }
+
+        .editArticle {
+            @include transition(all 0.3s ease);
+            color: $gray;
+            display: inline-block;
+            float: right;
+            margin-right: 10px;
+            font-size: 28px;
+            cursor: pointer;
+
+            &:hover {
+                color: $primary;
             }
         }
     }
@@ -712,6 +745,13 @@ $article_color: #004264;
         }
 
     }
+
+    .location_remises {
+        margin: 3px 0 3px 30px;
+        font-size: 14px;
+        color: #8C0000;
+    }
+
     .article_options {
         padding-top: 10px;
         padding-left: 15px;
@@ -788,12 +828,29 @@ $article_color: #004264;
     }
 }
 
+.caisseSoundsOn,
+.caisseSoundsOff {
+    @include transition(all 0.3s ease);
+    
+    float: right; 
+    display: inline-block; 
+    margin-right: 12px;
+    margin-top: -2px;
+    font-size: 22px;
+    color: $gray;
+    cursor: pointer;
+    
+    &:hover {
+        color: $primary;
+    }
+}
+
 @media print {
     body * {
         visibility: hidden!important;
     }
 
-    #venteTicketContainer, 
+    #venteTicketContainer,
     #venteTicketContainer * {
         display: block;
         visibility: visible!important;

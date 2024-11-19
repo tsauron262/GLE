@@ -62,7 +62,7 @@
 
     &.subObjectForm,
     .formGroupMultipleItem {
-        margin-bottom: 10px; 
+        margin-bottom: 10px;
         border: 1px solid #969696;
         padding: 10px;
     }
@@ -81,7 +81,7 @@
     display: -ms-flexbox;
     display: flex;
 
-    .inputLabel, 
+    .inputLabel,
     /*.inputContainer, (transféré dans .fieldRowInput)*/
     .inputMultipleValuesContainer {
         padding: 10px 15px;
@@ -104,7 +104,7 @@
         border-bottom: 1px solid $gray_light;
         padding: 10px 15px;
 
-        .inputContainer {      
+        .inputContainer {
             select {
                 max-width: 350px!important;
             }
@@ -307,9 +307,9 @@ select.switch {
     }
 
     & + span + .toggle-slider {
-        position: relative; 
+        position: relative;
         display: inline-block;
-        width: 40px; 
+        width: 40px;
         height: 20px;
         cursor: pointer;
         border-radius: 1.5em;
@@ -321,11 +321,11 @@ select.switch {
         margin-bottom: 0!important;
 
         &:after {
-            position: absolute; 
+            position: absolute;
             content:'';
-            width: 16px; 
+            width: 16px;
             height: 16px;
-            top: 2px; 
+            top: 2px;
             left: 2px;
             border-radius: 50%;
             @include transition(250ms ease-in-out);
@@ -333,14 +333,15 @@ select.switch {
             box-shadow:
                 0 0.1em 0.15em -0.05em rgba(#fff,.9
                 ) inset,
-                0 0.2em 0.2em -0.12em rgba(#000,.5);    
+                0 0.2em 0.2em -0.12em rgba(#000,.5);
         }
 
         &:before {
-            position: absolute; content:'';
-            width: 32px; 
+            position: absolute;
+            content:'';
+            width: 32px;
             height: 12px;
-            top: 4px; 
+            top: 4px;
             left: 4px;
             border-radius: 0.75em;
             @include transition(250ms ease-in-out);
@@ -372,8 +373,8 @@ select.switch {
                 box-shadow:
                     0 0.08em 0.15em -0.1em rgba(#000,.5) inset,
                     0 0.05em 0.08em -0.01em rgba(#fff,.7),
-                    3em 0 0 0 rgba(#4c6,.7) inset;        
-            }  
+                    3em 0 0 0 rgba(#4c6,.7) inset;
+            }
             &:after {
                 left: 22px
             }
@@ -509,7 +510,8 @@ select.switch {
         }
 
         & > td.removeButton {
-            width: 10%
+            width: 10%;
+            text-align: center;
         }
 
         &.ui-sortable-helper {
@@ -631,7 +633,7 @@ input[type=text].large_input {
                 font-size: 16px;
                 color: $info;
             }
-        } 
+        }
     }
 
     .search_object_result {
@@ -639,7 +641,7 @@ input[type=text].large_input {
     }
 }
 
-/*Check lists:*/ 
+/*Check lists:*/
 
 .check_list_container {
     max-height: 450px;
@@ -668,7 +670,7 @@ input[type=text].large_input {
 
     & > label,
     & > .check_list_group_title {
-        @include transition(all 0.3s ease);  
+        @include transition(all 0.3s ease);
         display: inline-block;
         max-width: 100%;
         margin-left: 0!important;
@@ -886,12 +888,12 @@ input[type=text].large_input {
     border: 1px solid #787878;
 
     .singleLineFormCaption {
-        padding: 5px 12px; 
+        padding: 5px 12px;
         background-color: #F0F0F0;
     }
 
     .singleLineFormContent {
-        padding: 5px 12px; 
+        padding: 5px 12px;
 
         select,
         .select2-container {
@@ -940,7 +942,7 @@ input[type=text].large_input {
 
     .check_list_search_input {
         display: none!important;
-    }   
+    }
 }
 
 /*Filters Input*/
@@ -1031,7 +1033,7 @@ input[type=text].large_input {
     input {
         @include transition(all 0.3s ease);
         border: 1px solid #6C6C6C;
-        padding: 5px 10px!important; 
+        padding: 5px 10px!important;
         font-size: 14px;
 
         &:focus {
@@ -1076,7 +1078,7 @@ input[type=text].large_input {
 
 .bimp_drop_files_container {
     padding: 10px;
-    
+
     .add_file_input {
         display: none;
     }
@@ -1166,7 +1168,7 @@ input[type=text].large_input {
 
                     &:hover {
                         opacity: 1;
-                        
+
                         i {
                             opacity: 1;
                         }

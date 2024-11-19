@@ -4880,8 +4880,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         $warnings[] = BimpTools::getMsgFromArray($note_errors, 'Erreurs lors de la copie des notes de la propales');
                     }
 
-                    // Copie des remises globales: 
-                    $this->copyRemisesGlobalesFromOrigin($propal, $warnings);
+                    /* deja fait dans bimpcomm -> create*/
+//                    // Copie des remises globales: 
+//                    $this->copyRemisesGlobalesFromOrigin($propal, $warnings);
 
                     if ($this->field_exists('id_demande_fin') && $propal->field_exists('id_demande_fin')) {
                         if ((int) $propal->getData('id_demande_fin')) {

@@ -111,6 +111,9 @@ class Bimp_ActionComm extends BimpObject
         foreach ($this->dol_object->userassigned as $userassigned) {
             $users[] = $userassigned['id'];
         }
+        if(!count($users)){
+            $users = BimpTools::getPostFieldValue('param_values/fields/users_assigned', array(), 'array');
+        }
         return $users;
     }
 

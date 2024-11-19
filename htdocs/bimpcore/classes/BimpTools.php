@@ -96,12 +96,20 @@ class BimpTools
             }
             if ($value && $check) {
                 $val_temp = $value;
-                $val_temp = str_replace('"', 'ù£ù', $val_temp);
-                $val_temp = self::sanitizeVal($val_temp, $check, $filter, $options, $value);
-                $val_temp = str_replace('ù£ù', '"', $val_temp);
+                if (is_string($val_temp)) {
+                    $val_temp = str_replace('"', 'ù£ù', $val_temp);
+                }
                 
-                $val_temp = str_replace(' <br', '<br', $val_temp);
-                $value = str_replace(' <br', '<br', $value);
+                $val_temp = self::sanitizeVal($val_temp, $check, $filter, $options, $value);
+
+                if (is_string($val_temp)) {
+                    $val_temp = str_replace('ù£ù', '"', $val_temp);
+                    $val_temp = str_replace(' <br', '<br', $val_temp);
+                }
+
+                if (is_string($value)) {
+                    $value = str_replace(' <br', '<br', $value);
+                }
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
@@ -2823,11 +2831,11 @@ class BimpTools
         if (!preg_match('/.+\/$/', $old_root)) {
             $old_root .= '/';
         }
-        
+
         if (!preg_match('/.+\/$/', $new_root)) {
             $new_root .= '/';
         }
-        
+
         return str_replace($old_root, $new_root, $text);
     }
 

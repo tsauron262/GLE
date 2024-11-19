@@ -97,7 +97,7 @@ class BimpTools
             if ($value && $check) {
                 $val_temp = $value;
                 $val_temp = str_replace('"', 'ù£ù', $val_temp);
-                $val_temp = self::sanitizeVal($val_temp, $check, $filter, $options);
+                $val_temp = self::sanitizeVal($val_temp, $check, $filter, $options, $value);
                 $val_temp = str_replace('ù£ù', '"', $val_temp);
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
@@ -1800,7 +1800,7 @@ class BimpTools
 
     // Gestion de données:
 
-    public static function sanitizeVal($value, $check, $filter, $options)
+    public static function sanitizeVal($value, $check, $filter, $options, &$valueInit)
     {
         switch ($check) {
             case 'array':
@@ -1859,6 +1859,7 @@ class BimpTools
                 if (preg_match('/^\.[0-9]+$/', $value)) {
                     $value = '0' . $value;
                 }
+                $valueInit = $value;
 
                 if (!self::isNumericType($value)) {
                     $value = 0;

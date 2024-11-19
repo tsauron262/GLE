@@ -359,7 +359,7 @@ class BimpLocationLine extends BimpObject
         return $html;
     }
 
-    public function displayDates($single_line = false)
+    public function displayDates($single_line = false, $display_availabilities = true)
     {
         $html = '';
 
@@ -396,7 +396,10 @@ class BimpLocationLine extends BimpObject
             }
         }
 
-        $html .= $this->renderAvailablitiesAlerts(false);
+        if ($display_availabilities) {
+            $html .= $this->renderAvailablitiesAlerts(false);
+        }
+
 
         return $html;
     }

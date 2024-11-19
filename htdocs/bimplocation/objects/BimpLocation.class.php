@@ -745,7 +745,7 @@ class BimpLocation extends BimpObject
                     $html .= '<b> (' . BimpTools::displayMoneyValue($pu_ttc, 'EUR', 0, 0, 0, 2, 0, ',', 1) . ' TTC / jour)</b></div>';
 
                     $html .= '<div style="margin: 8px 30px">';
-                    $html .= '<span style="font-size: 14px">' . $line->displayDates(true) . '</span> (' . $total_qty . ' jours)';
+                    $html .= '<span style="font-size: 14px">' . $line->displayDates(true, false) . '</span> (' . $total_qty . ' jours)';
                     $html .= $line->renderAvailablitiesAlerts();
                     $html .= '</div>';
 

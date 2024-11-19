@@ -42,10 +42,12 @@ class BimpNotification extends BimpObject
 
         // Ajout notif is :
         foreach ($notifs_data as $n) {
-            $bn = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', $n['id_notification']);
+            if(is_array($n)){
+                $bn = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', $n['id_notification']);
 
-            if (BimpObject::objectLoaded($bn)) {
-                $notifs[$n['id_notification']] = $bn->getUserNotifications($id_user, $n);
+                if (BimpObject::objectLoaded($bn)) {
+                    $notifs[$n['id_notification']] = $bn->getUserNotifications($id_user, $n);
+                }
             }
         }
 

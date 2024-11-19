@@ -752,9 +752,9 @@ class Bimp_Log extends BimpObject
 
                     $message .= "\n\n" . "Extra Data : " . $this->displayExtraData();
 
-//                    if ((int) BimpCore::getConf('send_logs_urgents_emails')) {
-//                        mailSyn2("LOG URGENT", BimpCore::getConf('devs_email'), null, $message);
-//                    }
+                    if ((int) BimpCore::getConf('send_logs_urgents_emails')) {
+                        mailSyn2("LOG URGENT", BimpCore::getConf('devs_email'), null, $message);
+                    }
                 }
             }
         }

@@ -223,7 +223,7 @@ class BimpController
                         $txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
                     }
 
-//                    if ((int) BimpCore::getConf('send_fatal_errors_emails')) {
+                    if ((int) BimpCore::getConf('send_fatal_errors_emails')) {
 //                        $last_error_fatal_tms = BimpCore::getConf('last_fatal_error_tms', 0);
 //                        $cur_tms = date('U');
 
@@ -236,9 +236,9 @@ class BimpController
 //                            $erp_name = BimpCore::getConf('erp_name', '');
 //                            BimpTools::sendSmsAdmin('10 erreurs fatales en moins de 30 secondes');
 //                        } elseif ($nb < 10) {
-//                            mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
+                            mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
 //                        }
-//                    }
+                    }
                 }
 
                 if (strpos($msg, 'Allowed memory size') !== false) {

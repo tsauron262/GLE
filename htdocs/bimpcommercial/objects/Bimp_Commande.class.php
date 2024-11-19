@@ -4904,6 +4904,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $client = $this->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
                 $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Commande:' . $this->id . '}}');
+
+                $id_client_facture = (int) $this->getData('id_client_facture');
+                if ($id_client_facture && $id_client_facture !== $client->id) {
+                    $client_fac = $this->getChildObject('client_facture');
+                    
+                    if (BimpObject::objectLoaded($client_fac)) {
+                        $client_fac->setActivity('Création ' . $this->getLabel('of_the') . ' {{Commande:' . $this->id . '}}');
+                    }
+                }
             }
         }
 

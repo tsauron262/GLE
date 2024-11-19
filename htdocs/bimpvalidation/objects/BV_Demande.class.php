@@ -311,67 +311,6 @@ class BV_Demande extends BimpObject
         return $label;
     }
 
-    public function getUserNotificationsDemandes($id_user, $id_max, &$errors = array())
-    {
-        $demandes = array(
-            'content'           => array(),
-            'nb_user_demandes'  => 0,
-            'nb_other_demandes' => 0
-        );
-
-        $filters = array(
-            'status'  => 0,
-            'or_user' => array(
-                'or' => array(
-                    'id_user_affected' => (int) $id_user,
-                    'validation_users' => array(
-                        'part_type' => 'middle',
-                        'part'      => '[' . $id_user . ']'
-                    )
-                )
-            )
-        );
-
-        $secteurs = BimpCache::getSecteursArray();
-        BimpObject::loadClass('bimpvalidation', 'BV_Rule');
-
-        foreach (BimpCache::getBimpObjectObjects('bimpvalidation', 'BV_Demande', $filters) as $demande) {
-            $obj = $demande->getObjInstance();
-
-            if (BimpObject::objectLoaded($obj)) {
-                $obj_params = BimpValidation::getObjectParams($obj);
-                $client = $obj->getChildObject('client');
-                $user_demande = $demande->getChildObject('user_demande');
-
-                $new_demande = array(
-                    'type'         => $demande->displayValidationType(),
-                    'obj_link'     => $obj->getLink(),
-                    'url'          => $obj->getUrl(),
-                    'client'       => (BimpObject::objectLoaded($client) ? $client->getLink() : ''),
-                    'secteur'      => lcfirst($secteurs[$obj_params['secteur']]),
-                    'val'          => $demande->displayObjVal(),
-                    'id'           => $demande->id,
-                    'date_create'  => $demande->getData('date_create'),
-                    'user_demande' => (BimpObject::objectLoaded($user_demande) ? $user_demande->getName() : ''),
-                    'can_process'  => $demande->canProcess(),
-                    'can_view'     => $demande->canView()
-                );
-
-                if ((int) $demande->getData('id_user_affected') === $id_user) {
-                    $new_demande['id_tab'] = 'user_demandes';
-                    $demandes['nb_user_demandes']++;
-                } else {
-                    $new_demande['id_tab'] = 'other_demandes';
-                    $demandes['nb_other_demandes']++;
-                }
-
-                $demandes['content'][] = $new_demande;
-            }
-        }
-
-        return $demandes;
-    }
-
     public static function getObjectType($object)
     {
         BimpObject::loadClass('bimpvalidation', 'BV_Rule');
@@ -714,7 +653,11 @@ class BV_Demande extends BimpObject
         $warnings = array();
 
         $success = 'Demande ' . $this->displayValidationType() . ' acceptée';
-        $success_callback = 'bimp_reloadPage();';
+
+        $success_callback = '';
+        if (!(int) BimpTools::getArrayValueFromPath($data, 'no_page_reload', 0)) {
+            $success_callback = 'bimp_reloadPage();';
+        }
 
         $obj_validation_errors = array();
         $errors = $this->setAccepted(true, $warnings, $success, $obj_validation_errors);
@@ -735,7 +678,11 @@ class BV_Demande extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Demande ' . $this->displayValidationType() . ' refusée';
-        $success_callback = 'bimp_reloadPage();';
+
+        $success_callback = '';
+        if (!(int) BimpTools::getArrayValueFromPath($data, 'no_page_reload', 0)) {
+            $success_callback = 'bimp_reloadPage();';
+        }
 
         $motif = BimpTools::getArrayValueFromPath($data, 'motif', '');
 
@@ -783,7 +730,11 @@ class BV_Demande extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Demande ' . $this->displayValidationType() . ' remise en attente';
-        $success_callback = 'bimp_reloadPage();';
+
+        $success_callback = '';
+        if (!(int) BimpTools::getArrayValueFromPath($data, 'no_page_reload', 0)) {
+            $success_callback = 'bimp_reloadPage();';
+        }
 
         $this->set('status', 0);
         $this->set('id_user_validate', 0);
@@ -821,5 +772,72 @@ class BV_Demande extends BimpObject
         }
 
         return $errors;
+    }
+
+    // Méthodes statiques : 
+
+    public static function getUserNotificationsDemandes($id_user, $tms = '', $options = array(), &$errors = array())
+    {
+        $data = array(
+            'tms'      => date('Y-m-d H:i:s'),
+            'elements' => array()
+        );
+
+        $filters = array(
+            'status'  => 0,
+            'or_user' => array(
+                'or' => array(
+                    'id_user_affected' => (int) $id_user,
+                    'validation_users' => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $id_user . ']'
+                    )
+                )
+            )
+        );
+
+        if ($tms) {
+            $filters['tms'] = array(
+                'operator' => '>',
+                'value'    => $tms
+            );
+        }
+
+        $secteurs = BimpCache::getSecteursArray();
+        BimpObject::loadClass('bimpvalidation', 'BV_Rule');
+
+        foreach (BimpCache::getBimpObjectObjects('bimpvalidation', 'BV_Demande', $filters) as $demande) {
+            $obj = $demande->getObjInstance();
+
+            if (BimpObject::objectLoaded($obj)) {
+                $obj_params = BimpValidation::getObjectParams($obj);
+                $client = $obj->getChildObject('client');
+                $user_demande = $demande->getChildObject('user_demande');
+
+                $new_demande = array(
+                    'type'         => $demande->displayValidationType(),
+                    'obj_link'     => $obj->getLink(),
+                    'url'          => $obj->getUrl(),
+                    'client'       => (BimpObject::objectLoaded($client) ? $client->getLink() : ''),
+                    'secteur'      => lcfirst($secteurs[$obj_params['secteur']]),
+                    'val'          => $demande->displayObjVal(),
+                    'id'           => $demande->id,
+                    'date_create'  => $demande->getData('date_create'),
+                    'user_demande' => (BimpObject::objectLoaded($user_demande) ? $user_demande->getName() : ''),
+                    'can_process'  => $demande->canProcess(),
+                    'can_view'     => $demande->canView()
+                );
+
+                if ((int) $demande->getData('id_user_affected') === $id_user) {
+                    $new_demande['tab_type'] = 'user_demandes';
+                } else {
+                    $new_demande['tab_type'] = 'other_demandes';
+                }
+
+                $data['elements'][] = $new_demande;
+            }
+        }
+
+        return $data;
     }
 }

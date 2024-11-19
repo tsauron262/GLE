@@ -1,25 +1,20 @@
 notifHashtag = null;
+
 class hashtag extends AbstractNotification {
-
-    /**
-     * Overrides
-     */
-
-    constructor(nom, id_notification) {
-        super(nom, id_notification);
+    constructor(id, storage_key) {
+        super('hashtag', id, storage_key);
         notifHashtag = this;
+
+        this.init();
     }
 
     init() {
-        if (typeof object_labels['BimpNote'] === 'undefined')
-            object_labels['BimpNote'] = 'Hashtag';
-
         if ($('a#' + this.dropdown_id).length == 0) {
-
-            if (theme != 'BimpTheme')
+            if (theme != 'BimpTheme') {
                 var notif_white = 'notif_white';
-            else
+            } else {
                 var notif_white = '';
+            }
 
             var html = '<a class="nav-link dropdown-toggle header-icon ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
             html += '<i class="fas fa5-hashtag atoplogin"></i></a>';
@@ -32,19 +27,17 @@ class hashtag extends AbstractNotification {
             html += '</div>';
             html += '</div>';
 
-            $(this.parent_selector).prepend(html);
-
-            super.init(this);
+            var $container = $(this.parent_selector);
+            if ($container.length) {
+                $container.prepend(html);
+                super.init();
+            } else {
+                console.error('Hashtags : container notifs absent');
+            }
         }
     }
 
     formatElement(element, key) {
-//        console.log(element);
-        if ($('div.list_part[key="' + key + '"]').length) {
-            $('div.list_part[key="' + key + '"]').remove();
-            AbstractNotification.prototype.elementRemoved(1, this.dropdown_id);
-        }
-
         var html = '';
 
         element.is_new = this.isNew(element);
@@ -64,7 +57,7 @@ class hashtag extends AbstractNotification {
 
     getElementHeaderButtons(element, key) {
         var html = '';
-        var callback_set_as_viewed = this.ptr + '.setAsViewed("' + key + '","' + element.id + '")';
+        var callback_set_as_viewed = 'notifHashtag.setAsViewed("' + key + '","' + element.id + '")';
 
         // Marquer comme lu
         if (!element.is_viewed) {
@@ -73,14 +66,14 @@ class hashtag extends AbstractNotification {
         } else {
             html += '<span style="font-size: 11px" class="success"><i class="fas fa5-check iconLeft"></i>Lu</span>';
         }
-        
+
         return html;
     }
 
     isNew(element) {
-
-        if (parseInt(element.is_viewed) === 1)
+        if (parseInt(element.is_viewed) === 1) {
             return 0;
+        }
 
         return 1;
     }
@@ -89,45 +82,41 @@ class hashtag extends AbstractNotification {
         return element.id;
     }
 
-    displayNotification(element) {
-        var bn = this;
-
-        if (window.Notification && Notification.permission === "granted") {
-
-            var titre = "Nouveau message de ";
-            var n = new Notification(titre, {
-                body: element.content,
-                icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
-            });
-
-            n.onclick = function () {
-                if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1)
-                    $('#' + bn.dropdown_id).trigger('click');
-            }
+    sendBrowserNotification(elements) {
+        if (!elements.length) {
+            return;
         }
 
-    }
-
-    displayMultipleNotification(elements) {
-        var nb_valid = elements.length;
         var bn = this;
+        var title = '';
+        var content = '';
 
-        if (window.Notification && Notification.permission === "granted") {
+        if (elements.length > 1) {
+            title = elements.length + ' nouvelles citations';
+        } else {
+            title = "Nouvelle citation";
+            content = elements[0].content;
+        }
 
-            var n = new Notification("Vous avez " + nb_valid + " objés liés.", {
-                body: '',
-                icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
-            });
-
-            n.onclick = function () {
+        BimpBrowserNotification(title, content, function () {
+            window.parent.parent.focus();
+            if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1) {
                 $('#' + bn.dropdown_id).trigger('click');
             }
-        }
+        });
     }
 
-    /**
-     * Fonctions spécifique à la classe
-     */
-
-
+    getLabel() {
+        return 'Hashtags';
+    }
 }
+
+$(document).ready(function () {
+    $('body').on('objectChange', function (e) {
+        if (e.module === 'bimpcore' && e.object_name === 'BimpLink') {
+            if (typeof (notifHashtag) !== 'undefined' && notifHashtag !== null) {
+                notifHashtag.refreshElements();
+            }
+        }
+    });
+});

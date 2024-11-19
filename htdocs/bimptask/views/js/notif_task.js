@@ -1,33 +1,36 @@
 notifTask = null;
 class notif_task extends AbstractNotification {
 
-    /**
-     * Overrides
-     */
-
-    constructor(nom) {
-        super(nom);
+    constructor(id, storage_key) {
+        super('notif_task', id, storage_key);
         notifTask = this;
+
+        this.nb_affected = 0;
+        this.nb_affected_msgs = 0;
+        this.nb_unaffected = 0;
+        this.nb_unaffectd_msgs = 0;
+
+        this.affected_selector = '#user_notifications_affected_tasks';
+        this.unaffected_selector = '#user_notifications_unaffected_tasks';
+
+        this.init();
     }
 
     init() {
-        this.my = 'my_task';
-        this.unaffected = 'unaffected_task';
         var nt = this;
 
-        if (theme != 'BimpTheme')
+        if (theme != 'BimpTheme') {
             var notif_white = 'notif_white';
-        else
+        } else {
             var notif_white = '';
+        }
 
-        if ($('a#' + this.dropdown_id).length == 0) {
-
+        if ($('a#' + this.dropdown_id).length === 0) {
             var html = '<a class="nav-link dropdown-toggle header-icon ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
             html += '<i class="fas fa5-tasks atoplogin"></i>';
             html += '</a>';
             html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id + '">';
-            html += '<div class="notifications-wrap list_notification ' + this.nom + '">';
-            html += '</div>';
+            html += '<div class="notifications-wrap list_notification ' + ''/*this.nom */ + '">';
 
             html += '<div class="header" style="padding: 5px 15px">';
 
@@ -36,8 +39,6 @@ class notif_task extends AbstractNotification {
             html += '<td style="width: 30%">';
             html += 'Tâches en cours';
             html += this.getBoutonReload(this.dropdown_id);
-
-
 
             html += '</td>';
             html += '<td style="width: 70%; text-align: right">';
@@ -57,65 +58,64 @@ class notif_task extends AbstractNotification {
 
             // Nav tabs 
             html += '<ul id="nav_task" class="nav nav-tabs" role="tablist">';
-            html += '<li role="presentation" class="active"><a href="#' + nt.my + '" aria-controls="' + nt.my + '" role="tab" data-toggle="tab">Mes tâches</a></li>';
-            html += '<li role="presentation"><a href="#' + nt.unaffected + '" aria-controls="' + nt.unaffected + '" role="tab" data-toggle="tab">Tâches non attribuées</a></li>';
+            html += '<li role="presentation" class="active"><a href="#user_notifications_affected_tasks" aria-controls="user_notifications_affected_tasks" role="tab" data-toggle="tab">Mes tâches</a></li>';
+            html += '<li role="presentation"><a href="#user_notifications_unaffected_tasks" aria-controls="user_notifications_unaffected_tasks" role="tab" data-toggle="tab">Tâches non attribuées</a></li>';
             html += '</ul>';
 
             // Tab panels 
             html += '<div class="tab-content task_panel">';
-            html += '<div role="tabpanel" class="list_notification tab-pane fade in active" id="' + nt.my + '"><div class="task_with_prio"></div><div class="task_no_prio"></div></div>';
-            html += '<div role="tabpanel" class="list_notification tab-pane fade" id="' + nt.unaffected + '"><div class="task_with_prio"></div><div class="task_no_prio"></div></div>';
+            html += '<div role="tabpanel" class="list_notification tab-pane fade in active" id="user_notifications_affected_tasks"></div>';
+            html += '<div role="tabpanel" class="list_notification tab-pane fade" id="user_notifications_unaffected_tasks"></div>';
             html += '</div>';
 
             html += '</div>';
             html += '</div>';
+            html += '</div>';
 
-            $(this.parent_selector).prepend(html);
+            var $container = $(this.parent_selector);
+            if ($container.length) {
+                $container.prepend(html);
 
+                // Animations slide sur le coté: 
+                $('ul#nav_task > li > a[data-toggle="tab"]').on('hide.bs.tab', function (e) {
+                    var $old_tab = $($(e.target).attr("href"));
+                    var $new_tab = $($(e.relatedTarget).attr("href"));
 
-//            // Animation slide sur le coté
-            $('ul#nav_task > li > a[data-toggle="tab"]').on('hide.bs.tab', function (e) {
-                var $old_tab = $($(e.target).attr("href"));
-                var $new_tab = $($(e.relatedTarget).attr("href"));
+                    if ($new_tab.index() < $old_tab.index()) {
+                        $old_tab.css('position', 'relative').css("right", "0").show();
+                        $old_tab.animate({"right": "-100%"}, 300, function () {
+                            $old_tab.css("right", 0).removeAttr("style");
+                        });
+                    } else {
+                        $old_tab.css('position', 'relative').css("left", "0").show();
+                        $old_tab.animate({"left": "-100%"}, 300, function () {
+                            $old_tab.css("left", 0).removeAttr("style");
+                        });
+                    }
+                });
 
-                if ($new_tab.index() < $old_tab.index()) {
-                    $old_tab.css('position', 'relative').css("right", "0").show();
-                    $old_tab.animate({"right": "-100%"}, 300, function () {
-                        $old_tab.css("right", 0).removeAttr("style");
-                    });
-                } else {
-                    $old_tab.css('position', 'relative').css("left", "0").show();
-                    $old_tab.animate({"left": "-100%"}, 300, function () {
-                        $old_tab.css("left", 0).removeAttr("style");
-                    });
-                }
-            });
+                $('ul#nav_task > li > a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+                    var $new_tab = $($(e.target).attr("href"));
+                    var $old_tab = $($(e.relatedTarget).attr("href"));
 
-            $('ul#nav_task > li > a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-                var $new_tab = $($(e.target).attr("href"));
-                var $old_tab = $($(e.relatedTarget).attr("href"));
+                    if ($new_tab.index() > $old_tab.index()) {
+                        $new_tab.css('position', 'relative').css("right", "-2500px");
+                        $new_tab.animate({"right": "0"}, 500);
+                    } else {
+                        $new_tab.css('position', 'relative').css("left", "-2500px");
+                        $new_tab.animate({"left": "0"}, 500);
+                    }
+                });
 
-                if ($new_tab.index() > $old_tab.index()) {
-                    $new_tab.css('position', 'relative').css("right", "-2500px");
-                    $new_tab.animate({"right": "0"}, 500);
-                } else {
-                    $new_tab.css('position', 'relative').css("left", "-2500px");
-                    $new_tab.animate({"left": "0"}, 500);
-                }
-            });
-
-            super.init(this);
+                super.init();
+            } else {
+                console.error('Tâches : container notifs absent');
+            }
         }
     }
 
     isNew(element) {
-
-        // Cette tâche concerne directement l'utilisateur connecté
-//        if (element.user_type == this.my)
         return 1;
-
-        // Cette tâche est non attribué
-        return 0;
     }
 
     getbuttonSendMail(id_object) {
@@ -201,8 +201,6 @@ class notif_task extends AbstractNotification {
             html += '<div class="task_txt">' + element.txt + '</div>';
         }
 
-        this.updateNav(element.user_type, 1, element.not_viewed);
-
         element.class = 'single_task';
 
         return html;
@@ -214,7 +212,7 @@ class notif_task extends AbstractNotification {
         html += this.getButtonNotViewed(element.id, element.not_viewed);
 
         // Tâche pour l'utilisateur courant
-        if (element.user_type == this.my) {
+        if (element.user_type === 'affected') {
             if (element.can_rep_mail)
                 html += this.getbuttonSendMail(element.id);
             if (element.can_close)
@@ -223,7 +221,7 @@ class notif_task extends AbstractNotification {
                 html += this.getButtonRefuseAttribute(element.id);
 
             // Tâche non affectée
-        } else if (element.user_type == this.unaffected) {
+        } else if (element.user_type === 'unaffected') {
             if (element.can_rep_mail)
                 html += this.getbuttonSendMail(element.id);
             if (element.can_close)
@@ -245,114 +243,83 @@ class notif_task extends AbstractNotification {
         return html;
     }
 
-    updateNav(user_type, nb_task, nb_msg) {
+    emptyContent() {
+        this.nb_affected = 0;
+        this.nb_affected_msgs = 0;
+        this.nb_unaffected = 0;
+        this.nb_unaffectd_msgs = 0;
 
-        var $nav = $('ul#nav_task > li > a[href="#' + user_type + '"]');
-
-        // Init des valeur des attriuts
-        if (typeof $nav.attr('nb_task') === typeof undefined)
-            $nav.attr('nb_task', 0);
-
-        if (typeof $nav.attr('nb_msg') === typeof undefined)
-            $nav.attr('nb_msg', 0);
-
-        // Calculs des nouvelles valeur
-        var new_nb_task = parseInt($nav.attr('nb_task')) + nb_task;
-        var new_nb_msg = parseInt($nav.attr('nb_msg')) + nb_msg;
-
-        if (new_nb_task > 1)
-            var s_task = 's';
-        else
-            var s_task = '';
-
-        if (user_type === this.my)
-            var to_print = 'tâche' + s_task + ' en attente' + s_task;
-        else
-            var to_print = 'tâche' + s_task + ' non attribuée' + s_task;
-
-        $nav.attr('nb_task', new_nb_task);
-        $nav.attr('nb_msg', new_nb_msg);
-
-        if (new_nb_msg > 0) {
-            if (new_nb_msg > 1)
-                var s_msg = 's';
-            else
-                var s_msg = '';
-            $nav.text(new_nb_task + ' ' + to_print + ' ' + new_nb_msg + ' message' + s_msg + ' non lu' + s_msg);
-        } else
-            $nav.text(new_nb_task + ' ' + to_print);
-
+        $(this.affected_selector).html('');
+        $(this.unaffected_selector).html('');
     }
 
-    emptyNav(user_type) {
-
-        var $nav = $('ul#nav_task > li > a[href="#' + user_type + '"]');
-
-        $nav.attr('nb_task', 0);
-        $nav.attr('nb_msg', 0);
-
-        if (user_type === this.my)
-            var to_print = 'tâche 0 en attente';
-        else
-            var to_print = 'tâche 0 non attribuée';
-
-        $nav.text(to_print);
+    renderElements() {
+        super.renderElements();
+        this.updateNavs();
     }
 
-    displayNotification(element) {
+    appendElement(element, key, html) {
+        if (element.user_type === 'affected') {
+            this.nb_affected++;
+            this.nb_affectd_msgs += element.not_viewed;
+            $(this.affected_selector).append(html);
+        } else {
+            this.nb_unaffected++;
+            this.nb_unaffectd_msgs += element.not_viewed;
+            $(this.unaffected_selector).append(html);
+        }
+    }
+
+    updateNavs() {
+        var $nav = $('ul#nav_task > li > a[href="#user_notifications_affected_tasks"]');
+
+        if ($nav.length) {
+            $nav.attr('nb_task', this.nb_affected);
+            $nav.attr('nb_msg', this.nb_affectd_msgs);
+        }
+
+        var html = 'Mes tâches <span class="badge badge-' + (this.nb_affected > 0 ? 'info' : 'danger') + '" style="margin-left: 6px; font-size: 10px">' + this.nb_affected + '</span>';
+        if (this.nb_affectd_msgs) {
+            html += ' (' + this.nb_affectd_msgs + ' message' + (this.nb_affectd_msgs > 1 ? 's' : '') + ' non lu' + (this.nb_affectd_msgs > 1 ? 's' : '') + ')';
+        }
+        $nav.html(html);
+
+        var $nav = $('ul#nav_task > li > a[href="#user_notifications_unaffected_tasks"]');
+
+        if ($nav.length) {
+            $nav.attr('nb_task', this.nb_affected);
+            $nav.attr('nb_msg', this.nb_affectd_msgs);
+        }
+
+        html = 'Tâches non attribuées <span class="badge badge-' + (this.nb_unaffected > 0 ? 'info' : 'danger') + '" style="margin-left: 6px; font-size: 10px">' + this.nb_unaffected + '</span>';
+        if (this.nb_unaffectd_msgs) {
+            html += ' (' + this.nb_unaffectd_msgs + ' message' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ' non lu' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ')';
+        }
+        $nav.html(html);
+    }
+
+    sendBrowserNotification(elements) {
+        if (!elements.length) {
+            return;
+        }
+
         var bn = this;
+        var title = '';
+        var content = '';
 
-        if (window.Notification && Notification.permission === "granted") {
-            var content = element.txt.replace(/(<([^>]+)>)/gi, "");
-            var n = new Notification(element.subj, {
-                body: content,
-                icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
-            });
-
-            n.onclick = function () {
-                window.parent.parent.focus();
-                if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1)
-                    $('#' + bn.dropdown_id).trigger('click');
-            }
+        if (elements.length > 1) {
+            title = 'Vous avec reçu ' + elements.length + ' nouvelles tâches';
+        } else {
+            title = "Nouvelle tâche : " + elements[0].subj;
+            content = elements[0].txt;
         }
 
-    }
-
-    displayMultipleNotification(elements) {
-        var nb_task = 0;
-        var nb_urg = 0;
-        var bn = this;
-
-        for (var i in elements) {
-            if (elements[i].user_type === this.my) {
-                nb_task++;
-                if (elements[i].prio === 20)
-                    nb_urg++;
+        BimpBrowserNotification(title, content, function () {
+            window.parent.parent.focus();
+            if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1) {
+                $('#' + bn.dropdown_id).trigger('click');
             }
-        }
-
-        if (window.Notification && Notification.permission === "granted") {
-
-            var msg_urg = '';
-
-            if (nb_urg != 0) {
-                if (nb_urg == 1)
-                    msg_urg += ' (dont ' + nb_urg + ' urgente)';
-                else
-                    msg_urg += ' (dont ' + nb_urg + ' urgentes)';
-            }
-
-            var n = new Notification("Vous avez " + nb_task + msg_urg + " taches en cours.", {
-                body: '',
-                icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
-            });
-
-            n.onclick = function () {
-                window.parent.parent.focus();
-                if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1)
-                    $('#' + bn.dropdown_id).trigger('click');
-            };
-        }
+        });
     }
 
     isMultiple(elements) {
@@ -360,75 +327,15 @@ class notif_task extends AbstractNotification {
         var nb_my_task = 0;
 
         for (var i in elements) {
-            if (elements[i].user_type === this.my)
+            if (elements[i].user_type === 'affected') {
                 nb_my_task++;
+            }
         }
 
         return nb_my_task > 2;
     }
 
-    /**
-     * Attention dans le cas de cette utilisation pas de mise à jour du span rouge (volontairement)
-     */
-    remove(id_task) {
-
-        var not_viewed = parseInt($('div[key="task_' + id_task + '"] > button[not_viewed]').attr('not_viewed'));
-
-        // Mes tâches
-        if ($('div[key="task_' + id_task + '"]').parent().parent() === this.my) {
-            this.elementRemoved(1, this.dropdown_id);
-            this.updateNav(this.unaffected, -1, -not_viewed);
-
-            // Tâches non attribuée
-        } else {
-            this.updateNav(this.unaffected, -1, -not_viewed);
-        }
-
-        $('div[key="task_' + id_task + '"]').remove();
-
-
-    }
-
-    move(id_task, prio, id_new_user) {
-
-        var to_move = $('div[key="task_' + id_task + '"]');
-        var user_type = this.unaffected;
-        var prio_type = 'task_no_prio';
-
-        var not_viewed = parseInt($('div[key="task_' + id_task + '"] > button[not_viewed]').attr('not_viewed'));
-
-        // Ne rien faire lorsque l'on désattribue une tâche déjà non attribuée
-        if (parseInt(id_new_user) === 0 && to_move.parent().parent().attr('id') == this.unaffected) {
-            return;
-        }
-
-        // Affecté à l'utilisateur courant
-        if (parseInt(id_new_user) > 0 && parseInt(id_user) === parseInt(id_new_user)) {
-            this.elementAdded(1, this.dropdown_id);
-            user_type = this.my;
-            this.updateNav(this.my, 1, not_viewed);
-            this.updateNav(this.unaffected, -1, -not_viewed);
-        }
-
-        // Affecté à l'utilisateur courant
-        else {
-            this.updateNav(this.my, -1, -not_viewed);
-            this.updateNav(this.unaffected, 1, not_viewed);
-        }
-
-        // Prioritaire
-        if (parseInt(prio) > 0)
-            prio_type = 'task_with_prio';
-
-        this.swapButton(to_move, id_task);
-
-
-        $('div.tab-content > #' + user_type + ' > div.' + prio_type).prepend(to_move);
-
-    }
-
     swapButton(element, id_task) {
-
         var btn_refuse_attribute = element.find('button[name="refuse_attribute"]');
         if (btn_refuse_attribute.length == 1) {
             var new_button = this.getButtonAttribute(id_task);
@@ -445,17 +352,17 @@ class notif_task extends AbstractNotification {
 
     }
 
-    emptyNotifs() {
-        var nb_rm_my = $('.task_with_prio > div').length;
-        var nb_rm_unaffected = $('.task_no_prio > div').length;
-
-        $('.task_with_prio').empty();
-        $('.task_no_prio').empty();
-
-        this.elementRemoved(nb_rm_my, this.dropdown_id);
-        this.elementRemoved(nb_rm_unaffected, this.dropdown_id);
-
-        this.emptyNav(this.my);
-        this.emptyNav(this.unaffected);
+    getLabel() {
+        return 'Tâches';
     }
 }
+
+$(document).ready(function () {
+    $('body').on('objectChange', function (e) {
+        if (e.module === 'bimptask' && e.object_name === 'BIMP_Task') {
+            if (typeof (notifTask) !== 'undefined' && notifTask !== null) {
+                notifTask.refreshElements();
+            }
+        }
+    });
+});

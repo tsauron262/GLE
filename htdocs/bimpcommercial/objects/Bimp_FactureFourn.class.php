@@ -429,6 +429,18 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         return $buttons;
     }
+    
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+            $actions[] = array(
+                'label'   => 'Fichiers Zip des PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
+            );
+
+        return $actions;
+    }
 
     public function getModelsPdfArray()
     {

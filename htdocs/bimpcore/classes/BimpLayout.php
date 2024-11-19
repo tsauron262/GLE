@@ -9,7 +9,7 @@ class BimpLayout
     public $js_files = array();
     public $css_files = array();
     public $js_vars = array();
-    public $local_vars = array();
+    public $js_local_vars = array();
     public $page_title = '';
     public $extra_head = '';
     public $body_id = 'mainbody';
@@ -118,11 +118,11 @@ class BimpLayout
         }
     }
 
-    public function addLocalVars($local_vars)
+    public function addJsLocalVars($js_local_vars)
     {
-        if (is_array($local_vars) && !empty($local_vars)) {
-            foreach ($local_vars as $var_name => $var_value) {
-                $this->local_vars[$var_name] = $var_value;
+        if (is_array($js_local_vars) && !empty($js_local_vars)) {
+            foreach ($js_local_vars as $var_name => $var_value) {
+                $this->js_local_vars[$var_name] = $var_value;
             }
         }
     }
@@ -136,19 +136,20 @@ class BimpLayout
 
         if (!empty($this->js_vars)) {
             $bimp_layout_js_vars .= "\n" . '<!-- VARS JS -->' . "\n";
-            $bimp_layout_js_vars .= '<script '.BimpTools::getScriptAttribut().'>' . "\n";
+            $bimp_layout_js_vars .= '<script ' . BimpTools::getScriptAttribut() . '>' . "\n";
 
             foreach ($this->js_vars as $var_name => $var_value) {
                 $bimp_layout_js_vars .= "\t" . 'var ' . $var_name . ' = ';
                 $bimp_layout_js_vars .= $var_value;
                 $bimp_layout_js_vars .= ';' . "\n";
             }
-            if(count($this->local_vars)){
+            
+            if (count($this->js_local_vars)) {
                 $bimp_layout_js_vars .= "\t $(document).ready(function() {";
-                $bimp_layout_js_vars .= "\t var bimp_storage = new BimpStorage();";
-                foreach ($this->local_vars as $var_name => $var_value) {
+//                $bimp_layout_js_vars .= "\t var bimp_storage = new BimpStorage();"; // exite déjà dans bimpcore.js
+                foreach ($this->js_local_vars as $var_name => $var_value) {
                     $bimp_layout_js_vars .= "\t" . 'bimp_storage.set("' . $var_name . '",';
-                    if(is_int($var_value))
+                    if (is_int($var_value))
                         $bimp_layout_js_vars .= $var_value;
                     else
                         $bimp_layout_js_vars .= '"' . $var_value . '"';
@@ -180,7 +181,7 @@ class BimpLayout
         echo $this->renderModals();
 
         // Ce script doit figurer en toute fin de page (on cherche à être sûr que tout le js bimpcore est chargé): 
-        echo '<script '.BimpTools::getScriptAttribut().'>';
+        echo '<script ' . BimpTools::getScriptAttribut() . '>';
         echo '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
         echo '</script>' . "\n\n";
     }

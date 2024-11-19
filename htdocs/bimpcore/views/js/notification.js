@@ -18,295 +18,195 @@
  *     
  */
 
+if (typeof (bimp_use_local_storage) === 'undefined') {
+    var bimp_use_local_storage = false;
+}
+
+if (typeof (bimp_debug_notifs) === 'undefined') {
+    var bimp_debug_notifs = false;
+}
+
+if (bimp_use_local_storage && bimp_debug_notifs) {
+    console.log('DEBUG NOTIFS ACTIVÉ');
+    console.log('STOCKAGE LOCAL ACTIVÉ');
+}
+
 class AbstractNotification {
 
-    constructor(id_notification) {
-        if (this.constructor == AbstractNotification) {
-            throw new Error('La classe abstraite "AbstractNotification" ne peut être instanciée.');
-            return;
-        }
+    // Init
 
+    constructor(nom, id, storage_key) {
+        this.nom = nom;
+        this.id = id;
+        this.elements = [];
         this.id_max = 0;
-        this.use_localStorage = false;
-        this.id_notification = id_notification;
-        this.content = [];
-        this.ptr = 'notificationActive[' + this.id_notification + '].obj';
-        this.dropdown_id = 'dropdown_' + this.id_notification;
-
+        this.tms = '';
+        this.storage_key = storage_key;
+        this.dropdown_id = 'dropdown_' + id;
         this.parent_selector = 'div.login_block_other';
-//        this.display_notification = true;
-//        if (bimp_storage.get(this.id_notification) === null)
-//            bimp_storage.set(this.id_notification, this.id_max);
-
-        this.init();
+        this.content_selector = 'div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap';
+        this.max_elements = 30;
+        this.sort_way = 'desc';
     }
 
-    init(an) {
-        var instance = this;
+    init() {
+        var ptr = this;
 
-        $('#' + an.dropdown_id).click(function (e) {
-            an.expand();
+        $('#' + ptr.dropdown_id).click(function (e) {
+            ptr.expand();
             e.stopPropagation();
-
         });
 
         $(document).click(function (e) {
             if (!$('#page_modal').hasClass('in') && $(e.target).attr('id') != 'page_modal') {
                 var $target = $(e.target);
-                if (!$target.closest(instance.parent_selector).length)
-                    instance.collapse();
+                if (!$target.closest(ptr.parent_selector).length) {
+                    ptr.collapse();
+                }
             }
         });
 
-        $('span[name="reload_notif"][dropdown_id="' + instance.dropdown_id + '"]').click(function () {
-            instance.reloadNotif();
+        $('span[name="reload_notif"][dropdown_id="' + ptr.dropdown_id + '"]').click(function () {
+            ptr.refreshElements();
         });
+
+        this.loadStorage();
+        if (this.elements.length) {
+            this.renderElements();
+        }
     }
 
-    notificationAction(action, id, data, success) {
-        data['actionNotif'] = action;
-        data['id_notification'] = this.id_notification;
-        data['id'] = id;
+    // Gestion des élements: 
 
-        BimpAjax('notificationAction', data, null, {
-            display_success: false,
-            success: function (result, bimpAjax) {
-                success(result, bimpAjax);
-            }
-        });
-    }
+    setNewElements(data, full = false) {
+        console.log('new elems');
+        console.log(data);
 
-    setAsViewed(key, id) {
-        var data = {
-        };
+        if (typeof (data.tms) !== 'undefined') {
+            this.tms = data.tms;
+        }
 
-        var thisClass = this;
-        var success = function (result, bimpAjax) {
-            thisClass.isViewed(key);
-        };
-
-        this.notificationAction('setAsViewed', id, data, success);
-    }
-
-    isViewed(key) {
-        $('div.list_part[key="' + key + '"] span.nonLu').removeClass('nonLu');
-        this.elementRemoved(1);
-    }
-
-    expand() {
-        var instance = this;
-        $(this.parent_selector).find('.bimp_notification_dropdown').each(function () {
-            // Définition de l'attribut is_open
-            if (typeof $(this).attr('is_open') === typeof undefined)
-                $(this).attr('is_open', 0);
-
-            var was_open = parseInt($(this).attr('is_open'));
-
-            // Fermeture
-            if (was_open === 1) {
-                $(this).slideToggle(200);
-                $(this).attr('is_open', 0);
+        if (typeof (data.elements) === 'object') {
+            if (full) {
+                this.elements = [];
             }
 
-            // Ouverture de la dropdown cliquée si elle n'était pas déjà ouverte
-            if ($(this).attr('aria-labelledby') === instance.dropdown_id && was_open === 0) {
-                $(this).slideToggle(200);
-                $(this).attr('is_open', 1);
+            for (var i in data.elements) {
+                this.addElement(data.elements[i]);
             }
+        }
 
-        });
-    }
-
-    collapse() {
-        $(this.parent_selector).find('.bimp_notification_dropdown').each(function () {
-
-            // Définition de l'attribut is_open
-            if (typeof $(this).attr('is_open') === typeof undefined)
-                $(this).attr('is_open', 0);
-
-            // Fermeture
-            if (parseInt($(this).attr('is_open')) === 1) {
-                $(this).slideToggle(200);
-                $(this).attr('is_open', 0);
-            }
-        });
+        this.checkElements();
+        this.renderElements();
+        this.checkBrowserNotification();
+        this.setStorage();
     }
 
     addElement(element) {
-        /**
-         * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
-         */
-
-        console.log(element);
-        console.log(typeof element.content, this.id_notification + "_content", element.content.length);
-
-        if (typeof element.content === "object" && (element.content.length > 0 || Object.keys(element.content).length > 0)) {
-
-            if (this.id_max == 0)
-                var add = 0;
-            else
-                var add = 1;
-
-            if (this.use_localStorage) {
-                console.log('storage');
-                bimp_storage.set(this.id_notification + "_content", element.content, add);
-                this.traiteStorage();
-            } else {
-                console.log('no_storage');
-                this.traiteElement(element.content);
+        for (var i in this.elements) {
+            if (this.elements[i].id === element.id) {
+                this.elements[i] = element;
+                return;
             }
         }
 
+        this.elements.push(element);
     }
 
-    traiteStorage() {
-        if (!this.use_localStorage) {
-            return;
-        }
-        
-        var content = bimp_storage.get(this.id_notification + "_content");
-        if (content !== null) {
-            this.content = [];
-            this.id_max = 0;
-            this.emptyNotifs();
-            this.traiteElement(content);
-        }
-    }
+    checkElements() {
+        if (this.elements.length) {
+            var notif = this;
 
-    traiteElement(content) {
-        content = Object.keys(content).map(function (cle) {
-            return content[cle];
-        });
-        var notif = this;
+            this.elements.sort(function compare(a, b) {
+                if (!a || !b) {
+                    return 0;
+                }
 
-
-        content = content.sort(function compare(a, b) {
-            if (notif.isNew(a) < notif.isNew(b))
-                return -1;
-            if (notif.isNew(a) > notif.isNew(b))
-                return 1;
-            
-            if (a.position !== undefined) {
-                if (a.position > b.position)
-                    return -1;
-                if (a.position < b.position)
+                if (notif.isNew(a) < notif.isNew(b)) {
                     return 1;
-            }
-            if (a.id < b.id)
-                return -1;
-            if (a.id > b.id)
-                return 1;
-            return 0;
-        });
-
-//        content = Object.fromEntries(content);
-
-        var nb_unread = 0;
-        var id_max_changed = 0;
-        var to_display = '';
-
-//        if (content !== null && this.isMultiple(content))
-//            var is_multiple = true;
-//        else
-        var is_multiple = false;
-
-        for (var i in content) {
-
-            // Redéfinition de id max
-            if (typeof content[i].tms !== 'undefined') {
-                if (parseInt(content[i].tms) > this.id_max) {
-                    this.id_max = parseInt(content[i].tms);
                 }
-            } else {
-                if (parseInt(content[i].id) > this.id_max) {
-                    this.id_max = parseInt(content[i].id);
+                if (notif.isNew(a) > notif.isNew(b)) {
+                    return -1;
                 }
-            }
 
-            // Si la fonction n'est pas implémenter dans la classe fille: is_new = 1
-            var is_new = this.isNew(content[i]);
+                if (notif.sort_way === 'asc') {
+                    if (a.sort_val < b.sort_val) {
+                        return -1;
+                    }
 
-            // Clé utilisé pour identifier les "groupes de message" (ex: conversation)
-            var key = this.getKey(content[i]);
+                    if (a.sort_val > b.sort_val) {
+                        return 1;
+                    }
+                } else {
+                    if (a.sort_val > b.sort_val) {
+                        return -1;
+                    }
 
-            // Affichage dans le topmenu
-            to_display = this.formatElement(content[i], key);
-            this.addInList(to_display, content[i].url, content[i], key, content[i].append);
-
-            // Augmentation du nombre dans le span rouge
-            if (is_new === 1) {
-                // Affichage dans la notification
-                if (!is_multiple) {
-                    var id_max_os = parseInt(bimp_storage.get(this.id_notification + 'id_max_notif_os'));
-                    if (isNaN(id_max_os) || id_max_os < this.id_max) {
-                        bimp_storage.set(this.id_notification + 'id_max_notif_os', this.id_max);
-                        this.displayNotification(content[i]);
+                    if (a.sort_val < b.sort_val) {
+                        return 1;
                     }
                 }
 
-                nb_unread++;
+                return 0;
+            });
+
+            if (this.elements.length > this.max_elements) {
+                this.elements.splice(this.max_elements, (this.elements.length - this.max_elements));
             }
         }
-
-        if (is_multiple) {
-            var id_max_os = parseInt(bimp_storage.get(this.id_notification + 'id_max_notif_os'));
-            if (isNaN(id_max_os) || id_max_os < this.id_max) {
-                console.log('notifiii');
-                bimp_storage.set(this.id_notification + 'id_max_notif_os', this.id_max);
-                this.displayMultipleNotification(content, nb_unread);
-            }
-        }
-
-
-        this.elementAdded(nb_unread);
     }
 
-    addInList(to_display, url, element, key, to_append = false) {
-
-        if (!element.class)
-            element.class = '';
-
-        var html = '';
-
-        html += '<div class="list_part ' + (url ? 'notif_link ' : '') + element.class + '" key="' + key + '">';
-
-        var header = '';
-
-        if (element.date_create) {
-            header += '<span class="date_notif">' + this.formatDate(element.date_create) + '</span>';
-        }
-
-        var header_buttons = this.getElementHeaderButtons(element, key);
-
-        if (url) {
-            header_buttons += '<span class="rowButton" onclick="window.open(\'' + url + '\')">';
-            header_buttons += '<i class="fas fa5-external-link-alt"></i></span>';
-        }
-
-        if (header_buttons) {
-            header += '<div style="display: inline-block; float: right">';
-            header += header_buttons;
-            header += '</div>';
-        }
-
-        if (header) {
-            html += '<div class="part_list_header">' + header + '</div>';
-        }
-
-        html += to_display;
-
-        html += '</div>';
-
-        var $container = null;
-
-        if (to_append === false) {
-            $container = $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap ');
-        } else {
-            $container = $(to_append);
-        }
+    renderElements() {
+        var $container = $(this.content_selector);
 
         if ($.isOk($container)) {
-            $container.prepend(html);
+            this.emptyContent();
+            var nb_unread = 0;
+
+            for (var i in this.elements) {
+                if (!this.elements[i]) {
+                    continue;
+                }
+
+                var html = '';
+                var is_new = this.isNew(this.elements[i]);
+                var key = this.getKey(this.elements[i]);
+                var url = this.elements[i].url;
+
+                if (is_new) {
+                    nb_unread++;
+                }
+
+                html += '<div class="list_part ' + (url ? 'notif_link ' : '') + this.elements[i].class + '" key="' + this.elements[i].id + '">';
+
+                var header = '';
+
+                if (this.elements[i].date_create) {
+                    header += '<span class="date_notif">' + this.formatDate(this.elements[i].date_create) + '</span>';
+                }
+
+                var header_buttons = this.getElementHeaderButtons(this.elements[i], this.elements[i].id);
+
+                if (url) {
+                    header_buttons += '<span class="rowButton" onclick="window.open(\'' + url + '\')">';
+                    header_buttons += '<i class="fas fa5-external-link-alt"></i></span>';
+                }
+
+                if (header_buttons) {
+                    header += '<div style="display: inline-block; float: right">';
+                    header += header_buttons;
+                    header += '</div>';
+                }
+
+                if (header) {
+                    html += '<div class="part_list_header">' + header + '</div>';
+                }
+
+                html += this.formatElement(this.elements[i], key);
+                html += '</div>';
+
+                this.appendElement(this.elements[i], key, html);
+            }
 
             $container.find('.bs-popover').each(function () {
                 if (!parseInt($(this).data('bs_popover_event_init'))) {
@@ -327,12 +227,146 @@ class AbstractNotification {
                     $(this).data('bs_popover_click_event_init', 1);
                 }
             });
-    }
+
+//            if (is_multiple) { ??? 
+//                var id_max_os = parseInt(bimp_storage.get(this.id + 'id_max_notif_os'));
+//                if (isNaN(id_max_os) || id_max_os < this.id_max) {
+//                    console.log('notifiii');
+//                    bimp_storage.set(this.id + 'id_max_notif_os', this.id_max);
+//                    this.displayMultipleNotification(content, nb_unread);
+//                }
+//            }
+
+            this.setCountSpanValue(nb_unread);
+        } else {
+            console.error(this.getLabel() + ' : content container absent');
+        }
     }
 
-    isMultiple(elements)
-    {
-        return elements.length >= 7;
+    appendElement(element, key, html) {
+        var $container = $(this.content_selector);
+
+        if ($.isOk($container)) {
+            $container.append(html);
+        }
+    }
+
+    refreshElements() {
+        if (bimp_debug_notifs) {
+            console.log('REFRESH : ' + this.nom);
+        }
+        bimp_notifications.reload(false, this.id);
+    }
+
+    emptyContent() {
+        var $container = $(this.content_selector);
+
+        if ($.isOk($container)) {
+            $container.html('');
+        }
+    }
+
+    // Gestion du storage: 
+
+    setStorage() {
+        if (bimp_use_local_storage && this.storage_key) {
+            bimp_storage.set(this.storage_key, {
+                'id_max': this.id_max,
+                'tms': this.tms,
+                'elements': this.elements
+            });
+        }
+    }
+
+    loadStorage() {
+        if (bimp_use_local_storage) {
+            var data = bimp_storage.get(this.storage_key, 'obj');
+
+            if (data) {
+                if (typeof (data.id_max) !== 'undefined') {
+                    this.id_max = data.id_max;
+                }
+
+                this.elements = data.elements;
+                this.tms = data.tms;
+
+                if (bimp_debug_notifs) {
+                    console.log('Notifs "' + this.nom + '" : storage OK');
+                    console.log(this.elements);
+                }
+            }
+        }
+    }
+
+    // Traitements: 
+
+    expand() {
+        var instance = this;
+        $(this.parent_selector).find('.bimp_notification_dropdown').each(function () {
+            if (typeof $(this).attr('is_open') === typeof undefined) {
+                $(this).attr('is_open', 0);
+            }
+
+            var was_open = parseInt($(this).attr('is_open'));
+
+            // Fermeture
+            if (was_open === 1) {
+                $(this).slideToggle(200);
+                $(this).attr('is_open', 0);
+            }
+
+            // Ouverture de la dropdown cliquée si elle n'était pas déjà ouverte
+            if ($(this).attr('aria-labelledby') === instance.dropdown_id && was_open === 0) {
+                $(this).slideToggle(200);
+                $(this).attr('is_open', 1);
+            }
+
+        });
+    }
+
+    collapse() {
+        $(this.parent_selector).find('.bimp_notification_dropdown').each(function () {
+            if (typeof $(this).attr('is_open') === typeof undefined) {
+                $(this).attr('is_open', 0);
+            }
+
+            // Fermeture
+            if (parseInt($(this).attr('is_open')) === 1) {
+                $(this).slideToggle(200);
+                $(this).attr('is_open', 0);
+            }
+        });
+    }
+
+    notificationAction(action, id, data, success_callback = null, refresh_elements = true) {
+        var notif = this;
+        data['actionNotif'] = action;
+        data['id_notification'] = this.id;
+        data['id'] = id;
+
+        BimpAjax('notificationAction', data, null, {
+            display_success: false,
+            notif: notif,
+            refresh_elements: refresh_elements,
+            success: function (result, bimpAjax) {
+                if (typeof (success_callback) === 'function') {
+                    success_callback(result, bimpAjax);
+                }
+
+                if (bimpAjax.refresh_elements) {
+                    bimpAjax.notif.refreshElements();
+                }
+            }
+        });
+    }
+
+    setAsViewed(key, id) {
+        var ptr = this;
+        this.notificationAction('setAsViewed', id, {});
+    }
+
+    isViewed(key) {
+        $('div.list_part[key="' + key + '"] span.nonLu').removeClass('nonLu');
     }
 
     formatDate(input) {
@@ -343,48 +377,19 @@ class AbstractNotification {
                 m.getFullYear() + " " +
                 ("0" + m.getHours()).slice(-2) + ":" +
                 ("0" + m.getMinutes()).slice(-2);
-        // Pas besoin des secondes
-//                + ":" +
-//                ("0" + m.getSeconds()).slice(-2);
     }
 
-    elementAdded(nb_add) {
-        // Aucun nouvel élément
-        if (nb_add === 0)
-            return;
+    setCountSpanValue(count) {
+        var $span = $('a#' + this.dropdown_id + ' > span.badge.bg-danger');
 
-        var span_red = $('a#' + this.dropdown_id + ' > span.badge.bg-danger');
-
-
-        // Le span existe, on le met à jour
-        if (0 < parseInt(span_red.length)) {
-            var nb_old = parseInt($('a#' + this.dropdown_id + ' > span.badge.bg-danger').html());
-            span_red.html(nb_add + nb_old);
-        }
-
-        // Le span n'existe pas, il faut le créer
-        else {
-            $('a#' + this.dropdown_id).append('<span class="badge bg-danger">' + nb_add + '</span>');
-        }
-    }
-
-    elementRemoved(nb_rm) {
-
-        // Aucun élément à supprimer
-        if (nb_rm === 0)
-            return;
-        var span_red = $('a#' + this.dropdown_id + ' > span.badge.bg-danger');
-
-        // Le span existe, on le met à jour
-        if (0 < parseInt(span_red.length)) {
-
-            var nb_old = parseInt(span_red.html());
-            var nb_new = nb_old - nb_rm;
-            if (nb_new <= 0)
-                span_red.remove();
-            else
-                span_red.html(nb_new);
-
+        if ($span.length) {
+            if (count > 0) {
+                $span.html(count);
+            } else {
+                $span.remove();
+            }
+        } else if (count > 0) {
+            $('a#' + this.dropdown_id).append('<span class="badge bg-danger">' + count + '</span>');
         }
     }
 
@@ -397,49 +402,67 @@ class AbstractNotification {
     }
 
     getBoutonReload() {
-        return '<span dropdown_id="' + this.dropdown_id + '" name="reload_notif" class="objectIcon"><i class="fas fa5-redo-alt"></i></span>';
+        return '<span dropdown_id="' + this.dropdown_id + '" name="reload_notif" class="' + this.nom + '_reload_btn reload_notif_btn"><i class="fas fa5-redo-alt"></i></span><span class="' + this.nom + '_loading_spin loading-spin reload_notif_spinner"><i class="fa fa-spinner fa-spin"></i></span>';
     }
 
-    reloadNotif() {
-        this.content = [];
-        this.id_max = 0;
-
-        this.emptyNotifs();
-
-        // TODO check la suite
-//        this.display_notification = false;
-        bimp_notification.reload(false, this.id_notification);
+    getLabel() {
+        return 'Notifications';
     }
 
-    emptyNotifs(display_loading_spin) {
-        var nb_rm = $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap > div').length;
-
-        $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap').empty();
-
-        this.elementRemoved(nb_rm, this.dropdown_id);
+    showLoading() {
+        $('.' + this.nom + '_reload_btn').hide();
+        $('.' + this.nom + '_loading_spin').show();
     }
 
+    hideLoading() {
+        $('.' + this.nom + '_reload_btn').show();
+        $('.' + this.nom + '_loading_spin').hide();
+    }
+
+    checkBrowserNotification() {
+        var new_elements = [];
+        var new_id_max = 0;
+
+        for (var i in this.elements) {
+            if (this.id_max && this.isNew(this.elements[i]) && this.elements[i].id > this.id_max) {
+                new_elements.push(this.elements[i]);
+            }
+
+            if (this.elements[i].id > new_id_max) {
+                new_id_max = this.elements[i].id;
+            }
+        }
+
+        this.id_max = new_id_max;
+
+        if (new_elements.length) {
+            this.sendBrowserNotification(new_elements);
+        }
+    }
+
+    processBrowserNotification(elements) {
+    }
 }
 
-function BimpNotification() {
+function BimpNotifications() {
     this.id = getRandomInt(9999999999999);
     this.active = true;
     this.hold = false;
     this.processing = false;
-    this.delay = 0;
+    this.delay = 30000;
+//    this.delay = 10000;
     this.is_first_iteration = true;
-    this.$loading = $();
-    this.$refreshBtn = $();
-    this.notificationActive = {};
-
+    this.nb_iterations = 0;
+    this.notifications = [];
     var bn = this;
 
     // Ajout du panneau rouge si notifications non activée
-    if (Notification.permission !== "granted") {
+//    if (Notification.permission !== "granted") {
 //        $('div.dropdown.modifDropdown:last').prepend();
-    }
+//    }
 
-    this.reload = function (reiterate = true, id_notification = 0) {
+    this.reload = function (reiterate = true, id_notification_type = 0) {
+//        return;
 
         if (!bn.active || bn.processing) {
             bn.iterate();
@@ -447,68 +470,94 @@ function BimpNotification() {
         }
 
         if (bn.hold) {
-            alert("HOLD EN COURS"); // TODO check encore utile ?
             bn.delay = 0;
             bn.iterate();
         } else {
             bn.processing = true;
-            bn.$loading.show();
-            bn.$refreshBtn.hide();
             var data = {
                 randomId: bn.id,
-                notificationActive: []
+                notifs_data: []
             };
 
+            if (bimp_debug_notifs) {
+                console.log('reload notifs (' + id_notification_type + ')');
+            }
 
-            for (var i in this.notificationActive) {
-                if (id_notification == 0 || id_notification == this.notificationActive[i].id_notification) {
-                    var notif = {
-                        id_notification: this.notificationActive[i].id_notification,
-                        id_max: this.notificationActive[i].obj.id_max
+            var full_reload = (id_notification_type || bn.is_first_iteration ? true : false);
+
+            if (!full_reload) {
+                // Permettre un reload complet toutes les 5 itérations
+                bn.nb_iterations++;
+                if (bn.nb_iterations >= 5) {
+                    full_reload = true;
+                }
+            }
+
+            if (full_reload) {
+                bn.nb_iterations = 0;
+            }
+
+            for (var i in this.notifications) {
+                if (!id_notification_type || (id_notification_type == this.notifications[i].id)) {
+                    var notif_data = {
+                        id_notification: this.notifications[i].id
                     };
-                    data.notificationActive.push(notif);
+
+                    if (!full_reload) {
+                        notif_data.tms = this.notifications[i].tms;
+                    }
+
+                    this.notifications[i].showLoading();
+                    data.notifs_data.push(notif_data);
                 }
             }
 
             data.date_start = date_start;
 
-
-            BimpAjax('getNotification', data, null, {
+            BimpAjax('getUserNotifications', data, null, {
                 display_success: false,
                 display_errors: false,
                 display_warnings: false,
                 display_debug_content: false,
+                reiterate: reiterate,
+                full_reload: full_reload,
                 success: function (result, bimpAjax) {
-                    bn.processing = false;
-                    bn.$loading.hide();
-                    bn.$refreshBtn.show();
-
-                    if (result.notifications) {
-//                        console.log(result.notifications);
-                        for (const [id, value] of Object.entries(result.notifications)) {
-                            bn.notificationActive[id].obj.addElement(value);
-                        }
-//                        bn.delay = 0;
+                    if (bimp_debug_notifs) {
+                        console.log('reload notifs result : ');
+                        console.log(result);
                     }
 
-                    if (reiterate)
-                        bn.iterate();
-                },
-                error: function () {
                     bn.processing = false;
-                    bn.$loading.hide();
-                    bn.$refreshBtn.show();
-                    if (reiterate)
+                    bn.is_first_iteration = false;
+
+                    if (result.notifications) {
+                        for (const [id, value] of Object.entries(result.notifications)) {
+                            bn.notifications[id].hideLoading();
+                            bn.notifications[id].setNewElements(value, bimpAjax.full_reload);
+                        }
+                    }
+
+                    if (bimpAjax.reiterate) {
                         bn.iterate();
+                    }
+                },
+                error: function (result, bimpAjax) {
+                    bn.processing = false;
+                    for (var i in this.notifications) {
+                        this.notifications[i].hideLoading();
+                    }
+
+                    if (bimpAjax.reiterate) {
+                        bn.iterate();
+                    }
                 }
             });
     }
     };
 
     this.iterate = function () {
-        if (bn.delay < 20000) {
-            bn.delay += 4000;
-//            bn.delay += 2000; // valeur d'origine
+        if (bn.delay < 60000) {
+            bn.delay += 30000;
         }
 
         if (bn.delay > 0) {
@@ -540,13 +589,11 @@ function BimpNotification() {
     };
 
     this.onWindowLoaded = function () {
-
         var bn = this;
 
         if (typeof navigator.permissions === "object") {
             navigator.permissions.query({name: 'notifications'})
                     .then(function (permission_status) {
-
                         permission_status.onchange = function () {
                             if (Notification.permission !== "granted")
                                 bn.addButtonAllowNotification();
@@ -555,7 +602,6 @@ function BimpNotification() {
                         };
                     });
         }
-
 
         var now = new Date();
         date_start = now.getFullYear() + "-" +
@@ -566,7 +612,7 @@ function BimpNotification() {
                 ("0" + now.getSeconds()).slice(-2);
 
 
-        // Premièrement, vérifions que nous avons la permission de publier des notifications. Si ce n'est pas le cas, demandons la
+        // Premièrement, vérifions que nous avons la permission de publier des notifications. Si ce n'est pas le cas, demandons-la
         if (window.Notification && Notification.permission !== "granted") {
 
             this.addButtonAllowNotification();
@@ -578,11 +624,9 @@ function BimpNotification() {
                 });
             }
 
-
             // Si l'utilisateur n'a pas choisi s'il accepte d'être notifié
             // Note: à cause de Chrome, nous ne sommes pas certains que la propriété permission soit définie, par conséquent il n'est pas sûr de vérifier la valeur par défaut.
             else if (window.Notification && Notification.permission !== "denied") {
-//                    
 //                    if (Notification.permission !== status) {
 //                        Notification.permission = status;
 //                    }
@@ -608,60 +652,53 @@ function BimpNotification() {
 //                alert("Vous ne serez pas notifié (pas recommandé)");
             }
         }
-        // Variable définie coté PHP (actions_bimpcore.class.php)
-        this.notificationActive = notificationActive;
 
-        var localStorageOk = false;
-        for (const [id_notification, value] of Object.entries(this.notificationActive)) {
-            var notification = this;
-            $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
-                eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '(' + value.id_notification + ');');
-//                notification.notificationActive[id_notification].obj.traiteStorage();
-//                if(notification.notificationActive[id_notification].obj.id_max > 0) 
-//                    localStorageOk = true;
-            });
-
+        // Variable définie coté PHP (BimpCore::getJsVars())
+        if (typeof (bimp_notifications_actives) !== 'undefined') {
+            for (const [id_notification, value] of Object.entries(bimp_notifications_actives)) {
+                $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
+                    eval('bimp_notifications.notifications[' + value.id_notification + '] = new ' + value.nom + '(' + value.id_notification + ', \'' + value.storage_key + '\');');
+                });
+            }
         }
 
-        setTimeout(function () {
-            if (localStorageOk) {
-//                console.log('storage ok');
-                setTimeout(function () {
-                    bn.iterate();
-                }, 15000);
-            } else {
-//                console.log('storage off');
-                bn.iterate();
-            }
-        }, 4000);
+        bn.iterate();
 
         if (!parseInt($(window).data('focus_bimp_notification_event_init'))) {
-
             document.addEventListener('visibilitychange', function () {
-
                 if (document.hidden) {
+                    if (bimp_debug_notifs) {
+                        console.log('NOTIFS ONGLET DÉSACTIVÉES');
+                    }
                     bn.active = false;
 
                     setTimeout(function () {
-                        // Aucun autre onglet a prit le lead
+                        // Aucun autre onglet n'a prit le lead
                         if (parseInt(bimp_storage.get('id_bn_actif')) === bn.id)
-//                                bn.updateStorage;
-//                            else 
                         {
                             bn.active = true;
-
                         }
-
                     }, 1000);
 
                 } else {
+                    if (bimp_debug_notifs) {
+                        console.log('NOTIFS ONGLET ACTIVÉES');
+                    }
                     bn.active = true;
                     bn.updateStorage();
-                    for (const [id_notification, notif] of Object.entries(bn.notificationActive)) {
-                        var notification = this;
-                        notif.obj.traiteStorage();
+
+                    if (bimp_use_local_storage) {
+                        // Actualisations depuis le storage :
+                        if (bimp_debug_notifs) {
+                            console.log('ACTUALISATION NOTIFS DEPUIS STORAGE');
+                        }
+                        for (var i in bn.notifications) {
+                            bn.notifications[i].loadStorage();
+                            if (bn.notifications[i].elements.length) {
+                                bn.notifications[i].renderElements();
+                            }
+                        }
                     }
-//                        bn.iterate();
                 }
             });
 
@@ -676,13 +713,11 @@ function BimpNotification() {
     };
 }
 
-var bimp_notification = new BimpNotification();
-var bimp_storage = new BimpStorage('obj');
+var bimp_notifications = new BimpNotifications();
+//var bimp_storage = new BimpStorage(); // Déplacé dans bimpcore.js
 
 $(document).ready(function () {
     $('a#notiDropdown').hide();
-    bimp_notification.updateStorage();
-    bimp_notification.onWindowLoaded();
+    bimp_notifications.updateStorage();
+    bimp_notifications.onWindowLoaded();
 });
-
-

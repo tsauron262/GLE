@@ -123,6 +123,14 @@ params:
         label: Compte d'autoliquidation de vente de TVA
         required: 1
         cat: tva
+    autoliquidation_tva_ex_666:
+        label: Compte d'autoliquidation d'achat de TVA
+        required: 1
+        cat: tva
+    autoliquidation_tva_ex_711:
+        label: Compte d'autoliquidation de vente de TVA
+        required: 1
+        cat: tva
     vente_tva_fr:
         label: Compte vente de TVA (France)
         required: 1

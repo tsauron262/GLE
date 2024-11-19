@@ -102,65 +102,6 @@ class BimpLink extends BimpObject
         return '';
     }
 
-    public function getMyLink($id_user, $id_max, &$errors = array())
-    {
-        $demandes = array();
-
-        $filters = array(
-            'id'             => array(
-                'operator' => '>',
-                'value'    => (int) $id_max
-            ),
-            'linked_module'  => 'bimpcore',
-            'user_ou_groupe' => array('or' => array(
-                    'user'  => array('and_fields' => array(
-                            'linked_name' => 'Bimp_User',
-                            'linked_id'   => $id_user,
-                        )),
-                    'group' => array('and_fields' => array(
-                            'linked_name' => 'Bimp_UserGroup',
-                            'linked_id'   => self::getUserUserGroupsList($id_user),
-                        )),
-                )),
-            'viewed' => 0
-        );
-        
-        $ids = BimpCache::getBimpObjectIds($this->module, $this->object_name, $filters, 'a.id', 'DESC', array(), 150);
-        $filters['viewed'] = 1;
-        $ids = BimpTools::merge_array($ids, BimpCache::getBimpObjectIds($this->module, $this->object_name, $filters, 'a.id', 'DESC', array(), 150));
-
-        $nb_demandes = 0;
-
-        foreach ($ids as $id) {
-            $d = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
-            $bimp_object = $d->getSourceObject();
-
-            if ($bimp_object->isLoaded()) {
-                $nb_demandes++;
-                if($nb_demandes > 15)
-                    break;
-                $new_demande = array(
-                    'id'             => $d->id,
-                    'is_viewed'      => (int) $d->getData('viewed'),
-                    'can_set_viewed' => (int) $this->isUserDest(),
-                    'obj_link'       => $bimp_object->getLink(),
-                    'src'            => $d->getSourceFieldLabel(),
-                    'content'        => $d->displaySourceFieldContent()
-                );
-
-                $demandes['content'][] = $new_demande;
-            }
-        }
-
-        if (!isset($demandes['content'])) {
-            $demandes['content'] = array();
-        }
-
-        $demandes['nb_demande'] = $nb_demandes;
-
-        return $demandes;
-    }
-
     // Getters statiques: 
 
     public static function getUsersLinked($src_object)
@@ -417,14 +358,73 @@ class BimpLink extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'if (typeof notifHashtag !== "undefined" && notifHashtag !== null)
         notifHashtag.reloadNotif();'
         );
     }
 
     // Traitements statiques: 
+
+    public static function getUserNotificationsLinks($id_user, $tms = '', $options = array(), &$errors = array())
+    {
+        if ((int) BimpCore::getConf('mode_eco')) {
+            return array();
+        }
+
+        $data = array(
+            'tms'      => date('Y-m-d H:i:s'),
+            'elements' => array()
+        );
+
+        $filters = array(
+            'linked_module'  => 'bimpcore',
+            'user_ou_groupe' => array('or' => array(
+                    'user'  => array('and_fields' => array(
+                            'linked_name' => 'Bimp_User',
+                            'linked_id'   => $id_user,
+                        )),
+                    'group' => array('and_fields' => array(
+                            'linked_name' => 'Bimp_UserGroup',
+                            'linked_id'   => self::getUserUserGroupsList($id_user),
+                        )),
+                ))
+        );
+
+        if ($tms) {
+            $filters['tms'] = array(
+                'operator' => '>',
+                'value'    => $tms
+            );
+        }
+
+        $ids = BimpCache::getBimpObjectIds('bimpcore', 'BimpLink', $filters, 'a.id', 'DESC', array(), 30);
+
+//        echo '<pre>';
+//        print_r($ids);
+//        exit;
+
+        foreach ($ids as $id) {
+            $link = BimpCache::getBimpObjectInstance('bimpcore', 'BimpLink', $id);
+            if (BimpObject::objectLoaded($link)) {
+                $bimp_object = $link->getSourceObject();
+
+                if (BimpObject::objectLoaded($bimp_object)) {
+                    $data['elements'][] = array(
+                        'id'             => $link->id,
+                        'is_viewed'      => (int) $link->getData('viewed'),
+                        'can_set_viewed' => 1,
+                        'obj_link'       => $bimp_object->getLink(),
+                        'src'            => $link->getSourceFieldLabel(),
+                        'content'        => $link->displaySourceFieldContent()
+                    );
+                }
+            }
+        }
+
+        return $data;
+    }
 
     public static function deleteAllForSource($src_object, $field_name, &$warnings = array(), $no_transactions_db = false)
     {
@@ -436,11 +436,11 @@ class BimpLink extends BimpObject
             foreach ($links as $link) {
                 $id_link = (int) $link->id;
                 $link_warnings = array();
-                
+
                 if ($no_transactions_db) {
                     $link->useNoTransactionsDb();
                 }
-                
+
                 $link_errors = $link->delete($link_warnings, true);
 
                 if (count($link_warnings)) {
@@ -462,7 +462,7 @@ class BimpLink extends BimpObject
 
         if (is_a($src_object, 'BimpObject') && BimpObject::objectLoaded($src_object) && is_array($links)) {
             $no_transactions = $src_object->db->db->noTransaction;
-            
+
             if (empty($links)) {
                 // Suppr de tous les liens éventuels pour cet objet source:
                 $del_warnings = array();
@@ -496,11 +496,11 @@ class BimpLink extends BimpObject
 
                     $del_warnings = array();
                     $id_cur_link = $cur_link->id;
-                    
+
                     if ($no_transactions) {
                         $cur_link->useNoTransactionsDb();
                     }
-                    
+
                     $del_errors = $cur_link->delete($del_warnings, true);
 
                     if (count($del_errors)) {

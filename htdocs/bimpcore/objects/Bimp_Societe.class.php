@@ -1347,7 +1347,7 @@ class Bimp_Societe extends BimpDolObject
         return $encours;
     }
 
-    public function getEncoursNonFacture($withOtherSiret = true, &$debug = '')
+    public function getEncoursNonFacture($withOtherSiret = true, &$debug = '', $excluded_commandes = array())
     {
         if (!$this->isLoaded()) {
             return 0;
@@ -1387,17 +1387,25 @@ class Bimp_Societe extends BimpDolObject
                     )
         ));
 
-        $sql .= BimpTools::getSqlWhere(array(
-                    'c.fk_statut'      => 1,
+        $filters = array(
+            'c.fk_statut'      => 1,
 //                    'c.fk_soc'         => $ids,
 //                    'c.id_client_facture'         => $ids,
-                    'custom'           => array('custom' => '(c.id_client_facture IN (' . implode(',', $ids) . ') || (c.fk_soc IN (' . implode(',', $ids) . ') && c.id_client_facture = 0))'),
-                    'c.invoice_status' => array(
-                        'operator' => '!=',
-                        'value'    => 2
-                    ),
-                    'c.entity'         => explode(',', getEntity('commande'))
-        ));
+            'custom'           => array('custom' => '(c.id_client_facture IN (' . implode(',', $ids) . ') || (c.fk_soc IN (' . implode(',', $ids) . ') && c.id_client_facture = 0))'),
+            'c.invoice_status' => array(
+                'operator' => '!=',
+                'value'    => 2
+            ),
+            'c.entity'         => explode(',', getEntity('commande'))
+        );
+
+        if (!empty($excluded_commandes)) {
+            $filters['c.rowid'] = array(
+                'not_in' => $excluded_commandes
+            );
+        }
+
+        $sql .= BimpTools::getSqlWhere($filters);
 
         $rows = $this->db->executeS($sql, 'array');
 

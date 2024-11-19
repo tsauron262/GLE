@@ -208,6 +208,15 @@
                     $structure['SENS']                          = sizing($this->getSens(-$TTC), 1);
                     $ecriture .= implode('', $structure) . "\n";
                 }
+                if($facture->getData('zone_vente') == $this->zoneAchat['HorsUE']) {
+                    $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_ex_666', null, 'bimptocegid'), 17);
+                    $structure['SENS']                          = sizing($this->getSens($TTC), 1);
+                    $structure['MONTANT']                       = sizing(abs(round(20*$TTC / 100, 2)), 20, true);
+                    $ecriture .= implode('', $structure) . "\n";
+                    $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_ex_711', null, 'bimptocegid'), 17);
+                    $structure['SENS']                          = sizing($this->getSens(-$TTC), 1);
+                    $ecriture .= implode('', $structure) . "\n";
+                }
                                 
                 $total_mis_en_ligne =  (round($total_d3e,2) + round($total_tva, 2) + round($total_ht, 2));
                 $controlle_ttc = (round($TTC, 2));

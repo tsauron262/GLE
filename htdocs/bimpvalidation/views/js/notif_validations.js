@@ -1,25 +1,33 @@
 
-class notif_validations extends AbstractNotification {
-    /**
-     * Overrides
-     */
+var notifValidations = null;
 
-    constructor(nom) {
-        super(nom);
+class notif_validations extends AbstractNotification {
+    constructor(id, storage_key) {
+        super('notif_validations', id, storage_key);
+        notifValidations = this;
+
+        this.nb_user_demandes = 0;
+        this.nb_other_demandes = 0;
+
+        this.user_demandes_id = 'notifs_user_demandes_validation';
+        this.other_demandes_id = 'notifs_other_demandes_validation';
+
+        this.init();
     }
 
     init() {
-        if (theme != 'BimpTheme')
+        if (theme != 'BimpTheme') {
             var notif_white = 'notif_white';
-        else
+        } else {
             var notif_white = '';
+        }
 
         if (!$('a#' + this.dropdown_id).length) {
             var html = '<a class="nav-link dropdown-toggle header-icon ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
             html += '<i class="far fa5-check-circle atoplogin"></i>';
             html += '</a>';
             html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id + '">';
-            html += '<div class="notifications-wrap list_notification ' + this.nom + '">';
+            html += '<div class="notifications-wrap list_notification ' + '' /*this.nom*/ + '">';
             html += '</div>';
 
             html += '<div class="header" style="padding: 10px 15px">';
@@ -42,113 +50,76 @@ class notif_validations extends AbstractNotification {
 
             // Nav tabs 
             html += '<ul id="nav_bv_demandes" class="nav nav-tabs" role="tablist">';
-            html += '<li role="presentation" class="active"><a href="#user_demandes" aria-controls="user_demandes" role="tab" data-toggle="tab">Mes demandes assignées à valider&nbsp;&nbsp;<span class="badge badge-default nb_elements">0</span></a></li>';
-            html += '<li role="presentation"><a href="#other_demandes" aria-controls="other_demandes" role="tab" data-toggle="tab">Autres demandes validables&nbsp;&nbsp;<span class="badge badge-default nb_elements">0</span></a></li>';
+            html += '<li role="presentation" class="active"><a href="#' + this.user_demandes_id + '" aria-controls="user_demandes" role="tab" data-toggle="tab">Mes demandes assignées à valider&nbsp;&nbsp;<span class="badge badge-default nb_elements">0</span></a></li>';
+            html += '<li role="presentation"><a href="#' + this.other_demandes_id + '" aria-controls="other_demandes" role="tab" data-toggle="tab">Autres demandes validables&nbsp;&nbsp;<span class="badge badge-default nb_elements">0</span></a></li>';
             html += '</ul>';
 
             // Tab panels 
             html += '<div class="tab-content bv_demandes_panel">';
-            html += '<div role="tabpanel" class="list_notification tab-pane fade in active" id="user_demandes"></div>';
-            html += '<div role="tabpanel" class="list_notification tab-pane fade" id="other_demandes"></div>';
+            html += '<div role="tabpanel" class="list_notification tab-pane fade in active" id="' + this.user_demandes_id + '"></div>';
+            html += '<div role="tabpanel" class="list_notification tab-pane fade" id="' + this.other_demandes_id + '"></div>';
             html += '</div>';
 
             html += '</div>';
             html += '</div>';
 
-            $(this.parent_selector).prepend(html);
+            var $container = $(this.parent_selector);
+            if ($container.length) {
+                $container.prepend(html);
 
-//            // Animation slide sur le coté
-            $('ul#nav_bv_demandes > li > a[data-toggle="tab"]').on('hide.bs.tab', function (e) {
-                var $old_tab = $($(e.target).attr("href"));
-                var $new_tab = $($(e.relatedTarget).attr("href"));
+                // Animations slides sur le côté: 
+                $('ul#nav_bv_demandes > li > a[data-toggle="tab"]').on('hide.bs.tab', function (e) {
+                    var $old_tab = $($(e.target).attr("href"));
+                    var $new_tab = $($(e.relatedTarget).attr("href"));
 
-                if ($new_tab.index() < $old_tab.index()) {
-                    $old_tab.css('position', 'relative').css("right", "0").show();
-                    $old_tab.animate({"right": "-100%"}, 300, function () {
-                        $old_tab.css("right", 0).removeAttr("style");
-                    });
-                } else {
-                    $old_tab.css('position', 'relative').css("left", "0").show();
-                    $old_tab.animate({"left": "-100%"}, 300, function () {
-                        $old_tab.css("left", 0).removeAttr("style");
-                    });
-                }
-            });
+                    if ($new_tab.index() < $old_tab.index()) {
+                        $old_tab.css('position', 'relative').css("right", "0").show();
+                        $old_tab.animate({"right": "-100%"}, 300, function () {
+                            $old_tab.css("right", 0).removeAttr("style");
+                        });
+                    } else {
+                        $old_tab.css('position', 'relative').css("left", "0").show();
+                        $old_tab.animate({"left": "-100%"}, 300, function () {
+                            $old_tab.css("left", 0).removeAttr("style");
+                        });
+                    }
+                });
 
-            $('ul#nav_bv_demandes > li > a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-                var $new_tab = $($(e.target).attr("href"));
-                var $old_tab = $($(e.relatedTarget).attr("href"));
+                $('ul#nav_bv_demandes > li > a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+                    var $new_tab = $($(e.target).attr("href"));
+                    var $old_tab = $($(e.relatedTarget).attr("href"));
 
-                if ($new_tab.index() > $old_tab.index()) {
-                    $new_tab.css('position', 'relative').css("right", "-2500px");
-                    $new_tab.animate({"right": "0"}, 500);
-                } else {
-                    $new_tab.css('position', 'relative').css("left", "-2500px");
-                    $new_tab.animate({"left": "0"}, 500);
-                }
-            });
+                    if ($new_tab.index() > $old_tab.index()) {
+                        $new_tab.css('position', 'relative').css("right", "-2500px");
+                        $new_tab.animate({"right": "0"}, 500);
+                    } else {
+                        $new_tab.css('position', 'relative').css("left", "-2500px");
+                        $new_tab.animate({"left": "0"}, 500);
+                    }
+                });
 
-            super.init(this);
+                super.init();
+            } else {
+                console.error('Demandes de validation : container notifs absent');
+            }
         }
     }
 
-    addElement(element) {
-        if (typeof element.content === "object" && element.content.length > 0) {
-            this.emptyNotifs();
-
-            var new_items = [];
-            for (var i in element.content) {
-                var item = element.content[i];
-
-                if (parseInt(item.id) > this.id_max) {
-                    this.id_max = parseInt(item.id);
-                    new_items.push(item);
-                }
-
-                var key = this.getKey(item);
-                var item_html = this.formatElement(item, key);
-                this.addInList(item_html, item.url, item, key, item.append);
-            }
-
-            if (new_items.length > 0) {
-                // todo : améliorer les notifications (ne compte que les user_demandes
-                var title = 'Vous avez ' + new_items.length;
-
-                if (new_items.length > 1) {
-                    title += ' nouvelles demandes';
-                } else {
-                    title += ' nouvelle demande';
-                }
-
-                title += ' de validation à traiter';
-
-//                this.displayNotification(title, ''); // A debugguer
-            }
-
-            $('#nav_bv_demandes a[aria-controls="user_demandes"] span.nb_elements').html(element.nb_user_demandes);
-            $('#nav_bv_demandes a[aria-controls="other_demandes"] span.nb_elements').html(element.nb_other_demandes);
-
-            var $span = $('a#' + this.dropdown_id + ' > span.badge.bg-danger');
-
-            if (!$span.length && element.nb_user_demandes > 0) {
-                $('a#' + this.dropdown_id).append('<span class="badge bg-danger">' + element.nb_user_demandes + '</span>');
-            } else if (!element.nb_user_demandes) {
-                $span.remove();
-            } else {
-                $span.html(element.nb_user_demandes);
-            }
+    isNew(element) {
+        if (element.tab_type === 'user_demandes') {
+            return 1;
         }
+
+        return 0;
     }
 
     formatElement(element, key) {
         var html = '';
 
-        element.append = 'div.bv_demandes_panel > #' + element.id_tab;
-
         html += '<div class="bv_demande_content">';
         html += '<b>Validation ' + element.type + '</b><br/>';
-        html += '<div class="user_demande">' + element.user_demande + '</div>';
 
+        html += '<div class="user_demande">' + element.user_demande + '</div>';
         if (typeof element.obj_link !== 'undefined') {
             html += '<b>Pièce : </b>' + element.obj_link + '<br/>';
         }
@@ -160,7 +131,6 @@ class notif_validations extends AbstractNotification {
         }
         html += '</div>';
 
-
         return html;
     }
 
@@ -169,11 +139,11 @@ class notif_validations extends AbstractNotification {
 
         if (element.id) {
             if (element.can_process) {
-                var onclick = 'setObjectAction($(this), {module: \'bimpvalidation\', object_name: \'BV_Demande\', id_object: ' + element.id + '}, \'accept\')';
+                var onclick = 'setObjectAction($(this), {module: \'bimpvalidation\', object_name: \'BV_Demande\', id_object: ' + element.id + '}, \'accept\', {no_page_reload: 1})';
                 html += '<span class="btn btn-default btn-small" onclick="' + onclick + '"><i class="fas fa5-check iconLeft"></i>Accepter</span>';
 
                 var onclick = 'setObjectAction($(this), {module: \'bimpvalidation\', object_name: \'BV_Demande\', id_object: ' + element.id + '}';
-                onclick += ', \'refuse\', {}, null, null, {form_name: \'refuse\'})';
+                onclick += ', \'refuse\', {no_page_reload: 1}, null, null, {form_name: \'refuse\'})';
                 html += '<button class="btn btn-default btn-small" onclick="' + onclick + '"><i class="fas fa5-times iconLeft"></i>Refuser</button>';
             }
 
@@ -186,33 +156,80 @@ class notif_validations extends AbstractNotification {
         return html;
     }
 
-    emptyNotifs() {
-        $('div.bv_demandes_panel > #user_demandes').empty();
-        $('div.bv_demandes_panel > #other_demandes').empty();
-        $('#nav_bv_demandes span.nb_elements').html('0');
+    emptyContent() {
+        this.nb_user_demandes = 0;
+        this.nb_other_demandes = 0;
+
+        $('#' + this.user_demandes_id).html('');
+        $('#' + this.other_demandes_id).html('');
     }
 
-    elementAdded(nb_add) {
-
-    }
-
-    elementRemoved(nb_rm) {
-
-    }
-
-    displayNotification(title, msg) {
-        var dvn = this;
-
-        if (window.Notification && Notification.permission === "granted") {
-            var n = new Notification(title, {
-                body: msg,
-                icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
-            });
-
-            n.onclick = function () {
-                if (parseInt($('div[aria-labelledby="' + dvn.dropdown_id + '"]').attr('is_open')) !== 1)
-                    $('#' + dvn.dropdown_id).trigger('click');
-            };
+    appendElement(element, key, html) {
+        if (element.tab_type === 'user_demandes') {
+            this.nb_user_demandes++;
+            $('#' + this.user_demandes_id).append(html);
+        } else {
+            this.nb_other_demandes++;
+            $('#' + this.other_demandes_id).append(html);
         }
     }
+
+    renderElements() {
+        super.renderElements();
+        this.updateNavs();
+    }
+
+    updateNavs() {
+        var $span = $('#nav_bv_demandes a[href="#' + this.user_demandes_id + '"] span.nb_elements');
+        $span.text(this.nb_user_demandes);
+        if (this.nb_user_demandes > 0) {
+            $span.removeClass('badge-danger').addClass('badge-info');
+        } else {
+            $span.removeClass('badge-info').addClass('badge-danger');
+        }
+
+        var $span = $('#nav_bv_demandes a[href="#' + this.other_demandes_id + '"] span.nb_elements');
+        $span.text(this.nb_other_demandes);
+        if (this.nb_other_demandes > 0) {
+            $span.removeClass('badge-danger').addClass('badge-info');
+        } else {
+            $span.removeClass('badge-info').addClass('badge-danger');
+        }
+    }
+
+    sendBrowserNotification(elements) {
+        if (!elements.length) {
+            return;
+        }
+
+        var bn = this;
+        var title = '';
+
+        if (elements.length > 1) {
+            title = 'Vous avec reçu ' + elements.length + ' nouvelles demandes de validation';
+        } else {
+            title = "Nouvelle demande de validation " + elements[0].type;
+        }
+
+        BimpBrowserNotification(title, '', function () {
+            window.parent.parent.focus();
+            if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1) {
+                $('#' + bn.dropdown_id).trigger('click');
+            }
+        });
+    }
+
+    getLabel() {
+        return 'Demandes de validation';
+    }
 }
+
+$(document).ready(function () {
+    $('body').on('objectChange', function (e) {
+        if (e.module === 'bimpvalidation' && e.object_name === 'BV_Demande') {
+            if (typeof (notifValidations) !== 'undefined' && notifValidations !== null) {
+                notifValidations.refreshElements();
+            }
+        }
+    });
+});

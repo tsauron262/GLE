@@ -297,15 +297,15 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             contentType: bimpAjax.contentType,
             processData: bimpAjax.processData,
             success: function (result) {
-                if (typeof (result.bimp_hash) !== 'undefined') {
-                    bimpAjax.bimp_storage.set('bimp_hash', result.bimp_hash);
-                }
-
                 if (typeof (result.request_id) !== 'undefined') {
                     bimpAjax = bimp_requests[parseInt(result.request_id)];
                 } else {
                     bimp_msg('Erreur: ID de requête invalide', 'danger', null, true);
                     return;
+                }
+
+                if (typeof (result.bimp_hash) !== 'undefined') {
+                    bimpAjax.bimp_storage.set('bimp_hash', result.bimp_hash);
                 }
 
                 if (typeof (result.nologged) !== 'undefined') {

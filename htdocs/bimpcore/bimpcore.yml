@@ -240,6 +240,16 @@ params:
         cat: debug
     
     # E-mails: 
+    send_fatal_errors_emails: 
+        label: Envoyer les erreurs fatales par e-mail
+        type: bool
+        cat: emails
+        def: 1
+    send_logs_urgents_emails: 
+        label: Envoyer les logs urgents par e-mail
+        type: bool
+        cat: emails
+        def: 1
     devs_email: 
         label: Adresse e-mail tous les devs
         cat: emails

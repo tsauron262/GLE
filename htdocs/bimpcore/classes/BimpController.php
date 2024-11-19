@@ -223,7 +223,22 @@ class BimpController
                         $txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
                     }
 
-//                    mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
+//                    if ((int) BimpCore::getConf('send_fatal_errors_emails')) {
+//                        $last_error_fatal_tms = BimpCore::getConf('last_fatal_error_tms', 0);
+//                        $cur_tms = date('U');
+
+//                        $nb = 0;
+//                        if ($cur_tms - $last_error_fatal_tms > 30) {
+//                            $nb = BimpCore::getConf('nb_fatal_errors', 0) + 1;
+//                        }
+//
+//                        if ($nb == 10) {
+//                            $erp_name = BimpCore::getConf('erp_name', '');
+//                            BimpTools::sendSmsAdmin('10 erreurs fatales en moins de 30 secondes');
+//                        } elseif ($nb < 10) {
+//                            mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
+//                        }
+//                    }
                 }
 
                 if (strpos($msg, 'Allowed memory size') !== false) {
@@ -3325,7 +3340,7 @@ class BimpController
             'request_id'    => BimpTools::getValue('request_id', 0, 'int')
         );
     }
-    
+
     protected function ajaxProcessNotificationAction()
     {
         $errors = array();
@@ -3373,7 +3388,7 @@ class BimpController
     }
 
     // Divers: 
-    
+
     protected function ajaxProcessLoadDocumentation()
     {
         $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', '', 'alphanohtml'), 'modal', BimpTools::getValue('idSection', 'princ', 'alphanohtml'));

@@ -1251,6 +1251,9 @@ function sanitizeVal($out = '', $check = 'alphanohtml', $filter = null, $options
 			break;
 		default:
 			dol_syslog("Error, you call sanitizeVal() with a bad value for the check type. Data will be sanitized with alphanohtml.", LOG_ERR);
+                        /*moddrsi*/
+                        BimpCore::addlog('Error, you call sanitizeVal() with a bad value for the check type. Data will be sanitized with alphanohtml.', 2, 'secu');
+                        /*fmoddrsi*/
 			$out = GETPOST($out, 'alphanohtml');
 			break;
 	}

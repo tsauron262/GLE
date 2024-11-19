@@ -40,9 +40,9 @@ fields:
         type: id_object
         object: forfait
         input: 
-            type: select
-            options: 
-                callback: getSelectForfaitsArray
+            type: custom
+            content: 
+                callback: renderForfaitInput
         display_if: 
             field_name: id_equipment
             hide_values: 0
@@ -99,10 +99,6 @@ forms:
             - field: date_to
             - field: id_equipment
             - field: id_forfait
-              input: 
-                  type: custom
-                  content: 
-                      callback: renderForfaitInput
             - field: pu_ht
             - field: tva_tx
             - field: remise

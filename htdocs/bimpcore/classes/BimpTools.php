@@ -2847,7 +2847,7 @@ class BimpTools
 
         if ($no_html) {
             if ($title) {
-                $msg .= htmlentities($title) . ' : ' . "\n";
+                $msg .= strip_tags($title) . ' : ' . "\n";
             }
 
             if (is_array($msgs)) {
@@ -2859,7 +2859,7 @@ class BimpTools
                         $fl = false;
                     }
 
-                    $msg .= "\t" . '- ' . htmlentities($m);
+                    $msg .= "\t" . '- ' . strip_tags($m);
                 }
             } else {
                 $msg .= ($title ? "\t" . '- ' : '') . $msgs;

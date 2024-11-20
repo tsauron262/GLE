@@ -208,7 +208,8 @@ class BimpNote extends BimpObject
         }
 
         if (is_null($users_delegations)) {
-            $users_delegations = BimpCache::getBdb()->getValues('user', 'rowid', 'delegations LIKE \'%[' . $user->id . ']%\'');
+//            $users_delegations = BimpCache::getBdb()->getValues('user', 'rowid', 'delegations LIKE \'%[' . $user->id . ']%\'');
+            $users_delegations = array();
         }
 
         if (!empty($users_delegations)) {
@@ -892,9 +893,11 @@ class BimpNote extends BimpObject
         );
 
         $notes = self::getUserNewNotes($tms, $options['max'], $id_user, false);
-        $bdb = self::getBdb();
-//        $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
 
+        $users_delegations = array();
+
+//        $bdb = self::getBdb();        
+//        $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
 //        if (!empty($users_delegations)) {
 //            foreach ($users_delegations as $id_user_delegation) {
 //                $user_notes = self::getUserNewNotes($tms, $options['max'], $id_user_delegation, false);

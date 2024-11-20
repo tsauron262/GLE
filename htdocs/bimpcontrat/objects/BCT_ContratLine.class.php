@@ -5367,7 +5367,7 @@ class BCT_ContratLine extends BimpObject
 
                         if (!$this->getData('date_fac_start') || $this->getData('date_fac_start') < $date_ouverture) {
                             $this->set('date_fac_start', $dt->format('Y-m-d'));
-                        } 
+                        }
 //                        else {
 //                            $date_debut = $this->getData('date_fac_start');
 //                        }
@@ -6345,13 +6345,15 @@ class BCT_ContratLine extends BimpObject
         $debug = false;
         $check = true;
 
-        if ($debug)
+        if ($debug) {
             echo 'POS BEF: ' . $position . '<br/>';
+        }
 
         $position = (int) $this->checkPosition($position);
 
-        if ($debug)
+        if ($debug) {
             echo 'POS AFT: ' . $position . '<br/>';
+        }
 
         if (!$this->isLoaded($errors)) {
             $check = false;
@@ -6372,8 +6374,10 @@ class BCT_ContratLine extends BimpObject
                     if ($i === $position) {
                         // Attribution de la nouvelle position: 
                         if (!in_array($this->id, $done)) {
-                            if ($debug)
+                            if ($debug) {
                                 echo 'THIS => ' . $position . '<br/>';
+                            }
+
                             $this->db->update('contratdet', array(
                                 'rang' => (int) $position
                                     ), '`rowid` = ' . (int) $this->id);
@@ -6388,8 +6392,10 @@ class BCT_ContratLine extends BimpObject
                                     ), null, null, 'rang', 'asc', 'array', array('rowid', 'rang'));
                             if (!is_null($children)) {
                                 foreach ($children as $child) {
-                                    if ($debug)
+                                    if ($debug) {
                                         echo 'THIS CHILD #' . $child['rowid'] . ' => ' . $i . '<br/>';
+                                    }
+
                                     if ((int) $child['rang'] !== $i) {
                                         $this->db->update('contratdet', array(
                                             'rang' => (int) $i
@@ -6419,8 +6425,10 @@ class BCT_ContratLine extends BimpObject
 
                     // Attribution de la position courante à la ligne courante: 
                     if ((int) $line['rang'] !== $i) {
-                        if ($debug)
+                        if ($debug) {
                             echo 'LINE #' . $line['rowid'] . ' => ' . $i . '<br/>';
+                        }
+
                         $this->db->update('contratdet', array(
                             'rang' => (int) $i
                                 ), '`rowid` = ' . (int) $line['rowid']);
@@ -6437,8 +6445,10 @@ class BCT_ContratLine extends BimpObject
                         foreach ($children as $child) {
                             if ($i === $position) {
                                 if ($id_parent_line === (int) $line['rowid']) {
-                                    if ($debug)
+                                    if ($debug) {
                                         echo 'THIS AS CHILD => ' . $i . '<br/>';
+                                    }
+
                                     $this->db->update('contratdet', array(
                                         'rang' => (int) $position
                                             ), '`rowid` = ' . (int) $this->id);
@@ -6449,8 +6459,10 @@ class BCT_ContratLine extends BimpObject
                                 }
                             }
                             if (!in_array((int) $child['rowid'], $done) && (int) $child['rowid'] !== $this->id) {
-                                if ($debug)
+                                if ($debug) {
                                     echo 'LINE #' . $line['rowid'] . ' CHILD #' . $child['rowid'] . ' => ' . $i . '<br/>';
+                                }
+
                                 if ((int) $child['position'] !== $i) {
                                     $this->db->update('contratdet', array(
                                         'rang' => (int) $i
@@ -6464,11 +6476,13 @@ class BCT_ContratLine extends BimpObject
                 }
 
                 if (!in_array($this->id, $done)) {
-                    if ($debug)
+                    if ($debug) {
                         echo 'THIS DEF => ' . $position . '<br/>';
+                    }
+
                     $this->db->update('contratdet', array(
                         'position' => (int) $i
-                            ), '`contratdet` = ' . (int) $this->id);
+                            ), '`rowid` = ' . (int) $this->id);
                     $this->set('position', $i);
                 }
             }
@@ -6476,8 +6490,10 @@ class BCT_ContratLine extends BimpObject
             $check = false;
         }
 
-        if ($debug)
+        if ($debug) {
             exit;
+        }
+
         return $check;
     }
 

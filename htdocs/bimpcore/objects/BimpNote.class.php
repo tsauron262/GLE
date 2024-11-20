@@ -208,7 +208,7 @@ class BimpNote extends BimpObject
         }
 
         if (is_null($users_delegations)) {
-            $users_delegations = $this->db->getValues('user', 'rowid', 'delegations LIKE \'%[' . $user->id . ']%\'');
+            $users_delegations = BimpCache::getBdb()->getValues('user', 'rowid', 'delegations LIKE \'%[' . $user->id . ']%\'');
         }
 
         if (!empty($users_delegations)) {

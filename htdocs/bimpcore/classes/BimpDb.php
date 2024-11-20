@@ -388,7 +388,7 @@ class BimpDb
     public function getCount($table, $where = '1', $primary = 'id', $joins = array())
     {
         $sql = 'SELECT COUNT(DISTINCT `' . $primary . '`) as nb_rows FROM ' . MAIN_DB_PREFIX . $table;
-        
+
         if (!empty($joins)) {
             foreach ($joins as $key => $join) {
                 $table = (isset($join['table']) ? $join['table'] : '');
@@ -430,7 +430,7 @@ class BimpDb
         $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
 
         if ($order_by) {
-            $sql .= ' ORDER BY `' . $order_by . '` '. $order_way;
+            $sql .= ' ORDER BY `' . $order_by . '` ' . $order_way;
         }
         if (!is_null($limit)) {
             $sql .= ' LIMIT ' . $limit;
@@ -446,7 +446,11 @@ class BimpDb
                 $rows[] = $obj->$field;
             }
         }
-        $this->db->free($result);
+
+        if (is_object($result)) {
+            $this->db->free($result);
+        }
+
         return $rows;
     }
 

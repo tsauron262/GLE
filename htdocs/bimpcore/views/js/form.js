@@ -3700,7 +3700,7 @@ function setInputsEvents($container) {
             $(this).data('row_selector_input_events_init', 1);
         }
     });
-    $container.find('input.strip_tags').add($container.find('textarea.strip_tags')).each(function() {
+    $container.find('input.strip_tags')/*.add($container.find('textarea.strip_tags'))*/.each(function() {
         if (!parseInt($(this).data('strip_tags_input_events_init'))) {
             $(this).data('strip_tags_input_events_init', 1);
             

@@ -100,7 +100,7 @@ class BimpController
             $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
         }
 
-        $this->current_tab = BimpTools::getValue('tab', 'default', 'aZ09');
+        $this->current_tab = BimpTools::getValue('tab', 'default', 'alphanohtml');
         $this->config = BimpConfig::getControllerConfigInstance($this->module, $this->controller, $this);
 
         if ($this->config->errors) {

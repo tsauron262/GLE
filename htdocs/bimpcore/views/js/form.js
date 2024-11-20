@@ -3700,27 +3700,27 @@ function setInputsEvents($container) {
             $(this).data('row_selector_input_events_init', 1);
         }
     });
-    $container.find('input.strip_tags')/*.add($container.find('textarea.strip_tags'))*/.each(function() {
-        if (!parseInt($(this).data('strip_tags_input_events_init'))) {
-            $(this).data('strip_tags_input_events_init', 1);
-            
-            $(this).change(function() {
-                var val = $(this).val();
-                if (/</.test(val)) {
-                    bimp_msg('Caractère "<" interdit', 'danger');
-                    val = val.replace(/</g, '');
-                    $(this).val(val);
-                }
-                
-                if (/>/.test(val)) {
-                    bimp_msg('Caractère ">" interdit', 'danger');
-                    val = val.replace(/>/g, '');
-                    $(this).val(val);
-                }
-            });
-            
-            $(this).change();
-        }
+    $container.find('input.strip_tags').add($container.find('textarea.strip_tags')).each(function() {
+//        if (!parseInt($(this).data('strip_tags_input_events_init'))) {
+//            $(this).data('strip_tags_input_events_init', 1);
+//            
+//            $(this).change(function() {
+//                var val = $(this).val();
+//                if (/</.test(val)) {
+//                    bimp_msg('Caractère "<" interdit', 'danger');
+//                    val = val.replace(/</g, '');
+//                    $(this).val(val);
+//                }
+//                
+//                if (/>/.test(val)) {
+//                    bimp_msg('Caractère ">" interdit', 'danger');
+//                    val = val.replace(/>/g, '');
+//                    $(this).val(val);
+//                }
+//            });
+//            
+//            $(this).change();
+//        }
     });
 }
 

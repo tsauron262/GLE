@@ -8279,8 +8279,9 @@ class BCT_ContratLine extends BimpObject
             $date_end = $this->getData('date_fin_validite');
             $fk_fournprice = (int) $this->getData('fk_product_fournisseur_price');
             $pa_ht = (float) $this->getData('buy_price_ht');
+            $rang = $this->getNextPosition();
 
-            $result = $contrat->dol_object->addline($desc, $pu_ht, $qty, $txtva, 0, 0, $fk_product, $remise_percent, $date_start, $date_end, 'HT', 0.0, 0, $fk_fournprice, $pa_ht, $extrafields);
+            $result = $contrat->dol_object->addline($desc, $pu_ht, $qty, $txtva, 0, 0, $fk_product, $remise_percent, $date_start, $date_end, 'HT', 0.0, 0, $fk_fournprice, $pa_ht, $extrafields, null, $rang);
             if ($result <= 0) {
                 if (isset($contrat->dol_object->error) && $contrat->dol_object->error) {
                     $errors[] = $contrat->dol_object->error;
@@ -8380,4 +8381,12 @@ class BCT_ContratLine extends BimpObject
 
         return 0;
     }
+//    public function create(&$warnings = [], $force_create = false)
+//    {
+//        $errors = parent::create($warnings, $force_create);
+//        
+//        die('RANG : ' . $this->getData('rang'));
+//        
+//        return $errors;
+//    }
 }

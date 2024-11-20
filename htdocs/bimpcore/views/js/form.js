@@ -3707,13 +3707,13 @@ function setInputsEvents($container) {
             $(this).change(function() {
                 var val = $(this).val();
                 if (/</.test(val)) {
-                    bimp_msg('Caractère "<" interdit supprimé', 'danger');
+                    bimp_msg('Caractère "<" interdit', 'danger');
                     val = val.replace(/</g, '');
                     $(this).val(val);
                 }
                 
                 if (/>/.test(val)) {
-                    bimp_msg('Caractère ">" interdit supprimé', 'danger');
+                    bimp_msg('Caractère ">" interdit', 'danger');
                     val = val.replace(/>/g, '');
                     $(this).val(val);
                 }

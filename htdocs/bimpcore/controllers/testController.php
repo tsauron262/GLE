@@ -7,7 +7,7 @@ class testController extends BimpController
     {
         $html = '';
         
-        $html .= '<span class="btn btn-default" onclick="BimpBrowserNotification(\'TEST\', \'CONTENT\')">';
+        $html .= '<span class="btn btn-default" onclick="BimpBrowserNotification(\'TEST\', \'CONTENT\', function() {bimp_msg(\'ICI\');})">';
         $html .= 'TEST NOTIF';
         $html .= '</span>';
         

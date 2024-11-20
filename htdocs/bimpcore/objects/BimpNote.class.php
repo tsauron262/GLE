@@ -893,18 +893,18 @@ class BimpNote extends BimpObject
 
         $notes = self::getUserNewNotes($tms, $options['max'], $id_user, false);
         $bdb = self::getBdb();
-        $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+//        $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
 
-        if (!empty($users_delegations)) {
-            foreach ($users_delegations as $id_user_delegation) {
-                $user_notes = self::getUserNewNotes($tms, $options['max'], $id_user_delegation, false);
-                foreach ($user_notes as $id_user_note) {
-                    if (!in_array($id_user_note, $notes)) {
-                        $notes[] = $id_user_note;
-                    }
-                }
-            }
-        }
+//        if (!empty($users_delegations)) {
+//            foreach ($users_delegations as $id_user_delegation) {
+//                $user_notes = self::getUserNewNotes($tms, $options['max'], $id_user_delegation, false);
+//                foreach ($user_notes as $id_user_note) {
+//                    if (!in_array($id_user_note, $notes)) {
+//                        $notes[] = $id_user_note;
+//                    }
+//                }
+//            }
+//        }
 
         foreach ($notes as $id_note) {
             $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', $id_note);

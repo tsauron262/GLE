@@ -2953,7 +2953,8 @@ class BimpObject extends BimpCache
                 }
             }
 
-            $auto_strip_tags = (int) BimpCore::getConf('auto_strip_tags', null, 'bimpcore');
+//            $auto_strip_tags = (int) BimpCore::getConf('auto_strip_tags', null, 'bimpcore');
+            $auto_strip_tags = false;
             if ($auto_strip_tags) {
                 if ((int) $this->getConf('fields/' . $field . '/no_strip_tags', 0, false, 'bool')) {
                     $auto_strip_tags = 0;

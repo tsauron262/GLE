@@ -8381,12 +8381,4 @@ class BCT_ContratLine extends BimpObject
 
         return 0;
     }
-//    public function create(&$warnings = [], $force_create = false)
-//    {
-//        $errors = parent::create($warnings, $force_create);
-//        
-//        die('RANG : ' . $this->getData('rang'));
-//        
-//        return $errors;
-//    }
 }

@@ -7398,7 +7398,7 @@ class Bimp_Facture extends BimpComm
             $out .= ' - ' . $fact->getLink() . '<br/>';
             $sujet = 'Facture en attente d\'export Chorus ' . $fact->getRef();
             $msg = 'La facture {{Facture:' . $fact->id . '}} est en attente d\'export chorus';
-            BIMP_Task::addAutoTask('facturation', $sujet, $msg, "facture_extrafields:fk_object=" . $fact->id . ' AND (chorus_status > 1 OR paye = 1)');
+            BIMP_Task::addAutoTask('facturation', $sujet, $msg, 'facture f LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields ef ON f.rowid = ef.fk_object:f.rowid=' . $fact->id . ' AND (ef.chorus_status > 1 OR f.paye = 1)');
         }
 
         return $out;

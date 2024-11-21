@@ -4758,7 +4758,7 @@ function BimpInputHashtags() {
                                 if ($src_input.length) {
                                     if (!parseInt($src_input.data('bih_events_init'))) {
                                         $src_input.data('bih_input_name', input_name);
-
+                                        
                                         $src_input.keyup(function (e) {
                                             var text = $(this).val();
 

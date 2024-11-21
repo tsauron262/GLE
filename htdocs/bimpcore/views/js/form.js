@@ -636,8 +636,9 @@ function validateForm($form) {
                 }
 
                 // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
-                if ($(this).find('.cke').length) {
-                    var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                var $cke = $(this).find('.cke');
+                if ($cke.length) {
+                    var html_value = $cke.find('iframe').contents().find('body').html();
                     if (html_value === '<br>') {
                         html_value = '';
                     }
@@ -1181,8 +1182,9 @@ function getInputValue($inputContainer) {
         }
 
 
+        var $cke = $inputContainer.find('.cke');
         if ($inputContainer.find('.cke').length) {
-            var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+            var html_value = $cke.find('iframe').contents().find('body').html();
             $inputContainer.find('[name="' + field_name + '"]').val(html_value);
         }
 
@@ -3700,7 +3702,7 @@ function setInputsEvents($container) {
             $(this).data('row_selector_input_events_init', 1);
         }
     });
-    $container.find('input.strip_tags').add($container.find('textarea.strip_tags')).each(function() {
+    $container.find('input.strip_tags').add($container.find('textarea.strip_tags')).each(function () {
 //        if (!parseInt($(this).data('strip_tags_input_events_init'))) {
 //            $(this).data('strip_tags_input_events_init', 1);
 //            
@@ -4700,7 +4702,7 @@ function BimpInputHashtags() {
                 var field_name = $input.attr('name');
 
                 if (field_name) {
-                    var $container = $input.parent().find('#cke_' + field_name);
+                    var $container = $input.parent().find('.cke');
 
                     if (!$container.length) {
                         setTimeout(function () {
@@ -4716,7 +4718,7 @@ function BimpInputHashtags() {
                             if (!parseInt($btn.data('bih_events_init'))) {
                                 $btn.data('bih_input_name', input_name);
                                 $btn.click(function (e) {
-                                    var $container2 = $(this).findParentByClass('cke_editor_' + $btn.data('bih_input_name'));
+                                    var $container2 = $(this).findParentByClass('cke');
 
                                     if ($.isOk($container2)) {
                                         var $input2 = $container2.parent().children('.html_editor_hashtags');
@@ -4758,7 +4760,7 @@ function BimpInputHashtags() {
                                 if ($src_input.length) {
                                     if (!parseInt($src_input.data('bih_events_init'))) {
                                         $src_input.data('bih_input_name', input_name);
-                                        
+
                                         $src_input.keyup(function (e) {
                                             var text = $(this).val();
 

@@ -38,6 +38,9 @@ class DolEditor
 	// If not using fckeditor
 	public $content;
 	public $htmlname;
+        /*moddrsi 20.2*/
+        public $inputName;
+        /*fmoddrsi 20.2*/
 	public $toolbarname;
 	public $toolbarstartexpanded;
 	public $rows;
@@ -126,7 +129,11 @@ class DolEditor
 			} else {
 				$this->content = $content;
 			}
-			$this->htmlname 			= $htmlname;
+                        /*moddrsi 20.2*/
+                        $this->inputName = $htmlname;
+			$this->htmlname = random_int(111111, 999999) .'_' . $htmlname;
+                        /*fmoddrsi 20.2*/
+                        
 			$this->toolbarname = $shorttoolbarname;
 			$this->toolbarstartexpanded = $toolbarstartexpanded;
 			$this->rows					= max(ROWS_3, $rows);
@@ -170,7 +177,7 @@ class DolEditor
 			//$out.= '<textarea id="'.$this->htmlname.'" name="'.$this->htmlname.'" '.($this->readonly?' disabled':'').' rows="'.$this->rows.'"'.(preg_match('/%/',$this->cols)?' style="margin-top: 5px; width: '.$this->cols.'"':' cols="'.$this->cols.'"').' class="flat">';
 			// TODO We do not put the 'disabled' tag because on a read form, it change style with grey.
 			//print $this->content;
-			$out .= '<textarea id="'.$this->htmlname.'" name="'.$this->htmlname.'" rows="'.$this->rows.'"'.(preg_match('/%/', $this->cols) ? ' style="margin-top: 5px; width: '.$this->cols.'"' : ' cols="'.$this->cols.'"').' '.($moreparam ? $moreparam : '').' class="flat './*moddrsi (20.2)*/($this->extra_class ? $this->extra_class . (strpos($this->extra_class, 'allow_hashtags') !== false ? ' html_editor_hashtags ' : ''): '')/*fmoddrsi*/.$morecss.'">';
+			$out .= '<textarea id="'.$this->htmlname.'" name="'.$this->inputName.'" rows="'.$this->rows.'"'.(preg_match('/%/', $this->cols) ? ' style="margin-top: 5px; width: '.$this->cols.'"' : ' cols="'.$this->cols.'"').' '.($moreparam ? $moreparam : '').' class="flat './*moddrsi (20.2)*/($this->extra_class ? $this->extra_class . (strpos($this->extra_class, 'allow_hashtags') !== false ? ' html_editor_hashtags ' : ''): '')/*fmoddrsi*/.$morecss.'">';
 			$out .= htmlspecialchars($this->content);
 			$out .= '</textarea>';
 

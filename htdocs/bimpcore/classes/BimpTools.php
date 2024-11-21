@@ -99,7 +99,7 @@ class BimpTools
                 if (is_string($val_temp)) {
                     $val_temp = str_replace('"', 'ù£ù', $val_temp);
                 }
-                
+
                 $val_temp = self::sanitizeVal($val_temp, $check, $filter, $options, $value);
 
                 if (is_string($val_temp)) {
@@ -114,8 +114,8 @@ class BimpTools
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
                         ))) {
-                    if (!$val_temp || (is_string($value) && $val_temp != $value)) {
-                        if (!$val_temp) {
+                    if ($val_temp === '' || (is_string($value) && $val_temp != $value)) {
+                        if ($val_temp === '') {
                             BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
                                 'check'           => $check,
                                 'Valeur initiale' => (is_array($value) ? 'ARRAY' : '"' . (string) htmlentities($value) . '" (' . gettype($value) . ')'),

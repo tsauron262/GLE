@@ -70,6 +70,7 @@ fields:
         default_value: 
             callback: getDefaultEmail
         depends_on: id_contact
+        data_check: email
         
     password:
         label: Mot de passe 

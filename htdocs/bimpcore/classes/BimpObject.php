@@ -1322,6 +1322,12 @@ class BimpObject extends BimpCache
 
     public function getFieldDataCheckType($field_name)
     {
+        $check = $this->getConf('fields/' . $field_name . '/data_check', '');
+        
+        if ($check) {
+            return $check;
+        }
+        
         $check = 'alphanohtml';
 
         $data_type = $this->getConf('fields/' . $field_name . '/type', '');

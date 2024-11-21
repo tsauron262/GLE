@@ -18,6 +18,7 @@ class BimpTools
             'no_html' => '$'
         )
     );
+    
     public static $sql_operators = array('>', '<', '>=', '<=', '!=');
     public static $bloquages = array();
     public static $postTraitment = array();

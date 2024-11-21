@@ -7920,7 +7920,7 @@ function dol_string_onlythesehtmltags($stringtoclean, $cleanalsosomestyles = 1, 
 		$allowed_tags = array(
 			"html", "head", "meta", "body", "article", "a", "abbr", "b", "blockquote", "br", "cite", "div", "dl", "dd", "dt", "em", "font", "img", "ins", "hr", "i", "li",
 			"ol", "p", "q", "s", "span", "strike", "strong", "title", "table", "tr", "th", "td", "u", "ul", "sup", "sub", "blockquote", "pre", "h1", "h2", "h3", "h4", "h5", "h6",
-			"header", "footer", "nav", "section", "menu", "menuitem"	// html5 tags
+			"header", "footer", "nav", "section", "menu", "menuitem"/*moddrsi 20.2*/,"tbody","thead","tfoot"/*moddrsi 20.2*/ 	// html5 tags
 		);
 	}
 	$allowed_tags[] = "comment";		// this tags is added to manage comment <!--...--> that are replaced into <comment>...</comment>
@@ -8310,7 +8310,10 @@ function dol_htmlwithnojs($stringtoencode, $nouseofiframesandbox = 0, $check = '
 			if ($check == 'restricthtmlallowclass' || $check == 'restricthtmlallowunvalid') {
 				$out = dol_string_onlythesehtmltags($out, 0, 0, 1);
 			} else {
-				$out = dol_string_onlythesehtmltags($out, 0, 1, 1);
+                            /*moddrsi 20.2*/
+//				$out = dol_string_onlythesehtmltags($out, 0, 1, 1);
+                                $out = dol_string_onlythesehtmltags($out, 0, 0, 1);
+                            /*fmoddrsi 20.2*/
 			}
 
 			// Keep only some html attributes and exclude non expected HTML attributes and clean content of some attributes (keep only alt=, title=...).

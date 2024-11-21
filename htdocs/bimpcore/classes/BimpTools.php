@@ -110,26 +110,33 @@ class BimpTools
                 if (is_string($value)) {
                     $value = str_replace(' <br', '<br', $value);
                 }
+                
+                $valueInitForTest = $value;
+                
+                if (is_string($valueInitForTest)) {
+                    $valueInitForTest = str_replace('  ', ' ', $valueInitForTest);
+                }
+                
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
                         ))) {
-                    if ($val_temp === '' || (is_string($value) && $val_temp != $value)) {
+                    if ($val_temp === '' || (is_string($valueInitForTest) && $val_temp != $valueInitForTest)) {
                         if ($val_temp === '') {
                             BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
                                 'check'           => $check,
-                                'Valeur initiale' => (is_array($value) ? 'ARRAY' : '"' . (string) htmlentities($value) . '" (' . gettype($value) . ')'),
+                                'Valeur initiale' => (is_array($valueInitForTest) ? 'ARRAY' : '"' . (string) htmlentities($valueInitForTest) . '" (' . gettype($valueInitForTest) . ')'),
                             ));
 
 //                            BimpController::addAjaxWarnings('Attention, donnée invalide (' . $key . ')');
                         } else {
                             BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
                                 'check'                 => $check,
-                                'Valeur initiale'       => (is_array($value) ? 'ARRAY' : (string) '"' . htmlentities($value) . '"' . ' (' . gettype($value) . ')'),
-                                'Valeur modifiée'       => (is_array($val_temp) ? 'ARRAY' : (string) '"' . htmlentities($val_temp) . '"' . ' (' . gettype($value) . ')'),
-                                'Valeur initiale brut'  => '"' . $value . '"',
+                                'Valeur initiale'       => (is_array($valueInitForTest) ? 'ARRAY' : (string) '"' . htmlentities($valueInitForTest) . '"' . ' (' . gettype($valueInitForTest) . ')'),
+                                'Valeur modifiée'       => (is_array($val_temp) ? 'ARRAY' : (string) '"' . htmlentities($val_temp) . '"' . ' (' . gettype($val_temp) . ')'),
+                                'Valeur initiale brut'  => '"' . $valueInitForTest . '"',
                                 'Valeur modifiée brut'  => '"' . $val_temp . '"',
-                                'Valeur initiale ascii' => '"' . BimpTools::toAscii($value) . '"',
+                                'Valeur initiale ascii' => '"' . BimpTools::toAscii($valueInitForTest) . '"',
                                 'Valeur modifiée ascii' => '"' . BimpTools::toAscii($val_temp) . '"'
                             ));
 

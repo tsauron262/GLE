@@ -5526,7 +5526,7 @@ class BCT_ContratLine extends BimpObject
                     $fac_ended = true;
                     if ((int) $this->getData('fac_periodicity')) {
                         $fac_data = $this->getPeriodsToBillData();
-                        if ($fac_data['date_next_period_tobill'] <= $date_fin_validite) {
+                        if (!(int) $fac_data['nb_periods_tobill_max']) {
                             $fac_ended = false;
                         }
                     }
@@ -5540,7 +5540,7 @@ class BCT_ContratLine extends BimpObject
                     $achat_ended = true;
                     if ((int) $this->getData('achat_periodicity')) {
                         $fac_data = $this->getPeriodsToBuyData();
-                        if ($fac_data['date_next_achat'] <= $date_fin_validite) {
+                        if (!(int) $fac_data['nb_periods_tobuy_max']) {
                             $achat_ended = false;
                         }
                     }

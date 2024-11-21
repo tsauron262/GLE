@@ -121,7 +121,7 @@ class BimpTools
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
                         ))) {
-                    if ($val_temp === '' || (is_string($valueInitForTest) && $val_temp != $valueInitForTest)) {
+                    if ($val_temp === '' || (is_string($valueInitForTest) && $val_temp != $valueInitForTest && $val_temp != $value)) {
                         if ($val_temp === '') {
                             BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
                                 'check'           => $check,
@@ -136,11 +136,12 @@ class BimpTools
                                 'Valeur modifiée'       => (is_array($val_temp) ? 'ARRAY' : (string) '"' . htmlentities($val_temp) . '"' . ' (' . gettype($val_temp) . ')'),
                                 'Valeur initiale brut'  => '"' . $valueInitForTest . '"',
                                 'Valeur modifiée brut'  => '"' . $val_temp . '"',
-                                'Valeur initiale ascii' => '"' . BimpTools::toAscii($valueInitForTest) . '"',
+                                'Valeur initiale ascii' => '"' . BimpTools::toAscii($value) . '"',
+                                'Valeur testé ascii' => '"' . BimpTools::toAscii($valueInitForTest) . '"',
                                 'Valeur modifiée ascii' => '"' . BimpTools::toAscii($val_temp) . '"'
                             ));
 
-//                            BimpController::addAjaxWarnings('Attention, donnée modifiée (' . $key . ')');
+//                            BimpController::addAjaxWarnings('Attention, donnée modifiée (' . $key . '). Nouvelle valeur : '.((strlen($val_temp) > 40)? substr($val_temp,40).'...' : $val_temp));
                         }
 //                        if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
 //                            $value = $val_temp;

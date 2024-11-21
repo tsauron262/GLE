@@ -6184,7 +6184,8 @@ ORDER BY a.val_max DESC");
                 return array('errors' => $errors, 'warnings' => $warnings);
             }
 
-            // Vérifs paiements: 
+            // Vérifs paiements:
+            
             $caisse = null;
             $payment_1_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
             $payment_2_set = (isset($data['paid2']) && (float) $data['paid2'] > 0);

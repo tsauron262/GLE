@@ -59,6 +59,10 @@ class BimpInput
                     $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
                 }
 
+                if (!isset($options['strip_tags']) || (int) $options['strip_tags']) {
+                    $extra_class .= ($extra_class ? ' ' : '') . 'strip_tags';
+                }
+
                 $value = htmlentities($value);
                 if ((isset($options['addon_left']) && $options['addon_left']) ||
                         (isset($options['addon_right']) && $options['addon_right'])) {
@@ -151,6 +155,10 @@ class BimpInput
                 break;
 
             case 'password':
+                if (!isset($options['strip_tags']) || (int) $options['strip_tags']) {
+                    $extra_class .= ($extra_class ? ' ' : '') . 'strip_tags';
+                }
+
                 $min_length = (int) BimpTools::getArrayValueFromPath($options, 'min_length', 12);
                 $special_required = (int) BimpTools::getArrayValueFromPath($options, 'special_required', 1);
                 $maj_required = (int) BimpTools::getArrayValueFromPath($options, 'maj_required', 1);
@@ -161,7 +169,12 @@ class BimpInput
                 $data .= ' data-maj_required="' . $maj_required . '"';
                 $data .= ' data-num_required="' . $num_required . '"';
 
-                $html .= '<input type="password" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"' . $data . $extra_attr . '/>';
+                $html .= '<input type="password" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"' . $data . $extra_attr;
+                if ($extra_class) {
+                    $html .= ' class="' . $extra_class . '"';
+                }
+                $html .= '/>';
+
                 $html .= '<p class="inputHelp">';
                 $html .= $min_length . ' caractères minimum';
                 if ($special_required || $maj_required || $num_required) {
@@ -264,10 +277,6 @@ class BimpInput
                 break;
 
             case 'textarea':
-                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
-                    $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
-                }
-
                 $value = htmlentities($value);
 
                 if (!isset($options['rows'])) {
@@ -303,6 +312,10 @@ class BimpInput
                 $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
                 $classes = array();
 
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
+                    $classes[] = 'allow_hashtags ';
+                }
+                
                 if (isset($options['auto_expand']) && (int) $options['auto_expand']) {
                     $classes[] = 'auto_expand ';
                 }
@@ -311,6 +324,9 @@ class BimpInput
                 }
                 if (isset($options['tab_key_as_enter']) && $options['tab_key_as_enter']) {
                     $classes[] = 'tab_key_as_enter';
+                }
+                if (!isset($options['strip_tags']) || (int) $options['strip_tags']) {
+                    $classes[] = 'strip_tags';
                 }
                 if ($extra_class) {
                     $classes[] = $extra_class;

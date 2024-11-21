@@ -1,5 +1,9 @@
 var ticket_url = './ticket.php';
 
+if (typeof (caisse_sounds_on) === 'undefined') {
+    var caisse_sounds_on = false;
+}
+
 function BC_Vente() {
     var ptr = this;
 
@@ -20,6 +24,7 @@ function BC_Vente() {
         this.remises = [];
         this.returns = [];
         this.paiement_differe = 0;
+        this.total_locations_ttc = 0;
     };
 
     this.ajaxResult = function (result) {
@@ -130,12 +135,22 @@ function BC_Vente() {
         if (typeof (result.vente_data.returns) !== 'undefined') {
             this.returns = result.vente_data.returns;
         }
+        
+        if (typeof (result.vente_data.total_locations_ttc) !== 'undefined') {
+            this.total_locations_ttc = result.vente_data.total_locations_ttc;
+        }
+
+        var total_label = 'Total ';
+        if (typeof (result.vente_data.locations_content) !== 'undefined') {
+            total_label += 'ventes ';
+        }
 
         if (parseInt($('#venteHt').find('[name="vente_ht"]').val())) {
-            $('.cart_total_label').text('Total HT');
+            total_label += 'HT';
         } else {
-            $('.cart_total_label').text('Total TTC');
+            total_label += 'TTC';
         }
+        $('.cart_total_label').text(total_label);
 
 //        displayMoneyValue(this.total_remises_vente, $('#venteRemises').find('.total_remises_vente span'));
         displayMoneyValue(this.total_remises_articles, $('#venteRemises').find('.total_remises_articles span'));
@@ -255,12 +270,23 @@ function BC_Vente() {
             }
         }
 
-        if ((this.nb_articles > 0 || this.nb_returns > 0) && (this.paiement_differe || this.toPay <= 0)) {
+        if ((this.nb_articles > 0 || this.nb_returns > 0 || this.total_locations_ttc != 0) && (this.paiement_differe || this.toPay <= 0)) {
             $('#validateCurrentVenteButton').removeClass('disabled');
 //            $('#saveCurrentVenteButton').addClass('disabled');
         } else {
             $('#validateCurrentVenteButton').addClass('disabled');
 //            $('#saveCurrentVenteButton').removeClass('disabled');
+        }
+
+        if (typeof (result.vente_data.locations_content) !== 'undefined') {
+            $('#venteLocationsContent').html(result.vente_data.locations_content);
+
+            setCommonEvents($('#venteLocationsContent'));
+            setInputsEvents($('#venteLocationsContent'));
+
+            $('#venteLocationsContent').find('select[name="vente_id_selected_loc"]').change(function () {
+                saveObjectField('bimpcaisse', 'BC_Vente', Vente.id_vente, 'id_selected_location', parseInt($(this).val()));
+            });
         }
     };
 
@@ -268,13 +294,22 @@ function BC_Vente() {
 
     this.refresh = function () {
         if (ptr.id_vente) {
+            $('.refreshVenteButton').hide();
+            $('.refreshVenteloading').css('display', 'inline-block');
             BimpAjax('loadVenteData', {
                 id_vente: ptr.id_vente
             }, null, {
                 display_success: false,
                 display_errors_in_popup_only: true,
                 success: function (result, bimpAjax) {
+                    $('.refreshVenteloading').hide();
+                    $('.refreshVenteButton').show();
+
                     ptr.ajaxResult(result);
+                },
+                error: function (result, bimpAjax) {
+                    $('.refreshVenteloading').hide();
+                    $('.refreshVenteButton').show();
                 }
             });
         }
@@ -307,7 +342,7 @@ function openCaisse($button, confirm_fonds) {
     if (isNaN(fonds)) {
         fonds = 0;
     }
-    
+
 //    if (!fonds) {
 //        bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning', null, true);
 //        return;
@@ -472,7 +507,7 @@ function loadNewVente(id_client) {
     });
 }
 
-function loadVente($button, id_vente) {
+function loadVente($button, id_vente, open_tab) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -482,6 +517,10 @@ function loadVente($button, id_vente) {
     if (!id_caisse) {
         bimp_msg('Erreur: identifiant de la caisse absent', 'danger');
         return;
+    }
+    
+    if (typeof(open_tab) !== 'undefined' && open_tab) {
+        $('#bc_main_container').find('a[href="#ventes"]').click();
     }
 
     var $container = $('#currentVenteContainer');
@@ -519,7 +558,6 @@ function loadVente($button, id_vente) {
                 onViewLoaded($view);
             }
             Vente.ajaxResult(result);
-
             onVenteLoaded();
         },
         error: function (result, bimpAjax) {
@@ -959,11 +997,14 @@ function findProduct($button) {
         display_processing: true,
         processing_padding: 0,
         processing_msg: 'Recherche en cours',
+        remove_current_content: false,
+        eraseResultButton: true,
+        use_refresh_idx: false,
         $button: $button,
         $input: $input,
         success: function (result, bimpAjax) {
             if (typeof (result.result_html) !== 'undefined' && result.result_html) {
-                $resultContainer.html(result.result_html).slideDown(250).css('height', 'auto');
+                $resultContainer.append(result.result_html).slideDown(250).css('height', 'auto');
             } else if (typeof (result.cart_html) !== 'undefined' && result.cart_html) {
                 $('#ventePanierLines').prepend(result.cart_html);
                 var $line = $('#ventePanierLines').find('.cartArticleLine:first');
@@ -971,9 +1012,23 @@ function findProduct($button) {
             }
             Vente.ajaxResult(result);
             bimpAjax.$input.val('').focus();
+
+            if (caisse_sounds_on) {
+                if (result.ok) {
+//                bimp_msg('GO PLAY OK');
+                    BimpSound.play('success');
+                } else {
+//                bimp_msg('GO PLAY KO');
+                    BimpSound.play('danger');
+                }
+            }
         },
         error: function (result, bimpAjax) {
             bimpAjax.$input.focus().select();
+
+            if (caisse_sounds_on) {
+                BimpSound.play('danger');
+            }
         }
     });
 }
@@ -1421,7 +1476,7 @@ function onVenteLoaded() {
         });
         $input.data('event_init', 1);
     }
-    
+
     $input = $('#note_public');
     if ($input.length && !parseInt($input.data('event_init'))) {
         $input.change(function () {
@@ -1486,6 +1541,22 @@ function onVenteLoaded() {
 
     checkMultipleValues();
     checkDiscounts();
+}
+
+// Sons: 
+
+function caisseSoundsOn() {
+    caisse_sounds_on = true;
+    $('.caisseSoundsOff').hide();
+    $('.caisseSoundsOn').css('display', 'inline-block');
+    saveBimpcoreConf('bimpcaisse', 'sounds_on', 1, null, null, false);
+}
+
+function caisseSoundsOff() {
+    $('.caisseSoundsOn').hide();
+    $('.caisseSoundsOff').css('display', 'inline-block');
+    caisse_sounds_on = false;
+    saveBimpcoreConf('bimpcaisse', 'sounds_on', 0, null, null, false);
 }
 
 $(document).ready(function () {

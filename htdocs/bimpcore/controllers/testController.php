@@ -7,25 +7,9 @@ class testController extends BimpController
     {
         $html = '';
         
-        $html .= '<span class="btn btn-default" onclick="BimpBrowserNotification(\'TEST\', \'CONTENT\')">';
+        $html .= '<span class="btn btn-default" onclick="BimpBrowserNotification(\'TEST\', \'CONTENT\', function() {bimp_msg(\'ICI\');})">';
         $html .= 'TEST NOTIF';
         $html .= '</span>';
-        
-        $html .= '<br/><br/>';
-        
-        
-        global $user;
-        
-        $html .= '1<pre>';
-        $html .= print_r($user->rights, 1);
-        $html .= '</pre>';
-        
-        $bUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
-        $bUser->dol_object->loadRights();
-        
-        $html .= '2<pre>';
-        $html .= print_r($bUser->dol_object->rights, 1);
-        $html .= '</pre>';
         
         return $html;
         if (!BimpCore::isUserDev()) {

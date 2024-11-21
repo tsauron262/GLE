@@ -15,7 +15,7 @@ class BC_Vente extends BimpObject
         2 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('success'))
     );
 
-    // Getters:
+    // Getters booléens:
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
@@ -28,45 +28,74 @@ class BC_Vente extends BimpObject
         return 0;
     }
 
-    public function getClient_contactsArray()
-    {
-        $contacts = array(
-            0 => ''
-        );
-        $id_client = $this->getData('id_client');
-        if (!is_null($id_client) && $id_client) {
-            $where = '`fk_soc` = ' . (int) $id_client;
-            $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
-                }
-            }
-        }
+    // Getters params :
 
-        return $contacts;
-    }
-
-    public function getArticlesArray()
+    public function getDocumentExtraButtons()
     {
+        $buttons = array();
         if ($this->isLoaded()) {
-            $articles = array();
-            foreach ($this->getChildrenObjects('articles') as $article) {
-                $product = $article->getChildObject('product');
-                if (BimpObject::objectLoaded($product)) {
-                    $articles[$article->id] = $product->getRef() . ' - ' . $product->getName();
+            if ((int) $this->getData('status') === 2) {
+                if ((int) $this->getData('id_facture')) {
+                    $facture = $this->getChildObject('facture');
+                    if (!is_null($facture) && isset($facture->id) && $facture->id) {
+                        $file = dol_sanitizeFileName($facture->ref);
+                        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&attachment=0';
+                        $url .= '&file=' . htmlentities($file . '/' . $file) . '.pdf';
+                        $buttons[] = array(
+                            'label'   => 'Fichier PDF de la facture',
+                            'icon'    => 'fas_file-pdf',
+                            'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
+                        );
+
+                        if ((int) $this->getData('id_avoir')) {
+                            $avoir = $this->getChildObject('avoir');
+                            if (!is_null($avoir) && isset($avoir->id) && $avoir->id) {
+                                $file = dol_sanitizeFileName($avoir->ref);
+                                $url = DOL_URL_ROOT . '/document.php?modulepart=facture&attachment=0';
+                                $url .= '&file=' . htmlentities($file . '/' . $file) . '.pdf';
+                                $buttons[] = array(
+                                    'label'   => 'Fichier PDF de l\'avoir',
+                                    'icon'    => 'far_file-pdf',
+                                    'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
+                                );
+                            }
+                        }
+
+                        $url = DOL_URL_ROOT . '/bimpcaisse/ticket.php?id_vente=' . $this->id;
+                        $buttons[] = array(
+                            'label'   => 'Ticket de caisse',
+                            'icon'    => 'fas_receipt',
+                            'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
+                        );
+                    }
                 }
             }
-            return $articles;
+        }
+        return $buttons;
+    }
+
+    public function getDefaultListExtraButtons()
+    {
+        $buttons = $this->getDocumentExtraButtons();
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('status') !== 2) {
+                $buttons[] = array(
+                    'label'   => 'Abandonner la vente',
+                    'icon'    => 'fas_times',
+                    'onclick' => 'setVenteStatus($(this), ' . $this->id . ', 0)'
+                );
+                $buttons[] = array(
+                    'label'   => 'Editer',
+                    'icon'    => 'fas_edit',
+                    'onclick' => 'loadVente($(this), ' . $this->id . ');'
+                );
+            }
         }
 
-        return array();
+        return $buttons;
     }
 
-    public function getCond_reglementsArray()
-    {
-        return self::getCondReglementsArray();
-    }
+    // Getters données : 
 
     public function getAjaxData()
     {
@@ -92,6 +121,9 @@ class BC_Vente extends BimpObject
         $toPay = 0;
         $toReturn = 0;
         $avoir = 0;
+
+        $locations_content = '';
+        $locations_total_ttc = 0;
 
         foreach ($this->getChildrenObjects('articles') as $article) {
             $qty = (int) $article->getData('qty');
@@ -240,8 +272,12 @@ class BC_Vente extends BimpObject
             );
         }
 
+        if (BimpCore::isModuleActive('bimplocation')) {
+            $locations_content = $this->renderLocationsContent($locations_total_ttc);
+        }
+
         $total_discounts = (float) $this->getTotalDiscounts();
-        $toPay = $total_ttc - $total_remises - $total_returns - $total_discounts;
+        $toPay = $total_ttc - $total_remises - $total_returns - $total_discounts + $locations_total_ttc;
 
         if ($toPay < 0) {
             $avoir = -$toPay;
@@ -283,7 +319,9 @@ class BC_Vente extends BimpObject
             'articles'               => $articles,
             'remises'                => $remises,
             'returns'                => $returns,
-            'paiement_differe'       => $paiement_differe
+            'paiement_differe'       => $paiement_differe,
+            'total_locations_ttc'    => $locations_total_ttc,
+            'locations_content'      => $locations_content
         );
     }
 
@@ -337,100 +375,6 @@ class BC_Vente extends BimpObject
         return $currentReturnedEquipments;
     }
 
-    public function getDocumentExtraButtons()
-    {
-        $buttons = array();
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('status') === 2) {
-                if ((int) $this->getData('id_facture')) {
-                    $facture = $this->getChildObject('facture');
-                    if (!is_null($facture) && isset($facture->id) && $facture->id) {
-                        $file = dol_sanitizeFileName($facture->ref);
-                        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&attachment=0';
-                        $url .= '&file=' . htmlentities($file . '/' . $file) . '.pdf';
-                        $buttons[] = array(
-                            'label'   => 'Fichier PDF de la facture',
-                            'icon'    => 'fas_file-pdf',
-                            'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
-                        );
-
-                        if ((int) $this->getData('id_avoir')) {
-                            $avoir = $this->getChildObject('avoir');
-                            if (!is_null($avoir) && isset($avoir->id) && $avoir->id) {
-                                $file = dol_sanitizeFileName($avoir->ref);
-                                $url = DOL_URL_ROOT . '/document.php?modulepart=facture&attachment=0';
-                                $url .= '&file=' . htmlentities($file . '/' . $file) . '.pdf';
-                                $buttons[] = array(
-                                    'label'   => 'Fichier PDF de l\'avoir',
-                                    'icon'    => 'far_file-pdf',
-                                    'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
-                                );
-                            }
-                        }
-
-                        $url = DOL_URL_ROOT . '/bimpcaisse/ticket.php?id_vente=' . $this->id;
-                        $buttons[] = array(
-                            'label'   => 'Ticket de caisse',
-                            'icon'    => 'fas_receipt',
-                            'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
-                        );
-                    }
-                }
-            }
-        }
-        return $buttons;
-    }
-
-    public function getDefaultListExtraButtons()
-    {
-        $buttons = $this->getDocumentExtraButtons();
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('status') !== 2) {
-                $buttons[] = array(
-                    'label'   => 'Abandonner la vente',
-                    'icon'    => 'fas_times',
-                    'onclick' => 'setVenteStatus($(this), ' . $this->id . ', 0)'
-                );
-                $buttons[] = array(
-                    'label'   => 'Editer',
-                    'icon'    => 'fas_edit',
-                    'onclick' => 'loadVente($(this), ' . $this->id . ');'
-                );
-            }
-        }
-
-        return $buttons;
-    }
-
-    public function getAvailableCustomerDiscountsArray()
-    {
-        $discounts = array();
-
-        $client = $this->getChildObject('client');
-
-        if (BimpObject::objectLoaded($client)) {
-            return $client->getAvailableDiscountsArray();
-        }
-
-//        $id_client = (int) $this->getData('id_client');
-//        if ($id_client) {
-//            global $conf;
-//
-//            $where = '`fk_soc` = ' . (int) $id_client . ' AND `entity` = ' . $conf->entity;
-//            $where .= ' AND `fk_facture` IS NULL AND `fk_facture_line` IS NULL';
-//            $rows = $this->db->getRows('societe_remise_except', $where, null, 'array', array(
-//                'rowid', 'amount_ttc', 'description'
-//            ));
-//            if (!is_null($rows) && count($rows)) {
-//                foreach ($rows as $r) {
-//                    $discounts[(int) $r['rowid']] = $r['description'] . ' : ' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . ' TTC';
-//                }
-//            }
-//        }
-
-        return $discounts;
-    }
-
     public function getNbArticles()
     {
         if ($this->isLoaded()) {
@@ -461,6 +405,77 @@ class BC_Vente extends BimpObject
         }
 
         return 0;
+    }
+
+    // Getters array : 
+
+    public function getAvailableCustomerDiscountsArray()
+    {
+        $discounts = array();
+
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            return $client->getAvailableDiscountsArray();
+        }
+
+//        $id_client = (int) $this->getData('id_client');
+//        if ($id_client) {
+//            global $conf;
+//
+//            $where = '`fk_soc` = ' . (int) $id_client . ' AND `entity` = ' . $conf->entity;
+//            $where .= ' AND `fk_facture` IS NULL AND `fk_facture_line` IS NULL';
+//            $rows = $this->db->getRows('societe_remise_except', $where, null, 'array', array(
+//                'rowid', 'amount_ttc', 'description'
+//            ));
+//            if (!is_null($rows) && count($rows)) {
+//                foreach ($rows as $r) {
+//                    $discounts[(int) $r['rowid']] = $r['description'] . ' : ' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . ' TTC';
+//                }
+//            }
+//        }
+
+        return $discounts;
+    }
+
+    public function getClient_contactsArray()
+    {
+        $contacts = array(
+            0 => ''
+        );
+        $id_client = $this->getData('id_client');
+        if (!is_null($id_client) && $id_client) {
+            $where = '`fk_soc` = ' . (int) $id_client;
+            $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
+                }
+            }
+        }
+
+        return $contacts;
+    }
+
+    public function getArticlesArray()
+    {
+        if ($this->isLoaded()) {
+            $articles = array();
+            foreach ($this->getChildrenObjects('articles') as $article) {
+                $product = $article->getChildObject('product');
+                if (BimpObject::objectLoaded($product)) {
+                    $articles[$article->id] = $product->getRef() . ' - ' . $product->getName();
+                }
+            }
+            return $articles;
+        }
+
+        return array();
+    }
+
+    public function getCond_reglementsArray()
+    {
+        return self::getCondReglementsArray();
     }
 
     // Afficages: 
@@ -569,8 +584,21 @@ class BC_Vente extends BimpObject
         $html .= '<div id="curVenteInfos" class="venteSection">';
 
         // Bouton "Actualiser": 
-        $html .= '<span class="btn btn-default" style="float: right; display: inline-block; margin-top: -2px" onclick="Vente.refresh();">';
+        $html .= '<span class="btn btn-default refreshVenteButton" style="float: right; display: inline-block; margin-top: -2px" onclick="Vente.refresh();">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser la vente';
+        $html .= '</span>';
+        $html .= '<span class="refreshVenteloading" style="display: none; margin-top: -2px; float: right; font-size: 28px; color: #3B6EA0">';
+        $html .= '<i class="fa fa-spinner fa-spin"></i>';
+        $html .= '</span>';
+
+        // Boutons sons: 
+        $sounds_on = (int) BimpCore::getConf('sounds_on', null, 'bimpcaisse');
+        $html .= '<span class="caisseSoundsOn bs-popover"' . (!$sounds_on ? ' style="display: none"' : '') . ' onclick="caisseSoundsOff();" ' . BimpRender::renderPopoverData('Désactiver les sons') . '>';
+        $html .= BimpRender::renderIcon('fas_volume-up');
+        $html .= '</span>';
+
+        $html .= '<span class="caisseSoundsOff bs-popover"' . ($sounds_on ? ' style="display: none"' : '') . ' onclick="caisseSoundsOn();"' . BimpRender::renderPopoverData('Activer les sons') . '>';
+        $html .= BimpRender::renderIcon('fas_volume-mute');
         $html .= '</span>';
 
         // Choix Commercial: 
@@ -674,17 +702,27 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '<div class="venteSectionBody">';
         $html .= '<span class="nbReturns">0 article</span>';
-
         $html .= '<div class="totalReturnsTitle">Total TTC&nbsp;:&nbsp;<span class="totalReturns">0,00&nbsp;&euro;</span></div>';
-        $html .= '<div id="returnsLines">';
+        $html .= '<div id="returnsLines"></div>';
         $html .= '</div>';
         $html .= '</div>';
-        $html .= '</div>';
+        
+        // Locations: 
+        if (BimpCore::isModuleActive('bimplocation')) {
+            $html .= '<div id="curVenteLocations" class="venteSection" style="margin-bottom: 10px">';
+            $html .= '<div class="venteSectionHeader">';
+            $html .= BimpRender::renderIcon('fas_business-time', 'iconLeft');
+            $html .= '<span class="venteSectionTitle">Locations</span>';
+            $html .= '</div>';
+            $html .= '<div class="venteSectionBody">';
+            $html .= $this->renderLocationsView();
+            $html .= '</div>';
+            $html .= '</div>';
+        }
 
+        $html .= '</div>'; // curVenteRight
 
-        $html .= '</div>';
-
-        $html .= '</div>';
+        $html .= '</div>'; // curVenteGlobal
 
         return $html;
     }
@@ -946,12 +984,130 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
+    public function renderLocationsView()
+    {
+        $html = '';
+
+        if (BimpCore::isModuleActive('bimplocation')) {
+            $onclick = $this->getJsActionOnclick('addLocation', array(), array(
+                'form_name' => 'add_location'
+            ));
+
+            $html .= '<div style="text-align: right">';
+            $html .= '<button type="button" id="addLocationButton" class="btn btn-default"';
+            $html .= ' onclick="' . $onclick . '"';
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_business-time', 'iconLeft') . 'Intégrer une location';
+            $html .= '</button>';
+            $html .= '</div>';
+
+            $html .= '<div id="venteLocationsContent">';
+            $html .= $this->renderLocationsContent();
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
+    public function renderLocationsContent(&$total_ttc = 0)
+    {
+        $html = '';
+
+        $total_ttc = 0;
+
+        if (BimpCore::isModuleActive('bimplocation') && $this->isLoaded()) {
+            $locations = BimpCache::getBimpObjectObjects('bimplocation', 'BimpLocation', array(
+                        'id_cur_vente' => $this->id
+            ));
+
+            if (!empty($locations)) {
+                $loc_select_options = array();
+
+                $content = '';
+                $id_selected_loc = (int) $this->getData('id_selected_location');
+                $loc_line = BimpObject::getInstance('bimplocation', 'BimpLocationLine');
+                $fl = true;
+                foreach ($locations as $loc) {
+                    if (!$id_selected_loc) {
+                        $id_selected_loc = $loc->id;
+                        $this->updateField('id_selected_location', $id_selected_loc);
+                    }
+
+                    $loc_select_options[$loc->id] = '<b>' . $loc->getRef() . '</b> (Du ' . date('d / m / Y', strtotime($loc->getData('date_from'))) . ' au ' . date('d / m / Y', strtotime($loc->getData('date_to'))) . ')';
+
+                    $content .= '<table class="bimp_list_table vente_loc_table" style="border-top: 2px solid #636363; border-bottom: 2px solid #636363; ' . (!$fl ? 'margin-top: 30px;' : 'margin-top: 10px;') . '">';
+                    $content .= '<tbody>';
+
+                    $content .= '<tr>';
+                    $content .= '<td>' . $loc->getLink() . '</td>';
+                    $content .= '<td>';
+                    $content .= 'Du ' . date('d / m / Y', strtotime($loc->getData('date_from')));
+                    $content .= '<br/>Au ' . date('d / m / Y', strtotime($loc->getData('date_to')));
+                    $content .= '</td>';
+
+                    $content .= '<td style="text-align: right">';
+                    
+                    if ($loc->isActionAllowed('editDates') && $loc->canSetAction('editDates')) {
+                        $content .= BimpRender::renderRowButton('Modifier les dates', 'fas_calendar-alt', $loc->getJsActionOnclick('editDates', array(), array(
+                            'form_name' => 'edit_dates'
+                        )));
+                    }
+
+                    $loc_line->setIdParent($loc->id);
+                    $onclick = $loc_line->getJsLoadModalForm('default', 'Ajout d\\\'un équipement', array(
+                        'fields' => array(
+                            'date_from' => $loc->getData('date_from'),
+                            'date_to'   => $loc->getData('date_to')
+                        )
+                            ), null, '', 0, '$(this)', 'function() {Vente.refresh();}');
+                    $content .= BimpRender::renderRowButton('Ajouter un équipement', 'fas_plus-circle', $onclick);
+
+                    $onclick = $this->getJsActionOnclick('removeLocation', array(
+                        'id_location' => $loc->id
+                            ), array(
+                        'confirm_msg' => 'Veuillez confirmer le retrait de la locaiton ' . $loc->getRef()
+                    ));
+                    $content .= BimpRender::renderRowButton('Retirer cette location de cette vente', 'fas_times', $onclick);
+                    $content .= '</td>';
+
+                    $content .= '</tr>';
+                    $content .= '</tbody>';
+                    $content .= '</table>';
+
+                    $amounts = $loc->getAmounts();
+                    $total_ttc += $amounts['total_remain_to_bill'];
+
+                    $content .= $loc->renderCaisseLocationLines();
+
+                    $fl = false;
+                }
+
+                if (count($locations) > 1) {
+                    $html .= '<span style="font-size: 12px; font-style: italic">Ajouts automatiques à la location : </span><br/>';
+                    $html .= BimpInput::renderInput('select', 'vente_id_selected_loc', $id_selected_loc, array(
+                                'options' => $loc_select_options
+                    ));
+                }
+
+                $html .= '<div id="venteLocationsTotal" style="margin: 5px 0">';
+                $html .= 'Total locations TTC ' . BimpTools::displayMoneyValue($total_ttc, 'EUR');
+                $html .= '</div>';
+
+                $html .= $content;
+            }
+        }
+
+        return $html;
+    }
+
     public function renderCartContent()
     {
         $html = '';
 
         $total = 0;
         $nbArticles = 0;
+
+        $locations_actives = BimpCore::isModuleActive('bimplocation');
 
         $html .= '<div style="text-align: right">';
         $html .= '<button type="button" id="loadRemiseFormButton" class="btn btn-default"';
@@ -964,6 +1120,7 @@ class BC_Vente extends BimpObject
         $html .= '>';
         $html .= '<i class="fa fa-reply iconLeft"></i>Retour Produit';
         $html .= '</button>';
+
         $html .= '</div>';
 
         $html .= '<div id="venteNbArticles">';
@@ -981,9 +1138,9 @@ class BC_Vente extends BimpObject
         $html .= '<div id="ventePanierTotal">';
         $html .= '<span class="cart_total_label">';
         if ((int) $this->getData('vente_ht')) {
-            $html .= 'Total HT';
+            $html .= 'Total ' . ($locations_actives ? 'ventes ' : '') . 'HT';
         } else {
-            $html .= 'Total TTC';
+            $html .= 'Total ' . ($locations_actives ? 'ventes ' : '') . 'TTTC';
         }
 
         $html .= '</span>: <span class="cart_total">' . BimpTools::displayMoneyValue($total, 'EUR') . '</span>';
@@ -1025,17 +1182,17 @@ class BC_Vente extends BimpObject
         $modeReg = self::getModeReglementsArray('code');
 //        echo '<pre>';print_r($modeReg);
         BimpObject::loadClass('bimpcaisse', 'BC_VentePaiement');
-        foreach(BC_VentePaiement::$codes as $code => $infos){
-            if(isset($modeReg[$code])){
+        foreach (BC_VentePaiement::$codes as $code => $infos) {
+            if (isset($modeReg[$code])) {
                 $html .= '<div class="col-lg-4">';
                 $html .= '<button id="ventePaiementLiquideButton"type="button" class="ventePaiementButton btn btn-default btn-large"';
-                $html .= ' onclick="displayNewPaiementForm($(this));" data-code="'.$code.'">';
-                $html .= ''.BimpRender::renderIcon($infos['icon'], 'iconLeft').''.$infos['label'];
+                $html .= ' onclick="displayNewPaiementForm($(this));" data-code="' . $code . '">';
+                $html .= '' . BimpRender::renderIcon($infos['icon'], 'iconLeft') . '' . $infos['label'];
                 $html .= '</button>';
                 $html .= '</div>';
             }
         }
-        
+
 //        $html .= '<div class="col-lg-4">';
 //        $html .= '<button id="ventePaiementLiquideButton"type="button" class="ventePaiementButton btn btn-default btn-large"';
 //        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="LIQ">';
@@ -1121,24 +1278,6 @@ class BC_Vente extends BimpObject
         $html .= $this->renderPaiementsLines();
         $html .= '</div>';
 
-        // Conditions de réglement: 
-        $id_cond = (int) $this->getData('id_cond_reglement');
-        $html .= '<div id="condReglement" style="font-size: 14px">';
-        $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
-        $html .= '<select id="condReglementSelect" name="condReglementSelect"  ' . (!(int) BimpCore::getConf('use_mode_reglement_caisse', null, 'bimpcaisse') ? 'disabled' : '') . '>';
-        foreach ($this->getCond_reglementsArray() as $id => $label) {
-            $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
-        }
-        $html .= '</select>';
-        $html .= '</div>';
-
-        // Vente au prix HT: 
-        $vente_ht = (int) $this->getData('vente_ht');
-        $html .= '<div id="venteHt" style="font-size: 14px">';
-        $html .= '<span style="font-weight: bold">Vendre au prix hors-taxes : </span>';
-        $html .= BimpInput::renderInput('toggle', 'vente_ht', $vente_ht);
-        $html .= '</div>';
-
         // Remboursement avoir Client:
         $html .= '<div id="avoirRbtForm">';
 
@@ -1179,6 +1318,24 @@ class BC_Vente extends BimpObject
         }
         $html .= '<div id="totalDiscounts">Total remises client utilisées: <span></span></div>';
         $html .= '</div>';
+        $html .= '</div>';
+
+        // Conditions de réglement: 
+        $id_cond = (int) $this->getData('id_cond_reglement');
+        $html .= '<div id="condReglement" style="font-size: 14px">';
+        $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
+        $html .= '<select id="condReglementSelect" name="condReglementSelect"  ' . (!(int) BimpCore::getConf('use_mode_reglement_caisse', null, 'bimpcaisse') ? 'disabled' : '') . '>';
+        foreach ($this->getCond_reglementsArray() as $id => $label) {
+            $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '</div>';
+
+        // Vente au prix HT: 
+        $vente_ht = (int) $this->getData('vente_ht');
+        $html .= '<div id="venteHt" style="font-size: 14px">';
+        $html .= '<span style="font-weight: bold">Vendre au prix hors-taxes : </span>';
+        $html .= BimpInput::renderInput('toggle', 'vente_ht', $vente_ht);
         $html .= '</div>';
 
         return $html;
@@ -1620,9 +1777,57 @@ class BC_Vente extends BimpObject
         return '';
     }
 
+    public function renderLocationSelect()
+    {
+        $html = '';
+
+        $id_client = (int) $this->getData('id_client');
+
+        if ($id_client) {
+            $locations = array(
+                0 => 'Nouvelle location'
+            );
+
+            $value = 0;
+            foreach (BimpCache::getBimpObjectObjects('bimplocation', 'BimpLocation', array(
+                'id_client'    => $id_client,
+                'id_entrepot'  => (int) $this->getData('id_entrepot'),
+                'status'       => array(
+                    'and' => array(
+                        array(
+                            'operator' => '>=',
+                            'value'    => 0
+                        ),
+                        array(
+                            'operator' => '<',
+                            'value'    => 10
+                        )
+                    )
+                ),
+                'id_cur_vente' => 0
+            )) as $loc) {
+                if (!$value) {
+                    $value = $loc->id;
+                }
+                $label = $loc->getRef();
+                $label .= ' (du ' . date('d / m / Y', strtotime($loc->getData('date_from')));
+                $label .= ' au ' . date('d / m / Y', strtotime($loc->getData('date_to'))) . ')';
+                $locations[$loc->id] = $label;
+            }
+
+            $html .= BimpInput::renderInput('select', 'id_location', $value, array(
+                        'options' => $locations
+            ));
+        } else {
+            $html .= BimpRender::renderAlerts('Aucun client sélectionné', 'danger');
+        }
+
+        return $html;
+    }
+
     // Traitements : 
 
-    public function checkEquipment($id_equipment, &$errors)
+    public function checkEquipment($id_equipment, &$errors, &$is_location = false)
     {
         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
 
@@ -1639,13 +1844,18 @@ class BC_Vente extends BimpObject
                 ));
                 return null;
             } else {
-                $product = $equipment->getChildObject('product');
+                $product = $equipment->getChildObject('bimp_product');
                 if (!BimpObject::objectLoaded($product)) {
                     $errors[] = 'Le produit associé à l\'équipement ' . $equipment->getLink(array(
                                 'with_icon' => 0,
                                 'card'      => ''
                             )) . ' n\'existe plus (ID ' . $id_product . ')';
                     return null;
+                }
+
+                if (BimpCore::isModuleActive('bimplocation') && !empty($product->getData('forfaits_location'))) {
+                    $is_location = true;
+                    return $equipment;
                 }
 
                 if (!$equipment->isAvailable(0, $errors, array(// On ne vérifie pas l'emplacement de l'équipement pour éviter le blocage de la vente. 
@@ -1664,9 +1874,27 @@ class BC_Vente extends BimpObject
     {
         $html = '';
 
-        $equipment = $this->checkEquipment($id_equipment, $errors);
+        $is_location = false;
+        $equipment = $this->checkEquipment($id_equipment, $errors, $is_location);
         if (BimpObject::objectLoaded($equipment)) {
-            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_product'));
+            if ($is_location) {
+                $id_selected_loc = (int) $this->getData('id_selected_location');
+                if (!$id_selected_loc) {
+                    $errors[] = 'Aucune location sélectionnée dans cette vente pour l\'ajout d\'équipement à louer';
+                } else {
+                    $loc = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocation', $id_selected_loc);
+                    if (!BimpObject::objectLoaded($loc)) {
+                        $errors[] = 'La location sélectionnée #' . $id_selected_loc . ' n\'existe plus';
+                    } else {
+                        $errors = $loc->addEquipment($equipment);
+                    }
+                }
+
+                return '';
+            }
+
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData('id_product'));
+
             $article = BimpObject::getInstance($this->module, 'BC_VenteArticle');
             $prix_ht = 0;
             $prix_ttc = 0;
@@ -1768,6 +1996,7 @@ class BC_Vente extends BimpObject
     {
         $cart_html = '';
         $result_html = '';
+        $ok = 0;
 
         $equipements = array();
 
@@ -1822,6 +2051,7 @@ class BC_Vente extends BimpObject
                     if (array_key_exists($equipements[0], $current_equipments)) {
                         $result_html .= BimpRender::renderAlerts('L\'équipement #' . $equipements[0] . ' "' . $search . '" a déjà été ajouté au panier', 'warning');
                     } else {
+                        $ok = 1;
                         $cart_html = $this->addCartEquipement($equipements[0], $errors);
                     }
                 } else {
@@ -1859,11 +2089,14 @@ class BC_Vente extends BimpObject
                                     $product_label = '#' . $products[0];
                                 }
                                 $result_html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des quantités pour le produit ' . $product_label), 'danger');
+                            } else {
+                                $ok = 1;
                             }
                         }
                     }
 
                     if (!$check) {
+                        $ok = 1;
                         $cart_html = $this->addCartProduct((int) $products[0], $errors);
                     }
                 } else {
@@ -1888,9 +2121,14 @@ class BC_Vente extends BimpObject
             }
         }
 
+        if (count($errors)) {
+            $ok = 0;
+        }
+
         return array(
             'cart_html'   => $cart_html,
-            'result_html' => $result_html
+            'result_html' => $result_html,
+            'ok'          => $ok
         );
     }
 
@@ -2082,11 +2320,11 @@ class BC_Vente extends BimpObject
 
         if (($has_equipment || $has_returns || ((int) $data['paiement_differe'] && BimpCore::getConf('use_mode_reglement_caisse', null, 'bimpcaisse'))) && !BimpObject::objectLoaded($client)) {
             $errors[] = 'Compte client obligatoire pour cette vente';
-            if($has_equipment)
+            if ($has_equipment)
                 $errors[] = 'Produit sérialisable';
-            if($has_returns)
+            if ($has_returns)
                 $errors[] = 'Produit retourné';
-            if($data['paiement_differe'])
+            if ($data['paiement_differe'])
                 $errors[] = 'Paiment diféré';
         }
 
@@ -2127,6 +2365,25 @@ class BC_Vente extends BimpObject
 
             if (!$this->checkVente($errors)) {
                 return false;
+            }
+
+            $locations = array();
+            if (BimpCore::isModuleActive('bimplocation')) {
+                $locations = BimpCache::getBimpObjectObjects('bimplocation', 'BimpLocation', array(
+                            'id_cur_vente' => $this->id
+                ));
+                if (!empty($locations)) {
+                    foreach ($locations as $location) {
+                        $location_errors = $location->createVenteArticlesLines($this->id);
+                        if (count($location_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($location_errors, 'Erreurs lors de l\'ajout des lignes de la location ' . $location->getLink());
+                        }
+                    }
+
+                    if (count($errors)) {
+                        return false;
+                    }
+                }
             }
 
             $articles = $this->getChildrenObjects('articles');
@@ -2321,6 +2578,16 @@ class BC_Vente extends BimpObject
                 BimpCore::addlog('Erreurs validation vente en caisse', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
                     'Erreurs' => $errors
                 ));
+                return false;
+            } else {
+                if (!empty($locations)) {
+                    foreach ($locations as $location) {
+                        $location->updateField('id_cur_vente', 0);
+                        $location->checkStatus();
+                    }
+                    
+                    $this->updateField('id_selected_location', 0);
+                }
             }
             return true;
         }
@@ -2353,7 +2620,7 @@ class BC_Vente extends BimpObject
         if (!$id_account) {
             $id_account = (int) BimpCore::getConf('id_default_bank_account');
         }
-        
+
         $account = $caisse->getChildObject('account');
         $account_label = '';
         if (BimpObject::objectLoaded($account)) {
@@ -2398,7 +2665,8 @@ class BC_Vente extends BimpObject
         }
 
         if (!$id_mode_reglement) {
-            $id_mode_reglement = (int) BimpCore::getConf('id_cond_reglement_default', 0, 'bimpcaisse');;
+            $id_mode_reglement = (int) BimpCore::getConf('id_cond_reglement_default', 0, 'bimpcaisse');
+            ;
         }
 
         $id_cond_reglement = (int) $this->getData('id_cond_reglement');
@@ -2590,7 +2858,7 @@ class BC_Vente extends BimpObject
             ));
 
             $line->id_product = (int) $product->id;
-//            $line->desc = $product->getName() . ' - Réf. ' . $product->getRef() . ($serial ? ' - N° de série: ' . $serial : '');
+            $line->desc = $article->getData('infos');
             $line->qty = (int) $article->getData('qty');
             $line->pu_ht = (float) $article->getData('unit_price_tax_ex');
             if ((int) $this->getData('vente_ht')) {
@@ -2809,6 +3077,124 @@ class BC_Vente extends BimpObject
         $facture->checkIsPaid();
 
         return $facture->id;
+    }
+
+    // Actions: 
+
+    public function actionAddLocation($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded($errors)) {
+            $id_location = (int) BimpTools::getArrayValueFromPath($data, 'id_location', 0);
+            if (!$id_location) {
+                $date_from = BimpTools::getArrayValueFromPath($data, 'date_from', '');
+                $date_to = BimpTools::getArrayValueFromPath($data, 'date_to', '');
+
+                if (!$date_from) {
+                    $errors[] = 'Date de début de la location absente';
+                }
+                if (!$date_to) {
+                    $errors[] = 'Date de fin de la location absentee';
+                }
+
+                if ($date_from && $date_to && $date_to < $date_from) {
+                    $errors[] = 'La date de fin ne peut pas être antérieure à la date de début';
+                }
+
+                $id_client = (int) $this->getData('id_client');
+                if (!$id_client) {
+                    $errors[] = 'Aucun client sélectionné pour cette vente';
+                }
+
+                if (!count($errors)) {
+                    $location = BimpObject::createBimpObject('bimplocation', 'BimpLocation', array(
+                                'id_client'              => (int) $this->getData('id_client'),
+                                'id_contact_facturation' => (int) $this->getData('id_client_contact'),
+                                'id_entrepot'            => (int) $this->getData('id_entrepot'),
+                                'date_from'              => $date_from,
+                                'date_to'                => $date_to
+                                    ), true, $errors, $warnings);
+
+                    if (!count($errors)) {
+                        $success = 'Création d\'une nouvelle location effectuée';
+                    }
+                }
+            } else {
+                $location = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocation', $id_location);
+                if (!BimpObject::objectLoaded($location)) {
+                    $errors[] = 'La location #' . $id_location . ' n\'existe plus';
+                }
+            }
+
+            if (!count($errors) && BimpObject::objectLoaded($location)) {
+                $errors = $location->updateField('id_cur_vente', $this->id);
+
+                if (!count($errors)) {
+                    $success = 'Intégration de la location effectuée';
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionRemoveLocation($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded($errors)) {
+            $id_location = (int) BimpTools::getArrayValueFromPath($data, 'id_location', 0);
+            if (!$id_location) {
+                $errors[] = 'ID location à retirer absent';
+            } else {
+                $location = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocation', $id_location);
+                if (!BimpObject::objectLoaded($location)) {
+                    $errors[] = 'La location #' . $id_location . ' n\'existe plus';
+                } elseif ((int) $location->getData('id_cur_vente') !== $this->id) {
+                    $errors[] = 'Cette location n\'est plus liée à cette vente';
+                }
+            }
+
+            if (!count($errors)) {
+                $errors = $location->updateField('id_cur_vente', 0);
+
+                if (!count($errors)) {
+                    $success = 'Retrait de la location ' . $location->getRef() . ' effectuée';
+
+                    if ((int) $this->getData('id_selected_location') === $location->id) {
+                        $id_selected_loc = 0;
+
+                        $locations = BimpCache::getBimpObjectObjects('bimplocation', 'BimpLocation', array(
+                                    'id_cur_vente' => $this->id
+                        ));
+
+                        foreach ($locations as $loc) {
+                            if ((int) $loc->id === $location->id) {
+                                continue;
+                            }
+
+                            $id_selected_loc = (int) $loc->id;
+                            break;
+                        }
+
+                        $this->updateField('id_selected_location', $id_selected_loc);
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides

@@ -3659,6 +3659,69 @@ function setInputsEvents($container) {
             checkPasswordInput($(this));
         });
     });
+    $container.find('input.table_row_selector[type="checkbox"]').each(function () {
+        if (!parseInt($(this).data('row_selector_input_events_init'))) {
+            $(this).change(function () {
+                var $td = $(this).findParentByTag('td');
+
+                if ($.isOk($td)) {
+                    var $row = null;
+
+                    var nb_row = 1;
+                    var rowspan = parseInt($td.attr('rowspan'));
+
+                    if (!isNaN(rowspan) && rowspan > 1) {
+                        nb_row = rowspan;
+                    }
+
+                    while (nb_row >= 1) {
+                        nb_row--;
+
+                        if ($.isOk($row)) {
+                            $row = $row.next('tr');
+                        } else {
+                            $row = $td.findParentByTag('tr');
+                        }
+
+                        if ($.isOk($row)) {
+                            if ($(this).prop('checked')) {
+                                $row.removeClass('deactivated').addClass('selected');
+                            } else {
+                                $row.removeClass('selected').addClass('deactivated');
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            });
+
+            $(this).change();
+            $(this).data('row_selector_input_events_init', 1);
+        }
+    });
+    $container.find('input.strip_tags').add($container.find('textarea.strip_tags')).each(function() {
+//        if (!parseInt($(this).data('strip_tags_input_events_init'))) {
+//            $(this).data('strip_tags_input_events_init', 1);
+//            
+//            $(this).change(function() {
+//                var val = $(this).val();
+//                if (/</.test(val)) {
+//                    bimp_msg('Caractère "<" interdit', 'danger');
+//                    val = val.replace(/</g, '');
+//                    $(this).val(val);
+//                }
+//                
+//                if (/>/.test(val)) {
+//                    bimp_msg('Caractère ">" interdit', 'danger');
+//                    val = val.replace(/>/g, '');
+//                    $(this).val(val);
+//                }
+//            });
+//            
+//            $(this).change();
+//        }
+    });
 }
 
 function setInputEvents($form, $input) {

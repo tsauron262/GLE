@@ -356,12 +356,12 @@ class BimpGroupManager {
     
     /* Get all groups id where the user is */
 
-    function getGroupIdByUserId($userid, $entity = 1) {
+    function getGroupIdByUserId($userid, $entity = 1) {        
         if (!isset(static::$cacheStatic['grpsUser'][$userid])) {
             $groupids = array();
             $sql = "SELECT fk_usergroup";
             $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user";
-            $sql.= " WHERE fk_user=" . $userid. ' AND entity='.$entity;
+            $sql.= " WHERE fk_user=" . $userid. ($entity !== '' ? ' AND entity='.$entity : '');
             
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {

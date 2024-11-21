@@ -189,6 +189,11 @@ fields:
     note_public: 
         label: Note publique
         
+    id_selected_location: 
+        label: Location sélectionnée
+        data_type: id
+        default_value: 0
+        
 fields_tables: 
     infos: 
         title: Informations
@@ -370,3 +375,29 @@ forms:
         rows: 
             - field: id_client
               label: Choix du client
+              
+    add_location: 
+        rows: 
+            - custom: 1
+              label: Location
+              input_name: id_location
+              input: 
+                  type: custom
+                  content: 
+                      callback: renderLocationSelect
+            - custom: 1
+              label: Du
+              input_name: date_from
+              input: 
+                  type: date
+              display_if:
+                  field_name: id_location
+                  show_values: 0
+            - custom: 1
+              label: Au
+              input_name: date_to
+              input: 
+                  type: date
+              display_if: 
+                  field_name: id_location
+                  show_values: 0

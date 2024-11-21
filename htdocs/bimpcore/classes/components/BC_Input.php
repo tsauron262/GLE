@@ -26,7 +26,8 @@ class BC_Input extends BimpComponent
             'hashtags'        => array('data_type' => 'bool', 'default' => 0),
             'scanner'         => array('data_type' => 'bool', 'default' => 0),
             'no_autocorrect'  => array('data_type' => 'bool', 'default' => 0),
-            'possible_values' => array('data_type' => 'array', 'default' => array())
+            'possible_values' => array('data_type' => 'array', 'default' => array()),
+            'strip_tags'      => array('data_type' => 'bool', 'default' => 1)
         ),
         'password'                    => array(
             'min_length'       => array('data_type' => 'int', 'default' => 12), // Nombre de caractères minimum
@@ -66,7 +67,8 @@ class BC_Input extends BimpComponent
             'maxlength'        => array('data_type' => 'int'),
             'possible_values'  => array('data_type' => 'array', 'default' => array()),
             'hashtags'         => array('data_type' => 'bool', 'default' => 0),
-            'scanner'          => array('data_type' => 'bool', 'default' => 0)
+            'scanner'          => array('data_type' => 'bool', 'default' => 0),
+            'strip_tags'       => array('data_type' => 'bool', 'default' => 1)
         ),
         'html'                        => array(
             'hashtags'        => array('data_type' => 'bool', 'default' => 0),
@@ -354,6 +356,7 @@ class BC_Input extends BimpComponent
                 $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
                 $options['no_autocorrect'] = ((isset($this->params['no_autocorrect'])) ? (int) $this->params['no_autocorrect'] : 0);
                 $options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
+                $options['strip_tags'] = (isset($this->field_params['no_strip_tags']) ? !(int) $this->field_params['no_strip_tags'] : (isset($this->params['strip_tags']) ? (int) $this->params['strip_tags'] : 1));
 
             case 'qty':
                 $options['data'] = array();
@@ -422,8 +425,10 @@ class BC_Input extends BimpComponent
                 $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 1;
                 break;
 
-            case 'html':
             case 'textarea':
+                $options['strip_tags'] = (isset($this->field_params['no_strip_tags']) ? !(int) $this->field_params['no_strip_tags'] : (isset($this->params['strip_tags']) ? (int) $this->params['strip_tags'] : 1));
+
+            case 'html':
                 $options['rows'] = isset($this->params['rows']) ? $this->params['rows'] : 3;
                 $options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
                 $options['note'] = isset($this->params['note']) ? $this->params['note'] : 0;

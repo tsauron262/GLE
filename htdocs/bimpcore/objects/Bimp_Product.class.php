@@ -695,22 +695,14 @@ class Bimp_Product extends BimpObject
         return array();
     }
 
-    public function getForfaitsLocationList()
-    {
-        if ($this->isLoaded()) {
-            return $this->db->getValues('bimp_location_product_forfait', 'id_forfait', 'id_product = ' . $this->id);
-        }
-
-        return array();
-    }
-
     public function getAvailableForfaitsLocationArray()
     {
         $where = 'ef.type2 = 30';
 
         $forfaits = $this->getData('forfaits_location');
+
         if (!empty($forfaits)) {
-            $where .= ' AND rowid NOT IN(' . implode(',', $forfaits) . ')';
+            $where .= ' AND a.rowid NOT IN(' . implode(',', $forfaits) . ')';
         }
 
         $rows = $this->db->getRows('product a', $where, null, 'array', array('a.rowid', 'a.ref', 'a.label'), null, null, array(
@@ -1653,6 +1645,27 @@ class Bimp_Product extends BimpObject
 
 
         return $values;
+    }
+
+    public function getDefaultIdForfaitLocation($qty = 0)
+    {
+        $forfaits = $this->getData('forfaits_location');
+
+        if (!empty($forfaits)) {
+            foreach ($forfaits as $id_forfait) {
+                $forfait = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_forfait);
+                if (BimpObject::objectLoaded($forfait)) {
+                    $min_qty = $forfait->getData('min_qty');
+                    if ($qty && $min_qty && $qty < $min_qty) {
+                        continue;
+                    }
+                    
+                    return $id_forfait;
+                }
+            }
+        }
+
+        return 0;
     }
 
     // Getters stocks:

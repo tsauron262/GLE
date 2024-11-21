@@ -85,7 +85,8 @@ class API_UserAccount extends BimpObject
             $id_user = $user->id;
         }
 
-        if (in_array($id_user, $this->getData('users'))) {
+        $users = $this->getData('users');
+        if (is_array($users) && in_array($id_user, $users)) {
             return 1;
         }
 

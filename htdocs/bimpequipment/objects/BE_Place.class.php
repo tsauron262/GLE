@@ -93,14 +93,14 @@ class BE_Place extends BimpObject
     public function getTypesArray()
     {
         $types = self::$types;
-        
+
         if (!BimpCore::isModuleActive('bimplocation')) {
             unset(self::$types[self::BE_PLACE_LOCATION]);
         }
-        
+
         return $types;
     }
-    
+
     public function getContactsArray()
     {
         $contacts = array();
@@ -230,6 +230,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_PRET:
                 case self::BE_PLACE_INTERNE:
                 case self::BE_PLACE_NOT_RESTIT:
+                case self::BE_PLACE_LOCATION:
                 case self::BE_PLACE_ENQUETE:
                     if ($with_type) {
                         $html .= 'Entrepôt: ';

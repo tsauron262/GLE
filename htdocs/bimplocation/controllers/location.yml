@@ -1,9 +1,12 @@
 bootstrap: 1
-
+    
 title: 
     callback: 
         object: location
         method: getPageTitle
+        
+js: 
+    - /bimplocation/views/js/bimplocation.js
         
 objects:
     location: 

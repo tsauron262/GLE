@@ -639,18 +639,18 @@ class StockOrder extends BimpObject
 
             $gsx = new GSX_v2($shipTo);
 
-            if (BimpCore::isModeDev()) {
-                $result = array(
-                    'orderId' => '123456'
-                );
-            } else {
+//            if (BimpCore::isModeDev()) {
+//                $result = array(
+//                    'orderId' => '123456'
+//                );
+//            } else {
                 $result = $gsx->stockingOrderCreate($order_parts, 'CS_'.$this->id, 'CONFIRM');
                 if (!$gsx->logged) {
                     $errors[] = BimpRender::renderAlerts($gsx->displayNoLogged());
                 } else {
                     $errors = $gsx->getErrors();
                 }
-            }
+//            }
 
 
             if (!count($errors)) {

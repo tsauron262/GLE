@@ -153,20 +153,27 @@ class bimp_note extends AbstractNotification {
         var bn = this;
         var title = '';
         var content = '';
+        var onclick = null;
 
         if (elements.length > 1) {
             title = 'Vous avec reçu ' + elements.length + ' nouveaux messages';
+            onclick = function (x) {
+                window.focus(); //this.close();
+                if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1) {
+                    $('#' + bn.dropdown_id).trigger('click');
+                }
+            };
         } else {
             title = "Nouveau message de " + elements[0].author.nom;
             content = elements[0].content;
+            onclick = function (x) {
+                window.focus();
+                window.open(elements[0].obj_url);
+                this.close();
+            };
         }
 
-        BimpBrowserNotification(title, content, function () {
-            window.parent.parent.focus();
-            if (parseInt($('div[aria-labelledby="' + bn.dropdown_id + '"]').attr('is_open')) !== 1) {
-                $('#' + bn.dropdown_id).trigger('click');
-            }
-        });
+        BimpBrowserNotification(title, content, onclick);
     }
 
     getInitiales(nom) {

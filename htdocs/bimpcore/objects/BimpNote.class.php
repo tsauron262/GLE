@@ -914,6 +914,7 @@ class BimpNote extends BimpObject
             if ($id_obj) {
                 $bc = BimpCollection::getInstance($note->getData('obj_module'), $note->getData('obj_name'));
                 $obj_link = $bc->getLink($id_obj, array('card' => ''));
+                $obj_url = $bc->getUrl($id_obj, 'private');
             }
 
             if (BimpObject::objectLoaded($note)) {
@@ -927,6 +928,7 @@ class BimpNote extends BimpObject
                     'is_dest_user_or_grp' => (int) ($note->getData('type_dest') != self::BN_DEST_NO),
                     'is_viewed'           => (int) $note->getData('viewed'),
                     'obj_link'            => $obj_link,
+                    'obj_url'            => $obj_url,
                     'obj_module'          => $note->getData('obj_module'),
                     'obj_name'            => $note->getData('obj_name'),
                     'id_obj'              => $id_obj,

@@ -314,6 +314,38 @@ class BimpCollection
         return $link;
     }
 
+    public function getUrl($id_object, $context = '')
+    {
+        if (!(int) $id_object) {
+            return '';
+        }
+
+        $link = '';
+        $is_in_cache = false;
+
+        if (isset($this->data[$id_object]['url'])) {
+            $link = $this->data[$id_object]['url'];
+        } else {
+            $instance = $this->getObjectInstance($id_object, $is_in_cache);
+
+            if (BimpObject::objectLoaded($instance)) {
+                $link = $instance->getUrl($context);
+
+                if ($link) {
+                    if (isset($this->data[$id_object])) {
+                        $this->data[$id_object]['url'] = $link;
+                    }
+                }
+            }
+        }
+
+        if (BimpDebug::isActive() && !$is_in_cache) {
+            BimpDebug::incCollectionInfo($this->object->object_name, 'url', 1, ($link ? true : false));
+        }
+
+        return $link;
+    }
+
     public function getName($id_object, $withGeneric = true)
     {
         if (!(int) $id_object) {

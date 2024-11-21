@@ -265,11 +265,12 @@ function BimpBrowserNotification(title, content, onclick) {
             icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
         };
 
-        if (typeof (onclick) === 'function') {
-            data.onclick = onclick;
-        }
 
         var n = new Notification(title, data);
+        
+        if (typeof (onclick) === 'function') {
+            n.onclick = onclick;
+        }
     }
 }
 

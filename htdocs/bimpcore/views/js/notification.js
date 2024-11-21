@@ -286,7 +286,7 @@ class AbstractNotification {
 
             if (data) {
                 if (typeof (data.id_max) !== 'undefined') {
-                    this.id_max = data.id_max;
+                    this.id_max = parseInt(data.id_max);
                 }
 
                 this.elements = data.elements;
@@ -426,12 +426,12 @@ class AbstractNotification {
         var new_id_max = 0;
 
         for (var i in this.elements) {
-            if (this.id_max && this.isNew(this.elements[i]) && this.elements[i].id > this.id_max) {
+            if (this.id_max && this.isNew(this.elements[i]) && parseInt(this.elements[i].id) > parseInt(this.id_max)) {
                 new_elements.push(this.elements[i]);
             }
 
-            if (this.elements[i].id > new_id_max) {
-                new_id_max = this.elements[i].id;
+            if (parseInt(this.elements[i].id) > parseInt(new_id_max)) {
+                new_id_max = parseInt(this.elements[i].id);
             }
         }
 

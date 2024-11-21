@@ -121,7 +121,7 @@ class BimpTools
                                 'Valeur initiale' => (is_array($value) ? 'ARRAY' : '"' . (string) htmlentities($value) . '" (' . gettype($value) . ')'),
                             ));
 
-                            BimpController::addAjaxWarnings('Attention, donnée invalide (' . $key . ')');
+//                            BimpController::addAjaxWarnings('Attention, donnée invalide (' . $key . ')');
                         } else {
                             BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
                                 'check'                 => $check,
@@ -133,7 +133,7 @@ class BimpTools
                                 'Valeur modifiée ascii' => '"' . BimpTools::toAscii($val_temp) . '"'
                             ));
 
-                            BimpController::addAjaxWarnings('Attention, donnée modifiée (' . $key . ')');
+//                            BimpController::addAjaxWarnings('Attention, donnée modifiée (' . $key . ')');
                         }
 //                        if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
 //                            $value = $val_temp;

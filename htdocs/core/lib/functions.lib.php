@@ -8209,9 +8209,6 @@ function dol_htmlwithnojs($stringtoencode, $nouseofiframesandbox = 0, $check = '
 			$oldstringtoclean = $out;
 
 			if (!empty($out) && getDolGlobalString('MAIN_RESTRICTHTML_ONLY_VALID_HTML') && $check != 'restricthtmlallowunvalid') {
-                            if (defined('BIMP_LIB')) {
-                                BimpDebug::addDebugTime('check ' . $check .' : MAIN_RESTRICTHTML_ONLY_VALID_HTML');
-                            }
 				try {
 					libxml_use_internal_errors(false);	// Avoid to fill memory with xml errors
 					if (LIBXML_VERSION < 20900) {
@@ -8243,16 +8240,9 @@ function dol_htmlwithnojs($stringtoencode, $nouseofiframesandbox = 0, $check = '
 					//print $e->getMessage();
 					$out = 'InvalidHTMLStringCantBeCleaned '.$e->getMessage();
 				}
-			} else {
-                            if (defined('BIMP_LIB')) {
-                                BimpDebug::addDebugTime('check ' . $check .' : NO MAIN_RESTRICTHTML_ONLY_VALID_HTML');
-                            }
-                        }
+			}
 
 			if (!empty($out) && getDolGlobalString('MAIN_RESTRICTHTML_ONLY_VALID_HTML_TIDY') && $check != 'restricthtmlallowunvalid') {
-                            if (defined('BIMP_LIB')) {
-                                BimpDebug::addDebugTime('check ' . $check .' : MAIN_RESTRICTHTML_ONLY_VALID_HTML_TIDY');
-                            }
 				try {
 					// Try cleaning using tidy
 					if (extension_loaded('tidy') && class_exists("tidy")) {
@@ -8286,11 +8276,7 @@ function dol_htmlwithnojs($stringtoencode, $nouseofiframesandbox = 0, $check = '
 					//print $e->getMessage();
 					$out = 'InvalidHTMLStringCantBeCleaned '.$e->getMessage();
 				}
-			} else {
-                            if (defined('BIMP_LIB')) {
-                                BimpDebug::addDebugTime('check ' . $check .' : NO MAIN_RESTRICTHTML_ONLY_VALID_HTML_TIDY');
-                            }
-                        }
+			}
 
 			// Clear ZERO WIDTH NO-BREAK SPACE, ZERO WIDTH SPACE, ZERO WIDTH JOINER
 			$out = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', ' ', $out);

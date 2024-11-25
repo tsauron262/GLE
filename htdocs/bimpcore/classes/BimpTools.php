@@ -105,30 +105,15 @@ class BimpTools
 
                 if (is_string($val_temp)) {
                     $val_temp = str_replace('ù£ù', '"', $val_temp);
-                    $val_temp = str_replace(' <br', '<br', $val_temp);
-                    $val_temp = str_replace('<br>   ', '<br>', $val_temp);
-                    $val_temp = str_replace('<br>  ', '<br>', $val_temp);
-                    $val_temp = str_replace('<br> ', '<br>', $val_temp);
-                }
-
-                if (is_string($value)) {
-                    $value = str_replace(' <br', '<br', $value);
-                    $value = str_replace('<br>   ', '<br>', $value);
-                    $value = str_replace('<br>  ', '<br>', $value);
-                    $value = str_replace('<br> ', '<br>', $value);
                 }
                 
                 $valueInitForTest = $value;
-                
-                if (is_string($valueInitForTest)) {
-                    $valueInitForTest = str_replace('  ', ' ', $valueInitForTest);
-                }
                 
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
                         ))) {
-                    if ($val_temp === '' || (is_string($valueInitForTest) && $val_temp != $valueInitForTest && $val_temp != $value)) {
+                    if ($val_temp === '' || (is_string($valueInitForTest) && str_replace(" ", "", $val_temp) != str_replace(" ", "", $valueInitForTest) && str_replace(" ", "", $val_temp) != str_replace(" ", "", $value))) {
                         if ($val_temp === '') {
                             BimpCore::addlog('Donnée invalidée (' . $key . ')', 3, 'secu', null, array(
                                 'check'           => $check,

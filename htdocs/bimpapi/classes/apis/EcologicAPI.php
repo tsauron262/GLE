@@ -161,12 +161,15 @@ www.opmconseil.com
             }
         }
         elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId']) && !isset($ecologicData['RequestOk'])){//on update la demande
-            $params['url_params'] = array('RequestId'/*attention erreur API, ca devrait être RequestId*/ => $ecologicData['RequestId'],'callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
+            $params['url_params'] = array('RequestId' => $ecologicData['RequestId'],'callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
             $return = $this->execCurl('updatesupportrequest', $params, $errors);
             
             if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){
                 $ecologicData['RequestOk'] = true;
             }
+            /*
+             * pre demande trop vieille on efface les infos
+             */
             elseif(((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])){
                 $errors = array();
                 BimpCore::addlog('Suppression des info demande de remboursmeent '.$sav->id.' old requestId : '.$ecologicData['RequestId']);
@@ -230,6 +233,9 @@ www.opmconseil.com
             }
             
             if($filesOk){
+                /*
+                 * on uploade tous les documents
+                 */
                 foreach($tabFile as $fileT){
                     if(!isset($ecologicData['files']) || !in_array($fileT[1], $ecologicData['files'])){
                         $paramsFile = array();
@@ -260,6 +266,9 @@ www.opmconseil.com
             $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => $dateClose, 'ConsumerInvoiceNumber'=>$facRef, 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref, 'Submit' => 'true');
             $return = $this->execCurl('updateclaim', $params, $errors);
             
+            /*
+             * Tout est 
+             */
             if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S" && isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
                 $sav->updateField('status_ecologic', 99);
             else{

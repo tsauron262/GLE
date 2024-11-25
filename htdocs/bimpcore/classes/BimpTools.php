@@ -106,11 +106,15 @@ class BimpTools
                 if (is_string($val_temp)) {
                     $val_temp = str_replace('ù£ù', '"', $val_temp);
                     $val_temp = str_replace(' <br', '<br', $val_temp);
+                    $val_temp = str_replace('<br>   ', '<br>', $val_temp);
+                    $val_temp = str_replace('<br>  ', '<br>', $val_temp);
                     $val_temp = str_replace('<br> ', '<br>', $val_temp);
                 }
 
                 if (is_string($value)) {
                     $value = str_replace(' <br', '<br', $value);
+                    $value = str_replace('<br>   ', '<br>', $value);
+                    $value = str_replace('<br>  ', '<br>', $value);
                     $value = str_replace('<br> ', '<br>', $value);
                 }
                 

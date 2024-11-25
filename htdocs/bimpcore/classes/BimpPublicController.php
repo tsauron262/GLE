@@ -28,7 +28,7 @@ class BimpPublicController extends BimpController
             $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : '');
         }
 
-        switch (BimpTools::getValue('back', '', 'aZ09')) {
+        switch (BimpTools::getValue('back', '', 'nohtml')) {
             case 'savForm':
                 $this->back_url = BimpObject::getPublicBaseUrl() . 'fc=savForm';
 

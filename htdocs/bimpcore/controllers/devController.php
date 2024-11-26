@@ -335,10 +335,8 @@ class devController extends BimpController
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
             curl_setopt($ch, CURLOPT_POST, 1);
             $datas = array(
-                'data' => array(
                     'secret' => WEBHOOK_SECRET_GIT_PULL,
                     'since' => $date
-                )
             );
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datas));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

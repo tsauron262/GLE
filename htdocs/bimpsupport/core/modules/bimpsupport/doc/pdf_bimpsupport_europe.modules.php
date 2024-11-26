@@ -415,7 +415,13 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                         if (BimpObject::objectLoaded($signataire)) {
                             $sign = $signataire->getData('base_64_signature');
                             if ($sign) {
-                                $pdf->Image($sign, 12, 217, 45, 22);
+                                $output_file = DOL_DATA_ROOT . '/tmp.png';
+                                $ifp = fopen($output_file, 'wb');
+                                $data = explode(',', $sign);
+                                fwrite($ifp, base64_decode($data[1]));
+                                fclose($ifp);
+                                
+                                $pdf->Image($output_file, 12, 217, 45, 22);
                             }
                         }
                     }

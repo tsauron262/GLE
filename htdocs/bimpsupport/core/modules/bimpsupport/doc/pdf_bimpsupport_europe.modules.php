@@ -502,7 +502,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                         if($sign && strlen($sign) > 10000){
                             $base64_image = $userTech->getData('signature_papier');
 
-                            $output_file = DOL_DATA_ROOT . '/tmp.png';
+                            $output_file = DOL_DATA_ROOT . '/tmp2.png';
                             $ifp = fopen($output_file, 'w');
                             $data = explode(',', $base64_image);
                             fwrite($ifp, base64_decode($data[1]));

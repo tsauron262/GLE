@@ -331,7 +331,7 @@ class devController extends BimpController
             if($file != '.' && $file != '..'){
                 $timeSt = str_replace('.logs', '', $file);
                 $content = file_get_contents($dirLogs.$file);
-                if(preg_match('/bimp-erp[ \n]*([0-9a-z]*)\.\.([0-9a-z]*)[ \n]*master/', $content, $matches)){
+                if(preg_match('/bimp-erp[ \n]*([0-9a-z]*)\.\.([0-9a-z]*)[ \n]*(master|doli20)/', $content, $matches)){
                     $content = $matches[1].'<br/>'.$matches[2];
                     $start = false;
                     foreach($tabPull as $id => $pull){

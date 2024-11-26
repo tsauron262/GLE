@@ -325,17 +325,22 @@ class devController extends BimpController
         if(count($tabDateCommit) == 2){
             $date = $tabDateCommit[0];
             $pulls = explode('commit ', $tabDateCommit[1]);
+            $tabPull = array();
+            foreach($pulls as $pull){
+                $tabPull[substr($pull, 0, 18)] = $pull;
+            }
             
             $html .= '<textarea style="width: 780px; height: 380px">';
             $ch = curl_init(WEBHOOK_SERVER . '/hooks/log-bimp163');
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
             curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
+            $datas = array(
                 'data' => array(
                     'secret' => WEBHOOK_SECRET_GIT_PULL,
                     'since' => $date
                 )
-            )));
+            );
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datas));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
             $result = curl_exec($ch);
@@ -350,18 +355,21 @@ class devController extends BimpController
             $html .= '</textarea>';
             
             $pulls2 = explode('commit ', $result);
-            $html .= (count($pulls)+count($pulls2)).' commit(s)';
-            foreach($pulls as $pull){
-                $tabPull[substr($pull, 0, 18)] = $pull;
+            if(count($pulls2) > 1){
+                foreach($pulls2 as $pull){
+                    $tabPull[substr($pull, 0, 18)] = $pull;
+                }
+                $dirLogs = PATH_TMP.'/git_logs_commit/';
+                if(!is_dir($dirLogs))
+                    mkdir ($dirLogs);
+                file_put_contents($dirLogs.'logs_commit.logs', date("Y-m-d").$separateurForDate.implode('commit ', $tabPull));
             }
-            foreach($pulls2 as $pull){
-                $tabPull[substr($pull, 0, 18)] = $pull;
+            else{
+                $html .= BimpRender::renderAlerts('Aucune données recupéré via le Hook <pre>' . print_r($datas, 1).'</pre>');
             }
-            $dirLogs = PATH_TMP.'/git_logs_commit/';
-            if(!is_dir($dirLogs))
-                mkdir ($dirLogs);
-            file_put_contents($dirLogs.'logs_commit.logs', date("Y-m-d").$separateurForDate.implode('commit ', $tabPull));
     //        $html .= '<pre>'.print_r($tabPull,1).'</pre>';
+            
+            $html .= (count($tabPull)).' commit(s)';
             $dirLogs = PATH_TMP.'/git_logs/';
             $files = scandir($dirLogs);
             foreach($files as $file){

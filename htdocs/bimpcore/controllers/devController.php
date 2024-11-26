@@ -348,10 +348,10 @@ class devController extends BimpController
             $html .= 'Hook : ' . $hook['url'] . ' OK';
             $html .= '<br/><br/>';
             
-            $dirLogs = PATH_TMP.'/git_logs/';
-            if(!is_dir($dirLogs))
-                mkdir ($dirLogs);
-            file_put_contents($dirLogs. time().'.logs', $result);
+//            $dirLogs = PATH_TMP.'/git_logs/';
+//            if(!is_dir($dirLogs))
+//                mkdir ($dirLogs);
+//            file_put_contents($dirLogs. time().'.logs', $result);
         }
         
         
@@ -363,7 +363,7 @@ class devController extends BimpController
         
         $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs_old.logs');
         $pulls = explode('commit ', $pulls);
-        $pulls2 = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
+        $pulls2 = $result;//file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
         $pulls2 = explode('commit ', $pulls2);
         $html .= (count($pulls)+count($pulls2)).' commit(s)';
         foreach($pulls as $pull){

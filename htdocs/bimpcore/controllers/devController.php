@@ -372,6 +372,7 @@ class devController extends BimpController
         foreach($pulls2 as $pull){
             $tabPull[substr($pull, 0, 18)] = $pull;
         }
+        file_put_contents(PATH_TMP.'/git_logs_commit/'.date("Y-m-d").'.logs', implode('commit ', $tabPull));
 //        $html .= '<pre>'.print_r($tabPull,1).'</pre>';
         $dirLogs = PATH_TMP.'/git_logs/';
         $files = scandir($dirLogs);

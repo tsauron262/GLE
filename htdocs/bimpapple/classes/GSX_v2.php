@@ -294,7 +294,7 @@ class GSX_v2 extends GSX_Const
 //        static::debug($this->appleId, 'enregistrement token ' . $type . ' : ' . $token); // Génère trop de logs. 
         $is_default = ($this->appleId === self::$default_ids['apple_id']);
         if ($is_default) {
-            BimpCore::addlog('Save token, old Token : ' . $this->auth_token . ' <br/>new : ' . $token . ' <br/>appleId : ' . $this->appleId);
+//            BimpCore::addlog('Save token, old Token : ' . $this->auth_token . ' <br/>new : ' . $token . ' <br/>appleId : ' . $this->appleId);
             global $conf;
             $this->acti_token = $token;
             $this->auth_token = $token;

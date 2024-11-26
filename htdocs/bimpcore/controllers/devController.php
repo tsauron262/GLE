@@ -313,11 +313,59 @@ class devController extends BimpController
         /*
          * git log --reverse > /GLE-data/bimp163/tmp/git_logs_commit/logs.logs
          */
+        
+        $html = '';
+        
+        $tabHook = array();
+        $tabHook[] = array(
+            'url'  => WEBHOOK_SERVER . '/hooks/log-bimp163',
+            'data' => array(
+                'secret' => WEBHOOK_SECRET_GIT_PULL,
+                'since' => '2024-11-01'
+            )
+        );
+        foreach ($tabHook as $hook) {
+            $html .= '<textarea style="width: 780px; height: 380px">';
+            $ch = curl_init($hook['url']);
+            $datas = json_encode($hook['data']);
+
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $datas);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            $result = curl_exec($ch);
+            
+            $html .= $result;
+
+            if (curl_error($ch)) {
+                print_r(curl_error($ch));
+            }
+            curl_close($ch);
+
+            $html .= '</textarea>';
+            $html .= '<br/><br/>';
+            $html .= 'Hook : ' . $hook['url'] . ' OK';
+            $html .= '<br/><br/>';
+            
+            $dirLogs = PATH_TMP.'/git_logs/';
+            if(!is_dir($dirLogs))
+                mkdir ($dirLogs);
+            file_put_contents($dirLogs. time().'.logs', $result);
+        }
+        
+        
+        
+        
+        
+        
+        
+        
         $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs_old.logs');
         $pulls = explode('commit ', $pulls);
         $pulls2 = file_get_contents(PATH_TMP.'/git_logs_commit/logs.logs');
         $pulls2 = explode('commit ', $pulls2);
-        $html = (count($pulls)+count($pulls2)).' commit(s)';
+        $html .= (count($pulls)+count($pulls2)).' commit(s)';
         foreach($pulls as $pull){
             $tabPull[substr($pull, 0, 18)] = $pull;
         }

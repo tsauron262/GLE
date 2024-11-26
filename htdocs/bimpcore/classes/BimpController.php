@@ -2015,9 +2015,9 @@ class BimpController
         $errors = array();
         $html = '';
 
-        $module = BimpTools::getValue('module', '', 'aZ09');
-        $object_name = BimpTools::getValue('object_name', '', 'aZ09');
-        $filter = BimpTools::getValue('filter', '', 'aZ09');
+        $module = BimpTools::getValue('module', '', 'alphanohtml');
+        $object_name = BimpTools::getValue('object_name', '', 'alphanohtml');
+        $filter = BimpTools::getValue('filter', '', 'alphanohtml');
 
         if ($module && $object_name) {
             if ($filter) {

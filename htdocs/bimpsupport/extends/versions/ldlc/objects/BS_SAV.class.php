@@ -391,7 +391,9 @@ class BS_SAV_ExtVersion extends BS_SAV
     public function getDefaultSiteId()
     {
         global $tabCentre;
-        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][11]))
+        if (isset($tabCentre[$this->getData('code_centre_repa')]) && isset($tabCentre[$this->getData('code_centre_repa')][11]))
+            return $tabCentre[$this->getData('code_centre_repa')][11];
+        elseif (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][11]))
             return $tabCentre[$this->getData('code_centre')][11];
     }
 

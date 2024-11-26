@@ -416,7 +416,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                             $sign = $signataire->getData('base_64_signature');
                             if ($sign) {
                                 $output_file = DOL_DATA_ROOT . '/tmp.png';
-                                $ifp = fopen($output_file, 'wb');
+                                $ifp = fopen($output_file, 'w');
                                 $data = explode(',', $sign);
                                 fwrite($ifp, base64_decode($data[1]));
                                 fclose($ifp);
@@ -503,7 +503,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                             $base64_image = $userTech->getData('signature_papier');
 
                             $output_file = DOL_DATA_ROOT . '/tmp.png';
-                            $ifp = fopen($output_file, 'wb');
+                            $ifp = fopen($output_file, 'w');
                             $data = explode(',', $base64_image);
                             fwrite($ifp, base64_decode($data[1]));
                             fclose($ifp);

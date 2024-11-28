@@ -4757,7 +4757,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $toMail = BimpTools::cleanEmailsStr($toMail);
 
                 if (BimpValidate::isEmail($toMail)) {
-
                     $bimpMail = new BimpMail($this, $subject, $toMail, $fromMail, $mail_msg);
                     $bimpMail->addFiles($files);
                     $bimpMail->setFromType('ldlc');

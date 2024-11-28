@@ -1550,7 +1550,7 @@ class BCT_Contrat extends BimpDolObject
                     'type'               => ($line->getData('fk_product') > 0 ? Bimp_FactureLine::LINE_PRODUCT : Bimp_FactureLine::LINE_FREE),
                     'remisable'          => 2,
                     'editable'           => (isset($line_data['editable']) ? (int) $line_data['editable'] : 0),
-                    'pa_editable'        => 0,
+                    'pa_editable'        => 1,
                     'linked_id_object'   => (int) $line->id,
                     'linked_object_name' => 'contrat_line',
                     'hide_in_pdf'        => 0
@@ -1602,28 +1602,17 @@ class BCT_Contrat extends BimpDolObject
                     }
                 }
 
-                $id_fourn = 0;
-                $pa_ht_line = (float) $line->getData('buy_price_ht');
-                $pa_ht_fourn = 0;
-
-                $id_pfp = (int) $line->getData('fk_product_fournisseur_price');
-                if ($id_pfp) {
-                    $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
-                    if (!BimpObject::objectLoaded($pfp)) {
-                        $line_errors[] = 'Le prix d\'achat fournisseur #' . $id_pfp . ' n\'existe plus';
-                    } else {
-                        $id_fourn = $pfp->getData('fk_soc');
-                        $pa_ht_fourn = $pfp->getData('price');
-                    }
-                }
-
+                $origin_pa_label = '';
+                $id_pfp = 0;
+                $pa_ht = $line->getPaHtForPeriod($date_from, $date_to, $origin_pa_label, $id_pfp, true);
+                
                 $fac_line->qty = $line_qty;
                 $fac_line->desc = $line->getData('description');
                 $fac_line->id_product = (int) $line->getData('fk_product');
                 $fac_line->pu_ht = (isset($line_data['subprice']) ? $line_data['subprice'] : $line->getData('subprice'));
                 $fac_line->tva_tx = $line->getData('tva_tx');
-                $fac_line->pa_ht = ($pa_ht_fourn ? $pa_ht_fourn : $pa_ht_line);
-                $fac_line->id_fourn_price = $line->getData('fk_product_fournisseur_price');
+                $fac_line->pa_ht = $pa_ht;
+                $fac_line->id_fourn_price = $id_pfp;
                 $fac_line->date_from = $date_from;
                 $fac_line->date_to = $date_to;
                 $fac_line->no_remises_arrieres_auto_create = true;

@@ -2019,6 +2019,93 @@ class BCT_ContratLine extends BimpObject
         return $data;
     }
 
+    public function getPaHtForPeriod($date_from = '', $date_to = '', &$origin_pa_label = '', &$id_pfp = 0, $use_current_pfp_price = false)
+    {
+        if ($this->isLoaded()) {
+            if ($date_from && $date_to) {
+                // Recherche prix d'achat réel :
+                $comm_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                            'a.linked_object_name' => 'contrat_line',
+                            'a.linked_id_object'   => $this->id,
+                            'fdet.date_start'       => array(
+                                'operator' => '<',
+                                'value'    => date('Y-m-d', strtotime($date_to)) . ' 23:59:59'
+                            ),
+                            'fdet.date_end'         => array(
+                                'operator' => '>',
+                                'value'    => date('Y-m-d', strtotime($date_from)) . ' 00:00:00'
+                            )
+                                ), 'a.rowid', 'DESC', array(
+                            'fdet' => array(
+                                'table' => 'commande_fournisseurdet',
+                                'on'    => 'fdet.rowid = a.id_line'
+                            )
+                ));
+
+                foreach ($comm_fourn_lines as $cf_line) {
+                    $comm_fourn_data = $this->db->getRow('commande_fournisseur', 'rowid = ' . (int) $cf_line->getData('id_obj'), array('ref', 'fk_statut'), 'array');
+
+                    if (is_null($comm_fourn_data)) {
+                        continue;
+                    }
+
+                    $fac_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureFournLine', array(
+                                'linked_object_name' => 'commande_fourn_line',
+                                'linked_id_object'   => (int) $cf_line->id
+                    ));
+
+                    // Vérification des lignes de factures fourn: 
+                    foreach ($fac_fourn_lines as $ff_line) {
+                        $fac_fourn_data = $this->db->getRow('facture_fourn', 'rowid = ' . (int) $ff_line->getData('id_obj'), array('ref', 'fk_statut'), 'array');
+                        if (!is_null($fac_fourn_data)) {
+                            $origin_pa_label = 'PA Facture fournisseur ' . $fac_fourn_data['ref'];
+                            if ((int) $fac_fourn_data['fk_statut'] === 0) {
+                                $origin_pa_label .= ' <span class="warning">(non validée)</span>';
+                            }
+                            $origin_pa_label .= ' : ' . BimpTools::displayMoneyValue((float) $ff_line->pu_ht);
+                            $id_pfp = (int) $ff_line->id_fourn_price;
+                            return $ff_line->pu_ht;
+                        }
+                    }
+
+                    $cf_line_pu_ht = $cf_line->getUnitPriceHTWithRemises();
+                    $id_pfp = (int) $cf_line->id_fourn_price;
+
+                    $origin_pa_label = 'PA Commande fournisseur ' . $comm_fourn_data['ref'];
+                    if ((int) $comm_fourn_data['fk_statut'] === 0) {
+                        $origin_pa_label .= ' <span class="warning">(non validée)</span>';
+                    }
+                    $origin_pa_label .= ' : ' . BimpTools::displayMoneyValue($cf_line_pu_ht);
+                    return $cf_line_pu_ht;
+                }
+            }
+        }
+
+        $pa_ht = 0;
+
+        $id_pfp = (int) $this->getData('fk_product_fournisseur_price');
+        if ($id_pfp && $use_current_pfp_price) {
+            $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
+            if (BimpObject::objectLoaded($pfp)) {
+                $pa_ht = $pfp->getData('price');
+                $origin_pa_label = 'Prix d\'achat fournisseur : ' . $pfp->getName() . ' : ' . BimpTools::displayMoneyValue($pa_ht);
+                return $pa_ht;
+            }
+        }
+
+        $pa_ht = (float) $this->getData('buy_price_ht');
+
+        $contrat = $this->getParentInstance();
+        if (BimpObject::objectLoaded($contrat)) {
+            $origin_pa_label = 'PA ligne n° ' . $this->getData('rang') . ' du contrat ' . $contrat->getRef();
+        } else {
+            $origin_pa_label = 'PA Ligne de contrat';
+        }
+        $origin_pa_label .= ' : ' . BimpTools::displayMoneyValue($pa_ht);
+
+        return $pa_ht;
+    }
+
     // Getters statiques:
 
     public static function getPeriodicFacLinesToProcess($params = array(), &$errors = array())

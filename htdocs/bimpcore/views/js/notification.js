@@ -285,7 +285,7 @@ class AbstractNotification {
             var data = bimp_storage.get(this.storage_key, 'obj');
 
             if (data) {
-                if (typeof (data.id_max) !== 'undefined') {
+                if (typeof (data.id_max) !== 'undefined' && parseInt(data.id_max) > this.id_max) {
                     this.id_max = parseInt(data.id_max);
                 }
 
@@ -422,6 +422,18 @@ class AbstractNotification {
     }
 
     checkBrowserNotification() {
+        var data = {};
+        
+        if (bimp_use_local_storage) {
+            var data = bimp_storage.get(this.storage_key, 'obj');
+
+            if (data) {
+                if (typeof (data.id_max) !== 'undefined' && parseInt(data.id_max) > this.id_max) {
+                    this.id_max = parseInt(data.id_max);
+                }
+            }
+        }
+
         var new_elements = [];
         var new_id_max = 0;
 

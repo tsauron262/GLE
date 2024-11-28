@@ -492,21 +492,23 @@ class Bimp_FactureLine extends ObjectLine
                     $cur_pa_ht = null;
                     $errors = BimpTools::merge_array($errors, $this->calcPaByEquipments(false, $date, $pa_ht, $cur_pa_ht, $details));
                 } else {
-                    $commande_line = null;
-                    if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
-                        $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
-                    }
+                    $linked_object_name = $this->getData('linked_object_name');
+                    $linked_id_object = (int) $this->getData('linked_id_object');
 
                     $def_pa_ht = 0;
                     $def_pa_label = '';
 
-                    if ((int) $product->getData('no_fixe_prices')) {
-                        if (BimpObject::objectLoaded($commande_line)) {
-                            $comm_ref = (string) $this->db->getValue('commande', 'ref', 'rowid = ' . (int) $commande_line->getData('id_obj'));
+                    $remain_qty = $fullQty;
+                    $total_achats = 0;
 
-                            if ($comm_ref) {
-                                $def_pa_ht = (float) $commande_line->pa_ht;
-                                $def_pa_label = 'PA commande client ' . $comm_ref;
+                    $commande_line = null;
+                    $contrat_line = null;
+
+                    if ($linked_object_name === 'contrat_line') {
+                        if ($linked_id_object) {
+                            $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $linked_id_object);
+                            if (BimpObject::objectLoaded($contrat_line)) {
+                                $def_pa_ht = $contrat_line->getPaHtForPeriod($this->date_from, $this->date_to, $def_pa_label);
                             }
                         }
 
@@ -514,125 +516,140 @@ class Bimp_FactureLine extends ObjectLine
                             $def_pa_ht = (float) $this->pa_ht;
                             $def_pa_label = 'PA enregistré dans cette ligne de facture';
                         }
-                    } else {
-                        $def_pa_ht = (float) $product->getCurrentPaHt(null, true, $date);
-                        if ($date) {
-                            $dt = new DateTime($date);
-                            $def_pa_label = 'PA courant du produit au ' . $dt->format('d / m / Y');
-                        } else {
-                            $def_pa_label = 'PA courant du produit';
+                    } elseif ($linked_object_name === 'commande_line') {
+                        if ($linked_id_object) {
+                            $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $linked_id_object);
                         }
-                    }
 
-                    $remain_qty = $fullQty;
-                    $total_achats = 0;
+                        if ((int) $product->getData('no_fixe_prices') && BimpObject::objectLoaded($commande_line)) {
+                            $comm_ref = (string) $this->db->getValue('commande', 'ref', 'rowid = ' . (int) $commande_line->getData('id_obj'));
 
-                    if (BimpObject::objectLoaded($commande_line)) {
-                        // Recherche des PA réels dans les factures fourn, BR et commandes fourn.
-                        $comm_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
-                                    'linked_object_name' => 'commande_line',
-                                    'linked_id_object'   => (int) $commande_line->id
-                        ));
-
-                        foreach ($comm_fourn_lines as $cf_line) {
-                            $comm_fourn_data = $this->db->getRow('commande_fournisseur', 'rowid = ' . (int) $cf_line->getData('id_obj'), array('ref', 'fk_statut'), 'array');
-
-                            if (is_null($comm_fourn_data)) {
-                                continue;
+                            if ($comm_ref) {
+                                $def_pa_ht = (float) $commande_line->pa_ht;
+                                $def_pa_label = 'PA commande client ' . $comm_ref;
                             }
 
-                            $cf_line_remain_qty = (float) $cf_line->qty;
-                            if ($cf_line_remain_qty > $remain_qty) {
-                                $cf_line_remain_qty = $remain_qty;
+                            if (!$def_pa_ht) {
+                                $def_pa_ht = (float) $this->pa_ht;
+                                $def_pa_label = 'PA enregistré dans cette ligne de facture';
                             }
-
-                            if (!$cf_line_remain_qty) {
-                                continue;
+                        } else {
+                            $def_pa_ht = (float) $product->getCurrentPaHt(null, true, $date);
+                            if ($date) {
+                                $dt = new DateTime($date);
+                                $def_pa_label = 'PA courant du produit au ' . $dt->format('d / m / Y');
+                            } else {
+                                $def_pa_label = 'PA courant du produit';
                             }
+                        }
 
-                            $remain_qty -= $cf_line_remain_qty;
-                            $cf_line_pu_ht = (float) $cf_line->getUnitPriceHTWithRemises();
-
-                            $fac_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureFournLine', array(
-                                        'linked_object_name' => 'commande_fourn_line',
-                                        'linked_id_object'   => (int) $cf_line->id
+                        if (BimpObject::objectLoaded($commande_line)) {
+                            // Recherche des PA réels dans les factures fourn, BR et commandes fourn.
+                            $comm_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                                        'linked_object_name' => 'commande_line',
+                                        'linked_id_object'   => (int) $commande_line->id
                             ));
 
-                            // Vérification des lignes de factures fourn: 
-                            foreach ($fac_fourn_lines as $ff_line) {
-                                $ff_line_qty = (float) $ff_line->getFullQty();
-                                if ($ff_line_qty > $cf_line_remain_qty) {
-                                    $ff_line_qty = $cf_line_remain_qty;
-                                }
+                            foreach ($comm_fourn_lines as $cf_line) {
+                                $comm_fourn_data = $this->db->getRow('commande_fournisseur', 'rowid = ' . (int) $cf_line->getData('id_obj'), array('ref', 'fk_statut'), 'array');
 
-                                if (!$ff_line_qty) {
+                                if (is_null($comm_fourn_data)) {
                                     continue;
                                 }
 
-                                $fac_fourn_data = $this->db->getRow('facture_fourn', 'rowid = ' . (int) $ff_line->getData('id_obj'), array('ref', 'fk_statut'), 'array');
-                                if (!is_null($fac_fourn_data)) {
-                                    $total_achats += ($ff_line->pu_ht * $ff_line_qty);
-                                    $detail = 'PA Facture fournisseur ' . $fac_fourn_data['ref'];
-                                    if ((int) $fac_fourn_data['fk_statut'] === 0) {
-                                        $detail .= ' <span class="warning">(non validée)</span>';
-                                    }
-                                    $detail .= ' pour ' . $ff_line_qty . ' unité(s) : ' . BimpTools::displayMoneyValue((float) $ff_line->pu_ht);
-                                    $details[] = $detail;
-                                    $cf_line_remain_qty -= $ff_line_qty;
+                                $cf_line_remain_qty = (float) $cf_line->qty;
+                                if ($cf_line_remain_qty > $remain_qty) {
+                                    $cf_line_remain_qty = $remain_qty;
                                 }
-                            }
 
-                            if ($cf_line_remain_qty > 0) {
-                                // Vérification des réceptions validées non facturées: 
-                                $receptions = $cf_line->getData('receptions');
-                                foreach ($receptions as $id_reception => $reception_data) {
-                                    if (!isset($reception_data['received']) || !(int) $reception_data['received']) {
+                                if (!$cf_line_remain_qty) {
+                                    continue;
+                                }
+
+                                $remain_qty -= $cf_line_remain_qty;
+                                $cf_line_pu_ht = (float) $cf_line->getUnitPriceHTWithRemises();
+
+                                $fac_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureFournLine', array(
+                                            'linked_object_name' => 'commande_fourn_line',
+                                            'linked_id_object'   => (int) $cf_line->id
+                                ));
+
+                                // Vérification des lignes de factures fourn: 
+                                foreach ($fac_fourn_lines as $ff_line) {
+                                    $ff_line_qty = (float) $ff_line->getFullQty();
+                                    if ($ff_line_qty > $cf_line_remain_qty) {
+                                        $ff_line_qty = $cf_line_remain_qty;
+                                    }
+
+                                    if (!$ff_line_qty) {
                                         continue;
                                     }
 
-                                    $br_values = $this->db->getRow('bl_commande_fourn_reception', 'id = ' . (int) $id_reception, array('num_reception', 'ref', 'status', 'id_facture'), 'array');
-                                    if (!is_null($br_values)) {
-                                        $br_qty = (float) $reception_data['qty'];
-                                        if ($br_qty > $cf_line_remain_qty) {
-                                            $br_qty = $cf_line_remain_qty;
+                                    $fac_fourn_data = $this->db->getRow('facture_fourn', 'rowid = ' . (int) $ff_line->getData('id_obj'), array('ref', 'fk_statut'), 'array');
+                                    if (!is_null($fac_fourn_data)) {
+                                        $total_achats += ($ff_line->pu_ht * $ff_line_qty);
+                                        $detail = 'PA Facture fournisseur ' . $fac_fourn_data['ref'];
+                                        if ((int) $fac_fourn_data['fk_statut'] === 0) {
+                                            $detail .= ' <span class="warning">(non validée)</span>';
                                         }
-
-                                        if (!$br_qty) {
-                                            continue;
-                                        }
-
-                                        // Calcul PA moyen de la réception: 
-                                        $br_total_qty = 0;
-                                        $br_total_amount = 0;
-                                        if (isset($reception_data['qties'])) {
-                                            foreach ($reception_data['qties'] as $qty_data) {
-                                                $br_total_qty += (float) $qty_data['qty'];
-                                                $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $cf_line_pu_ht);
-                                                $br_total_amount += ((float) $qty_data['qty'] * $pu_ht);
-                                            }
-                                        }
-
-                                        if ($br_total_qty > 0) {
-                                            $pu_moyen = $br_total_amount / $br_total_qty;
-                                            $detail = 'PA réception n°' . $br_values['num_reception'] . ' - ' . $br_values['ref'];
-                                            $detail .= ' (Commande fournisseur ' . $comm_fourn_data['ref'] . ')';
-                                            $detail .= ' pour ' . $br_qty . ' unité(s) - Moyenne: ' . BimpTools::displayMoneyValue($pu_moyen);
-                                            $details[] = $detail;
-                                            $cf_line_remain_qty -= $br_qty;
-                                            $total_achats += ($pu_moyen * $br_qty);
-                                        }
+                                        $detail .= ' pour ' . $ff_line_qty . ' unité(s) : ' . BimpTools::displayMoneyValue((float) $ff_line->pu_ht);
+                                        $details[] = $detail;
+                                        $cf_line_remain_qty -= $ff_line_qty;
                                     }
                                 }
 
-                                // Attribution du PA commande fourn pour les qtés restantes: 
                                 if ($cf_line_remain_qty > 0) {
-                                    $total_achats += ($cf_line_pu_ht * $cf_line_remain_qty);
-                                    $detail = 'PA Commande fournisseur ' . $comm_fourn_data['ref'];
-                                    if ((int) $comm_fourn_data['fk_statut'] === 0) {
-                                        $detail .= ' <span class="warning">(non validée)</span>';
+                                    // Vérification des réceptions validées non facturées: 
+                                    $receptions = $cf_line->getData('receptions');
+                                    foreach ($receptions as $id_reception => $reception_data) {
+                                        if (!isset($reception_data['received']) || !(int) $reception_data['received']) {
+                                            continue;
+                                        }
+
+                                        $br_values = $this->db->getRow('bl_commande_fourn_reception', 'id = ' . (int) $id_reception, array('num_reception', 'ref', 'status', 'id_facture'), 'array');
+                                        if (!is_null($br_values)) {
+                                            $br_qty = (float) $reception_data['qty'];
+                                            if ($br_qty > $cf_line_remain_qty) {
+                                                $br_qty = $cf_line_remain_qty;
+                                            }
+
+                                            if (!$br_qty) {
+                                                continue;
+                                            }
+
+                                            // Calcul PA moyen de la réception: 
+                                            $br_total_qty = 0;
+                                            $br_total_amount = 0;
+                                            if (isset($reception_data['qties'])) {
+                                                foreach ($reception_data['qties'] as $qty_data) {
+                                                    $br_total_qty += (float) $qty_data['qty'];
+                                                    $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $cf_line_pu_ht);
+                                                    $br_total_amount += ((float) $qty_data['qty'] * $pu_ht);
+                                                }
+                                            }
+
+                                            if ($br_total_qty > 0) {
+                                                $pu_moyen = $br_total_amount / $br_total_qty;
+                                                $detail = 'PA réception n°' . $br_values['num_reception'] . ' - ' . $br_values['ref'];
+                                                $detail .= ' (Commande fournisseur ' . $comm_fourn_data['ref'] . ')';
+                                                $detail .= ' pour ' . $br_qty . ' unité(s) - Moyenne: ' . BimpTools::displayMoneyValue($pu_moyen);
+                                                $details[] = $detail;
+                                                $cf_line_remain_qty -= $br_qty;
+                                                $total_achats += ($pu_moyen * $br_qty);
+                                            }
+                                        }
                                     }
-                                    $detail .= ' pour ' . $cf_line_remain_qty . ' unité(s) : ' . BimpTools::displayMoneyValue($cf_line_pu_ht);
-                                    $details[] = $detail;
+
+                                    // Attribution du PA commande fourn pour les qtés restantes: 
+                                    if ($cf_line_remain_qty > 0) {
+                                        $total_achats += ($cf_line_pu_ht * $cf_line_remain_qty);
+                                        $detail = 'PA Commande fournisseur ' . $comm_fourn_data['ref'];
+                                        if ((int) $comm_fourn_data['fk_statut'] === 0) {
+                                            $detail .= ' <span class="warning">(non validée)</span>';
+                                        }
+                                        $detail .= ' pour ' . $cf_line_remain_qty . ' unité(s) : ' . BimpTools::displayMoneyValue($cf_line_pu_ht);
+                                        $details[] = $detail;
+                                    }
                                 }
                             }
                         }
@@ -641,7 +658,12 @@ class Bimp_FactureLine extends ObjectLine
                     // Attribution du PA par défaut pour les qtés restantes: 
                     if ($remain_qty > 0) {
                         $total_achats += ($def_pa_ht * $remain_qty);
-                        $details[] = $def_pa_label . ' pour ' . $remain_qty . ' unité(s) : ' . BimpTools::displayMoneyValue($def_pa_ht);
+
+                        if (!$linked_object_name || $linked_object_name !== 'contrat_line') {
+                            $details[] = $def_pa_label . ' pour ' . $remain_qty . ' unité(s) : ' . BimpTools::displayMoneyValue($def_pa_ht);
+                        } else {
+                            $details[] = $def_pa_label;
+                        }
                     }
 
                     $pa_ht = $total_achats / $fullQty;

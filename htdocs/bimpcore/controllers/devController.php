@@ -331,7 +331,7 @@ class devController extends BimpController
             }
             
             $html .= '<textarea style="width: 780px; height: 380px">';
-            $ch = curl_init(WEBHOOK_SERVER . '/hooks/log-bimp163');
+            $ch = curl_init(WEBHOOK_SERVER . WEBHOOK_PATH_GIT_LOG);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
             curl_setopt($ch, CURLOPT_POST, 1);
             $datas = array(
@@ -363,7 +363,7 @@ class devController extends BimpController
                 file_put_contents($dirLogs.'logs_commit.logs', date("Y-m-d").$separateurForDate.implode('commit ', $tabPull));
             }
             else{
-                $html .= BimpRender::renderAlerts('Aucune données recupéré via le Hook <pre>' . print_r($datas, 1).'</pre>');
+                $html .= BimpRender::renderAlerts('Aucune données recupéré via le Hook');// <pre>' . print_r($datas, 1).'</pre>');
             }
     //        $html .= '<pre>'.print_r($tabPull,1).'</pre>';
             

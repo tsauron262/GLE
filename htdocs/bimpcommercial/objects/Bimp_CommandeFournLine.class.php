@@ -673,29 +673,29 @@ class Bimp_CommandeFournLine extends FournObjectLine
 //                        $items[$id_eq] = ($serial ? $serial : 'Equipment #' . $id_eq);
 //                    }
 //                } else {
-                    BimpObject::loadClass('bimpequipment', 'BE_Place');
-                    $sql = BimpTools::getSqlSelect(array('a.id', 'a.serial'));
-                    $sql .= BimpTools::getSqlFrom('be_equipment', array(
-                                'p' => array(
-                                    'table' => 'be_equipment_place',
-                                    'alias' => 'p',
-                                    'on'    => 'p.id_equipment = a.id'
-                                )
-                    ));
-                    $sql .= BimpTools::getSqlWhere(array(
-                                'a.id_product'  => (int) $this->id_product,
-                                'p.position'    => 1,
-                                'p.type'        => BE_Place::BE_PLACE_ENTREPOT,
-                                'p.id_entrepot' => $id_entrepot
-                    ));
+                BimpObject::loadClass('bimpequipment', 'BE_Place');
+                $sql = BimpTools::getSqlSelect(array('a.id', 'a.serial'));
+                $sql .= BimpTools::getSqlFrom('be_equipment', array(
+                            'p' => array(
+                                'table' => 'be_equipment_place',
+                                'alias' => 'p',
+                                'on'    => 'p.id_equipment = a.id'
+                            )
+                ));
+                $sql .= BimpTools::getSqlWhere(array(
+                            'a.id_product'  => (int) $this->id_product,
+                            'p.position'    => 1,
+                            'p.type'        => BE_Place::BE_PLACE_ENTREPOT,
+                            'p.id_entrepot' => $id_entrepot
+                ));
 
-                    $rows = self::getBdb()->executeS($sql, 'array');
+                $rows = self::getBdb()->executeS($sql, 'array');
 
-                    if (!is_null($rows)) {
-                        foreach ($rows as $r) {
-                            $items[(int) $r['id']] = $r['serial'];
-                        }
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        $items[(int) $r['id']] = $r['serial'];
                     }
+                }
 //                }
 
                 foreach ($items as $id_equipment => $label) {
@@ -709,7 +709,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         unset($items[$id_equipment]);
                     }
                 }
-                
             }
         }
 
@@ -2297,18 +2296,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return;
         }
 
-        if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
-            $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+        $obj_name = $this->getData('linked_object_name');
+        $id_obj = (int) $this->getData('linked_id_object');
 
-            if (BimpObject::objectLoaded($comm_line)) {
-                $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
-                            'linked_object_name' => 'commande_line',
-                            'linked_id_object'   => (int) $comm_line->id
-                ));
+        if ($obj_name && $id_obj && in_array($obj_name, array('commande_line', 'contrat_line'))) {
+            $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
+                        'linked_object_name' => $obj_name,
+                        'linked_id_object'   => $id_obj
+            ));
 
-                foreach ($fac_lines as $fac_line) {
-                    $fac_line->checkPrixAchat();
-                }
+            foreach ($fac_lines as $fac_line) {
+                $fac_line->checkPrixAchat();
             }
         }
     }

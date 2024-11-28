@@ -211,7 +211,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         global $user;
         return $user->rights->fournisseur->facture->creer;
     }
-    
+
     public function canView()
     {
         global $user;
@@ -429,15 +429,15 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         return $buttons;
     }
-    
+
     public function getListExtraBulkActions()
     {
         $actions = array();
-            $actions[] = array(
-                'label'   => 'Fichiers Zip des PDF',
-                'icon'    => 'fas_file-pdf',
-                'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
-            );
+        $actions[] = array(
+            'label'   => 'Fichiers Zip des PDF',
+            'icon'    => 'fas_file-pdf',
+            'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
+        );
 
         return $actions;
     }
@@ -459,7 +459,6 @@ class Bimp_FactureFourn extends BimpCommAchat
 //
 //        return '';
 //    }
-
 //    public function getFileUrl($file_name, $page = 'document')
 //    {
 //        $dir = $this->getFilesDir();
@@ -471,8 +470,9 @@ class Bimp_FactureFourn extends BimpCommAchat
 //
 //        return '';
 //    }
-    
-    public function getSubDir(){
+
+    public function getSubDir()
+    {
         return get_exdir($this->id, 2, 0, 0, $this->dol_object, 'invoice_supplier') . dol_sanitizeFileName($this->getRef());
     }
 
@@ -483,7 +483,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         }
 
         global $conf;
-        if($this->isLoaded() && $this->dol_object->entity > 0)
+        if ($this->isLoaded() && $this->dol_object->entity > 0)
             return $conf->fournisseur->facture->multidir_output[$this->dol_object->entity] . '/';
         else
             return $conf->fournisseur->facture->dir_output . '/';
@@ -535,11 +535,12 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         return '';
     }
-    
-    public function displayInfoDateF(){
+
+    public function displayInfoDateF()
+    {
         $dateMin = BimpCore::getConf('last_export_date', null, 'bimptocegid');
-        if($dateMin && date($dateMin) > date($this->getData('datef')))
-            return 'Attention la date va être remplacée par '.$dateMin;
+        if ($dateMin && date($dateMin) > date($this->getData('datef')))
+            return 'Attention la date va être remplacée par ' . $dateMin;
     }
 
     public function displayPaidStatus($icon = true, $short_label = false)
@@ -980,10 +981,10 @@ class Bimp_FactureFourn extends BimpCommAchat
                 // Maj des données d'achat des équipements:
                 $line->onFactureValidate();
             }
-            
+
             //verif date
             $dateMin = BimpCore::getConf('last_export_date', null, 'bimptocegid');
-            if($dateMin && date($dateMin) > date($this->getData('datef')))
+            if ($dateMin && date($dateMin) > date($this->getData('datef')))
                 $this->updateField('datef', $dateMin);
 
             // Maj des prix d'achat courants des produits: 
@@ -1029,13 +1030,14 @@ class Bimp_FactureFourn extends BimpCommAchat
                 if ($line->getData('linked_object_name') === 'commande_fourn_line' && (int) $line->getData('linked_id_object')) {
                     $comm_fourn_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $line->getData('linked_id_object'));
 
-                    if (BimpObject::objectLoaded($comm_fourn_line) && $comm_fourn_line->getData('linked_object_name') === 'commande_line' && (int) $comm_fourn_line->getData('linked_id_object')) {
-                        $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $comm_fourn_line->getData('linked_id_object'));
+                    if (BimpObject::objectLoaded($comm_fourn_line)) {
+                        $cf_line_linked_object_name = $comm_fourn_line->getData('linked_object_name');
+                        $cf_line_linked_id_object = (int) $comm_fourn_line->getData('linked_id_object');
 
-                        if (BimpObject::objectLoaded($comm_line)) {
+                        if ($cf_line_linked_id_object && in_array($cf_line_linked_object_name, array('commande_line', 'contrat_line'))) {
                             $fac_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine', array(
-                                        'linked_object_name' => 'commande_line',
-                                        'linked_id_object'   => (int) $comm_line->id
+                                        'linked_object_name' => $cf_line_linked_object_name,
+                                        'linked_id_object'   => $cf_line_linked_id_object
                             ));
 
                             foreach ($fac_lines as $fac_line) {
@@ -1065,7 +1067,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 $reception->updateField('id_facture', 0);
             }
         }
-        
+
         $errors = BimpTools::merge_array($errors, parent::onDelete($warnings));
 
         $this->isDeleting = $prevDeleting;
@@ -1206,7 +1208,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionValidate($data, &$success)
     {

@@ -4718,7 +4718,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if ($mail_msg) {
                 $toMail = '';
 
-                if ($msg_type === 'Facture' && (int) $client->getData('contact_default')) {
+                if ($msg_type === 'Facture' && (int) $client->getData('contact_default') && is_null($id_contact)) {
                     $fac_contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $client->getData('contact_default'));
 
                     if (BimpObject::objectLoaded($fac_contact)) {

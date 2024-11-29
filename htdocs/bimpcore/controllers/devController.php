@@ -49,7 +49,7 @@ class devController extends BimpController
         $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=test" target="_blank">';
         $html .= 'PAGE TESTS' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
         $html .= '</a>';
-        
+
         if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/bimptest.php')) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/bimptest.php" target="_blank">';
             $html .= 'TESTS RAPIDES' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
@@ -66,6 +66,10 @@ class devController extends BimpController
             $html .= '</a>';
         }
 
+        $html .= '<span class="btn btn-default" onclick="BimpAjax(\'afterGitProcess\', {}, null, {})">';
+        $html .= BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'AFTER GIT';
+        $html .= '</span>';
+
         if (!BimpCore::isModeDev()) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/cron_log.php" target="_blank">';
             $html .= 'Logs CRONS client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
@@ -81,6 +85,8 @@ class devController extends BimpController
             $html .= 'GIT PULL ALL' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
         }
+
+
         $html .= '</div>';
 
         // Récap Paramètres ERP: 
@@ -307,42 +313,41 @@ class devController extends BimpController
 
         return $html;
     }
-    
+
     public function renderPullTab()
     {
         /*
          * git log --reverse > /GLE-data/bimp163/tmp/git_logs_commit/logs.logs
          */
-        
+
         $html = '';
-         $separateurForDate = '||||||||||||';
-        
-        
+        $separateurForDate = '||||||||||||';
+
 //        $pulls = file_get_contents(PATH_TMP.'/git_logs_commit/logs_old.logs');
 //        $pulls = explode('commit ', $pulls);
-        $file = file_get_contents(PATH_TMP.'/git_logs_commit/logs_commit.logs');
+        $file = file_get_contents(PATH_TMP . '/git_logs_commit/logs_commit.logs');
         $tabDateCommit = explode($separateurForDate, $file);
-        if(count($tabDateCommit) == 2){
+        if (count($tabDateCommit) == 2) {
             $date = $tabDateCommit[0];
             $pulls = explode('commit ', $tabDateCommit[1]);
             $tabPull = array();
-            foreach($pulls as $pull){
+            foreach ($pulls as $pull) {
                 $tabPull[substr($pull, 0, 18)] = $pull;
             }
-            
+
             $html .= '<textarea style="width: 780px; height: 380px">';
             $ch = curl_init(WEBHOOK_SERVER . WEBHOOK_PATH_GIT_LOG);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
             curl_setopt($ch, CURLOPT_POST, 1);
             $datas = array(
-                    'secret' => WEBHOOK_SECRET_GIT_PULL,
-                    'since' => $date
+                'secret' => WEBHOOK_SECRET_GIT_PULL,
+                'since'  => $date
             );
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datas));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
             $result = curl_exec($ch);
-            
+
             $html .= $result;
 
             if (curl_error($ch)) {
@@ -351,64 +356,60 @@ class devController extends BimpController
             curl_close($ch);
 
             $html .= '</textarea>';
-            
+
             $pulls2 = explode('commit ', $result);
-            if(count($pulls2) > 1){
-                foreach($pulls2 as $pull){
+            if (count($pulls2) > 1) {
+                foreach ($pulls2 as $pull) {
                     $tabPull[substr($pull, 0, 18)] = $pull;
                 }
-                $dirLogs = PATH_TMP.'/git_logs_commit/';
-                if(!is_dir($dirLogs))
-                    mkdir ($dirLogs);
-                file_put_contents($dirLogs.'logs_commit.logs', date("Y-m-d").$separateurForDate.implode('commit ', $tabPull));
+                $dirLogs = PATH_TMP . '/git_logs_commit/';
+                if (!is_dir($dirLogs))
+                    mkdir($dirLogs);
+                file_put_contents($dirLogs . 'logs_commit.logs', date("Y-m-d") . $separateurForDate . implode('commit ', $tabPull));
+            } else {
+                $html .= BimpRender::renderAlerts('Aucune données recupéré via le Hook'); // <pre>' . print_r($datas, 1).'</pre>');
             }
-            else{
-                $html .= BimpRender::renderAlerts('Aucune données recupéré via le Hook');// <pre>' . print_r($datas, 1).'</pre>');
-            }
-    //        $html .= '<pre>'.print_r($tabPull,1).'</pre>';
-            
-            $html .= (count($tabPull)).' commit(s)';
-            $dirLogs = PATH_TMP.'/git_logs/';
+            //        $html .= '<pre>'.print_r($tabPull,1).'</pre>';
+
+            $html .= (count($tabPull)) . ' commit(s)';
+            $dirLogs = PATH_TMP . '/git_logs/';
             $files = scandir($dirLogs);
-            foreach($files as $file){
-                if($file != '.' && $file != '..'){
+            foreach ($files as $file) {
+                if ($file != '.' && $file != '..') {
                     $timeSt = str_replace('.logs', '', $file);
-                    $content = file_get_contents($dirLogs.$file);
-                    if(preg_match('/bimp-erp[ \n]*([0-9a-z]*)\.\.([0-9a-z]*)[ \n]*(master|doli20)/', $content, $matches)){
-                        $content = $matches[1].'<br/>'.$matches[2];
+                    $content = file_get_contents($dirLogs . $file);
+                    if (preg_match('/bimp-erp[ \n]*([0-9a-z]*)\.\.([0-9a-z]*)[ \n]*(master|doli20)/', $content, $matches)) {
+                        $content = $matches[1] . '<br/>' . $matches[2];
                         $start = false;
-                        foreach($tabPull as $id => $pull){
-                            if($start){
-                                $content .= '<br/><br/>'.str_replace('\n', '<br>', $pull);
+                        foreach ($tabPull as $id => $pull) {
+                            if ($start) {
+                                $content .= '<br/><br/>' . str_replace('\n', '<br>', $pull);
                             }
-                            if(!$start && stripos($id, $matches[1]) === 0)
+                            if (!$start && stripos($id, $matches[1]) === 0)
                                 $start = true;
-                            elseif(stripos($id, $matches[2]) === 0)
+                            elseif (stripos($id, $matches[2]) === 0)
                                 break;
                         }
-
-                    }
-                    else {
+                    } else {
                         $content = 'Alredy up to date';
                     }
 
 
-                    $tabHtml[date("Y", $timeSt)][date("m", $timeSt)][] = BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), $content, '', array('open'=>false));
+                    $tabHtml[date("Y", $timeSt)][date("m", $timeSt)][] = BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), $content, '', array('open' => false));
                 }
             }
-            foreach($tabHtml as $y => $datas){
+            foreach ($tabHtml as $y => $datas) {
                 $htmlT = '';
-                foreach($datas as $m => $datas2){
+                foreach ($datas as $m => $datas2) {
                     $htmlT2 = '';
-                    foreach($datas2 as $pull){
+                    foreach ($datas2 as $pull) {
                         $htmlT2 .= $pull;
                     }
-                    $htmlT .= BimpRender::renderPanel($m, $htmlT2, '', array('open'=>false));
+                    $htmlT .= BimpRender::renderPanel($m, $htmlT2, '', array('open' => false));
                 }
-                $html .= BimpRender::renderPanel($y, $htmlT, '', array('open'=>false));
+                $html .= BimpRender::renderPanel($y, $htmlT, '', array('open' => false));
             }
-        }
-        else{
+        } else {
             $html .= BimpRender::renderAlerts('Quelque chose n\'est pas en place');
         }
         return $html;
@@ -702,6 +703,18 @@ class devController extends BimpController
             'errors'     => $errors,
             'warnings'   => $warnings,
             'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0, 'int')
+        );
+    }
+
+    public function ajaxProcessAfterGitProcess()
+    {
+        $success = '';
+        $errors = BimpCore::afterGitPullProcess(true, $success);
+        return array(
+            'errors'     => $errors,
+            'success'    => $success,
+            'warnings'   => array(),
             'request_id' => BimpTools::getValue('request_id', 0, 'int')
         );
     }

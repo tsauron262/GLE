@@ -204,6 +204,14 @@ params:
         type: bool
         def: 1
         cat: perfs
+        sub_params: 
+            - if: 1
+              params: 
+                  use_public_files_external_dir: 
+                      label: Utiliser le dossier externes (bimpressources) pour les ressources publiques
+                      type: bool
+                      def: 0
+                      
     use_db_transactions: 
         label: Utiliser les transactions DB
         type: bool

@@ -60,7 +60,7 @@ if ($lock_msg) {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
             $result = curl_exec($ch);
-            
+
             echo $result;
 
             if (curl_error($ch)) {
@@ -72,12 +72,24 @@ if ($lock_msg) {
             echo '<br/><br/>';
             echo 'Hook : ' . $hook['url'] . ' OK';
             echo '<br/><br/>';
-            
-            $dirLogs = PATH_TMP.'/git_logs/';
-            if(!is_dir($dirLogs))
-                mkdir ($dirLogs);
-            file_put_contents($dirLogs. time().'.logs', $result);
+
+            $dirLogs = PATH_TMP . '/git_logs/';
+            if (!is_dir($dirLogs))
+                mkdir($dirLogs);
+            file_put_contents($dirLogs . time() . '.logs', $result);
         }
+
+//        if (!isset($_REQUEST['no_after']) || !(int) $_REQUEST['no_after']) {
+//            if (isset($_REQUEST['no_menu']) && (int) $_REQUEST['no_menu']) {
+//                require_once('../main.inc.php');
+//            }
+//
+//            if (!defined('BIMP_LIB')) {
+//                require_once '../bimpcore/Bimp_Lib.php';
+//            }
+//
+//            BimpCore::afterGitPullProcess();
+//        }
     }
 }
 

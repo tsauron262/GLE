@@ -62,7 +62,7 @@ class BimpCore
     );
     public static $html_purifier = null;
 
-    // Initialisation: 
+    // Initialisation:
 
     public static function init()
     {
@@ -250,40 +250,83 @@ class BimpCore
             $file_path = $matches[1];
         }
 
+        $debug = false;
+
+        if ($debug) {
+            echo '<div style="margin-top: 100px; margin-left: 300px">';
+            echo '<br/>getUrl : ' . $file_path;
+        }
+
+
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
             if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
+                $external_dir = '';
+                if ((int) BimpCore::getConf('use_public_files_external_dir')) {
+                    $external_dir = '/bimpressources';
+                }
                 $pathinfo = pathinfo($file_path);
 
                 if (strpos($pathinfo['dirname'], '/views/') !== false) {
                     $tms = filemtime(DOL_DOCUMENT_ROOT . '/' . $file_path);
 
                     if ($tms !== false) {
-                        $out_file = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_tms_' . $tms . '.' . $pathinfo['extension'];
+                        $out_dir = DOL_DOCUMENT_ROOT . $external_dir . '/' . $pathinfo['dirname'];
+                        $out_file = $pathinfo['filename'] . '_tms_' . $tms . '.' . $pathinfo['extension'];
 
                         if (preg_match('/^\/+(.+)$/', $out_file, $matches)) {
                             $out_file = $matches[1];
                         }
+                        if ($debug) {
+                            echo '<br/>TEST : ' . $out_dir . '/' . $out_file;
+                        }
 
-                        if (!file_exists(DOL_DOCUMENT_ROOT . '/' . $out_file)) {
+                        $err = '';
+                        if ($external_dir && !file_exists($out_dir)) {
+                            $err = BimpTools::makeDirectories($out_dir, DOL_DOCUMENT_ROOT);
+
+                            if ($err) {
+                                BimpCore::addlog('Echec création du dossier "' . $out_dir . '"', 3, 'bimpcore', null, array(
+                                    'Erreur'  => $err,
+                                    'Fichier' => $out_file
+                                ));
+                            }
+
+                            echo '<br/>Err : ' . $err;
+                        }
+
+                        if (!$err && !file_exists($out_dir . '/' . $out_file)) {
                             // Suppr du fichier existant: 
-                            $dir = DOL_DOCUMENT_ROOT . '/' . $pathinfo['dirname'];
-                            foreach (scandir($dir) as $f) {
+                            foreach (scandir($out_dir) as $f) {
                                 if (in_array($f, array('.', '..'))) {
                                     continue;
                                 }
 
                                 if (preg_match('/^' . preg_quote($pathinfo['filename']) . '_tms_\d+\.' . preg_quote($pathinfo['extension']) . '$/', $f)) {
-                                    unlink($dir . '/' . $f);
+                                    if ($debug) {
+                                        echo '<br/>DEL' . out_dir . '/' . $f;
+                                    }
+                                    unlink($out_dir . '/' . $f);
                                 }
                             }
 
-                            if (!copy(DOL_DOCUMENT_ROOT . '/' . $file_path, DOL_DOCUMENT_ROOT . '/' . $out_file)) {
-                                BimpCore::addlog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', Bimp_Log::BIMP_LOG_ALERTE);
+                            if ($debug) {
+                                echo '<br/>COPY - ';
+                            }
+
+                            if (!copy(DOL_DOCUMENT_ROOT . '/' . $file_path, $out_dir . '/' . $out_file)) {
+                                BimpCore::addlog('Echec création du fichier "' . $out_dir . '/' . $out_file . '" - Vérifier les droits', Bimp_Log::BIMP_LOG_ALERTE);
+                                if ($debug) {
+                                    echo 'FAIL';
+                                }
+                            } else {
+                                if ($debug) {
+                                    echo 'OK';
+                                }
                             }
                         }
 
-                        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $out_file)) {
-                            $url = $out_file;
+                        if (file_exists($out_dir . '/' . $out_file)) {
+                            $url = $external_dir . '/' . $pathinfo['dirname'] . '/' . $out_file;
                         }
                     }
                 }
@@ -306,14 +349,62 @@ class BimpCore
 
                 return $prefixe . $url;
             }
+            if ($debug) {
+                echo '<br/>URL : ' . $url;
+                echo '</div>';
+            }
+
             return $url;
+        }
+
+        if ($debug) {
+            echo '</div>';
         }
 
         BimpCore::addlog('FICHIER ABSENT: "' . DOL_DOCUMENT_ROOT . '/' . $file_path . '"', Bimp_Log::BIMP_LOG_ERREUR);
         return '';
     }
 
-    // Gestion Versions et mises à jours: 
+    public static function checkRessourcesDir($dir = '', &$errors = array(), &$success = '')
+    {
+        if (is_dir(DOL_DOCUMENT_ROOT . '/' . $dir)) {
+            foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $dir) as $f) {
+                if (in_array($f, array('.', '..'))) {
+                    continue;
+                }
+
+                if (is_dir(DOL_DOCUMENT_ROOT . '/' . $dir . '/' . $f)) {
+                    self::checkRessourcesDir($dir . '/' . $f, $errors, $success);
+                } else {
+                    $success .= ($success ? '<br/>' : '') . 'TEST ' . $dir . '/' . $f;
+                    if (!file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/' . $dir . '/' . $f)) {
+                        $err = '';
+                        if (!is_dir(DOL_DOCUMENT_ROOT . '/bimpressources/' . $dir)) {
+                            $err = BimpTools::makeDirectories(DOL_DOCUMENT_ROOT . '/bimpressources/' . $dir, DOL_DOCUMENT_ROOT);
+
+                            if ($err) {
+                                $errors[] = 'Echec création du dossier "' . DOL_DOCUMENT_ROOT . '/bimpressources/' . $dir . '"';
+                            }
+                        }
+
+                        if (!$err) {
+                            if (!copy(DOL_DOCUMENT_ROOT . '/' . $dir . '/' . $f, DOL_DOCUMENT_ROOT . '/bimpressources/' . $dir . '/' . $f)) {
+                                $errors[] = 'Echec de la copie du fichier "' . DOL_DOCUMENT_ROOT . '/' . $dir . '/' . $f;// . '" - <pre>' . print_r(error_get_last(), 1) . '</pre>';
+                            } else {
+                                $success .= ($success ? '<br/>' : '') . 'COPIE ' . $dir . '/' . $f . ' OK';
+                            }
+                        }
+                    } else {
+                        $success .= ' - EXISTS';
+                    }
+                }
+            }
+        } else {
+            $errors[] = $dir .' n\'existe pas';
+        }
+    }
+
+    // Gestion Versions et mises à jours:
 
     public static function checkSqlUpdates()
     {
@@ -764,6 +855,21 @@ class BimpCore
         $versions[$dev] = $version;
 
         self::setConf('bimpcore_version', $versions);
+    }
+
+    public static function afterGitPullProcess($force_process = false, &$success = '')
+    {
+        $errors = array();
+
+        if ($force_process || ((int) BimpCore::getConf('use_files_tms') && (int) BimpCore::getConf('use_public_files_external_dir'))) {
+            if (!file_exists(DOL_DOCUMENT_ROOT . '/bimpressources')) {
+                BimpCore::addlog('ATTENTION dossier "bimpressources" absent', Bimp_Log::BIMP_LOG_URGENT);
+            } else {
+                self::checkRessourcesDir('bimpcore/views/fonts', $errors, $success);
+            }
+        }
+
+        return $errors;
     }
 
     // Gestion BimpCore Conf: 

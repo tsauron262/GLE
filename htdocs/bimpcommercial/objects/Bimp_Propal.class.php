@@ -1091,7 +1091,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     // Créer un contrat
                     if (1) {
                         $form_name = 'contrat';
-                        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+                        if (BimpCore::isEntity('bimp') && !in_array($user->login, array('v.gilbert', 'e.amadei', 'e.sirodot'))) {
                             $form_name = 'contrat_disabled';
                         }
 
@@ -2660,7 +2660,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $errors = [];
 
         global $user;
-        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+        if (BimpCore::isEntity('bimp') && !in_array($user->login, array('v.gilbert', 'e.amadei', 'e.sirodot'))) {
             $errors[] = 'Ce module de contrat n\'est plus maintenu, vous êtes invités à créer un contrat d\'abonnement ou une commande. Contactez le groupe Consoles si vous avez besoin d\'assistance';
         } else {
             $instance = $this->getInstance('bimpcontract', 'BContract_contrat');

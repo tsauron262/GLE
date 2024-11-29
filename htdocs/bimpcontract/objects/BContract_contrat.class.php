@@ -200,7 +200,7 @@ class BContract_contrat extends BimpDolObject
     public function canCreate()
     {
         global $user;
-        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+        if (BimpCore::isEntity('bimp') && !in_array($user->login, array('v.gilbert', 'e.amadei', 'e.sirodot'))) {
             return 0;
         }
         
@@ -4831,7 +4831,7 @@ class BContract_contrat extends BimpDolObject
         $errors = array();
         
         global $user;
-        if (BimpCore::isEntity('bimp') && $user->login !== 'v.gilbert') {
+        if (BimpCore::isEntity('bimp') && !in_array($user->login, array('v.gilbert', 'e.amadei', 'e.sirodot'))) {
             $errors[] = 'Ce module de contrat n\'est plus maintenu, vous êtes invités à créer un contrat d\'abonnement ou une commande. Contactez le groupe Consoles si vous avez besoin d\'assistance';
             return $errors;
         }

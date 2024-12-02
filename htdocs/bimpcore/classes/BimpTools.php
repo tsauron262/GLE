@@ -2821,13 +2821,16 @@ class BimpTools
 
     public static function toAscii($string)
     {
-        $longueur = strlen($string);
-        $return = '';
-        for ($i = 0; $i < $longueur; $i++) {
-            $caractere = substr($string, $i, 1);
-            $return .= ord($caractere) . "-";
+        if(is_string($string)){
+            $longueur = strlen($string);
+            $return = '';
+            for ($i = 0; $i < $longueur; $i++) {
+                $caractere = substr($string, $i, 1);
+                $return .= ord($caractere) . "-";
+            }
+            return $return;
         }
-        return $return;
+        return 'not_a_string';
     }
 
     public static function replaceUrlRoot($old_root, $new_root, $text)

@@ -5,12 +5,13 @@ class StockOrder extends BimpObject
 
     const STATUT_BROUILLON = 0;
     const STATUT_ORDERED = 1;
+
 //    const STATUT_RECEIVED = 2;
 
     public static $status_list = array(
         self::STATUT_BROUILLON => array('label' => 'Brouillon', 'icon' => 'far_file-alt', 'classes' => array('warning')),
-        self::STATUT_ORDERED   => array('label' => 'Commandé',/* 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
-        self::STATUT_RECEIVED  => array('label' => 'Réceptionnée',*/ 'icon' => 'fas_check', 'classes' => array('success')),
+        self::STATUT_ORDERED   => array('label'   => 'Commandé', /* 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+              self::STATUT_RECEIVED  => array('label' => 'Réceptionnée', */ 'icon'    => 'fas_check', 'classes' => array('success')),
     );
 
     // Droits Users: 
@@ -228,20 +229,19 @@ class StockOrder extends BimpObject
             $content .= BimpInput::renderInput('text', 'search_terms', '');
 
             $html .= BimpInput::renderInputContainer('search_terms', '', $content);
-            
-            
+
             $content = '<label>Par type de produit: </label>';
-            
+
             $shipTo = $this->getShipTo($errors);
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
 
             $gsx = new GSX_v2($shipTo);
             $options = $gsx->getProductCacheOption();
-            
-//            echo '<pre>';print_r($options);die;
-            $content .= BimpInput::renderInput('select', 'search_parent_type', '', array('options'=>$options));
 
-            $html .= '<br/>'.BimpInput::renderInputContainer('search_parent_type', '', $content);
+//            echo '<pre>';print_r($options);die;
+            $content .= BimpInput::renderInput('select', 'search_parent_type', '', array('options' => $options));
+
+            $html .= '<br/>' . BimpInput::renderInputContainer('search_parent_type', '', $content);
 
             $onclick = 'StockOrder.searchParts($(this), ' . $this->id . ')';
 
@@ -271,7 +271,7 @@ class StockOrder extends BimpObject
                 'ref'     => 'Réf.',
                 'desc'    => 'Description',
                 'qty'     => 'Qté',
-                'price'     => 'Prix Stock',
+                'price'   => 'Prix Stock',
                 'buttons' => ''
             );
 
@@ -301,7 +301,7 @@ class StockOrder extends BimpObject
                     'ref'     => $part_number,
                     'qty'     => $qty_html,
                     'desc'    => $part['desc'],
-                    'price'    => $part['price'].' €',
+                    'price'   => $part['price'] . ' €',
                     'buttons' => ($parts_editable ? BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $this->getJsActionOnclick('removePart', array(
                                 'part_number' => $part_number
                                     ), array(
@@ -539,9 +539,9 @@ class StockOrder extends BimpObject
                 $errors[] = 'Ce composant a déjà été ajouté dans cette commande. Veuillez en modifier les qtés si nécessaire';
             } else {
                 $parts[$ref] = array(
-                    'desc' => $desc,
-                    'qty'  => $qty,
-                    'price'=> $price
+                    'desc'  => $desc,
+                    'qty'   => $qty,
+                    'price' => $price
                 );
 
                 $errors = $this->updateField('parts', $parts);
@@ -619,7 +619,7 @@ class StockOrder extends BimpObject
         if (empty($parts)) {
             $errors[] = 'Aucun composant ajouté à cette commande';
         }
-        
+
         if ((int) $this->getData('status')) {
             $errors[] = 'Ce renvoi n\'est plus au statut brouillon';
             return 0;
@@ -638,22 +638,24 @@ class StockOrder extends BimpObject
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
 
             $gsx = new GSX_v2($shipTo);
+            $gsx_ok = false;
 
 //            if (BimpCore::isModeDev()) {
 //                $result = array(
 //                    'orderId' => '123456'
 //                );
 //            } else {
-                $result = $gsx->stockingOrderCreate($order_parts, 'CS_'.$this->id, 'CONFIRM');
-                if (!$gsx->logged) {
-                    $errors[] = BimpRender::renderAlerts($gsx->displayNoLogged());
-                } else {
-                    $errors = $gsx->getErrors();
-                }
+            $result = $gsx->stockingOrderCreate($order_parts, 'CS_' . $this->id, 'CONFIRM');
+            if (!$gsx->logged) {
+                $errors[] = BimpRender::renderAlerts($gsx->displayNoLogged());
+            } else {
+                $errors = $gsx->getErrors();
+            }
 //            }
 
 
             if (!count($errors)) {
+                $gsx_ok = true;
                 $success .= 'Commande de stock effectuée sur GSX avec succès';
 
                 $order_id = BimpTools::getArrayValueFromPath($result, 'orderId', '');
@@ -666,7 +668,7 @@ class StockOrder extends BimpObject
 
                 $up_errors = $this->update($warnings, true);
                 if (count($up_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du statut de la commande de stock');
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du statut de la commande de stock');
                 }
 
                 $code_centre = $this->getData('code_centre');
@@ -682,7 +684,9 @@ class StockOrder extends BimpObject
                     } else {
                         $eeeCode = '';
                         $product_label = '';
-//TODO pourquoi sait commenté, on a besoin de recup le eeeCode et le productlabel...
+
+                        //  TODO pourquoi sait commenté, on a besoin de recup le eeeCode et le productlabel...
+//
 //                            $result2 = $gsx->stockingOrderPartsSummary(array(
 //                                'partNumber' => $part_number
 //                            ));
@@ -708,16 +712,27 @@ class StockOrder extends BimpObject
                             'qty'            => 0,
                             'qty_to_receive' => (int) $part_data['qty'],
                             'last_pa'        => $part_data['price'],
-                            'description'  => $part_data['desc'],
+                            'description'    => $part_data['desc'],
                             'product_label'  => $product_label,
                             'code_eee'       => $eeeCode
                                 ), true, $stock_errors);
                     }
 
                     if (count($stock_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($stock_errors, 'Echec de l\'enregistrement de la quantité à recevoir pour le composant "' . $part_number . '"');
+                        $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec de l\'enregistrement de la quantité à recevoir pour le composant "' . $part_number . '"');
                     }
                 }
+            }
+
+            if (count($errors) && $gsx_ok) {
+                BimpCore::addlog('Erreur suite à commande de stock GSX', Bimp_Log::BIMP_LOG_URGENT, 'gsx', $this, array(
+                    'Erreurs' => $errors
+                ));
+                
+                // Pour éviter de commander à nouveau sur GSX : 
+                BimpCache::getBdb(true)->update('bimp_apple_stock_order', array(
+                    'status' => self::STATUT_ORDERED
+                ), 'id = ' . $this->id);
             }
 
             return array(

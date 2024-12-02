@@ -82,6 +82,10 @@ fields:
         label: Message
         type: text
 
+    active: 
+        label: Activée
+        type: bool
+        default_value: 1
             
 
 lists:
@@ -97,3 +101,5 @@ lists:
             type_action:
             notified_user:
             notified_group:
+            active: 
+                edit: 1

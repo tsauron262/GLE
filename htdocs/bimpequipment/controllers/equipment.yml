@@ -49,7 +49,7 @@ sections:
 #                              object: equipment
 #                              children: logiciels
 
-          - id: inters
+          - id: locations
             title: Locations
             show: 
                 is_module_active: bimplocation

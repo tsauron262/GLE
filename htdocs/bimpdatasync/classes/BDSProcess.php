@@ -47,7 +47,7 @@ abstract class BDSProcess
 
         global $db, $user;
         $this->options = BimpTools::overrideArray($this->options, $options);
-        
+
         if (self::$debug) {
             $this->options['debug'] = true;
         }
@@ -134,17 +134,16 @@ abstract class BDSProcess
     }
 
     // Déclenchement des opération: 
-    
-    public function gestionPersistance($id_operation, $debut = true, $erase = false){
+
+    public function gestionPersistance($id_operation, $debut = true, $erase = false)
+    {
         global $user;
-        $uniqKey = 'data_persistante'.$this->process->id.$id_operation.$user->id;
-        if($debut){
+        $uniqKey = 'data_persistante' . $this->process->id . $id_operation . $user->id;
+        if ($debut) {
             $this->data_persistante = $_SESSION[$uniqKey];
-        }
-        elseif(!$erase){
+        } elseif (!$erase) {
             $_SESSION[$uniqKey] = $this->data_persistante;
-        }
-        else{
+        } else {
             unset($_SESSION[$uniqKey]);
         }
     }
@@ -237,7 +236,7 @@ abstract class BDSProcess
             $html = BimpRender::renderFoldableContainer('[INITIALISATION]', $this->debug_content, array('open' => 0, 'offset_left' => true));
             $data['debug_content'] = $html;
         }
-        
+
         $this->gestionPersistance($id_operation, false);
 
         return $data;
@@ -245,12 +244,12 @@ abstract class BDSProcess
 
     public function finalizeOperation($id_operation, $id_report, $extra_data = array(), &$errors = array(), $has_finalization = false)
     {
-        
+
         $this->gestionPersistance($id_operation);
-        
+
         $result = array();
 
-        if($has_finalization){
+        if ($has_finalization) {
             if (BimpObject::objectLoaded($this->process)) {
                 if ((int) $id_report && (!BimpObject::objectLoaded($this->report) || $this->report != $id_report)) {
                     $this->report = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Report', (int) $id_report);
@@ -481,7 +480,7 @@ abstract class BDSProcess
 
     public function executeOperationStep($id_operation, $step_name, $id_report = 0, $iteration = 0, $extra_data = array())
     {
-        
+
         $this->gestionPersistance($id_operation);
         $result = array();
         $errors = array();
@@ -560,8 +559,7 @@ abstract class BDSProcess
         }
 
         $result['errors'] = array_merge($result['errors'], $errors);
-        
-        
+
         $this->gestionPersistance($id_operation, false);
         return $result;
     }

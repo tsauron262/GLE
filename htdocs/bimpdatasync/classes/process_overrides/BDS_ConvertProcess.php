@@ -37,9 +37,9 @@ class BDS_ConvertProcess extends BDSProcess
 
             $elements = $this->{'find' . $method}($errors);
 
-            if (empty($elements)) {
-                $errors[] = 'Aucun élément à convertir trouvé';
-            } else {
+            if (!empty($elements)) {
+//                $errors[] = 'Aucun élément à convertir trouvé';
+//            } else {
                 $data['steps'] = array(
                     'convert' => array(
                         'label'                  => BimpTools::getArrayValueFromPath(self::$methods, $method, 'Conversion'),

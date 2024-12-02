@@ -612,6 +612,7 @@ class StockOrder extends BimpObject
         $errors = array();
         $warnings = array();
         $success = '';
+        $sc = '';
 
         $parts = $this->getData('parts');
         $shipTo = $this->getShipTo($errors);
@@ -728,16 +729,19 @@ class StockOrder extends BimpObject
                 BimpCore::addlog('Erreur suite à commande de stock GSX', Bimp_Log::BIMP_LOG_URGENT, 'gsx', $this, array(
                     'Erreurs' => $errors
                 ));
-                
+
                 // Pour éviter de commander à nouveau sur GSX : 
                 BimpCache::getBdb(true)->update('bimp_apple_stock_order', array(
                     'status' => self::STATUT_ORDERED
-                ), 'id = ' . $this->id);
+                        ), 'id = ' . $this->id);
+
+                $sc = 'triggerObjectChange(\'bimpapple\', \'StockOrder\', ' . $this->id . ')';
             }
 
             return array(
-                'errors'   => $errors,
-                'warnings' => $warnings
+                'errors'           => $errors,
+                'warnings'         => $warnings,
+                'success_callback' => $sc
             );
         }
     }

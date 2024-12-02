@@ -543,6 +543,28 @@ class BimpCache
         return $result;
     }
 
+    public static function getCommercialBimpComm()
+    {
+        $cache_key = 'commercial_bimpcomm';
+
+        $result = static::getCacheServeur($cache_key);
+        if (!$result) {
+            $result = array();
+            global $db;
+
+            $sql = $db->query(" SELECT u.lastname, u.firstname, ec.element_id, ct.element FROM `".MAIN_DB_PREFIX."element_contact` ec, ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."c_type_contact ct WHERE ec.fk_socpeople = u.rowid AND ct.rowid = ec.fk_c_type_contact AND ct. code = 'SALESREPFOLL'");
+            while ($ln = $db->fetch_object($sql)) {
+                $result[$ln->element][$ln->element_id][] = $ln->lastname . ' ' . $ln->firstname;
+            }
+//            print_r($result);die;
+            static::setCacheServeur($cache_key, $result, 2 * 60);
+        }
+        return $result;
+    }
+    
+    
+    
+
     public static function getDureeMoySav($nbJ = 30, $ios = false)
     {
         $cache_key = 'sav_moy_duree' . $nbJ . $ios;

@@ -99,6 +99,7 @@ lists:
             type_piece:
             type_notif:
             type_action:
+            message_notif: 
             notified_user:
             notified_group:
             active: 

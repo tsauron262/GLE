@@ -48,6 +48,17 @@ sections:
 #                          list: 
 #                              object: equipment
 #                              children: logiciels
+
+          - id: inters
+            title: Locations
+            show: 
+                is_module_active: bimplocation
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderLocationsList
+                        object: equipment
                         
           - id: reservations
             title: Réservations

@@ -603,6 +603,19 @@ class BimpComm extends BimpDolObject
     {
         return $this->getChildObject('lines');
     }
+    
+    
+
+    public static function getCommercialCsvValue($needed_fields = array())
+    {
+        global $db;
+
+        $list = static::getCommercialBimpComm();
+
+        if (isset($list[static::$dol_module][$needed_fields['rowid']]))
+            return implode("\n", $list[static::$dol_module][$needed_fields['rowid']]);
+        return '';
+    }
 
     public function getActionsButtons()
     {

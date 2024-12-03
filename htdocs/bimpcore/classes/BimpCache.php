@@ -543,21 +543,20 @@ class BimpCache
         return $result;
     }
 
-    public static function getCommercialBimpComm()
+    public static function getCommercialBimpComm($element)
     {
-        $cache_key = 'commercial_bimpcomm';
-
-        $result = static::getCache($cache_key);
+        $cache_key = 'commercial_bimpcomm_'.$element;
+        
+        $result = static::getCacheServeur($cache_key);
         if (!$result) {
             $result = array();
             global $db;
-
-            $sql = $db->query(" SELECT u.lastname, u.firstname, ec.element_id, ct.element FROM `".MAIN_DB_PREFIX."element_contact` ec, ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."c_type_contact ct WHERE ec.fk_socpeople = u.rowid AND ct.rowid = ec.fk_c_type_contact AND ct.code = 'SALESREPFOLL'");
+            $sql = $db->query(" SELECT u.lastname, u.firstname, ec.element_id, ct.element FROM `".MAIN_DB_PREFIX."element_contact` ec, ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."c_type_contact ct WHERE ec.fk_socpeople = u.rowid AND ct.rowid = ec.fk_c_type_contact AND ct.code = 'SALESREPFOLL' AND ct.element = '".$element."';");
             while ($ln = $db->fetch_object($sql)) {
-                $result[$ln->element][$ln->element_id][] = $ln->lastname . ' ' . $ln->firstname;
+                $result[$ln->element_id][] = $ln->lastname . ' ' . $ln->firstname;
             }
-//            print_r($result);die;
-            static::setCache($cache_key, $result);
+            $db->free($sql);
+            static::setCacheServeur($cache_key, $result, 2 * 60);
         }
         return $result;
     }

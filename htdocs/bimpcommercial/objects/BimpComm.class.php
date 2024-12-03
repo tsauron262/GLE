@@ -612,7 +612,7 @@ class BimpComm extends BimpDolObject
 
         $list = static::getCommercialBimpComm(static::$dol_module);
 
-        if (isset($list[static::$dol_module][$needed_fields['rowid']]))
+        if (isset($list[$needed_fields['rowid']]))
             return implode("\n", $list[$needed_fields['rowid']]);
         return '';
     }

@@ -175,12 +175,18 @@ class BimpCache
     {
         global $conf;
         $key = $conf->entity . $key;
+        
+        if(isset(self::$cache['key']) && !is_null(self::$cache['key']))
+            return self::$cache['key'];
+        
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
 
         if (is_a(self::$cache_server, 'BimpCacheServer')) {
             $result = self::$cache_server->getCacheServeur($key);
+            
+            self::$cache['key'] = $result;
 
             if (!is_null($result) && BimpDebug::isActive()) {
                 BimpDebug::incCacheServerKeyCount($key);

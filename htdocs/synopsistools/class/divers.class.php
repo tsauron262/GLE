@@ -22,7 +22,11 @@ class synopsisHook
     function __construct()
     {
         global $conf, $db, $dbBIMPERP, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
-define('NOTOKENRENEWAL', true);
+        
+        if (!defined('NOTOKENRENEWAL')) {
+            define('NOTOKENRENEWAL', true);
+        }
+        
         static::initDeb();
 
         if (!defined('BIMP_LIB')) {

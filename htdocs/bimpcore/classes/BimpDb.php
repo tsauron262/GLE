@@ -103,8 +103,10 @@ class BimpDb
         global $conf;
         $sql = str_replace('__entity__', $conf->entity, $sql);
         $result = $this->db->query($sql);
-        if (!$result)
+
+        if (!$result) {
             $this->logSqlError($sql);
+        }
 
         return $result;
     }
@@ -145,16 +147,19 @@ class BimpDb
     {
         if (file_exists($file)) {
             $sql = file_get_contents($file);
+
             $sql = str_replace("llx_", MAIN_DB_PREFIX, $sql);
             $sql = str_replace("MAIN_DB_PREFIX", MAIN_DB_PREFIX, $sql);
+
             if ($sql) {
-//                $sql = str_replace("; \n", ";\n", $sql);
                 $sql = preg_replace("/;( )*\n/U", ";\n", $sql);
+
                 $tabSql = explode(";\n", $sql);
                 foreach ($tabSql as $req) {
                     $req = trim($req);
+                    
                     if ($req != "") {
-                        if ($result = $this->execute($req) < 0) {
+                        if ($result = $this->execute($req) <= 0) {
                             BimpCore::addlog('Erreur SQL maj', 3, 'sql', null, array(
                                 'Requête' => (!is_null($req) ? $req : ''),
                                 'Erreur'  => $this->err()

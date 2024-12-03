@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpalert_produit` ADD `active` tinyint(1) NOT NULL DEFAULT 1;

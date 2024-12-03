@@ -406,7 +406,7 @@ class BimpCore
 
     // Gestion Versions et mises à jours:
 
-    public static function checkSqlUpdates()
+    public static function checkSqlUpdates($execute = false)
     {
         if (BimpTools::isSubmit('ajax')) {
             return;
@@ -458,7 +458,7 @@ class BimpCore
         }
 
         if (!empty($updates) || !empty($modules_updates) || !empty($modules_extends_updates) || $menu_update) {
-            if (!BimpTools::isSubmit('bimpcore_update_confirm')) {
+            if (!$execute && !BimpTools::isSubmit('bimpcore_update_confirm')) {
                 echo 'MISE A JOUR SQL AUTO <br/><br/>';
                 if ($menu_update) {
                     echo 'Le liste complète des élements du menu BimpThème doit être mise à jour à la version: ' . $menu_update . '<br/><br/>';

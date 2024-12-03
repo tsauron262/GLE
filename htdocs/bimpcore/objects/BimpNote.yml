@@ -269,7 +269,7 @@ lists_cols:
         value: 
             callback: displayChatmsg
     parent:
-        label: Objet liée
+        label: Objet lié
         value:
             callback: getParentLink
                     

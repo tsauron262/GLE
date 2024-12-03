@@ -547,7 +547,7 @@ class BimpCache
     {
         $cache_key = 'commercial_bimpcomm_'.$element;
         
-        $result = static::getCacheServeur($cache_key);
+        $result = static::getCache($cache_key);
         if (!$result) {
             $result = array();
             global $db;
@@ -556,7 +556,7 @@ class BimpCache
                 $result[$ln->element_id][] = $ln->lastname . ' ' . $ln->firstname;
             }
             $db->free($sql);
-            static::setCacheServeur($cache_key, $result, 2 * 60);
+            static::setCache($cache_key, $result);
         }
         return $result;
     }

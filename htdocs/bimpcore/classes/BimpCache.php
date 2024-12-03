@@ -185,10 +185,6 @@ class BimpCache
             if (!is_null($result) && BimpDebug::isActive()) {
                 BimpDebug::incCacheServerKeyCount($key);
             }
-            global $user;
-            if($user->rowid == 242 && stripos($key, 'commercial_bimpcomm_') !== false){
-                die('on passe '.$key);
-            }
 
             return $result;
         }
@@ -549,15 +545,6 @@ class BimpCache
 
     public static function getCommercialBimpComm($element, $cache_serveur = false)
     {
-        global $user;
-        if($user->rowid == 242){
-            
-        }
-        else
-            $cache_serveur  = false;
-        
-        
-        
         $cache_key = 'commercial_bimpcomm_'.$element;
         
         if($cache_serveur){

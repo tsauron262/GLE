@@ -543,11 +543,16 @@ class BimpCache
         return $result;
     }
 
-    public static function getCommercialBimpComm($element)
+    public static function getCommercialBimpComm($element, $cache_serveur = false)
     {
         $cache_key = 'commercial_bimpcomm_'.$element;
         
-        $result = static::getCache($cache_key);
+        if($cache_serveur){
+            $result = static::getCacheServeur($cache_key);
+        }
+        else{
+            $result = static::getCache($cache_key);
+        }
         if (!$result) {
             $result = array();
             global $db;
@@ -556,7 +561,12 @@ class BimpCache
                 $result[$ln->element_id][] = $ln->lastname . ' ' . $ln->firstname;
             }
             $db->free($sql);
-            static::setCache($cache_key, $result);
+            if($cache_serveur){
+                static::setCacheServeur($cache_key, $result, 2 * 60);
+            }
+            else{
+                static::setCache($cache_key, $result);
+            }
         }
         return $result;
     }

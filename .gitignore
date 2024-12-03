@@ -96,3 +96,4 @@ phpstan_custom.neon
 /htdocs/bimpcore/views/.sass-cache/
 /htdocs/bimpcore/diff_from.html
 /htdocs/bimpcore/diff_to.html
+/htdocs/bimpressources/

@@ -186,7 +186,8 @@ class BimpCache
         if (is_a(self::$cache_server, 'BimpCacheServer')) {
             $result = self::$cache_server->getCacheServeur($key);
             
-            self::$cache[$key] = $result;
+            if(!is_null($result))
+                self::$cache[$key] = $result;
 
             if (!is_null($result) && BimpDebug::isActive()) {
                 BimpDebug::incCacheServerKeyCount($key);

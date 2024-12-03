@@ -740,6 +740,7 @@ forms:
             - field: description_strong
             - field: fk_product_type
             - field: type2
+            - field: serialisable
             - field: type_compta
             - field: barcode
             - field: weight

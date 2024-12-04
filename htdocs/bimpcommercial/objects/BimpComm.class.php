@@ -608,9 +608,7 @@ class BimpComm extends BimpDolObject
 
     public static function getCommercialCsvValue($needed_fields = array())
     {
-        global $db;
-
-        $list = static::getCommercialBimpComm(static::$dol_module, true);
+        $list = static::getCommercialBimpComm(static::$dol_module, false);
 
         if (isset($list[$needed_fields['rowid']]))
             return implode("\n", $list[$needed_fields['rowid']]);

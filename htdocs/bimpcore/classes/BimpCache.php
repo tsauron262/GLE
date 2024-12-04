@@ -175,19 +175,22 @@ class BimpCache
     {
         global $conf;
         $key = $conf->entity . $key;
+        
+        if(isset(self::$cache[$key]) && !is_null(self::$cache[$key]))
+            return self::$cache[$key];
+        
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
 
         if (is_a(self::$cache_server, 'BimpCacheServer')) {
             $result = self::$cache_server->getCacheServeur($key);
+            
+            if(!is_null($result))
+                self::$cache[$key] = $result;
 
             if (!is_null($result) && BimpDebug::isActive()) {
                 BimpDebug::incCacheServerKeyCount($key);
-            }
-            global $user;
-            if($user->rowid == 242 && stripos($key, 'commercial_bimpcomm_') !== false){
-                die('on passe '.$key);
             }
 
             return $result;
@@ -549,15 +552,6 @@ class BimpCache
 
     public static function getCommercialBimpComm($element, $cache_serveur = false)
     {
-        global $user;
-        if($user->rowid == 242){
-            
-        }
-        else
-            $cache_serveur  = false;
-        
-        
-        
         $cache_key = 'commercial_bimpcomm_'.$element;
         
         if($cache_serveur){

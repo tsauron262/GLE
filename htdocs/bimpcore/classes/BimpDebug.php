@@ -76,9 +76,7 @@ class BimpDebug
         if (is_null(self::$user_checked)) {
             global $user;
             if (BimpObject::objectLoaded($user)) {
-                if ((isset($_SESSION['force_user_dev']) && (int) $_SESSION['force_user_dev']) ||
-                        $user->admin || 
-                        (defined('MOD_DEV') && MOD_DEV)) {
+                if ($user->admin || $user->login == 'm.gallet' || (defined('MOD_DEV') && MOD_DEV)) {
                     self::$user_checked = 1;
                 } else {
                     self::$user_checked = 0;

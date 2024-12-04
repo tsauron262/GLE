@@ -71,10 +71,14 @@ class BimpDebug
 
     public static function checkUser()
     {
+        // /!\ Attention aux appels ici - risque élevé de boucle infinie !! /!\
+        
         if (is_null(self::$user_checked)) {
             global $user;
             if (BimpObject::objectLoaded($user)) {
-                if ($user->admin || (defined('MOD_DEV') && MOD_DEV)) {
+                if ((isset($_SESSION['force_user_dev']) && (int) $_SESSION['force_user_dev']) ||
+                        $user->admin || 
+                        (defined('MOD_DEV') && MOD_DEV)) {
                     self::$user_checked = 1;
                 } else {
                     self::$user_checked = 0;
@@ -157,16 +161,16 @@ class BimpDebug
     {
         global $bimp_start_time, $user;
         $msg = '';
-        $debMail = 'User '.$user->login.'<br/>';
+        $debMail = 'User ' . $user->login . '<br/>';
         if (!(float) $bimp_start_time) {
             $msg .= 'Variable bimp_start_time absente du fichier index.php';
-            mailSyn2('Page time indeterminer', 'tommy@bimp.fr', null, $debMail.$msg);
+            mailSyn2('Page time indeterminer', 'tommy@bimp.fr', null, $debMail . $msg);
         } else {
             if (!defined('DISABLE_LONG_PAGE_NOTIFICATION') && (microtime(1) - $bimp_start_time) > 40) {
                 $msg .= (microtime(1) - $bimp_start_time) . ' sec';
 
                 $msg .= self::renderDebugTimes();
-                mailSyn2('Page trés lourde', 'tommy@bimp.fr,f.martinez@bimp.fr', null, $debMail.$msg);
+                mailSyn2('Page trés lourde', 'tommy@bimp.fr,f.martinez@bimp.fr', null, $debMail . $msg);
                 BimpCore::addlog('Page trop lourde ' . microtime(1) - $bimp_start_time, Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info' => $msg));
             }
         }
@@ -345,9 +349,9 @@ class BimpDebug
     {
         /*
          * Toujours actif pour les logs
-        if (!self::isActive()) {
-            return '';
-        }
+          if (!self::isActive()) {
+          return '';
+          }
          */
 
         if (empty(self::$times)) {
@@ -835,7 +839,7 @@ class BimpDebug
             $diff_label = '<span class="' . $class . '">' . $diff_label . '</span>';
         }
 
-        $content = BimpRender::renderDebugInfo(BimpRender::renderSql($sql), '', ''/*, true*/);
+        $content = BimpRender::renderDebugInfo(BimpRender::renderSql($sql), '', ''/* , true */);
         $title = '<span class="' . ($num_transaction < 0 ? 'danger">[HORS TRANSAC]' : 'info">[TRANSAC #' . $num_transaction . '] ') . '</span>';
         $title .= ' - Requête #' . $num_request . ' - ' . $diff_label;
 
@@ -851,9 +855,9 @@ class BimpDebug
                 break;
             }
         }
-        
-        if(BimpCore::getConf('trace_for_sql', 0))
-                $content .= BimpRender::renderDebugInfo(BimpTools::displayBacktrace());
+
+        if (BimpCore::getConf('trace_for_sql', 0))
+            $content .= BimpRender::renderDebugInfo(BimpTools::displayBacktrace());
 
         self::addDebug('sql', $title, $content, array(
             'open' => false

@@ -71,20 +71,21 @@ class BimpDebug
 
     public static function checkUser()
     {
-        if (is_null(self::$user_checked)) {
-            global $user;
-            if (BimpObject::objectLoaded($user)) {
-                if ($user->admin || MOD_DEV) {
-                    self::$user_checked = 1;
-                } else {
-                    self::$user_checked = 0;
-                }
-            } else {
-                return 0;
-            }
-        }
-
-        return self::$user_checked;
+        return 0;
+//        if (is_null(self::$user_checked)) {
+//            global $user;
+//            if (BimpObject::objectLoaded($user)) {
+//                if ($user->admin || MOD_DEV) {
+//                    self::$user_checked = 1;
+//                } else {
+//                    self::$user_checked = 0;
+//                }
+//            } else {
+//                return 0;
+//            }
+//        }
+//
+//        return self::$user_checked;
     }
 
     public static function isActive()

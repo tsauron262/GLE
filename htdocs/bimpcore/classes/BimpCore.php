@@ -1113,23 +1113,16 @@ class BimpCore
 
     public static function isUserDev()
     {
+        global $user;
+        if (BimpObject::objectLoaded($user)) {
+            $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
+
+            if ((int) $bimpUser->getData('is_dev')) {
+                return 1;
+            }
+        }
+
         return 0;
-//        global $force_user_dev;
-//        
-//        if (!is_null($force_user_dev) && (int) $force_user_dev) {
-//            return 1;
-//        }
-//        
-//        global $user;
-//        if (BimpObject::objectLoaded($user)) {
-//            $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
-//
-//            if ((int) $bimpUser->getData('is_dev')) {
-//                return 1;
-//            }
-//        }
-//
-//        return 0;
     }
 
     // Gestion ini: 

@@ -27,6 +27,8 @@ if (!$user->admin) {
     exit;
 }
 
+die('DATA : ' . DOL_DATA_ROOT);
+
 echo '<br/>FIN';
 echo '</body></html>';
 

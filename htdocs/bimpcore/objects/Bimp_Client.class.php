@@ -72,6 +72,9 @@ class Bimp_Client extends Bimp_Societe
 
             case 'attributeCommercial':
                 return (int) $user->admin;
+                
+            case 'setOutstandingAtradius': 
+                return (int) ($user->admin || $user->rights->bimpcommercial->admin_financier);
         }
 
         return (int) parent::canSetAction($action);
@@ -1359,9 +1362,7 @@ class Bimp_Client extends Bimp_Societe
             $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Rafraîchir Atradius';
             $html .= '</span>';
 
-            global $user;
-
-            if ($user->rights->bimpcommercial->admin_financier) {
+            if ($this->canSetAction('setOutstandingAtradius')) {
                 // Demande d'encours
                 $onclick = $this->getJsActionOnclick('setOutstandingAtradius', array(), array('form_name' => 'setOutstandingAtradius'));
 

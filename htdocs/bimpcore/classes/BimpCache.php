@@ -566,10 +566,6 @@ class BimpCache
             $sql = $db->query(" SELECT u.lastname, u.firstname, ec.element_id, ct.element FROM `".MAIN_DB_PREFIX."element_contact` ec, ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."c_type_contact ct WHERE ec.fk_socpeople = u.rowid AND ct.rowid = ec.fk_c_type_contact AND ct.code = 'SALESREPFOLL' AND ct.element = '".$element."';");
             while ($ln = $db->fetch_object($sql)) {
                 $result[$ln->element_id][] = $ln->lastname . ' ' . $ln->firstname;
-                
-                echo '<pre>';
-                print_r($result);
-                exit;
             }
             $db->free($sql);
             if($cache_serveur){

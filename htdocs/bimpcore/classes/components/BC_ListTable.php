@@ -2391,7 +2391,7 @@ class BC_ListTable extends BC_List
     }
 
     public function renderCsvContent($separator, $col_options, $headers = true, $light_export = false, &$errors = array())
-    {        
+    {
         set_time_limit(0);
         BimpCore::setMaxExecutionTime(12000);
         BimpCore::setMemoryLimit(8192);
@@ -2681,43 +2681,53 @@ class BC_ListTable extends BC_List
                         $errors[] = 'Champ invalide pour la colonne "' . self::getColFullTitle($this->object, $col_name) . '"';
                     }
                 } elseif (method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue')) {
-                    $fields[$col_name] = array(
-                        'class'         => get_class($field_object),
-                        'field'         => $field_name,
-                        'needed_fields' => array()
-                    );
+                    $col_errors = array();
+                    
+                    $init_method = 'init' . ucfirst($field_name) . 'csvValue';
+                    if (method_exists($field_object, $init_method)) {
+                        $col_errors = $field_object->$init_method($ids);
+                    }
 
-                    $needed_fields = BimpTools::getArrayValueFromPath($col_params, 'csv_needed_fields', array());
+                    if (empty($col_errors)) {
+                        $fields[$col_name] = array(
+                            'class'         => get_class($field_object),
+                            'field'         => $field_name,
+                            'needed_fields' => array()
+                        );
 
-                    if (!empty($needed_fields)) {
-                        $col_children = explode('___', $col_name);
-                        array_pop($col_children);
-                        $field_alias = 'a';
-                        $col_errors = array();
+                        $needed_fields = BimpTools::getArrayValueFromPath($col_params, 'csv_needed_fields', array());
 
-                        if (!empty($col_children)) {
-                            $col_errors = $this->object->getRecursiveChildrenJoins($col_children, $filters, $joins, 'a', $field_alias);
-                        }
+                        if (!empty($needed_fields)) {
+                            $col_children = explode('___', $col_name);
+                            array_pop($col_children);
+                            $field_alias = 'a';
 
-                        if (count($col_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . self::getColFullTitle($this->object, $col_name) . '"');
-                        } else {
-                            foreach ($needed_fields as $needed_field) {
-                                if ($field_object->field_exists($needed_field)) {
-                                    $col_errors = array();
-                                    $sqlKey = $field_object->getFieldSqlKey($needed_field, $field_alias, null, $filters, $joins, $col_errors);
+                            if (!empty($col_children)) {
+                                $col_errors = $this->object->getRecursiveChildrenJoins($col_children, $filters, $joins, 'a', $field_alias);
+                            }
 
-                                    if ($sqlKey) {
-                                        $return_fields[] = $sqlKey . ' as ' . $col_name . '_needed_field_' . $needed_field;
-                                        $fields[$col_name]['needed_fields'][] = $needed_field;
-                                    } elseif (count($col_errors)) {
-                                        $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . self::getColFullTitle($this->object, $col_name) . '" (Champ requis: "' . $field_object->getConf('fields/' . $needed_field . '/label', $needed_field) . '")');
-                                    } else {
-                                        $errors[] = 'Champ invalide pour la colonne "' . self::getColFullTitle($this->object, $col_name) . '" (Champ requis: "' . $field_object->getConf('fields/' . $needed_field . '/label', $needed_field) . '")';
+                            if (!count($col_errors)) {
+                                foreach ($needed_fields as $needed_field) {
+                                    if ($field_object->field_exists($needed_field)) {
+                                        $col_errors = array();
+                                        $sqlKey = $field_object->getFieldSqlKey($needed_field, $field_alias, null, $filters, $joins, $col_errors);
+
+                                        if ($sqlKey) {
+                                            $return_fields[] = $sqlKey . ' as ' . $col_name . '_needed_field_' . $needed_field;
+                                            $fields[$col_name]['needed_fields'][] = $needed_field;
+                                        } elseif (count($col_errors)) {
+                                            $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . self::getColFullTitle($this->object, $col_name) . '" (Champ requis: "' . $field_object->getConf('fields/' . $needed_field . '/label', $needed_field) . '")');
+                                        } else {
+                                            $errors[] = 'Champ invalide pour la colonne "' . self::getColFullTitle($this->object, $col_name) . '" (Champ requis: "' . $field_object->getConf('fields/' . $needed_field . '/label', $needed_field) . '")';
+                                        }
                                     }
                                 }
                             }
                         }
+                    }
+
+                    if (count($col_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . self::getColFullTitle($this->object, $col_name) . '"');
                     }
                 }
             }
@@ -2793,7 +2803,7 @@ class BC_ListTable extends BC_List
                                         }
                                     }
                                 }
-                                
+
 
                                 if (is_array($value)) {//champ json
                                     $value = implode("\n", $value);

@@ -168,7 +168,7 @@ class modBimpsupport extends DolibarrModules {
         $this->rights = array();  // Permission array used by this module
         $r = 0;
         $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-        $this->rights[$r][1] = 'Créer modifié SAV'; // Permission label
+        $this->rights[$r][1] = 'Créer et modifier les SAV'; // Permission label
         $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
         $this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
@@ -180,11 +180,15 @@ class modBimpsupport extends DolibarrModules {
         $this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
         $r++;
-//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-//        $this->rights[$r][1] = 'Delete objects of My Module'; // Permission label
-//        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
-//        $this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Gérer les non-restitutions'; // Permission label
+        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'not_restituted';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
+        $r++;
+        
+        
         // Main menu entries
         $this->menu = array();   // List of menus to add
 //        $r = 1;
@@ -339,6 +343,8 @@ class modBimpsupport extends DolibarrModules {
      * @return     int             	1 if OK, 0 if KO
      */
     public function remove($options = '') {
+        global $conf;
+        
         $sql = array();
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevissav' AND entity = ".$conf->entity.";";
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpinvoicesav' AND entity = ".$conf->entity.";";

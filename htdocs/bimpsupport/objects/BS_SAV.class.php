@@ -249,6 +249,19 @@ class BS_SAV extends BimpObject
         return (int) $user->rights->BimpSupport->delete;
     }
 
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'notRestituted':
+            case 'reopen':
+                return (int) $user->rights->BimpSupport->not_restituted;
+        }
+
+        return parent::canSetAction($action);
+    }
+
     // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = [])
@@ -6184,7 +6197,7 @@ ORDER BY a.val_max DESC");
             }
 
             // Vérifs paiements:
-            
+
             $caisse = null;
             $payment_1_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
             $payment_2_set = (isset($data['paid2']) && (float) $data['paid2'] > 0);
@@ -7937,6 +7950,11 @@ ORDER BY a.val_max DESC");
                         }
                     }
                 }
+            }
+
+            if (!count($errors)) {
+                global $user, $langs;
+                $this->addNote('Réouverture du SAV le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             }
         }
 

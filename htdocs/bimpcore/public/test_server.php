@@ -20,7 +20,7 @@
 try{
     
     
-    if(isset($_REQUEST['error']))
+    if(!isset($_REQUEST['error']) || $_REQUEST['error'] == 0)
         fonction_nexistepas();
     else{
         require_once("../../main.inc.php");

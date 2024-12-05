@@ -6306,13 +6306,17 @@ class BCT_ContratLine extends BimpObject
                         $bundle_propal_line->no_maj_bundle = false;
                         $bundle_propal_line->majBundle($err);
 
-                        $bundle_line->set('line_origin_type', 'propal_line');
-                        $bundle_line->set('id_line_origin', $bundle_propal_line->id);
-
-                        $err = $bundle_line->update($warnings, true);
                         if (count($err)) {
-                            $bundle_prod = $bundle_line->getChildObject('product');
-                            $errors[] = BimpTools::getMsgFromArray($err, 'Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ' : Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat ');
+                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec du traitement des remises bundle (Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ')');
+                        } else {
+                            $bundle_line->set('line_origin_type', 'propal_line');
+                            $bundle_line->set('id_line_origin', $bundle_propal_line->id);
+
+                            $err = $bundle_line->update($warnings, true);
+                            if (count($err)) {
+                                $bundle_prod = $bundle_line->getChildObject('product');
+                                $errors[] = BimpTools::getMsgFromArray($err, 'Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ' : Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat ');
+                            }
                         }
                     }
                 }

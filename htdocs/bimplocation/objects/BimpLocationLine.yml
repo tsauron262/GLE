@@ -57,6 +57,7 @@ fields:
         display_if: 
             field_name: id_forfait
             hide_values: 0
+        decimals: 4
         
     tva_tx: 
         label: Tx TVA

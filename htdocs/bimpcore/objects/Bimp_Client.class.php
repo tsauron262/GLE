@@ -3277,7 +3277,7 @@ class Bimp_Client extends Bimp_Societe
     public function getIdAtradius(&$errors = array())
     {
         if ($this->isAnonymised()) {
-            $errors[] = 'Impossible de synchro avec une client Annonymisé';
+            $errors[] = 'Impossible de synchro avec un client Annonymisé';
             return 0;
         }
 
@@ -3301,7 +3301,7 @@ class Bimp_Client extends Bimp_Societe
                 $errors[] = 'L\'API Atraidus n\'est pas configurée correctement';
             }
         } else {
-            $errors[] = "SIREN ivalide : impossible d'obtenir l'ID Atradius";
+            $errors[] = "SIREN invalide : impossible d'obtenir l'ID Atradius";
         }
 
         return 0;

@@ -2479,8 +2479,6 @@ class Bimp_Facture extends BimpComm
                 if (isset($rows[0]['warranty_type'])) {
                     return $rows[0]['warranty_type'];
                 }
-            } else {
-                die('err : ' . self::getBdb()->err());
             }
         }
 

@@ -6,7 +6,6 @@ BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 global $langs;
 $langs->load('bills');
 $langs->load('errors');
-$cacheInstance = array();
 
 class Bimp_Facture extends BimpComm
 {
@@ -63,6 +62,8 @@ class Bimp_Facture extends BimpComm
         5 => array('label' => 'Retour produit'),
         6 => array('label' => 'Autre')
     );
+    protected $savs = null;
+    protected $repas = null;
 
     // Gestion des droits: 
 
@@ -2452,6 +2453,38 @@ class Bimp_Facture extends BimpComm
         return $tx;
     }
 
+    // Getters CSV :
+
+    public static function getSav_equipment_warantyCsvValue($needed_fields = array())
+    {
+        if (isset($needed_fields['rowid']) && (int) $needed_fields['rowid']) {
+            $sql = BimpTools::getSqlFullSelectQuery('bs_sav', array('e.warranty_type'), array(
+                        'or_sav' => array(
+                            'or' => array(
+                                'a.id_facture_acompte' => $needed_fields['rowid'],
+                                'a.id_facture'         => $needed_fields['rowid'],
+                                'a.id_facture_avoir'   => $needed_fields['rowid']
+                            )
+                        )
+                            ), array(
+                        'e' => array(
+                            'table' => 'be_equipment',
+                            'on'    => 'e.id = a.id_equipment'
+                        )
+            ));
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                if (isset($rows[0]['warranty_type'])) {
+                    return $rows[0]['warranty_type'];
+                }
+            }
+        }
+
+        return '';
+    }
+
     // Affichages: 
 
     public function displayPotentielRemise()
@@ -2504,62 +2537,83 @@ class Bimp_Facture extends BimpComm
 
     public function displayInfoSav($field)
     {
-        if (!isset($cacheInstance['savs'])) {
-            $cacheInstance['savs'] = array();
+        if (is_null($this->savs)) {
+            $this->savs = array();
             if ($this->isLoaded()) {
-                $cacheInstance['savs'] = BimpObject::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('custom' => array('custom' => '(`id_facture_acompte` = ' . $this->id . ' || `id_facture` = ' . $this->id . ' ||`id_facture_avoir` = ' . $this->id . ')')));
+                $this->savs = BimpObject::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('or_sav' => array(
+                                'or' => array(
+                                    'id_facture_acompte' => $this->id,
+                                    'id_facture'         => $this->id,
+                                    'id_facture_avoir'   => $this->id
+                                )
+                )));
             }
         }
 
         $result = array();
         global $modeCsv;
-        foreach ($cacheInstance['savs'] as $sav) {
-            if ($field == 'sav') {
-                if (!$modeCsv)
-                    $result[] = $sav->getLink();
-                else
-                    $result[] = $sav->getRef();
-            }
-            if (in_array($field, array('equipment', 'product', 'productInfo', 'waranty'))) {
-                $equipment = $sav->getChildObject('equipment');
-                if ($field == 'equipment') {
-                    if (!$modeCsv)
-                        $result[] = $equipment->getLink();
-                    else
-                        $result[] = $equipment->getData('serial');
-                }
-                if ($field == 'waranty') {
-                    $result[] = $equipment->getData('warranty_type');
-                }
-                if ($field == 'product') {
-                    $prod = $equipment->getChildObject('product');
-                    if (BimpObject::objectLoaded($prod)) {
-                        if (!$modeCsv)
-                            $result[] = $prod->getNomUrl();
-                        else
-                            $result[] = $prod->ref;
-                    }
-                }
-                if ($field == 'productInfo') {
-                    $prod = $equipment->getChildObject('product');
-                    if (BimpObject::objectLoaded($prod)) {
-                        $result[] = $prod->label;
-                    } else {
-                        $result[] = $equipment->getData('product_label');
-                    }
-                }
-            }
-            if ($field == 'apple_number') {
-                if (!isset($cacheInstance['repas'])) {
-                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id), 'id', 'desc');
-                }
 
-                foreach ($cacheInstance['repas'] as $repa) {
-                    $result[] = $repa->getData('repair_number');
+        foreach ($this->savs as $sav) {
+            switch ($field) {
+                case 'sav':
+                    if (!$modeCsv)
+                        $result[] = $sav->getLink();
+                    else
+                        $result[] = $sav->getRef();
                     break;
-                }
+
+                case 'equipment':
+                case 'waranty':
+                case 'product':
+                case 'productInfo':
+                    $equipment = $sav->getChildObject('equipment');
+
+                    switch ($field) {
+                        case 'equipment':
+                            if (!$modeCsv)
+                                $result[] = $equipment->getLink();
+                            else
+                                $result[] = $equipment->getData('serial');
+                            break;
+
+                        case 'waranty':
+                            $result[] = $equipment->getData('warranty_type');
+                            break;
+
+                        case 'product':
+                            $prod = $equipment->getChildObject('product');
+                            if (BimpObject::objectLoaded($prod)) {
+                                if (!$modeCsv)
+                                    $result[] = $prod->getNomUrl();
+                                else
+                                    $result[] = $prod->ref;
+                            }
+                            break;
+
+                        case 'productInfo':
+                            $prod = $equipment->getChildObject('product');
+                            if (BimpObject::objectLoaded($prod)) {
+                                $result[] = $prod->label;
+                            } else {
+                                $result[] = $equipment->getData('product_label');
+                            }
+                            break;
+                    }
+                    break;
+
+                case 'apple_number':
+                    if (is_null($this->repas)) {
+                        $this->repas = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id), 'id', 'desc');
+                    }
+
+                    foreach ($this->repas as $repa) {
+                        $result[] = $repa->getData('repair_number');
+                        break;
+                    }
+                    break;
             }
         }
+
         return implode('<br/>', $result);
     }
 
@@ -4494,10 +4548,10 @@ class Bimp_Facture extends BimpComm
                 if ($client->isAdministration()) {
                     $this->updateField('chorus_status', 0);
                 }
-                
+
                 $client->setActivity('Validation ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
             }
-            
+
             $id_client_final = (int) $this->getData('id_client_final');
             if ($id_client_final && $id_client_final !== $client->id) {
                 $client_final = $this->getChildObject('client_final');
@@ -6712,6 +6766,14 @@ class Bimp_Facture extends BimpComm
 
     // Overrides BimpObject:
 
+    public function reset()
+    {
+        parent::reset();
+
+        $this->savs = null;
+        $this->repas = null;
+    }
+
     public function validate()
     {
         $errors = parent::validate();
@@ -7020,12 +7082,12 @@ class Bimp_Facture extends BimpComm
                     }
                 }
             }
-            
+
             $client = $this->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
                 $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
             }
-            
+
             $id_client_final = (int) $this->getData('id_client_final');
             if ($id_client_final && $id_client_final !== $client->id) {
                 $client_final = $this->getChildObject('client_final');

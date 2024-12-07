@@ -575,6 +575,7 @@ class BimpCache
                 static::setCache($cache_key, $result);
             }
         }
+        
         return $result;
     }
     

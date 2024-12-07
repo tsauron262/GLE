@@ -5,7 +5,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 global $langs;
 $langs->load('bills');
 $langs->load('errors');
-$cacheInstance = array();
 
 class BT_ficheInter extends BimpDolObject
 {

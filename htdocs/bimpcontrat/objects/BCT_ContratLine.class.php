@@ -2027,11 +2027,11 @@ class BCT_ContratLine extends BimpObject
                 $comm_fourn_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
                             'a.linked_object_name' => 'contrat_line',
                             'a.linked_id_object'   => $this->id,
-                            'fdet.date_start'       => array(
+                            'fdet.date_start'      => array(
                                 'operator' => '<',
                                 'value'    => date('Y-m-d', strtotime($date_to)) . ' 23:59:59'
                             ),
-                            'fdet.date_end'         => array(
+                            'fdet.date_end'        => array(
                                 'operator' => '>',
                                 'value'    => date('Y-m-d', strtotime($date_from)) . ' 00:00:00'
                             )
@@ -5360,6 +5360,8 @@ class BCT_ContratLine extends BimpObject
 
     public function onSave(&$errors = [], &$warnings = [])
     {
+        // Ne pas màj ligne de propale liée sinon boucle infinie. 
+
         $this->hydrateFromDolObject();
 
         parent::onSave($errors, $warnings);
@@ -6280,6 +6282,7 @@ class BCT_ContratLine extends BimpObject
                         'type'                => ($bundle_line->getData('linked_object_name') === 'bundleCorrect' ? ObjectLine::LINE_FREE : ObjectLine::LINE_PRODUCT),
                         'editable'            => 0,
                         'deletable'           => 0,
+                        'remisable'           => 2,
                         'linked_object_name'  => $bundle_line->getData('linked_object_name'),
                         'linked_id_object'    => $bundle_line->getData('linked_id_object'),
                         'abo_fac_periodicity' => $bundle_line->getData('fac_periodicity'),
@@ -6300,13 +6303,20 @@ class BCT_ContratLine extends BimpObject
                         $bundle_prod = $bundle_line->getChildObject('product');
                         $errors[] = BimpTools::getMsgFromArray($err, 'Echec de l\'ajout d\une sous-ligne de bundle au devis (Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ')');
                     } else {
-                        $bundle_line->set('line_origin_type', 'propal_line');
-                        $bundle_line->set('id_line_origin', $bundle_propal_line->id);
+                        $bundle_propal_line->no_maj_bundle = false;
+                        $bundle_propal_line->majBundle($err);
 
-                        $err = $bundle_line->update($warnings, true);
                         if (count($err)) {
-                            $bundle_prod = $bundle_line->getChildObject('product');
-                            $errors[] = BimpTools::getMsgFromArray($err, 'Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ' : Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat ');
+                            $errors[] = BimpTools::getMsgFromArray($err, 'Echec du traitement des remises bundle (Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ')');
+                        } else {
+                            $bundle_line->set('line_origin_type', 'propal_line');
+                            $bundle_line->set('id_line_origin', $bundle_propal_line->id);
+
+                            $err = $bundle_line->update($warnings, true);
+                            if (count($err)) {
+                                $bundle_prod = $bundle_line->getChildObject('product');
+                                $errors[] = BimpTools::getMsgFromArray($err, 'Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ' : Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat ');
+                            }
                         }
                     }
                 }

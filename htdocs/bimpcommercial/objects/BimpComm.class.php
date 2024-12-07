@@ -604,14 +604,13 @@ class BimpComm extends BimpDolObject
         return $this->getChildObject('lines');
     }
     
-    
-
     public static function getCommercialCsvValue($needed_fields = array())
     {
         $list = static::getCommercialBimpComm(static::$dol_module, false);
 
         if (isset($list[$needed_fields['rowid']]))
             return implode("\n", $list[$needed_fields['rowid']]);
+        
         return '';
     }
 

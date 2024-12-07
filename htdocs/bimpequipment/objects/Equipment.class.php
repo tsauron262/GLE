@@ -411,7 +411,7 @@ class Equipment extends BimpObject
         $buttons[] = array(
             'label'   => 'Etiquette',
             'icon'    => 'fas_sticky-note',
-            'onclick' => $this->getJsActionOnclick('generateEtiquette')
+            'onclick' => $this->getJsActionOnclick('generateEtiquette', array(), array('form_name'=>'etiquettes'))
         );
 
         return $buttons;
@@ -1843,7 +1843,7 @@ class Equipment extends BimpObject
         }
 
         if ($url) {
-            $success_callback = 'window.open(\'' . $url . '\');';
+            $success_callback = 'window.open(\'' . $url .'&mode='.$data['mode'].'&qty='.$data['qty']. '\');';
         }
 
         return array(

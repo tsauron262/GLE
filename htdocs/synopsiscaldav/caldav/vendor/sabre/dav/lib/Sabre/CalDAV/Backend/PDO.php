@@ -475,6 +475,7 @@ class PDO extends AbstractBackend {
             $calendarData2[] = 'CLASS:CONFIDENTIAL';
         }
         if (isset($action->fk_element) && isset($action->elementtype)) { 
+            include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
             $url = \dolGetElementUrl($action->fk_element, $action->elementtype, 1);
             if($url)
                 $calendarData2[] = 'LOCATION:'.$url;

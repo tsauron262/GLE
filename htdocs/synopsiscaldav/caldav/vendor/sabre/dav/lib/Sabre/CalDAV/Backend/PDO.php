@@ -473,6 +473,11 @@ class PDO extends AbstractBackend {
         if (isset($action->array_options['options_conf']) && $action->array_options['options_conf'] == true) {
             $calendarData2[] = 'CLASS:CONFIDENTIAL';
         }
+        if (isset($action->fk_element) && isset($action->elementtype)) {
+            $url = dolGetElementUrl($action->fk_element, $action->elementtype, 1);
+            if($url)
+                $calendarData2[] = 'LOCATION:'.$url;
+        }
 
         if ($row['organisateur'] != "")
             $calendarData2[] = 'X-OWNER:mailto:' . $row['organisateur'];
@@ -480,6 +485,7 @@ class PDO extends AbstractBackend {
         $calendarData2[] = 'SEQUENCE:' . $row['sequence'];
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
+        
 
 
 

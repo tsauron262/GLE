@@ -118,6 +118,17 @@ www.opmconseil.com
         return $data;
     }
     
+    public function getDefaultCurlOptions($request_name, &$errors = array())
+    {
+        $return = parent::getDefaultCurlOptions($request_name, $errors);
+        /*
+         * problémd ecertificat
+         */
+        $return[CURLOPT_SSL_VERIFYHOST] = 0;
+        $return[CURLOPT_SSL_VERIFYPEER] = 0;
+        return $return;
+    }
+    
     public function executereqWithCache($name, $params = array(), &$errors = array(), &$warnings = array()){
         $key = 'apiReqEcologic'.$name.base64_encode(json_encode($params));
         if(BimpCache::cacheServerExists($key)){

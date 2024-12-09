@@ -419,6 +419,7 @@ class PDO extends AbstractBackend {
         $calendarData2 = array(); //$this->traiteTabIcs($row['agendaplus'], array());
 
         /* Participant */
+        $action->fetch($row['id']);
         $action->id = $row['id'];
         $action->fetch_userassigned();
         if ($row['participentExt'] != "")

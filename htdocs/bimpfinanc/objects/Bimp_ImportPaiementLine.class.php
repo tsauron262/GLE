@@ -50,7 +50,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             
             
             //recherche du nom
-            if(preg_match('/'.$parent->getFiltreWithBanque('05').'[0-9A-Z]{2}[0-9]{2}[0-9]{2}[0-9]{2}     NPY(.*)'.'/', $this->getData('data'), $matches)){
+            if(preg_match('/'.$parent->getFiltreWithBanque('05').'[0-9A-Z]{2}[0-9]{2}[0-9]{2}[0-9]{2}     NP.(.*)'.'/', $this->getData('data'), $matches)){
                 $name = $matches[1];
 //                $type = 'vir';
             }

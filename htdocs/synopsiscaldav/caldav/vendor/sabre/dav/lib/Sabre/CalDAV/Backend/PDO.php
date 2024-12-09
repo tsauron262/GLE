@@ -478,8 +478,8 @@ class PDO extends AbstractBackend {
             if($url)
                 $calendarData2[] = 'LOCATION:'.$url;
         }
-        if($action->fk_element == 11802920)
-                $calendarData2[] = 'LOCATIONnnnn:'.$url;
+//        if($action->fk_element == 11802920)
+                $calendarData2[] = 'LOCATIONnnnn:test'.$action->fk_element.$action->elementtype;
 
         if ($row['organisateur'] != "")
             $calendarData2[] = 'X-OWNER:mailto:' . $row['organisateur'];

@@ -419,8 +419,8 @@ class PDO extends AbstractBackend {
         $calendarData2 = array(); //$this->traiteTabIcs($row['agendaplus'], array());
 
         /* Participant */
-        $action->fetch($row['id']);
-//        $action->id = $row['id'];
+//        $action->fetch($row['id']);
+        $action->id = $row['id'];
         $action->fetch_userassigned();
         if ($row['participentExt'] != "")
             $tabPartExtInt = explode(",", $row['participentExt']);
@@ -476,7 +476,9 @@ class PDO extends AbstractBackend {
         }
         if (isset($action->fk_element) && isset($action->elementtype)) { 
             include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
-            $url = \dolGetElementUrl($action->fk_element, $action->elementtype, 1);
+            $bimpAction = \BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm', $action->id);
+            $url = $bimpAction->getLinkedUrl();
+//            $url = \dolGetElementUrl($action->fk_element, $action->elementtype, 1);
             if($url)
                 $calendarData2[] = 'LOCATION:'.$url;
         }

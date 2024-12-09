@@ -210,6 +210,25 @@ class Bimp_ActionComm extends BimpObject
         }
         return $return;
     }
+    
+    public function getLinkedUrl($externe = false){
+        $html = '';
+        if ((int) $this->getData('fk_element') && $this->getData('elementtype')) {
+            $instance = BimpTools::getInstanceByElementType($this->getData('elementtype'), (int) $this->getData('fk_element'));
+
+            if (is_null($instance)) {
+                $html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
+            } elseif (BimpObject::objectLoaded($instance)) {
+                if($externe)
+                    $html .= $_SERVER['HTTP_X_FORWARDED_PROTO'].'://'.$_SERVER['SERVER_NAME'];
+                $html .= BimpObject::getInstanceUrl($instance);
+            } else {
+                $html .= BimpTools::ucfirst(BimpObject::getInstanceLabel($instance) . ' #' . $this->getData('fk_element'));
+            }
+        }
+
+        return $html;
+    }
 
     public function displayElement()
     {

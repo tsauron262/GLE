@@ -420,7 +420,7 @@ class PDO extends AbstractBackend {
 
         /* Participant */
         $action->fetch($row['id']);
-        $action->id = $row['id'];
+//        $action->id = $row['id'];
         $action->fetch_userassigned();
         if ($row['participentExt'] != "")
             $tabPartExtInt = explode(",", $row['participentExt']);

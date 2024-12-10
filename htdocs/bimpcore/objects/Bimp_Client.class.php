@@ -1480,11 +1480,40 @@ class Bimp_Client extends Bimp_Societe
         return $html;
     }
 
+    public function renderlocationsView()
+    {
+        $html = '';
+
+        if (BimpCore::isModuleActive('bimplocation')) {
+            $tabs = array();
+            
+            $tabs[] = array(
+                'id'            => 'client_locations_list_tab',
+                'title'         => BimpRender::renderIcon('fas_business-time', 'iconLeft') . 'Locations du client',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_locations_list_tab .nav_tab_ajax_result\')', array('locations'), array('button' => ''))
+            );
+            
+            $tabs[] = array(
+                'id'            => 'client_locations_lines_list_tab',
+                'title'         => BimpRender::renderIcon('fas_business-time', 'iconLeft') . 'Equipements loués',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_locations_lines_list_tab .nav_tab_ajax_result\')', array('locations_lines'), array('button' => ''))
+            );
+            
+            $html .= BimpRender::renderNavTabs($tabs, 'locations_view');
+        } else {
+            $html .= BimpRender::renderAlerts('Module locaions désactivé');
+        }
+
+        return $html;
+    }
+
     public function renderCommercialView()
     {
         $tabs = array();
 
-        // Propales
+        // Propales        
         if ($this->isDolModuleActif('propale'))
             $tabs[] = array(
                 'id'            => 'client_propales_list_tab',
@@ -1883,6 +1912,16 @@ class Bimp_Client extends Bimp_Societe
             case 'fi':
                 $list = new BC_ListTable(BimpObject::getInstance('bimptechnique', 'BT_ficheInter'), 'client', 1, null, 'Fiche interventions du client "' . $client_label . '"', 'fas_ambulance');
                 $list->addFieldFilterValue('fk_soc', $this->id);
+                break;
+            
+            case 'locations':
+                $list = new BC_ListTable(BimpObject::getInstance('bimplocation', 'BimpLocation'), 'client', 1, null, 'Locations du client "' . $client_label . '"', 'fas_business-time');
+                $list->addFieldFilterValue('id_client', $this->id);
+                break;
+            
+            case 'locations_lines':
+                $list = new BC_ListTable(BimpObject::getInstance('bimplocation', 'BimpLocationLine'), 'client', 1, null, 'Equipments loués du client "' . $client_label . '"', 'fas_business-time');
+                $list->addFieldFilterValue('parent:id_client', $this->id);
                 break;
         }
 

@@ -40,6 +40,16 @@ sections:
                     callback: 
                         method: renderCardView
                         object: client
+          - id: locations
+            title: Locations
+            show: 
+                is_module_active: bimplocation
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderlocationsView
+                        object: client
           - id: commercial
             title: Commercial
             struct: 
@@ -98,6 +108,7 @@ sections:
 #                    panel: 1
 #                    object: client
 #                    children: files
+
           - id: all_files
             title: Fichiers
             struct:      

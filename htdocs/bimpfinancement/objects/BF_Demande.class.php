@@ -4966,10 +4966,29 @@ class BF_Demande extends BimpObject
                         // PDF contrat de location: 
                         require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
                         $pdf = new ContratFinancementPDF($db, $this, $client_data, $loueur_data, $cessionnaire_data, 'elec');
-                        $pdf->render($files_dir . $file_name, 'F');
+                        $contrat_file_name = $this->getSignatureDocFileName('contrat') . '_tmp';
+                        $pdf->render($files_dir . $contrat_file_name, 'F');
                         if (count($pdf->errors)) {
                             $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
                         }
+                        
+                        $mandat_file_name = 'mandat_sepa_' . $ref . '.pdf';
+                        require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/MandatSepaFinancementPDF.php';
+                        $pdf = new MandatSepaFinancementPDF($db, $client_data);
+                        if (!$pdf->render($files_dir . $mandat_file_name, 'F')) {
+                            $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
+                        }
+                        
+                        if (!count($errors)) {
+                            $pdf = new BimpConcatPdf();
+                            $pdf->concatFiles($files_dir . $file_name, array(
+                                $files_dir . $contrat_file_name,
+                                $files_dir . $mandat_file_name
+                                    ), 'F');
+                        }
+                        unlink($files_dir . $contrat_file_name);
+                        unlink($files_dir . $mandat_file_name);
+                        
                         break;
                 }
 

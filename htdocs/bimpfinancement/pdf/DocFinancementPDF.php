@@ -73,6 +73,62 @@ class DocFinancementPDF extends BimpDocumentPDF
         $this->header_vars['doc_name'] = $this->doc_name;
     }
 
+    public function renderHeader()
+    {
+        $html = '';
+
+        $html .= '<table>';
+        $html .= '<tr>';
+        $html .= '<td style="width: 70%">';
+
+        $html .= '<table>';
+        $html .= '<tr>';
+        $html .= '<td>';
+        if (isset($this->header_vars['logo_img']) && $this->header_vars['logo_img']) {
+            $html .= '<img src="' . $this->header_vars['logo_img'] . '" style="width: auto; height: 45px;"/>';
+        }
+        $html .= '</td>';
+        $html .= '<td style="width: 5%"></td>';
+        $html .= '<td style="50%; vertical-align: top">';
+
+        if (isset($this->header_vars['header_infos'])) {
+            $html .= $this->header_vars['header_infos'];
+        }
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td colspan="3">';
+
+        if (isset($this->header_vars['doc_name'])) {
+            $html .= '<br/><br/><span style="font-size: 11px; color: #' . $this->primary . '">' . $this->header_vars['doc_name'] . '</span>';
+        }
+
+        if (isset($this->header_vars['doc_ref'])) {
+            $html .= '<br/><span style="font-size: 9px;">' . $this->header_vars['doc_ref'] . '</span>';
+        }
+
+        if (isset($this->header_vars['ref_extra'])) {
+            $html .= '<br/>' . $this->header_vars['ref_extra'];
+        }
+        
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        $html .= '</td>';
+
+        $html .= '<td style="30%; text-align: right;">';
+        if (isset($this->header_vars['header_right'])) {
+            $html .= $this->header_vars['header_right'];
+        }
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        return $html;
+    }
+
     public function isTargetCompany()
     {
         if (isset($this->client_data['is_company'])) {

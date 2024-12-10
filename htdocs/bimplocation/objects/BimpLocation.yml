@@ -298,5 +298,10 @@ lists:
             id_client: 
             date_from: 
             date_to: 
+                
+    client: 
+        extends: default
+        cols: 
+            id_client: unset
             
         

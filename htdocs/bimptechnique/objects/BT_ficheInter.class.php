@@ -221,7 +221,7 @@ class BT_ficheInter extends BimpDolObject
         if ($this->isLoaded()) {
             $status = (int) $this->getData('fk_statut');
 
-            if (in_array($field, array('fk_soc', /*'fk_contrat', 'commandes', 'tickets',*/ 'urgent', 'fk_user_tech', 'datei', 'time_from', 'time_to', 'description'))) {
+            if (in_array($field, array('fk_soc', /* 'fk_contrat', 'commandes', 'tickets', */ 'urgent', 'fk_user_tech', 'datei', 'time_from', 'time_to', 'description'))) {
                 if ($status !== self::STATUT_BROUILLON) {
                     return 0;
                 }
@@ -502,7 +502,7 @@ class BT_ficheInter extends BimpDolObject
     {
         $buttons = array();
 
-        if ($this->isLoaded() /*&& (int) $this->getData('fk_statut') === self::STATUT_BROUILLON*/) {
+        if ($this->isLoaded() /* && (int) $this->getData('fk_statut') === self::STATUT_BROUILLON */) {
             $buttons[] = array(
                 'label'   => 'Editer les objets liés',
                 'icon'    => 'fas_edit',
@@ -2451,8 +2451,12 @@ class BT_ficheInter extends BimpDolObject
         $success = 'Mise à jour effectuée';
 
         $this->addLog("Le client à signé la FI et le fichier est déposé");
-        $this->set('type_signature', self::TYPE_SIGN_PAPIER);
-        $this->setSigned();
+        $this->updateField('type_signature', self::TYPE_SIGN_PAPIER);
+
+        if (!count($errors)) {
+            $errors = $this->setSigned($warnings);
+        }
+
         $this->updateField('fk_statut', 1);
 
         return [
@@ -2927,9 +2931,9 @@ class BT_ficheInter extends BimpDolObject
                             $new_factureLine->qty = 1;
                         else
                             $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
-                        if($new_factureLine->qty < 1)
+                        if ($new_factureLine->qty < 1)
                             $new_factureLine->qty = 1;
-                        $new_factureLine->qty = (ceil($new_factureLine->qty*2))/2;//arrondie a la deumie heure suplémentaire
+                        $new_factureLine->qty = (ceil($new_factureLine->qty * 2)) / 2; //arrondie a la deumie heure suplémentaire
                         $new_factureLine->id_product = $product->id;
                         $new_factureLine->tva_tx = 20;
                         $paBase = /* BimpCore::getConf('cout_horaire_technicien', */$product->getCurrentPaHt()/* , 'bimptechnique') */;
@@ -3269,7 +3273,7 @@ class BT_ficheInter extends BimpDolObject
             BimpTools::loadDolClass('comm/action/', 'actioncomm', 'ActionComm');
             $actionComm = new ActionComm($this->db->db);
             //changement de desc
-            if($init_desc != $this->getData('description')){
+            if ($init_desc != $this->getData('description')) {
                 $id_event = $this->getEventId();
                 if ($id_event > 0) {
                     $actionComm->fetch($id_event);
@@ -3279,9 +3283,9 @@ class BT_ficheInter extends BimpDolObject
                     }
                 }
             }
-            
-            
-            
+
+
+
             // Changement de tech: 
             if ($init_id_tech !== (int) $this->getData('fk_user_tech')) {
                 $changement_de_tech = true;

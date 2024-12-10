@@ -124,8 +124,8 @@ www.opmconseil.com
         /*
          * problémd ecertificat
          */
-        $return[CURLOPT_SSL_VERIFYHOST] = 0;
-        $return[CURLOPT_SSL_VERIFYPEER] = 0;
+//        $return[CURLOPT_SSL_VERIFYHOST] = 0;
+//        $return[CURLOPT_SSL_VERIFYPEER] = 0;
         return $return;
     }
     

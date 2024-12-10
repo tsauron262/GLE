@@ -1082,7 +1082,10 @@ forms:
               input: 
                   type: select
                   options: 
-                      array: client_contacts
+                      callback:
+                          method: getClient_contactsArray
+                          params:
+                              - 1
                   help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client                  
             - custom: 1
               label: Notification

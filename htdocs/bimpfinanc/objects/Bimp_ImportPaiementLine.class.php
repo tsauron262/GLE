@@ -42,7 +42,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             $date = '20' . $matches[4] . '-' . $matches[3] . '-' . $matches[2];
             $date2 = '20' . $matches[7] . '-' . $matches[6] . '-' . $matches[5];
 //            $type = strtolower(trim($matches[8]));
-            $type = $matches[1] == '05' || $matches[1] == 'C2' ? 'vir' : '';
+            $type = $matches[1] == '05' || $matches[1] == 'C2' || $matches[1] == '41' ? 'vir' : '';
             $type2 = $matches[9];
             $name = $matches[10];
             $price = $this->traitePrice($matches[12]);
@@ -50,7 +50,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             
             
             //recherche du nom
-            if(preg_match('/'.$parent->getFiltreWithBanque('05').'[0-9A-Z]{2}[0-9]{2}[0-9]{2}[0-9]{2}     NPY(.*)'.'/', $this->getData('data'), $matches)){
+            if(preg_match('/'.$parent->getFiltreWithBanque('05').'[0-9A-Z]{2}[0-9]{2}[0-9]{2}[0-9]{2}     NP.(.*)'.'/', $this->getData('data'), $matches)){
                 $name = $matches[1];
 //                $type = 'vir';
             }

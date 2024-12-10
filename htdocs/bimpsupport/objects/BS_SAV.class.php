@@ -1447,9 +1447,9 @@ class BS_SAV extends BimpObject
 
     // Getters array: 
 
-    public function getClient_contactsArray()
+    public function getClient_contactsArray($active_only = false)
     {
-        return $this->getSocieteContactsArray((int) $this->getData('id_client'));
+        return $this->getSocieteContactsArray((int) $this->getData('id_client'), true, '', $active_only);
     }
 
     public function getContratsArray()

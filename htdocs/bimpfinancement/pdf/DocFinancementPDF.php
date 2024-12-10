@@ -85,7 +85,7 @@ class DocFinancementPDF extends BimpDocumentPDF
         $html .= '<tr>';
         $html .= '<td>';
         if (isset($this->header_vars['logo_img']) && $this->header_vars['logo_img']) {
-            $html .= '<img src="' . $this->header_vars['logo_img'] . '" style="width: ' . (isset($this->header_vars['logo_width']) ? $this->header_vars['logo_width'] . 'px;' : '') . ' height: auto;"/>';
+            $html .= '<img src="' . $this->header_vars['logo_img'] . '" style="width: auto; height: 45px;"/>';
         }
         $html .= '</td>';
         $html .= '<td style="width: 5%"></td>';
@@ -101,16 +101,17 @@ class DocFinancementPDF extends BimpDocumentPDF
         $html .= '<td colspan="3">';
 
         if (isset($this->header_vars['doc_name'])) {
-            $html .= '<span style="font-size: 11px; color: #' . $this->primary . '">' . $this->header_vars['doc_name'] . '</span><br/>';
+            $html .= '<br/><br/><span style="font-size: 11px; color: #' . $this->primary . '">' . $this->header_vars['doc_name'] . '</span>';
         }
 
         if (isset($this->header_vars['doc_ref'])) {
-            $html .= '<span style="font-size: 9px;">' . $this->header_vars['doc_ref'] . '</span><br/>';
+            $html .= '<br/><span style="font-size: 9px;">' . $this->header_vars['doc_ref'] . '</span>';
         }
 
         if (isset($this->header_vars['ref_extra'])) {
-            $html .= $this->header_vars['ref_extra'];
+            $html .= '<br/>' . $this->header_vars['ref_extra'];
         }
+        
         $html .= '</td>';
         $html .= '</tr>';
         $html .= '</table>';

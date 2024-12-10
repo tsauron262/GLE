@@ -54,7 +54,13 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         global $conf;
 
-        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        $ext_entity = BimpCore::getExtendsEntity();
+        if ($ext_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/' . $ext_entity . '/logo_pdf.png')) {
+            $logo_file = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/' . $ext_entity . '/logo_pdf.png';
+        } else {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        }
+
         if ($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo)) {
             $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
         } else {
@@ -130,20 +136,20 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf;
 
         if ($this->footerCompany->name) {
-            $line1 .= '<span style="font-weight: bold;">' . $this->langs->convToOutputCharset($this->footerCompany->name).' </span> | ';
+            $line1 .= '<span style="font-weight: bold;">' . $this->langs->convToOutputCharset($this->footerCompany->name) . ' </span> | ';
         }
         if ($this->footerCompany->url) {
-            $line1 .= $this->footerCompany->url.'<br/>';
+            $line1 .= $this->footerCompany->url . '<br/>';
         }
 
         if ($this->footerCompany->address) {
             if (BimpCore::isEntity('prolease')) {
-                $line2 .= $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town;
+                $line1 .= $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town;
             } else {
                 $line1 .= $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town . " | Tél : " . $this->footerCompany->phone;
             }
         }
-        
+
 
         if ($this->footerCompany->forme_juridique_code) {
             $line2 .= $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->footerCompany->forme_juridique_code));
@@ -179,9 +185,9 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (preg_match('/\((.*)\)/i', $field, $reg)) {
                     $field = $reg[1];
                 }
-                $line2 .= ($line2 ? " - " : "") . 'RCS' . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4).' ';
+                $line2 .= ($line2 ? " - " : "") . 'RCS' . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4) . ' ';
             }
-            if ($this->footerCompany->idprof1 /*&& ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)*/) {
+            if ($this->footerCompany->idprof1 /* && ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2) */) {
                 $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);
                 if (preg_match('/\((.*)\)/i', $field, $reg)) {
                     $field = $reg[1];

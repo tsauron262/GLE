@@ -143,8 +143,8 @@ lists:
             - label: supprimer les lignes sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_field: position
-        sort_way: asc
+        sort_field: date_from
+        sort_way: desc
         n: 30
         add_btn: 0
         edit_btn: 1
@@ -165,6 +165,7 @@ lists:
         pagination: 0
         positions: 1
         positions_open: 1
+        sort_field: position
         sort_way: asc
         n: 0
         filters_panel: unset
@@ -172,5 +173,28 @@ lists:
         add_form_name: default
         cols: 
             id_location: unset
+            
+    equipment: 
+        extends: default
+        cols: 
+            unextends: 1
+            id_location:
+            parent:id_client:
+            date_from: 
+            date_to:
+            infos: 
+            cancelled: 
+                
+    client: 
+        extends: default
+        cols: 
+            unextends: 1
+            id_location:
+            equipment: 
+            forfait: 
+            date_from: 
+            date_to:
+            infos: 
+            cancelled: 
             
             

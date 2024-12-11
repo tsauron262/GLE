@@ -1821,6 +1821,19 @@ class Equipment extends BimpObject
         return $html;
     }
 
+    public function renderLocationsList()
+    {
+        if ($this->isLoaded()) {
+            $loc = BimpObject::getInstance('bimplocation', 'BimpLocationLine');
+            $bc_list = new BC_ListTable($loc, 'equipment', 1, null, 'Locations de l\'équipement "' . $this->getRef() . '"', 'fas_business-time');
+            $bc_list->addFieldFilterValue('id_equipment', $this->id);
+
+            return $bc_list->renderHtml();
+        }
+
+        return BimpRender::renderAlerts('ID équipement absent');
+    }
+
     // Actions: 
 
     public function actionGenerateEtiquette($data, &$success)
@@ -2078,9 +2091,9 @@ class Equipment extends BimpObject
 
         if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {
             // Pas de correction du id_product pour l'instant car trop dangereux (stocks, incohérences commandes / factures, etc.)
-            
-            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');            
-            
+
+            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+
             if ($prod_instance->field_exists('code_config') && preg_match('/^.+(.{4})$/', $serial, $matches)) {
                 $apple_product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                             'code_config' => $matches[1],

@@ -475,7 +475,11 @@ class BF_Line extends BimpObject
                 break;
 
             case self::TYPE_FREE:
-                $html .= '<b>' . $this->getData('ref') . '</b>';
+                $ref = $this->getData('ref');
+                if ($ref) {
+                    $html .= '<b>' . $ref . '</b>';
+                }
+
             case self::TYPE_TEXT:
                 $html .= ($html ? '<br/>' : '') . $this->getData('label');
                 break;
@@ -905,7 +909,7 @@ class BF_Line extends BimpObject
             $serials = $this->getData('serials');
             $diff = count($serials) - (int) $this->getData('qty');
             if ($diff > 0 && $this->getData('qty') > 0) {
-                $errors[] = 'Le nombre de n° de série enregistrés est supérieur aux quantités de la ligne. Veuillez retirer ' . $diff . ' n° de série ( '.print_r($serials, 1).')';
+                $errors[] = 'Le nombre de n° de série enregistrés est supérieur aux quantités de la ligne. Veuillez retirer ' . $diff . ' n° de série ( ' . print_r($serials, 1) . ')';
             }
         }
 

@@ -1103,6 +1103,34 @@ class BF_Demande extends BimpObject
         );
     }
 
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        $where_source = 'source.commercial_data LIKE \'%' . $this->db->db->escape((string) $value) . '%\'';
+
+        $alias = $main_alias . '___commercial';
+        $joins[$alias] = array(
+            'alias' => $alias,
+            'table' => 'socpeople',
+            'on'    => $main_alias . '.id_supplier_contact = ' . $alias . '.rowid'
+        );
+
+        $filters['or_commercial'] = array(
+            'or' => array(
+                $alias . '.firstname'         => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                $alias . '.lastname'                 => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                $main_alias . '.id_main_source' => array(
+                    'in' => 'SELECT source.id FROM ' . MAIN_DB_PREFIX . 'bf_demande_source source WHERE ' . $where_source
+                )
+            )
+        );
+    }
+    
     // Getters array: 
 
     public function getClientContactsArray($include_empty = true, $active_only = true)
@@ -2085,6 +2113,19 @@ class BF_Demande extends BimpObject
         return $this->displaySourceClient('main', $with_popover_infos);
     }
 
+    public function displayCommercial($with_popover_infos = false)
+    {
+        if ((int) $this->getData('id_main_source')) {
+            return $this->displaySourceCommercial('main', $with_popover_infos);
+        }
+        
+        if ((int) $this->getData('id_supplier_contact')) {
+            return $this->displayDataDefault('id_supplier_contact');
+        }
+        
+        return '';
+    }
+    
     public function displaySourceClient($id_source = 'main', $with_popover_infos = false)
     {
         if ($id_source === 'main') {

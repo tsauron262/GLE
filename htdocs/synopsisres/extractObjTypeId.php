@@ -62,9 +62,9 @@ function getTabTypeObject($typeFiltre = null)
         'commandeFournisseur'   => array('urls' => array("fourn/commande/card.php"),
             'path' => '/fourn/class/fournisseur.commande.class.php',
             'obj'  => 'CommandeFournisseur'),
-        'BS_SAV'                => array('urls' => array("bimpsupport/index.php?fc=sav"),
-            'path' => '/bimpsupport/objects/BS_SAV.class.php',
-            'obj'  => 'BS_SAV',
+        'BS_SAV'                => array('urls'   => array("bimpsupport/index.php?fc=sav"),
+            'path'   => '/bimpsupport/objects/BS_SAV.class.php',
+            'obj'    => 'BS_SAV',
             'module' => 'bimpsupport'),
         'Equipment'             => array('urls'   => array("bimpequipment/index.php?fc=equipment"),
             'path'   => '/bimpequipment/objects/Equipment.class.php',
@@ -103,9 +103,13 @@ function getTabTypeObject($typeFiltre = null)
             'urls'   => array('bimpcore/index.php?fc=product'),
             'module' => 'bimpcore'
         ),
-        'BCT_Contrat' => array(
+        'BCT_Contrat'           => array(
             'urls'   => array('bimpcontrat/index.php?fc=contrat'),
             'module' => 'bimpcontrat'
+        ),
+        'BimpLocation'          => array(
+            'urls'   => array('bimplocation/index.php?fc=location'),
+            'module' => 'bimplocation'
         )
     );
 
@@ -118,7 +122,7 @@ function getTabTypeObject($typeFiltre = null)
                 $data['obj'] = ucfirst($typeT);
 
             if (!isset($data['path'])) {
-                if (isset($data['module']) && strpos($data['module'], 'bimp') === 0) 
+                if (isset($data['module']) && strpos($data['module'], 'bimp') === 0)
                     $data['path'] = $data['module'] . "/objects/" . $data['obj'] . ".class.php";
                 else
                     $data['path'] = "/" . $data['type'] . "/class/" . strtolower($data['obj']) . ".class.php";
@@ -175,7 +179,7 @@ function getTypeAndId($url = null, $request = null)
 
 
     $tabTypeObject = getTabTypeObject();
-    
+
     $element_type = null;
     $element_id = 0;
 

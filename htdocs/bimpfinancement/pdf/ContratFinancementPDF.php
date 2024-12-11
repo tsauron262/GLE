@@ -19,7 +19,7 @@ class ContratFinancementPDF extends DocFinancementPDF
     public $cessionnaire_data;
     public $cg_file = DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/cg_contrat.pdf';
     public $cg_page_start = 0;
-    public $cg_page_number = 7;
+    public $cg_page_number = 8;
     public $display_line_amounts = false;
 
     # Params:
@@ -236,6 +236,11 @@ class ContratFinancementPDF extends DocFinancementPDF
         }
 
         $this->writeFullBlock($html);
+
+        if ($this->pdf->getY() > 200) {
+            $this->pdf->newPage();
+        }
+        
         $html = '';
 
         $html .= '<div style="font-size: 9px; style="text-align: justify"">';
@@ -432,9 +437,9 @@ class ContratFinancementPDF extends DocFinancementPDF
 //            $this->pdf->SetXY(0, 10);
 //            $this->pdf->Cell(0, 0, $title, 0, 2, 'C', 0);
 
-            if ($i === 6) {
+            if ($i === 7) {
 //                if ($this->type_pdf === 'papier') {
-                $this->pdf->SetXY(10, 220);
+                $this->pdf->SetXY(10, 235);
                 $this->writeFullBlock($this->getSignatureBlocHtml());
 //                }
             }

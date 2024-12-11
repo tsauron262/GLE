@@ -135,7 +135,7 @@ function BC_Vente() {
         if (typeof (result.vente_data.returns) !== 'undefined') {
             this.returns = result.vente_data.returns;
         }
-        
+
         if (typeof (result.vente_data.total_locations_ttc) !== 'undefined') {
             this.total_locations_ttc = result.vente_data.total_locations_ttc;
         }
@@ -518,8 +518,8 @@ function loadVente($button, id_vente, open_tab) {
         bimp_msg('Erreur: identifiant de la caisse absent', 'danger');
         return;
     }
-    
-    if (typeof(open_tab) !== 'undefined' && open_tab) {
+
+    if (typeof (open_tab) !== 'undefined' && open_tab) {
         $('#bc_main_container').find('a[href="#ventes"]').click();
     }
 
@@ -1034,7 +1034,7 @@ function findProduct($button) {
 }
 
 function selectArticle($button, id_object, object_name) {
-    if ($button.hasClass('disabled')) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
         return;
     }
 
@@ -1042,9 +1042,6 @@ function selectArticle($button, id_object, object_name) {
         $(this).find('button').addClass('disabled');
     });
 
-    $button.removeClass('disabled');
-
-    $button.removeClass('disabled');
     BimpAjax('selectArticle', {
         id_vente: Vente.id_vente,
         id_object: id_object,
@@ -1686,4 +1683,12 @@ $(document).ready(function () {
     $('body').on('objectChange', function (e) {
         refreshVente();
     });
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var id_vente = urlParams.get('id_vente');
+    if (typeof(id_vente) !== 'undefined' && parseInt(id_vente)) {
+        loadVente($(), id_vente, true);
+        removeUrlParam('id_vente');
+    }
+
 });

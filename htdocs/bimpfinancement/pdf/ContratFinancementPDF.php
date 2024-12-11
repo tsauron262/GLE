@@ -236,6 +236,11 @@ class ContratFinancementPDF extends DocFinancementPDF
         }
 
         $this->writeFullBlock($html);
+
+        if ($this->pdf->getY() > 200) {
+            $this->pdf->newPage();
+        }
+        
         $html = '';
 
         $html .= '<div style="font-size: 9px; style="text-align: justify"">';

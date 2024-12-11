@@ -203,7 +203,6 @@ class BimpPDF_Table
                 $content .= $this->addDEEEandRPCP($key, $row['object'], $row['qte'], str_replace("%", "", $row['tva']));
             }
 
-
             $html .= '<td style="width: ' . $col_width . 'px';
             if ($style) {
                 $html .= '; ' . $style;

@@ -1103,6 +1103,34 @@ class BF_Demande extends BimpObject
         );
     }
 
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        $where_source = 'source.commercial_data LIKE \'%' . $this->db->db->escape((string) $value) . '%\'';
+
+        $alias = $main_alias . '___commercial';
+        $joins[$alias] = array(
+            'alias' => $alias,
+            'table' => 'socpeople',
+            'on'    => $main_alias . '.id_supplier_contact = ' . $alias . '.rowid'
+        );
+
+        $filters['or_commercial'] = array(
+            'or' => array(
+                $alias . '.firstname'         => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                $alias . '.lastname'                 => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                $main_alias . '.id_main_source' => array(
+                    'in' => 'SELECT source.id FROM ' . MAIN_DB_PREFIX . 'bf_demande_source source WHERE ' . $where_source
+                )
+            )
+        );
+    }
+    
     // Getters array: 
 
     public function getClientContactsArray($include_empty = true, $active_only = true)
@@ -2085,6 +2113,19 @@ class BF_Demande extends BimpObject
         return $this->displaySourceClient('main', $with_popover_infos);
     }
 
+    public function displayCommercial($with_popover_infos = false)
+    {
+        if ((int) $this->getData('id_main_source')) {
+            return $this->displaySourceCommercial('main', $with_popover_infos);
+        }
+        
+        if ((int) $this->getData('id_supplier_contact')) {
+            return $this->displayDataDefault('id_supplier_contact');
+        }
+        
+        return '';
+    }
+    
     public function displaySourceClient($id_source = 'main', $with_popover_infos = false)
     {
         if ($id_source === 'main') {
@@ -4966,10 +5007,29 @@ class BF_Demande extends BimpObject
                         // PDF contrat de location: 
                         require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
                         $pdf = new ContratFinancementPDF($db, $this, $client_data, $loueur_data, $cessionnaire_data, 'elec');
-                        $pdf->render($files_dir . $file_name, 'F');
+                        $contrat_file_name = $this->getSignatureDocFileName('contrat') . '_tmp';
+                        $pdf->render($files_dir . $contrat_file_name, 'F');
                         if (count($pdf->errors)) {
                             $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
                         }
+                        
+                        $mandat_file_name = 'mandat_sepa_' . $ref . '.pdf';
+                        require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/MandatSepaFinancementPDF.php';
+                        $pdf = new MandatSepaFinancementPDF($db, $client_data);
+                        if (!$pdf->render($files_dir . $mandat_file_name, 'F')) {
+                            $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
+                        }
+                        
+                        if (!count($errors)) {
+                            $pdf = new BimpConcatPdf();
+                            $pdf->concatFiles($files_dir . $file_name, array(
+                                $files_dir . $contrat_file_name,
+                                $files_dir . $mandat_file_name
+                                    ), 'F');
+                        }
+                        unlink($files_dir . $contrat_file_name);
+                        unlink($files_dir . $mandat_file_name);
+                        
                         break;
                 }
 

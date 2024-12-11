@@ -1615,6 +1615,14 @@ lists_cols:
             callback: displayClient
         search: 
             type: value_part
+            
+    commercial: 
+        label: Commercial
+        value: 
+            callback: displayCommercial
+        search: 
+            type: value_part
+            
     total:        
         label: Total demande HT
         value: 

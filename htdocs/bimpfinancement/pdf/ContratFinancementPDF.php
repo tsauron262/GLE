@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/DocFinancementPDF.php';
 class ContratFinancementPDF extends DocFinancementPDF
 {
 
-    public static $nb_cgv_pages = 'quatre';
+    public static $nb_cgv_pages = 'sept';
     public static $doc_type = 'contrat';
     public $type_pdf = '';
     public $signature_bloc = true;
@@ -19,7 +19,7 @@ class ContratFinancementPDF extends DocFinancementPDF
     public $cessionnaire_data;
     public $cg_file = DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/cg_contrat.pdf';
     public $cg_page_start = 0;
-    public $cg_page_number = 4;
+    public $cg_page_number = 8;
     public $display_line_amounts = false;
 
     # Params:
@@ -117,15 +117,15 @@ class ContratFinancementPDF extends DocFinancementPDF
         $html .= '</p>';
 
         $html .= '<p style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Le loueur</p>';
-        $html .= '<p>';
+        $html .= '<p style="text-align: justify">';
         $html .= 'La société LDLC PRO LEASE, SAS au capital de 100 000,00 € dont le siège social est situé à LIMONEST (69760), 2 rue des érables, ';
         $html .= 'enregistrée sous le numéro siren 838 651 594 auprès du RCS de Lyon, représentée par M. Olivier VILLEMONTE de la CLERGERIE, ';
         $html .= 'intervenant en qualité de Président.';
         $html .= '</p>';
 
-        $html .= '<p>';
+        $html .= '<p style="text-align: justify">';
         $html .= 'Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l’accepte, ';
-        $html .= 'aux Conditions Particulières et aux Conditions Générales composées de ' . self::$nb_cgv_pages . ' pages recto.';
+        $html .= 'aux Conditions Particulières du contrat de location n°' . str_replace('DF', '', $this->demande->getRef()) . ' et aux Conditions Générales composées de ' . self::$nb_cgv_pages . ' pages recto.';
         $html .= '</p>';
         $html .= '</div>';
 
@@ -164,12 +164,12 @@ class ContratFinancementPDF extends DocFinancementPDF
                 $loyer_ht = (float) $this->demande->getData('loyer_mensuel_evo_ht') * $periodicity;
                 $loyer_ttc = $loyer_ht * 1.2;
 
-                $html .= '<table cellpadding="3px" style="text-align: center">';
+                $html .= '<table cellpadding="3px" style="text-align: center;">';
                 $html .= '<tr>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Nombre de loyers</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Montant HT</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Périodicité</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Montant TTC</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Nombre de loyers</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Montant HT</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Périodicité</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Montant TTC</th>';
                 $html .= '</tr>';
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #F2F2F2"><b>' . $nb_loyers . '</b></td>';
@@ -189,12 +189,12 @@ class ContratFinancementPDF extends DocFinancementPDF
                 $loyer_suppl_ht = (float) $this->demande->getData('loyer_mensuel_suppl_ht') * $periodicity;
                 $loyer_suppl_ttc = $loyer_suppl_ht * 1.2;
 
-                $html .= '<table cellpadding="3px" style="text-align: center">';
+                $html .= '<table cellpadding="3px" style="text-align: center; width: 100%">';
                 $html .= '<tr>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Nombre de loyers</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Montant HT</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Périodicité</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Montant TTC</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Nombre de loyers</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Montant HT</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Périodicité</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Montant TTC</th>';
                 $html .= '</tr>';
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #F2F2F2"><b>' . $nb_loyers . '</b></td>';
@@ -205,12 +205,12 @@ class ContratFinancementPDF extends DocFinancementPDF
                 $html .= '</table>';
 
                 $html .= '<p>Suivi de : </p>';
-                $html .= '<table cellpadding="3px" style="text-align: center">';
+                $html .= '<table cellpadding="3px" style="text-align: center; width: 100%">';
                 $html .= '<tr>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Nombre de loyers</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Montant HT</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Périodicité</th>';
-                $html .= '<th style="width: 120px; background-color: #' . $this->primary . '; color: #fff;">Montant TTC</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Nombre de loyers</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Montant HT</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Périodicité</th>';
+                $html .= '<th style="width: 134px; background-color: #' . $this->primary . '; color: #fff;">Montant TTC</th>';
                 $html .= '</tr>';
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #F2F2F2"><b>' . (12 / $periodicity) . '</b></td>';
@@ -227,38 +227,30 @@ class ContratFinancementPDF extends DocFinancementPDF
 
         $livraisons = BimpTools::getArrayValueFromPath($this->client_data, 'livraisons', '');
         if ($livraisons) {
-            $html .= '<div style="font-size: 9px">';
+            $html .= '<div>';
             $html .= '<p style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Site(s) de livraison / installation</p>';
-            $html .= '<p style="font-weight: bold">';
+            $html .= '<p style="font-size: 9px; font-weight: bold">';
             $html .= $livraisons;
             $html .= '</p>';
             $html .= '</div>';
         }
 
         $this->writeFullBlock($html);
+
+        if ($this->pdf->getY() > 200) {
+            $this->pdf->newPage();
+        }
+        
         $html = '';
 
-        $html .= '<div style="font-size: 9px">';
-        $html .= '<p>';
-        $html .= 'Le locataire déclare avoir été parfaitement informé de l’opération lors de la phase précontractuelle, avoir pris connaissance, reçu et accepter toutes les conditions particulières et générales. Il atteste que le contrat est en rapport direct avec son activité professionnelle et souscrit pour les besoins de cette dernière. Le signataire atteste être habilité à l’effet d’engager le locataire au titre du présent contrat. Le locataire reconnait avoir une copie des Conditions Générales, les avoir acceptées sans réserve y compris les clauses attribution de compétence et CNIL.';
-        $html .= '</p>';
-
-//        $html .= '<p>';
-//        $html .= 'Fait en autant d’exemplaires que de parties, un pour chacune des parties';
-//        $html .= '</p>';
+        $html .= '<div style="font-size: 9px; style="text-align: justify"">';
+        $html .= 'Le locataire déclare avoir été parfaitement informé de l’opération lors de la phase précontractuelle, avoir pris connaissance, reçues et acceptées toutes les conditions particulières et générales. ';
+        $html .= 'Il atteste que le contrat est en rapport direct avec son activité professionnelle et souscrit pour les besoins de cette dernière. Le signataire atteste être habilité à l’effet d’engager le locataire au titre du présent contrat. ';
+        $html .= 'Le locataire reconnait avoir une copie des Conditions Générales, les avoir acceptées sans réserve y compris les clauses attribution de compétence et CNIL.';
 
         if ($this->type_pdf == 'elec') {
             $html .= '<p>Document à signer électroniquement par les trois parties</p>';
         }
-
-        $html .= '<p>';
-        $html .= '<b>ANNEXES : </b>';
-        $html .= '<ul>';
-        $html .= '<li>Conditions générales composées de ' . self::$nb_cgv_pages . ' pages recto</li>';
-        $html .= '</ul>';
-        $html .= '</p>';
-
-//        $html .= '<p>Fait à Limonest, le ' . date('d / m / Y') . ' </p>';
 
         $html .= '</div>';
 
@@ -439,16 +431,18 @@ class ContratFinancementPDF extends DocFinancementPDF
         $this->pdf->createHeader('');
         $this->cg_page_start = $this->pdf->getPage() + 1;
 
-        $title = 'Conditions générales du contrat de location n°' . str_replace('DF', '', $this->demande->getRef());
-        for ($i = 1; $i < 5; $i++) {
+//        $title = 'Conditions générales du contrat de location n°' . str_replace('DF', '', $this->demande->getRef());
+        for ($i = 1; $i <= $this->cg_page_number; $i++) {
             $this->pdf->AddPage();
-            $this->pdf->SetXY(0, 10);
-            $this->pdf->Cell(0, 0, $title, 0, 2, 'C', 0);
-        }
+//            $this->pdf->SetXY(0, 10);
+//            $this->pdf->Cell(0, 0, $title, 0, 2, 'C', 0);
 
-        if ($this->type_pdf === 'papier') {
-            $this->pdf->SetXY(10, 150);
-            $this->writeFullBlock($this->getSignatureBlocHtml());
+            if ($i === 7) {
+//                if ($this->type_pdf === 'papier') {
+                $this->pdf->SetXY(10, 235);
+                $this->writeFullBlock($this->getSignatureBlocHtml());
+//                }
+            }
         }
     }
 

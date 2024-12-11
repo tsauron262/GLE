@@ -168,6 +168,21 @@ class BimpLocation extends BimpObject
                     'confirm_msg' => 'Veuillez confirmer le retrait de cette location de la vente en cours #' . $id_vente
                 ))
             );
+
+            $onclick = '';
+
+            if (strpos($_SERVER['PHP_SELF'], 'bimpcaisse') !== false) {
+                $onclick = 'loadVente($(this), ' . $id_vente . ', true);';
+            } else {
+                $url = DOL_URL_ROOT . '/bimpcaisse/index.php?id_vente=' . $id_vente;
+                $onclick = 'window.open(\'' . $url . '\');';
+            }
+
+            $buttons[] = array(
+                'label'   => 'Ouvrir la vente en cours #' . $id_vente,
+                'icon'    => 'fas_arrow-circle-right',
+                'onclick' => $onclick
+            );
         }
 
         if ($this->isActionAllowed('close') && $this->canSetAction('close')) {
@@ -217,6 +232,22 @@ class BimpLocation extends BimpObject
 
         if ($this->isActionAllowed('removeFromCurVente') && $this->canSetAction('removeFromCurVente')) {
             $id_vente = (int) $this->getData('id_cur_vente');
+
+            $onclick = '';
+
+            if (strpos($_SERVER['PHP_SELF'], 'bimpcaisse') !== false) {
+                $onclick = 'loadVente($(this), ' . $id_vente . ', true);';
+            } else {
+                $url = DOL_URL_ROOT . '/bimpcaisse/index.php?id_vente=' . $id_vente;
+                $onclick = 'window.open(\'' . $url . '\');';
+            }
+
+            $buttons[] = array(
+                'label'   => 'Ouvrir la vente en cours #' . $id_vente,
+                'icon'    => 'fas_arrow-circle-right',
+                'onclick' => $onclick
+            );
+
             $buttons[] = array(
                 'label'   => 'Retirer de la vente en cours #' . $id_vente,
                 'icon'    => 'fas_times',
@@ -726,18 +757,29 @@ class BimpLocation extends BimpObject
                             $html .= BimpRender::renderIcon('fas_trash-alt');
                             $html .= '</span>';
                         }
+
+                        if ($line->can('edit')) {
+                            $onclick = $line->getJsLoadModalForm('default', 'Edition de la location', array(), null, '', 0, '$(this)', 'function() {Vente.refresh()}');
+                            $html .= '<span class="editArticle" onclick="' . $onclick . '">';
+                            $html .= BimpRender::renderIcon('fas_edit');
+                            $html .= '</span>';
+                        }
                     } elseif ($line->isActionAllowed('reopen') && $line->canSetAction('reopen')) {
-                        $onclick = $this->getJsActionOnclick('reopen', array(), array());
+                        $onclick = $line->getJsActionOnclick('reopen', array(), array());
                         $html .= '<span class="reopenArticle bs-popover" onclick="' . $onclick . '"' . BimpRender::renderPopoverData('Réouvrir') . '>';
-                        $html .= BimpRender::renderIcon('fas_redo');
+                        $html .= BimpRender::renderIcon('fas_undo');
                         $html .= '</span>';
                     }
-
-                    $onclick = $line->getJsLoadModalForm('default', 'Edition de la location', array(), null, '', 0, '$(this)', 'function() {Vente.refresh()}');
-                    $html .= '<span class="editArticle" onclick="' . $onclick . '">';
-                    $html .= BimpRender::renderIcon('fas_edit');
-                    $html .= '</span>';
                     $html .= '</div>';
+
+                    if ($line->isActionAllowed('sellEquipment') && $line->canSetAction('sellEquipment')) {
+                        $onclick = $line->getJsActionOnclick('sellEquipment', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer l\\\'annulation de la location et la mise en vente de l\\\'équipement'
+                        ));
+                        $html .= '<span class="btn btn-default btn-small" onclick="' . $onclick . '" style="position: absolute; margin-top: 10px; right: 35px;">';
+                        $html .= 'Vendre';
+                        $html .= '</span>';
+                    }
 
                     $html .= '<div class="product_info"><b>N° équipement : ' . $equipment->getData('serial') . '</b></div>';
                     $html .= '<div class="product_info"><b>Réf: </b>' . $product->getRef() . '</div>';
@@ -753,6 +795,13 @@ class BimpLocation extends BimpObject
                         $html .= '<div class="location_remises">';
                         $html .= 'Remise (' . BimpTools::displayFloatValue($remise, 2, ',', 0, 0, 0, 0, 1, 1) . ' %) : ';
                         $html .= '<b>' . BimpTools::displayMoneyValue(($pu_ttc * $total_qty * ($remise / 100)), 'EUR', 0, 0, 0, 2, 0, ',', 1) . '</b>';
+                        $html .= '</div>';
+                    }
+
+                    $infos = $line->getData('infos');
+                    if ($infos) {
+                        $html .= '<div class="note_content" style="margin: 10px 15px">';
+                        $html .= $infos;
                         $html .= '</div>';
                     }
 

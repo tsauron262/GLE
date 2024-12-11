@@ -18,7 +18,7 @@ class BimpLocationLine extends BimpObject
         return 0;
     }
 
-    public function isEquipmentAvailable($id_eq, $date_from = '', $date_to = '', $id_entrepot = 0, &$errors = array())
+    public function isEquipmentAvailable($id_eq = 0, $date_from = '', $date_to = '', $id_entrepot = 0, &$errors = array())
     {
         if (!$id_eq) {
             $id_eq = (int) $this->getData('id_equipment');
@@ -34,6 +34,14 @@ class BimpLocationLine extends BimpObject
             $errors[] = 'L\'équipement #' . $id_eq . ' n\'existe plus';
             return 0;
         }
+
+        if (!$id_entrepot) {
+            $loc = $this->getParentInstance();
+            if (BimpObject::objectLoaded($loc)) {
+                $id_entrepot = (int) $loc->getData('id_entrepot');
+            }
+        }
+
         $place = $eq->getCurrentPlace();
         if (!BimpObject::objectLoaded($place) || (int) $place->getData('type') !== BE_Place::BE_PLACE_LOCATION) {
             $errors[] = 'L\'équipement ' . $eq->getLink() . ' n\'est pas dans un emplacement de type "location"';
@@ -100,6 +108,10 @@ class BimpLocationLine extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
         switch ($action) {
             case 'reopen':
                 if (!(int) $this->getData('cancelled')) {
@@ -380,7 +392,7 @@ class BimpLocationLine extends BimpObject
             if ($loc_from && $loc_from != $this->getData('date_from')) {
                 $html .= '<span class="important">';
                 $html .= $this->displayDataDefault('date_from');
-                $html .= '</span>' . ($single_line ? ' ' : '<br/>');
+                $html .= '</span>';
             } else {
                 $html .= $this->displayDataDefault('date_from');
             }
@@ -404,7 +416,7 @@ class BimpLocationLine extends BimpObject
         return $html;
     }
 
-    // Rendus HTML : 
+    // Rendus HTML :
 
     public function renderForfaitInput()
     {
@@ -525,7 +537,72 @@ class BimpLocationLine extends BimpObject
         return $html;
     }
 
-    // Overrides : 
+    // Actions :
+
+    public function actionReopen($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Réouverture de la ligne de location effectuée avec succès';
+
+        if ($this->isEquipmentAvailable(0, '', '', 0, $errors)) {
+            $errors = $this->updateField('cancelled', 0);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSellEquipment($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+//        $vente = null;
+        $loc = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($loc)) {
+            $errors[] = 'Location absent';
+        }
+//        else {
+//            $vente = $loc->getChildObject('cur_vente');
+//            if (!BimpObject::objectLoaded($vente)) {
+//                $errors[] = 'Aucune vente en cours pour cette location';
+//            }
+//        }
+
+        $eq = $this->getChildObject('equipment');
+        if (!BimpObject::objectLoaded($eq)) {
+            $errors[] = 'Equipement absent';
+        }
+
+        if (!count($errors)) {
+            $errors = $this->updateField('cancelled', 1);
+
+            if (!count($errors)) {
+                $id_entrepot = (int) $loc->getData('id_entrepot');
+                if ($id_entrepot) {
+                    BimpObject::loadClass('bimpequipment', 'BE_Place');
+                    $errors = $eq->moveToPlace(BE_Place::BE_PLACE_ENTREPOT, $id_entrepot, '', 'Mise en vente équipement');
+
+                    if (!count($errors)) {
+                        $sc = 'selectArticle($(), ' . $eq->id . ', \'equipment\');';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    // Overrides :
 
     public function reset()
     {

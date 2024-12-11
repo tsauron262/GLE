@@ -555,6 +555,25 @@ forms:
               type: custom
               content: 
                   callback: renderMergeFormInput
+                  
+    etiquettes:
+        rows: 
+            - custom: 1
+              label: Quantité
+              input_name: qty
+              input: 
+                type: qty
+              value: 1
+            - custom: 1
+              label: Mode
+              input_name: mode
+              input: 
+                type: select
+              values:
+                  1: Ref + serial 89x36
+                  2: Ref + serial 57x32
+                  3: 2serial H 57x32
+                  4: 2serial V 57x32
             
 filters: 
     in_package: 
@@ -669,7 +688,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this));
             - label: Générer étiquettes
               icon: fas_sticky-note
-              onclick: setSelectedObjectsAction($(this), 'list_id', 'generateEtiquette', {}, null, null, true)
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'generateEtiquette', {}, 'etiquettes', null, true)
         filters_panel: default
         sort_field: date_create
         sort_way: desc

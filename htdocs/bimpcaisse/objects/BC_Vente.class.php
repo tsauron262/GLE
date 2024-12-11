@@ -706,7 +706,7 @@ class BC_Vente extends BimpObject
         $html .= '<div id="returnsLines"></div>';
         $html .= '</div>';
         $html .= '</div>';
-        
+
         // Locations: 
         if (BimpCore::isModuleActive('bimplocation')) {
             $html .= '<div id="curVenteLocations" class="venteSection" style="margin-bottom: 10px">';
@@ -1046,10 +1046,10 @@ class BC_Vente extends BimpObject
                     $content .= '</td>';
 
                     $content .= '<td style="text-align: right">';
-                    
+
                     if ($loc->isActionAllowed('editDates') && $loc->canSetAction('editDates')) {
                         $content .= BimpRender::renderRowButton('Modifier les dates', 'fas_calendar-alt', $loc->getJsActionOnclick('editDates', array(), array(
-                            'form_name' => 'edit_dates'
+                                            'form_name' => 'edit_dates'
                         )));
                     }
 
@@ -1827,7 +1827,7 @@ class BC_Vente extends BimpObject
 
     // Traitements : 
 
-    public function checkEquipment($id_equipment, &$errors, &$is_location = false)
+    public function checkEquipment($id_equipment, &$errors, &$is_location = false, $no_location = false)
     {
         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
 
@@ -1853,9 +1853,12 @@ class BC_Vente extends BimpObject
                     return null;
                 }
 
-                if (BimpCore::isModuleActive('bimplocation') && !empty($product->getData('forfaits_location'))) {
-                    $is_location = true;
-                    return $equipment;
+                if (!$no_location && BimpCore::isModuleActive('bimplocation') && !empty($product->getData('forfaits_location'))) {
+                    $place = $equipment->getCurrentPlace();
+                    if (BimpObject::objectLoaded($place) && $place->getData('type') === BE_Place::BE_PLACE_LOCATION) {
+                        $is_location = true;
+                        return $equipment;
+                    }
                 }
 
                 if (!$equipment->isAvailable(0, $errors, array(// On ne vérifie pas l'emplacement de l'équipement pour éviter le blocage de la vente. 
@@ -1870,14 +1873,14 @@ class BC_Vente extends BimpObject
         return $equipment;
     }
 
-    public function addCartEquipement($id_equipment, &$errors)
+    public function addCartEquipement($id_equipment, &$errors, $no_location = false)
     {
         $html = '';
 
         $is_location = false;
-        $equipment = $this->checkEquipment($id_equipment, $errors, $is_location);
+        $equipment = $this->checkEquipment($id_equipment, $errors, $is_location, $no_location);
         if (BimpObject::objectLoaded($equipment)) {
-            if ($is_location) {
+            if (!$no_location && $is_location) {
                 $id_selected_loc = (int) $this->getData('id_selected_location');
                 if (!$id_selected_loc) {
                     $errors[] = 'Aucune location sélectionnée dans cette vente pour l\'ajout d\'équipement à louer';
@@ -2585,7 +2588,7 @@ class BC_Vente extends BimpObject
                         $location->updateField('id_cur_vente', 0);
                         $location->checkStatus();
                     }
-                    
+
                     $this->updateField('id_selected_location', 0);
                 }
             }

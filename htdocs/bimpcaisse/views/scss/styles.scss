@@ -690,6 +690,20 @@ $article_color: #004264;
             }
         }
 
+        .reopenArticle {
+            @include transition(all 0.3s ease);
+            color: $gray;
+            display: inline-block;
+            float: right;
+            margin-right: -30px;
+            font-size: 28px;
+            cursor: pointer;
+
+            &:hover {
+                color: $primary;
+            }
+        }
+
         .editArticle {
             @include transition(all 0.3s ease);
             color: $gray;
@@ -831,15 +845,15 @@ $article_color: #004264;
 .caisseSoundsOn,
 .caisseSoundsOff {
     @include transition(all 0.3s ease);
-    
-    float: right; 
-    display: inline-block; 
+
+    float: right;
+    display: inline-block;
     margin-right: 12px;
     margin-top: -2px;
     font-size: 22px;
     color: $gray;
     cursor: pointer;
-    
+
     &:hover {
         color: $primary;
     }

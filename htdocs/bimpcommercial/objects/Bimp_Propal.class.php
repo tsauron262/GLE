@@ -1076,16 +1076,18 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 )
                             );
                             $onclick = $facture->getJsLoadModalForm('default', 'Création d\\\'une facture', $values, '', 'redirect');
-                        } else {
-                            $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $clientFact->id;
-                            $onclick = 'window.location = \'' . $url . '\'';
+                            
+                            
+                            $buttons[] = array(
+                                'label'   => 'Créer une facture ou un avoir',
+                                'icon'    => 'fas_file-invoice-dollar',
+                                'onclick' => $onclick
+                            );
+//                        } else {
+//                            $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $clientFact->id;
+//                            $onclick = 'window.location = \'' . $url . '\'';
                         }
 
-                        $buttons[] = array(
-                            'label'   => 'Créer une facture ou un avoir',
-                            'icon'    => 'fas_file-invoice-dollar',
-                            'onclick' => $onclick
-                        );
                     }
 
                     // Créer un contrat

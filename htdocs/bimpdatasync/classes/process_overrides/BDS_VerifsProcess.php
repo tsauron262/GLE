@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 11;
+    public static $current_version = 12;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -1524,7 +1524,69 @@ class BDS_VerifsProcess extends BDSProcess
             }
         }
     }
-    
+
+    // Vérifs PA Factures : 
+
+    public function initCheckFacturesPA(&$data, &$errors = array())
+    {
+        $rows = $this->db->getRows('facture f', 'fef.type = \'S\' AND f.datec > \'2024-11-28 00:00:00\'', null, 'array', array('f.rowid'), null, null, array(
+            'fef' => array(
+                'table' => 'facture_extrafields',
+                'on'    => 'f.rowid = fef.fk_object'
+            )
+        ));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $elements = array();
+
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['rowid'];
+                }
+
+                $data['steps']['process'] = array(
+                    'label'                  => 'Vérifs des PA Factures',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 10
+                );
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCheckFacturesPA($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcommercial', 'Bimp_FactureLine');
+            if (!empty($this->references)) {
+                foreach ($this->references as $id_fac) {
+                    $this->incProcessed();
+                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
+
+                    if (BimpObject::objectLoaded($fac)) {
+                        $lines = $fac->getLines('product');
+
+                        foreach ($lines as $line) {
+                            $this->incProcessed();
+
+                            $details = array();
+                            $cur_pa = $line->pa_ht;
+                            $line->checkPrixAchat($details);
+
+                            if ($cur_pa != $line->pa_ht) {
+                                $this->Info('MAJ PA ' . $cur_pa . ' => ' . $line->pa_ht . '<br/>Détail : <pre>' . print_r($details, 1) . '</pre>', $fac, 'Ligne n° ' . $line->getData('position'));
+                                $this->incUpdated();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Install: 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -1860,7 +1922,7 @@ class BDS_VerifsProcess extends BDSProcess
 
             $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
         }
-        
+
         if ($cur_version < 11) {
             // Opération "Vérif des statuts commande des propales": 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
@@ -1869,6 +1931,20 @@ class BDS_VerifsProcess extends BDSProcess
                         'name'          => 'checkPropalsCommandeStatus',
                         'description'   => '',
                         'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
+                            ), true, $errors, $warnings);
+        }
+
+        if ($cur_version < 12) {
+            // Opération "Vérif des statuts commande des propales": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Vérif PA FActures',
+                        'name'          => 'checkFacturesPA',
+                        'description'   => '',
+                        'warning'       => 'Attention, les filtres sont en dur dans le code',
                         'active'        => 1,
                         'use_report'    => 1,
                         'reports_delay' => 30

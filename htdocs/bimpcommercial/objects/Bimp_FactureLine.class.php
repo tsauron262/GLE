@@ -461,11 +461,11 @@ class Bimp_FactureLine extends ObjectLine
         }
     }
 
-    public function checkPrixAchat()
+    public function checkPrixAchat(&$details = array())
     {
         $errors = array();
         if ($this->isLoaded($errors)) {
-            $pa_ht = $this->calcPrixAchat();
+            $pa_ht = $this->calcPrixAchat($details);
             $errors = $this->updatePrixAchat($pa_ht);
         }
         return $errors;

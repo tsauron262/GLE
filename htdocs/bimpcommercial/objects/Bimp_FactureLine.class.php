@@ -485,7 +485,7 @@ class Bimp_FactureLine extends ObjectLine
             }
         }
 
-        if ((int) $this->getData('type') === self::LINE_PRODUCT && (int) $this->getData('pa_editable') && $fullQty > 0) {
+        if ((int) $this->getData('type') === self::LINE_PRODUCT && (int) $this->getData('pa_editable') && $fullQty <> 0) {
             $product = $this->getProduct();
             if (BimpObject::objectLoaded($product)) {
                 if ($product->isSerialisable()) {

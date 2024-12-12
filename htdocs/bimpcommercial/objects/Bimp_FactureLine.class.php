@@ -465,7 +465,7 @@ class Bimp_FactureLine extends ObjectLine
     {
         $errors = array();
         if ($this->isLoaded($errors)) {
-            $pa_ht = $this->calcPrixAchat($details);
+            $pa_ht = $this->calcPrixAchat(null, $details);
             $errors = $this->updatePrixAchat($pa_ht);
         }
         return $errors;
@@ -474,7 +474,7 @@ class Bimp_FactureLine extends ObjectLine
     public function calcPrixAchat($date = null, &$details = array(), &$errors = array())
     {
         $pa_ht = (float) $this->pa_ht;
-        $fullQty = (float) $this->getFullQty();
+        $fullQty = abs((float) $this->getFullQty());
 
         if (is_null($date)) {
             $facture = $this->getParentInstance();
@@ -485,7 +485,7 @@ class Bimp_FactureLine extends ObjectLine
             }
         }
 
-        if ((int) $this->getData('type') === self::LINE_PRODUCT && (int) $this->getData('pa_editable') && $fullQty <> 0) {
+        if ((int) $this->getData('type') === self::LINE_PRODUCT && (int) $this->getData('pa_editable') && $fullQty > 0) {
             $product = $this->getProduct();
             if (BimpObject::objectLoaded($product)) {
                 if ($product->isSerialisable()) {
@@ -559,7 +559,7 @@ class Bimp_FactureLine extends ObjectLine
                                     continue;
                                 }
 
-                                $cf_line_remain_qty = (float) $cf_line->qty;
+                                $cf_line_remain_qty = abs((float) $cf_line->qty);
                                 if ($cf_line_remain_qty > $remain_qty) {
                                     $cf_line_remain_qty = $remain_qty;
                                 }
@@ -578,7 +578,7 @@ class Bimp_FactureLine extends ObjectLine
 
                                 // Vérification des lignes de factures fourn: 
                                 foreach ($fac_fourn_lines as $ff_line) {
-                                    $ff_line_qty = (float) $ff_line->getFullQty();
+                                    $ff_line_qty = abs((float) $ff_line->getFullQty());
                                     if ($ff_line_qty > $cf_line_remain_qty) {
                                         $ff_line_qty = $cf_line_remain_qty;
                                     }
@@ -610,7 +610,7 @@ class Bimp_FactureLine extends ObjectLine
 
                                         $br_values = $this->db->getRow('bl_commande_fourn_reception', 'id = ' . (int) $id_reception, array('num_reception', 'ref', 'status', 'id_facture'), 'array');
                                         if (!is_null($br_values)) {
-                                            $br_qty = (float) $reception_data['qty'];
+                                            $br_qty = abs((float) $reception_data['qty']);
                                             if ($br_qty > $cf_line_remain_qty) {
                                                 $br_qty = $cf_line_remain_qty;
                                             }
@@ -624,9 +624,9 @@ class Bimp_FactureLine extends ObjectLine
                                             $br_total_amount = 0;
                                             if (isset($reception_data['qties'])) {
                                                 foreach ($reception_data['qties'] as $qty_data) {
-                                                    $br_total_qty += (float) $qty_data['qty'];
+                                                    $br_total_qty += abs((float) $qty_data['qty']);
                                                     $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $cf_line_pu_ht);
-                                                    $br_total_amount += ((float) $qty_data['qty'] * $pu_ht);
+                                                    $br_total_amount += (abs((float) $qty_data['qty']) * $pu_ht);
                                                 }
                                             }
 

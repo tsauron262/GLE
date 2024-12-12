@@ -485,7 +485,7 @@ class Bimp_FactureLine extends ObjectLine
             }
         }
 
-        if ((int) $this->getData('type') === self::LINE_PRODUCT && (int) $this->getData('pa_editable') && $fullQty > 0) {
+        if ((int) $this->getData('type') === self::LINE_PRODUCT && (int) $this->getData('pa_editable') && $fullQty <> 0) {
             $product = $this->getProduct();
             if (BimpObject::objectLoaded($product)) {
                 if ($product->isSerialisable()) {
@@ -495,7 +495,7 @@ class Bimp_FactureLine extends ObjectLine
                     $linked_object_name = $this->getData('linked_object_name');
                     $linked_id_object = (int) $this->getData('linked_id_object');
 
-                    $def_pa_ht = 0;
+                    $def_pa_ht = (float) $this->pa_ht;
                     $def_pa_label = '';
 
                     $remain_qty = $fullQty;
@@ -503,6 +503,16 @@ class Bimp_FactureLine extends ObjectLine
 
                     $commande_line = null;
                     $contrat_line = null;
+                    
+                    if (!(int) $product->getData('no_fixe_prices')){
+                        $def_pa_ht = (float) $product->getCurrentPaHt(null, true, $date);
+                        if ($date) {
+                            $dt = new DateTime($date);
+                            $def_pa_label = 'PA courant du produit au ' . $dt->format('d / m / Y');
+                        } else {
+                            $def_pa_label = 'PA courant du produit';
+                        }
+                    }
 
                     if ($linked_object_name === 'contrat_line') {
                         if ($linked_id_object) {
@@ -533,15 +543,7 @@ class Bimp_FactureLine extends ObjectLine
                                 $def_pa_ht = (float) $this->pa_ht;
                                 $def_pa_label = 'PA enregistré dans cette ligne de facture';
                             }
-                        } else {
-                            $def_pa_ht = (float) $product->getCurrentPaHt(null, true, $date);
-                            if ($date) {
-                                $dt = new DateTime($date);
-                                $def_pa_label = 'PA courant du produit au ' . $dt->format('d / m / Y');
-                            } else {
-                                $def_pa_label = 'PA courant du produit';
-                            }
-                        }
+                        } 
 
                         if (BimpObject::objectLoaded($commande_line)) {
                             // Recherche des PA réels dans les factures fourn, BR et commandes fourn.

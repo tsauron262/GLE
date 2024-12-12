@@ -1116,11 +1116,11 @@ class BF_Demande extends BimpObject
 
         $filters['or_commercial'] = array(
             'or' => array(
-                $alias . '.firstname'         => array(
+                $alias . '.firstname'           => array(
                     'part_type' => 'middle',
                     'part'      => $value
                 ),
-                $alias . '.lastname'                 => array(
+                $alias . '.lastname'            => array(
                     'part_type' => 'middle',
                     'part'      => $value
                 ),
@@ -1130,7 +1130,7 @@ class BF_Demande extends BimpObject
             )
         );
     }
-    
+
     // Getters array: 
 
     public function getClientContactsArray($include_empty = true, $active_only = true)
@@ -2118,14 +2118,14 @@ class BF_Demande extends BimpObject
         if ((int) $this->getData('id_main_source')) {
             return $this->displaySourceCommercial('main', $with_popover_infos);
         }
-        
+
         if ((int) $this->getData('id_supplier_contact')) {
             return $this->displayDataDefault('id_supplier_contact');
         }
-        
+
         return '';
     }
-    
+
     public function displaySourceClient($id_source = 'main', $with_popover_infos = false)
     {
         if ($id_source === 'main') {
@@ -4962,6 +4962,7 @@ class BF_Demande extends BimpObject
                 $files_dir = $this->getFilesDir();
                 $ref = $this->getRef();
                 $file_name = $this->getSignatureDocFileName('contrat');
+                $annexe_file_path = DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/annexe_contrat.pdf';
 
                 switch ($type_pdf) {
                     case 'papier':
@@ -4995,7 +4996,8 @@ class BF_Demande extends BimpObject
                                 $files_dir . $contrat_file_name,
                                 $files_dir . $contrat_file_name,
                                 $files_dir . $contrat_file_name,
-                                $files_dir . $mandat_file_name
+                                $files_dir . $mandat_file_name,
+                                $annexe_file_path
                                     ), 'F');
                         }
                         unlink($files_dir . $consignes_file_name);
@@ -5012,24 +5014,25 @@ class BF_Demande extends BimpObject
                         if (count($pdf->errors)) {
                             $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
                         }
-                        
+
                         $mandat_file_name = 'mandat_sepa_' . $ref . '.pdf';
                         require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/MandatSepaFinancementPDF.php';
                         $pdf = new MandatSepaFinancementPDF($db, $client_data);
                         if (!$pdf->render($files_dir . $mandat_file_name, 'F')) {
                             $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
                         }
-                        
+
                         if (!count($errors)) {
                             $pdf = new BimpConcatPdf();
                             $pdf->concatFiles($files_dir . $file_name, array(
                                 $files_dir . $contrat_file_name,
-                                $files_dir . $mandat_file_name
+                                $files_dir . $mandat_file_name,
+                                $annexe_file_path
                                     ), 'F');
                         }
                         unlink($files_dir . $contrat_file_name);
                         unlink($files_dir . $mandat_file_name);
-                        
+
                         break;
                 }
 

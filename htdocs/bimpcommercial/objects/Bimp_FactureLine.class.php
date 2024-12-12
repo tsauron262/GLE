@@ -495,7 +495,7 @@ class Bimp_FactureLine extends ObjectLine
                     $linked_object_name = $this->getData('linked_object_name');
                     $linked_id_object = (int) $this->getData('linked_id_object');
 
-                    $def_pa_ht = 0;
+                    $def_pa_ht = (float) $this->pa_ht;
                     $def_pa_label = '';
 
                     $remain_qty = $fullQty;

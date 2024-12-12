@@ -1529,7 +1529,7 @@ class BDS_VerifsProcess extends BDSProcess
 
     public function initCheckFacturesPA(&$data, &$errors = array())
     {
-        $rows = $this->db->getRows('facture f', 'fef.type = \'S\'', null, 'array', array('f.rowid'), null, null, array(
+        $rows = $this->db->getRows('facture f', 'fef.type = \'S\' AND f.datec > \'2024-11-28 00:00:00\'', null, 'array', array('f.rowid'), null, null, array(
             'fef' => array(
                 'table' => 'facture_extrafields',
                 'on'    => 'f.rowid = fef.fk_object'

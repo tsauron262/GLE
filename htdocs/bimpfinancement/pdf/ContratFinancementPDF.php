@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/DocFinancementPDF.php';
 class ContratFinancementPDF extends DocFinancementPDF
 {
 
-    public static $nb_cgv_pages = 'sept';
+    
     public static $doc_type = 'contrat';
     public $type_pdf = '';
     public $signature_bloc = true;
@@ -19,7 +19,8 @@ class ContratFinancementPDF extends DocFinancementPDF
     public $cessionnaire_data;
     public $cg_file = DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/cg_contrat.pdf';
     public $cg_page_start = 0;
-    public $cg_page_number = 8;
+    public $cg_page_number = 6;
+    public static $nb_cgv_pages = 'six';
     public $display_line_amounts = false;
 
     # Params:
@@ -437,9 +438,9 @@ class ContratFinancementPDF extends DocFinancementPDF
 //            $this->pdf->SetXY(0, 10);
 //            $this->pdf->Cell(0, 0, $title, 0, 2, 'C', 0);
 
-            if ($i === 7) {
+            if ($i === 6) {
 //                if ($this->type_pdf === 'papier') {
-                $this->pdf->SetXY(10, 235);
+                $this->pdf->SetXY(10, 120);
                 $this->writeFullBlock($this->getSignatureBlocHtml());
 //                }
             }

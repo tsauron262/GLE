@@ -1038,6 +1038,71 @@ forms:
         rows: 
             - field: forfaits_location
             
+    generate_equipments: 
+        rows: 
+            - custom: 1
+              label: Nombre
+              input_name: qty
+              data_type: int
+              input: 
+                  type: qty
+              value: 1
+            - custom: 1
+              label: Type d'emplacement
+              data_type: int
+              input_name: place_type
+              input: 
+                  type: select
+                  options: 
+                      callback: getEquipmentsPlacesTypesArray
+              value: 
+                  conf: 
+                      name: generate_equipments_defaut_place_type
+                      module: bimpequipment
+            - custom: 1
+              label: Entrepôt emplacement
+              data_type: id
+              input_name: place_id_entrepot
+              input: 
+                   type: search_entrepot
+              value: 
+                  conf: 
+                      name: generate_equipments_default_id_entrepot
+                      module: bimpequipment
+              display_if: 
+                  field_name: place_type
+                  hide_values: 0
+            - custom: 1
+              label: Générer des étiquettes
+              input_name: generate_etiquettes
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Nombre d'étiquettes par équipement
+              input_name: qty_etiquettes
+              data_type: int
+              input: 
+                  type: qty
+              value: 1
+              display_if: 
+                  field_name: generate_etiquettes
+                  show_values: 1
+            - custom: 1
+              label: Format étiquettes
+              input_name: etiquettes_format
+              input: 
+                  type: select
+                  options:
+                      1: Ref + serial 89x36
+                      2: Ref + serial 57x32
+                      3: 2serial H 57x32
+                      4: 2serial V 57x32
+              display_if: 
+                  field_name: generate_etiquettes
+                  show_values: 1
+            
 fields_tables: 
     infos: 
         title: Informations

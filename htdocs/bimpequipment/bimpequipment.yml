@@ -1,0 +1,14 @@
+params: 
+    allow_generate_equipments: 
+        label: Activer la génération en série d'équipements
+        type: bool
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  generate_equipments_defaut_place_type: 
+                      label: Type d'emplacement par défaut
+                      def: 0
+                  generate_equipments_default_id_entrepot: 
+                      label: Entrepôt par défaut
+                      def: 0

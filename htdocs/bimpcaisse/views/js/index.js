@@ -1041,7 +1041,11 @@ function selectArticle($button, id_object, object_name) {
     $('.selectArticleLine').each(function () {
         $(this).find('button').addClass('disabled');
     });
-
+    
+    if ($.isOk($button)) {
+        $button.removeClass('disabled');
+    }
+    
     BimpAjax('selectArticle', {
         id_vente: Vente.id_vente,
         id_object: id_object,

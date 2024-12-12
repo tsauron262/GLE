@@ -256,7 +256,8 @@ class BS_SAV extends BimpObject
         switch ($action) {
             case 'notRestituted':
             case 'reopen':
-                return (int) $user->rights->BimpSupport->not_restituted;
+                return 1;
+//                return (int) $user->rights->BimpSupport->not_restituted;
         }
 
         return parent::canSetAction($action);

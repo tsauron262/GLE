@@ -17,7 +17,7 @@ if ($id_equipment) {
     $equipments[] = $id_equipment;
     $filename = 'etiquette_equipement_' . $id_equipment;
 } else {
-    $equipments = explode(',', BimpTools::getValue('equipments', array(), 'array'));
+    $equipments = explode(',', BimpTools::getValue('equipments'));
     $filename = 'etiquettes_equipements_' . date('Y-m-d_H-i');
 }
 

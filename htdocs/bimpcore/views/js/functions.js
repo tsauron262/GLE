@@ -1224,6 +1224,14 @@ function getUrlParams(param) {
     return params;
 }
 
+function removeUrlParam(param) {
+    var url = window.location.href;
+    var regex = new RegExp('[&?]' + param + '=[^&]*');
+    var newUrl = url.replace(regex, '');
+    newUrl = newUrl.replace(/([&?])$/, ''); 
+    window.history.replaceState({}, '', newUrl);
+}
+
 function bimp_reloadPage() {
     // Recharge la page en cours en tenant compte des onglets actifs: 
 

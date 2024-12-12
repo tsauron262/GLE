@@ -44,6 +44,8 @@ class indexController extends BimpController
     public function renderHtml()
     {
         global $mysoc;
+        
+        $html = '';
 
         $html .= '<div id="bc_main_container">';
         $html .= '<div class="container-fluid">';

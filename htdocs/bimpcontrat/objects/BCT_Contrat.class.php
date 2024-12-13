@@ -177,6 +177,14 @@ class BCT_Contrat extends BimpDolObject
     {
         $buttons = Array();
 
+        if ($this->isActionAllowed('testComm') && $this->canSetAction('testComm')) {
+            $buttons[] = array(
+                'label'   => 'TEST COMM',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('testComm', array(), array())
+            );
+        }
+        
         // Valider : 
         if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
             $buttons[] = array(
@@ -507,18 +515,20 @@ class BCT_Contrat extends BimpDolObject
 
     public function getCommercialId($params = array(), &$is_superior = false, &$is_default = false)
     {
-        $id_user = (int) $this->getData('fk_commercial_suivi');
-        if ($id_user) {
-            if (isset($params['check_active']) && (int) $params['check_active']) {
-                if ((int) $this->db->getValue('user', 'statut', 'rowid = ' . $id_user)) {
-                    return $id_user;
-                }
-            } else {
-                return $id_user;
-            }
-        }
+        
+        $id_user = parent::getCommercialId($params, $is_superior, $is_default);
+        
+        
+//        $id_user = (int) $this->getData('fk_commercial_suivi');
+//        if ($id_user) {
+//            if (isset($params['check_active']) && (int) $params['check_active']) {
+//                if (!(int) $this->db->getValue('user', 'statut', 'rowid = ' . $id_user)) {
+//                    return 0;
+//                }
+//            }
+//        }
 
-        return parent::getCommercialId($params, $is_superior, $is_default);
+        return $id_user;
     }
 
     // Getters Array :
@@ -2107,6 +2117,31 @@ class BCT_Contrat extends BimpDolObject
             } else {
                 $warnings[] = 'Aucun stock à corriger';
             }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function actionTestComm($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        
+        $id_user = $this->getCommercialId();
+        
+        if ($id_user) {
+            $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+            if (BimpObject::objectLoaded($u)) {
+                $success .= 'COMM : ' . $u->getName();
+            } else {
+                $errors[] = 'U #' . $id_user.' KO';
+            }
+        } else {
+            $errors[] = 'NO COMM';
         }
 
         return array(

@@ -522,14 +522,14 @@ class BCT_Contrat extends BimpDolObject
         $id_user = parent::getCommercialId($params, $is_superior, $is_default);
         
         
-//        $id_user = (int) $this->getData('fk_commercial_suivi');
-//        if ($id_user) {
-//            if (isset($params['check_active']) && (int) $params['check_active']) {
-//                if (!(int) $this->db->getValue('user', 'statut', 'rowid = ' . $id_user)) {
-//                    return 0;
-//                }
-//            }
-//        }
+        $id_user = (int) $this->getData('fk_commercial_suivi');
+        if ($id_user) {
+            if (isset($params['check_active']) && (int) $params['check_active']) {
+                if (!(int) $this->db->getValue('user', 'statut', 'rowid = ' . $id_user)) {
+                    return 0;
+                }
+            }
+        }
 
         return $id_user;
     }
@@ -2153,7 +2153,7 @@ class BCT_Contrat extends BimpDolObject
         );
     }
 
-    // Overrides : 
+    // Overrides :
 
     public function create(&$warnings = array(), $force_create = false)
     {

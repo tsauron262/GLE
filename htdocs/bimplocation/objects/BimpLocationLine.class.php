@@ -174,6 +174,8 @@ class BimpLocationLine extends BimpObject
 
             $this->amounts['total_billed'] = $this->getTotalBilled();
             $this->amounts['remain_to_bill'] = $this->amounts['total_ttc'] - $this->amounts['total_billed'];
+            if($this->amounts['remain_to_bill'] > -0.01 && $this->amounts['remain_to_bill'] < 0.01)
+                $this->amounts['remain_to_bill'] = 0;
         }
 
         return $this->amounts;

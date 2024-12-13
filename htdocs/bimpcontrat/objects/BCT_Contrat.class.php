@@ -78,6 +78,9 @@ class BCT_Contrat extends BimpDolObject
         }
 
         switch ($action) {
+            case 'testComm': 
+                return BimpCore::isUserDev();
+                
             case 'validate':
                 if ($user->rights->bimpcontract->to_validate) {
                     return 1;

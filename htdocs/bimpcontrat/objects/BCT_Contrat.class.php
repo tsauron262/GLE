@@ -78,9 +78,9 @@ class BCT_Contrat extends BimpDolObject
         }
 
         switch ($action) {
-            case 'testComm': 
+            case 'testComm':
                 return BimpCore::isUserDev();
-                
+
             case 'validate':
                 if ($user->rights->bimpcontract->to_validate) {
                     return 1;
@@ -187,7 +187,7 @@ class BCT_Contrat extends BimpDolObject
                 'onclick' => $this->getJsActionOnclick('testComm', array(), array())
             );
         }
-        
+
         // Valider : 
         if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
             $buttons[] = array(
@@ -518,15 +518,16 @@ class BCT_Contrat extends BimpDolObject
 
     public function getCommercialId($params = array(), &$is_superior = false, &$is_default = false)
     {
-        
+
         $id_user = parent::getCommercialId($params, $is_superior, $is_default);
-        
-        
-        $id_user = (int) $this->getData('fk_commercial_suivi');
-        if ($id_user) {
-            if (isset($params['check_active']) && (int) $params['check_active']) {
-                if (!(int) $this->db->getValue('user', 'statut', 'rowid = ' . $id_user)) {
-                    return 0;
+
+        if (!$id_user) {
+            $id_user = (int) $this->getData('fk_commercial_suivi');
+            if ($id_user) {
+                if (isset($params['check_active']) && (int) $params['check_active']) {
+                    if (!(int) $this->db->getValue('user', 'statut', 'rowid = ' . $id_user)) {
+                        return 0;
+                    }
                 }
             }
         }
@@ -1618,7 +1619,7 @@ class BCT_Contrat extends BimpDolObject
                 $origin_pa_label = '';
                 $id_pfp = 0;
                 $pa_ht = $line->getPaHtForPeriod($date_from, $date_to, $origin_pa_label, $id_pfp, true);
-                
+
                 $fac_line->qty = $line_qty;
                 $fac_line->desc = $line->getData('description');
                 $fac_line->id_product = (int) $line->getData('fk_product');
@@ -2127,21 +2128,21 @@ class BCT_Contrat extends BimpDolObject
             'warnings' => $warnings
         );
     }
-    
+
     public function actionTestComm($data, &$success)
     {
         $errors = array();
         $warnings = array();
         $success = '';
-        
+
         $id_user = $this->getCommercialId();
-        
+
         if ($id_user) {
             $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
             if (BimpObject::objectLoaded($u)) {
                 $success .= 'COMM : ' . $u->getName();
             } else {
-                $errors[] = 'U #' . $id_user.' KO';
+                $errors[] = 'U #' . $id_user . ' KO';
             }
         } else {
             $errors[] = 'NO COMM';
@@ -2175,9 +2176,9 @@ class BCT_Contrat extends BimpDolObject
                         $comms = array();
                     }
                 }
-                
+
                 $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Contrat2:' . $this->id . '}}');
-                
+
                 $fk_soc_facturation = (int) $this->getData('fk_soc_facturation');
                 if ($fk_soc_facturation && $fk_soc_facturation !== $client->id) {
                     $client_fac = $this->getChildObject('client_facturation');
@@ -2515,18 +2516,18 @@ class BCT_Contrat extends BimpDolObject
         $date_lim->sub(new DateInterval('P3M'));
 
         $rows = $bdb->executeS(BimpTools::getSqlFullSelectQuery('facture', array('a.rowid as id_facture'), array(
-                    'fk_statut'       => 1,
-                    'type'            => array(0, 1),
-                    'paye'            => 0,
-                    'paiement_status' => array(
+                    'fk_statut'                    => 1,
+                    'type'                         => array(0, 1),
+                    'paye'                         => 0,
+                    'paiement_status'              => array(
                         'operator' => '!=',
                         'value'    => 2
                     ),
                     'alert_abonnement_unpaid_send' => 0,
-                    'has_abo'         => array(
+                    'has_abo'                      => array(
                         'custom' => '(SELECT COUNT(fl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_facture_line fl WHERE fl.id_obj = a.rowid AND fl.linked_object_name = \'contrat_line\') > 0'
                     ),
-                    'relance_date'    => array(
+                    'relance_date'                 => array(
                         'custom' => '(SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bimp_relance_clients_line rl WHERE rl.relance_idx = 1 AND rl.date_send <= \'' . $date_lim->format('Y-m-d') . '\' AND rl.factures LIKE CONCAT(\'%[\', a.rowid, \']%\')) > 0'
                     )
                 )), 'array');
@@ -2541,7 +2542,7 @@ class BCT_Contrat extends BimpDolObject
                     $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_facture']);
                     if (BimpObject::objectLoaded($fac)) {
                         $out .= $fac->getLink();
-                        
+
                         $client = $fac->getChildObject('client');
                         $subject = 'Facture ' . $fac->getRef() . ' impayée non régularisée';
                         $msg = 'Bonjour,<br/><br/>';

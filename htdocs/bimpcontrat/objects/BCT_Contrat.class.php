@@ -518,7 +518,6 @@ class BCT_Contrat extends BimpDolObject
 
     public function getCommercialId($params = array(), &$is_superior = false, &$is_default = false)
     {
-
         $id_user = parent::getCommercialId($params, $is_superior, $is_default);
 
         if (!$id_user) {

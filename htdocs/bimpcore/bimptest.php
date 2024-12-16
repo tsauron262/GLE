@@ -27,21 +27,26 @@ if (!$user->admin) {
     exit;
 }
 
-$sql = BimpTools::getSqlFullSelectQuery('contrat', array('rowid'), array(
-    'a.version' => 2,
-    'a.fk_commercial_suivi' => array(
-        'operator' => '!=',
-        'value' => '(SELECT ec.fk_socpeople FROM llx_element_contact ec WHERE ec.fk_c_type_contact = 11 AND ec.element_id = a.rowid ORDER BY ec.rowid DESC LIMIT 1'
-    )
-), array(), array(
-    'n' => 1
-));
+$sql = BimpTools::getSqlFullSelectQuery('contrat', array('a.rowid'), array(
+            'a.version'             => 2,
+            'a.fk_commercial_suivi' => array(
+                'operator' => '!=',
+                'value'    => '(SELECT ec.fk_socpeople FROM llx_element_contact ec WHERE ec.fk_c_type_contact = 11 AND ec.element_id = a.rowid ORDER BY ec.rowid DESC LIMIT 1'
+            )
+                ), array(), array(
+            'n' => 1
+        ));
 
 $rows = $bdb->executeS($sql, 'array');
 
-echo 'ROWS<pre>';
-print_r($rows);
-exit;
+foreach ($rows as $r) {
+    $c = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $r['rowid']);
+
+    if (BimpObject::objectLoaded($c)) {
+        echo $c->id . ' : ' .  $c->getData('fk_commercial_suivi') . ' - ' . $c->getCommercialId() .'<br/>';
+    }
+    break;
+}
 
 echo '<br/>FIN';
 echo '</body></html>';

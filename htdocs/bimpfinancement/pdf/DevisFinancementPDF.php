@@ -11,7 +11,7 @@ class DevisFinancementPDF extends DocFinancementPDF
     public $object_signature_params_field_name = 'signature_devis_params';
 
     public function __construct($db, $demande, $extra_data = array(), $options = array())
-    {        
+    {
         parent::__construct($db, $demande, $extra_data, $options);
 
         $this->doc_name = 'Offre de location';
@@ -148,16 +148,27 @@ class DevisFinancementPDF extends DocFinancementPDF
 
     public function renderAfterBottom()
     {
+        $html = '';
+        $total_demande = $this->demande->getTotalDemandeHT();
+
+        $periodicity = 0;
+        $nb_mois = 0;
+
+        if (BimpObject::objectLoaded($this->demande_refin)) {
+            $df_values = $this->values;
+
+            $nb_mois = $df_values['nb_mois'];
+            $periodicity = $df_values['periodicity'];
+        } else {
+            $nb_mois = $this->demande->getData('duration');
+            $periodicity = (int) $this->demande->getData('periodicity');
+        }
+
         if (count($this->errors)) {
             return;
         }
-
-        $html = '';
-
-        $total_demande = $this->demande->getTotalDemandeHT();
-        $nb_mois = $this->demande->getData('duration');
-        $periodicity = (int) $this->demande->getData('periodicity');
         $nb_loyers = $nb_mois / $periodicity;
+
         $duration_label = '';
         $dyn_duration_label = '';
         if (in_array($nb_mois, array(12, 24, 36, 48, 60, 72))) {
@@ -173,7 +184,7 @@ class DevisFinancementPDF extends DocFinancementPDF
         $has_dyn = (int) BimpTools::getArrayValueFromPath($this->options, 'formules/dyn', 0);
 
         if ($has_evo) {
-            $loyer_evo_ht = $this->demande->getData('loyer_mensuel_evo_ht') * $periodicity;
+            $loyer_evo_ht = (isset($df_values['loyer_evo_mensuel']) ? $df_values['loyer_evo_mensuel'] : $this->demande->getData('loyer_mensuel_evo_ht')) * $periodicity;
 
             if ($loyer_evo_ht) {
                 $html .= '<div style="font-size: 8px">';
@@ -205,8 +216,8 @@ class DevisFinancementPDF extends DocFinancementPDF
         }
 
         if ($has_dyn) {
-            $loyer_dyn_ht = $this->demande->getData('loyer_mensuel_dyn_ht') * $periodicity;
-            $loyer_dyn_suppl = $this->demande->getData('loyer_mensuel_suppl_ht') * $periodicity;
+            $loyer_dyn_ht = (isset($df_values['loyer_dyn_mensuel']) ? $df_values['loyer_dyn_mensuel'] : $this->demande->getData('loyer_mensuel_dyn_ht')) * $periodicity;
+            $loyer_dyn_suppl = (isset($df_values['loyer_dyn_suppl_mensuel']) ? $df_values['loyer_dyn_suppl_mensuel'] : $this->demande->getData('loyer_mensuel_suppl_ht')) * $periodicity;
 
             if ($loyer_dyn_ht) {
                 $html .= '<div style="font-size: 8px">';
@@ -314,7 +325,7 @@ class DevisFinancementPDF extends DocFinancementPDF
         $html .= 'Nous sommes à votre entière disposition pour tout complément d\'information, et vous prions d’agréer, ';
         $html .= 'Madame, Monsieur, l\'expression de nos meilleures salutations.';
         $html .= '</p>';
-        
+
         if ($has_evo && $has_dyn) {
             $html .= '<p style="font-size: 8px;">';
             $html .= '<b>Merci d\'indiquer ci-dessous la formule que vous choisissez (évolutive ou dynamique) : </b>';

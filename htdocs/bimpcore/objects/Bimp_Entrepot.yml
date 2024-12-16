@@ -18,6 +18,7 @@ list_page_url:
     
 nom_url: 
     syntaxe: <ref>
+    card: default
     
 labels: 
     name: entrepôt
@@ -130,3 +131,16 @@ searches:
             - a.lieu
             - a.town
         label_syntaxe: '<a.ref> - <a.lieu> (<a.town>)'
+        
+cards: 
+    default: 
+        title: nom
+        fields: 
+            ref: 
+                field: ref
+                label: Ref.
+            address: 
+                label: Adresse
+                value: 
+                    callback: displayFullAdress
+        view_btn: 1

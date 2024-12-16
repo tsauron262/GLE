@@ -27,30 +27,33 @@ if (!$user->admin) {
     exit;
 }
 
-//$rows = $bdb->getRows('product', '', null, 'array', array('rowid', 'ref'));
+//$sql = BimpTools::getSqlFullSelectQuery('contrat', array('a.rowid'), array(
+//            'a.version'             => 2,
+//            'a.fk_commercial_suivi' => array(
+//                'operator' => '!=',
+//                'value'    => '(SELECT ec.fk_socpeople FROM llx_element_contact ec WHERE ec.fk_c_type_contact = 11 AND ec.element_id = a.rowid ORDER BY ec.rowid DESC LIMIT 1'
+//            )
+//                ), array());
 //
-//if (is_array($rows)) {
-//    foreach ($rows as $r) {
-//        if (preg_match('/^(.+)_A$/', $r['ref'], $matches)) {
-//            $ref = $matches[1] . '/A';
-//            if ($bdb->update('product', array(
-//                        'ref' => $ref
-//                            ), 'rowid = ' . $r['rowid']) <= 0) {
-//                echo 'FAIL : ' . $ref . '<br/>';
-//            } else {
-//                echo 'OK ' . $ref . '<br/>';
-//            }
+//$rows = $bdb->executeS($sql, 'array');
+//
+//foreach ($rows as $r) {
+//    $c = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $r['rowid']);
+//
+//    if (BimpObject::objectLoaded($c)) {
+//        $id_comm = $c->getCommercialId();
+//        echo $c->id . ' : ' .  $c->getData('fk_commercial_suivi') . ' - ' . $id_comm .' => ';
+//        
+//        if ($bdb->update('contrat', array(
+//            'fk_commercial_suivi' => $id_comm
+//        ), 'rowid = ' . $r['rowid']) > 0) {
+//            echo 'OK';
+//        } else {
+//            echo 'KO - ' . $bdb->err();
 //        }
+//        echo '<br/>';
 //    }
-//}$
-
-if (BimpTools::getValue('reset', 0, 'int')) {
-    $_SESSION['dol_tz_string'] = '';
-}
-
-echo '<pre>';
-print_r($_SESSION);
-echo '</pre>';
+//}
 
 echo '<br/>FIN';
 echo '</body></html>';

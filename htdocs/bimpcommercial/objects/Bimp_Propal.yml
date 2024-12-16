@@ -668,6 +668,15 @@ forms:
                   options: 
                       callback: getDFCalcModesArray
               depends_on: target
+            - custom: 1
+              label: Formules à proposer
+              input_name: formules
+              input: 
+                  type: check_list
+                  items:
+                      callback: getDevisLocationFormulesArray
+              value: evo,dyn 
+              depends_on: duration
                                 
 fields_tables: 
     infos: 

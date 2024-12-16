@@ -2473,7 +2473,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-
+        
         $result['errors'] = BimpTools::merge_array($result['errors'], BimpTools::getDolEventsMsgs(array('errors')));
 
         if (!count($result['errors'])) {

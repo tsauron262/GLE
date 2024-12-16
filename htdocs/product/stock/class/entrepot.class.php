@@ -1056,8 +1056,6 @@ class Entrepot extends CommonObject
         /* moddrsi 20.2*/
         public function getBannerAddress($htmlkey, $object)
 	{
-            ini_set('display_errors', 1);
-
             global $conf, $langs, $form, $extralanguages;
 
 		$countriesusingstate = array('AU', 'US', 'IN', 'GB', 'ES', 'UK', 'TR'); // See also option MAIN_FORCE_STATE_INTO_ADDRESS

@@ -44,7 +44,7 @@ foreach ($rows as $r) {
 
     if (BimpObject::objectLoaded($c)) {
         $id_comm = $c->getCommercialId();
-        echo $c->id . ' : ' .  $c->getData('fk_commercial_suivi') . ' - ' . $id_comm;
+        echo $c->id . ' : ' .  $c->getData('fk_commercial_suivi') . ' - ' . $id_comm .' => ';
         
         if ($bdb->update('contrat', array(
             'fk_commercial_suivi' => $id_comm
@@ -54,7 +54,6 @@ foreach ($rows as $r) {
             echo 'KO - ' . $bdb->err();
         }
     }
-    break;
 }
 
 echo '<br/>FIN';

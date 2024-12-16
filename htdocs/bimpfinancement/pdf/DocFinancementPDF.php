@@ -8,6 +8,7 @@ class DocFinancementPDF extends BimpDocumentPDF
 
     public static $doc_type = '';
     public $demande = null;
+    public $demande_refin = null;
     public $client_data = array();
     public $sources = array();
     public $values = array();
@@ -27,7 +28,16 @@ class DocFinancementPDF extends BimpDocumentPDF
         if (!BimpObject::objectLoaded($this->demande)) {
             $this->errors[] = 'Demande invalide';
         } else {
-            $this->values = $this->demande->getCalcValues(false, $this->errors);
+            if (isset($extra_data['id_df']) && (int) $extra_data['id_df']) {
+                $this->demande_refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_DemandeRefinanceur', (int) $extra_data['id_df']);
+                if (BimpObject::objectLoaded($this->demande_refin)) {
+                    $this->values = $this->demande_refin->getCalcValues(false, $this->errors);
+                } else {
+                    $this->errors[] = 'La demande refinanceur #' . $extra_data['id_df'] . ' n\'existe plus';
+                }
+            } else {
+                $this->values = $this->demande->getCalcValues(false, $this->errors);
+            }
         }
 
         $this->object_signature_params_field_name = 'signature_' . static::$doc_type . '_params';

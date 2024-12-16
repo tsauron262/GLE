@@ -1449,6 +1449,20 @@ class Bimp_Propal extends Bimp_PropalTemp
         BimpObject::loadClass('bimpfinancement', 'BF_Demande');
         return BF_Demande::$calc_modes;
     }
+    
+    public function getDevisLocationFormulesArray($allowed_only = true)
+    {
+        $formules = array(
+            'evo' => 'Formule évolutive',
+            'dyn' => 'Formule dynamique'
+        );
+
+        if ($allowed_only && (int) BimpTools::getPostFieldValue('duration', 36, 'int') > 36) {
+            unset($formules['dyn']);
+        }
+
+        return $formules;
+    }
 
     // Affichages : 
 
@@ -3156,6 +3170,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $data['lines'] = json_encode($lines);
                 $data['montant_materiels'] = $montant_materiel;
                 $data['montant_services'] = $montant_services;
+                $data['formules'] = json_encode($data['formules']);
 
                 $result = $api->getPropositionLocation($data, $errors, $warnings);
 

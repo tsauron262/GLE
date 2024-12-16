@@ -3590,7 +3590,7 @@ class User extends CommonObject
                 }
                 
                 if(!defined('LDAP_MOD_AD')){
-                    $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser", "erpUser"));
+                    $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));//, "erpUser"));
                     $info ['accountstatus'] = ($this->statut == 1)? "active" : "disabled";
                     $info ['enabledservice'] = array();
                 }

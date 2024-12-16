@@ -32,8 +32,8 @@ $dfs = BimpCache::getBimpObjectObjects('bimpfinancement', 'BF_Demande', array('d
 foreach ($dfs as $df) {
     echo 'DF #' . $df->id;
 
-    $date_loyer = $this->getData('date_loyer');
-    $duration = (int) $this->getData('duration');
+    $date_loyer = $df->getData('date_loyer');
+    $duration = (int) $df->getData('duration');
     if ($date_loyer && $duration) {
         $dt = new DateTime($date_loyer);
         $dt->add(new DateInterval('P' . $duration . 'M'));

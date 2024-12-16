@@ -130,3 +130,15 @@ searches:
             - a.lieu
             - a.town
         label_syntaxe: '<a.ref> - <a.lieu> (<a.town>)'
+        
+cards: 
+    default: 
+        title: nom
+        fields: 
+            ref: 
+                field: ref
+            address: 
+                label: Adresse
+                value: 
+                    callback: displayFullAddress
+        view_btn: 1

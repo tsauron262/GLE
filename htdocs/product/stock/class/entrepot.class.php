@@ -1052,4 +1052,133 @@ class Entrepot extends CommonObject
 		$return .= '</div>';
 		return $return;
 	}
+        
+        /* moddrsi 20.2*/
+        public function getBannerAddress($htmlkey, $object)
+	{
+            ini_set('display_errors', 1);
+
+            global $conf, $langs, $form, $extralanguages;
+
+		$countriesusingstate = array('AU', 'US', 'IN', 'GB', 'ES', 'UK', 'TR'); // See also option MAIN_FORCE_STATE_INTO_ADDRESS
+
+		$contactid = 0;
+		$thirdpartyid = 0;
+
+		$out = '';
+
+		$outdone = 0;
+		$coords = $this->getFullAddress(1, ', ', (!empty($conf->global->MAIN_SHOW_REGION_IN_STATE_SELECT) ? $conf->global->MAIN_SHOW_REGION_IN_STATE_SELECT : 0));
+		if ($coords) {
+			$out .= dol_print_address($coords, 'address_'.$htmlkey.'_'.$this->id, $this->element, $this->id, 1, ', ');
+			$outdone++;
+			$outdone++;
+		}
+
+		if (!in_array($this->country_code, $countriesusingstate) && empty($conf->global->MAIN_FORCE_STATE_INTO_ADDRESS)   // If MAIN_FORCE_STATE_INTO_ADDRESS is on, state is already returned previously with getFullAddress
+				&& empty($conf->global->SOCIETE_DISABLE_STATE) && $this->state) {
+			if (!empty($conf->global->MAIN_SHOW_REGION_IN_STATE_SELECT) && $conf->global->MAIN_SHOW_REGION_IN_STATE_SELECT == 1 && $this->region) {
+				$out .= ($outdone ? ' - ' : '').$this->region.' - '.$this->state;
+			} else {
+				$out .= ($outdone ? ' - ' : '').$this->state;
+			}
+			$outdone++;
+		}
+
+		if (!empty($this->phone) || !empty($this->phone_pro) || !empty($this->phone_mobile) || !empty($this->phone_perso) || !empty($this->fax) || !empty($this->office_phone) || !empty($this->user_mobile) || !empty($this->office_fax)) {
+			$out .= ($outdone ? '<br>' : '');
+		}
+		if (!empty($this->phone) && empty($this->phone_pro)) {		// For objects that store pro phone into ->phone
+			$out .= dol_print_phone($this->phone, $this->country_code, $contactid, $thirdpartyid, 'AC_TEL', '&nbsp;', 'phone', $langs->trans("PhonePro"));
+			$outdone++;
+		}
+		if (!empty($this->phone_pro)) {
+			$out .= dol_print_phone($this->phone_pro, $this->country_code, $contactid, $thirdpartyid, 'AC_TEL', '&nbsp;', 'phone', $langs->trans("PhonePro"));
+			$outdone++;
+		}
+		if (!empty($this->phone_mobile)) {
+			$out .= dol_print_phone($this->phone_mobile, $this->country_code, $contactid, $thirdpartyid, 'AC_TEL', '&nbsp;', 'mobile', $langs->trans("PhoneMobile"));
+			$outdone++;
+		}
+		if (!empty($this->phone_perso)) {
+			$out .= dol_print_phone($this->phone_perso, $this->country_code, $contactid, $thirdpartyid, 'AC_TEL', '&nbsp;', 'phone', $langs->trans("PhonePerso"));
+			$outdone++;
+		}
+		if (!empty($this->office_phone)) {
+			$out .= dol_print_phone($this->office_phone, $this->country_code, $contactid, $thirdpartyid, 'AC_TEL', '&nbsp;', 'phone', $langs->trans("PhonePro"));
+			$outdone++;
+		}
+		if (!empty($this->user_mobile)) {
+			$out .= dol_print_phone($this->user_mobile, $this->country_code, $contactid, $thirdpartyid, 'AC_TEL', '&nbsp;', 'mobile', $langs->trans("PhoneMobile"));
+			$outdone++;
+		}
+		if (!empty($this->fax)) {
+			$out .= dol_print_phone($this->fax, $this->country_code, $contactid, $thirdpartyid, 'AC_FAX', '&nbsp;', 'fax', $langs->trans("Fax"));
+			$outdone++;
+		}
+		if (!empty($this->office_fax)) {
+			$out .= dol_print_phone($this->office_fax, $this->country_code, $contactid, $thirdpartyid, 'AC_FAX', '&nbsp;', 'fax', $langs->trans("Fax"));
+			$outdone++;
+		}
+
+		if ($out) {
+			$out .= '<div style="clear: both;"></div>';
+		}
+		$outdone = 0;
+		if (!empty($this->email)) {
+			$out .= dol_print_email($this->email, $this->id, $object->id, 'AC_EMAIL', 0, 0, 1);
+			$outdone++;
+		}
+		if (!empty($this->url)) {
+			//$out.=dol_print_url($this->url,'_goout',0,1);//steve changed to blank
+			$out .= dol_print_url($this->url, '_blank', 0, 1);
+			$outdone++;
+		}
+
+		if (!empty($conf->socialnetworks->enabled)) {
+			$outsocialnetwork = '';
+
+			if (!empty($this->socialnetworks) && is_array($this->socialnetworks) && count($this->socialnetworks) > 0) {
+				$socialnetworksdict = getArrayOfSocialNetworks();
+				foreach ($this->socialnetworks as $key => $value) {
+					if ($value) {
+						$outsocialnetwork .= dol_print_socialnetworks($value, $this->id, $object->id, $key, $socialnetworksdict);
+					}
+					$outdone++;
+				}
+			} else {	// Old code to remove
+				if (!empty($this->skype)) {
+					$outsocialnetwork .= dol_print_socialnetworks($this->skype, $this->id, $object->id, 'skype');
+				}
+				$outdone++;
+				if (!empty($this->jabberid)) {
+					$outsocialnetwork .= dol_print_socialnetworks($this->jabberid, $this->id, $object->id, 'jabber');
+				}
+				$outdone++;
+				if (!empty($this->twitter)) {
+					$outsocialnetwork .= dol_print_socialnetworks($this->twitter, $this->id, $object->id, 'twitter');
+				}
+				$outdone++;
+				if (!empty($this->facebook)) {
+					$outsocialnetwork .= dol_print_socialnetworks($this->facebook, $this->id, $object->id, 'facebook');
+				}
+				$outdone++;
+				if (!empty($this->linkedin)) {
+					$outsocialnetwork .= dol_print_socialnetworks($this->linkedin, $this->id, $object->id, 'linkedin');
+				}
+				$outdone++;
+			}
+
+			if ($outsocialnetwork) {
+				$out .= '<div style="clear: both;">'.$outsocialnetwork.'</div>';
+			}
+		}
+
+		if ($out) {
+			return '<!-- BEGIN part to show address block -->'."\n".$out.'<!-- END Part to show address block -->'."\n";
+		} else {
+			return '';
+		}
+	}        
+        /* fmoddrsi*/
 }

@@ -138,6 +138,7 @@ cards:
         fields: 
             ref: 
                 field: ref
+                label: Ref.
             address: 
                 label: Adresse
                 value: 

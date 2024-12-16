@@ -63,21 +63,12 @@ class commandeController extends BimpController
 //            mailSyn2($subject, 'f.martinez@bimp.fr', '', $mail_msg);
 //        }
 
-        $entrepôt = $commande->getChildObject('entrepot');
+        $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $_GET['id_entrepot']);
 
-        if (BimpObject::objectLoaded($entrepôt)) {
+        if (BimpObject::objectLoaded($entrepot)) {
             $tabs_header .= '<div style="margin: 10px 0; font-size: 14px; font-weight; bold">';
-            $tabs_header .= BimpRender::renderIcon('fas_warehouse', 'iconLeft') . 'Entrepôt: ';
-
-            $url = BimpTools::getDolObjectUrl($entrepôt);
-            if ($url) {
-                $tabs_header .= '<a href="' . $url . '" target="_blank">';
-                $tabs_header .= $entrepôt->ref . ' - ' . $entrepôt->lieu;
-                $tabs_header .= '</a>';
-            } else {
-                $tabs_header .= $entrepôt->ref . ' - ' . $entrepôt->lieu;
-            }
-            $tabs_header .= BimpRender::renderObjectIcons($entrepôt, true, null, $url);
+            $tabs_header .= 'Entrepôt : ';
+            $tabs_header .= $entrepot->getLink();
             $tabs_header .= '</div>';
         }
 

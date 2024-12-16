@@ -27,7 +27,7 @@ if (!$user->admin) {
     exit;
 }
 
-$dfs = BimpCache::getBimpObjectObjects('bimpfinancement', 'BF_Demande', array('date_loyer' => 'IN_NOT_NULL', 'duration' => array('operator' => '>', 'value' => 0)));
+$dfs = BimpCache::getBimpObjectObjects('bimpfinancement', 'BF_Demande', array('date_loyer' => 'IS_NOT_NULL', 'duration' => array('operator' => '>', 'value' => 0)));
 
 foreach ($dfs as $df) {
     echo 'DF #' . $df->id;

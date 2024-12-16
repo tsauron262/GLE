@@ -45,10 +45,9 @@ foreach ($dfs as $df) {
             print_r($err);
             echo '</pre>';
         } else {
-            echo 'OK ' . $dt->format('d / m / Y');
+            echo 'OK - ' . $dt->format('d / m / Y');
         }
         echo '<br/>';
-        break;
     }
 }
 

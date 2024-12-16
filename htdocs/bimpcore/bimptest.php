@@ -38,7 +38,16 @@ foreach ($dfs as $df) {
         $dt = new DateTime($date_loyer);
         $dt->add(new DateInterval('P' . $duration . 'M'));
         $dt->sub(new DateInterval('P1D'));
-        $df->updateField('date_fin', $dt->format('Y-m-d'));
+        $err = $df->updateField('date_fin', $dt->format('Y-m-d'));
+        
+        if (count($err)) {
+            echo '<pre>';
+            print_r($err);
+            echo '</pre>';
+        } else {
+            echo 'OK ' . $dt->format('d / m / Y');
+        }
+        echo '<br/>';
     }
 }
 

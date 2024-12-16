@@ -27,33 +27,33 @@ if (!$user->admin) {
     exit;
 }
 
-$sql = BimpTools::getSqlFullSelectQuery('contrat', array('a.rowid'), array(
-            'a.version'             => 2,
-            'a.fk_commercial_suivi' => array(
-                'operator' => '!=',
-                'value'    => '(SELECT ec.fk_socpeople FROM llx_element_contact ec WHERE ec.fk_c_type_contact = 11 AND ec.element_id = a.rowid ORDER BY ec.rowid DESC LIMIT 1'
-            )
-                ), array());
-
-$rows = $bdb->executeS($sql, 'array');
-
-foreach ($rows as $r) {
-    $c = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $r['rowid']);
-
-    if (BimpObject::objectLoaded($c)) {
-        $id_comm = $c->getCommercialId();
-        echo $c->id . ' : ' .  $c->getData('fk_commercial_suivi') . ' - ' . $id_comm .' => ';
-        
-        if ($bdb->update('contrat', array(
-            'fk_commercial_suivi' => $id_comm
-        ), 'rowid = ' . $r['rowid']) > 0) {
-            echo 'OK';
-        } else {
-            echo 'KO - ' . $bdb->err();
-        }
-        echo '<br/>';
-    }
-}
+//$sql = BimpTools::getSqlFullSelectQuery('contrat', array('a.rowid'), array(
+//            'a.version'             => 2,
+//            'a.fk_commercial_suivi' => array(
+//                'operator' => '!=',
+//                'value'    => '(SELECT ec.fk_socpeople FROM llx_element_contact ec WHERE ec.fk_c_type_contact = 11 AND ec.element_id = a.rowid ORDER BY ec.rowid DESC LIMIT 1'
+//            )
+//                ), array());
+//
+//$rows = $bdb->executeS($sql, 'array');
+//
+//foreach ($rows as $r) {
+//    $c = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $r['rowid']);
+//
+//    if (BimpObject::objectLoaded($c)) {
+//        $id_comm = $c->getCommercialId();
+//        echo $c->id . ' : ' .  $c->getData('fk_commercial_suivi') . ' - ' . $id_comm .' => ';
+//        
+//        if ($bdb->update('contrat', array(
+//            'fk_commercial_suivi' => $id_comm
+//        ), 'rowid = ' . $r['rowid']) > 0) {
+//            echo 'OK';
+//        } else {
+//            echo 'KO - ' . $bdb->err();
+//        }
+//        echo '<br/>';
+//    }
+//}
 
 echo '<br/>FIN';
 echo '</body></html>';

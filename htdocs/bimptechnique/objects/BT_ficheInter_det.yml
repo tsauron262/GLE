@@ -73,7 +73,7 @@ fields:
     date:
         label: Date
         type: date
-        dol_prop: datei
+#        dol_prop: datei
         required: 1
     
     # Champ Bimp Object:

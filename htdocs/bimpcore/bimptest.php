@@ -27,29 +27,21 @@ if (!$user->admin) {
     exit;
 }
 
-$dfs = BimpCache::getBimpObjectObjects('bimpfinancement', 'BF_Demande', array('date_loyer' => 'IS_NOT_NULL', 'duration' => array('operator' => '>', 'value' => 0)));
+$sql = BimpTools::getSqlFullSelectQuery('contrat', array('rowid'), array(
+    'a.version' => 2,
+    'a.fk_commercial_suivi' => array(
+        'operator' => '!=',
+        'value' => '(SELECT ec.fk_socpeople FROM llx_element_contact ec WHERE ec.fk_c_type_contact = 11 AND ec.element_id = a.rowid ORDER BY ec.rowid DESC LIMIT 1'
+    )
+), array(), array(
+    'n' => 1
+));
 
-foreach ($dfs as $df) {
-    echo 'DF #' . $df->id;
+$rows = $bdb->executeS($sql, 'array');
 
-    $date_loyer = $df->getData('date_loyer');
-    $duration = (int) $df->getData('duration');
-    if ($date_loyer && $duration) {
-        $dt = new DateTime($date_loyer);
-        $dt->add(new DateInterval('P' . $duration . 'M'));
-        $dt->sub(new DateInterval('P1D'));
-        $err = $df->updateField('date_fin', $dt->format('Y-m-d'));
-        
-        if (count($err)) {
-            echo '<pre>';
-            print_r($err);
-            echo '</pre>';
-        } else {
-            echo 'OK - ' . $dt->format('d / m / Y');
-        }
-        echo '<br/>';
-    }
-}
+echo 'ROWS<pre>';
+print_r($rows);
+exit;
 
 echo '<br/>FIN';
 echo '</body></html>';

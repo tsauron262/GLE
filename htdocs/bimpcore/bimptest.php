@@ -27,30 +27,20 @@ if (!$user->admin) {
     exit;
 }
 
-//$rows = $bdb->getRows('product', '', null, 'array', array('rowid', 'ref'));
-//
-//if (is_array($rows)) {
-//    foreach ($rows as $r) {
-//        if (preg_match('/^(.+)_A$/', $r['ref'], $matches)) {
-//            $ref = $matches[1] . '/A';
-//            if ($bdb->update('product', array(
-//                        'ref' => $ref
-//                            ), 'rowid = ' . $r['rowid']) <= 0) {
-//                echo 'FAIL : ' . $ref . '<br/>';
-//            } else {
-//                echo 'OK ' . $ref . '<br/>';
-//            }
-//        }
-//    }
-//}$
+$dfs = BimpCache::getBimpObjectObjects('bimpfincancement', 'BF_Demande', array('date_loyer' => 'IN_NOT_NULL', 'duration' => array('operator' => '>', 'value' => 0)));
 
-if (BimpTools::getValue('reset', 0, 'int')) {
-    $_SESSION['dol_tz_string'] = '';
+foreach ($dfs as $df) {
+    echo 'DF #' . $df->id;
+
+    $date_loyer = $this->getData('date_loyer');
+    $duration = (int) $this->getData('duration');
+    if ($date_loyer && $duration) {
+        $dt = new DateTime($date_loyer);
+        $dt->add(new DateInterval('P' . $duration . 'M'));
+        $dt->sub(new DateInterval('P1D'));
+        $df->updateField('date_fin', $dt->format('Y-m-d'));
+    }
 }
-
-echo '<pre>';
-print_r($_SESSION);
-echo '</pre>';
 
 echo '<br/>FIN';
 echo '</body></html>';

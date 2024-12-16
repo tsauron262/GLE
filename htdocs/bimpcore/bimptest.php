@@ -53,6 +53,7 @@ foreach ($rows as $r) {
         } else {
             echo 'KO - ' . $bdb->err();
         }
+        echo '<br/>';
     }
 }
 

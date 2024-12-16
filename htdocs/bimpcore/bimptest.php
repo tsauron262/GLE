@@ -33,9 +33,7 @@ $sql = BimpTools::getSqlFullSelectQuery('contrat', array('a.rowid'), array(
                 'operator' => '!=',
                 'value'    => '(SELECT ec.fk_socpeople FROM llx_element_contact ec WHERE ec.fk_c_type_contact = 11 AND ec.element_id = a.rowid ORDER BY ec.rowid DESC LIMIT 1'
             )
-                ), array(), array(
-            'n' => 1
-        ));
+                ), array());
 
 $rows = $bdb->executeS($sql, 'array');
 

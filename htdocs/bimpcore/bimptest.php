@@ -43,7 +43,16 @@ foreach ($rows as $r) {
     $c = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $r['rowid']);
 
     if (BimpObject::objectLoaded($c)) {
-        echo $c->id . ' : ' .  $c->getData('fk_commercial_suivi') . ' - ' . $c->getCommercialId() .'<br/>';
+        $id_comm = $c->getCommercialId();
+        echo $c->id . ' : ' .  $c->getData('fk_commercial_suivi') . ' - ' . $id_comm;
+        
+        if ($bdb->update('contrat', array(
+            'fk_commercial_suivi' => $id_comm
+        ), 'rowid = ' . $r['rowid']) > 0) {
+            echo 'OK';
+        } else {
+            echo 'KO - ' . $bdb->err();
+        }
     }
     break;
 }

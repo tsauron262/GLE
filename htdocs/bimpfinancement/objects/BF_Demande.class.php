@@ -5984,7 +5984,7 @@ class BF_Demande extends BimpObject
             $duration = (int) $this->getData('duration');
 
             if ($date_loyer && $duration &&
-                    ($date_loyer != $this->getInitData('date_loyer' || $duration != (int) $this->getInitData('duration')))) {
+                    ($date_loyer != $this->getInitData('date_loyer') || $duration != (int) $this->getInitData('duration'))) {
                 $dt = new DateTime($date_loyer);
                 $dt->add(new DateInterval('P' . $duration . 'M'));
                 $dt->sub(new DateInterval('P1D'));

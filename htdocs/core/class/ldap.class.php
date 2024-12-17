@@ -890,7 +890,9 @@ class Ldap
 		$content = $this->dumpContent($dn, $info);
 
 		//Create directory & file
-		$result = dol_mkdir($ldapDirTemp);
+                $reulst = 1;
+                if(!is_dir($ldapDirTemp))
+                    $result = dol_mkdir($ldapDirTemp);
 		if ($result != 0) {
 			$outputfile = $ldapDirTemp.'/ldapinput.in';
 			$fp = fopen($outputfile, "w");

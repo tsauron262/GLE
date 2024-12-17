@@ -7,16 +7,6 @@ class testController extends BimpController
     {
         $html = '';
 
-        $df = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', 93);
-        $isgnature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $df->getData('id_signature_devis'));
-
-        $inf = '';
-        $err = $df->onSigned($isgnature, $inf);
-
-        $html .= $inf . '<pre>';
-        $html .= print_r($err, 1);
-        $html .= '</pre>';
-
         return $html;
         if (!BimpCore::isUserDev()) {
             return BimpRender::renderAlerts('Page réservée aux développeurs');

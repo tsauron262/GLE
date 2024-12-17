@@ -3649,7 +3649,7 @@ class User extends CommonObject
                 }
                 
 
-                $info['shadowAddress'] = array();
+//                $info['shadowAddress'] = array();
                 if($this->statut == 1 && isset($this->array_options['options_alias'])){
 //                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
                     $this->array_options['options_alias'] = str_replace(array("\r\n","\r","\n","\\r","\\n","\\r\\n"), ",", $this->array_options['options_alias']);

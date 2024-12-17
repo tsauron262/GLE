@@ -302,6 +302,10 @@ class BimpSignataire extends BimpObject
 
     public function isFonctionRequired()
     {
+        if (in_array((int) $this->getData('type'), array(self::TYPE_NONE, self::TYPE_PAPIER, self::TYPE_PAPIER_NO_SCAN))) {
+            return 0;            
+        }
+        
         if ((int) $this->getData('type') === self::TYPE_CLIENT) {
             return $this->isClientCompany();
         }

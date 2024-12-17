@@ -1002,7 +1002,7 @@ class BimpCommDemandeFin extends BimpObject
         return $this->df_data;
     }
 
-    public function onDocFinReceived($doc_type, $docs_content, $signature_params, $signataires_data = array())
+    public function onDocFinReceived($doc_type, $docs_content, $signature_params = array(), $signataires_data = array(), $signed = false)
     {
         $errors = array();
 
@@ -1017,7 +1017,7 @@ class BimpCommDemandeFin extends BimpObject
             }
 
             if (!count($errors)) {
-                $file_name = $this->getSignatureDocFileName($doc_type);
+                $file_name = $this->getSignatureDocFileName($doc_type, $signed);
                 if (!$file_name) {
                     $errors[] = 'Type de document invalide: ' . $doc_type;
                 } else {
@@ -1035,31 +1035,45 @@ class BimpCommDemandeFin extends BimpObject
                     }
 
                     if (!count($errors)) {
-                        if (!empty($signature_params)) {
+                        if ($signed || !empty($signature_params)) {
                             switch ($doc_type) {
                                 case 'devis_fin':
                                     $this->updateField('status', static::DOC_STATUS_ACCEPTED);
-                                    $this->updateField('signature_df_params', $signature_params);
+
+                                    if ($signed) {
+                                        $this->updateField('devis_fin_status', static::DOC_STATUS_ACCEPTED);
+                                    } else {
+                                        $this->updateField($doc_type . '_status', self::DOC_STATUS_ATTENTE);
+                                        $this->updateField('signature_df_params', $signature_params);
+                                    }
                                     break;
 
                                 case 'contrat_fin':
-                                    $this->updateField('signature_cf_params', $signature_params);
-                                    $this->updateField('signataires_cf_data', $signataires_data);
+                                    if ($signed) {
+                                        $this->updateField('contrat_fin_status', static::DOC_STATUS_ACCEPTED);
+                                    } else {
+                                        $this->updateField($doc_type . '_status', self::DOC_STATUS_ATTENTE);
+                                        $this->updateField('signature_cf_params', $signature_params);
+                                        $this->updateField('signataires_cf_data', $signataires_data);
+                                    }
                                     break;
 
                                 case 'pvr_fin':
-                                    $this->updateField('signature_pvr_params', $signature_params);
-                                    $this->updateField('signataires_pvr_data', $signataires_data);
+                                    if ($signed) {
+                                        $this->updateField('pvr_fin_status', static::DOC_STATUS_ACCEPTED);
+                                    } else {
+                                        $this->updateField($doc_type . '_status', self::DOC_STATUS_ATTENTE);
+                                        $this->updateField('signature_pvr_params', $signature_params);
+                                        $this->updateField('signataires_pvr_data', $signataires_data);
+                                    }
                                     break;
                             }
                         }
 
-                        $this->updateField($doc_type . '_status', self::DOC_STATUS_ATTENTE);
-
                         $parent = $this->getParentInstance();
                         if (BimpObject::objectLoaded($parent)) {
                             $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' reçu', strtoupper($doc_type) . '_RECEIVED');
-                            $this->addParentNoteForCommercial('Document reçu : ' . $this->getDocTypeLabel($doc_type) . ($i > 1 ? ' (' . $i . ' fichiers)' : ''));
+                            $this->addParentNoteForCommercial('Document ' . ($signed ? 'signé ' : '') . 'reçu : ' . $this->getDocTypeLabel($doc_type) . ($i > 1 ? ' (' . $i . ' fichiers)' : ''));
                         }
                     }
                 }

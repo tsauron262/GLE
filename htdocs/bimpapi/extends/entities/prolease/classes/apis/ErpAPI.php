@@ -104,7 +104,7 @@ class ErpAPI_ExtEntity extends ErpAPI
         return null;
     }
 
-    public function sendDocFinancement($id_demande, $type_origine, $id_origine, $doc_type, $docs_content, $signature_params, $signataires_data, &$errors = array(), &$warnings = array())
+    public function sendDocFinancement($id_demande, $type_origine, $id_origine, $doc_type, $docs_content, $signature_params, $signataires_data, $signed = 0, &$errors = array(), &$warnings = array())
     {
         $response = $this->execCurl('sendDocFinancement', array(
             'fields' => array(
@@ -115,7 +115,8 @@ class ErpAPI_ExtEntity extends ErpAPI
                 'doc_type'         => $doc_type,
                 'docs_content'     => $docs_content,
                 'signature_params' => $signature_params,
-                'signataires_data' => $signataires_data
+                'signataires_data' => $signataires_data,
+                'signed'           => (int) $signed
             )), $errors);
 
         if (isset($response['warnings'])) {

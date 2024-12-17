@@ -6,11 +6,17 @@ class testController extends BimpController
     public function renderHtml()
     {
         $html = '';
-        
-        $html .= '<span class="btn btn-default" onclick="BimpBrowserNotification(\'TEST\', \'CONTENT\')">';
-        $html .= 'TEST NOTIF';
-        $html .= '</span>';
-        
+
+        $df = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', 93);
+        $isgnature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $df->getData('id_signature_devis'));
+
+        $inf = '';
+        $err = $df->onSigned($isgnature, $inf);
+
+        $html .= $inf . '<pre>';
+        $html .= print_r($err, 1);
+        $html .= '</pre>';
+
         return $html;
         if (!BimpCore::isUserDev()) {
             return BimpRender::renderAlerts('Page réservée aux développeurs');
@@ -229,11 +235,9 @@ class testController extends BimpController
 //        $html .= 'BC_Form::render - Mém : ' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1);
 //        $html .= '</div>';
 //        $html .= $content;
-
 //        $html .= 'PARAMS : <pre>';
 //        $html .= print_r($params, 1);
 //        $html .= '</pre>';
-
 //        return $html;
     }
 }

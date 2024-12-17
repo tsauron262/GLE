@@ -3569,6 +3569,8 @@ class User extends CommonObject
                 $info['postalCode'] = ($this->zip != "")? $this->zip : "00000";
                 $info['street'] = ($this->town != "")? $this->town : "nc";
                 
+                $info['displayName'] = $info['cn'];
+                
 //                if($this->array_options['options_date_e'] > 0)
 //                    $info['hireDate'] = dol_print_date($this->array_options['options_date_e'], '%Y%m%d')."000000Z";
 //                else

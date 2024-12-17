@@ -3648,7 +3648,40 @@ class User extends CommonObject
                     $info["domainGlobalAdmin"] = "yes";
                 }
                 
-
+                $info['enabledservice'][] = "doveadm";
+                $info['enabledservice'][] = "lib-storage";
+                $info['enabledservice'][] = "indexer-worker";
+                $info['enabledservice'][] = "dsync";
+                $info['enabledservice'][] = "quota-status";
+                $info['enabledservice'][] = "mail";
+                $info['enabledservice'][] = "smtp";
+                $info['enabledservice'][] = "smtpsecured";
+                $info['enabledservice'][] = "smtptls";
+                $info['enabledservice'][] = "pop3";
+                $info['enabledservice'][] = "pop3secured";
+                $info['enabledservice'][] = "pop3tls";
+                $info['enabledservice'][] = "imap";
+                $info['enabledservice'][] = "imapsecured";
+                $info['enabledservice'][] = "imaptls";
+                $info['enabledservice'][] = "managesieve";
+                $info['enabledservice'][] = "managesievesecured";
+                $info['enabledservice'][] = "managesievetls";
+                $info['enabledservice'][] = "sieve";
+                $info['enabledservice'][] = "sievesecured";
+                $info['enabledservice'][] = "sievetls";
+                $info['enabledservice'][] = "deliver";
+                $info['enabledservice'][] = "lda";
+                $info['enabledservice'][] = "lmtp";
+                $info['enabledservice'][] = "recipientbcc";
+                $info['enabledservice'][] = "senderbcc";
+                $info['enabledservice'][] = "forward";
+                $info['enabledservice'][] = "shadowaddress";
+                $info['enabledservice'][] = "displayedInGlobalAddressBook";
+                $info['enabledservice'][] = "sogo";
+                $info['enabledservice'][] = "sogowebmail";
+                $info['enabledservice'][] = "sogocalendar";
+                $info['enabledservice'][] = "sogoactivesync";
+                
 //                $info['shadowAddress'] = array();
                 if($this->statut == 1 && isset($this->array_options['options_alias'])){
 //                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);

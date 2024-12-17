@@ -3408,7 +3408,7 @@ class User extends CommonObject
 		$keymodified = false;
 
 		// Object classes
-		$info["objectclass"] = explode(',', getDolGlobalString('LDAP_USER_OBJECT_CLASS'));
+		$info["objectClass"] = explode(',', getDolGlobalString('LDAP_USER_OBJECT_CLASS'));
 
 		$this->fullname = $this->getFullName($langs);
 
@@ -3502,7 +3502,7 @@ class User extends CommonObject
 		}
 
 		if (getDolGlobalString('LDAP_SERVER_TYPE') == 'egroupware') {
-			$info["objectclass"][4] = "phpgwContact"; // compatibilite egroupware
+			$info["objectClass"][4] = "phpgwContact"; // compatibilite egroupware
 
 			$info['uidnumber'] = $this->id;
 

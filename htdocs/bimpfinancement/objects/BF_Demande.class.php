@@ -6587,7 +6587,7 @@ class BF_Demande extends BimpObject
         return '';
     }
 
-    public function onSigned($bimpSignature, &$inf = '')
+    public function onSigned($bimpSignature)
     {
         $errors = array();
 
@@ -6602,7 +6602,6 @@ class BF_Demande extends BimpObject
 
             if (!count($errors)) {
                 if ($this->hasSource()) {
-                    $inf = '<br/>ICI - ';
                     $sources = $this->getChildrenObjects('sources');
 
                     foreach ($sources as $source) {
@@ -6610,7 +6609,6 @@ class BF_Demande extends BimpObject
                         $id_origine = (int) $source->getData('id_origine');
 
                         if (!$type_origine || !$id_origine) {
-                            $inf .= 'KO';
                             continue;
                         }
 
@@ -6620,7 +6618,6 @@ class BF_Demande extends BimpObject
                         if (!count($req_errors)) {
                             $file = $this->getFilesDir() . $this->getSignatureDocFileName($doc_type, 1);
 
-                            $inf .= ' SEND ' . $file . ' to ' . $source->displayName() . ' => ';
                             $docs_content = array(base64_encode(file_get_contents($file)));
                             $docs_content = json_encode($docs_content);
 
@@ -6629,8 +6626,6 @@ class BF_Demande extends BimpObject
 
                         if (count($req_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de l\'envoi du document signé à ' . $source->displayName());
-                        } else {
-                            $inf .= 'OK';
                         }
                     }
                 }

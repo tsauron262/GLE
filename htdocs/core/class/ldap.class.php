@@ -890,7 +890,7 @@ class Ldap
 		$content = $this->dumpContent($dn, $info);
 
 		//Create directory & file
-                $reulst = 1;
+                $result = 1;
                 if(!is_dir($ldapDirTemp))
                     $result = dol_mkdir($ldapDirTemp);
 		if ($result != 0) {

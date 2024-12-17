@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT.'/core/modules/syslog/logHandler.php';
+require_once DOL_DOCUMENT_ROOT.'/core/modules/syslog/logHandlerInterface.php';
 
 /**
  * Class to manage logging to ChromPHP
@@ -140,7 +141,7 @@ class mod_syslog_chromephp extends LogHandler implements LogHandlerInterface
 	 *	@param	array	$content	Content to log
 	 * 	@return	null|false
 	 */
-	public function export($content)
+	public function export($content, $suffixinfilename = '')
 	{
 		global $conf;
 

@@ -3,6 +3,17 @@
 class BimpLocationLine extends BimpObject
 {
 
+    const STATUS_CANCELLED = -1;
+    const STATUS_RESERVED = 0;
+    const STATUS_ONGOING = 1;
+    const STATUS_RESTITUTED = 10;
+
+    public static $status_list = array(
+        self::STATUS_CANCELLED  => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::STATUS_RESERVED   => array('label' => 'Réservé', 'icon' => 'fas_lock', 'classes' => array('warning')),
+        self::STATUS_ONGOING    => array('label' => 'Mis à disposition', 'icon' => 'fas_hand-holding', 'classes' => array('info')),
+        self::STATUS_RESTITUTED => array('label' => 'Restitué', 'icon' => 'fas_check', 'classes' => array('success')),
+    );
     protected $amounts = null;
 
     // Getters booléens : 
@@ -62,7 +73,7 @@ class BimpLocationLine extends BimpObject
             $date_to = $this->getData('date_to');
         }
 
-        $where = 'l.status >= 0 AND a.cancelled = 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_from <= \'' . $date_to . '\' AND a.date_to >= \'' . $date_from . '\'';
+        $where = 'l.status >= 0 AND a.status >= 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_from <= \'' . $date_to . '\' AND a.date_to >= \'' . $date_from . '\'';
 
         if ($this->isLoaded()) {
             $where .= ' AND a.id != ' . $this->id;
@@ -98,7 +109,7 @@ class BimpLocationLine extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = [])
     {
-        if ((int) $this->getData('cancelled')) {
+        if ((int) $this->getData('status') < 0) {
             $errors[] = 'Cette ligne est annulée';
             return 0;
         }
@@ -108,14 +119,16 @@ class BimpLocationLine extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
-        }
-
         switch ($action) {
             case 'reopen':
-                if (!(int) $this->getData('cancelled')) {
+                if ((int) $this->getData('status') >= 0) {
                     $errors[] = 'Cette ligne de location n\'est pas annulée';
+                    return 0;
+                }
+                return 1;
+
+            case 'sellEquipment':
+                if (!$this->isLoaded($errors)) {
                     return 0;
                 }
                 return 1;
@@ -134,10 +147,49 @@ class BimpLocationLine extends BimpObject
 
     // Getters données :
 
+    public function getQty()
+    {
+        $fac_from = $this->getFacFrom();
+        $fac_to = $this->getFacTo();
+
+        if ($fac_from && $fac_to && ($fac_from <= $fac_to)) {
+            $period_data = BimpTools::getDatesIntervalData($fac_from, $fac_to, false, true);
+            return $period_data['full_days'];
+        }
+
+        return 0;
+    }
+
+    public function getFacFrom()
+    {
+        $fac_from = $this->getData('fac_date_from');
+
+        if (!$fac_from) {
+            return $this->getData('date_from');
+        }
+
+        return $fac_from;
+    }
+
+    public function getFacTo()
+    {
+        $fac_to = $this->getData('fac_date_to');
+
+        if (!$fac_to) {
+            return $this->getData('date_to');
+        }
+
+        return $fac_to;
+    }
+
     public function getAmounts($recalculate = false)
     {
         if (is_null($this->amounts) || $recalculate) {
+            $fac_from = $this->getFacFrom();
+            $fac_to = $this->getFacTo();
             $this->amounts = array(
+                'fac_from'       => $fac_from,
+                'fac_to'         => $fac_to,
                 'pu_ht'          => 0,
                 'remise'         => 0,
                 'pu_ht_remise'   => 0,
@@ -151,10 +203,10 @@ class BimpLocationLine extends BimpObject
                 'remain_to_bill' => 0
             );
 
-            if ((int) $this->getData('cancelled')) {
+            if ((int) $this->getData('status') < 0) {
                 $this->amounts['qty'] = 0;
             } else {
-                $period_data = BimpTools::getDatesIntervalData($this->getData('date_from'), $this->getData('date_to'), false, true);
+                $period_data = BimpTools::getDatesIntervalData($fac_from, $fac_to, false, true);
                 $this->amounts['qty'] = $period_data['full_days'];
             }
 
@@ -174,6 +226,10 @@ class BimpLocationLine extends BimpObject
 
             $this->amounts['total_billed'] = $this->getTotalBilled();
             $this->amounts['remain_to_bill'] = $this->amounts['total_ttc'] - $this->amounts['total_billed'];
+
+            if ($this->amounts['remain_to_bill'] > -0.01 && $this->amounts['remain_to_bill'] < 0.01) {
+                $this->amounts['remain_to_bill'] = 0;
+            }
         }
 
         return $this->amounts;
@@ -264,8 +320,18 @@ class BimpLocationLine extends BimpObject
     public function getInputValue($field_name)
     {
         switch ($field_name) {
+            case 'status':
+                if (!$this->isLoaded()) {
+                    $loc = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($loc)) {
+                        return (int) $loc->getData('lines_process_status');
+                    }
+                }
+                return (int) $this->getData('status');
             case 'date_from':
             case 'date_to':
+            case 'fac_date_from':
+            case 'fac_date_to':
                 if (!$this->isLoaded()) {
                     $loc = $this->getParentInstance();
                     if (BimpObject::objectLoaded($loc)) {
@@ -274,22 +340,22 @@ class BimpLocationLine extends BimpObject
                 }
                 break;
 
-            case 'pu_ht':
-            case 'tva_tx':
-                if (!$this->isLoaded() || (int) $this->getData('id_forfait') !== (int) $this->getInitData('id_forfait')) {
-                    $prod = $this->getChildObject('forfait');
-                    if (BimpObject::objectLoaded($prod)) {
-                        switch ($field_name) {
-                            case 'pu_ht':
-                                return $prod->getData('price');
-
-                            case 'tva_tx':
-                                return $prod->getData('tva_tx');
-                        }
-                    }
-                    return 0;
-                }
-                break;
+//            case 'pu_ht':
+//            case 'tva_tx':
+//                if (!$this->isLoaded() || (int) $this->getData('id_forfait') !== (int) $this->getInitData('id_forfait')) {
+//                    $prod = $this->getChildObject('forfait');
+//                    if (BimpObject::objectLoaded($prod)) {
+//                        switch ($field_name) {
+//                            case 'pu_ht':
+//                                return $prod->getData('price');
+//
+//                            case 'tva_tx':
+//                                return $prod->getData('tva_tx');
+//                        }
+//                    }
+//                    return 0;
+//                }
+//                break;
         }
 
         return $this->getData($field_name);
@@ -301,24 +367,28 @@ class BimpLocationLine extends BimpObject
     {
         $forfaits = array();
 
-        $date_from = $this->getData('date_from');
-        $date_to = $this->getData('date_to');
+//        $date_from = $this->getData('date_from');
+//        $date_to = $this->getData('date_to');
         $id_eq = (int) $this->getData('id_equipment');
 
-        if ($date_from && $date_to && $id_eq) {
+//        if ($date_from && $date_to && $id_eq) {
+        if ($id_eq) {
             $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_eq);
 
             if (BimpObject::objectLoaded($eq)) {
                 $product = $eq->getChildObject('bimp_product');
                 if (BimpObject::objectLoaded($product)) {
-                    $interval = BimpTools::getDatesIntervalData($date_from, $date_to);
-                    $nDays = $interval['full_days'];
+//                    $interval = BimpTools::getDatesIntervalData($date_from, $date_to);
+//                    $nDays = $interval['full_days'];
                     $prod_forfaits = $product->getData('forfaits_location');
 
                     foreach ($prod_forfaits as $id_forfait) {
                         $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_forfait);
 
-                        if (BimpObject::objectLoaded($prod) && $prod->getData('min_qty') <= $nDays) {
+//                        if (BimpObject::objectLoaded($prod) && $prod->getData('min_qty') <= $nDays) {
+//                            $forfaits[$id_forfait] = $prod->getRef() . ' - ' . $prod->getData('label');
+//                        }
+                        if (BimpObject::objectLoaded($prod)) {
                             $forfaits[$id_forfait] = $prod->getRef() . ' - ' . $prod->getData('label');
                         }
                     }
@@ -375,7 +445,7 @@ class BimpLocationLine extends BimpObject
     {
         $html = '';
 
-        if ((int) $this->getData('cancelled')) {
+        if ((int) $this->getData('status') < 0) {
             $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Annulée</span>';
         } else {
             $loc_from = '';
@@ -389,7 +459,10 @@ class BimpLocationLine extends BimpObject
 
             $html .= 'Du ';
 
-            if ($loc_from && $loc_from != $this->getData('date_from')) {
+            $from = $this->getData('date_from');
+            $to = $this->getData('date_to');
+
+            if ($loc_from && $loc_from != $from) {
                 $html .= '<span class="important">';
                 $html .= $this->displayDataDefault('date_from');
                 $html .= '</span>';
@@ -399,19 +472,45 @@ class BimpLocationLine extends BimpObject
 
             $html .= ($single_line ? ' au ' : '<br/>Au ');
 
-            if ($loc_to && $loc_to != $this->getData('date_to')) {
+            if ($loc_to && $loc_to != $to) {
                 $html .= '<span class="important">';
                 $html .= $this->displayDataDefault('date_to');
                 $html .= '</span>';
             } else {
                 $html .= $this->displayDataDefault('date_to');
             }
-        }
 
-        if ($display_availabilities) {
-            $html .= $this->renderAvailablitiesAlerts(false);
-        }
+            if ($display_availabilities && $single_line) {
+                $html .= $this->renderAvailablitiesAlerts(true);
+            }
 
+            $fac_from = $this->getData('fac_date_from');
+            if ($fac_from && $fac_from == $from) {
+                $fac_from = '';
+            }
+            $fac_to = $this->getData('fac_date_to');
+            if ($fac_to && $fac_to == $to) {
+                $fac_to = '';
+            }
+
+            if ($fac_from || $fac_to) {
+                $html .= '<br/><span class="warning" style="font-size: 11px; font-style: italic">';
+                $html .= 'Facturé ';
+
+                if ($fac_from) {
+                    $html .= ($fac_to ? 'du' : 'à partir du') . ' ' . date('d / m / Y', strtotime($fac_from));
+                }
+
+                if ($fac_to) {
+                    $html .= ($fac_from ? ' au' : 'jusqu\'au') . ' ' . date('d / m / Y', strtotime($fac_to));
+                }
+                $html .= '</span>';
+            }
+
+            if ($display_availabilities && !$single_line) {
+                $html .= $this->renderAvailablitiesAlerts(false);
+            }
+        }
 
         return $html;
     }
@@ -471,7 +570,7 @@ class BimpLocationLine extends BimpObject
         if ($date_from && $date_to && $id_eq) {
             $dt = new DateTime($date_from);
             $dt->sub(new DateInterval('P15D'));
-            $where = 'l.status >= 0 AND a.cancelled = 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_to < \'' . $date_from . '\'';
+            $where = 'l.status >= 0 AND a.status >= 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_to < \'' . $date_from . '\'';
             $where .= ' AND a.date_to >= \'' . $dt->format('Y-m-d') . '\'';
 
             if ($this->isLoaded()) {
@@ -495,7 +594,7 @@ class BimpLocationLine extends BimpObject
 
             $dt = new DateTime($date_to);
             $dt->add(new DateInterval('P15D'));
-            $where = 'l.status >= 0 AND a.cancelled = 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_from > \'' . $date_to . '\'';
+            $where = 'l.status >= 0 AND a.status >= 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_from > \'' . $date_to . '\'';
             $where .= ' AND a.date_from <= \'' . $dt->format('Y-m-d') . '\'';
 
             if ($this->isLoaded()) {
@@ -537,6 +636,19 @@ class BimpLocationLine extends BimpObject
         return $html;
     }
 
+    // Traitements : 
+
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        parent::onSave($errors, $warnings);
+
+        $loc = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($loc)) {
+            $loc->checkStatus();
+        }
+    }
+
     // Actions :
 
     public function actionReopen($data, &$success)
@@ -546,7 +658,14 @@ class BimpLocationLine extends BimpObject
         $success = 'Réouverture de la ligne de location effectuée avec succès';
 
         if ($this->isEquipmentAvailable(0, '', '', 0, $errors)) {
-            $errors = $this->updateField('cancelled', 0);
+            $errors = $this->updateField('status', (int) BimpTools::getArrayValueFromPath($data, 'status', 0));
+
+            if (!empty($errors)) {
+                $loc = $this->getParentInstance();
+                if (BimpObject::objectLoaded($loc)) {
+                    $loc->checkStatus();
+                }
+            }
         }
 
         return array(
@@ -562,17 +681,10 @@ class BimpLocationLine extends BimpObject
         $success = '';
         $sc = '';
 
-//        $vente = null;
         $loc = $this->getParentInstance();
         if (!BimpObject::objectLoaded($loc)) {
             $errors[] = 'Location absent';
         }
-//        else {
-//            $vente = $loc->getChildObject('cur_vente');
-//            if (!BimpObject::objectLoaded($vente)) {
-//                $errors[] = 'Aucune vente en cours pour cette location';
-//            }
-//        }
 
         $eq = $this->getChildObject('equipment');
         if (!BimpObject::objectLoaded($eq)) {
@@ -580,7 +692,7 @@ class BimpLocationLine extends BimpObject
         }
 
         if (!count($errors)) {
-            $errors = $this->updateField('cancelled', 1);
+            $errors = $this->updateField('status', self::STATUS_CANCELLED);
 
             if (!count($errors)) {
                 $id_entrepot = (int) $loc->getData('id_entrepot');
@@ -590,6 +702,8 @@ class BimpLocationLine extends BimpObject
 
                     if (!count($errors)) {
                         $sc = 'selectArticle($(), ' . $eq->id . ', \'equipment\');';
+
+                        $loc->checkStatus();
                     }
                 }
             }
@@ -599,6 +713,134 @@ class BimpLocationLine extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $sc
+        );
+    }
+
+    public function actionEditStatus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        $status = (int) BimpTools::getArrayValueFromPath($data, 'status', 0);
+
+        if (empty($ids)) {
+            $errors[] = 'Aucun équipement sélectionné';
+        } else {
+            $nOk = 0;
+            $locs = array();
+
+            foreach ($ids as $id) {
+                $line = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocationLine', $id);
+
+                if (!BimpObject::objectLoaded($line)) {
+                    $errors[] = 'Ligne de location #' . $id . ' inexsitante';
+                } else {
+                    $id_loc = (int) $line->getData('id_location');
+                    if (!in_array($id_loc, $locs)) {
+                        $loc = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocation', $id_loc);
+                        $loc->lines_mass_processing = true;
+                        $locs[$id_loc] = $loc;
+                    }
+
+                    $line_err = $line->updateField('status', $status);
+
+                    if (count($line_err)) {
+                        $eq = $line->getChildObject('equipment');
+                        $errors[] = BimpTools::getMsgFromArray($line_err, 'Echec de la mise à jour pour l\'équipement ' . (BimpObject::objectLoaded($eq) ? $eq->getRef() : '#' . $line->getData('id_equipment')));
+                    } else {
+                        $nOk++;
+                    }
+                }
+            }
+
+            if (!count($errors)) {
+                $success = $nOk . ' équipement' . ($nOk > 1 ? 's' : '') . ' mis à jour avec succès';
+                foreach ($locs as $id_loc => $loc) {
+                    $loc->lines_mass_processing = false;
+                    $loc->checkStatus();
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionEditDates($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        $date_from = BimpTools::getArrayValueFromPath($data, 'date_from', '');
+        $date_to = BimpTools::getArrayValueFromPath($data, 'date_to', '');
+        $fac_from = BimpTools::getArrayValueFromPath($data, 'fac_date_from', '');
+        $fac_to = BimpTools::getArrayValueFromPath($data, 'fac_date_to', '');
+
+        if (empty($ids)) {
+            $errors[] = 'Aucun équipement sélectionné';
+        } else {
+            $nOk = 0;
+            $locs = array();
+
+            foreach ($ids as $id) {
+                $line = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocationLine', $id);
+
+                if (!BimpObject::objectLoaded($line)) {
+                    $errors[] = 'Ligne de location #' . $id . ' inexsitante';
+                } else {
+                    $id_loc = (int) $line->getData('id_location');
+                    if (!in_array($id_loc, $locs)) {
+                        $loc = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocation', $id_loc);
+                        $loc->lines_mass_processing = true;
+                        $locs[$id_loc] = $loc;
+                    }
+
+                    if ($date_from) {
+                        $line->set('date_from', $date_from);
+                    }
+
+                    if ($date_to) {
+                        $line->set('date_to', $date_to);
+                    }
+
+                    if ($fac_from) {
+                        $line->set('fac_date_from', $fac_from);
+                    }
+
+                    if ($fac_to) {
+                        $line->set('fac_date_to', $fac_to);
+                    }
+
+                    $line_w = array();
+                    $line_err = $line->update($line_w, true);
+
+                    if (count($line_err)) {
+                        $eq = $line->getChildObject('equipment');
+                        $errors[] = BimpTools::getMsgFromArray($line_err, 'Echec de la mise à jour pour l\'équipement ' . (BimpObject::objectLoaded($eq) ? $eq->getRef() : '#' . $line->getData('id_equipment')));
+                    } else {
+                        $nOk++;
+                    }
+                }
+            }
+
+            if (!count($errors)) {
+                $success = $nOk . ' équipement' . ($nOk > 1 ? 's' : '') . ' mis à jour avec succès';
+                foreach ($locs as $id_loc => $loc) {
+                    $loc->lines_mass_processing = false;
+                    $loc->checkStatus();
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 
@@ -617,23 +859,50 @@ class BimpLocationLine extends BimpObject
 
         if (!count($errors)) {
             if ($this->getData('date_to') < $this->getData('date_from')) {
-                $errors[] = 'La date de fin est antérieur à la date de début';
+                $errors[] = 'La date de fin est inférieure à la date de début';
+            }
+
+            $fac_from = $this->getData('fac_date_from');
+            $fac_to = $this->getData('fac_date_to');
+
+            if ($fac_to && $fac_from && $fac_to < $fac_from) {
+                $errors[] = 'La date de fin de facturation est inférieure à la date de début de facturation';
+            }
+
+            if (!count($errors)) {
+                if ($fac_from && $fac_from < $this->getData('date_from')) {
+                    $errors[] = 'La date de début de facturation ne peut pas être inférieure à la date de début de location';
+                }
+
+                if ($fac_to && $fac_to > $this->getData('date_to')) {
+                    $errors[] = 'La date de fin de facturation ne peut pas être supérieure à la date de fin de location';
+                }
             }
 
             $forfait = $this->getChildObject('forfait');
             if (!BimpObject::objectLoaded($forfait)) {
                 $errors[] = 'Le forfait #' . $this->getData('id_forfait') . ' n\'existe plus';
             } else {
-                if (!(float) $this->getData('pu_ht')) {
-                    $this->set('pu_ht', $forfait->getData('price'));
+                if (!count($errors) && (int) BimpCore::getConf('use_price_rules') && (!$this->isLoaded() ||
+                        (int) $this->getData('id_forfait') !== (int) $this->getInitData('id_forfait') ||
+                        $this->getData('date_from') !== $this->getInitData('date_from') ||
+                        $this->getData('date_to') !== $this->getInitData('date_to') ||
+                        $this->getData('fac_date_from') !== $this->getInitData('fac_date_from') ||
+                        $this->getData('fac_date_to') !== $this->getInitData('fac_date_to'))) {
+
+                    BimpObject::loadClass('bimpcore', 'Bimp_ProductPriceRule');
+                    
+                    $this->set('pu_ht', Bimp_ProductPriceRule::getBestPriceForProduct($forfait, array('qty' => $this->getQty())));
                 }
 
                 if (!(float) $this->getData('tva_tx')) {
                     $this->set('tva_tx', $forfait->getData('tva_tx'));
                 }
+            }
 
-                $location = $this->getParentInstance();
+            $location = $this->getParentInstance();
 
+            if (!$this->isLoaded() || (int) $this->getData('id_equipment') !== (int) $this->getInitData('id_equipment')) {
                 $this->isEquipmentAvailable(0, '', '', $location->getData('id_entrepot'), $errors);
             }
         }
@@ -648,7 +917,7 @@ class BimpLocationLine extends BimpObject
         if (BimpObject::objectLoaded($loc) && (!isset($loc->isDeleting) || !$loc->isDeleting)) {
             $amounts = $this->getAmounts();
             if ($amounts['total_billed'] > 0) {
-                return $this->updateField('cancelled', 1);
+                return $this->updateField('status', self::STATUS_CANCELLED);
             }
         }
 

@@ -110,6 +110,14 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_ProductProduct
+                
+    price_rules: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductPriceRule
             
 fields: 
     ref: 
@@ -721,11 +729,6 @@ fields:
             type: select
             options: 
                 callback: getAvailableForfaitsLocationArray
-                
-    min_qty: 
-        label: Quantité minimale
-        type: int
-        default_value: 0
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -1136,10 +1139,6 @@ fields_tables:
               edit: 1
               show: 
                   is_module_active: bimplocation
-            - field: min_qty
-              edit: 1
-              show: 
-                  is_module_active: bimplocation
             - field: remisable
               edit: 1
             - field: no_fixe_prices
@@ -1363,6 +1362,16 @@ views:
                   col_sm: 12
                   list: 
                       children: prices
+                      name: product
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  show: 
+                      conf: use_price_rules
+                  list: 
+                      children: price_rules
                       name: product
                      
             - cols: 

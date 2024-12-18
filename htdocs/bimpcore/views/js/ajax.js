@@ -54,6 +54,8 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.append_html_transition = true; // Si append_html true
     this.eraseResultButton = false; // Bouton pour effacer le contenu du résultat
 
+    this.play_sounds = false;
+
     this.processing_msg = 'Traitement en cours';
     this.success_msg = 'Opération effectuée avec succès';
     this.error_msg = 'Une erreur est survenue, l\'opération n\'a pas aboutie';
@@ -350,7 +352,14 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     if (typeof (bimpAjax.error) === 'function') {
                         bimpAjax.error(result, bimpAjax);
                     }
+
+                    if (bimpAjax.play_sounds) {
+                        BimpSound.play('danger');
+                    }
                 } else {
+                    if (bimpAjax.play_sounds) {
+                        BimpSound.play('success');
+                    }
                     bimpAjax.display_result_success(result);
                     var no_callbacks = false;
 
@@ -459,6 +468,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 delete bimp_requests[bimpAjax.request_id];
             },
             error: function (response, a, b) {
+                if (bimpAjax.play_sounds) {
+                    BimpSound.play('danger');
+                }
                 if (!bimp_is_unloaded) {
                     if (bimpAjax.display_errors) {
                         if (typeof (response.responseText) === 'string' && response.responseText) {

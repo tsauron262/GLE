@@ -1015,10 +1015,8 @@ function findProduct($button) {
 
             if (caisse_sounds_on) {
                 if (result.ok) {
-//                bimp_msg('GO PLAY OK');
                     BimpSound.play('success');
                 } else {
-//                bimp_msg('GO PLAY KO');
                     BimpSound.play('danger');
                 }
             }

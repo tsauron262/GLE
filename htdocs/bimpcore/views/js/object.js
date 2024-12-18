@@ -40,7 +40,7 @@ function saveObject(module, object_name, id_object, fields, $resultContainer, su
     });
 }
 
-function saveObjectField(module, object_name, id_object, field, value, $resultContainer, successCallback, display_success) {
+function saveObjectField(module, object_name, id_object, field, value, $resultContainer, successCallback, display_success, triggers) {
     var data = {
         module: module,
         object_name: object_name,
@@ -53,17 +53,24 @@ function saveObjectField(module, object_name, id_object, field, value, $resultCo
         display_success = true;
     }
 
+    if (typeof (display_success) === 'undefined') {
+        triggers = true;
+    }
+
     BimpAjax('saveObjectField', data, $resultContainer, {
         display_success: display_success,
         success: function (result) {
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
-            $('body').trigger($.Event('objectChange', {
-                module: result.module,
-                object_name: result.object_name,
-                id_object: result.id_object
-            }));
+
+            if (triggers) {
+                $('body').trigger($.Event('objectChange', {
+                    module: result.module,
+                    object_name: result.object_name,
+                    id_object: result.id_object
+                }));
+            }
         }
     });
 }
@@ -218,7 +225,9 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
         use_bimpdatasync: false, // Utiliser BimpDataSync
         use_report: false, // Utiliser les rapports BimpDataSync
         display_processing: true,
-        processing_msg: 'Traitement en cours'
+        processing_msg: 'Traitement en cours',
+        remove_result_content: true,
+        play_sounds: false
     };
 
     for (var i in def_options) {
@@ -383,6 +392,12 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
 
             bds_initObjectActionProcess($button, data, options.modal_title, $resultContainer);
         } else {
+            var remove_current_content = options.remove_result_content;
+            var eraseResultButton = false;
+            if (!remove_current_content) {
+                eraseResultButton = true;
+            }
+
             BimpAjax('setObjectAction', data, $resultContainer, {
                 $button: $button,
                 display_success_in_popup_only: true,
@@ -395,6 +410,9 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
                 processing_padding: 10,
                 append_html: true,
                 modal_scroll_bottom: options.modal_scroll_bottom,
+                remove_current_content: remove_current_content,
+                eraseResultButton: eraseResultButton,
+                play_sounds: options.play_sounds,
                 success: function (result, bimpAjax) {
                     if (typeof (successCallback) === 'function') {
                         successCallback(result);

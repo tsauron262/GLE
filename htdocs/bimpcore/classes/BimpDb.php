@@ -444,11 +444,14 @@ class BimpDb
         $result = $this->db->query($sql);
 
         $rows = null;
-        if ($result && $this->db->num_rows($result)) {
+        if ($result) {
             $rows = array();
-            for ($i = 0; $i < $this->db->num_rows($result); $i++) {
-                $obj = $this->db->fetch_object($result);
-                $rows[] = $obj->$field;
+
+            if ($this->db->num_rows($result)) {
+                for ($i = 0; $i < $this->db->num_rows($result); $i++) {
+                    $obj = $this->db->fetch_object($result);
+                    $rows[] = $obj->$field;
+                }
             }
         }
 

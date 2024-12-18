@@ -428,10 +428,18 @@ fields:
         label: Date de mise en loyer
         type: date
         
+    date_fin: 
+        label: Date de fin
+        type: date
+        
     formule: 
         label: Formule choisie
         values: 
             array: formules
+        input: 
+            type: select
+            options: 
+                callback: getSelectFormulesArray
         default_value: none
             
     agreement_number:
@@ -603,6 +611,16 @@ forms:
             - field: duration
             - field: periodicity
             - field: mode_calcul
+            - custom: 1
+              label: Formules à proposer
+              input_name: formules
+              input: 
+                  type: check_list
+                  items:
+                      callback: getDevisFormulesArray
+              value: evo,dyn 
+              depends_on: duration
+              
               
     cancel: 
         rows: 
@@ -677,6 +695,8 @@ forms:
         rows: 
             contact_signature: 
                 custom: 1
+                show: 
+                    callback: !hasSource
                 label: Contact signataire du client
                 data_type: id_object
                 input_name: id_contact_signature
@@ -690,7 +710,49 @@ forms:
                     help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
                 value: 
                     callback: getDefaultSignatureContact
+            
+            contact_email: 
+                custom: 1
+                show: 
+                    callback: hasSource
+                label: Adresse e-mail du contact client
+                input_name: contact_email
+                input: 
+                    type: text
+                value: 
+                    callback: 
+                        method: getSourceClientData
+                        params: 
+                            - email
                     
+            contact_nom: 
+                custom: 1
+                show: 
+                    callback: hasSource
+                label: Nom du contact client
+                input_name: contact_nom
+                input: 
+                    type: text
+                value: 
+                    callback: 
+                        method: getSourceClientData
+                        params: 
+                            - nom
+                            
+            contact_fonction: 
+                custom: 1
+                show: 
+                    callback: hasSource
+                label: Fonction du contact client
+                input_name: contact_fonction
+                input: 
+                    type: text
+                value: 
+                    callback: 
+                        method: getSourceClientData
+                        params: 
+                            - fonction
+                            
             signature_type: 
                 custom: 1
                 label: Type de signature
@@ -787,6 +849,20 @@ forms:
         title: Création du devis de location
         rows: 
             - custom: 1
+              label: Demande refinanceur
+              type: id
+              input_name: id_df
+              input: 
+                  type: select
+                  options: 
+                      callback: getDemandesRefinanceursArray
+              value: 
+                  callback: 
+                      method: getSelectedDemandeRefinanceurData
+                      params: 
+                          - id
+                          - 1
+            - custom: 1
               label: Remplacer le (ou un des) devis généré(s)
               input_name: replace_devis
               data_type: bool
@@ -813,8 +889,7 @@ forms:
               input: 
                   type: check_list
                   items:
-                      evo: Formule évolutive
-                      dyn: Formule dynamique
+                      callback: getDevisFormulesArray
               value: evo,dyn 
                       
     generate_contrat: 
@@ -1126,6 +1201,8 @@ forms:
         msgs: 
             callback: getFacturesFormMsgs
         rows:
+          - field: date_loyer
+            required: 1
           - title: Facture Fournisseur
           - custom: 1
             label: Créer la facture fournisseur
@@ -1242,7 +1319,6 @@ forms:
     force_fin_contrat: 
         rows: 
             - field: date_loyer
-              required: 1
             - custom: 1
               label: Refinanceur
               input_name: id_refinanceur
@@ -1274,6 +1350,8 @@ forms:
         msgs: 
             callback: getFacturesFormMsgs
         rows:
+          - field: date_loyer
+            required: 1
           - field: total_rachat_ht
           - field: vr_vente
           - title: Facture Fournisseur de rachat au financeur 
@@ -1400,6 +1478,8 @@ fields_tables:
         rows: 
             - field: id_user_resp
             - field: date_loyer
+              edit: 1
+            - field: date_fin
               edit: 1
             - field: agreement_number
               edit: 1

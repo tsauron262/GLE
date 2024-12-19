@@ -185,6 +185,47 @@ class Bimp_Contact extends BimpObject
         return $fields;
     }
 
+    public function getContactInfosData($with_client_default = true, $with_civility = true)
+    {
+        $data = array(
+            'nom'           => $this->displayNomComplet($with_civility),
+            'email'         => $this->getData('email'),
+            'phone'         => '',
+            'email_origine' => '',
+            'phone_origine' => ''
+        );
+
+        $data['phone'] = $this->getData('phone_mobile');
+        if (!$data['phone']) {
+            $data['phone'] = $this->getData('phone');
+
+            if (!$data['phone']) {
+                $data['phone'] = $this->getData('phone_perso');
+            }
+        }
+
+        if ($with_client_default && (!$data['email'] || !$data['phone'])) {
+            $client = $this->getParentInstance();
+            if (BimpObject::objectLoaded($client)) {
+                if (!$data['email']) {
+                    $data['email'] = $client->getData('email');
+                    if ($data['email']) {
+                        $data['email_origine'] = 'Adresse e-mail de la fiche client';
+                    }
+                }
+                
+                if (!$data['phone']) {
+                    $data['phone'] = $client->getData('phone');
+                    if ($data['phone']) {
+                        $data['phone_origine'] = 'N° de tél. de la fiche client';
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
     // Affichage: 
 
     public function displayCountry()
@@ -280,12 +321,27 @@ class Bimp_Contact extends BimpObject
         return $return;
     }
 
-    public function displayNomComplet()
+    public function displayNomComplet($with_civility = false)
     {
-        $return = $this->getData('firstname');
-        if ($this->getData('lastname') != '' && $this->getData('firstname') != '')
-            $return .= ' ';
-        $return .= $this->getData('lastname');
+        $return = '';
+
+        if ($with_civility) {
+            $civility = $this->getData('civility');
+            if ($civility) {
+                $return .= $civility;
+            }
+        }
+
+        $lastname = $this->getData('lastname');
+        $firstname = $this->getData('firstname');
+
+        if ($firstname) {
+            $return .= ($return ? ' ' : '') . $firstname;
+        }
+
+        if ($lastname) {
+            $return .= ($return ? ' ' : '') . $lastname;
+        }
 
         return $return;
     }

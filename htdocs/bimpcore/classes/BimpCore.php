@@ -721,7 +721,7 @@ class BimpCore
                     }
                 }
             }
-
+            
             foreach ($modules as $module) {
                 if (BimpCore::getVersion()) {
                     $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/sql';
@@ -755,6 +755,7 @@ class BimpCore
                     if (file_exists($dir) && is_dir($dir)) {
 
                         $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), 0);
+                        
                         $files = scandir($dir);
 
                         foreach ($files as $f) {

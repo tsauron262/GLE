@@ -568,6 +568,11 @@ fields:
         type: money
         default_value: 0
         
+    docusign_email_send: 
+        label: E-mail infos docusign envoyé
+        type: bool
+        default_value: 0
+        
 forms:
     default: 
         rows: 
@@ -620,7 +625,6 @@ forms:
                       callback: getDevisFormulesArray
               value: evo,dyn 
               depends_on: duration
-              
               
     cancel: 
         rows: 
@@ -1470,6 +1474,36 @@ forms:
                 field_name: create_fac_cli_rev
                 show_values: 1
             depends_on: fac_cli_rev_id_client
+            
+    send_docusign_email: 
+        msgs: 
+            callback: getDocusignEmailMsgs
+        rows: 
+            - custom: 1
+              label: Contact client
+              data_type: id_object
+              input_name: id_contact_signature
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: id_client
+                  help: 'Contact obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+              value: 
+                  callback: getDefaultSignatureContact
+            
+            - custom: 1
+              label: Informations contact
+              input_name: infos_contact
+              content: 
+                  callback: renderSignatureInfosContact
+              depends_on: id_contact_signature
+              display_if: 
+                  field_name: id_contact_signature
+                  hide_values: 0
                 
 fields_tables:
     infos: 

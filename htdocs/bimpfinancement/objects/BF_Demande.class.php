@@ -222,11 +222,7 @@ class BF_Demande extends BimpObject
 
     public function isActionAllowed($action, &$errors = [])
     {
-        if (in_array($action, array('generatePropositionLocation', 'generateListCsv'))) {
-            return 1;
-        }
-
-        if (in_array($action, array('mergeDemandes'))) {
+        if (in_array($action, array('generatePropositionLocation', 'generateListCsv', 'mergeDemandes'))) {
             return 1;
         }
 
@@ -312,6 +308,28 @@ class BF_Demande extends BimpObject
                     $errors[] = 'Le devis de location a déjà été généré et envoyé au client';
                 }
                 return (count($errors) ? 0 : 1);
+
+            case 'sendDocusignEmail':
+                if (!(int) BimpCore::getConf('contrat_loc_signature_allow_docusign', null, 'bimpfinancement')) {
+                    $errors[] = 'La signature DocuSign n\'est pas activée pour les contrats';
+                    return 0;
+                }
+
+                if ((int) $this->getData('id_main_source')) {
+                    $errors[] = 'La signature du contrat doit être proposée par la source externe';
+                    return 0;
+                }
+
+                if ((int) $this->getData('devis_status') !== self::DOC_ACCEPTED) {
+                    $errors[] = 'Le devis n\'est pas au statut "accepté"';
+                    return 0;
+                }
+
+                if ((int) $this->getData('contrat_status') >= 20) {
+                    $errors[] = 'Le contrat n\'est plus en attente de signature';
+                    return 0;
+                }
+                return 1;
 
             case 'generateContratFinancement':
             case 'uploadContratFinancement':
@@ -754,6 +772,16 @@ class BF_Demande extends BimpObject
                 'onclick' => $this->getJsNewStatusOnclick(self::STATUS_DRAFT, array(), array(
                     'confirm_msg'      => 'Veuillez confirmer',
                     'success_callback' => 'function($result, bimpAjax) {bimp_reloadPage()}'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('sendDocusignEmail') && $this->canSetAction('sendDocusignEmail')) {
+            $buttons[] = array(
+                'label'   => 'Envoyer e-mail infos DocuSign',
+                'icon'    => 'fas_envelope',
+                'onclick' => $this->getJsActionOnclick('sendDocusignEmail', array(), array(
+                    'form_name' => 'send_docusign_email'
                 ))
             );
         }
@@ -2089,6 +2117,19 @@ class BF_Demande extends BimpObject
 
 
         return $this->missing_serials;
+    }
+
+    public function getDocusignEmailMsgs()
+    {
+        $msgs = array();
+
+        if ((int) $this->getData('docusign_email_send')) {
+            $msgs[] = array(
+                'type'    => 'warning',
+                'content' => BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : cet e-mail a déjà été envoyé au client'
+            );
+        }
+        return $msgs;
     }
 
     // Getters statics: 
@@ -3525,6 +3566,58 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
+    public function renderSignatureInfosContact()
+    {
+        $html = '';
+
+        $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature', 0, 'int');
+
+        if (!$id_contact) {
+            $id_contact = $this->getDefaultSignatureContact();
+        }
+
+        if (!$id_contact) {
+            $html .= '<span class="danger">Aucun contact sélectionné</span>';
+        } else {
+            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+
+            if (!BimpObject::objectLoaded($contact)) {
+                $html .= BimpRender::renderAlerts('Le contact #' . $id_contact . ' n\'existe plus');
+            } else {
+                $data = $contact->getContactInfosData(true, true);
+
+                $html .= '<b>Nom : </b>';
+                if ($data['nom']) {
+                    $html .= $data['nom'];
+                } else {
+                    $html .= '<span class="danger">Aucun</span>';
+                }
+
+                $html .= '<br/><b>Adresse e-mail : </b>';
+                if ($data['email']) {
+                    $html .= $data['email'];
+                    if ($data['email_origine']) {
+                        $html .= ' <span class="warning">(' . $data['email_origine'] . ')</span>';
+                    }
+                } else {
+                    $html .= '<span class="danger">Aucun</span>';
+                }
+
+                $html .= '<br/><b>N° tel. : </b>';
+                if ($data['phone']) {
+                    $html .= $data['phone'];
+                    if ($data['phone_origine']) {
+                        $html .= ' <span class="warning">(' . $data['phone_origine'] . ')</span>';
+                    }
+                } else {
+                    $html .= '<span class="danger">Aucun</span>';
+                }
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements: 
 
     public function editClientDataFromSource($client_data)
@@ -4788,6 +4881,83 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
+    public function sendDocuSignEmail($id_contact = 0)
+    {
+        $errors = array();
+
+        if (!$id_contact) {
+            $id_contact = (int) $this->getData('id_contact_client');
+        }
+
+        if (!$id_contact) {
+            $errors[] = 'Aucun contact client sélectionné pour l\'envoi de l\'e-mail';
+        } else {
+            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+            if (!BimpObject::objectLoaded($contact)) {
+                $errors[] = 'Le contact client #' . $id_contact . ' n\'existe plus';
+            } else {
+                $data = $contact->getContactInfosData();
+
+                if (!$data['nom']) {
+                    $errors[] = 'Aucun nom enregistré pour le contact ' . $contact->getLink();
+                }
+
+                if (!$data['email']) {
+                    $errors[] = 'Aucune adresse e-mail enregistrée pour le contact ' . $contact->getLink();
+                }
+
+                if (!$data['phone']) {
+                    $errors[] = 'Aucun N° de tel. enregistré pour le contact ' . $contact->getLink();
+                }
+
+                if (!count($errors)) {
+                    $subject = 'Information concernant la signature de votre contrat de location';
+
+                    $msg = 'Bonjour, <br/><br/>';
+
+                    $msg .= 'Pour donner suite à nos échanges et à la proposition de location longue-durée qui vous a été adressée par LDLC PRO LEASE, nous nous apprêtons à lancer le processus de signature électronique de votre contrat.<br/><br/>';
+
+                    $msg .= 'Vous allez donc recevoir très prochainement un courriel vous invitant à cette démarche. <br/><br/>';
+
+                    $msg .= 'Les paramètres que nous allons utiliser pour ce faire, sont : <br/>';
+
+                    $msg .= '<ul>';
+                    $msg .= '<li>Votre identité : ' . $data['nom'] . '</li>';
+                    $msg .= '<li>Votre adresse e-mail nominative : ' . $data['email'] . '</li>';
+                    $msg .= '<li>Votre n° de téléphone portable dont vous aurez besoin au cours du process pour confirmer votre identité : ' . $data['phone'] . '</li>';
+                    $msg .= '</ul>';
+
+                    $msg .= 'Nous vous remercions de confirmer l’exactitude de ces éléments par retour de mail. <br/><br/>';
+
+                    $msg .= 'Pour terminer, nos vous serions également reconnaissant, de nous transmettre par courriel, les documents complémentaires que sont : <br/>';
+
+                    $msg .= '<ul>';
+                    $msg .= '<li>Une copie de votre pièce d’identité (CNI recto-verso ou passeport). </li>';
+                    $msg .= '<li>Une copie d’un RIB / IBAN du compte bancaire sur lequel les loyers seront prélevés. </li>';
+                    $msg .= '</ul>';
+
+                    $msg .= 'A noter, ce RIB / IBAN professionnel doit impérativement mentionner le nom de votre entreprise. <br/><br/>';
+
+                    $msg .= 'En cas de difficultés, l’équipe LDLC PRO LEASE se tient à votre disposition : <br/>';
+
+                    $msg .= '<ul>';
+                    $msg .= '<li>Par courriel, à l’adresse <a href="mailto: financement@ldlc.pro">financement@ldlc.pro</a></li>';
+                    $msg .= '<li>Par téléphone au <b>04 26 68 17 94</b></li>';
+                    $msg .= '</ul>';
+
+                    $msg .= 'Bien cordialement';
+
+                    $mail = new BimpMail($this, $subject, $data['email'], '', $msg);
+                    if ($mail->send($errors)) {
+                        $this->updateField('docusign_email_send', 1);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionTakeCharge($data, &$success)
@@ -5307,6 +5477,26 @@ class BF_Demande extends BimpObject
         $success = 'PVR de réception marqué signé';
 
         $errors = $this->forceDocSigned('pvr', $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSendDocusignEmail($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'E-mail envoyé avec succès';
+
+        $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
+
+        if (!$id_contact) {
+            $errors[] = 'Veuillez sélectionner un contact';
+        } else {
+            $errors = $this->sendDocuSignEmail($id_contact);
+        }
 
         return array(
             'errors'   => $errors,

@@ -3411,9 +3411,9 @@ class BimpCache
             $cache_key .= '_active_only';
         }
 
-        if ($include_codes_keys) {
-            $cache_key .= '_with_codes_keys';
-        }
+//        if ($include_codes_keys) {
+//            $cache_key .= '_with_codes_keys';
+//        }
 
         if (!isset(self::$cache[$cache_key])) {
             $where = '';
@@ -3421,18 +3421,18 @@ class BimpCache
             if ($active_only) {
                 $where .= '`active` = 1';
             }
-            $rows = self::getBdb()->getRows('c_civility', $where, null, 'array', array('code', 'label', 'code'), 'label', 'DESC');
+            $rows = self::getBdb()->getRows('c_civility', $where, null, 'array', array('code', 'label'/*, 'code'*/), 'label', 'DESC');
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     self::$cache[$cache_key][$r['code']] = $r['label'];
                 }
 
-                if ($include_codes_keys) {
-                    foreach ($rows as $r) {
-                        self::$cache[$cache_key][$r['code']] = $r['label'];
-                    }
-                }
+//                if ($include_codes_keys) {
+//                    foreach ($rows as $r) {
+//                        self::$cache[$cache_key][$r['code']] = $r['label'];
+//                    }
+//                }
             }
         }
 

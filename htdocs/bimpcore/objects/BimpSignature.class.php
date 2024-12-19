@@ -682,7 +682,7 @@ class BimpSignature extends BimpObject
                         ucfirst($nom_piece),
                         $ref_piece,
                         $lien_espace_client,
-                                ''
+                        ''
                             ), $email_body);
 
                     $font_size = BimpTools::getArrayValueFromPath($signature_params, 'fs', 'Size9');
@@ -779,13 +779,6 @@ class BimpSignature extends BimpObject
 
                     if ((int) $signataire->getData('type') === BimpSignataire::TYPE_CLIENT && (int) $signataire->getData('need_sms_code')) {
                         $phones = array();
-                        $client = $signataire->getChildObject('client');
-                        if (BimpObject::objectLoaded($client)) {
-                            $phone = $client->getData('phone');
-                            if ($phone) {
-                                $phones[] = BimpTools::cleanPhoneNumberStr($phone, true, true);
-                            }
-                        }
 
                         $contact = $signataire->getChildObject('contact');
 
@@ -801,6 +794,14 @@ class BimpSignature extends BimpObject
                             }
 
                             $phone = $contact->getData('phone_perso');
+                            if ($phone) {
+                                $phones[] = BimpTools::cleanPhoneNumberStr($phone, true, true);
+                            }
+                        }
+
+                        $client = $signataire->getChildObject('client');
+                        if (BimpObject::objectLoaded($client)) {
+                            $phone = $client->getData('phone');
                             if ($phone) {
                                 $phones[] = BimpTools::cleanPhoneNumberStr($phone, true, true);
                             }
@@ -1891,7 +1892,7 @@ class BimpSignature extends BimpObject
             $obj->getLabel('the'),
             $obj->getRef(),
             '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>',
-                    ''
+            ''
                 ), $email_content);
     }
 

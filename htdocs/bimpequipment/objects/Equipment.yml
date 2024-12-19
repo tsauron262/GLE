@@ -821,6 +821,17 @@ searches:
             - a.serial
         label_syntaxe: '<a.serial>'
         
+    withprod:
+        extends: default
+        fields_search: 
+            100: p.ref
+            101: p.label
+        joins:
+            p: 
+                table: product
+                on: a.id_product = p.rowid
+                alias: p
+        
 cards: 
     default: 
         view_btn: 1

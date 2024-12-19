@@ -209,8 +209,20 @@ class BimpLocationLine extends BimpObject
                 $period_data = BimpTools::getDatesIntervalData($fac_from, $fac_to, false, true);
                 $this->amounts['qty'] = $period_data['full_days'];
             }
+            
+            if(BimpCore::getConf('round_price', 0, 'bimplocation')){
+                $tempTotTtc = $this->getData('pu_ht') * $this->amounts['qty'] * (1 + ($this->getData('tva_tx') / 100));
+                $difToArrondieHt = (round($tempTotTtc) - $tempTotTtc) / (1 + ($this->getData('tva_tx') / 100));
+                $puCorrigé = (float) $this->getData('pu_ht') + ($difToArrondieHt / $this->amounts['qty']);
+            }
+            else{
+                $puCorrigé = $this->getData('pu_ht');
+            }
+            
+            
+            
 
-            $this->amounts['pu_ht'] = $this->amounts['pu_ht_remise'] = (float) $this->getData('pu_ht');
+            $this->amounts['pu_ht'] = $this->amounts['pu_ht_remise'] = (float) $puCorrigé;
             $this->amounts['remise'] = (float) $this->getData('remise');
 
             if ($this->amounts['remise']) {

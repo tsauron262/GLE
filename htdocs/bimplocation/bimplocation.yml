@@ -1,0 +1,4 @@
+params: 
+    round_price: 
+        label: Arrondir le prix a l\'euro
+        type: bool

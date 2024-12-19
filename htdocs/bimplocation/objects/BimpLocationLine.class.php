@@ -639,6 +639,12 @@ class BimpLocationLine extends BimpObject
                 $this->isEquipmentAvailable(0, '', '', $location->getData('id_entrepot'), $errors);
             }
         }
+        
+        $remiseTtc = BimpTools::getValue('remiseTtc', 0);
+        if($remiseTtc > 0){
+            $remisePourcent = $remiseTtc / (($this->getData('pu_ht') * (100+$this->getData('tva_tx')))/ 100)*100;
+            $this->set('remise', $remisePourcent);
+        }
 
         return $errors;
     }

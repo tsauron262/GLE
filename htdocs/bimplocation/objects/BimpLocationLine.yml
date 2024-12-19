@@ -34,6 +34,7 @@ fields:
         default_value: 0
         input: 
             card: default
+            search_name: withprod
         
     id_forfait: 
         label: Forfait
@@ -103,6 +104,12 @@ forms:
             - field: pu_ht
             - field: tva_tx
             - field: remise
+            - custom: 1
+              label: Remise en Euro TTC (prioritaire)
+              input_name: remiseTtc
+              data_type: money
+              input: 
+                  type: text
             - field: infos
             
 lists_cols: 

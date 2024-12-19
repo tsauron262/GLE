@@ -894,6 +894,9 @@ class BimpLocationLine extends BimpObject
                     
                     $this->set('pu_ht', Bimp_ProductPriceRule::getBestPriceForProduct($forfait, array('qty' => $this->getQty())));
                 }
+                else{
+                    $this->set('pu_ht', $forfait->getData('price'));
+                }
 
                 if (!(float) $this->getData('tva_tx')) {
                     $this->set('tva_tx', $forfait->getData('tva_tx'));

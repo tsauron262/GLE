@@ -4425,7 +4425,9 @@ class ObjectLine extends BimpObject
             } elseif (BimpTools::isSubmit('fields/' . $field)) {
                 $value = BimpTools::getValue('fields/' . $field, null, $data_check);
             } else {
-                if (isset($this->{$field})) {
+                if ($field == 'abo_date_from') {
+                    $value = $this->date_from;
+                } elseif (isset($this->{$field})) {
                     $value = $this->{$field};
                 } elseif ($this->field_exists($field)) {
                     $value = $this->getData($field);

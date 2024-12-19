@@ -5992,9 +5992,15 @@ class ObjectLine extends BimpObject
 
                         if ($this->field_exists('abo_nb_units') && (float) $this->getData('abo_nb_units') != 0) {
                             $fieldsCopy['abo_nb_units'] = $child_prod->getData('qty') * $nb_units * $qty_ratio;
-                        } else {
-                            $propertiesCopy['qty'] = $child_prod->getData('qty') * $this->qty;
                         }
+//                        else {
+                        $propertiesCopy['qty'] = $child_prod->getData('qty') * $this->qty;
+
+                        if ($isAbonnement) {
+                            $propertiesCopy['date_from'] = $this->date_from;
+                            $propertiesCopy['date_to'] = $this->date_to;
+                        }
+//                        }
 
                         $errors = BimpTools::merge_array($errors, $parent->createMajLn(
                                                 array(

@@ -1006,60 +1006,62 @@ class Bimp_PropalLine extends ObjectLine
         $errors = array();
 
         if ($this->isAbonnement()) {
-            $total_qty = 0;
-            $id_contrat_line = (int) $this->getData('id_linked_contrat_line');
-            $contrat_line = null;
-            if ($id_contrat_line) {
-                if ($this->checkLinkedContratLine($errors)) {
-                    if (!count($errors)) {
-                        $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
-                        $this->set('abo_fac_periodicity', $contrat_line->getData('fac_periodicity'));
-                        $this->set('abo_duration', $contrat_line->getData('duration'));
-                        $this->set('abo_fac_term', $contrat_line->getData('fac_term'));
-                        $this->set('abo_nb_renouv', $contrat_line->getData('nb_renouv'));
+            if (!(int) $this->getData('id_parent_line') || !in_array($this->getData('linked_object_name'), array('bundle', 'bundleCorrect'))) {
+                $total_qty = 0;
+                $id_contrat_line = (int) $this->getData('id_linked_contrat_line');
+                $contrat_line = null;
+                if ($id_contrat_line) {
+                    if ($this->checkLinkedContratLine($errors)) {
+                        if (!count($errors)) {
+                            $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_contrat_line);
+                            $this->set('abo_fac_periodicity', $contrat_line->getData('fac_periodicity'));
+                            $this->set('abo_duration', $contrat_line->getData('duration'));
+                            $this->set('abo_fac_term', $contrat_line->getData('fac_term'));
+                            $this->set('abo_nb_renouv', $contrat_line->getData('nb_renouv'));
 
-                        $err = array();
-                        $periods_data = $this->getAboFacData($err);
+                            $err = array();
+                            $periods_data = $this->getAboFacData($err);
 
-                        if (!count($err)) {
-                            $total_qty = $periods_data['total_qty'];
-                        } else {
-                            $errors[] = BimpTools::getMsgFromArray($err, 'Impossible de calculer la quantité totale avec prorata');
+                            if (!count($err)) {
+                                $total_qty = $periods_data['total_qty'];
+                            } else {
+                                $errors[] = BimpTools::getMsgFromArray($err, 'Impossible de calculer la quantité totale avec prorata');
+                            }
                         }
                     }
                 }
-            }
 
-            $duration = (int) $this->getData('abo_duration');
+                $duration = (int) $this->getData('abo_duration');
 
-            if (!$total_qty) {
-                $nb_units = (float) $this->getData('abo_nb_units');
+                if (!$total_qty) {
+                    $nb_units = (float) $this->getData('abo_nb_units');
 
-                $prod = $this->getProduct();
-                if (BimpObject::objectLoaded($prod)) {
-                    $prod_duration = (int) $prod->getData('duree');
-                    if (!$prod_duration) {
-                        $errors[] = 'Durée unitaire du produit non définie';
+                    $prod = $this->getProduct();
+                    if (BimpObject::objectLoaded($prod)) {
+                        $prod_duration = (int) $prod->getData('duree');
+                        if (!$prod_duration) {
+                            $errors[] = 'Durée unitaire du produit non définie';
+                        }
+                    }
+
+                    if ($nb_units && $duration && $prod_duration) {
+                        $total_qty = $nb_units * ($duration / $prod_duration);
+                    } else {
+                        $total_qty = $this->qty;
                     }
                 }
 
-                if ($nb_units && $duration && $prod_duration) {
-                    $total_qty = $nb_units * ($duration / $prod_duration);
-                } else {
-                    $total_qty = $this->qty;
-                }
-            }
+                $this->qty = $total_qty;
 
-            $this->qty = $total_qty;
-
-            if ($this->date_from && (int) $this->getData('abo_duration')) {
-                if (BimpObject::objectLoaded($contrat_line)) {
-                    $this->date_to = $contrat_line->getData('date_fin_validite');
-                } else {
-                    $dt = new DateTime($this->date_from);
-                    $dt->add(new DateInterval('P' . (int) $this->getData('abo_duration') . 'M'));
-                    $dt->sub(new DateInterval('P1D'));
-                    $this->date_to = $dt->format('Y-m-d');
+                if ($this->date_from && (int) $this->getData('abo_duration')) {
+                    if (BimpObject::objectLoaded($contrat_line)) {
+                        $this->date_to = $contrat_line->getData('date_fin_validite');
+                    } else {
+                        $dt = new DateTime($this->date_from);
+                        $dt->add(new DateInterval('P' . (int) $this->getData('abo_duration') . 'M'));
+                        $dt->sub(new DateInterval('P1D'));
+                        $this->date_to = $dt->format('Y-m-d');
+                    }
                 }
             }
         } else {

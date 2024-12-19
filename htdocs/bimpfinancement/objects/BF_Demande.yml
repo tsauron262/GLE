@@ -695,6 +695,8 @@ forms:
         rows: 
             contact_signature: 
                 custom: 1
+                show: 
+                    callback: !hasSource
                 label: Contact signataire du client
                 data_type: id_object
                 input_name: id_contact_signature
@@ -708,7 +710,49 @@ forms:
                     help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
                 value: 
                     callback: getDefaultSignatureContact
+            
+            contact_email: 
+                custom: 1
+                show: 
+                    callback: hasSource
+                label: Adresse e-mail du contact client
+                input_name: contact_email
+                input: 
+                    type: text
+                value: 
+                    callback: 
+                        method: getSourceClientData
+                        params: 
+                            - email
                     
+            contact_nom: 
+                custom: 1
+                show: 
+                    callback: hasSource
+                label: Nom du contact client
+                input_name: contact_nom
+                input: 
+                    type: text
+                value: 
+                    callback: 
+                        method: getSourceClientData
+                        params: 
+                            - nom
+                            
+            contact_fonction: 
+                custom: 1
+                show: 
+                    callback: hasSource
+                label: Fonction du contact client
+                input_name: contact_fonction
+                input: 
+                    type: text
+                value: 
+                    callback: 
+                        method: getSourceClientData
+                        params: 
+                            - fonction
+                            
             signature_type: 
                 custom: 1
                 label: Type de signature

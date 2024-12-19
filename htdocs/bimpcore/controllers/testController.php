@@ -6,11 +6,7 @@ class testController extends BimpController
     public function renderHtml()
     {
         $html = '';
-        
-        $html .= '<span class="btn btn-default" onclick="BimpBrowserNotification(\'TEST\', \'CONTENT\', function() {bimp_msg(\'ICI\');})">';
-        $html .= 'TEST NOTIF';
-        $html .= '</span>';
-        
+
         return $html;
         if (!BimpCore::isUserDev()) {
             return BimpRender::renderAlerts('Page réservée aux développeurs');
@@ -229,11 +225,9 @@ class testController extends BimpController
 //        $html .= 'BC_Form::render - Mém : ' . ($diff > 0 ? '+' : '') . round($diff / 1000, 1);
 //        $html .= '</div>';
 //        $html .= $content;
-
 //        $html .= 'PARAMS : <pre>';
 //        $html .= print_r($params, 1);
 //        $html .= '</pre>';
-
 //        return $html;
     }
 }

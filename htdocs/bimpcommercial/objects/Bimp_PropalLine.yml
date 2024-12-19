@@ -145,6 +145,9 @@ forms:
                         method: isFieldEditable
                         params: 
                             - abo_linked_line_other_ref
+                display_if: 
+                    field_name: is_abonnement
+                    show_values: 1
             id_linked_contrat_line: 
                 show: 1
                 field: id_linked_contrat_line

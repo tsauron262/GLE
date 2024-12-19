@@ -1074,6 +1074,17 @@ class BC_Vente extends BimpObject
                     $content .= '</tbody>';
                     $content .= '</table>';
 
+                    BimpObject::loadClass('bimplocation', 'BimpLocationLine');
+                    $content .= '<div>';
+                    $content .= '<b>Statut à assigner aux équipements scannés : </b><br/>';
+                    $content .= BimpInput::renderInput('select', 'loc_' . $loc->id . '_line_process_status', (int) $loc->getData('lines_process_status'), array(
+                                'options'    => BimpLocationLine::$status_list,
+                                'extra_attr' => array(
+                                    'onchange' => 'saveObjectField(\'bimplocation\', \'BimpLocation\', ' . $loc->id . ', \'lines_process_status\', $(this).val(), null, null, false, false);'
+                                )
+                    ));
+                    $content .= '</div>';
+
                     $amounts = $loc->getAmounts();
                     $total_ttc += $amounts['total_remain_to_bill'];
 
@@ -1853,10 +1864,15 @@ class BC_Vente extends BimpObject
                     return null;
                 }
 
-                if (!$no_location && BimpCore::isModuleActive('bimplocation') && !empty($product->getData('forfaits_location'))) {
+                if (!$no_location && BimpCore::isModuleActive('bimplocation')) {
                     $place = $equipment->getCurrentPlace();
-                    if (BimpObject::objectLoaded($place) && $place->getData('type') === BE_Place::BE_PLACE_LOCATION) {
+                    if (BimpObject::objectLoaded($place) && (int) $place->getData('type') === BE_Place::BE_PLACE_LOCATION) {
                         $is_location = true;
+
+                        if (empty($product->getData('forfaits_location'))) {
+                            $errors[] = 'Aucun forfait de location défini pour la location de l\'équipement ' . $equipment->getLink();
+                            return null;
+                        }
                         return $equipment;
                     }
                 }
@@ -1879,8 +1895,9 @@ class BC_Vente extends BimpObject
 
         $is_location = false;
         $equipment = $this->checkEquipment($id_equipment, $errors, $is_location, $no_location);
-        if (BimpObject::objectLoaded($equipment)) {
-            if (!$no_location && $is_location) {
+
+        if ($is_location && !$no_location) {
+            if (BimpObject::objectLoaded($equipment)) {
                 $id_selected_loc = (int) $this->getData('id_selected_location');
                 if (!$id_selected_loc) {
                     $errors[] = 'Aucune location sélectionnée dans cette vente pour l\'ajout d\'équipement à louer';
@@ -1892,10 +1909,14 @@ class BC_Vente extends BimpObject
                         $errors = $loc->addEquipment($equipment);
                     }
                 }
-
-                return '';
+            } elseif (!count($errors)) {
+                $errors[] = 'l\'équipement #' . $id_equipment .' n\'existe plus';
             }
 
+            return '';
+        }
+
+        if (BimpObject::objectLoaded($equipment)) {
             $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData('id_product'));
 
             $article = BimpObject::getInstance($this->module, 'BC_VenteArticle');
@@ -1925,24 +1946,25 @@ class BC_Vente extends BimpObject
                 $article_errors = $article->create();
 
                 if (!count($article_errors)) {
-                    if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
-                        $subject = 'Erreur emplacement équipement';
-                        $msg = 'Un équipement a été ajouté à une vente en caisse dont l\'entrepôt ne correspond pas à l\'emplacement actuellement enregistré pour cet équipement';
-                        $msg .= "\n\n";
-                        $msg .= "\t" . 'Vente n°' . $this->id . "\n";
-                        $msg .= "\t" . 'Equipement: ' . $equipment->getData('serial') . ' (ID: ' . $equipment->id . ')' . "\n";
-
-                        $entrepot = BimpCache::getDolObjectInstance((int) $this->getData('id_entrepot'), 'product/stock', 'entrepot');
-                        if (BimpObject::ObjectLoaded($entrepot)) {
-                            $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->libelle . "\n";
-                        }
-
-                        $place = $equipment->getCurrentPlace();
-                        if (BimpObject::ObjectLoaded($place)) {
-                            $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
-                        }
-                        mailSyn2($subject, 'Admin_stock@bimp.fr', '', $msg);
-                    }
+//                    if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
+//                        $subject = 'Erreur emplacement équipement';
+//                        $msg = 'Un équipement a été ajouté à une vente en caisse dont l\'entrepôt ne correspond pas à l\'emplacement actuellement enregistré pour cet équipement';
+//                        $msg .= "\n\n";
+//                        $msg .= "\t" . 'Vente n°' . $this->id . "\n";
+//                        $msg .= "\t" . 'Equipement: ' . $equipment->getData('serial') . ' (ID: ' . $equipment->id . ')' . "\n";
+//
+//                        $entrepot = BimpCache::getDolObjectInstance((int) $this->getData('id_entrepot'), 'product/stock', 'entrepot');
+//                        if (BimpObject::ObjectLoaded($entrepot)) {
+//                            $msg .= "\t" . 'Entrepôt de la vente: ' . $entrepot->libelle . "\n";
+//                        }
+//
+//                        $place = $equipment->getCurrentPlace();
+//                        if (BimpObject::ObjectLoaded($place)) {
+//                            $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
+//                        }
+//                        
+//                        mailSyn2($subject, 'Admin_stock@bimp.fr', '', $msg);
+//                    }
 
                     $html .= $this->renderCartEquipmentline($article, $product, $equipment);
                 }
@@ -2613,6 +2635,7 @@ class BC_Vente extends BimpObject
         }
 
         global $db, $user, $langs, $conf;
+        $is_locations_active = (int) BimpCache::isModuleActif('bimplocation');
 
         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
@@ -2881,6 +2904,18 @@ class BC_Vente extends BimpObject
             }
 
             $line->pa_ht = $pa_ht;
+
+            if ($is_locations_active && $line->qty > 0 && $article->getData('linked_object_name') == 'location_line') {
+                $id_loc_line = (int) $article->getData('linked_id_object');
+                if ($id_loc_line) {
+                    $loc_line = BimpCache::getBimpObjectInstance('bimplocation', 'BimpLocationLine', $id_loc_line);
+
+                    if (BimpObject::objectLoaded($loc_line)) {
+                        $line->date_from = $loc_line->getFacFrom();
+                        $line->date_to = $loc_line->getFacTo();
+                    }
+                }
+            }
 
             $line_warnings = array();
             $line_errors = $line->create($line_warnings, true);

@@ -120,10 +120,29 @@ fields:
         type: date
         required: 1
         
+    fac_date_from: 
+        label: Facturé à partir du
+        type: date
+        input: 
+            help: Laisser vide si identique à la date de début
+        
+    fac_date_to: 
+        label: Facturé jusqu'au
+        type: date
+        input: 
+            help: Laisser vide si identique à la date de fin
+        
     id_cur_vente: 
         label: Vente en cours
         type: id_object
         object: cur_vente
+        default_value: 0
+        
+    lines_process_status: 
+        label: Statut actuel à assigner aux équipemnts
+        type: int
+        values: 
+            callback: getLinesStatusArray
         default_value: 0
         
 forms: 
@@ -134,6 +153,8 @@ forms:
             - field: id_contact_facturation
             - field: date_from
             - field: date_to
+            - field: fac_date_from
+            - field: fac_date_to
             
     edit: 
         rows: 
@@ -145,6 +166,8 @@ forms:
         rows: 
             - field: date_from
             - field: date_to
+            - field: fac_date_from
+            - field: fac_date_to
             - custom: 1
               label: Dates équipements
               input_name: lines_dates_modify
@@ -207,6 +230,8 @@ fields_tables:
             - field: id_entrepot
             - field: date_from
             - field: date_to
+            - field: fac_date_from
+            - field: fac_date_to
             - field: id_client
               display: card
             - field: id_contact_facturation
@@ -254,6 +279,10 @@ views:
 #                    col_md: 7
 #                    custom:
 #                        callback: renderMontants
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderQuickProcessForm
             - cols: 
                 - type: list
                   list: 

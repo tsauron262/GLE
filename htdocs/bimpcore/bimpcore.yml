@@ -323,6 +323,10 @@ params:
         info: Séparer chaque valeur par une virgule sans espace
         warning: Si défini, bloque l'édition manuelle du coût de revient
         def: ''
+    use_price_rules: 
+        label: utiliser les règles de prix
+        type: bool
+        def: 0
         
     # Tiers:
     check_solvabilite_client: 

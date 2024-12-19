@@ -247,17 +247,21 @@ $bimp_panel_h_margin: 8px;*/
     /* line 225, ../scss/styles.scss */
     #bc_main_container.fullScreen span.objectIcon {
       margin-left: 10px; }
-  /* line 231, ../scss/styles.scss */
+    /* line 229, ../scss/styles.scss */
+    #bc_main_container.fullScreen span.caisseSoundsOn, #bc_main_container.fullScreen span.caisseSoundsOff {
+      float: right;
+      margin-right: 12px; }
+  /* line 237, ../scss/styles.scss */
   #bc_main_container.fullScreen .bc_body {
     padding: 5px 15px 15px 15px; }
-  /* line 235, ../scss/styles.scss */
+  /* line 241, ../scss/styles.scss */
   #bc_main_container.fullScreen #currentVenteContainer {
     position: absolute;
     left: 0;
     right: 0;
     top: 140px;
     bottom: 0; }
-  /* line 243, ../scss/styles.scss */
+  /* line 249, ../scss/styles.scss */
   #bc_main_container.fullScreen #currenVenteContent {
     position: absolute;
     top: 0;
@@ -268,14 +272,14 @@ $bimp_panel_h_margin: 8px;*/
     overflow-x: auto;
     margin-bottom: 0;
     margin-top: 0; }
-  /* line 255, ../scss/styles.scss */
+  /* line 261, ../scss/styles.scss */
   #bc_main_container.fullScreen .footer_buttons {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     padding: 15px; }
-  /* line 263, ../scss/styles.scss */
+  /* line 269, ../scss/styles.scss */
   #bc_main_container.fullScreen #listVentesContainer,
   #bc_main_container.fullScreen #clients,
   #bc_main_container.fullScreen #mvt_fonds,
@@ -289,69 +293,69 @@ $bimp_panel_h_margin: 8px;*/
     overflow: auto; }
 
 /*Vente: Sections*/
-/* line 280, ../scss/styles.scss */
+/* line 286, ../scss/styles.scss */
 .venteSection .venteSectionHeader {
   background-color: #636363;
   color: #fff;
   font-size: 18px;
   text-align: center;
   padding: 8px 12px; }
-/* line 287, ../scss/styles.scss */
+/* line 293, ../scss/styles.scss */
 .venteSection .venteSectionBody {
   padding: 20px;
   background-color: #fff; }
-/* line 292, ../scss/styles.scss */
+/* line 298, ../scss/styles.scss */
 .venteSection .formRow {
   margin: 0 !important; }
-  /* line 295, ../scss/styles.scss */
+  /* line 301, ../scss/styles.scss */
   .venteSection .formRow .inputLabel {
     color: #282828;
     background-color: #fff;
     border: none; }
-  /* line 301, ../scss/styles.scss */
+  /* line 307, ../scss/styles.scss */
   .venteSection .formRow .formRowInput {
     border: none; }
-    /* line 304, ../scss/styles.scss */
+    /* line 310, ../scss/styles.scss */
     .venteSection .formRow .formRowInput input, .venteSection .formRow .formRowInput select, .venteSection .formRow .formRowInput textarea {
       width: 100%; }
-    /* line 308, ../scss/styles.scss */
+    /* line 314, ../scss/styles.scss */
     .venteSection .formRow .formRowInput input {
       border: 1px solid #636363;
       padding: 5px; }
-      /* line 312, ../scss/styles.scss */
+      /* line 318, ../scss/styles.scss */
       .venteSection .formRow .formRowInput input:focus {
         box-shadow: 0 0 4px #0087B4;
         border-color: #005A78; }
 
-/* line 321, ../scss/styles.scss */
+/* line 327, ../scss/styles.scss */
 #curVenteGlobal {
   padding-bottom: 15px; }
 
-/* line 325, ../scss/styles.scss */
+/* line 331, ../scss/styles.scss */
 #curVenteInfos {
   background-color: #fff;
   padding: 10px;
   margin-bottom: 15px; }
-  /* line 330, ../scss/styles.scss */
+  /* line 336, ../scss/styles.scss */
   #curVenteInfos .curVenteInfo {
     display: inline-block;
     margin-bottom: 2px; }
-    /* line 333, ../scss/styles.scss */
+    /* line 339, ../scss/styles.scss */
     #curVenteInfos .curVenteInfo input {
       width: 450px; }
 
-/* line 341, ../scss/styles.scss */
+/* line 347, ../scss/styles.scss */
 #venteClientFormContainer .search_object_input_container .search_icon,
 #venteClientFormContainer .search_object_input_container .search_object_result,
 #venteClientFormContainer .search_object_input_container .no_item_selected {
   display: none !important; }
-/* line 348, ../scss/styles.scss */
+/* line 354, ../scss/styles.scss */
 #venteClientFormContainer .search_object_input_container .spinner {
   position: absolute;
   top: 17px;
   right: 0; }
 
-/* line 357, ../scss/styles.scss */
+/* line 363, ../scss/styles.scss */
 #venteClientViewContainer h3 {
   font-size: 16px;
   color: #282828;
@@ -359,46 +363,46 @@ $bimp_panel_h_margin: 8px;*/
   margin-top: 0;
   margin-bottom: 5px;
   border-bottom: 1px solid #282828; }
-/* line 366, ../scss/styles.scss */
+/* line 372, ../scss/styles.scss */
 #venteClientViewContainer h4 {
   color: #282828; }
-  /* line 369, ../scss/styles.scss */
+  /* line 375, ../scss/styles.scss */
   #venteClientViewContainer h4 span {
     color: #7d7d7d; }
-/* line 374, ../scss/styles.scss */
+/* line 380, ../scss/styles.scss */
 #venteClientViewContainer .client_infos {
   font-size: 12px;
   color: #636363;
   padding-left: 30px;
   margin-top: 10px; }
-  /* line 380, ../scss/styles.scss */
+  /* line 386, ../scss/styles.scss */
   #venteClientViewContainer .client_infos i {
     font-size: 14px;
     color: #282828;
     margin-left: -20px;
     float: left; }
-/* line 389, ../scss/styles.scss */
+/* line 395, ../scss/styles.scss */
 #venteClientViewContainer #contactSelect {
   width: 100%;
   padding: 7px 0; }
-/* line 394, ../scss/styles.scss */
+/* line 400, ../scss/styles.scss */
 #venteClientViewContainer .contactActions {
   display: inline-block;
   float: right;
   margin-right: -90px; }
 
-/* line 401, ../scss/styles.scss */
+/* line 407, ../scss/styles.scss */
 #venteSearchProduct {
   line-height: 28px;
   vertical-align: middle;
   font-size: 16px;
   font-weight: bold; }
 
-/* line 408, ../scss/styles.scss */
+/* line 414, ../scss/styles.scss */
 #addProductResult {
   display: none; }
 
-/* line 412, ../scss/styles.scss */
+/* line 418, ../scss/styles.scss */
 #venteRemises {
   display: none;
   padding: 10px;
@@ -406,31 +410,31 @@ $bimp_panel_h_margin: 8px;*/
   background-color: #F5F5F5;
   font-size: 15px;
   color: #8C0000; }
-  /* line 420, ../scss/styles.scss */
+  /* line 426, ../scss/styles.scss */
   #venteRemises .title {
     font-weight: bold;
     font-size: 16px;
     border-bottom: 1px solid #282828; }
-  /* line 426, ../scss/styles.scss */
+  /* line 432, ../scss/styles.scss */
   #venteRemises .remises_lines,
   #venteRemises .total_remises_vente,
   #venteRemises .total_remises_articles,
   #venteRemises .total_remises {
     text-align: right;
     padding: 4px 30px 4px 10px; }
-    /* line 433, ../scss/styles.scss */
+    /* line 439, ../scss/styles.scss */
     #venteRemises .remises_lines .remise,
     #venteRemises .total_remises_vente .remise,
     #venteRemises .total_remises_articles .remise,
     #venteRemises .total_remises .remise {
       margin-bottom: 4px; }
-    /* line 436, ../scss/styles.scss */
+    /* line 442, ../scss/styles.scss */
     #venteRemises .remises_lines span,
     #venteRemises .total_remises_vente span,
     #venteRemises .total_remises_articles span,
     #venteRemises .total_remises span {
       font-weight: bold; }
-    /* line 440, ../scss/styles.scss */
+    /* line 446, ../scss/styles.scss */
     #venteRemises .remises_lines i,
     #venteRemises .total_remises_vente i,
     #venteRemises .total_remises_articles i,
@@ -444,18 +448,18 @@ $bimp_panel_h_margin: 8px;*/
       color: #b4b4b4;
       font-size: 18px;
       cursor: pointer; }
-      /* line 450, ../scss/styles.scss */
+      /* line 456, ../scss/styles.scss */
       #venteRemises .remises_lines i:hover,
       #venteRemises .total_remises_vente i:hover,
       #venteRemises .total_remises_articles i:hover,
       #venteRemises .total_remises i:hover {
         color: #A00000; }
-  /* line 455, ../scss/styles.scss */
+  /* line 461, ../scss/styles.scss */
   #venteRemises .total_remises {
     font-weight: bold;
     font-size: 16px; }
 
-/* line 461, ../scss/styles.scss */
+/* line 467, ../scss/styles.scss */
 #ventePanierTotal,
 #venteLocationsTotal {
   text-align: center;
@@ -466,21 +470,21 @@ $bimp_panel_h_margin: 8px;*/
   font-size: 24px;
   padding: 10px; }
 
-/* line 473, ../scss/styles.scss */
+/* line 479, ../scss/styles.scss */
 #venteLocationsContent .select2 {
   width: 100% !important; }
-/* line 477, ../scss/styles.scss */
+/* line 483, ../scss/styles.scss */
 #venteLocationsContent .vente_loc_table td {
   background-color: #F0F0F0 !important; }
 
-/* line 482, ../scss/styles.scss */
+/* line 488, ../scss/styles.scss */
 #venteNbArticles {
   display: inline-block;
   margin-bottom: 10px;
   font-size: 15px;
   color: #282828; }
 
-/* line 492, ../scss/styles.scss */
+/* line 498, ../scss/styles.scss */
 #venteToPay,
 #venteToReturn,
 #venteAvoir {
@@ -489,37 +493,37 @@ $bimp_panel_h_margin: 8px;*/
   font-size: 20px;
   padding: 10px; }
 
-/* line 501, ../scss/styles.scss */
+/* line 507, ../scss/styles.scss */
 #venteToPay {
   color: #282828;
   background-color: #CCE6FF;
   /*border: 1px solid $secondary;*/ }
 
-/* line 507, ../scss/styles.scss */
+/* line 513, ../scss/styles.scss */
 #venteToReturn {
   color: #fff;
   background-color: #348C41; }
 
-/* line 512, ../scss/styles.scss */
+/* line 518, ../scss/styles.scss */
 #venteAvoir {
   color: #fff;
   background-color: #F0B400; }
 
-/* line 518, ../scss/styles.scss */
+/* line 524, ../scss/styles.scss */
 #ventePaiementButtons button {
   width: 100%;
   text-align: center; }
 
-/* line 524, ../scss/styles.scss */
+/* line 530, ../scss/styles.scss */
 #venteAddPaiementFormContainer {
   padding: 20px;
   text-align: center;
   display: none; }
-  /* line 529, ../scss/styles.scss */
+  /* line 535, ../scss/styles.scss */
   #venteAddPaiementFormContainer span {
     font-size: 16px;
     margin-right: 8px; }
-  /* line 533, ../scss/styles.scss */
+  /* line 539, ../scss/styles.scss */
   #venteAddPaiementFormContainer input {
     width: 160px;
     border: 1px solid #636363;
@@ -527,26 +531,26 @@ $bimp_panel_h_margin: 8px;*/
     font-size: 15px;
     font-weight: bold;
     vertical-align: middle; }
-    /* line 541, ../scss/styles.scss */
+    /* line 547, ../scss/styles.scss */
     #venteAddPaiementFormContainer input:focus {
       box-shadow: 0 0 4px #0087B4;
       border-color: #005A78; }
-  /* line 546, ../scss/styles.scss */
+  /* line 552, ../scss/styles.scss */
   #venteAddPaiementFormContainer .inputAddon {
     border-color: #636363;
     background-color: #636363;
     color: #fff;
     vertical-align: middle;
     padding: 7px 12px; }
-  /* line 554, ../scss/styles.scss */
+  /* line 560, ../scss/styles.scss */
   #venteAddPaiementFormContainer button {
     margin-left: 0 15px; }
 
-/* line 559, ../scss/styles.scss */
+/* line 565, ../scss/styles.scss */
 #ventePaimentsLines {
   max-width: 450px;
   margin: 20px 30px; }
-  /* line 563, ../scss/styles.scss */
+  /* line 569, ../scss/styles.scss */
   #ventePaimentsLines .paiement_line {
     margin: 5px;
     padding: 5px;
@@ -554,20 +558,20 @@ $bimp_panel_h_margin: 8px;*/
     font-weight: bold;
     color: #282828;
     font-size: 16px; }
-    /* line 571, ../scss/styles.scss */
+    /* line 577, ../scss/styles.scss */
     #ventePaimentsLines .paiement_line .paiement_label {
       display: inline-block;
       width: 59%; }
-      /* line 575, ../scss/styles.scss */
+      /* line 581, ../scss/styles.scss */
       #ventePaimentsLines .paiement_line .paiement_label i {
         margin-right: 12px; }
-    /* line 579, ../scss/styles.scss */
+    /* line 585, ../scss/styles.scss */
     #ventePaimentsLines .paiement_line .paiement_montant {
       display: inline-block;
       width: 39%;
       text-align: right;
       padding-right: 40px; }
-    /* line 585, ../scss/styles.scss */
+    /* line 591, ../scss/styles.scss */
     #ventePaimentsLines .paiement_line .deletePaiementButton {
       float: right;
       margin-right: -40px;
@@ -577,10 +581,10 @@ $bimp_panel_h_margin: 8px;*/
       -webkit-transition: all 0.3s ease;
       -o-transition: all 0.3s ease;
       transition: all 0.3s ease; }
-      /* line 593, ../scss/styles.scss */
+      /* line 599, ../scss/styles.scss */
       #ventePaimentsLines .paiement_line .deletePaiementButton:hover {
         color: #A00000; }
-  /* line 598, ../scss/styles.scss */
+  /* line 604, ../scss/styles.scss */
   #ventePaimentsLines .paiements_total {
     color: #282828;
     padding: 8px;
@@ -588,39 +592,39 @@ $bimp_panel_h_margin: 8px;*/
     font-weight: bold;
     text-align: right; }
 
-/* line 607, ../scss/styles.scss */
+/* line 613, ../scss/styles.scss */
 #venteHt {
   margin-top: 15px; }
-  /* line 610, ../scss/styles.scss */
+  /* line 616, ../scss/styles.scss */
   #venteHt > span {
     vertical-align: middle; }
-  /* line 614, ../scss/styles.scss */
+  /* line 620, ../scss/styles.scss */
   #venteHt .toggleContainer {
     vertical-align: middle; }
 
-/* line 619, ../scss/styles.scss */
+/* line 625, ../scss/styles.scss */
 #avoirRbtForm {
   display: none;
   margin: 30px 0; }
-  /* line 623, ../scss/styles.scss */
+  /* line 629, ../scss/styles.scss */
   #avoirRbtForm #avoirRbtModePaiement {
     display: none; }
 
-/* line 628, ../scss/styles.scss */
+/* line 634, ../scss/styles.scss */
 #customerDiscountsContainer {
   margin: 30px 0 20px;
   padding: 10px;
   border: 1px solid #DCDCDC; }
-  /* line 633, ../scss/styles.scss */
+  /* line 639, ../scss/styles.scss */
   #customerDiscountsContainer #customerDiscounts {
     /*max-width: 450px;*/
     margin: 0 30px; }
-  /* line 639, ../scss/styles.scss */
+  /* line 645, ../scss/styles.scss */
   #customerDiscountsContainer .title {
     font-weight: bold;
     font-size: 14px;
     margin-bottom: 10px; }
-  /* line 645, ../scss/styles.scss */
+  /* line 651, ../scss/styles.scss */
   #customerDiscountsContainer #totalDiscounts {
     color: #282828;
     padding: 8px;
@@ -628,25 +632,25 @@ $bimp_panel_h_margin: 8px;*/
     font-weight: bold;
     text-align: right; }
 
-/* line 654, ../scss/styles.scss */
+/* line 660, ../scss/styles.scss */
 .selectArticleLine {
   margin: 5px;
   padding: 10px;
   border: 1px solid #B4B4B4; }
-  /* line 659, ../scss/styles.scss */
+  /* line 665, ../scss/styles.scss */
   .selectArticleLine .product_price {
     font-weight: bold;
     font-size: 14px;
     text-align: right; }
 
-/* line 666, ../scss/styles.scss */
+/* line 672, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine,
 #curVenteRetours .returnLine,
 #venteLocationsContent .cartLocationLine {
   padding-top: 10px;
   margin-top: 10px;
   border-top: 1px solid #B4B4B4; }
-  /* line 673, ../scss/styles.scss */
+  /* line 679, ../scss/styles.scss */
   #ventePanierLines .cartArticleLine .product_title,
   #curVenteRetours .returnLine .product_title,
   #venteLocationsContent .cartLocationLine .product_title {
@@ -654,7 +658,7 @@ $bimp_panel_h_margin: 8px;*/
     font-size: 18px;
     padding-bottom: 8px;
     padding-right: 40px; }
-    /* line 679, ../scss/styles.scss */
+    /* line 685, ../scss/styles.scss */
     #ventePanierLines .cartArticleLine .product_title .removeArticle,
     #curVenteRetours .returnLine .product_title .removeArticle,
     #venteLocationsContent .cartLocationLine .product_title .removeArticle {
@@ -667,12 +671,12 @@ $bimp_panel_h_margin: 8px;*/
       margin-right: -30px;
       font-size: 28px;
       cursor: pointer; }
-      /* line 688, ../scss/styles.scss */
+      /* line 694, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .product_title .removeArticle:hover,
       #curVenteRetours .returnLine .product_title .removeArticle:hover,
       #venteLocationsContent .cartLocationLine .product_title .removeArticle:hover {
         color: #A00000; }
-    /* line 693, ../scss/styles.scss */
+    /* line 699, ../scss/styles.scss */
     #ventePanierLines .cartArticleLine .product_title .reopenArticle,
     #curVenteRetours .returnLine .product_title .reopenArticle,
     #venteLocationsContent .cartLocationLine .product_title .reopenArticle {
@@ -685,12 +689,12 @@ $bimp_panel_h_margin: 8px;*/
       margin-right: -30px;
       font-size: 28px;
       cursor: pointer; }
-      /* line 702, ../scss/styles.scss */
+      /* line 708, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .product_title .reopenArticle:hover,
       #curVenteRetours .returnLine .product_title .reopenArticle:hover,
       #venteLocationsContent .cartLocationLine .product_title .reopenArticle:hover {
         color: #EF7D00; }
-    /* line 707, ../scss/styles.scss */
+    /* line 713, ../scss/styles.scss */
     #ventePanierLines .cartArticleLine .product_title .editArticle,
     #curVenteRetours .returnLine .product_title .editArticle,
     #venteLocationsContent .cartLocationLine .product_title .editArticle {
@@ -703,19 +707,19 @@ $bimp_panel_h_margin: 8px;*/
       margin-right: 10px;
       font-size: 28px;
       cursor: pointer; }
-      /* line 716, ../scss/styles.scss */
+      /* line 722, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .product_title .editArticle:hover,
       #curVenteRetours .returnLine .product_title .editArticle:hover,
       #venteLocationsContent .cartLocationLine .product_title .editArticle:hover {
         color: #EF7D00; }
-  /* line 721, ../scss/styles.scss */
+  /* line 727, ../scss/styles.scss */
   #ventePanierLines .cartArticleLine .product_info,
   #curVenteRetours .returnLine .product_info,
   #venteLocationsContent .cartLocationLine .product_info {
     color: #282828;
     font-size: 12px;
     padding-left: 15px; }
-  /* line 727, ../scss/styles.scss */
+  /* line 733, ../scss/styles.scss */
   #ventePanierLines .cartArticleLine .article_remises,
   #curVenteRetours .returnLine .article_remises,
   #venteLocationsContent .cartLocationLine .article_remises {
@@ -724,23 +728,23 @@ $bimp_panel_h_margin: 8px;*/
     font-size: 12px;
     color: #8C0000;
     text-align: left; }
-    /* line 734, ../scss/styles.scss */
+    /* line 740, ../scss/styles.scss */
     #ventePanierLines .cartArticleLine .article_remises .title,
     #curVenteRetours .returnLine .article_remises .title,
     #venteLocationsContent .cartLocationLine .article_remises .title {
       font-weight: bold; }
-    /* line 739, ../scss/styles.scss */
+    /* line 745, ../scss/styles.scss */
     #ventePanierLines .cartArticleLine .article_remises .content .remise,
     #curVenteRetours .returnLine .article_remises .content .remise,
     #venteLocationsContent .cartLocationLine .article_remises .content .remise {
       font-size: 14px;
       padding: 6px; }
-      /* line 742, ../scss/styles.scss */
+      /* line 748, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .article_remises .content .remise span,
       #curVenteRetours .returnLine .article_remises .content .remise span,
       #venteLocationsContent .cartLocationLine .article_remises .content .remise span {
         font-weight: bold; }
-      /* line 746, ../scss/styles.scss */
+      /* line 752, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .article_remises .content .remise i,
       #curVenteRetours .returnLine .article_remises .content .remise i,
       #venteLocationsContent .cartLocationLine .article_remises .content .remise i {
@@ -752,32 +756,32 @@ $bimp_panel_h_margin: 8px;*/
         margin-top: -2px;
         margin-left: 15px;
         cursor: pointer; }
-        /* line 754, ../scss/styles.scss */
+        /* line 760, ../scss/styles.scss */
         #ventePanierLines .cartArticleLine .article_remises .content .remise i:hover,
         #curVenteRetours .returnLine .article_remises .content .remise i:hover,
         #venteLocationsContent .cartLocationLine .article_remises .content .remise i:hover {
           color: #A00000; }
-  /* line 763, ../scss/styles.scss */
+  /* line 769, ../scss/styles.scss */
   #ventePanierLines .cartArticleLine .location_remises,
   #curVenteRetours .returnLine .location_remises,
   #venteLocationsContent .cartLocationLine .location_remises {
     margin: 3px 0 3px 30px;
     font-size: 14px;
     color: #8C0000; }
-  /* line 769, ../scss/styles.scss */
+  /* line 775, ../scss/styles.scss */
   #ventePanierLines .cartArticleLine .article_options,
   #curVenteRetours .returnLine .article_options,
   #venteLocationsContent .cartLocationLine .article_options {
     padding-top: 10px;
     padding-left: 15px;
     padding-right: 60px; }
-    /* line 774, ../scss/styles.scss */
+    /* line 780, ../scss/styles.scss */
     #ventePanierLines .cartArticleLine .article_options .article_qty,
     #curVenteRetours .returnLine .article_options .article_qty,
     #venteLocationsContent .cartLocationLine .article_options .article_qty {
       text-align: left;
       display: inline-block; }
-      /* line 778, ../scss/styles.scss */
+      /* line 784, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .article_options .article_qty .qty_down,
       #ventePanierLines .cartArticleLine .article_options .article_qty .qty_up,
       #curVenteRetours .returnLine .article_options .article_qty .qty_down,
@@ -791,7 +795,7 @@ $bimp_panel_h_margin: 8px;*/
         -webkit-transition: all 0.3s ease;
         -o-transition: all 0.3s ease;
         transition: all 0.3s ease; }
-        /* line 786, ../scss/styles.scss */
+        /* line 792, ../scss/styles.scss */
         #ventePanierLines .cartArticleLine .article_options .article_qty .qty_down:hover,
         #ventePanierLines .cartArticleLine .article_options .article_qty .qty_up:hover,
         #curVenteRetours .returnLine .article_options .article_qty .qty_down:hover,
@@ -799,7 +803,7 @@ $bimp_panel_h_margin: 8px;*/
         #venteLocationsContent .cartLocationLine .article_options .article_qty .qty_down:hover,
         #venteLocationsContent .cartLocationLine .article_options .article_qty .qty_up:hover {
           color: #EF7D00; }
-      /* line 790, ../scss/styles.scss */
+      /* line 796, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .article_options .article_qty .article_qty_input,
       #curVenteRetours .returnLine .article_options .article_qty .article_qty_input,
       #venteLocationsContent .cartLocationLine .article_options .article_qty .article_qty_input {
@@ -811,13 +815,13 @@ $bimp_panel_h_margin: 8px;*/
         text-align: center;
         width: 60px;
         vertical-align: middle; }
-        /* line 800, ../scss/styles.scss */
+        /* line 806, ../scss/styles.scss */
         #ventePanierLines .cartArticleLine .article_options .article_qty .article_qty_input:focus,
         #curVenteRetours .returnLine .article_options .article_qty .article_qty_input:focus,
         #venteLocationsContent .cartLocationLine .article_options .article_qty .article_qty_input:focus {
           box-shadow: 0 0 4px #0087B4;
           border-color: #005A78; }
-    /* line 806, ../scss/styles.scss */
+    /* line 812, ../scss/styles.scss */
     #ventePanierLines .cartArticleLine .article_options .product_total_price,
     #curVenteRetours .returnLine .article_options .product_total_price,
     #venteLocationsContent .cartLocationLine .article_options .product_total_price {
@@ -825,7 +829,7 @@ $bimp_panel_h_margin: 8px;*/
                   float: right;*/
       margin-right: -60px;
       text-align: right; }
-      /* line 812, ../scss/styles.scss */
+      /* line 818, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .article_options .product_total_price .base_price,
       #curVenteRetours .returnLine .article_options .product_total_price .base_price,
       #venteLocationsContent .cartLocationLine .article_options .product_total_price .base_price {
@@ -833,24 +837,24 @@ $bimp_panel_h_margin: 8px;*/
         color: #636363;
         font-size: 16px;
         text-decoration: line-through; }
-      /* line 819, ../scss/styles.scss */
+      /* line 825, ../scss/styles.scss */
       #ventePanierLines .cartArticleLine .article_options .product_total_price .final_price,
       #curVenteRetours .returnLine .article_options .product_total_price .final_price,
       #venteLocationsContent .cartLocationLine .article_options .product_total_price .final_price {
         color: #004264;
         font-weight: bold;
         font-size: 20px; }
-  /* line 827, ../scss/styles.scss */
+  /* line 833, ../scss/styles.scss */
   #ventePanierLines .cartArticleLine .placeAlert,
   #curVenteRetours .returnLine .placeAlert,
   #venteLocationsContent .cartLocationLine .placeAlert {
     margin-top: 10px; }
 
-/* line 832, ../scss/styles.scss */
+/* line 838, ../scss/styles.scss */
 #curVenteRetours {
   margin-top: 15px;
   display: none; }
-  /* line 836, ../scss/styles.scss */
+  /* line 842, ../scss/styles.scss */
   #curVenteRetours .totalReturnsTitle {
     font-weight: bold;
     color: #8c0000;
@@ -858,7 +862,7 @@ $bimp_panel_h_margin: 8px;*/
     display: inline-block;
     float: right; }
 
-/* line 845, ../scss/styles.scss */
+/* line 851, ../scss/styles.scss */
 .caisseSoundsOn,
 .caisseSoundsOff {
   -webkit-transition: all 0.3s ease;
@@ -871,23 +875,23 @@ $bimp_panel_h_margin: 8px;*/
   font-size: 22px;
   color: #B4B4B4;
   cursor: pointer; }
-  /* line 857, ../scss/styles.scss */
+  /* line 863, ../scss/styles.scss */
   .caisseSoundsOn:hover,
   .caisseSoundsOff:hover {
     color: #EF7D00; }
 
 @media print {
-  /* line 863, ../scss/styles.scss */
+  /* line 869, ../scss/styles.scss */
   body * {
     visibility: hidden !important; }
 
-  /* line 867, ../scss/styles.scss */
+  /* line 873, ../scss/styles.scss */
   #venteTicketContainer,
   #venteTicketContainer * {
     display: block;
     visibility: visible !important; }
 
-  /* line 873, ../scss/styles.scss */
+  /* line 879, ../scss/styles.scss */
   #venteTicketContainer {
     position: absolute;
     left: 0;

@@ -1688,7 +1688,7 @@ class Bimp_Product extends BimpObject
         return $values;
     }
 
-    public function getDefaultIdForfaitLocation($qty = 0)
+    public function getDefaultIdForfaitLocation(/* $qty = 0 */)
     {
         $forfaits = $this->getData('forfaits_location');
 
@@ -1696,10 +1696,10 @@ class Bimp_Product extends BimpObject
             foreach ($forfaits as $id_forfait) {
                 $forfait = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_forfait);
                 if (BimpObject::objectLoaded($forfait)) {
-                    $min_qty = $forfait->getData('min_qty');
-                    if ($qty && $min_qty && $qty < $min_qty) {
-                        continue;
-                    }
+//                    $min_qty = $forfait->getData('min_qty');
+//                    if ($qty && $min_qty && $qty < $min_qty) {
+//                        continue;
+//                    }
 
                     return $id_forfait;
                 }
@@ -4722,42 +4722,65 @@ class Bimp_Product extends BimpObject
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($prodcomb), 'Echec de la création de la combinaison');
                 } else {
                     $post_temp = $_POST;
+                    $_POST = array();
                     $new_id_product = $result;
 
-                    $i = 0;
-                    while (1) {
-                        $i++;
-                        $key = 'fourn_prices_' . $i . '_';
-                        if (!isset($data[$key . 'fk_soc'])) {
-                            break;
-                        }
-
-                        $_POST = array();
-
-                        $pfp_data = array(
-                            'fk_product' => $new_id_product
-                        );
-
+                    $new_prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $new_id_product);
+                    if (BimpObject::objectLoaded($new_prod)) {
+                        $new_prod_data = array();
                         foreach (array(
-                    'fk_soc',
-                    'ref_fourn',
-                    'price',
-                    'tva'
+                    'forfaits_location'
                         ) as $field_name) {
-                            if (isset($data[$key . $field_name])) {
-                                $pfp_data[$field_name] = $data[$key . $field_name];
+                            if ($this->field_exists($field_name)) {
+                                $new_prod_data[$field_name] = $this->getData($field_name);
                             }
                         }
 
-                        if ((int) BimpTools::getArrayValueFromPath($data, $key . 'is_cur_pa', 0)) {
-                            $_POST['is_cur_pa'] = 1;
+                        if (!empty($new_prod_data)) {
+                            $new_prod->validateArray($new_prod_data);
+                            $up_errors = $new_prod->update($warnings, true);
+                            if (count($up_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de création de la nouvelle combinaison');
+                            }
                         }
+                    }
 
-                        $pfp_errors = array();
-                        BimpObject::createBimpObject('bimpcore', 'Bimp_ProductFournisseurPrice', $pfp_data, true, $pfp_errors);
+                    if (!count($errors)) {
+                        $i = 0;
+                        while (1) {
+                            $i++;
+                            $key = 'fourn_prices_' . $i . '_';
+                            if (!isset($data[$key . 'fk_soc'])) {
+                                break;
+                            }
 
-                        if (count($pfp_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($pfp_errors, 'Echec de la création du prix d\'achat fournisseur #' . $i);
+                            $_POST = array();
+
+                            $pfp_data = array(
+                                'fk_product' => $new_id_product
+                            );
+
+                            foreach (array(
+                        'fk_soc',
+                        'ref_fourn',
+                        'price',
+                        'tva'
+                            ) as $field_name) {
+                                if (isset($data[$key . $field_name])) {
+                                    $pfp_data[$field_name] = $data[$key . $field_name];
+                                }
+                            }
+
+                            if ((int) BimpTools::getArrayValueFromPath($data, $key . 'is_cur_pa', 0)) {
+                                $_POST['is_cur_pa'] = 1;
+                            }
+
+                            $pfp_errors = array();
+                            BimpObject::createBimpObject('bimpcore', 'Bimp_ProductFournisseurPrice', $pfp_data, true, $pfp_errors);
+
+                            if (count($pfp_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($pfp_errors, 'Echec de la création du prix d\'achat fournisseur #' . $i);
+                            }
                         }
                     }
 

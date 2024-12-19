@@ -225,6 +225,12 @@ $article_color: #004264;
         &.objectIcon {
             margin-left: 10px;
         }
+        
+        &.caisseSoundsOn,
+        &.caisseSoundsOff {
+            float: right;
+            margin-right: 12px;
+        }
     }
     padding: 0;
 

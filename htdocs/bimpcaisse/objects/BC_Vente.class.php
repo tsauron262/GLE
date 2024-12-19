@@ -3169,6 +3169,7 @@ class BC_Vente extends BimpObject
 
             if (!count($errors) && BimpObject::objectLoaded($location)) {
                 $errors = $location->updateField('id_cur_vente', $this->id);
+                $errors = $location->updateField('lines_process_status', 1);
 
                 if (!count($errors)) {
                     $success = 'Intégration de la location effectuée';

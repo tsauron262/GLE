@@ -28,6 +28,49 @@ class Bimpcoopmvt extends BimpObject
         return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
     }
     
+    public function renderStat(){
+        global $db;
+        $html = '';
+        $rows = array(1=>array(), 2=>array());
+        
+        //
+        
+        $sql = $db->query('SELECT SUM(value) as value, fk_user, type FROM '.MAIN_DB_PREFIX.'bimp_coop_mvt GROUP BY fk_user, type;');
+        while ($ln = $db->fetch_object($sql)){
+            $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $ln->fk_user);
+            if($ln->value != 0){
+                $rows[$ln->type][] = array(
+                    'name' => $userT->getFullName(),
+                    'montant' => BimpTools::displayMoneyValue($ln->value),
+                );
+            }
+        }
+//        echo '<pre>';
+//        print_r($rows);die;
+        
+        
+        $header = array(
+            'name'     => 'Nom',
+            'montant'   => 'Value'
+        );
+        
+        
+        $html .= BimpRender::renderBimpListTable(array(0=>array(
+            'cap' => BimpRender::renderBimpListTable($rows[1], $header, array(
+                            'searchable'  => true,
+                            'sortable'    => true,
+                            'search_mode' => 'show'
+                )),
+            'ccp' => BimpRender::renderBimpListTable($rows[2], $header, array(
+                            'searchable'  => true,
+                            'sortable'    => true,
+                            'search_mode' => 'show'
+                ))
+        )), array('cap'=>'Capital', 'ccp'=>'Compte courant'));
+        
+        return $html;
+    }
+    
     public function renderListObjects($userId, $type){
         $list = new BC_ListTable($this, 'default', 1, null, 'Mouvements', 'fas_users');
         $list->addFieldFilterValue('type', $type);

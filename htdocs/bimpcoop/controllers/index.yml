@@ -9,7 +9,15 @@ objects:
 sections:
     - type: tabs
       tabs: 
-        default:
+        stat:
+            label: Stats
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderStat
+                          object: bimpcoopmvt
+        capital:
             label: Capital
             sections:
                 - type: list

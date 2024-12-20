@@ -94,7 +94,7 @@ lists:
         configurable: 0
         enable_search: 1
         pagination: 0
-        checkboxes: 0
+        checkboxes: 1
         add_btn: 1
         has_total: 1
         add_form_name: default
@@ -103,6 +103,8 @@ lists:
         total_row: 1
 #        extra_btn: 
 #            callback: getListsExtraButtons
+        extra_bulk_actions: 
+            callback: getListsExtraBulkActions
         n: 0
         cols: 
             fk_user: 

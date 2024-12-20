@@ -2,7 +2,7 @@ CREATE TABLE `llx_bimp_coop_mvt` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `type` int(11) DEFAULT NULL,
   `date` date DEFAULT NULL,
-  `value` double(20,4) DEFAULT NULL,
+  `value` float(20,4) DEFAULT NULL,
   `fk_user` int(11) DEFAULT NULL,
   `info` varchar(300) DEFAULT NULL,
   `user_update` int(11) DEFAULT NULL,

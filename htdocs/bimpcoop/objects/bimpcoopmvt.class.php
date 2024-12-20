@@ -51,30 +51,87 @@ class Bimpcoopmvt extends BimpObject
         return 'bouton';
     }
     
+    public function getListsExtraBulkActions(){
+        $buttons = array();
+        $buttons[] = array(
+                'label'   => 'Crées paiements',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsBulkActionOnclick('create_paiement', array(), array('form_name' => 'create_paiement'))
+            );
+        return $buttons;
+    }
+    
     public function actionCreate_paiement($data, &$success = ''){
         global $user;
         $success = 'Paiement créer avec succés';
         $errors = array();
         
-        $userM = $this->getChildObject('userM');
+        
+        if($this->isLoaded()){
+            $objs = array($this);
+        }
+        else{
+            $objs = array();
+            foreach (BimpTools::getArrayValueFromPath($data, 'id_objects', array()) as $id){
+                $objs[] = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
+            }
+        }
+             
+        $amount = 0;
+        $userM = null;
         $paiement = $this->getChildObject('paiementDiv');
-        $paiement->amount = abs($this->getData('value'));
-        $paiement->sens = ($this->getData('value') > 0)? 1 : 0;
-        $paiement->datep = $this->getData('date');
-        $paiement->label = $this->displayData('type', null, null, true).' '.$userM->getFullName();
+        $type = null;
+        $notes = array();
+        foreach($objs as $obj){
+            if(is_null($userM))
+                $userM = $obj->getChildObject('userM');
+//            elseif($userM != $obj->getChildObject('userM'))
+//                $errors[] = 'PLusieurs utilisateurs diférent';
+            $amount += $obj->getData('value');
+            if(is_null($paiement->datep))
+                $paiement->datep = $obj->getData('date');
+            elseif($paiement->datep != $obj->getData('date'))
+                $errors[] = 'PLusieurs date diférente';
+            if(is_null($type))
+                $type = $obj->displayData('type', null, null, true);
+            elseif($type != $obj->displayData('type', null, null, true))
+                $errors[] = 'PLusieurs type diférent';
+            $notes[] = $obj->getData('note');
+            $paiementTemp = $obj->getChildObject('paiementDiv');
+            if($paiementTemp->id > 0)
+                $errors[] = 'La ligne comporte deja un paiement';
+        }
+        $paiement->amount = abs($amount);
+        $paiement->sens = ($amount > 0)? 1 : 0;
+        $paiement->label = $type.' '.$userM->getFullName();
         $paiement->fk_account = $data['id_account'];
         $paiement->type_payment = $data['id_mode_paiement'];
         $paiement->accountancy_code = '422';
         $paiement->subledger_account = $userM->getData('code_compta');
-        $paiement->note = $this->getData('note');
+        $paiement->note = implode('\n', $notes);
         
         if($paiement->create($user) < 1)
             $errors[] = 'erreur '.$paiement->error;
         else{
-            $this->updateField('id_paiement', $paiement->id);
+            foreach ($objs as $obj){
+                $obj->updateField('id_paiement', $paiement->id);
+            }
         }
         
         return array('errors'=> $errors, 'warnings'=>array());
+    }
+    
+    public function isEditable($force_edit = false, &$errors = []): int {
+        $paiementTemp = $this->getChildObject('paiementDiv');
+        if($paiementTemp->id > 0)
+            return 0;
+        
+        
+        return parent::isEditable($force_edit, $errors);
+    }
+    
+    public function isDeletable($force_delete = false, &$errors = []) {
+        return $this->isEditable($force_delete, $errors);
     }
 }
 

@@ -842,6 +842,7 @@ while ($i < $imaxinloop) {
 
 		// Accounting subledger account
 		if (!empty($arrayfields['subledger']['checked'])) {
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/accounting.lib.php';
 			print '<td class="tdoverflowmax150">'.length_accounta($obj->subledger_account).'</td>';
 			if (!$i) {
 				$totalarray['nbfield']++;

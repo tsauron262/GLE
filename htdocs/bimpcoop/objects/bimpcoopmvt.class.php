@@ -32,6 +32,7 @@ class Bimpcoopmvt extends BimpObject
         global $db;
         $html = '';
         $rows = array(1=>array(), 2=>array());
+        $totals = array(1=>0, 2=>0);
         
         //
         
@@ -41,7 +42,22 @@ class Bimpcoopmvt extends BimpObject
             if($ln->value != 0){
                 $rows[$ln->type][] = array(
                     'name' => $userT->getFullName(),
-                    'montant' => BimpTools::displayMoneyValue($ln->value),
+                    'montant' => array(
+                        'value' => $ln->value,
+                        'content' => BimpTools::displayMoneyValue($ln->value),
+                    ),
+                );
+            }
+        }
+        
+        
+        $sql = $db->query('SELECT SUM(value) as value, fk_user, type FROM '.MAIN_DB_PREFIX.'bimp_coop_mvt GROUP BY type;');
+        while ($ln = $db->fetch_object($sql)){
+            $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $ln->fk_user);
+            if($ln->value != 0){
+                $totals[$ln->type] = array(
+                    'value' => $ln->value,
+                    'content' => BimpTools::displayMoneyValue($ln->value)
                 );
             }
         }
@@ -61,12 +77,16 @@ class Bimpcoopmvt extends BimpObject
                             'sortable'    => true,
                             'search_mode' => 'show'
                 )),
-            'ccp' => BimpRender::renderBimpListTable($rows[2], $header, array(
+            'cca' => BimpRender::renderBimpListTable($rows[2], $header, array(
                             'searchable'  => true,
                             'sortable'    => true,
                             'search_mode' => 'show'
-                ))
-        )), array('cap'=>'Capital', 'ccp'=>'Compte courant'));
+            ))
+        ),1=>array(
+            'cap'=>$totals[1],
+            'cca'=>$totals[2]     
+        )
+        ), array('cap'=>'Capital', 'cca'=>'Compte courant'));
         
         return $html;
     }

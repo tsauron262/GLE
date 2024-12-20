@@ -1,0 +1,27 @@
+bootstrap: 1
+title: Bimp Coop
+
+objects:
+    bimpcoopmvt:
+        instance:
+            bimp_object: bimpcoopmvt
+    
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Capital
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: bimpcoopmvt
+                      name: capital
+        cpt_courant:
+            label: Compte courant
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: bimpcoopmvt
+                      name: cpt_courant

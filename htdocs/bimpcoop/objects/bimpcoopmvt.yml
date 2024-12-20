@@ -1,0 +1,136 @@
+table: bimp_coop_mvt
+
+labels: 
+    name: Mouvement
+    name_plur: Mouvements
+    is_female: 1
+    
+objects:
+    paiementDiv:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: compta/bank
+                file: paymentvarious
+                class: PaymentVarious
+            id_object: 
+                field_value: id_paiement
+    userM:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user
+    
+fields: 
+    fk_user:
+        label: Utilisateur
+        type: id_object
+        object: userM
+    type: 
+        label: Type opération
+        required: 1
+        type: list
+        values:
+            1: Capital
+            2: Compte courant
+    date: 
+        label: Date
+        type: date
+    value:
+        label: Montant opération
+        type: money
+    info: 
+        label: Info
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+    id_paiement:
+        label: Ecriture
+        type: id_object
+        object: paiementDiv
+    
+    
+forms: 
+    create_paiement:
+        rows: 
+            bank:
+                custom: 1
+                label: Compte bancaire
+                input_name: id_account
+                input: 
+                    type: select_mysoc_account
+                value: 
+                    callback: getDefaultBankAccount
+            mode:
+              custom: 1
+              label: Mode de paiement
+              input_name: id_mode_paiement
+              required: 0
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
+                
+   
+#list_cols:
+#    id_paiement:
+#        custom: 1
+#        value: 
+#            callback: displayPaiement   
+lists_cols: 
+    id_paiement2: 
+        label: Paiement
+        value: 
+            callback: displayPaiement
+            
+lists: 
+    default: 
+        title: Mouvements de fond
+        icon: fas_percent
+        configurable: 0
+        enable_search: 1
+        pagination: 0
+        checkboxes: 0
+        add_btn: 1
+        has_total: 1
+        add_form_name: default
+        edit_btn: 1
+        delete_btn: 1
+        total_row: 1
+#        extra_btn: 
+#            callback: getListsExtraButtons
+        n: 0
+        cols: 
+            fk_user: 
+            type: 
+            date: 
+            value:
+            info:
+            id_paiement2:
+                
+    capital:
+        title: Capital
+        extends: default
+        list_filters:
+            - name: type
+              filter: 1
+        add_form_values:
+            fields:
+                type: 1
+                
+    cpt_courant:
+        title: Compte courants
+        extends: default
+        list_filters:
+            - name: type
+              filter: 2
+        add_form_values:
+            fields:
+                type: 2
+        
+            
+    

@@ -15,7 +15,9 @@ class BimpModules extends DolibarrModules {
         $this->numero = 8567;
 
         $this->family = "BIMP";
-        $this->description = "Bimp Caisse";
+        
+        if($this->description == '')
+            $this->description = "Bimp Divers";
         if(is_null($this->version))
             $this->version = '1';    // 'experimental' or 'dolibarr' or version
         $this->name = preg_replace('/^mod/i', '', get_class($this));

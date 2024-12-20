@@ -1023,6 +1023,17 @@ class Bimp_User extends BimpObject
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLdapView', '$(\'#ldap .nav_tab_ajax_result\')', array('ldap'), array('button' => ''))
         );
+        
+        if(BimpTools::isModuleDoliActif('bimpcoop')){
+            $coop = BimpObject::getBimpObjectInstance('bimpcoop', 'bimpcoopmvt');
+            $tabs[] = array(
+                'id'            => 'ldap',
+                'title'         => BimpRender::renderIcon('users', 'iconLeft') . 'Capital',
+    //            'content' => $this->renderLdapView()
+                'ajax'          => 1,
+                'ajax_callback' => $coop->getJsLoadCustomContent('renderCoopUserView', '$(\'#ldap .nav_tab_ajax_result\')', array($this->id), array('button' => ''))
+            );
+        }
 
         return BimpRender::renderNavTabs($tabs);
     }

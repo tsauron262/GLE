@@ -196,6 +196,34 @@ class Bimpcoopmvt extends BimpObject
     public function isDeletable($force_delete = false, &$errors = []) {
         return $this->isEditable($force_delete, $errors);
     }
+    
+    
+    //graph
+    public function getFieldsGraphRep($type = 1){
+        $fields = array();
+        $cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array(
+            'type'      => $type
+        ));
+        foreach($cmds as $cmdData){
+            $userM = $cmdData->getChildObject('userM');
+            if($userM->isLoaded())
+                $title = $userM->getFullName();
+            else
+                $title = 'n/c';
+            $fields[$userM->id] = array(
+               "title"      => $title,
+               'field'     => 'value',
+               'calc'      => 'SUM',
+               'filters'    => array(
+                   'fk_user'     => $userM->id,
+                    'type'      => $type
+               )
+
+
+            );
+        }
+        return $fields;
+    }
 }
 
 

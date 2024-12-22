@@ -25,6 +25,10 @@ sections:
                       panel: 1
                       object: bimpcoopmvt
                       name: capital
+                - type: graph
+                  graph: 
+                      object: bimpcoopmvt
+                      name: rep
         cpt_courant:
             label: Compte courant
             sections:
@@ -33,3 +37,7 @@ sections:
                       panel: 1
                       object: bimpcoopmvt
                       name: cpt_courant
+                - type: graph
+                  graph: 
+                      object: bimpcoopmvt
+                      name: rep2

@@ -135,4 +135,33 @@ lists:
                 type: 2
         
             
-    
+graph:
+    rep:
+        mode: doughnut
+        title: Repartition
+#        xDateConfig:
+#            field: date
+#            date1: 1
+#            date2: 2
+#            def: 1year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getFieldsGraphRep
+    rep2:
+        mode: doughnut
+        title: Repartition
+#        xDateConfig:
+#            field: date
+#            date1: 1
+#            date2: 2
+#            def: 1year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: 
+                    method: getFieldsGraphRep
+                    params: 
+                        - 2

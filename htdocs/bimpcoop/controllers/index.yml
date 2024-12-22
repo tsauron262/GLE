@@ -41,3 +41,7 @@ sections:
                   graph: 
                       object: bimpcoopmvt
                       name: rep2
+                - type: graph
+                  graph: 
+                      object: bimpcoopmvt
+                      name: rep3

@@ -199,27 +199,27 @@ class Bimpcoopmvt extends BimpObject
     
     
     //graph
-    public function getFieldsGraphRep($type = 1){
+    public function getFieldsGraphRep($type = 1, $label = ''){
         $fields = array();
-        $cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array(
+        $filter = array(
             'type'      => $type
-        ));
+        );
+        if($label != '')
+            $filter['info'] = 'URGENCE';
+        $cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filter);
         foreach($cmds as $cmdData){
             $userM = $cmdData->getChildObject('userM');
             if($userM->isLoaded())
                 $title = $userM->getFullName();
             else
                 $title = 'n/c';
+            
+            $filter2 = array_merge($filter, array('fk_user' => $userM->id));
             $fields[$userM->id] = array(
                "title"      => $title,
                'field'     => 'value',
                'calc'      => 'SUM',
-               'filters'    => array(
-                   'fk_user'     => $userM->id,
-                    'type'      => $type
-               )
-
-
+               'filters'    => $filter2
             );
         }
         return $fields;

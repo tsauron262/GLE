@@ -138,7 +138,7 @@ lists:
 graph:
     rep:
         mode: doughnut
-        title: Repartition
+        title: Repartition Capital
 #        xDateConfig:
 #            field: date
 #            date1: 1
@@ -151,7 +151,7 @@ graph:
                 callback: getFieldsGraphRep
     rep2:
         mode: doughnut
-        title: Repartition
+        title: Repartition CCA
 #        xDateConfig:
 #            field: date
 #            date1: 1
@@ -165,3 +165,20 @@ graph:
                     method: getFieldsGraphRep
                     params: 
                         - 2
+    rep3:
+        mode: doughnut
+        title: Repartition CCA Urgence
+#        xDateConfig:
+#            field: date
+#            date1: 1
+#            date2: 2
+#            def: 1year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: 
+                    method: getFieldsGraphRep
+                    params: 
+                        - 2
+                        - URGENCE

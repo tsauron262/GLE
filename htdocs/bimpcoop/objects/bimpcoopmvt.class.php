@@ -173,8 +173,7 @@ GROUP BY categorie;');
         $tabInfoSolde[' '] = '';
         $tabInfoSolde['DEPUIS DEBUT'] = BimpTools::displayMoneyValue($tot - 47000);
         $tabInfoSolde['  '] = '';
-        $tabInfoSolde['Dif Prévi'] = BimpTools::displayMoneyValue($tot - BimpCore::getConf('b_previ', 0, 'bimpcoop') + 10000 - $tabInfoD['Travaux'] - 5739);
-        //22 021
+        $tabInfoSolde['Dif Prévi'] = BimpTools::displayMoneyValue($tot - 10000 + $tabInfoD['Travaux'] - 5739 - BimpCore::getConf('b_previ', 0, 'bimpcoop'));
         
         
         

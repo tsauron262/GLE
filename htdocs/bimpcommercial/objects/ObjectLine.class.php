@@ -3011,15 +3011,15 @@ class ObjectLine extends BimpObject
                     switch ($class_name) {
                         case 'Propal':
                             BimpCache::unsetDolObjectInstance((int) $id_line, 'comm/propal', 'propal', 'PropaleLigne');
-                            $result = $object->updateline($id_line, (float) $this->pu_ht, $this->qty, (float) $this->remise, (float) $this->tva_tx, 0, 0, (string) $this->desc, 'HT', 0, 0, 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht, '', 0, $date_from, $date_to);
+                            $result = $object->updateline($id_line, (float) $this->pu_ht, $this->qty, (float) $this->remise, (float) $this->tva_tx, 0, 0, (string) $this->desc, 'HT', 0, 0, 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht, '', $this->product_type, $date_from, $date_to);
                             break;
 
                         case 'Facture':
-                            $result = $object->updateline($id_line, (string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->remise, $date_from, $date_to, (float) $this->tva_tx, 0, 0, 'HT', 0, 0, 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
+                            $result = $object->updateline($id_line, (string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->remise, $date_from, $date_to, (float) $this->tva_tx, 0, 0, 'HT', 0, $this->product_type, 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
                         case 'Commande':
-                            $result = $object->updateLine($id_line, (string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->remise, (float) $this->tva_tx, 0.0, 0.0, 'HT', 0, $date_from, $date_to, 0, 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
+                            $result = $object->updateLine($id_line, (string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->remise, (float) $this->tva_tx, 0.0, 0.0, 'HT', 0, $date_from, $date_to, $this->product_type, 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
                         case 'CommandeFournisseur':

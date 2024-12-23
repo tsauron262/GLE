@@ -148,7 +148,7 @@ ORDER BY a.rowid DESC;');
                 $tot += $ln->tot;
             }
         }
-        $tabInfo['loyer'] += BimpTools::displayMoneyValue(BimpCore::getConf('b_loyer', 0, 'bimpcoop'));
+        $tabInfo['loyer'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
         $tabInfo[''] = '';
         $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
         $content = '<table class="bimp_list_table">';
@@ -176,8 +176,8 @@ GROUP BY categorie;');
                 $tot += $ln->tot;
             }
         }
-        $tabInfo['travaux'] += BimpTools::displayMoneyValue(BimpCore::getConf('b_travaux', 0, 'bimpcoop'));
-        $tabInfo['autre'] += BimpTools::displayMoneyValue(BimpCore::getConf('b_autre', 0, 'bimpcoop'));
+        $tabInfo['travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
+        $tabInfo['autre'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
         $tabInfo[''] = '';
         $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
         $content = '<table class="bimp_list_table">';

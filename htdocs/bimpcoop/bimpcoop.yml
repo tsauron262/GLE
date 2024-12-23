@@ -12,3 +12,6 @@ params:
     b_loyer: 
         label: Loyer
         def: '0'
+    b_previ: 
+        label: Previsionelle a jour
+        def: '0'

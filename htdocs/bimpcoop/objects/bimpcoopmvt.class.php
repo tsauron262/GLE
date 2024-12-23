@@ -183,12 +183,12 @@ ORDER BY a.rowid DESC;');
 //        $tot += BimpCore::getConf('b_autre', 0, 'bimpcoop');
 //        $tabInfo[''] = '';
 //        $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
-        $content = '<table class="bimp_list_table">';
-        foreach($tabInfo as $nom => $val){
-            $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
-        }
-        $content .= '</table>';
-        $panels['Dépences'] = $content;
+//        $content = '<table class="bimp_list_table">';
+//        foreach($tabInfo as $nom => $val){
+//            $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
+//        }
+//        $content .= '</table>';
+//        $panels['Dépences'] = $content;
         
         
         $html = '';

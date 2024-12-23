@@ -161,13 +161,13 @@ ORDER BY a.rowid DESC;');
         
         
         //depensse (stat achat)
-        $tabInfo = array();
-        $sql = $db->query('SELECT a_product_ef.categorie AS categorie, SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
-FROM '.MAIN_DB_PREFIX.'facture_fourn_det a
-LEFT JOIN '.MAIN_DB_PREFIX.'facture_fourn f ON f.rowid = a.fk_facture_fourn
-LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
-GROUP BY categorie;');
-        $tot = 0;
+//        $tabInfo = array();
+//        $sql = $db->query('SELECT a_product_ef.categorie AS categorie, SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
+//FROM '.MAIN_DB_PREFIX.'facture_fourn_det a
+//LEFT JOIN '.MAIN_DB_PREFIX.'facture_fourn f ON f.rowid = a.fk_facture_fourn
+//LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
+//GROUP BY categorie;');
+//        $tot = 0;
 //        while($ln = $db->fetch_object($sql)){
 //            if($ln->tot != 0){
 //                $label = $categ[$ln->categorie];

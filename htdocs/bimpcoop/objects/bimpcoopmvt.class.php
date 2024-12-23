@@ -177,10 +177,10 @@ GROUP BY categorie;');
                 $tot += $ln->tot;
             }
         }
-        $tabInfo['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
-        $tot += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
-        $tabInfo['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
-        $tot += BimpCore::getConf('b_autre', 0, 'bimpcoop');
+//        $tabInfo['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
+//        $tot += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
+//        $tabInfo['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
+//        $tot += BimpCore::getConf('b_autre', 0, 'bimpcoop');
         $tabInfo[''] = '';
         $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
         $content = '<table class="bimp_list_table">';
@@ -188,7 +188,7 @@ GROUP BY categorie;');
             $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
         }
         $content .= '</table>';
-//        $panels['Dépences'] = $content;
+        $panels['Dépences'] = $content;
         
         
         $html = '';

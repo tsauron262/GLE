@@ -147,6 +147,12 @@ ORDER BY a.rowid DESC;');
             }
         }
         $tabInfo['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
+        
+        $sql = $db->query('SELECT SUM(amount_ttc) as tot FROM `'.MAIN_DB_PREFIX.'societe_remise_except` WHERE (fk_facture < 0 OR fk_facture IS NULL) AND fk_facture_source > 0');
+        while($ln = $db->fetch_object($sql)){
+            $tabInfo['Acompte'] += $ln->tot;
+        }
+        
         $panels['Recette'] = $this->traiteTab($tabInfo);
         
         

@@ -168,15 +168,15 @@ LEFT JOIN '.MAIN_DB_PREFIX.'facture_fourn f ON f.rowid = a.fk_facture_fourn
 LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
 GROUP BY categorie;');
         $tot = 0;
-        while($ln = $db->fetch_object($sql)){
-            if($ln->tot != 0){
-                $label = $categ[$ln->categorie];
-                if($label == '')
-                    $label = 'Categ inconnue '.$ln->categorie;
-                $tabInfo[$label] = BimpTools::displayMoneyValue($ln->tot);
-                $tot += $ln->tot;
-            }
-        }
+//        while($ln = $db->fetch_object($sql)){
+//            if($ln->tot != 0){
+//                $label = $categ[$ln->categorie];
+//                if($label == '')
+//                    $label = 'Categ inconnue '.$ln->categorie;
+//                $tabInfo[$label] = BimpTools::displayMoneyValue($ln->tot);
+//                $tot += $ln->tot;
+//            }
+//        }
 //        $tabInfo['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
 //        $tot += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
 //        $tabInfo['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');

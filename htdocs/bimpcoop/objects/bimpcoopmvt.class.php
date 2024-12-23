@@ -162,7 +162,7 @@ GROUP BY categorie;');
                 $label = $bank[$ln->fk_account];
                 if($label == '')
                     $label = 'Banque '.$ln->fk_account;
-                $tabInfoSolde['Solde '.$label] = BimpTools::displayMoneyValue($ln->solde);
+                $tabInfoSolde['Solde '.$label] = $ln->solde;
                 $tot += $ln->solde;
             }
         }
@@ -172,21 +172,21 @@ GROUP BY categorie;');
             $tabInfoSolde['Solde NEF'] -= 1430.73;
             $tot -= 1430.73;
         }
-        $tabInfoSolde['Solde Bl'] = BimpTools::displayMoneyValue(BimpCore::getConf('b_solde', 0, 'bimpcoop'));
+        $tabInfoSolde['Solde Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
         $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
         $tabInfoSolde[''] = '';
-        $tabInfoSolde['TOTAL'] = BimpTools::displayMoneyValue($tot);
+        $tabInfoSolde['TOTAL'] = $tot;
         $tabInfoSolde[' '] = '';
-        $tabInfoSolde['DEPUIS DEBUT'] = BimpTools::displayMoneyValue($tot - 47000);
+        $tabInfoSolde['DEPUIS DEBUT'] = $tot - 47000;
         $tabInfoSolde['  '] = '';
-        $tabInfoSolde['Dif Prévi'] = BimpTools::displayMoneyValue($tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop'));
+        $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
         
         
         
         
         $contentSolde = '<table class="bimp_list_table">';
         foreach($tabInfoSolde as $nom => $val){
-            $contentSolde .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
+            $contentSolde .= '<tr><th>'.$nom.'</th><td>'.BimpTools::displayMoneyValue($val).'</td></tr>';
         }
         $contentSolde .= '</table>';
         $panels['Soldes'] = $contentSolde;

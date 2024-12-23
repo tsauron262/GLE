@@ -223,6 +223,8 @@ class DoliDBMysqliC extends DoliDBMysqli
         elseif (!$this->discover_svc()) {
 //            $this->error = "Cannot discover database servers";
             dol_syslog(get_class($this) . "::DoliDBMysqliC Connect error: Cannot discover database servers", LOG_ERR);
+            if(class_exists('BimpCore'))
+                BimpCore::addlog('consul ne repond pas utilisation de mysqli', Bimp_Log::BIMP_LOG_ERREUR);
             return parent::__construct('mysqli', $host, $user, $pass, $name, $port);
         }
         else{

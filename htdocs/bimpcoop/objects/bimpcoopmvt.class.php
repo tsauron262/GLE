@@ -181,8 +181,8 @@ ORDER BY a.rowid DESC;');
 //        $tot += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
 //        $tabInfo['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
 //        $tot += BimpCore::getConf('b_autre', 0, 'bimpcoop');
-        $tabInfo[''] = '';
-        $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
+//        $tabInfo[''] = '';
+//        $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
         $content = '<table class="bimp_list_table">';
         foreach($tabInfo as $nom => $val){
             $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';

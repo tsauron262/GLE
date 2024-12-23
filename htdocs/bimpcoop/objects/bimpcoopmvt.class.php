@@ -166,6 +166,12 @@ GROUP BY categorie;');
                 $tot += $ln->solde;
             }
         }
+        if(GETPOST('ajPret') == 1){
+            $tabInfoSolde['Solde Banque POP'] -= 1446.38;
+            $tot -= 1446.38;
+            $tabInfoSolde['Solde NEF'] -= 1430.73;
+            $tot -= 1430.73;
+        }
         $tabInfoSolde['Solde Bl'] = BimpTools::displayMoneyValue(BimpCore::getConf('b_solde', 0, 'bimpcoop'));
         $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
         $tabInfoSolde[''] = '';

@@ -148,7 +148,7 @@ ORDER BY a.rowid DESC;');
                 $tot += $ln->tot;
             }
         }
-        $tabInfo['location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
+        $tabInfo['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
         $tot += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
         $tabInfo[''] = '';
         $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
@@ -159,35 +159,35 @@ ORDER BY a.rowid DESC;');
         $content .= '</table>';
         $panels['Recette'] = $content;
         
-//        
-//        //depensse (stat achat)
-//        $tabInfo = array();
-//        $sql = $db->query('SELECT a_product_ef.categorie AS categorie, SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
-//FROM '.MAIN_DB_PREFIX.'facture_fourn_det a
-//LEFT JOIN '.MAIN_DB_PREFIX.'facture_fourn f ON f.rowid = a.fk_facture_fourn
-//LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
-//GROUP BY categorie;');
-//        $tot = 0;
-//        while($ln = $db->fetch_object($sql)){
-//            if($ln->tot != 0){
-//                $label = $categ[$ln->categorie];
-//                if($label == '')
-//                    $label = 'Categ inconnue '.$ln->categorie;
-//                $tabInfo[$label] = BimpTools::displayMoneyValue($ln->tot);
-//                $tot += $ln->tot;
-//            }
-//        }
-//        $tabInfo['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
-//        $tot += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
-//        $tabInfo['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
-//        $tot += BimpCore::getConf('b_autre', 0, 'bimpcoop');
-//        $tabInfo[''] = '';
-//        $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
-//        $content = '<table class="bimp_list_table">';
-//        foreach($tabInfo as $nom => $val){
-//            $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
-//        }
-//        $content .= '</table>';
+        
+        //depensse (stat achat)
+        $tabInfo = array();
+        $sql = $db->query('SELECT a_product_ef.categorie AS categorie, SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
+FROM '.MAIN_DB_PREFIX.'facture_fourn_det a
+LEFT JOIN '.MAIN_DB_PREFIX.'facture_fourn f ON f.rowid = a.fk_facture_fourn
+LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
+GROUP BY categorie;');
+        $tot = 0;
+        while($ln = $db->fetch_object($sql)){
+            if($ln->tot != 0){
+                $label = $categ[$ln->categorie];
+                if($label == '')
+                    $label = 'Categ inconnue '.$ln->categorie;
+                $tabInfo[$label] = BimpTools::displayMoneyValue($ln->tot);
+                $tot += $ln->tot;
+            }
+        }
+        $tabInfo['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
+        $tot += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
+        $tabInfo['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
+        $tot += BimpCore::getConf('b_autre', 0, 'bimpcoop');
+        $tabInfo[''] = '';
+        $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
+        $content = '<table class="bimp_list_table">';
+        foreach($tabInfo as $nom => $val){
+            $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
+        }
+        $content .= '</table>';
 //        $panels['Dépences'] = $content;
         
         

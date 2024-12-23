@@ -30,9 +30,10 @@ class Bimpcoopmvt extends BimpObject
     
     public function renderStat(){
         global $db;
-        $html = '';
+        $panels = array();
         $rows = array(1=>array(), 2=>array());
         $totals = array(1=>0, 2=>0);
+        
         
         //
         
@@ -42,10 +43,7 @@ class Bimpcoopmvt extends BimpObject
             if($ln->value != 0){
                 $rows[$ln->type][] = array(
                     'name' => $userT->getFullName(),
-                    'montant' => array(
-                        'value' => $ln->value,
-                        'content' => BimpTools::displayMoneyValue($ln->value),
-                    ),
+                    'montant' => BimpTools::displayMoneyValue($ln->value),
                 );
             }
         }
@@ -55,10 +53,7 @@ class Bimpcoopmvt extends BimpObject
         while ($ln = $db->fetch_object($sql)){
             $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $ln->fk_user);
             if($ln->value != 0){
-                $totals[$ln->type] = array(
-                    'value' => $ln->value,
-                    'content' => BimpTools::displayMoneyValue($ln->value)
-                );
+                $totals[$ln->type] = BimpTools::displayMoneyValue($ln->value);
             }
         }
 //        echo '<pre>';
@@ -70,24 +65,133 @@ class Bimpcoopmvt extends BimpObject
             'montant'   => 'Value'
         );
         
-        
-        $html .= BimpRender::renderBimpListTable(array(0=>array(
-            'cap' => BimpRender::renderBimpListTable($rows[1], $header, array(
+        $panels['Capital'] = BimpRender::renderBimpListTable($rows[1], $header, array(
                             'searchable'  => true,
                             'sortable'    => true,
                             'search_mode' => 'show'
-                )),
-            'cca' => BimpRender::renderBimpListTable($rows[2], $header, array(
+                )).$totals[1];
+        
+        
+        $panels['CCA'] = BimpRender::renderBimpListTable($rows[2], $header, array(
                             'searchable'  => true,
                             'sortable'    => true,
                             'search_mode' => 'show'
-            ))
-        ),1=>array(
-            'cap'=>$totals[1],
-            'cca'=>$totals[2]     
-        )
-        ), array('cap'=>'Capital', 'cca'=>'Compte courant'));
+            )).$totals[2];
         
+        
+        $tabInfo = array();
+        
+        
+        //bank
+        $sql = $db->query("SELECT * FROM `".MAIN_DB_PREFIX."bank_account`;");
+        $bank  = array();
+        while($ln = $db->fetch_object($sql)){
+            $bank[$ln->rowid] = $ln->label;
+        }
+        
+        $sql = $db->query('SELECT SUM(amount)as solde, fk_account FROM '.MAIN_DB_PREFIX.'bank GROUP BY fk_account');
+        $tot = 0;
+        while($ln = $db->fetch_object($sql)){
+            if($ln->solde != 0){
+                $label = $bank[$ln->fk_account];
+                if($label == '')
+                    $label = 'Banque '.$ln->fk_account;
+                $tabInfo['Solde '.$label] = BimpTools::displayMoneyValue($ln->solde);
+                $tot += $ln->solde;
+            }
+        }
+        $tabInfo['Solde Bl'] = BimpTools::displayMoneyValue(BimpCore::getConf('b_solde', 0, 'bimpcoop'));
+        $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
+        $tabInfo[''] = '';
+        $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
+        $tabInfo[' '] = '';
+        $tabInfo['DEPUIS DEBUT'] = BimpTools::displayMoneyValue($tot - 47000);
+        
+        $content = '<table class="bimp_list_table">';
+        foreach($tabInfo as $nom => $val){
+            $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
+        }
+        $content .= '</table>';
+        $panels['Soldes'] = $content;
+//        $html .= BimpRender::renderPanel('Chiffres ', $content, '', array('open' => 1));
+        //47000
+        
+        
+        
+        
+        
+        //categorie
+        $sql = $db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_c_values8sens` WHERE `type` = 'categorie';");
+        $categ  = array();
+        while($ln = $db->fetch_object($sql)){
+            $categ[$ln->id] = $ln->label;
+        }
+        
+        
+        //Recette (stat vente)
+        $tabInfo = array();
+        $sql = $db->query('SELECT a_product_ef.categorie AS categorie,  SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
+FROM '.MAIN_DB_PREFIX.'facturedet a
+LEFT JOIN '.MAIN_DB_PREFIX.'facture f ON f.rowid = a.fk_facture
+LEFT JOIN '.MAIN_DB_PREFIX.'facture a___parent ON a___parent.rowid = a.fk_facture
+LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
+WHERE a___parent.type IN ("0","1","2")
+GROUP BY categorie
+ORDER BY a.rowid DESC;');
+        $tot = 0;
+        while($ln = $db->fetch_object($sql)){
+            if($ln->tot != 0){
+                $label = $categ[$ln->categorie];
+                if($label == '')
+                    $label = 'Categ inconnue '.$ln->categorie;
+                $tabInfo[$label] = BimpTools::displayMoneyValue($ln->tot);
+                $tot += $ln->tot;
+            }
+        }
+        $tabInfo['loyer'] += BimpTools::displayMoneyValue(BimpCore::getConf('b_loyer', 0, 'bimpcoop'));
+        $tabInfo[''] = '';
+        $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
+        $content = '<table class="bimp_list_table">';
+        foreach($tabInfo as $nom => $val){
+            $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
+        }
+        $content .= '</table>';
+        $panels['Recette'] = $content;
+        
+        
+        //depensse (stat achat)
+        $tabInfo = array();
+        $sql = $db->query('SELECT a_product_ef.categorie AS categorie, SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
+FROM '.MAIN_DB_PREFIX.'facture_fourn_det a
+LEFT JOIN '.MAIN_DB_PREFIX.'facture_fourn f ON f.rowid = a.fk_facture_fourn
+LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
+GROUP BY categorie;');
+        $tot = 0;
+        while($ln = $db->fetch_object($sql)){
+            if($ln->tot != 0){
+                $label = $categ[$ln->categorie];
+                if($label == '')
+                    $label = 'Categ inconnue '.$ln->categorie;
+                $tabInfo[$label] = BimpTools::displayMoneyValue($ln->tot);
+                $tot += $ln->tot;
+            }
+        }
+        $tabInfo['travaux'] += BimpTools::displayMoneyValue(BimpCore::getConf('b_travaux', 0, 'bimpcoop'));
+        $tabInfo['autre'] += BimpTools::displayMoneyValue(BimpCore::getConf('b_autre', 0, 'bimpcoop'));
+        $tabInfo[''] = '';
+        $tabInfo['TOTAL'] = BimpTools::displayMoneyValue($tot);
+        $content = '<table class="bimp_list_table">';
+        foreach($tabInfo as $nom => $val){
+            $content .= '<tr><th>'.$nom.'</th><td>'.$val.'</td></tr>';
+        }
+        $content .= '</table>';
+        $panels['Dépences'] = $content;
+        
+        
+        $html = '';
+        foreach($panels as $name => $content){
+            $html .= '<div class="col_xs-6 col-sm-4 col-md-4">'.BimpRender::renderPanel($name, $content, '', array('open' => 1)).'</div>';
+        }
         return $html;
     }
     

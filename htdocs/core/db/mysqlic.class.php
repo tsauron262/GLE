@@ -289,7 +289,7 @@ class DoliDBMysqliC extends DoliDBMysqli
 
         foreach ($this->CONSUL_SERVERS as $consul_server) {
             $full_url = $consul_server . self::CONSUL_PATH . $this->CONSUL_SERVICE_DATABASE . "?filter=" . urlencode($req_filter);
-            $json_string = file_get_contents($full_url);
+            $json_string = file_get_contents($full_url, 0, stream_context_create(["http"=>["timeout"=>3]]));
             if ($json_string === FALSE)
                 continue;
             $json_obj = json_decode($json_string);

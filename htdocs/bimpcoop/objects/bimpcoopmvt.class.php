@@ -127,7 +127,7 @@ ORDER BY a.rowid DESC;');
                 $tabInfoR[$label] = $ln->tot;
             }
         }
-        if(is_null(BimpTools::getPostFieldValue('dateD', null)) && is_null(BimpTools::getPostFieldValue('dateF', null))){
+        if(BimpTools::getPostFieldValue('dateD', null) && BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoR['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
         }
         
@@ -160,7 +160,7 @@ GROUP BY categorie;');
                 $tabInfoD[$label] = $ln->tot;
             }
         }
-        if(is_null(BimpTools::getPostFieldValue('dateD', null)) && is_null(BimpTools::getPostFieldValue('dateF', null))){
+        if(BimpTools::getPostFieldValue('dateD', null) && BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoD['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
             $tabInfoD['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
         }
@@ -189,7 +189,7 @@ GROUP BY categorie;');
             $tot -= 1430.73;
         }
         
-        if(is_null(BimpTools::getPostFieldValue('dateF', null))){
+        if(BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoSolde['Solde Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
             $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
         }
@@ -199,7 +199,7 @@ GROUP BY categorie;');
         $tabInfoSolde['DEPUIS DEBUT'] = $tot - 47000;
         $tabInfoSolde['  '] = '';
         
-        if(is_null(BimpTools::getPostFieldValue('dateF', null))){
+        if(BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
         }
         

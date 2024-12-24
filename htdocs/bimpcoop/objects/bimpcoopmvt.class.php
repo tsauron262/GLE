@@ -28,15 +28,11 @@ class Bimpcoopmvt extends BimpObject
         return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
     }
     
-    public function renderStat(){
+    public function renderCapitalCCA(){
         global $db;
         $panels = array();
         $rows = array(1=>array(), 2=>array());
         $totals = array(1=>0, 2=>0);
-        
-        
-        //
-        
         $sql = $db->query('SELECT SUM(value) as value, fk_user, type FROM '.MAIN_DB_PREFIX.'bimp_coop_mvt GROUP BY fk_user, type;');
         while ($ln = $db->fetch_object($sql)){
             $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $ln->fk_user);
@@ -65,18 +61,25 @@ class Bimpcoopmvt extends BimpObject
             'montant'   => 'Value'
         );
         
-        $panels['Capital'] = BimpRender::renderBimpListTable($rows[1], $header, array(
+        $panels['Capital'] = array('content'=>BimpRender::renderBimpListTable($rows[1], $header, array(
                             'searchable'  => true,
                             'sortable'    => true,
                             'search_mode' => 'show'
-                )).'TOTAL : '.$totals[1];
+                )).'TOTAL : '.$totals[1], 'xs'=>12,'sm'=>12,'md'=>6);
         
         
-        $panels['CCA'] = BimpRender::renderBimpListTable($rows[2], $header, array(
+        $panels['CCA'] = array('content'=>BimpRender::renderBimpListTable($rows[2], $header, array(
                             'searchable'  => true,
                             'sortable'    => true,
                             'search_mode' => 'show'
-            )).'TOTAL : '.$totals[2];
+            )).'TOTAL : '.$totals[2], 'xs'=>12,'sm'=>12,'md'=>6);
+        
+        return $panels;
+    }
+    
+    public function renderStat(){
+        global $db;
+        $panels = array();
         
         
         $tabInfoSolde = array();
@@ -111,8 +114,10 @@ FROM '.MAIN_DB_PREFIX.'facturedet a
 LEFT JOIN '.MAIN_DB_PREFIX.'facture f ON f.rowid = a.fk_facture
 LEFT JOIN '.MAIN_DB_PREFIX.'facture a___parent ON a___parent.rowid = a.fk_facture
 LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
-WHERE a___parent.type IN ("0","1","2")
-GROUP BY categorie
+WHERE a___parent.type IN ("0","1","2")'.
+                (BimpTools::getPostFieldValue('dateD', null)? ' AND f.datef > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+                (BimpTools::getPostFieldValue('dateF', null)? ' AND f.datef < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+' GROUP BY categorie
 ORDER BY a.rowid DESC;');
         while($ln = $db->fetch_object($sql)){
             if($ln->tot != 0){
@@ -124,7 +129,10 @@ ORDER BY a.rowid DESC;');
         }
         $tabInfoR['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
         
-        $sql = $db->query('SELECT SUM(amount_ttc) as tot FROM `'.MAIN_DB_PREFIX.'societe_remise_except` WHERE (fk_facture < 0 OR fk_facture IS NULL) AND fk_facture_source > 0');
+        $sql = $db->query('SELECT SUM(amount_ttc) as tot FROM `'.MAIN_DB_PREFIX.'societe_remise_except` WHERE (fk_facture < 0 OR fk_facture IS NULL) AND fk_facture_source > 0'.
+                (BimpTools::getPostFieldValue('dateD', null)? ' AND datec > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+                (BimpTools::getPostFieldValue('dateF', null)? ' AND datec < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+'');
         while($ln = $db->fetch_object($sql)){
             $tabInfoR['Acompte'] += $ln->tot;
         }
@@ -137,6 +145,10 @@ ORDER BY a.rowid DESC;');
 FROM '.MAIN_DB_PREFIX.'facture_fourn_det a
 LEFT JOIN '.MAIN_DB_PREFIX.'facture_fourn f ON f.rowid = a.fk_facture_fourn
 LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
+WHERE 1'.
+                (BimpTools::getPostFieldValue('dateD', null)? ' AND f.datef > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+                (BimpTools::getPostFieldValue('dateF', null)? ' AND f.datef < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+'
 GROUP BY categorie;');
         while($ln = $db->fetch_object($sql)){
             if($ln->tot != 0){
@@ -189,15 +201,48 @@ GROUP BY categorie;');
             $contentSolde .= '<tr><th>'.$nom.'</th><td>'.BimpTools::displayMoneyValue($val).'</td></tr>';
         }
         $contentSolde .= '</table>';
-        $panels['Soldes'] = $contentSolde;
+        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form>', 'xs'=>12,'sm'=>12,'md'=>12);
+        $panels['Compta']['Soldes'] = $contentSolde;
         
-        $panels['Recette'] = $this->traiteTab($tabInfoR);
-        $panels['Dépences'] = $this->traiteTab($tabInfoD);
+        $panels['Compta']['Recette'] = $this->traiteTab($tabInfoR);
+        $panels['Compta']['Dépences'] = $this->traiteTab($tabInfoD);
         
         
+        
+        $panels['Repartition Capital CCA'] = array('content'=>$this->renderCapitalCCA(), 'xs'=>12,'sm'=>8,'md'=>8);
+        
+        
+        return BimpTools::getPostFieldValue('dateD').$this->renderPanels($panels);
+    }
+    
+    public function renderPanels($panels, $xsD=6, $smD=4, $mdD=4, $open = 1){
         $html = '';
         foreach($panels as $name => $content){
-            $html .= '<div class="col_xs-6 col-sm-4 col-md-4">'.BimpRender::renderPanel($name, $content, '', array('open' => 1)).'</div>';
+            $xs = $xsD;
+            $sm = $smD;
+            $md = $mdD;
+            if(is_array($content)){
+                if(isset($content['xs']))
+                    $xs = $content['xs'];
+                if(isset($content['sm']))
+                    $sm = $content['sm'];
+                if(isset($content['md']))
+                    $md = $content['md'];
+                if(isset($content['content'])){
+                    if(is_array($content['content']))
+                        $content = $this->renderPanels($content['content']);
+                    else
+                        $content = $content['content'];
+                }
+                else{
+                    $content = $this->renderPanels($content);
+                    $xs = $sm = $md = 12;
+                }
+            }
+//            else
+                $content = BimpRender::renderPanel($name, $content, '', array('open' => $open));
+            
+            $html .= '<div class="col_xs-'.$xs.' col-sm-'.$sm.' col-md-'.$md.'">'.$content.'</div>';
         }
         return $html;
     }

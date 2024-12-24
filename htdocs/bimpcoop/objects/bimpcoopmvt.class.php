@@ -127,7 +127,7 @@ ORDER BY a.rowid DESC;');
                 $tabInfoR[$label] = $ln->tot;
             }
         }
-        if(BimpTools::getPostFieldValue('dateD', null) && BimpTools::getPostFieldValue('dateF', null)){
+        if(!BimpTools::getPostFieldValue('dateD', null) && !BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoR['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
         }
         
@@ -160,7 +160,7 @@ GROUP BY categorie;');
                 $tabInfoD[$label] = $ln->tot;
             }
         }
-        if(BimpTools::getPostFieldValue('dateD', null) && BimpTools::getPostFieldValue('dateF', null)){
+        if(!BimpTools::getPostFieldValue('dateD', null) && !BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoD['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
             $tabInfoD['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
         }
@@ -189,7 +189,7 @@ GROUP BY categorie;');
             $tot -= 1430.73;
         }
         
-        if(BimpTools::getPostFieldValue('dateF', null)){
+        if(!BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoSolde['Solde Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
             $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
         }
@@ -199,7 +199,7 @@ GROUP BY categorie;');
         $tabInfoSolde['DEPUIS DEBUT'] = $tot - 47000;
         $tabInfoSolde['  '] = '';
         
-        if(BimpTools::getPostFieldValue('dateF', null)){
+        if(!BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
         }
         
@@ -222,7 +222,7 @@ GROUP BY categorie;');
         $panels['Repartition Capital CCA'] = array('content'=>$this->renderCapitalCCA(), 'xs'=>12,'sm'=>8,'md'=>8);
         
         
-        return BimpTools::getPostFieldValue('dateD').$this->renderPanels($panels);
+        return $this->renderPanels($panels);
     }
     
     public function renderPanels($panels, $xsD=6, $smD=4, $mdD=4, $open = 1){

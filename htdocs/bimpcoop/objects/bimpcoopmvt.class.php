@@ -236,21 +236,21 @@ GROUP BY categorie;');
                     $label = $bank[$ln->fk_account];
                     if($label == '')
                         $label = 'Banque '.$ln->fk_account;
-                    $tabInfoSolde['Solde '.$label] = $ln->solde;
+                    $tabInfoSolde['Mouvement '.$label] = $ln->solde;
                     $tot += $ln->solde;
                 }
             }
             if(BimpTools::getPostFieldValue('ajPret', 0) == 1){
-                $tabInfoSolde['Solde Banque POP'] -= 1446.38;
+                $tabInfoSolde['Mouvement Banque POP'] -= 1446.38;
                 $tot -= 1446.38;
-                $tabInfoSolde['Solde NEF'] -= 1430.73;
+                $tabInfoSolde['Mouvement NEF'] -= 1430.73;
                 $tot -= 1430.73;
             }
 
-            if(!BimpTools::getPostFieldValue('dateF', null)){
-                $tabInfoSolde['Solde Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
-                $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
-            }
+//            if(!BimpTools::getPostFieldValue('dateF', null)){
+//                $tabInfoSolde['Mouvement Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
+//                $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
+//            }
             $tabInfoSolde[''] = '';
             $tabInfoSolde['TOTAL'] = $tot;
             $tabInfoSolde[' '] = '';

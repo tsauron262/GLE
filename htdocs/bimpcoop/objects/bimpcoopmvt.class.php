@@ -155,6 +155,7 @@ WHERE value > 0'.
         
         //depensse (stat achat)
         $tabInfoD = array();
+        $tabInfoAPrevoir = array();
         $sql = $db->query('SELECT a_product_ef.categorie AS categorie, SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
 FROM '.MAIN_DB_PREFIX.'facture_fourn_det a
 LEFT JOIN '.MAIN_DB_PREFIX.'facture_fourn f ON f.rowid = a.fk_facture_fourn
@@ -185,6 +186,34 @@ WHERE value < 0'.
                 if($label == '')
                     $label = 'Categ inconnue '.$ln->categorie;
                 $tabInfoD[$label] += -$ln->tot;
+            }
+        }
+        
+        
+        
+        $sql = $db->query('SELECT SUM(total_ttc) as tot, categorie
+FROM '.MAIN_DB_PREFIX.'expensereport e LEFT JOIN '.MAIN_DB_PREFIX.'expensereport_extrafields le ON le.fk_object = e.rowid WHERE paid = 1 '.
+                (BimpTools::getPostFieldValue('dateD', null)? ' AND date_approve > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+                (BimpTools::getPostFieldValue('dateF', null)? ' AND date_approve < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+' GROUP BY categorie;');
+        while($ln = $db->fetch_object($sql)){
+            if($ln->tot != 0){
+                $label = $categ[$ln->categorie];
+                if($label == '')
+                    $label = 'Categ inconnue '.$ln->categorie;
+                $tabInfoD[$label] += -$ln->tot;
+            }
+        }
+        
+        
+        $sql = $db->query('SELECT SUM(total_ttc) as tot, categorie
+FROM '.MAIN_DB_PREFIX.'expensereport e LEFT JOIN '.MAIN_DB_PREFIX.'expensereport_extrafields le ON le.fk_object = e.rowid WHERE paid = 0  GROUP BY categorie;');
+        while($ln = $db->fetch_object($sql)){
+            if($ln->tot != 0){
+                $label = $categ[$ln->categorie];
+                if($label == '')
+                    $label = 'Categ inconnue '.$ln->categorie;
+                $tabInfoAPrevoir[$label] += -$ln->tot;
             }
         }
         
@@ -305,6 +334,7 @@ WHERE value < 0'.
         
         $panels['Compta']['Recette'] = $this->traiteTab($tabInfoR);
         $panels['Compta']['Dépences'] = $this->traiteTab($tabInfoD);
+        $panels['Compta']['A prevoir'] = $this->traiteTab($tabInfoAPrevoir);
         
         
         

@@ -127,7 +127,9 @@ ORDER BY a.rowid DESC;');
                 $tabInfoR[$label] = $ln->tot;
             }
         }
-        $tabInfoR['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
+        if(is_null(BimpTools::getPostFieldValue('dateD', null)) && is_null(BimpTools::getPostFieldValue('dateF', null))){
+            $tabInfoR['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
+        }
         
         $sql = $db->query('SELECT SUM(amount_ttc) as tot FROM `'.MAIN_DB_PREFIX.'societe_remise_except` WHERE (fk_facture < 0 OR fk_facture IS NULL) AND fk_facture_source > 0'.
                 (BimpTools::getPostFieldValue('dateD', null)? ' AND datec > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
@@ -158,8 +160,10 @@ GROUP BY categorie;');
                 $tabInfoD[$label] = $ln->tot;
             }
         }
-        $tabInfoD['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
-        $tabInfoD['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
+        if(is_null(BimpTools::getPostFieldValue('dateD', null)) && is_null(BimpTools::getPostFieldValue('dateF', null))){
+            $tabInfoD['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
+            $tabInfoD['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
+        }
         
         
         
@@ -184,14 +188,20 @@ GROUP BY categorie;');
             $tabInfoSolde['Solde NEF'] -= 1430.73;
             $tot -= 1430.73;
         }
-        $tabInfoSolde['Solde Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
-        $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
+        
+        if(is_null(BimpTools::getPostFieldValue('dateF', null))){
+            $tabInfoSolde['Solde Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
+            $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
+        }
         $tabInfoSolde[''] = '';
         $tabInfoSolde['TOTAL'] = $tot;
         $tabInfoSolde[' '] = '';
         $tabInfoSolde['DEPUIS DEBUT'] = $tot - 47000;
         $tabInfoSolde['  '] = '';
-        $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
+        
+        if(is_null(BimpTools::getPostFieldValue('dateF', null))){
+            $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
+        }
         
         
         

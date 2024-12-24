@@ -279,7 +279,7 @@ FROM '.MAIN_DB_PREFIX.'expensereport e LEFT JOIN '.MAIN_DB_PREFIX.'expensereport
         
         
         
-        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">Simuler un prelevement d\'emprunt dans les soldes : '.BimpInput::renderInput('toggle', 'ajPret', BimpTools::getPostFieldValue('ajPret')).'<br/>Du'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).'<br/>Au'.BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form><br/>'.BimpRender::renderAlerts('Les notes de frais ne sont pas encore prise en compte ici', 'warning'), 'xs'=>12,'sm'=>12,'md'=>12);
+        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">Simuler un prelevement d\'emprunt dans les soldes : '.BimpInput::renderInput('toggle', 'ajPret', BimpTools::getPostFieldValue('ajPret')).'<br/>Du'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).'<br/>Au'.BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form><br/>'.BimpRender::renderAlerts('Les frais a prevoir ne sont pas encore bien prise en compte, seulement les note de frais non payée', 'warning'), 'xs'=>12,'sm'=>12,'md'=>12);
         $panels['Compta']['Soldes'] = $contentSolde;
         
         if(BimpTools::getPostFieldValue('dateD', null)){//mouvement sur comptes

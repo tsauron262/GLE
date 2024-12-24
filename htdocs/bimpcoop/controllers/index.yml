@@ -5,6 +5,9 @@ objects:
     bimpcoopmvt:
         instance:
             bimp_object: bimpcoopmvt
+    bimpcoopnonrep:
+        instance:
+            bimp_object: bimpcoopnonrep
     
 sections:
     - type: tabs
@@ -45,3 +48,10 @@ sections:
                   graph: 
                       object: bimpcoopmvt
                       name: rep3
+        non_rep:
+            label: Non repertoriées
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: bimpcoopnonrep

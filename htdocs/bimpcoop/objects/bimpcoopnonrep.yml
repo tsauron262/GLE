@@ -1,0 +1,147 @@
+table: bimp_coop_nonrep
+
+labels: 
+    name: Non repertorié
+    name_plur: Non repertoriés
+    is_female: 1
+    
+objects:
+    
+fields: 
+    date: 
+        label: Date
+        type: date
+#    dateV: 
+#        label: Date de valeur
+#        type: date
+    value:
+        label: Montant opération
+        type: money
+    info: 
+        label: Info
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+    categorie:
+        label: Catégorie
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - categorie
+        values:
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - categorie
+    
+    
+forms: 
+    create_paiement:
+        rows: 
+            bank:
+                custom: 1
+                label: Compte bancaire
+                input_name: id_account
+                input: 
+                    type: select_mysoc_account
+                value: 
+                    callback: getDefaultBankAccount
+            mode:
+              custom: 1
+              label: Mode de paiement
+              input_name: id_mode_paiement
+              required: 0
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
+                
+   
+#list_cols:
+#    id_paiement:
+#        custom: 1
+#        value: 
+#            callback: displayPaiement   
+lists_cols: 
+    id_paiement2: 
+        label: Paiement
+        value: 
+            callback: displayPaiement
+            
+lists: 
+    default: 
+        title: Mouvements de fond
+        icon: fas_percent
+        configurable: 0
+        enable_search: 1
+        pagination: 0
+        checkboxes: 1
+        add_btn: 1
+        has_total: 1
+        add_form_name: default
+        edit_btn: 1
+        delete_btn: 1
+        total_row: 1
+        n: 0
+        cols:  
+            date: 
+            value:
+            info:
+            categorie:
+                
+        
+            
+#graph:
+#    rep:
+#        mode: doughnut
+#        title: Repartition Capital
+##        xDateConfig:
+##            field: date
+##            date1: 1
+##            date2: 2
+##            def: 1year
+#        y: €
+#        use_k: 1
+#        yConfig:
+#            fields:
+#                callback: getFieldsGraphRep
+#    rep2:
+#        mode: doughnut
+#        title: Repartition CCA
+##        xDateConfig:
+##            field: date
+##            date1: 1
+##            date2: 2
+##            def: 1year
+#        y: €
+#        use_k: 1
+#        yConfig:
+#            fields:
+#                callback: 
+#                    method: getFieldsGraphRep
+#                    params: 
+#                        - 2
+#    rep3:
+#        mode: doughnut
+#        title: Repartition CCA Urgence
+##        xDateConfig:
+##            field: date
+##            date1: 1
+##            date2: 2
+##            def: 1year
+#        y: €
+#        use_k: 1
+#        yConfig:
+#            fields:
+#                callback: 
+#                    method: getFieldsGraphRep
+#                    params: 
+#                        - 2
+#                        - URGENCE

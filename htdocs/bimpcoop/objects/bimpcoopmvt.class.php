@@ -126,6 +126,21 @@ ORDER BY a.rowid DESC;');
                 $tabInfoR[$label] = $ln->tot;
             }
         }
+        
+        $sql = $db->query('SELECT categorie AS categorie,  SUM(value) AS tot
+FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep a
+WHERE value > 0'.
+                (BimpTools::getPostFieldValue('dateD', null)? ' AND date > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+                (BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+' GROUP BY categorie;');
+        while($ln = $db->fetch_object($sql)){
+            if($ln->tot != 0){
+                $label = $categ[$ln->categorie];
+                if($label == '')
+                    $label = 'Categ inconnue '.$ln->categorie;
+                $tabInfoR[$label] += $ln->tot;
+            }
+        }
         if(!BimpTools::getPostFieldValue('dateD', null) && !BimpTools::getPostFieldValue('dateF', null)){
             $tabInfoR['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
         }
@@ -158,6 +173,21 @@ GROUP BY categorie;');
                 if($label == '')
                     $label = 'Categ inconnue '.$ln->categorie;
                 $tabInfoD[$label] = $ln->tot;
+            }
+        }
+        
+        $sql = $db->query('SELECT categorie AS categorie,  SUM(value) AS tot
+FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep a
+WHERE value < 0'.
+                (BimpTools::getPostFieldValue('dateD', null)? ' AND date > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+                (BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+' GROUP BY categorie;');
+        while($ln = $db->fetch_object($sql)){
+            if($ln->tot != 0){
+                $label = $categ[$ln->categorie];
+                if($label == '')
+                    $label = 'Categ inconnue '.$ln->categorie;
+                $tabInfoD[$label] += -$ln->tot;
             }
         }
         if(!BimpTools::getPostFieldValue('dateD', null) && !BimpTools::getPostFieldValue('dateF', null)){

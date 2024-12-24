@@ -254,13 +254,6 @@ GROUP BY categorie;');
             $tabInfoSolde[''] = '';
             $tabInfoSolde['TOTAL'] = $tot;
             $tabInfoSolde[' '] = '';
-            $tabInfoSolde['DEPUIS DEBUT'] = $tot - 47000;
-            $tabInfoSolde['  '] = '';
-
-            if(!BimpTools::getPostFieldValue('dateF', null)){
-                $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
-            }
-
 
 
 

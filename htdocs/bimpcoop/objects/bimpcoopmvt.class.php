@@ -135,7 +135,8 @@ ORDER BY a.rowid DESC;');
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND datec < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
 '');
         while($ln = $db->fetch_object($sql)){
-            $tabInfoR['Acompte'] += $ln->tot;
+            if($ln->tot != 0)
+                $tabInfoR['Acompte'] += $ln->tot;
         }
         
         

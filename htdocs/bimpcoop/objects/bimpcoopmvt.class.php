@@ -82,7 +82,6 @@ class Bimpcoopmvt extends BimpObject
         $panels = array();
         
         
-        $tabInfoSolde = array();
         
         
         //bank
@@ -176,6 +175,8 @@ GROUP BY categorie;');
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND datev < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
                  ' GROUP BY fk_account');
         $tot = 0;
+        
+        $tabInfoSolde = array();
         while($ln = $db->fetch_object($sql)){
             if($ln->solde != 0){
                 $label = $bank[$ln->fk_account];
@@ -185,7 +186,7 @@ GROUP BY categorie;');
                 $tot += $ln->solde;
             }
         }
-        if(GETPOST('ajPret') == 1){
+        if(BimpTools::getPostFieldValue('ajPret', 0) == 1){
             $tabInfoSolde['Solde Banque POP'] -= 1446.38;
             $tot -= 1446.38;
             $tabInfoSolde['Solde NEF'] -= 1430.73;
@@ -214,8 +215,64 @@ GROUP BY categorie;');
             $contentSolde .= '<tr><th>'.$nom.'</th><td>'.BimpTools::displayMoneyValue($val).'</td></tr>';
         }
         $contentSolde .= '</table>';
-        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form>', 'xs'=>12,'sm'=>12,'md'=>12);
+        
+        
+        
+        
+        
+        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">Simuler un prelevement d\'emprunt dans les soldes : '.BimpInput::renderInput('toggle', 'ajPret', BimpTools::getPostFieldValue('ajPret')).'<br/>Du'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).'<br/>Au'.BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form><br/>'.BimpRender::renderAlerts('Attention en cas d\'utilisation des filtres de dates les montant non rentré en compta serront ignorées', 'warning'), 'xs'=>12,'sm'=>12,'md'=>12);
         $panels['Compta']['Soldes'] = $contentSolde;
+        
+        if(BimpTools::getPostFieldValue('dateD', null)){//mouvement sur comptes
+            $tabInfoSolde = array();
+             $sql = $db->query('SELECT SUM(amount)as solde, fk_account FROM '.MAIN_DB_PREFIX.'bank'
+                    . ' WHERE 1 '.
+                    (BimpTools::getPostFieldValue('dateD', null)? ' AND datev > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+                    (BimpTools::getPostFieldValue('dateF', null)? ' AND datev < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+                     ' GROUP BY fk_account');
+            $tot = 0;
+            while($ln = $db->fetch_object($sql)){
+                if($ln->solde != 0){
+                    $label = $bank[$ln->fk_account];
+                    if($label == '')
+                        $label = 'Banque '.$ln->fk_account;
+                    $tabInfoSolde['Solde '.$label] = $ln->solde;
+                    $tot += $ln->solde;
+                }
+            }
+            if(BimpTools::getPostFieldValue('ajPret', 0) == 1){
+                $tabInfoSolde['Solde Banque POP'] -= 1446.38;
+                $tot -= 1446.38;
+                $tabInfoSolde['Solde NEF'] -= 1430.73;
+                $tot -= 1430.73;
+            }
+
+            if(!BimpTools::getPostFieldValue('dateF', null)){
+                $tabInfoSolde['Solde Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
+                $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
+            }
+            $tabInfoSolde[''] = '';
+            $tabInfoSolde['TOTAL'] = $tot;
+            $tabInfoSolde[' '] = '';
+            $tabInfoSolde['DEPUIS DEBUT'] = $tot - 47000;
+            $tabInfoSolde['  '] = '';
+
+            if(!BimpTools::getPostFieldValue('dateF', null)){
+                $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
+            }
+
+
+
+
+            $contentSolde = '<table class="bimp_list_table">';
+            foreach($tabInfoSolde as $nom => $val){
+                $contentSolde .= '<tr><th>'.$nom.'</th><td>'.BimpTools::displayMoneyValue($val).'</td></tr>';
+            }
+            $contentSolde .= '</table>';
+            $panels['Compta']['Mouvement compte'] = $contentSolde;
+        }
+        
+        
         
         $panels['Compta']['Recette'] = $this->traiteTab($tabInfoR);
         $panels['Compta']['Dépences'] = $this->traiteTab($tabInfoD);

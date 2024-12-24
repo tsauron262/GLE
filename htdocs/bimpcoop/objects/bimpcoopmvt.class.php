@@ -171,7 +171,10 @@ GROUP BY categorie;');
         
         
         
-        $sql = $db->query('SELECT SUM(amount)as solde, fk_account FROM '.MAIN_DB_PREFIX.'bank GROUP BY fk_account');
+        $sql = $db->query('SELECT SUM(amount)as solde, fk_account FROM '.MAIN_DB_PREFIX.'bank'
+                . 'WHERE '.
+                (BimpTools::getPostFieldValue('dateF', null)? ' AND datev < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+                 ' GROUP BY fk_account');
         $tot = 0;
         while($ln = $db->fetch_object($sql)){
             if($ln->solde != 0){

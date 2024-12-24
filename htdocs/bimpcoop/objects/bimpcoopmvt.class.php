@@ -201,7 +201,7 @@ FROM '.MAIN_DB_PREFIX.'expensereport e LEFT JOIN '.MAIN_DB_PREFIX.'expensereport
                 $label = $categ[$ln->categorie];
                 if($label == '')
                     $label = 'Categ inconnue '.$ln->categorie;
-                $tabInfoD[$label] += -$ln->tot;
+                $tabInfoD[$label] += $ln->tot;
             }
         }
         
@@ -213,7 +213,7 @@ FROM '.MAIN_DB_PREFIX.'expensereport e LEFT JOIN '.MAIN_DB_PREFIX.'expensereport
                 $label = $categ[$ln->categorie];
                 if($label == '')
                     $label = 'Categ inconnue '.$ln->categorie;
-                $tabInfoAPrevoir[$label] += -$ln->tot;
+                $tabInfoAPrevoir[$label] += $ln->tot;
             }
         }
         

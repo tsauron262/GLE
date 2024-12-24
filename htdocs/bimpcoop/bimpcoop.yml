@@ -1,17 +1,5 @@
 params: 
     # Principaux:
-    b_solde: 
-        label: Solde
-        def: '0'
-    b_travaux: 
-        label: Travaux
-        def: '0'
-    b_autre: 
-        label: Autre
-        def: '0'
-    b_loyer: 
-        label: Loyer
-        def: '0'
     b_previ: 
         label: Previsionelle a jour
         def: '0'

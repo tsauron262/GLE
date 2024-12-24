@@ -141,9 +141,6 @@ WHERE value > 0'.
                 $tabInfoR[$label] += $ln->tot;
             }
         }
-        if(!BimpTools::getPostFieldValue('dateD', null) && !BimpTools::getPostFieldValue('dateF', null)){
-            $tabInfoR['Location'] += BimpCore::getConf('b_loyer', 0, 'bimpcoop');
-        }
         
         $sql = $db->query('SELECT SUM(amount_ttc) as tot FROM `'.MAIN_DB_PREFIX.'societe_remise_except` WHERE (fk_facture < 0 OR fk_facture IS NULL) AND fk_facture_source > 0'.
                 (BimpTools::getPostFieldValue('dateD', null)? ' AND datec > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
@@ -190,10 +187,6 @@ WHERE value < 0'.
                 $tabInfoD[$label] += -$ln->tot;
             }
         }
-        if(!BimpTools::getPostFieldValue('dateD', null) && !BimpTools::getPostFieldValue('dateF', null)){
-            $tabInfoD['Travaux'] += BimpCore::getConf('b_travaux', 0, 'bimpcoop');
-            $tabInfoD['Divers'] += BimpCore::getConf('b_autre', 0, 'bimpcoop');
-        }
         
         
         
@@ -224,10 +217,16 @@ WHERE value < 0'.
             $tot -= 1430.73;
         }
         
-        if(!BimpTools::getPostFieldValue('dateF', null)){
-            $tabInfoSolde['Solde Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
-            $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
+        
+        $sql = $db->query('SELECT SUM(value) as solde FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep'
+                . ' WHERE 1 '.
+                (BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+                 '');
+        while($ln = $db->fetch_object($sql)){
+            $tabInfoSolde['Solde Bl'] =$ln->solde;
+            $tot += $ln->solde;
         }
+        
         $tabInfoSolde[''] = '';
         $tabInfoSolde['TOTAL'] = $tot;
         $tabInfoSolde[' '] = '';
@@ -251,7 +250,7 @@ WHERE value < 0'.
         
         
         
-        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">Simuler un prelevement d\'emprunt dans les soldes : '.BimpInput::renderInput('toggle', 'ajPret', BimpTools::getPostFieldValue('ajPret')).'<br/>Du'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).'<br/>Au'.BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form><br/>'.BimpRender::renderAlerts('Attention en cas d\'utilisation des filtres de dates les montant non rentré en compta serront ignorées', 'warning'), 'xs'=>12,'sm'=>12,'md'=>12);
+        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">Simuler un prelevement d\'emprunt dans les soldes : '.BimpInput::renderInput('toggle', 'ajPret', BimpTools::getPostFieldValue('ajPret')).'<br/>Du'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).'<br/>Au'.BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form><br/>'.BimpRender::renderAlerts('Les notes de frais ne sont pas encore prise en compte ici', 'warning'), 'xs'=>12,'sm'=>12,'md'=>12);
         $panels['Compta']['Soldes'] = $contentSolde;
         
         if(BimpTools::getPostFieldValue('dateD', null)){//mouvement sur comptes
@@ -277,11 +276,17 @@ WHERE value < 0'.
                 $tabInfoSolde['Mouvement NEF'] -= 1430.73;
                 $tot -= 1430.73;
             }
-
-//            if(!BimpTools::getPostFieldValue('dateF', null)){
-//                $tabInfoSolde['Mouvement Bl'] = BimpCore::getConf('b_solde', 0, 'bimpcoop');
-//                $tot += BimpCore::getConf('b_solde', 0, 'bimpcoop');
-//            }
+            
+            $sql = $db->query('SELECT SUM(value) as solde FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep'
+                    . ' WHERE 1 '.
+                    (BimpTools::getPostFieldValue('dateD', null)? ' AND date > "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+                    (BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+                     '');
+            while($ln = $db->fetch_object($sql)){
+                $tabInfoSolde['Solde Bl'] =$ln->solde;
+                $tot += $ln->solde;
+            }
+            
             $tabInfoSolde[''] = '';
             $tabInfoSolde['TOTAL'] = $tot;
             $tabInfoSolde[' '] = '';

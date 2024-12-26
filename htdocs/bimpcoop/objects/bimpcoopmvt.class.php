@@ -52,6 +52,14 @@ class Bimpcoopmvt extends BimpObject
                 $totals[$ln->type] = BimpTools::displayMoneyValue($ln->value);
             }
         }
+        $totUrg = 0;
+        $sql = $db->query('SELECT SUM(value) as value, fk_user, type FROM '.MAIN_DB_PREFIX.'bimp_coop_mvt WHERE info LIKE "urgence" AND type = 2;');
+        while ($ln = $db->fetch_object($sql)){
+            $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $ln->fk_user);
+            if($ln->value != 0){
+                $totUrg = BimpTools::displayMoneyValue($ln->value);
+            }
+        }
 //        echo '<pre>';
 //        print_r($rows);die;
         
@@ -72,7 +80,7 @@ class Bimpcoopmvt extends BimpObject
                             'searchable'  => true,
                             'sortable'    => true,
                             'search_mode' => 'show'
-            )).'TOTAL : '.$totals[2], 'xs'=>12,'sm'=>12,'md'=>6);
+            )).'TOTAL : '.$totals[2].'<br/>Dont '.$totUrg.' de compte d\'urgence', 'xs'=>12,'sm'=>12,'md'=>6);
         
         return $panels;
     }

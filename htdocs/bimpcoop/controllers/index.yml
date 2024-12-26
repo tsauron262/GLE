@@ -12,7 +12,7 @@ objects:
 sections:
     - type: tabs
       tabs: 
-        stat:
+        default:
             label: Stats
             sections:
                 - type: custom

@@ -3,3 +3,6 @@ params:
     b_previ: 
         label: Previsionelle a jour
         def: '0'
+    b_comment: 
+        label: Commentaire
+        def: 'Les frais a prevoir ne sont pas encore bien prise en compte, seulement les note de frais non payée'

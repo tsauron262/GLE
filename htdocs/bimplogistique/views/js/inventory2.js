@@ -7,11 +7,13 @@ function insertProduct(input, quantity) {
     }, null, {
         processing_msg: 'Insertion en cours',
         success: function (result, bimpAjax) {
-            $("input[name=search_insert_line]").val('');
-            $("input[name=search_insert_line]").focus();
-            $("input[name=insert_quantity]").val(1);
-            playBipOk();
-            triggerObjectChange('bimplogistique', 'InventoryLine2');
+            setTimeout(function(){
+                $("input[name=search_insert_line]").val('');
+                $("input[name=search_insert_line]").focus();
+                $("input[name=insert_quantity]").val(1);
+                playBipOk();
+                triggerObjectChange('bimplogistique', 'InventoryLine2');
+            }, 1000);
         }, error: function(result, bimpAjax) {
             playBipError();
         }

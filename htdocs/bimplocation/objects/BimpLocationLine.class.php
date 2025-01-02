@@ -895,19 +895,20 @@ class BimpLocationLine extends BimpObject
             if (!BimpObject::objectLoaded($forfait)) {
                 $errors[] = 'Le forfait #' . $this->getData('id_forfait') . ' n\'existe plus';
             } else {
-                if (!count($errors) && (int) BimpCore::getConf('use_price_rules') && (!$this->isLoaded() ||
+                if (!count($errors)  && (!$this->isLoaded() ||
                         (int) $this->getData('id_forfait') !== (int) $this->getInitData('id_forfait') ||
                         $this->getData('date_from') !== $this->getInitData('date_from') ||
                         $this->getData('date_to') !== $this->getInitData('date_to') ||
                         $this->getData('fac_date_from') !== $this->getInitData('fac_date_from') ||
                         $this->getData('fac_date_to') !== $this->getInitData('fac_date_to'))) {
+                    if((int) BimpCore::getConf('use_price_rules')){
+                        BimpObject::loadClass('bimpcore', 'Bimp_ProductPriceRule');
 
-                    BimpObject::loadClass('bimpcore', 'Bimp_ProductPriceRule');
-                    
-                    $this->set('pu_ht', Bimp_ProductPriceRule::getBestPriceForProduct($forfait, array('qty' => $this->getQty())));
-                }
-                else{
-                    $this->set('pu_ht', $forfait->getData('price'));
+                        $this->set('pu_ht', Bimp_ProductPriceRule::getBestPriceForProduct($forfait, array('qty' => $this->getQty())));
+                    }
+                    else{
+                        $this->set('pu_ht', $forfait->getData('price'));
+                    }
                 }
 
                 if (!(float) $this->getData('tva_tx')) {

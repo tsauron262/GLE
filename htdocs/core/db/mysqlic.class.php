@@ -223,6 +223,8 @@ class DoliDBMysqliC extends DoliDBMysqli
         elseif (!$this->discover_svc()) {
 //            $this->error = "Cannot discover database servers";
             dol_syslog(get_class($this) . "::DoliDBMysqliC Connect error: Cannot discover database servers", LOG_ERR);
+            if(class_exists('BimpCore'))
+                BimpCore::addlog('consul ne repond pas utilisation de mysqli', Bimp_Log::BIMP_LOG_ERREUR);
             return parent::__construct('mysqli', $host, $user, $pass, $name, $port);
         }
         else{
@@ -287,7 +289,7 @@ class DoliDBMysqliC extends DoliDBMysqli
 
         foreach ($this->CONSUL_SERVERS as $consul_server) {
             $full_url = $consul_server . self::CONSUL_PATH . $this->CONSUL_SERVICE_DATABASE . "?filter=" . urlencode($req_filter);
-            $json_string = file_get_contents($full_url);
+            $json_string = file_get_contents($full_url, 0, stream_context_create(["http"=>["timeout"=>3]]));
             if ($json_string === FALSE)
                 continue;
             $json_obj = json_decode($json_string);

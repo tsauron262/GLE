@@ -1693,7 +1693,7 @@ searches:
         fields_search: 
             - a.label
             - a.ref
-            - a.barcode
+#            - a.barcode
             - fp.ref_fourn
         joins:
             fp: 

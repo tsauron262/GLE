@@ -62,6 +62,13 @@ function initEvents2() {
                         insertProduct(input, quantity);
                 }
             });
+            
+            $inputs_selector.on('keypress', function (event) {
+                event.stopPropagation();
+            });
+            $inputs_selector.on('keyup', function (event) {
+                event.stopPropagation();
+            });
         });
     });
 }

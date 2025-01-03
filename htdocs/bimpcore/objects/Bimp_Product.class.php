@@ -4646,6 +4646,10 @@ class Bimp_Product extends BimpObject
             if ($this->dol_object->updatePrice($price_base, $price_base_type, $user, $tva_tx) < 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour du prix du produit');
             }
+            else{
+                global $user;
+                $this->dol_object->update($this->dol_object->id, $user);
+            }
         }
 
         $this->hydrateFromDolObject();

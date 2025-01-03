@@ -82,9 +82,10 @@ lists:
        delete_btn:
            callback: isDeletable
        bulk_actions:
-            delete: 
-                icon: fas_trash-alt
-                onclick: deleteSelectedObjects('list_id', $(this))
+            - label: Supprimer les lignes sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
        sort_field: id
        sort_way: desc
        n: 50

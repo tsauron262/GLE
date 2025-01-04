@@ -1314,7 +1314,7 @@ AND i.id=' . (int) $this->id;
             foreach ($package_prod_qty as $id_package => $prod_qty) {
 
                 foreach ($prod_qty as $id_product => $data) {
-                    if($id_product % 3 == 1){
+                    if($id_product % 3 == 2){
 
                     if ((int) $data['diff'] == 0)
                         continue;

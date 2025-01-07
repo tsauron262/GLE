@@ -28,7 +28,7 @@ if (!$user->admin) {
 }
 
 $cl = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', 2258284);
-$cl->checkQties();
+$cl->checkQties(true);
 
 echo 'done';
 

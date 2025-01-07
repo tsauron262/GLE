@@ -242,6 +242,10 @@ if ($action == 'builddoc'/* && $user->hasRight('banque', 'cheque')*/) {
         if (!$user->hasRight('banque', 'cheque')) {
             setEventMessages('Vous n\'avez pas la permission pour cette opération', array(), 'errors');
         } else {
+            if ($user->login === 'f.martinez') {
+                die('ICI');    
+            }
+            
             $result = $object->fetch($id);
 
            // Save last template used to generate document

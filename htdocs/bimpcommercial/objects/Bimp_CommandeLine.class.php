@@ -7977,7 +7977,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
-    public function checkQties($debug = false)
+    public function checkQties()
     {
         if ($this->isLoaded()) {
             $commande = $this->getParentInstance();
@@ -8032,11 +8032,6 @@ class Bimp_CommandeLine extends ObjectLine
                             $qty_billed_not_shipped = 0;
                         else
                             $qty_shipped_not_billed = 0;
-                    }
-                    
-                    if ($debug) {
-                        echo 'Shipped : ' . $shipped_qty.'<br/>';
-                        echo 'Billed : ' . $billed_qty.'<br/>';
                     }
 
                     if ($shipped_qty !== (float) $this->getData('qty_shipped')) {

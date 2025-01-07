@@ -18,6 +18,7 @@ forms:
               data_type: percent
               input: 
                   type: text
+              decimals: 4
             - custom: 1
               label: Pour annulation
               input_name: annul

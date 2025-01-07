@@ -682,6 +682,7 @@ if ($id) {
 			print $form->editfieldval('SubledgerAccount', 'subledger_account', $object->subledger_account, $object, (!$alreadyaccounted && $permissiontoadd), 'string', '', null, null, '', 1, 'lengthAccounta');
 		}
 	} else {
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/accounting.lib.php';
 		print length_accounta($object->subledger_account);
 	}
 	print '</td></tr>';

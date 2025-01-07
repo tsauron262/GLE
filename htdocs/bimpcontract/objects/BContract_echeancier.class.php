@@ -1528,6 +1528,7 @@ class BContract_echeancier extends BimpObject
                     $new_first_line->pu_ht = $total_ht;
                     $new_first_line->tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
                     $new_first_line->pa_ht = $pa_ht;
+                    $new_first_line->product_type = 1;
 
                     $line_warnings = array();
                     $line_errors = $new_first_line->create($line_warnings, true);

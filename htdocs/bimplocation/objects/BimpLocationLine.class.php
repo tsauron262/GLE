@@ -209,18 +209,17 @@ class BimpLocationLine extends BimpObject
                 $period_data = BimpTools::getDatesIntervalData($fac_from, $fac_to, false, true);
                 $this->amounts['qty'] = $period_data['full_days'];
             }
-            
-            if(BimpCore::getConf('round_price', 0, 'bimplocation')){
+
+            if (BimpCore::getConf('round_price', 0, 'bimplocation')) {
                 $tempTotTtc = $this->getData('pu_ht') * $this->amounts['qty'] * (1 + ($this->getData('tva_tx') / 100));
                 $difToArrondieHt = (round($tempTotTtc) - $tempTotTtc) / (1 + ($this->getData('tva_tx') / 100));
                 $puCorrigé = (float) $this->getData('pu_ht') + ($difToArrondieHt / $this->amounts['qty']);
-            }
-            else{
+            } else {
                 $puCorrigé = $this->getData('pu_ht');
             }
-            
-            
-            
+
+
+
 
             $this->amounts['pu_ht'] = $this->amounts['pu_ht_remise'] = (float) $puCorrigé;
             $this->amounts['remise'] = (float) $this->getData('remise');
@@ -903,10 +902,9 @@ class BimpLocationLine extends BimpObject
                         $this->getData('fac_date_to') !== $this->getInitData('fac_date_to'))) {
 
                     BimpObject::loadClass('bimpcore', 'Bimp_ProductPriceRule');
-                    
+
                     $this->set('pu_ht', Bimp_ProductPriceRule::getBestPriceForProduct($forfait, array('qty' => $this->getQty())));
-                }
-                else{
+                } else {
                     $this->set('pu_ht', $forfait->getData('price'));
                 }
 
@@ -921,10 +919,10 @@ class BimpLocationLine extends BimpObject
                 $this->isEquipmentAvailable(0, '', '', $location->getData('id_entrepot'), $errors);
             }
         }
-        
+
         $remiseTtc = BimpTools::getValue('remiseTtc', 0);
-        if($remiseTtc > 0){
-            $remisePourcent = $remiseTtc / (($this->getData('pu_ht') * (100+$this->getData('tva_tx')))/ 100)*100;
+        if ($remiseTtc > 0) {
+            $remisePourcent = $remiseTtc / (($this->getData('pu_ht') * (100 + $this->getData('tva_tx'))) / 100) * 100;
             $this->set('remise', $remisePourcent);
         }
 

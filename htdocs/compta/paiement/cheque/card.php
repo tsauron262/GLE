@@ -238,38 +238,30 @@ if ($action == 'confirm_reject_check' && $confirm == 'yes' && $user->hasRight('b
 	}
 }
 
-if ($action == 'builddoc'/* && $user->hasRight('banque', 'cheque')*/) {
-        if (!$user->hasRight('banque', 'cheque')) {
-            setEventMessages('Vous n\'avez pas la permission pour cette opération', array(), 'errors');
-        } else {
-            if ($user->login === 'f.martinez') {
-                die('ICI');    
-            }
-            
-            $result = $object->fetch($id);
+if ($action == 'builddoc' && $user->hasRight('banque', 'cheque')) {
+	$result = $object->fetch($id);
 
-           // Save last template used to generate document
-           //if (GETPOST('model')) $object->setDocModel($user, GETPOST('model','alpha'));
+	// Save last template used to generate document
+	//if (GETPOST('model')) $object->setDocModel($user, GETPOST('model','alpha'));
 
-           $outputlangs = $langs;
-           $newlang = '';
-           if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
-                   $newlang = GETPOST('lang_id', 'aZ09');
-           }
-           //if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newlang)) $newlang=$object->client->default_lang;
-           if (!empty($newlang)) {
-                   $outputlangs = new Translate("", $conf);
-                   $outputlangs->setDefaultLang($newlang);
-           }
-           $result = $object->generatePdf(GETPOST("model"), $outputlangs);
-           if ($result <= 0) {
-                   dol_print_error($db, $object->error);
-                   exit;
-           } else {
-                   header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id.(!getDolGlobalString('MAIN_JUMP_TAG') ? '' : '#builddoc'));
-                   exit;
-           }   
-        }
+	$outputlangs = $langs;
+	$newlang = '';
+	if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
+		$newlang = GETPOST('lang_id', 'aZ09');
+	}
+	//if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newlang)) $newlang=$object->client->default_lang;
+	if (!empty($newlang)) {
+		$outputlangs = new Translate("", $conf);
+		$outputlangs->setDefaultLang($newlang);
+	}
+	$result = $object->generatePdf(GETPOST("model"), $outputlangs);
+	if ($result <= 0) {
+		dol_print_error($db, $object->error);
+		exit;
+	} else {
+		header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id.(!getDolGlobalString('MAIN_JUMP_TAG') ? '' : '#builddoc'));
+		exit;
+	}
 } elseif ($action == 'remove_file' && $user->hasRight('banque', 'cheque')) {
 	// Remove file in doc form
 	if ($object->fetch($id) > 0) {

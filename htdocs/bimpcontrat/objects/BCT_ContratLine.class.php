@@ -2489,7 +2489,7 @@ class BCT_ContratLine extends BimpObject
                 $contrat_lines = $contrat->getLines('abo', false, $filters);
 
                 foreach ($contrat_lines as $line) {
-                    if (!$line->isActive() || $line->isResiliated()) {
+                    if (/*!$line->isActive() || */$line->isResiliated()) {
                         continue;
                     }
 

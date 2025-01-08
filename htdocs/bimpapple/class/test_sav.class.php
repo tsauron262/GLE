@@ -109,10 +109,20 @@ class test_sav
         $this->fetchLocalise();
         
         $errors = array();
+        
+        $dt_reserved = new DateTime();
+        $dt_reserved->sub('P1D');
+        $date_reserved = $dt_reserved->format('Y-m-d');
+        
         $sql = $this->db->query('SELECT DISTINCT a.id as id
 FROM llx_bs_sav a
-LEFT JOIN llx_be_equipment a___equipment ON a___equipment.id = a.id_equipment
-WHERE  a.status IN (-1,0,1,2,3,4,5,6,7) AND a___equipment.status_gsx IN ("3")');
+LEFT JOIN llx_be_equipment eq ON eq.id = a.id_equipment
+WHERE eq.status_gsx = 3 AND (
+a.status IN (0,1,2,3,4,5,6,7) OR
+(a.status = -1 AND a.date_create >= \'' . $date_reserved . ' 00:00:00\' AND a.date_crate <= \'' . $date_reserved . ' 23:59:59\')
+)');
+        
+        $ok = 0;
         while ($ln = $this->db->fetch_object($sql)) {
             $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
             $tmpErrors = $sav->sendMsg('localise');
@@ -121,7 +131,7 @@ WHERE  a.status IN (-1,0,1,2,3,4,5,6,7) AND a___equipment.status_gsx IN ("3")');
             BimpTools::merge_array($errors, $tmpErrors);
         }
 
-        $this->output .= 'Terminé ' . $ok . ' mail envoyée ' . print_r($errors, 1);
+        $this->output .= 'Terminé ' . $ok . ' mail envoyés ' . print_r($errors, 1);
         return 0;
     }
 
@@ -378,6 +388,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
     function fetchImeiPetit($nbParUser = 10)
     {
+        
         global $db;
 
         $sql = $db->query("SELECT MAX(u.rowid) as idUser, gsx_acti_token FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.`fk_object` and gsx_acti_token != '' GROUP by `gsx_acti_token`");

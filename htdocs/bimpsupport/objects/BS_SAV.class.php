@@ -4674,7 +4674,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                     $subject = " Important, à propos de la réparation de votre appareil";
 
-                    $mail_msg = 'Bonjour,<br/><br/>Votre appareil déposé sous le dossier <b>' . $this->getRef() . '</b>, ';
+                    $mail_msg = 'Bonjour,<br/><br/>Votre appareil enregistré sous le dossier <b>' . $this->getRef() . '</b>, ';
                     $mail_msg .= 'n° de série <b>' . $eq->getData('serial') . '</b>';
                     $mail_msg .= ' est toujours associé à votre compte Apple iCloud.<br/><br/>';
 

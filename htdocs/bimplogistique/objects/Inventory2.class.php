@@ -1314,6 +1314,7 @@ AND i.id=' . (int) $this->id;
             foreach ($package_prod_qty as $id_package => $prod_qty) {
 
                 foreach ($prod_qty as $id_product => $data) {
+                    if($id_product % 3 == 0){
 
                     if ((int) $data['diff'] == 0)
                         continue;
@@ -1381,6 +1382,7 @@ AND i.id=' . (int) $this->id;
                             $diff = -$data['diff'];
                             $errors = BimpTools::merge_array($errors, $package_vol->addProduct($id_product, $diff, $id_entrepot, $warnings, $code_mvt, $mvt_label, 'inventory2', $this->id));
                         }
+                    }
                     }
                 } // loop prod
             } // loop package

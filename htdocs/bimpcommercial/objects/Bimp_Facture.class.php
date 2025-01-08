@@ -3693,21 +3693,24 @@ class Bimp_Facture extends BimpComm
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le ' . BimpTools::printDate($this->dol_object->date_creation, 'strong');
 
-            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_creation_id);
             if (BimpObject::objectLoaded($user)) {
                 $html .= ' par&nbsp;&nbsp;' . $user->getLink();
             }
             $html .= '</div>';
 
             $status = (int) $this->getData('fk_statut');
-            if ($status >= 1 && (int) $this->dol_object->user_valid) {
+            if ($status >= 1) {
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée le ' . BimpTools::printDate($this->dol_object->date_validation, 'strong');
 
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid);
-                if (BimpObject::objectLoaded($user)) {
-                    $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+                if ((int) $this->dol_object->user_validation_id) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_validation_id);
+                    if (BimpObject::objectLoaded($user)) {
+                        $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+                    }
                 }
+                
                 $html .= '</div>';
             }
 

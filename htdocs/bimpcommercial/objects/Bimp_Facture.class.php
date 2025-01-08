@@ -3710,7 +3710,7 @@ class Bimp_Facture extends BimpComm
                         $html .= ' par&nbsp;&nbsp;' . $user->getLink();
                     }
                 }
-                
+
                 $html .= '</div>';
             }
 
@@ -3723,8 +3723,10 @@ class Bimp_Facture extends BimpComm
 
         $client = $this->getChildObject('client');
         if (BimpObject::objectLoaded($client)) {
-            if ($client->getData('msg_fact') != '')
-                $html .= BimpRender::renderAlerts('Message facturation : ' . $client->getData('msg_fact'));
+            if ($client->getData('msg_fact') != '') {
+                $html .= BimpRender::renderAlerts('Message facturation : ' . $client->getData('msg_fact'), 'warning');
+            }
+            
             $html .= '<div style="margin-top: 10px">';
             $html .= '<strong>Client: </strong>';
             $html .= $client->getLink();

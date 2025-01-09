@@ -5408,7 +5408,7 @@ class BCT_ContratLine extends BimpObject
                         if ($this->checkLinkedLine($errors)) {
                             $linked_line = $this->getChildObject('linked_line');
 
-                            if ((int) $linked_line->getData('statut') !== self::STATUS_ACTIVE) {
+                            if ((int) $linked_line->getData('statut') < self::STATUS_ACTIVE) {
                                 $errors[] = 'La ligne d\'abonnement liée n\'est pas active. Il n\'est pas possible d\'activer cet abonnement';
                             } else {
                                 $line_errors = $linked_line->validate();

@@ -44,11 +44,9 @@ class test_sav extends BimpCron
 
     function __construct($db)
     {
-        $this->db = $db;
-        require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-        require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
 
+        parent::__construct($db);
 //        $this->initGsx();
     }
 

@@ -2850,7 +2850,7 @@ class BimpTools
     
     public static function escapeForHtml($txt)
     {
-        $txt = str_replace("'", "\\\'", $txt);
+        $txt = str_replace("'", "\\'", $txt);
         $txt = self::htmlentities_array($txt);
         
         return $txt;

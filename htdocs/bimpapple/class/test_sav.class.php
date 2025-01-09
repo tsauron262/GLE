@@ -118,7 +118,7 @@ FROM llx_bs_sav a
 LEFT JOIN llx_be_equipment eq ON eq.id = a.id_equipment
 WHERE eq.status_gsx = 3 AND (
 a.status IN (0,1,2,3,4,5,6,7) OR
-(a.status = -1 AND a.date_create >= \'' . $date_reserved . ' 00:00:00\' AND a.date_crate <= \'' . $date_reserved . ' 23:59:59\')
+(a.status = -1 AND a.date_create >= \'' . $date_reserved . ' 00:00:00\' AND a.date_create <= \'' . $date_reserved . ' 23:59:59\')
 )');
 
         if (is_object($sql)) {

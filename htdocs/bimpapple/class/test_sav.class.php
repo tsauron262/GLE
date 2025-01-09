@@ -127,12 +127,12 @@ a.status IN (0,1,2,3,4,5,6,7) OR
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
                 if (BimpObject::objectLoaded($sav)) {
                     $this->output .= ($this->output ? '<br/>' : '') . 'SEND MSG SAV #' . $sav->id;
-                    $tmpErrors = $sav->sendMsg('localise');
-                    if (!count($tmpErrors)) {
+//                    $tmpErrors = $sav->sendMsg('localise');
+//                    if (!count($tmpErrors)) {
                         $ok++;
-                    } else {
-                        BimpTools::merge_array($errors, $tmpErrors);
-                    }
+//                    } else {
+//                        BimpTools::merge_array($errors, $tmpErrors);
+//                    }
                 }
             }
         } else {
@@ -424,7 +424,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
     {
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         $filtre = array();
-        $filtre['custom'] = array('custom' => 'status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))');
+        $filtre['custom'] = array('custom' => 'status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE a.status IN (-1,0,1,2,3,4,5,6,7))');
         $rows = $equipment->getList($filtre, 200, 1, 'id', 'desc', 'array', array('id', 'serial'));
 
         $this->fetchGsxInfo($rows);

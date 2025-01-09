@@ -105,7 +105,7 @@ class test_sav extends BimpCron
 
     function mailLocalise()
     {
-//        $this->fetchLocalise();
+        $this->fetchLocalise();
 
         $errors = array();
 
@@ -127,10 +127,12 @@ a.status IN (0,1,2,3,4,5,6,7) OR
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
                 if (BimpObject::objectLoaded($sav)) {
                     $this->output .= ($this->output ? '<br/>' : '') . 'SEND MSG SAV #' . $sav->id;
-                    //            $tmpErrors = $sav->sendMsg('localise');
-//            if (!count($tmpErrors))
-                    $ok++;
-//                BimpTools::merge_array($errors, $tmpErrors);
+                    $tmpErrors = $sav->sendMsg('localise');
+                    if (!count($tmpErrors)) {
+                        $ok++;
+                    } else {
+                        BimpTools::merge_array($errors, $tmpErrors);
+                    }
                 }
             }
         } else {

@@ -654,7 +654,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 if (!empty($values)) {
                     $onclick = $this->getJsActionOnclick('createInvoice', array(
                         'ref_supplier'      => BimpTools::escapeForHtml($this->getData('ref_supplier')),
-                        'libelle'           => $this->getData('libelle'),
+                        'libelle'           => BimpTools::escapeForHtml($this->getData('libelle')),
                         'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                         'id_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
                         'receptions'        => json_encode($values)

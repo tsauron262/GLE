@@ -121,7 +121,7 @@ a.status IN (0,1,2,3,4,5,6,7) OR
 (a.status = -1 AND a.date_create >= \'' . $date_reserved . ' 00:00:00\' AND a.date_crate <= \'' . $date_reserved . ' 23:59:59\')
 )');
 
-        if (!is_null($sql)) {
+        if (is_object($sql)) {
             $ok = 0;
             while ($ln = $this->db->fetch_object($sql)) {
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);

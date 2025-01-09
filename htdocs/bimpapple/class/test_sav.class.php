@@ -35,6 +35,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
 class test_sav extends BimpCron
 {
+
     public $nbErr = 0;
     public $nbOk = 0;
     public $nbMail = 0;
@@ -127,6 +128,7 @@ a.status IN (0,1,2,3,4,5,6,7) OR
             while ($ln = $this->db->fetch_object($sql)) {
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
                 if (BimpObject::objectLoaded($sav)) {
+                    $this->output .= ($this->output ? '<br/>' : '') . 'SEND MSG SAV #' . $sav->id;
                     //            $tmpErrors = $sav->sendMsg('localise');
 //            if (!count($tmpErrors))
                     $ok++;
@@ -137,7 +139,13 @@ a.status IN (0,1,2,3,4,5,6,7) OR
             $errors[] = 'ERR SQL - ' . $this->db->lasterror();
         }
 
-        $this->output .= 'Terminé ' . $ok . ' mail(s) envoyé(s) ' . print_r($errors, 1);
+        $this->output .= ($this->output ? '<br/><br/>' : '') . 'Terminé ' . $ok . ' mail(s) envoyé(s)';
+
+        if (count($errors)) {
+            $this->output .= 'Erreurs : <pre>';
+            $this->output .= print_r($errors, 1);
+            $this->output .= '</pre>';
+        }
         return 0;
     }
 

@@ -27,12 +27,6 @@ if (!$user->admin) {
     exit;
 }
 
-require_once DOL_DOCUMENT_ROOT .'/bimpapple/class/test_sav.class.php';
-
-$test = new test_sav($db);
-$test->mailLocalise();
-
-echo 'RES : ' . $test->output;
 
 echo '<br/>FIN';
 echo '</body></html>';

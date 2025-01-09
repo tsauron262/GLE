@@ -107,13 +107,13 @@ class test_sav
     function mailLocalise()
     {
         $this->fetchLocalise();
-        
+
         $errors = array();
-        
+
         $dt_reserved = new DateTime();
         $dt_reserved->sub('P1D');
         $date_reserved = $dt_reserved->format('Y-m-d');
-        
+
         $sql = $this->db->query('SELECT DISTINCT a.id as id
 FROM llx_bs_sav a
 LEFT JOIN llx_be_equipment eq ON eq.id = a.id_equipment
@@ -121,14 +121,20 @@ WHERE eq.status_gsx = 3 AND (
 a.status IN (0,1,2,3,4,5,6,7) OR
 (a.status = -1 AND a.date_create >= \'' . $date_reserved . ' 00:00:00\' AND a.date_crate <= \'' . $date_reserved . ' 23:59:59\')
 )');
-        
-        $ok = 0;
-        while ($ln = $this->db->fetch_object($sql)) {
-            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
-            $tmpErrors = $sav->sendMsg('localise');
-            if (!count($tmpErrors))
-                $ok++;
-            BimpTools::merge_array($errors, $tmpErrors);
+
+        if (!is_null($sql)) {
+            $ok = 0;
+            while ($ln = $this->db->fetch_object($sql)) {
+                $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
+                if (BimpObject::objectLoaded($sav)) {
+                    //            $tmpErrors = $sav->sendMsg('localise');
+//            if (!count($tmpErrors))
+                    $ok++;
+//                BimpTools::merge_array($errors, $tmpErrors);
+                }
+            }
+        } else {
+            $errors[] = 'ERR SQL - ' . $this->db->lasterror();
         }
 
         $this->output .= 'Terminé ' . $ok . ' mail envoyés ' . print_r($errors, 1);
@@ -151,10 +157,9 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
             $req .= " AND (s.status = 999 || (DATEDIFF(now(), s.date_terminer) > 5) && s.status >= 9)";
         } else
             $req .= " AND s.status = 9";
-        
-        global $conf;
-        $req .= " AND s.entity = ".$conf->entity;
 
+        global $conf;
+        $req .= " AND s.entity = " . $conf->entity;
 
         $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";
 
@@ -388,7 +393,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
     function fetchImeiPetit($nbParUser = 10)
     {
-        
+
         global $db;
 
         $sql = $db->query("SELECT MAX(u.rowid) as idUser, gsx_acti_token FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.`fk_object` and gsx_acti_token != '' GROUP by `gsx_acti_token`");
@@ -406,8 +411,9 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
         return 0;
     }
-    
-    function fetchLocalise(){
+
+    function fetchLocalise()
+    {
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         $filtre = array();
         $filtre['custom'] = array('custom' => 'status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))');
@@ -419,7 +425,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
     function fetchEquipmentsImei($nb = 1, $modeLabel = 0)
     {
         $errors = array();
-        
+
         if ($nb < 1)
             $nb = 1;
 
@@ -449,17 +455,16 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
         $this->fetchGsxInfo($rows);
 
-
         return 0;
     }
-    
-    
-    public function fetchGsxInfo($rows){
-        
+
+    public function fetchGsxInfo($rows)
+    {
+
         if (!class_exists('GSX_v2')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
         }
-        
+
         $gsx = GSX_v2::getInstance(true);
         $gsx->authenticate();
 
@@ -475,11 +480,11 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $r['id']);
                 $errorsEq = $equipment->majWithGsx();
 
-                $this->output .= $r['serial'].'<br/>';
+                $this->output .= $r['serial'] . '<br/>';
                 if (count($errorsEq)) {
 //                        print_r($errors);
                     $this->output .= 'Erreurs: <pre>' . print_r($errorsEq, 1) . '</pre>';
-                    if(isset($errorsEq[0]) && stripos($errorsEq[0], 'Un équipement existe') === false)
+                    if (isset($errorsEq[0]) && stripos($errorsEq[0], 'Un équipement existe') === false)
                         break;
                 }
                 $errors = BimpTools::merge_array($errors, $errorsEq);
@@ -487,7 +492,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                 $this->nbImei++;
             }
         }
-        
+
         if ($this->nbImei) {
             $this->output .= ' ' . $this->nbImei . ' n° equipements corrigé(s).';
         }

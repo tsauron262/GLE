@@ -107,7 +107,7 @@ class test_sav extends BimpCron
 
     function mailLocalise()
     {
-        $this->fetchLocalise();
+//        $this->fetchLocalise();
 
         $errors = array();
 

@@ -31,10 +31,10 @@ if (isset($_GET['actionTest'])) {
     llxFooter();
 }
 
-class test_sav
-{
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-    public $output = "";
+class test_sav extends BimpCron
+{
     public $nbErr = 0;
     public $nbOk = 0;
     public $nbMail = 0;
@@ -111,7 +111,7 @@ class test_sav
         $errors = array();
 
         $dt_reserved = new DateTime();
-        $dt_reserved->sub('P1D');
+        $dt_reserved->sub(new DateInterval('P1D'));
         $date_reserved = $dt_reserved->format('Y-m-d');
 
         $sql = $this->db->query('SELECT DISTINCT a.id as id
@@ -137,7 +137,7 @@ a.status IN (0,1,2,3,4,5,6,7) OR
             $errors[] = 'ERR SQL - ' . $this->db->lasterror();
         }
 
-        $this->output .= 'Terminé ' . $ok . ' mail envoyés ' . print_r($errors, 1);
+        $this->output .= 'Terminé ' . $ok . ' mail(s) envoyé(s) ' . print_r($errors, 1);
         return 0;
     }
 

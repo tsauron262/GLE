@@ -62,7 +62,7 @@ class BimpCore
     );
     public static $html_purifier = null;
 
-    // Initialisation: 
+    // Initialisation:
 
     public static function init()
     {
@@ -81,7 +81,7 @@ class BimpCore
                 self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
             }
 
-            // Traitements CSS : 
+            // Traitements CSS :
             if ($use_css_v2) {
                 if ($is_context_private) {
                     if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css')) {
@@ -110,7 +110,7 @@ class BimpCore
                 }
             }
 
-            // Traitements JS : 
+            // Traitements JS :
             if ($is_context_private) {
                 self::$files['js']['notification'] = '/bimpcore/views/js/notification.js';
             }
@@ -139,15 +139,15 @@ class BimpCore
             $layout->addCssFile(self::getFileUrl($css_file, true, false));
         }
 
-        // Ajout fichiers JS BimpCore: 
+        // Ajout fichiers JS BimpCore:
         foreach (self::$files['js'] as $js_file) {
             $layout->addJsFile(self::getFileUrl($js_file, true, false));
         }
 
-        // Ajouts variables JS: 
+        // Ajouts variables JS:
         $layout->addJsVars(self::getJsVars());
 
-        // Ajouts variables local: 
+        // Ajouts variables local:
         if (class_exists('Session')) {
             $layout->addJsLocalVars(array(
                 'bimp_hash' => Session::getHash()
@@ -263,7 +263,7 @@ class BimpCore
                         }
 
                         if (!file_exists(DOL_DOCUMENT_ROOT . '/' . $out_file)) {
-                            // Suppr du fichier existant: 
+                            // Suppr du fichier existant:
                             $dir = DOL_DOCUMENT_ROOT . '/' . $pathinfo['dirname'];
                             foreach (scandir($dir) as $f) {
                                 if (in_array($f, array('.', '..'))) {
@@ -311,7 +311,7 @@ class BimpCore
         return '';
     }
 
-    // Gestion Versions et mises à jours: 
+    // Gestion Versions et mises à jours:
 
     public static function checkSqlUpdates()
     {
@@ -628,7 +628,7 @@ class BimpCore
                     }
                 }
             }
-            
+
             foreach ($modules as $module) {
                 if (BimpCore::getVersion()) {
                     $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/sql';
@@ -662,7 +662,7 @@ class BimpCore
                     if (file_exists($dir) && is_dir($dir)) {
 
                         $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), 0);
-                        
+
                         $files = scandir($dir);
 
                         foreach ($files as $f) {
@@ -737,7 +737,7 @@ class BimpCore
         }
 
         if ($update) {
-            if (!empty($versions)) { // Pour éviter un écrasement... 
+            if (!empty($versions)) { // Pour éviter un écrasement...
                 $bdb->update('bimpcore_conf', array(
                     'value' => json_encode($versions)
                         ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
@@ -765,7 +765,7 @@ class BimpCore
         self::setConf('bimpcore_version', $versions);
     }
 
-    // Gestion BimpCore Conf: 
+    // Gestion BimpCore Conf:
 
     public static function getConfCache()
     {
@@ -794,10 +794,10 @@ class BimpCore
     public static function getConf($name, $default = null, $module = 'bimpcore', &$source = '', $entity = null)
     {
         // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
-        // passée en argument de la fonction. 
+        // passée en argument de la fonction.
         // si cette argument est null on retourne la valeur par défaut définie dans le YML de la config du module (si elle est existe)
-        // on retourne null sinon. 
-        // Le système de cache permet de vérifier une seule fois la valeur en base et la valeur par défaut du YML. 
+        // on retourne null sinon.
+        // Le système de cache permet de vérifier une seule fois la valeur en base et la valeur par défaut du YML.
 
 
         if (!$module) {
@@ -824,7 +824,7 @@ class BimpCore
             return $cache[0][$module][$name];
         }
 
-        // Check éventuelle erreur sur le module: 
+        // Check éventuelle erreur sur le module:
         if (isset($cache[(int) $entity])) {
             foreach ($cache[(int) $entity] as $module_name => $params) {
                 if (isset($params[$name])) {
@@ -946,7 +946,7 @@ class BimpCore
         return (int) self::getConf('id_user_group_' . $group_code);
     }
 
-    // Gestion params yml globaux: 
+    // Gestion params yml globaux:
 
     public static function getParam($full_path, $default_value = '', $type = 'string')
     {
@@ -961,7 +961,7 @@ class BimpCore
         return $default_value;
     }
 
-    // Getters divers: 
+    // Getters divers:
 
     public static function getBimpUser()
     {
@@ -981,7 +981,7 @@ class BimpCore
         return null;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public static function isModuleActive($module)
     {
@@ -1016,7 +1016,7 @@ class BimpCore
         return 0;
     }
 
-    // Gestion ini: 
+    // Gestion ini:
 
     public static function setMaxExecutionTime($time)
     {
@@ -1036,7 +1036,7 @@ class BimpCore
         }
     }
 
-    // Gestion extends: 
+    // Gestion extends:
 
     public static function getExtendsEntity()
     {
@@ -1096,10 +1096,10 @@ class BimpCore
 
     public static function requireFileForEntity($module, $file_name, $return_only = false)
     {
-        // Priorités: 
-        // - Fichier "Entité" 
+        // Priorités:
+        // - Fichier "Entité"
         // - Fichier "Version"
-        // - Fichier entité "default" 
+        // - Fichier entité "default"
         // - Fichier de base
 
         $dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
@@ -1332,7 +1332,7 @@ class BimpCore
         return $errors;
     }
 
-    // Gestion des locks 
+    // Gestion des locks
 
     public static function checkObjectLock($object, &$token = '')
     {
@@ -1363,7 +1363,7 @@ class BimpCore
             if (!is_null($row)) {
                 if ($token && $token == $row['token']) {
                     // Si token fourni et correspond au lock en cours : pas de blocage, on conserve le lock actuel
-                    // On réinitialise tout de même le tms: 
+                    // On réinitialise tout de même le tms:
                     $bdb->update('bimpcore_object_lock', array(
                         'tms' => time()
                             ), 'id = ' . (int) $row['id']);
@@ -1385,7 +1385,7 @@ class BimpCore
             }
 
             if (is_null($row)) {
-                // Pa de lock en cours, on en créé un: 
+                // Pa de lock en cours, on en créé un:
                 if (!$token) {
                     $token = BimpTools::randomPassword(12);
                 }
@@ -1563,13 +1563,13 @@ class BimpCore
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
     }
 
-    // Rendus HTML Globaux: 
+    // Rendus HTML Globaux:
 
     public static function renderUserTopExtraToolsHtml()
     {
         $html = '';
 
-        // Déclarer un bug: 
+        // Déclarer un bug:
         if (BimpCore::isModuleActive('bimptask') && BimpCore::getConf('allow_bug_task', null, 'bimptask')) {
             $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
             $onclick = $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
@@ -1594,7 +1594,8 @@ class BimpCore
         $html .= '</span>';
         $html .= '</div>';
 
-        // Outils devs: 
+
+        // Outils devs:
         global $user;
         $is_user_dev = BimpCore::isUserDev();
 
@@ -1626,6 +1627,8 @@ class BimpCore
                         'side'        => 'left'
             ));
         }
+
+		return '';
     }
 
     public static function renderUserTopAccountHtml()
@@ -1638,21 +1641,21 @@ class BimpCore
         $content = '';
         $content .= '<div style="padding: 15px;">';
 
-        // Mon profile: 
+        // Mon profile:
         $content .= '<div style="margin-bottom: 12px">';
         $content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '">';
         $content .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Mon profil';
         $content .= '</a>';
         $content .= '</div>';
 
-        // Mon agenda: 
+        // Mon agenda:
         $content .= '<div style="margin-bottom: 12px">';
         $content .= '<a href="' . DOL_URL_ROOT . '/synopsistools/agenda/vue.php">';
         $content .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Mon Agenda';
         $content .= '</a>';
         $content .= '</div>';
 
-        // Ma messagerie: 
+        // Ma messagerie:
         $content .= '<div style="margin-bottom: 12px">';
         $content .= '<a href="' . DOL_URL_ROOT . '/bimpmsg/index.php?fc=bal">';
         $content .= BimpRender::renderIcon('fas_envelope-open-text', 'iconLeft') . 'Ma messagerie';
@@ -1666,7 +1669,7 @@ class BimpCore
         $content .= '</a>';
         $content .= '</div>';
 
-        // Logout: 
+        // Logout:
         $content .= '<div style="margin-top: 10px; text-align: center">';
         $content .= '<a class="btn btn-danger" href="' . DOL_URL_ROOT . '/user/logout.php">';
         $content .= BimpRender::renderIcon('fas_power-off', 'iconLeft') . 'Se déconnecter';

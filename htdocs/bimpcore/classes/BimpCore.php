@@ -389,7 +389,7 @@ class BimpCore
 
                         if (!$err) {
                             if (!copy(DOL_DOCUMENT_ROOT . '/' . $dir . '/' . $f, DOL_DOCUMENT_ROOT . '/bimpressources/' . $dir . '/' . $f)) {
-                                $errors[] = 'Echec de la copie du fichier "' . DOL_DOCUMENT_ROOT . '/' . $dir . '/' . $f;// . '" - <pre>' . print_r(error_get_last(), 1) . '</pre>';
+                                $errors[] = 'Echec de la copie du fichier "' . DOL_DOCUMENT_ROOT . '/' . $dir . '/' . $f; // . '" - <pre>' . print_r(error_get_last(), 1) . '</pre>';
                             } else {
                                 $success .= ($success ? '<br/>' : '') . 'COPIE ' . $dir . '/' . $f . ' OK';
                             }
@@ -400,7 +400,7 @@ class BimpCore
                 }
             }
         } else {
-            $errors[] = $dir .' n\'existe pas';
+            $errors[] = $dir . ' n\'existe pas';
         }
     }
 
@@ -1703,7 +1703,6 @@ class BimpCore
         $html .= '</span>';
         $html .= '</div>';
 
-
         // Outils devs:
         global $user;
         $is_user_dev = BimpCore::isUserDev();
@@ -1737,7 +1736,7 @@ class BimpCore
             ));
         }
 
-		return '';
+        return '';
     }
 
     public static function renderUserTopAccountHtml()

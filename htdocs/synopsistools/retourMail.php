@@ -8,7 +8,9 @@ require("../main.inc.php");
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 $msgId = str_replace(array('<', '>'), '', $json['message-id']);
-//BimpCore::addlog('test ');
+BimpCore::addlog('test ');
+
+BimpCore::addlog('webhokk '.print_r($json, 1));
 
 //if($json['email'] == 'tommy@bimp.fr')
 //    mailSyn2('test', 't.sauron@bimp.fr', null, 'ici '.print_r($json,1));

@@ -1517,6 +1517,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $html .= '<strong>Client: </strong>';
                 $html .= $client->getLink();
                 $html .= '</div>';
+                
+                $msg_achats = $client->getData('msg_achat');
+                if ($msg_achats) {
+                    $html .= '<div style="margin-top: 10px" class="alert alert-warning">';
+                    $html .= '<b>Message achats : </b>' . $msg_achats;
+                    $html .= '</div>';
+                }
             }
         }
 

@@ -357,8 +357,8 @@ class BContract_echeancier extends BimpObject
 
             foreach ($factures as $index => $data) {
 
-                $dateStartFacturation->setTimestamp($data['dateStart']);
-                $dateStopFacturation->setTimestamp($data['dateEnd']);
+                $dateStartFacturation->setTimestamp((is_string($data['dateStart']) ? strtotime($data['dateStart']) : $data['dateStart']));
+                $dateStopFacturation->setTimestamp((is_string($data['dateEnd']) ? strtotime($data['dateEnd']) : $data['dateEnd']));
 
                 if ($dateStartFacturation->format('d/m/Y') == $debut && $dateStopFacturation->format('d/m/Y') == $fin) {
                     return Array(

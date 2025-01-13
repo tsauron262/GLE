@@ -9,10 +9,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 
 
-BimpCore::addlog('Weeb hook mail '.'ici '.print_r($json,1));
-
-if($json['email'] == 'tommy@bimp.fr')
-    mailSyn2('test', 't.sauron@bimp.fr', null, 'ici '.print_r($json,1));
+BimpCore::addlog('Weeb hook2');
+//
+//if($json['email'] == 'tommy@bimp.fr')
+//    mailSyn2('test', 't.sauron@bimp.fr', null, 'ici '.print_r($json,1));
 
 
 

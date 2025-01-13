@@ -4,6 +4,7 @@
 //$json = json_decode(file_get_contents('php://input'), true);
 //$json = array('message-id' => 'hhhh');
 define("NOLOGIN", 1);
+define('NOCSRFCHECK', 1);
 require("../main.inc.php");
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 

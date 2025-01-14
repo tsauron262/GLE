@@ -480,7 +480,7 @@ class PDO extends AbstractBackend {
             $url = $bimpAction->getLinkedUrl(true);
 //            $url = \dolGetElementUrl($action->fk_element, $action->elementtype, 1);
             if($url)
-                $calendarData2[] = 'LOCATION:'.$url;
+                $calendarData2[] = 'URL;VALUE=URI:'.$url;
         //}
 
         if ($row['organisateur'] != "")

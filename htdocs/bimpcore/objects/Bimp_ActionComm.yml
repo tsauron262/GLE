@@ -476,6 +476,13 @@ lists_cols:
         label: Elément lié
         value: 
             callback: displayElement
+    link:
+        label: Lien
+        value: 
+            callback: 
+                method: getLinkedUrl
+                params:
+                    - 1
     state: 
         label: Etat
         value: 

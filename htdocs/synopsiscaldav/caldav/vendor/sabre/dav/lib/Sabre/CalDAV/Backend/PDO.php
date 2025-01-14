@@ -474,6 +474,13 @@ class PDO extends AbstractBackend {
         if (isset($action->array_options['options_conf']) && $action->array_options['options_conf'] == true) {
             $calendarData2[] = 'CLASS:CONFIDENTIAL';
         }
+
+        if ($row['organisateur'] != "")
+            $calendarData2[] = 'X-OWNER:mailto:' . $row['organisateur'];
+
+        $calendarData2[] = 'SEQUENCE:' . $row['sequence'];
+        
+        
         //if (isset($action->fk_element) && isset($action->elementtype)) { 
             include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
             $bimpAction = \BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm', $action->id);
@@ -482,11 +489,7 @@ class PDO extends AbstractBackend {
             if($url)
                 $calendarData2[] = 'URL;VALUE=URI:'.$url;
         //}
-
-        if ($row['organisateur'] != "")
-            $calendarData2[] = 'X-OWNER:mailto:' . $row['organisateur'];
-
-        $calendarData2[] = 'SEQUENCE:' . $row['sequence'];
+        
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
         

@@ -987,7 +987,25 @@ graph:
                     title: CA ht
                     field: total_ht
                     calc: SUM
-            
+                    
+    parBoutique:
+        title: Par Boutique
+        relative: 1
+        xDateConfig:
+            field: date
+            params: 
+                - month 
+                - day
+                - week
+            date1: 1
+            date2: 2
+            def: 1year
+        y: Wh
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getFieldsEntrepot
+         
 views: 
     default: 
         objects_change_reload: BimpFile,BimpNote,RemiseGlobale

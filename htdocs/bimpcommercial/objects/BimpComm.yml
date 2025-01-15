@@ -993,12 +993,12 @@ graph:
         xDateConfig:
             field: date
             params: 
-                - month 
                 - day
+                - month 
                 - week
             date1: 1
             date2: 2
-            def: 1year
+            def: 1month
         y: €
         use_k: 1
         yConfig:

@@ -105,9 +105,6 @@ class facturesController extends BimpController
             $graph->addFieldFilterValue('fk_statut', $filtres);
         }
         
-        
-        
-        $html = $list->renderHtml();
         if(isset($graph))
             $html .= $graph->renderHtml();
         return $html;

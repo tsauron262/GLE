@@ -335,7 +335,7 @@ class BimpComm extends BimpDolObject
                'field'     => 'total_ht',
                'calc'      => 'SUM',
                'filters'    => array(
-                   'ae.entrepot'     => $id
+                   'entrepot'     => $id
                )
             );
         }

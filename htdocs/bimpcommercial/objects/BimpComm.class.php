@@ -330,7 +330,7 @@ class BimpComm extends BimpDolObject
 
         $i=0;
         foreach($entrepots as $id => $nom){
-            $fields[$cmdData->id] = array(
+            $fields[$id] = array(
                "title"      => $nom,
                'field'     => 'total_ht',
                'calc'      => 'SUM',

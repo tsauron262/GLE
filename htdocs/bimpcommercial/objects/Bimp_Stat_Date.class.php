@@ -28,7 +28,7 @@ class Bimp_Stat_Date extends BimpObject
             $date = new DateTime($this->getData('date'));
             $date->sub(new DateInterval('P' . $nb_month . 'M'));
 
-            $sql = $this->db->db->query("SELECT * FROM `llx_bimp_stat_date` WHERE `date` = '" . $date->format('Y-m-d') . "' AND `filter` = '" . $this->getData('filter') . "'");
+            $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_stat_date` WHERE `date` = '" . $date->format('Y-m-d') . "' AND `filter` = '" . $this->getData('filter') . "'");
             if ($this->db->db->num_rows($sql) > 0) {
                 $ln = $this->db->db->fetch_object($sql);
                 if (stripos($field, 'total') && !$modeCSV)
@@ -229,7 +229,7 @@ class Bimp_Stat_Date extends BimpObject
                 $nbFact = (isset($this->datasFacture[$dateStr . $this->signatureFilter])) ? $this->datasFacture[$dateStr . $this->signatureFilter]->nb : 0;
                 $totFact = (isset($this->datasFacture[$dateStr . $this->signatureFilter])) ? $this->datasFacture[$dateStr . $this->signatureFilter]->tot : 0;
 
-                $this->db->db->query("INSERT INTO `llx_bimp_stat_date`(`date`, `devis_qty`, `devis_total`, `commande_qty`, `commande_total`, `facture_qty`, `facture_total`,`filter`) "
+                $this->db->db->query("INSERT INTO `".MAIN_DB_PREFIX."bimp_stat_date`(`date`, `devis_qty`, `devis_total`, `commande_qty`, `commande_total`, `facture_qty`, `facture_total`,`filter`) "
                         . "VALUES ('" . $dateStr . "', " . $nbProp . ", " . $totProp . ", " . $nbComm . ", " . $totComm . ", " . $nbFact . ", " . $totFact . ", '" . $this->signatureFilter . "')");
             }
 
@@ -274,38 +274,38 @@ class Bimp_Stat_Date extends BimpObject
                 }
             }
         }
-        $sql = $this->db->db->query("SELECT * FROM `llx_bimp_stat_date` WHERE filter = '" . $this->signatureFilter . "' GROUP BY date ASC");
+        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_stat_date` WHERE filter = '" . $this->signatureFilter . "' GROUP BY date ASC");
         while ($ln = $this->db->db->fetch_object($sql)) {
             $this->datas[$ln->date . $this->signatureFilter] = $ln;
         }
 
-        $req = "SELECT " . $selectDate . " as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_propal` a";
+        $req = "SELECT " . $selectDate . " as date, count(*) as nb, SUM(total_ht) as tot FROM `".MAIN_DB_PREFIX."propal` a";
         if ($extrafield)
-            $req .= " LEFT JOIN llx_propal_extrafields f ON  a.rowid = f.fk_object ";
+            $req .= " LEFT JOIN ".MAIN_DB_PREFIX."propal_extrafields f ON  a.rowid = f.fk_object ";
         if ($contact)
-            $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'propal' ";
+            $req .= " LEFT JOIN `".MAIN_DB_PREFIX."element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `".MAIN_DB_PREFIX."c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'propal' ";
         $req .= " WHERE 1 " . $and . " group by " . $groupBy;
         $sql = $this->db->db->query($req);
         while ($ln = $this->db->db->fetch_object($sql)) {
             $this->datasPropal[$ln->date . $this->signatureFilter] = $ln;
         }
 
-        $req = "SELECT " . $selectDate . " as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_commande` a";
+        $req = "SELECT " . $selectDate . " as date, count(*) as nb, SUM(total_ht) as tot FROM `".MAIN_DB_PREFIX."commande` a";
         if ($extrafield)
-            $req .= " LEFT JOIN llx_commande_extrafields f ON a.rowid = f.fk_object ";
+            $req .= " LEFT JOIN ".MAIN_DB_PREFIX."commande_extrafields f ON a.rowid = f.fk_object ";
         if ($contact)
-            $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'commande' ";
+            $req .= " LEFT JOIN `".MAIN_DB_PREFIX."element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `".MAIN_DB_PREFIX."c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'commande' ";
         $req .= " WHERE 1 " . $and . " group by " . $groupBy;
         $sql = $this->db->db->query($req);
         while ($ln = $this->db->db->fetch_object($sql)) {
             $this->datasCommande[$ln->date . $this->signatureFilter] = $ln;
         }
 
-        $req = "SELECT " . $selectDate . " as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_facture` a";
+        $req = "SELECT " . $selectDate . " as date, count(*) as nb, SUM(total_ht) as tot FROM `".MAIN_DB_PREFIX."facture` a";
         if ($extrafield)
-            $req .= " LEFT JOIN llx_facture_extrafields f ON a.rowid = f.fk_object ";
+            $req .= " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields f ON a.rowid = f.fk_object ";
         if ($contact)
-            $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'facture' ";
+            $req .= " LEFT JOIN `".MAIN_DB_PREFIX."element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `".MAIN_DB_PREFIX."c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'facture' ";
         $req .= " WHERE 1 " . $and . $andFact . " group by " . $groupBy;
         $sql = $this->db->db->query($req);
         while ($ln = $this->db->db->fetch_object($sql)) {

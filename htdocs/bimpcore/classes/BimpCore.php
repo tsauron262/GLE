@@ -339,6 +339,7 @@ class BimpCore
 
         if ($url) {
             if ($include_root) {
+                echo 'ici'.DOL_URL_ROOT.'la';
                 $prefixe = DOL_URL_ROOT;
                 if ($prefixe == "/")
                     $prefixe = "";

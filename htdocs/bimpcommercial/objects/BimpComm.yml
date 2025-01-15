@@ -1004,7 +1004,7 @@ graph:
         use_k: 1
         yConfig:
             fields:
-                callback: getFieldsEntrepot
+                callback: getFieldsGraphEntrepot
          
 views: 
     default: 

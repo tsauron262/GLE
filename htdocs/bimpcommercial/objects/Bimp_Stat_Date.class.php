@@ -274,7 +274,7 @@ class Bimp_Stat_Date extends BimpObject
                 }
             }
         }
-        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_stat_date` WHERE filter = '" . $this->signatureFilter . "' GROUP BY date ASC");
+        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_stat_date` WHERE filter = '" . $this->signatureFilter . "' GROUP BY date");
         while ($ln = $this->db->db->fetch_object($sql)) {
             $this->datas[$ln->date . $this->signatureFilter] = $ln;
         }

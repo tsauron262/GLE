@@ -324,7 +324,7 @@ class Bimp_Stat_Date extends BimpObject
     
     public function prepareForGraph(){
         $this->isOk = true;
-        $this->signatureFilter = '[]{"facture_type":["3"]}[]"day"';
+        $this->signatureFilter = '[][][]"day"';
     }
 
     public function getLabel($type = "", $ucfirst = false)

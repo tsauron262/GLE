@@ -2929,7 +2929,7 @@ class BimpCache
 
         if ($with_caisse_close || $with_caisse_open)
             $cache_key .= '_jamisEnCache';
-        $entitys = getEntity('entrepot', 1);
+        $entitys = getEntity('stock', 1);
         $cache_key .= '_' . $entitys;
 
         if (!isset(self::$cache[$cache_key]) || $with_caisse_close) {

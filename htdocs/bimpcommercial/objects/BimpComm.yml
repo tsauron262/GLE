@@ -987,6 +987,23 @@ graph:
                     title: CA ht
                     field: total_ht
                     calc: SUM
+                    
+    parBoutique:
+        title: Par Boutique
+        xDateConfig:
+            field: date
+            params: 
+                - day
+                - month 
+                - week
+            date1: 1
+            date2: 2
+            def: 1month
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getFieldsGraphEntrepot
             
 views: 
     default: 

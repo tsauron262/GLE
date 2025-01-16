@@ -323,6 +323,25 @@ class BimpComm extends BimpDolObject
 
         return (count($errors) ? 0 : 1);
     }
+    
+    public function getFieldsGraphEntrepot(){
+        $fields = array();        
+        $entrepots = BimpCache::getEntrepotsArray();
+
+        $i=0;
+        foreach($entrepots as $id => $nom){
+            $fields[$id] = array(
+               "title"      => $nom,
+               'field'     => 'total_ht',
+               'calc'      => 'SUM',
+               'filters'    => array(
+                   'entrepot'     => $id
+               )
+            );
+        }
+        
+        return $fields;
+    }
 
     public function isUnvalidatable(&$errors = array())
     {

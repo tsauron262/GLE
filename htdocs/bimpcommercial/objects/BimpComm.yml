@@ -1004,7 +1004,7 @@ graph:
         yConfig:
             fields:
                 callback: getFieldsGraphEntrepot
-         
+            
 views: 
     default: 
         objects_change_reload: BimpFile,BimpNote,RemiseGlobale
@@ -1197,3 +1197,6 @@ views_lists:
         pagination: 1
         sort_field: datec
         sort_way: desc
+
+functions:
+    - getMarginInfosArray

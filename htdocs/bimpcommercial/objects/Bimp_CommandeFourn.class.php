@@ -2415,7 +2415,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
         // Mise à jour des extra_fields: 
         global $user;
-        if ($this->dol_object->insertExtraFields('', $user) <= 0) {
+        if ($this->dol_object->insertExtraFields('', $user) < 0) {
             $errors[] = 'Echec de la mise à jour des champs supplémentaires';
         }
         if (!count($errors)) {

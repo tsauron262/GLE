@@ -324,7 +324,7 @@ class BimpComm extends BimpDolObject
         return (count($errors) ? 0 : 1);
     }
     
-    public function getFieldsGraphEntrepot(){
+    public function getFieldsGraphEntrepot($mode = 'ca'){
         $fields = array();        
         $entrepots = BimpCache::getEntrepotsArray();
 
@@ -332,7 +332,7 @@ class BimpComm extends BimpDolObject
         foreach($entrepots as $id => $nom){
             $fields[$id] = array(
                "title"      => $nom,
-               'field'     => 'total_ht',
+               'field'     => ($mode == 'ca') ? 'total_ht' : 'marge',
                'calc'      => 'SUM',
                'filters'    => array(
                    'entrepot'     => $id

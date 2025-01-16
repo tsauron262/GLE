@@ -978,7 +978,7 @@ class UserGroup extends CommonObject
                 if(!isset($info['mail']) || stripos($info['mail'], "@") === false){
                     $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
                     require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
-                    $info ['mail'] = str_replace(",", "", traiteCarac($oldName)."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
+                    $info ['mail'] = str_replace(",", "", traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
                 }
                 
                 
@@ -987,11 +987,11 @@ class UserGroup extends CommonObject
                 }
                 
                 
-                if(!isset($info['bimpOldMail']) || stripos($info['bimpOldMail'], "@") === false){
-                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
-                    require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
-                    $info ['bimpOldMail'] = str_replace(",", "", traiteCarac($oldName)."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
-                }
+//                if(!isset($info['bimpOldMail']) || stripos($info['bimpOldMail'], "@") === false){
+//                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+//                    require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
+//                    $info ['bimpOldMail'] = str_replace(",", "", traiteCarac($oldName)."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
+//                }
                     
                 if(!defined('LDAP_MOD_AD')){
                     $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = str_replace(" ","_",$info[$conf->global->LDAP_GROUP_FIELD_FULLNAME]);
@@ -1001,10 +1001,10 @@ class UserGroup extends CommonObject
                     if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook'])
                         $info['enabledservice'][] = "displayedInGlobalAddressBook";
 
-                    if(!defined("LIST_DOMAINE_VALID"))
-                        die("Constante LIST_DOMAINE_VALID non definie");
-                    if(!defined("DOMAINE_GROUP_ID"))
-                        die("Constante DOMAINE_GROUP_ID non definie");
+//                    if(!defined("LIST_DOMAINE_VALID"))
+//                        die("Constante LIST_DOMAINE_VALID non definie");
+//                    if(!defined("DOMAINE_GROUP_ID"))
+//                        die("Constante DOMAINE_GROUP_ID non definie");
 
 
 

@@ -75,7 +75,7 @@ class BCT_ContratLine extends BimpObject
                 return 1;
 
             case 'deactivate':
-                return ($user->admin || in_array($user->login, array('a.remeur', 'p.bachorz')) ? 1 : 0);
+                return ($user->admin || in_array($user->login, array('a.remeur', 'p.bachorz', 'm.gallet', 'e.amadei')) ? 1 : 0);
 
             case 'addUnits':
                 return 1;
@@ -2489,11 +2489,11 @@ class BCT_ContratLine extends BimpObject
                 $contrat_lines = $contrat->getLines('abo', false, $filters);
 
                 foreach ($contrat_lines as $line) {
-                    if (!$line->isActive() || $line->isResiliated()) {
+                    if (/* !$line->isActive() || */$line->isResiliated()) {
                         continue;
                     }
 
-                    $lines[$line->id] = $line->displayProduct('ref_nom') . ' (' . $line->displayPeriods(true) . ')';
+                    $lines[$line->id] = 'Ligne n° ' . $line->getData('rang') . ' - ' . $line->displayProduct('ref_nom') . ' (' . $line->displayPeriods(true) . ')';
                 }
 
                 return $lines;
@@ -5408,7 +5408,7 @@ class BCT_ContratLine extends BimpObject
                         if ($this->checkLinkedLine($errors)) {
                             $linked_line = $this->getChildObject('linked_line');
 
-                            if ((int) $linked_line->getData('statut') !== self::STATUS_ACTIVE) {
+                            if ((int) $linked_line->getData('statut') < self::STATUS_ACTIVE) {
                                 $errors[] = 'La ligne d\'abonnement liée n\'est pas active. Il n\'est pas possible d\'activer cet abonnement';
                             } else {
                                 $line_errors = $linked_line->validate();

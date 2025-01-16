@@ -342,6 +342,31 @@ class Bimp_FactureLine extends ObjectLine
         return $html;
     }
 
+    public function displayPdfAboInfos()
+    {
+        $html = '';
+
+        if ($this->isLoaded() && $this->qty) {
+            $prod = $this->getProduct();
+            if (BimpObject::objectLoaded($prod) && $prod->isAbonnement() && $this->date_from && $this->date_to) {
+                $prod_duration = (int) $prod->getData('duree');
+                $interval = BimpTools::getDatesIntervalData($this->date_from, $this->date_to);
+                $nb_monthes = $interval['nb_monthes_decimal'];
+
+                if ($prod_duration && $nb_monthes && $prod_duration) {
+                    $nb_units = ($this->qty / $nb_monthes) * $prod_duration;
+
+                    if ($nb_units) {
+                        $nb_prod_periods = $nb_monthes / $prod_duration;
+                        $html .= '<b>' . BimpTools::displayFloatValue($nb_units, 2, ',', 0, 0, 0, 0, 1, 1) . ' unité(s) de ' . $prod_duration . ' mois ' . ($nb_prod_periods > 1 ? ' x ' . BimpTools::displayFloatValue($nb_prod_periods, 6, ',', 0, 0, 0, 0, 1, 1) : '') . '</b>';
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
+
     // Rendus HTML: 
 
     public function renderQuickAddForm($bc_list)
@@ -503,8 +528,8 @@ class Bimp_FactureLine extends ObjectLine
 
                     $commande_line = null;
                     $contrat_line = null;
-                    
-                    if (!(int) $product->getData('no_fixe_prices')){
+
+                    if (!(int) $product->getData('no_fixe_prices')) {
                         $def_pa_ht = (float) $product->getCurrentPaHt(null, true, $date);
                         if ($date) {
                             $dt = new DateTime($date);
@@ -543,7 +568,7 @@ class Bimp_FactureLine extends ObjectLine
                                 $def_pa_ht = (float) $this->pa_ht;
                                 $def_pa_label = 'PA enregistré dans cette ligne de facture';
                             }
-                        } 
+                        }
 
                         if (BimpObject::objectLoaded($commande_line)) {
                             // Recherche des PA réels dans les factures fourn, BR et commandes fourn.

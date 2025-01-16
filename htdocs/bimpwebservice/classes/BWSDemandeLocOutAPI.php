@@ -181,7 +181,7 @@ class BWSDemandeLocOutAPI extends BWSApi
                     
                     if (!$signed) {
                         $signature_params = $this->getParam('signature_params', array());
-                        if (empty($signature_data)) {
+                        if (empty($signature_params)) {
                             $this->addError('MISSING_PARAMETER', 'Paramètres de signature du document absents');
                             return array();
                         }

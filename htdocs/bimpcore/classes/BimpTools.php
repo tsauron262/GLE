@@ -2847,6 +2847,14 @@ class BimpTools
 
         return str_replace($old_root, $new_root, $text);
     }
+    
+    public static function escapeForHtml($txt)
+    {
+        $txt = str_replace("'", "\\'", $txt);
+        $txt = self::htmlentities_array($txt);
+        
+        return $txt;
+    }
 
     // Traitements sur des array: 
 

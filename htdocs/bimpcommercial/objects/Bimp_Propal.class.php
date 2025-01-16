@@ -469,7 +469,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createContrat':
-                if ($status !== Propal::STATUS_SIGNED) {
+                if (!in_array($status, array(Propal::STATUS_SIGNED, Propal::STATUS_BILLED))) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
                 }
@@ -1076,8 +1076,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 )
                             );
                             $onclick = $facture->getJsLoadModalForm('default', 'Création d\\\'une facture', $values, '', 'redirect');
-                            
-                            
+
                             $buttons[] = array(
                                 'label'   => 'Créer une facture ou un avoir',
                                 'icon'    => 'fas_file-invoice-dollar',
@@ -1087,7 +1086,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 //                            $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $clientFact->id;
 //                            $onclick = 'window.location = \'' . $url . '\'';
                         }
-
                     }
 
                     // Créer un contrat
@@ -1456,7 +1454,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         BimpObject::loadClass('bimpfinancement', 'BF_Demande');
         return BF_Demande::$calc_modes;
     }
-    
+
     public function getDevisLocationFormulesArray($allowed_only = true)
     {
         $formules = array(

@@ -989,7 +989,7 @@ graph:
                     calc: SUM
                     
     parBoutique:
-        title: Par Boutique
+        title: CA par Boutique
         xDateConfig:
             field: date
             params: 
@@ -1004,6 +1004,26 @@ graph:
         yConfig:
             fields:
                 callback: getFieldsGraphEntrepot
+                    
+    parBoutiqueMarge:
+        title: Marge par Boutique
+        xDateConfig:
+            field: date
+            params: 
+                - day
+                - month 
+                - week
+            date1: 1
+            date2: 2
+            def: 1month
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: 
+                    method: getFieldsGraphEntrepot
+                    params:
+                        - marge
             
 views: 
     default: 

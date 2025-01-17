@@ -5398,9 +5398,9 @@ class Societe extends CommonObject
 			$this->db->begin();
                         
                         /* moddrsi (20.2)*/
-                        $sql = $this->db->query('SELECT Count(*) as nb, `ref_fourn`, `fk_product` FROM `llx_product_fournisseur_price` WHERE `fk_soc` IN ('.$soc_origin_id.', '.$this->id.') GROUP BY `ref_fourn`, `fk_product` HAVING nb > 1');
+                        $sql = $this->db->query('SELECT Count(*) as nb, `ref_fourn`, `fk_product` FROM `'.MAIN_DB_PREFIX.'product_fournisseur_price` WHERE `fk_soc` IN ('.$soc_origin_id.', '.$this->id.') GROUP BY `ref_fourn`, `fk_product` HAVING nb > 1');
                         while($ln = $this->db->fetch_object($sql)){
-                            $this->db->query('UPDATE `llx_product_fournisseur_price` SET ref_fourn = CONCAT(ref_fourn, "-B") WHERE fk_product = '.$ln->fk_product.' AND ref_fourn = "'.$ln->ref_fourn.'" AND fk_soc = '.$soc_origin_id.' ');
+                            $this->db->query('UPDATE `'.MAIN_DB_PREFIX.'product_fournisseur_price` SET ref_fourn = CONCAT(ref_fourn, "-B") WHERE fk_product = '.$ln->fk_product.' AND ref_fourn = "'.$ln->ref_fourn.'" AND fk_soc = '.$soc_origin_id.' ');
                         }
                         /* fmoddrsi*/
 

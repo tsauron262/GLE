@@ -47,7 +47,7 @@ class importProdFourn extends import8sens {
         if($prodId > 0){
             $fournId = $this->getFourn($ln['ProGFouCode']);
             if($fournId > 0){
-                $sql3 = $this->db->query("SELECT rowid, ref_fourn, price, unitprice, quantity, tva_tx, fk_product FROM `llx_product_fournisseur_price` WHERE  `fk_soc` = ".$fournId." AND ref_fourn LIKE '".$ln['ProCode']."'");
+                $sql3 = $this->db->query("SELECT rowid, ref_fourn, price, unitprice, quantity, tva_tx, fk_product FROM `".MAIN_DB_PREFIX."product_fournisseur_price` WHERE  `fk_soc` = ".$fournId." AND ref_fourn LIKE '".$ln['ProCode']."'");
                 $ok = false;
                 $existeDeja = "non";
                 while ($ln3 = $this->db->fetch_object($sql3)){
@@ -98,7 +98,7 @@ class importProdFourn extends import8sens {
 
     function addPrice($idP, $idF, $ln) {
         echo "addPrice<br/>";
-        $this->db->query("INSERT INTO `llx_product_fournisseur_price`"
+        $this->db->query("INSERT INTO `".MAIN_DB_PREFIX."product_fournisseur_price`"
                 . "(`fk_product`, `fk_soc`, `ref_fourn`,`price`, `quantity`, `tva_tx`, unitprice) VALUES "
                 . "(".$idP.",".$idF.",'".$ln['ProCode']."','".$ln['ProPrixBase']."',1,'".$ln['Pro1TaxTaux']."', '".$ln['ProPrixBase']."')");
         return $id;
@@ -106,7 +106,7 @@ class importProdFourn extends import8sens {
 
     function updatePrice($idGle, $ln) {
         global $user;
-        $this->db->query("UPDATE `llx_product_fournisseur_price` SET "
+        $this->db->query("UPDATE `".MAIN_DB_PREFIX."product_fournisseur_price` SET "
                 . "ref_fourn = '".$ln['ProCode']."', price = '".$ln['ProPrixBase']."', quantity = 1, tva_tx = '".$ln['Pro1TaxTaux']."', unitprice = '".$ln['ProPrixBase']."' "
                 . " WHERE rowid = ".$idGle);
         

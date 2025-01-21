@@ -8397,8 +8397,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $html = '';
 
         $functions = array('getLink', 'getFilesDir');
-        $functions = BimpTools::merge_array($functions, $this->getConf('functions/', array()));
-
+        $functions = BimpTools::merge_array($functions, $this->getConf('functions', array(), false, 'array'));
         foreach ($functions as $data) {
             if (!is_array($data)) {
                 $title = $data . '()';

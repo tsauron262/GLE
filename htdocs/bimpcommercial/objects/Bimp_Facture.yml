@@ -1388,3 +1388,9 @@ graph:
     parDay:
         xDateConfig:
             field: datef
+    parBoutique:
+        xDateConfig:
+            field: datef
+    parBoutiqueMarge:
+        xDateConfig:
+            field: datef

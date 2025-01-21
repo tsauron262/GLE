@@ -2231,7 +2231,7 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded()) {
             global $db;
 
-            $query = 'SELECT * FROM `llx_product_fournisseur_price` WHERE `fk_product` = ' . (int) $this->id;
+            $query = 'SELECT * FROM `'.MAIN_DB_PREFIX.'product_fournisseur_price` WHERE `fk_product` = ' . (int) $this->id;
             if ($id_fourn)
                 $query .= ' AND `fk_soc` = ' . (int) $id_fourn;
 

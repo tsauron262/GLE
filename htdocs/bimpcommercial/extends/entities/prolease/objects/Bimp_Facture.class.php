@@ -8,6 +8,7 @@ class Bimp_Facture_ExtEntity extends Bimp_Facture
         1      => 'Contrat de location',
         2      => 'Indemnité dépassement contrat ',
         3      => 'Cession final du produit',
+        4      => 'Location',
         10     => 'Autre'
     );
     
@@ -32,6 +33,9 @@ class Bimp_Facture_ExtEntity extends Bimp_Facture
                 break;
             case 3:
                 return 12;
+                break;
+            case 4:
+                return 17;
                 break;
         }
     }

@@ -13,7 +13,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
         'renderBottom' => 0
     );
 
-    # Données: 
+    # Données:
     public $title;
     public $sub_title = '';
     public $montant_materiels;
@@ -61,7 +61,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
         if (is_string($this->formules)) {
             $this->formules = json_decode($this->formules);
         }
-        
+
         if (empty($this->formules)) {
             $this->errors[] = 'Aucune formule sélectionnée';
         }
@@ -75,7 +75,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
 
     public function initData()
     {
-        
+
     }
 
     public function initHeader()
@@ -400,7 +400,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
                 $eco_percent = $eco / $total_demande * 100;
             }
 
-            $html .= '<div style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Comparatif</div>';
+            $html .= '<div style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Comparatif à ' . $nb_mois . '</div>';
 
             $html .= '<div style="font-size: 8px">';
             $html .= '<table cellpadding="3px">';

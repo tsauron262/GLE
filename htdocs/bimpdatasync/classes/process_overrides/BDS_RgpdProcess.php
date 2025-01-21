@@ -439,7 +439,7 @@ class BDS_RgpdProcess extends BDSProcess
         return $result;
     }
 
-    // Finalisation opérations: 
+    // Finalisation opérations:
 
     public function finalizeDailyCheck(&$errors = array(), $extra_data = array())
     {
@@ -455,7 +455,7 @@ class BDS_RgpdProcess extends BDSProcess
         return array();
     }
 
-    // Recherche des éléments à traiter: 
+    // Recherche des éléments à traiter:
 
     public function getElementsToProcess($allowed = array())
     {
@@ -471,17 +471,17 @@ class BDS_RgpdProcess extends BDSProcess
             'clients' => array()
         );
 
-        // Recherche des pièces brouillons à suppr. 
+        // Recherche des pièces brouillons à suppr.
         if ($allowed['delete_drafts'] && (int) $this->getOption('delete_drafts', 0)) {
             $data['drafts'] = $this->findDraftsToDelete();
         }
 
-        // Recherche des pièces dont les fichiers sont à supprimer: 
+        // Recherche des pièces dont les fichiers sont à supprimer:
         if ($allowed['delete_files'] && (int) $this->getOption('delete_files', 0)) {
             $data['files'] = $this->findFilesToDelete('all');
         }
 
-        // Recherche des clients à anonymiser: 
+        // Recherche des clients à anonymiser:
         if ($allowed['anonymize_clients'] && (int) $this->getOption('anonymize_clients', 0)) {
             $data['clients'] = $this->findClientsToAnonymise();
         }
@@ -538,7 +538,7 @@ class BDS_RgpdProcess extends BDSProcess
 
     public function findFilesToDelete($type = 'all')
     {
-        // Recherche de fichiers dont délai légal de conservation dépassé ET client anonymisé. 
+        // Recherche de fichiers dont délai légal de conservation dépassé ET client anonymisé.
         $data = array();
         $types = array();
 
@@ -597,7 +597,7 @@ class BDS_RgpdProcess extends BDSProcess
             }
 
             if ($type === 'propales') {
-                // Propales refusées de + de 3 ans : 
+                // Propales refusées de + de 3 ans :
                 $date_from_3y = $this->getParam('files_from_3y_propales', '0000-00-00');
 
                 $dt = new DateTime();
@@ -678,7 +678,7 @@ class BDS_RgpdProcess extends BDSProcess
         $clients = array();
         $excluded_clients = $this->getParam('excluded_clients', '');
 
-        // Recherche clients pros sans activité depuis 10 ans: 
+        // Recherche clients pros sans activité depuis 10 ans:
         $dt = new DateTime();
         $dt->sub(new DateInterval('P5Y'));
         $dt_5y = $dt->format('Y-m-d');
@@ -701,7 +701,7 @@ class BDS_RgpdProcess extends BDSProcess
         return $clients;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function deleteDrafts($type, $list, &$errors = array())
     {
@@ -947,7 +947,7 @@ class BDS_RgpdProcess extends BDSProcess
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
 
             if (BimpObject::objectLoaded($client)) {
-                // Vérif date dernière activité (par précaution): 
+                // Vérif date dernière activité (par précaution):
                 $check_errors = array();
                 $check_warnings = array();
                 $infos = '';
@@ -967,7 +967,7 @@ class BDS_RgpdProcess extends BDSProcess
                     continue;
                 }
 
-                // Anonymisation des données: 
+                // Anonymisation des données:
                 $client_warnings = array();
                 $client_errors = $client->anonymiseData(true, 'Dernière activité le ' . date('d / m / Y', strtotime($date_last_activity)), $client_warnings, $this);
 
@@ -1213,7 +1213,7 @@ class BDS_RgpdProcess extends BDSProcess
                     }
 
                     if (is_dir($dir)) {
-                        // Dépl. fichiers: 
+                        // Dépl. fichiers:
                         foreach (scandir($dir_anon) as $file) {
                             if (in_array($file, array('.', '..'))) {
                                 continue;
@@ -1254,7 +1254,7 @@ class BDS_RgpdProcess extends BDSProcess
         return $errors;
     }
 
-    // Getters statiques: 
+    // Getters statiques:
 
     public static function getObjectInstance($type)
     {
@@ -1275,11 +1275,11 @@ class BDS_RgpdProcess extends BDSProcess
         return self::$objects_params[$type];
     }
 
-    // Install: 
+    // Install:
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
-        // Process: 
+        // Process:
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'Rgpd',
                     'title'       => ($title ? $title : static::$default_public_title),
@@ -1290,7 +1290,7 @@ class BDS_RgpdProcess extends BDSProcess
 
         if (BimpObject::objectLoaded($process)) {
 
-            // Paramètres: 
+            // Paramètres:
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
@@ -1310,7 +1310,7 @@ class BDS_RgpdProcess extends BDSProcess
                         ), true, $warnings, $warnings);
             }
 
-//            
+//
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'files_from_3y_propales',
@@ -1318,7 +1318,7 @@ class BDS_RgpdProcess extends BDSProcess
                 'value'      => '0000-00-00'
                     ), true, $warnings, $warnings);
 
-            // options: 
+            // options:
 
             $options = array();
 
@@ -1490,7 +1490,7 @@ class BDS_RgpdProcess extends BDSProcess
                 $options['test_one'] = (int) $opt->id;
             }
 
-            // Opérations: 
+            // Opérations:
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $process->id,
                         'title'         => 'Vérifications quotidiennes',

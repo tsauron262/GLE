@@ -125,7 +125,7 @@ class BS_ApplePart extends BimpObject
     public static $back_glass_refs = array("661-35700", "661-36907", "661-36838", "661-37208", "661-35703", "661-36910", "661-30386", "661-30386", "661-36841", "661-37211", "661-36842", "661-37212", "661-30413", "661-30383", "661-35702", "661-36909", "661-36839", "661-37209", "661-30417", "661-30387", "661-30415", "661-30385", "661-30384", "661-30384", "661-35701", "661-36908", "661-30419", "661-36840", "661-37210", "661-30389", "661-30416");
     protected static $compTIACodes = null;
 
-    // Droits user: 
+    // Droits user:
 
     public function canDelete()
     {
@@ -133,7 +133,7 @@ class BS_ApplePart extends BimpObject
         return (int) $user->rights->BimpSupport->read;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCartEditable()
     {
@@ -169,7 +169,7 @@ class BS_ApplePart extends BimpObject
         return (int) !((BimpObject::objectLoaded($issue) && $issue->isTierPart()) || in_array($this->getData('part_number'), self::$partsWithNonIssue));
     }
 
-    // Getters array: 
+    // Getters array:
 
     public static function getCompTIACodes()
     {
@@ -257,7 +257,7 @@ class BS_ApplePart extends BimpObject
         return array();
     }
 
-    // Getters config: 
+    // Getters config:
 
     public function getNoIssueExtaButtons()
     {
@@ -308,7 +308,7 @@ class BS_ApplePart extends BimpObject
         }
 
 
-        //rer systéme 
+        //rer systéme
         if (stripos($desc, 'REAR SYSTEM') !== false)
             $type = "rear";
 
@@ -360,7 +360,7 @@ class BS_ApplePart extends BimpObject
         }
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function checkPrice($no_update = false)
     {
@@ -419,7 +419,7 @@ class BS_ApplePart extends BimpObject
     public static function convertPrixStatic($type, $prix, $ref, $isIphone, $price_type = 'STOCK')
     {
         if (BimpCore::isEntity('actimac')) {
-            // modif demandée par Mickaël Muller pour actimac: 
+            // modif demandée par Mickaël Muller pour actimac:
             if (in_array($ref, self::$back_glass_refs)) {
                 return 229 / 1.2;
             }
@@ -439,10 +439,13 @@ class BS_ApplePart extends BimpObject
             case '661-44954':
             case '661-42720':
                 return 135 / 1.2;
-                
-            case '661-42837': 
-            case '661-44796': 
+
+            case '661-42837':
+            case '661-44796':
                 return 109 / 1.2;
+
+			case 'SJ7X2Z':
+				return 289 / 1.2;
         }
 
         if ($prix < 1)
@@ -665,7 +668,7 @@ class BS_ApplePart extends BimpObject
         }
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionAttributeToIssue($data, &$success)
     {
@@ -694,7 +697,7 @@ class BS_ApplePart extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validate()
     {
@@ -797,7 +800,7 @@ class BS_ApplePart extends BimpObject
             if (count($line_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la création de la ligne du devis');
             } else {
-                // Création de la remise client par défaut. 
+                // Création de la remise client par défaut.
                 $client = $sav->getChildObject('client');
                 if (BimpObject::objectLoaded($client)) {
                     $remise_percent = (float) $client->dol_object->remise_percent;

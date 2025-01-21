@@ -120,6 +120,8 @@ graph:
             
 lists:
     default:
+        header_buttons: 
+            callback: getHeaderBtnList
         filters_panel: default
         delete_btn: 1
         update_btn: 1

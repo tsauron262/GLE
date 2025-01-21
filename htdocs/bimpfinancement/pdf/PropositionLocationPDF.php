@@ -400,7 +400,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
                 $eco_percent = $eco / $total_demande * 100;
             }
 
-            $html .= '<div style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Comparatif à ' . $nb_mois . '</div>';
+            $html .= '<div style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Comparatif à ' . $nb_mois . ' mois</div>';
 
             $html .= '<div style="font-size: 8px">';
             $html .= '<table cellpadding="3px">';
@@ -419,7 +419,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
             $html .= '</tr>';
 
             $html .= '<tr>';
-            $html .= '<td style="background-color: #F2F2F2"><b>Dynamique</b></td>';
+            $html .= '<td style="background-color: #F2F2F2"><b>Dynamique</b><br/>(Avec renouvellement des équipements)</td>';
             $html .= '<td style="background-color: #F2F2F2">' . BimpTools::displayMoneyValue($loyer_dyn_ht) . '</td>';
             $html .= '<td style="background-color: #F2F2F2"><b>';
             $html .= BimpTools::displayMoneyValue($loyer_dyn_ht * $nb_loyers);

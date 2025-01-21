@@ -29,6 +29,8 @@ if (!$user->admin) {
 
 //$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', 12);
 
+echo 'TEST HERE !!';
+
 echo '<br/>FIN';
 echo '</body></html>';
 

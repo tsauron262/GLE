@@ -11,4 +11,16 @@ class BS_CentreSav extends BimpObject	{
 	{
 		return $this->canCreate();
 	}
+	public function validate()
+	{
+		$errors = parent::validate();
+		$code = $this->getData('code');
+		if($code)	{
+			$id_centre = $this->db->getValue($this->getTable(), "id", 'code = "'.$code.'"'. ($this->isLoaded() ? ' AND id != ' . $this->id : ''));
+			if($id_centre)	{
+				$errors[] = "Centre '".$code."' existe déjà.";
+			}
+		}
+		return $errors;
+	}
 }

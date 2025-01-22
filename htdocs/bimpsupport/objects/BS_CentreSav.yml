@@ -73,6 +73,7 @@ fields:
             type: search_group
     warning:
         label: Warning
+        type: text
 
 lists:
     default:
@@ -154,3 +155,9 @@ views:
                         name: infos
 
 
+list_page_url:
+    controller: index
+    url_params:
+        tab: centre
+
+header_list_name: default

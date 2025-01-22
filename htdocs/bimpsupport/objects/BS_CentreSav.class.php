@@ -23,4 +23,7 @@ class BS_CentreSav extends BimpObject	{
 		}
 		return $errors;
 	}
+	public static function getCentreSav($code)	{
+		return BimpCache::findBimpObjectInstance('bimpsupport', 'BS_CentreSav', array('code' => $code));
+	}
 }

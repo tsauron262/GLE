@@ -1,6 +1,12 @@
 table: bs_centre_sav
 icon: fas_store
 controller: centre
+
+nom_url:
+    syntaxe: <code> - <label>
+
+name_syntaxe: <code> - <label>
+
 labels:
     name: centre SAV
     name_plur: centres SAV
@@ -41,6 +47,10 @@ fields:
     zip:
         label: Code Postal
         required: 1
+    town:
+        label: Ville
+        required: 1
+
     address:
         label: Adresse
         required: 1
@@ -100,6 +110,7 @@ lists:
             id_entrepot:
             address:
             zip:
+            town:
             shipTo:
             email:
             tel:
@@ -117,10 +128,14 @@ fields_tables:
                 field: label
             id_entrepot:
                 field: id_entrepot
+            id_centre_rattachement:
+                field: id_centre_rattachement
             address:
                 field: address
             zip:
                 field: zip
+            town:
+                field: town
             shipTo:
                 field: shipTo
             email:
@@ -140,7 +155,7 @@ fields_tables:
 views:
     default:
         title:
-            callback: getRef
+            callback: getName
 #            callback: getCode
 
         objects_change_reload: BS_CentreSav

@@ -1630,19 +1630,19 @@ class BS_SAV extends BimpObject
         }
 
         if ($code_centre) {
-            global $tabCentre;
-
-            if (isset($tabCentre[$code_centre])) {
+            BimpObject::loadClass('bimpsupport', 'BS_CentreSav');
+			$centre = BS_CentreSav::getCentreSav($code_centre);
+            if (BimpObject::objectLoaded($centre)) {
                 return array(
-                    'tel'         => $tabCentre[$code_centre][0],
-                    'mail'        => $tabCentre[$code_centre][1],
-                    'label'       => $tabCentre[$code_centre][2],
-                    'shipTo'      => $tabCentre[$code_centre][4],
-                    'zip'         => $tabCentre[$code_centre][5],
-                    'town'        => $tabCentre[$code_centre][6],
-                    'address'     => $tabCentre[$code_centre][7],
-                    'id_entrepot' => $tabCentre[$code_centre][8],
-                    'ship_to'     => $tabCentre[$code_centre][4]
+                    'tel'         => $centre->getData('tel'),
+                    'mail'        => $centre->getData('email'),
+                    'label'       => $centre->getData('label'),
+                    'shipTo'      => $centre->getData('shipTo'),
+                    'zip'         => $centre->getData('zip'),
+                    'town'        => $centre->getData('town'),
+                    'address'     => $centre->getData('address'),
+                    'id_entrepot' => $centre->getData('id_entrepot'),
+                    'ship_to'     => $centre->getData('shipTo')
                 );
             }
         }

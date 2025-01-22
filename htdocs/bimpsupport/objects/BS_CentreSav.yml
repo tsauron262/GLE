@@ -30,6 +30,8 @@ fields:
         type: id_object
         object: entrepot
         default_value: 0
+        input:
+            type: search_entrepot
 
 lists:
     default:
@@ -58,4 +60,47 @@ lists:
             shipTo:
             email:
             tel:
+
+fields_tables:
+    infos:
+        title: Informations
+        icon: info-circle
+        rows:
+            label:
+                field: label
+            id_entrepot:
+                field: id_entrepot
+            address:
+                field: address
+            zip:
+                field: zip
+            shipTo:
+                field: shipTo
+            email:
+                field: email
+            tel:
+                field: tel
+views:
+    default:
+        title:
+            callback: getRef
+        objects_change_reload: BS_CentreSav
+        rows:
+            - cols:
+                  - type: object_header
+            - cols:
+                  - type: fields_table
+                    col_lg: 12
+                    col_mg: 12
+                    fields_table:
+                        name: infos
+#    infos:
+#        panel: 0
+#        objects_change_reload: BS_CentreSav
+#        rows:
+#            - type: fields_table
+#              col_lg: 12
+#              col_mg: 12
+#              fields_table:
+#                  name: infos
 

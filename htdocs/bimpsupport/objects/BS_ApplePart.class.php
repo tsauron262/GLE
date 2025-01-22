@@ -444,7 +444,7 @@ class BS_ApplePart extends BimpObject
             case '661-44796':
                 return 109 / 1.2;
 
-			case 'SJ7X2Z':
+			case 'SJ7X2Z/A':
 				return 289 / 1.2;
         }
 

@@ -4796,16 +4796,19 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if (!empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
                 $errors[] = 'Envoi des SMS désactivé pour le moment';
             } else {
+				$to = '';
+
                 require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-                if (!is_null($contact) && $contact->isLoaded()) {
+                if (BimpObject::objectLoaded($contact)) {
                     if (testNumSms($contact->dol_object->phone_mobile))
                         $to = $contact->dol_object->phone_mobile;
                     elseif (testNumSms($contact->dol_object->phone_pro))
                         $to = $contact->dol_object->phone_pro;
                     elseif (testNumSms($contact->dol_object->phone_perso))
                         $to = $contact->dol_object->phone_perso;
-                } elseif (testNumSms($client->dol_object->phone))
-                    $to = $client->dol_object->phone;
+                } elseif (testNumSms($client->dol_object->phone)) {
+					$to = $client->dol_object->phone;
+				}
 
                 if (stripos($sms, $this->getData('ref')) === false)
                     $sms .= "\n" . $this->getData('ref');
@@ -4818,9 +4821,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if (dol_strlen(str_replace('\n', '', $sms)) > 160)
                     BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
 
-                if ($user->login == 'f.martinez') {
-                    $to = "0686691814";
-                }
                 $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
                 $to = traiteNumMobile($to);

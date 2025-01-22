@@ -1,10 +1,31 @@
 table: bs_centre_sav
 icon: fas_store
+controller: centre
 labels:
     name: centre SAV
     name_plur: centres SAV
-    
+
+objects:
+    centre_rattachement:
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_CentreSav
+            id_object:
+                field_value: id_centre_rattachement
+    groupe_associe:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_UserGroup
+            id_object:
+                field_value: id
+
+
 fields:
+    code:
+        label: Code
+        required: 1
     label:
         label: Libellé
         required: 1
@@ -32,6 +53,26 @@ fields:
         default_value: 0
         input:
             type: search_entrepot
+    active:
+        label: Actif
+        type: bool
+        default_value: 1
+    id_centre_rattachement:
+        label: Centre de rattachement
+        type: id_object
+        object: centre_rattachement
+        default_value: 0
+    token:
+        label: Token
+    id_group:
+        label: Groupe associé au centre
+        type: id_object
+        object: groupe_associe
+        default_value: 0
+        input:
+            type: search_group
+    warning:
+        label: Warning
 
 lists:
     default:
@@ -53,6 +94,7 @@ lists:
         page_btn: 1
         modal_view: default
         cols:
+            code:
             label:
             id_entrepot:
             address:
@@ -60,12 +102,16 @@ lists:
             shipTo:
             email:
             tel:
+            active:
+                edit: 1
 
 fields_tables:
     infos:
         title: Informations
         icon: info-circle
         rows:
+            code:
+                field: code
             label:
                 field: label
             id_entrepot:
@@ -80,10 +126,22 @@ fields_tables:
                 field: email
             tel:
                 field: tel
+            active:
+                field: active
+                edit: 1
+            token:
+                field: token
+            id_group:
+                field: id_group
+            warning:
+                field: warning
+
 views:
     default:
         title:
             callback: getRef
+#            callback: getCode
+
         objects_change_reload: BS_CentreSav
         rows:
             - cols:
@@ -94,13 +152,5 @@ views:
                     col_mg: 12
                     fields_table:
                         name: infos
-#    infos:
-#        panel: 0
-#        objects_change_reload: BS_CentreSav
-#        rows:
-#            - type: fields_table
-#              col_lg: 12
-#              col_mg: 12
-#              fields_table:
-#                  name: infos
+
 

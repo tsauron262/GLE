@@ -9,7 +9,6 @@ class shipToList
     {
         BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
-
 //        global $tabCentre;
 //        foreach ($tabCentre as $centre)
 //            if (isset($centre['7']))
@@ -28,7 +27,7 @@ class shipToList
 //                    'Phone'         => array(
 //                        'Number' => $centre['0']
 //                )); /* echo "<pre>";
-                  print_r(self::$list); */
+//                  print_r(self::$list); */
     }
 
     /* public static $list = array(

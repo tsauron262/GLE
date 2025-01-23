@@ -4872,10 +4872,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		}
 
 		if ($contact_pref === 3 && $sms && $to_sms) {
-			global $user;
-			if ((BimpCore::isModeDev() && $user->admin) || $user->login === 'f.martinez') {
-				die('Envoi SMS au ' . $to_sms . ' (' . $to_sms_phone_type . ')');
-			}
+//			global $user;
+//			if ((BimpCore::isModeDev() && $user->admin) || $user->login === 'f.martinez') {
+//				die('Envoi SMS au ' . $to_sms . ' (' . $to_sms_phone_type . ')');
+//			}
 
 			require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
 

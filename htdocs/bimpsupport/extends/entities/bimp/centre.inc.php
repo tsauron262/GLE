@@ -1,8 +1,15 @@
 <?php
 
+if (!defined('BIMP_LIB')) {
+	require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+}
+if ((int) BimpCore::getConf('use_centres_sav', null, 'bimpsupport')) {
+	BimpCore::addlog('Fichier centre.inc require', 4);
+}
+
 global $tabCentre;
 
-// 0: tel / 1: email / 2: label / 3: ?? / 4: shipTo / 5: zip / 6: ville / 7: adresse / 8: ID entrepôt / 9: actif / 10: Centre répa de rattachement (fac.) 
+// 0: tel / 1: email / 2: label / 3: ?? / 4: shipTo / 5: zip / 6: ville / 7: adresse / 8: ID entrepôt / 9: actif / 10: Centre répa de rattachement (fac.)
 
 $tabCentre = array(
     "V"     => array("04 75 62 73 80", "sav07@ldlc.com", "Guilherand-Granges", 19, "1461030", "07500", "GUILHERAND-GRANGES", "Espace Colibri \n 85 rue Conrad Kilian", 25, 1, null, 'a1c004b1-d110-49c0-acc8-1ac8641c8696'),

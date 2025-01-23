@@ -96,7 +96,7 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
 
 
 
-            
+
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -115,7 +115,8 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
     function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
 
-        global $tabCentre;
+//        global $tabCentre;
+		$tabCentre = BimpCache::getCentres();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -194,8 +195,8 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-// 
-//                
+//
+//
 
 
 
@@ -256,9 +257,9 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
                 $pdf->SetXY('147', '39.5');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1082]->valueStr, 0, 'L');
                 $pdf->SetXY('147', '45.5');
-                $pdf->MultiCell(100, 6, $tabCentre[$chrono2->valuesPlus[1082]->value][0], 0, 'L');
+                $pdf->MultiCell(100, 6, $tabCentre[$chrono2->valuesPlus[1082]->value]['tel'], 0, 'L');
                 $pdf->SetXY('147', '51.3');
-                $pdf->MultiCell(100, 6, $tabCentre[$chrono2->valuesPlus[1082]->value][1], 0, 'L');
+                $pdf->MultiCell(100, 6, $tabCentre[$chrono2->valuesPlus[1082]->value]['mail'], 0, 'L');
 //                $tabCentre
                 //client
                 $contact = "";
@@ -414,7 +415,7 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
 //                for($i=0;$i<1000;$i = $i+5){
 //                $pdf->SetXY($i,$i);
 //                $pdf->MultiCell(155, 6, $i, 0, 'L');
-//                
+//
 //                }
 
 

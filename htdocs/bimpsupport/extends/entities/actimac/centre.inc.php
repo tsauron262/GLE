@@ -1,5 +1,12 @@
 <?php
 
+if (!defined('BIMP_LIB')) {
+	require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+}
+if ((int) BimpCore::getConf('use_centres_sav', null, 'bimpsupport')) {
+	BimpCore::addlog('Fichier centre.inc require', 4);
+}
+
 global $tabCentre;
 
 // 0: tel / 1: email / 2: label / 3: ?? / 4: shipTo / 5: zip / 6: ville / 7: adresse / 8: ID entrepôt / 9: actif / 10: Centre répa de rattachement (fac.)

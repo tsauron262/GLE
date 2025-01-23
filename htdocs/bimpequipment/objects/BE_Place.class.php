@@ -442,8 +442,10 @@ class BE_Place extends BimpObject
                         if (!$this->getData('code_centre')) {
                             return array('Valeur obligatoire absente: "Centre" ou "Entrepot"');
                         }
-                        global $tabCentre;
-                        $this->set('id_entrepot', (int) $tabCentre[$this->getData('code_centre')][8]);
+//                        global $tabCentre;
+//                        $this->set('id_entrepot', (int) $tabCentre[$this->getData('code_centre')][8]);
+						$lescentres = BimpCache::getCentres();
+						$this->set('id_entrepot', (int) $lescentres[$this->getData('code_centre')]['id_entrepot']);
                     }
 
                     $this->set('id_client', 0);

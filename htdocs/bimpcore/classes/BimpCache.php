@@ -2870,40 +2870,44 @@ class BimpCache
 			if((int)BimpCore::getConf('use_centres_sav', null, 'bimpsupport'))	{
 				foreach (BimpCache::getBimpObjectObjects('bimpsupport', 'BS_CentreSav') as $centre)	{
 					self::$cache['centres'][$centre->getData('code')] = array(
-						'code'        => $centre->getData('code'),
-						'label'       => $centre->getData('label'),
-						'tel'         => $centre->getData('tel'),
-						'mail'        => $centre->getData('mail'),
-						'address'     => $centre->getData('address'),
-						'zip'         => $centre->getData('zip'),
-						'town'        => $centre->getData('town'),
-						'id_entrepot' => $centre->getData('id_entrepot'),
-						'shipTo'      => $centre->getData('shipTo'),
-						'active'      => $centre->getData('active'),
+						'code'				=> $centre->getData('code'),
+						'label'				=> $centre->getData('label'),			// 2
+						'tel'				=> $centre->getData('tel'), 			// 0
+						'mail'				=> $centre->getData('mail'),			// 1
+						'address'			=> $centre->getData('address'),		// 7
+						'zip'				=> $centre->getData('zip'),			// 5
+						'town'				=> $centre->getData('town'),			// 6
+						'id_entrepot'		=> $centre->getData('id_entrepot'),	// 8
+						'shipTo'			=> $centre->getData('shipTo'),		// 4
+						'active'			=> $centre->getData('active'),		// 9
+						'id_centre_rattachement' => $centre->getData('id_centre_rattachement'),		// 10
+						'token'				=> $centre->getData('token'),		// 11
+						'id_group'			=> $centre->getData('id_group'),
 						'infos'       => ""
 					);
 				}
 			}
 			else	{
 				global $tabCentre;
-
 				if (!is_array($tabCentre)) {
 					BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 				}
-
 				foreach ($tabCentre as $code => $centre) {
 					self::$cache['centres'][$code] = array(
-						'code'        => $code,
-						'label'       => $centre[2],
-						'tel'         => $centre[0],
-						'mail'        => $centre[1],
-						'address'     => $centre[7],
-						'zip'         => $centre[5],
-						'town'        => $centre[6],
-						'id_entrepot' => $centre[8],
-						'shipTo'      => $centre[4],
-						'active'      => (isset($centre[9]) ? $centre[9] : 1),
-						'infos'       => (isset($centre['infos']) ? $centre['infos'] : '')
+						'code'				=> $code,
+						'label'				=> $centre[2],
+						'tel'				=> $centre[0],
+						'mail'				=> $centre[1],
+						'address'			=> $centre[7],
+						'zip'				=> $centre[5],
+						'town'				=> $centre[6],
+						'id_entrepot'		=> $centre[8],
+						'shipTo'			=> $centre[4],
+						'active'			=> (isset($centre[9]) ? $centre[9] : 1),
+						'id_centre_rattachement' => $centre[10],
+						'token'				=> $centre[11],
+						'id_group'			=> $centre['idGroup'],
+						'infos'       => ""
 					);
 				}
 			}

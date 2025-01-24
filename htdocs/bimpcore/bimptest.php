@@ -26,7 +26,8 @@ if (!$user->admin) {
     echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
     exit;
 }
-echo 'heyyy'; 
+
+echo '';
 
 echo '<br/>FIN';
 echo '</body></html>';

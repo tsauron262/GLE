@@ -28,7 +28,7 @@ class Bimp_User extends BimpObject
         13 => 'Samedi (sem. paires)'
     );
 
-    // Gestion des droits: 
+    // Gestion des droits:
 
     public function canView()
     {
@@ -259,7 +259,7 @@ class Bimp_User extends BimpObject
         return 0;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getCardFields($card_name)
     {
@@ -384,7 +384,7 @@ class Bimp_User extends BimpObject
         return $this->getData('firstname') . ' ' . $this->getData('lastname');
     }
 
-    // Getters Statics: 
+    // Getters Statics:
 
     public static function getUserGroupsRights($id_user, $id_entity = 0)
     {
@@ -501,7 +501,7 @@ class Bimp_User extends BimpObject
         return BimpCache::$cache[$cache_key];
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {
@@ -532,7 +532,7 @@ class Bimp_User extends BimpObject
                 ))
             );
         }
-        
+
         if ($this->isActionAllowed('unlock') && $this->canSetAction('unlock')) {
             $buttons[] = array(
                 'label'   => 'Débloquer',
@@ -677,7 +677,7 @@ class Bimp_User extends BimpObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayUserGroupsSecu()
     {
@@ -840,7 +840,7 @@ class Bimp_User extends BimpObject
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderLogo($format = 'mini', $preview = false)
     {
@@ -1771,7 +1771,7 @@ class Bimp_User extends BimpObject
         $user_label = $this->getName();
 
         switch ($list_type) {
-            // Onglet "Groupes": 
+            // Onglet "Groupes":
             case 'user_groups':
                 if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
                     return $this->renderUserGroupsTable();
@@ -1781,7 +1781,7 @@ class Bimp_User extends BimpObject
                 $list->addFieldFilterValue('ugu.fk_user', $this->id);
                 break;
 
-            // Onglet "Liste des configurations de listes": 
+            // Onglet "Liste des configurations de listes":
             case 'lists_configs':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'ListTableConfig'), 'default', 1, null, 'Liste des configurations de listes de "' . $user_label . '"', 'fas_cog');
                 $list->addIdentifierSuffix('user_' . $this->id);
@@ -1789,7 +1789,7 @@ class Bimp_User extends BimpObject
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
 
-            // Onglet "'Liste des configuration de filtres":
+            // Onglet "'Liste des configurations de filtres" :
             case 'filters_configs':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'FiltersConfig'), 'default', 1, null, 'Liste des configuration de filtres de "' . $user_label . '"', 'fas_cog');
                 $list->addIdentifierSuffix('user_' . $this->id);
@@ -1804,7 +1804,7 @@ class Bimp_User extends BimpObject
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
 
-            // Onglet "Droits utilisateur": 
+            // Onglet "Droits utilisateur":
             case 'user_rights':
                 $right = BimpObject::getInstance('bimpcore', 'Bimp_UserRight');
                 $list = new BC_ListTable($right, 'user', 1, null, 'Droits assignés à ' . $this->getName());
@@ -1819,14 +1819,14 @@ class Bimp_User extends BimpObject
                 ));
                 break;
 
-            // Onglet "Commission": 
+            // Onglet "Commission":
             case 'commissions':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpfinanc', 'BimpCommission'), 'user', 1, null, 'Commissions de "' . $user_label . '"', 'fas_comment-dollar');
                 $list->addFieldFilterValue('type', BimpCommission::TYPE_USER);
                 $list->addFieldFilterValue('id_user', $this->id);
                 break;
 
-            // Onglet "Commercial": 
+            // Onglet "Commercial":
             case 'clients':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_Client'), 'default', 1, null, 'Clients dont "' . $user_label . '" est le commercial', 'fas_user-circle');
                 $sql = $this->id . ' IN (SELECT sc.fk_user FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = a.rowid)';
@@ -1835,7 +1835,7 @@ class Bimp_User extends BimpObject
                 ));
                 break;
 
-            // Onglet "Materiel": 
+            // Onglet "Materiel":
             case 'materiel':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'default', 1, null, 'Materiel serialisé de "' . $user_label . '"', 'fas_tv');
 
@@ -1847,7 +1847,7 @@ class Bimp_User extends BimpObject
                 $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'BE_PackageProduct'), 'default', 1, null, 'Materiel serialisé de "' . $user_label . '"', 'fas_tv');
 
                 //                $list->addJoin('be_equipment_place', 'a___places.id_equipment = a.id', 'a___places');
-                //                
+                //
                 //                $list->addFieldFilterValue('a___places.position', 1);
                 //                $list->addFieldFilterValue('a___places.id_user', $this->id);
                 break;
@@ -1863,7 +1863,7 @@ class Bimp_User extends BimpObject
 
                 $list->addJoin('be_package', 'a___parent.id = a.id_package', 'a___parent');
                 $list->addJoin('be_package_place', 'a___parent___places.id_package = a___parent.id', 'a___parent___places');
-                //                
+                //
                 $list->addFieldFilterValue('a___parent___places.position', 1);
                 $list->addFieldFilterValue('a___parent___places.id_user', $this->id);
                 $list->addFieldFilterValue('a___parent___places.type', 3);
@@ -1938,7 +1938,7 @@ class Bimp_User extends BimpObject
             $html .= '<tbody>';
 
             foreach ($redirs as $redir) {
-                
+
             }
 
             $html .= '</tbody>';
@@ -2122,7 +2122,7 @@ class Bimp_User extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function saveInterfaceParam($param_name, $value)
     {
@@ -2227,7 +2227,7 @@ class Bimp_User extends BimpObject
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionExportConges($data, &$success = '')
     {
@@ -2395,7 +2395,7 @@ class Bimp_User extends BimpObject
                                 }
                                 $results[$id_right][$id_entity] = 1;
 
-                                // Ajout du droit lire si nécessaire: 
+                                // Ajout du droit lire si nécessaire:
                                 if (!in_array($right_def['perms'], array('lire', 'read')) && !in_array($right_def['subperms'], array('lire', 'read'))) {
                                     $where = 'module = \'' . $right_def['module'] . '\'';
                                     if ($right_def['subperms']) {
@@ -2513,7 +2513,7 @@ class Bimp_User extends BimpObject
                                 );
 
                                 if ($module) {
-                                    // Si droit lire, suppr des droits du même ensemble: 
+                                    // Si droit lire, suppr des droits du même ensemble:
                                     if (in_array($subperms, array('lire', 'read')) || in_array($perms, array('lire', 'read'))) {
                                         $filters = array(
                                             'a.fk_user' => $this->id,
@@ -2725,22 +2725,22 @@ class Bimp_User extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
+
     public function actionUnlock($data, &$success)
     {
         $errors = array();
         $warnings = array();
         $success = 'Compte débloqué';
-        
+
         $errors = $this->updateField('echec_auth', 0);
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function onSave(&$errors = array(), &$warnings = array())
     {
@@ -2773,7 +2773,7 @@ class Bimp_User extends BimpObject
         return $errors;
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function getAvailableUsersList($users_in, $date_from = null, &$errors = array(), &$warnings = array())
     {
@@ -2878,7 +2878,7 @@ class Bimp_User extends BimpObject
         return $user->isAvailable($date, $errors, $unavailable_reason);
     }
 
-    // Boxes: 
+    // Boxes:
 
     public function boxCreateUser($boxObj, $context)
     {
@@ -2897,8 +2897,8 @@ class Bimp_User extends BimpObject
 
         $sql = "SELECT count(*) as nb, sc.fk_user, u.lastname, u.firstname FROM llx_societe s
     LEFT JOIN llx_societe_commerciaux sc ON sc.fk_soc = s.rowid
-    LEFT JOIN llx_user u ON u.rowid = sc.fk_user 
-    LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
+    LEFT JOIN llx_user u ON u.rowid = sc.fk_user
+    LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user
     WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= " . $nbJ . " ";
 
         $userId = $user->id;
@@ -2942,8 +2942,8 @@ class Bimp_User extends BimpObject
     LEFT JOIN llx_facture f ON f.rowid = a.fk_facture
     LEFT JOIN llx_element_contact elemcont ON elemcont.element_id = a.fk_facture
     LEFT JOIN llx_c_type_contact typecont ON elemcont.fk_c_type_contact = typecont.rowid
-    LEFT JOIN llx_user u ON u.rowid = elemcont.fk_socpeople 
-    LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
+    LEFT JOIN llx_user u ON u.rowid = elemcont.fk_socpeople
+    LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user
     LEFT JOIN llx_product product ON product.rowid = a.fk_product
     WHERE typecont.element = 'facture' AND typecont.source = 'internal' AND typecont.code = 'SALESREPFOLL' AND f.type IN ('0','1','2','4','5') ";
         $sql .= "AND  DATEDIFF(now(), f.datef ) <= " . $nbJ . " ";

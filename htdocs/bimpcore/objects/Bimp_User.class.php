@@ -122,16 +122,22 @@ class Bimp_User extends BimpObject
 
     public function canEditField($field_name)
     {
-        switch ($field_name) {
-            case 'extra_materiel':
-                global $user;
+		global $user;
 
-                if ($user->admin || $user->login == 'l.gay') {
-                    return 1;
-                }
-                return 0;
-        }
-        return parent::canEditField($field_name);
+		switch ($field_name) {
+			case 'extra_materiel':
+				if ($user->admin || $user->login == 'l.gay') {
+					return 1;
+				}
+				return 0;
+
+			case 'delegations':
+				if (!$this->isLoaded()) {
+					return 0;
+				}
+				return (int) ($user->admin || ($user->id == $this->id));
+		}
+		return parent::canEditField($field_name);
     }
 
     // Getters booléens:
@@ -839,6 +845,54 @@ class Bimp_User extends BimpObject
 
         return $html;
     }
+
+	public function displayDelegations()
+	{
+		$html = '';
+
+		if ($this->isLoaded()) {
+			$delegations = $this->getData('delegations');
+
+			if (!empty($delegations)) {
+				$msg = '';
+				if (count($delegations) > 1) {
+					$msg .= 'Les utilisateurs ci-dessous ont ';
+				} else {
+					$msg .= 'L\'utilisateur ci-dessous a ';
+				}
+				$msg .= 'accès à vos messages et vos tâches';
+				$html .= BimpRender::renderAlerts($msg, 'warning');
+				$html .= $this->displayDataDefault('delegations');
+			} else {
+				$html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Aucune délégation</span>';
+			}
+
+			if ($this->canEditField('delegations')) {
+				$html .= '<div class="buttonsContainer align-right">';
+				$html .= '<span class="btn btn-default" onclick="' . $this->getJsLoadModalForm('delegations', 'Modifier vos délégations') . '">';
+				$html .= BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Gérer';
+				$html .= '</span>';
+				$html .= '</div>';
+			}
+
+			$users = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_User', array(
+				'delegations' => array(
+					'part'      => '[' . $this->id . ']',
+					'part_type' => 'middle'
+				)
+			));
+
+			if (!empty($users)) {
+				$html .= '<div style="margin-top: 15xp">';
+				foreach ($users as $u) {
+					$html .= BimpRender::renderAlerts('L\'utilisateur ' . $u->getLink() . ' vous a accordé l\'accès à ses messages et tâches', 'info');
+				}
+				$html .= '</div>';
+			}
+		}
+
+		return $html;
+	}
 
     // Rendus HTML:
 

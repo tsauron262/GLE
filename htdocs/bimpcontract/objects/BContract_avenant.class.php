@@ -37,7 +37,7 @@ class BContract_avenant extends BContract_contrat
     );
     public static $default_signature_params = array();
 
-    // Droits user: 
+    // Droits user:
 
     public function canDelete()
     {
@@ -57,7 +57,7 @@ class BContract_avenant extends BContract_contrat
         return 1;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function by($by)
     {
@@ -86,7 +86,7 @@ class BContract_avenant extends BContract_contrat
         return 1;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getExtraBtn()
     {
@@ -163,7 +163,7 @@ class BContract_avenant extends BContract_contrat
         return $buttons;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getLink($params = array(), $forced_context = '')
     {
@@ -284,7 +284,7 @@ class BContract_avenant extends BContract_contrat
         return $allSerials;
     }
 
-    // Affcihages: 
+    // Affcihages:
 
     public function displayCoutTotal()
     {
@@ -306,7 +306,7 @@ class BContract_avenant extends BContract_contrat
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderSignature()
     {
@@ -338,7 +338,7 @@ class BContract_avenant extends BContract_contrat
         ));
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '')
     {
@@ -481,7 +481,7 @@ class BContract_avenant extends BContract_contrat
 //                        $id_line = $parent->dol_object->addLine(
 //                                    $service->getData('description'),
 //                                    $ligne_de_l_avenant->getCoup(false) / $qty, $qty, 20, 0, 0,
-//                                    $service->id, $i['remise'], 
+//                                    $service->id, $i['remise'],
 //                                    $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
 //                                );
 //                        $l = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $id_line);
@@ -532,7 +532,7 @@ class BContract_avenant extends BContract_contrat
 
                         $serialsLigne = BimpTools::json_decode_array($ligne_du_contrat->getData('serials'));
                         $newSerials = BimpTools::json_decode_array($infos['serials_in']);
-                        if (count(array_diff($serialsLigne, $newSerials)) > 0 && !$dejaChange) {
+                        if (count(array_diff($serialsLigne, $newSerials)) > 0/* && !$dejaChange*/) {
                             $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
                         }
                     }
@@ -544,7 +544,7 @@ class BContract_avenant extends BContract_contrat
             $success = 'Avenant signé avec succès';
             $ref = $parent->getData('ref') . '-AV' . $this->getData('number_in_contrat');
 
-            $dateS = new DateTime($data['date_signed']);
+            $dateS = new DateTime($date);
 
             $objet = 'Signature avenant n°' . 'AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' client ' . $client->getData('code_client') . ' ' . $client->getName();
             $message = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
@@ -582,7 +582,7 @@ class BContract_avenant extends BContract_contrat
         }
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionValidate($data, &$success)
     {
@@ -846,7 +846,7 @@ class BContract_avenant extends BContract_contrat
         ];
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validatePost()
     {
@@ -901,12 +901,6 @@ class BContract_avenant extends BContract_contrat
                             foreach ($parent->dol_object->lines as $line) {
                                 $laLigne = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $line->id);
                                 if ($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
-                                    $nbSerial = count(BimpTools::json_decode_array($laLigne->getData('serials')));
-
-                                    if ($nbSerial < 1) {
-                                        $nbSerial = 1;
-                                    }
-
                                     $det->set('id_avenant', $this->id);
                                     $det->set('id_line_contrat', $laLigne->id);
                                     $det->set('qty', $laLigne->getData('qty'));
@@ -941,7 +935,6 @@ class BContract_avenant extends BContract_contrat
                         $date_de_fin->add(new DateInterval('P' . $months . 'M'));
                         //$date_de_fin->sub(new DateInterval('P1D'));
 
-
                         BimpTools::merge_array($errors, $this->updateField('want_end_date', $date_de_fin->format('Y-m-d')));
                         BimpTools::merge_array($errors, $this->updateField('date_effect', $date_effect->format("Y-m-d")));
                         BimpTools::merge_array($errors, $this->updateField('date_end', $date_end->format("Y-m-d")));
@@ -958,7 +951,7 @@ class BContract_avenant extends BContract_contrat
         $errors = array();
 
         $years = (int) BimpTools::getPostFieldValue("years", 0, 'int');
-        
+
         if ($years) {
             $nombre_months = $years * 12;
             $end = new DateTime($this->getData('date_end'));
@@ -1061,7 +1054,7 @@ class BContract_avenant extends BContract_contrat
 
     public function getSignatureDocRef($doc_type)
     {
-        
+
     }
 
     public function getSignatureParams($doc_type)

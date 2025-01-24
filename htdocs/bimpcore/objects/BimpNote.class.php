@@ -44,10 +44,6 @@ class BimpNote extends BimpObject
         self::BN_DEST_GROUP => 'Groupe',
         self::BN_DEST_SOC   => 'Tiers (par mail)'
     );
-    private static $jsReload = '
-    if (typeof notifNote !== "undefined" && notifNote !== null)
-        notifNote.reloadNotif();
-            ';
 
     // Droits users: 
     public function canEdit()
@@ -197,7 +193,7 @@ class BimpNote extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    public function isUserDest()
+    public function isUserDest($users_delegations = array())
     {
         global $user;
         if ($this->getData("type_dest") == self::BN_DEST_USER && $this->getData("fk_user_dest") == $user->id) {
@@ -210,6 +206,19 @@ class BimpNote extends BimpObject
             return 1;
         }
 
+        if (!empty($users_delegations)) {
+            foreach ($users_delegations as $id_user) {
+                if ($this->getData("type_dest") == self::BN_DEST_USER && $this->getData("fk_user_dest") == $id_user) {
+                    return 1;
+                }
+
+                $listIdGr = self::getUserUserGroupsList($id_user);
+
+                if ($this->getData("type_dest") == self::BN_DEST_GROUP && in_array($this->getData("fk_group_dest"), $listIdGr)) {
+                    return 1;
+                }
+            }
+        }
         return 0;
     }
 
@@ -444,109 +453,6 @@ class BimpNote extends BimpObject
         );
     }
 
-    public function getNoteForUser($id_user, $id_max, &$errors = array())
-    {
-        if ((int) BimpCore::getConf('mode_eco'))
-            return array();
-        $messages = array();
-        $messages['id_current_user'] = (int) $id_user;
-
-        $conversations = $this->getMyNewConversations($id_max, true, 30, $id_user, false, false);
-
-        foreach ($conversations as $c) {
-            $note = null;
-            $msg = array();
-            if ($c['id_obj']) {
-                $sql = 'SELECT MAX(id) AS id_max, MIN(id) as id_min';
-                $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimpcore_note`';
-                $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj_module'] . '"';
-                $sql .= ' AND `obj_name` = "' . $c['obj_name'] . '" AND `id_obj` = ' . $c['id_obj'];
-                $res = $this->db->db->query($sql);
-                $ln = $this->db->db->fetch_object($res);
-                if ($res) {
-                    if (!$c['lu'])
-                        $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
-                    else {
-                        $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $ln->id_max);
-                    }
-                }
-            }
-
-            if ($note) {
-                // Note
-                //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
-                $msg['content'] = $note->displayData('content', 'default', false, false, true);
-                $msg['id_ref'] = (int) $c['idNoteRef'];
-                $msg['id'] = (int) $note->id;
-                $msg['id_min'] = (int) (isset($ln) ? $ln->id_min : $note->id);
-                $msg['user_create'] = (int) $note->getData('user_create');
-                $msg['date_create'] = $note->getData('date_create');
-                $msg['tms'] = strtotime($note->getData('date_update'));
-                $msg['is_user_or_grp'] = (int) $note->getData('type_dest') != self::BN_DEST_NO;
-                $msg['is_user'] = (int) $note->getData('type_dest') == self::BN_DEST_USER;
-                $msg['is_grp'] = (int) $note->getData('type_dest') == self::BN_DEST_GROUP;
-                $msg['type_author'] = $this->getData('type_author') == self::BN_AUTHOR_USER;
-                $msg['is_user_dest'] = (int) $note->isUserDest();
-                $msg['is_user_author'] = (int) $note->isUserAuthor();
-
-                $msg['obj_type'] = $note->getData('obj_type');
-                $msg['obj_module'] = $note->getData('obj_module');
-                $msg['obj_name'] = $note->getData('obj_name');
-                $msg['id_obj'] = (int) $note->getData('id_obj');
-                $msg['is_viewed'] = (int) $note->getData('viewed');
-
-                // Obj
-//                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
-                $bc = BimpCollection::getInstance($c['obj_module'], $c['obj_name']);
-                $link = $bc->getLink((int) $c['id_obj']);
-
-                if ($link) {
-                    $msg['obj']['nom_url'] = $link;
-                } else {
-                    $msg['introuvable'] = $c['obj_module'] . ' ' . $c['obj_name'] . ' ' . $c['id_obj'];
-                }
-
-//                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));
-                /*  if (method_exists($c['obj'], "getChildObject")) {//ne fonctionne pas sans objet. Et obet trop lourd.
-                  $soc = $c['obj']->getChildObject("societe");
-                  if (!$soc or!$soc->isLoaded())
-                  $soc = $c['obj']->getChildObject("client");
-
-                  if ($soc && $soc->isLoaded())
-                  $msg['obj']['client_nom_url'] = $soc->getLink(array('external_link'=>0, 'modal_view'=>0));
-                  } */
-
-                // Author
-                $author = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('user_create'));
-                $msg['author']['id'] = (int) $author->getData('id');
-                $msg['author']['nom'] = $author->getData('firstname') . ' ' . $author->getData('lastname');
-                //            $msg['author']['firstname'] = $author->getData('firstname');
-                //            $msg['author']['lastname'] = $author->getData('lastname');
-                //            if($msg['is_user']) {
-                //                $msg['dest']['firstname'] = $dest->getData('firstname');
-                //                $msg['dest']['lastname'] = $dest->getData('lastname');
-                //                $msg['dest']['id'] = (int) $dest->getData('id');
-                //            } elseif($msg['is_grp']) {
-                //                $msg['dest']['firstname'] = $dest->getData('firstname');
-                //                $msg['dest']['lastname'] = $dest->getData('lastname');
-                //            }
-                // Destinataire
-//                if ($msg['is_user']) {
-//                    $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
-//                    $msg['dest']['nom'] = $dest->getData('firstname') . ' ' . $dest->getData('lastname');
-//                } elseif ($msg['is_grp'])
-                $msg['dest']['nom'] = $note->displayDestinataire(false, true);
-            }
-            if (count($msg))
-                $messages['content'][$msg['id_min']] = $msg;
-        }
-
-        if (empty($messages['content']))
-            $messages['content'] = array();
-
-        return $messages;
-    }
-
     // Affichage: 
 
     public function displayDestinataire($display_input_value = true, $no_html = false)
@@ -580,6 +486,7 @@ class BimpNote extends BimpObject
 
             case self::BN_AUTHOR_FREE:
                 return $this->displayData('email', 'default', $display_input_value, $no_html);
+
             case self::BN_AUTHOR_GROUP:
                 return $this->displayData('fk_group_author', 'nom_url', $display_input_value, $no_html);
         }
@@ -720,9 +627,8 @@ class BimpNote extends BimpObject
         }
 
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => self::$jsReload
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 
@@ -760,7 +666,6 @@ class BimpNote extends BimpObject
             }
         } if ($this->isLoaded($errors)) {
             $success = 'Marquée comme vue';
-
             if ((int) $this->getData('delete_on_view')) {
                 $errors = $this->delete($warnings, true);
             } else {
@@ -769,9 +674,8 @@ class BimpNote extends BimpObject
         }
 
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => self::$jsReload
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 
@@ -967,111 +871,176 @@ class BimpNote extends BimpObject
         return $errors;
     }
 
-    public static function getMyNewConversations($id_max = 0, $notViewedInFirst = true, $limit = 10, $idUser = null, $onlyNotViewed = false, $withObject = true)
+    public static function getNotesForUser($id_user, $tms = '', $options = array(), &$errors = array())
+    {
+        if ((int) BimpCore::getConf('mode_eco')) {
+            return array();
+        }
+
+        $options = BimpTools::overrideArray(array(
+                    'max' => 30
+                        ), $options);
+
+        $data = array(
+            'tms'      => date('Y-m-d H:i:s'),
+            'elements' => array()
+        );
+
+        $notes = self::getUserNewNotes($tms, $options['max'], $id_user, false);
+        $bdb = self::getBdb();
+        $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+
+        if (!empty($users_delegations)) {
+            foreach ($users_delegations as $id_user_delegation) {
+                $user_notes = self::getUserNewNotes($tms, $options['max'], $id_user_delegation, false);
+                foreach ($user_notes as $id_user_note) {
+                    if (!in_array($id_user_note, $notes)) {
+                        $notes[] = $id_user_note;
+                    }
+                }
+            }
+        }
+
+        foreach ($notes as $id_note) {
+            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', $id_note);
+            $obj_link = '';
+
+            $id_obj = (int) $note->getData('id_obj');
+            if ($id_obj) {
+                $bc = BimpCollection::getInstance($note->getData('obj_module'), $note->getData('obj_name'));
+                $obj_link = $bc->getLink($id_obj, array('card' => ''));
+            }
+
+            if (BimpObject::objectLoaded($note)) {
+                $data['elements'][$id_note] = array(
+                    'sort_val'            => $id_note,
+                    'id'                  => $id_note,
+                    'content'             => $note->displayDataDefault('content'),
+                    'date_create'         => $note->getData('date_create'),
+                    'is_user_author'      => $note->isUserAuthor(),
+                    'is_user_dest'        => $note->isUserDest($users_delegations),
+                    'is_dest_user_or_grp' => (int) ($note->getData('type_dest') != self::BN_DEST_NO),
+                    'is_viewed'           => (int) $note->getData('viewed'),
+                    'obj_link'            => $obj_link,
+                    'obj_module'          => $note->getData('obj_module'),
+                    'obj_name'            => $note->getData('obj_name'),
+                    'id_obj'              => $id_obj,
+                    'author'              => array(
+                        'id'  => (int) $note->getData('user_create'),
+                        'nom' => $note->displayAuthor(false, true)
+                    ),
+                    'dest'                => array(
+                        'nom' => $note->displayDestinataire(false, true)
+                    )
+                );
+            }
+        }
+
+        return $data;
+    }
+
+    public static function getUserNewNotes($tms = '', $limit = 10, $idUser = null, $onlyNotViewed = false)
     {
         if (is_null($idUser)) {
             global $user;
             $idUser = $user->id;
         }
-        $listIdGr = self::getUserUserGroupsList($idUser);
-        $date = new DateTime();
-        $date->setTimestamp($id_max);
 
-        $reqDeb = "SELECT id, `obj_type`,`obj_module`,`obj_name`,`id_obj`, id as idNoteRef"
-                . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
-                . "WHERE ";
+        $bdb = BimpCache::getBdb();
+        $user_groups = self::getUserUserGroupsList($idUser);
+        $notes = array();
 
-        if ($id_max > 0)
-            $reqDeb .= " date_update > '" . $date->format('Y-m-d H:i:s') . "' AND ";
+        $where = '';
 
-        $where = "((type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
+        if ($onlyNotViewed) {
+            $where .= 'a.viewed = 0 AND ';
+        }
 
-        if (count($listIdGr) > 0) {
-            $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
+        if ($tms) {
+            $where .= 'a.tms > \'' . $tms . '\' AND ';
+        }
+
+        $where .= '(';
+
+        $where .= '(a.type_dest = 1 AND a.fk_user_dest = ' . $idUser . ')';
+        if (!empty($user_groups)) {
+            $where .= ' OR (a.type_dest = 4 AND a.fk_group_dest IN (' . implode(',', $user_groups) . '))';
+        }
+
+        if (!$onlyNotViewed) {
+            $where .= ' OR (a.type_author = 1 AND a.user_create = ' . $idUser . ' AND a.type_dest > 0)';
         }
 
         $where .= ')';
 
-        $where .= "         ";
-
-//        $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
-//        if($notViewedInFirst)
-//            $reqFin .= " ORDER by mviewed ASC";
-//        else
-        $reqFin .= " ORDER BY id DESC";
-        $reqFin .= " LIMIT 0," . $limit * 10;
-        $tabFils = array();
-        $tabNoDoublons = array();
-        $tabReq = array();
-        $tabReq[0] = $reqDeb . "(" . $where . ") AND viewed = 0 " . $reqFin;
-        if (!$onlyNotViewed) {
-//            $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
-            $tabReq[1] = $reqDeb . $where . $reqFin;
-            $tabReq[2] = $reqDeb . "type_author = 1 AND user_create = " . $idUser.' AND type_dest > 0 ' . $reqFin;
+        if (!$onlyNotViewed && !(int) BimpCore::getConf('mode_eco')) {
+            // Si non lu ou si aucune autre note plus récente pour le même objet :
+            $where .= ' AND (a.viewed = 0 OR (';
+            $where .= '(SELECT COUNT(b.id) FROM ' . MAIN_DB_PREFIX . 'bimpcore_note b WHERE b.obj_name = a.obj_name AND b.id_obj = a.id_obj AND b.id > a.id) = 0';
+            $where .= '))';
         }
 
-//        echo '<pre>';
-//        print_r($tabReq);
-//        die();
-        $i = 0;
-        foreach ($tabReq as $rang => $req) {
-//            echo($req.'<br/><br/>');
-            $sql = self::getBdb()->db->query($req);
-            if ($sql) {
-                while ($ln = self::getBdb()->db->fetch_object($sql)) {
-                    if ($i > $limit)
-                        break 2;
-                    $hash = $ln->obj_module . $ln->obj_name . $ln->id_obj;
-                    if (!isset($tabNoDoublons[$hash])) {
-                        $i++;
-                        $tabNoDoublons[$hash] = true;
-                        $data = array("lu" => $rang, "idNoteRef" => $ln->idNoteRef);
-                        if ($withObject && $ln->obj_type == "bimp_object") {
-                            $data['obj'] = BimpCache::getBimpObjectInstance($ln->obj_module, $ln->obj_name, $ln->id_obj);
-                        } elseif (!$withObject) {
-                            $data['obj_module'] = $ln->obj_module;
-                            $data['obj_name'] = $ln->obj_name;
-                            $data['id_obj'] = $ln->id_obj;
-                        }
-                        $tabFils[$ln->idNoteRef] = $data;
-                    }
-                }
+        $rows = $bdb->getRows('bimpcore_note a', $where, $limit, 'array', array('DISTINCT a.id'), 'id', 'DESC');
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $notes[] = $r['id'];
             }
         }
-//        print_r($tabFils);
-        return $tabFils;
+
+        return $notes;
     }
 
     public static function cronNonLu()
     {
         $listUser = BimpObject::getBimpObjectList('bimpcore', 'Bimp_User', array('statut' => 1));
 
-        global $db;
-        $userT = new User($db);
-//        $listUser = array(242);
+        $bdb = BimpCache::getBdb();
+        $maxForMail = 20;
+        $erp_name = BimpCore::getConf('erp_name');
+
         foreach ($listUser as $idUser) {
+            $email = $bdb->getValue('user', 'email', 'rowid = ' . $idUser);
+            if (!$email) {
+                continue;
+            }
+
             $html = '';
-            $notes = BimpNote::getMyNewConversations(0, true, 500, $idUser, true, false);
-            $maxForMail = 20;
-            $data = array();
-            foreach ($notes as $note)
-                if ($note['lu'] == 0 && count($data) < $maxForMail) {
-                    $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
-                    $data[] = 'Message de ' . $noteObj->displayData('user_create', 'nom') . ' concernant ' . $noteObj->getParentLink() . ': <br/><i>' . $noteObj->displayData('content') . '</i>';
+            $notes = BimpNote::getUserNewNotes('', 500, $idUser, true);
+
+            if (!empty($notes)) {
+                $n = count($notes);
+                $s = ($n > 1 ? 's' : '');
+
+                $subject = $n . ' message' . $s . ' non lu' . $s . ' dans l\'ERP' . ($erp_name ? ' ' . $erp_name : '');
+                $html .= 'Bonjour vous avez ' . $n . ' message' . $s . ' non lu' . $s . ' : <br/>';
+
+                if ($n > $maxForMail) {
+                    $html .= 'Voici les ' . $maxForMail . ' derniers<br/>';
                 }
-            if (count($data) > 0) {
-                $userT->fetch($idUser);
-                $html = '';
-//                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
-                $html .= 'Bonjour vous avez ' . count($notes) . ' message(s) non lu : <br/>';
-                if (count($data) >= $maxForMail)
-                    $html .= 'Voici les ' . count($data) . ' derniers<br/>';
-                $html .= '<br/>Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
+                $html .= '<br/>Pour désactiver cette relance, vous pouvez : ';
+                $html .= '<br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>';
+                $html .= '- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.';
 
-                $html .= implode('<br/><br/>', $data);
-                mailSyn2('Message dans l\'erp', $userT->email, null, $html);
+                $i = 0;
+                foreach ($notes as $id_note) {
+                    $i++;
+                    if ($i > $maxForMail) {
+                        break;
+                    }
 
-//                echo $htmlTitre . $html;
+                    $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', $id_note);
+                    $html .= '<br/><br/>';
+
+                    $author = $note->displayAuthor(false, true);
+                    $link = $note->getParentLink();
+
+                    $html .= '<b>Message' . ($author ? ' de ' . $author : '') . ($link ? ' concernant ' . $link : '') . ' : </b><br/>';
+                    $html .= '<i>' . $note->displayDataDefault('content') . '</i>';
+                }
+
+                $email = BimpTools::cleanEmailsStr($email);
+                mailSyn2($subject, $email, null, $html);
             }
         }
 

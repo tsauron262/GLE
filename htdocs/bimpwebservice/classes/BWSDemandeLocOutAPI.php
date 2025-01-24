@@ -34,8 +34,9 @@ BWSApi::$requests['sendDocFinancement'] = array(
         'id_origine'       => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
         'doc_type'         => array('label' => 'Type de document'),
         'docs_content'     => array('label' => 'Fichier(s)', 'data_type' => 'json', 'required' => 1),
-        'signature_params' => array('label' => 'Paramètres signature', 'data_type' => 'json', 'required' => 1),
-        'signataires_data' => array('label' => 'Données signataires', 'data_type' => 'json')
+        'signature_params' => array('label' => 'Paramètres signature', 'data_type' => 'json'),
+        'signataires_data' => array('label' => 'Données signataires', 'data_type' => 'json'),
+        'signed'           => array('label' => 'Document signé', 'data_type' => 'bool', 'default' => 0)
     )
 );
 
@@ -71,12 +72,10 @@ BWSApi::$requests['reopenDemandeFinancement'] = array(
 );
 
 BWSApi::$requests['getContractInfo'] = array(
-    'date_valid'   => array('label' => 'Date ou le contrat doit être actif', 'required' => 0), 
-    'ref_cli'      => array('label' => 'Code client', 'required' => 0), 
-    'prod'      => array('label' => 'Ref produit', 'required' => 0),
+    'date_valid' => array('label' => 'Date ou le contrat doit être actif', 'required' => 0),
+    'ref_cli'    => array('label' => 'Code client', 'required' => 0),
+    'prod'       => array('label' => 'Ref produit', 'required' => 0),
 );
-
-
 
 class BWSDemandeLocOutAPI extends BWSApi
 {
@@ -176,7 +175,21 @@ class BWSDemandeLocOutAPI extends BWSApi
                 if (!BimpObject::objectLoaded($bcdf)) {
                     $this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
                 } else {
-                    $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('docs_content', ''), $this->getParam('signature_params', array()), $this->getParam('signataires_data', array()));
+                    $signed = (int) $this->getParam('signed', 0);
+                    $signature_params = array();
+                    $signature_data = array();
+                    
+                    if (!$signed) {
+                        $signature_params = $this->getParam('signature_params', array());
+                        if (empty($signature_data)) {
+                            $this->addError('MISSING_PARAMETER', 'Paramètres de signature du document absents');
+                            return array();
+                        }
+                        
+                        $signature_data = $this->getParam('signataires_data', array());
+                    }
+                    
+                    $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('docs_content', ''), $signature_params, $signature_data, $signed);
 
                     if (count($errors)) {
                         $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
@@ -222,7 +235,7 @@ class BWSDemandeLocOutAPI extends BWSApi
 
         return $response;
     }
-    
+
     protected function wsRequest_reviewDocFinancement()
     {
         $response = array();
@@ -246,7 +259,7 @@ class BWSDemandeLocOutAPI extends BWSApi
                 if (!BimpObject::objectLoaded($bcdf)) {
                     $this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
                 } else {
-                    $errors = $bcdf->reviewDocFin($this->getParam('doc_type', '').'_fin');
+                    $errors = $bcdf->reviewDocFin($this->getParam('doc_type', '') . '_fin');
 
                     if (count($errors)) {
                         $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
@@ -376,7 +389,7 @@ class BWSDemandeLocOutAPI extends BWSApi
         if ($refCli) {
             $filters['client:code_client'] = $refCli;
         }
-        if($refProd)
+        if ($refProd)
             $filters['lines:produit:ref'] = $refProd;
 
         if (!count($filters)) {

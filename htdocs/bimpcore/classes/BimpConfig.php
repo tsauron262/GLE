@@ -1175,8 +1175,19 @@ class BimpConfig
     {
         if (is_string($callback)) {
             if (!is_null($this->instance) && is_object($this->instance)) {
+                $not = 0;
+                if (preg_match('/^!(.+)$/', $callback, $matches)) {
+                    $not = 1;
+                    $callback = $matches[1];
+                }
                 if (method_exists($this->instance, $callback)) {
-                    return $this->instance->{$callback}();
+                    $result = $this->instance->{$callback}();
+
+                    if ($not) {
+                        return !$result;
+                    }
+
+                    return $result;
                 } else {
                     $this->logConfigError('Méthode "' . $callback . '" inexistante dans la classe ' . get_class($this->instance));
                 }
@@ -1184,8 +1195,15 @@ class BimpConfig
                 $this->logConfigError('Impossible d\'appeller la méthode "' . $callback . '" - Instance invalide');
             }
         } elseif (is_array($callback)) {
+
             $is_static = $this->get($path . '/is_static', false, false, 'bool');
             $method = $this->get($path . '/method', null, true);
+            if (preg_match('/^!(.+)$/', $method, $matches)) {
+                $not = 1;
+                $method = $matches[1];
+            } else {
+                $not = (int) $this->get($path . '/not', 0, false, 'bool');
+            }
             if ($this->isDefined($path . '/object')) {
                 $instance = $this->getObject($path . '/object');
             } elseif ($is_static && $this->isDefined($path . '/class_name')) {
@@ -1213,7 +1231,7 @@ class BimpConfig
                     return BimpCache::getCallFunctionCache($instance, $method, $params, $is_static);
                 } else {
                     if ($is_static) {
-                        return forward_static_call_array(array(
+                        $result = forward_static_call_array(array(
                             $instance, $method
                                 ), $params);
                     } else {
@@ -1222,10 +1240,17 @@ class BimpConfig
                         foreach ($params as $key => $value) {
                             $args[] = $value;
                         }
-                        return call_user_func_array(array(
+
+                        $result = call_user_func_array(array(
                             $instance, $method
                                 ), $args);
                     }
+                    
+                    if ($not) {
+                        return !$result;
+                    }
+                    
+                    return $result;
                 }
             }
         }

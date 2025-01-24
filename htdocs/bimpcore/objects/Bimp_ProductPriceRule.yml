@@ -1,0 +1,95 @@
+
+table: bimp_product_price_rule
+common_fields: 0
+icon: fas_percent
+
+labels: 
+    name: règle de prix
+    name_plur: règles de prix
+    is_female: 1
+    
+parent_module: bimpcore
+parent_object: Bimp_Product
+parent_id_property: id_product
+
+fields: 
+    id_product: 
+        label: Produit
+        type: id_parent
+        
+    type_condition: 
+        label: Type de condition
+        values: 
+            array: types_condition
+        default_value: qty_min
+            
+    cond_value: 
+        label: Valeur condition
+        type: float
+        default_value: 0
+        
+    type_impact: 
+        label: Impact
+        values: 
+            array: types_impact
+        default_value: reduc_percent
+        
+    impact_value: 
+        label: Valeur impact
+        type: float
+        default_value: 0
+        
+    active: 
+        label: Activée
+        type: bool
+        default_value: 1
+        
+forms: 
+    default: 
+        rows: 
+            - field: type_condition
+            - field: cond_value
+            - field: type_impact
+            - field: impact_value
+            - field: active
+            
+lists_cols: 
+    condition: 
+        label: Condition
+        value: 
+            callback: displayCondition
+            
+    impact: 
+        label: Impact
+        value: 
+            callback: displayImpact
+            
+lists: 
+    default: 
+        title: Règles de prix
+        icon: fas_percent
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les remises sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_btn: 0
+        delete_btn: 1
+        cols:
+            id_product:
+            condition: 
+            impact: 
+            active: 
+                edit: 1
+                
+    product: 
+        extends: default
+        add_btn: 1     
+        add_form_name: default
+        enable_search: 0
+        cols: 
+            id_product: unset

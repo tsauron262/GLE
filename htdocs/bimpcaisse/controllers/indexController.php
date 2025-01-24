@@ -5,6 +5,14 @@ class indexController extends BimpController
 
     protected $caisse = null;
 
+    public function initLayout()
+    {
+        $layout = BimpLayout::getInstance();
+        $layout->addJsVar('caisse_sounds_on', (int) BimpCore::getConf('sounds_on', null, 'bimpcaisse'));
+
+        parent::initLayout();
+    }
+
     public function isCaisseValide(BC_Caisse $caisse, &$errors = array())
     {
         return $caisse->isValid($errors);
@@ -35,7 +43,9 @@ class indexController extends BimpController
 
     public function renderHtml()
     {
-        global $conf, $mysoc;
+        global $mysoc;
+        
+        $html = '';
 
         $html .= '<div id="bc_main_container">';
         $html .= '<div class="container-fluid">';
@@ -140,27 +150,37 @@ class indexController extends BimpController
         if (!BimpObject::objectLoaded($caisse)) {
             $html .= $this->renderOpenCaisseHtml();
         } else {
-            $tabs = array(
-                array(
-                    'id'      => 'ventes',
-                    'title'   => 'Ventes',
-                    'content' => $this->renderVentesTabHtml()
-                ),
-                array(
-                    'id'      => 'clients',
-                    'title'   => 'Clients',
-                    'content' => $this->renderClientsTabHtml()
-                ),
-                array(
-                    'id'      => 'mvt_fonds',
-                    'title'   => 'Mouvements de fonds',
-                    'content' => $this->renderMvtFondsTabHtml($caisse)
-                ),
-                array(
-                    'id'      => 'paiements',
-                    'title'   => 'Historique des paiements',
-                    'content' => $this->renderSessionPaymentsTab($caisse)
-                )
+            $tabs = array();
+            $tabs[] = array(
+                'id'      => 'ventes',
+                'title'   => 'Ventes',
+                'content' => $this->renderVentesTabHtml()
+            );
+
+            if (BimpTools::isModuleDoliActif('bimplocation')) {
+                $tabs[] = array(
+                    'id'      => 'locations',
+                    'title'   => 'Locations',
+                    'content' => $this->renderLocationTabHtml()
+                );
+            }
+
+            $tabs[] = array(
+                'id'      => 'clients',
+                'title'   => 'Clients',
+                'content' => $this->renderClientsTabHtml()
+            );
+
+            $tabs[] = array(
+                'id'      => 'mvt_fonds',
+                'title'   => 'Mouvements de fonds',
+                'content' => $this->renderMvtFondsTabHtml($caisse)
+            );
+
+            $tabs[] = array(
+                'id'      => 'paiements',
+                'title'   => 'Historique des paiements',
+                'content' => $this->renderSessionPaymentsTab($caisse)
             );
 
             $html .= BimpRender::renderNavTabs($tabs);
@@ -228,7 +248,7 @@ class indexController extends BimpController
             $html .= '<div class="freeFormRow">';
             $html .= '<div class="freeFormLabel">Centre: </div>';
             $html .= '<div class="freeFormInput">';
-            $html .= BimpInput::renderInput('search_entrepot', 'id_entrepot', $id_entrepot, array('with_caisse_close'=> true, 'include_empty'=> true));
+            $html .= BimpInput::renderInput('search_entrepot', 'id_entrepot', $id_entrepot, array('with_caisse_close' => true, 'include_empty' => true));
             $html .= '</div>';
             $html .= '</div>';
 
@@ -292,7 +312,7 @@ class indexController extends BimpController
             $html .= '<div class="freeFormRow">';
             $html .= '<div class="freeFormLabel">Montant du fonds de caisse: </div>';
             $html .= '<div class="freeFormInput">';
-            
+
             $html .= BimpRender::renderCompteurCaisse('fonds');
 
 //            $html .= BimpInput::renderInput('text', 'fonds', '', array(
@@ -467,6 +487,13 @@ class indexController extends BimpController
         $html .= '</div>';
 
         return $html;
+    }
+
+    public function renderLocationTabHtml()
+    {
+        $loc = BimpObject::getInstance('bimplocation', 'BimpLocation');
+        $list = new BC_ListTable($loc, 'default');
+        return $list->renderHtml();
     }
 
     public function renderClientsTabHtml()
@@ -677,20 +704,20 @@ class indexController extends BimpController
                 if (is_null($session) || !$session->isLoaded()) {
                     $errors[] = 'Session de caisse invalide';
                 } else {
-                    /*if (!count($errors)) {//pour ne pas fermer avec des ventes brouillon
-                        if (1) {
-                            $bc_vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente');
-                            $filters = array();
-                            $filters['id_caisse'] = array($caisse->id);
-                            $filters['id_caisse_session'] = array($session->id);
-                            $list = $bc_vente->getList($filters);
-                            foreach ($list as $infoVente)
-                                if ($infoVente['status'] == 1)
-                                    $nbBr++;
-                            if ($nbBr > 0)
-                                $errors[] = "Abandonnez toutes les ventes à l’état brouillon au préalable. (" . $nbBr . ")";
-                        }
-                    }*/
+                    /* if (!count($errors)) {//pour ne pas fermer avec des ventes brouillon
+                      if (1) {
+                      $bc_vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente');
+                      $filters = array();
+                      $filters['id_caisse'] = array($caisse->id);
+                      $filters['id_caisse_session'] = array($session->id);
+                      $list = $bc_vente->getList($filters);
+                      foreach ($list as $infoVente)
+                      if ($infoVente['status'] == 1)
+                      $nbBr++;
+                      if ($nbBr > 0)
+                      $errors[] = "Abandonnez toutes les ventes à l’état brouillon au préalable. (" . $nbBr . ")";
+                      }
+                      } */
 
 
 
@@ -888,6 +915,13 @@ class indexController extends BimpController
         $ticket_html = '';
         $ticket_errors = array();
 
+        $bdb = BimpCache::getBdb();
+        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions') && !(int) $this->getConf('no_transaction_db', 0, false, 'bool');
+
+        if ($use_db_transactions) {
+            $bdb->db->begin();
+        }
+
         $id_vente = (int) BimpTools::getValue('id_vente', 0, 'int');
         $status = BimpTools::getValue('status', null, 'int');
 
@@ -912,9 +946,6 @@ class indexController extends BimpController
                 $errors[] = 'Cette vente ne peut pas être modifiée car elle a été validée';
             } else {
                 if ((int) $status === 2) {
-//                    if ($vente->getData('status') === 0) {
-//                        $errors[] = 'Cette vente ne peut pas être validée car elle a été annulée';
-//                    } else {
                     $success = 'Vente validée avec succès';
                     $validate = (int) $vente->validateVente($validate_errors);
                     if (!$validate) {
@@ -923,29 +954,36 @@ class indexController extends BimpController
                     } else {
                         $ticket_html = $vente->renderTicketHtml($ticket_errors);
                     }
-                    if (count($validate_errors)) {
+                    if (!$use_db_transactions && count($validate_errors)) {
                         $msg = 'Erreur validation vente ' . $vente->id . "\n";
                         foreach ($validate_errors as $e) {
                             $msg .= ' - ' . $e . "\n";
                         }
                         dol_syslog($msg, LOG_DEBUG);
-                        if ($validate) {
-                            // Remplacé par un log urgent
-//                            $msg = 'Erreurs suite à la validation de la vente #' . $vente->id . "\n\n";
-//                            $msg .= print_r($validate_errors, 1);
-//                            mailSyn2('ERREURS VENTE', BimpCore::getConf('devs_email'), '', $msg);
-                        }
                     }
-//                    }
                 } else {
                     if ((int) $status === 1) {
                         $success = 'Vente enregistrée avec succès';
                     } else {
                         $success = 'Vente abandonnée';
+
+                        if (BimpCore::isModuleActive('bimplocation')) {
+                            BimpCache::getBdb()->update('bimp_location', array(
+                                'id_cur_vente' => 0
+                                    ), 'id_cur_vente = ' . $id_vente);
+                        }
                     }
                     $vente->set('status', (int) $status);
                     $errors = BimpTools::merge_array($errors, $vente->update());
                 }
+            }
+        }
+
+        if ($use_db_transactions) {
+            if (count($errors) || count($validate_errors)) {
+                $bdb->db->rollback();
+            } else {
+                $bdb->db->commit();
             }
         }
 
@@ -1257,7 +1295,8 @@ class indexController extends BimpController
 
         $result = array(
             'cart_html'   => '',
-            'result_html' => ''
+            'result_html' => '',
+            'ok'          => 0
         );
 
         $vente_data = array();
@@ -1277,6 +1316,7 @@ class indexController extends BimpController
             'request_id'  => BimpTools::getValue('request_id', 0, 'int'),
             'cart_html'   => $result['cart_html'],
             'result_html' => $result['result_html'],
+            'ok'          => $result['ok'],
             'vente_data'  => $vente_data
         );
     }

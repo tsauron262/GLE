@@ -839,6 +839,7 @@ searches:
     default: 
         fields_search: 
             - a.ref
+            - a.rowid
             - s.nom
         fields_return: 
             - a.ref

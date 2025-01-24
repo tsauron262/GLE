@@ -4,6 +4,7 @@ title: Caisse
 
 js: 
     - /bimpcommercial/views/js/paiement.js
+    - /bimplocation/views/js/bimplocation.js
     
 css: 
     - /bimpcaisse/views/css/styles.css

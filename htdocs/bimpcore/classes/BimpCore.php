@@ -62,39 +62,58 @@ class BimpCore
     );
     public static $html_purifier = null;
 
-    // Initialisation: 
+    // Initialisation:
 
     public static function init()
     {
         if (!self::$is_init) {
+            BimpDebug::addDebugTime('Début affichage page');
+
             self::$is_init = true;
 
             global $noBootstrap;
 
-            BimpDebug::addDebugTime('Début affichage page');
-
-            // Commenté car pose problème
-//            if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
-//                self::setContext("private"); // Todo: trouver meilleure solution (Le contexte privé / public doit être indépendant du module) 
-//            }
+            $extends_entity = BimpCore::getExtendsEntity();
+            $use_css_v2 = (int) self::getConf('use_css_v2');
+            $is_context_private = self::isContextPrivate();
 
             if ($noBootstrap) {
                 self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
             }
 
-            if (self::isContextPrivate()) {
-                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BimpCore::getExtendsEntity() . '.css';
-                }
-                self::$files['js'][] = '/bimpcore/views/js/notification.js';
-            } else {
-                if (BimpCore::getExtendsEntity() != '' && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css')) {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BimpCore::getExtendsEntity() . '.css';
+            // Traitements CSS :
+            if ($use_css_v2) {
+                if ($is_context_private) {
+                    if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css';
+                    } else {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/default/bimpcore.css';
+                    }
                 } else {
-                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+                    if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore_public.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore_public.css';
+                    } else {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/default/bimpcore_public.css';
+                    }
+                }
+            } else {
+                if ($is_context_private) {
+                    if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css';
+                    }
+                } else {
+                    if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css')) {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css';
+                    } else {
+                        self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+                    }
                 }
             }
 
+            // Traitements JS :
+            if ($is_context_private) {
+                self::$files['js']['notification'] = '/bimpcore/views/js/notification.js';
+            }
             if (!self::isModuleActive('bimpdatasync')) {
                 unset(self::$files['css']['bds_operations']);
                 unset(self::$files['js']['bds_operations']);
@@ -105,7 +124,7 @@ class BimpCore
         }
     }
 
-    // Gestion Layout / js / css: 
+    // Gestion Layout / js / css:
 
     public static function initLayout()
     {
@@ -120,17 +139,17 @@ class BimpCore
             $layout->addCssFile(self::getFileUrl($css_file, true, false));
         }
 
-        // Ajout fichiers JS BimpCore: 
+        // Ajout fichiers JS BimpCore:
         foreach (self::$files['js'] as $js_file) {
             $layout->addJsFile(self::getFileUrl($js_file, true, false));
         }
 
-        // Ajouts variables JS: 
+        // Ajouts variables JS:
         $layout->addJsVars(self::getJsVars());
 
-        // Ajouts variables local: 
+        // Ajouts variables local:
         if (class_exists('Session')) {
-            $layout->addLocalVars(array(
+            $layout->addJsLocalVars(array(
                 'bimp_hash' => Session::getHash()
             ));
         }
@@ -142,16 +161,20 @@ class BimpCore
     {
         global $user, $conf, $dolibarr_main_url_root;
         $vars = array(
-            'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
-            'entity'          => $conf->entity,
-            'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
-            'bimp_context'    => '\'' . self::getContext() . '\'',
-            'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
-            'sessionHideMenu' => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0)
+            'dol_url_root'               => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
+            'entity'                     => $conf->entity,
+            'id_user'                    => (BimpObject::objectLoaded($user) ? $user->id : 0),
+            'bimp_context'               => '\'' . self::getContext() . '\'',
+            'theme'                      => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
+            'sessionHideMenu'            => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0),
+            'bimp_use_local_storage'     => (int) BimpCore::getConf('use_browser_local_storage'),
+            'bimp_local_storage_prefixe' => '\'' . BimpCore::getConf('bimp_local_storage_prefixe') . '\'',
+            'bimp_debug_local_storage'   => (int) BimpCore::getConf('js_debug_local_storage'),
+            'bimp_debug_notifs'          => (int) BimpCore::getConf('js_debug_notifs')
         );
 
         $notifs = '{';
-        if (self::isContextPrivate()) {
+        if (self::isContextPrivate() && BimpObject::objectLoaded($user)) {
             $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
             $config_notification = $notification->getList(array('active' => 1));
 
@@ -161,13 +184,14 @@ class BimpCore
                     $notifs .= "nom: '" . $cn['nom'] . "', ";
                     $notifs .= "id_notification: '" . $cn['id'] . "', ";
                     $notifs .= "module: '" . $cn['module'] . "', ";
+                    $notifs .= "storage_key: '" . 'user_' . $user->id . '_' . $cn['nom'] . '\',';
                     $notifs .= "obj: null},";
                 }
             }
         }
         $notifs .= '}';
 
-        $vars['notificationActive'] = $notifs;
+        $vars['bimp_notifications_actives'] = $notifs;
 
         return $vars;
     }
@@ -186,7 +210,7 @@ class BimpCore
             $js_vars = self::getJsVars();
 
             if (!empty($js_vars)) {
-                $html .= "\n" . '<script '.BimpTools::getScriptAttribut().'>' . "\n";
+                $html .= "\n" . '<script ' . BimpTools::getScriptAttribut() . '>' . "\n";
                 foreach ($js_vars as $var_name => $var_value) {
                     $html .= "\t" . 'var ' . $var_name . ' = ';
                     if (BimpTools::isNumericType($var_value)) {
@@ -202,7 +226,7 @@ class BimpCore
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
                 if ($url) {
-                    $html .= '<script '.BimpTools::getScriptAttribut().' src="' . $url . '"></script>' . "\n";
+                    $html .= '<script ' . BimpTools::getScriptAttribut() . ' src="' . $url . '"></script>' . "\n";
                 }
             }
 
@@ -239,7 +263,7 @@ class BimpCore
                         }
 
                         if (!file_exists(DOL_DOCUMENT_ROOT . '/' . $out_file)) {
-                            // Suppr du fichier existant: 
+                            // Suppr du fichier existant:
                             $dir = DOL_DOCUMENT_ROOT . '/' . $pathinfo['dirname'];
                             foreach (scandir($dir) as $f) {
                                 if (in_array($f, array('.', '..'))) {
@@ -287,7 +311,7 @@ class BimpCore
         return '';
     }
 
-    // Gestion Versions et mises à jours: 
+    // Gestion Versions et mises à jours:
 
     public static function checkSqlUpdates()
     {
@@ -638,6 +662,7 @@ class BimpCore
                     if (file_exists($dir) && is_dir($dir)) {
 
                         $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), 0);
+
                         $files = scandir($dir);
 
                         foreach ($files as $f) {
@@ -712,7 +737,7 @@ class BimpCore
         }
 
         if ($update) {
-            if (!empty($versions)) { // Pour éviter un écrasement... 
+            if (!empty($versions)) { // Pour éviter un écrasement...
                 $bdb->update('bimpcore_conf', array(
                     'value' => json_encode($versions)
                         ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
@@ -740,7 +765,7 @@ class BimpCore
         self::setConf('bimpcore_version', $versions);
     }
 
-    // Gestion BimpCore Conf: 
+    // Gestion BimpCore Conf:
 
     public static function getConfCache()
     {
@@ -769,10 +794,10 @@ class BimpCore
     public static function getConf($name, $default = null, $module = 'bimpcore', &$source = '', $entity = null)
     {
         // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
-        // passée en argument de la fonction. 
+        // passée en argument de la fonction.
         // si cette argument est null on retourne la valeur par défaut définie dans le YML de la config du module (si elle est existe)
-        // on retourne null sinon. 
-        // Le système de cache permet de vérifier une seule fois la valeur en base et la valeur par défaut du YML. 
+        // on retourne null sinon.
+        // Le système de cache permet de vérifier une seule fois la valeur en base et la valeur par défaut du YML.
 
 
         if (!$module) {
@@ -799,7 +824,7 @@ class BimpCore
             return $cache[0][$module][$name];
         }
 
-        // Check éventuelle erreur sur le module: 
+        // Check éventuelle erreur sur le module:
         if (isset($cache[(int) $entity])) {
             foreach ($cache[(int) $entity] as $module_name => $params) {
                 if (isset($params[$name])) {
@@ -921,7 +946,7 @@ class BimpCore
         return (int) self::getConf('id_user_group_' . $group_code);
     }
 
-    // Gestion params yml globaux: 
+    // Gestion params yml globaux:
 
     public static function getParam($full_path, $default_value = '', $type = 'string')
     {
@@ -936,7 +961,7 @@ class BimpCore
         return $default_value;
     }
 
-    // Getters divers: 
+    // Getters divers:
 
     public static function getBimpUser()
     {
@@ -956,7 +981,7 @@ class BimpCore
         return null;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public static function isModuleActive($module)
     {
@@ -991,7 +1016,7 @@ class BimpCore
         return 0;
     }
 
-    // Gestion ini: 
+    // Gestion ini:
 
     public static function setMaxExecutionTime($time)
     {
@@ -1011,7 +1036,7 @@ class BimpCore
         }
     }
 
-    // Gestion extends: 
+    // Gestion extends:
 
     public static function getExtendsEntity()
     {
@@ -1071,10 +1096,10 @@ class BimpCore
 
     public static function requireFileForEntity($module, $file_name, $return_only = false)
     {
-        // Priorités: 
-        // - Fichier "Entité" 
+        // Priorités:
+        // - Fichier "Entité"
         // - Fichier "Version"
-        // - Fichier entité "default" 
+        // - Fichier entité "default"
         // - Fichier de base
 
         $dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
@@ -1264,7 +1289,6 @@ class BimpCore
                         exit;
                     }
                 } else {
-                    // Ca prend trop de ressources pour pas grand chose... //oui, mais sinon, on perd toute notion de logs qui revient ou non...
                     if (BimpDebug::isActive()) {
                         BimpDebug::incCacheInfosCount('logs', false);
                     }
@@ -1276,27 +1300,29 @@ class BimpCore
                     $warnings = array();
                     $errUpdate = $log->update($warnings, true);
 
-                    $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
+                    if ((int) BimpCore::getConf('save_similar_logs_as_note')) {
+                        $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
 
-                    if (defined('ID_ERP')) {
-                        $data['ID ERP'] = ID_ERP;
+                        if (defined('ID_ERP')) {
+                            $data['ID ERP'] = ID_ERP;
+                        }
+
+                        if (BimpObject::objectLoaded($user)) {
+                            $data['User'] = '#' . $user->id;
+                        }
+
+                        if (BimpObject::objectLoaded($object)) {
+                            $data['Objet'] = BimpObject::getInstanceNomUrl($object);
+                        }
+
+                        if (count($errUpdate)) {
+                            $data['Erreurs Màj log'] = $errUpdate;
+                        }
+
+                        $data['GET'] = BimpTools::htmlentities_array($_GET);
+                        $data['POST'] = BimpTools::htmlentities_array($_POST);
+                        $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                     }
-
-                    if (BimpObject::objectLoaded($user)) {
-                        $data['User'] = '#' . $user->id;
-                    }
-
-                    if (BimpObject::objectLoaded($object)) {
-                        $data['Objet'] = BimpObject::getInstanceNomUrl($object);
-                    }
-
-                    if (count($errUpdate)) {
-                        $data['Erreurs Màj log'] = $errUpdate;
-                    }
-
-                    $data['GET'] = BimpTools::htmlentities_array($_GET);
-                    $data['POST'] = BimpTools::htmlentities_array($_POST);
-                    $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                 }
             }
 
@@ -1306,7 +1332,7 @@ class BimpCore
         return $errors;
     }
 
-    // Gestion des locks 
+    // Gestion des locks
 
     public static function checkObjectLock($object, &$token = '')
     {
@@ -1337,7 +1363,7 @@ class BimpCore
             if (!is_null($row)) {
                 if ($token && $token == $row['token']) {
                     // Si token fourni et correspond au lock en cours : pas de blocage, on conserve le lock actuel
-                    // On réinitialise tout de même le tms: 
+                    // On réinitialise tout de même le tms:
                     $bdb->update('bimpcore_object_lock', array(
                         'tms' => time()
                             ), 'id = ' . (int) $row['id']);
@@ -1359,7 +1385,7 @@ class BimpCore
             }
 
             if (is_null($row)) {
-                // Pa de lock en cours, on en créé un: 
+                // Pa de lock en cours, on en créé un:
                 if (!$token) {
                     $token = BimpTools::randomPassword(12);
                 }
@@ -1537,13 +1563,13 @@ class BimpCore
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
     }
 
-    // Rendus HTML Globaux: 
+    // Rendus HTML Globaux:
 
     public static function renderUserTopExtraToolsHtml()
     {
         $html = '';
 
-        // Déclarer un bug: 
+        // Déclarer un bug:
         if (BimpCore::isModuleActive('bimptask') && BimpCore::getConf('allow_bug_task', null, 'bimptask')) {
             $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
             $onclick = $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
@@ -1568,10 +1594,11 @@ class BimpCore
         $html .= '</span>';
         $html .= '</div>';
 
-        // Outils devs: 
+
+        // Outils devs:
         global $user;
         $is_user_dev = BimpCore::isUserDev();
-        
+
         if ($is_user_dev || $user->login == 's.lehalle') {
             $html .= '<div style="margin: 5px 0; text-align: center; color: #7F7F7F; font-size: 11px">----- OUTILS DEV ------</div>';
 
@@ -1600,6 +1627,8 @@ class BimpCore
                         'side'        => 'left'
             ));
         }
+
+		return '';
     }
 
     public static function renderUserTopAccountHtml()
@@ -1612,21 +1641,21 @@ class BimpCore
         $content = '';
         $content .= '<div style="padding: 15px;">';
 
-        // Mon profile: 
+        // Mon profile:
         $content .= '<div style="margin-bottom: 12px">';
         $content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '">';
         $content .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Mon profil';
         $content .= '</a>';
         $content .= '</div>';
 
-        // Mon agenda: 
+        // Mon agenda:
         $content .= '<div style="margin-bottom: 12px">';
         $content .= '<a href="' . DOL_URL_ROOT . '/synopsistools/agenda/vue.php">';
         $content .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Mon Agenda';
         $content .= '</a>';
         $content .= '</div>';
 
-        // Ma messagerie: 
+        // Ma messagerie:
         $content .= '<div style="margin-bottom: 12px">';
         $content .= '<a href="' . DOL_URL_ROOT . '/bimpmsg/index.php?fc=bal">';
         $content .= BimpRender::renderIcon('fas_envelope-open-text', 'iconLeft') . 'Ma messagerie';
@@ -1640,7 +1669,7 @@ class BimpCore
         $content .= '</a>';
         $content .= '</div>';
 
-        // Logout: 
+        // Logout:
         $content .= '<div style="margin-top: 10px; text-align: center">';
         $content .= '<a class="btn btn-danger" href="' . DOL_URL_ROOT . '/user/logout.php">';
         $content .= BimpRender::renderIcon('fas_power-off', 'iconLeft') . 'Se déconnecter';

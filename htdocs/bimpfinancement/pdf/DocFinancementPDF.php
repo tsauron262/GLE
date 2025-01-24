@@ -8,6 +8,7 @@ class DocFinancementPDF extends BimpDocumentPDF
 
     public static $doc_type = '';
     public $demande = null;
+    public $demande_refin = null;
     public $client_data = array();
     public $sources = array();
     public $values = array();
@@ -27,7 +28,16 @@ class DocFinancementPDF extends BimpDocumentPDF
         if (!BimpObject::objectLoaded($this->demande)) {
             $this->errors[] = 'Demande invalide';
         } else {
-            $this->values = $this->demande->getCalcValues(false, $this->errors);
+            if (isset($extra_data['id_df']) && (int) $extra_data['id_df']) {
+                $this->demande_refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_DemandeRefinanceur', (int) $extra_data['id_df']);
+                if (BimpObject::objectLoaded($this->demande_refin)) {
+                    $this->values = $this->demande_refin->getCalcValues(false, $this->errors);
+                } else {
+                    $this->errors[] = 'La demande refinanceur #' . $extra_data['id_df'] . ' n\'existe plus';
+                }
+            } else {
+                $this->values = $this->demande->getCalcValues(false, $this->errors);
+            }
         }
 
         $this->object_signature_params_field_name = 'signature_' . static::$doc_type . '_params';
@@ -71,6 +81,40 @@ class DocFinancementPDF extends BimpDocumentPDF
         }
         $this->header_vars['doc_ref'] = $doc_ref;
         $this->header_vars['doc_name'] = $this->doc_name;
+    }
+
+    public function renderHeader()
+    {
+        $html = '';
+
+        $html .= '<table>';
+        $html .= '<tr>';
+        $html .= '<td style="width: 80%">';
+        if (isset($this->header_vars['logo_img']) && $this->header_vars['logo_img']) {
+            $html .= '<img src="' . $this->header_vars['logo_img'] . '" style="width: auto; height: 45px;"/>';
+        }
+        if (isset($this->header_vars['doc_name'])) {
+            $html .= '<br/><br/><span style="font-size: 11px; color: #' . $this->primary . '">' . $this->header_vars['doc_name'] . '</span>';
+        }
+
+        if (isset($this->header_vars['doc_ref'])) {
+            $html .= '<br/><span style="font-size: 9px;">' . $this->header_vars['doc_ref'] . '</span>';
+        }
+
+        if (isset($this->header_vars['ref_extra'])) {
+            $html .= '<br/>' . $this->header_vars['ref_extra'];
+        }
+        $html .= '</td>';
+
+        $html .= '<td style="20%;">';
+        if (isset($this->header_vars['header_infos'])) {
+            $html .= $this->header_vars['header_infos'];
+        }
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        return $html;
     }
 
     public function isTargetCompany()
@@ -138,14 +182,14 @@ class DocFinancementPDF extends BimpDocumentPDF
     public function renderLines()
     {
         $table = new BimpPDF_Table($this->pdf, true, $this->primary);
-        $table->addCol('desc', 'Désignation', 0, '', '', '');
-        $table->addCol('qte', 'Quantité', 20, 'text-align: center', '', 'text-align: center');
+        $table->addCol('desc', 'Désignation', 0, 'vertical-align: middle', '', '');
+        $table->addCol('qte', 'Quantité', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
 
         if ($this->display_line_amounts) {
-            $table->addCol('pu_ht', 'PU HT', 20, 'text-align: center', '', 'text-align: center');
-            $table->addCol('remise', 'Remise', 20, 'text-align: center', '', 'text-align: center');
-            $table->addCol('tva_tx', 'TVA', 20, 'text-align: center', '', 'text-align: center');
-            $table->addCol('total_ttc', 'Total TTC', 20, 'text-align: center', '', 'text-align: center');
+            $table->addCol('pu_ht', 'PU HT', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
+            $table->addCol('remise', 'Remise', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
+            $table->addCol('tva_tx', 'TVA', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
+            $table->addCol('total_ttc', 'Total TTC', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
         }
 
         $lines = $this->demande->getLines();
@@ -197,7 +241,7 @@ class DocFinancementPDF extends BimpDocumentPDF
 
 
         if (count($table->rows)) {
-            $this->writeContent('<div style="font-weight: bold; font-size: 9px;">Description des équipements et quantités :</div>');
+            $this->writeContent('<div style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Description des équipements et quantités : <br/></div>');
             $this->pdf->addVMargin(1);
             $table->write();
         }

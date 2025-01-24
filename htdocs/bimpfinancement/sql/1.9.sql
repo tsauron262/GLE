@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bf_demande` ADD `docusign_email_send` tinyint(1) NOT NULL DEFAULT 0;

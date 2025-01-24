@@ -110,6 +110,14 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_ProductProduct
+                
+    price_rules: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductPriceRule
             
 fields: 
     ref: 
@@ -212,6 +220,7 @@ fields:
         label: Prix de revient
         type: money
         default_value: 0
+        history: 1
         
     cost_price_percent:
         label: Pourcentage du coût de revient
@@ -221,6 +230,7 @@ fields:
             callback: getCostPricePercentValues
         input:
               help: Si renseigné est prioritaire pour le calcul du prix de revient
+        history: 1
         
     cur_pa_origin: 
         label: Type origine pa
@@ -277,6 +287,12 @@ fields:
         type: bool
         user_edit: 1
         default_value: 1
+        
+    to_rent: 
+        label: En location
+        type: bool
+        user_edit: 1
+        default_value: 0
         
     customcode: 
         label: Code douane
@@ -703,6 +719,17 @@ fields:
         type: bool
         default_value: 0
         
+    forfaits_location: 
+        label: Forfaits location
+        type: items_list
+        items_data_type: id_object
+        object: product
+        items_braces: 1
+        input: 
+            type: select
+            options: 
+                callback: getAvailableForfaitsLocationArray
+        
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
@@ -742,6 +769,9 @@ forms:
             - field: 2hotline
             - field: duree
             - field: duree_i
+            - field: forfaits_location
+              show: 
+                  is_module_active: bimplocation
             
     create:
         extends: default
@@ -927,8 +957,9 @@ forms:
             - custom: 1
               label: Quantité
               input_name: qty
-              data_type: int
-              min: 1
+              data_type: float
+              min: 0
+              decimals: 6
               input: 
                   type: qty
                   
@@ -997,8 +1028,76 @@ forms:
               label: Prix d'achat fournisseur
               on_edit: 1
               multiple: 1
-              form_name: create_prod
+              form_name: create_prod     
+              
+    add_forfait: 
+        rows: 
+            - field: forfaits_location
             
+    generate_equipments: 
+        rows: 
+            - custom: 1
+              label: Nombre
+              input_name: qty
+              data_type: int
+              input: 
+                  type: qty
+              value: 1
+            - custom: 1
+              label: Type d'emplacement
+              data_type: int
+              input_name: place_type
+              input: 
+                  type: select
+                  options: 
+                      callback: getEquipmentsPlacesTypesArray
+              value: 
+                  conf: 
+                      name: generate_equipments_defaut_place_type
+                      module: bimpequipment
+            - custom: 1
+              label: Entrepôt emplacement
+              data_type: id
+              input_name: place_id_entrepot
+              input: 
+                   type: search_entrepot
+              value: 
+                  conf: 
+                      name: generate_equipments_default_id_entrepot
+                      module: bimpequipment
+              display_if: 
+                  field_name: place_type
+                  hide_values: 0
+            - custom: 1
+              label: Générer des étiquettes
+              input_name: generate_etiquettes
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Nombre d'étiquettes par équipement
+              input_name: qty_etiquettes
+              data_type: int
+              input: 
+                  type: qty
+              value: 1
+              display_if: 
+                  field_name: generate_etiquettes
+                  show_values: 1
+            - custom: 1
+              label: Format étiquettes
+              input_name: etiquettes_format
+              input: 
+                  type: select
+                  options:
+                      1: Ref + serial 89x36
+                      2: Ref + serial 57x32
+                      3: 2serial H 57x32
+                      4: 2serial V 57x32
+              display_if: 
+                  field_name: generate_etiquettes
+                  show_values: 1
             
 fields_tables: 
     infos: 
@@ -1036,6 +1135,10 @@ fields_tables:
               edit: 1
             - field: tobuy
               edit: 1
+            - field: to_rent
+              edit: 1
+              show: 
+                  is_module_active: bimplocation
             - field: remisable
               edit: 1
             - field: no_fixe_prices
@@ -1099,6 +1202,10 @@ fields_tables:
             - field: deee
             - field: rpcp
             - field: type_remise_arr
+            - field: forfaits_location
+              show: 
+                  is_module_active: bimplocation
+            
             
     prices_bundle:
         title: Prix d'achat
@@ -1255,6 +1362,16 @@ views:
                   col_sm: 12
                   list: 
                       children: prices
+                      name: product
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  show: 
+                      conf: use_price_rules
+                  list: 
+                      children: price_rules
                       name: product
                      
             - cols: 

@@ -24,6 +24,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
     public $lines;
     public $client_data = array();
     public $options = array();
+    public $formules = array();
 
     public function __construct($data)
     {
@@ -56,6 +57,15 @@ class PropositionLocationPDF extends BimpDocumentPDF
             $this->errors[] = 'Périodicité des loyers absente';
         }
 
+        $this->formules = BimpTools::getArrayValueFromPath($data, 'formules', array());
+        if (is_string($this->formules)) {
+            $this->formules = json_decode($this->formules);
+        }
+        
+        if (empty($this->formules)) {
+            $this->errors[] = 'Aucune formule sélectionnée';
+        }
+
         $this->mode_calcul = BimpTools::getArrayValueFromPath($data, 'mode_calcul', (int) BimpCore::getConf('def_mode_calcul', null, 'bimpfinancement'));
         $this->lines = BimpTools::getArrayValueFromPath($data, 'lines', array());
 
@@ -72,9 +82,14 @@ class PropositionLocationPDF extends BimpDocumentPDF
     {
         global $conf;
 
-        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-        if ($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo)) {
-            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
+        $ext_entity = BimpCore::getExtendsEntity();
+        if ($ext_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/' . $ext_entity . '/logo_pdf.png')) {
+            $logo_file = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/' . $ext_entity . '/logo_pdf.png';
+        } else {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+            if ($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo)) {
+                $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
+            }
         }
 
         $logo_width = 0;
@@ -134,7 +149,7 @@ class PropositionLocationPDF extends BimpDocumentPDF
         $html .= '<span style="font-size: 12px; font-weight: bold; color: #' . $this->primary . '">';
         $html .= $this->title;
         $html .= '</span>';
-        
+
         if ($this->sub_title) {
             $html .= '<br/><span style="font-size: 8px">';
             $html .= $this->sub_title;
@@ -153,8 +168,8 @@ class PropositionLocationPDF extends BimpDocumentPDF
         $html .= '<p style="font-weight: bold">Rappel de l\'offre <span style="color: #' . $this->primary . '">LDLC PRO LEASE</span></p>';
         $html .= '<p>Les offres de financement proposées par LDLC.PRO LEASE permettent de gérer au mieux le cycle de vie des matériels informatiques.</p>';
 
-        $has_evo = (int) BimpTools::getArrayValueFromPath($this->options, 'formules/evo', 1);
-        $has_dyn = (int) BimpTools::getArrayValueFromPath($this->options, 'formules/dyn', 1);
+        $has_evo = (in_array('evo', $this->formules));
+        $has_dyn = (in_array('dyn', $this->formules));
 
         if ($has_evo || (!$has_evo && !$has_dyn)) {
             $html .= '<p>La "<b>Formule Evolutive</b>" permet notamment : </p>';
@@ -274,8 +289,8 @@ class PropositionLocationPDF extends BimpDocumentPDF
 
         $values = BFTools::getCalcValues($this->montant_materiels, $this->montant_services, $tx_cession, $nb_mois, $marge / 100, $vr_achat, $mode_calcul, $periodicity, $this->errors);
 
-        $has_evo = (int) BimpTools::getArrayValueFromPath($this->options, 'formules/evo', 1);
-        $has_dyn = (int) BimpTools::getArrayValueFromPath($this->options, 'formules/dyn', 1);
+        $has_evo = (in_array('evo', $this->formules));
+        $has_dyn = (in_array('dyn', $this->formules));
 
         if (count($this->errors)) {
             return;

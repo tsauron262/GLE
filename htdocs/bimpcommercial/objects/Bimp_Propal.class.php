@@ -1449,6 +1449,20 @@ class Bimp_Propal extends Bimp_PropalTemp
         BimpObject::loadClass('bimpfinancement', 'BF_Demande');
         return BF_Demande::$calc_modes;
     }
+    
+    public function getDevisLocationFormulesArray($allowed_only = true)
+    {
+        $formules = array(
+            'evo' => 'Formule évolutive',
+            'dyn' => 'Formule dynamique'
+        );
+
+        if ($allowed_only && (int) BimpTools::getPostFieldValue('duration', 36, 'int') > 36) {
+            unset($formules['dyn']);
+        }
+
+        return $formules;
+    }
 
     // Affichages : 
 
@@ -1592,7 +1606,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if ($nb_abos > 0) {
                         global $user;
                         if (((int) $this->getData('contrats_status') === self::PROCESS_STATUS_TODO && $this->isActionAllowed('createContratAbo')) || (in_array($user->login, array('e.amadei', 'f.martinez')))) {
-                            if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
+                            if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0.009) {
                                 if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
                                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention : ce devis contient des lignes d\'abonnement et le client n\'a pas d\'encours autorisé.<br/>';
                                     $msg .= 'Celui-ci doit donc être soit payé à l\'avance via un accompte, soit passé en mode de réglement par prélèvement à date de facture';
@@ -2737,7 +2751,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         } else {
             if ($this->getNbAbonnements() > 0) {
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', ($id_client_facturation ? $id_client_facturation : $id_client));
-                if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0) {
+                if (BimpObject::objectLoaded($client) && $client->getData('outstanding_limit') <= 0 && $this->getTotalTtc() > 0.009) {
                     if ($this->dol_object->cond_reglement_code != 'RECEP' || $this->dol_object->mode_reglement_code != 'PRE') {
                         $errors[] = 'Le client n\'a pas d\'encours autorisé. Ce devis doit donc être soit payé à l\'avance via un accompte, soit passé en mode de réglement par prélèvement à date de facture';
                     }
@@ -3156,6 +3170,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $data['lines'] = json_encode($lines);
                 $data['montant_materiels'] = $montant_materiel;
                 $data['montant_services'] = $montant_services;
+                $data['formules'] = json_encode($data['formules']);
 
                 $result = $api->getPropositionLocation($data, $errors, $warnings);
 

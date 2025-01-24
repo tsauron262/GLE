@@ -108,7 +108,7 @@ class BTC_export_facture_fourn extends BTC_export {
             case 3: // Achat export
                 $use_tva = false;
                 $use_d3e = false;
-                $use_autoliquidation = false;
+                $use_autoliquidation = true;
                 $compte_achat_produit = BimpCore::getConf('achat_produit_ex', null, 'bimptocegid');
                 $compte_achat_service = BimpCore::getConf('achat_service_ex', null, 'bimptocegid');
                 $compte_frais_de_port = BimpCore::getConf('frais_de_port_achat_ex', null, 'bimptocegid');
@@ -308,10 +308,16 @@ class BTC_export_facture_fourn extends BTC_export {
         // Entre en jeu que si l'autoliquidation de TVA est activé et que la societé à un numéro de TVA intracommunaitaire
         if ($use_autoliquidation && $societe->getData('tva_intra')) {
             $tva_calcule = round(20 * $total_ttc_facture / 100, 2);
-            $structure['compte_general'] = [BimpCore::getConf('autoliquidation_tva_666', null, 'bimptocegid'), 17];
+            if($zone_achat == 3)
+                $structure['compte_general'] = [BimpCore::getConf('autoliquidation_tva_ex_666', null, 'bimptocegid'), 17];
+            else
+                $structure['compte_general'] = [BimpCore::getConf('autoliquidation_tva_666', null, 'bimptocegid'), 17];
             $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture_fourn', false, $sens_parent), 1];
             $structure['montant'] = [abs(round($tva_calcule, 2)), 20, true];
             $ecritures .= $this->struct($structure);
+            if($zone_achat == 3)
+                $structure['compte_general'] = [BimpCore::getConf('autoliquidation_tva_ex_711', null, 'bimptocegid'), 17];
+            else
             $structure['compte_general'] = [BimpCore::getConf('autoliquidation_tva_711', null, 'bimptocegid'), 17];
             $structure['sens'] = [$sens_parent, 1];
             $ecritures .= $this->struct($structure);

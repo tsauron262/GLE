@@ -62,3 +62,5 @@ doc/install.lock
 /htdocs/bimpcore/views/.sass-cache/
 /htdocs/en/
 /htdocs/includes/
+/htdocs/bimpcore/site.html
+/htdocs/bimpflo/

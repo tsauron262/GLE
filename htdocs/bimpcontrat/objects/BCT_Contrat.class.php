@@ -1512,9 +1512,9 @@ class BCT_Contrat extends BimpDolObject
                 $line_warnings = array();
                 $line_qty = (float) $line_data['qty'];
 
-                if (!$line_qty) {
-                    continue;
-                }
+//                if (!$line_qty) {
+//                    continue;
+//                }
 
                 $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
                 if ((int) $line->getData('line_type') === BCT_ContratLine::TYPE_TEXT) {
@@ -2146,6 +2146,16 @@ class BCT_Contrat extends BimpDolObject
                     if (!empty($comms) && (count($comms) > 1 || $comms[0] != $id_commercial)) {
                         $this->dol_object->delete_linked_contact('internal', 'SALESREPFOLL');
                         $comms = array();
+                    }
+                }
+                
+                $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Contrat2:' . $this->id . '}}');
+                
+                $fk_soc_facturation = (int) $this->getData('fk_soc_facturation');
+                if ($fk_soc_facturation && $fk_soc_facturation !== $client->id) {
+                    $client_fac = $this->getChildObject('client_facturation');
+                    if (BimpObject::objectLoaded($client_fac)) {
+                        $client_fac->setActivity('Création ' . $this->getLabel('of_the') . ' {{Contrat2:' . $this->id . '}}');
                     }
                 }
             }

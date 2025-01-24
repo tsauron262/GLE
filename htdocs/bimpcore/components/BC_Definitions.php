@@ -15,14 +15,14 @@ class BC_Definitions
 
             if (\BimpCache::cacheServerExists($key)) {
                 self::$definitions = \BimpCache::getCacheServeur($key);
+            } else {
+                self::$definitions = spyc_load_file(DOL_DOCUMENT_ROOT . '/bimpcore/components/components.yml');
+                \BimpCache::setCacheServeur($key, self::$definitions);
             }
-
-            self::$definitions = spyc_load_file(DOL_DOCUMENT_ROOT . '/bimpcore/components/components.yml');
-            \BimpCache::setCacheServeur($key, self::$definitions);
         }
     }
 
-    public static function getComponentDefinitions($component_path, $override_params = array())
+    public static function getComponentDefinitions($component_path, $override_params = array(), $params_only = false)
     {
         self::initDefinitions();
 
@@ -39,7 +39,7 @@ class BC_Definitions
             unset($defs['includes']);
 
             foreach ($includes as $include) {
-                $defs = self::getComponentDefinitions($include, $defs);
+                $defs['params'] = self::getComponentDefinitions($include, $defs['params'], true);
             }
         }
 
@@ -48,12 +48,16 @@ class BC_Definitions
             $extends = $defs['extends'];
             unset($defs['extends']);
 
-            $defs = self::getComponentDefinitions($extends, $defs);
+            $defs['params'] = self::getComponentDefinitions($extends, $defs['params'], true);
         }
 
         // Traitement des surcharges : 
         if (!empty($override_params)) {
-            $defs = \BimpTools::overrideArray($defs, $override_params, false, true);
+            $defs['params'] = \BimpTools::overrideArray($defs['params'], $override_params, false, true);
+        }
+
+        if ($params_only) {
+            return $defs['params'];
         }
 
         return $defs;

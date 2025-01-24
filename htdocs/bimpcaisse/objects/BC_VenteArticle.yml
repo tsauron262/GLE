@@ -54,6 +54,18 @@ fields:
         label: Pourcentage Remise arrière
         type: percent
         default_value: 0
+        
+    infos: 
+        label: Informations
+        type: text
+        
+    linked_object_name: 
+        label: Type d'objet lié
+        
+    linked_id_object: 
+        label: ID objet lié
+        type: id
+        default_value: 0
     
 lists_cols: 
     total_ttc: 
@@ -72,6 +84,7 @@ lists:
         cols:
             id_product: 
             id_equipment: 
+            infos: 
             qty: 
             remise_crt: 
                 field: remise_crt

@@ -166,7 +166,7 @@ class BimpDebug
                 $msg .= (microtime(1) - $bimp_start_time) . ' sec';
 
                 $msg .= self::renderDebugTimes();
-                mailSyn2('Page trés lourde', 'tommy@bimp.fr', null, $debMail.$msg);
+                mailSyn2('Page trés lourde', 'tommy@bimp.fr,f.martinez@bimp.fr', null, $debMail.$msg);
                 BimpCore::addlog('Page trop lourde ' . microtime(1) - $bimp_start_time, Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info' => $msg));
             }
         }
@@ -851,6 +851,9 @@ class BimpDebug
                 break;
             }
         }
+        
+        if(BimpCore::getConf('trace_for_sql', 0))
+                $content .= BimpRender::renderDebugInfo(BimpTools::displayBacktrace());
 
         self::addDebug('sql', $title, $content, array(
             'open' => false

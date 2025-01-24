@@ -1699,7 +1699,7 @@ function onRequestResponse(xhr, requestType, prodId) {
                         if (prod_id) {
                             reloadProductInfos(prod_id, $repair.data('serial'));
                         } else {
-                            alert('la');
+                            alert('Erreur : ID Produit absent');
                         }
                         return;
                     }

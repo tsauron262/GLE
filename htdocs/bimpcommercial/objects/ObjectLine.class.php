@@ -1161,6 +1161,37 @@ class ObjectLine extends BimpObject
         return $margin;
     }
 
+    public function getMargeFinalePrevue($full_qty = true)
+    {
+        $margin = (float) $this->getMargin($full_qty);
+
+        $done = false;
+        if ($this->object_name === 'Bimp_FactureLine') {
+            $facture = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($facture)) {
+                if ((int) $facture->getData('fk_statut')) {
+                    $done = true;
+                    $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                                'id_facture_line' => (int) $this->id
+                    ));
+
+                    foreach ($revals as $reval) {
+                        if (in_array((int) $reval->getData('status'), array(0, 1))) {
+                            $margin += $reval->getTotal();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$done) {
+            $margin += $this->getTotalRemisesArrieres($full_qty);
+        }
+
+        return $margin;
+    }
+
     public function getMarginRate()
     {
         $pu = (float) $this->pu_ht;
@@ -4036,7 +4067,7 @@ class ObjectLine extends BimpObject
             ));
 
             $tabRang = array();
-            $tabTemp = $this->db->executeS('SELECT ' . $primary . ' as id, rang FROM '.MAIN_DB_PREFIX . $table . ' WHERE ' . $this::$dol_line_parent_field . ' = ' . $parent->id, 'array');
+            $tabTemp = $this->db->executeS('SELECT ' . $primary . ' as id, rang FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $this::$dol_line_parent_field . ' = ' . $parent->id, 'array');
 
             if (is_array($tabTemp)) {
                 foreach ($tabTemp as $lnTemp) {
@@ -4387,7 +4418,9 @@ class ObjectLine extends BimpObject
             } elseif (BimpTools::isSubmit('fields/' . $field)) {
                 $value = BimpTools::getValue('fields/' . $field, null, $data_check);
             } else {
-                if (isset($this->{$field})) {
+                if ($field == 'abo_date_from') {
+                    $value = $this->date_from;
+                } elseif (isset($this->{$field})) {
                     $value = $this->{$field};
                 } elseif ($this->field_exists($field)) {
                     $value = $this->getData($field);
@@ -5952,8 +5985,7 @@ class ObjectLine extends BimpObject
 
                         if ($this->field_exists('abo_nb_units') && (float) $this->getData('abo_nb_units') != 0) {
                             $fieldsCopy['abo_nb_units'] = $child_prod->getData('qty') * $nb_units * $qty_ratio;
-                        } 
-                        else {
+                        } else {
                             $propertiesCopy['qty'] = $child_prod->getData('qty') * $this->qty;
                         }
 

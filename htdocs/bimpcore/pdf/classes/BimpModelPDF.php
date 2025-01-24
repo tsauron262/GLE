@@ -125,7 +125,9 @@ Abstract class BimpModelPDF
 
         if ($this->add_header) {
             if (is_null($this->header)) {
-                if (file_exists(static::$tpl_dir . '/' . static::$type . '/header.html')) {
+                if (method_exists($this, 'renderHeader')) {
+                    $this->header = $this->renderHeader();
+                } elseif (file_exists(static::$tpl_dir . '/' . static::$type . '/header.html')) {
                     $this->header = $this->renderTemplate(static::$tpl_dir . '/' . static::$type . '/header.html', $this->header_vars);
                 } else {
                     $this->header = $this->renderTemplate(static::$tpl_dir . '/header.html', $this->header_vars);
@@ -593,12 +595,11 @@ Abstract class BimpModelPDF
     public static function cleanHtml($html)
     {
         // Virer caractères invisibles : 
-        
 //        $html = str_replace('?', '[INTPOINT]', $html);
 //        $html = utf8_decode($html);
 //        $html = str_replace('?', '', $html);
 //        $html = str_replace('[INTPOINT]', '?', $html);
-        
+
         if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
 //            echo 'AVANT: <br/>'; 
 //            echo htmlentities($html);

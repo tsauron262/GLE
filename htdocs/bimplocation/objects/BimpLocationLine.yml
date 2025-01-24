@@ -1,0 +1,265 @@
+table: bimp_location_line
+icon: fas_bars
+common_fields: 0
+positions: 1
+position_insert: after
+
+header_btn: 
+    callback: getActionsButtons
+    
+labels:
+    name: équipement en location
+    name_plur: équipements en location
+    
+parent_module: bimplocation
+parent_object: BimpLocation
+parent_id_property: id_location
+
+objects: 
+    forfait: 
+        extends: product
+        instance: 
+            id_object: 
+                field_value: id_forfait
+                
+fields: 
+    id_location: 
+        label: Location
+        type: id_parent
+        
+    id_equipment: 
+        label: Equipement
+        type: id_object
+        object: equipment
+        default_value: 0
+        input: 
+            card: default
+        
+    id_forfait: 
+        label: Forfait
+        type: id_object
+        object: forfait
+        input: 
+            type: custom
+            content: 
+                callback: renderForfaitInput
+        display_if: 
+            field_name: id_equipment
+            hide_values: 0
+        depends_on: date_from,date_to,id_equipment
+        default_value: 0
+        
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        displays: 
+            icon: 
+                type: array_value
+                icon_only: 1
+           
+    pu_ht: 
+        label: PU HT
+        type: money
+        default_value: 0
+        depends_on: id_forfait
+        display_if: 
+            field_name: id_forfait
+            hide_values: 0
+        
+    tva_tx: 
+        label: Tx TVA
+        type: percent
+        default_value: 0
+        depends_on: id_forfait
+        display_if: 
+            field_name: id_forfait
+            hide_values: 0
+        
+    remise: 
+        label: Remise
+        type: percent
+        default_value: 0
+        
+    date_from: 
+        label: Du
+        type: date
+        required: 1
+        
+    date_to: 
+        label: Au
+        type: date
+        required: 1
+        
+    fac_date_from: 
+        label: Facturé à partir du
+        type: date
+        input: 
+            help: Laisser vide si identique à la date de début
+        
+    fac_date_to: 
+        label: Facturé jusqu'au
+        type: date
+        input: 
+            help: Laisser vide si identique à la date de fin
+        
+    infos: 
+        label: Infos
+        type: text
+        note: 1
+    
+forms: 
+    default: 
+        rows: 
+            - field: status
+            - field: date_from
+            - field: date_to
+            - field: fac_date_from
+            - field: fac_date_to
+            - field: id_equipment
+            - field: id_forfait
+#            - field: pu_ht
+#            - field: tva_tx
+            - field: remise
+            - field: infos
+            
+    edit_status: 
+        rows: 
+            - field: status
+            
+    edit_dates: 
+        msgs: 
+            - type: info
+              content: Saisissez uniquement les dates à modifier
+        rows: 
+            - custom: 1
+              label: Du
+              data_type: date
+              input_name: date_from
+              input: 
+                  type: date
+              value: ''
+            - custom: 1
+              label: Au
+              data_type: date
+              input_name: date_to
+              input: 
+                  type: date
+              value: ''
+            - custom: 1
+              label: Facturé à partir du
+              data_type: date
+              input_name: fac_date_from
+              input: 
+                  type: date
+              value: ''
+            - custom: 1
+              label: Facturé jusqu'au
+              data_type: date
+              input_name: fac_date_to
+              input: 
+                  type: date
+              value: ''
+            
+lists_cols: 
+    equipment: 
+        label: Equipement
+        value: 
+            callback: displayEquipment 
+    
+    forfait: 
+        label: Forfait
+        value: 
+            callback: displayForfaitInfos
+            
+    dates: 
+        label: Dates
+        value: 
+            callback: displayDates
+
+filters_panel: 
+    filters: 
+        default: 
+            id_location: 
+            id_equipment: 
+            id_equipment:id_product:
+            id_forfait: 
+            date_from: 
+            date_to: 
+
+lists: 
+    default: 
+        title: Equipements en location
+        icon: fas_business-time
+        configurable: 1
+        checkboxes: 1
+        pagination: 1
+        filters_panel: default
+        bulk_actions:
+            - label: supprimer les lignes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+            - label: Editer le statut
+              icon: fas_check-square
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'editStatus', {}, 'edit_status');
+            - label: Editer les dates
+              icon: fas_calendar-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'editDates', {}, 'edit_dates');
+        sort_field: date_from
+        sort_way: desc
+        n: 30
+        add_btn: 0
+        edit_btn: 1
+        delete_btn: 1
+        extra_btn: 
+            callback: getListExtraBtn
+        cols: 
+            id_location:
+            status: 
+            equipment: 
+            forfait: 
+            dates: 
+            infos:
+                edit: 1
+                
+    location: 
+        title: Equipements
+        extends: default
+        pagination: 0
+        positions: 1
+        positions_open: 1
+        sort_field: position
+        sort_way: asc
+        n: 0
+        filters_panel: unset
+        add_btn: 1
+        add_form_name: default
+        cols: 
+            id_location: unset
+            
+    equipment: 
+        extends: default
+        cols: 
+            unextends: 1
+            id_location:
+            parent:id_client:
+            status: 
+            date_from: 
+            date_to:
+            infos: 
+                
+    client: 
+        extends: default
+        cols: 
+            unextends: 1
+            id_location:
+            status: 
+            equipment: 
+            forfait: 
+            date_from: 
+            date_to:
+            infos: 
+            
+            

@@ -120,28 +120,32 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                         $form.find('[name="fk_typent"]').change();
                     }
 
-                    if (typeof (result.data.nom) === 'string' && result.data.nom) {
-                        $form.find('[name="nom"]').val(result.data.nom);
-                    }
-                    if (typeof (result.data.rcs) === 'string' && result.data.rcs) {
-                        $form.find('[name="idprof4"]').val(result.data.rcs);
-                    }
 
-                    if (typeof (result.data.address) === 'string' && result.data.address) {
-                        $form.find('[name="address"]').val(result.data.address);
-                    }
+                    if (typeof (result.data.nom) === 'string' && result.data.nom.indexOf('Non-Diffusible') < 1) {
+                        if (typeof (result.data.nom) === 'string' && result.data.nom) {
+                            $form.find('[name="nom"]').val(result.data.nom);
+                        }
+                        if (typeof (result.data.rcs) === 'string' && result.data.rcs) {
+                            $form.find('[name="idprof4"]').val(result.data.rcs);
+                        }
 
-                    if (typeof (result.data.zip) === 'string' && result.data.zip) {
-                        $form.find('[name="zip"]').val(result.data.zip);
-                    }
+                        if (typeof (result.data.address) === 'string' && result.data.address) {
+                            $form.find('[name="address"]').val(result.data.address);
+                        }
 
-                    if (typeof (result.data.town) === 'string' && result.data.town) {
-                        $form.find('[name="town"]').val(result.data.town);
-                    }
+                        if (typeof (result.data.zip) === 'string' && result.data.zip) {
+                            $form.find('[name="zip"]').val(result.data.zip);
+                        }
 
-                    if (typeof (result.data.phone) === 'string' && result.data.phone) {
-                        $form.find('[name="phone"]').val(result.data.phone);
-                    }
+                        if (typeof (result.data.town) === 'string' && result.data.town) {
+                            $form.find('[name="town"]').val(result.data.town);
+                        }
+
+                        if (typeof (result.data.phone) === 'string' && result.data.phone) {
+                            $form.find('[name="phone"]').val(result.data.phone);
+                        }
+                    } else
+                        alert('Le client semble être sur liste rouge');
 
                     if (typeof (result.data.tva_intra) === 'string' && result.data.tva_intra) {
                         $form.find('[name="tva_intra"]').val(result.data.tva_intra);
@@ -169,7 +173,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     }
 
                     if (typeof (result.data.alert) === 'string' && result.data.alert) {
-                        alert(result.data.alert)
+                        alert(result.data.alert);
                     }
                 }
             },
@@ -736,58 +740,88 @@ function onProductionAddCombinationFormLoaded($form) {
     });
 }
 
+if (typeof (bimp_local_storage_prefixe) === 'undefined') {
+    var bimp_local_storage_prefixe = '';
+}
+
+if (typeof(bimp_debug_local_storage) === 'undefined') {
+    var bimp_debug_local_storage = false;
+}
+
+if (bimp_debug_local_storage) {
+    console.log('DEBUG STOCKAGE LOCAL ACTIVÉ');
+}
+
 class BimpStorage {
-    constructor(type = 'text') {
-        this.type = type;
+    constructor(/*type = 'text'*/) {
+        // this.type = type; => on ne fourni plus le type ici mais seulement dans get()
     }
 
     getFullKey(key) {
-        return dol_url_root + '_' + entity + '_' + key;
+        return (bimp_local_storage_prefixe ? bimp_local_storage_prefixe + '_' : '') + dol_url_root + '_' + entity + '_' + key;
     }
 
     get(key, type = 'text') {
-//        console.log(this.getFullKey(key));
-        var value = localStorage.getItem(this.getFullKey(key));
-        if (this.type == 'obj') {
+        var full_key = this.getFullKey(key);
+        
+        if (bimp_debug_local_storage) {
+            console.log('get storage (' + type + ') : ' + full_key);
+        }
+        
+        var value = localStorage.getItem(full_key);
+
+        if (type === 'obj') {
             var obj = JSON.parse(value);
 
-            // Is an object
-            if (typeof obj === 'object' && obj !== null)
+            if (typeof obj === 'object' && obj !== null) {
+                if (bimp_debug_local_storage) {
+                    console.log(obj);
+                }
                 return obj;
+            }
+        }
+
+        if (bimp_debug_local_storage) {
+            console.log(value);
         }
 
         return value;
     }
-    ;
-            set(key, value, add = false) {
-        // Est un object
-        if (add) {
-            var oldValue = this.get(key);
-            if (typeof oldValue === 'object' && typeof value === 'object') {
-//                console.log('concat response', oldValue, value);
-                value = {
-                    ...oldValue,
-                    ...value
-                };
-//                console.log('result', value);
-            } else
-                console.log('oups concat impossible');
 
+    set(key, value/*, add = false*/) {
+//        if (add) {
+//            var oldValue = this.get(key);
+//            if (typeof oldValue === 'object' && typeof value === 'object') {
+////                console.log('concat response', oldValue, value);
+//                value = {
+//                    ...oldValue,
+//                    ...value
+//                };
+////                console.log('result', value);
+//            } else
+//                console.log('oups concat impossible');
+//        }
+
+        var full_key = this.getFullKey(key);
+
+        if (bimp_debug_local_storage) {
+            console.log('set storage : ' + full_key);
+            console.log(value);
         }
 
+        if (typeof value === 'object' && value !== null) {
+            value = JSON.stringify(value);
+        }
 
-        if (typeof value === 'object' && value !== null)
-            return localStorage.setItem(this.getFullKey(key), JSON.stringify(value));
-
-        return localStorage.setItem(this.getFullKey(key), value);
+        return localStorage.setItem(full_key, value);
     }
-    ;
-            remove(key) {
+
+    remove(key) {
         localStorage.removeItem(this.getFullKey(key));
     }
-    ;
 }
 
+var bimp_storage = new BimpStorage();
 
 $(document).ready(function () {
     $('body').on('formLoaded', function (e) {

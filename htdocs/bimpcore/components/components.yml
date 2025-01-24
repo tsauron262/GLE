@@ -2,6 +2,35 @@ BimpComponent:
     labels: 
         name: composant
     params: 
+        show: 
+            label: Afficher
+            info: Si Non, l'élément ne sera pas inclus dans le contenu HTML
+            data_type: bool
+            default: 1
+        before_content: 
+            label: Contenu avant
+        after_content: 
+            label: Contenu après
+        extra_classes: 
+            label: Classes HTML supplémentaires
+            data_type: array
+        extra_data: 
+            label: Data HTML supplémentaires
+            data_type: array
+        extra_styles: 
+            label: Styles CSS supplémentaires
+            data_type: array
+        inline: 
+            label: Affichage en ligne
+            data_type: bool
+            default: 0
+     
+ObjectData: 
+    labels: 
+        name: données objet
+        name_plur: données objets
+        is_female: 1
+    params: 
         module: 
             label: Module
             in_data: 1
@@ -11,40 +40,26 @@ BimpComponent:
         id_object: 
             label: ID Objet
             data_type: int
-            default: 0
             in_data: 1
-        show: 
-            label: Afficher
-            info: Si Non, l'élément ne sera pas inclus dans le contenu HTML
-            data_type: bool
-            default: 1
-        content_only: 
-            label: Générer seulement le contenu (sans le container)
-            data_type: bool
-            default: 0
-        before_content: 
-            label: Contenu avant
-        after_content: 
-            label: Contenu après
+            
+LoadingData: 
+    labels: 
+        name: données de chargement
+        name_plur: données de chargement
+        is_female: 1
+    params: 
         on_loaded: 
             label: Callback JS après chargement
+            in_data: 1
         no_reload: 
             label: Reload ajax désactivés
             data_type: bool
-            default: 0
+            in_data: 1
         objects_change_reload: 
             label: Liste des objets déclanchant un reload
             data_type: array
-        extra_classes: 
-            label: Classes HTML supplémentaires
-            data_type: array
-        extra_data: 
-            label: Data HTML supplémentaires
-            data_type: array
-        extra_styles: 
-            label: Styles CSS supplémentaires
-            data_type: array''
-     
+            in_data: 1
+        
 GridElement: 
     labels: 
         name: élément de grille bootstrap
@@ -79,6 +94,12 @@ Button:
             label: Icône
         onclick: 
             label: Onclick
+        disabled: 
+            label: Désactivé
+            data_type: bool
+            default: 0
+        popover: 
+            label: Popover
 
 Msg: 
     labels: 
@@ -92,8 +113,15 @@ Msg:
                 warning: Alerte
                 danger: Erreur
             default: info
+        content: 
+            label: Contenu
         
 BC_Panel: 
+    extends: BimpComponent
+    includes: 
+        - ObjectData
+    labels: 
+        name: panel
     params: 
         title: 
             label: Titre
@@ -119,23 +147,23 @@ BC_Panel:
                 large: Grand
             default: medium
         msgs: 
-            type: component
-            component: Msg
-            mutliple: 1
+            type: params
+            params_name: Msg
+            multiple: 1
         header_buttons: 
             label: Boutons en en-tête
-            type: component
-            component: Button
+            type: params
+            params_name: Button
             multiple: 1
         header_icons: 
             label: Boutons en en-tête
-            type: component
-            component: Button
+            type: params
+            params_name: Button
             multiple: 1
         footer_extra_btn: 
             label: Boutons supplémentaires dans le pieds-de-page
-            type: component
-            component: Button
+            type: params
+            params_name: Button
             multiple: 1
         footer_extra_content: 
             label: Contenu supplémentaire en pied-de-page
@@ -148,6 +176,8 @@ forms:
     BC_Form: 
         extends: BC_Panel
         params: 
+            icon: 
+                default: fas_edit
             on_save: 
                 label: Après enregistrement
                 values: 
@@ -156,14 +186,19 @@ forms:
                     redirect: Rediriger sur l'url fournie
                     open: Ouvrir l'url fournie dans un nouvel onglet
                     none: Ne rien faire
+                default: close
+                in_data: 1
             on_submit: 
                 label: Callback JS avant soumission
+                in_data: 1
             on_success: 
                 label: Callback JS après enregistrement effectué avec succès
+                in_data: 1
             no_auto_submit: 
                 label: Pas de soumissions automatique
                 data_type: bool
                 default: 0
+                in_data: 1
             cancel_btn: 
                 label: Afficher le bouton "Annuler"
                 data_type: bool
@@ -175,28 +210,36 @@ forms:
 #            rows_callback: 
 #                label: Callback avant chargement des lignes
             force_edit:
-                label: Forcer la validation
+                label: Mode forcé
                 data_type: bool
                 default: 0
+                in_data: 1
+            id_parent: 
+                label: ID objet parent
+                data_type: int
+                default: 0
+                in_data: 1
             elements: 
                 type: component
                 component: BC_FormElement
                 multiple: 1
                 
     BC_FormElement: 
+        extends: BimpComponent
+        includes: 
+            - GridElement
         labels: 
             name: élément de formulaire
             name_plur: éléments de formulaire
+        component_name_param: type
         params: 
             type: 
-                type: component_name
                 label: Type
                 values: 
-                    - BC_FormFieldInput
-                    - BC_FormCustomInput
-                    - BC_FormSection
-                    - BC_FormObjectInput
-                    - BC_FormAssoInput
+                    input: BC_FormInput
+                    section: BC_FormSection
+                array_value: 1
+                default: input
             hidden: 
                 label: Masqué
                 info: Si Non, l'élément sera inclus dans le formulaire mais non visible
@@ -212,18 +255,35 @@ forms:
                 label: Conserver la nouvelle valeur lors du rechargement de l'input
                 data_type: bool
                 default: 0
-                display_if: 
-                    field_name: depends_on
-                    hide_values: ''
-                    
+    
+    BC_FormInput: 
+        extends: forms/BC_FormElement
+        labels: 
+            name: champ de formulaire
+            name_plur: champs de formulaire
+        params: 
+            display_mode: 
+                label: Mode d'affichage
+                values: 
+                    row: Ligne entière
+                    inline: Bloc de ligne
+                default: row
+            label: 
+                label: Libellé
+            help: 
+                label: Texte d'aide
+            input: 
+                label: Input
+                type: component
+                component: BC_Input
+                
     BC_FormSection: 
         extends: forms/BC_FormElement
-        includes: 
-            - GridElement
         labels: 
-            name: section de formualaire
-            name_plur: sections de formualaire
+            name: section de formulaire
+            name_plur: sections de formulaires
             is_female: 1
+        params: 
             title: 
                 label: Titre
             icon: 
@@ -233,98 +293,466 @@ forms:
                 type: component
                 component: BC_FormElement
                 multiple: 1
-            
-    BC_FormInput: 
-        extends: forms/BC_FormElement
+                
+inputs: 
+    BC_Input:
+        extends: BimpComponent
         labels: 
-            name: Input
+            name: input
+        component_name_param: type
         params: 
-            display_mode: 
-                label: Mode d'affichage
+            type: 
+                label: Type
                 values: 
-                    row: Ligne entière
-                    inline: Bloc de ligne
-            label: 
-                label: Libellé
+                    text: BC_TextInput
+                    password: BC_PasswordInput
+                    number: BC_NumberInput
+                    qty: BC_QtyInput
+                    textarea: BC_TextareaInput
+                    html: BC_HtmlInput
+                    datetime: BC_DatetimeInput
+                    date: BC_DateInput
+                    time: BC_TimeInput
+                    timer: BC_TimerInput
+                    select: BC_SelectInput
+                    toggle: BC_ToggleInput
+                    check_list: BC_CheckListInput
+                    select_user: BC_SelectUserInput
+                    ziptown: BC_ZiptownInput
+                    search_object: BC_SearchObjectInput
+                    object_filters: BC_ObjectFiltersInput
+                    signature_pad: BC_SignaturePadInput
+                    drop_files: BC_DropFilesInput
+                    file_upload: BC_FileUploadInput
+                    hidden: BC_HiddenInput
+                    custom: BC_CustomInput
+                array_value: 1
+                default: text
+            name: 
+                label: Nom input
+                required: 1
             required: 
                 label: Obligatoire
                 data_type: bool
                 default: 0
+            disabled: 
+                label: Champ désactivé
+                data_type: bool
+                default: 0
             value: 
                 label: Valeur prédéfinie
-                
-    BC_FormFieldInput: 
-        extends: forms/BC_Input
-        labels: 
-            name: Input d'un champ objet
-            name_plur: Inputs de champs objet
-        params: 
-            field: 
-                label: Nom du champ
-            edit: 
-                label: Autoriser l'édition du champ
-                data_type: bool
-                default: 1
-            create_form: 
-                label: Formualaire de création (si data_type = id_object)
-            create_form_values: 
-                label: Données prédéfinies du formualaire de création
+            input_classes: 
+                label: Classes de l'input
                 data_type: array
-                display_if: 
-                    field_name: create_form
-                    hide_value: ''
-            create_form_label: 
-                label: Libellé formulaire de création
-                display_if: 
-                    field_name: create_form
-                    hide_value: ''
-            edit_form: 
-                label: Formualaire d'édition (si data_type = id_object)
-            edit_form_values: 
-                label: Données prédéfinies du formualaire d'édition
+            input_styles: 
+                label: Styles css de l'input
                 data_type: array
-                display_if: 
-                    field_name: edit_form
-                    hide_value: ''
-            edit_form_label: 
-                label: Libellé formulaire d'édition
-                display_if: 
-                    field_name: edit_form
-                    hide_value: ''
+            onchange: 
+                label: Callback JS onchange
     
-    BC_FormCustomInput: 
-        extends: forms/BC_Input
+    BC_TextInput: 
+        extends: inputs/BC_Input
         labels: 
-            name: Input personnalisé
-            name_plur: Inputs personnalisés
-            
-    BC_FormAssoInput: 
-        extends: forms/BC_Input
-        labels: 
-            name: Input d'association d'objets
-            name_plur: Inputs d'associations d'objets
-        
-    BC_FormObjectInput: 
-        extends: forms/BC_Input
-        labels: 
-            name: Input objet lié
-            name_plur: Inpus objets liés
+            name: texte
         params: 
-            form_name: 
-                label: Nom du formulaire
-                default: default
-            form_values: 
-                label: Valeurs prédéfinies du formlaire
-                data_type: array
-            multiple: 
-                label: Autoriser l'ajout de plusieurs objets
+            addon_left: 
+                label: Add-on à gauche
+            addon_right: 
+                label: add-on à droite
+            placeholder: 
+                label: Place Holder
+            hashtags: 
+                label: Hashtags activés
                 data_type: bool
                 default: 0
-            on_create: 
-                label: Sur création de l'objet parent
+            scanner: 
+                label: Scanner activé
+                data_type: bool
+                default: 0
+            values: 
+                label: Valeurs prédéfinies
+                data_type: array
+            allow_custom: 
+                label: Autoriser valeur personnalisées (si valeurs prédéfinies)
                 data_type: bool
                 default: 1
-            on_edit: 
-                label: Sur édition de l'objet parent
+            max_chars: 
+                label: Nombre de caractères max
+                data_type: int
+                in_data: 1
+            regex: 
+                label: Expression régulière à vérifier
+                in_data: 1
+            no_autocorrect: 
+                label: Désactiver l'auto-correction
                 data_type: bool
                 default: 0
+            possible_values: 
+                label: valeurs possibles
+                data_type: array
+                
+    BC_PasswordInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: mot de passe
+            name_plur: mots de passe
+        params: 
+            min_length: 
+                label: Longueur min
+                data_type: int
+                default: 12
+                in_data: 1
+            special_required: 
+                label: Caractère spécial obligatoire
+                data_type: bool
+                default: 1
+                in_data: 1
+            maj_required: 
+                label: Caractère en majuscule obligatoire
+                data_type: bool
+                default: 1
+                in_data: 1
+            num_required: 
+                label: Caractère numérique obligatoire
+                data_type: bool
+                default: 1
+                in_data: 1
+                
+    BC_NumberInput: 
+        extends: inputs/BC_TextInput
+        labels: 
+            name: nombre
+        params: 
+            min: 
+                label: valeur minimale
+                data_type: any
+                in_data: 1
+            max: 
+                label: valeur maximale
+                data_type: any
+                in_data: 1
+            unsigned: 
+                label: Valeurs positives uniquement
+                data_type: bool
+                default: 0
+                in_data: 1
+            decimals: 
+                label: Nombre de décimales autorisées
+                data_type: int
+                default: 0
+                in_data: 1
+            min_label: 
+                label: Afficher la valeur minimale
+                data_type: bool
+                default: 0
+            max_label: 
+                label: Afficher la valeur maximale
+                data_type: bool
+                default: 0
+                
+    BC_QtyInput: 
+        extends: inputs/BC_NumberInput
+        labels: 
+            name: quantité
+            is_female: 1
+        params: 
+            step: 
+                label: Valeur incrémentale
+                data_type: float
+                default: 1
+                in_data: 1
+                
+    BC_TextareaInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: texte long
+            name_plur: textes longs
+        params: 
+            rows: 
+                label: Nombre de lignes
+                data_type: int
+                default: 3
+            max_chars: 
+                label: Nombre de caractères max
+                data_type: int
+            hashtags: 
+                label: Hashtags activés
+                data_type: bool
+                default: 0
+            scanner: 
+                label: Scanner activé
+                data_type: bool
+                default: 0
+                
+    BC_HtmlInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: Editeur HTML
+            name_plur: Editeurs HTML
+        params: 
+            hashtags: 
+                label: Hashtags activés
+                data_type: bool
+                default: 0
+            
+    BC_DatetimeInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: date et heure
+            name_plur: dates et heures
+            is_female: 1
+        params: 
+            display_now:
+                label: Afficher la date et/ou l'heure actuelle
+                data_type: bool
+                default: 0
+            range: 
+                label: Intervalle
+                data_type: bool
+                default: 0
+            subtype: 
+                label: Sous-Type
+                values: 
+                    datetime: Date et Heure
+                    date: Date seulement
+                    time: Heure seulement
+                default: datetime
+            with_seconds: 
+                label: Inclure les secondes
+                default: 1
+                
+    BC_TimerInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: timer
+        params: 
+            with_days: 
+                label: Inclure le nombre de jours
+                data_type: bool
+                default: 1
+            with_secondes: 
+                label: Inclure le nombre de secondes
+                data_type: bool
+                default: 1
+                
+    BC_SelectInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: sélecteur
+        params: 
+            options: 
+                label: Liste des choix
+                data_type: array
+            select_first: 
+                label: Pré-sélectionner le premier choix
+                data_type: bool
+                default: 0
+            cache_key: 
+                label: Clé du cache pour la liste des choix
+            include_empty: 
+                label: Inclure un choix vide
+                data_type: bool
+                default: 0
+            empty_value: 
+                label: Valeur du choix vide
+                default: 0
+            empty_label: 
+                label: Intitulé du choix vide
+                default: ''
+            display_mode: 
+                label: Mode d'affichage
+                values: 
+                    select: Liste déroulante
+                    switch: Switch
+                    
+    BC_SelectUserInput: 
+        extends: inputs/BC_SelectInput
+        labels: 
+            name: utilisateur
+        params: 
+            include_current: 
+                label: Inclure le choix "Utilisateur connecté"
+                data_type: bool
+                default: 0
+            active_only: 
+                label: Utilisateurs actifs seulement
+                data_type: bool
+                default: 0
+                    
+    BC_ToggleInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: toggle
+        params: 
+            display_labels: 
+                label: Afficher les libellés
+                data_type: bool
+                default: 1
+            toggle_on: 
+                label: Libellé pour la valeur 1
+                default: OUI
+            toggle_off: 
+                label: Libellé pour la valeur 0
+                default: NON
+                
+    BC_CheckListInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: liste à cocher
+            name_plur: listes à cocher
+            is_female: 1
+        params: 
+            items: 
+                label: Eléments
+                data_type: array
+            select_all_buttons: 
+                label: Afficher le bouton de sélection de tous les élements
+                data_type: bool
+                default: 1
+            search_input: 
+                label: Afficher un champ de recherche
+                data_type: bool
+                default: 0
+            max: 
+                label: Nombre max d'éléments sélectionnables
+                data_type: any
+                default: none
+                in_data: 1
+            max_input_name: 
+                label: Nom du champ contenant le nombre max d'éléments sélectionnables
+                in_data: 1
+            max_input_abs: 
+                label: Prendre la valeur absolue du champ contenant le nombre max d'éléments sélectionnables
+                in_data: 1
+                data_type: bool
+                default: 0
+            items_inline: 
+                label: Afficher les éléments en ligne
+                data_type: bool
+                default: 0
+            
+    BC_ZiptownInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: autocomplétion par code postal
+            name_plur: autocomplétions par code postal
+            is_female: 1
+        params: 
+            field_type: 
+                label: Type de champ
+                values: 
+                    zip: Code postal
+                    town: Ville
+            town_field: 
+                label: Nom du champ pour la ville
+            zip_field: 
+                label: Nom du champ pour le code postal
+            state_field: 
+                label: Nom du champ pour la région
+            country_field: 
+                label: Nom du champ pour le pays
+                
+    BC_SearchObjectInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: recherche d'objet
+            name_plur: recherches d'objets
+            is_female: 1
+        params: 
+            module: 
+                label: Module
+                required: 1
+            object_name: 
+                label: Nom objet
+                required: 1
+            search_name: 
+                label: Nom du type de recherche
+                default: default
+            card: 
+                label: Afficher les mini-fiches dans les résulats
+            display_selected: 
+                label: Afficher l'élément sélectionné
+                data_type: bool
+                default: 1
+            max_results: 
+                label: Nombre max de résultats
+                data_type: int
+                default: 200
+            scanner: 
+                label: Activer le scanner
+                data_type: bool
+                default: 0
+                
+    BC_ObjectFiltersInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: filtres objet
+            name_plur: filtres objets
+        params: 
+            obj_input_name: 
+                label: Nom du champ contenant le type d'objet
+            obj_module: 
+                label: Module
+            obj_name: 
+                label: Nom objet
+    
+    BC_SignaturePadInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: signature électronique
+            name_plur: signatures électroniques
+            is_female: 1
+        params: 
+            check_mentions: 
+                label: Mentions à cocher
+                data_type: array
+                
+    BC_DropFilesInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: dépôt de fichiers
+            name_plur: dépôts de fichiers
+        params: 
+            max_items: 
+                label: Nombre max de fichiers déposables
+                data_type: int
+            files_dir: 
+                label: Dossier
+            allowed_types: 
+                label: Types autorisés
+                data_type: array
+            allowed_ext: 
+                label: Extensions autorisées
+                data_type: array
+            
+    BC_FileUploadInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: envoi de fichier
+            name_plur: envois de fichiers
+            
+    BC_HiddenInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: champ caché
+            name_plur: champs cachés
+            
+    BC_CustomInput: 
+        extends: inputs/BC_Input
+        labels: 
+            name: champ personnalisé
+            name_plur: champs personnalisés
+        params: 
+            content: 
+                label: Contenu
+    
+    
+    
+                
+                
+            
+                
+                
+            
+                
+        

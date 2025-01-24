@@ -1,0 +1,1 @@
+UPDATE `llx_bimp_notification` SET `method` = 'getUserNotificationsLinks' WHERE `method` = 'getMyLink';

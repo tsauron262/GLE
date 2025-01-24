@@ -675,6 +675,8 @@ class BimpValidation
                         $val = (float) $object->getCurrentTotal(1);
                     }
 
+                    $debug .= '<br/>Total TTC ' . $object->getLabel() . ' : ' . $val . '<br/>';
+
                     if ($val > 0) {
                         if (method_exists($object, 'getClientFacture')) {
                             $client = $object->getClientFacture();
@@ -683,7 +685,13 @@ class BimpValidation
                         }
 
                         if (BimpObject::objectLoaded($client)) {
-                            $val += (float) $client->getEncours(true, $debug) + $client->getEncoursNonFacture(true, $debug) - ((float) $client->getData('outstanding_limit') * 1.2);
+                            $excluded = array();
+
+                            if (is_a($object, 'Bimp_Commande')) {
+                                $excluded[] = $object->id;
+                            }
+
+                            $val += (float) $client->getEncours(true, $debug) + $client->getEncoursNonFacture(true, $debug, $excluded) - ((float) $client->getData('outstanding_limit') * 1.2);
                         }
 
                         if ($val < 0) {

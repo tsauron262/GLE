@@ -52,6 +52,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.use_refresh_idx = true; // Si $resultContainer non null
     this.remove_current_content = true; // Si append_html true
     this.append_html_transition = true; // Si append_html true
+    this.eraseResultButton = false; // Bouton pour effacer le contenu du résultat
+
+    this.play_sounds = false;
 
     this.processing_msg = 'Traitement en cours';
     this.success_msg = 'Opération effectuée avec succès';
@@ -74,14 +77,14 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.error = function () {
     };
-    
+
     this.addBimpHash = function () {
-        if (typeof bimpAjax.bimp_storage.get('bimp_hash') !== 'undefined'){
+        if (typeof bimpAjax.bimp_storage.get('bimp_hash') !== 'undefined') {
             var bimp_hash = bimpAjax.bimp_storage.get('bimp_hash');
         }
 
         if (typeof (bimp_hash) !== 'undefined' && bimp_hash) {
-            if(typeof (data.append) == 'function')
+            if (typeof (data.append) == 'function')
                 data.append("bimp_hash", bimpAjax.bimp_storage.get('bimp_hash'));
             else
                 data['bimp_hash'] = bimp_hash;
@@ -109,7 +112,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     if (typeof (bimp_context) !== 'undefined' && bimp_context) {
         bimpAjax.url += "&bimp_context=" + bimp_context;
     }
-    
+
     bimpAjax.addBimpHash();
 
     // Affichage du message de chargement ou suppression du contenu actuel si nécessaire
@@ -121,7 +124,13 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 process_html += '<p class="loading-text">' + this.processing_msg + '</p>';
             }
             process_html += '</div>';
-            this.$resultContainer.html(process_html).find('.content-loading').show();
+
+            if (this.remove_current_content) {
+                this.$resultContainer.html(process_html);
+            } else {
+                this.$resultContainer.prepend(process_html);
+            }
+            this.$resultContainer.find('.content-loading').show();
             this.$resultContainer.show();
         } else {
             bimp_msg(this.processing_msg, 'info', null, true);
@@ -290,15 +299,15 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             contentType: bimpAjax.contentType,
             processData: bimpAjax.processData,
             success: function (result) {
-                if(typeof (result.bimp_hash) !== 'undefined') {
-                    bimpAjax.bimp_storage.set('bimp_hash', result.bimp_hash);
-                }
-                
                 if (typeof (result.request_id) !== 'undefined') {
                     bimpAjax = bimp_requests[parseInt(result.request_id)];
                 } else {
                     bimp_msg('Erreur: ID de requête invalide', 'danger', null, true);
                     return;
+                }
+
+                if (typeof (result.bimp_hash) !== 'undefined') {
+                    bimpAjax.bimp_storage.set('bimp_hash', result.bimp_hash);
                 }
 
                 if (typeof (result.nologged) !== 'undefined') {
@@ -331,7 +340,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 }
 
                 if (bimpAjax.display_processing && bimpAjax.$resultContainer) {
-                    bimpAjax.$resultContainer.html('').slideUp(250);
+                    if (bimpAjax.remove_current_content) {
+                        bimpAjax.$resultContainer.html('').slideUp(250);
+                    } else {
+                        bimpAjax.$resultContainer.find('.content-loading').remove();
+                    }
                 }
                 if ((typeof (result.errors) !== 'undefined') && result.errors && result.errors.length) {
                     bimpAjax.display_result_errors(result.errors);
@@ -339,7 +352,14 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     if (typeof (bimpAjax.error) === 'function') {
                         bimpAjax.error(result, bimpAjax);
                     }
+
+                    if (bimpAjax.play_sounds) {
+                        BimpSound.play('danger');
+                    }
                 } else {
+                    if (bimpAjax.play_sounds) {
+                        BimpSound.play('success');
+                    }
                     bimpAjax.display_result_success(result);
                     var no_callbacks = false;
 
@@ -426,6 +446,18 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     bimpAjax.display_result_infos(result.infos);
                 }
 
+                if (bimpAjax.eraseResultButton && $.isOk(bimpAjax.$resultContainer)) {
+                    if (bimpAjax.$resultContainer.html() && !bimpAjax.$resultContainer.find('.eraseAjaxResultBtn').length) {
+                        var btn_html = '<div style="margin: 10px 0; text-align: center">';
+                        btn_html += '<span class="btn btn-default eraseAjaxResultBtn" onclick="$(this).parent().parent().html(\'\')">';
+                        btn_html += '<i class="fas fa5-times iconLeft"></i>Tout effacer';
+                        btn_html += '</span>';
+                        btn_html += '</div>';
+
+                        bimpAjax.$resultContainer.prepend(btn_html);
+                    }
+                }
+
                 if (bimpAjax.modal_scroll_bottom) {
                     bimpModal.scrollBottom();
                 }
@@ -436,6 +468,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 delete bimp_requests[bimpAjax.request_id];
             },
             error: function (response, a, b) {
+                if (bimpAjax.play_sounds) {
+                    BimpSound.play('danger');
+                }
                 if (!bimp_is_unloaded) {
                     if (bimpAjax.display_errors) {
                         if (typeof (response.responseText) === 'string' && response.responseText) {

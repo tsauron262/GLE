@@ -411,7 +411,7 @@ class Equipment extends BimpObject
         $buttons[] = array(
             'label'   => 'Etiquette',
             'icon'    => 'fas_sticky-note',
-            'onclick' => $this->getJsActionOnclick('generateEtiquette')
+            'onclick' => $this->getJsActionOnclick('generateEtiquette', array(), array('form_name' => 'etiquettes'))
         );
 
         return $buttons;
@@ -863,6 +863,31 @@ class Equipment extends BimpObject
         }
 
         return 0;
+    }
+
+    public static function getNextSerialAuto($id_product, $prefix = null)
+    {
+        if ((int) $id_product) {
+            if (is_null($prefix)) {
+                $prefix = $id_product;
+            }
+            $serials = self::getBdb()->getValues('be_equipment', 'serial', 'id_product = ' . $id_product . ' AND serial LIKE \'' . $prefix . '-%\'', null, 'serial', 'DESC');
+
+            $n = 1;
+            if (is_array($serials) && count($serials)) {
+                foreach ($serials as $serial) {
+                    if (preg_match('/^' . $prefix . '\-(\d+)$/', $serial, $matches)) {
+                        $n = (int) $matches[1] + 1;
+                        break;
+                    }
+                }
+            }
+
+            return $prefix . '-' . BimpTools::addZeros($n, 5);
+        }
+
+
+        return '';
     }
 
     // Affichage: 
@@ -1402,7 +1427,7 @@ class Equipment extends BimpObject
         }
     }
 
-    public function moveToPlaceType($type, $idI = 0, $force = 0)
+    public function moveToPlaceType($type, $id_inventaire = 0, $force = 0)
     {
         $errors = array();
         $current_place = $this->getCurrentPlace();
@@ -1415,10 +1440,11 @@ class Equipment extends BimpObject
 
         if (!count($errors)) {
             // Correction de l'emplacement initial en cas d'erreur: 
-            $text = "Transfert auto via Inventaire";
-            if ($idI > 0)
-                $text .= '-' . $idI;
-            $text .= '-SN:' . $this->getData('serial');
+            $text = "Transfert auto via inventaire";
+            if ($id_inventaire > 0) {
+                $text .= ' - ' . $id_inventaire;
+            }
+            $text .= ' - SN:' . $this->getData('serial');
             $this->moveToPlace($type, (int) $current_place->getData('id_entrepot'), '', $text, $force);
         }
 
@@ -1817,8 +1843,21 @@ class Equipment extends BimpObject
         if (count($errors)) {
             $html .= BimpRender::renderAlerts($errors);
         }
-
+        
         return $html;
+    }
+
+    public function renderLocationsList()
+    {
+        if ($this->isLoaded()) {
+            $loc = BimpObject::getInstance('bimplocation', 'BimpLocationLine');
+            $bc_list = new BC_ListTable($loc, 'equipment', 1, null, 'Locations de l\'équipement "' . $this->getRef() . '"', 'fas_business-time');
+            $bc_list->addFieldFilterValue('id_equipment', $this->id);
+
+            return $bc_list->renderHtml();
+        }
+
+        return BimpRender::renderAlerts('ID équipement absent');
     }
 
     // Actions: 
@@ -1843,7 +1882,7 @@ class Equipment extends BimpObject
         }
 
         if ($url) {
-            $success_callback = 'window.open(\'' . $url . '\');';
+            $success_callback = 'window.open(\'' . $url . '&mode=' . $data['mode'] . '&qty=' . $data['qty'] . '\');';
         }
 
         return array(
@@ -2078,9 +2117,9 @@ class Equipment extends BimpObject
 
         if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {
             // Pas de correction du id_product pour l'instant car trop dangereux (stocks, incohérences commandes / factures, etc.)
-            
-            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');            
-            
+
+            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+
             if ($prod_instance->field_exists('code_config') && preg_match('/^.+(.{4})$/', $serial, $matches)) {
                 $apple_product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                             'code_config' => $matches[1],

@@ -1,0 +1,336 @@
+table: bimp_location
+controller: location
+icon: fas_business-time
+
+list_page_url: 
+    controller: index
+            
+header_list_name: default
+header_edit_form: edit
+
+header_btn: 
+    callback: getActionsButtons
+        
+nom_url: 
+    with_status: 1
+    syntaxe: <ref>
+    card: default
+    
+labels:
+    name: location
+    is_female: 1
+    
+objects: 
+    contact_facturation: 
+        extends: contact
+        instance: 
+            id_object: 
+                field_value: id_contact_facturation
+    
+    facture_acompte: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture_acompte
+                
+    cur_vente: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcaisse
+                name: BC_Vente
+            id_object:
+                field_value: id_cur_vente
+        
+    lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimplocation
+                name: BimpLocationLine
+                
+fields: 
+    ref: 
+        label: Référence
+        
+    status: 
+        label: Status
+        type: int
+        values: 
+            array: status_list
+            
+    id_client: 
+        label: Client
+        type: id_object
+        object: client
+        required: 1
+        input: 
+            card: default
+        create_form: light_particulier
+        create_form_values: 
+            fields: 
+                marche: 
+                    - 18
+        edit_form: default
+        
+    id_contact_facturation: 
+        label: Contact facturation
+        type: id_object
+        object: contact_facturation
+        depends_on: id_client
+        display_if:
+            field_name: id_client
+            hide_values: 0,
+        create_form: default
+        edit_form: default
+        create_form_values:
+            fields: 
+                fk_soc: 
+                    field_value: id_client
+        input: 
+            type: select
+            options: 
+                array: clientContacts
+        search: 
+            input: 
+                type: search_object
+        
+    id_entrepot: 
+        label: Entrepôt
+        type: id_object
+        object: bimp_entrepot
+        input: 
+            type: search_entrepot
+        required: 1
+        
+    id_facture_acompte: 
+        label: Facture d'acompte
+        type: id_object
+        object: facture_acompte
+        
+    date_from: 
+        label: Du
+        type: date
+        required: 1
+        
+    date_to: 
+        label: Au
+        type: date
+        required: 1
+        
+    fac_date_from: 
+        label: Facturé à partir du
+        type: date
+        input: 
+            help: Laisser vide si identique à la date de début
+        
+    fac_date_to: 
+        label: Facturé jusqu'au
+        type: date
+        input: 
+            help: Laisser vide si identique à la date de fin
+        
+    id_cur_vente: 
+        label: Vente en cours
+        type: id_object
+        object: cur_vente
+        default_value: 0
+        
+    lines_process_status: 
+        label: Statut actuel à assigner aux équipemnts
+        type: int
+        values: 
+            callback: getLinesStatusArray
+        default_value: 0
+        
+forms: 
+    default: 
+        rows: 
+            - field: id_entrepot
+            - field: id_client
+            - field: id_contact_facturation
+            - field: date_from
+            - field: date_to
+            - field: fac_date_from
+            - field: fac_date_to
+            
+    edit: 
+        rows: 
+            - field: id_entrepot
+            - field: id_client
+            - field: id_contact_facturation
+            
+    edit_dates: 
+        rows: 
+            - field: date_from
+            - field: date_to
+            - field: fac_date_from
+            - field: fac_date_to
+            - custom: 1
+              label: Dates équipements
+              input_name: lines_dates_modify
+              input: 
+                  type: select
+                  options: 
+                      all: Ajuster toutes les dates de location des équipements
+                      only_identicals: Ajuster seulement les dates de location des équipements n'ayant pas été modifiées
+                      none: Ne pas ajuster les dates de location des équipements
+              value: all
+                      
+    facturation: 
+        modal_format: large
+        rows: 
+            - custom: 1
+              label: Facture
+              input_name: id_facture
+              input: 
+                  type: select
+                  options: 
+                      callback: getClientDraftFacturesArray
+            - custom: 1
+              label: Libellé facture
+              input_name: fac_label
+              input: 
+                  type: text
+              value: Location de matériel
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Valider la facture
+              input_name: validate_fac
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Lignes
+              input_name: lines
+              input: 
+                  type: custom
+                  content: 
+                      callback: renderFactureLinesInputs
+                      
+    add_to_vente: 
+        rows: 
+            - custom: 1
+              label: Vente
+              input_name: id_vente
+              input: 
+                  type: select
+                  options: 
+                      callback: getClientVentesArray
+        
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: id_entrepot
+            - field: date_from
+            - field: date_to
+            - field: fac_date_from
+            - field: fac_date_to
+            - field: id_client
+              display: card
+            - field: id_contact_facturation
+              display: card
+            - field: id_facture_acompte
+              show: 
+                  field_value: id_facture_acompte
+              
+views: 
+    infos: 
+        no_reload: 0
+        objects_change_reload: BimpLocationLine
+        panel: 0
+        rows: 
+            - cols: 
+                  - type: fields_table
+                    col_lg: 5
+                    col_md: 5
+                    fields_table: 
+                        name: infos
+
+                  - type: custom
+                    col_lg: 7
+                    col_md: 7
+                    custom:
+                        callback: renderMontants
+                        
+    default: 
+        no_reload: 1
+        rows: 
+            - cols: 
+                  - type: object_header
+            - cols: 
+                  - type: view
+                    view: 
+                        name: infos
+#                  - type: fields_table
+#                    col_lg: 4
+#                    col_md: 5
+#                    fields_table: 
+#                        name: infos
+#
+#                  - type: custom
+#                    col_lg: 8
+#                    col_md: 7
+#                    custom:
+#                        callback: renderMontants
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderQuickProcessForm
+            - cols: 
+                - type: list
+                  list: 
+                      title: Equipements
+                      name: location
+                      children: lines
+       
+filters_panels: 
+    default: 
+        filters: 
+            - field: status
+            - field: id_client
+            - field: date_from
+            - field: date_to
+            
+lists: 
+    default: 
+        title: Liste des locations
+        icon: fas_business-time
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les location sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        filters_panel: default
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        edit_btn: 1
+        edit_form: edit
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
+        cols: 
+            ref:
+            status: 
+            date_create:
+            id_client: 
+            date_from: 
+            date_to: 
+                
+    client: 
+        extends: default
+        cols: 
+            id_client: unset
+            
+        

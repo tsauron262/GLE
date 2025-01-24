@@ -4494,6 +4494,17 @@ class Bimp_Facture extends BimpComm
                 if ($client->isAdministration()) {
                     $this->updateField('chorus_status', 0);
                 }
+                
+                $client->setActivity('Validation ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
+            }
+            
+            $id_client_final = (int) $this->getData('id_client_final');
+            if ($id_client_final && $id_client_final !== $client->id) {
+                $client_final = $this->getChildObject('client_final');
+
+                if (BimpObject::objectLoaded($client_final)) {
+                    $client_final->setActivity('Validation ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
+                }
             }
         }
 
@@ -5278,7 +5289,7 @@ class Bimp_Facture extends BimpComm
             'prime'               => $this->getData('prime'),
             'prime2'              => $this->getData('prime2'),
             'rib_client'          => $this->getData('rib_client'),
-            'datef'               => $this->getData('datef'),
+            'datef'               => date('Y-m-d'),
             'fk_account'          => $this->getData('fk_account'),
             'centre'              => $this->getData('centre'),
             'pdf_hide_pu'         => $this->getData('pdf_hide_pu'),
@@ -7007,6 +7018,20 @@ class Bimp_Facture extends BimpComm
                             unset($asso);
                         }
                     }
+                }
+            }
+            
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
+            }
+            
+            $id_client_final = (int) $this->getData('id_client_final');
+            if ($id_client_final && $id_client_final !== $client->id) {
+                $client_final = $this->getChildObject('client_final');
+
+                if (BimpObject::objectLoaded($client_final)) {
+                    $client_final->setActivity('Création ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
                 }
             }
         }

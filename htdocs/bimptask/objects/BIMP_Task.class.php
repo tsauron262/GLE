@@ -42,13 +42,8 @@ class BIMP_Task extends BimpAbstractFollow
             'autre' => array('label' => 'Autre')
         )
     );
-    private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
 
     // Droits users: 
-    
-    public function isDev(){
-        return ($this->getData('type_manuel') == 'devvv');
-    }
 
     public function canView()
     {
@@ -100,6 +95,7 @@ class BIMP_Task extends BimpAbstractFollow
             case 'id_user_owner':
             case 'id_task':
                 return $this->canAttribute();
+
             case 'ok_metier':
                 return ($user->admin && !BimpCore::isUserDev());
         }
@@ -117,6 +113,11 @@ class BIMP_Task extends BimpAbstractFollow
     }
 
     // Getters booléens: 
+
+    public function isDev()
+    {
+        return ($this->getData('type_manuel') == 'devvv');
+    }
 
     public function isFieldEditable($field, $force_edit = false)
     {
@@ -334,43 +335,18 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Getters Array:
 
-    public function getFiltreRightArray($user)
-    {
-        $filtre = array();
-        $tabFiltre = self::getFiltreDstRight($user);
-        if (count($tabFiltre[1])) {
-            $filtre['dst_par_type'] = array(
-                'or' => array(
-                    'mode_auto' => array(
-                        'and_fields' => array(
-                            'auto' => 1,
-                            'dst'  => array($tabFiltre[0] => $tabFiltre[1])
-                        )
-                    ),
-                    'mode_manu' => array(
-                        'and_fields' => array(
-                            'auto'        => 0,
-                            'type_manuel' => array($tabFiltre[0] => $tabFiltre[1])
-                        )
-                    )
-            ));
-        } /* else
-          $filtre['id'] = array('operator' => '>', 'value' => '0'); //toujours vraie   !!! pourquoi ? fait bugger */
-        return $filtre;
-    }
-
     public function getSous_type_list_taskArray()
     {
-        if(!$this->isLoaded()){
+        if (!$this->isLoaded()) {
             $sT = array();
-            foreach(self::$sous_types as $datas){
-                foreach($datas as $code => $values){
+            foreach (self::$sous_types as $datas) {
+                foreach ($datas as $code => $values) {
                     $sT[$code] = $values;
                 }
             }
             return $sT;
         }
-        
+
         $type = BimpTools::getPostFieldValue('type_manuel', $this->getData('type_manuel'), 'alphanohtml');
 
         if (isset($type) && self::$sous_types[$type])
@@ -412,29 +388,31 @@ class BIMP_Task extends BimpAbstractFollow
     public function getListFiltre($type = "normal", $title = 'Toutes')
     {
         global $user;
-        
+
         $listName = 'default';
-        
-        if($type == 'orgaDev')
+
+        if ($type == 'orgaDev') {
             $listName = 'sortable';
-        
+        }
+
         $list = new BC_ListTable($this, $listName, 1, null, $title);
         $list->addIdentifierSuffix($type);
 
-        if ($type == 'byMy')
+        if ($type == 'byMy') {
             $list->addFieldFilterValue('user_create', (int) $user->id);
-        elseif ($type == "orgaDev"){
+        } elseif ($type == "orgaDev") {
             $list->addFieldFilterValue('type_manuel', 'dev');
-            $list->addFieldFilterValue('status', array(0,1,2,3));
-        }  
-        elseif ($type == "my")
+            $list->addFieldFilterValue('status', array(0, 1, 2, 3));
+        } elseif ($type == "my") {
             $list->addFieldFilterValue('id_user_owner', (int) $user->id);
-        else
+        } else {
             $list->addFieldFilterValue('fgdg_dst', array(
                 ($type == "my" ? 'and_fields' : 'or') => BimpTools::merge_array(array(
                     'id_user_owner' => $user->id
-                        ), $this->getFiltreRightArray($user))
+                        ), self::getFiltreRightArray($user))
             ));
+        }
+
         return $list;
     }
 
@@ -522,168 +500,6 @@ class BIMP_Task extends BimpAbstractFollow
         }
 
         return $users;
-    }
-
-    public function getTaskForUser($id_user, $id_max, &$errors = array())
-    {
-        $tasks = array();
-        $nb_my = 0;
-        $nb_unaffected = 0;
-
-        global $user;
-
-        $tasks['content'] = BimpTools::merge_array(
-                        // Tâches affectées à l'utilisateur actuel        
-                        self::getNewTasks(array(
-                            'id'      => array(
-                                'operator' => '>',
-                                'value'    => $id_max
-                            ),
-                            'or_user' => array(
-                                'or' => array(
-                                    'owner'  => array(
-                                        'and_fields' => array(
-                                            'id_user_owner' => (int) $id_user,
-                                            'status'        => array(0, 1, 3)
-                                        )
-                                    ),
-                                    'author' => array(
-                                        'and_fields' => array(
-                                            'user_create' => (int) $id_user,
-                                            'status'      => 2
-                                        )
-                                    )
-                                )
-                            )), 'my_task', $nb_my
-                        ), self::getNewTasks(BimpTools::merge_array(array(// Tâches non affectées
-                                    'id'            => array(
-                                        'operator' => '>',
-                                        'value'    => $id_max
-                                    ),
-                                    'id_user_owner' => 0,
-                                    'status'        => array(0, 1, 3
-                                    )
-                                        ), $this->getFiltreRightArray($user)), 'unaffected_task', $nb_unaffected
-        ));
-
-        $tasks['nb_my'] = $nb_my;
-        $tasks['unaffected_task'] = $nb_unaffected;
-        return $tasks;
-    }
-
-    public static function getTableSqlDroitPasDroit($user)
-    {
-        $tabDroit = $tabPasDroit = $tabTous = array();
-        foreach (self::getTypeArray() as $src => $nom) {
-            if ($src != "other") {
-                if ($user->rights->bimptask->$src->read)
-                    $tabDroit[] = '' . $src . '';
-                else
-                    $tabPasDroit[] = '' . $src . '';
-                $tabTous[] = '' . $src . '';
-            }
-        }
-        return array($tabDroit, $tabPasDroit, $tabTous);
-    }
-
-    public static function getFiltreDstRight($user)
-    {
-        $tabT = self::getTableSqlDroitPasDroit($user);
-        if ($user->rights->bimptask->other->read)
-            return array("not_in", $tabT[1]);
-        else
-            return array("in", $tabT[0]);
-    }
-
-    private static function getNewTasks($filters, $user_type, &$nb, $exclude_parent_tasks = true)
-    {
-        global $user;
-        $bdb = self::getBdb();
-
-        $tasks = array();
-
-        $i = 0;
-
-        if ($exclude_parent_tasks) {
-            $filters['(SELECT COUNT(DISTINCT st.id) FROM ' . MAIN_DB_PREFIX . 'bimp_task st WHERE st.id_task = a.id AND st.status < 4)'] = 0;
-        }
-
-        $sql = 'SELECT DISTINCT a.id';
-        $sql .= BimpTools::getSqlFrom('bimp_task');
-        $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy('position', 'ASC', 'a');
-        $sql .= BimpTools::getSqlLimit(50);
-
-        $rows = $bdb->executeS($sql, 'array');
-
-        if (!is_array($rows)) {
-            return array();
-        }
-
-        foreach ($rows as $r) {
-            $t = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
-            if (!BimpObject::objectLoaded($t)) {
-                continue;
-            }
-
-            if ($t->can('view')) {
-                $nb++;
-                $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
-                $where .= ' AND viewed = 0 AND user_create != ' . (int) $user->id;
-                $not_viewed = (int) $bdb->getCount('bimpcore_note', $where);
-
-                $user_author = $t->getChildObject('user_create');
-                $prio = (int) $t->getData('prio');
-                $prio_badge = '';
-                switch ($prio) {
-                    case 20:
-                        $prio_badge = '<span class="badge badge-danger" style="margin-right: 8px; font-size: 10px">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Urgent</span>';
-                        break;
-
-                    case 10:
-                        $prio_badge = '<span class="badge badge-warning" style="margin-right: 8px; font-size: 10px">Important</span>';
-                        break;
-                }
-
-                $status = (int) $t->getData('status');
-                $status_icon = '<span class="' . implode(' ', self::$valStatus[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
-                $status_icon .= BimpRender::renderPopoverData(self::$valStatus[$status]['label']) . '>';
-                $status_icon .= BimpRender::renderIcon(self::$valStatus[$status]['icon']) . '</span>';
-
-                $parent_task = null;
-
-                if ((int) $t->getData('id_task')) {
-                    $parent_task = $t->getChildObject('task_mere');
-                }
-
-                $task = array(
-                    'id'            => $t->getData('id'),
-                    'user_type'     => $user_type,
-                    'position'     => $t->getData('position'),
-                    'prio'          => $prio,
-                    'status_icon'   => $status_icon,
-                    'prio_badge'    => $prio_badge,
-                    'subj'          => $t->getData('subj'),
-                    'src'           => $t->getData('src'),
-                    'txt'           => $t->displayData("txt", 'default', false),
-                    'date_create'   => $t->getData('date_create'),
-                    'url'           => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id'),
-                    'not_viewed'    => (int) $not_viewed,
-                    'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
-                    'can_close'     => (int) $t->can('edit'),
-                    'can_attribute' => (int) ($t->can('edit') or $t->canAttribute()),
-                    'can_edit'      => (int) $t->can('edit'),
-                    'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
-                    'parent_task'   => (BimpObject::objectLoaded($parent_task) ? $parent_task->getLink() : '')
-                );
-
-                $tasks[] = $task;
-
-                $i++;
-            }
-        }
-
-        return $tasks;
     }
 
     public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
@@ -1141,10 +957,8 @@ class BIMP_Task extends BimpAbstractFollow
         $errors = $warnings = array();
         $success = "Tâche fermée";
         $errors = $this->updateField("status", 4);
-        $success_callback = '';
 
         if (!count($errors)) {
-            $success_callback = self::$jsReload;
 
             $close_label = BimpTools::getArrayValueFromPath($data, 'close_label', 'Tâche terminée');
             $comment = BimpTools::getArrayValueFromPath($data, 'comment', '');
@@ -1165,9 +979,8 @@ class BIMP_Task extends BimpAbstractFollow
         }
 
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 
@@ -1187,7 +1000,6 @@ class BIMP_Task extends BimpAbstractFollow
 
     public function actionAttribute($data, &$success)
     {
-        global $user;
         $errors = $warnings = array();
 
         $this->updateField("id_user_owner", $data['id_user_owner']);
@@ -1211,9 +1023,8 @@ class BIMP_Task extends BimpAbstractFollow
         $this->addObjectLog($msg);
 
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => self::$jsReload
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 
@@ -1258,9 +1069,8 @@ class BIMP_Task extends BimpAbstractFollow
         $this->addObjectLog($msg);
 
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => self::$jsReload
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 
@@ -1345,6 +1155,240 @@ class BIMP_Task extends BimpAbstractFollow
 
     // Méthodes statiques: 
 
+    public static function getTaskForUser($id_user, $tms = '', $options = array(), &$errors = array())
+    {
+        if ((int) BimpCore::getConf('mode_eco')) {
+            return array();
+        }
+
+        $data = array(
+            'tms'      => date('Y-m-d H:i:s'),
+            'elements' => array()
+        );
+
+        $bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+        if (!BimpObject::objectLoaded($bimp_user)) {
+            return $data;
+        }
+
+        $filters = array();
+
+        if ($tms) {
+            $filters['tms'] = array(
+                'operator' => '>',
+                'value'    => $tms
+            );
+        }
+
+        if (isset($options['excluded_tasks']) && !empty($options['excluded_tasks'])) {
+            $filters['id'] = array(
+                'not_in' => $options['excluded_tasks']
+            );
+        }
+
+        $filters['or_user'] = array(
+            'or' => array(
+                'owner'  => array(
+                    'and_fields' => array(
+                        'id_user_owner' => (int) $id_user,
+                        'status'        => array(0, 1, 3)
+                    )
+                ),
+                'author' => array(
+                    'and_fields' => array(
+                        'user_create' => (int) $id_user,
+                        'status'      => 2
+                    )
+                )
+            )
+        );
+
+        $affected_elements = self::getNewTasks($filters, 'affected');
+
+        unset($filters['or_user']);
+        $filters['id_user_owner'] = 0;
+        $filters['status'] = array(0, 1, 3);
+        $filters = BimpTools::merge_array($filters, self::getFiltreRightArray($bimp_user->dol_object));
+
+        $unaffected_elements = self::getNewTasks($filters, 'unaffected');
+
+        $data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
+
+        if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
+            $bdb = self::getBdb();
+            $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+
+            if (!empty($users_delegations)) {
+                $taks_ids = array();
+
+                foreach ($data['elements'] as &$task) {
+                    $taks_ids[] = $task['id'];
+                }
+
+                foreach ($users_delegations as $id_user_delegation) {
+                    $user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
+                    $user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
+
+                    $user_tasks = self::getTaskForUser($id_user_delegation, $tms, array(
+                                'excluded_tasks'      => $taks_ids,
+                                'include_delegations' => 0
+                                    ), $errors);
+
+                    if (!empty($user_tasks)) {
+                        foreach ($user_tasks['elements'] as &$task) {
+                            $taks_ids[] = $task['id'];
+                            $task['dest'] = $user_name;
+                        }
+
+                        $data['elements'] = BimpTools::merge_array($data['elements'], $user_tasks['elements']);
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public static function getFiltreRightArray($user)
+    {
+        $filtre = array();
+        $tabFiltre = self::getFiltreDstRight($user);
+        if (count($tabFiltre[1])) {
+            $filtre['dst_par_type'] = array(
+                'or' => array(
+                    'mode_auto' => array(
+                        'and_fields' => array(
+                            'auto' => 1,
+                            'dst'  => array($tabFiltre[0] => $tabFiltre[1])
+                        )
+                    ),
+                    'mode_manu' => array(
+                        'and_fields' => array(
+                            'auto'        => 0,
+                            'type_manuel' => array($tabFiltre[0] => $tabFiltre[1])
+                        )
+                    )
+            ));
+        }
+
+        return $filtre;
+    }
+
+    public static function getTableSqlDroitPasDroit($user)
+    {
+        $tabDroit = $tabPasDroit = $tabTous = array();
+        foreach (self::getTypeArray() as $src => $nom) {
+            if ($src != "other") {
+                if ($user->rights->bimptask->$src->read)
+                    $tabDroit[] = '' . $src . '';
+                else
+                    $tabPasDroit[] = '' . $src . '';
+                $tabTous[] = '' . $src . '';
+            }
+        }
+        return array($tabDroit, $tabPasDroit, $tabTous);
+    }
+
+    public static function getFiltreDstRight($user)
+    {
+        $tabT = self::getTableSqlDroitPasDroit($user);
+        if ($user->rights->bimptask->other->read)
+            return array("not_in", $tabT[1]);
+        else
+            return array("in", $tabT[0]);
+    }
+
+    private static function getNewTasks($filters, $user_type, $exclude_parent_tasks = true)
+    {
+        global $user;
+        $bdb = self::getBdb();
+
+        $tasks = array();
+
+        $i = 0;
+
+        if ($exclude_parent_tasks) {
+            $filters['(SELECT COUNT(DISTINCT st.id) FROM ' . MAIN_DB_PREFIX . 'bimp_task st WHERE st.id_task = a.id AND st.status < 4)'] = 0;
+        }
+
+        $sql = 'SELECT DISTINCT a.id';
+        $sql .= BimpTools::getSqlFrom('bimp_task');
+        $sql .= BimpTools::getSqlWhere($filters);
+        $sql .= BimpTools::getSqlOrderBy('position', 'ASC', 'a');
+        $sql .= BimpTools::getSqlLimit(50);
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (!is_array($rows)) {
+            return array();
+        }
+
+        foreach ($rows as $r) {
+            $t = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
+            if (!BimpObject::objectLoaded($t)) {
+                continue;
+            }
+
+            if ($t->can('view')) {
+                $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
+                $where .= ' AND viewed = 0 AND user_create != ' . (int) $user->id;
+                $not_viewed = (int) $bdb->getCount('bimpcore_note', $where);
+
+                $user_author = $t->getChildObject('user_create');
+                $prio = (int) $t->getData('prio');
+                $prio_badge = '';
+                switch ($prio) {
+                    case 20:
+                        $prio_badge = '<span class="badge badge-danger" style="margin-right: 8px; font-size: 10px">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Urgent</span>';
+                        break;
+
+                    case 10:
+                        $prio_badge = '<span class="badge badge-warning" style="margin-right: 8px; font-size: 10px">Important</span>';
+                        break;
+                }
+
+                $status = (int) $t->getData('status');
+                $status_icon = '<span class="' . implode(' ', self::$valStatus[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
+                $status_icon .= BimpRender::renderPopoverData(self::$valStatus[$status]['label']) . '>';
+                $status_icon .= BimpRender::renderIcon(self::$valStatus[$status]['icon']) . '</span>';
+
+                $parent_task = null;
+
+                if ((int) $t->getData('id_task')) {
+                    $parent_task = $t->getChildObject('task_mere');
+                }
+
+                $task = array(
+                    'id'            => $t->id,
+                    'sort_val'      => $t->getData('date_create'),
+                    'user_type'     => $user_type,
+                    'position'      => $t->getData('position'),
+                    'prio'          => $prio,
+                    'status_icon'   => $status_icon,
+                    'prio_badge'    => $prio_badge,
+                    'subj'          => $t->getData('subj'),
+                    'src'           => $t->getData('src'),
+                    'txt'           => $t->displayData("txt", 'default', false),
+                    'date_create'   => $t->getData('date_create'),
+                    'url'           => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id'),
+                    'not_viewed'    => (int) $not_viewed,
+                    'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
+                    'can_close'     => (int) $t->can('edit'),
+                    'can_attribute' => (int) ($t->can('edit') or $t->canAttribute()),
+                    'can_edit'      => (int) $t->can('edit'),
+                    'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
+                    'parent_task'   => (BimpObject::objectLoaded($parent_task) ? $parent_task->getLink() : '')
+                );
+
+                $tasks[] = $task;
+
+                $i++;
+            }
+        }
+
+        return $tasks;
+    }
+
     public static function addAutoTask($dst, $subject, $msg, $test_ferme = '')
     {
         global $conf;
@@ -1365,4 +1409,9 @@ if (is_array($tabCentre)) {
     foreach ($tabCentre as $code => $centre) {
         BIMP_Task::$sous_types['sav'][$code] = array('label' => 'SAV' . $code);
     }
+}
+
+function sortBimpTasksByDateCreate($a, $b)
+{
+    return ($a['date_create'] < $b['date_create'] ? -1 : ($a['date_create'] > $b['date_create'] ? 1 : 0));
 }

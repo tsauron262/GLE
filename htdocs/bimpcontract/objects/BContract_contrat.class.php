@@ -2453,7 +2453,7 @@ class BContract_contrat extends BimpDolObject
             $htmlT = '';
             $htmlT .= "<strong>";
             $htmlT .= "Nombre de FI: " . count($fis) . '<br />';
-            $htmlT .= "Nombre d'heures vendue : " . $ficheInter->timestamp_to_time($duree_vendu) .  ' (ratio avenants : ' . $ratio_avenants . ')' .'<br/>';
+            $htmlT .= "Nombre d'heures vendue : " . $ficheInter->timestamp_to_time($duree_vendu) /*.  ' (ratio avenants : ' . $ratio_avenants . ')' */.'<br/>';
 //            $html .= "Nombre d'heures de délégation vendue : ".print_r($this->getTotalHeureDelegation(true),true).'<br/>';
             $htmlT .= "Nombre d'heures FI dans le contrat : " . $ficheInter->timestamp_to_time($dureeFi['contrat']['tot']) . '<br />';
             $htmlT .= "Dont : " . $ficheInter->timestamp_to_time($dureeFi['contrat']['dep']) . ' h de déplacement<br />';

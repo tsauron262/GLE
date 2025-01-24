@@ -54,7 +54,7 @@ class BimpObject extends BimpCache
         'list_page_url'            => array('data_type' => 'array'),
         'parent_module'            => array('default' => ''),
         'parent_object'            => array('default' => ''),
-        'parent_id_property'       => array('defautl' => ''),
+        'parent_id_property'       => array('default' => ''),
         'positions'                => array('data_type' => 'bool', 'default' => 0),
         'position_insert'          => array('default' => 'before'),
         'labels'                   => array('type' => 'definitions', 'defs_type' => 'labels'),
@@ -376,7 +376,6 @@ class BimpObject extends BimpCache
         }
 
         $this->addCommonFieldsConfig();
-
         $this->addEntityFieldConfig();
 
         $errors = array();

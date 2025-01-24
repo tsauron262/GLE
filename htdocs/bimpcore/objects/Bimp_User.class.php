@@ -28,7 +28,7 @@ class Bimp_User extends BimpObject
         13 => 'Samedi (sem. paires)'
     );
 
-    // Gestion des droits: 
+    // Gestion des droits:
 
     public function canView()
     {
@@ -122,20 +122,14 @@ class Bimp_User extends BimpObject
 
     public function canEditField($field_name)
     {
-        global $user;
-
         switch ($field_name) {
             case 'extra_materiel':
+                global $user;
+
                 if ($user->admin || $user->login == 'l.gay') {
                     return 1;
                 }
                 return 0;
-
-            case 'delegations':
-                if (!$this->isLoaded()) {
-                    return 0;
-                }
-                return (int) ($user->admin || ($user->id == $this->id));
         }
         return parent::canEditField($field_name);
     }
@@ -265,7 +259,7 @@ class Bimp_User extends BimpObject
         return 0;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getCardFields($card_name)
     {
@@ -390,7 +384,7 @@ class Bimp_User extends BimpObject
         return $this->getData('firstname') . ' ' . $this->getData('lastname');
     }
 
-    // Getters Statics: 
+    // Getters Statics:
 
     public static function getUserGroupsRights($id_user, $id_entity = 0)
     {
@@ -507,7 +501,7 @@ class Bimp_User extends BimpObject
         return BimpCache::$cache[$cache_key];
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {
@@ -683,7 +677,7 @@ class Bimp_User extends BimpObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayUserGroupsSecu()
     {
@@ -846,55 +840,7 @@ class Bimp_User extends BimpObject
         return $html;
     }
 
-    public function displayDelegations()
-    {
-        $html = '';
-
-        if ($this->isLoaded()) {
-            $delegations = $this->getData('delegations');
-
-            if (!empty($delegations)) {
-                $msg = '';
-                if (count($delegations) > 1) {
-                    $msg .= 'Les utilisateurs ci-dessous ont ';
-                } else {
-                    $msg .= 'L\'utilisateur ci-dessous a ';
-                }
-                $msg .= 'accès à vos messages et vos tâches';
-                $html .= BimpRender::renderAlerts($msg, 'warning');
-                $html .= $this->displayDataDefault('delegations');
-            } else {
-                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Aucune délégation</span>';
-            }
-
-            if ($this->canEditField('delegations')) {
-                $html .= '<div class="buttonsContainer align-right">';
-                $html .= '<span class="btn btn-default" onclick="' . $this->getJsLoadModalForm('delegations', 'Modifier vos délégations') . '">';
-                $html .= BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Gérer';
-                $html .= '</span>';
-                $html .= '</div>';
-            }
-
-            $users = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_User', array(
-                        'delegations' => array(
-                            'part'      => '[' . $this->id . ']',
-                            'part_type' => 'middle'
-                        )
-            ));
-
-            if (!empty($users)) {
-                $html .= '<div style="margin-top: 15xp">';
-                foreach ($users as $u) {
-                    $html .= BimpRender::renderAlerts('L\'utilisateur ' . $u->getLink() . ' vous a accordé l\'accès à ses messages et tâches', 'info');
-                }
-                $html .= '</div>';
-            }
-        }
-
-        return $html;
-    }
-
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderLogo($format = 'mini', $preview = false)
     {
@@ -1029,65 +975,40 @@ class Bimp_User extends BimpObject
 
     public function renderTasksView()
     {
-        if (!$this->isLoaded()) {
-            return '';
-        }
-
-        $contents = array();
-
-        $users = array($this->id);
-
-        $users_delegations = $this->db->getValues('user', 'rowid', 'delegations LIKE \'%[' . $this->id . ']%\'');
-        if (!empty($users_delegations)) {
-            $users = BimpTools::merge_array($users, $users_delegations);
-        }
-
-        global $user;
-
-        foreach ($users as $id_user) {
-            $user_tabs = array();
-            $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
-            $tabList = array(
-                "my"      => ($user->id == $id_user ? 'Mes tâches' : 'Tâches') . ' assignées',
-                "byMy"    => ($user->id == $id_user ? 'Mes tâches' : 'Tâches') . ' créées',
-                "all"     => 'Toutes',
-                "orgaDev" => 'Organisation dév'
-            );
-
-            $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-
-            if (BimpObject::objectLoaded($u)) {
-                foreach ($tabList as $name => $title) {
-                    $list = $task->getListFiltre($name, $title, $u->dol_object);
-
-                    $user_tabs[] = array(
-                        'id'      => 'user_' . $id_user . '_' . $name,
-                        'title'   => $title,
-                        'content' => $list->renderHtml()
-                    );
-                }
-
-                $contents[$id_user] = BimpRender::renderNavTabs($user_tabs, 'user_' . $id_user . '_tasks');
-            }
-        }
-
-
         $tabs = array();
 
-        foreach ($contents as $id_user => $content) {
-            if (count($contents) <= 1) {
-                return $content;
-            }
+        $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
+        $filtres = BIMP_Task::getFiltreDstRight($this->dol_object);
 
-            $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-            $tabs[] = array(
-                'id'      => 'user_' . $id_user . '_tasks_tab',
-                'title'   => (BimpObject::objectLoaded($u) ? $u->getName() : 'Utilisateur #' . $id_user),
-                'content' => $content
-            );
+        // Liste mes tâches assignées
+        $list = new BC_ListTable($task, 'default', 1, null, 'Mes tâches assignées');
+        $list->addIdentifierSuffix('my_tasks');
+
+        $list->addFieldFilterValue('id_user_owner', (int) $this->id);
+        if (count($filtres[1]) > 0) {
+            $list->addFieldFilterValue('dst', array(
+                $filtres[0] => $filtres[1]
+            ));
         }
 
-        return BimpRender::renderNavTabs($tabs, 'users_tasks');
+        $tabs[] = array(
+            'id'      => 'my_tasks',
+            'title'   => 'Mes tâches assignées',
+            'content' => $list->renderHtml()
+        );
+
+//        // Liste mes tâches créées
+        $list = new BC_ListTable($task, 'default', 1, null, 'Mes tâches créées');
+        $list->addIdentifierSuffix('by_me');
+        $list->addFieldFilterValue('user_create', (int) $this->id);
+
+        $tabs[] = array(
+            'id'      => 'tasks_by_me',
+            'title'   => 'Mes tâches crées',
+            'content' => $list->renderHtml()
+        );
+
+        return BimpRender::renderNavTabs($tabs, 'tasks');
     }
 
     public function renderLdapView()
@@ -1118,7 +1039,7 @@ class Bimp_User extends BimpObject
 
         if ($conf->global->LDAP_SERVER_TYPE == "activedirectory") {
             $ldap = new Ldap();
-            $result = $ldap->connectBind();
+            $result = $ldap->connect_bind();
             if ($result > 0) {
                 $userSID = $ldap->getObjectSid($object->login);
             }
@@ -1175,7 +1096,7 @@ class Bimp_User extends BimpObject
 
         // Lecture LDAP
         $ldap = new Ldap();
-        $result = $ldap->connectBind();
+        $result = $ldap->connect_bind();
         if ($result > 0) {
             $info = $object->_load_ldap_info();
             $dn = $object->_load_ldap_dn($info, 1);
@@ -1850,7 +1771,7 @@ class Bimp_User extends BimpObject
         $user_label = $this->getName();
 
         switch ($list_type) {
-            // Onglet "Groupes": 
+            // Onglet "Groupes":
             case 'user_groups':
                 if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
                     return $this->renderUserGroupsTable();
@@ -1860,7 +1781,7 @@ class Bimp_User extends BimpObject
                 $list->addFieldFilterValue('ugu.fk_user', $this->id);
                 break;
 
-            // Onglet "Liste des configurations de listes": 
+            // Onglet "Liste des configurations de listes":
             case 'lists_configs':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'ListTableConfig'), 'default', 1, null, 'Liste des configurations de listes de "' . $user_label . '"', 'fas_cog');
                 $list->addIdentifierSuffix('user_' . $this->id);
@@ -1868,11 +1789,11 @@ class Bimp_User extends BimpObject
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
 
-            // Onglet "'Liste des configuration de filtres":
+            // Onglet "'Liste des configurations de filtres" :
             case 'filters_configs':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'FiltersConfig'), 'default', 1, null, 'Liste des configuration de filtres de "' . $user_label . '"', 'fas_cog');
                 $list->addIdentifierSuffix('user_' . $this->id);
-                $list->addFieldFilterValue('owner_type', FiltersConfig::OWNER_TYPE_USER);
+                $list->addFieldFilterValue('owner_type', ListTableConfig::OWNER_TYPE_USER);
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
 
@@ -1883,7 +1804,7 @@ class Bimp_User extends BimpObject
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
 
-            // Onglet "Droits utilisateur": 
+            // Onglet "Droits utilisateur":
             case 'user_rights':
                 $right = BimpObject::getInstance('bimpcore', 'Bimp_UserRight');
                 $list = new BC_ListTable($right, 'user', 1, null, 'Droits assignés à ' . $this->getName());
@@ -1898,14 +1819,14 @@ class Bimp_User extends BimpObject
                 ));
                 break;
 
-            // Onglet "Commission": 
+            // Onglet "Commission":
             case 'commissions':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpfinanc', 'BimpCommission'), 'user', 1, null, 'Commissions de "' . $user_label . '"', 'fas_comment-dollar');
                 $list->addFieldFilterValue('type', BimpCommission::TYPE_USER);
                 $list->addFieldFilterValue('id_user', $this->id);
                 break;
 
-            // Onglet "Commercial": 
+            // Onglet "Commercial":
             case 'clients':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_Client'), 'default', 1, null, 'Clients dont "' . $user_label . '" est le commercial', 'fas_user-circle');
                 $sql = $this->id . ' IN (SELECT sc.fk_user FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = a.rowid)';
@@ -1914,7 +1835,7 @@ class Bimp_User extends BimpObject
                 ));
                 break;
 
-            // Onglet "Materiel": 
+            // Onglet "Materiel":
             case 'materiel':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'default', 1, null, 'Materiel serialisé de "' . $user_label . '"', 'fas_tv');
 
@@ -1926,7 +1847,7 @@ class Bimp_User extends BimpObject
                 $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'BE_PackageProduct'), 'default', 1, null, 'Materiel serialisé de "' . $user_label . '"', 'fas_tv');
 
                 //                $list->addJoin('be_equipment_place', 'a___places.id_equipment = a.id', 'a___places');
-                //                
+                //
                 //                $list->addFieldFilterValue('a___places.position', 1);
                 //                $list->addFieldFilterValue('a___places.id_user', $this->id);
                 break;
@@ -1942,7 +1863,7 @@ class Bimp_User extends BimpObject
 
                 $list->addJoin('be_package', 'a___parent.id = a.id_package', 'a___parent');
                 $list->addJoin('be_package_place', 'a___parent___places.id_package = a___parent.id', 'a___parent___places');
-                //                
+                //
                 $list->addFieldFilterValue('a___parent___places.position', 1);
                 $list->addFieldFilterValue('a___parent___places.id_user', $this->id);
                 $list->addFieldFilterValue('a___parent___places.type', 3);
@@ -2017,7 +1938,7 @@ class Bimp_User extends BimpObject
             $html .= '<tbody>';
 
             foreach ($redirs as $redir) {
-                
+
             }
 
             $html .= '</tbody>';
@@ -2201,7 +2122,7 @@ class Bimp_User extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function saveInterfaceParam($param_name, $value)
     {
@@ -2306,7 +2227,7 @@ class Bimp_User extends BimpObject
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionExportConges($data, &$success = '')
     {
@@ -2474,7 +2395,7 @@ class Bimp_User extends BimpObject
                                 }
                                 $results[$id_right][$id_entity] = 1;
 
-                                // Ajout du droit lire si nécessaire: 
+                                // Ajout du droit lire si nécessaire:
                                 if (!in_array($right_def['perms'], array('lire', 'read')) && !in_array($right_def['subperms'], array('lire', 'read'))) {
                                     $where = 'module = \'' . $right_def['module'] . '\'';
                                     if ($right_def['subperms']) {
@@ -2592,7 +2513,7 @@ class Bimp_User extends BimpObject
                                 );
 
                                 if ($module) {
-                                    // Si droit lire, suppr des droits du même ensemble: 
+                                    // Si droit lire, suppr des droits du même ensemble:
                                     if (in_array($subperms, array('lire', 'read')) || in_array($perms, array('lire', 'read'))) {
                                         $filters = array(
                                             'a.fk_user' => $this->id,
@@ -2819,27 +2740,7 @@ class Bimp_User extends BimpObject
         );
     }
 
-    // Overrides: 
-
-    public function validate()
-    {
-        $errors = parent::validate();
-
-        if ($this->isLoaded()) {
-            $delegations = $this->getData('delegations');
-            if (!empty($delegations)) {
-                foreach ($delegations as $idx => $id_user) {
-                    if ($id_user == $this->id) {
-                        unset($delegations[$idx]);
-                    }
-                }
-
-                $this->set('delegations', $delegations);
-            }
-        }
-
-        return $errors;
-    }
+    // Overrides:
 
     public function onSave(&$errors = array(), &$warnings = array())
     {
@@ -2858,7 +2759,6 @@ class Bimp_User extends BimpObject
             $this->dol_object->oldcopy = clone $this->dol_object;
         }
 
-        $init_delegations = $this->getInitData('delegations');
         $init_statut = (int) $this->getInitData('statut');
         $statut = (int) $this->getData('statut');
 
@@ -2868,27 +2768,12 @@ class Bimp_User extends BimpObject
             if ($init_statut !== $statut) {
                 $this->updateField('statut', $statut);
             }
-
-            $delegations = $this->getData('delegations');
-            foreach ($delegations as $id_user) {
-                if (!in_array($id_user, $init_delegations)) {
-                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-                    $this->addObjectLog('Délégation attribuée à ' . (BimpObject::objectLoaded($u) ? $u->getName() : 'l\'utilisateur #' . $id_user));
-                }
-            }
-
-            foreach ($init_delegations as $id_user) {
-                if (!in_array($id_user, $delegations)) {
-                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-                    $this->addObjectLog('Délégation retirée à ' . (BimpObject::objectLoaded($u) ? $u->getName() : 'l\'utilisateur #' . $id_user));
-                }
-            }
         }
 
         return $errors;
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function getAvailableUsersList($users_in, $date_from = null, &$errors = array(), &$warnings = array())
     {
@@ -2993,7 +2878,7 @@ class Bimp_User extends BimpObject
         return $user->isAvailable($date, $errors, $unavailable_reason);
     }
 
-    // Boxes: 
+    // Boxes:
 
     public function boxCreateUser($boxObj, $context)
     {
@@ -3012,8 +2897,8 @@ class Bimp_User extends BimpObject
 
         $sql = "SELECT count(*) as nb, sc.fk_user, u.lastname, u.firstname FROM llx_societe s
     LEFT JOIN llx_societe_commerciaux sc ON sc.fk_soc = s.rowid
-    LEFT JOIN llx_user u ON u.rowid = sc.fk_user 
-    LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
+    LEFT JOIN llx_user u ON u.rowid = sc.fk_user
+    LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user
     WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= " . $nbJ . " ";
 
         $userId = $user->id;
@@ -3057,8 +2942,8 @@ class Bimp_User extends BimpObject
     LEFT JOIN llx_facture f ON f.rowid = a.fk_facture
     LEFT JOIN llx_element_contact elemcont ON elemcont.element_id = a.fk_facture
     LEFT JOIN llx_c_type_contact typecont ON elemcont.fk_c_type_contact = typecont.rowid
-    LEFT JOIN llx_user u ON u.rowid = elemcont.fk_socpeople 
-    LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
+    LEFT JOIN llx_user u ON u.rowid = elemcont.fk_socpeople
+    LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user
     LEFT JOIN llx_product product ON product.rowid = a.fk_product
     WHERE typecont.element = 'facture' AND typecont.source = 'internal' AND typecont.code = 'SALESREPFOLL' AND f.type IN ('0','1','2','4','5') ";
         $sql .= "AND  DATEDIFF(now(), f.datef ) <= " . $nbJ . " ";

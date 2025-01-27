@@ -85,7 +85,12 @@ class BimpMailCore
             } elseif (isset($conf->global->MAIN_INFO_SOCIETE_MAIL) && $conf->global->MAIN_INFO_SOCIETE_MAIL != '') {
                 $from .= $conf->global->MAIN_INFO_SOCIETE_MAIL;
             } else {
-                $from .= 'no-reply@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr';
+				if ($user->login === 'f.martinez') {
+					$from .= 'no-reply@actimac.fr';
+				} else {
+					$from .= 'no-reply@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr';
+				}
+
                 if (!$reply_to) {
                     $reply_to = 'none';
                 }

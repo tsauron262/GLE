@@ -33,7 +33,7 @@ foreach (array(
 			 'grunchy99@gmail.com'
 		 ) as $to) {
 	echo '<br/>TEST ' . $to . ' : ';
-	$mail = new BimpMail($client, 'TEST', '', '', 'TEST');
+	$mail = new BimpMail($client, 'TEST', $to, '', 'TEST');
 
 	$errors = array();
 	$mail->send($errors);

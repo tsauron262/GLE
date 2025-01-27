@@ -19,9 +19,9 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 $msgId = str_replace(array('<', '>'), '', $json['message-id']);
 
 if($msgId != 0 && $msgId != ''){
-	BimpCore::addlog('Weeb hook mail ' . $json['email'], Bimp_Log::BIMP_LOG_NOTIF, 'email', null, array(
-		'JSON' => $json
-	));
+//	BimpCore::addlog('Weeb hook mail ' . $json['email'], Bimp_Log::BIMP_LOG_NOTIF, 'email', null, array(
+//		'JSON' => $json
+//	));
 
     $result = BimpCache::findBimpObjectInstance('bimpcore', 'BimpMailLog', array('msg_id' => $msgId), true);
     if(!$result){
@@ -32,10 +32,10 @@ if($msgId != 0 && $msgId != ''){
                            'msg_id' => ''
             ), true);
     }
-    if($result && is_object($result)){
+    if(BimpObject::objectLoaded($result)){
         if($result->getData('msg_id') == '')
             $result->updateField('msg_id', $msgId);
-        $result->changeStatut($json['event'], $json['email'], $json['date']);
+        $result->changeStatut($json['event'], $json['email'], $json['date'], (isset($json['reason']) ? $json['reason'] : ''));
     }
 }
 

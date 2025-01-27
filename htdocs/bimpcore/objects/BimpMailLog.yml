@@ -64,6 +64,10 @@ fields:
         label: Message Id
         type: string
         
+    error_reason:
+        label: Raison erreur
+        type: text
+        
 lists:
     default:
         modal_view: default
@@ -94,6 +98,7 @@ fields_tables:
             - field: msg
             - field: msg_id
             - field: old_trace
+            - field: error_reason
                 
 views:
     default:

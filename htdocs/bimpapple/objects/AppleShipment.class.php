@@ -28,7 +28,7 @@ class AppleShipment extends BimpObject
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -155,14 +155,14 @@ class AppleShipment extends BimpObject
         return parent::isFieldEditable($field, $force_edit);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {
         $buttons = $this->getListButtons();
 
         if ($this->isLoaded()) {
-            // Validation: 
+            // Validation:
             if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
                 $buttons[] = array(
                     'label'   => 'Valider',
@@ -173,7 +173,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Annulation: 
+            // Annulation:
             if ($this->isActionAllowed('cancel') && $this->canSetAction('cancel')) {
                 $buttons[] = array(
                     'label'   => 'Annuler',
@@ -184,7 +184,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Réouverture: 
+            // Réouverture:
             if ($this->isActionAllowed('reopen') && $this->canSetAction('reopen')) {
                 $buttons[] = array(
                     'label'   => ($this->getData('status') > 0 ? 'Modifier' : 'Réouvrir'),
@@ -195,7 +195,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Création retour GSX: 
+            // Création retour GSX:
             if ($this->isActionAllowed('createGsxReturn') && $this->canSetAction('createGsxReturn')) {
                 $buttons[] = array(
                     'label'   => 'Enregistrer sur GSX',
@@ -208,7 +208,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Mise à jour retour GSX: 
+            // Mise à jour retour GSX:
             if ($this->isActionAllowed('updateGsxReturn') && $this->canSetAction('updateGsxReturn')) {
                 $buttons[] = array(
                     'label'   => 'Mettre à jour les infos sur GSX',
@@ -219,7 +219,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Création et confirmation retour GSX: 
+            // Création et confirmation retour GSX:
             if ($this->isActionAllowed('createGsxReturn') && $this->canSetAction('createGsxReturn')) {
                 $buttons[] = array(
                     'label'   => 'Enregistrer et confirmer sur GSX',
@@ -232,7 +232,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Confirmation sur GSX: 
+            // Confirmation sur GSX:
             if ($this->isActionAllowed('confirmGsxReturn') && $this->canSetAction('confirmGsxReturn')) {
                 $buttons[] = array(
                     'label'   => 'Confirmer sur GSX',
@@ -243,7 +243,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Validation expédition: 
+            // Validation expédition:
             if ($this->isNewStatusAllowed(4)) {
                 $buttons[] = array(
                     'label'   => 'Expédié',
@@ -264,7 +264,7 @@ class AppleShipment extends BimpObject
             }
 
 
-            // Document complet: 
+            // Document complet:
             if ($this->isActionAllowed('fetchFullDoc') && $this->canSetAction('fetchFullDoc')) {
                 $buttons[] = array(
                     'label'   => 'Document complet',
@@ -273,7 +273,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Packing liste: 
+            // Packing liste:
             $onclick = '';
             $filePath = $this->getPackingListFilePath();
             if (file_exists($filePath)) {
@@ -295,7 +295,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Etiquette de retour: 
+            // Etiquette de retour:
             $onclick = '';
             $filePath = $this->getBulkReturnLabelFilePath();
             if (file_exists($filePath)) {
@@ -317,7 +317,7 @@ class AppleShipment extends BimpObject
                 );
             }
 
-            // Etiquettes composants: 
+            // Etiquettes composants:
             if ($this->isActionAllowed('fetchPartsReturnLabel') && $this->canSetAction('fetchPartsReturnLabel')) {
                 $buttons[] = array(
                     'label'   => 'Etiquettes composants',
@@ -383,11 +383,11 @@ class AppleShipment extends BimpObject
     public function getFileUrl($file_name, $page = 'document')
     {
         if ((int) $this->getData('user_create')) {
-            // Nouvelle version: 
+            // Nouvelle version:
             return parent::getFileUrl($file_name, $page);
         }
 
-        // Ancienne version: 
+        // Ancienne version:
         if (!$file_name) {
             return '';
         }
@@ -479,7 +479,7 @@ class AppleShipment extends BimpObject
         return '';
     }
 
-    // Getters données: 
+    // Getters données:
 
     public static function getShiptosData()
     {
@@ -487,28 +487,46 @@ class AppleShipment extends BimpObject
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
-            global $tabCentre;
-
-            if (is_array($tabCentre)) {
-                foreach ($tabCentre as $centre) {
-                    if (isset($centre['7'])) {
-                        self::$cache[$cache_key][$centre['4']] = array(
-                            'Name'          => 'BIMP',
-                            'AttentionName' => 'SAV',
-                            'ShipperNumber' => 'R8X411',
-                            'Address'       => array(
-                                'AddressLine'       => $centre['7'],
-                                'City'              => $centre['6'],
-                                'StateProvinceCode' => substr($centre['5'], 0, 2),
-                                'PostalCode'        => $centre['5'],
-                                'CountryCode'       => 'FR',
-                            ),
-                            'Phone'         => array(
-                                'Number' => $centre['0']
-                        ));
-                    }
-                }
-            }
+//            global $tabCentre;
+//
+//            if (is_array($tabCentre)) {
+//                foreach ($tabCentre as $centre) {
+//                    if (isset($centre['7'])) {
+//                        self::$cache[$cache_key][$centre['4']] = array(
+//                            'Name'          => 'BIMP',
+//                            'AttentionName' => 'SAV',
+//                            'ShipperNumber' => 'R8X411',
+//                            'Address'       => array(
+//                                'AddressLine'       => $centre['7'],
+//                                'City'              => $centre['6'],
+//                                'StateProvinceCode' => substr($centre['5'], 0, 2),
+//                                'PostalCode'        => $centre['5'],
+//                                'CountryCode'       => 'FR',
+//                            ),
+//                            'Phone'         => array(
+//                                'Number' => $centre['0']
+//                        ));
+//                    }
+//                }
+//            }
+			$lescentres = BimpCache::getCentres();
+			foreach ($lescentres as $centre) {
+				self::$cache[$cache_key][$centre['shipTo']] = array(
+					'Name'          => 'BIMP',
+					'AttentionName' => 'SAV',
+					'ShipperNumber' => 'R8X411',
+					'Address'       => array(
+						'AddressLine'       => $centre['address'],
+						'City'              => $centre['town'],
+						'StateProvinceCode' => substr($centre['zip'], 0, 2),
+						'PostalCode'        => $centre['zip'],
+						'CountryCode'       => 'FR',
+					),
+					'Phone'         => array(
+						'Number' => $centre['tel']
+					)
+				);
+			}
         }
 
         return self::getCacheArray($cache_key);
@@ -521,7 +539,7 @@ class AppleShipment extends BimpObject
         return (int) self::getBdb()->getValue('bimp_gsx_shipment_part', 'shipment_id', $where);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public static function getShiptosArray($include_empty = false)
     {
@@ -562,7 +580,7 @@ class AppleShipment extends BimpObject
         return array();
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderPartsPendingList($shipTo = null)
     {
@@ -1342,7 +1360,7 @@ class AppleShipment extends BimpObject
             $gsx = GSX_v2::getInstance();
 
             if ($gsx->logged) {
-                // Etiquette retour: 
+                // Etiquette retour:
 //                $filePath = $this->getBulkReturnLabelFilePath();
 //
 //                if (!file_exists($filePath) && $gsx->logged) {
@@ -1361,7 +1379,7 @@ class AppleShipment extends BimpObject
                     }
                 }
 
-                // Etiquettes parts: 
+                // Etiquettes parts:
                 foreach ($parts as $part) {
                     if (!$gsx->logged) {
                         break;

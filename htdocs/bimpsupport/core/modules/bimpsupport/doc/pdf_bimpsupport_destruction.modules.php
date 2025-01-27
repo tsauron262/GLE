@@ -68,7 +68,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
 
 
-            
+
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -88,7 +88,8 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
     {
         global $user, $langs, $conf;
 
-        global $tabCentre;
+//        global $tabCentre;
+		$lescentres = BimpCache::getCentres();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -132,7 +133,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
                     $pdf1->setPrintFooter(false);
                 }
 
-    
+
                 $pdf->SetAutoPageBreak(1, 0);
 //                if (class_exists('TCPDF')) {
 //                    $pdf->setPrintHeader(false);
@@ -157,11 +158,11 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                
+
                 $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/destruction.pdf');
                 $tplidx = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                
+
                 $equipment = $sav->getChildObject('equipment');
 
                 $pdf->SetXY('61', '35.6');
@@ -173,12 +174,12 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
                 //centre
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->SetXY('142', '40');
-                $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][2], 0, 'L');
+                $pdf->MultiCell(100, 6, $lescentres[$code_entrepot]['label'], 0, 'L');
                 $pdf->SetXY('142', '45.5');
-                $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][0], 0, 'L');
+                $pdf->MultiCell(100, 6, $lescentres[$code_entrepot]['tel'], 0, 'L');
                 $pdf->SetXY('142', '51');
-                $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][1], 0, 'L');
-//                $tabCentre
+                $pdf->MultiCell(100, 6, $lescentres[$code_entrepot]['mail'], 0, 'L');
+
                 //client
                 $contact = "";
                 $client = $sav->getChildObject('client')->dol_object;
@@ -224,8 +225,8 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
 
                 $pdf->SetXY('32', '148.3');
                 $pdf->MultiCell(100, 6, $contact, 0, 'L');
-                
-                
+
+
             // Logo
             $logo = false;
             if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
@@ -249,7 +250,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
                 $pdf->Output($file, 'F');
 //
 ////                ////$langs->setPhpLang();    // On restaure langue session
-                
+
 
 
                 return 1;   // Pas d'erreur

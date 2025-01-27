@@ -43,7 +43,7 @@ class BIMP_Task extends BimpAbstractFollow
         )
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function isDev()
     {
@@ -116,7 +116,7 @@ class BIMP_Task extends BimpAbstractFollow
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isFieldEditable($field, $force_edit = false)
     {
@@ -194,7 +194,7 @@ class BIMP_Task extends BimpAbstractFollow
         return 0;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getListHeaderExtraBtn()
     {
@@ -420,7 +420,7 @@ class BIMP_Task extends BimpAbstractFollow
         return $list;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getUserRight($right)
     {
@@ -555,7 +555,7 @@ class BIMP_Task extends BimpAbstractFollow
         return $status;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayType()
     {
@@ -624,7 +624,7 @@ class BIMP_Task extends BimpAbstractFollow
         return '';
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderStatusExtra()
     {
@@ -636,7 +636,7 @@ class BIMP_Task extends BimpAbstractFollow
     {
         $html = '';
 
-        // Tâches à traiter: 
+        // Tâches à traiter:
 
         $sql = 'SELECT a.sous_type, a.id_user_owner';
         $sql .= ', SUM(' . BimpTools::getSqlCase(array(
@@ -666,7 +666,7 @@ class BIMP_Task extends BimpAbstractFollow
 //        die($sql);
         $rows = self::getBdb()->executeS($sql, 'array');
 
-        // Trie: 
+        // Trie:
         if (!empty($rows)) {
 
             $counts = array();
@@ -790,7 +790,7 @@ class BIMP_Task extends BimpAbstractFollow
         return $bc->renderHtml();
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function createIfNotActif()
     {
@@ -919,10 +919,10 @@ class BIMP_Task extends BimpAbstractFollow
 
 
 
-//        $right = 
-//        
-//        
-//        
+//        $right =
+//
+//
+//
 //                    $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 //            $this->rights[$r][1] = 'Read '.$nom; // Permission label
 //            $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
@@ -954,7 +954,7 @@ class BIMP_Task extends BimpAbstractFollow
         $this->updateField('date_update', $note->getData('date_create'));
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionClose($data, &$success = '')
     {
@@ -1045,7 +1045,7 @@ class BIMP_Task extends BimpAbstractFollow
         }
 
         $files = array();
-        // Fichiers joints: 
+        // Fichiers joints:
         if (isset($data['join_files']) && is_array($data['join_files'])) {
             foreach ($data['join_files'] as $id_file) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
@@ -1094,7 +1094,7 @@ class BIMP_Task extends BimpAbstractFollow
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function checkObject($context = '', $field = '')
     {
@@ -1157,7 +1157,7 @@ class BIMP_Task extends BimpAbstractFollow
         return $errors;
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function getTaskForUser($id_user, $tms = '', $options = array(), &$errors = array())
     {
@@ -1418,6 +1418,7 @@ class BIMP_Task extends BimpAbstractFollow
 
 BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 global $tabCentre;
+
 if (is_array($tabCentre)) {
     foreach ($tabCentre as $code => $centre) {
         BIMP_Task::$sous_types['sav'][$code] = array('label' => 'SAV' . $code);

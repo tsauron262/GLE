@@ -60,7 +60,8 @@ if (!$action) {
         'maj_marge'                                 => 'Mise a jour des marge liste id facutures',
         'correct_contrat_parent_line'               => 'Correction ligne parente pour les sous-lignes bundle dans les contrats',
         'correct_contrats_bundles'                  => 'Correction des bundles dans les contrats',
-        'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos'
+        'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos',
+		'convert_centre_sav'						=> 'Convertion des centres sav'
     );
 
     $path = pathinfo(__FILE__);
@@ -524,6 +525,47 @@ switch ($action) {
         }
         break;
 
+	case 'convert_centre_sav':
+		BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+		global $tabCentre;
+
+		$bdb = BimpCache::getBdb();
+		foreach ($tabCentre as $code => $centre) {
+			$errors = array();
+			if(isset($centre[10]))	{
+				$id_centre_rattache = $bdb->getValue('bs_centre_sav', "id", 'code = "'.$centre[10].'"');
+			}
+			else $id_centre_rattache = 0;
+
+			BimpObject::createBimpObject('bimpsupport', 'BS_CentreSav', array(
+				'code' => $code,
+				'label' => $centre[2],
+				'id_entrepot' => $centre[8],
+				'id_centre_rattachement' => $id_centre_rattache,
+				'address' => $centre[7],
+				'zip' => $centre[5],
+				'town' => $centre[6],
+				'shipTo' => $centre[4],
+				'email' => $centre[1],
+				'tel' => $centre[0],
+				'active' => $centre[9],
+				'token' => (isset($centre[11]) ? $centre[1] : 0),
+				'id_group' => (isset($centre['idGroup']) ? $centre['idGroup'] : 0),
+				'warning' => (isset($centre[12]) ? $centre[12] : 0),
+			), true, $errors);
+
+			if(count($errors)) {
+				echo '<pre>';
+				print_r($errors);
+				echo '</pre>';
+			}
+			else	{
+				echo '<br />OK ' . $code;
+			}
+
+		}
+	break;
+
     default:
         echo 'Action invalide';
         break;
@@ -532,7 +574,7 @@ switch ($action) {
 echo '<br/>FIN';
 echo '</body></html>';
 
-// FONCTIONS: 
+// FONCTIONS:
 
 
 function convertListsConfigs($new_filters = array())

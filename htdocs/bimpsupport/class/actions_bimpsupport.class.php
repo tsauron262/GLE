@@ -7,7 +7,7 @@ class ActionsBimpsupport
 
     function doActions($parameters, &$object, &$action, $hookmanager)
     {
-        
+
     }
 
 //    function printSearchForm($parameters, &$object, &$action, $hookmanager) {
@@ -68,14 +68,14 @@ class ActionsBimpsupport
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
         }
-        
+
         global $conf, $user, $db;
         $return = '';
 
         $mode_eco = (int) BimpCore::getConf('mode_eco');
 
         //consigne commande
-        // ??? 
+        // ???
 //        if ($element_id > 0 && ($element_type == "contrat" || $element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
 //            $return .= '<div class="blockvmenufirst blockvmenupair rouge' . ($context == 1 ? ' vmenu' : '') . '">';
 //            $return .= '<div class="menu_titre">';
@@ -98,19 +98,35 @@ class ActionsBimpsupport
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id) || userInGroupe("SAV", $user->id)) {
             $hrefFin = "";
 
-            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-            global $tabCentre;
-            $allCentre = false;
+//            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//            global $tabCentre;
+//            $allCentre = false;
+//            if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
+//                $allCentre = true;
+//                $centreUser = array();
+//                foreach ($tabCentre as $idT2 => $tabCT)
+//                    $centreUser[] = $idT2;
+//            } else {
+//                $centreUser = explode(" ", trim($user->array_options['options_apple_centre'])); //Transforme lettre centre en id centre
+//                foreach ($centreUser as $idT => $CT) {//Va devenir inutille
+//                    foreach ($tabCentre as $idT2 => $tabCT)
+//                        if ($tabCT[8] == $CT)
+//                            $centreUser[$idT] = $idT2;
+//                }
+//            }
+
+			$lescentres = BimpCache::getCentres();
+			$allCentre = false;
             if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
                 $allCentre = true;
                 $centreUser = array();
-                foreach ($tabCentre as $idT2 => $tabCT)
+                foreach ($lescentres as $idT2 => $tabCT)
                     $centreUser[] = $idT2;
             } else {
                 $centreUser = explode(" ", trim($user->array_options['options_apple_centre'])); //Transforme lettre centre en id centre
                 foreach ($centreUser as $idT => $CT) {//Va devenir inutille
-                    foreach ($tabCentre as $idT2 => $tabCT)
-                        if ($tabCT[8] == $CT)
+                    foreach ($lescentres as $idT2 => $tabCT)
+                        if ($tabCT['id_entrepot'] == $CT)
                             $centreUser[$idT] = $idT2;
                 }
             }
@@ -131,9 +147,11 @@ class ActionsBimpsupport
             $return .= '<br/><a class="vsmenu" title="Garantie Apple" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/star.png" border="0" alt="" title=""> Garantie Apple</a>';
             $return .= '</div>';
 
-            foreach ($tabCentre as $idGr => $tabOneCentr) {
+//            foreach ($tabCentre as $idGr => $tabOneCentr) {
+            foreach ($lescentres as $idGr => $tabOneCentr) {
                 if (count($centreUser) == 0 || in_array($idGr, $centreUser))
-                    $tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
+//                    $tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
+                    $tabGroupe[] = array("label" => $tabOneCentr['label'], "valeur" => $idGr, "forUrl" => $idGr);
             }
             $tabResult = array();
 

@@ -1549,9 +1549,10 @@ class BS_SAV extends BimpObject
 
     public function getDefaultCodeCentreRepa()
     {
-        global $tabCentre;
-        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][10]))
-            return $tabCentre[$this->getData('code_centre')][10];
+//        global $tabCentre;
+		$tabCentre = BimpCache::getCentres();
+        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['id_centre_rattachement']))
+            return $tabCentre[$this->getData('code_centre')]['id_centre_rattachement'];
     }
 
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
@@ -1630,19 +1631,19 @@ class BS_SAV extends BimpObject
         }
 
         if ($code_centre) {
-            global $tabCentre;
-
-            if (isset($tabCentre[$code_centre])) {
+            BimpObject::loadClass('bimpsupport', 'BS_CentreSav');
+			$centre = BS_CentreSav::getCentreSav($code_centre);
+            if (BimpObject::objectLoaded($centre)) {
                 return array(
-                    'tel'         => $tabCentre[$code_centre][0],
-                    'mail'        => $tabCentre[$code_centre][1],
-                    'label'       => $tabCentre[$code_centre][2],
-                    'shipTo'      => $tabCentre[$code_centre][4],
-                    'zip'         => $tabCentre[$code_centre][5],
-                    'town'        => $tabCentre[$code_centre][6],
-                    'address'     => $tabCentre[$code_centre][7],
-                    'id_entrepot' => $tabCentre[$code_centre][8],
-                    'ship_to'     => $tabCentre[$code_centre][4]
+                    'tel'         => $centre->getData('tel'),
+                    'mail'        => $centre->getData('email'),
+                    'label'       => $centre->getData('label'),
+                    'shipTo'      => $centre->getData('shipTo'),
+                    'zip'         => $centre->getData('zip'),
+                    'town'        => $centre->getData('town'),
+                    'address'     => $centre->getData('address'),
+                    'id_entrepot' => $centre->getData('id_entrepot'),
+                    'ship_to'     => $centre->getData('shipTo')
                 );
             }
         }
@@ -1901,11 +1902,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     {
         $codeCentre = $this->getCodeCentre();
 
-        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-        global $tabCentre;
+//        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//        global $tabCentre;
+		$tabCentre = BimpCache::getCentres();
         if (isset($tabCentre[$codeCentre])) {
-            if (isset($tabCentre[$codeCentre]['idGroup'])) {
-                return $tabCentre[$codeCentre]['idGroup'];
+            if (isset($tabCentre[$codeCentre]['id_group'])) {
+                return $tabCentre[$codeCentre]['id_group'];
             } else {
                 BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
             }
@@ -3107,7 +3109,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
             $hrefFin = "";
 
-            global $tabCentre;
+//            global $tabCentre;
+			$tabCentre = BimpCache::getCentres();
             if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
                 $centreUser = array();
                 foreach ($tabCentre as $idT2 => $tabCT)
@@ -3116,7 +3119,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $centreUser = explode(" ", trim($user->array_options['options_apple_centre'])); //Transforme lettre centre en id centre
                 foreach ($centreUser as $idT => $CT) {//Va devenir inutille
                     foreach ($tabCentre as $idT2 => $tabCT)
-                        if ($tabCT[8] == $CT)
+                        if ($tabCT['id_entrepot'] == $CT)
                             $centreUser[$idT] = $idT2;
                 }
             }
@@ -3131,7 +3134,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             foreach ($tabCentre as $idGr => $tabOneCentr) {
                 if (count($centreUser) == 0 || in_array($idGr, $centreUser))
-                    $tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
+                    $tabGroupe[] = array("label" => $tabOneCentr['label'], "valeur" => $idGr, "forUrl" => $idGr);
             }
             $tabResult = array();
 

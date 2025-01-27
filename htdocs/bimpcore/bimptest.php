@@ -29,8 +29,7 @@ if (!$user->admin) {
 
 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 142370);
 foreach (array(
-			 'test-n0sf2zo7p@srv1.mail-tester.com',
-			 'grunchy99@gmail.com'
+			 'f.martinez@bimp.fr',
 		 ) as $to) {
 	echo '<br/>TEST ' . $to . ' : ';
 	$mail = new BimpMail($client, 'TEST', $to, '', 'TEST');
@@ -39,7 +38,7 @@ foreach (array(
 	$mail->send($errors);
 
 	if (count($errors)) {
-		echo '<pre>' . print_r($errors) . '<pre>';
+		echo '<pre>' . print_r($errors) . '</pre>';
 	} else {
 		echo 'OK';
 	}

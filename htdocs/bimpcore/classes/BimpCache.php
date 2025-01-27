@@ -392,7 +392,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false, $force_delete = false)
+    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false, $force_delete = false, $order_by = 'primary', $order_way = 'desc')
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -403,7 +403,9 @@ class BimpCache
             $table = $instance->getTable();
             $primary = $instance->getPrimary();
 
-            if ($instance->isDolObject()) {
+			if ($order_by == 'primary') {    $order_by = $primary; }
+
+			if ($instance->isDolObject()) {
                 $filters = $instance->checkSqlFilters($filters, $joins, 'a');
             }
 
@@ -414,7 +416,7 @@ class BimpCache
             $sql = BimpTools::getSqlSelect('a.' . $primary);
             $sql .= BimpTools::getSqlFrom($table, $joins);
             $sql .= BimpTools::getSqlWhere($filters);
-            $sql .= BimpTools::getSqlOrderBy('a.' . $primary, 'DESC');
+            $sql .= BimpTools::getSqlOrderBy('a.' . $order_by, $order_way);
 
             $rows = self::getBdb()->executeS($sql, 'array');
 

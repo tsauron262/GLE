@@ -45,5 +45,12 @@ sections:
                     method: renderLinkedListes
                     params:
                         - sav_centre
+            -   id: cgvCentre
+                title: CGV du centre
+                ajax_render_method:
+                    object: centre
+                    method: renderLinkedListes
+                    params:
+                        - cgv_centre
                         
                             

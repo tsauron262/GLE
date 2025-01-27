@@ -38,11 +38,14 @@ class BS_CentreSav extends BimpObject	{
 		}
 
 		$list = null;
-
 		switch ($list_type) {
 			case 'sav_centre':
 				$list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SAV'), 'centre');
 				$list->addFieldFilterValue('a.code_centre', $this->getData('code'));
+				break;
+			case 'cgv_centre':
+				$list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpCGV'));
+				$list->addFieldFilterValue('a.id_centre', $this->getData('id'));
 				break;
 		}
 

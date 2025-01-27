@@ -295,7 +295,7 @@ class BimpCore
                         }
 
                         if (!$err && !file_exists($out_dir . '/' . $out_file)) {
-                            // Suppr du fichier existant: 
+                            // Suppr du fichier existant:
                             foreach (scandir($out_dir) as $f) {
                                 if (in_array($f, array('.', '..'))) {
                                     continue;
@@ -873,7 +873,7 @@ class BimpCore
         return $errors;
     }
 
-    // Gestion BimpCore Conf: 
+    // Gestion BimpCore Conf:
 
     public static function getConfCache()
     {
@@ -1350,7 +1350,8 @@ class BimpCore
 
             if ($check) {
                 // On vérifie qu'on n'a pas déjà un log similaire:
-                $id_current_log = BimpCache::bimpLogExists($type, $level, $msg, $extra_data);
+//                $id_current_log = BimpCache::bimpLogExists($type, $level, $msg, $extra_data);
+				$id_current_log = 0;
 
                 $mod = '';
                 $obj = '';

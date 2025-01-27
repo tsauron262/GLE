@@ -19,7 +19,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 $msgId = str_replace(array('<', '>'), '', $json['message-id']);
 
 if($msgId != 0 && $msgId != ''){
-	BimpCore::addlog('Weeb hook mail ', Bimp_Log::BIMP_LOG_NOTIF, 'email', null, array(
+	BimpCore::addlog('Weeb hook mail ' . $json['email'], Bimp_Log::BIMP_LOG_NOTIF, 'email', null, array(
 		'JSON' => $json
 	));
 

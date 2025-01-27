@@ -84,7 +84,8 @@ lists:
     
     cgvCentre:
         extends: default
-        id_centre: unset
+        cols:
+            id_centre: unset
             
 forms:
     default:

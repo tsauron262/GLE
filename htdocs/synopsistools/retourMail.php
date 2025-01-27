@@ -16,16 +16,19 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 //if($json['email'] == 'tommy@bimp.fr')
 //    mailSyn2('test', 't.sauron@bimp.fr', null, 'ici '.print_r($json,1));
 
-
 $msgId = str_replace(array('<', '>'), '', $json['message-id']);
 
 if($msgId != 0 && $msgId != ''){
+	BimpCore::addlog('Weeb hook mail ', Bimp_Log::BIMP_LOG_NOTIF, 'email', null, array(
+		'JSON' => $json
+	));
+
     $result = BimpCache::findBimpObjectInstance('bimpcore', 'BimpMailLog', array('msg_id' => $msgId), true);
     if(!$result){
         $result = BimpCache::findBimpObjectInstance('bimpcore', 'BimpMailLog', array('mail_to' => array(
                             'operator' => 'like',
                             'value'    => '%'.$json['email'].'%'
-                        ), 'mail_subject' => addslashes($json['subject']), 
+                        ), 'mail_subject' => addslashes($json['subject']),
                            'msg_id' => ''
             ), true);
     }

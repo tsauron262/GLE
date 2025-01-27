@@ -77,6 +77,7 @@ class BimpMailCore
 			));
 		}
 
+		global $user;
 		if ($user->login === 'f.martinez') {
 			$from = 'no-reply@actimac.fr';
 		}

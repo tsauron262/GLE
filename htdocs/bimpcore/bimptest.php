@@ -29,9 +29,9 @@ if (!$user->admin) {
 
 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 142370);
 foreach (array(
-	'f.martinez@bimp.fr'
-//			 'test-n0sf2zo7p@srv1.mail-tester.com',
-//			 'grunchy99@gmail.com'
+//	'f.martinez@bimp.fr'
+			 'test-n0sf2zo7p@srv1.mail-tester.com',
+			 'grunchy99@gmail.com'
 		 ) as $to) {
 	echo '<br/>TEST ' . $to . ' : ';
 	$mail = new BimpMail($client, 'TEST', $to, '', 'TEST');

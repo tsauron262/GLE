@@ -18,21 +18,21 @@ if (class_exists('BimpComm_ExtEntity')) {
 
     class Bimp_PropalTemp extends BimpComm_ExtEntity
     {
-        
+
     }
 
 } elseif (class_exists('BimpComm_ExtVersion')) {
 
     class Bimp_PropalTemp extends BimpComm_ExtVersion
     {
-        
+
     }
 
 } else {
 
     class Bimp_PropalTemp extends BimpComm
     {
-        
+
     }
 
 }
@@ -672,8 +672,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     public function isDocuSignAllowed(&$errors = array(), &$is_required = false)
     {
-        // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
-        // Utiliser une extension.  
+        // Attention : pas de conditions spécifiques à une version de l'ERP ici.
+        // Utiliser une extension.
 
         if (!(int) BimpCore::getConf('propal_signature_allow_docusign', null, 'bimpcommercial')) {
             $errors[] = 'Signature DocuSign non autorisée pour ce devis';
@@ -699,8 +699,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     public function isSignDistAllowed(&$errors = array())
     {
-        // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
-        // Utiliser une extension.  
+        // Attention : pas de conditions spécifiques à une version de l'ERP ici.
+        // Utiliser une extension.
         $ds_errors = array();
         $ds_required = false;
         if ((int) $this->isDocuSignAllowed($ds_errors, $ds_required)) {
@@ -752,7 +752,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return 1;
     }
 
-    // Getters données : 
+    // Getters données :
 
     public function getInputValue($input_name)
     {
@@ -949,7 +949,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         if ($use_signature) {
                             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
                                 $no_signature = true;
-                                // Créer Signature: 
+                                // Créer Signature:
                                 $signature_buttons[] = array(
                                     'label'   => 'Créer la fiche signature',
                                     'icon'    => 'fas_signature',
@@ -1005,7 +1005,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         }
                     }
 
-                    // Créer commande: 
+                    // Créer commande:
                     $errors = array();
                     if ($this->isActionAllowed('createOrder', $errors) && $this->canSetAction('createOrder')) {
                         $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
@@ -1050,7 +1050,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         );
                     }
 
-                    // Créer facture: 
+                    // Créer facture:
                     if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
                         $onclick = '';
                         if (!BimpCore::getConf('commande_required_for_factures', null, 'bimpcommercial')) {
@@ -1104,7 +1104,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         );
                     }
 
-                    // Réviser: 
+                    // Réviser:
                     if ($status > 0) {
                         $errors = array();
                         if ($this->isActionAllowed('review', $errors)) {
@@ -1175,7 +1175,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     );
                 }
 
-                // Cloner: 
+                // Cloner:
                 if ($this->can("create")) {
                     $buttons[] = array(
                         'label'   => 'Cloner',
@@ -1390,7 +1390,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return 0;
     }
 
-    // Getters Array : 
+    // Getters Array :
 
     public function getModelsPdfArray()
     {
@@ -1469,7 +1469,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $formules;
     }
 
-    // Affichages : 
+    // Affichages :
 
     public function displayIfMessageFormContrat()
     {
@@ -1501,7 +1501,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $msgs;
     }
 
-    // Rendus HTML : 
+    // Rendus HTML :
 
     public function renderHeaderStatusExtra()
     {
@@ -1870,7 +1870,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function checkCommandeStatus($cur_status = null)
     {
@@ -1984,7 +1984,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if (!empty($lines)) {
                         $commandes_ids = array();
 
-                        // Vérif lignes de commandes existantes pour chaque produit : 
+                        // Vérif lignes de commandes existantes pour chaque produit :
                         foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande')) as $item) {
                             if (!in_array((int) $item['id_object'], $commandes_ids)) {
                                 $commandes_ids[] = (int) $item['id_object'];
@@ -2115,11 +2115,11 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpRevision.php';
 
-        // Maj Ref: 
+        // Maj Ref:
         $new_ref = BimpRevision::convertRef($old_ref, "propal");
         BimpRevisionPropal::setLienRevision($old_ref, $this->id, $new_propal->id, $new_ref);
 
-        // Ajout objets liés: 
+        // Ajout objets liés:
         $elements = getElementElement("propal", null, $this->id);
         foreach ($elements as $item) {
             addElementElement($item['ts'], $item['td'], $new_propal->id, $item['d']);
@@ -2130,7 +2130,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             addElementElement($item['ts'], $item['td'], $new_propal->id, $item['d'], 0);
         }
 
-        // Copie fichiers: 
+        // Copie fichiers:
         $dir = DOL_DATA_ROOT . '/propale/' . $old_ref . "/";
         $dir2 = DOL_DATA_ROOT . '/propale/' . $new_ref . "/";
 
@@ -2146,30 +2146,30 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Annulation signature: 
+        // Annulation signature:
         $signature = $this->getChildObject('signature');
 
         if (BimpObject::objectLoaded($signature)) {
             $signature->cancelAllSignatures();
         }
 
-        // Ajout des notes: 
+        // Ajout des notes:
         $this->addObjectLog('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $new_propal->getRef());
         $new_propal->addObjectLog('Révision de la proposition: ' . $this->getRef());
 
-        // Copie des lignes: 
+        // Copie des lignes:
         $errors = BimpTools::merge_array($errors, $new_propal->createLinesFromOrigin($this, array(
                             'is_review'                 => true,
                             'qty_to_zero_sauf_acomptes' => $is_refus
         )));
 
-        // Copie des contacts: 
+        // Copie des contacts:
         $new_propal->copyContactsFromOrigin($this, $warnings);
 
         // Copie des remises globales:
         $new_propal->copyRemisesGlobalesFromOrigin($this, $warnings);
 
-        // Ajout de la ligne "Proposition commerciale révisée / refusée" dans la révision: 
+        // Ajout de la ligne "Proposition commerciale révisée / refusée" dans la révision:
         $totHt = (float) $this->dol_object->total_ht;
 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
@@ -2423,7 +2423,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 if ((int) $this->getData('fk_statut') !== Propal::STATUS_SIGNED) {
                     $this->updateField('fk_statut', Propal::STATUS_SIGNED);
 
-                    // Vérification de l\'existance d'une commande: 
+                    // Vérification de l\'existance d'une commande:
                     $where = '`fk_source` = ' . (int) $this->id . ' AND `sourcetype` = \'propal\'';
                     $where .= ' AND `targettype` = \'commande\'';
 
@@ -2954,7 +2954,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if ($nOk) {
                         $success .= ($success ? '<br/>' : '') . $nOk . ' ligne(s) ajoutée(s) au contrat ' . $contrat->getRef();
 
-                        // Traitement des lignes parentes: 
+                        // Traitement des lignes parentes:
                         foreach ($lines as $line) {
                             if (isset($new_lines[$line->id]) && BimpObject::objectLoaded($new_lines[$line->id])) {
                                 $id_parent_line = (int) $line->getData('id_parent_line');
@@ -3124,7 +3124,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                 foreach ($this->getLines('all') as $line) {
                     if ((int) $line->id_remise_except) {
-                        continue; // On exclut les événtuels acomptes / avoirs. 
+                        continue; // On exclut les événtuels acomptes / avoirs.
                     }
 
                     switch ($line->getData('type')) {
@@ -3186,6 +3186,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $data['montant_materiels'] = $montant_materiel;
                 $data['montant_services'] = $montant_services;
                 $data['formules'] = json_encode($data['formules']);
+
+				if ((int) $this->getData('fk_statut') > 0) {
+					$data['ref_devis'] = $this->getRef();
+				}
 
                 $result = $api->getPropositionLocation($data, $errors, $warnings);
 
@@ -3307,7 +3311,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Mise à jour des extra_fields: 
+        // Mise à jour des extra_fields:
         if ($this->dol_object->insertExtraFields('', $user) < 0) {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour des champs supplémentaires');
         }
@@ -3334,7 +3338,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Conditions de réglement: 
+        // Conditions de réglement:
         if ((int) $this->getData('fk_cond_reglement') !== (int) $this->dol_object->cond_reglement_id) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();
@@ -3344,7 +3348,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Mode de réglement: 
+        // Mode de réglement:
         if ((int) $this->getData('fk_mode_reglement') !== (int) $this->dol_object->mode_reglement_id) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();
@@ -3354,7 +3358,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Note privée: 
+        // Note privée:
         if ((string) $this->getData('note_private') !== (string) $this->dol_object->note_private) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();
@@ -3364,7 +3368,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Note publique: 
+        // Note publique:
         if ((string) $this->getData('note_public') !== (string) $this->dol_object->note_public) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();
@@ -3374,7 +3378,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Date: 
+        // Date:
         if ($this->getData('datep') != $this->getInitData('datep')) {
             $this->updateField('fin_validite', BimpTools::getDateTms($this->getData('datep')) + ($this->dol_object->duree_validite * 24 * 3600));
         }
@@ -3394,7 +3398,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Date fin validité: 
+        // Date fin validité:
         if ((string) $this->getData('fin_validite')) {
             $date = BimpTools::getDateTms($this->getData('fin_validite'));
         } else {
@@ -3409,7 +3413,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Date livraison: 
+        // Date livraison:
         if ((string) $this->getData('date_livraison')) {
             $date = BimpTools::getDateTms($this->getData('date_livraison'));
         } else {
@@ -3424,7 +3428,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        // Délai de livraison: 
+        // Délai de livraison:
         if ((int) $this->getData('fk_availability') !== (int) $this->dol_object->availability_id) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();

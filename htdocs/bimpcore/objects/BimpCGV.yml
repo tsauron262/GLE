@@ -74,6 +74,8 @@ lists:
         add_btn_label: Nouvelle CGV par pièce
         edit_btn: 1
         edit_form: edit
+        extra_btn:
+            callback: getListExtraButtons
         modal_view: default
         cols:
             types_pieces:
@@ -103,6 +105,19 @@ forms:
                   allowed_ext: pdf
                   help: Fichier PDF de la CGV
                   max_items: 1
+    
+    modifyPdfForm:
+        rows:
+            -   custom: 1
+                label: Fichier
+                input_name: file
+                required: 1
+                input:
+                    type: drop_files
+                    allowed_ext: pdf
+                    help: Fichier PDF de la CGV
+                    max_items: 1
+        
 
      
 views:

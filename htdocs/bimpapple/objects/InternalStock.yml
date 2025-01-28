@@ -166,7 +166,6 @@ forms:
         title: Transférer
         rows:
             - field: id_linked_prod
-              edit: 0
             - custom: 1
               label: Qté à transférer
               input_name: qty_to_transfer

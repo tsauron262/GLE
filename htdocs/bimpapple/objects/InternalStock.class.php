@@ -41,10 +41,10 @@ class InternalStock extends PartStock
 					return 0;
 				}
 
-				if ((int) $this->getData('id_linked_prod') <= 0) {
-					$errors[] = 'Aucun produit lié';
-					return 0;
-				}
+//				if ((int) $this->getData('id_linked_prod') <= 0) {
+//					$errors[] = 'Aucun produit lié';
+//					return 0;
+//				}
 				return 1;
 
 			case 'receive':

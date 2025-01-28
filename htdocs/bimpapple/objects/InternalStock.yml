@@ -209,3 +209,4 @@ lists:
             do_not_order: 
                 edit: 1
             date_last_commande:
+            id_linked_prod:

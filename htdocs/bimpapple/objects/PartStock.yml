@@ -177,7 +177,7 @@ lists:
                 method: canSetAction
                 params:
                     - correct
-        edit_btn: 0
+        edit_btn: 1
         edit_form: edit
         extra_btn: 
             callback: getListExtraButtons

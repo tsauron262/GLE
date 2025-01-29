@@ -17,13 +17,12 @@ class InternalStock extends PartStock
 				if ($user->admin || $user->rights->bimpapple->part_stock->admin) {
 					return 1;
 				}
-
 				return 0;
 
 			case 'correct':
 				return ($user->admin || $user->rights->bimpapple->part_stock->admin);
+
 			case 'receive':
-				return 1;
 			case 'transferStock':
 				return 1;
 		}
@@ -40,11 +39,6 @@ class InternalStock extends PartStock
 				if (!$this->isLoaded($errors)) {
 					return 0;
 				}
-
-//				if ((int) $this->getData('id_linked_prod') <= 0) {
-//					$errors[] = 'Aucun produit lié';
-//					return 0;
-//				}
 				return 1;
 
 			case 'receive':
@@ -121,6 +115,13 @@ class InternalStock extends PartStock
 	public function getEntrepotId()
 	{
 		$code_centre = $this->getData('code_centre');
+
+		if ($code_centre) {
+			$centres = BimpCache::getCentres();
+			if (isset($centres[$code_centre]['id_entrepot'])) {
+				return $centres[$code_centre]['id_entrepot'];
+			}
+		}
 
 		return 0;
 	}

@@ -2316,7 +2316,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			$signature_propal = $propal->getChildObject('signature');
 
 			if (BimpObject::objectLoaded($signature_propal)) {
-				$alertes = $signature_propal->renderSignatureAlertes(true, true, true, '(Et donc devis non envoyé par e-mail)');
+				$alertes = $signature_propal->renderSignatureAlertes(true, true, true);
 				if ($alertes) {
 					$html .= '<div style="margin-top: 10px">';
 					$html .= $alertes;
@@ -4539,6 +4539,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 		switch ($msg_type) {
 			case 'Facture':
+				$Bfacture = null;
 				$facture = null;
 				$files = array();
 				if ((int) $this->getData('id_facture')) {
@@ -5465,8 +5466,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		return array();
 	}
 
-	public function createSignature($doc_type, $id_contact = null, &$warnings = array(), $params = array())
+	public function createSignature($doc_type, $id_contact = null, &$warnings = array(), $params = array(), &$dist_access_open = false)
 	{
+		$dist_access_open = false;
+
 		$params = BimpTools::overrideArray(array(
 			'allow_no_scan'   => 1,
 			'allow_dist'      => 0,
@@ -5521,6 +5524,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 						if (count($open_errors)) {
 							$warnings[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de l\'accès à la signature à distance');
+						} else {
+							$dist_access_open = true;
 						}
 					}
 				}
@@ -5759,18 +5764,18 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		$errors = array();
 		$warnings = array();
 		$infos = array();
+		$dist_access_open = false;
 
 		$create_signature = BimpTools::getArrayValueFromPath($data, 'create_signature', $this->needSignaturePropal());
+		/** @var Bimp_Client $client */
+		$client = $this->getChildObject('client');
+		$id_contact_signataire = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
 
 		if ($create_signature) {
-			$client = $this->getChildObject('client');
-
 			if (!BimpObject::objectLoaded($client)) {
 				$errors[] = 'Client absent';
 			} else {
-				$id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
-
-				if (!$id_contact && $client->isCompany()) {
+				if (!$id_contact_signataire && $client->isCompany()) {
 					$errors[] = 'Veuillez sélectionner le contact signataire';
 				}
 			}
@@ -5780,6 +5785,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			$this->updateField('diagnostic', $data['diagnostic']);
 		}
 
+		/** @var Bimp_Propal $propal */
 		$propal = $this->getChildObject('propal');
 
 		if (!(string) $this->getData('diagnostic')) {
@@ -5867,7 +5873,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 					} elseif ($create_signature) {
 						$email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
 						$signature_warnings = array();
-						$signature_errors = $propal->createSignature(false, true, (int) $this->getData('id_contact'), $email_content, $signature_warnings);
+						$signature_errors = $propal->createSignature(false, true, (int) $this->getData('id_contact'), $email_content, $signature_warnings, $success, $dist_access_open);
 
 						if (count($signature_warnings)) {
 							$this->addObjectLog(BimpTools::getMsgFromArray($signature_warnings, 'Erreurs lors de la création de la fiche signature'));
@@ -5876,8 +5882,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 						if (count($signature_errors)) {
 							$warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
 							$this->addObjectLog(BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature'));
-						} else {
-							$this->addNote('Devis envoyé via signature électronique le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+						}
+
+						if ($dist_access_open) {
+							$this->addNote('Demande de signature électronique à distance envoyée le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
 						}
 					}
 				}
@@ -5896,25 +5904,19 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 				$propal->hydrateFromDolObject();
 
 				if (isset($data['send_msg']) && (int) $data['send_msg'] && !$this->allGarantie) {
-					$sms_only = $create_signature;
+					$sms_only = ($create_signature && $dist_access_open);
 					$id_contact_notif = BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null);
-					if ((int) $id_contact != (int) $id_contact_notif) {
+					if ($id_contact_signataire != (int) $id_contact_notif) {
 						$sms_only = false;
 					}
 					$warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis', $sms_only, $id_contact_notif, $success));
 					if (!$sms_only) {
-						$this->addNote('Devis envoyé via e-mail le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+						$this->addNote('Devis envoyé par e-mail le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
 					}
 				} else {
-					$this->addNote('Devis validé sans envoi le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+					$this->addNote('Devis validé ' . (!$dist_access_open ? 'sans envoi par e-mail ' : '') . 'le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
 				}
 			}
-		}
-
-		if (count($errors)) {
-//            BimpCore::addlog('Echec validation propale SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
-//                'Erreurs' => $errors
-//            ));
 		}
 
 		return array(

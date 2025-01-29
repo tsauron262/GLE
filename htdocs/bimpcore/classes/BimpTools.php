@@ -82,11 +82,10 @@ class BimpTools
 			$value = stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
 		}
 
-		if ($value == 'true') {
+		if ($value == 'true')
 			$value = 1;
-		} elseif ($value == 'false') {
+		elseif ($value == 'false')
 			$value = 0;
-		}
 
 		if ((int) BimpCore::getConf('activate_post_data_check')) {
 			if (is_string($value)) {
@@ -121,9 +120,8 @@ class BimpTools
 								'Valeur initiale' => (is_array($valueInitForTest) ? 'ARRAY' : '"' . (string) htmlentities($valueInitForTest) . '" (' . gettype($valueInitForTest) . ')'),
 							));
 
-							if ((int) !BimpCore::getConf('post_data_check_log_only')) {
+							if ((int) !BimpCore::getConf('post_data_check_log_only'))
 								BimpController::addAjaxWarnings('Attention, donnée invalide (' . $key . ')');
-							}
 						} else {
 							BimpCore::addlog('Donnée modifiée (' . $key . ')', 2, 'secu', null, array(
 								'check'                 => $check,
@@ -132,13 +130,12 @@ class BimpTools
 								'Valeur initiale brut'  => '"' . $valueInitForTest . '"',
 								'Valeur modifiée brut'  => '"' . $val_temp . '"',
 								'Valeur initiale ascii' => '"' . BimpTools::toAscii($value) . '"',
-								'Valeur testé ascii'    => '"' . BimpTools::toAscii($valueInitForTest) . '"',
+								'Valeur testé ascii' => '"' . BimpTools::toAscii($valueInitForTest) . '"',
 								'Valeur modifiée ascii' => '"' . BimpTools::toAscii($val_temp) . '"'
 							));
 
-							if ((int) !BimpCore::getConf('post_data_check_log_only')) {
-								BimpController::addAjaxWarnings('Attention, donnée modifiée (' . $key . '). Nouvelle valeur : ' . ((strlen($val_temp) > 40) ? substr($val_temp, 40) . '...' : $val_temp));
-							}
+							if ((int) !BimpCore::getConf('post_data_check_log_only'))
+								BimpController::addAjaxWarnings('Attention, donnée modifiée (' . $key . '). Nouvelle valeur : '.((strlen($val_temp) > 40)? substr($val_temp,40).'...' : $val_temp));
 						}
 						if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
 							$value = $val_temp;
@@ -239,15 +236,13 @@ class BimpTools
 	{
 		// Pas d'extension elle est géré en auto
 		global $user;
-		if (!is_dir($dir_dest)) {
+		if (!is_dir($dir_dest))
 			mkdir($dir_dest);
-		}
 
 		$dir = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir();
 		$files = BimpTools::getAjaxFileName($field_name);
-		if (!is_array($files)) {
+		if (!is_array($files))
 			$files = array($files);
-		}
 
 		foreach ($files as $file) {
 			if ($name_dest == null) {
@@ -988,11 +983,10 @@ class BimpTools
 
 		$nbCaractTotal = strlen($prefix) + $numCaractere;
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-		if ($numCaractere > 0) {
+		if ($numCaractere > 0)
 			$max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = " . $nbCaractTotal);
-		} else {
+		else
 			$max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
-		}
 
 		if ((string) $max) {
 			if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {
@@ -1501,7 +1495,7 @@ class BimpTools
 			$sql_field = '';
 			if (preg_match('/\./', $field)) {
 				$sql_field = $field;
-			} elseif (!is_null($default_alias) && $default_alias) {
+			} elseif ($default_alias) {
 				$sql_field = $default_alias . '.' . $field;
 			} else {
 				$sql_field = '`' . $field . '`';
@@ -1541,44 +1535,7 @@ class BimpTools
 						}
 					}
 				} elseif (isset($filter['part_type']) && isset($filter['part'])) {
-					$escape_char = '';
-					foreach (array('$', '|', '&', '@') as $char) {
-						if (strpos($filter['part'], $char) === false) {
-							$escape_char = $char;
-							break;
-						}
-					}
-					$filter['part'] = addslashes($filter['part']);
-					if ($escape_char) {
-						$filter['part'] = str_replace('%', $escape_char . '%', $filter['part']);
-						$filter['part'] = str_replace('_', $escape_char . '_', $filter['part']);
-					}
-					if (isset($filter['not']) && (int) $filter['not']) {
-						$sql .= ' NOT';
-					}
-					$sql .= ' LIKE \'';
-					switch ($filter['part_type']) {
-						case 'full':
-							$sql .= $filter['part'];
-							break;
-
-						case 'beginning':
-							$sql .= $filter['part'] . '%';
-							break;
-
-						case 'end':
-							$sql .= '%' . $filter['part'];
-							break;
-
-						default:
-						case 'middle':
-							$sql .= '%' . $filter['part'] . '%';
-							break;
-					}
-					$sql .= '\'';
-					if ($escape_char) {
-						$sql .= ' ESCAPE \'' . $escape_char . '\'';
-					}
+					$sql .= self::getSqlLike($filter['part'], $filter['part_type'], (isset($filter['not']) ? $filter['not'] : 0));
 				} elseif (isset($filter['in'])) {
 					if (is_array($filter['in'])) {
 						$has_null = false;
@@ -1637,16 +1594,35 @@ class BimpTools
 					} else {
 						$sql .= ' NOT IN (' . $filter['not_in'] . ')';
 					}
-				} elseif (isset($filter['in_brace'])) {
-					if (count($filter['in_brace']) > 0) {
+				} elseif (isset($filter['in_braces']))	{
+					if (is_array($filter['in_braces'])) {
 						$firstLoop = true;
-						foreach ($filter['in_brace'] as $key => $in_brace_value) {
-							if (!$firstLoop) {
-								$sql .= ' OR ' . $sql_field;
+						$sql = '(';
+						foreach ($filter['in_braces'] as $key => $in_braces_value) {
+							if( !$firstLoop )	{
+								$sql .= ' OR ';
 							}
-							$sql .= ' LIKE \'%[' . $in_brace_value . ']%\' ';
+							$sql .= $sql_field . self::getSqlLike($in_braces_value, 'middle', false, true);
 							$firstLoop = false;
 						}
+						$sql .= ')';
+					} else {
+						$sql .= self::getSqlLike($filter['in_braces'], 'middle', false, true);
+					}
+				} elseif (isset($filter['not_in_braces'])) {
+					if (is_array($filter['not_in_braces'])) {
+						$firstLoop = true;
+						$sql = '(';
+						foreach ($filter['not_in_braces'] as $key => $in_braces_value) {
+							if( !$firstLoop )	{
+								$sql .= ' AND ';
+							}
+							$sql .= $sql_field . self::getSqlLike($in_braces_value, 'middle', true, true);
+							$firstLoop = false;
+						}
+						$sql .= ')';
+					} else {
+						$sql .= self::getSqlLike($filter['in_braces'], 'middle', true, true);
 					}
 				} else {
 					if (is_array($filter) && count($filter) > 0) {
@@ -1672,6 +1648,61 @@ class BimpTools
 			}
 		}
 
+		return $sql;
+	}
+
+	public static function getSqlLike($value, $part_type = 'middle', $not = false, $braces = false, $escape = true)
+	{
+		$sql = '';
+		$escape_char = '';
+
+		if ($escape && strpos($value, '%') !== false || strpos($value, '_') !== false) {
+			foreach (array('$', '|', '&', '@') as $char) {
+				if (strpos($value, $char) === false) {
+					$escape_char = $char;
+					break;
+				}
+			}
+			if ($escape_char) {
+				$value = str_replace('%', $escape_char . '%', $value);
+				$value = str_replace('_', $escape_char . '_', $value);
+			}
+		}
+
+		$value = addslashes($value);
+
+		if ($braces) {
+			$value = '[' . $value . ']';
+		}
+
+		if ($not) {
+			$sql .= ' NOT';
+		}
+
+		$sql .= ' LIKE \'';
+		switch ($part_type) {
+			case 'full':
+				$sql .= $value;
+				break;
+
+			case 'beginning':
+				$sql .= $value . '%';
+				break;
+
+			case 'end':
+				$sql .= '%' . $value;
+				break;
+
+			default:
+			case 'middle':
+				$sql .= '%' . $value . '%';
+				break;
+		}
+		$sql .= '\'';
+
+		if ($escape_char) {
+			$sql .= ' ESCAPE \'' . $escape_char . '\'';
+		}
 		return $sql;
 	}
 
@@ -1962,9 +1993,8 @@ class BimpTools
 					}
 				}
 
-				if (is_bool($value)) {
+				if (is_bool($value))
 					$value = ($value ? 1 : 0);
-				}
 
 				if (is_numeric($value)) {
 					if ((int) $value !== 0) {
@@ -2287,9 +2317,8 @@ class BimpTools
 		} elseif ($timer['minutes'] > 0) {
 			$html .= $timer['minutes'] . ' min ';
 		}
-		if ($withSecondes && $timer['secondes']) {
+		if ($withSecondes && $timer['secondes'])
 			$html .= $timer['secondes'] . ' sec ';
-		}
 		$html .= '</span>';
 		return $html;
 	}
@@ -2298,9 +2327,8 @@ class BimpTools
 
 	public static function printDate($date, $balise = "span", $class = '', $format = 'd / m / Y H:i:s', $format_mini = 'd / m / Y')
 	{
-		if ($date == '') {
+		if ($date == '')
 			return '';
-		}
 
 		if (is_string($date) && stripos($date, '-') > 0) {
 			$date = new DateTime($date);
@@ -2571,7 +2599,8 @@ class BimpTools
 		}
 
 		if ($return_default) {
-			return BimpCache::cacheServeurFunction('getDefaultTva');;
+			return BimpCache::cacheServeurFunction('getDefaultTva');
+			;
 		}
 
 		return 0;
@@ -2797,12 +2826,10 @@ class BimpTools
 	public static function displayPhone($phone, $with33 = false)
 	{
 		$phone = str_replace('+33', '0', $phone);
-		if (strlen($phone) == 10) {
+		if (strlen($phone) == 10)
 			$phone = implode(' ', str_split($phone, 2));
-		}
-		if ($with33 && stripos($phone, '0') === 0) {
+		if ($with33 && stripos($phone, '0') === 0)
 			$phone = "+33 (0)" . substr($phone, 1);
-		}
 		return $phone;
 	}
 
@@ -2844,7 +2871,7 @@ class BimpTools
 
 	public static function toAscii($string)
 	{
-		if (is_string($string)) {
+		if(is_string($string)){
 			$longueur = strlen($string);
 			$return = '';
 			for ($i = 0; $i < $longueur; $i++) {
@@ -2971,12 +2998,10 @@ class BimpTools
 		}
 
 		if (is_string($current_value)) {
-			if (stripos($current_value, 'DOL_DATA_ROOT') !== false && defined('DOL_DATA_ROOT')) {
+			if (stripos($current_value, 'DOL_DATA_ROOT') !== false && defined('DOL_DATA_ROOT'))
 				$current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
-			}
-			if (stripos($current_value, 'PATH_TMP') !== false && defined('PATH_TMP')) {
+			if (stripos($current_value, 'PATH_TMP') !== false && defined('PATH_TMP'))
 				$current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
-			}
 		}
 
 		return $current_value;
@@ -3112,11 +3137,10 @@ class BimpTools
 	public static function htmlentities_array($array)
 	{
 		foreach ($array as $clef => $value) {
-			if (is_array($value)) {
+			if (is_array($value))
 				$array[$clef] = BimpTools::htmlentities_array($value);
-			} else {
+			else
 				$array[$clef] = htmlentities($value);
-			}
 		}
 		return $array;
 	}
@@ -3157,9 +3181,8 @@ class BimpTools
 		}
 
 		global $modeCSV;
-		if ($modeCSV) {
+		if ($modeCSV)
 			return str_replace(".", ",", $value);
-		}
 		if (is_numeric($value)) {
 			$value = (float) $value;
 		}
@@ -3527,24 +3550,23 @@ class BimpTools
 		return $array;
 	}
 
-	public static function getDateLimReglement($date_begin, $id_cond_reglement) {}
+	public static function getDateLimReglement($date_begin, $id_cond_reglement)
+	{
+
+	}
 
 	public static function getRemiseExceptLabel($desc)
 	{
 		global $langs;
 
-		if (preg_match('/\(CREDIT_NOTE\)/', $desc)) {
+		if (preg_match('/\(CREDIT_NOTE\)/', $desc))
 			$desc = preg_replace('/\(CREDIT_NOTE\)/', $langs->trans("CreditNote"), $desc);
-		}
-		if (preg_match('/\(DEPOSIT\)/', $desc)) {
+		if (preg_match('/\(DEPOSIT\)/', $desc))
 			$desc = preg_replace('/\(DEPOSIT\)/', $langs->trans("Deposit"), $desc);
-		}
-		if (preg_match('/\(EXCESS RECEIVED\)/', $desc)) {
+		if (preg_match('/\(EXCESS RECEIVED\)/', $desc))
 			$desc = preg_replace('/\(EXCESS RECEIVED\)/', $langs->trans("ExcessReceived"), $desc);
-		}
-		if (preg_match('/\(EXCESS PAID\)/', $desc)) {
+		if (preg_match('/\(EXCESS PAID\)/', $desc))
 			$desc = preg_replace('/\(EXCESS PAID\)/', $langs->trans("ExcessPaid"), $desc);
-		}
 
 		return $desc;
 	}
@@ -3734,25 +3756,21 @@ class BimpTools
 			$g = $color_code["g"] + (round($color_code["g"]) * $percentage_adjuster);
 			$b = $color_code["b"] + (round($color_code["b"]) * $percentage_adjuster);
 
-			return array(
-				"r" => round(max(0, min(255, $r))),
-				"g" => round(max(0, min(255, $g))),
-				"b" => round(max(0, min(255, $b)))
-			);
-		} else {
-			if (preg_match("/#/", $color_code)) {
-				$hex = str_replace("#", "", $color_code);
-				$r = (strlen($hex) == 3) ? hexdec(substr($hex, 0, 1) . substr($hex, 0, 1)) : hexdec(substr($hex, 0, 2));
-				$g = (strlen($hex) == 3) ? hexdec(substr($hex, 1, 1) . substr($hex, 1, 1)) : hexdec(substr($hex, 2, 2));
-				$b = (strlen($hex) == 3) ? hexdec(substr($hex, 2, 1) . substr($hex, 2, 1)) : hexdec(substr($hex, 4, 2));
-				$r = round($r + ($r * $percentage_adjuster));
-				$g = round($g + ($g * $percentage_adjuster));
-				$b = round($b + ($b * $percentage_adjuster));
+			return array("r" => round(max(0, min(255, $r))),
+						 "g" => round(max(0, min(255, $g))),
+						 "b" => round(max(0, min(255, $b))));
+		} else if (preg_match("/#/", $color_code)) {
+			$hex = str_replace("#", "", $color_code);
+			$r = (strlen($hex) == 3) ? hexdec(substr($hex, 0, 1) . substr($hex, 0, 1)) : hexdec(substr($hex, 0, 2));
+			$g = (strlen($hex) == 3) ? hexdec(substr($hex, 1, 1) . substr($hex, 1, 1)) : hexdec(substr($hex, 2, 2));
+			$b = (strlen($hex) == 3) ? hexdec(substr($hex, 2, 1) . substr($hex, 2, 1)) : hexdec(substr($hex, 4, 2));
+			$r = round($r + ($r * $percentage_adjuster));
+			$g = round($g + ($g * $percentage_adjuster));
+			$b = round($b + ($b * $percentage_adjuster));
 
-				return "#" . str_pad(dechex(max(0, min(255, $r))), 2, "0", STR_PAD_LEFT)
-					. str_pad(dechex(max(0, min(255, $g))), 2, "0", STR_PAD_LEFT)
-					. str_pad(dechex(max(0, min(255, $b))), 2, "0", STR_PAD_LEFT);
-			}
+			return "#" . str_pad(dechex(max(0, min(255, $r))), 2, "0", STR_PAD_LEFT)
+				. str_pad(dechex(max(0, min(255, $g))), 2, "0", STR_PAD_LEFT)
+				. str_pad(dechex(max(0, min(255, $b))), 2, "0", STR_PAD_LEFT);
 		}
 	}
 
@@ -3777,7 +3795,7 @@ class BimpTools
 	public static function hexToHsl($hex)
 	{
 		$hex = array($hex[0] . $hex[1], $hex[2] . $hex[3], $hex[4] . $hex[5]);
-		$rgb = array_map(function($part) {
+		$rgb = array_map(function ($part) {
 			return hexdec($part) / 255;
 		}, $hex);
 
@@ -3834,21 +3852,16 @@ class BimpTools
 
 	public static function hue2rgb($p, $q, $t)
 	{
-		if ($t < 0) {
+		if ($t < 0)
 			$t += 1;
-		}
-		if ($t > 1) {
+		if ($t > 1)
 			$t -= 1;
-		}
-		if ($t < 1 / 6) {
+		if ($t < 1 / 6)
 			return $p + ($q - $p) * 6 * $t;
-		}
-		if ($t < 1 / 2) {
+		if ($t < 1 / 2)
 			return $q;
-		}
-		if ($t < 2 / 3) {
+		if ($t < 2 / 3)
 			return $p + ($q - $p) * (2 / 3 - $t) * 6;
-		}
 
 		return $p;
 	}
@@ -3931,9 +3944,8 @@ class BimpTools
 					}
 				}
 
-				if (isset($trace['line'])) {
+				if (isset($trace['line']))
 					$line = $trace['line'] . ': ';
-				}
 
 				if (isset($trace['class']) && $trace['class']) {
 					$line .= $trace['class'] . BimpTools::getArrayValueFromPath($trace, 'type', '->');
@@ -3978,9 +3990,7 @@ class BimpTools
 //        }
 
 		if (in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
-		{
 			return true;
-		}
 
 
 		$nb++;
@@ -4002,9 +4012,8 @@ class BimpTools
 
 
 		$text = "Yes" . rand(0, 10000000) . $user->getFullName($langs);
-		if (!file_put_contents($file, $text)) {
+		if (!file_put_contents($file, $text))
 			die('droit sur fichier incorrect : ' . $file);
-		}
 		usleep(1000000);
 		$text2 = file_get_contents($file);
 		if ($text == $text2) {
@@ -4070,9 +4079,8 @@ class BimpTools
 	{
 		$i = 0;
 		foreach (static::$bloquages as $id => $type) {
-			if (!unlink(static::getFileBloqued($type))) {
+			if (!unlink(static::getFileBloqued($type)))
 				BimpCore::addlog('Suppression fichier de lock impossible ' . static::getFileBloqued($type), Bimp_Log::BIMP_LOG_URGENT);
-			}
 			unset(static::$bloquages[$id]);
 			$i++;
 			$debloquer[] = $type;
@@ -4088,9 +4096,8 @@ class BimpTools
 	public static function getDirBloqued()
 	{
 		$folder = DOL_DATA_ROOT . '/bloqueFile/';
-		if (!is_dir($folder)) {
+		if (!is_dir($folder))
 			mkdir($folder);
-		}
 		return $folder;
 	}
 
@@ -4099,9 +4106,8 @@ class BimpTools
 		$dir = static::getDirBloqued();
 		$files = scandir($dir);
 		foreach ($files as $file) {
-			if (stripos($file, $type) === 0 && (!$notThis || stripos($file, '_' . ID_ERP) === false)) {
+			if (stripos($file, $type) === 0 && (!$notThis || stripos($file, '_' . ID_ERP) === false))
 				return $file;
-			}
 		}
 		return false;
 	}
@@ -4126,9 +4132,8 @@ class BimpTools
 				$db::stopAll('sleppIfBloqued');
 				return 0;
 			}
-		} else {
+		} else
 			return 0;
-		}
 	}
 
 	public static function getUserEmailOrSuperiorEmail($id_user, $allow_default = true)
@@ -4148,12 +4153,10 @@ class BimpTools
 	public static function mailGrouper($to, $from, $msg)
 	{
 		$dir = PATH_TMP . "/bimpcore/mailsGrouper/";
-		if (!is_dir($dir)) {
+		if (!is_dir($dir))
 			mkdir($dir);
-		}
-		if (!is_dir($dir)) {
+		if (!is_dir($dir))
 			return false;
-		}
 		$msg = "<br/><br/>" . dol_print_date(dol_now(), '%d/%m/%Y %H:%M:%S') . " : " . $msg;
 		$file = $dir . $to;
 		$file .= "$" . $from;
@@ -4171,12 +4174,10 @@ class BimpTools
 	public static function sendMailGrouper()
 	{
 		$dir = PATH_TMP . "/bimpcore/mailsGrouper/";
-		if (!is_dir($dir)) {
+		if (!is_dir($dir))
 			mkdir($dir);
-		}
-		if (!is_dir($dir)) {
+		if (!is_dir($dir))
 			return false;
-		}
 		$files = scandir($dir);
 		$i = 0;
 		foreach ($files as $file) {
@@ -4206,13 +4207,11 @@ class BimpTools
 
 		global $conf;
 
-		if (stripos($module, 'MAIN_MODULE_') === false) {
+		if (stripos($module, 'MAIN_MODULE_') === false)
 			$module = 'MAIN_MODULE_' . strtoupper($module);
-		}
 
-		if (isset($conf->global->$module) && $conf->global->$module) {
+		if (isset($conf->global->$module) && $conf->global->$module)
 			return 1;
-		}
 
 		return 0;
 	}
@@ -4255,12 +4254,10 @@ class BimpTools
 				$return .= substr(strip_tags($data), 0, $lenght) . '...';
 				$return .= '</span>';
 				return $return;
-			} else {
+			} else
 				return $data;
-			}
 		}
 	}
-
 	/*
      * Sécurité
      */
@@ -4295,9 +4292,8 @@ class BimpTools
 	public static function getScriptAttribut()
 	{
 		$return = ' type="text/javascript"';
-		if (defined('csp_nonce')) {
+		if (defined('csp_nonce'))
 			$return .= ' nonce="' . csp_nonce . '"';
-		}
 		return $return;
 	}
 
@@ -4308,13 +4304,11 @@ class BimpTools
 			$ipUser = $tmp[0];
 		}
 		$tmp = explode(".", $ipUser);
-		if (count($tmp) < 4) {
+		if (count($tmp) < 4)
 			$ipUser = $_SERVER['REMOTE_ADDR'];
-		}
 		$tmp = explode(".", $ipUser);
-		if (count($tmp) < 4) {
+		if (count($tmp) < 4)
 			$ipUser = $_SERVER['HTTP_X_REAL_IP'];
-		}
 		return $ipUser;
 	}
 }

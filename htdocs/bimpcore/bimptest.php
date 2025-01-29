@@ -27,8 +27,6 @@ if (!$user->admin) {
     exit;
 }
 
-echo 'TEST TEST TEST';
-
 echo '<br/>FIN';
 echo '</body></html>';
 

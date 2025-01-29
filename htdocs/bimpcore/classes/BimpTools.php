@@ -1631,7 +1631,18 @@ class BimpTools
                     } else {
                         $sql .= ' NOT IN (' . $filter['not_in'] . ')';
                     }
-                } else {
+                } elseif (isset($filter['in_brace']))	{
+					if( count($filter['in_brace']) > 0 ) {
+						$firstLoop = true;
+						foreach ($filter['in_brace'] as $key => $in_brace_value)	{
+							if( !$firstLoop )	{
+								$sql .= ' OR ' . $sql_field;
+							}
+							$sql .= ' LIKE \'%[' . $in_brace_value . ']%\' ';
+							$firstLoop = false;
+						}
+					}
+				} else {
                     if (is_array($filter) && count($filter) > 0) {
                         $sql .= ' IN ("' . implode('","', $filter) . '")';
                     } elseif ((is_array($filter) && count($filter) == 0) || $filter == '') {

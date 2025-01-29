@@ -63,6 +63,7 @@ lists:
         title: Liste des CGV
         configurable: 1
         checkboxes: 1
+        filters_panel: default
         bulk_actions:
             -   label: Supprimer les lignes sélectionnées
                 icon: fas_trash-alt
@@ -136,6 +137,13 @@ views:
                     col_mg: 12
                     fields_table:
                         name: infoscgv
+filters_panels:
+    default:
+        filters:
+            types_pieces:
+            secteurs:
+            id_centre:
+            date_start:
 
 fields_tables:
     infoscgv:

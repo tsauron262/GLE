@@ -451,14 +451,9 @@ class InternalStock extends PartStock
 		$warnings = array();
 		$success = '';
 
-		$id_prod = (int) BimpTools::getArrayValueFromPath($data, 'id_linked_prod', 0);
-		if (!$id_prod) {
-			$errors[] = 'Aucun produit sélectionné';
-		}
-
-		$id_entrepot = (int) BimpTools::getArrayValueFromPath($data, 'id_entrepot', 0);
-		if (!$id_entrepot) {
-			$errors[] = 'Aucun entrepôt sélectionné';
+		$transfer_type = BimpTools::getArrayValueFromPath($data, 'transfer_type', '');
+		if (!$transfer_type) {
+			$errors[] = 'Type de transfert absent';
 		}
 
 		$qty = (int) BimpTools::getArrayValueFromPath($data, 'qty_to_transfer', 0);
@@ -466,31 +461,87 @@ class InternalStock extends PartStock
 			$errors[] = 'Veillez saisir une quantité non nulle';
 		}
 
-		if (!count($errors)) {
-			$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
-			if (!BimpObject::objectLoaded($prod)) {
-				$errors[] = 'Produit #' . $id_prod . ' inexistant';
-			}
+		switch ($transfer_type) {
+			case 'entrepot':
+				$prod = null;
+				$entrepot = null;
 
-			$entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $id_entrepot);
-			if (!BimpObject::objectLoaded($entrepot)) {
-				$errors[] = 'Entrepôt ' . $id_entrepot . ' inexistant';
-			}
-
-			if (!count($errors)) {
-				$desc = 'Transfert vers stock produit ' . $prod->getRef() . ' - entrepôt : ' . $entrepot->getName();
-				$stock_errors = $this->correctStock($qty * -1, '', 'TRANSFERT', $desc, $warnings);
-				if (count($stock_errors)) {
-					$errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec de la correction du stock interne du composant');
+				$id_prod = (int) BimpTools::getArrayValueFromPath($data, 'id_linked_prod', 0);
+				if (!$id_prod) {
+					$errors[] = 'Aucun produit sélectionné';
 				} else {
-					$prod_errors = $prod->correctStocks($entrepot->id, abs($qty), ($qty > 0 ? 0 : 1), 'TRANSFERT_PART_STOCK', 'Transfert depuis stock interne composant ' . $this->getData('part_number'), $warnings);
-					if (count($prod_errors)) {
-						$errors[] = BimpTools::getMsgFromArray($prod_errors, 'Echec de la correction du stock du produit ' . $prod->getRef());
-					} else {
-						$success = 'Transfert de ' . abs($qty) . ' unité' . ($qty > 1 ? 's' : '') . ' effectué avec succès';
+					$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+					if (!BimpObject::objectLoaded($prod)) {
+						$errors[] = 'Produit #' . $id_prod . ' inexistant';
 					}
 				}
-			}
+
+				$id_entrepot = (int) BimpTools::getArrayValueFromPath($data, 'id_entrepot', 0);
+				if (!$id_entrepot) {
+					$errors[] = 'Aucun entrepôt sélectionné';
+				} else {
+					$entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $id_entrepot);
+					if (!BimpObject::objectLoaded($entrepot)) {
+						$errors[] = 'Entrepôt ' . $id_entrepot . ' inexistant';
+					}
+				}
+
+				if (!count($errors)) {
+					$desc = 'Transfert vers stock produit ' . $prod->getRef() . ' - entrepôt : ' . $entrepot->getName();
+					$stock_errors = $this->correctStock($qty * -1, '', 'TRANSFERT_EXTERNE', $desc, $warnings);
+					if (count($stock_errors)) {
+						$errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec de la correction du stock interne du composant');
+					} else {
+						$prod_errors = $prod->correctStocks($entrepot->id, abs($qty), ($qty > 0 ? 0 : 1), 'TRANSFERT_PART_STOCK', 'Transfert depuis stock interne composant ' . $this->getData('part_number'), $warnings);
+						if (count($prod_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($prod_errors, 'Echec de la correction du stock du produit ' . $prod->getRef());
+						} else {
+							$success = 'Transfert de ' . abs($qty) . ' unité' . ($qty > 1 ? 's' : '') . ' effectué avec succès';
+						}
+					}
+				}
+				break;
+
+			case 'internal':
+				$code_centre_dest = BimpTools::getArrayValueFromPath($data, 'code_centre_dest', '');
+				if (!$code_centre_dest) {
+					$errors[] = 'Code centre de destination absent';
+				} elseif ($code_centre_dest == $this->getData('code_centre')) {
+					$errors[] = 'Le centre de destination doit être différent du centre de départ';
+				} else {
+					$stock_dest = static::getStockInstance($code_centre_dest, $this->getData('part_number'));
+					if (!BimpObject::objectLoaded($stock_dest)) {
+						$stock_dest = BimpObject::createBimpObject('bimpapple', 'InternalStock', array(
+							'code_centre' => $code_centre_dest,
+							'part_number' => $this->getData('part_number'),
+							'qty'         => 0
+						), true, $errors, $warnings);
+					}
+
+					if (!count($errors) && BimpObject::objectLoaded($stock_dest)) {
+						$centres = BimpCache::getCentres();
+						$code_centre_src = $this->getData('code_centre');
+						$centre_label = (isset($centres[$code_centre_src]['label']) ? 'de ' . $centres[$code_centre_src]['label'] : 'du centre ' . $code_centre_src);
+						$stock_errors = $stock_dest->correctStock($qty, '', 'TRANSFERT_INTERNE', 'Transfert depuis stock interne ' . $centre_label, $warnings);
+
+						if (count($stock_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec de la correction du stock interne de destination');
+						} else {
+							$centre_label = (isset($centres[$code_centre_dest]['label']) ? 'de ' . $centres[$code_centre_dest]['label'] : 'du centre ' . $code_centre_dest);
+							$stock_errors = $this->correctStock($qty * -1, '', 'TRANSFERT_INTERNE', 'Transfert vers stock interne ' . $centre_label, $warnings);
+							if (count($stock_errors)) {
+								$errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec de la correction du stock interne de départ');
+							} else {
+								$success = 'Transfert de ' . abs($qty) . ' unité' . ($qty > 1 ? 's' : '') . ' effectué avec succès';
+							}
+						}
+					}
+				}
+				break;
+
+			default:
+				$errors[] = 'Type de transfert inconnu';
+				break;
 		}
 
 		return array(

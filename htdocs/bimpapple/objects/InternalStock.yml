@@ -1,6 +1,6 @@
 abstract: 0
 
-extends: 
+extends:
     module: bimpapple
     object_name: PartStock
 
@@ -8,63 +8,63 @@ table: bimp_apple_internal_stock
 
 entity_name: InternalStock
 
-nom_url: 
+nom_url:
     syntaxe: Stock interne <part_number>
-    
-list_page_url: 
-    url_params: 
+
+list_page_url:
+    url_params:
         tab: part_stocks
         navtab-maintabs: internal_stocks
 
-labels: 
+labels:
     name: stock interne
     name_plur: stocks internes
-    
+
 objects:
     linked_product:
         extends: product
         instance:
             id_object:
                 field_value: id_linked_prod
-        
-fields: 
+
+fields:
     serialized: unset
     serials: unset
     
-    qty: 
+    qty:
         label: Qté dispo
         display_if: unset
-        
-    qty_to_receive: 
+    
+    qty_to_receive:
         label: Qté en attente de réception
         type: int
-        input: 
+        input:
             type: qty
         default_value: 0
-            
-    do_not_order: 
+    
+    do_not_order:
         label: Ne plus commander
         type: bool
         default_value: 0
-        
+    
     description:
         label: Description
-        
-    product_label: 
+    
+    product_label:
         label: Libellé produit
-        
-    code_eee: 
+    
+    code_eee:
         label: Code EEE
-        
-    last_pa: 
+    
+    last_pa:
         label: Dernier Prix d'achat
         type: money
         default_value: 0
-        
-    date_last_vente: 
+    
+    date_last_vente:
         label: Date dernière vente
         type: date
-    date_last_commande: 
+    date_last_commande:
         label: Date dernière commande
         type: date
     id_linked_prod:
@@ -72,140 +72,165 @@ fields:
         type: id_object
         default_value: 0
         object: linked_product
-        
-forms: 
-    default: 
-        rows: 
+
+forms:
+    default:
+        rows:
             serialized: unset
-            qty_tot: 
+            qty_tot:
                 display_if: unset
-            description: 
+            description:
                 field: description
-            product_label: 
+            product_label:
                 field: product_label
-            code_eee: 
+            code_eee:
                 field: code_eee
-            last_pa: 
+            last_pa:
                 field: last_pa
-            qty_to_receive: 
+            qty_to_receive:
                 field: qty_to_receive
-            do_not_order: 
+            do_not_order:
                 field: do_not_order
             id_linked_prod:
                 field: id_linked_prod
-                
-            
-    edit: 
-        rows: 
+    
+    
+    edit:
+        rows:
             unextends: 1
-            description: 
+            description:
                 field: description
-            product_label: 
+            product_label:
                 field: product_label
-            code_eee: 
+            code_eee:
                 field: code_eee
-            last_pa: 
+            last_pa:
                 field: last_pa
-            qty_to_receive: 
+            qty_to_receive:
                 field: qty_to_receive
-            do_not_order: 
+            do_not_order:
                 field: do_not_order
             id_linked_prod:
                 field: id_linked_prod
-            
-    csv_import: 
-        rows: 
-            - field: code_centre
-            - custom: 1
-              label: Fichier
-              input_name: file
-              input: 
-                  type: drop_files
-                  allowed_ext: csv
-                  max_items: 1
-                  help: 'Séparateur : ";"<br/>Colonnes : Réf., Description, Libellé produit, Prix d&apos;achat HT, Code eee, Qté à ajouter'
-              
-    receive: 
+    
+    csv_import:
+        rows:
+            -   field: code_centre
+            -   custom: 1
+                label: Fichier
+                input_name: file
+                input:
+                    type: drop_files
+                    allowed_ext: csv
+                    max_items: 1
+                    help: 'Séparateur : ";"<br/>Colonnes : Réf., Description, Libellé produit, Prix d&apos;achat HT, Code eee, Qté à ajouter'
+    
+    receive:
         title: Réceptionner
-        rows: 
-            - custom: 1
-              label: N° de réception
-              input_name: reception_number
-              input: 
-                  type: text
-            - custom: 1
-              label: Qté reçue
-              input_name: qty_received
-              data_type: int
-              input: 
-                  type: qty
-                  max_label: 1
-              min: 0
-              max: 
-                  field_value: qty_to_receive
-              value: 
-                  field_value: qty_to_receive
-                  
-    bulk_receive: 
+        rows:
+            -   custom: 1
+                label: N° de réception
+                input_name: reception_number
+                input:
+                    type: text
+            -   custom: 1
+                label: Qté reçue
+                input_name: qty_received
+                data_type: int
+                input:
+                    type: qty
+                    max_label: 1
+                min: 0
+                max:
+                    field_value: qty_to_receive
+                value:
+                    field_value: qty_to_receive
+    
+    bulk_receive:
         title: Réceptionner
-        rows: 
-            - custom: 1
-              label: N° de réception
-              input_name: reception_number
-              input: 
-                  type: text
-            - field: code_centre
-            - custom: 1
-              label: qtés reçues par composant
-              input_name: qties
-              content: 
-                  callback: renderPartsReceivedQtiesInputs
-              depends_on: code_centre
-            
+        rows:
+            -   custom: 1
+                label: N° de réception
+                input_name: reception_number
+                input:
+                    type: text
+            -   field: code_centre
+            -   custom: 1
+                label: qtés reçues par composant
+                input_name: qties
+                content:
+                    callback: renderPartsReceivedQtiesInputs
+                depends_on: code_centre
+    
     transfer_stock:
         title: Transférer
         rows:
-            - field: id_linked_prod
-            - custom: 1
-              label: Qté à transférer
-              input_name: qty_to_transfer
-              data_type: int
-              input:
-                  type: qty
-                  max_label: 1
-                  help: Indiquez une valeur négative pour un transfert entrant
-              min: none
-              max:
-                  field_value: qty
-              value:
-                  field_value: qty
-              
-            - custom: 1
-              label: Entrepôt de destination
-              input_name: id_entrepot
-              input:
-                  type: search_entrepot
-              value:
-                  callback: getEntrepotId
-filters_panels: 
-    default: 
-        filters: 
+            -   custom: 1
+                label: Qté à transférer
+                input_name: qty_to_transfer
+                data_type: int
+                input:
+                    type: qty
+                    max_label: 1
+                    help: Indiquez une valeur négative pour un transfert entrant
+                min: none
+                max:
+                    field_value: qty
+                value:
+                    field_value: qty
+            -   custom: 1
+                label: Type de transfert
+                input_name: transfer_type
+                input:
+                    type: select
+                    options:
+                        entrepot: Transfert vers un entrepôt
+                        internal: Transfert interne
+                value: entrepot
+            -   field: id_linked_prod
+                label: Produit
+                display_if:
+                    field_name: transfer_type
+                    show_values: entrepot
+            -   custom: 1
+                label: Entrepôt de destination
+                input_name: id_entrepot
+                input:
+                    type: search_entrepot
+                value:
+                    callback: getEntrepotId
+                display_if:
+                    field_name: transfer_type
+                    show_values: entrepot
+            -   custom: 1
+                label: Centre de destination
+                input_name: code_centre_dest
+                input:
+                    type: select
+                    options:
+                        callback: getCentresArray
+                display_if:
+                    field_name: transfer_type
+                    show_values: internal
+filters_panels:
+    default:
+        filters:
             serialized: unset
-            
-lists: 
-    default: 
+
+lists:
+    default:
         sort_field: qty_to_receive
         sort_order: DESC
         title: Stocks internes
-        cols: 
+        cols:
             serials: unset
-            qty_to_receive: 
-            description: 
-            product_label: 
-            code_eee: 
-            last_pa: 
+            qty_to_receive:
+            description:
+            product_label:
+            code_eee:
+            last_pa:
                 edit: 1
-            do_not_order: 
+            do_not_order:
                 edit: 1
             date_last_commande:
             id_linked_prod:

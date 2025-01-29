@@ -994,8 +994,6 @@ forms:
                 display_if: 
                     field_name: paid
                     show_values: 0
-                show: 
-                    field_value: id_propal
             send_msg: 
                 custom: 1
                 label: Notifier le client

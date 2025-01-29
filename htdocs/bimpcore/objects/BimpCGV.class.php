@@ -86,6 +86,7 @@ class BimpCGV extends BimpObject
 				BimpTools::moveTmpFiles($warnings, $file, $files_dir, 'CGV_file.pdf');
 			}
 		}
+		return  $errors;
 	}
 
 	public function dispayPdfButton()

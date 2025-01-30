@@ -2204,8 +2204,9 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $new_propal->id;
     }
 
-    public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '')
+    public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '', &$dist_access_open = false)
     {
+		$dist_access_open = false;
         $errors = array();
 
         if ($this->isLoaded($errors)) {
@@ -2280,12 +2281,15 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                             if (count($open_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de l\'accès à la signature à distance');
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                            } else {
+								$dist_access_open = true;
+								$success .= '<br/>Accès à la signature à distance ouvert avec succès avec envoi d\'un e-mail au signataire';
+							}
+						}
+					}
+				}
+			}
+		}
 
         return $errors;
     }

@@ -4,7 +4,7 @@ include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 
 //die(md5("admin:BaikalDAV:"."admin@synopsis"));
 //class object {
-//    
+//
 //}
 
 if (!defined('PATH_TMP'))
@@ -22,11 +22,11 @@ class synopsisHook
     function __construct()
     {
         global $conf, $db, $dbBIMPERP, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
-        
+
         if (!defined('NOTOKENRENEWAL')) {
             define('NOTOKENRENEWAL', true);
         }
-        
+
         static::initDeb();
 
         if (!defined('BIMP_LIB')) {
@@ -39,7 +39,8 @@ class synopsisHook
 //                $conf->entity = $entity;
         }
 
-        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+		$tabCentre = BimpCache::getCentres();
 
         //Pour les logiciel externe.
         $dbBIMPERP = $db;
@@ -790,7 +791,7 @@ class dashboard
 //          dashboard.init();
 //        }
 //      });
-//      
+//
 //
 //    </script>
 //
@@ -810,7 +811,7 @@ class dashboard
 //      <a class="editlayout headerlink" href="#">Edit layout</a>
 //    </div>
 //  </div>-->
-//      
+//
 //      <div class="butAction ui-widget-header ui-corner-all ui-state-default" style="padding: 5px 10px; width: 290px;"><em><span class="ui-icon ui-icon-info" style="float: left; margin: -1px 3px 0px 0px"></span><a class="openaddwidgetdialog" href="#">Ajouter des widgets à votre tableau de bord.</a></em></div>
 //
 //

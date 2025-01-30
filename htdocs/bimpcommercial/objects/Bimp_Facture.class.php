@@ -1,8 +1,8 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
-BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-
+//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+BimpCache::getCentres();
 global $langs;
 $langs->load('bills');
 $langs->load('errors');
@@ -65,7 +65,7 @@ class Bimp_Facture extends BimpComm
     protected $savs = null;
     protected $repas = null;
 
-    // Gestion des droits: 
+    // Gestion des droits:
 
     public function canCreate()
     {
@@ -75,7 +75,7 @@ class Bimp_Facture extends BimpComm
 
     public function canEdit()
     {
-        return 1; // nécessaire pour permettre l'édition de certains champs selon les droits défini dans canEditField(). 
+        return 1; // nécessaire pour permettre l'édition de certains champs selon les droits défini dans canEditField().
         // Par défaut l'édition des champs renvoi sur canCreate()
 //        return $this->canCreate();
     }
@@ -256,7 +256,7 @@ class Bimp_Facture extends BimpComm
                 return parent::canEditField($field_name);
         }
 
-        // Par défaut: 
+        // Par défaut:
         return $this->canCreate();
     }
 
@@ -396,25 +396,25 @@ class Bimp_Facture extends BimpComm
 
         switch ($action) {
             case 'validate':
-                // Vérif du statut: 
+                // Vérif du statut:
                 if ($status !== Facture::STATUS_DRAFT) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut brouillon';
                     return 0;
                 }
 
-                // Vérif du client: 
+                // Vérif du client:
                 $soc = $this->getChildObject('client');
                 if (!BimpObject::objectLoaded($soc)) {
                     $errors[] = 'Client absent ou invalide';
                 }
 
-                // Vérif des lignes: 
+                // Vérif des lignes:
                 $lines = $this->getLines('not_text');
                 if (!count($lines)) {
                     $errors[] = 'Aucune ligne ajoutée  ' . $this->getLabel('to');
                 }
 
-                // Vérif du montant total: 
+                // Vérif du montant total:
 //                if ((in_array($type, array(
 //                            Facture::TYPE_STANDARD,
 //                            Facture::TYPE_REPLACEMENT,
@@ -437,8 +437,8 @@ class Bimp_Facture extends BimpComm
 //                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positifs non autorisés';
 //                    }
 //                }
-//                
-                // Vérif des lignes: 
+//
+                // Vérif des lignes:
                 if ($this->getData('litige'))
                     $errors[] = "Merci de régler le litige avant de valider " . $this->getLabel('the');
 
@@ -1005,7 +1005,7 @@ class Bimp_Facture extends BimpComm
             }
 
             if ($mode_relance !== 'indiv') {
-                if (!(int) $this->getData('nb_relance')) { // Si au moins une relance a déjà été effectuée, on ne tient pas compte du mode de règlement. 
+                if (!(int) $this->getData('nb_relance')) { // Si au moins une relance a déjà été effectuée, on ne tient pas compte du mode de règlement.
                     $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '', 'bimpcommercial');
                     if ($excluded_modes_reglement && in_array((int) $this->getData('fk_mode_reglement'), explode(',', $excluded_modes_reglement))) {
                         $errors[] = 'Le mode de paiement de cette facture ne permet pas sa relance';
@@ -1111,7 +1111,7 @@ class Bimp_Facture extends BimpComm
                 );
             }
 
-            // Marquer exporté vers Chorus: 
+            // Marquer exporté vers Chorus:
             if ($this->isActionAllowed('forceChorusExported') && $this->canSetAction('forceChorusExported')) {
                 $buttons[] = array(
                     'label'   => 'Marquer exporté vers Chorus',
@@ -1122,7 +1122,7 @@ class Bimp_Facture extends BimpComm
                 );
             }
 
-            // Marquer envoyé par e-mail sans export Chorus: 
+            // Marquer envoyé par e-mail sans export Chorus:
             if ($this->isActionAllowed('markSendNoChorusExport') && $this->canSetAction('markSendNoChorusExport')) {
                 $buttons[] = array(
                     'label'   => 'Marquer envoyé par e-mail sans export CHORUS',
@@ -1230,7 +1230,7 @@ class Bimp_Facture extends BimpComm
                 );
             }
 
-            // Remboursement trop perçu / payé. 
+            // Remboursement trop perçu / payé.
             if (BimpCore::getConf('use_payments') && $this->isActionAllowed('payBack') && $this->canSetAction('payBack')) {
                 if ($type === Facture::TYPE_CREDIT_NOTE) {
                     $label = 'Paiement trop remboursé';
@@ -1289,7 +1289,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            // Classée payée: 
+            // Classée payée:
             if (BimpCore::getConf('use_payments') && $this->isActionAllowed('classifyPaid') && $this->canSetAction('classifyPaid')) {
                 $buttons[] = array(
                     'label'   => $langs->trans('ClassifyPaid'),
@@ -1300,7 +1300,7 @@ class Bimp_Facture extends BimpComm
                 );
             }
 
-            // Irrécouvrable: 
+            // Irrécouvrable:
             if ($this->isActionAllowed('setIrrecouvrable') && $this->canSetAction('setIrrecouvrable')) {
                 $buttons[] = array(
                     'label'   => BimpTools::ucfirst($this->getLabel('')) . ' irrécouvrable',
@@ -1311,7 +1311,7 @@ class Bimp_Facture extends BimpComm
                 );
             }
 
-            // Abandonner: 
+            // Abandonner:
             if (!$total_paid) {
                 if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
                     $errors = array();
@@ -1335,7 +1335,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            // Cloner: 
+            // Cloner:
             if ($this->can("create")) {
                 $buttons[] = array(
                     'label'   => 'Cloner',
@@ -1395,7 +1395,7 @@ class Bimp_Facture extends BimpComm
                         );
                     }
                 } elseif ($type === Facture::TYPE_CREDIT_NOTE) {
-                    // Refacturer: 
+                    // Refacturer:
                     $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                     $values = array(
                         'fields' => array(
@@ -1430,7 +1430,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            // Refacturer vers facture existante: 
+            // Refacturer vers facture existante:
             if ($this->isActionAllowed('linesToFacture') && $this->canSetAction('linesToFacture')) {
                 $onclick = $this->getJsActionOnclick('linesToFacture', array(), array(
                     'form_name' => 'lines_to_facture'
@@ -1442,7 +1442,7 @@ class Bimp_Facture extends BimpComm
                 );
             }
 
-            // Annuler et refacturer: 
+            // Annuler et refacturer:
             if ($this->isActionAllowed('cancelAndRefacture') && $this->canSetAction('cancelAndRefacture')) {
                 $buttons[] = array(
                     'label'   => 'Annuler et réfacturer',
@@ -1477,7 +1477,7 @@ class Bimp_Facture extends BimpComm
             );
         }
 
-        // Vérifier les paiements: 
+        // Vérifier les paiements:
         if (BimpCore::getConf('use_payments') && $this->isActionAllowed('checkPaiements') && $this->canSetAction('checkPaiements')) {
             $buttons[] = array(
                 'label'   => 'Vérifier les paiements',
@@ -1486,7 +1486,7 @@ class Bimp_Facture extends BimpComm
             );
         }
 
-        // Vérifier les paiements: 
+        // Vérifier les paiements:
         if ($this->isActionAllowed('checkMargin') && $this->canSetAction('checkMargin')) {
             $buttons[] = array(
                 'label'   => 'Vérifier total achats / marges (reval OK)',
@@ -1770,7 +1770,7 @@ class Bimp_Facture extends BimpComm
         return $buttons;
     }
 
-    // Getters Array: 
+    // Getters Array:
 
     public function getSelectTypesArray()
     {
@@ -1798,7 +1798,7 @@ class Bimp_Facture extends BimpComm
         }
 
         if ($id_soc) {
-            // todo : implémenter la prise en charge des factues de situation si rétabli dans la config. 
+            // todo : implémenter la prise en charge des factues de situation si rétabli dans la config.
 //            if (!empty($conf->global->INVOICE_USE_SITUATION)) {
 //                $types['5'] = array(
 //                    'label' => self::$types[5]['label'],
@@ -2034,7 +2034,7 @@ class Bimp_Facture extends BimpComm
         return $msg;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getSumDiscountsUsed()
     {
@@ -2081,7 +2081,7 @@ class Bimp_Facture extends BimpComm
             $paid = (float) $this->getSumPayments();
             $paid += (float) $this->getSumDiscountsUsed();
 
-            // La conversion en remise n'affecte pas le total des paiements dans le cas des factures d'accomptes. 
+            // La conversion en remise n'affecte pas le total des paiements dans le cas des factures d'accomptes.
 
             if (in_array((int) $this->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
                 $paid -= (float) $this->getConvertedToReducAmount();
@@ -2093,7 +2093,7 @@ class Bimp_Facture extends BimpComm
 
     public function getRemainToPay($true_value = false, $round = true)
     {
-        // $true_value: ne pas tenir compte du statut "payé". 
+        // $true_value: ne pas tenir compte du statut "payé".
 
         if ($this->isLoaded()) {
             if (!$true_value && $this->dol_object->paye) {
@@ -2485,7 +2485,7 @@ class Bimp_Facture extends BimpComm
         return '';
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayPotentielRemise()
     {
@@ -3136,7 +3136,7 @@ class Bimp_Facture extends BimpComm
 
     public function diplayDuplicata()
     {
-        
+
     }
 
     public function displayChorusData()
@@ -3191,14 +3191,14 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
-    //Rendus HTML: 
+    //Rendus HTML:
 
     public function renderContentExtraLeft()
     {
         $html = '';
 
         if (BimpCore::getConf('use_payments')) {
-            // Partie "Paiements": 
+            // Partie "Paiements":
             if ($this->isLoaded()) {
                 $html .= '<table class="bimp_fields_table">';
                 $html .= '<tbody>';
@@ -3216,7 +3216,7 @@ class Bimp_Facture extends BimpComm
                 $total_paid = (float) $this->dol_object->getSommePaiement();
                 $total_avoirs = 0;
 
-                // *** Facturé *** 
+                // *** Facturé ***
 
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>Facturé</strong> : </td>';
@@ -3224,7 +3224,7 @@ class Bimp_Facture extends BimpComm
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
-                // *** Déjà payé : *** 
+                // *** Déjà payé : ***
 
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>Paiements effectués</strong>';
@@ -3281,7 +3281,7 @@ class Bimp_Facture extends BimpComm
                 $remainToPay_final = $remainToPay;
 
                 if ($type !== Facture::TYPE_CREDIT_NOTE) {
-                    // Payée partiellement 'escompte': 
+                    // Payée partiellement 'escompte':
                     if (($status == Facture::STATUS_CLOSED || $status == Facture::STATUS_ABANDONED)) {
                         $label = '';
                         switch ($this->dol_object->close_code) {
@@ -3341,7 +3341,7 @@ class Bimp_Facture extends BimpComm
                     }
 
                     if ($type !== Facture::TYPE_DEPOSIT) {
-                        // Trop perçu converti en remise: 
+                        // Trop perçu converti en remise:
                         $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'asc');
 
                         if (is_array($rows) && !empty($rows)) {
@@ -3363,7 +3363,7 @@ class Bimp_Facture extends BimpComm
                         }
                     }
                 } else {
-                    // Converti en remise: 
+                    // Converti en remise:
                     $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'asc');
 
                     if (is_array($rows) && !empty($rows)) {
@@ -3387,7 +3387,7 @@ class Bimp_Facture extends BimpComm
                     }
                 }
 
-                // Reste à payer: 
+                // Reste à payer:
                 $remainToPay_final = round($remainToPay_final, 2);
 
                 $paye = (int) $this->getData('paye');
@@ -3430,7 +3430,7 @@ class Bimp_Facture extends BimpComm
                     $html .= '</tr>';
                 }
 
-                // Acompte converti en remise: 
+                // Acompte converti en remise:
                 if ($type === Facture::TYPE_DEPOSIT) {
                     BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                     $discount = new DiscountAbsolute($this->db->db);
@@ -3448,7 +3448,7 @@ class Bimp_Facture extends BimpComm
                 $html .= '</tbody>';
                 $html .= '</table>';
 
-                // Boutons 
+                // Boutons
 
                 $html .= '<div class="buttonsContainer align-center">';
                 if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
@@ -3726,7 +3726,7 @@ class Bimp_Facture extends BimpComm
             if ($client->getData('msg_fact') != '') {
                 $html .= BimpRender::renderAlerts('Message facturation : ' . $client->getData('msg_fact'), 'warning');
             }
-            
+
             $html .= '<div style="margin-top: 10px">';
             $html .= '<strong>Client: </strong>';
             $html .= $client->getLink();
@@ -3771,10 +3771,10 @@ class Bimp_Facture extends BimpComm
     {
         $validation_type = 0;
 
-        // 0: validation standard. 
-        // 1: avoir créé automatiquement avec lignes négatives si  facture/ ou facture avec lignes positives si avoir. 
-        // 2: Possibilité de déplacer les lignes négatives dans un avoir. 
-        // 3: Facture ou Avoir intégralement inversé (Facture -> avoir / Avoir -> facture). 
+        // 0: validation standard.
+        // 1: avoir créé automatiquement avec lignes négatives si  facture/ ou facture avec lignes positives si avoir.
+        // 2: Possibilité de déplacer les lignes négatives dans un avoir.
+        // 3: Facture ou Avoir intégralement inversé (Facture -> avoir / Avoir -> facture).
 
         $html = '';
 
@@ -4350,7 +4350,7 @@ class Bimp_Facture extends BimpComm
                 return $errors;
             }
 
-            // Si Total < 0 avec au moins une ligne négative hors remise absolue => conversion auto en avoir. 
+            // Si Total < 0 avec au moins une ligne négative hors remise absolue => conversion auto en avoir.
 
             switch ($type) {
                 case Facture::TYPE_STANDARD:
@@ -4414,7 +4414,7 @@ class Bimp_Facture extends BimpComm
                 $line->onFactureValidate();
             }
 
-            // transformation des lignes de remise excepts en paiements: 
+            // transformation des lignes de remise excepts en paiements:
             if (in_array((int) $this->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
                 $lines = $this->getLines();
 
@@ -4452,7 +4452,7 @@ class Bimp_Facture extends BimpComm
                             }
                         }
                     } elseif ($line->isArticleLine()) {
-                        // Création des revalorisations sur Remise arrière: 
+                        // Création des revalorisations sur Remise arrière:
                         $remises_arrieres = $line->getRemisesArrieres();
                         if (!empty($remises_arrieres)) {
                             foreach ($remises_arrieres as $remise_arriere) {
@@ -4463,7 +4463,7 @@ class Bimp_Facture extends BimpComm
 
                                 $ra_type = $remise_arriere->getData('type');
 
-                                // On vérifie qu'une reval n'existe pas déjà: 
+                                // On vérifie qu'une reval n'existe pas déjà:
                                 if ($ra_type != 'oth') {
                                     $reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
                                                 'id_facture'      => (int) $this->id,
@@ -4504,7 +4504,7 @@ class Bimp_Facture extends BimpComm
                             }
                         }
 
-                        // Mouvements de stocks : 
+                        // Mouvements de stocks :
                         if ($line->getData('linked_object_name') == 'contrat_line' && (int) $line->getData('linked_id_object')) {
                             $contrat_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $line->getData('linked_id_object'));
                             if (BimpObject::objectLoaded($contrat_line)) {
@@ -4521,7 +4521,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            // Classemement "facturé" des commandes et propales: 
+            // Classemement "facturé" des commandes et propales:
             $facturee = true;
             $this->dol_object->fetchObjectLinked();
 
@@ -4539,8 +4539,8 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
-            // A ce stade on est censé être sûr que la facture sera bien validée (Cette méthode doit être appellée par le dernier trigger) 
-            // Le statut doit être à 1 pour les vérifs qui suivent. 
+            // A ce stade on est censé être sûr que la facture sera bien validée (Cette méthode doit être appellée par le dernier trigger)
+            // Le statut doit être à 1 pour les vérifs qui suivent.
             $this->set('fk_statut', 1);
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
@@ -4572,7 +4572,7 @@ class Bimp_Facture extends BimpComm
 
     public function onUnValidate(&$warnings = array())
     {
-        // Attention: Alimenter $errors annulera la dévalidation. 
+        // Attention: Alimenter $errors annulera la dévalidation.
 
         $errors = array();
 
@@ -4730,7 +4730,7 @@ class Bimp_Facture extends BimpComm
             return array();
         }
 
-        // Création de l'avoir: 
+        // Création de l'avoir:
 
         $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
@@ -4822,7 +4822,7 @@ class Bimp_Facture extends BimpComm
         $this->dol_object->update_price(1);
         $avoir->dol_object->update_price(1);
 
-        // Pour être sûr d'être à jour dans les données: 
+        // Pour être sûr d'être à jour dans les données:
         $this->fetch($this->id);
         $avoir->fetch($avoir->id);
 
@@ -4840,7 +4840,7 @@ class Bimp_Facture extends BimpComm
             $asso->addObjectAssociation((int) $avoir->id, (int) $id_commande);
         }
 
-        // Ajout id_avoir pour les éventuelles expéditions liées: 
+        // Ajout id_avoir pour les éventuelles expéditions liées:
         $shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
                     'id_facture' => (int) $this->id
         ));
@@ -4849,7 +4849,7 @@ class Bimp_Facture extends BimpComm
             $shipment->updateField('id_avoir', (int) $avoir->id);
         }
 
-        // validation de l'avoir (sans trigger pour éviter les boucles infinies): 
+        // validation de l'avoir (sans trigger pour éviter les boucles infinies):
         global $user;
         if ($avoir->dol_object->validate($user/* , 0, 0, 1 */) <= 0) {//attention si no triggers, pas de blockedlog
             $msg = 'Avoir créé avec succès mais échec de la validation';
@@ -4864,7 +4864,7 @@ class Bimp_Facture extends BimpComm
             $avoir->dol_object->generateDocument($model, $langs);
         }
 
-        // Conversion en remise: 
+        // Conversion en remise:
         if ($convertToReduc) {
             $conv_errors = $avoir->convertToRemise();
 
@@ -4916,7 +4916,7 @@ class Bimp_Facture extends BimpComm
         if (!in_array($type, array(Facture::TYPE_DEPOSIT, Facture::TYPE_CREDIT_NOTE, Facture::TYPE_STANDARD))) {
             $errors[] = 'Les ' . $this->getLabel('name_plur') . ' ne peuvent pas être converti' . $this->e() . 's en remise';
         } else {
-            // On vérifie si une remise n'a pas déjà été créée: 
+            // On vérifie si une remise n'a pas déjà été créée:
 //            $discountcheck = new DiscountAbsolute($db);
 //            $result = $discountcheck->fetch(0, $this->id);
 //            if (!empty($discountcheck->id)) {
@@ -5053,7 +5053,7 @@ class Bimp_Facture extends BimpComm
 
             $max_rtp = (float) BimpCore::getConf('max_rtp_for_classify_paid', null, 'bimpcommercial');
             if (!$remain_to_pay || ($max_rtp > 0 && $remain_to_pay > 0 && $remain_to_pay < $max_rtp)) {
-                $paiement_status = 2; // Entièrement payé. 
+                $paiement_status = 2; // Entièrement payé.
                 if (!$paiement_status_only && !$paye) {
                     $success = '';
                     $close_code = '';
@@ -5285,7 +5285,7 @@ class Bimp_Facture extends BimpComm
             $prev_relance_idx = $last_relance_idx - 1;
 
             if ($prev_relance_idx) {
-                // Recherche de la ligne de relance correspondant à la relance précédente: 
+                // Recherche de la ligne de relance correspondant à la relance précédente:
                 $line = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpRelanceClientsLine', array(
                             'id_client'   => (int) $this->getData('fk_soc'),
                             'relance_idx' => $prev_relance_idx,
@@ -5298,7 +5298,7 @@ class Bimp_Facture extends BimpComm
                 if (BimpObject::objectLoaded($line)) {
                     $prev_relance_date = date('Y-m-d', strtotime($line->getData('date_send')));
                 } else {
-                    // Si non trouvée on calcule une date théorique: 
+                    // Si non trouvée on calcule une date théorique:
                     $delay = $this->getRelanceDelay($last_relance_idx);
                     $last_relance_date = $this->getData('date_relance');
 
@@ -5478,7 +5478,7 @@ class Bimp_Facture extends BimpComm
                 if (!count($errors)) {
                     $remises_errors = array();
 
-                    // Pour être sûr d'être à jour dans les données: 
+                    // Pour être sûr d'être à jour dans les données:
                     $fac_cancel->fetch($fac_cancel->id);
                     $new_fac->fetch($new_fac->id);
 
@@ -5811,7 +5811,7 @@ class Bimp_Facture extends BimpComm
         );
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionReopen($data, &$success)
     {
@@ -6111,7 +6111,7 @@ class Bimp_Facture extends BimpComm
         $success = '';
         $succes_callback = '';
 
-        // Vérifications: 
+        // Vérifications:
         BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
         $discount = new DiscountAbsolute($this->db->db);
         $discount->fetch(0, (int) $this->id);
@@ -6150,7 +6150,7 @@ class Bimp_Facture extends BimpComm
                             ), true, $errors, $warnings);
 
             if (!count($errors) && BimpObject::objectLoaded($facture)) {
-                // Ajout de la remise. 
+                // Ajout de la remise.
                 $dis_errors = $facture->insertDiscount((int) $discount->id);
                 if (count($dis_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($dis_errors, 'Echec de l\'ajout de la remise à la facture de remboursement');
@@ -6805,27 +6805,27 @@ class Bimp_Facture extends BimpComm
         $new_data['statut_export'] = 0;
         $new_data['douane_number'] = '';
 
-        // Statut paiement: 
+        // Statut paiement:
         $new_data['remain_to_pay'] = 0;
         $new_data['paiement_status'] = 0;
 
-        // relances: 
+        // relances:
         $new_data['nb_relance'] = 0;
         $new_data['date_relance'] = null;
         $new_data['date_next_relance'] = null;
         $new_data['relance_active'] = 1;
 
-        // Abandon: 
+        // Abandon:
         $new_data['close_code'] = null;
         $new_data['close_note'] = '';
         $new_data['date_irrecouvrable'] = null;
         $new_data['id_user_irrecouvrable'] = 0;
 
-        // Autre: 
+        // Autre:
         $new_data['prelevement'] = 0;
         $new_data['date_cfr'] = null;
 
-        // CHORUS: 
+        // CHORUS:
         $new_data['chorus_status'] = -1;
         $new_data['chorus_data'] = array();
 
@@ -6988,13 +6988,13 @@ class Bimp_Facture extends BimpComm
                                 $warnings[] = BimpTools::getMsgFromArray($line_errors);
                             }
 
-                            // Copie des remises globales: 
+                            // Copie des remises globales:
                             $this->copyRemisesGlobalesFromOrigin($facture, $warnings, true);
                         } elseif ($avoir_remain_to_pay) {
                             $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
                         }
 
-                        // Copie des contacts: 
+                        // Copie des contacts:
                         if (BimpObject::objectLoaded($facture)) {
                             $this->copyContactsFromOrigin($facture, $warnings);
                         }
@@ -7045,22 +7045,22 @@ class Bimp_Facture extends BimpComm
                             'keep_links'    => true
                         );
 
-                        if ($avoir_to_refacture->getData('datec') < '2020-09-24 00:00:00') { // Date d'inversion des qtés au lieu des prix dans les avoirs. 
+                        if ($avoir_to_refacture->getData('datec') < '2020-09-24 00:00:00') { // Date d'inversion des qtés au lieu des prix dans les avoirs.
                             $params['inverse_prices'] = true;
                         } else {
                             $params['inverse_qty'] = true;
                         }
 
-                        // copie des lignes: 
+                        // copie des lignes:
                         $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, $params);
                         if (count($lines_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($lines_errors);
                         }
 
-                        // Copie des contacts: 
+                        // Copie des contacts:
                         $this->copyContactsFromOrigin($avoir_to_refacture, $warnings);
 
-                        // Copie des remises globales: 
+                        // Copie des remises globales:
                         $this->copyRemisesGlobalesFromOrigin($avoir_to_refacture, $warnings, true);
                     }
                 }
@@ -7074,7 +7074,7 @@ class Bimp_Facture extends BimpComm
         if (!count($errors)) {
             $this->fetch($this->id);
 
-            // Asso avec commandes: 
+            // Asso avec commandes:
             if (!empty($linked_objects)) {
                 foreach ($linked_objects as $item) {
                     if ($item['type'] === 'commande') {
@@ -7169,13 +7169,13 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    // Rappels liés aux factures: 
+    // Rappels liés aux factures:
 
     public static function sendRappels()
     {
         $out = '';
 
-        // Rappels quotidiens: 
+        // Rappels quotidiens:
         $result = static::sendRappelFacturesBrouillons();
         if ($result) {
             $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels factures brouillons -----------<br/><br/>' . $result;
@@ -7191,7 +7191,7 @@ class Bimp_Facture extends BimpComm
             $out .= ($out ? '<br/><br/>' : '') . '-------------- Tâches exports CHORUS -------------<br/><br/>' . $result;
         }
 
-        // Rappels Hebdomadaires: 
+        // Rappels Hebdomadaires:
         if ((int) date('N') == 7) {
             $result = static::sendRappelFacturesMargesNegatives();
             if ($result) {
@@ -7471,7 +7471,7 @@ class Bimp_Facture extends BimpComm
         return $out;
     }
 
-    // Traitements globaux: 
+    // Traitements globaux:
 
     public static function checkIsPaidAll($filters = array())
     {
@@ -7508,7 +7508,7 @@ class Bimp_Facture extends BimpComm
         ));
 
         foreach ($items as $id_fac) {
-            $fac = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac); // On ne passe pas par le cache vu le nombre d'objets à instancier. 
+            $fac = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac); // On ne passe pas par le cache vu le nombre d'objets à instancier.
             if (BimpObject::objectLoaded($fac)) {
                 $init_rtp = (float) $fac->getData('remain_to_pay');
                 $fac->checkRemainToPay();
@@ -7652,13 +7652,13 @@ class Bimp_Facture extends BimpComm
                             }
                             $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Fac ' . $ref . ': échec copie des lignes');
                         } else {
-                            // Copie des contacts: 
+                            // Copie des contacts:
                             $new_fac->copyContactsFromOrigin($fac);
 
-                            // Copie des remises globales: 
+                            // Copie des remises globales:
                             $new_fac->copyRemisesGlobalesFromOrigin($fac, $fac_warnings, true);
 
-                            // Validation: 
+                            // Validation:
                             if ($new_fac->dol_object->validate($user, '', 0, 0) <= 0) {
                                 if ($echo) {
                                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_fac->dol_object), 'Echec de la validation de la facture d\'annulation'), 'danger');
@@ -7675,7 +7675,7 @@ class Bimp_Facture extends BimpComm
                                     $avoir = $new_fac;
                                 }
 
-                                // Conversion en remise: 
+                                // Conversion en remise:
                                 $conv_errors = $avoir->convertToRemise();
                                 if ($conv_errors) {
                                     if ($echo) {
@@ -7683,7 +7683,7 @@ class Bimp_Facture extends BimpComm
                                     }
                                     $errors[] = BimpTools::getMsgFromArray($conv_errors, 'FAC ' . $ref . ': échec conversion en remise');
                                 } else {
-                                    // Application de la remise: 
+                                    // Application de la remise:
                                     $discount = new DiscountAbsolute($db);
                                     $discount->fetch(0, $avoir->id);
 
@@ -7772,7 +7772,7 @@ class Bimp_Facture extends BimpComm
         return $nchecked . ' facture(s) vérifée(s)';
     }
 
-    // Gestion Graphs : 
+    // Gestion Graphs :
     public static function dataGraphPayeAn($boxObj, $context)
     {
         $boxObj->boxlabel = 'Facture par statut paiement';

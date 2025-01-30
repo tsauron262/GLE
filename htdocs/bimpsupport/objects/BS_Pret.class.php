@@ -1,6 +1,7 @@
 <?php
 
-BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+$tabCentre = BimpCache::getCentres();
 
 class BS_Pret extends BimpObject
 {

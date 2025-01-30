@@ -1103,7 +1103,7 @@ class Bimp_CommandeLine extends ObjectLine
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet det ON det.rowid = l.id_line';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON l.id_obj = c.rowid';
             $sql .= ' WHERE l.linked_object_name = \'commande_line\' AND l.linked_id_object = ' . $this->id;
-            $sql .= ' AND c.fk_statut < 6'; // Non annulée. 
+            $sql .= ' AND c.fk_statut < 6'; // Non annulée.
 
             if ($commandes_validated_only) {
                 $sql .= ' AND c.fk_statut > 0';
@@ -1127,12 +1127,12 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function getShipmentData($id_shipment)
     {
-        // *** Shipment Data *** 
+        // *** Shipment Data ***
         // qty: float
         // group: bool
         // shipped: bool
         // equipments: array (liste id_equipment) / si retour: id_equipment => id_entrepot_destination
-        // id_entrepot (si retour prod non serial: entrepot de destination). 
+        // id_entrepot (si retour prod non serial: entrepot de destination).
 
         $shipments = $this->getData('shipments');
 
@@ -1431,7 +1431,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $equipments;
     }
 
-    // Getters opé périodiques: 
+    // Getters opé périodiques:
 
     public function getExpStartPeriode($check = false, &$infos = array())
     {
@@ -1555,7 +1555,7 @@ class Bimp_CommandeLine extends ObjectLine
             $sql = 'SELECT c.rowid, c.date_commande, c.date_creation FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur c';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line l ON l.id_obj = c.rowid';
             $sql .= ' WHERE l.linked_object_name = \'commande_line\' AND l.linked_id_object = ' . $this->id;
-            $sql .= ' AND c.fk_statut < 6'; // Non annulée. 
+            $sql .= ' AND c.fk_statut < 6'; // Non annulée.
 
             $rows = $this->db->executeS($sql, 'array');
 
@@ -1602,7 +1602,7 @@ class Bimp_CommandeLine extends ObjectLine
             'nb_total_periods'        => 0, // Nombre total de périodes
             'nb_periods_shipped'      => 0, // Nombre de périodes déjà expédiées
             'nb_periods_max'          => 0, // Nombre total de périodes restantes
-            'nb_periods_until_today'  => 0, // Nombre total de périodes écoulées jusqu'à aujourd'hui. 
+            'nb_periods_until_today'  => 0, // Nombre total de périodes écoulées jusqu'à aujourd'hui.
             'nb_periods_toship_today' => 0, // Nombre de période à livrer aujourd'hui
             'shipment_nb_periods'     => 0, // Nombre de périodes à livrer pour l'expédition spécifiée
             'start_date'              => '',
@@ -1629,7 +1629,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $nb_total_periods = (int) $this->getData('exp_nb_periods');
                 $nb_periods_until_today = 0;
 
-                // Calcul du nombre total de périodes écoulées à la date du jour: 
+                // Calcul du nombre total de périodes écoulées à la date du jour:
                 $start = $this->getExpStartPeriode();
 
                 if ($start && $start !== '0000-00-00') {
@@ -1642,11 +1642,11 @@ class Bimp_CommandeLine extends ObjectLine
                         $interval = $dt_now->diff($dt_start, true);
 
                         if ($interval !== false) {
-                            // Nombre de mois écoulés: 
+                            // Nombre de mois écoulés:
                             $nb_month = (($interval->y * 12) + $interval->m);
 
                             if ((int) $nb_month) {
-                                // Nombre de périodes écoulées: 
+                                // Nombre de périodes écoulées:
                                 $nb_periods_until_today = floor($nb_month / $periodicity);
                             }
                         }
@@ -1656,12 +1656,12 @@ class Bimp_CommandeLine extends ObjectLine
                     $nb_periods_until_today = 1;
                 }
 
-                // Ajustement sur le nombre max de périodes facturables: 
+                // Ajustement sur le nombre max de périodes facturables:
                 if ($nb_periods_until_today > $nb_total_periods) {
                     $nb_periods_until_today = $nb_total_periods;
                 }
 
-                // Retrait du nombre de périodes déjà facturées: 
+                // Retrait du nombre de périodes déjà facturées:
                 $qty_shipped = (float) $this->getShippedQty();
                 $shipment_qty = null;
 
@@ -1670,7 +1670,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $qty_shipped -= $shipment_qty;
                 }
 
-                // Calcul du nombre de périodes déjà expédiées: 
+                // Calcul du nombre de périodes déjà expédiées:
                 $nb_periods_shipped = null;
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product) && $product->isTypeProduct()) {
@@ -1763,10 +1763,10 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $data = array(
             'nb_total_periods'        => 0, // Nombre total de périodes
-            'nb_periods_billed'       => 0, // Nombre de périodes déjà facturées. 
-            'nb_periods_max'          => 0, // Nombre total de périodes restant à facturer. 
-            'nb_periods_until_today'  => 0, // Nombre total de périodes écoulées jusqu'à aujourd'hui. 
-            'nb_periods_tobill_today' => 0, // Nombre de périodes à facturer à date.  
+            'nb_periods_billed'       => 0, // Nombre de périodes déjà facturées.
+            'nb_periods_max'          => 0, // Nombre total de périodes restant à facturer.
+            'nb_periods_until_today'  => 0, // Nombre total de périodes écoulées jusqu'à aujourd'hui.
+            'nb_periods_tobill_today' => 0, // Nombre de périodes à facturer à date.
             'fac_nb_periods'          => 0, // Nombre de période à facturer pour la facture indiquée (nouvelle facture si null)
             'qty_for_1_period'        => $this->getFacQtyFor1Periode(),
             'start_date'              => ''
@@ -1788,7 +1788,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $nb_total_periods = (int) $this->getData('fac_nb_periods');
                 $nb_periods_until_today = 0;
 
-                // Calcul du nombre total de périodes écoulées à la date du jour: 
+                // Calcul du nombre total de périodes écoulées à la date du jour:
                 $start = $this->getFacStartPeriode();
                 if ($this->getData('fact_echue')) {
                     $start = date('Y-m-d', strtotime('+' . $this->getData('fac_periodicity') . ' month', strtotime($start)));
@@ -1804,11 +1804,11 @@ class Bimp_CommandeLine extends ObjectLine
                         $interval = $dt_now->diff($dt_start, true);
 
                         if ($interval !== false) {
-                            // Nombre de mois écoulés: 
+                            // Nombre de mois écoulés:
                             $nb_month = (($interval->y * 12) + $interval->m);
 
                             if ((int) $nb_month) {
-                                // Nombre de périodes écoulées: 
+                                // Nombre de périodes écoulées:
                                 $nb_periods_until_today = (int) floor($nb_month / $periodicity);
                             }
                         }
@@ -1818,12 +1818,12 @@ class Bimp_CommandeLine extends ObjectLine
                     $nb_periods_until_today = 1;
                 }
 
-                // Ajustement sur le nombre max de périodes facturables: 
+                // Ajustement sur le nombre max de périodes facturables:
                 if ($nb_periods_until_today > $nb_total_periods) {
                     $nb_periods_until_today = $nb_total_periods;
                 }
 
-                // Retrait du nombre de périodes déjà facturées: 
+                // Retrait du nombre de périodes déjà facturées:
                 $qty_billed = (float) $this->getData('qty_billed');
                 $facture_qty = null;
 
@@ -1888,10 +1888,10 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $data = array(
             'nb_total_periods'          => 0, // Nombre total de périodes
-            'nb_periods_bought'         => 0, // Nombre de périodes déjà achetées. 
-            'nb_periods_max'            => 0, // Nombre total de périodes restant à acheter. 
-            'nb_periods_until_today'    => 0, // Nombre total de périodes écoulées jusqu'à aujourd'hui. 
-            'nb_periods_tobuy_today'    => 0, // Nombre de périodes à acheter à date.  
+            'nb_periods_bought'         => 0, // Nombre de périodes déjà achetées.
+            'nb_periods_max'            => 0, // Nombre total de périodes restant à acheter.
+            'nb_periods_until_today'    => 0, // Nombre total de périodes écoulées jusqu'à aujourd'hui.
+            'nb_periods_tobuy_today'    => 0, // Nombre de périodes à acheter à date.
             'commande_fourn_nb_periods' => 0, // Nombre de période à acheter pour la commande fourn indiquée (nouvelle commande si null)
             'qty_for_1_period'          => $this->getAchatQtyFor1Periode(),
             'start_date'                => ''
@@ -1911,7 +1911,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $nb_total_periods = (int) $this->getData('achat_nb_periods');
                 $nb_periods_until_today = 0;
 
-                // Calcul du nombre total de périodes écoulées à la date du jour: 
+                // Calcul du nombre total de périodes écoulées à la date du jour:
                 $start = $this->getAchatStartPeriode();
 
                 if ($start && $start !== '0000-00-00') {
@@ -1924,11 +1924,11 @@ class Bimp_CommandeLine extends ObjectLine
                         $interval = $dt_now->diff($dt_start, true);
 
                         if ($interval !== false) {
-                            // Nombre de mois écoulés: 
+                            // Nombre de mois écoulés:
                             $nb_month = (($interval->y * 12) + $interval->m);
 
                             if ((int) $nb_month) {
-                                // Nombre de périodes écoulées: 
+                                // Nombre de périodes écoulées:
                                 $nb_periods_until_today = (int) floor($nb_month / $periodicity);
                             }
                         }
@@ -1939,12 +1939,12 @@ class Bimp_CommandeLine extends ObjectLine
                     $nb_periods_until_today = 1;
                 }
 
-                // Ajustement sur le nombre max de périodes facturables: 
+                // Ajustement sur le nombre max de périodes facturables:
                 if ($nb_periods_until_today > $nb_total_periods) {
                     $nb_periods_until_today = $nb_total_periods;
                 }
 
-                // Retrait du nombre de périodes déjà facturées: 
+                // Retrait du nombre de périodes déjà facturées:
                 $qty_bought = (float) $this->getBoughtQty();
                 $commande_qty = 0;
 
@@ -2860,7 +2860,7 @@ class Bimp_CommandeLine extends ObjectLine
             $html .= '</span>';
         }
 
-        // Qté facturée: 
+        // Qté facturée:
         $qty_billed = round((float) $this->getBilledQty(), 6);
         $qty_billed_valid = round((float) $this->getBilledQty(null, true), 6);
 
@@ -3127,7 +3127,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $html .= '</table>';
                 }
             } else {
-                // Recherche des unités commandées: 
+                // Recherche des unités commandées:
                 $qty_ordered = 0;
                 $qty_received = 0;
 
@@ -5244,7 +5244,7 @@ class Bimp_CommandeLine extends ObjectLine
         $html .= '<tbody class="headers_col">';
 
         if (!(int) $params['id_fourn']) {
-            // Livraisons : 
+            // Livraisons :
             $html .= '<tr>';
             $html .= '<th>' . BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons</th>';
             $html .= '<td><span class="badge badge-' . ($nb_exp > 0 ? 'warning' : 'success') . '">' . $nb_exp . '</span></td>';
@@ -5268,7 +5268,7 @@ class Bimp_CommandeLine extends ObjectLine
             $html .= '</td>';
             $html .= '</tr>';
 
-            // Facturation : 
+            // Facturation :
 
             $html .= '<tr>';
             $html .= '<th>' . BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Facturations</th>';
@@ -5294,7 +5294,7 @@ class Bimp_CommandeLine extends ObjectLine
             $html .= '</tr>';
         }
 
-        // Achats : 
+        // Achats :
         $html .= '<tr>';
         $html .= '<th>' . BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Achats</th>';
         $html .= '<td><span class="badge badge-' . ($nb_achats > 0 ? 'warning' : 'success') . '">' . $nb_achats . '</span></td>';
@@ -5500,7 +5500,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         $lines = self::getPeriodicExpLinesToProcess($errors, $id_client, $id_product);
 
-        // Trie par commande client / contact: 
+        // Trie par commande client / contact:
         $lines_by_commandes = array();
 
         foreach ($lines as $id_line) {
@@ -5721,7 +5721,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             $html .= BimpRender::renderIcon('fas_check', 'iconLeft') . '<span class = "success">' . $msg . '</span>';
         } else {
-            // Répartition par entrepôt / secteur / mode et conditions de réglement : 
+            // Répartition par entrepôt / secteur / mode et conditions de réglement :
 
             $clients_factures = array();
 
@@ -5972,7 +5972,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         $lines = self::getPeriodicAchatLinesToProcess($errors, $id_fourn_filter, $id_client, $id_product);
 
-        // Trie par fournisseur et entrepot: 
+        // Trie par fournisseur et entrepot:
         $lines_by_fourns = array();
 
         foreach ($lines as $id_line => $line_data) {
@@ -6344,7 +6344,7 @@ class Bimp_CommandeLine extends ObjectLine
                         if ((int) $product->getData('fk_product_type') === 0) {
                             $qty = (int) ceil($this->getFullQty() - (float) $reserved_qties['total']);
                             if ($qty > 0) {
-                                // On Vérifie l'existence d'une réservation au statut "à traiter" pour cette ligne de commande: 
+                                // On Vérifie l'existence d'une réservation au statut "à traiter" pour cette ligne de commande:
                                 $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
                                             'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
                                             'id_commande_client'      => (int) $commande->id,
@@ -6353,7 +6353,7 @@ class Bimp_CommandeLine extends ObjectLine
                                                 ), true);
 
                                 if (BimpObject::objectLoaded($reservation)) {
-                                    // Mise à jour des quantités de la réservation: 
+                                    // Mise à jour des quantités de la réservation:
                                     $qty += (int) $reservation->getData('qty');
                                     $reservation->set('qty', $qty);
                                     $res_warnings = array();
@@ -6416,12 +6416,12 @@ class Bimp_CommandeLine extends ObjectLine
 
                                     $res_warnings = array();
                                     if ($new_qty > 0) {
-                                        // mise à jour de la réservation: 
+                                        // mise à jour de la réservation:
                                         $qty += (int) $reservation->getData('qty');
                                         $reservation->set('qty', $qty);
                                         $res_errors = $reservation->update($res_warnings, true);
                                     } else {
-                                        // Suppression de la réservation: 
+                                        // Suppression de la réservation:
                                         $res_errors = $reservation->delete($res_warnings, true);
                                     }
                                 }
@@ -6443,19 +6443,19 @@ class Bimp_CommandeLine extends ObjectLine
 
                                         $res_warnings = array();
                                         if ($new_qty > 0) {
-                                            // mise à jour de la réservation: 
+                                            // mise à jour de la réservation:
                                             $qty += (int) $reservation->getData('qty');
                                             $reservation->set('qty', $qty);
                                             $reservation->update($res_warnings, true);
                                         } else {
-                                            // Suppression de la réservation: 
+                                            // Suppression de la réservation:
                                             $reservation->delete($res_warnings, true);
                                         }
                                     }
                                 }
                             }
                         } else {
-                            // Service : on supprime toutes les réservations éventuelles: 
+                            // Service : on supprime toutes les réservations éventuelles:
                             if ((float) $reserved_qties['total'] > 0) {
 //                                mailSyn2("Suppression reservations", BimpCore::getConf('devs_email'), null, "Attention une reservation a été supprimé " . $product->getData('ref') . " comm: " . $this->getData("id_obj"));
                                 foreach (BimpCache::getBimpObjectObjects('bimpreservation', 'BR_Reservation', array(
@@ -6711,7 +6711,7 @@ class Bimp_CommandeLine extends ObjectLine
             $shipment_data = $this->getShipmentData((int) $shipment->id);
             $shipment_data['qty'] = (float) $data['qty'];
 
-            // Grouper les articles: 
+            // Grouper les articles:
             $group = null;
 
             $product = $this->getProduct();
@@ -6738,7 +6738,7 @@ class Bimp_CommandeLine extends ObjectLine
                 unset($shipment_data['id_entrepot']);
             }
 
-            // Vérification des quantités: 
+            // Vérification des quantités:
             $total_qty_shipped = 0;
             foreach ($shipments as $id_shipment => $s_data) {
                 if ((int) $id_shipment === $shipment->id) {
@@ -6773,7 +6773,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
             $shipment_data['equipments'] = $equipments;
 
-            // Mise à jour: 
+            // Mise à jour:
             if (!count($errors)) {
                 $shipments[(int) $shipment->id] = $shipment_data;
                 $errors = $this->updateField('shipments', $shipments);
@@ -6913,8 +6913,8 @@ class Bimp_CommandeLine extends ObjectLine
                 return $errors;
             }
             if ((float) $shipment_data['qty'] >= 0) {
-                // Cas des produits vendus: 
-                // traitement des réservations: 
+                // Cas des produits vendus:
+                // traitement des réservations:
                 $stock_label = 'Expédition n°' . $shipment->getData('num_livraison') . ' pour la commande client "' . $commande->getRef() . '"';
                 $codemove = 'CO' . $commande->id . '_EXP' . $shipment->id;
 
@@ -6937,7 +6937,7 @@ class Bimp_CommandeLine extends ObjectLine
                                         $reservation->set('id_origin', (int) $shipment->id);
                                         $reservation->update();
 
-                                        // Mise à jour de l'emplacement de l'équipement: 
+                                        // Mise à jour de l'emplacement de l'équipement:
                                         $place_errors = $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $id_client, $codemove, $stock_label, 1, '', 'commande', (int) $commande->id, $id_contact);
 
                                         if (count($place_errors)) {
@@ -6975,7 +6975,7 @@ class Bimp_CommandeLine extends ObjectLine
                     }
                 }
 
-                // Traitement durée limitée: 
+                // Traitement durée limitée:
                 if (BimpObject::objectLoaded($product) && (int) $product->getData('duree') > 0) {
                     if (empty($this->date_from)) {
                         $date_from = $shipment->getData('date_shipped');
@@ -6990,7 +6990,7 @@ class Bimp_CommandeLine extends ObjectLine
                     }
                 }
             } else {
-                // Cas des produits retournés: 
+                // Cas des produits retournés:
 
                 if (BimpObject::ObjectLoaded($product) && !(int) $product->getData('fk_product_type')) {
                     $stock_label = 'Retour - Expédition n°' . $shipment->getData('num_livraison') . ' - Commande client "' . $commande->getRef() . '"';
@@ -7001,7 +7001,7 @@ class Bimp_CommandeLine extends ObjectLine
                         if (!isset($shipment_data['equipments']) || count($shipment_data['equipments']) !== abs($shipment_data['qty'])) {
                             $errors[] = 'Le nombre d\'équipements sélectionnés est incorrect';
                         } else {
-                            //  Vérifications: 
+                            //  Vérifications:
                             foreach ($shipment_data['equipments'] as $id_equipment) {
                                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                                 if (!BimpObject::objectLoaded($equipment)) {
@@ -7025,7 +7025,7 @@ class Bimp_CommandeLine extends ObjectLine
                             }
 
                             if (!count($errors)) {
-                                // Mise à jour des emplacements:             
+                                // Mise à jour des emplacements:
 
                                 foreach ($shipment_data['equipments'] as $id_equipment) {
                                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
@@ -7056,7 +7056,7 @@ class Bimp_CommandeLine extends ObjectLine
                             }
                         }
                     } else {
-                        // Mise en stock: 
+                        // Mise en stock:
                         if (!isset($shipment_data['id_entrepot']) || !(int) $shipment_data['id_entrepot']) {
                             $errors[] = 'Entrepôt de destination absent';
                         } else {
@@ -7070,7 +7070,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        // Mise à jour des données de l'expédition: 
+        // Mise à jour des données de l'expédition:
 
         if (!count($errors)) {
             $shipments = $this->getData('shipments');
@@ -7125,11 +7125,11 @@ class Bimp_CommandeLine extends ObjectLine
         $stock_label = 'Annulation de l\'expédition n°' . $shipment->getData('num_livraison') . ' pour la commande client "' . $commande->getRef() . '"';
         $codemove = 'CO' . $commande->id . '_EXP' . $shipment->id . '_ANNUL';
 
-        // Cas des produits vendus: 
+        // Cas des produits vendus:
         if ((float) $shipment_data['qty'] > 0) {
             if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
 
-                // Traitement des réservations: 
+                // Traitement des réservations:
                 $reservations = $this->getReservations('status', 'asc', '300', (int) $shipment->id);
 
                 foreach ($reservations as $reservation) {
@@ -7144,7 +7144,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 if (count($res_errors)) {
                                     $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut pour l\'équipement ' . $equipment->getData('serial'));
                                 } else {
-                                    // Mise à jour de l'emplacement de l'équipement:  
+                                    // Mise à jour de l'emplacement de l'équipement:
                                     $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                                     $place_errors = $place->validateArray(array(
                                         'id_equipment' => $id_equipment,
@@ -7198,7 +7198,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
 
-            // Traitement durée limitée: 
+            // Traitement durée limitée:
             if (BimpObject::objectLoaded($product) && (int) $product->getData('duree') > 0) {
                 $date_shipped = $shipment->getData('date_shipped');
                 if (!empty($date_shipped)) {
@@ -7214,12 +7214,12 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
         } else {
-            // Cas des produits retournés: 
+            // Cas des produits retournés:
             $stock_label = 'Retour - ' . $stock_label;
 
             if (BimpObject::ObjectLoaded($product) && !$product->getData('fk_product_type')) {
                 if ($product->isSerialisable()) {
-                    // Création des emplacements: 
+                    // Création des emplacements:
                     $id_client = (int) $commande->getData('fk_soc');
                     foreach ($shipment_data['equipments'] as $id_equipment) {
                         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
@@ -7250,7 +7250,7 @@ class Bimp_CommandeLine extends ObjectLine
                         }
                     }
                 } else {
-                    // Retraits des stocks: 
+                    // Retraits des stocks:
                     if (isset($shipment_data['id_entrepot']) && (int) $shipment_data['id_entrepot']) {
                         $stock_errors = $product->correctStocks((int) $shipment_data['id_entrepot'], abs($shipment_data['qty']), Bimp_Product::STOCK_OUT, $codemove, $stock_label, 'commande', (int) $commande->id);
                         if (count($stock_errors)) {
@@ -7261,7 +7261,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        // Mise à jour des données de l'expédition: 
+        // Mise à jour des données de l'expédition:
 
         if (!count($errors)) {
             $shipments = $this->getData('shipments');
@@ -7403,7 +7403,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         $factures = $this->getData('factures');
 
-        // Vérification des quantités: 
+        // Vérification des quantités:
         $total_qty_billed = 0;
         foreach ($factures as $id_fac => $facture_data) {
             if ((int) $id_facture && ((int) $id_fac === (int) $id_facture)) {
@@ -7481,7 +7481,7 @@ class Bimp_CommandeLine extends ObjectLine
             return $errors;
         }
 
-        // Vérifications: 
+        // Vérifications:
 
         $fullQty = (float) $this->getFullQty();
         $total_qty = 0;
@@ -7534,7 +7534,7 @@ class Bimp_CommandeLine extends ObjectLine
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture_data['id_facture']);
             $equipments = isset($facture_data['equipments']) ? $facture_data['equipments'] : array();
 
-            // Vérification qté et équipements facture: 
+            // Vérification qté et équipements facture:
             $check_errors = $this->checkFactureData($qty, $equipments, (int) $facture_data['id_facture']);
 
             if (count($check_errors)) {
@@ -7542,7 +7542,7 @@ class Bimp_CommandeLine extends ObjectLine
                 continue;
             }
 
-            // Mise à jour de la ligne de facture: 
+            // Mise à jour de la ligne de facture:
 
             if ((int) $facture->getData('fk_statut') == 0) {
                 $data = array(
@@ -7566,7 +7566,7 @@ class Bimp_CommandeLine extends ObjectLine
                     continue;
                 }
 
-                // Mise à jour de la ligne de commande: 
+                // Mise à jour de la ligne de commande:
                 $line_warnings = array();
                 $line_errors = $this->setFactureData((int) $facture->id, $qty, $equipments, $line_warnings, false);
                 if (count($line_errors)) {
@@ -7998,7 +7998,7 @@ class Bimp_CommandeLine extends ObjectLine
 //                    $fullQty = abs($fullQty);
                     $shipments_qty = (float) $this->getShipmentsQty();
 
-                    // Expéditions: 
+                    // Expéditions:
                     if (isset($status_forced['shipment']) && (int) $status_forced['shipment'] && (int) $commande->getData('shipment_status') === 2) {
                         $shipped_qty = $shipments_qty;
                         $to_ship_qty = 0;
@@ -8007,7 +8007,7 @@ class Bimp_CommandeLine extends ObjectLine
                         $to_ship_qty = $shipments_qty - $shipped_qty;
                     }
 
-                    // Facturation: 
+                    // Facturation:
                     if (isset($status_forced['invoice']) && (int) $status_forced['invoice'] && (int) $commande->getData('invoice_status') === 2) {
                         $billed_qty = $fullQty;
                         $to_bill_qty = 0;
@@ -8146,17 +8146,7 @@ class Bimp_CommandeLine extends ObjectLine
                     if ($product->isTypeProduct()) {
                         $max = $this->getReservationsQties(0);
                     } else {
-                        $max = (float) $this->getFullQty();
-
-                        // Recheche des qtés déjà commandées: 
-                        $fournLines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
-                                    'linked_object_name' => 'commande_line',
-                                    'linked_id_object'   => (int) $this->id
-                        ));
-
-                        foreach ($fournLines as $line) {
-                            $max -= (float) $line->getFullQty();
-                        }
+                        $max = $this->getFullQty() - $this->getBoughtQty();
                     }
                 }
             }
@@ -8227,7 +8217,7 @@ class Bimp_CommandeLine extends ObjectLine
                         break;
                 }
 
-                // Création de la commande fourn : 
+                // Création de la commande fourn :
                 $commande_fourn = null;
 
                 if ($id_commande_fourn == 'new' || !(int) $id_commande_fourn) {
@@ -8248,7 +8238,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
 
                 if (!count($errors)) {
-                    // Ajout de la ligne à la CF: 
+                    // Ajout de la ligne à la CF:
                     $line_warnings = array();
                     $line_errors = $this->addToCommandeFourn($commande_fourn->id, $qty, array(
                         'id_fourn_price' => $id_fourn_price,
@@ -8552,7 +8542,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $success = 'Un équipement retiré avec succès';
                 }
 
-                // Retrait des expéditions: 
+                // Retrait des expéditions:
                 $shipments = $this->getData('shipments');
                 foreach ($shipments as $id_shipment => $shipment_data) {
                     if (isset($shipment_data['equipments']) && !empty($shipment_data['equipments'])) {
@@ -8571,7 +8561,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $warnings[] = BimpTools::getMsgFromArray($up_errors);
                 }
 
-                // Retrait des factures: 
+                // Retrait des factures:
                 $factures = $this->getData('factures');
 
                 foreach ($factures as $id_facture => $facture_data) {
@@ -8905,23 +8895,23 @@ class Bimp_CommandeLine extends ObjectLine
                                 $line_qty = $line->getFullQty();
 
                                 if ($line_qty < $exp_nb_periods) {
-                                    // Ajustement du nombres de périodes: 
+                                    // Ajustement du nombres de périodes:
                                     $line_data['exp_nb_periods'] = $line_qty;
                                     $line_warnings[] = 'Nombre de périodes réduites à ' . $line_qty;
                                 } elseif ($exp_nb_periods > $line_qty) {
                                     $period_unit = $line_qty / $exp_nb_periods;
                                     if (round($period_unit) != $period_unit) {
-                                        // Tentative d'ajustement de la périodicité: 
+                                        // Tentative d'ajustement de la périodicité:
                                         if ($exp_periodicity > 1) {
                                             $nb_month = $exp_periodicity * $exp_nb_periods;
 
                                             $min_periodicity = $nb_month / $line_qty;
 
-                                            // Si la nouvelle périodicité tombe juste: 
+                                            // Si la nouvelle périodicité tombe juste:
                                             if (round($min_periodicity) == $min_periodicity) {
                                                 $new_nb_periods = $nb_month / $min_periodicity;
 
-                                                // Si le nouveau nombre de périodes tombe juste: 
+                                                // Si le nouveau nombre de périodes tombe juste:
                                                 if (round($new_nb_periods) == $new_nb_periods) {
                                                     $line_data['exp_periodicity'] = $min_periodicity;
                                                     $line_data['exp_nb_periods'] = $new_nb_periods;
@@ -8996,7 +8986,7 @@ class Bimp_CommandeLine extends ObjectLine
         );
     }
 
-    // Actions BDS : 
+    // Actions BDS :
 
     public function initBdsActionPeriodicityMassProcess($process, &$action_data = array(), &$errors = array(), $extra_data = array())
     {
@@ -9048,7 +9038,7 @@ class Bimp_CommandeLine extends ObjectLine
                                             }
                                         }
                                     } else {
-                                        // Création de l'expédition : 
+                                        // Création de l'expédition :
                                         $shipment_errors = array();
                                         $shipment = BimpObject::createBimpObject('bimplogistique', 'BL_CommandeShipment', array(
                                                     'id_commande_client' => $id_commande,
@@ -9284,7 +9274,7 @@ class Bimp_CommandeLine extends ObjectLine
                                             }
                                         }
                                     } else {
-                                        // Création de la CF : 
+                                        // Création de la CF :
                                         $cf_errors = array();
                                         $cf = BimpObject::createBimpObject('bimpcommercial', 'Bimp_CommandeFourn', array(
                                                     'fk_soc'   => $id_fourn,
@@ -9842,14 +9832,14 @@ class Bimp_CommandeLine extends ObjectLine
 
                         $commandes = $this->db->executeS($sql, 'array');
 
-                        // Liens commandes: 
+                        // Liens commandes:
                         if (!empty($commandes)) {
                             foreach ($commandes as $c) {
                                 $fac->dol_object->add_object_linked('commande', (int) $c['id_commande']);
                             }
                         }
 
-                        // Contacts: 
+                        // Contacts:
                         $contacts = array();
                         $users = array();
                         if (!empty($commandes)) {
@@ -9880,7 +9870,7 @@ class Bimp_CommandeLine extends ObjectLine
 
                             if (BimpObject::objectLoaded($client)) {
                                 if (!isset($contacts['BILLING2']) || empty($contacts['BILLING2']) || count($contacts['BILLING2']) > 1) {
-                                    // On récupère le contact e-mail facturation par défaut de la fiche client : 
+                                    // On récupère le contact e-mail facturation par défaut de la fiche client :
                                     $id_def_contact = (int) $client->getData('contact_default');
                                     if ($id_def_contact) {
                                         $contacts['BILLING2'] = array($id_def_contact);
@@ -9888,7 +9878,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 }
 
                                 if (!isset($users['SALESREPFOLL']) || empty($users['SALESREPFOLL'])) {
-                                    // On récupère le commerical du client : 
+                                    // On récupère le commerical du client :
                                     $id_def_commercial = (int) $client->getCommercial(false);
                                     if ($id_def_commercial) {
                                         $users['SALESREPFOLL'] = array($id_def_commercial);
@@ -10351,7 +10341,7 @@ class Bimp_CommandeLine extends ObjectLine
             $commande = $this->getParentInstance();
 
             if (BimpObject::objectLoaded($commande) && ((int) $commande->getData('fk_statut') === 1)) {
-                // Vérification des réservations: 
+                // Vérification des réservations:
                 $this->checkReservations(); // les quantités des réservations sont vérifiées dans cette méthode.
             }
         }
@@ -10422,7 +10412,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        // Forçage si on est dans le cas d'une ligne ajouté en logistique: 
+        // Forçage si on est dans le cas d'une ligne ajouté en logistique:
         if ((int) $this->qty === 0 && (int) $this->getData('qty_modif')) {
             $force_update = true;
         }

@@ -33,5 +33,5 @@ sections:
                 type: view
                 view:
                     object: entrepot
-                    name: default
+                    name: complet
 

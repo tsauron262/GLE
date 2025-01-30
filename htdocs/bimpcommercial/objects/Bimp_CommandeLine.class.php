@@ -3148,7 +3148,7 @@ class Bimp_CommandeLine extends ObjectLine
 				), 'id', 'asc', array(
 					'cf' => array(
 						'table' => 'commande_fournisseur',
-						'on'    => 'cf.fk_commande = a.id_obj'
+						'on'    => 'cf.rowid = a.id_obj'
 					)
 				));
 

@@ -9,12 +9,7 @@ table: entrepot
 primary: rowid
 icon: fas_warehouse
 
-#controller: entrepot
-
-list_page_url: 
-    controller: admin
-#    url_params:
-#        tab: entrepots
+controller: entrepot
     
 nom_url: 
     syntaxe: <ref>
@@ -69,17 +64,21 @@ fields_tables:
                     callback: displayFullAdress
                   
 views: 
-    default: 
-        rows: 
-            - cols: 
-                - type: object_header
-            - cols: 
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    fields_table: 
-                        name: infos
-                  
+    default:
+        edit_btn: 1
+        rows:
+            -   cols:
+                    -   type: fields_table
+                        col_lg: 6
+                        col_md: 6
+                        fields_table:
+                            name: infos
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderStocksView
+
+
 filters_panels: 
     default: 
         filters: 
@@ -108,6 +107,7 @@ lists:
         n: 10
         add_form_name: default
         modal_view: default
+        page_btn: 1
         edit_btn: 1
         edit_form: default
         delete_btn: 1
@@ -144,3 +144,10 @@ cards:
                 value: 
                     callback: displayFullAdress
         view_btn: 1
+    
+list_page_url:
+    controller: admin
+#    url_params:
+#        tab: admin
+        
+header_list_name: default

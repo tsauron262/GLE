@@ -10,7 +10,7 @@ class Bimp_Entrepot extends BimpObject
         2 => array('label' => 'Actif (en interne seulement)', 'icon' => 'fas_exclamation', 'classes' => array('warning'))
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function canCreate()
     {
@@ -29,7 +29,7 @@ class Bimp_Entrepot extends BimpObject
 //        return $this->canEdit();
 //    }
 
-    // Getters: 
+    // Getters:
 
     public function getNameProperties()
     {
@@ -57,7 +57,7 @@ class Bimp_Entrepot extends BimpObject
         }
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayFullAdress()
     {
@@ -80,7 +80,7 @@ class Bimp_Entrepot extends BimpObject
         return $html;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function getDolObjectUpdateParams()
     {
@@ -91,4 +91,87 @@ class Bimp_Entrepot extends BimpObject
             $user
         );
     }
+
+	public function renderStocksView()
+	{
+		$html = '';
+
+		$tabs = array();
+
+		// Stocks par entrepôt:
+		$tabs[] = array(
+			'id'            => 'stocks_by_entrepots_tab',
+			'title'         => BimpRender::renderIcon('fas_box-open', 'iconLeft') . 'Stocks par entrepôts',
+			'ajax'          => 1,
+			'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_by_entrepots_tab .nav_tab_ajax_result\')', array('stocks_by_entrepots'), array('button' => ''))
+		);
+
+		// Mouvements de stock:
+		$tabs[] = array(
+			'id'            => 'stocks_mvts_tab',
+			'title'         => BimpRender::renderIcon('fas_exchange-alt', 'iconLeft') . 'Mouvements de stock',
+			'ajax'          => 1,
+			'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_mvts_tab .nav_tab_ajax_result\')', array('stocks_mvts'), array('button' => ''))
+		);
+
+		// Mouvements de stock d'équipements:
+		$tabs[] = array(
+			'id'            => 'stocks_equipment_tab',
+			'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Équipements en stock',
+			'ajax'          => 1,
+			'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_equipment_tab .nav_tab_ajax_result\')', array('stocks_equipment'), array('button' => ''))
+		);
+
+		$html = BimpRender::renderNavTabs($tabs, 'stocks_view');
+
+		return $html;
+	}
+
+	public function renderLinkedObjectsList($list_type)
+	{
+		global $conf;
+		$errors = array();
+		if (!$this->isLoaded($errors)) {
+			return BimpRender::renderAlerts($errors);
+		}
+
+		$html = '';
+
+		$list = null;
+		$product_label = $this->getRef();
+
+		switch ($list_type) {
+			case 'stocks_by_entrepots':
+				$list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Product_Entrepot'), 'entrepot', 1, null, 'Stocks du produit "' . $product_label . '"', 'fas_box-open');
+				$list->addFieldFilterValue('fk_entrepot', $this->id);
+				break;
+
+			case 'stocks_mvts':
+				$list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpProductMouvement'), 'entrepot', 1, null, 'Mouvements stock du produit "' . $product_label . '"', 'fas_exchange-alt');
+				$list->addFieldFilterValue('fk_entrepot', $this->id);
+				break;
+
+			case 'stocks_equipment':
+				$list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'entrepot', 1, null, 'Equipements en stock du produit "' . $product_label . '"', 'fas_desktop');
+					$list->addFieldFilterValue('epl.id_entrepot', $this->id);
+				$list->addFieldFilterValue('epl.position', 1);
+				$list->addFieldFilterValue('epl.type', BE_Place::BE_PLACE_ENTREPOT);
+				$list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
+
+				break;
+
+
+		}
+
+		if (is_a($list, 'BC_ListTable')) {
+			$html .= $list->renderHtml();
+		} elseif ($list_type && !$html) {
+			$html .= BimpRender::renderAlerts('La liste de type "' . $list_type . '" n\'existe pas');
+		} elseif (!$html) {
+			$html .= BimpRender::renderAlerts('Type de liste non spécifié');
+		}
+
+		return $html;
+	}
+
 }

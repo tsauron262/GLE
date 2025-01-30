@@ -3141,11 +3141,14 @@ class Bimp_CommandeLine extends ObjectLine
 				$fournLines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
 					'linked_object_name' => 'commande_line',
 					'linked_id_object'   => (int) $this->id,
-					'cf.fk_statut < 6'
+					'cf.fk_statut'       => array(
+						'operator' => '<',
+						'value'    => 6
+					)
 				), 'id', 'asc', array(
 					'cf' => array(
 						'table' => 'commande_fournisseur',
-						'on' => 'cf.fk_commande = a.id_obj'
+						'on'    => 'cf.rowid = a.id_obj'
 					)
 				));
 
@@ -3229,10 +3232,10 @@ class Bimp_CommandeLine extends ObjectLine
 
 							if (!BimpObject::objectLoaded($shipment) || (int) $shipment->getData('status') === BL_CommandeShipment::BLCS_BROUILLON) {
 								if (!(int) $id_entrepot) {
-									$commande = $this->getParentInstance();
 									if (BimpObject::objectLoaded($shipment)) {
 										$id_entrepot = (int) $shipment->getData('id_entrepot');
 									} else {
+										$commande = $this->getParentInstance();
 										$id_entrepot = (int) $commande->getData('entrepot');
 									}
 								}
@@ -5243,6 +5246,7 @@ class Bimp_CommandeLine extends ObjectLine
 	public function renderPeriodsToProcessOverview($params = array())
 	{
 		$html = '';
+
 		$params = BimpTools::overrideArray(array(
 			'id_client'  => 0,
 			'id_fourn'   => 0,
@@ -8164,17 +8168,7 @@ class Bimp_CommandeLine extends ObjectLine
 					if ($product->isTypeProduct()) {
 						$max = $this->getReservationsQties(0);
 					} else {
-						$max = (float) $this->getFullQty();
-
-						// Recheche des qtés déjà commandées:
-						$fournLines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
-							'linked_object_name' => 'commande_line',
-							'linked_id_object'   => (int) $this->id
-						));
-
-						foreach ($fournLines as $line) {
-							$max -= (float) $line->getFullQty();
-						}
+						$max = $this->getFullQty() - $this->getBoughtQty();
 					}
 				}
 			}

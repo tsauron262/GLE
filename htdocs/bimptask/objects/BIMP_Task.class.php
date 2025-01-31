@@ -428,10 +428,15 @@ class BIMP_Task extends BimpAbstractFollow
 
 	// Getters données:
 
-	public function getUserRight($right)
+	public function getUserRight($right, $user_check = null)
 	{
 		global $user;
-		if ($user->admin) {
+
+		if (is_null($user_check)) {
+			$user_check = $user;
+		}
+
+		if ($user_check->admin) {
 			return 1;
 		}
 
@@ -444,26 +449,30 @@ class BIMP_Task extends BimpAbstractFollow
 			$classRight = $this->getType();
 		}
 
-		if ($this->getData("id_user_owner") == $user->id) {
+		if ($this->getData("id_user_owner") == $user_check->id) {
 			return 1;
 		}
 
-		if ($this->getData("user_create") == $user->id/* && $right == 'read' */) // => Pourquoi? le créateur devrait pouvoir modifier la tâche
+		if ($this->getData("user_create") == $user_check->id/* && $right == 'read' */) // => Pourquoi? le créateur devrait pouvoir modifier la tâche
 		{
 			return 1;
 		}
 
-		$return = $user->rights->bimptask->$classRight->$right;
+		$return = $user_check->rights->bimptask->$classRight->$right;
 
-		if (!$return) {
-			$users_delegations = $this->db->getValues('user', 'rowid', 'delegations LIKE \'%[' . $user->id . ']%\'');
+		if (!$return && $user_check->id == $user->id) {
+			$users_delegations = $this->db->getValues('user', 'rowid', 'delegations LIKE \'%[' . $user_check->id . ']%\'');
 
 			if (!empty($users_delegations)) {
 				foreach ($users_delegations as $id_user_delegation) {
+					if ($id_user_delegation == $user_check->id) {
+						continue; // Pour éviter boucle infinie si erreur de paramétrage (délégation à soi-même)
+					}
+
 					/** @var Bimp_User $user_delegation */
 					$user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
 					if (BimpObject::objectLoaded($user_delegation)) {
-						$return = $user_delegation->dol_object->rights->bimptask->$classRight->$right;
+						$return = $this->getUserRight($right, $user_delegation->dol_object);
 						if ($return) {
 							break;
 						}

@@ -174,4 +174,77 @@ class Bimp_Entrepot extends BimpObject
 		return $html;
 	}
 
+	/*
+	public function isValidate()
+	{
+		if (!(int) BimpCore::getConf('use_valid_product')) {
+			return 1;
+		}
+
+		return $this->getData('validate');
+	}
+	*/
+
+	public function isActionAllowed($action, &$errors = array())
+	{
+		switch ($action) {
+			case 'CorrectionStock':
+				return 1;
+		}
+
+		return (int) parent::isActionAllowed($action, $errors);
+	}
+
+	public function canSetAction($action)
+	{
+		global $user;
+		switch ($action) {
+			case 'CorrectionStock':
+				return $user->rights->bimpcommercial->correct_stocks;
+		}
+
+		return (int) parent::canSetAction($action);
+	}
+
+	public function getActionsButtons()
+	{
+		// Boutons d'actions:
+		$buttons = array();
+
+		if ($this->isActionAllowed('CorrectionStock') && $this->canSetAction('CorrectionStock')) {
+			$buttons['CorrectionStock'] = array(
+				'label'   => 'Corriger le stock',
+				'icon'    => 'fas_random',
+				'onclick' => $this->getJsActionOnclick('CorrectionStock', array(
+					'qty' => 1
+				), array(
+					'form_name' => 'CorrectionStock'
+				))
+			);
+		}
+
+		return $buttons;
+	}
+
+	// actions
+	public function actionCorrectionStock($data, &$success)
+	{
+		global $user;
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		$sens = BimpTools::getArrayValueFromPath($data, 'sens');
+		$qty = BimpTools::getArrayValueFromPath($data, 'qty', 1);
+		$id_product = BimpTools::getArrayValueFromPath($data, 'id_product');
+		$comment = BimpTools::getArrayValueFromPath($data, 'comment');
+
+		$product = BimpObject::getInstance('bimpcore', 'Bimp_Product', $id_product);
+		$errors = $product->correctStocks($this->id, $qty, $sens, 'mouvement_manuel', $comment, 'user', $user->id);
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
 }

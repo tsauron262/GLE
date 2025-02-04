@@ -119,6 +119,11 @@ params:
         info: Séparer chaque adresse e-mail par une virgule sans espace. 
         def: ''
         
+    check_factures_amounts_modif_rights:
+        label: Vérifier les droits de modification des montants des factures
+        type: bool
+        def: 0
+        
     # PDFs: 
     pdf_headers_entrepot_address: 
         label: Afficher l'adresse de l'entrepôt dans l'en-tête des PDF

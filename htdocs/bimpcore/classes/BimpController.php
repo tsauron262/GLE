@@ -2660,11 +2660,11 @@ class BimpController
         $views_list_name = BimpTools::getValue('views_list_name', null, 'aZ09');
         $modal_format = 'large';
 
-        if (is_null($object_name) || !$object_name) {
+        if (!$object_name) {
             $errors[] = 'Type d\'objet absent';
         }
 
-        if (is_null($views_list_name) || !$views_list_name) {
+        if (!$views_list_name) {
             $errors[] = 'Type de liste de vues absent';
         }
 

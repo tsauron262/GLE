@@ -1626,7 +1626,7 @@ class BimpCore
 	{
 		global $user;
 
-		if ($user->login !== 'f.martinez') {
+		if ($user->login != 'f.martinez') {
 			return 1;
 		}
 
@@ -1657,7 +1657,7 @@ class BimpCore
 		}
 
 		if ($data[$id_user]['count'] >= $limit) {
-			BimpCore::addlog('Rate limit atteinte (type : ' . $type . ')', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+			BimpCore::addlog('Limite de requêtes atteinte (type : ' . $type . ')', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
 				'Limit'  => $limit,
 				'Period' => $period,
 				'Count'  => $data[$id_user]['count'],

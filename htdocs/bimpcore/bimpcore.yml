@@ -515,6 +515,16 @@ params:
                       type: bool
                       def: 1
                       
+    rate_limiting_list_limit:
+        label: Nombre de reqêtes max par période pour les listes
+        def: 20
+        cat: secu
+        
+    rate_limiting_list_period:
+        label: Période de limitation des requêtes pour les listes
+        def: 600
+        cat: secu
+    
     # Styles : 
     use_css_v2: 
         label: Utiliser la V2 des CSS

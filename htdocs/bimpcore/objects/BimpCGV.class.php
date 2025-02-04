@@ -7,8 +7,11 @@ class BimpCGV extends BimpObject
 	public function canCreate()
 	{
 		global $user;
-		if ($user->admin) return 1;
-		else return 0;
+		if ($user->admin) {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 
 	public function canDelete()
@@ -59,18 +62,18 @@ class BimpCGV extends BimpObject
 		$filtre = array(
 			'types_pieces' => array(
 				'part_type' => 'middle',
-				'part' => '[' . $type . ']'
+				'part'      => '[' . $type . ']'
 			),
-			'secteurs' => array(
+			'secteurs'     => array(
 				'part_type' => 'middle',
-				'part' => '[' . $secteur . ']'
+				'part'      => '[' . $secteur . ']'
 			),
-			'date_start' => array(
+			'date_start'   => array(
 				'operator' => '<=',
-				'value' => $date_piece
+				'value'    => $date_piece
 			)
 		);
-		if( $secteur == 'S' && $id_centre > 0)	{
+		if ($secteur == 'S' && $id_centre > 0) {
 			$filtre['id_centre'] = $id_centre;
 		}
 		return BimpCache::findBimpObjectInstance('bimpcore', 'BimpCGV', $filtre, true, false, false, 'date_start');
@@ -79,14 +82,14 @@ class BimpCGV extends BimpObject
 	public function create(&$warnings = array(), $force_create = false)
 	{
 		$errors = parent::create($warnings, $force_create);
-		if(empty($errors))	{
+		if (empty($errors)) {
 			$file = BimpTools::getPostFieldValue('file', array(), 'array');
 			if (!empty($file)) {
 				$files_dir = $this->getFilesDir();
 				BimpTools::moveTmpFiles($warnings, $file, $files_dir, 'CGV_file.pdf');
 			}
 		}
-		return  $errors;
+		return $errors;
 	}
 
 	public function dispayPdfButton()
@@ -115,22 +118,21 @@ class BimpCGV extends BimpObject
 
 		if (!empty($file)) {
 			$files_dir = $this->getFilesDir();
-			if(file_exists($files_dir . 'CGV_file.pdf'))	{
+			if (file_exists($files_dir . 'CGV_file.pdf')) {
 				unlink($files_dir . 'CGV_file.pdf');
 			}
 			BimpTools::moveTmpFiles($warnings, $file, $files_dir, 'CGV_file.pdf');
 
-			$nb_pages = BimpTools::getPostFieldValue('nb_pages');
-			$signature_y_pos = BimpTools::getPostFieldValue('signature_y_pos');
+			$nb_pages = BimpTools::getArrayValueFromPath($data, 'nb_pages', 1);
+			$signature_y_pos = BimpTools::getArrayValueFromPath($data,'signature_y_pos', 0);
 
 			$errors = $this->updateFields(array(
-				'nb_pages' => $nb_pages,
+				'nb_pages'        => $nb_pages,
 				'signature_y_pos' => $signature_y_pos
 			));
-			if(empty($errors))	{
+			if (empty($errors)) {
 				$success = 'Fichier PDF modifié';
 			}
-
 		} else {
 			$errors[] = 'Aucun fichier PDF reçu';
 		}

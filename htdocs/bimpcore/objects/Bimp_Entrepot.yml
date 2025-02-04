@@ -9,6 +9,9 @@ table: entrepot
 primary: rowid
 icon: fas_warehouse
 
+header_btn:
+    callback: getActionsButtons
+
 controller: entrepot
     
 nom_url: 

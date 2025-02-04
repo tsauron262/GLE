@@ -4763,53 +4763,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			return $errors;
 		}
 
-		// Check num tel (avant envoi mail).
-		$to_sms = '';
-		$to_sms_phone_type = '';
-		if ($contact_pref === 3 && $sms && empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
-			if (BimpObject::objectLoaded($contact)) {
-				if (testNumSms($contact->dol_object->phone_mobile)) {
-					$to_sms = $contact->dol_object->phone_mobile;
-					$to_sms_phone_type = 'Tel. mobile du contact';
-				} elseif (testNumSms($contact->dol_object->phone_pro)) {
-					$to_sms = $contact->dol_object->phone_pro;
-					$to_sms_phone_type = 'Tel. pro du contact';
-				} elseif (testNumSms($contact->dol_object->phone_perso)) {
-					$to_sms = $contact->dol_object->phone_perso;
-					$to_sms_phone_type = 'Tel. perso du contact';
-				}
-			}
-
-			if (!$to_sms && (testNumSms($client->dol_object->phone))) {
-				$to_sms = $client->dol_object->phone;
-				$to_sms_phone_type = 'Tel. de la fiche client';
-			}
-
-			if (!$to_sms) {
-				$err_msg = 'Aucun numéro de mobile valide trouvé pour le contact client sélectionné';
-				if (BimpObject::objectLoaded($contact)) {
-					if ($contact->dol_object->phone_mobile) {
-						$err_msg .= '<br/>Num mobile contact invalide (' . $contact->dol_object->phone_mobile . ')';
-					}
-					if ($contact->dol_object->phone_pro) {
-						$err_msg .= '<br/>Num pro contact invalide (' . $contact->dol_object->phone_pro . ')';
-					}
-					if ($contact->dol_object->phone_perso) {
-						$err_msg .= '<br/>Num perso contact invalide (' . $contact->dol_object->phone_perso . ')';
-					}
-				}
-				if ($client->dol_object->phone) {
-					$err_msg .= '<br/>Num fiche client (' . $client->dol_object->phone . ')';
-				}
-
-				$errors[] = $err_msg;
-			}
-
-			if (count($errors)) {
-				return $errors;
-			}
-		}
-
 		if (!$sms_only) {
 			if ($mail_msg) {
 				$toMail = '';
@@ -4872,36 +4825,77 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			}
 		}
 
-		if ($contact_pref === 3 && $sms && $to_sms) {
-//			global $user;
-//			if ((BimpCore::isModeDev() && $user->admin) || $user->login === 'f.martinez') {
-//				die('Envoi SMS au ' . $to_sms . ' (' . $to_sms_phone_type . ')');
-//			}
-
-			require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-
-			if (stripos($sms, $this->getData('ref')) === false) {
-				$sms .= "\n" . $this->getData('ref');
+		// Check num tel (avant envoi mail).
+		$to_sms = '';
+		$to_sms_phone_type = '';
+		if ($contact_pref === 3 && $sms && empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
+			if (BimpObject::objectLoaded($contact)) {
+				if (testNumSms($contact->dol_object->phone_mobile)) {
+					$to_sms = $contact->dol_object->phone_mobile;
+					$to_sms_phone_type = 'Tel. mobile du contact';
+				} elseif (testNumSms($contact->dol_object->phone_pro)) {
+					$to_sms = $contact->dol_object->phone_pro;
+					$to_sms_phone_type = 'Tel. pro du contact';
+				} elseif (testNumSms($contact->dol_object->phone_perso)) {
+					$to_sms = $contact->dol_object->phone_perso;
+					$to_sms_phone_type = 'Tel. perso du contact';
+				}
 			}
 
-			$sms = str_replace('ç', 'c', $sms);
-			$sms = str_replace('ê', 'e', $sms);
-			$sms = str_replace('ë', 'e', $sms);
-			$sms = str_replace('ô', 'o', $sms);
-
-			if (dol_strlen(str_replace('\n', '', $sms)) > 160) {
-				BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
+			if (!$to_sms && (testNumSms($client->dol_object->phone))) {
+				$to_sms = $client->dol_object->phone;
+				$to_sms_phone_type = 'Tel. de la fiche client';
 			}
 
-			$fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+			if (!$to_sms) {
+				$err_msg = 'Aucun numéro de mobile valide trouvé pour le contact client sélectionné';
+				if (BimpObject::objectLoaded($contact)) {
+					if ($contact->dol_object->phone_mobile) {
+						$err_msg .= '<br/>Num mobile contact invalide (' . $contact->dol_object->phone_mobile . ')';
+					}
+					if ($contact->dol_object->phone_pro) {
+						$err_msg .= '<br/>Num pro contact invalide (' . $contact->dol_object->phone_pro . ')';
+					}
+					if ($contact->dol_object->phone_perso) {
+						$err_msg .= '<br/>Num perso contact invalide (' . $contact->dol_object->phone_perso . ')';
+					}
+				}
+				if ($client->dol_object->phone) {
+					$err_msg .= '<br/>Num fiche client (' . $client->dol_object->phone . ')';
+				}
 
-			$to_sms = traiteNumMobile($to_sms);
-
-			$smsfile = new CSMSFile($to_sms, $fromsms, $sms);
-			if (!$smsfile->sendfile()) {
-				$errors[] = 'Echec de l\'envoi du sms';
+				$errors[] = $err_msg;
 			} else {
-				$success .= ($success ? '<br/>' : '') . 'Envoi SMS au n° ' . $to_sms . ' OK (' . $to_sms_phone_type . ')';
+				//			global $user;
+				//			if ((BimpCore::isModeDev() && $user->admin) || $user->login === 'f.martinez') {
+				//				die('Envoi SMS au ' . $to_sms . ' (' . $to_sms_phone_type . ')');
+				//			}
+
+				require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+
+				if (stripos($sms, $this->getData('ref')) === false) {
+					$sms .= "\n" . $this->getData('ref');
+				}
+
+				$sms = str_replace('ç', 'c', $sms);
+				$sms = str_replace('ê', 'e', $sms);
+				$sms = str_replace('ë', 'e', $sms);
+				$sms = str_replace('ô', 'o', $sms);
+
+				if (dol_strlen(str_replace('\n', '', $sms)) > 160) {
+					BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
+				}
+
+				$fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+
+				$to_sms = traiteNumMobile($to_sms);
+
+				$smsfile = new CSMSFile($to_sms, $fromsms, $sms);
+				if (!$smsfile->sendfile()) {
+					$errors[] = 'Echec de l\'envoi du sms';
+				} else {
+					$success .= ($success ? '<br/>' : '') . 'Envoi SMS au n° ' . $to_sms . ' OK (' . $to_sms_phone_type . ')';
+				}
 			}
 		}
 

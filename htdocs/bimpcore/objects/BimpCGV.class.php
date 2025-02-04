@@ -119,7 +119,18 @@ class BimpCGV extends BimpObject
 				unlink($files_dir . 'CGV_file.pdf');
 			}
 			BimpTools::moveTmpFiles($warnings, $file, $files_dir, 'CGV_file.pdf');
-			$success = 'Fichier PDF modifié';
+
+			$nb_pages = BimpTools::getPostFieldValue('nb_pages');
+			$signature_y_pos = BimpTools::getPostFieldValue('signature_y_pos');
+
+			$errors = $this->updateFields(array(
+				'nb_pages' => $nb_pages,
+				'signature_y_pos' => $signature_y_pos
+			));
+			if(empty($errors))	{
+				$success = 'Fichier PDF modifié';
+			}
+
 		} else {
 			$errors[] = 'Aucun fichier PDF reçu';
 		}

@@ -52,6 +52,23 @@ fields:
         label: Date de mise en application
         type: date
         required: 1
+    nb_pages :
+        label: Nombre de pages
+        type: qty
+        decimals: 0
+        min: 1
+#        default_value: 1
+        required: 1
+    signature_y_pos :
+        label: Position en Y du bloc signature
+        type: qty
+        decimals: 0
+        min: 0
+        default_value: 0
+        input:
+            help: Laisser à 0 pour ne pas afficher le bloc signature
+        required: 1
+    
 lists_cols:
     pdf:
         label: PDF
@@ -84,6 +101,9 @@ lists:
             id_centre:
             date_start:
             pdf:
+            nb_pages:
+            signature_y_pos:
+            
     
     cgvCentre:
         extends: default
@@ -106,6 +126,8 @@ forms:
                   allowed_ext: pdf
                   help: Fichier PDF de la CGV
                   max_items: 1
+            - field: nb_pages
+            - field: signature_y_pos
     
     modifyPdfForm:
         rows:
@@ -118,7 +140,9 @@ forms:
                     allowed_ext: pdf
                     help: Fichier PDF de la CGV
                     max_items: 1
-        
+            -   field: nb_pages
+            -   field: signature_y_pos
+
 
      
 views:

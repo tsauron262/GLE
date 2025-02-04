@@ -1656,21 +1656,26 @@ class BimpCore
 			$data[$id_user]['count'] = 0;
 		}
 
+		$data[$id_user]['count']++;
+
+		if ($data[$id_user]['count'] < $limit) {
+			$data[$id_user]['last_access_time'] = $current_time;
+		}
+
+		BimpCache::setCacheServeur('rate_limiting_' . $type, $data);
+
 		if ($data[$id_user]['count'] >= $limit) {
-			BimpCore::addlog('Limite de requêtes atteinte (type : ' . $type . ')', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-				'Limit'  => $limit,
-				'Period' => $period,
-				'Count'  => $data[$id_user]['count'],
-				'User'   => $id_user
-			));
+			if ($data[$id_user]['count'] == $limit) {
+				BimpCore::addlog('Limite de requêtes atteinte (type : ' . $type . ')', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+					'Limit'  => $limit,
+					'Period' => $period,
+					'User'   => $id_user
+				));
+			}
 
 			$errors[] = 'Limite de requêtes atteinte. Merci de patienter quelques instants avant de réessayer.';
 			return 0;
 		}
-
-		$data[$id_user]['count']++;
-		$data[$id_user]['last_access_time'] = $current_time;
-		BimpCache::setCacheServeur('rate_limiting_' . $type, $data);
 
 		return 1;
 	}

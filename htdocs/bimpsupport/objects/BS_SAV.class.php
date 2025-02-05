@@ -674,6 +674,31 @@ class BS_SAV extends BimpObject
 		return 0;
 	}
 
+	public function isEquipmentIphone8Plus()
+	{
+		/** @var Equipment $eq */
+		$eq = $this->getChildObject('equipment');
+		if (BimpObject::objectLoaded($eq)) {
+			$prod_label = $eq->getProductLabel();
+
+			$prod_label = str_replace(' ', '', $prod_label);
+			$prod_label = str_replace('-', '', $prod_label);
+			$prod_label = str_replace('_', '', $prod_label);
+
+			if (preg_match('/iphone(\d+|x|xr|xs)/i', $prod_label, $matches)) {
+				if (preg_match('/^[0-9]$/', $matches[1])) {
+					if ((int) $matches[1] < 0) {
+						return 0;
+					}
+				}
+
+				return 1;
+			}
+		}
+
+		return 0;
+	}
+
 	// Getters params:
 
 	public function getCreateJsCallback()
@@ -5698,6 +5723,33 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		return 0;
 	}
 
+	public function addPartsAuto($id_issue, $ref_added_part, &$warnings = array())
+	{
+		$errors = array();
+		if ($this->isLoaded($errors) && $this->isEquipmentIphone8Plus()) {
+			BimpObject::loadClass('bimpapple', 'BS_ApplePart');
+			foreach (BS_ApplePart::$iphonesPartsAuto as $part_number => $part_label) {
+				$id_part = (int) $this->db->getValue('bs_apple_part', 'id', 'id_sav = ' . $this->id . ' AND part_number = \'' . $part_number . '\'');
+				if ($id_part) {
+					$warnings[] = 'Le composant ' . $part_number .' - ' . $part_label . ' a déjà été ajouté';
+				} else {
+					$part_errors = array();
+					BimpObject::createBimpObject('bimpapple', 'BS_ApplePart', array(
+						'id_sav'       => $this->id,
+						'id_issue' => $id_issue,
+						'part_number'  => $part_number,
+						'label'        => $part_label .'. Pour ' . $ref_added_part
+					), true, $part_errors);
+
+					if (count($part_errors)) {
+						$errors[] = BimpTools::getMsgFromArray($part_errors, 'Echec de l\'ajout du composant ' . $part_number . ' - ' . $part_label);
+					}
+				}
+			}
+		}
+		return $errors;
+	}
+
 	// Actions:
 
 	public function actionWaitClient($data, &$success)
@@ -8005,7 +8057,7 @@ ORDER BY a.val_max DESC");
 					$cur_place = $equipment->getCurrentPlace();
 
 					// Mise en non restitué :
-					if (!BimpObject::objectLoaded($cur_place) ||  $cur_place->getData('type') != BE_Place::BE_PLACE_SAV || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
+					if (!BimpObject::objectLoaded($cur_place) || $cur_place->getData('type') != BE_Place::BE_PLACE_SAV || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
 						$place = BimpObject::getInstance('bimpequipment', 'BE_Place');
 						$place_errors = $place->validateArray(array(
 							'id_equipment' => $equipment->id,

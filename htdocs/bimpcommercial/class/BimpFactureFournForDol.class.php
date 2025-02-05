@@ -42,7 +42,11 @@ class BimpFactureFournForDol extends Bimp_FactureFourn
 //            echo '<pre>';
 //            print_r(array('Factures sans expertise BIMP', $user->getData('email'), null, $msg));
 //            echo '<br/><br/>';
-            mailSyn2('Factures sans expertise BIMP', $user->getData('email'), null, $msg);
+
+			$code_mail = 'relance_facture_sans_expertise';
+
+			$user->sendMsg();
+//            mailSyn2('Factures sans expertise BIMP', $user->getData('email'), null, $msg);
             $nbMail++;
         }
         $this->output = $nb . ' factures ' . $nbMail . ' mail';

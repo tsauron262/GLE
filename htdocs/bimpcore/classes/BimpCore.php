@@ -1635,7 +1635,8 @@ class BimpCore
 //		}
 
 		$limit = (int) BimpCore::getConf('rate_limiting_' . $type . '_limit', 20);
-		$period = (int) BimpCore::getConf('rate_limiting_' . $type . '_period', 600);
+		$period = (int) BimpCore::getConf('rate_limiting_' . $type . '_period', 60);
+		$reset_delay = (int) BimpCore::getConf('rate_limiting_' . $type . '_reset_delay', 30);
 
 
 		$id_user = 0;
@@ -1644,28 +1645,42 @@ class BimpCore
 		}
 
 		$current_time = time();
-		$data = BimpCache::getCacheServeur('rate_limiting_' . $type);
-		if (!isset($data[$id_user])) {
-			$data[$id_user] = array(
+//		$data = BimpCache::getCacheServeur('rate_limiting_' . $type);
+		$data = (isset($_SESSION['rate_limiting_' . $type]) ? $_SESSION['rate_limiting_' . $type] : array());
+
+		// Si durée depuis la dernière requête > délai de réinitialisation,
+		// ou si durée depuis la première requête > période de vérification ET limite non atteinte,
+		// on réinitialise le compteur:
+
+//		if ($current_time - $data['last_access_time'] >= $reset_delay) {
+//			$errors[] = 'REINIT 1';
+//		}
+//
+//		if ($current_time - $data['start_time'] >= $period && $data['count'] < $limit) {
+//			$errors[] = 'REINIT 2 - P = ' . $period .' - T = ' . ($current_time - $data['start_time']) .' - C = ' . $data['count'] . ' - L = ' . $limit;
+//		}
+
+		if (empty($data) ||
+			($current_time - $data['last_access_time'] >= $reset_delay) ||
+			($current_time - $data['start_time'] >= $period && $data['count'] < $limit)) {
+			$data = array(
 				'count'            => 0,
+				'start_time'       => $current_time,
 				'last_access_time' => $current_time
 			);
 		}
 
-		if ($current_time - $data[$id_user]['last_access_time'] >= $period) {
-			$data[$id_user]['count'] = 0;
+		$data['count']++;
+		if ($data['count'] <= $limit) {
+			$data['last_access_time'] = $current_time;
 		}
 
-		$data[$id_user]['count']++;
+		$_SESSION['rate_limiting_' . $type] = $data;
+//		BimpCache::setCacheServeur('rate_limiting_' . $type, $data);
 
-		if ($data[$id_user]['count'] < $limit) {
-			$data[$id_user]['last_access_time'] = $current_time;
-		}
-
-		BimpCache::setCacheServeur('rate_limiting_' . $type, $data);
-
-		if ($data[$id_user]['count'] >= $limit) {
-			if ($data[$id_user]['count'] == $limit) {
+		// Vérif limite atteinte :
+		if ($data['count'] >= $limit) {
+			if ($data['count'] == $limit) {
 				BimpCore::addlog('Limite de requêtes atteinte (type : ' . $type . ')', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
 					'Limit'  => $limit,
 					'Period' => $period,

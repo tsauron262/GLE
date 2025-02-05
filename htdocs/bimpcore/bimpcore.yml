@@ -521,8 +521,15 @@ params:
         cat: secu
         
     rate_limiting_list_period:
-        label: Période de limitation des requêtes pour les listes
-        def: 600
+        label: Période de vérification des limitations de requêtes pour les listes
+        info: valeur en secondes
+        def: 60
+        cat: secu
+        
+    rate_limiting_list_reset_delay:
+        label: Délai de réinitialisation du compteur lorsque la limite est atteinte pour les listes
+        info: valeur en secondes
+        def: 30
         cat: secu
     
     # Styles : 

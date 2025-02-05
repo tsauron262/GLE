@@ -21,6 +21,7 @@ name_syntaxe: <firstname> <lastname>
 nom_url: 
     syntaxe: <name>
     card: default
+    modal_view: default
     
 labels: 
     name: contact
@@ -209,8 +210,6 @@ forms:
                 field: firstname
             lastname: 
                 field: lastname
-            address: 
-                field: address
             address: 
                 field: address
             zip: 

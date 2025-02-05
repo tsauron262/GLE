@@ -5745,7 +5745,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 						if (count($part_errors)) {
 							$errors[] = BimpTools::getMsgFromArray($part_errors, 'Echec de l\'ajout du composant ' . $part_number . ' - ' . $part_label);
 						} else {
-//							$errors[] = 'OK : ' . $part_number;
+							$warnings[] = 'OK : ' . $part_number;
 						}
 					}
 				}

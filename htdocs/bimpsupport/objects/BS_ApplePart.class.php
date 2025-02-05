@@ -787,7 +787,7 @@ class BS_ApplePart extends BimpObject
 				$sav = $this->getParentInstance();
 				if (BimpObject::objectLoaded($sav)) {
 //					$errors[] = 'LA';
-					$errors = BimpTools::merge_array($errors, $sav->addPartsAuto($this->getData('id_issue'), $this->getData('part_number')));
+					$errors = BimpTools::merge_array($errors, $sav->addPartsAuto($this->getData('id_issue'), $this->getData('part_number'), $warnings));
 				}
 			} else {
 				foreach (self::$refLiee as $data) {

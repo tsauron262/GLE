@@ -1624,17 +1624,14 @@ class BimpCore
 
 	public static function checkRateLimit($type, &$errors = array())
 	{
-		global $user;
+		global $user, $langs;
 
-		if ($user->login != 'f.martinez') {
+		$limit = (int) BimpCore::getConf('rate_limiting_' . $type . '_limit', 20);
+
+		if (!$limit) {
 			return 1;
 		}
 
-//		if (!(int) BimpCore::getConf('use_rate_limiting')) {
-//			return 1;
-//		}
-
-		$limit = (int) BimpCore::getConf('rate_limiting_' . $type . '_limit', 20);
 		$period = (int) BimpCore::getConf('rate_limiting_' . $type . '_period', 60);
 		$reset_delay = (int) BimpCore::getConf('rate_limiting_' . $type . '_reset_delay', 30);
 
@@ -1681,15 +1678,18 @@ class BimpCore
 		// Vérif limite atteinte :
 		if ($data['count'] >= $limit) {
 			if ($data['count'] == $limit) {
-				BimpCore::addlog('Limite de requêtes atteinte (type : ' . $type . ')', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-					'Limit'  => $limit,
-					'Period' => $period,
-					'User'   => $id_user
+				BimpCore::addlog('Limite de requêtes atteinte (type : ' . $type . ')', 1, 'bimpcore', null, array(
+					'Utilisateur' => $user->id,
+					'Limit'       => $limit,
+					'Period'      => $period,
+					'Délai'       => $reset_delay
 				));
 			}
 
-			$errors[] = 'Limite de requêtes atteinte. Merci de patienter quelques instants avant de réessayer.';
-			return 0;
+			if ($user->login == 'f.martinez') {
+				$errors[] = 'Limite de requêtes atteinte. Merci de patienter quelques instants avant de réessayer.';
+				return 0;
+			}
 		}
 
 		return 1;

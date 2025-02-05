@@ -5728,7 +5728,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		$errors = array();
 		if ($this->isLoaded($errors)) {
 			if ($this->isEquipmentIphone8Plus()) {
-				BimpObject::loadClass('bimpapple', 'BS_ApplePart');
+				BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
+				BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
 				foreach (BS_ApplePart::$iphonesPartsAuto as $part_number => $part_label) {
 					$id_part = (int) $this->db->getValue('bs_apple_part', 'id', 'id_sav = ' . $this->id . ' AND part_number = \'' . $part_number . '\'');
 					if ($id_part) {

@@ -4529,81 +4529,85 @@ class ObjectLine extends BimpObject
 				break;
 
 			case 'qty':
+				if (!$this->canEditQty()) {
+					$html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
+					$html .= $value;
+				} else {
 //                if (!$force_edit && !$this->isFieldEditable('qty')) {
 //                    return $value;
 //                }
 
-				$product_type = null;
-				if ((int) $this->id_product) {
-					$product_type = (int) $this->db->getValue('product', 'fk_product_type', '`rowid` = ' . (int) $this->id_product);
-				}
+					$product_type = null;
+					if ((int) $this->id_product) {
+						$product_type = (int) $this->db->getValue('product', 'fk_product_type', '`rowid` = ' . (int) $this->id_product);
+					}
 
-				if (is_null($value)) {
-					$value = 1;
-				}
+					if (is_null($value)) {
+						$value = 1;
+					}
 
-				if (BimpObject::objectLoaded($this->post_equipment)) {
-					$html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
-					$html .= '1';
-				} else {
-					if ($product_type == Product::TYPE_SERVICE) {
-						$html = BimpInput::renderInput('qty', $prefixe . 'qty', (float) $value, array(
-							'step' => 1,
-							'data' => array(
-								'data_type' => 'number',
-								'min'       => 'none',
-								'unsigned'  => 0,
-								'decimals'  => 6
-							)
-						));
+					if (BimpObject::objectLoaded($this->post_equipment)) {
+						$html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
+						$html .= '1';
 					} else {
-						$min = $max = 'none';
-						$decimals = $this->getQtyDecimals();
+						if ($product_type == Product::TYPE_SERVICE) {
+							$html = BimpInput::renderInput('qty', $prefixe . 'qty', (float) $value, array(
+								'step' => 1,
+								'data' => array(
+									'data_type' => 'number',
+									'min'       => 'none',
+									'unsigned'  => 0,
+									'decimals'  => 6
+								)
+							));
+						} else {
+							$min = $max = 'none';
+							$decimals = $this->getQtyDecimals();
 
-						if ($this->isLoaded()) {
-							if (method_exists($this, 'getMinQty')) {
-								$min = $this->getMinQty();
-							} else {
-								$equipment_lines = $this->getEquipmentLines();
-								if (count($equipment_lines)) {
-									$min = 0;
-									foreach ($equipment_lines as $line) {
-										if ((int) $line->getData('id_equipment')) {
-											$min++;
+							if ($this->isLoaded()) {
+								if (method_exists($this, 'getMinQty')) {
+									$min = $this->getMinQty();
+								} else {
+									$equipment_lines = $this->getEquipmentLines();
+									if (count($equipment_lines)) {
+										$min = 0;
+										foreach ($equipment_lines as $line) {
+											if ((int) $line->getData('id_equipment')) {
+												$min++;
+											}
 										}
-									}
-									if (!$min) {
-										$min = 'none';
+										if (!$min) {
+											$min = 'none';
+										}
 									}
 								}
 							}
-						}
-						$parent = $this->getParentInstance();
-						if (is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2 && $min != 'none') {
-							$max = -$min;
-							$min = 'none';
+							$parent = $this->getParentInstance();
+							if (is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2 && $min != 'none') {
+								$max = -$min;
+								$min = 'none';
+							}
+
+							$value = round((float) $value, $decimals);
+							$html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
+								'data' => array(
+									'data_type' => 'number',
+									'min'       => $min,
+									'max'       => $max,
+									'unsigned'  => 0,
+									'decimals'  => $decimals
+								)
+							));
 						}
 
-						$value = round((float) $value, $decimals);
-						$html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
-							'data' => array(
-								'data_type' => 'number',
-								'min'       => $min,
-								'max'       => $max,
-								'unsigned'  => 0,
-								'decimals'  => $decimals
-							)
-						));
-					}
-
-					if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
-						$html .= '<div style="margin-top: 6px">';
-						$msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
-						$html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
-						$html .= '</div>';
+						if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
+							$html .= '<div style="margin-top: 6px">';
+							$msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
+							$html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+							$html .= '</div>';
+						}
 					}
 				}
-
 				break;
 
 			case 'pu_ht':

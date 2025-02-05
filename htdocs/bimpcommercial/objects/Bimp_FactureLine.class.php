@@ -25,33 +25,44 @@ class Bimp_FactureLine extends ObjectLine
 
 	public function canModifiyFactureAmount()
 	{
-		return 1;
-//		if (!(int) BimpCore::getConf('check_factures_amounts_modif_rights', null, 'bimpcommercial')) {
-//			return 1;
-//		}
-//
-//		global $user;
-//		if (isset($user->rights->bimpcommercial->modifFacAmount) && (int) $user->rights->bimpcommercial->modifFacAmount) {
-//			return 1;
-//		}
-//
-//		return 0;
+		if (!$this->isLoaded()) {
+			return 1;
+		}
+
+		global $user;
+		if (isset($user->rights->bimpcommercial->modif_fac_amount) && (int) $user->rights->bimpcommercial->modif_fac_amount) {
+			return 1;
+		}
+
+		return 0;
 	}
 
-//	public function canEditPrixAchat()
-//	{
-//		return $this->canModifiyFactureAmount();
-//	}
-//
-//	public function canEditPrixVente()
-//	{
-//		return $this->canModifiyFactureAmount();
-//	}
-//
-//	public function canEditQty()
-//	{
-//		return $this->canModifiyFactureAmount();
-//	}
+	public function canEditPrixAchat()
+	{
+		if (!(int) BimpCore::getConf('check_factures_amounts_modif_rights', null, 'bimpcommercial')) {
+			return parent::canEditPrixAchat();
+		}
+
+		return $this->canModifiyFactureAmount();
+	}
+
+	public function canEditPrixVente()
+	{
+		if (!(int) BimpCore::getConf('check_factures_amounts_modif_rights', null, 'bimpcommercial')) {
+			return parent::canEditPrixVente();
+		}
+
+		return $this->canModifiyFactureAmount();
+	}
+
+	public function canEditQty()
+	{
+		if (!(int) BimpCore::getConf('check_factures_amounts_modif_rights', null, 'bimpcommercial')) {
+			return 1;
+		}
+
+		return $this->canModifiyFactureAmount();
+	}
 
 	public function getTotalMarge()
 	{
@@ -97,6 +108,7 @@ class Bimp_FactureLine extends ObjectLine
 				}
 				return 0;
 		}
+
 		return parent::canSetAction($action);
 	}
 

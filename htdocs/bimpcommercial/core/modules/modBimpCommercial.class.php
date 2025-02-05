@@ -66,8 +66,8 @@ class modBimpCommercial extends DolibarrModules
 		// Module description, used if translation string 'ModuleMyModuleDesc' not found (MyModue is name of module).
 		$this->description = "BimpCommercial";
 		// Used only if file README.md and README-LL.md not found.
-		
-                
+
+
                                     $this->version = '1.0';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
@@ -77,7 +77,7 @@ class modBimpCommercial extends DolibarrModules
 		// If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
 		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
 		$this->picto='generic';
-               
+
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 		// for default path (eg: /mymodule/core/xxxxx) (0=disable, 1=enable)
@@ -109,9 +109,9 @@ class modBimpCommercial extends DolibarrModules
 		//                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
 		// );
 		$this->const = array();
-                
-                
-                
+
+
+
         $this->tabs = array(
 //                    'thirdparty:+bimpcommercial:bimpcommercial:bimpcommercial@bimpcommercial:$user->rights->bimpcommercial->read:/bimpcommercial/tabs/bimpcommercial.php?socid=__ID__',
             'thirdparty:+commercial:Commercial:bimpcommercial:$user->rights->bimpcommercial->read:/bimpcommercial/index.php?fc=tabCommercial&id=__ID__'
@@ -175,13 +175,13 @@ class modBimpCommercial extends DolibarrModules
         	//0=>array('file'=>'mymodulewidget1.php@mymodule','note'=>'Widget provided by MyModule','enabledbydefaulton'=>'Home'),
         	//1=>array('file'=>'mymodulewidget2.php@mymodule','note'=>'Widget provided by MyModule'),
         	//2=>array('file'=>'mymodulewidget3.php@mymodule','note'=>'Widget provided by MyModule')
-        
+
 
 
 		// Cronjobs (List of cron jobs entries to add when module is enabled)
 		$this->cronjobs = array();
 			//0=>array('label'=>'MyJob label', 'jobtype'=>'method', 'class'=>'/mymodule/class/mymodulemyjob.class.php', 'objectname'=>'MyModuleMyJob', 'method'=>'myMethod', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>true)
-		
+
 		// Example: $this->cronjobs=array(0=>array('label'=>'My label', 'jobtype'=>'method', 'class'=>'/dir/class/file.class.php', 'objectname'=>'MyClass', 'method'=>'myMethod', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>true),
 		//                                1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>true)
 		// );
@@ -198,8 +198,8 @@ class modBimpCommercial extends DolibarrModules
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
-                
+
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Modifier prix vente';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
@@ -207,7 +207,7 @@ class modBimpCommercial extends DolibarrModules
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Modifier prix achat';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
@@ -215,7 +215,7 @@ class modBimpCommercial extends DolibarrModules
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Attribuer les commerciaux des clients';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -223,7 +223,7 @@ class modBimpCommercial extends DolibarrModules
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Facturation d\'avance';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -231,7 +231,7 @@ class modBimpCommercial extends DolibarrModules
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Changer entrepot';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -239,7 +239,7 @@ class modBimpCommercial extends DolibarrModules
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Valider produits';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -247,7 +247,7 @@ class modBimpCommercial extends DolibarrModules
 		//$this->rights[$r][5] = '';			    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Voir Commissions';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -255,7 +255,7 @@ class modBimpCommercial extends DolibarrModules
 		$this->rights[$r][5] = 'read';			    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Gestion Commissions';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -263,7 +263,7 @@ class modBimpCommercial extends DolibarrModules
 		$this->rights[$r][5] = 'write';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Editeur HTML ligne comm';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -271,7 +271,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'write';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Voir reval';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -279,7 +279,7 @@ class modBimpCommercial extends DolibarrModules
 		$this->rights[$r][5] = 'read';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Créer reval';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -287,7 +287,7 @@ class modBimpCommercial extends DolibarrModules
 		$this->rights[$r][5] = 'write';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Valider reval';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -295,7 +295,7 @@ class modBimpCommercial extends DolibarrModules
 		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Edite zone de Vente';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -303,7 +303,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Edite date facture';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -311,7 +311,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Administration paiement';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -319,7 +319,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Administration financière';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -327,7 +327,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Administration relances global';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -335,7 +335,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Administration relances individuelles';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -343,7 +343,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Désactivation des relances auto (clients / factures)';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -351,16 +351,16 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Désactivation des relances auto 1 mois';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'deactivate_relances_one_month';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
-                // (Flo) Par précaution, je met +4 car les droits de 514587 à 514589 sont enregistrés pour des groupes (bien que ces droits semblent ne plus exister). 
+                // (Flo) Par précaution, je met +4 car les droits de 514587 à 514589 sont enregistrés pour des groupes (bien que ces droits semblent ne plus exister).
 		$r += 4;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Administration recouvrement';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -368,7 +368,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Editer commercial d\'une pièce';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -376,7 +376,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Administration facture';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -384,7 +384,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Réceptionner vers stocks boutiques';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -392,7 +392,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Choisir ref commandes fourn';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -408,7 +408,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Gestion Recouvrement';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -416,7 +416,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Forcer status';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -424,7 +424,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Exports Chorus';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -440,7 +440,7 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Demande de location';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -448,21 +448,29 @@ class modBimpCommercial extends DolibarrModules
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
                 $r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Edition des PV/PA produits + option pas de prix fixes';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'edit_product_prices';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-                
+
                 $r++;
-                
+
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Correction des stocks produits';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'correct_stocks';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//		
+//
+		$r++;
+
+		$this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Mofications qté / pu / pa factures brouillons';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'modif_fac_amount';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
 		// Main menu entries
 		$this->menu = array();			// List of menus to add
 		$r=0;
@@ -549,7 +557,7 @@ class modBimpCommercial extends DolibarrModules
 	{
             global $conf;
 		$sql = array();
-                
+
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
                 $name = 'module_version_'.strtolower($this->name);
                 // Se fais que lors de l'installation du module
@@ -560,71 +568,71 @@ class modBimpCommercial extends DolibarrModules
                     $extrafields->addExtraField('contact_default', 'Contact email facturation par défaut', 'sellist', 100, '', 'societe', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:37:"socpeople:lastname:rowid::fk_soc=$ID$";N;}}', 1, '', 1);
                     $extrafields->addExtraField('remisable', 'Remisable', 'boolean', null, '', 'product', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:0:"";N;}}', 1, '', 1);
                 }
-                
+
                 //contact commercial
 //                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('propal', 'internal','SALESREPSIGN','Commercial', '1');";
 //                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('commande', 'internal','SALESREPSIGN','Commercial', '1');";
 //                $sql[]="INSERT INTO `".MAIN_DB_PREFIX."c_type_contact`(`element`, `source`, `code`, `libelle`, `active`) VALUES ('facture', 'internal','SALESREPSIGN','Commercial', '1');";
-                
 
-                // Propales: 
+
+                // Propales:
                 //$sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'azur';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevis', ".$conf->entity.", 'propal', 'Devis BIMP', NULL);";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimployerdevis', ".$conf->entity.", 'propal', 'Proposition loyer', NULL);";
-                
+
                 // Commande
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommande', ".$conf->entity.", 'order', 'Commande', NULL);";
-                
+
                 //Facture
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'crabe';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpfact', ".$conf->entity.", 'invoice', 'Facture', NULL);";
-                
-                // Commande fourn: 
+
+                // Commande fourn:
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'muscadet';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommandefourn', ".$conf->entity.", 'order_supplier', 'Commande fournisseur', NULL);";
-                
+
                 // Dash board commercial
                 $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
 
 		//$this->_load_tables('/bimpcommercial/sql/');
-//                
+//
 //                $extrafields = new ExtraFields($this->db);
 //                $extrafields->addExtraField('crt', 'Remise arrière', 'varchar', 1, 10, 'product');
 //                $extrafields->addExtraField('ref_constructeur', 'Réf. constructeur', 'int', 1, 255, 'product');
 //                $extrafields->addExtraField('pa_prevu', 'Prix d\'achat HT prévu', 'decimal', 1, '24,8', 'product', 0, 0, 0);
 //                $extrafields->addExtraField('infos_pa', 'Informations prix d\'achat', 'text', 1, 2000, 'product');
-//                
+//
 //                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'propal', 0, 0, 1);
 //                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'commande', 0, 0, 1);
 //                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'facture', 0, 0, 1);
-//                
+//
 //                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'commande_fournisseur', 0, 0, 1);
 //                $extrafields->addExtraField('zone_vente', 'Zone de vente', 'int', 1, 255, 'facture_fourn', 0, 0, 1);
-//                
+//
 //                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
 //                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
 //                $extrafields->addExtraField('pdf_hide_pu', 'Masquer les prix unitaires dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
-//                
+//
 //                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
 //                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
 ////                $extrafields->addExtraField('pdf_hide_reduc', 'Masquer les réductions dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
-//                
+//
 //                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
 //                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
 ////                $extrafields->addExtraField('pdf_hide_total', 'Masquer les totaux dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
-//                
+//
 //                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'propal', 0, 0, 0);
 //                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'commande', 0, 0, 0);
 ////                $extrafields->addExtraField('pdf_hide_ttc', 'Masquer la colonne total TTC dans le PDF', 'boolean', 1, 1, 'facture', 0, 0, 0);
-//                
+//
 //                $extrafields->addExtraField('ignore_compta', 'Ignorer', 'boolean', 1, 1, 'facture', 0, 0, 0);
-//                
-//                // Nécessaire pour valider tous les produits actuels seulement si le champ validate n\'existe pas déjà (Etant donné qu'on défini la valeur par défaut à 0): 
+//
+//                // Nécessaire pour valider tous les produits actuels seulement si le champ validate n\'existe pas déjà (Etant donné qu'on défini la valeur par défaut à 0):
 //                if (!$this->db->num_rows($this->db->query('SELECT `rowid` FROM '.MAIN_DB_PREFIX.'extrafields WHERE elementtype = \'product\' AND `name` = \'validate\''))) {
 //                    $extrafields->addExtraField('validate', 'Validé', 'boolean', 1, 1, 'product', 0, 0, 0);
-//                    
+//
 //                    $this->db->query('UPDATE ' . MAIN_DB_PREFIX . 'product_extrafields SET `validate` = 1 WHERE 1');
 //                }
 
@@ -642,7 +650,7 @@ class modBimpCommercial extends DolibarrModules
 	public function remove($options = '')
 	{
 		$sql = array();
-                
+
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommercial';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimployerdevis';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevis';";
@@ -650,17 +658,17 @@ class modBimpCommercial extends DolibarrModules
 
 //                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'einstein', 1, 'propal', 'einstein', NULL);";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'azur', ".$conf->entity.", 'propal', 'azur', NULL);";
-                
+
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'einstein', ".$conf->entity.", 'order', 'einstein', NULL);";
-                
+
                 //Facture
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpfact';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'crabe', ".$conf->entity.", 'invoice', 'crabe', NULL);";
-                
-                // Commande Fourn: 
+
+                // Commande Fourn:
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommandefourn';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'muscadet', ".$conf->entity.", 'order_supplier', 'muscadet', NULL);";
-                
+
                 // Dash board commercial
                 $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/comm/index.php?mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";
 

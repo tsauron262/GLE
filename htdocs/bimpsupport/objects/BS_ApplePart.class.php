@@ -782,11 +782,11 @@ class BS_ApplePart extends BimpObject
 		if (!count($errors)) {
 			global $user;
 			if ($user->login == 'f.martinez') {
-				$errors[] = 'ICI';
+//				$errors[] = 'ICI';
 				/**    @var BS_SAV $sav */
 				$sav = $this->getParentInstance();
 				if (BimpObject::objectLoaded($sav)) {
-					$errors[] = 'LA';
+//					$errors[] = 'LA';
 					$errors = BimpTools::merge_array($errors, $sav->addPartsAuto($this->getData('id_issue'), $this->getData('part_number')));
 				}
 			} else {

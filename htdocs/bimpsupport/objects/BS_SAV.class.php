@@ -5735,7 +5735,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 						$warnings[] = 'Le composant ' . $part_number . ' - ' . $part_label . ' a déjà été ajouté';
 					} else {
 						$part_errors = array();
-						$new_part = BimpObject::createBimpObject('bimpapple', 'BS_ApplePart', array(
+						$new_part = BimpObject::createBimpObject('bimpsupport', 'BS_ApplePart', array(
 							'id_sav'      => $this->id,
 							'id_issue'    => $id_issue,
 							'part_number' => $part_number,

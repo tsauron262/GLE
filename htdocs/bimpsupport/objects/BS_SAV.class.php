@@ -5726,25 +5726,29 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 	public function addPartsAuto($id_issue, $ref_added_part, &$warnings = array())
 	{
 		$errors = array();
-		if ($this->isLoaded($errors) && $this->isEquipmentIphone8Plus()) {
-			BimpObject::loadClass('bimpapple', 'BS_ApplePart');
-			foreach (BS_ApplePart::$iphonesPartsAuto as $part_number => $part_label) {
-				$id_part = (int) $this->db->getValue('bs_apple_part', 'id', 'id_sav = ' . $this->id . ' AND part_number = \'' . $part_number . '\'');
-				if ($id_part) {
-					$warnings[] = 'Le composant ' . $part_number .' - ' . $part_label . ' a déjà été ajouté';
-				} else {
-					$part_errors = array();
-					BimpObject::createBimpObject('bimpapple', 'BS_ApplePart', array(
-						'id_sav'       => $this->id,
-						'id_issue' => $id_issue,
-						'part_number'  => $part_number,
-						'label'        => $part_label .'. Pour ' . $ref_added_part
-					), true, $part_errors);
+		if ($this->isLoaded($errors)) {
+			if ($this->isEquipmentIphone8Plus()) {
+				BimpObject::loadClass('bimpapple', 'BS_ApplePart');
+				foreach (BS_ApplePart::$iphonesPartsAuto as $part_number => $part_label) {
+					$id_part = (int) $this->db->getValue('bs_apple_part', 'id', 'id_sav = ' . $this->id . ' AND part_number = \'' . $part_number . '\'');
+					if ($id_part) {
+						$warnings[] = 'Le composant ' . $part_number . ' - ' . $part_label . ' a déjà été ajouté';
+					} else {
+						$part_errors = array();
+						BimpObject::createBimpObject('bimpapple', 'BS_ApplePart', array(
+							'id_sav'      => $this->id,
+							'id_issue'    => $id_issue,
+							'part_number' => $part_number,
+							'label'       => $part_label . '. Pour ' . $ref_added_part
+						), true, $part_errors);
 
-					if (count($part_errors)) {
-						$errors[] = BimpTools::getMsgFromArray($part_errors, 'Echec de l\'ajout du composant ' . $part_number . ' - ' . $part_label);
+						if (count($part_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($part_errors, 'Echec de l\'ajout du composant ' . $part_number . ' - ' . $part_label);
+						}
 					}
 				}
+			} else {
+				$errors[] = 'Le SAV n\'est pas un iPhone 8 Plus';
 			}
 		}
 		return $errors;

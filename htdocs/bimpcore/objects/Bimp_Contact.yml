@@ -9,6 +9,8 @@ icon: far_id-card
 parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
+controller: contact
+
 list_page_url: 
     controller: clients
     url_params: 

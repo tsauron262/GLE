@@ -5735,17 +5735,21 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 						$warnings[] = 'Le composant ' . $part_number . ' - ' . $part_label . ' a déjà été ajouté';
 					} else {
 						$part_errors = array();
-						BimpObject::createBimpObject('bimpapple', 'BS_ApplePart', array(
+						$new_part = BimpObject::createBimpObject('bimpapple', 'BS_ApplePart', array(
 							'id_sav'      => $this->id,
 							'id_issue'    => $id_issue,
 							'part_number' => $part_number,
-							'label'       => $part_label . '. Pour ' . $ref_added_part
+							'label'       => $part_label . '. Pour : ' . $ref_added_part
 						), true, $part_errors);
 
-						if (count($part_errors)) {
+//						$obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name);
+//						$obj->validateArray(array('part_number' => $refAJ, 'id_sav' => $this->getData('id_sav'), 'id_issue' => $this->getData('id_issue'), 'label' => $libAj . '. Pour : ' . $ref));
+//						$errors = BimpTools::merge_array($errors, $obj->create());
+
+						if (!BimpObject::objectLoaded($new_part) | -count($part_errors)) {
 							$errors[] = BimpTools::getMsgFromArray($part_errors, 'Echec de l\'ajout du composant ' . $part_number . ' - ' . $part_label);
 						} else {
-							$warnings[] = 'OK : ' . $part_number;
+							$warnings[] = 'OK #' . $new_part->id . ' : ' . $part_number . ' - ' . $this->id . ' - ' . $id_issue;
 						}
 					}
 				}

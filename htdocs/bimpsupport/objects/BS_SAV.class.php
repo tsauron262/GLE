@@ -8005,7 +8005,7 @@ ORDER BY a.val_max DESC");
 					$cur_place = $equipment->getCurrentPlace();
 
 					// Mise en non restitué :
-					if ($cur_place->getData('type') != BE_Place::BE_PLACE_SAV || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
+					if (!BimpObject::objectLoaded($cur_place) ||  $cur_place->getData('type') != BE_Place::BE_PLACE_SAV || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
 						$place = BimpObject::getInstance('bimpequipment', 'BE_Place');
 						$place_errors = $place->validateArray(array(
 							'id_equipment' => $equipment->id,

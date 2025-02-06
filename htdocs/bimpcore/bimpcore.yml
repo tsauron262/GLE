@@ -517,7 +517,7 @@ params:
                       
     rate_limiting_list_limit:
         label: Nombre de reqêtes max par période pour les listes
-        def: 20
+        def: 12
         cat: secu
         
     rate_limiting_list_period:
@@ -528,6 +528,23 @@ params:
         
     rate_limiting_list_reset_delay:
         label: Délai de réinitialisation du compteur lorsque la limite est atteinte pour les listes
+        info: valeur en secondes
+        def: 30
+        cat: secu
+        
+    rate_limiting_page_limit:
+        label: Nombre de reqêtes max par période pour les pages
+        def: 10
+        cat: secu
+    
+    rate_limiting_page_period:
+        label: Période de vérification des limitations de requêtes pour les pages
+        info: valeur en secondes
+        def: 60
+        cat: secu
+    
+    rate_limiting_page_reset_delay:
+        label: Délai de réinitialisation du compteur lorsque la limite est atteinte pour les pages
         info: valeur en secondes
         def: 30
         cat: secu

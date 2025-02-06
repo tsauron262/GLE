@@ -85,6 +85,9 @@ class BCT_ContratLine extends BimpObject
 
             case 'MoveToOtherContrat':
                 return 1;
+
+			case 'checkStatus':
+				return $user->admin;
         }
         return parent::canSetAction($action);
     }
@@ -196,7 +199,7 @@ class BCT_ContratLine extends BimpObject
     {
         $contrat = null;
 
-        if (in_array($action, array('deactivate', 'facRegul', 'setResiliateDate')) && !$this->isLoaded($errors)) {
+        if (in_array($action, array('deactivate', 'facRegul', 'setResiliateDate', 'checkStatus')) && !$this->isLoaded($errors)) {
             return 0;
         }
 
@@ -5607,7 +5610,7 @@ class BCT_ContratLine extends BimpObject
             $status = (int) $this->getData('statut');
 
             if ($status > 0) {
-                $new_status = 4;
+                $new_status = self::STATUS_ACTIVE;
                 $date_fin_validite = $this->getData('date_fin_validite');
 
                 if ($date_fin_validite) {
@@ -5640,8 +5643,25 @@ class BCT_ContratLine extends BimpObject
                     }
 
                     if ($fac_ended && $achat_ended && $date_fin_validite < date('Y-m-d') . ' 00:00:00') {
-                        $new_status = self::STATUS_CLOSED;
-                    }
+						$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+							'id_parent_line' => $this->id
+						));
+
+						$all_children_closed = true;
+						if (!empty($lines)) {
+							foreach ($lines as $line) {
+								$line->checkStatus();
+								if ((int) $line->getData('statut') > 0 && (int) $line->getData('statut') < self::STATUS_CLOSED) {
+									$all_children_closed = false;
+									break;
+								}
+							}
+						}
+
+						if ($all_children_closed) {
+							$new_status = self::STATUS_CLOSED;
+						}
+					}
 
                     if ($new_status != $status) {
                         $errors = $this->updateField('statut', $new_status);
@@ -7298,6 +7318,20 @@ class BCT_ContratLine extends BimpObject
             'success_callback' => $sc
         );
     }
+
+	public function actionCheckStatus($data, &$success = '')
+	{
+		$errors = array();
+		$warnings = array();
+		$success = 'Vérification du statut effectuée';
+
+		$this->checkStatus($warnings);
+
+	    return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
 
     // Actions BimpDataSync:
 

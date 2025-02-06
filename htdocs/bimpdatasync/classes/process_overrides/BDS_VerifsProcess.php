@@ -8,7 +8,7 @@ class BDS_VerifsProcess extends BDSProcess
     public static $current_version = 12;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
-    // Vérifs marges factures : 
+    // Vérifs marges factures :
 
     public function initCheckFacsMargin(&$data, &$errors = array())
     {
@@ -93,7 +93,7 @@ class BDS_VerifsProcess extends BDSProcess
         return $result;
     }
 
-    // Vérifs marges commandes : 
+    // Vérifs marges commandes :
 
     public function initCheckCommandesMargin(&$data, &$errors = array())
     {
@@ -206,7 +206,7 @@ class BDS_VerifsProcess extends BDSProcess
         return $result;
     }
 
-    // Vérifs Restes à payer factures: 
+    // Vérifs Restes à payer factures:
 
     public function initCheckFacsRtp(&$data, &$errors = array())
     {
@@ -300,7 +300,7 @@ class BDS_VerifsProcess extends BDSProcess
         return $result;
     }
 
-    // Vérifs réceptions: 
+    // Vérifs réceptions:
 
     public function initCheckReceptions(&$data, &$errors = array())
     {
@@ -323,7 +323,7 @@ class BDS_VerifsProcess extends BDSProcess
 //
             $elements = array();
 
-            // Recherche par réception existantes: 
+            // Recherche par réception existantes:
             $where = 'status = 1';
             if ($date_from) {
                 $where .= ' AND date_received >= \'' . $date_from . ' 00:00:00\'';
@@ -341,7 +341,7 @@ class BDS_VerifsProcess extends BDSProcess
                 $errors[] = $this->db->err();
             }
 
-            // Recherche par codes mouvements: 
+            // Recherche par codes mouvements:
             $where = 'a.inventorycode LIKE \'%$_RECEP%\' ESCAPE \'$\'';
             if (!$include_serialized) {
                 $where .= ' AND p.serialisable = 0';
@@ -427,12 +427,12 @@ class BDS_VerifsProcess extends BDSProcess
                     )
                 ));
 
-//                $this->DebugData($mvts, 'MVTS 2'); 
+//                $this->DebugData($mvts, 'MVTS 2');
 
                 if (is_array($mvts)) {
                     $lines = array();
 
-                    // Trie par ligne: 
+                    // Trie par ligne:
                     foreach ($mvts as $m) {
                         if (!$include_serialized && (int) $m['serialisable']) {
                             continue;
@@ -525,7 +525,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Vérifs expéditions: 
+    // Vérifs expéditions:
 
     public function initCheckShipments(&$data, &$errors = array())
     {
@@ -544,7 +544,7 @@ class BDS_VerifsProcess extends BDSProcess
 
             $elements = array();
 
-            // Recherche par codes mouvements: 
+            // Recherche par codes mouvements:
             $where = 'a.inventorycode LIKE \'CO%$_EXP%\' ESCAPE \'$\'';
             $where .= ' AND p.serialisable = 0';
             if ($date_from) {
@@ -603,7 +603,7 @@ class BDS_VerifsProcess extends BDSProcess
 
             $entrepots = BimpCache::getEntrepotsArray(false, false, true);
 
-            // Trie par commande et expéditions: 
+            // Trie par commande et expéditions:
             $commandes = array();
             foreach ($this->references as $ref) {
                 if (preg_match('/^(\d+)_(\d+)$/', $ref, $matches)) {
@@ -623,10 +623,10 @@ class BDS_VerifsProcess extends BDSProcess
                 }
             }
 
-            // Traitement par commande: 
+            // Traitement par commande:
             foreach ($commandes as $id_cmd => $cmd_data) {
                 $commande_instance->id = $id_cmd;
-                // Calcul qty attendues par produits: 
+                // Calcul qty attendues par produits:
                 $lines = $this->db->getRows('commandedet det', 'det.fk_commande = ' . $id_cmd . ' AND det.fk_product > 0 AND pef.serialisable = 0 AND p.fk_product_type = 0', null, 'array', array('l.id', 'l.shipments', 'det.fk_product'), null, null, array(
                     array(
                         'alias' => 'l',
@@ -683,7 +683,7 @@ class BDS_VerifsProcess extends BDSProcess
                 }
             }
 
-            // Calcul qty mouvements par produits: 
+            // Calcul qty mouvements par produits:
             foreach ($commandes as $id_cmd => $cmd_data) {
                 foreach ($cmd_data['prods'] as $id_prod => $prod_shipments) {
                     foreach ($prod_shipments as $id_shipment => $qties) {
@@ -706,7 +706,7 @@ class BDS_VerifsProcess extends BDSProcess
 
             $this->DebugData($commandes, 'DONNEES COMMANDES');
 
-            // Comparaisons: 
+            // Comparaisons:
             foreach ($commandes as $id_cmd => $cmd_data) {
                 foreach ($cmd_data['prods'] as $id_prod => $prod_shipments) {
                     foreach ($prod_shipments as $id_shipment => $qties) {
@@ -731,7 +731,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Correction code mouvements annulations réceptions: 
+    // Correction code mouvements annulations réceptions:
 
     public function initCorrectCodeMvt(&$data, &$errors = array())
     {
@@ -806,7 +806,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Corrections positions: 
+    // Corrections positions:
 
     public function initCorrectPositions(&$data, &$errors = array())
     {
@@ -901,7 +901,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Corrections doc signés: 
+    // Corrections doc signés:
 
     public function initCorrectSignedDoc(&$data, &$errors = array())
     {
@@ -961,7 +961,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Vérifs clients finaux factures: 
+    // Vérifs clients finaux factures:
 
     public function initCheckClientsFinauxFactures(&$data, &$errors = array())
     {
@@ -1069,7 +1069,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Vérifs et correction des stocks contrats d'abonnement : 
+    // Vérifs et correction des stocks contrats d'abonnement :
 
     public function initCheckContratsStocks(&$data, &$errors = array())
     {
@@ -1159,13 +1159,13 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Vérifs et correction des statuts des abonnements : 
+    // Vérifs et correction des statuts des abonnements :
 
     public function initCheckAbonnementsStatus(&$data, &$errors = array())
     {
         $filters = array(
             'a.line_type' => 2,
-            'a.statut'    => array('operator' => '>', 'value' => 0),
+            'a.statut'    => array('operator' => '>', 'value' => 4),
             'c.version'   => 2,
         );
 
@@ -1222,7 +1222,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Vérifs et correction des statuts abonnements dans les devis: 
+    // Vérifs et correction des statuts abonnements dans les devis:
 
     public function initCheckPropalsContratsStatus(&$data, &$errors = array())
     {
@@ -1282,7 +1282,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Vérifs et correction des statuts abonnements dans les devis: 
+    // Vérifs et correction des statuts abonnements dans les devis:
 
     public function initCheckCommandesFournStatus(&$data, &$errors = array())
     {
@@ -1328,7 +1328,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Revalorisations PA factures: 
+    // Revalorisations PA factures:
 
     public function initFacsRevals(&$data, &$errors = array())
     {
@@ -1465,7 +1465,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Vérifs et correction des statuts commande dans les devis: 
+    // Vérifs et correction des statuts commande dans les devis:
 
     public function initCheckPropalsCommandeStatus(&$data, &$errors = array())
     {
@@ -1525,7 +1525,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Vérifs PA Factures : 
+    // Vérifs PA Factures :
 
     public function initCheckFacturesPA(&$data, &$errors = array())
     {
@@ -1587,7 +1587,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Install: 
+    // Install:
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
@@ -1601,7 +1601,7 @@ class BDS_VerifsProcess extends BDSProcess
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($process)) {
-            // Options: 
+            // Options:
 
             $options = array();
 
@@ -1675,8 +1675,8 @@ class BDS_VerifsProcess extends BDSProcess
                 $options['rtp_zero_only'] = (int) $opt->id;
             }
 
-            // Opérations: 
-            // Vérifs marges factures: 
+            // Opérations:
+            // Vérifs marges factures:
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'  => (int) $process->id,
                         'title'       => 'Vérifier les marges + revals OK des factures',
@@ -1703,7 +1703,7 @@ class BDS_VerifsProcess extends BDSProcess
                 $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
             }
 
-            // Vérifs restes à payer factures: 
+            // Vérifs restes à payer factures:
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'  => (int) $process->id,
                         'title'       => 'Vérifier les restes à payer des factures',
@@ -1745,7 +1745,7 @@ class BDS_VerifsProcess extends BDSProcess
         $errors = array();
 
         if ($cur_version < 2) {
-            // Opération "Reconstruction des docs signés": 
+            // Opération "Reconstruction des docs signés":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Reconstruction des docs signés',
@@ -1763,7 +1763,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 3) {
-            // Opération "Vérif des clients finaux des factures": 
+            // Opération "Vérif des clients finaux des factures":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérification des clients finaux des factures',
@@ -1777,7 +1777,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 4) {
-            // Opération "Désactivation des produits sans mouvements depuis 2 ans": 
+            // Opération "Désactivation des produits sans mouvements depuis 2 ans":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Désactivation des produits sans mouvements depuis 2 ans',
@@ -1791,7 +1791,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 5) {
-            // Opération "Vérif des stocks des facturations des contrats d\'abonnement": 
+            // Opération "Vérif des stocks des facturations des contrats d\'abonnement":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des stocks des facturations des contrats d\'abonnement',
@@ -1805,7 +1805,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 6) {
-            // Opération "Vérif des statuts des abonnements": 
+            // Opération "Vérif des statuts des abonnements":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des statuts des abonnements',
@@ -1819,7 +1819,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 7) {
-            // Opération "Vérif des statuts abonnements des propales": 
+            // Opération "Vérif des statuts abonnements des propales":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des statuts abonnements des propales',
@@ -1833,7 +1833,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 8) {
-            // Opération "Vérif des marges des commandes": 
+            // Opération "Vérif des marges des commandes":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des marges des commandes',
@@ -1868,7 +1868,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 9) {
-            // Opération "Vérif des marges des commandes": 
+            // Opération "Vérif des marges des commandes":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des statuts des commandes fournisseur',
@@ -1882,7 +1882,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 10) {
-            // Opération "Revalorisation PA factures": 
+            // Opération "Revalorisation PA factures":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Revalorisation PA factures',
@@ -1924,7 +1924,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 11) {
-            // Opération "Vérif des statuts commande des propales": 
+            // Opération "Vérif des statuts commande des propales":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif des statuts commande des propales',
@@ -1938,7 +1938,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if ($cur_version < 12) {
-            // Opération "Vérif des statuts commande des propales": 
+            // Opération "Vérif des statuts commande des propales":
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $id_process,
                         'title'         => 'Vérif PA FActures',

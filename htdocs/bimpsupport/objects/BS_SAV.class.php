@@ -5747,8 +5747,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 						}
 					}
 				}
-			} else {
-				$errors[] = 'Le SAV n\'est pas un iPhone 8 Plus';
 			}
 		}
 		return $errors;

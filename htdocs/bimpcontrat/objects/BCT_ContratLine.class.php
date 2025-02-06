@@ -585,6 +585,14 @@ class BCT_ContratLine extends BimpObject
             );
         }
 
+		if ($this->isActionAllowed('checkStatus') && $this->canSetAction('checkStatus')) {
+			$buttons[] = array(
+				'label'   => 'Vérif statut (admin)',
+				'icon'    => 'fas_check',
+				'onclick' => $this->getJsActionOnclick('checkStatus', array(), array())
+			);
+		}
+
         return $buttons;
     }
 

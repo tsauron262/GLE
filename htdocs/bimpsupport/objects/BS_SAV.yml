@@ -1186,7 +1186,6 @@ forms:
               label: Paiement
               hidden: 1
               input_name: id_paiement
-              hidden: 1
               input: 
                   type: hidden
             - custom: 1

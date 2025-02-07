@@ -1,0 +1,1 @@
+ALTER TABLE `llx_societe` ADD `msg_achat` TEXT NOT NULL DEFAULT '';

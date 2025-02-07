@@ -63,6 +63,8 @@ class ObjectLine extends BimpObject
 
     public function canEditField($field_name)
     {
+        global $user; 
+        
         switch ($field_name) {
             case 'pu_ht':
                 return $this->canEditPrixVente();

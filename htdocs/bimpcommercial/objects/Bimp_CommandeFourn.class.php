@@ -653,8 +653,8 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
                 if (!empty($values)) {
                     $onclick = $this->getJsActionOnclick('createInvoice', array(
-                        'ref_supplier'      => $this->getData('ref_supplier'),
-                        'libelle'           => $this->getData('libelle'),
+                        'ref_supplier'      => BimpTools::escapeForHtml($this->getData('ref_supplier')),
+                        'libelle'           => BimpTools::escapeForHtml($this->getData('libelle')),
                         'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                         'id_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
                         'receptions'        => json_encode($values)
@@ -2415,7 +2415,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
         // Mise à jour des extra_fields: 
         global $user;
-        if ($this->dol_object->insertExtraFields('', $user) <= 0) {
+        if ($this->dol_object->insertExtraFields('', $user) < 0) {
             $errors[] = 'Echec de la mise à jour des champs supplémentaires';
         }
         if (!count($errors)) {

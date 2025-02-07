@@ -16,7 +16,7 @@ header("Content-type: text/xml");
 define("NOLOGIN", 1);  // This means this output page does not require to be logged.
 require_once("../../main.inc.php");
 
-$query = 'SELECT p.*, pf.price, `ref_fourn` FROM llx_product p LEFT JOIN `llx_product_fournisseur_price` pf ON `fk_product` = p.rowid GROUP BY p.`rowid`';
+$query = 'SELECT p.*, pf.price, `ref_fourn` FROM llx_product p LEFT JOIN `'.MAIN_DB_PREFIX.'product_fournisseur_price` pf ON `fk_product` = p.rowid GROUP BY p.`rowid`';
 if(GETPOST('limit'))
     $query .= " LIMIT 0,".GETPOST ('limit');
 $sql = $db->query($query);

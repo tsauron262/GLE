@@ -82,6 +82,56 @@ class facturesController extends BimpController
         $html = $list->renderHtml();
         if(isset($graph))
             $html .= $graph->renderHtml();
+        
+        
+        $graph = new BC_Graph($facture, 'parBoutique');
+
+
+        if ($this->socid) {
+            $list->addFieldFilterValue('fk_soc', (int) $societe->id);
+            $list->params['add_form_values']['fields']['fk_soc'] = (int) $societe->id;
+            $graph->addFieldFilterValue('or_client', array(
+                'or' => array(
+                    'fk_soc'            => $this->id,
+                    'id_client_facture' => $this->id
+                )
+            ));
+        }
+        
+        
+        if(isset($_REQUEST['fk_statut'])){
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            $list->addFieldFilterValue('fk_statut', $filtres);
+            $graph->addFieldFilterValue('fk_statut', $filtres);
+        }
+        
+        if(isset($graph))
+            $html .= $graph->renderHtml();
+        
+        
+        $graph = new BC_Graph($facture, 'parBoutiqueMarge');
+
+
+        if ($this->socid) {
+            $list->addFieldFilterValue('fk_soc', (int) $societe->id);
+            $list->params['add_form_values']['fields']['fk_soc'] = (int) $societe->id;
+            $graph->addFieldFilterValue('or_client', array(
+                'or' => array(
+                    'fk_soc'            => $this->id,
+                    'id_client_facture' => $this->id
+                )
+            ));
+        }
+        
+        
+        if(isset($_REQUEST['fk_statut'])){
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            $list->addFieldFilterValue('fk_statut', $filtres);
+            $graph->addFieldFilterValue('fk_statut', $filtres);
+        }
+        
+        if(isset($graph))
+            $html .= $graph->renderHtml();
         return $html;
     }
 

@@ -805,6 +805,10 @@ fields:
         label: Message Facturation
         type: text
         
+    msg_achat: 
+        label: Message Achats
+        type: text
+        
     consigne_ref_ext:
         label: Consigne référence externe
         type: text
@@ -900,6 +904,8 @@ fields_tables:
               show: 
                   callback: isClient
             - field: msg_fact
+              edit: 1
+            - field: msg_achat
               edit: 1
             - field: date_relances_deactivated
               show: 

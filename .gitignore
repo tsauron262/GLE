@@ -99,3 +99,5 @@ phpstan_custom.neon
 /htdocs/bimpressources/
 !/htdocs/synopsiscaldav/caldav/vendor/
 /htdocs/includes/
+/htdocs/bimpcore/site.html
+/htdocs/bimpflo/

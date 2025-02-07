@@ -345,6 +345,7 @@ params:
         def: ''
     use_price_rules: 
         label: utiliser les règles de prix
+        cat: products
         type: bool
         def: 0
         

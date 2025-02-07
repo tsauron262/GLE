@@ -3052,11 +3052,11 @@ class BT_ficheInter extends BimpDolObject
                     $errors[] = 'Signature absente';
                 }
             }
-            if (in_array($type_sign, array(self::TYPE_SIGN_PAPIER, self::TYPE_SIGN_ELEC))) {
-                if (!$this->getData('signataire')) {
-                    $errors[] = 'Nom du signataire absent';
-                }
-            }
+//            if (in_array($type_sign, array(self::TYPE_SIGN_PAPIER, self::TYPE_SIGN_ELEC))) {
+//                if (!$this->getData('signataire')) {
+//                    $errors[] = 'Nom du signataire absent';
+//                }
+//            }
             if ($type_sign) {
                 if (!$this->getData('email_signature')) {
                     $errors[] = 'Adresse e-mail du client absente';

@@ -3549,20 +3549,20 @@ class User extends CommonObject
 		}
                 
                 /*moddrsi (20.2)*/
-//                if(!empty($conf->global->LDAP_FIELD_PASSWORD_CRYPTED))
-//                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{MD5}".base64_encode( pack( 'H*' , $this->pass_indatabase_crypted));
-//                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
-                
-                if( function_exists( 'mhash' ) && function_exists( 'mhash_keygen_s2k' ) ) {
-                    $password_clear = $this->pass_indatabase;
-                    mt_srand( (double) microtime() * 1000000 );
-                    $salt = mhash_keygen_s2k( MHASH_SHA1, $password_clear, substr( pack( "h*", md5( mt_rand() ) ), 0, 8 ), 4 );
-                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".base64_encode( mhash( MHASH_SHA1, $password_clear.$salt ).$salt );
-                }
-                
-                if($this->pass_indatabase_crypted != ''){
-                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = $this->pass_indatabase_crypted;
-                }
+////                if(!empty($conf->global->LDAP_FIELD_PASSWORD_CRYPTED))
+////                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{MD5}".base64_encode( pack( 'H*' , $this->pass_indatabase_crypted));
+////                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
+//                
+//                if( function_exists( 'mhash' ) && function_exists( 'mhash_keygen_s2k' ) ) {
+//                    $password_clear = $this->pass_indatabase;
+//                    mt_srand( (double) microtime() * 1000000 );
+//                    $salt = mhash_keygen_s2k( MHASH_SHA1, $password_clear, substr( pack( "h*", md5( mt_rand() ) ), 0, 8 ), 4 );
+//                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".base64_encode( mhash( MHASH_SHA1, $password_clear.$salt ).$salt );
+//                }
+//                
+//                if($this->pass_indatabase_crypted != ''){
+//                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = $this->pass_indatabase_crypted;
+//                }
                 
                 
                 $info['postalAddress'] = $this->address;
@@ -3633,8 +3633,8 @@ class User extends CommonObject
                         $temp = explode("@", $info["mail"]);
                         $date = '2016.01.01.01.01.01';
                         $ident = $this->id.$info['mail'];
-                        $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
-                        $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
+//                        $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
+//                        $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
                         if(isset($this->array_options['options_mailquota']) && $this->array_options['options_mailquota'] > 0)
                             $info ['mailQuota'] = $this->array_options['options_mailquota'];
                         else
@@ -3648,39 +3648,39 @@ class User extends CommonObject
                     $info["domainGlobalAdmin"] = "yes";
                 }
                 
-                $info['enabledservice'][] = "doveadm";
-                $info['enabledservice'][] = "lib-storage";
-                $info['enabledservice'][] = "indexer-worker";
-                $info['enabledservice'][] = "dsync";
-                $info['enabledservice'][] = "quota-status";
-                $info['enabledservice'][] = "mail";
-                $info['enabledservice'][] = "smtp";
-                $info['enabledservice'][] = "smtpsecured";
-                $info['enabledservice'][] = "smtptls";
-                $info['enabledservice'][] = "pop3";
-                $info['enabledservice'][] = "pop3secured";
-                $info['enabledservice'][] = "pop3tls";
-                $info['enabledservice'][] = "imap";
-                $info['enabledservice'][] = "imapsecured";
-                $info['enabledservice'][] = "imaptls";
-                $info['enabledservice'][] = "managesieve";
-                $info['enabledservice'][] = "managesievesecured";
-                $info['enabledservice'][] = "managesievetls";
-                $info['enabledservice'][] = "sieve";
-                $info['enabledservice'][] = "sievesecured";
-                $info['enabledservice'][] = "sievetls";
-                $info['enabledservice'][] = "deliver";
-                $info['enabledservice'][] = "lda";
-                $info['enabledservice'][] = "lmtp";
-                $info['enabledservice'][] = "recipientbcc";
-                $info['enabledservice'][] = "senderbcc";
-                $info['enabledservice'][] = "forward";
-                $info['enabledservice'][] = "shadowaddress";
-                $info['enabledservice'][] = "displayedInGlobalAddressBook";
-                $info['enabledservice'][] = "sogo";
-                $info['enabledservice'][] = "sogowebmail";
-                $info['enabledservice'][] = "sogocalendar";
-                $info['enabledservice'][] = "sogoactivesync";
+//                $info['enabledservice'][] = "doveadm";
+//                $info['enabledservice'][] = "lib-storage";
+//                $info['enabledservice'][] = "indexer-worker";
+//                $info['enabledservice'][] = "dsync";
+//                $info['enabledservice'][] = "quota-status";
+//                $info['enabledservice'][] = "mail";
+//                $info['enabledservice'][] = "smtp";
+//                $info['enabledservice'][] = "smtpsecured";
+//                $info['enabledservice'][] = "smtptls";
+//                $info['enabledservice'][] = "pop3";
+//                $info['enabledservice'][] = "pop3secured";
+//                $info['enabledservice'][] = "pop3tls";
+//                $info['enabledservice'][] = "imap";
+//                $info['enabledservice'][] = "imapsecured";
+//                $info['enabledservice'][] = "imaptls";
+//                $info['enabledservice'][] = "managesieve";
+//                $info['enabledservice'][] = "managesievesecured";
+//                $info['enabledservice'][] = "managesievetls";
+//                $info['enabledservice'][] = "sieve";
+//                $info['enabledservice'][] = "sievesecured";
+//                $info['enabledservice'][] = "sievetls";
+//                $info['enabledservice'][] = "deliver";
+//                $info['enabledservice'][] = "lda";
+//                $info['enabledservice'][] = "lmtp";
+//                $info['enabledservice'][] = "recipientbcc";
+//                $info['enabledservice'][] = "senderbcc";
+//                $info['enabledservice'][] = "forward";
+//                $info['enabledservice'][] = "shadowaddress";
+//                $info['enabledservice'][] = "displayedInGlobalAddressBook";
+//                $info['enabledservice'][] = "sogo";
+//                $info['enabledservice'][] = "sogowebmail";
+//                $info['enabledservice'][] = "sogocalendar";
+//                $info['enabledservice'][] = "sogoactivesync";
                 
 //                $info['shadowAddress'] = array();
                 if($this->statut == 1 && isset($this->array_options['options_alias'])){

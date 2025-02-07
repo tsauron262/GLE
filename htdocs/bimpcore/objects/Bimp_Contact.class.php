@@ -253,7 +253,7 @@ class Bimp_Contact extends BimpObject
         return '';
     }
 
-    public function displayFullAddress($singleLine = false)
+    public function displayFullAddress($singleLine = false, $icon = false)
     {
         $html = '';
 
@@ -281,6 +281,10 @@ class Bimp_Contact extends BimpObject
         } elseif ($this->getData('fk_pays')) {
             $html .= $this->displayCountry();
         }
+
+		if ($icon && $html) {
+			$html = BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $html;
+		}
 
         return $html;
     }
@@ -347,6 +351,21 @@ class Bimp_Contact extends BimpObject
         return $return;
     }
 
+	// Rendus HTML :
+
+	public function renderHeaderExtraLeft() {
+		$html = '';
+
+		$client = $this->getParentInstance();
+		if (BimpObject::objectLoaded($client)) {
+			$html .= $client->getLink() .'<br/>';
+		}
+
+		$html .= $this->displayFullAddress(true, true) .'<br/>';
+		$html .= $this->displayContactInfos();
+
+		return $html;
+	}
     // Traitements:
 
     public function anonymiseData($save_data = true)

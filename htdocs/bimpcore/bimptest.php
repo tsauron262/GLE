@@ -28,14 +28,17 @@ if (!$user->admin) {
 }
 
 $num = '06 37 00 08 40';
+
 $infos = '';
-echo 'TEST dur : ';
+echo 'TEST dur : <br/>';
+echo 'num   : ' . $num .' <br/>';
+echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
 if (!BimpTools::isValidNumMobile($num)) {
 	echo 'KO - ' . $infos;
 } else {
 	echo 'OK';
 }
-echo '<br/>';
+echo '<br/><br/>';
 
 /** @var Bimp_Contact $contact */
 $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', 202486);
@@ -45,33 +48,39 @@ if (BimpObject::objectLoaded($contact)) {
 
 	$infos = '';
 	$num = $contact->dol_object->phone_mobile;
-	echo 'TEST mobile (' . $num . ') : ';
+	echo 'TEST mobile : <br/>';
+	echo 'num   : ' . $num .' <br/>';
+	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
 	if (!BimpTools::isValidNumMobile($num)) {
 		echo 'KO - ' . $infos;
 	} else {
 		echo 'OK';
 	}
-	echo '<br/>';
+	echo '<br/><br/>';
 
 	$infos = '';
 	$num = $contact->dol_object->phone_pro;
-	echo 'TEST pro (' . $num . ') : ';
+	echo 'TEST pro : <br/>';
+	echo 'num   : ' . $num .' <br/>';
+	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
 	if (!BimpTools::isValidNumMobile($num)) {
 		echo 'KO - ' . $infos;
 	} else {
 		echo 'OK';
 	}
-	echo '<br/>';
+	echo '<br/><br/>';
 
 	$infos = '';
 	$num = $contact->dol_object->phone_perso;
-	echo 'TEST perso (' . $num . ') : ';
+	echo 'TEST perso : <br/>';
+	echo 'num   : ' . $num .' <br/>';
+	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
 	if (!BimpTools::isValidNumMobile($num)) {
 		echo 'KO - ' . $infos;
 	} else {
 		echo 'OK';
 	}
-	echo '<br/>';
+	echo '<br/><br/>';
 } else {
 	echo 'KO - Contact non chargé';
 }

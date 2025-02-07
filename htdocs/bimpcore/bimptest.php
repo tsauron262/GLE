@@ -58,21 +58,8 @@ if (BimpObject::objectLoaded($contact)) {
 	}
 	echo '<br/><br/>';
 
-	$infos = '';
-	$num = $contact->dol_object->phone_pro;
-	echo 'TEST pro : <br/>';
-	echo 'num   : ' . $num .' <br/>';
-	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
-	if (!BimpTools::isValidNumMobile($num, $infos)) {
-		echo 'KO - ' . $infos;
-	} else {
-		echo 'OK';
-	}
-	echo '<br/><br/>';
-
-	$infos = '';
-	$num = $contact->dol_object->phone_perso;
-	echo 'TEST perso : <br/>';
+	echo 'preg_replace : <br/>';
+	$num = preg_replace('/[\x00-\x1F\x7F]/u', '', $num);
 	echo 'num   : ' . $num .' <br/>';
 	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
 	if (!BimpTools::isValidNumMobile($num, $infos)) {

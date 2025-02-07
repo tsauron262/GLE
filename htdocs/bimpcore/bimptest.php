@@ -27,7 +27,8 @@ if (!$user->admin) {
     exit;
 }
 
-echo 'Hola ! ';
+echo 'TEST 1 : ' . (int) getDolGlobalString('COMPANY_USE_SEARCH_TO_SELECT') . '<br/>';
+echo 'TEST 2 : ' . (int) empty($conf->use_javascript_ajax) . '<br/>';
 
 
 echo '<br/>FIN';

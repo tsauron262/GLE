@@ -6363,7 +6363,7 @@ class BCT_ContratLine extends BimpObject
         $contrat = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($contrat) || (isset($contrat->isDeleting) && $contrat->isDeleting)) {
-            return;
+            return 0;
         }
 
         $id_parent_line = (int) $this->getData('id_parent_line');

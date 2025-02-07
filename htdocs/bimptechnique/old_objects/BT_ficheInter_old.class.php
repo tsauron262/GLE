@@ -84,7 +84,7 @@ class BT_ficheInter extends BimpDolObject
         return parent::__construct($module, $object_name);
     }
 
-    // Droits users: 
+    // Droits users:
 
     public function canCreate()
     {
@@ -118,18 +118,18 @@ class BT_ficheInter extends BimpDolObject
     public function canSetAction($action)
     {
         switch ($action) {
-            
+
         }
 
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
         switch ($action) {
-            
+
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -206,7 +206,7 @@ class BT_ficheInter extends BimpDolObject
         return 0;
     }
 
-    // Gettters params: 
+    // Gettters params:
 
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
@@ -377,7 +377,7 @@ class BT_ficheInter extends BimpDolObject
 //                        'form_name' => 'farSign'
 //                    ))
 //                );
-//                
+//
                 }
 
                 if ($statut == self::STATUT_SIGANTURE_PAPIER) {
@@ -447,7 +447,7 @@ class BT_ficheInter extends BimpDolObject
         return $url;
     }
 
-    // Getters filtres listes: 
+    // Getters filtres listes:
 
     public function getListFilterDefault()
     {
@@ -461,7 +461,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function getListFilterAll()
     {
-        // Utiliser un callback que si du traitement PHP est nécessaire: sinon mettre en dur dans le yml de la liste. 
+        // Utiliser un callback que si du traitement PHP est nécessaire: sinon mettre en dur dans le yml de la liste.
         return Array(
             Array(
                 'name'   => 'new_fi',
@@ -518,7 +518,7 @@ class BT_ficheInter extends BimpDolObject
         );
     }
 
-    // Getters Données: 
+    // Getters Données:
 
     public function getNextNumRef($soc)
     {
@@ -619,10 +619,10 @@ class BT_ficheInter extends BimpDolObject
 
     public function getLinesForInter()
     {
-        // Fonction utilisée nulle part mais herureusement car totalement non fonctionnelle. 
+        // Fonction utilisée nulle part mais herureusement car totalement non fonctionnelle.
         $return = [];
 
-        $parent = $this->getParentInstance(); // ?? Cet objet n'a pas de parent... 
+        $parent = $this->getParentInstance(); // ?? Cet objet n'a pas de parent...
 
         if (!BimpObject::objectLoaded($parent)) {
             return $return;
@@ -692,11 +692,11 @@ class BT_ficheInter extends BimpDolObject
 
     public function getHtLine($type_line, $id_line)
     {
-        // Aurait dû s'appeller getTotalHtLine (Essayer d'être précis dans le nom des fonctions, ça facilite la compréhension pour tout le monde. 
+        // Aurait dû s'appeller getTotalHtLine (Essayer d'être précis dans le nom des fonctions, ça facilite la compréhension pour tout le monde.
 
         switch ($type_line) {
             case 'contrat':
-                // Toujours passer par le cache!! 
+                // Toujours passer par le cache!!
 //                $obj = $this->getInstance('bimpcontract', 'BContract_contratLine', $id_line);
                 $obj = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $id_line);
                 if (BimpObject::objectLoaded($obj)) {
@@ -743,7 +743,7 @@ class BT_ficheInter extends BimpDolObject
         return $this->tmp_facturable;
     }
 
-    // Getters Array: 
+    // Getters Array:
 
     public function getTypeActionCommArray()
     {
@@ -964,11 +964,11 @@ class BT_ficheInter extends BimpDolObject
         $children = $this->getChildrenList('inters', ["type" => $type]);
 
 //        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
-        
+
         $arrayCode = BT_ficheInter_det::$servicesForFacturation;
         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
         $product->find(Array('ref' => $arrayCode[$type]));
-        
+
         $services = [];
         $index = 1;
         if (count($children)) {
@@ -1020,8 +1020,8 @@ class BT_ficheInter extends BimpDolObject
         }
         return $array;
     }
-    
-    // Affichages: 
+
+    // Affichages:
 
     public function displayVersion()
     {
@@ -1158,7 +1158,7 @@ class BT_ficheInter extends BimpDolObject
 
                 return $html;
             } else {
-                
+
             }
 
             return 0;
@@ -1321,7 +1321,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function displayServicesForForm()
     {
-        
+
     }
 
     public function displayDuree()
@@ -1335,7 +1335,7 @@ class BT_ficheInter extends BimpDolObject
         return count($this->getChildrenObjects('inters'));
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderSignaturePad($addClass = '')
     {
@@ -1347,7 +1347,7 @@ class BT_ficheInter extends BimpDolObject
         }
 
         $html = '';
-        $html .= '<div class="wrapper"> 
+        $html .= '<div class="wrapper">
                       <canvas id="' . $prefix . 'signature-pad" class="signature-pad ' . $addClass . '" style="border: solid 1px; ' . $displayStyle . '" width=400 height=200></canvas>
                   </div>
                   <div>
@@ -1688,7 +1688,7 @@ class BT_ficheInter extends BimpDolObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function deleteDolObject(&$errors)
     {
@@ -1903,7 +1903,7 @@ class BT_ficheInter extends BimpDolObject
             $commercial = $this->getCommercialClient();
             $bimpMail = new BimpMail($this, "Rapport d'intervention - " . $this->getRef(),
                                      $mail_signataire, '', "Bonjour, merci de signer votre rapport d'intervention à l'adresse suivante: "
-                    . "<a href='" . DOL_URL_ROOT . "/bimptechnique/public'>" . DOL_URL_ROOT . "/bimptechnique/public</a> en entrant votre nom ainsi que le mot de passe suivant: <b>$new_password</b><br />Cet accès n'est valable que 4 Jours calandaire."
+                    . "<a href='" . DOL_URL_ROOT . "/bimptechnique/public'>" . DOL_URL_ROOT . "/bimptechnique/public</a> en entrant votre nom ainsi que le mot de passe suivant: <b>$new_password</b><br />Cet accès n'est valable que 4 Jours calendaire."
                     . "<br /><br />Cordialement", $commercial->getData('email'));
             global $conf;
             $files = array();
@@ -1950,7 +1950,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function chooseModeFacturation()
     {
-        
+
     }
 
     public function switch_mode_facturation_deponds_type_and_service()
@@ -1984,7 +1984,7 @@ class BT_ficheInter extends BimpDolObject
         return 2;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionCreateFromRien($data, &$success = '')
     {
@@ -2074,7 +2074,7 @@ class BT_ficheInter extends BimpDolObject
             mailSyn2($sujet, $techForMail->getData('email') . "", "gle@bimp.fr", $message);
         }
 
-        //echo '<pre>' . print_r($new, 1);        
+        //echo '<pre>' . print_r($new, 1);
 
         return Array(
             'errors'   => $errors,
@@ -2590,7 +2590,7 @@ class BT_ficheInter extends BimpDolObject
         );
     }
 
-    // Outils : 
+    // Outils :
 
     public function time_to_qty($time)
     {

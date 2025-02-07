@@ -4855,19 +4855,19 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		$to_sms_phone_type = '';
 		if ($contact_pref === 3 && $sms && empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
 			if (BimpObject::objectLoaded($contact)) {
-				if (testNumSms($contact->dol_object->phone_mobile)) {
+				if (BimpTools::isValidNumMobile($contact->dol_object->phone_mobile)) {
 					$to_sms = $contact->dol_object->phone_mobile;
 					$to_sms_phone_type = 'Tel. mobile du contact';
-				} elseif (testNumSms($contact->dol_object->phone_pro)) {
+				} elseif (BimpTools::isValidNumMobile($contact->dol_object->phone_pro)) {
 					$to_sms = $contact->dol_object->phone_pro;
 					$to_sms_phone_type = 'Tel. pro du contact';
-				} elseif (testNumSms($contact->dol_object->phone_perso)) {
+				} elseif (BimpTools::isValidNumMobile($contact->dol_object->phone_perso)) {
 					$to_sms = $contact->dol_object->phone_perso;
 					$to_sms_phone_type = 'Tel. perso du contact';
 				}
 			}
 
-			if (!$to_sms && (testNumSms($client->dol_object->phone))) {
+			if (!$to_sms && (BimpTools::isValidNumMobile($client->dol_object->phone))) {
 				$to_sms = $client->dol_object->phone;
 				$to_sms_phone_type = 'Tel. de la fiche client';
 			}
@@ -9070,22 +9070,4 @@ ORDER BY a.val_max DESC");
 
 		return $errors;
 	}
-}
-
-function testNumSms($to)
-{
-	$to = str_replace(" ", "", $to);
-	if ($to == "") {
-		return 0;
-	}
-
-	if ((stripos($to, "06") === 0 || stripos($to, "07") === 0) && strlen($to) == 10) {
-		return 1;
-	}
-
-	if ((stripos($to, "+336") === 0 || stripos($to, "+337") === 0) && strlen($to) == 12) {
-		return 1;
-	}
-
-	return 0;
 }

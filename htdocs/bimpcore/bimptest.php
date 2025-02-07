@@ -18,32 +18,62 @@ global $db, $user;
 $bdb = new BimpDb($db);
 
 if (!BimpObject::objectLoaded($user)) {
-    echo BimpRender::renderAlerts('Aucun utilisateur connecté');
-    exit;
+	echo BimpRender::renderAlerts('Aucun utilisateur connecté');
+	exit;
 }
 
 if (!$user->admin) {
-    echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
-    exit;
+	echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
+	exit;
 }
 
-$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 142370);
-foreach (array(
-//	'f.martinez@bimp.fr'
-			 'test-n0sf2zo7p@srv1.mail-tester.com',
-			 'grunchy99@gmail.com'
-		 ) as $to) {
-	echo '<br/>TEST ' . $to . ' : ';
-	$mail = new BimpMail($client, 'TEST', $to, '', 'TEST');
+$num = '06 37 00 08 40';
+$infos = '';
+echo 'TEST dur : ';
+if (!BimpTools::isValidNumMobile($num)) {
+	echo 'KO - ' . $infos;
+} else {
+	echo 'OK';
+}
+echo '<br/>';
 
-	$errors = array();
-	$mail->send($errors);
+/** @var Bimp_Contact $contact */
+$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', 202486);
+if (BimpObject::objectLoaded($contact)) {
 
-	if (count($errors)) {
-		echo '<pre>' . print_r($errors) . '</pre>';
+	echo 'TEST contact ' . $contact->getLink() .'<br/>';
+
+	$infos = '';
+	$num = $contact->dol_object->phone_mobile;
+	echo 'TEST mobile (' . $num . ') : ';
+	if (!BimpTools::isValidNumMobile($num)) {
+		echo 'KO - ' . $infos;
 	} else {
 		echo 'OK';
 	}
+	echo '<br/>';
+
+	$infos = '';
+	$num = $contact->dol_object->phone_pro;
+	echo 'TEST pro (' . $num . ') : ';
+	if (!BimpTools::isValidNumMobile($num)) {
+		echo 'KO - ' . $infos;
+	} else {
+		echo 'OK';
+	}
+	echo '<br/>';
+
+	$infos = '';
+	$num = $contact->dol_object->phone_perso;
+	echo 'TEST perso (' . $num . ') : ';
+	if (!BimpTools::isValidNumMobile($num)) {
+		echo 'KO - ' . $infos;
+	} else {
+		echo 'OK';
+	}
+	echo '<br/>';
+} else {
+	echo 'KO - Contact non chargé';
 }
 
 echo '<br/>FIN';

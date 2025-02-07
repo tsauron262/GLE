@@ -59,7 +59,7 @@ if (BimpObject::objectLoaded($contact)) {
 	echo '<br/><br/>';
 
 	echo 'preg_replace : <br/>';
-	$num = preg_replace('/[\x00-\x1F\x7F]/u', '', $num);
+	$num = preg_replace('/[^0-9\+]/u', '', $num);
 	echo 'num   : ' . $num .' <br/>';
 	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
 	if (!BimpTools::isValidNumMobile($num, $infos)) {

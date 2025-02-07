@@ -13,14 +13,13 @@ primary: rowid
 labels: 
     name: paiement
     
-    
-    
 objects: 
     user_creat: 
         extends: user
         instance: 
             id_object: 
                 field_value: fk_user_author
+                
 fields: 
     amount: 
         dol_prop: montant
@@ -62,6 +61,7 @@ forms:
                     field_name: id_fourn
                 content: 
                     callback: renderFacturesAmountsInputs       
+                    
 lists_cols: 
     client: 
         label: Fournisseur

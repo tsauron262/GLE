@@ -33,7 +33,7 @@ $infos = '';
 echo 'TEST dur : <br/>';
 echo 'num   : ' . $num .' <br/>';
 echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
-if (!BimpTools::isValidNumMobile($num)) {
+if (!BimpTools::isValidNumMobile($num, $infos)) {
 	echo 'KO - ' . $infos;
 } else {
 	echo 'OK';
@@ -51,7 +51,7 @@ if (BimpObject::objectLoaded($contact)) {
 	echo 'TEST mobile : <br/>';
 	echo 'num   : ' . $num .' <br/>';
 	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
-	if (!BimpTools::isValidNumMobile($num)) {
+	if (!BimpTools::isValidNumMobile($num, $infos)) {
 		echo 'KO - ' . $infos;
 	} else {
 		echo 'OK';
@@ -63,7 +63,7 @@ if (BimpObject::objectLoaded($contact)) {
 	echo 'TEST pro : <br/>';
 	echo 'num   : ' . $num .' <br/>';
 	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
-	if (!BimpTools::isValidNumMobile($num)) {
+	if (!BimpTools::isValidNumMobile($num, $infos)) {
 		echo 'KO - ' . $infos;
 	} else {
 		echo 'OK';
@@ -75,7 +75,7 @@ if (BimpObject::objectLoaded($contact)) {
 	echo 'TEST perso : <br/>';
 	echo 'num   : ' . $num .' <br/>';
 	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
-	if (!BimpTools::isValidNumMobile($num)) {
+	if (!BimpTools::isValidNumMobile($num, $infos)) {
 		echo 'KO - ' . $infos;
 	} else {
 		echo 'OK';

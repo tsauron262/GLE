@@ -3700,7 +3700,7 @@ class BimpTools
 
 	public static function isValidNumMobile($num, &$infos = '')
 	{
-		$num = str_replace(" ", "", $num);
+		$num = preg_replace('/[^0-9\+]/u', '', $num);
 		if ($num == "") {
 			$infos = 'Aucun numéro spécifié';
 			return 0;

@@ -1233,8 +1233,8 @@ function cachePage($page, $delay = 0, $mode = 2)
 
 function traiteNumMobile($to)
 {
-	$to = str_replace(" ", "", $to);
-//	$to = preg_replace('/[^0-9\+]/u', '', $to);
+//	$to = str_replace(" ", "", $to);
+	$to = preg_replace('/[^0-9\+]/u', '', $to);
 
 	if (stripos($to, "+") === false) {
 		$to = "+33" . substr($to, 1, 10);

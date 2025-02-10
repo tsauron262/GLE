@@ -49,7 +49,7 @@ function addPackageEquipment($button) {
                 }, $resultContainer, function () {
                     var $list = $container.findParentByClass('BE_Package_view_default').find('.Equipment_list_table_package');
                     if ($.isOk($list)) {
-                        reloadObjectList($list.attr('id'));
+                        reloadObjectList($list.attr('id'), null, false, undefined, 0, 250);
                     }
                 }, {
                     no_triggers: true
@@ -123,7 +123,7 @@ function addPackageProduct($button) {
         }, $resultContainer, function () {
             var $list = $container.findParentByClass('BE_Package_view_default').find('.BE_PackageProduct_list_table');
             if ($.isOk($list)) {
-                reloadObjectList($list.attr('id'));
+                reloadObjectList($list.attr('id'), null, false, undefined, 0, 250);
             }
             $container.find('input[name="id_product"]').val(0).change();
             $container.find('input[name="search_id_product"]').val('');
@@ -182,7 +182,7 @@ function removeSelectedEquipmentsFromPackage(list_id, $button, ) {
     }, 'removeEquipment', {
         'equipments': equipments_list
     }, null, function () {
-        reloadObjectList($list.attr('id'));
+        reloadObjectList($list.attr('id'), null, false, undefined, 0, 250);
     }, {
         form_name: 'remove_equipment',
         no_triggers: true
@@ -232,7 +232,7 @@ function removeSelectedProductsFromPackage(list_id, $button) {
     }, 'removeProduct', {
         'packageProducts': packageProducts
     }, null, function () {
-        reloadObjectList($list.attr('id'));
+        reloadObjectList($list.attr('id'), null, false, undefined, 0, 250);
     }, {
         form_name: 'remove_product',
         no_triggers: true

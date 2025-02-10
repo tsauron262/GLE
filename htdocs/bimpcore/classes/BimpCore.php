@@ -1636,10 +1636,10 @@ class BimpCore
 		$reset_delay = (int) BimpCore::getConf('rate_limiting_' . $type . '_reset_delay', 30);
 
 
-		$id_user = 0;
-		if (BimpObject::objectLoaded($user)) {
-			$id_user = $user->id;
-		}
+//		$id_user = 0;
+//		if (BimpObject::objectLoaded($user)) {
+//			$id_user = $user->id;
+//		}
 
 		$current_time = time();
 //		$data = BimpCache::getCacheServeur('rate_limiting_' . $type);
@@ -1678,7 +1678,7 @@ class BimpCore
 		// Vérif limite atteinte :
 		if ($data['count'] >= $limit) {
 			if ($data['count'] == $limit) {
-				BimpCore::addlog('Limite de requêtes atteinte en '.($current_time - $data['start_time']).' sec (type : ' . $type . ')', 4, 'secu', null, array(
+				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ')', 4, 'secu', null, array(
 					'Utilisateur' => $user->id,
 					'Limit'       => $limit,
 					'Period'      => $period,
@@ -1687,7 +1687,7 @@ class BimpCore
 			}
 
 			if ($user->login == 'f.martinez') {
-				$errors[] = 'Limite de requêtes atteinte. Merci de patienter quelques instants avant de réessayer.';
+				$errors[] = 'Limite de requêtes atteinte (' . $data['count'] . '). Merci de patienter quelques instants avant de réessayer.<pre>' . print_r($_SESSION['rate_limiting_' . $type], 1) . '</pre>';
 				return 0;
 			}
 		}

@@ -61,6 +61,7 @@ class BCT_ContratLine extends BimpObject
 				if (!empty($user->rights->bimpcontrat->facturation_avance)) {
 					return 1;
 				}
+				return 0;
 
 			case 'activate':
 				return (int) ($user->admin || !empty($user->rights->bimpcontract->to_validate));
@@ -72,19 +73,15 @@ class BCT_ContratLine extends BimpObject
 				return (int) $user->rights->fournisseur->commande->creer;
 
 			case 'renouv':
+			case 'addUnits':
+			case 'MoveToOtherContrat':
 				return 1;
 
 			case 'deactivate':
 				return ($user->admin || in_array($user->login, array('a.remeur', 'p.bachorz', 'm.gallet', 'e.amadei', 'c.dodelin')) ? 1 : 0);
 
-			case 'addUnits':
-				return 1;
-
 			case 'checkDateNextFac':
 				return BimpCore::isUserDev();
-
-			case 'MoveToOtherContrat':
-				return 1;
 
 			case 'checkStatus':
 				return $user->admin;
@@ -1886,9 +1883,9 @@ class BCT_ContratLine extends BimpObject
 
 		$fac_periodicity = (int) $this->getData('fac_periodicity');
 
-		if (!$fac_periodicity) {
+//		if (!$fac_periodicity) {
 //            $errors[] = 'Périodicité de facturation non définie';
-		}
+//		}
 
 		if (!count($errors)) {
 			$fac_data = $this->getFacturesData(true);
@@ -5668,9 +5665,9 @@ class BCT_ContratLine extends BimpObject
 
 			if ($status > 0) {
 				$new_status = self::STATUS_ACTIVE;
-				$date_fin_validite = $this->getData('date_fin_validite');
+				$date_fin = $this->getDateFinReele();
 
-				if ($date_fin_validite) {
+				if ($date_fin) {
 					// Vérif facturation terminée:
 					$fac_ended = true;
 					if ((int) $this->getData('fac_periodicity')) {
@@ -5699,7 +5696,7 @@ class BCT_ContratLine extends BimpObject
 						$infos[] = 'Achats terminés';
 					}
 
-					if ($fac_ended && $achat_ended && $date_fin_validite < date('Y-m-d') . ' 00:00:00') {
+					if ($fac_ended && $achat_ended && $date_fin < date('Y-m-d') . ' 00:00:00') {
 						$all_children_closed = true;
 
 						$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
@@ -7443,11 +7440,11 @@ class BCT_ContratLine extends BimpObject
 						} else {
 							// Création de la facture :
 							$fac_errors = array();
-							$id_entrepot = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_entrepot', 0, $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': entrepôt absent');
-							$secteur = BimpTools::getArrayValueFromPath($fac_data, 'secteur', '', $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': secteur absent');
-							$expertise = BimpTools::getArrayValueFromPath($fac_data, 'expertise', '', $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': expertise absente');
-							$id_mode_reglement = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_mode_reglement', 0, $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': mode de réglement absent');
-							$id_cond_reglement = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_cond_reglement', 0, $fac_errors, true, 'Facture n° ' . $fac_idx + 1 . ' pour le client ' . $client->getName() . ': conditions de réglement absentes');
+							$id_entrepot = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_entrepot', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': entrepôt absent');
+							$secteur = BimpTools::getArrayValueFromPath($fac_data, 'secteur', '', $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': secteur absent');
+							$expertise = BimpTools::getArrayValueFromPath($fac_data, 'expertise', '', $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': expertise absente');
+							$id_mode_reglement = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_mode_reglement', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': mode de réglement absent');
+							$id_cond_reglement = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_cond_reglement', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': conditions de réglement absentes');
 							$libelle = BimpTools::getArrayValueFromPath($fac_data, 'libelle', 'Facturation périodique');
 
 							if (!count($fac_errors)) {
@@ -8427,6 +8424,7 @@ class BCT_ContratLine extends BimpObject
 
 	public function createDolObject(&$errors = array(), &$warnings = array())
 	{
+		/** @var BCT_Contrat $contrat */
 		$contrat = $this->getParentInstance();
 
 		if (!BimpObject::objectLoaded($contrat)) {

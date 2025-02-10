@@ -1632,6 +1632,10 @@ class BimpCore
 			return 1;
 		}
 
+		if ($user->login == 'f.martinez') {
+			$limit = 3;
+		}
+
 		$period = (int) BimpCore::getConf('rate_limiting_' . $type . '_period', 60);
 		$reset_delay = (int) BimpCore::getConf('rate_limiting_' . $type . '_reset_delay', 30);
 

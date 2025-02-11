@@ -1317,7 +1317,7 @@ function loadPage($list, page, modeAppend) {
 
 	$list.find('input[name=param_p]').val(page);
 
-	reloadObjectList($list.attr('id'), undefined, undefined, undefined, modeAppend);
+	reloadObjectList($list.attr('id'), undefined, undefined, undefined, modeAppend, 250);
 }
 
 function deactivateSorting($list) {
@@ -1522,7 +1522,7 @@ function onListLoaded($list) {
 //        });
 
 		$list.find('input[name="param_n"]').change(function () {
-			reloadObjectList($list.attr('id'));
+			reloadObjectList($list.attr('id'), null, false, undefined, 0, 250);
 		});
 
 		var $tools = $list.find('.headerTools');
@@ -1598,7 +1598,7 @@ function onListLoaded($list) {
 			});
 
 			$tools.find('.refreshListButton').click(function () {
-				reloadObjectList($list.attr('id'));
+				reloadObjectList($list.attr('id'), null, false, undefined, 0, 250);
 			});
 
 			$list.find('input[name="param_n"]').change(function () {

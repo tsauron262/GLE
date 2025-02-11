@@ -1635,6 +1635,11 @@ class BimpCore
 		$period = (int) BimpCore::getConf('rate_limiting_' . $type . '_period', 60);
 		$reset_delay = (int) BimpCore::getConf('rate_limiting_' . $type . '_reset_delay', 30);
 
+		$is_mode_dev = BimpCore::isModeDev();
+		if ($is_mode_dev) {
+			$limit = 3;
+			$reset_delay = 10;
+		}
 
 //		$id_user = 0;
 //		if (BimpObject::objectLoaded($user)) {
@@ -1681,12 +1686,13 @@ class BimpCore
 				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ')', 4, 'secu', null, array(
 					'Utilisateur' => $user->id,
 					'Limit'       => $limit,
+					'Count'       => $data['count'],
 					'Period'      => $period,
 					'Délai'       => $reset_delay
 				));
 			}
 
-			if ($user->login == 'f.martinez') {
+			if ($is_mode_dev || $user->login == 'f.martinez') {
 				$errors[] = 'Limite de requêtes atteinte (' . $data['count'] . '). Merci de patienter quelques instants avant de réessayer.<pre>' . print_r($_SESSION['rate_limiting_' . $type], 1) . '</pre>';
 				return 0;
 			}

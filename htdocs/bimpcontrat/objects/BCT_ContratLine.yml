@@ -318,9 +318,9 @@ fields:
                 method: displayNextAchatDate
                 params: 
                     - 1
-#    date_achat_stop:
-#        label: Date d'arrêt des achats
-#        type: date
+    date_achat_stop:
+        label: Date d'arrêt des achats
+        type: date
     fk_user_author: 
         label: Créé par
         type: id_object

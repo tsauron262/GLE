@@ -209,7 +209,7 @@ class modBimptask extends DolibarrModules {
             $this->rights[$r][5] = 'attribute';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
             $r++;
         }
-        
+
 //        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 //        $this->rights[$r][1] = 'Create/Update objects of My Module'; // Permission label
 //        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
@@ -301,9 +301,9 @@ class modBimptask extends DolibarrModules {
      */
     public function init($options = '') {
         $sql = array();
-        
-        
-        
+
+
+
         $sql[] = 'CREATE TABLE if not exists `'.MAIN_DB_PREFIX.'bimp_task` (
   `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `src` varchar(127) NOT NULL,
@@ -321,14 +321,11 @@ class modBimptask extends DolibarrModules {
   test_ferme text
 );';
 
-        // Add restrictions to all categories son of root
-//        initRestrictions();
-
-        // Create extrafields
-        include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-        $extrafields = new ExtraFields($this->db);
-        //$result1=$extrafields->addExtraField('myattr1', "New Attr 1 label", 'boolean', 1, 3, 'thirdparty');
-        //$result2=$extrafields->addExtraField('myattr2', "New Attr 2 label", 'string', 1, 10, 'project');
+		require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+		$name = 'module_version_' . strtolower($this->name);
+		if (BimpCore::getConf($name) == "") {
+			BimpCore::setConf($name,  $this->version);
+		}
 
         return $this->_init($sql, $options);
     }

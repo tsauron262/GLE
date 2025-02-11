@@ -179,7 +179,7 @@ class BWSApi
 		$children_data = array();
 		if (!empty($children)) {
 			foreach ($children as $child_name => $child_data) {
-				if (!is_array($child_data)) {
+				if (!is_array($child_data) && !is_object($child_data)) {
 					$child_name = $child_data;
 				}
 				if (!$object->config->isDefined('objects/' . $child_name)) {
@@ -610,7 +610,6 @@ class BWSApi
 				if ($children) {
 					$children = json_decode($children);
 				}
-
 
 				/*
 				 * Todo implémenter recursivité des child exemple pour contrat array('lines'=>array('produit'))

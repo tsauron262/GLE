@@ -7380,6 +7380,40 @@ class BCT_ContratLine extends BimpObject
 		$warnings = array();
 		$success = 'Vérification du statut effectuée';
 
+		$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+			'id_parent_line'     => $this->id,
+			'linked_object_name' => 'bundle'
+		));
+		if (!empty($lines)) {
+			foreach ($lines as $line) {
+				$data_correct = array();
+
+				if ($line->getData('date_ouverture_prevue') != $this->getData('date_ouverture_prevue')) {
+					$data_correct['date_ouverture_prevue'] = $this->getData('date_ouverture_prevue');
+				}
+
+				if ($line->getData('date_ouverture') != $this->getData('date_ouverture')) {
+					$data_correct['date_ouverture'] = $this->getData('date_ouverture');
+				}
+
+				if ($line->getData('date_debut_validite') != $this->getData('date_debut_validite')) {
+					$data_correct['date_debut_validite'] = $this->getData('date_debut_validite');
+				}
+
+				if ($line->getData('date_fin_validite') != $this->getData('date_fin_validite')) {
+					$data_correct['date_fin_validite'] = $this->getData('date_fin_validite');
+				}
+
+				if ($line->getData('date_cloture') != $this->getData('date_cloture')) {
+					$data_correct['date_cloture'] = $this->getData('date_cloture');
+				}
+
+				if (!empty($data_correct)) {
+					$this->db->update('contratdet', $data_correct, 'rowid = ' . $line->id);
+				}
+			}
+		}
+
 		$this->checkStatus($warnings);
 
 		return array(

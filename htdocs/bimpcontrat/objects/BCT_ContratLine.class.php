@@ -5701,7 +5701,7 @@ class BCT_ContratLine extends BimpObject
 
 						$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
 							'id_parent_line'     => $this->id,
-							'linked_object_name' => 'bundle'
+							'linked_object_name' => array('bundle', 'bundleCorrect')
 						));
 						if (!empty($lines)) {
 							foreach ($lines as $line) {
@@ -7382,8 +7382,9 @@ class BCT_ContratLine extends BimpObject
 
 		$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
 			'id_parent_line'     => $this->id,
-			'linked_object_name' => 'bundle'
+			'linked_object_name' => array('bundle', 'bundleCorrect')
 		));
+
 		if (!empty($lines)) {
 			foreach ($lines as $line) {
 				$data_correct = array();

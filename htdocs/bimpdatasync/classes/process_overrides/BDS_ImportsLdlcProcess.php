@@ -13,7 +13,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         'ShortDesignation'  => 'lib',
         'Brand'             => 'brand',
         'ManufacturerRef'   => 'ref_manuf',
-        'IsAsleep'          => 'is_sleep2', 
+        'IsAsleep'          => 'is_sleep2',
         'IsDeleted'         => 'is_delete',
         'PriceVatOff'       => 'pu_ht',
         'PriceVatOn'        => 'pu_ttc',
@@ -140,8 +140,8 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 $file_data = $this->getFileData($this->nameFile, static::$price_keys, $errors, 0, 1, array(
                     'part_file_idx' => $file_idx
                 ));
-                
-                
+
+
                 foreach($file_data as $idLn => $line){
                     if ($line['url'] && '' != $line['url']) {
                         $file_data[$idLn]['url'] = 'https://media.ldlc.com'.$line['url'];
@@ -152,7 +152,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
                 if (!count($errors) && !empty($file_data)) {
                     $this->processFournPrices($file_data, $errors, true);
-                    
+
                     $i=0;
                     $tabHtml = array();
                     foreach($file_data as $line){
@@ -168,6 +168,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                     }
                     if(count($tabHtml)){
                         ksort($tabHtml);
+						$code = 'update_prices_file_marge_neg';
                         mailSyn2('Produit LDLC marge négative', 'tommy@bimp.fr'/*, a.pfeffer@ldlc.com, j.viales@ldlc.com'*/, null, '<h3>Bonjour, voici la liste des produits avec une marge négative ('.$i.')</h3><br/><br/>'.implode('<br/><br/><br/>------------------------- ', $tabHtml));
                     }
                 }
@@ -176,7 +177,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
         return $result;
     }
-    
+
     public function getFtpParams($params){
         if($params == 'ftp_host')
             return BimpCore::getConf('exports_ldlc_ftp_serv');
@@ -190,11 +191,11 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
             return BimpCore::getConf('exports_ldlc_ftp_mdp');
     }
 
-    // Install: 
+    // Install:
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
-        // Process: 
+        // Process:
 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ImportsLdlc',
@@ -206,7 +207,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
         if (BimpObject::objectLoaded($process)) {
 
-            // Params: 
+            // Params:
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
@@ -214,17 +215,17 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 'label'      => 'Dossier FTP',
                 'value'      => '/'.BimpCore::getConf('exports_ldlc_ftp_dir').'/catalogue/'
                     ), true, $warnings, $warnings);
-            
+
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'file_name',
                 'label'      => 'Nom fichier FTP',
                 'value'      => 'Ymd_catalog_ldlc_to_bimp.csv',
                     ), true, $warnings, $warnings);
-            
-            
-            
-            
+
+
+
+
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
@@ -254,7 +255,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 'value'      => '|;|'
                     ), true, $warnings, $warnings);
 
-            // Options: 
+            // Options:
 
             $opt1 = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,
@@ -276,7 +277,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                         'required'      => 0
                             ), true, $warnings, $warnings);
 
-            // Opérations: 
+            // Opérations:
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                 'id_process'  => (int) $process->id,

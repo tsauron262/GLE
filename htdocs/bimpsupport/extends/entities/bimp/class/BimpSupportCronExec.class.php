@@ -7,7 +7,7 @@ class BimpSupportCronExec extends BimpCron
     public function sendEcologic($sendMail = false)
     {
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
-        
+
         $savs = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('status_ecologic' => 1));
         $mail = '';
         foreach($savs as $sav){
@@ -32,7 +32,8 @@ class BimpSupportCronExec extends BimpCron
             $mails = array('tommy@bimp.fr');
             if(BimpCore::getConf('default_sav_email', '', 'bimpsupport') != '')
                     $mails[] = BimpCore::getConf('default_sav_email', '', 'bimpsupport');
-            mailSyn2('Probléme envoie ecologic', implode(',', $mails), null, $mail);
+            $code = 'pb_envoi_ecologic';
+			mailSyn2('Probléme envoie ecologic', implode(',', $mails), null, $mail);
             $this->output .= ($this->output ? '<br/><br/>' : '').'Mail envoyé';
         }
         return 0;

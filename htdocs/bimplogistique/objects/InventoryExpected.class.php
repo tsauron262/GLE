@@ -21,7 +21,7 @@ class InventoryExpected extends BimpObject
             $new_qty = $this->getData('qty_scanned') + $qty;
             $this->updateField('qty_scanned', $new_qty);
 
-            // Si la qty scanned passe à 0 alors que cette ligne était 
+            // Si la qty scanned passe à 0 alors que cette ligne était
             // en excès => on supprime la ligne
             if ((int) $this->getData('qty') == 0 and (int) $this->getData('qty_scanned') == 0)
                 $errors = BimpTools::merge_array($errors, $this->delete());
@@ -145,7 +145,8 @@ class InventoryExpected extends BimpObject
         }
         if (count($ids_equipments) > 0 && $this->getData('qty_scanned') != $qteScan) {
             $html = '<span class="error">ATTENTION INCOHERENCE DES DONNEE</span>' . $html;
-            mailSyn2('Incohérence inventaire', BimpCore::getConf('devs_email'), null, "Bonjour il y a une onchérence dans la ligne d'exected " . $this->id . ' ' . $qteScan . " num de serie scanné pour " . $this->getData('qty_scanned'));
+            $code = 'inventaire_incoherence_donnees';
+			mailSyn2('Incohérence inventaire', BimpCore::getConf('devs_email'), null, "Bonjour il y a une onchérence dans la ligne d'exected " . $this->id . ' ' . $qteScan . " num de serie scanné pour " . $this->getData('qty_scanned'));
         }
         return $html;
     }
@@ -265,7 +266,7 @@ class InventoryExpected extends BimpObject
             }
         }
 
-        
+
         global $modeCSV;
         if (!$modeCSV)
             return price($valorisation);
@@ -319,7 +320,7 @@ class InventoryExpected extends BimpObject
                     $this->updateField('ids_equipments', $ids_equipments);
                     $this->updateField('qty_scanned', $this->getData('qty_scanned') - 1);
 
-                    // Si la qty scanned passe à 0 alors que cette ligne était 
+                    // Si la qty scanned passe à 0 alors que cette ligne était
                     // en excès => on supprime la ligne:
                     if ((int) $this->getData('qty') == 0 and (int) $this->getData('qty_scanned') == 0
                             and empty($ids_equipments)) {

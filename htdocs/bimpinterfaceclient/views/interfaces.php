@@ -59,10 +59,10 @@ function getContratFromSerial($serial, $socid) {
 function createTicket($data) {
     global $userClient;
     $data = (object) $data;
-    
+
     $sujet = '------------------------------<br />';
     $sujet.= '<b>N° de série: </b>' . $data->serial . '<br />';
-    
+
     if(!empty($data->adresse_envois)) {
         $sujet.= "<b>Adresse d'envois: </b> ".$data->adresse_envois." <br />";
     }
@@ -72,14 +72,14 @@ function createTicket($data) {
     if(!empty($data->email_retour)) {
         $sujet.= "<b>Adresse email pour envoi du bon de retour:: </b> ".$data->email_retour." <br />";
     }
-    
+
     $sujet.= '------------------------------<br />';
-    
+
     if(!empty($data->description)) {
         $sujet .= '<br /><br />' . $data->description;
     }
-    
-    
+
+
     $new = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
     $new->set('serial', $data->serial);
     $new->set('id_contrat', $data->contrat);
@@ -89,22 +89,23 @@ function createTicket($data) {
     $new->set('id_user_resp', 0);
     $new->set('id_user_client', $data->userClient);
     //return print_r($new, 1);
-    
+
     if($new->create($warnings, false) > 0) {
-        
+
         $tmpContrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $data->contrat);
         $tmpUserClient = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $data->userClient);
-        
+
         $liste_destinataires = Array($tmpUserClient->getData('email'));
         $liste_destinataires = BimpTools::merge_array($liste_destinataires, Array('hotline@bimp.fr'));
         $liste_destinataires = BimpTools::merge_array($liste_destinataires, $tmpUserClient->get_dest('admin'));
-        $liste_destinataires = BimpTools::merge_array($liste_destinataires, $tmpUserClient->get_dest('commerciaux'));        
-        
+        $liste_destinataires = BimpTools::merge_array($liste_destinataires, $tmpUserClient->get_dest('commerciaux'));
+
         $liste_destinataire_interne_contrat_spare = '';
         if($tmpContrat->getData('objet_contrat') == 'CSP') {
             $liste_destinataire_interne_contrat_spare = 'j.garnier@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr';
         }
 
+		$code = 'creation_ticket_support_view';
         mailSyn2('BIMP-CLIENT : Création Ticket Support N°' . $new->getData('ticket_number'), implode(', ', $liste_destinataires), '',
                 '<h3>Ticket support numéro : '.$new->getData('ticket_number').'</h3>'
                 . 'Sujet du ticket : ' . $sujet . '<br />'
@@ -113,9 +114,9 @@ function createTicket($data) {
                 , array(), array(), array(), $liste_destinataire_interne_contrat_spare);
         $tmpContrat = null;
         $tmpUserClient = null;
-        
+
         return $new->id;
     }
 
-    
+
 }

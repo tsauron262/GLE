@@ -2306,12 +2306,42 @@ class Bimp_User extends BimpObject
         return $errors;
     }
 
-	public function sendMsg($code, $subject, $msg, $params = array()) {
+	public function isMailValid($code_mail="", $params = array())	{
 		$params = BimpTools::overrideArray(array(
-			'check_active' => true
+			'check_active' => true,
+			'check_disponibility' => false,
+			'allow_superior' => false
 		), $params);
 
-		mailSyn2();
+		$to = '';
+
+		if ($params['check_active']) {        // check si l'utilisateur est encore dans l'entreprise
+			if ((int) $this->getData('statut')) {    // statut = 1 => actif (on récup son email)
+				$to = $this->getData('email');
+			}
+		}
+
+		if ($params['check_disponibility']) {    // check si l'utilisateur est disponible (pas Off, ni en vacances, ...)
+			if ($this->isAvailable()) {    // il l'est, on récupere son email si $to est vide
+				if (!$to) {
+					$to = $this->getData('email');
+				}
+			} else {
+				$to = '';    // si pas disponible, on ne lui envoie pas de mail
+			}
+		}
+
+		if ($params['allow_superior'] && !$to) {    // on envoie à son supérieur si pas d'email
+			$to = $this->getEmailOrSuperiorEmail(true);
+		}
+
+		return BimpTools::cleanEmailsStr($to);
+	}
+
+	public function sendMsg($code, $subject, $msg, $params = array())	{
+		$to = $this->isMailValid($code, $params);
+		if($to)
+			return mailSyn2($subject, $to, '', $msg);
 	}
 
     // Actions:

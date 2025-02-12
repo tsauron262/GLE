@@ -29,7 +29,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         3 => array('label' => 'Facture d\'acompte')
     );
 
-    // Gestion des autorisations objet: 
+    // Gestion des autorisations objet:
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
@@ -204,7 +204,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         return 1;
     }
 
-    // Gestion des droits - overrides BimpObject: 
+    // Gestion des droits - overrides BimpObject:
 
     public function canCreate()
     {
@@ -288,7 +288,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         $buttons = array();
 
         if ($this->isLoaded()) {
-            // Valider: 
+            // Valider:
             if ($this->isActionAllowed('validate')) {
                 if ($this->canSetAction('validate')) {
                     $buttons[] = array(
@@ -309,7 +309,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 }
             }
 
-            // Modifier (si aucun paiement): 
+            // Modifier (si aucun paiement):
             if ($this->isActionAllowed('modify') && $this->canSetAction('modify')) {
                 $buttons[] = array(
                     'label'   => 'Modifier',
@@ -341,7 +341,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 }
             }
 
-            // Envoyer par email: 
+            // Envoyer par email:
             if ($this->isActionAllowed('sendEMail') && $this->canSetAction('sendEMail')) {
                 $onclick = $this->getJsActionOnclick('sendEmail', array(), array(
                     'form_name' => 'email'
@@ -353,7 +353,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 );
             }
 
-            // Réglement: 
+            // Réglement:
             if ($this->isActionAllowed('makePayment') && $this->canSetAction('makePayment')) {
                 $is_rbt = ((int) $this->getData('type') === FactureFournisseur::TYPE_CREDIT_NOTE);
 
@@ -371,7 +371,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 );
             }
 
-            // Classer payée: 
+            // Classer payée:
             if ($this->isActionAllowed('classifyPaid') && $this->canSetAction('classifyPaid')) {
                 $onclick = $this->getJsActionOnclick('classifyPaid', array(), array(
                     'confirm_msg' => 'Êtes-vous sûr de vouloir modifier ' . $this->getLabel('this') . ' au statut payé' . $this->e() . '?'
@@ -383,7 +383,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 );
             }
 
-            // Convertir en remise: 
+            // Convertir en remise:
             if ($this->isActionAllowed('convertToReduc') && $this->canSetAction('convertToReduc')) {
                 $confirm_msg = 'Veuillez confirmer la conversion en remise';
 
@@ -406,7 +406,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 );
             }
 
-            // Cloner: 
+            // Cloner:
             if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
                 $buttons[] = array(
                     'label'   => 'Cloner',
@@ -417,7 +417,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                     ))
                 );
             }
-            // Créer un avoir: 
+            // Créer un avoir:
 //            if ($this->isActionAllowed('create_credit_note') && $this->canSetAction('create_credit_note')) {
 //                $buttons[] = array(
 //                    'label'   => 'Créer un avoir',
@@ -512,7 +512,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         return $rtp;
     }
 
-    // Getters callbacks: 
+    // Getters callbacks:
 
     public function getCreateFromOriginCheckMsg()
     {
@@ -524,7 +524,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         }
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayPaid()
     {
@@ -707,7 +707,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 $html .= '</td>';
                 $html .= '</tr>';
 
-                // Avoirs utilisés: 
+                // Avoirs utilisés:
                 $rows = $this->db->getRows('societe_remise_except', '`fk_invoice_supplier` = ' . (int) $this->id, null, 'array');
                 if (!is_null($rows) && count($rows)) {
                     foreach ($rows as $r) {
@@ -739,7 +739,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 $remainToPay = (float) $this->getData('total_ttc') - $total_paid - $total_credit_note - $total_deposit;
                 $remainToPay_final = $remainToPay;
 
-                // Payée partiellement 'escompte': 
+                // Payée partiellement 'escompte':
                 if (($status == FactureFournisseur::STATUS_CLOSED || $status == FactureFournisseur::STATUS_ABANDONED)) {
                     $label = '';
                     switch ($this->dol_object->close_code) {
@@ -774,7 +774,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                     }
                 }
 
-                // Trop perçu converti en remise: 
+                // Trop perçu converti en remise:
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                 $discount = new DiscountAbsolute($this->db->db);
                 $discount->fetch(0, 0, $this->id);
@@ -790,14 +790,14 @@ class Bimp_FactureFourn extends BimpCommAchat
                     $html .= '</tr>';
                 }
 
-                // total facturé: 
+                // total facturé:
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>Facturé</strong> : </td>';
                 $html .= '<td>' . $this->displayData('total_ttc') . '</td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
-                // Reste à payer: 
+                // Reste à payer:
                 if ((int) $this->getData('paye')) {
                     $remainToPay_final = 0;
                     $class = 'success';
@@ -815,7 +815,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 $html .= '<td></td>';
                 $html .= '</tr>';
             } else {
-                // Avoirs: 
+                // Avoirs:
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>' . $langs->trans('AlreadyPaidBack') . '</strong> : </td>';
                 $html .= '<td>' . BimpTools::displayMoneyValue(-$total_paid, 'EUR') . '</td>';
@@ -953,7 +953,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         return '';
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function onCreate(&$warnings = array())
     {
@@ -987,7 +987,7 @@ class Bimp_FactureFourn extends BimpCommAchat
             if ($dateMin && date($dateMin) > date($this->getData('datef')))
                 $this->updateField('datef', $dateMin);
 
-            // Maj des prix d'achat courants des produits: 
+            // Maj des prix d'achat courants des produits:
             $products = array();
             foreach ($lines as $line) {
                 if (!(int) $line->id_product) {
@@ -1025,7 +1025,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                 $product->setCurrentPaHt($pa_ht, $id_fp, 'facture_fourn', (int) $this->id);
             }
 
-            // Maj des prix d'achat des lignes de factures client associées: 
+            // Maj des prix d'achat des lignes de factures client associées:
             foreach ($lines as $line) {
                 if ($line->getData('linked_object_name') === 'commande_fourn_line' && (int) $line->getData('linked_id_object')) {
                     $comm_fourn_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $line->getData('linked_id_object'));
@@ -1313,7 +1313,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         );
     }
 
-    // Overrides - BimpComm: 
+    // Overrides - BimpComm:
 
     public function getDbData($fields = null)
     {
@@ -1352,7 +1352,7 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         $i = 0;
 
-        // Création des lignes: 
+        // Création des lignes:
         $lines_new = array();
 
         foreach ($lines as $line) {
@@ -1406,7 +1406,7 @@ class Bimp_FactureFourn extends BimpCommAchat
                     $lines_new[(int) $line->id] = (int) $line_instance->id;
 
                     // NOTE: on n'intègre pas les remises de la ligne de commande: celles-ci sont déjà déduites dans le pu_ht.
-                    // Ajout des équipements: 
+                    // Ajout des équipements:
                     if ($isSerialisable) {
                         $equipments = (isset($line_data['equipments']) ? $line_data['equipments'] : array());
                         foreach ($equipments as $id_equipment) {
@@ -1426,7 +1426,7 @@ class Bimp_FactureFourn extends BimpCommAchat
             }
         }
 
-        // Attribution des lignes parentes: 
+        // Attribution des lignes parentes:
         foreach ($lines as $line) {
             $id_parent_line = (int) $line->getData('id_parent_line');
 
@@ -1570,15 +1570,16 @@ class Bimp_FactureFourn extends BimpCommAchat
         $i = 0;
         while ($ln = $this->db->db->fetch_object($sql)) {
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
-            $userCreate = new User($this->db->db);
-            $userCreate->fetch((int) $obj->getData('fk_user_author'));
+//            $userCreate = new User($this->db->db);
+//            $userCreate->fetch((int) $obj->getData('fk_user_author'));
+			$userCreate = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $obj->getData('fk_user_author'));
 
-            $mail = $userCreate->email;
-            if ($mail == '')
-                $mail = "tommy@bimp.fr";
-            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-            if (mailSyn2('Facture fournisseur brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une facture fournisseur en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
-                $i++;
+//            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
+			$code = 'facture_fourn_brouillon';
+			$sujet = 'Facture fournisseur brouillon à régulariser';
+			$msg = 'Bonjour,<br />Vous avez laissé une facture fournisseur en l\'état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.';
+
+            if($userCreate->sendMsg($code, $sujet, $msg))    $i++;
         }
         $this->resprints = "OK " . $i . ' mails';
         return "OK " . $i . ' mails';

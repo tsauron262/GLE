@@ -3247,6 +3247,7 @@ class Bimp_Client extends Bimp_Societe
                             $msg .= 'Merci d\'en vérifier la raison et de procéder à sa régularisation.<br/>';
                             $msg .= 'Lien acompte: ' . $fac->getLink();
 
+							$code = 'relance_paiement_acompte';
                             if (mailSyn2($subject, BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial'), '', $msg)) {
                                 $fac->updateField('relance_active', 0);
                             } else {
@@ -4121,6 +4122,7 @@ class Bimp_Client extends Bimp_Societe
 //                                    $html .= 'Pour ne plus recevoir de type de notification pour ce client, il est nécessaire de lui attribuer un commercial attitré';
 //                                }
 
+								$code = 'relances_deactivated_to_notify';
                                 mailSyn2($subject, $email, '', $html);
                             }
                         }

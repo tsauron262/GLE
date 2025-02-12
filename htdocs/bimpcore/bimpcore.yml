@@ -299,6 +299,11 @@ params:
         cat: emails
         def: ''
         required: 1
+    email_valid_paiement_comptant:
+        label: Adresse e-mail pour validation paiement comptant
+        cat: emails
+        def: ''
+        required: 1
         
     # Produits
     use_valid_product: 

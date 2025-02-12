@@ -37,7 +37,7 @@ class BContract_avenant extends BContract_contrat
     );
     public static $default_signature_params = array();
 
-    // Droits user: 
+    // Droits user:
 
     public function canDelete()
     {
@@ -57,7 +57,7 @@ class BContract_avenant extends BContract_contrat
         return 1;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function by($by)
     {
@@ -86,7 +86,7 @@ class BContract_avenant extends BContract_contrat
         return 1;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getExtraBtn()
     {
@@ -163,7 +163,7 @@ class BContract_avenant extends BContract_contrat
         return $buttons;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getLink($params = array(), $forced_context = '')
     {
@@ -284,7 +284,7 @@ class BContract_avenant extends BContract_contrat
         return $allSerials;
     }
 
-    // Affcihages: 
+    // Affcihages:
 
     public function displayCoutTotal()
     {
@@ -306,7 +306,7 @@ class BContract_avenant extends BContract_contrat
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderSignature()
     {
@@ -338,7 +338,7 @@ class BContract_avenant extends BContract_contrat
         ));
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '')
     {
@@ -481,7 +481,7 @@ class BContract_avenant extends BContract_contrat
 //                        $id_line = $parent->dol_object->addLine(
 //                                    $service->getData('description'),
 //                                    $ligne_de_l_avenant->getCoup(false) / $qty, $qty, 20, 0, 0,
-//                                    $service->id, $i['remise'], 
+//                                    $service->id, $i['remise'],
 //                                    $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
 //                                );
 //                        $l = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $id_line);
@@ -549,6 +549,7 @@ class BContract_avenant extends BContract_contrat
             $objet = 'Signature avenant n°' . 'AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' client ' . $client->getData('code_client') . ' ' . $client->getName();
             $message = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
+			$code = 'avenant_signe';
             mailSyn2($objet, 'contrat@bimp.fr', null, $message);
         }
 
@@ -577,12 +578,13 @@ class BContract_avenant extends BContract_contrat
                 $objet = 'Signature avenant n°' . 'AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' client ' . $client->getData('code_client') . ' ' . $client->getName();
                 $message = 'L\'avenant n°AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
+				$code = "avenant_prolongation_signe";
                 mailSyn2($objet, 'contrat@bimp.fr', null, $message);
             }
         }
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionValidate($data, &$success)
     {
@@ -617,6 +619,7 @@ class BContract_avenant extends BContract_contrat
                 $objet = 'Avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' Client ' . $client->getData('code_client') . ' ' . $client->getName();
                 $message = 'L\'avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' est en attente de signature';
 
+				$code = 'avenant_validation';
                 mailSyn2($objet, "contrat@bimp.fr", null, $message);
             }
         }
@@ -677,12 +680,14 @@ class BContract_avenant extends BContract_contrat
                 $commercial = $parent->getCommercialClient(true);
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getdata('fk_soc'));
                 $sujet = 'AVENANT ' . $this->getRefAv() . ' - ACTIVATION PROVISOIRE - ' . $client->getName();
-                $dest = $commercial->getData('email');
+//                $dest = $commercial->getData('email');
 
                 $message = 'Bonjour ' . $commercial->getName() . '<br />';
                 $message .= 'L\'avenant N°' . $this->getRefAv() . ' a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement. Vous recevrez une alerte par jour, à partir des derniers 5 jours de l\'activation provisoire.';
                 $message .= '<br /><br />Client: ' . $client->getLink() . '<br />Contrat: ' . $parent->getLink();
-                mailSyn2($sujet, $dest, null, $message);
+//                mailSyn2($sujet, $dest, null, $message);
+				$code = 'avenant_activation_provisoire';
+				$commercial->sendMail($code, $sujet, $message);
                 $this->updateField('date_activate', date('Y-m-d'));
                 $this->updateField('statut', self::AVENANT_STATUT_PROVISOIR);
             }
@@ -846,7 +851,7 @@ class BContract_avenant extends BContract_contrat
         ];
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validatePost()
     {
@@ -958,7 +963,7 @@ class BContract_avenant extends BContract_contrat
         $errors = array();
 
         $years = (int) BimpTools::getPostFieldValue("years", 0, 'int');
-        
+
         if ($years) {
             $nombre_months = $years * 12;
             $end = new DateTime($this->getData('date_end'));
@@ -1061,7 +1066,7 @@ class BContract_avenant extends BContract_contrat
 
     public function getSignatureDocRef($doc_type)
     {
-        
+
     }
 
     public function getSignatureParams($doc_type)

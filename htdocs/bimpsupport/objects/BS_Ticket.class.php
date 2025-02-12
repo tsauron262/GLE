@@ -109,7 +109,7 @@ class BS_Ticket extends BimpAbstractFollow
         return 0;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -231,7 +231,7 @@ class BS_Ticket extends BimpAbstractFollow
         return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getClient_contactsArray()
     {
@@ -326,7 +326,7 @@ class BS_Ticket extends BimpAbstractFollow
         return $tickets;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getExtraBtnListInterfaceClient()
     {
@@ -536,7 +536,7 @@ class BS_Ticket extends BimpAbstractFollow
         return null;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayDureeTotale()
     {
@@ -679,7 +679,7 @@ class BS_Ticket extends BimpAbstractFollow
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function onInterUpdate()
     {
@@ -793,7 +793,7 @@ class BS_Ticket extends BimpAbstractFollow
             'warnings' => $warnings
         );
     }
-    
+
     public function getEmailFollow($mode = 0){
         $mails = parent::getEmailFollow($mode);
         if($mode != 1){
@@ -846,7 +846,7 @@ class BS_Ticket extends BimpAbstractFollow
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validatePost()
     {
@@ -1064,7 +1064,16 @@ class BS_Ticket extends BimpAbstractFollow
             if (BimpObject::objectLoaded($userClient)) {
                 if ($this->getData('cover') == 3) {
                     // On envois un mail au commercial
-                    $destinaitaire_commercial = $userClient->get_dest('commerciaux');
+//                    $destinaitaire_commercial = $userClient->get_dest('commerciaux');
+					$commerciaux = BimpCache::getSocieteCommerciauxObjectsList($userClient);
+					$destinaitaire_commercial = array();
+					foreach ($commerciaux as $id => $commercial) {
+						$u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id);
+						$m = $u->isMailValid();
+						if ($m) {
+							$destinaitaire_commercial[] = $m;
+						}
+					}
                     $link = $this->getLink(array(), 'private');
                     $msg = 'Bonjour,<br/>';
                     $msg .= 'Le ticket ';
@@ -1075,6 +1084,7 @@ class BS_Ticket extends BimpAbstractFollow
                     }
                     $msg .= '<br/><b style="color:red" >N\'est pas couvert par le contrat</b>';
 
+					$code = 'ticket_sav_non_couvert_contrat';
                     mailSyn2('Demande support client non couverte', implode(', ', $destinaitaire_commercial), null, $msg);
                 }
 

@@ -9,7 +9,7 @@ class BS_Note extends BimpObject
         3 => 'Auteur seulement'
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function canView()
     {
@@ -67,7 +67,7 @@ class BS_Note extends BimpObject
 
         if ($this->isLoaded()) {
             if (BimpObject::objectLoaded($userClient) && (int) $userClient->id == (int) $this->getData('id_user_client')) {
-                // Code non fonctionnel: cette méthode doit pouvoir être appellée dans n'importe quel contexte (pas seulement lorsqu'on est sur la fiche ticket) => Donc $_REQUEST['id'] non valable. 
+                // Code non fonctionnel: cette méthode doit pouvoir être appellée dans n'importe quel contexte (pas seulement lorsqu'on est sur la fiche ticket) => Donc $_REQUEST['id'] non valable.
 //                    $list_of_note_for_this_ticket = $this->getList(Array('id_ticket' => $_REQUEST['id']));
 //                    $good_array = array('id' => 0, 'date' => '2000-01-01');
 //                    foreach ($list_of_note_for_this_ticket as $note) {
@@ -110,7 +110,7 @@ class BS_Note extends BimpObject
         return 0;
     }
 
-    // Getters: 
+    // Getters:
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -174,7 +174,7 @@ class BS_Note extends BimpObject
         );
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayAuthor()
     {
@@ -185,7 +185,7 @@ class BS_Note extends BimpObject
         return $this->displayData('user_create');
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function sendNotificationEmails()
     {
@@ -200,18 +200,35 @@ class BS_Note extends BimpObject
             $client = $ticket->getChildObject('user_client');
         }
 
-        $dests = array();
+//        $dests = array();
+        $userDests = array();
         if (BimpCore::isContextPublic()) {
             if (BimpObject::objectLoaded($client)) {
-                $dests = BimpTools::merge_array($dests, $client->get_dest('commerciaux'));
+//                $dests = BimpTools::merge_array($dests, $client->get_dest('commerciaux'));
+				$userDests = BimpTools::merge_array(
+					$userDests,
+					BimpCache::getSocieteCommerciauxObjectsList($client->getData('id'))->id
+				);
             }
 
             $resp = $ticket->getChildObject('user_resp');
             if (is_object($resp) && $resp->isLoaded()) {
-                $dests[] = $resp->getData('email');
+//                $dests[] = $resp->getData('email');
+				$userDests[] = $resp->getData('id');
             }
 
-            if (count($dests)) {
+//            if (count($dests)) {
+            if (count($userDests)) {
+                $dests = array();
+				foreach ($userDests as $idDest) {
+					$u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idDest);
+					$m = $u->isMailValid();
+					if ($m) {
+						$dests[] = $m;
+					}
+				}
+
+
                 $link = '';
                 if (BimpObject::objectLoaded($ticket)) {
                     $link = $ticket->getLink(array(), 'private');
@@ -227,6 +244,7 @@ class BS_Note extends BimpObject
                 $msg .= '<br/><br/>';
                 $msg .= 'Message : ' . $this->getData('content');
 
+				$code = 'add_note_by_client';
                 mailSyn2('BIMP - Message client sur ticket hotline #' . $ticket->id, implode(', ', $dests), '', $msg);
             }
         } elseif (BimpObject::objectLoaded($client) && $this->getData('visibility') == 1) {
@@ -257,7 +275,7 @@ class BS_Note extends BimpObject
         }
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {

@@ -44,7 +44,7 @@ class BimpController
             }
         }
 
-        // Surcharge Version: 
+        // Surcharge Version:
         if (BimpCore::getVersion()) {
             $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/controllers/' . $controllerClassBase . '.php';
             if (file_exists($version_file)) {
@@ -55,7 +55,7 @@ class BimpController
             }
         }
 
-        // Surcharge entité: 
+        // Surcharge entité:
         if (BimpCore::getExtendsEntity() != '') {
             $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/controllers/' . $controllerClassBase . '.php';
             if (file_exists($entity_file)) {
@@ -141,7 +141,7 @@ class BimpController
 
     public function init()
     {
-        
+
     }
 
     public function initLayout()
@@ -185,7 +185,7 @@ class BimpController
             return;
         }
 
-        ini_set('display_errors', 0); // Par précaution. 
+        ini_set('display_errors', 0); // Par précaution.
 //        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
 //        die('ERR : ' . $level . ' - ' . $msg . ' - ' . $file . ' - ' . $line);
         switch ($level) {
@@ -236,7 +236,8 @@ class BimpController
 //                            $erp_name = BimpCore::getConf('erp_name', '');
 //                            BimpTools::sendSmsAdmin('10 erreurs fatales en moins de 30 secondes');
 //                        } elseif ($nb < 10) {
-                            mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
+                        $code = 'erreur_fatale';
+						mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
 //                        }
                     }
                 }
@@ -548,7 +549,7 @@ class BimpController
         }
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     protected function renderSections($sections_path)
     {
@@ -906,7 +907,7 @@ class BimpController
                     $json_err_code = json_last_error();
 
                     if ($json_err_code == JSON_ERROR_UTF8) {
-                        // On tente un encodage utf-8. 
+                        // On tente un encodage utf-8.
                         $result = BimpTools::utf8_encode($result);
                         $result['warnings'] = static::getAndResetAjaxWarnings();
                         $json = json_encode($result);
@@ -1054,7 +1055,7 @@ class BimpController
         }
     }
 
-    // Enregistrements BimpObjects: 
+    // Enregistrements BimpObjects:
 
     protected function ajaxProcessSaveObject()
     {
@@ -1535,7 +1536,7 @@ class BimpController
     }
 
     // Chargements BimpObjects
-    // Views / Fields: 
+    // Views / Fields:
 
     protected function ajaxProcessLoadObjectView()
     {
@@ -1950,7 +1951,7 @@ class BimpController
                             $html = BimpRender::renderAlerts($bimpAsso->errors);
                         } else {
                             $html = $bimpAsso->renderAssociatesCheckList($field_prefix);
-                            // todo: remplacer 'default' par param correspondant (dans form/rows/...) 
+                            // todo: remplacer 'default' par param correspondant (dans form/rows/...)
                             $html = $bimpAsso->renderAddAssociateInput('default', false, $field_prefix, 0);
                         }
                     }
@@ -2619,7 +2620,7 @@ class BimpController
         );
     }
 
-    // Views Lists: 
+    // Views Lists:
 
     protected function ajaxProcessLoadObjectViewsList()
     {
@@ -2657,7 +2658,7 @@ class BimpController
         );
     }
 
-    // Stats Lists: 
+    // Stats Lists:
 
     protected function ajaxProcessLoadObjectStatsList()
     {
@@ -2828,7 +2829,7 @@ class BimpController
         );
     }
 
-    // Traitements BimpObjects: 
+    // Traitements BimpObjects:
 
     protected function ajaxProcessSetObjectNewStatus()
     {
@@ -3119,11 +3120,11 @@ class BimpController
         );
     }
 
-    // Gestion des listes: 
+    // Gestion des listes:
 
     protected function ajaxProcessLoadUserListFiltersList()
     {
-        // Obsolète. 
+        // Obsolète.
 
         $errors = array(
             'Erreur: cette fonction est désactivée'
@@ -3257,7 +3258,7 @@ class BimpController
         );
     }
 
-    // Gestion des configs utilisateur: 
+    // Gestion des configs utilisateur:
 
     protected function ajaxProcessLoadUserConfigsList()
     {
@@ -3318,7 +3319,7 @@ class BimpController
         );
     }
 
-    // Gestion des notifications : 
+    // Gestion des notifications :
 
     protected function ajaxProcessGetUserNotifications()
     {
@@ -3387,7 +3388,7 @@ class BimpController
         );
     }
 
-    // Divers: 
+    // Divers:
 
     protected function ajaxProcessLoadDocumentation()
     {

@@ -143,7 +143,8 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
                             } else {
                                 $commFourn->addObjectLog('Erreur EDI : ' . print_r($errorLn, 1));
-                                mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '') . ', debugerp@bimp.fr', null, 'Commande ' . $commFourn->getLink() . '<br/>' . print_r($errorLn, 1));
+                                $code = 'commande_ldlc_errors';
+								mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '') . ', debugerp@bimp.fr', null, 'Commande ' . $commFourn->getLink() . '<br/>' . print_r($errorLn, 1));
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
                             }
                         }
@@ -179,6 +180,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     $this->addObjectLog('Le fichier PDF fournisseur ' . $newName . ' à été ajouté.');
                     $ok = true;
                     if ($this->getData('entrepot') == 164) {
+						$code = 'commande_ldlc_facture';
                         mailSyn2("Nouvelle facture LDLC", BimpCore::getConf('mail_achat'), null, "Bonjour la facture " . $facNumber . " de la commande : " . $this->getLink() . " en livraison directe a été téléchargée");
                     }
                 }
@@ -229,7 +231,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
 
                     $ref = str_replace(' ', '', $ref);
-                    
+
                     if (strpos($ref, "AR") !== 0 || strlen(trim($ref)) > 14)
                         $errors[] = "La référence '" . $ref . "' ne semble pas être une ref LDLC correcte pour le produit " . $prod->getLink();
                     elseif ($diference > 0.08)

@@ -45,7 +45,7 @@ class BimpNote extends BimpObject
         self::BN_DEST_SOC   => 'Tiers (par mail)'
     );
 
-    // Droits users: 
+    // Droits users:
     public function canEdit()
     {
         global $user;
@@ -166,7 +166,7 @@ class BimpNote extends BimpObject
             case 'repondre':
                 if ($this->isLoaded()) {
 //                    if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER && (int) $this->getData('type_author') !== self::BN_AUTHOR_GROUP) {
-//                        $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu. 
+//                        $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu.
 //                        return 0;
 //                    }
                     global $user;
@@ -459,7 +459,7 @@ class BimpNote extends BimpObject
         );
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayDestinataire($display_input_value = true, $no_html = false)
     {
@@ -530,7 +530,7 @@ class BimpNote extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function traiteContent()
     {
@@ -604,7 +604,7 @@ class BimpNote extends BimpObject
         return 0;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionRepondre($data, &$success = '')
     {
@@ -685,7 +685,7 @@ class BimpNote extends BimpObject
         );
     }
 
-    // Overrrides: 
+    // Overrrides:
 
     public function validate()
     {
@@ -820,7 +820,7 @@ class BimpNote extends BimpObject
     {
         $return = parent::fetch($id, $parent);
 
-        // Par précaution + compat avec les notes archivées: 
+        // Par précaution + compat avec les notes archivées:
         if (in_array($this->getData('visibility'), array(3, 4))) {
             switch ($this->getData('visibility')) {
                 case 3:
@@ -896,7 +896,7 @@ class BimpNote extends BimpObject
 
         $users_delegations = array();
 
-//        $bdb = self::getBdb();        
+//        $bdb = self::getBdb();
 //        $users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
 //        if (!empty($users_delegations)) {
 //            foreach ($users_delegations as $id_user_delegation) {
@@ -1010,10 +1010,11 @@ class BimpNote extends BimpObject
         $erp_name = BimpCore::getConf('erp_name');
 
         foreach ($listUser as $idUser) {
-            $email = $bdb->getValue('user', 'email', 'rowid = ' . $idUser);
-            if (!$email) {
-                continue;
-            }
+			$bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idUser);
+//            $email = $bdb->getValue('user', 'email', 'rowid = ' . $idUser);
+//            if (!$email) {
+//                continue;
+//            }
 
             $html = '';
             $notes = BimpNote::getUserNewNotes('', 500, $idUser, true);
@@ -1049,8 +1050,10 @@ class BimpNote extends BimpObject
                     $html .= '<i>' . $note->displayDataDefault('content') . '</i>';
                 }
 
-                $email = BimpTools::cleanEmailsStr($email);
-                mailSyn2($subject, $email, null, $html);
+//                $email = BimpTools::cleanEmailsStr($email);
+				$code = 'message_ERP_nonlu';
+                $bimpUser->sendMsg($code, $subject, $html);
+				mailSyn2($subject, $email, null, $html);
             }
         }
 

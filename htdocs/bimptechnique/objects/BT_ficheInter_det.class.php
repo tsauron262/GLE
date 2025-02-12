@@ -1055,7 +1055,9 @@ class BT_ficheInter_det extends BimpDolObject
 					$message .= '<br />Heures renseignées dans la ligne de FI: ' . $this->convertTime($heuresFaites);
 					$message .= '<br />Type: ' . self::$types[$type]['label'];
 
-					mailSyn2($sujet, $commercial->getData('email') . ', contrat@bimp.fr', null, $message);
+					$code = 'depassement_heure_contrat_delegation';
+					$commercial->sendMsg($code, $sujet, $message);
+//					mailSyn2($sujet, $commercial->getData('email') . ', contrat@bimp.fr', null, $message);
 				}
 			}
 		}

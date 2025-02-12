@@ -8,7 +8,7 @@
 
 //header("Content-type: text/xml");
 }*/
-define("NOLOGIN", 1); 
+define("NOLOGIN", 1);
 $errors = array();
 
 require_once '../bimpcore/main.php';
@@ -22,10 +22,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 $controller = BimpController::getInstance('bimptask');
 
 
-$dst = urldecode($_REQUEST['dst']); 
-$src = urldecode($_REQUEST['src']); 
-$subj = urldecode($_REQUEST['subj']); 
-$txt = urldecode($_REQUEST['txt']); 
+$dst = urldecode($_REQUEST['dst']);
+$src = urldecode($_REQUEST['src']);
+$subj = urldecode($_REQUEST['subj']);
+$txt = urldecode($_REQUEST['txt']);
 
 
 if(stripos($subj, 'Réponse automatique') === 0){//on ne traite pas
@@ -45,9 +45,9 @@ if(!$traiter)
 die('ok fin');
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
-    
+
     BimpObject::loadClass('bimptask', 'BIMP_Task');
-    
+
     $errors = array();
     echo "traite" . $subj;
     $idTask = 0;
@@ -69,7 +69,7 @@ function traiteTask($dst, $src, $subj, $txt) {
     if (isset($matches[0])) {
         $idTask = str_replace($const, "", $matches[0]);
     }
-    
+
     if($dst == "sms-apple@bimp-groupe.net")
         $idTask= 25350;
 
@@ -79,12 +79,12 @@ function traiteTask($dst, $src, $subj, $txt) {
     }
     $tabTxt = explode("\n> ", $tabTxt[0]);
     $tabTxt = explode("Ce message et éventuellement les pièces jointes", $tabTxt[0]);
-    
-    
-    
+
+
+
     $txt = rtrim($tabTxt[0]);
-    
-    
+
+
     $user = new User($db);
     $sql = $db->query("SELECT u.rowid FROM `".MAIN_DB_PREFIX."user` u, ".MAIN_DB_PREFIX."user_extrafields ue WHERE ue.fk_object = u.rowid AND (email LIKE '".$src."' || ue.alias LIKE '%".$src."%')");
     if($db->num_rows($sql) > 0){
@@ -93,7 +93,7 @@ function traiteTask($dst, $src, $subj, $txt) {
     }
     else
         $user->fetch((int) BimpCore::getConf('id_user_def', null, 'bimptask'));
-    
+
 //    @$user->rights->bimptask->$dst->write = 1;
 //    @$user->rights->bimptask->other->write = 1;
 
@@ -102,9 +102,9 @@ function traiteTask($dst, $src, $subj, $txt) {
 //        if(!$task->fetch($idTask) || $task->getData("status") > 3)
 //            $idTask = 0;
 //    }
-    
+
     if ($idTask < 1) {
-        
+
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         echo "<br/>Création task";
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "", 'auto' => 0, );
@@ -117,7 +117,7 @@ function traiteTask($dst, $src, $subj, $txt) {
             $tab['type_manuel'] = 'sav';
             $tab['subj'] = 'Mail client sans SAV trouvée : '.$tab['subj'];
         }
-        
+
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $task->create());
     } else {
@@ -125,9 +125,10 @@ function traiteTask($dst, $src, $subj, $txt) {
         if($task && $task->isLoaded()){
             $task->addRepMail($user, $src, $txt);
         }
-        else
-            mailSyn2 ('Id task non existant', 'dev@bimp.fr', null, 'Un mail a était recu avec une tache inexistante : '.$idTask.'\n'.$src.'\n'.$txt);
-        
+        else	{
+			$code = 'task_not_exist';
+			mailSyn2('Id task non existant', 'dev@bimp.fr', null, 'Un mail a était recu avec une tache inexistante : ' . $idTask . '\n' . $src . '\n' . $txt);
+		}
 //        $errors = BimpTools::merge_array($errors, $task->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, 3));
     }
 
@@ -143,7 +144,7 @@ function traiteTask($dst, $src, $subj, $txt) {
             $nameFile = $fileT['name'];
             $file = BimpTools::cleanStringForUrl(str_replace('.'.pathinfo($nameFile, PATHINFO_EXTENSION), '', $nameFile)) . '.' . pathinfo($nameFile, PATHINFO_EXTENSION);
 
-            
+
             move_uploaded_file($fileT['tmp_name'], $dir.$file);
         }
     }

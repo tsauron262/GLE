@@ -20,7 +20,7 @@ class BV_Demande extends BimpObject
     );
     protected $obj_instance = null;
 
-    // Droits users: 
+    // Droits users:
 
     public function canSetAction($action)
     {
@@ -64,7 +64,7 @@ class BV_Demande extends BimpObject
                 $users[] = $id_user_affected;
             }
 
-            // Pour chaque user on vérifie que l'utilisateur n'est pas un supérieur (quelque soit le niveau hiérarchique) 
+            // Pour chaque user on vérifie que l'utilisateur n'est pas un supérieur (quelque soit le niveau hiérarchique)
             foreach ($users as $id_user) {
                 $cur_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
                 if ($cur_user->isUserSuperior($user->id, 100)) {
@@ -76,7 +76,7 @@ class BV_Demande extends BimpObject
         return 0;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -167,7 +167,7 @@ class BV_Demande extends BimpObject
         return 0;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getClientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
@@ -226,7 +226,7 @@ class BV_Demande extends BimpObject
         return $buttons;
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getTypesObjectsArray()
     {
@@ -240,7 +240,7 @@ class BV_Demande extends BimpObject
         return BV_Rule::$types;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getObjInstance()
     {
@@ -323,7 +323,7 @@ class BV_Demande extends BimpObject
         return '';
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayObj()
     {
@@ -390,7 +390,7 @@ class BV_Demande extends BimpObject
         return '';
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderQuickView()
     {
@@ -449,8 +449,8 @@ class BV_Demande extends BimpObject
             $user_demande = $this->getChildObject('user_demande');
 
             if (BimpObject::objectLoaded($user_demande) && $user_demande->id !== $user->id && BimpObject::objectLoaded($obj)) {
-                $email = BimpTools::cleanEmailsStr($user_demande->getData('email'));
-                if ($email) {
+//                $email = BimpTools::cleanEmailsStr($user_demande->getData('email'));
+//                if ($email) {
                     global $langs;
 
                     $validation_type = $this->displayValidationType();
@@ -460,7 +460,10 @@ class BV_Demande extends BimpObject
                     $msg .= 'La validation ' . $validation_type . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
                     $msg .= ' a été acceptée par ' . $user->getFullName($langs) . '<br/><br/>';
 
-                    if (mailSyn2($subject, $email, '', $msg)) {
+//                    if (mailSyn2($subject, $email, '', $msg)) {
+					$code = 'validation_piece_acceptee';
+//                    if (mailSyn2($subject, $email, '', $msg)) {
+                    if ($user_demande->sendMsg($code, $subject, $msg)) {
                         if (is_a($obj, 'BimpObject')) {
                             $obj->addObjectLog('Notification de validation ' . $validation_type . ' envoyée à "' . $email . '"');
                         }
@@ -469,7 +472,7 @@ class BV_Demande extends BimpObject
                             $obj->addObjectLog('Echec de l\'envoi de la notification de validation ' . $validation_type . ' à "' . $email . '"');
                         }
                     }
-                }
+//                }
             }
 
             if ($check_object) {
@@ -557,7 +560,9 @@ class BV_Demande extends BimpObject
                     if (!BimpObject::objectLoaded($obj)) {
                         $errors[] = 'Objet lié invalide';
                     } else {
-                        $email = BimpTools::cleanEmailsStr($user->getData('email'));
+						$code = "check_affected_user";
+//                        $email = BimpTools::cleanEmailsStr($user->getData('email'));
+						$email = $user->isMailValid($code);
 
                         if (!$email) {
                             $errors[] = 'Adresse e-mail absente pour l\'utilisateur ' . $user->getLink();
@@ -596,7 +601,8 @@ class BV_Demande extends BimpObject
                             }
 
                             $this->addObjectLog('Demande attribuée à {{Utilisateur:' . $id_new_user_affected . '}}' . ($infos ? '<br/><b>Motif : </b>' . $infos : ''));
-                            if (!mailSyn2($subject, $email, '', $msg)) {
+//                            if (!mailSyn2($subject, $email, '', $msg)) {
+                            if (!$user->sendMsg($code, $subject, $msg)) {
                                 $errors[] = 'Echec de l\'envoi de l\'e-mail de notification à ' . $user->getName();
                                 $this->addObjectLog('Echec de l\'envoi de la notification à ' . $user->getName());
                             }
@@ -645,7 +651,7 @@ class BV_Demande extends BimpObject
         return 0;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionAccept($data, &$success)
     {
@@ -701,6 +707,7 @@ class BV_Demande extends BimpObject
             $obj = $this->getObjInstance();
 
             if (BimpObject::objectLoaded($user_demande) && BimpObject::objectLoaded($obj)) {
+				$code = "validation_piece_refusee";
                 $email = BimpTools::cleanEmailsStr($user_demande->getData('email'));
                 if ($email) {
                     global $langs;
@@ -753,7 +760,7 @@ class BV_Demande extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function reset()
     {
@@ -774,7 +781,7 @@ class BV_Demande extends BimpObject
         return $errors;
     }
 
-    // Méthodes statiques : 
+    // Méthodes statiques :
 
     public static function getUserNotificationsDemandes($id_user, $tms = '', $options = array(), &$errors = array())
     {

@@ -144,7 +144,7 @@ class BWSApi
         set_error_handler(array($this, 'handleError'), E_ALL);
     }
 
-    // Getters statics: 
+    // Getters statics:
 
     public static function getRequestsArray()
     {
@@ -157,7 +157,7 @@ class BWSApi
         return $requests;
     }
 
-    // Getters: 
+    // Getters:
 
     public function getParam($param_path, $default_value = null)
     {
@@ -218,11 +218,11 @@ class BWSApi
         return $children_data;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function init($login, $token)
     {
-        // check requête: 
+        // check requête:
         if (!isset(self::$requests[$this->request_name])) {
             $this->addError('REQUEST_INVALID', 'La requête "' . $this->request_name . '" n\'existe pas');
             return false;
@@ -234,7 +234,7 @@ class BWSApi
             return false;
         }
 
-        // check user: 
+        // check user:
         $login = base64_decode($login);
         $this->ws_user = BimpCache::findBimpObjectInstance('bimpwebservice', 'BWS_User', array(
                     'email' => $login
@@ -272,7 +272,7 @@ class BWSApi
             }
         }
 
-        // Init USER 
+        // Init USER
         $id_user = (int) $this->ws_user->getIdUserErpUsed();
         if (!$id_user) {
             BimpCore::addlog('Utilisateur ERP associé non défini', Bimp_Log::BIMP_LOG_URGENT, 'ws', $this->ws_user, array(), true);
@@ -532,6 +532,7 @@ class BWSApi
                     $txt .= '<pre>' . print_r($this->params, 1) . '</pre>';
                 }
 
+				$code = 'webservice_error_fatal';
                 mailSyn2('ERREUR FATALE WEBSERVICE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email', 'f.martinez@bimp.fr'), '', $txt);
 
                 BimpCore::addlog('ERREUR FATALE WEBSERVICE - ' . $msg, Bimp_Log::BIMP_LOG_URGENT, 'ws', null, array(
@@ -565,7 +566,7 @@ class BWSApi
         }
     }
 
-    // Requêtes: 
+    // Requêtes:
 
     protected function wsRequest_authenticate()
     {
@@ -604,7 +605,7 @@ class BWSApi
         if (!count($this->errors)) {
             $object = $this->findObject();
             if (BimpObject::objectLoaded($object)) {
-                // Check des children: 
+                // Check des children:
                 $children = BimpTools::getArrayValueFromPath($this->params, 'children', '');
                 if ($children) {
                     $children = json_decode($children);
@@ -699,7 +700,7 @@ class BWSApi
                     }
                 }
 
-                // Check liste: 
+                // Check liste:
                 $list = $this->checkObjectRightFilters($obj_instance, $list);
             }
 

@@ -61,7 +61,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'components/BC_Input.php';
     require_once $dir . 'components/BC_Page.php';
     require_once $dir . 'components/BC_Graph.php';
-    
+
 //    require_once __DIR__ . '/components/BCV2_Lib.php';
 
     require_once $dir . 'BimpStruct.php';
@@ -76,8 +76,8 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpMailCore.php';
     require_once $dir . 'BimpModuleConf.php';
     require_once $dir . 'BimpLayout.php';
-    
-    
+
+
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
     BimpCore::setMaxExecutionTime(600);
@@ -98,6 +98,7 @@ if (!defined('BIMP_LIB')) {
                     $msg = 'Dans conf, constante PATH_EXTENDS à remplacer par BIMP_EXTENDS_ENTITY avec la valeur "' . BIMP_EXTENDS_ENTITY . '"';
                     $msg .= '<br/><br/>';
                     $msg .= 'ERP: <b>' . DOL_URL_ROOT . '</b>';
+					$code = 'PATH_EXTENDS_a_modifier';
                     mailSyn2('PATH_ENTENDS à modifier', BimpCore::getConf('devs_email'), '', $msg);
                     BimpCore::setConf('obsolete_extends_notif_date_send', date('Y-m-d'));
                 }

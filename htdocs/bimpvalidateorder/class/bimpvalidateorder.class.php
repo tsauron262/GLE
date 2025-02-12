@@ -56,7 +56,7 @@ class BimpValidateOrder
 
     /**
      * Triggered when validating an order
-     * 
+     *
      * @param type $user        the user who try to validate the order
      * @param type $price_order the price of the order
      * @param type $order       the order object
@@ -347,8 +347,10 @@ class BimpValidateOrder
     private function sendEmailToResponsible($id_responsible, $user, $order)
     {
 
-        $doli_user_responsible = new User($this->db);
-        $doli_user_responsible->fetch($id_responsible);
+//        $doli_user_responsible = new User($this->db);
+//        $doli_user_responsible->fetch($id_responsible);
+		$bimp_user_responsible = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_responsible);
+
 
         $subject = "BIMP ERP - Demande de validation de commande client";
 
@@ -366,6 +368,8 @@ class BimpValidateOrder
             $msg .= "\n\n" . $extra;
         }
 
-        return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
+//        return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
+		$code = 'demande_validation_commande';
+		return $bimp_user_responsible->sendMail($code, $subject, $msg);
     }
 }

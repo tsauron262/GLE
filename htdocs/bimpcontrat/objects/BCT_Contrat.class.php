@@ -26,7 +26,7 @@ class BCT_Contrat extends BimpDolObject
         2 => 'A date'
     );
 
-    // Droits user : 
+    // Droits user :
 
     public function canClientView()
     {
@@ -97,7 +97,7 @@ class BCT_Contrat extends BimpDolObject
         return parent::canSetAction($action);
     }
 
-    // Getters booléens : 
+    // Getters booléens :
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
@@ -174,7 +174,7 @@ class BCT_Contrat extends BimpDolObject
         return 1;
     }
 
-    // Getters params : 
+    // Getters params :
 
     public function getActionsButtons()
     {
@@ -188,7 +188,7 @@ class BCT_Contrat extends BimpDolObject
             );
         }
 
-        // Valider : 
+        // Valider :
         if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
             $buttons[] = array(
                 'label'   => 'Valider',
@@ -329,7 +329,7 @@ class BCT_Contrat extends BimpDolObject
         return $buttons;
     }
 
-    // Getters données : 
+    // Getters données :
 
     public function getBimpObjectsLinked($not_for = '')
     {
@@ -361,7 +361,7 @@ class BCT_Contrat extends BimpDolObject
         }
 
         if (isset($this->data['condregl']) && (int) $this->data['condregl']) {
-            return (int) $this->data['condregl']; // pas getData() sinon boucle infinie (getCondReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+            return (int) $this->data['condregl']; // pas getData() sinon boucle infinie (getCondReglementBySociete() étant définie en tant que callback du param default_value pour ce champ).
         }
 
         return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
@@ -388,7 +388,7 @@ class BCT_Contrat extends BimpDolObject
         }
 
         if (isset($this->data['moderegl']) && (int) $this->data['moderegl']) {
-            return (int) $this->data['moderegl']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+            return (int) $this->data['moderegl']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ).
         }
 
         return (int) BimpCore::getConf('societe_id_default_mode_reglement', 0);
@@ -643,7 +643,7 @@ class BCT_Contrat extends BimpDolObject
         return $lines;
     }
 
-    // Rendus HTML : 
+    // Rendus HTML :
 
     public function renderHeaderExtraLeft()
     {
@@ -1374,7 +1374,7 @@ class BCT_Contrat extends BimpDolObject
 
         $line_instance = BimpObject::getInstance('bimpcontrat', 'BCT_ContratLine');
 
-        // Overview: 
+        // Overview:
         $content = '<div class="periodic_operations_overview_content">';
         $content .= $line_instance->renderPeriodicOperationsToProcessOverview($params);
         $content .= '</div>';
@@ -1397,7 +1397,7 @@ class BCT_Contrat extends BimpDolObject
         $html .= '</div>';
 
         if (!(int) $params['id_fourn']) {
-            // Facturations: 
+            // Facturations:
             $tabs[] = array(
                 'id'            => 'fac_periods_tab',
                 'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Facturations périodiques',
@@ -1406,7 +1406,7 @@ class BCT_Contrat extends BimpDolObject
             );
         }
 
-        // Achats: 
+        // Achats:
         $tabs[] = array(
             'id'            => 'achat_periods_tab',
             'title'         => BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Achats périodiques',
@@ -1419,7 +1419,7 @@ class BCT_Contrat extends BimpDolObject
         return $html;
     }
 
-    // Traitements : 
+    // Traitements :
 
     public function addLinesToFacture($id_facture, $lines_data = null, $commit_each_line = false, $new_qties = true, &$nOk = 0)
     {
@@ -1457,7 +1457,7 @@ class BCT_Contrat extends BimpDolObject
 
         $lines_data = array();
 
-        // Trie des lignes par positions dans le contrat: 
+        // Trie des lignes par positions dans le contrat:
         foreach ($orderedLines as $id_contrat => $lines) {
             $lines_data[$id_contrat] = array();
 
@@ -1485,7 +1485,7 @@ class BCT_Contrat extends BimpDolObject
             $contrat = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_Contrat', (int) $id_contrat);
 
             if (BimpObject::objectLoaded($contrat)) {
-                // Création de la ligne de l'intitulé du contrat d'origine si nécessaire: 
+                // Création de la ligne de l'intitulé du contrat d'origine si nécessaire:
                 $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
                             'id_obj'             => (int) $facture->id,
                             'linked_object_name' => 'contrat_origin_label',
@@ -1531,7 +1531,7 @@ class BCT_Contrat extends BimpDolObject
 
                 $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
                 if ((int) $line->getData('line_type') === BCT_ContratLine::TYPE_TEXT) {
-                    // Création d'une ligne de texte: 
+                    // Création d'une ligne de texte:
                     $fac_line->validateArray(array(
                         'id_obj'             => (int) $facture->id,
                         'type'               => Bimp_FactureLine::LINE_TEXT,
@@ -1557,7 +1557,7 @@ class BCT_Contrat extends BimpDolObject
                     continue;
                 }
 
-                // Création de la ligne de facture: 
+                // Création de la ligne de facture:
                 $fac_line->validateArray(array(
                     'id_obj'             => (int) $facture->id,
                     'type'               => ($line->getData('fk_product') > 0 ? Bimp_FactureLine::LINE_PRODUCT : Bimp_FactureLine::LINE_FREE),
@@ -1578,7 +1578,7 @@ class BCT_Contrat extends BimpDolObject
                     $periods_data = $line->getPeriodsToBillData();
                     if ($periods_data['date_first_period_start'] == $periods_data['date_next_period_tobill'] &&
                             $periods_data['date_fac_start'] != $periods_data['date_first_period_start']) {
-                        // Première période partielle : 
+                        // Première période partielle :
                         $date_from = date('Y-m-d 00:00:00', strtotime($periods_data['date_fac_start']));
                         $dt = new DateTime($periods_data['date_first_period_end']);
 
@@ -1633,7 +1633,7 @@ class BCT_Contrat extends BimpDolObject
                 $line_errors = $fac_line->create($line_warnings, true);
 
                 if (!count($line_errors)) {
-                    // Ajout de la remise: 
+                    // Ajout de la remise:
                     $remise_percent = (float) $line->getData('remise_percent');
                     if ($remise_percent) {
                         $remises_errors = array();
@@ -1675,7 +1675,7 @@ class BCT_Contrat extends BimpDolObject
             }
         }
 
-        // Assos contrats / factures : 
+        // Assos contrats / factures :
         if (count($assos) && (!count($errors) || ($use_db_transactions && $commit_each_line))) {
             foreach ($assos as $id_contrat) {
                 addElementElement('bimp_contrat', 'facture', $id_contrat, $id_facture);
@@ -1721,7 +1721,7 @@ class BCT_Contrat extends BimpDolObject
 
         $lines_data = array();
 
-        // Trie des lignes par positions dans le contrat: 
+        // Trie des lignes par positions dans le contrat:
         foreach ($orderedLines as $id_contrat => $lines) {
             $lines_data[$id_contrat] = array();
 
@@ -1775,7 +1775,7 @@ class BCT_Contrat extends BimpDolObject
 
                 $cf_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
 
-                // Création de la ligne de commande fourn: 
+                // Création de la ligne de commande fourn:
                 $cf_line->validateArray(array(
                     'id_obj'             => (int) $cf->id,
                     'type'               => Bimp_CommandeFournLine::LINE_PRODUCT,
@@ -1795,7 +1795,7 @@ class BCT_Contrat extends BimpDolObject
                     $periods_data = $line->getPeriodsToBuyData();
                     if ($periods_data['date_next_achat'] == $periods_data['date_achat_start'] &&
                             $periods_data['date_achat_start'] != $periods_data['date_first_period_start']) {
-                        // Première période partielle : 
+                        // Première période partielle :
                         $date_from = date('Y-m-d 00:00:00', strtotime($periods_data['date_achat_start']));
                         $dt = new DateTime($periods_data['date_first_period_end']);
 
@@ -1886,7 +1886,7 @@ class BCT_Contrat extends BimpDolObject
             }
         }
 
-        // Assos contrats / factures : 
+        // Assos contrats / factures :
         if (count($assos) && (!count($errors) || ($use_db_transactions && $commit_each_line))) {
             foreach ($assos as $id_contrat) {
                 addElementElement('bimp_contrat', 'order_supplier', $id_contrat, $id_cf);
@@ -1917,7 +1917,7 @@ class BCT_Contrat extends BimpDolObject
         return $propal;
     }
 
-    // Actions : 
+    // Actions :
 
     public function actionValidate($data, &$success = '')
     {
@@ -1992,7 +1992,7 @@ class BCT_Contrat extends BimpDolObject
                         $errors[] = 'Echec du transfert des lignes - ' . $this->db->err();
                     }
 
-                    // Transfert des fichiers: 
+                    // Transfert des fichiers:
                     if (!count($errors)) {
                         $files = $contrat_to_import->getChildrenObjects('files');
 
@@ -2005,7 +2005,7 @@ class BCT_Contrat extends BimpDolObject
                         }
                     }
 
-                    // Suppr du contrat importé: 
+                    // Suppr du contrat importé:
                     if (!count($errors)) {
                         $this->addObjectLog('Import et fusion du contrat ' . $contrat_to_import->getRef());
 
@@ -2016,7 +2016,7 @@ class BCT_Contrat extends BimpDolObject
                         }
                     }
 
-                    // Autres transferts: 
+                    // Autres transferts:
                     if (!count($errors)) {
                         $this->db->update('element_element', array(
                             'fk_source' => $this->id
@@ -2225,7 +2225,7 @@ class BCT_Contrat extends BimpDolObject
         return $errors;
     }
 
-    // Méthodes statiques : 
+    // Méthodes statiques :
 
     public static function RenouvAuto()
     {
@@ -2560,7 +2560,8 @@ class BCT_Contrat extends BimpDolObject
                         }
                         $msg .= '<br/><br/>Par conséquent, vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.';
 
-                        if (mailSyn2($subject, $email, '', $msg)) {
+                        $code = 'alerte_abonnement_unpaid';
+						if (mailSyn2($subject, $email, '', $msg)) {
                             $out .= ' [OK]';
                             $fac->updateField('alert_abonnement_unpaid_send', 1);
                         } else {

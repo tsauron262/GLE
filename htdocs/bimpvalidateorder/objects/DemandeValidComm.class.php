@@ -85,7 +85,7 @@ class DemandeValidComm extends BimpObject
         $id_obj = (int) $this->getData('id_piece');
         if (!is_null($id_obj) && isset(self::$objets[$obj]))
             return BimpCache::getBimpObjectInstance(self::$objets[$obj]['module'], self::$objets[$obj]['obj_name'], $id_obj);
-        
+
         return null;
     }
 
@@ -201,8 +201,9 @@ class DemandeValidComm extends BimpObject
                 $subject_mail .= ', client inconnu';
         }
 
-
-        mailSyn2($subject_mail, $user_affected->getData('email'), null, $message_mail);
+		$code = "create_demande_validation_comm";
+//        mailSyn2($subject_mail, $user_affected->getData('email'), null, $message_mail);
+		$user_affected->sendMsg($code, $subject_mail, $message_mail);
 
         return $errors;
     }
@@ -293,7 +294,9 @@ class DemandeValidComm extends BimpObject
                     case self::TYPE_IMPAYE:
                         $message_mail .= (((int) $value == self::STATUS_VALIDATED) ? 'malgré les' : 'à cause des') . ' retards de paiement du client';
                 }
-                mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
+//                mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
+				$code = "onvalidate_demande_validation_piece";
+				$user_ask->sendMsg($code, $subject, $message_mail);
             }
         }
     }
@@ -392,7 +395,7 @@ class DemandeValidComm extends BimpObject
         if (method_exists($obj, 'actionValidate')) {
             $errorsVal = $obj->actionValidate(array(), $sucessPiece);
             $sucess .= '<br/>' . $sucessPiece;
-            
+
             if (count($errorsVal['errors'])) {
                 $errors[] = 'Validation ' . $name . ' impossible';
                 $errors = BimpTools::merge_array($errors, $errorsVal['errors']);
@@ -480,7 +483,7 @@ class DemandeValidComm extends BimpObject
                 $this->updateField('status', self::STATUS_VALIDATED);
             else
                 $errors[] = 'Validation impossible';
-            
+
             $filter = array(
                 'type_de_piece' => (int) $this->getData('type_de_piece'),
                 'id_piece'      => (int) $this->getData('id_piece'),
@@ -509,15 +512,15 @@ class DemandeValidComm extends BimpObject
                 'warnings' => $warnings
             );
     }
-    
+
     public function actionRefuseDemande($data, &$success)
     {
         $errors = $warnings = array();
         $success_callback = 'bimp_reloadPage();';
 
-        if (!$this->isLoaded()) 
+        if (!$this->isLoaded())
             $errors[] = "Objet non chargé";
-        else 
+        else
             $errors = $this->refuseDemande();
 
         return array(
@@ -526,7 +529,7 @@ class DemandeValidComm extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
+
     private function refuseDemande() {
         global $user;
         $errors = array();
@@ -536,10 +539,10 @@ class DemandeValidComm extends BimpObject
         $val_comm_validation = 0;
 
         list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp, $percent_remise) = $validateur->getObjectParams($object, $errors);
-        
+
         if(count($errors))
             return $errors;
-        
+
         switch ($type) {
             case self::TYPE_ENCOURS:
                 $can_validate = $validateur->userCanValidate((int) $user->id, $secteur, $type, $class, $val_euros, $object, $val_comm_validation);
@@ -557,12 +560,12 @@ class DemandeValidComm extends BimpObject
                 $errors[] = "Type de demande invalide";
                 break;
         }
-        
+
         if(!$can_validate) {
             $errors[] = "Vous n'avez pas les droits requis pour refuser cette demande";
             return $errors;
         }
-        
+
         $now = date('Y-m-d H:i:s');
         $this->updateField('id_user_valid', $user->id);
         $this->updateField('date_valid', $now);

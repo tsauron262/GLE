@@ -7283,10 +7283,16 @@ class Bimp_Facture extends BimpComm
                     $facs_ids .= ($facs_ids ? ', ' : '') . $fac_data['id'];
                 }
 
-                $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
-
-                $return .= ' - ' . $facs_ids . ' => Mail to ' . $mail . ' : ';
-                if (mailSyn2('Facture brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
+//                $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
+				$userComm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+				$code = "rappel_facture_brouillon";
+				$sujet = "Facture brouillon à régulariser";
+				$params = array(
+					'check_disponibility'	=> true,
+					'allow_superior'	=> true
+				);
+                $return .= ' - ' . $facs_ids . /*' => Mail to ' . $mail . */ ' : ';
+                if ($userComm->sendMsg($code, $sujet, $msg, $params)) {
                     $return .= ' [OK]';
                     $i++;
                 } else {
@@ -7404,7 +7410,8 @@ class Bimp_Facture extends BimpComm
                                 $soc = $facture->getChildObject('client');
 
                                 // Envoi e-mail:
-                                $cc = '';
+//                                $cc = '';
+								$cc_ids = array();
                                 $subject = 'Facture financement impayée - ' . $facture->getRef();
 
                                 if (BimpObject::objectLoaded($soc)) {
@@ -7415,21 +7422,22 @@ class Bimp_Facture extends BimpComm
                                     'fk_user'
                                 ));
 
-                                if (is_array($comms)) {
-                                    foreach ($comms as $c) {
-                                        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $c['fk_user']);
-
-                                        if (BimpObject::objectLoaded($commercial)) {
-                                            $cc .= ($cc ? ', ' : '') . BimpTools::cleanEmailsStr($commercial->getData('email'));
-                                        }
-                                    }
-                                }
+								if (is_array($comms)) {
+									foreach ($comms as $c) {
+										$commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $c['fk_user']);
+                                        if (BimpObject::objectLoaded($commercial) && $commercial->isMailValid()) {
+                                            $cc .= ($cc ? ', ' : '') . $commercial->isMailValid();
+										}
+									}
+								}
 
                                 $msg = 'Bonjour, ' . "\n\n";
                                 $msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
                                 $msg .= date('d / m / Y', strtotime($fac_date_lim));
 
                                 $out .= ' - Fac ' . $facture->getLink() . ' : ';
+
+								$code = "rappel_facture_financement_impayee";
                                 if (mailSyn2($subject, $to, '', $msg, array(), array(), array(), $cc)) {
                                     $out .= '[OK]';
                                 } else {

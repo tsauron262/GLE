@@ -2339,9 +2339,35 @@ class Bimp_User extends BimpObject
 	}
 
 	public function sendMsg($code, $subject, $msg, $params = array())	{
+		global $userMessages;
+		if ($code) {
+			$active = (isset($userMessages[$code]['active']) ? $userMessages[$code]['active'] : 1);
+			// TODO / gerer les désactivation depuis l'interface
+			if (!$active) {
+				return false;
+			}
+		}
 		$to = $this->isMailValid($code, $params);
-		if($to)
+		if ($to) {
 			return mailSyn2($subject, $to, '', $msg);
+		}
+	}
+
+	static public function getListEmailsVerifies($users)	{
+		if (!is_array($users))	{
+			$users = array($users);
+		}
+		$listEmais = array();
+		foreach ($users as $user) {
+			if (is_int($user))	{
+				$user =  BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user);
+			}
+			$to = $user->isMailValid();
+			if(!in_array($to, $listEmais) && $to != '')	{
+				$listEmais[] = $to;
+			}
+		}
+		return implode(',', $listEmais);
 	}
 
     // Actions:

@@ -257,10 +257,8 @@ class securLogSms
                 }
             }
 
-//            $toM = $this->traiteMail();
-//            if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, null, $text . ' IP : ' . $this->ip)) {
-			$bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->user->id);
-			if ($bimpUser->sendMsg('code_BIMP', 'Code BIMP', $text))		{
+            $toM = $this->traiteMail();
+            if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, null, $text . ' IP : ' . $this->ip)) {
                 $this->message[] = 'Code envoyé à ' . substr($toM, 0, 4) . "*******" . substr($toM, -7) . "<br/><br/>";
                 $okMail = true;
             }

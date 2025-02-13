@@ -52,18 +52,18 @@ class Cron
             foreach ($information as $id_fi => $i) {
                 $fi->fetch($id_fi);
                 $this->output .= $fi->getData('ref') . " retard de " . $i['days'] . " jours " . $tech->getData('email') . "<br />";
-                $mail .= str_replace('/bimpinv01072020', 'https://erp.bimp.fr/bimp8', $fi->getLink()) . " retard de " . $i['days'] . " jours<br />";
+                $mail .= /*str_replace('/bimpinv01072020', 'https://erp.bimp.fr/bimp8', $fi->getLink())*/ $fi->getLink() . " retard de " . $i['days'] . " jours<br />";
             }
             $mail .= "<br />Si la régularisation a été faite entre temps, merci de ne pas tenir compte de cet email.<br />Cordialement.";
 
 //            $emailSendTo = BimpTools::cleanEmailsStr($tech->getData('email'));
             $sujet = 'Fiches d\'intervention en brouillon';
 
-            if(in_array($id_tech, $this->idTechForVanina)) {
+            /*if(in_array($id_tech, $this->idTechForVanina)) {
                 $sujet = 'Fiche d\'intervention en brouillon de ' . $tech->getName();
                 $emailSendTo = $this->sendEmailDefault;
                 $mail .= '<br /><br />Ceci est un mail de redirection de ' . $tech->getData('email') . ' vers ' . $this->sendEmailDefault;
-            }
+            }*/
 
             global $langs;
             echo '<h1>'.$tech->dol_object->getFullName($langs).'</h1><br/>'.$mail;

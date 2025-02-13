@@ -11,7 +11,7 @@ class BS_Inter extends BimpObject
         2 => array('label' => 'Terminée', 'classes' => array('danger'))
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function canClientView()
     {
@@ -21,7 +21,7 @@ class BS_Inter extends BimpObject
         return 1;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -54,7 +54,7 @@ class BS_Inter extends BimpObject
         parent::isActionAllowed($action, $errors);
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getUserCurrentIntersFilters()
     {
@@ -172,7 +172,7 @@ class BS_Inter extends BimpObject
         return $html;
     }
 
-    // Actions: 
+    // Actions:
     public function actionClose($data, &$success)
     {
         $errors = array();
@@ -231,11 +231,20 @@ class BS_Inter extends BimpObject
                     $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de confirmation au client');
                 }
 
-                $to = implode(',', $userClient->get_dest('commerciaux'));
+//                $to = implode(',', $userClient->get_dest('commerciaux'));
+                $client = $userClient->getChildObject('client');
+				$to = '';
+
+				$params = array(); // parametres pour validation des emails
+				if (BimpObject::objectLoaded($client)) {
+				    $commerciaux = $client->getCommercial();
+					$to = $commerciaux->getListEmailsVerifies($params);
+				}
 
                 if ($to) {
                     $link = $ticket->getLink(array(), 'private');
                     $msg = 'Une intervention a été créée sur le ticket support ' . $link;
+					$code = "create_inter_ticket";
                     mailSyn2("BIMP - Intervention sur le ticket : " . $ticket->getData('ticket_number'), $to, '', $msg);
                 }
             }

@@ -79,6 +79,12 @@ objects:
                 module: bimpapple
                 name: GSX_Repair
             
+    centre:
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_CentreSav
+
 sections:
     - type: tabs
       tabs: 
@@ -209,6 +215,12 @@ sections:
                       object: repa   
                       
                       
-                      
+        centre:
+            label: Centres SAV
+            icon: fas_store
+            sections:
+                - type: list
+                  list:
+                    object: centre
                       
                 

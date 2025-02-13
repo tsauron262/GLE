@@ -2193,49 +2193,53 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
 
-            $contrats = BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', array(
-                        'fk_soc'  => $this->id,
-                        'version' => 1,
-                        'statut'  => 11
-            ));
+            if(BimpTools::isModuleDoliActif('bimpcontract')){
+                $contrats = BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', array(
+                            'fk_soc'  => $this->id,
+                            'version' => 1,
+                            'statut'  => 11
+                ));
 
-            if (!empty($contrats)) {
-                $html .= '<br/><div class="object_header_infos">';
-                $s = (count($contrats) > 1) ? 's' : '';
-                $html .= 'Contrat' . $s . ' actif' . $s . ' : ';
+                if (!empty($contrats)) {
+                    $html .= '<br/><div class="object_header_infos">';
+                    $s = (count($contrats) > 1) ? 's' : '';
+                    $html .= 'Contrat' . $s . ' actif' . $s . ' : ';
 
-                $fl = true;
-                foreach ($contrats as $contrat) {
-                    if (!$fl) {
-                        $html .= ', ';
-                    } else {
-                        $fl = false;
+                    $fl = true;
+                    foreach ($contrats as $contrat) {
+                        if (!$fl) {
+                            $html .= ', ';
+                        } else {
+                            $fl = false;
+                        }
+                        $html .= $contrat->getLink(array('object_icons' => 0));
                     }
-                    $html .= $contrat->getLink(array('object_icons' => 0));
+                    $html .= '</div>';
                 }
-                $html .= '</div>';
             }
 
-            $contrats = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_Contrat', array(
-                        'fk_soc'  => $this->id,
-                        'version' => 2
-            ));
+            if(BimpTools::isModuleDoliActif('bimpcontrat')){
+                $contrats = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_Contrat', array(
+                            'fk_soc'  => $this->id,
+                            'version' => 2
+                ));
 
-            if (!empty($contrats)) {
-                $html .= '<br/><div class="object_header_infos">';
-                $s = (count($contrats) > 1) ? 's' : '';
-                $html .= 'Contrat' . $s . ' d\'abonnement : ';
+                if (!empty($contrats)) {
+                    $html .= '<br/><div class="object_header_infos">';
+                    $s = (count($contrats) > 1) ? 's' : '';
+                    $html .= 'Contrat' . $s . ' d\'abonnement : ';
 
-                $fl = true;
-                foreach ($contrats as $contrat) {
-                    if (!$fl) {
-                        $html .= '<br/>';
-                    } else {
-                        $fl = false;
+                    $fl = true;
+                    foreach ($contrats as $contrat) {
+                        if (!$fl) {
+                            $html .= '<br/>';
+                        } else {
+                            $fl = false;
+                        }
+                        $html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>'));
                     }
-                    $html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>'));
+                    $html .= '</div>';
                 }
-                $html .= '</div>';
             }
 
             if ($this->getData('solvabilite_status') > 0) {

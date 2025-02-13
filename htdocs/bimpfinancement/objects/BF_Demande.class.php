@@ -82,7 +82,7 @@ class BF_Demande extends BimpObject
     protected $default_values = null;
     protected $missing_serials = null;
 
-    // Droits users: 
+    // Droits users:
 
     public function canClientView()
     {
@@ -139,7 +139,7 @@ class BF_Demande extends BimpObject
 
         $status = (int) $this->getData('status');
         switch ($field) {
-            case 'agreement_number': // Editable uniquement via demande refin. 
+            case 'agreement_number': // Editable uniquement via demande refin.
                 return 0;
 
             case 'marge_souhaitee':
@@ -230,13 +230,13 @@ class BF_Demande extends BimpObject
             return 0;
         }
 
-        // La DF doit obligatoirement être prise en charge pour effectuer toute action 
+        // La DF doit obligatoirement être prise en charge pour effectuer toute action
         if ($action !== 'takeCharge' && !(int) $this->getData('id_user_resp')) {
             $errors[] = 'Cette demande de location n\'est pas prise en charge';
             return 0;
         }
 
-        if (!in_array($action, array('reopen')) && $this->isClosed()) {
+        if (!in_array($action, array('reopen', 'createFacturesRevente')) && $this->isClosed()) {
             $errors[] = 'Cette demande de location est fermée';
             return 0;
         }
@@ -732,7 +732,7 @@ class BF_Demande extends BimpObject
         return 0;
     }
 
-    // Getters Params: 
+    // Getters Params:
 
     public function getActionsButtons()
     {
@@ -1198,7 +1198,7 @@ class BF_Demande extends BimpObject
         );
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getClientContactsArray($include_empty = true, $active_only = true)
     {
@@ -1486,7 +1486,7 @@ class BF_Demande extends BimpObject
         return $this->default_values;
     }
 
-    // getters données: 
+    // getters données:
 
     public function addNotificationNote($content, $type_author = BimpNote::BN_AUTHOR_USER, $email = '', $auto = 0, $visibility = BimpNote::BN_MEMBERS, $delete_on_view = 0)
     {
@@ -1548,7 +1548,7 @@ class BF_Demande extends BimpObject
                 }
                 return $this->getData('id_user_resp');
 
-            // Génération contrat: 
+            // Génération contrat:
             case 'client_name':
             case 'client_email':
             case 'client_is_company':
@@ -1751,7 +1751,7 @@ class BF_Demande extends BimpObject
                 }
                 return '';
 
-            // Génération factures: 
+            // Génération factures:
             case 'fac_fourn_libelle':
             case 'fac_fin_libelle':
                 return 'Contrat de location n° ' . str_replace('DF', '', $this->getRef());
@@ -1845,7 +1845,7 @@ class BF_Demande extends BimpObject
                 }
                 return 0;
 
-            // Factures de revente: 
+            // Factures de revente:
             case 'fac_fourn_rev_id_fourn':
                 $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
                 if ($id_refin) {
@@ -2132,7 +2132,7 @@ class BF_Demande extends BimpObject
         return $msgs;
     }
 
-    // Getters statics: 
+    // Getters statics:
 
     public static function getDocTypeLabel($doc_type)
     {
@@ -2143,7 +2143,7 @@ class BF_Demande extends BimpObject
         return $doc_type;
     }
 
-    // Getters Sources: 
+    // Getters Sources:
 
     public function getMainSource()
     {
@@ -2292,7 +2292,7 @@ class BF_Demande extends BimpObject
         return $return;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displaySourceName($id_source = 'main')
     {
@@ -2394,7 +2394,7 @@ class BF_Demande extends BimpObject
         return BimpTools::displayMoneyValue($this->getTotalAFinancer(), 'EUR', 1, 0, 0, 2, 1);
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
@@ -2424,7 +2424,7 @@ class BF_Demande extends BimpObject
         }
 
 //        if (!(int) $this->getData('id_main_source')) {
-        // Messages signature devis: 
+        // Messages signature devis:
         $signature_devis = $this->getChildObject('signature_devis');
         if (BimpObject::objectLoaded($signature_devis)) {
             if (!$signature_devis->isSigned()) {
@@ -2444,7 +2444,7 @@ class BF_Demande extends BimpObject
             }
         }
 
-        // Messages signature contrat: 
+        // Messages signature contrat:
         $signature_contrat = $this->getChildObject('signature_contrat');
         if (BimpObject::objectLoaded($signature_contrat)) {
             if (!$signature_contrat->isSigned()) {
@@ -2464,7 +2464,7 @@ class BF_Demande extends BimpObject
             }
         }
 
-        // Messages signature PVR: 
+        // Messages signature PVR:
         $signature_pvr = $this->getChildObject('signature_pvr');
         if (BimpObject::objectLoaded($signature_pvr)) {
             if (!$signature_pvr->isSigned()) {
@@ -2826,7 +2826,7 @@ class BF_Demande extends BimpObject
                             $html .= '<table class="objectSubList">';
                             $html .= '<tbody>';
 
-                            // TODO: A refondre - id_fournisseur remplacé par commandes_fourn (id_comm_fourn => qty) 
+                            // TODO: A refondre - id_fournisseur remplacé par commandes_fourn (id_comm_fourn => qty)
 //                            $fourn_lines = $this->getChildrenObjects('lines', array('id_fournisseur' => (int) $id_fourn), 'position', 'asc');
 //                            foreach ($fourn_lines as $fourn_line) {
 //                                $line = $fourn_line;
@@ -3098,7 +3098,7 @@ class BF_Demande extends BimpObject
                         'icon' => 'fas_file-invoice-dollar'
             ));
 
-            // Factures fournisseurs: 
+            // Factures fournisseurs:
             $factures = array();
             $facture = null;
             $content = '';
@@ -3618,7 +3618,7 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function editClientDataFromSource($client_data)
     {
@@ -3728,7 +3728,7 @@ class BF_Demande extends BimpObject
 
         if ($this->isLoaded()) {
             if ((int) $this->getData('closed')) {
-                return;
+                return array();
             }
             $cur_status = (int) $this->getData('status');
 
@@ -3790,6 +3790,7 @@ class BF_Demande extends BimpObject
         $devis_status = (int) $this->getData('devis_status');
         $contrat_status = (int) $this->getData('contrat_status');
         $pvr_status = (int) $this->getData('pvr_status');
+
         if (($devis_status >= 20 && $devis_status < 30) &&
                 ($contrat_status >= 20 && $contrat_status < 30) &&
                 ($pvr_status >= 20 && $pvr_status < 30) &&
@@ -4096,7 +4097,7 @@ class BF_Demande extends BimpObject
                                 if ($id_refin) {
                                     $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
                                     if (BimpObject::objectLoaded($refin)) {
-                                        
+
                                     }
                                 }
                             }
@@ -4305,7 +4306,7 @@ class BF_Demande extends BimpObject
             $lines = $this->getLines('not_text');
             $attributions = array();
 
-            // Trie des serials à attribuer: 
+            // Trie des serials à attribuer:
             foreach ($serials as $ref_prod => $prod_serials) {
                 foreach ($lines as $line) {
                     if (empty($prod_serials)) {
@@ -4805,7 +4806,7 @@ class BF_Demande extends BimpObject
                 if (!count($errors)) {
                     $this->addObjectLog(ucfirst($doc_type) . ' de location mis en révision', strtoupper($doc_type) . '_REVIEWD');
 
-                    // Suppr des fichiers : 
+                    // Suppr des fichiers :
 
                     $files_names = array($this->getSignatureDocFileName($doc_type, true));
 
@@ -5308,7 +5309,7 @@ class BF_Demande extends BimpObject
 
                 switch ($type_pdf) {
                     case 'papier':
-                        // PDF Consignes: 
+                        // PDF Consignes:
                         $consignes_file_name = 'consignes_' . $ref . '.pdf';
                         require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ConsignesContratFinancementPDF.php';
                         $pdf = new ConsignesContratFinancementPDF($db, $this);
@@ -5348,7 +5349,7 @@ class BF_Demande extends BimpObject
                         break;
 
                     case 'elec':
-                        // PDF contrat de location: 
+                        // PDF contrat de location:
                         require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
                         $pdf = new ContratFinancementPDF($db, $this, $client_data, $loueur_data, $cessionnaire_data, 'elec');
                         $contrat_file_name = $this->getSignatureDocFileName('contrat') . '_tmp';
@@ -5751,7 +5752,7 @@ class BF_Demande extends BimpObject
                         continue;
                     }
 
-                    // Transfert des sources: 
+                    // Transfert des sources:
                     foreach ($demande->getChildrenObjects('sources') as $source) {
                         $source_errors = $source->updateField('id_init_demande', $demande->id);
                         $source_errors = $source->updateField('id_demande', $id_demande_to_keep);
@@ -5760,7 +5761,7 @@ class BF_Demande extends BimpObject
                         }
                     }
 
-                    // Transferts des lignes: 
+                    // Transferts des lignes:
                     foreach ($demande->getLines() as $line) {
                         if (BimpObject::objectLoaded($line)) {
                             $next_line_position++;
@@ -5780,7 +5781,7 @@ class BF_Demande extends BimpObject
                         }
                     }
 
-                    // Suppression de la demande: 
+                    // Suppression de la demande:
                     $demande_warnings = array();
                     $demande_errors = $demande->delete($demande_warnings, true);
 
@@ -5801,7 +5802,7 @@ class BF_Demande extends BimpObject
 
                         $demande_to_keep->updateField('merged_demandes', $merged_demandes);
 
-                        // Recalcul totaux: 
+                        // Recalcul totaux:
                         $demande_to_keep->calcLinesMontants();
                     } else {
                         $errors[] = 'Demande à conserver #' . $id_demande_to_keep . ' n\'existe plus';
@@ -6288,7 +6289,7 @@ class BF_Demande extends BimpObject
         return parent::update($warnings, $force_update);
     }
 
-    // Gestion signatures : 
+    // Gestion signatures :
 
     public function isDocuSignAllowed($doc_type, $errors = array(), &$is_required = false)
     {
@@ -6851,7 +6852,7 @@ class BF_Demande extends BimpObject
 
         BimpObject::loadClass('bimpfinancement', 'BF_DemandeSource');
 
-        // Vérif données: 
+        // Vérif données:
         $type_source = BimpTools::getArrayValueFromPath($data, 'type_source', '');
 
         if (!$type_source) {
@@ -6907,7 +6908,7 @@ class BF_Demande extends BimpObject
             return null;
         }
 
-        // Création de la demande: 
+        // Création de la demande:
         $source_label = BF_DemandeSource::$types[$type_source];
         $origine_label = BimpTools::getArrayValueFromPath(BF_DemandeSource::$types_origines, $type_origine . '/label', $type_origine);
 
@@ -6931,7 +6932,7 @@ class BF_Demande extends BimpObject
         $demande = BimpObject::createBimpObject('bimpfinancement', 'BF_Demande', $df_data, true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($demande) && !count($errors)) {
-            // Création de la source: 
+            // Création de la source:
             $source = BimpObject::createBimpObject('bimpfinancement', 'BF_DemandeSource', array(
                         'id_demande'      => $demande->id,
                         'type'            => $type_source,
@@ -6947,7 +6948,7 @@ class BF_Demande extends BimpObject
                             ), true, $errors, $warnings);
 
             if (BimpObject::objectLoaded($source)) {
-                // Création des lignes: 
+                // Création des lignes:
                 BimpObject::loadClass('bimpfinancement', 'BF_Line');
                 BimpObject::createBimpObject('bimpfinancement', 'BF_Line', array(
                     'id_demande'  => $demande->id,
@@ -7036,7 +7037,7 @@ class BF_Demande extends BimpObject
         }
 
         if (is_dir($dir)) {
-            // Epuration des anciens fichiers: 
+            // Epuration des anciens fichiers:
             foreach (scandir($dir) as $f) {
                 if (in_array($f, array('.', '..'))) {
                     continue;

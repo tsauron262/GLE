@@ -18,7 +18,7 @@ class BimpTools
             'no_html' => '$'
         )
     );
-    
+
     public static $sql_operators = array('>', '<', '>=', '<=', '!=');
     public static $bloquages = array();
     public static $postTraitment = array();
@@ -106,9 +106,9 @@ class BimpTools
                 if (is_string($val_temp)) {
                     $val_temp = str_replace('ù£ù', '"', $val_temp);
                 }
-                
+
                 $valueInitForTest = $value;
-                
+
 
                 if (!in_array($key, array(// temporaire : pour éviter logs inutiles
                             'diagnostic', 'notecreditsafe', 'accessoires', 'search_value', 'ref_client'
@@ -156,17 +156,17 @@ class BimpTools
             return 1;
         }
 
-        // Chargement d'un input: 
+        // Chargement d'un input:
         if (BimpTools::isSubmit('fields/' . $field_name)) {
             return 1;
         }
 
-        // Action ajax: 
+        // Action ajax:
         if (BimpTools::isSubmit('extra_data/' . $field_name)) {
             return 1;
         }
 
-        // Envoi des données d'un formulaire: 
+        // Envoi des données d'un formulaire:
         if (BimpTools::isSubmit($field_name)) {
             return 1;
         }
@@ -191,17 +191,17 @@ class BimpTools
             return BimpTools::getValue('param_values/fields/' . $field_name, $default_value, $check, $filter, $options, $decode);
         }
 
-        // Chargement d'un input: 
+        // Chargement d'un input:
         if (BimpTools::isSubmit('fields/' . $field_name)) {
             return BimpTools::getValue('fields/' . $field_name, $default_value, $check, $filter, $options, $decode);
         }
 
-        // Action ajax: 
+        // Action ajax:
         if (BimpTools::isSubmit('extra_data/' . $field_name)) {
             return BimpTools::getValue('extra_data/' . $field_name, $default_value, $check, $filter, $options, $decode);
         }
 
-        // Envoi des données d'un formulaire: 
+        // Envoi des données d'un formulaire:
         if (BimpTools::isSubmit($field_name)) {
             return BimpTools::getValue($field_name, $default_value, $check, $filter, $options, $decode);
         }
@@ -219,11 +219,11 @@ class BimpTools
         return $default_value;
     }
 
-    // Gestion des fichiers uploadés: 
+    // Gestion des fichiers uploadés:
 
     public static function getTmpFilesDir()
     {
-        // On utilise un dossier par jour pour permettre de nettoyer les fichiers non déplacés. 
+        // On utilise un dossier par jour pour permettre de nettoyer les fichiers non déplacés.
         return 'bimpcore/tmp_files/' . date('Ymd');
     }
 
@@ -420,7 +420,7 @@ class BimpTools
         $file = strtolower(get_class($object)) . '/card.php';
 
         switch (get_class($object)) {
-            // gérer les exceptions... 
+            // gérer les exceptions...
         }
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
@@ -910,7 +910,7 @@ class BimpTools
         return null;
     }
 
-    // Gestion générique des objets: 
+    // Gestion générique des objets:
 
     public static function getObjectTable(BimpObject $parent, $id_object_field, $object = null)
     {
@@ -1275,7 +1275,7 @@ class BimpTools
         }
     }
 
-    // Gestion Logs: 
+    // Gestion Logs:
 
     public static function logTechnicalError($object, $method, $msg, $extra_data = array())
     {
@@ -2275,7 +2275,7 @@ class BimpTools
         return $html;
     }
 
-    // Gestion des dates: 
+    // Gestion des dates:
 
     public static function printDate($date, $balise = "span", $class = '', $format = 'd / m / Y H:i:s', $format_mini = 'd / m / Y')
     {
@@ -2499,7 +2499,7 @@ class BimpTools
         return 0;
     }
 
-    // Devises / prix: 
+    // Devises / prix:
 
     public static function getCurrencyIcon($currency)
     {
@@ -2591,7 +2591,7 @@ class BimpTools
         return (float) round($amout_tax_ex * $rate, $precision);
     }
 
-    // Traitements sur des strings: 
+    // Traitements sur des strings:
 
     public static function ucfirst($str)
     {
@@ -2647,7 +2647,7 @@ class BimpTools
 
     public static function cleanStringForUrl($text, $separator = '_', $charset = 'utf-8')
     {
-        // Commenter car apparemment ça converti les undescore en "n" => pose problème dans le cas des propales révisées. 
+        // Commenter car apparemment ça converti les undescore en "n" => pose problème dans le cas des propales révisées.
 //        $text = mb_convert_encoding($text, 'HTML-ENTITIES', $charset);
         // On vire les accents
         $text = preg_replace(array('/ß/', '/&(..)lig;/', '/&([aouAOU])uml;/', '/&(.)[^;]*;/'), array('ss', "$1", "$1" . 'e', "$1"), $text);
@@ -2674,13 +2674,13 @@ class BimpTools
     {
         $str_number = (string) $str_number;
 
-        // On vire tout espace: 
+        // On vire tout espace:
         $str_number = str_replace(' ', '', $str_number);
 
-        // On remplace la virgule: 
+        // On remplace la virgule:
         $str_number = str_replace(',', '.', $str_number);
 
-        // On retourne un float: 
+        // On retourne un float:
         return (float) $str_number;
     }
 
@@ -2704,7 +2704,7 @@ class BimpTools
 
     public static function utf8_encode($value)
     {
-        // Encodage récursif si $value = array() 
+        // Encodage récursif si $value = array()
 
         if (is_array($value)) {
             foreach ($value as $key => $subValue) {
@@ -2723,7 +2723,7 @@ class BimpTools
 
     public static function addZeros($str, $nbCarac)
     {
-        // Ajoute des zéros en début de chaîne de manière à obtenir $nbCarac caractères. 
+        // Ajoute des zéros en début de chaîne de manière à obtenir $nbCarac caractères.
         $str = '' . $str;
         if (strlen($str) < $nbCarac) {
             $n = ($nbCarac - strlen($str));
@@ -2847,16 +2847,16 @@ class BimpTools
 
         return str_replace($old_root, $new_root, $text);
     }
-    
+
     public static function escapeForHtml($txt)
     {
         $txt = str_replace("'", "\\'", $txt);
         $txt = self::htmlentities_array($txt);
-        
+
         return $txt;
     }
 
-    // Traitements sur des array: 
+    // Traitements sur des array:
 
     public static function getMsgFromArray($msgs, $title = '', $no_html = false)
     {
@@ -3097,7 +3097,7 @@ class BimpTools
         return $array;
     }
 
-    // Gestion des nombres: 
+    // Gestion des nombres:
 
     public static function getDecimalesNumber($float_number)
     {
@@ -3147,7 +3147,7 @@ class BimpTools
         $code = '';
         $hasMoreDecimals = false;
 
-        // Troncature: 
+        // Troncature:
         if ($truncate) {
             if ($value > 1000000000) {
                 $code = 'G';
@@ -3191,14 +3191,14 @@ class BimpTools
             $decimals = $max_decimales;
         }
 
-        // Arrondi: 
+        // Arrondi:
         $value = round($value, (int) $decimals);
 
         if ($value != round($base_price, 8)) {
             $hasMoreDecimals = true;
         }
 
-        // Espaces entre les milliers: 
+        // Espaces entre les milliers:
         if (!(string) $separator) {
             $separator = ',';
         }
@@ -3208,7 +3208,7 @@ class BimpTools
         $html = '';
 
         if (!$no_html) {
-            // Styles: 
+            // Styles:
             $html .= '<span';
 
             if ($with_styles) {
@@ -3222,7 +3222,7 @@ class BimpTools
                 $html .= '"';
             }
 
-            // popover: 
+            // popover:
             if ($hasMoreDecimals) {
                 $html .= ' class="bs-popover"';
                 $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
@@ -3267,7 +3267,7 @@ class BimpTools
 
     public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true, $no_zeros_decimals = false, $debug = false)
     {
-        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+        // $decimals: indiquer 'full' pour afficher toutes les décimales.
 
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -3281,7 +3281,7 @@ class BimpTools
         $code = '';
         $hasMoreDecimals = false;
 
-        // Troncature: 
+        // Troncature:
         if ($truncate) {
             if (abs($value) > 1000000000) {
                 $code = 'G';
@@ -3305,14 +3305,14 @@ class BimpTools
             }
         }
 
-        // Arrondi: 
+        // Arrondi:
         $value = round($value, (int) $decimals);
 
         if ($value != round($base_value, 8)) {
             $hasMoreDecimals = true;
         }
 
-        // Espaces entre les milliers: 
+        // Espaces entre les milliers:
         if (!(string) $separator) {
             $separator = ',';
         }
@@ -3321,7 +3321,7 @@ class BimpTools
         $html = '';
 
         if (!$no_html) {
-            // Styles: 
+            // Styles:
             $html .= '<span';
 
             if ($with_styles) {
@@ -3335,7 +3335,7 @@ class BimpTools
                 $html .= '"';
             }
 
-            // popover: 
+            // popover:
             if ($hasMoreDecimals) {
                 $html .= ' class="bs-popover"';
                 $html .= BimpRender::renderPopoverData(number_format($base_value, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
@@ -3504,7 +3504,7 @@ class BimpTools
 
     public static function getDateLimReglement($date_begin, $id_cond_reglement)
     {
-        
+
     }
 
     public static function getRemiseExceptLabel($desc)
@@ -3525,7 +3525,7 @@ class BimpTools
 
     public static function getCommercialArray($socid)
     {
-        // Ce type de fonction ne doit pas être mise dans BimpTools mais dans BimpCache. 
+        // Ce type de fonction ne doit pas être mise dans BimpTools mais dans BimpCache.
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
     }
 
@@ -3561,7 +3561,7 @@ class BimpTools
     public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@-_!?', $force_special_char = true)
     {
         for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
-            
+
         }
 
         if ($force_special_char && !preg_match('/[@\-_!\?]/', $s)) {
@@ -3647,13 +3647,13 @@ class BimpTools
             $file = $mysoc->logo;
         }
 
-//        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $file; => Selon changelog DOL16 (A vérifier) 
+//        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $file; => Selon changelog DOL16 (A vérifier)
         return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=logos/' . $file;
     }
 
     public static function verifCond($s)
     {
-        // Adapté de dol_eval() : nécessaire pour contourner cetaines restrictions. 
+        // Adapté de dol_eval() : nécessaire pour contourner cetaines restrictions.
 
         $errors = array();
 
@@ -3698,7 +3698,28 @@ class BimpTools
         return eval('return ' . $s . ';');
     }
 
-    // Gestion des couleurs: 
+	public static function isValidNumMobile($num, &$infos = '')
+	{
+		$num = preg_replace('/[^0-9\+]/u', '', $num);
+		if ($num == "") {
+			$infos = 'Aucun numéro spécifié';
+			return 0;
+		}
+
+		if ((stripos($num, "06") === 0 || stripos($num, "07") === 0) && strlen($num) == 10) {
+			return 1;
+		}
+
+		if ((stripos($num, "+336") === 0 || stripos($num, "+337") === 0) && strlen($num) == 12) {
+			return 1;
+		}
+
+		$infos = 'Le numéro "' . $num . '" n\'est pas un numéro mobile valide';
+
+		return 0;
+	}
+
+    // Gestion des couleurs:
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
     {
@@ -3838,7 +3859,7 @@ class BimpTools
         return array($r, $g, $b);
     }
 
-    // Debug: 
+    // Debug:
 
     public static function getBacktraceArray($backtrace)
     {
@@ -3866,7 +3887,7 @@ class BimpTools
                     if (!$current_file) {
                         $current_file = $file;
                     } elseif ($file != $current_file) {
-                        // Changement de fichier: 
+                        // Changement de fichier:
                         $files[] = array(
                             'file'  => $current_file,
                             'lines' => $lines
@@ -3934,10 +3955,10 @@ class BimpTools
             return 1;
         }
 
-//        return 1; //test 
+//        return 1; //test
         global $user, $langs;
         //il faut débuggé, si ca pose probléme c'est grave
-//        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
+//        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev...
 //            return;
 //        }
 
@@ -3992,7 +4013,7 @@ class BimpTools
     }
 
 //    public static function unlockNum($type){
-//        
+//
 //    }
 //    public static function bloqueDebloque($type, $bloque = true, $nb = 1)
 //    {

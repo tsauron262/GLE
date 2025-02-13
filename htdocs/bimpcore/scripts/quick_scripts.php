@@ -532,7 +532,7 @@ switch ($action) {
 echo '<br/>FIN';
 echo '</body></html>';
 
-// FONCTIONS: 
+// FONCTIONS:
 
 
 function convertListsConfigs($new_filters = array())

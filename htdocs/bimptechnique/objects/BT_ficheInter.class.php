@@ -39,7 +39,7 @@ class BT_ficheInter extends BimpDolObject
         self::STATUT_DEMANDE_FACT       => ['label' => "Attente de facturation", 'icon' => 'fas_comment-dollar', 'classes' => ['important']],
         self::STATUT_ATTENTE_VALIDATION => ['label' => "Attente de validation commercial", 'icon' => 'fas_thumbs-up', 'classes' => ['important']],
     ];
-    # Type inter: 
+    # Type inter:
 
     CONST TYPE_NO = 0;
     CONST TYPE_FORFAIT = 1;
@@ -54,7 +54,7 @@ class BT_ficheInter extends BimpDolObject
         self::TYPE_CONTRAT  => array('label' => 'Contrat', 'icon' => 'check', 'classes' => array('info')),
         self::TYPE_TEMPS    => array('label' => 'Temps pass&eacute;', 'icon' => 'check', 'classes' => array('warning')),
     );
-    # Natures: 
+    # Natures:
 
     CONST NATURE_NO = 0;
     CONST NATURE_INSTALL = 1;
@@ -75,7 +75,7 @@ class BT_ficheInter extends BimpDolObject
         self::NATURE_SUIVI     => array('label' => 'Suivi', 'icon' => 'arrow-right', 'classes' => array('info')),
         self::NATURE_DELEG     => array('label' => 'Délégation', 'icon' => 'user', 'classes' => array('info'))
     );
-    #Types signatures: 
+    #Types signatures:
 
     const TYPE_SIGN_DIST = 1;
     const TYPE_SIGN_PAPIER = 2;
@@ -88,7 +88,7 @@ class BT_ficheInter extends BimpDolObject
         self::TYPE_SIGN_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_signature')
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function canCreate()
     {
@@ -136,7 +136,7 @@ class BT_ficheInter extends BimpDolObject
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isEditable($force_edit = false, &$errors = [])
     {
@@ -341,7 +341,7 @@ class BT_ficheInter extends BimpDolObject
         return 0;
     }
 
-    // Getters Params: 
+    // Getters Params:
 
     public function getListExtraBulkActions()
     {
@@ -631,7 +631,7 @@ class BT_ficheInter extends BimpDolObject
         return 'FI ' . $this->getRef();
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getCommercialClient()
     {
@@ -690,11 +690,11 @@ class BT_ficheInter extends BimpDolObject
 
     public function getHtLine($type_line, $id_line)
     {
-        // Aurait dû s'appeller getTotalHtLine (Essayer d'être précis dans le nom des fonctions, ça facilite la compréhension pour tout le monde). 
+        // Aurait dû s'appeller getTotalHtLine (Essayer d'être précis dans le nom des fonctions, ça facilite la compréhension pour tout le monde).
 
         switch ($type_line) {
             case 'contrat':
-                // Toujours passer par le cache!! 
+                // Toujours passer par le cache!!
 //                $obj = $this->getInstance('bimpcontract', 'BContract_contratLine', $id_line);
                 $obj = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $id_line);
                 if (BimpObject::objectLoaded($obj)) {
@@ -772,7 +772,7 @@ class BT_ficheInter extends BimpDolObject
         return $this->db->getValue('actioncomm', 'id', $where);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getCommandesClientArray($include_empty = true)
     {
@@ -1258,7 +1258,7 @@ class BT_ficheInter extends BimpDolObject
         return $tickets;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayTech()
     {
@@ -1420,7 +1420,7 @@ class BT_ficheInter extends BimpDolObject
         $msgs = [];
 
 //        $children = $this->getChildrenList("facturation");
-//        
+//
 //
 //        if (count($children) > 0) {
 //            foreach ($children as $id_child) {
@@ -1638,7 +1638,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function displayServicesForForm()
     {
-        
+
     }
 
     public function displayDuree()
@@ -1652,7 +1652,7 @@ class BT_ficheInter extends BimpDolObject
         return count($this->getChildrenObjects('inters'));
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderEventsTable()
     {
@@ -1760,7 +1760,7 @@ class BT_ficheInter extends BimpDolObject
         }
 
         $html = '';
-        $html .= '<div class="wrapper"> 
+        $html .= '<div class="wrapper">
                       <canvas id="' . $prefix . 'signature-pad" class="signature-pad ' . $addClass . '" style="border: solid 1px; ' . $displayStyle . '" width=400 height=200></canvas>
                   </div>';
 
@@ -1872,7 +1872,7 @@ class BT_ficheInter extends BimpDolObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function duplicate($new_data)
     {
@@ -2061,14 +2061,14 @@ class BT_ficheInter extends BimpDolObject
                         }
                     }
 
-                    // Génération PDF: 
+                    // Génération PDF:
                     $result = $this->actionGeneratePdf([]);
 
                     if (count($result['errors'])) {
                         $warnings[] = BimpTools::getMsgFromArray($result['errors'], 'Echec création du fichier PDF');
                     }
 
-                    // Fermeture auto: 
+                    // Fermeture auto:
                     $auto_terminer = in_array((int) $this->getData('fk_soc'), explode(',', BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique'))) ? true : false;
 
                     if ($auto_terminer) {
@@ -2080,7 +2080,7 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     // Changement du titre de tous les events
-                    // Création des lignes de facturation: 
+                    // Création des lignes de facturation:
                     $services_executed = $this->getServicesExecutedArray();
                     if (count($services_executed)) {
                         foreach ($services_executed as $id_line_commande => $data) {
@@ -2149,7 +2149,7 @@ class BT_ficheInter extends BimpDolObject
                         }
                     }
 
-                    // Envoi mails: 
+                    // Envoi mails:
                     global $conf;
 
                     $mail_cli_errors = array();
@@ -2197,7 +2197,7 @@ class BT_ficheInter extends BimpDolObject
                         }
                     }
 
-                    // Envoi au client: 
+                    // Envoi au client:
                     if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST/* && !$this->getData('signed') */) {
                         if (!is_file($pdf_file)) {
                             $mail_cli_errors[] = 'Fichier PDF de la Fiche Inter absent';
@@ -2352,7 +2352,7 @@ class BT_ficheInter extends BimpDolObject
                 $msg .= 'Merci de signer votre rapport d\'intervention à l\'adresse suivante: ';
                 $msg .= '<a href="' . DOL_URL_ROOT . '/bimptechnique/public">' . DOL_URL_ROOT . '/bimptechnique/public</a>';
                 $msg .= ' en entrant votre nom ainsi que le mot de passe suivant: <b>' . $new_password . '</b><br/><br/>';
-                $msg .= 'Cet accès n\'est valable que 4 Jours calandaires.<br/><br/>';
+                $msg .= 'Cet accès n\'est valable que 4 Jours calendaires.<br/><br/>';
                 $msg .= 'Cordialement';
 
                 $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));
@@ -2506,7 +2506,7 @@ class BT_ficheInter extends BimpDolObject
         foreach ($lines as $line) {
             $i++;
 
-            // Lignes à ne pas copier en cas de clonage: 
+            // Lignes à ne pas copier en cas de clonage:
 
             $new_line = clone($line);
 
@@ -2995,7 +2995,7 @@ class BT_ficheInter extends BimpDolObject
         ];
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function reset()
     {
@@ -3016,7 +3016,7 @@ class BT_ficheInter extends BimpDolObject
                     $_POST['signataire'] = $contact->getName();
 
 //                if(array_key_exists('email_signature', $_POST) and BimpTools::getPostFieldValue('email_signature') == '')
-                // (Certain techs mettent leur propre adresse e-mail, on force l'adresse l'adresse e-mail du contact signataire) 
+                // (Certain techs mettent leur propre adresse e-mail, on force l'adresse l'adresse e-mail du contact signataire)
                 $_POST['email_signature'] = $contact->getData('email');
             }
         }
@@ -3045,7 +3045,7 @@ class BT_ficheInter extends BimpDolObject
                 $errors[] = 'L\'heure de fin de l\'intervention ne peut pas être inférieure à l\'heure de début';
             }
 
-            // Vérif données selon type de signature: 
+            // Vérif données selon type de signature:
             $type_sign = (int) $this->getData('type_signature');
             if ($type_sign === self::TYPE_SIGN_ELEC) {
                 if (!$this->getData('base_64_signature')) {
@@ -3072,7 +3072,7 @@ class BT_ficheInter extends BimpDolObject
             }
 
             if ($this->getInitData('fk_contrat') != BimpTools::getPostFieldValue('fk_contrat', null, 'int')) {
-                
+
             }
         }
 
@@ -3152,7 +3152,7 @@ class BT_ficheInter extends BimpDolObject
                     addElementElement('contrat', 'fichinter', $this->getData('fk_contrat'), $this->id);
                 }
 
-                // Création actionComm: 
+                // Création actionComm:
                 BimpTools::loadDolClass('comm/action/', 'actioncomm', 'ActionComm');
 
                 $actioncomm = new ActionComm($this->db->db);
@@ -3170,7 +3170,7 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm->fk_element = $this->id;
                 $actioncomm->create($user);
                 $errors = BimpTools::merge_array($errors, BimpTools::getErrorsFromDolObject($actioncomm));
-                // Envoi mail au tech: 
+                // Envoi mail au tech:
 
                 $tech = $this->getChildObject('user_tech');
                 if (!count($errors) && BimpObject::objectLoaded($tech)) {
@@ -3223,7 +3223,7 @@ class BT_ficheInter extends BimpDolObject
                 $this->setSigned($warnings);
             }
 
-            // Màj commandes liées: 
+            // Màj commandes liées:
             $commandes = $this->getData('commandes');
             foreach ($init_commandes as $id_commande) {
                 if (!in_array((int) $id_commande, $commandes)) {
@@ -3236,7 +3236,7 @@ class BT_ficheInter extends BimpDolObject
                 }
             }
 
-            // Màj tickets liés: 
+            // Màj tickets liés:
             $tickets = $this->getData('tickets');
             foreach ($init_tickets as $id_ticket) {
                 if (!in_array((int) $id_ticket, $tickets)) {
@@ -3250,9 +3250,9 @@ class BT_ficheInter extends BimpDolObject
                 }
             }
 
-            // Màj contrat lié: 
+            // Màj contrat lié:
             if ($init_fk_contrat !== (int) $this->getData('fk_contrat')) {
-                // La méthode update() de ficheinter ne met pas à jour fk_contrat. 
+                // La méthode update() de ficheinter ne met pas à jour fk_contrat.
 
                 if ($this->isFieldEditable('fk_contrat')) {
                     $err = $this->updateField('fk_contrat', $this->getData('fk_contrat'));
@@ -3286,7 +3286,7 @@ class BT_ficheInter extends BimpDolObject
 
 
 
-            // Changement de tech: 
+            // Changement de tech:
             if ($init_id_tech !== (int) $this->getData('fk_user_tech')) {
                 $changement_de_tech = true;
                 $table = 'actioncomm';
@@ -3420,7 +3420,7 @@ class BT_ficheInter extends BimpDolObject
         return $errors;
     }
 
-    // Outils : 
+    // Outils :
 
     public static function time_to_qty($time)
     {
@@ -3452,7 +3452,7 @@ class BT_ficheInter extends BimpDolObject
         return ($neg ? '-' : '') . str_pad($heures, 2, "0", STR_PAD_LEFT) . ":" . str_pad($minutes, 2, "0", STR_PAD_LEFT);
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function convertAllNewFi()
     {
@@ -3460,7 +3460,7 @@ class BT_ficheInter extends BimpDolObject
         return;
         $bdb = self::getBdb();
 
-        // Conversion Tickets / Commandes: 
+        // Conversion Tickets / Commandes:
         $where = 'new_fi = 1';
         $where .= ' AND ((commandes IS NOT NULL AND commandes != \'\')';
         $where .= ' OR (tickets IS NOT NULL AND tickets != \'\'))';
@@ -3508,7 +3508,7 @@ class BT_ficheInter extends BimpDolObject
             }
         }
 
-        // Conversion lignes FI dans Lignes facturation: 
+        // Conversion lignes FI dans Lignes facturation:
         $sql = 'SELECT a.id, a.fi_lines FROM llx_fichinter_facturation a';
         $sql .= ' LEFT JOIN llx_fichinter f ON a.fk_fichinter = f.rowid';
         $sql .= ' WHERE f.new_fi = 1';
@@ -3537,7 +3537,7 @@ class BT_ficheInter extends BimpDolObject
         }
 
 
-        // Conversion ID lignes de commandes dans Inters:     
+        // Conversion ID lignes de commandes dans Inters:
         $sql = 'SELECT a.rowid, a.id_line_commande as id_dol_line, cl.id as id_bimp_line FROM llx_fichinterdet a';
         $sql .= ' LEFT JOIN llx_fichinter f ON a.fk_fichinter = f.rowid';
         $sql .= ' LEFT JOIN llx_bimp_commande_line cl ON a.id_line_commande = cl.id_line';
@@ -3556,7 +3556,7 @@ class BT_ficheInter extends BimpDolObject
             }
         }
 
-        // Conversion ID lignes de commandes dans facturation:    
+        // Conversion ID lignes de commandes dans facturation:
         $sql = 'SELECT a.id, a.id_commande_line as id_dol_line, cl.id as id_bimp_line FROM llx_fichinter_facturation a';
         $sql .= ' LEFT JOIN llx_fichinter f ON a.fk_fichinter = f.rowid';
         $sql .= ' LEFT JOIN llx_bimp_commande_line cl ON a.id_commande_line = cl.id_line';

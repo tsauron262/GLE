@@ -5,6 +5,8 @@ if (isset($_GET['actionTest'])) {
     llxHeader();
 
     session_write_close();
+
+	global $db;
     $class = new test_sav($db);
     if ($_GET['actionTest'] == "fermetureAuto") {
         $class->tentativeFermetureAuto();
@@ -121,8 +123,9 @@ a.status IN (0,1,2,3,4,5,6,7) OR
 (a.status = -1 AND a.date_create >= \'' . $date_reserved . ' 00:00:00\' AND a.date_create <= \'' . $date_reserved . ' 23:59:59\')
 )');
 
+		$ok = 0;
+
         if (is_object($sql)) {
-            $ok = 0;
             while ($ln = $this->db->fetch_object($sql)) {
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
                 if (BimpObject::objectLoaded($sav)) {

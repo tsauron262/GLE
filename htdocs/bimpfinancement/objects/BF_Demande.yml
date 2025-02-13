@@ -611,6 +611,11 @@ forms:
               value: Proposition de location de vos équipements informatiques
               input: 
                       type: text
+            - custom: 1
+              label: Référence du devis
+              input_name: ref_devis
+              input:
+                  type: text
             - field: montant_materiels
             - field: montant_services
             - field: duration

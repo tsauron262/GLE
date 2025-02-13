@@ -1,106 +1,116 @@
-
-dol_object: 
-    instance: 
-        dol_object: 
+dol_object:
+    instance:
+        dol_object:
             module: product/stock
             file: entrepot
-            
+
 table: entrepot
 primary: rowid
 icon: fas_warehouse
 
-#controller: entrepot
+header_btn:
+    callback: getActionsButtons
 
-list_page_url: 
-    controller: admin
-#    url_params:
-#        tab: entrepots
-    
-nom_url: 
+controller: entrepot
+
+nom_url:
     syntaxe: <ref>
     card: default
-    
-labels: 
+
+labels:
     name: entrepôt
-    
-fields: 
-    ref: 
+
+fields:
+    ref:
         label: Référence
         dol_prop: label
         required: 1
     
-    lieu: 
+    lieu:
         label: Nom
-        
-    description: 
+    
+    description:
         label: Description
         hashtags: 1
-        
-    address: 
+    
+    address:
         label: Adresse
-        
-    zip: 
+    
+    zip:
         label: Code postal
-        
+    
     town:
         label: Ville
-        
-    statut: 
+    
+    statut:
         label: Statut
         type: int
-        values: 
+        values:
             array: status_list
         default_value: 1
-        
-fields_tables: 
-    infos: 
+
+fields_tables:
+    infos:
         title: Infos
         icon: fas_info
-        rows: 
-            ref: 
+        rows:
+            ref:
                 field: ref
-            lieu: 
+            lieu:
                 field: lieu
-            desc: 
+            desc:
                 field: description
-            address: 
+            address:
                 label: Adresse
-                value: 
+                value:
                     callback: displayFullAdress
-                  
-views: 
-    default: 
-        rows: 
-            - cols: 
-                - type: object_header
-            - cols: 
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    fields_table: 
-                        name: infos
-                  
-filters_panels: 
-    default: 
-        filters: 
-            ref: 
-            lieu: 
-            zip: 
-            town: 
-            statut: 
-        
-lists_cols: 
-    full_address: 
+
+views:
+    default:
+        edit_btn: 1
+        rows:
+            -   cols:
+                    -   type: fields_table
+                        col_lg: 12
+                        col_md: 12
+                        fields_table:
+                            name: infos
+    complet:
+        edit_btn: 1
+        rows:
+            -   cols:
+                    -   type: fields_table
+                        col_lg: 6
+                        col_md: 6
+                        fields_table:
+                            name: infos
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderStocksView
+
+
+filters_panels:
+    default:
+        filters:
+            ref:
+            lieu:
+            zip:
+            town:
+            statut:
+
+lists_cols:
+    full_address:
         label: Adresse complète
-        value: 
+        value:
             callback: displayFullAdress
     mail:
         label: Mail
         value:
             callback: getMail
-            
-lists: 
-    default: 
+
+lists:
+    default:
         configurable: 1
         filters_panel: default
         sort_field: rowid
@@ -108,39 +118,91 @@ lists:
         n: 10
         add_form_name: default
         modal_view: default
+        page_btn: 1
         edit_btn: 1
         edit_form: default
         delete_btn: 1
         cols:
-            ref: 
-            lieu: 
-            description: 
-            address: 
-            zip: 
-            town: 
+            ref:
+            lieu:
+            description:
+            address:
+            zip:
+            town:
             statut:
-                
-searches: 
-    default: 
-        fields_search: 
+
+searches:
+    default:
+        fields_search:
             - a.ref
             - a.lieu
             - a.town
-        fields_return: 
+        fields_return:
             - a.ref
             - a.lieu
             - a.town
         label_syntaxe: '<a.ref> - <a.lieu> (<a.town>)'
-        
-cards: 
-    default: 
+
+cards:
+    default:
         title: nom
-        fields: 
-            ref: 
+        fields:
+            ref:
                 field: ref
                 label: Ref.
-            address: 
+            address:
                 label: Adresse
-                value: 
+                value:
                     callback: displayFullAdress
         view_btn: 1
+
+list_page_url:
+    controller: admin
+#    url_params:
+#        tab: admin
+
+
+forms:
+    CorrectionStock:
+        title: Correction manuel du stock
+        rows:
+            -   custom: 1
+                label: Sens
+                input_name: sens
+                input:
+                    type: select
+                    options:
+                        0: Entrant (ajout)
+                        1: Sortant (retrait)
+            -   custom: 1
+                label: Quantité
+                input_name: qty
+                data_type: float
+                min: 0
+                decimals: 6
+                input:
+                    type: qty
+            
+            -   custom: 1
+                input_name: id_product
+                label: Produit
+                type: id_object
+                input:
+                    type: search_object
+                    object: product
+            -   custom: 1
+                input_name: comment
+                label: Infos
+                input:
+                    type: text
+        buttons:
+            -   type: submit
+                label: Enregistrer
+                class: btn-primary
+            -   type: reset
+                label: Annuler
+                class: btn-secondary
+        action: save
+        method: POST
+
+header_list_name: default

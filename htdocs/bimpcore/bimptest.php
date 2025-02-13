@@ -18,13 +18,13 @@ global $db, $user;
 $bdb = new BimpDb($db);
 
 if (!BimpObject::objectLoaded($user)) {
-    echo BimpRender::renderAlerts('Aucun utilisateur connecté');
-    exit;
+	echo BimpRender::renderAlerts('Aucun utilisateur connecté');
+	exit;
 }
 
 if (!$user->admin) {
-    echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
-    exit;
+	echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
+	exit;
 }
 
 echo 'TEST 1 : ' . (int) getDolGlobalString('COMPANY_USE_SEARCH_TO_SELECT') . '<br/>';

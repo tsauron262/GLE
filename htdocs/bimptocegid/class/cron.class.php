@@ -136,12 +136,12 @@
                                 }
                             }
 							$code = 'CEGID_ROLLBACK_compta_aucune_action';
-                            mailSyn2("Urgent - COMPTA ROLLBACK", 'dev@bimp.fr', null, $message);
+                            mailSyn2("Urgent - COMPTA ROLLBACK", BimpCore::getConf('devs_email'), null, $message);
                         //}
                     }
                 } else {
 					$code = 'CEGID_dossier_export_non_vide';
-                    mailSyn2('URGENT COMPTA', 'dev@bimp.fr', null, 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire), 1));
+                    mailSyn2('URGENT COMPTA', BimpCore::getConf('devs_email'), null, 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire), 1));
                 }
             } else {
                 die('Pas sur la bonne instance de l\'ERP');
@@ -222,7 +222,7 @@
 
                 if($mustSend) {
 					$code = 'CEGID_fichier_tra_non_conforme';
-                    mailSyn2('Urgent - Fichiers TRA non conformes', 'dev@bimp.fr', null, $message);
+                    mailSyn2('Urgent - Fichiers TRA non conformes', BimpCore::getConf('devs_email'), null, $message);
                 }
 
             }
@@ -569,7 +569,7 @@
                                                 unlink($file_path);
                                             } else {
 												$code = 'CEGID_erreur_copie_fichier';
-                                                mailSyn2("Compta - Erreur de copie", 'dev@bimp.fr', null, 'Le fichier ' . $filename . ' ne s\'est pas copié dans le dossier d\'import');
+                                                mailSyn2("Compta - Erreur de copie", BimpCore::getConf('devs_email'), null, 'Le fichier ' . $filename . ' ne s\'est pas copié dans le dossier d\'import');
                                             }
                                         } else {
                                             $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";

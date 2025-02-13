@@ -226,5 +226,11 @@ sections:
                   custom: 
                       callback: renderPullTab
                                     
-                            
+        mailerp:
+            label: Mail Erp
+            icon: fas_mail-bulk
+            sections:
+                - type: custom
+                  custom:
+                      callback: renderMailerTab
                       

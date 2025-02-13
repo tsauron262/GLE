@@ -642,7 +642,7 @@ class ValidComm extends BimpObject
                 $message_mail .= "Debug: pourtant la règle de validation $val_comm_demande ";
 
 			$code = 'absence_valideur_secteur';
-            mailSyn2("Droits validation commerciale requis", "debugerp@bimp.fr", null, $message_mail);
+            mailSyn2("Droits validation commerciale requis", BimpCore::getConf('debugerp_email'), null, $message_mail);
             return 0;
         }
 

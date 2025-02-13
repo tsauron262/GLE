@@ -821,7 +821,7 @@ class Bimp_Product extends BimpObject
             return BimpCore::getConf($confName, null, "bimptocegid");
         else {
 			$code = 'code_compta_inconnu_ACHAT';
-            mailSyn2('Probléme compta', 'dev@bimp.fr', null, 'Attention code compta inconnue ' . $confName);
+            mailSyn2('Probléme compta', bimpcore::getConf('devs_email'), null, 'Attention code compta inconnue ' . $confName);
             die;
         }
 
@@ -923,7 +923,7 @@ class Bimp_Product extends BimpObject
             return BimpCore::getConf($confName, null, "bimptocegid");
         else {
 			$code = 'code_compta_inconnu_VENTE';
-            mailSyn2('Probléme compta', 'dev@bimp.fr', null, 'Attention code compta inconnue ' . $confName);
+            mailSyn2('Probléme compta', BimpCore::getConf('devs_email'), null, 'Attention code compta inconnue ' . $confName);
             die;
         }
 

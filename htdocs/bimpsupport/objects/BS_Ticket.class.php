@@ -1012,7 +1012,8 @@ class BS_Ticket extends BimpAbstractFollow
                             . 'Priorité : ' . $this->displayData('priorite', 'default', false, true) . '<br />'
                             . 'Impact : ' . $this->displayData('impact', 'default', false, true) . '<br />';
 
-                    if (!mailSyn2($subject, $to, '', $msg, array(), array(), array(), $liste_destinataire_interne_contrat_spare)) {
+                    $code = 'creation_ticket_support';
+					if (!mailSyn2($subject, $to, '', $msg, array(), array(), array(), $liste_destinataire_interne_contrat_spare)) {
                         $warnings[] = 'Echec de l\'envoi de l\'e-mail de confirmation';
                     }
                 } else {

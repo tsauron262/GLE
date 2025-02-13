@@ -304,6 +304,17 @@ params:
         cat: emails
         def: ''
         required: 1
+    debugerp_email:
+        label: Adresse e-mail pour le débugage de l'ERP
+        cat: emails
+        def: ''
+        required: 1
+    all_user_email:
+        label: Adresse e-mail tous les utilisateurs
+        cat: emails
+        def: ''
+        required: 1
+        
         
     # Produits
     use_valid_product: 

@@ -1766,7 +1766,8 @@ class savFormController extends BimpPublicController
                         $msg .= 'Le client ' . $client->getLink(array(), 'private') . ' a été réactivé automatiquement suite à sa prise de rendez-vous SAV en ligne';
 
 						$code = 'react_client_prise_rdv_online';
-						mailSyn2('Client activé automatiquement', 's.reynaud@bimp.fr', '', $msg);
+						$module = $this->module;
+						mailSyn2('Client activé automatiquement', BimpCore::getConf('react_client_prise_rdv_online', '', $module), '', $msg);
                     }
 
                     if (BimpObject::objectLoaded($client)) {

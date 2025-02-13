@@ -127,7 +127,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         }
         else	{
 			$code = 'task_not_exist';
-			mailSyn2('Id task non existant', 'dev@bimp.fr', null, 'Un mail a était recu avec une tache inexistante : ' . $idTask . '\n' . $src . '\n' . $txt);
+			mailSyn2('Id task non existant', BimpCore::getConf('devs_email'), null, 'Un mail a était recu avec une tache inexistante : ' . $idTask . '\n' . $src . '\n' . $txt);
 		}
 //        $errors = BimpTools::merge_array($errors, $task->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, 3));
     }

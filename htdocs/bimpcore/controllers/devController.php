@@ -20,7 +20,7 @@ class devController extends BimpController
         return BimpCore::isUserDev();
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderDashboardTab()
     {
@@ -89,7 +89,7 @@ class devController extends BimpController
 
         $html .= '</div>';
 
-        // Récap Paramètres ERP: 
+        // Récap Paramètres ERP:
         $html .= '<div class="row" style="margin-bottom: 30px">';
         $html .= '<div class="col-sm-12">';
         $html .= 'Version:';
@@ -107,7 +107,7 @@ class devController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
-        // Vérifs comptes user bloqués: 
+        // Vérifs comptes user bloqués:
         $rows = $bdb->getRows('user_extrafields', 'echec_auth >= 3', null, 'array', array(
             'fk_object as id_user'
         ));
@@ -132,7 +132,7 @@ class devController extends BimpController
             $html .= '</ul>';
         }
 
-        // Vérif des versions vérouillée: 
+        // Vérif des versions vérouillée:
         if ((int) BimpCore::getConf('check_versions_lock')) {
             $html .= '<h4 class="danger">';
             $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . ' Vérification des versions vérouillée';
@@ -162,7 +162,7 @@ class devController extends BimpController
             $html .= '</div>';
         }
 
-        // Crons en erreur: 
+        // Crons en erreur:
         $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
         if (!empty($rows)) {
             $html .= '<div class="row" style="margin-bottom: 30px">';
@@ -180,7 +180,7 @@ class devController extends BimpController
             $html .= '</div>';
         }
 
-        // Paramètres obligatoires non définis: 
+        // Paramètres obligatoires non définis:
         $missings_params = BimpModuleConf::getMissingRequiredParams();
         if (!empty($missings_params)) {
             $html .= '<div class="row" style="margin-bottom: 30px">';
@@ -195,13 +195,13 @@ class devController extends BimpController
             $html .= '</div>';
         }
 
-        // Récap logs: 
+        // Récap logs:
         $html .= '<div class="row">';
         $html .= '<div class="col-sm-12 col-md-8">';
         $html .= Bimp_Log::renderBeforeListContent();
         $html .= '</div>';
 
-//        // Liens: 
+//        // Liens:
 //        $html .= '<div class="col-sm-12 col-md-4">';
 //        $content = '';
 //        foreach (self::$dev_links as $link) {
@@ -510,7 +510,59 @@ class devController extends BimpController
         return $menu->renderItemsList();
     }
 
-    // Ajax processes - Config modules: 
+	public function renderMailerTab()
+	{
+		require_once DOL_DOCUMENT_ROOT . '/bimpusertools/classes/UserMessages.php';
+
+		global $userMessages, $type_dest;
+
+		$onoff = array(
+			'no_active' => 'Inactif',
+			'active' => 'Actif',
+		);
+		$headers = array(
+			'code' => array('label' => 'Code'),
+			'label' => array('label' => 'Libellé'),
+			'type_dest' => array('label' => 'Type destinataire', 'search_values' => $type_dest),
+			'dest' => array('label' => 'Destinataire'),
+			'mail_active' => array('label' => 'Mail actif', 'search_values' => $onoff),
+			'module' => array('label' => 'Module'),
+			'module_active' => array('label'=>'Module actif', 'search_values' => $onoff, 'select_default' => 'active'),
+		);
+
+		$lines = array();
+		foreach ($userMessages AS $code => $userMessage) {
+//			if (! BimpCore::isModuleActive($userMessage['module'])) continue;
+			$lines[] = array(
+				'code' => $code,
+				'label' => $userMessage['label'],
+				'type_dest' => array(
+					'content' => $type_dest[$userMessage['type_dest']],
+					'value' => $userMessage['type_dest']
+				),
+				'dest' => $userMessage['dest'],
+				'module' => $userMessage['module'],
+				'mail_active' => array(
+					'content' => $userMessage['active'] ? $onoff['active'] : $onoff['no_active'],
+					'value' => $userMessage['active'] ? 'active' : 'no_active'
+				),
+				'module_active' => array(
+					'content' => BimpCore::isModuleActive($userMessage['module']) ? $onoff['active'] : $onoff['no_active'],
+					'value' => BimpCore::isModuleActive($userMessage['module']) ? 'active' : 'no_active'
+				),
+			);
+		}
+
+		$params = array(
+			'searchable' => true,
+			'sortable' => true,
+		);
+
+		return BimpRender::renderBimpListTable($lines, $headers, $params);
+
+	}
+
+    // Ajax processes - Config modules:
 
     public function ajaxProcessLoadModuleConfForm()
     {
@@ -629,7 +681,7 @@ class devController extends BimpController
         );
     }
 
-    // Ajax processes - Gestionnaire YML: 
+    // Ajax processes - Gestionnaire YML:
 
     public function ajaxProcessLoadYmlFilesSelect()
     {

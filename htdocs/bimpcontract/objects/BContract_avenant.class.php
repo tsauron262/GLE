@@ -550,7 +550,7 @@ class BContract_avenant extends BContract_contrat
             $message = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
 			$code = 'avenant_signe';
-            mailSyn2($objet, 'contrat@bimp.fr', null, $message);
+            mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
         }
 
         return $errors;
@@ -579,7 +579,7 @@ class BContract_avenant extends BContract_contrat
                 $message = 'L\'avenant n°AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
 				$code = "avenant_prolongation_signe";
-                mailSyn2($objet, 'contrat@bimp.fr', null, $message);
+                mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
             }
         }
     }
@@ -620,7 +620,7 @@ class BContract_avenant extends BContract_contrat
                 $message = 'L\'avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' est en attente de signature';
 
 				$code = 'avenant_validation';
-                mailSyn2($objet, "contrat@bimp.fr", null, $message);
+                mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
             }
         }
 

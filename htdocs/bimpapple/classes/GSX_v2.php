@@ -276,7 +276,7 @@ class GSX_v2 extends GSX_Const
             return $retour;
         } else
 			$code = 'erreur_auth_phantom';
-            mailSyn2('Pas de fonction ssh2_connect', 'debugerp@bimp.fr', null, 'Attention la fonction ssh2_connect n\'existe pas ' . (defined('ID_ERP') ? 'sur erp' . ID_ERP : ''));
+            mailSyn2('Pas de fonction ssh2_connect', BimpCore::getConf('debugerp_email'), null, 'Attention la fonction ssh2_connect n\'existe pas ' . (defined('ID_ERP') ? 'sur erp' . ID_ERP : ''));
     }
 
     public function reauthenticate()

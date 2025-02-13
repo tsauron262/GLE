@@ -1545,25 +1545,27 @@ class BT_ficheInter extends BimpDolObject
                     $html .= '</strong></u><br />';
 
                     foreach ($commande->getLines('not_text') as $line) {
-                        $service = $line->getProduct();
-                        $html .= ' - ';
+                        if($line->desc != 'Acompte'){
+                            $service = $line->getProduct();
+                            $html .= ' - ';
 
-                        if (BimpObject::objectLoaded($service)) {
-                            $html .= $service->getLink();
-                        }
+                            if (BimpObject::objectLoaded($service)) {
+                                $html .= $service->getLink();
+                            }
 
-                        $html .= "<strong> - (" . price($line->getTotalHT(true)) . "€ HT / " . price($line->getTotalTTC()) . "€ TTC)</strong>";
+                            $html .= "<strong> - (" . price($line->getTotalHT(true)) . "€ HT / " . price($line->getTotalTTC()) . "€ TTC)</strong>";
 
-                        if ($line->getData('force_qty_1') == 1) {
-                            $html .= " <strong class='danger'>Au forfait</strong>";
-                        }
+                            if ($line->getData('force_qty_1') == 1) {
+                                $html .= " <strong class='danger'>Au forfait</strong>";
+                            }
 
-                        if ($line->desc) {
-                            $html .= "<br /><strong style='margin-left:10px'>" . $line->desc . "</strong><br />";
-                        } elseif (BimpObject::objectLoaded($service) && $service->getData('description')) {
-                            $html .= "<br /><strong style='margin-left:10px'>" . $service->getData('description') . "</strong><br />";
-                        } else {
-                            $html .= '<br />';
+                            if ($line->desc) {
+                                $html .= "<br /><strong style='margin-left:10px'>" . $line->desc . "</strong><br />";
+                            } elseif (BimpObject::objectLoaded($service) && $service->getData('description')) {
+                                $html .= "<br /><strong style='margin-left:10px'>" . $service->getData('description') . "</strong><br />";
+                            } else {
+                                $html .= '<br />';
+                            }
                         }
                     }
                 } else {

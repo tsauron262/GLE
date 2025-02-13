@@ -2,6 +2,7 @@
 
 class Bimp_Contact extends BimpObject
 {
+	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     public static $status_list = array(
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -9,7 +10,7 @@ class Bimp_Contact extends BimpObject
     );
     public static $anonymization_fields = array('lastname', 'firstname', 'address', 'zip', 'town', 'email', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'skype', 'birthday');
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function canClientView()
     {
@@ -103,7 +104,7 @@ class Bimp_Contact extends BimpObject
         return parent::canEditField($field_name);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getSocContactsListTitle()
     {
@@ -213,7 +214,7 @@ class Bimp_Contact extends BimpObject
                         $data['email_origine'] = 'Adresse e-mail de la fiche client';
                     }
                 }
-                
+
                 if (!$data['phone']) {
                     $data['phone'] = $client->getData('phone');
                     if ($data['phone']) {
@@ -226,7 +227,7 @@ class Bimp_Contact extends BimpObject
         return $data;
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayCountry()
     {
@@ -252,7 +253,7 @@ class Bimp_Contact extends BimpObject
         return '';
     }
 
-    public function displayFullAddress($singleLine = false)
+    public function displayFullAddress($singleLine = false, $icon = false)
     {
         $html = '';
 
@@ -280,6 +281,10 @@ class Bimp_Contact extends BimpObject
         } elseif ($this->getData('fk_pays')) {
             $html .= $this->displayCountry();
         }
+
+		if ($icon && $html) {
+			$html = BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $html;
+		}
 
         return $html;
     }
@@ -346,7 +351,22 @@ class Bimp_Contact extends BimpObject
         return $return;
     }
 
-    // Traitements: 
+	// Rendus HTML :
+
+	public function renderHeaderExtraLeft() {
+		$html = '';
+
+		$client = $this->getParentInstance();
+		if (BimpObject::objectLoaded($client)) {
+			$html .= $client->getLink() .'<br/>';
+		}
+
+		$html .= $this->displayFullAddress(true, true) .'<br/>';
+		$html .= $this->displayContactInfos();
+
+		return $html;
+	}
+    // Traitements:
 
     public function anonymiseData($save_data = true)
     {
@@ -397,7 +417,7 @@ class Bimp_Contact extends BimpObject
 
         if (!count($errors)) {
             if (!empty($data)) {
-                // On fait un update direct en base pour contourner les validations de formats des données: 
+                // On fait un update direct en base pour contourner les validations de formats des données:
                 if ($this->db->update('socpeople', $data, 'rowid = ' . (int) $this->id) <= 0) {
                     $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
                 }
@@ -443,7 +463,7 @@ class Bimp_Contact extends BimpObject
         return $errors;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validate()
     {

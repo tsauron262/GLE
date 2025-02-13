@@ -44,7 +44,7 @@ class BimpController
             }
         }
 
-        // Surcharge Version: 
+        // Surcharge Version:
         if (BimpCore::getVersion()) {
             $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/controllers/' . $controllerClassBase . '.php';
             if (file_exists($version_file)) {
@@ -55,7 +55,7 @@ class BimpController
             }
         }
 
-        // Surcharge entité: 
+        // Surcharge entité:
         if (BimpCore::getExtendsEntity() != '') {
             $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/controllers/' . $controllerClassBase . '.php';
             if (file_exists($entity_file)) {
@@ -141,7 +141,7 @@ class BimpController
 
     public function init()
     {
-        
+
     }
 
     public function initLayout()
@@ -185,7 +185,7 @@ class BimpController
             return;
         }
 
-        ini_set('display_errors', 0); // Par précaution. 
+        ini_set('display_errors', 0); // Par précaution.
 //        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
 //        die('ERR : ' . $level . ' - ' . $msg . ' - ' . $file . ' - ' . $line);
         switch ($level) {
@@ -548,7 +548,7 @@ class BimpController
         }
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     protected function renderSections($sections_path)
     {
@@ -906,7 +906,7 @@ class BimpController
                     $json_err_code = json_last_error();
 
                     if ($json_err_code == JSON_ERROR_UTF8) {
-                        // On tente un encodage utf-8. 
+                        // On tente un encodage utf-8.
                         $result = BimpTools::utf8_encode($result);
                         $result['warnings'] = static::getAndResetAjaxWarnings();
                         $json = json_encode($result);
@@ -1054,7 +1054,7 @@ class BimpController
         }
     }
 
-    // Enregistrements BimpObjects: 
+    // Enregistrements BimpObjects:
 
     protected function ajaxProcessSaveObject()
     {
@@ -1535,7 +1535,7 @@ class BimpController
     }
 
     // Chargements BimpObjects
-    // Views / Fields: 
+    // Views / Fields:
 
     protected function ajaxProcessLoadObjectView()
     {
@@ -1950,7 +1950,7 @@ class BimpController
                             $html = BimpRender::renderAlerts($bimpAsso->errors);
                         } else {
                             $html = $bimpAsso->renderAssociatesCheckList($field_prefix);
-                            // todo: remplacer 'default' par param correspondant (dans form/rows/...) 
+                            // todo: remplacer 'default' par param correspondant (dans form/rows/...)
                             $html = $bimpAsso->renderAddAssociateInput('default', false, $field_prefix, 0);
                         }
                     }
@@ -2277,6 +2277,13 @@ class BimpController
     protected function ajaxProcessLoadObjectList()
     {
         $errors = array();
+		if (!BimpCore::checkRateLimit('list', $errors)) {
+			return array(
+				'errors'              => $errors,
+				'request_id'          => BimpTools::getValue('request_id', 0, 'int')
+			);
+		}
+
         $rows_html = '';
         $pagination_html = '';
         $filters_panel_html = '';
@@ -2299,7 +2306,7 @@ class BimpController
 
         $modal_format = 'large';
 
-        if (is_null($object_name) || !$object_name) {
+        if (!$object_name) {
             $errors[] = 'Type d\'objet absent';
         }
 
@@ -2379,6 +2386,13 @@ class BimpController
     protected function ajaxProcessLoadObjectListFullPanel()
     {
         $errors = array();
+		if (!BimpCore::checkRateLimit('list', $errors)) {
+			return array(
+				'errors'              => $errors,
+				'request_id'          => BimpTools::getValue('request_id', 0, 'int')
+			);
+		}
+
         $html = '';
         $list_id = '';
 
@@ -2427,6 +2441,13 @@ class BimpController
     protected function ajaxProcessLoadObjectListCustom()
     {
         $errors = array();
+		if (!BimpCore::checkRateLimit('list', $errors)) {
+			return array(
+				'errors'              => $errors,
+				'request_id'          => BimpTools::getValue('request_id', 0, 'int')
+			);
+		}
+
         $html = '';
         $filters_panel_html = '';
 
@@ -2619,11 +2640,18 @@ class BimpController
         );
     }
 
-    // Views Lists: 
+    // Views Lists:
 
     protected function ajaxProcessLoadObjectViewsList()
     {
         $errors = array();
+		if (!BimpCore::checkRateLimit('list', $errors)) {
+			return array(
+				'errors'              => $errors,
+				'request_id'          => BimpTools::getValue('request_id', 0, 'int')
+			);
+		}
+
         $html = '';
         $views_list_id = '';
 
@@ -2632,11 +2660,11 @@ class BimpController
         $views_list_name = BimpTools::getValue('views_list_name', null, 'aZ09');
         $modal_format = 'large';
 
-        if (is_null($object_name) || !$object_name) {
+        if (!$object_name) {
             $errors[] = 'Type d\'objet absent';
         }
 
-        if (is_null($views_list_name) || !$views_list_name) {
+        if (!$views_list_name) {
             $errors[] = 'Type de liste de vues absent';
         }
 
@@ -2657,11 +2685,18 @@ class BimpController
         );
     }
 
-    // Stats Lists: 
+    // Stats Lists:
 
     protected function ajaxProcessLoadObjectStatsList()
     {
         $errors = array();
+		if (!BimpCore::checkRateLimit('list', $errors)) {
+			return array(
+				'errors'              => $errors,
+				'request_id'          => BimpTools::getValue('request_id', 0, 'int')
+			);
+		}
+
         $html = '';
         $filters_panel_html = '';
         $active_filters_html = '';
@@ -2710,6 +2745,13 @@ class BimpController
     protected function ajaxProcessLoadObjectStatsListRows()
     {
         $errors = array();
+		if (!BimpCore::checkRateLimit('list', $errors)) {
+			return array(
+				'errors'              => $errors,
+				'request_id'          => BimpTools::getValue('request_id', 0, 'int')
+			);
+		}
+
         $rows_html = '';
         $pagination_html = '';
         $filters_panel_html = '';
@@ -2760,6 +2802,13 @@ class BimpController
     protected function ajaxProcessLoadObjectSubStatsList()
     {
         $errors = array();
+		if (!BimpCore::checkRateLimit('list', $errors)) {
+			return array(
+				'errors'              => $errors,
+				'request_id'          => BimpTools::getValue('request_id', 0, 'int')
+			);
+		}
+
         $html = '';
         $list_id = '';
         $pagination_html = '';
@@ -2828,7 +2877,7 @@ class BimpController
         );
     }
 
-    // Traitements BimpObjects: 
+    // Traitements BimpObjects:
 
     protected function ajaxProcessSetObjectNewStatus()
     {
@@ -3119,11 +3168,11 @@ class BimpController
         );
     }
 
-    // Gestion des listes: 
+    // Gestion des listes:
 
     protected function ajaxProcessLoadUserListFiltersList()
     {
-        // Obsolète. 
+        // Obsolète.
 
         $errors = array(
             'Erreur: cette fonction est désactivée'
@@ -3257,7 +3306,7 @@ class BimpController
         );
     }
 
-    // Gestion des configs utilisateur: 
+    // Gestion des configs utilisateur:
 
     protected function ajaxProcessLoadUserConfigsList()
     {
@@ -3318,7 +3367,7 @@ class BimpController
         );
     }
 
-    // Gestion des notifications : 
+    // Gestion des notifications :
 
     protected function ajaxProcessGetUserNotifications()
     {
@@ -3387,7 +3436,7 @@ class BimpController
         );
     }
 
-    // Divers: 
+    // Divers:
 
     protected function ajaxProcessLoadDocumentation()
     {

@@ -1546,7 +1546,11 @@ class SMTPs
 			$_header .= "Reply-To: ".$this->getReplyTo('addr')."\r\n";
 		}
 
-		$_header .= 'X-Mailer: Dolibarr version '.DOL_VERSION.' (using SMTPs Mailer)'."\r\n";
+		global $user;
+		if ($user->login !== 'f.martinez') {
+			$_header .= 'X-Mailer: Dolibarr version '.DOL_VERSION.' (using SMTPs Mailer)'."\r\n";
+		}
+
 		$_header .= 'X-Dolibarr-Option: '.($conf->global->MAIN_MAIL_USE_MULTI_PART ? 'MAIN_MAIL_USE_MULTI_PART' : 'No MAIN_MAIL_USE_MULTI_PART')."\r\n";
 		$_header .= 'Mime-Version: 1.0'."\r\n";
 

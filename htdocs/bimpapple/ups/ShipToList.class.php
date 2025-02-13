@@ -4,30 +4,30 @@ class shipToList
 {
 
     public static $list = array();
-    
+
     static function init()
     {
         BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-        
-        global $tabCentre;
-        foreach ($tabCentre as $centre)
-            if (isset($centre['7']))
-                self::$list[$centre['4']] = array(
-                    'Name'          => 'BIMP',
-                    'AttentionName' => 'SAV',
-                    'ShipperNumber' => 'R8X411',
-//            'ShipperNumber' => '4W63V6VCVF8',
-                    'Address'       => array(
-                        'AddressLine'       => $centre['7'],
-                        'City'              => $centre['6'],
-                        'StateProvinceCode' => substr($centre['5'], 0, 2),
-                        'PostalCode'        => $centre['5'],
-                        'CountryCode'       => 'FR',
-                    ),
-                    'Phone'         => array(
-                        'Number' => $centre['0']
-                )); /* echo "<pre>";
-                  print_r(self::$list); */
+
+//        global $tabCentre;
+//        foreach ($tabCentre as $centre)
+//            if (isset($centre['7']))
+//                self::$list[$centre['4']] = array(
+//                    'Name'          => 'BIMP',
+//                    'AttentionName' => 'SAV',
+//                    'ShipperNumber' => 'R8X411',
+////            'ShipperNumber' => '4W63V6VCVF8',
+//                    'Address'       => array(
+//                        'AddressLine'       => $centre['7'],
+//                        'City'              => $centre['6'],
+//                        'StateProvinceCode' => substr($centre['5'], 0, 2),
+//                        'PostalCode'        => $centre['5'],
+//                        'CountryCode'       => 'FR',
+//                    ),
+//                    'Phone'         => array(
+//                        'Number' => $centre['0']
+//                )); /* echo "<pre>";
+//                  print_r(self::$list); */
     }
 
     /* public static $list = array(

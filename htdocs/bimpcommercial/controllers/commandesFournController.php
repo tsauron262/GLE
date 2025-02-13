@@ -36,7 +36,7 @@ class commandesFournController extends BimpController
     public function renderProdsTab()
     {
         $this->getSocid();
-        
+
         BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeFournLine');
 //        Bimp_CommandeFournLine::checkAllQties();
         //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0, 'int);
@@ -80,15 +80,16 @@ class commandesFournController extends BimpController
 
         $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
 
-        if (isset($_REQUEST['fk_statut'])) {
-            $filtres = explode(",", $_REQUEST['fk_statut']);
+        if (BimpTools::isSubmit('fk_statut')) {
+			$statut = BimpTools::getValue("fk_statut", 0);
+            $filtres = explode(",", $statut);
+			$labels = array();
             foreach ($filtres as $val) {
-                if (isset($propal::$status_list[$val]))
-                    $labels[] = $propal::$status_list[$val]['label'];
+				if (isset($propal::$status_list[$val]))
+					$labels[] = $propal::$status_list[$val]['label'];
             }
             $titre .= ' au statut ' . implode(' ou ', $labels);
         }
-
 
         $list = new BC_ListTable($propal, $list, 1, null, $titre);
 
@@ -96,6 +97,7 @@ class commandesFournController extends BimpController
             $list->addFieldFilterValue('fk_soc', (int) $this->soc->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
         }
+
         if (isset($_REQUEST['fk_statut'])) {
             $filtres = explode(",", $_REQUEST['fk_statut']);
             $list->addFieldFilterValue('fk_statut', $filtres);

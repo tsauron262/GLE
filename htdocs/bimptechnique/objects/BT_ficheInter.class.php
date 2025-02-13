@@ -1517,7 +1517,7 @@ class BT_ficheInter extends BimpDolObject
 
                 if (BimpObject::objectLoaded($commande)) {
                     $html .= '<tr>';
-                    $html .= '<th style="text-align: left">Commande #' . $commande->id . ' - ' . $commande->getRef() . '</th>';
+                    $html .= '<th style="text-align: left">Commande #' . $commande->id . ' - ' . $commande->getRef() . ' - ' . $commande->getData('libelle') . '</th>';
                     $html .= '</tr>';
                 }
 

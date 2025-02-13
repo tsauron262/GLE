@@ -2308,8 +2308,8 @@ class BCT_Contrat extends BimpDolObject
                         if (BimpObject::objectLoaded($line)) {
                             $infos .= 'Ligne #' . $id_line . ' : ';
                             $line_errors = array();
-
-                            $line->renouvAbonnement(array(), $line_errors);
+							$lines_renouv = array();
+                            $line->renouvAbonnement(array(), $lines_renouv, $line_errors);
 
                             if (count($line_errors)) {
                                 $infos .= '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';

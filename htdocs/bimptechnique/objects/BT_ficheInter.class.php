@@ -3352,8 +3352,10 @@ class BT_ficheInter extends BimpDolObject
                 mailSyn2($sujet, $tech->getData('email'), null, $message);
             }
         }
-
-        return $errors;
+        if(count($errors))
+            return $errors;
+        else
+            return parent::update ($warnings, $force_update);
     }
 
     public function delete(&$warnings = [], $force_delete = false)

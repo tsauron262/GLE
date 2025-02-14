@@ -5886,6 +5886,8 @@ class BCT_ContratLine extends BimpObject
 		}
 
 		$prod = $this->getChildObject('product');
+		$prod_duration = 0;
+
 		$options = BimpTools::overrideArray(array(
 			'id_propal'         => -1,
 			'propal_label'      => '',
@@ -5905,7 +5907,6 @@ class BCT_ContratLine extends BimpObject
 		if (!BimpObject::objectLoaded($prod)) {
 			$errors[] = 'Produit lié absent';
 		} else {
-			$prod_duration = 0;
 			if (BimpObject::objectLoaded($prod)) {
 				$prod_duration = (int) $prod->getData('duree');
 			}

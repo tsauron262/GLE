@@ -3077,6 +3077,7 @@ class Bimp_Client extends Bimp_Societe
                             $bds_process->Alert($msg, $relance, $client->getRef());
                             $bds_process->incIgnored();
                         }
+                        mailSyn2('Relance non envoyé', BimpCore::getConf('emails_notify_solvabilite_client_change', 'dev@bimp.fr'), null, $msg);
                         continue;
                     }
 

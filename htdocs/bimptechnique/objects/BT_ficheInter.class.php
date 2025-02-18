@@ -1517,7 +1517,7 @@ class BT_ficheInter extends BimpDolObject
 
                 if (BimpObject::objectLoaded($commande)) {
                     $html .= '<tr>';
-                    $html .= '<th style="text-align: left">Commande #' . $commande->id . ' - ' . $commande->getRef() . '</th>';
+                    $html .= '<th style="text-align: left">Commande #' . $commande->id . ' - ' . $commande->getRef() . ' - ' . $commande->getData('libelle') . '</th>';
                     $html .= '</tr>';
                 }
 
@@ -1545,25 +1545,27 @@ class BT_ficheInter extends BimpDolObject
                     $html .= '</strong></u><br />';
 
                     foreach ($commande->getLines('not_text') as $line) {
-                        $service = $line->getProduct();
-                        $html .= ' - ';
+                        if($line->desc != 'Acompte'){
+                            $service = $line->getProduct();
+                            $html .= ' - ';
 
-                        if (BimpObject::objectLoaded($service)) {
-                            $html .= $service->getLink();
-                        }
+                            if (BimpObject::objectLoaded($service)) {
+                                $html .= $service->getLink();
+                            }
 
-                        $html .= "<strong> - (" . price($line->getTotalHT(true)) . "€ HT / " . price($line->getTotalTTC()) . "€ TTC)</strong>";
+                            $html .= "<strong> - (" . price($line->getTotalHT(true)) . "€ HT / " . price($line->getTotalTTC()) . "€ TTC)</strong>";
 
-                        if ($line->getData('force_qty_1') == 1) {
-                            $html .= " <strong class='danger'>Au forfait</strong>";
-                        }
+                            if ($line->getData('force_qty_1') == 1) {
+                                $html .= " <strong class='danger'>Au forfait</strong>";
+                            }
 
-                        if ($line->desc) {
-                            $html .= "<br /><strong style='margin-left:10px'>" . $line->desc . "</strong><br />";
-                        } elseif (BimpObject::objectLoaded($service) && $service->getData('description')) {
-                            $html .= "<br /><strong style='margin-left:10px'>" . $service->getData('description') . "</strong><br />";
-                        } else {
-                            $html .= '<br />';
+                            if ($line->desc) {
+                                $html .= "<br /><strong style='margin-left:10px'>" . $line->desc . "</strong><br />";
+                            } elseif (BimpObject::objectLoaded($service) && $service->getData('description')) {
+                                $html .= "<br /><strong style='margin-left:10px'>" . $service->getData('description') . "</strong><br />";
+                            } else {
+                                $html .= '<br />';
+                            }
                         }
                     }
                 } else {
@@ -3350,8 +3352,10 @@ class BT_ficheInter extends BimpDolObject
                 mailSyn2($sujet, $tech->getData('email'), null, $message);
             }
         }
-
-        return $errors;
+        if(count($errors))
+            return $errors;
+        else
+            return parent::update ($warnings, $force_update);
     }
 
     public function delete(&$warnings = [], $force_delete = false)

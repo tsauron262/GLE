@@ -1,0 +1,1 @@
+- Contrats d'abonnement : ajout infos achats en cours sur les sous-lignes de bundles dans la ligne principale du bundle.

@@ -37,7 +37,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
 class test_sav extends BimpCron
 {
-
     public $nbErr = 0;
     public $nbOk = 0;
     public $nbMail = 0;
@@ -124,7 +123,6 @@ a.status IN (0,1,2,3,4,5,6,7) OR
 )');
 
 		$ok = 0;
-
         if (is_object($sql)) {
             while ($ln = $this->db->fetch_object($sql)) {
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);

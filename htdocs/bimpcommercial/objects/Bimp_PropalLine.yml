@@ -70,7 +70,6 @@ fields:
         label: Terme de facturation
         type: int
         default_value: 1
-        depends_on: id_product
         values: 
             0: A terme échu
             1: A terme à échoir

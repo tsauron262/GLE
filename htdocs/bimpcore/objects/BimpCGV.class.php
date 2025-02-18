@@ -123,11 +123,11 @@ class BimpCGV extends BimpObject
 			}
 			BimpTools::moveTmpFiles($warnings, $file, $files_dir, 'CGV_file.pdf');
 
-			$nb_pages = BimpTools::getArrayValueFromPath($data, 'nb_pages', 1);
+//			$nb_pages = BimpTools::getArrayValueFromPath($data, 'nb_pages', 1);
 			$signature_y_pos = BimpTools::getArrayValueFromPath($data,'signature_y_pos', 0);
 
 			$errors = $this->updateFields(array(
-				'nb_pages'        => $nb_pages,
+//				'nb_pages'        => $nb_pages,
 				'signature_y_pos' => $signature_y_pos
 			));
 			if (empty($errors)) {

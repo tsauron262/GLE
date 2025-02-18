@@ -126,9 +126,11 @@ forms:
                   allowed_ext: pdf
                   help: Fichier PDF de la CGV
                   max_items: 1
-            - field: nb_pages
+#            - field: nb_pages
             - field: signature_y_pos
-    
+    edit:
+        extends: default
+        
     modifyPdfForm:
         rows:
             -   custom: 1
@@ -140,7 +142,7 @@ forms:
                     allowed_ext: pdf
                     help: Fichier PDF de la CGV
                     max_items: 1
-            -   field: nb_pages
+#            -   field: nb_pages
             -   field: signature_y_pos
 
 

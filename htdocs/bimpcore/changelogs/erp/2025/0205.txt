@@ -1,0 +1,3 @@
+- SAV : Ajout intégration automatique de composants dans les devis pour les iPhone 8 et +
+- Nouvelle version fiche entrepôt + bouton "Correction du stock"
+- Nouvelle version fiche contact client.

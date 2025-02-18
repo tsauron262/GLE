@@ -1,0 +1,1 @@
+- Contrats d'abonnement : ajout "Date d'arrêt des achats"

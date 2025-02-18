@@ -5472,7 +5472,6 @@ class BCT_ContratLine extends BimpObject
 								if (count($line_errors)) {
 									$errors[] = BimpTools::getMsgFromArray($line_errors, 'La ligne d\'abonnement liée contient des erreurs');
 								} else {
-									$date_fac_start = date('Y-m-d', strtotime($date_ouverture));
 									$date_debut = $linked_line->getData('date_ouverture');
 
 									if (!$date_debut) {
@@ -5484,21 +5483,23 @@ class BCT_ContratLine extends BimpObject
 									}
 									$date_fin = $linked_line->getData('date_fin_validite');
 
-//                                    if ($date_fac_start < $date_debut) {
-//                                        $errors[] = 'La date de début des facturations (' . date('d / m / Y', strtotime($date_fac_start)) . ') ne peut pas être inférieure à la date de début de l\'abonnement lié (' . date('d / m / Y', strtotime($date_debut)) . ')';
-//                                    }
 									if ($date_ouverture > $date_fin) {
 										$errors[] = 'La date d\'ouverture ne peut pas être supérieure à la date de fin de validité de l\'abonnement lié';
 									}
-								}
-							}
 
-							if (!count($errors)) {
-								$this->set('date_ouverture', date('Y-m-d 00:00:00', strtotime($date_ouverture)));
-								$this->set('date_debut_validite', $date_debut);
-								$this->set('date_fin_validite', date('Y-m-d 23:59:59', strtotime($date_fin)));
-								$this->set('date_fac_start', $date_fac_start);
-								$this->set('date_achat_start', $date_fac_start);
+									if (!count($errors)) {
+										$this->set('date_ouverture', date('Y-m-d 00:00:00', strtotime($date_ouverture)));
+										$this->set('date_debut_validite', $date_debut);
+										$this->set('date_fin_validite', date('Y-m-d 23:59:59', strtotime($date_fin)));
+
+										if (!$this->getData('date_fac_start') || $this->getData('date_fac_start') < $date_ouverture) {
+											$this->set('date_fac_start', date('Y-m-d', strtotime($date_ouverture)));
+										}
+										if (!$this->getData('date_achat_start') || $this->getData('date_achat_start') < $date_ouverture) {
+											$this->set('date_achat_start', date('Y-m-d', strtotime($date_ouverture)));
+										}
+									}
+								}
 							}
 						}
 					} else {
@@ -5514,9 +5515,6 @@ class BCT_ContratLine extends BimpObject
 						if (!$this->getData('date_fac_start') || $this->getData('date_fac_start') < $date_ouverture) {
 							$this->set('date_fac_start', $dt->format('Y-m-d'));
 						}
-//                        else {
-//                            $date_debut = $this->getData('date_fac_start');
-//                        }
 
 						if (!$this->getData('date_achat_start') || $this->getData('date_achat_start') < $date_ouverture) {
 							$this->set('date_achat_start', $dt->format('Y-m-d'));

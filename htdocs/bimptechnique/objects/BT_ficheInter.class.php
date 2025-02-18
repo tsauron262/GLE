@@ -141,7 +141,7 @@ class BT_ficheInter extends BimpDolObject
     public function isEditable($force_edit = false, &$errors = [])
     {
         if (!$force_edit && $this->isLoaded() && $this->isOldFi()) {
-            $errors[] = 'Il s\agit d\'une fiche inter créée via l\'ancien module';
+            $errors[] = 'Il s\'agit d\'une fiche inter créée via l\'ancien module';
             return 0;
         }
         if ($force_edit) {
@@ -3352,10 +3352,11 @@ class BT_ficheInter extends BimpDolObject
                 mailSyn2($sujet, $tech->getData('email'), null, $message);
             }
         }
+
         if(count($errors))
             return $errors;
         else
-            return parent::update ($warnings, $force_update);
+            return parent::update ($warnings, true);
     }
 
     public function delete(&$warnings = [], $force_delete = false)

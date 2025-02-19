@@ -23,6 +23,38 @@ class Bimp_Fournisseur extends Bimp_Societe
             'fournisseur' => 1
         );
     }
+    
+    
+    
+    public function actionUpdateVide($data, &$success){
+        $success = 'ok';
+        $errors = $warnings = array();
+        
+        $this->update();
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+
+    public function getListExtraBulkActions()
+    {
+        global $user;
+        
+        if ($user->admin) {
+            $actions[] = array(
+                'label'   => 'Update a vide',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsBulkActionOnclick('updateVide', array(
+                    ), array(
+                    'single_action'    => false,
+                ))
+            );
+        }
+        return $actions;
+    }
 
     // Affichages: 
 

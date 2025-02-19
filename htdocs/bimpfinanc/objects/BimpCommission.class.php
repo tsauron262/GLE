@@ -909,9 +909,6 @@ class BimpCommission extends BimpObject
 			if (isset($lines[0])) {
 				$line = str_getcsv($lines[0], ';');
 
-				echo 'LINE<pre>' . print_r($line, 1) . '</pre>';
-
-				echo 'COLS BEFORE<pre>' . print_r($cols, 1) . '</pre>';
 				foreach ($cols as $col_idx => $col_data) {
 					if ($line[$col_data[0]] != $col_data[1]) {
 						foreach ($line as $line_col_idx => $line_col_name) {
@@ -933,9 +930,6 @@ class BimpCommission extends BimpObject
 			if (!count($errors)) {
 				$i = 0;
 				$totals_by_br = array();
-
-				echo 'COLS <pre>' . print_r($cols, 1) . '</pre>';
-				echo 'LINES<pre>' . print_r($lines, 1) . '</pre>';
 
 				foreach ($lines as $idx => $line) {
 					if ($idx === 0) {
@@ -981,14 +975,11 @@ class BimpCommission extends BimpObject
 								$totals_by_br[$ref_br] += $price;
 							}
 
-							echo 'LINE DATA<pre>' . print_r($line_data, 1) . '</pre>';
 							$data = array();
-							echo 'COLS CHECK<pre>' . print_r($cols, 1) . '</pre>';
 							foreach ($cols as $col_idx => $col_data) {
 								echo $col_idx . ' - ' . $col_data[0] . ' - ' . $col_data[1] . ' => ' . $line_data[$col_data[0]] . '<br/>';
 								$data[] = $line_data[$col_data[0]];
 							}
-							echo 'DATA<pre>' . print_r($data, 1) . '</pre>';
 
 							$serials[] = $serial;
 							$elements[] = $i . ';' . implode(';', $data);
@@ -1061,9 +1052,6 @@ class BimpCommission extends BimpObject
 							break;
 					}
 				}
-
-				echo 'ELEMENTS<pre>' . print_r($elements, 1) . '</pre>';
-				exit;
 
 				if (count($line_errors)) {
 					$errors[] = BimpTools::getMsgFromArray($line_errors, 'Il n\'est pas possible de créer la facture');

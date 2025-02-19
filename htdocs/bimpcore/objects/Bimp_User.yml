@@ -56,6 +56,15 @@ objects:
             id_object: 
                 field_value: defaultentrepot
                 
+    user_params:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_UserParam
+        
+                
 fields: 
     statut:
         label: Statut

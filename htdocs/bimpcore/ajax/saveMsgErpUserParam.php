@@ -4,7 +4,7 @@
 		require ('../../main.inc.php');
 		require_once ('../classes/BimpCache.php');
 		$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $_POST['user']);
-		$errors = $user->saveInterfaceParam(
+		$errors = $user->saveUserParam(
 			$_POST['code'],
 			($_POST['value'] ? 'yes' : 'no')
 		);

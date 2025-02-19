@@ -912,7 +912,7 @@ class BimpCommission extends BimpObject
 				echo 'LINE<pre>' . print_r($line, 1) . '</pre>';
 
 				echo 'COLS BEFORE<pre>' . print_r($cols, 1) . '</pre>';
-				foreach ($cols as $col_idx => &$col_data) {
+				foreach ($cols as $col_idx => /*&*/$col_data) {
 //					if ($line[$col_data[0]] != $col_data[1]) {
 //						foreach ($line as $line_col_idx => $line_col_name) {
 //							if ($line_col_name == $col_data[1]) {

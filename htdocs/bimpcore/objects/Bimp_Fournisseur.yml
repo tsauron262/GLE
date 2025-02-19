@@ -89,6 +89,8 @@ lists:
         bulk_actions:
             0: 
                 label: supprimer les fournisseurs sélectionnés
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
         cols: 
             code_client: unset
 

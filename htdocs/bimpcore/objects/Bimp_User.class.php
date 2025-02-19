@@ -1207,6 +1207,69 @@ class Bimp_User extends BimpObject
         return $html;
     }
 
+	public function renderMsgErp($type_metier = 'metier')
+	{
+		require_once DOL_DOCUMENT_ROOT . '/bimpusertools/classes/UserMessages.php';
+
+		global $userMessages, $type_dest, $user;
+
+		$oui_non = array(
+			'yes' => 'Oui',
+			'no' => 'Non',
+		);
+
+		$headers = array(
+			'label' => array('label' => 'Libellé'),
+			'required' => array('label' => 'Obligatoire', 'search_values' => $oui_non),
+			'dest' => array('label' => 'Destinataire'),
+			'resil' => array('label' => 'Abonné', 'search_values' => $oui_non),
+		);
+
+		$lines = array();
+		foreach ($userMessages AS $code => $userMessage) {
+			if (!BimpCore::isModuleActive($userMessage['module'])) {
+				continue;
+			}
+			if ($userMessage['type_metier'] != $type_metier)	{
+				continue;
+			}
+			$required = BimpCore::getConf('userMessages__' . $code . '__required', '') != '' ? BimpCore::getConf('userMessages__' . $code . '__required', '') : $userMessage['required'];
+			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', '') != '' ? BimpCore::getConf('userMessages__' . $code . '__msgActive', '') : $userMessage['active'];
+			// $abonner = BimpCore::getConf('userMessages__' . $code . '_' . GETPOST('id', 'int') . '__abonner', '') != '' ? BimpCore::getConf('userMessages__' . $code . '_' . GETPOST('id', 'int') . '__abonner', '') : 1;
+			$abonner = ($this->getUserParamValue('userMessages__' . $code . '__abonner') != '' ? $this->getUserParamValue('userMessages__' . $code . '__abonner') : 'yes');
+
+			if (!$msg_active) {
+				continue;
+			}
+
+			$lines[] = array(
+				'label' => $userMessage['label'],
+
+				'required' => array(
+					'content' => '<span class="'.($required ? 'danger' : 'success' ).'">' . ($required ? $oui_non['yes'] : $oui_non['no']) . '</span>',
+					'value' => $required ? 'yes' : 'no'
+				),
+
+				'dest' => $userMessage['dest'],
+
+				'resil' => $required ? '' : array(
+					'content' => BimpInput::renderInput('toggle', 'resil', ($abonner == 'yes' ? 1 : 0),
+						array(
+							'extra_attr' => array('onchange' => 'saveMsgErpUserParam(\'userMessages__' . $code . '__abonner\', ' . $this->id . ', $(this).val())')
+						)
+					),
+					'value' => ($abonner == 'yes' ? 'yes' : 'no')
+				)
+			);
+		}
+		$params = array(
+			'searchable' => true,
+			'sortable' => true,
+		);
+
+		return BimpRender::renderBimpListTable($lines, $headers, $params);
+	}
+
     public function renderMaterielView()
     {
         $tabs = array();
@@ -1274,6 +1337,12 @@ class Bimp_User extends BimpObject
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#lists_filters_tab .nav_tab_ajax_result\')', array('lists_filters'), array('button' => ''))
             );
+
+			$tabs[] = array(
+				'id'            => 'msgErp',
+				'title'         => BimpRender::renderIcon('fas_mail-bulk', 'iconLeft') . 'Message ERP',
+				'content' => $this->renderMsgErp()
+			);
 
             return BimpRender::renderNavTabs($tabs, 'params_tabs');
         }

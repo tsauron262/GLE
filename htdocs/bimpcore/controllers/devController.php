@@ -510,46 +510,84 @@ class devController extends BimpController
         return $menu->renderItemsList();
     }
 
-	public function renderMailerTab()
+	public function renderMailerTab($type_metier)
 	{
 		require_once DOL_DOCUMENT_ROOT . '/bimpusertools/classes/UserMessages.php';
 
-		global $userMessages, $type_dest;
+		global $userMessages, $type_dest, $user;
 
 		$onoff = array(
 			'no_active' => 'Inactif',
 			'active' => 'Actif',
 		);
+		$oui_non = array(
+			'yes' => 'Oui',
+			'no' => 'Non',
+		);
 		$headers = array(
 			'code' => array('label' => 'Code'),
 			'label' => array('label' => 'Libellé'),
+			'required' => array('label' => 'Obligatoire', 'search_values' => $oui_non),
 			'type_dest' => array('label' => 'Type destinataire', 'search_values' => $type_dest),
 			'dest' => array('label' => 'Destinataire'),
 			'mail_active' => array('label' => 'Mail actif', 'search_values' => $onoff),
 			'module' => array('label' => 'Module'),
-			'module_active' => array('label'=>'Module actif', 'search_values' => $onoff, 'select_default' => 'active'),
+//			'module_active' => array('label'=>'Module actif', 'search_values' => $onoff),
 		);
 
 		$lines = array();
+//		$i = 0;
 		foreach ($userMessages AS $code => $userMessage) {
-//			if (! BimpCore::isModuleActive($userMessage['module'])) continue;
+//			$i++;
+//			if( $i > 10 ) {
+//				exit;
+//			}
+			if (!BimpCore::isModuleActive($userMessage['module'])) {
+				continue;
+			}
+			if ($userMessage['type_metier'] != $type_metier)	{
+				continue;
+			}
+			$required = BimpCore::getConf('userMessages__' . $code . '__required', '') != '' ? BimpCore::getConf('userMessages__' . $code . '__required', '') : $userMessage['required'];
+			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', '') != '' ? BimpCore::getConf('userMessages__' . $code . '__msgActive', '') : $userMessage['active'];
 			$lines[] = array(
 				'code' => $code,
 				'label' => $userMessage['label'],
+
+				'required' => $user->admin ? array(
+					'content' => BimpInput::renderInput('toggle', 'required', $required,
+						array('extra_attr' =>
+							  array('onchange' => 'saveBimpcoreConf(\'bimpcore\', \'userMessages__' . $code . '__required\', $(this).val(), \'\', \'\')')
+						)
+					),
+					'value' => $required ? 'yes' : 'no'
+				) : array(
+					'content' => '<span class="'.($required ? 'success' : 'danger' ).'">' . ($required ? $oui_non['yes'] : $oui_non['no']) . '</span>',
+					'value' => $required ? 'yes' : 'no'
+				),
+
 				'type_dest' => array(
 					'content' => $type_dest[$userMessage['type_dest']],
 					'value' => $userMessage['type_dest']
 				),
 				'dest' => $userMessage['dest'],
-				'module' => $userMessage['module'],
-				'mail_active' => array(
-					'content' => $userMessage['active'] ? $onoff['active'] : $onoff['no_active'],
-					'value' => $userMessage['active'] ? 'active' : 'no_active'
+
+				'mail_active' => $user->admin ? array(
+					'content' => BimpInput::renderInput('toggle', 'required', $msg_active,
+						array('extra_attr' =>
+								  array('onchange' => 'saveBimpcoreConf(\'bimpcore\', \'userMessages__' . $code . '__msgActive\', $(this).val(), \'\', \'\')')
+						)
+					),
+					'value' => ($msg_active ? 'active' : 'no_active')
+				) : array(
+					'content' => '<span class="'.($msg_active ? 'success' : 'danger' ).'">' . ($msg_active ? $onoff['active'] : $onoff['no_active']) . '</span>',
+					'value' => ($msg_active ? 'active' : 'no_active')
 				),
-				'module_active' => array(
+				'module' => $userMessage['module'],
+				/*'module_active' => array(
 					'content' => BimpCore::isModuleActive($userMessage['module']) ? $onoff['active'] : $onoff['no_active'],
 					'value' => BimpCore::isModuleActive($userMessage['module']) ? 'active' : 'no_active'
-				),
+				),*/
 			);
 		}
 

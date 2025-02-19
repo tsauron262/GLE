@@ -141,7 +141,7 @@ class BT_ficheInter extends BimpDolObject
     public function isEditable($force_edit = false, &$errors = [])
     {
         if (!$force_edit && $this->isLoaded() && $this->isOldFi()) {
-            $errors[] = 'Il s\agit d\'une fiche inter créée via l\'ancien module';
+            $errors[] = 'Il s\'agit d\'une fiche inter créée via l\'ancien module';
             return 0;
         }
         if ($force_edit) {
@@ -2490,9 +2490,12 @@ class BT_ficheInter extends BimpDolObject
     {
         $errors = array();
 
-        $params = BimpTools::overrideArray(array(
-                    'is_clone' => false,
-                        ), $params);
+		$params = array(
+			'is_clone' => false
+		);
+//        $params = BimpTools::overrideArray(array(
+//                    'is_clone' => false,
+//                        ), $params);
 
         if (!BimpObject::objectLoaded($origin) || !is_a($origin, 'BT_ficheInter')) {
             return array('Element d\'origine absent ou invalide');
@@ -2612,7 +2615,7 @@ class BT_ficheInter extends BimpDolObject
                     $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $id);
 
                     if (!BimpObject::objectLoaded($instance)) {
-                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id . ' n\'existe pas';
                         continue;
                     }
 
@@ -2962,6 +2965,7 @@ class BT_ficheInter extends BimpDolObject
                 $arrayCode = $children->getArrayServiceForBilling();
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
                 $product->find(Array('ref' => $arrayCode[$children::TYPE_DEPLA]));
+
                 if ($dep_de_reference->isLoaded()) {
                     $new_factureLine->pu_ht = $dep_de_reference->getData('price');
 
@@ -3352,10 +3356,11 @@ class BT_ficheInter extends BimpDolObject
                 mailSyn2($sujet, $tech->getData('email'), null, $message);
             }
         }
+
         if(count($errors))
             return $errors;
         else
-            return parent::update ($warnings, $force_update);
+            return parent::update ($warnings, true);
     }
 
     public function delete(&$warnings = [], $force_delete = false)

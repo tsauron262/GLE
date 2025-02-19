@@ -188,14 +188,7 @@ fields:
         display_if: 
             field_name: no_fixe_prices
             show_values: 0
-        
-    deee: 
-        label: ecotaxe
-        dol_extra_field: 1
-        type: money
-        decimals: 4
-        default_value: 4
-        
+            
     2hotline:
         label: Durée hotline en mois
         type: int
@@ -435,6 +428,7 @@ fields:
     deee:
         label: Eco-Taxe
         type: money
+        decimals: 4
         user_edit: 1
         dol_extra_field: 1
         

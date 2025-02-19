@@ -5472,7 +5472,6 @@ class BCT_ContratLine extends BimpObject
 								if (count($line_errors)) {
 									$errors[] = BimpTools::getMsgFromArray($line_errors, 'La ligne d\'abonnement liée contient des erreurs');
 								} else {
-									$date_fac_start = date('Y-m-d', strtotime($date_ouverture));
 									$date_debut = $linked_line->getData('date_ouverture');
 
 									if (!$date_debut) {
@@ -5484,21 +5483,23 @@ class BCT_ContratLine extends BimpObject
 									}
 									$date_fin = $linked_line->getData('date_fin_validite');
 
-//                                    if ($date_fac_start < $date_debut) {
-//                                        $errors[] = 'La date de début des facturations (' . date('d / m / Y', strtotime($date_fac_start)) . ') ne peut pas être inférieure à la date de début de l\'abonnement lié (' . date('d / m / Y', strtotime($date_debut)) . ')';
-//                                    }
 									if ($date_ouverture > $date_fin) {
 										$errors[] = 'La date d\'ouverture ne peut pas être supérieure à la date de fin de validité de l\'abonnement lié';
 									}
-								}
-							}
 
-							if (!count($errors)) {
-								$this->set('date_ouverture', date('Y-m-d 00:00:00', strtotime($date_ouverture)));
-								$this->set('date_debut_validite', $date_debut);
-								$this->set('date_fin_validite', date('Y-m-d 23:59:59', strtotime($date_fin)));
-								$this->set('date_fac_start', $date_fac_start);
-								$this->set('date_achat_start', $date_fac_start);
+									if (!count($errors)) {
+										$this->set('date_ouverture', date('Y-m-d 00:00:00', strtotime($date_ouverture)));
+										$this->set('date_debut_validite', $date_debut);
+										$this->set('date_fin_validite', date('Y-m-d 23:59:59', strtotime($date_fin)));
+
+										if (!$this->getData('date_fac_start') || $this->getData('date_fac_start') < $date_ouverture) {
+											$this->set('date_fac_start', date('Y-m-d', strtotime($date_ouverture)));
+										}
+										if (!$this->getData('date_achat_start') || $this->getData('date_achat_start') < $date_ouverture) {
+											$this->set('date_achat_start', date('Y-m-d', strtotime($date_ouverture)));
+										}
+									}
+								}
 							}
 						}
 					} else {
@@ -5514,9 +5515,6 @@ class BCT_ContratLine extends BimpObject
 						if (!$this->getData('date_fac_start') || $this->getData('date_fac_start') < $date_ouverture) {
 							$this->set('date_fac_start', $dt->format('Y-m-d'));
 						}
-//                        else {
-//                            $date_debut = $this->getData('date_fac_start');
-//                        }
 
 						if (!$this->getData('date_achat_start') || $this->getData('date_achat_start') < $date_ouverture) {
 							$this->set('date_achat_start', $dt->format('Y-m-d'));
@@ -6024,6 +6022,7 @@ class BCT_ContratLine extends BimpObject
 							'line_origin_type'             => ($options['id_propal'] < 0 ? 'contrat_line' : ''),
 							'achat_periodicity'            => $options['achat_periodicity'],
 							'variable_qty'                 => $this->getData('variable_qty'),
+							'variable_pu_ht'               => $this->getData('variable_pu_ht'),
 							'date_ouverture_prevue'        => $dt_ouv->format('Y-m-d') . ' 00:00:00'
 						), true, $errors, $warnings);
 
@@ -7094,6 +7093,7 @@ class BCT_ContratLine extends BimpObject
 			}
 
 			if (!count($errors)) {
+				/** @var BCT_ContratLine $line */
 				$line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_main_line);
 				if (!BimpObject::objectLoaded($line)) {
 					$errors[] = 'La ligne principale d\'ID ' . $id_main_line . ' n\'existe plus';
@@ -7737,7 +7737,7 @@ class BCT_ContratLine extends BimpObject
 
 											$sub_line_qty = 0;
 											$sub_line_qty_per_period = 0;
-											$sub_line_variable_qty = (int) $sub_line->getData('variable_pu_ht');
+											$sub_line_variable_pu_ht = (int) $sub_line->getData('variable_pu_ht');
 
 											if (isset($line_data['sub_lines'][$sub_line->id]['total_qty'])) {
 												$sub_line_qty = $line_data['sub_lines'][$sub_line->id]['total_qty'];
@@ -7756,7 +7756,7 @@ class BCT_ContratLine extends BimpObject
 												}
 											}
 
-											if (!$sub_line_qty && !$sub_line_variable_qty) {
+											if (!$sub_line_qty && !$sub_line_variable_pu_ht) {
 												$process->incIgnored();
 												$process->Alert('Ligne ignorée (Aucune quantité à facturer)', $facture, $line_ref . ' (Sous-ligne n°' . $sub_line->getData('rang') . ')');
 												continue;
@@ -7769,7 +7769,7 @@ class BCT_ContratLine extends BimpObject
 												'editable'   => 0
 											);
 
-											if ($sub_line_variable_qty) {
+											if ($sub_line_variable_pu_ht) {
 												$sub_lines_data[$sub_line->id]['subprice'] = BimpTools::getArrayValueFromPath($line_data, 'sub_lines/' . $sub_line->id . '/subprice', null);
 												$sub_lines_data[$sub_line->id]['editable'] = 1;
 
@@ -8295,7 +8295,7 @@ class BCT_ContratLine extends BimpObject
 	public function validatePost()
 	{
 		// temp :
-		if (isset($_POST['date_ouverture_prevue']) && !is_null($_POST['date_ouverture_prevue']) && $_POST['date_ouverture_prevue'] !== '') {
+		if (isset($_POST['date_ouverture_prevue']) && $_POST['date_ouverture_prevue'] !== '') {
 			$_POST['date_ouverture_prevue'] = date('Y-m-d', strtotime($_POST['date_ouverture_prevue'])) . ' 00:00:00';
 		}
 		$errors = parent::validatePost();
@@ -8355,6 +8355,7 @@ class BCT_ContratLine extends BimpObject
 						'fk_product_fournisseur_price' => 0,
 						'duration'                     => 0,
 						'variable_qty'                 => 0,
+						'variable_pu_ht'               => 0,
 						'fac_periodicity'              => 0,
 						'achat_periodicity'            => 0,
 						'nb_renouv'                    => 0,
@@ -8450,6 +8451,14 @@ class BCT_ContratLine extends BimpObject
 					}
 					if (is_null($this->getData('buy_price_ht'))) {
 						$this->set('buy_price_ht', $this->getValueForProduct('buy_price_ht', $prod));
+					}
+
+					if (!isset($this->data['variable_qty'])) {
+						$this->set('variable_qty', $this->getValueForProduct('variable_qty', $prod));
+					}
+
+					if (!isset($this->data['variable_pu_ht'])) {
+						$this->set('variable_pu_ht', $this->getValueForProduct('variable_pu_ht', $prod));
 					}
 				}
 			}

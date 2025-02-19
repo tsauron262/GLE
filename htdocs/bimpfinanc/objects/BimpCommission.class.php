@@ -913,18 +913,18 @@ class BimpCommission extends BimpObject
 
 				echo 'COLS BEFORE<pre>' . print_r($cols, 1) . '</pre>';
 				foreach ($cols as $col_idx => &$col_data) {
-					if ($line[$col_data[0]] != $col_data[1]) {
-						foreach ($line as $line_col_idx => $line_col_name) {
-							if ($line_col_name == $col_data[1]) {
-								$col_data[0] = $line_col_idx;
-								break;
-							}
-						}
+//					if ($line[$col_data[0]] != $col_data[1]) {
+//						foreach ($line as $line_col_idx => $line_col_name) {
+//							if ($line_col_name == $col_data[1]) {
+//								$col_data[0] = $line_col_idx;
+//								break;
+//							}
+//						}
 
 						if ($line[$col_data[0]] != $col_data[1]) {
 							$errors[] = 'En-tête absent ou invalide : ' . $col_data[1] . ' (colonne ' . ($col_data[0] + 1) . ') - Veuillez vérifier le fichier';
 						}
-					}
+//					}
 				}
 			} else {
 				$errors[] = 'Fichier vide';

@@ -3391,7 +3391,7 @@ class gsxController extends BimpController
                                     'foldable' => true
                         ));
 
-                        $gsx_content .= $sav->renderLoadPartsButton($serial, "deux");
+//                        $gsx_content .= $sav->renderLoadPartsButton($serial, "deux");
 
                         $html .= BimpRender::renderPanel($datas['productDescription'], $gsx_content, '', array(
                                     'type'     => 'secondary',

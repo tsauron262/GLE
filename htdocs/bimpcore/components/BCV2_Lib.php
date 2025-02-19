@@ -7,10 +7,16 @@ require_once __DIR__ . '/BC_Definitions.php';
 require_once __DIR__ . '/BimpComponent.php';
 require_once __DIR__ . '/BC_Panel.php';
 
+// Data :
+
+// Forms :
+
 require_once __DIR__ . '/forms/BC_Form.php';
 require_once __DIR__ . '/forms/BC_FormElement.php';
 require_once __DIR__ . '/forms/BC_FormInput.php';
 require_once __DIR__ . '/forms/BC_FormSection.php';
+
+// Inputs :
 
 require_once __DIR__ . '/inputs/BC_Input.php';
 require_once __DIR__ . '/inputs/BC_TextInput.php';

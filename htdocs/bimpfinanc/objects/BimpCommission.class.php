@@ -909,6 +909,8 @@ class BimpCommission extends BimpObject
 			if (isset($lines[0])) {
 				$line = str_getcsv($lines[0], ';');
 
+				echo 'LINE<pre>' . print_r($line, 1) . '</pre>';
+
 				echo 'COLS BEFORE<pre>' . print_r($cols, 1) . '</pre>';
 				foreach ($cols as $col_idx => &$col_data) {
 					if ($line[$col_data[0]] != $col_data[1]) {

@@ -982,7 +982,7 @@ class BimpCommission extends BimpObject
 							echo 'LINE DATA<pre>' . print_r($line_data, 1) . '</pre>';
 							$data = array();
 							foreach ($cols as $col_data) {
-								echo $col_data[0] . ' - ' . $col_data[0] . ' => ' . $line_data[$col_data[0]] . '<br/>';
+								echo $col_data[0] . ' - ' . $col_data[1] . ' => ' . $line_data[$col_data[0]] . '<br/>';
 								$data[] = $line_data[$col_data[0]];
 							}
 							echo 'DATA<pre>' . print_r($data, 1) . '</pre>';

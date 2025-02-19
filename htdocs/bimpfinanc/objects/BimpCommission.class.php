@@ -931,6 +931,7 @@ class BimpCommission extends BimpObject
 				$i = 0;
 				$totals_by_br = array();
 
+				echo 'COLS <pre>' . print_r($cols, 1) . '</pre>';
 				echo 'LINES<pre>' . print_r($lines, 1) . '</pre>';
 
 				foreach ($lines as $idx => $line) {

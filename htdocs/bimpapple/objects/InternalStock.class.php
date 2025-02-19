@@ -512,14 +512,14 @@ class InternalStock extends PartStock
 					$stock_dest = static::getStockInstance($code_centre_dest, $this->getData('part_number'));
 					if (!BimpObject::objectLoaded($stock_dest)) {
 						$stock_dest = BimpObject::createBimpObject('bimpapple', 'InternalStock', array(
-							'code_centre' => $code_centre_dest,
-							'part_number' => $this->getData('part_number'),
-							'qty'         => 0,
-							'do_not_order' => $this->getData('do_not_order'),
-							'description' => $this->getData('description'),
-							'product_label' => $this->getData('product_label'),
-							'code_eee'    => $this->getData('code_eee'),
-							'last_pa'     => $this->getData('last_pa'),
+							'code_centre'    => $code_centre_dest,
+							'part_number'    => $this->getData('part_number'),
+							'qty'            => 0,
+							'do_not_order'   => $this->getData('do_not_order'),
+							'description'    => $this->getData('description'),
+							'product_label'  => $this->getData('product_label'),
+							'code_eee'       => $this->getData('code_eee'),
+							'last_pa'        => $this->getData('last_pa'),
 							'id_linked_prod' => (int) $this->getData('id_linked_prod')
 						), true, $errors, $warnings);
 					}

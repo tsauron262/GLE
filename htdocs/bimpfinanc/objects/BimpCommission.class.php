@@ -931,6 +931,8 @@ class BimpCommission extends BimpObject
 				$i = 0;
 				$totals_by_br = array();
 
+				echo 'LINES<pre>' . print_r($lines, 1) . '</pre>';
+
 				foreach ($lines as $idx => $line) {
 					if ($idx === 0) {
 						continue;
@@ -975,10 +977,12 @@ class BimpCommission extends BimpObject
 								$totals_by_br[$ref_br] += $price;
 							}
 
+							echo 'LINE DATA<pre>' . print_r($line_data, 1) . '</pre>';
 							$data = array();
 							foreach ($cols as $col_data) {
 								$data[] = $line_data[$col_data[0]];
 							}
+							echo 'DATA<pre>' . print_r($data, 1) . '</pre>';
 
 							$serials[] = $serial;
 							$elements[] = $i . ';' . implode(';', $data);
@@ -1051,6 +1055,8 @@ class BimpCommission extends BimpObject
 							break;
 					}
 				}
+
+				echo 'ELEMENTS<pre>' . print_r($elements, 1) . '</pre>';
 
 				if (count($line_errors)) {
 					$errors[] = BimpTools::getMsgFromArray($line_errors, 'Il n\'est pas possible de créer la facture');

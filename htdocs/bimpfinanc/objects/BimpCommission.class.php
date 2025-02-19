@@ -921,7 +921,7 @@ class BimpCommission extends BimpObject
 							}
 						}
 
-						if ($line[$col_data[0]] != $col_data[1]) {
+						if ($line[$cols[$col_idx][0]] != $col_data[1]) {
 							$errors[] = 'En-tête absent ou invalide : ' . $col_data[1] . ' (colonne ' . ($col_data[0] + 1) . ') - Veuillez vérifier le fichier';
 						}
 					}

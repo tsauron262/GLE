@@ -2938,6 +2938,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                             'linked_object_name'           => $line->getData('linked_object_name'),
                                             'achat_periodicity'            => (BimpObject::objectLoaded($prod) ? $prod->getData('achat_def_periodicity') : 0),
                                             'variable_qty'                 => (!(int) $line->getData('id_parent_line') && BimpObject::objectLoaded($prod) ? $prod->getData('variable_qty') : 0),
+											'variable_pu_ht'                 => (BimpObject::objectLoaded($prod) ? $prod->getData('variable_pu_ht') : 0),
                                             'date_ouverture_prevue'        => $line_date_ouv
                                                 ), true, $line_errors, $line_warnings);
 

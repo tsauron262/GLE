@@ -30,7 +30,6 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_product
-    
     fourn_price: 
         relation: hasOne
         delete: 0

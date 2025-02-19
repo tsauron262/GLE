@@ -9349,11 +9349,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 $fl = false;
             }
-			if (isset($value['js_function'])) {
-				$js .= $key . ': ' . $value['js_function'];
-			} else {
-				$js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */$value/* )) */ . '\''));
-			}
+			$js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */$value/* )) */ . '\''));
         }
         $js .= '}, ';
         if (isset($params['result_container'])) {

@@ -1057,6 +1057,7 @@ class BimpCommission extends BimpObject
 				}
 
 				echo 'ELEMENTS<pre>' . print_r($elements, 1) . '</pre>';
+				exit;
 
 				if (count($line_errors)) {
 					$errors[] = BimpTools::getMsgFromArray($line_errors, 'Il n\'est pas possible de créer la facture');

@@ -1,12 +1,12 @@
 <?php
-global $userMessages, $type_dest, $canaux_diff_msg;
+global $user_messages, $types_dest, $canaux_diff_msg;
 
 $canaux_diff_msg = array(
 	'mail' => 'Email',
 	'msgerp' => 'Message interne'
 );
 
-$type_dest = array(
+$types_dest = array(
 	'commercial_piece' => 'Commercial pièce',
 	'commercial_client' => 'Commercial client',
 	'acheteur_piece' => 'Acheteur pièce',
@@ -23,7 +23,7 @@ $type_dest = array(
 	'text_perso_tech_sav' => 'technicien SAV et email perso',
 );
 
-$userMessages = array(
+$user_messages = array(
 	'relance_fac_sans_expertise_bimp' => array(		// \BimpFactureFournForDol::sendRelanceExpertiseBimp
 		'label' => 'Factures sans expertise BIMP',
 		'type_dest' => 'commercial_piece',

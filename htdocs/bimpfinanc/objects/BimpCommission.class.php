@@ -15,7 +15,7 @@ class BimpCommission extends BimpObject
         self::TYPE_ENTREPOT => array('label' => 'Commission entrepôt', 'icon' => 'fas_warehouse'),
     );
 
-    // Gestion des droits user: 
+    // Gestion des droits user:
 
     public function canDelete()
     {
@@ -65,7 +65,7 @@ class BimpCommission extends BimpObject
         return (int) parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -105,7 +105,7 @@ class BimpCommission extends BimpObject
         return 0;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {
@@ -194,7 +194,7 @@ class BimpCommission extends BimpObject
         return '';
     }
 
-    // Getters cache: 
+    // Getters cache:
 
     public function getRevalorisationsListCacheKey()
     {
@@ -444,7 +444,7 @@ class BimpCommission extends BimpObject
         $cache_key = 'commission_' . $this->id . '_amounts_data';
 
         if ($recalculate || !isset(self::$cache[$cache_key])) {
-            // Factures: 
+            // Factures:
             $factures_list = $this->getFacturesList(true);
 
             foreach ($factures_list as $id_facture) {
@@ -479,7 +479,7 @@ class BimpCommission extends BimpObject
             $data['total_marges_serv'] = $data['total_ca_serv'] - $data['total_pa_serv'];
             $data['total_marges_prod'] = $data['total_ca_prod'] - $data['total_pa_prod'];
 
-            // Revalorisations: 
+            // Revalorisations:
             $revals_list = $this->getRevalorisationsList(true);
 
             foreach ($revals_list as $id_reval) {
@@ -513,7 +513,7 @@ class BimpCommission extends BimpObject
         return self::$cache[$cache_key];
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayTaux($type = "marque")
     {
@@ -647,7 +647,7 @@ class BimpCommission extends BimpObject
         return '';
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderDetailsView()
     {
@@ -676,7 +676,7 @@ class BimpCommission extends BimpObject
                 break;
         }
 
-        // Factures: 
+        // Factures:
 
         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
@@ -700,7 +700,7 @@ class BimpCommission extends BimpObject
             'content' => $content
         );
 
-        // Revalorisations: 
+        // Revalorisations:
         $content = '';
         $revalorisation = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
 
@@ -778,6 +778,25 @@ class BimpCommission extends BimpObject
         );
     }
 
+	public function actionnom($data, &$success = '')
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		if ($this->isActionAllowed('nomaction') && $this->canSetAction('nomaction')) {
+			$buttons[] = array(
+				'label'   => 'Nom ',
+				'icon'    => 'fas_icon',
+				'onclick' => $this->getJsActionOnclick('nomaction', array(), array())
+			);
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
     public function actionValidate($data, &$success)
     {
         $errors = array();
@@ -806,7 +825,7 @@ class BimpCommission extends BimpObject
         );
     }
 
-    // Actions BDS: 
+    // Actions BDS:
 
     public function initBdsActionGenerateFactureCommissions($process, &$action_data = array(), &$errors = array(), $extra_data = array())
     {
@@ -1060,7 +1079,7 @@ class BimpCommission extends BimpObject
                     $process->setCurrentObjectData('bimpcommercial', 'Bimp_Facture');
                     $process->incProcessed();
 
-                    // Création facture: 
+                    // Création facture:
                     $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
                                 'libelle'        => 'Commissions AppleCare ' . $fourn_label,
                                 'fk_soc'         => $id_fourn,
@@ -1210,7 +1229,7 @@ class BimpCommission extends BimpObject
                                         $ref_prod = $line_data[$keys['ref_prod']];
                                         $qty = (int) $line_data[$keys['qty']];
 
-                                        // Recherche serials dans commande client: 
+                                        // Recherche serials dans commande client:
                                         $rows = array();
                                         switch ($type_piece) {
                                             case 'cf':
@@ -1476,7 +1495,7 @@ class BimpCommission extends BimpObject
                                     $process->incCreated();
                                     $process->Success('Ajout de la ligne n° ' . $i . ' OK', $facture, $serial);
 
-                                    // Création revalorisation: 
+                                    // Création revalorisation:
                                     $process->setCurrentObjectData('bimpfinanc', 'BimpRevalorisation');
                                     $process->incProcessed();
 
@@ -1550,14 +1569,14 @@ class BimpCommission extends BimpObject
         return $result;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            // Ajout des factures dispos: 
+            // Ajout des factures dispos:
             $factures = $this->getAvailableFacturesList((int) BimpTools::getPostFieldValue('paid_only', 0, 'int'), $this->getData('secteur'));
             $obj_field = '';
             switch ((int) $this->getData('type')) {
@@ -1581,7 +1600,7 @@ class BimpCommission extends BimpObject
                 }
             }
 
-            // Ajout des reval dispos: 
+            // Ajout des reval dispos:
             $revals = $this->getAvailableRevalorisationsList((int) BimpTools::getPostFieldValue('paid_only', 0, 'int'), $this->getData('secteur'));
             foreach ($revals as $id_reval) {
                 $reval = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', (int) $id_reval);

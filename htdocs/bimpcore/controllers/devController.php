@@ -514,7 +514,7 @@ class devController extends BimpController
 	{
 		require_once DOL_DOCUMENT_ROOT . '/bimpusertools/classes/UserMessages.php';
 
-		global $userMessages, $type_dest, $user;
+		global $user_messages, $types_dest, $user;
 
 		$onoff = array(
 			'no_active' => 'Inactif',
@@ -528,7 +528,7 @@ class devController extends BimpController
 			'code' => array('label' => 'Code'),
 			'label' => array('label' => 'Libellé'),
 			'required' => array('label' => 'Obligatoire', 'search_values' => $oui_non),
-			'type_dest' => array('label' => 'Type destinataire', 'search_values' => $type_dest),
+			'type_dest' => array('label' => 'Type destinataire', 'search_values' => $types_dest),
 			'dest' => array('label' => 'Destinataire'),
 			'mail_active' => array('label' => 'Mail actif', 'search_values' => $onoff),
 			'module' => array('label' => 'Module'),
@@ -537,7 +537,7 @@ class devController extends BimpController
 
 		$lines = array();
 //		$i = 0;
-		foreach ($userMessages AS $code => $userMessage) {
+		foreach ($user_messages AS $code => $userMessage) {
 //			$i++;
 //			if( $i > 10 ) {
 //				exit;
@@ -567,7 +567,7 @@ class devController extends BimpController
 				),
 
 				'type_dest' => array(
-					'content' => $type_dest[$userMessage['type_dest']],
+					'content' => $types_dest[$userMessage['type_dest']],
 					'value' => $userMessage['type_dest']
 				),
 				'dest' => $userMessage['dest'],

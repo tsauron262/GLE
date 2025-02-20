@@ -265,6 +265,14 @@ class Bimp_User extends BimpObject
 		return 0;
 	}
 
+	public function isMsgAllowed($code_msg, &$errors = array())
+	{
+		// todo franck
+		// checker actif / dispo / abonné
+		// alimenter $errors pour chaque vérif.
+
+		return 1;
+	}
 	// Getters données:
 
 	public function getCardFields($card_name)
@@ -361,6 +369,7 @@ class Bimp_User extends BimpObject
 
 	public function getEmailOrSuperiorEmail($allow_default = true)
 	{
+		// Franck : on laisse cette fonction qui est peut-être utile
 		$email = '';
 
 		if ((int) $this->getData('statut')) {
@@ -390,6 +399,27 @@ class Bimp_User extends BimpObject
 		return $this->getData('firstname') . ' ' . $this->getData('lastname');
 	}
 
+	public function getSubstituteUsers()
+	{
+		$users = array();
+
+		// checker délégués (on doit ajouter tous les délégués si plusieurs)
+
+		// si aucun délégué valide => checker supérieurs
+
+		// Pour les supérieurs : parcourir toute la hiérarchie et sélectionner le premier valide
+		// Pour l'instant on va éviter d'envoyer les mails au PDG : donc on sélectionne un supérieur que s'il possède lui-même un supérieur.
+		// On peut envisager une variable de conf (ex: max_superior_level_for_user_msg_substitute)
+		// = nombre minimum de supérieurs que doit posséder le user pour être sélectionné
+
+		// Ajouter chaque user comme ceci :
+//		$users[] = array(
+//			'id' => $id_user_subst,
+//			'info' => 'xxx reçoit ce message car il est délégué / supérieur de xxx' ($user->getName())
+//		);
+
+		return $users;
+	}
 	// Getters Statics:
 
 	public static function getUserGroupsRights($id_user, $id_entity = 0)
@@ -1212,7 +1242,7 @@ class Bimp_User extends BimpObject
 	{
 		require_once DOL_DOCUMENT_ROOT . '/bimpusertools/classes/UserMessages.php';
 
-		global $userMessages, $type_dest, $user;
+		global $user_messages, $types_dest, $user;
 
 		$oui_non = array(
 			'yes' => 'Oui',
@@ -1227,7 +1257,7 @@ class Bimp_User extends BimpObject
 		);
 
 		$lines = array();
-		foreach ($userMessages as $code => $userMessage) {
+		foreach ($user_messages as $code => $userMessage) {
 			if (!BimpCore::isModuleActive($userMessage['module'])) {
 				continue;
 			}
@@ -2401,6 +2431,7 @@ class Bimp_User extends BimpObject
 
 	public function isMailValid($code_mail = "", $params = array())
 	{
+		// todo franck
 		$params = BimpTools::overrideArray(array(
 			'check_active'        => true,
 			'check_disponibility' => false,
@@ -2434,9 +2465,9 @@ class Bimp_User extends BimpObject
 
 	public function sendMsg($code, $subject, $msg, $params = array())
 	{
-		global $userMessages;
+		global $user_messages;
 		if ($code) {
-			$active = (isset($userMessages[$code]['active']) ? $userMessages[$code]['active'] : 1);
+			$active = (isset($user_messages[$code]['active']) ? $user_messages[$code]['active'] : 1);
 			// TODO / gerer les désactivation depuis l'interface
 			if (!$active) {
 				return false;

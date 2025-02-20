@@ -777,26 +777,6 @@ class BimpCommission extends BimpObject
             'warnings' => $warnings
         );
     }
-
-	public function actionnom($data, &$success = '')
-	{
-		$errors = array();
-		$warnings = array();
-		$success = '';
-
-		if ($this->isActionAllowed('nomaction') && $this->canSetAction('nomaction')) {
-			$buttons[] = array(
-				'label'   => 'Nom ',
-				'icon'    => 'fas_icon',
-				'onclick' => $this->getJsActionOnclick('nomaction', array(), array())
-			);
-		}
-
-		return array(
-			'errors'   => $errors,
-			'warnings' => $warnings
-		);
-	}
     public function actionValidate($data, &$success)
     {
         $errors = array();

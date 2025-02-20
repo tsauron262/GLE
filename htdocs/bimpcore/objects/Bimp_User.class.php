@@ -1212,8 +1212,6 @@ class Bimp_User extends BimpObject
 	{
 		require_once DOL_DOCUMENT_ROOT . '/bimpusertools/classes/UserMessages.php';
 
-		global $userMessages, $type_dest, $user;
-
 		$oui_non = array(
 			'yes' => 'Oui',
 			'no'  => 'Non',
@@ -1226,6 +1224,7 @@ class Bimp_User extends BimpObject
 			'resil'    => array('label' => 'Abonné', 'search_values' => $oui_non),
 		);
 
+		$userMessages = UserMessages::getParamsMessageAll();
 		$lines = array();
 		foreach ($userMessages as $code => $userMessage) {
 			if (!BimpCore::isModuleActive($userMessage['module'])) {
@@ -1236,7 +1235,6 @@ class Bimp_User extends BimpObject
 			}
 			$required = BimpCore::getConf('userMessages__' . $code . '__required', '') != '' ? BimpCore::getConf('userMessages__' . $code . '__required', '') : $userMessage['required'];
 			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', '') != '' ? BimpCore::getConf('userMessages__' . $code . '__msgActive', '') : $userMessage['active'];
-			// $abonner = BimpCore::getConf('userMessages__' . $code . '_' . GETPOST('id', 'int') . '__abonner', '') != '' ? BimpCore::getConf('userMessages__' . $code . '_' . GETPOST('id', 'int') . '__abonner', '') : 1;
 			$abonner = ($this->getUserParamValue('userMessages__' . $code . '__abonner') != '' ? $this->getUserParamValue('userMessages__' . $code . '__abonner') : 'yes');
 
 			if (!$msg_active) {

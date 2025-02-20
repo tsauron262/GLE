@@ -1256,7 +1256,10 @@ class Bimp_User extends BimpObject
 				'resil' => $required ? '' : array(
 					'content' => BimpInput::renderInput('toggle', 'resil', ($abonner == 'yes' ? 1 : 0),
 						array(
-							'extra_attr' => array('onchange' => 'saveMsgErpUserParam(\'userMessages__' . $code . '__abonner\', ' . $this->id . ', $(this).val())')
+							'extra_attr' => array('onchange' => $this->getJsActionOnclick(
+								'saveMsgErpUserParam',
+								array('param' => 'userMessages__' . $code . '__abonner', 'value' => array('js_function' => 'parseInt($(this).val())'))
+							))
 						)
 					),
 					'value'   => ($abonner == 'yes' ? 'yes' : 'no')
@@ -2976,6 +2979,27 @@ class Bimp_User extends BimpObject
 		);
 	}
 
+	public function actionSaveMsgErpUserParam($data, &$success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		$param_name = BimpTools::getArrayValueFromPath($data, 'param', null);
+		$value = BimpTools::getArrayValueFromPath($data, 'value', null);
+		if ($this->isLoaded($errors)) {
+			$errors = $this->saveUserParam($param_name, ($value ? 'yes' : 'no'));
+		}
+
+		if (!count($errors)) {
+			$success = 'Paramètre enregistré avec succès';
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
 	// Overrides:
 
 	public function validate()

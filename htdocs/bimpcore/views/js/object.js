@@ -637,23 +637,3 @@ function saveBimpcoreConf(module, name, value, $resultContainer, successCallback
     });
 }
 // simpleUpload : déplacé dans functions.js
-
-function saveMsgErpUserParam(code, user, value, $resultContainer, successCallback) {
-	var data = {
-		code: code,
-		user: user,
-		value: value
-	};
-	console.log(data);
-	$.ajax({
-		url: DOL_URL_ROOT + '/bimpcore/ajax/saveMsgErpUserParam.php',
-		type: 'POST',
-		data: data,
-		dataType: 'json',
-		success: function (result) {
-			if (typeof (successCallback) === 'function') {
-				successCallback(result);
-			}
-		}
-	})
-}

@@ -1552,8 +1552,14 @@ class BS_SAV extends BimpObject
     {
 //        global $tabCentre;
 		$tabCentre = BimpCache::getCentres();
-        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['id_centre_rattachement']))
-            return $tabCentre[$this->getData('code_centre')]['id_centre_rattachement'];
+        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['id_centre_rattachement'])) {
+			$idCentre =  $tabCentre[$this->getData('code_centre')]['id_centre_rattachement'];
+			foreach ($tabCentre as $centre)	{
+				if($centre['id'] == $idCentre)	{
+					return $centre['code'];
+				}
+			}
+		}
     }
 
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())

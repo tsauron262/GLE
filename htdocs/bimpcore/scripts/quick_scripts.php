@@ -529,6 +529,10 @@ switch ($action) {
 		BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 		global $tabCentre;
 
+		echo '<pre>';
+		print_r($tabCentre);
+		echo '</pre>';
+
 		$bdb = BimpCache::getBdb();
 		foreach ($tabCentre as $code => $centre) {
 			$errors = array();
@@ -549,9 +553,9 @@ switch ($action) {
 				'email' => $centre[1],
 				'tel' => $centre[0],
 				'active' => $centre[9],
-				'token' => (isset($centre[11]) ? $centre[1] : 0),
+				'token' => (isset($centre[11]) ? $centre[11] : ''),
 				'id_group' => (isset($centre['idGroup']) ? $centre['idGroup'] : 0),
-				'warning' => (isset($centre[12]) ? $centre[12] : 0),
+				'warning' => (isset($centre[12]) ? $centre[12] : ''),
 			), true, $errors);
 
 			if(count($errors)) {
@@ -564,6 +568,7 @@ switch ($action) {
 			}
 
 		}
+
 	break;
 
     default:

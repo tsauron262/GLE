@@ -2,6 +2,7 @@ table: bs_centre_sav
 icon: fas_store
 controller: centre
 in_cache_serveur: 1
+entity_name: entrepot
 
 nom_url:
     syntaxe: <code> - <label>
@@ -74,7 +75,7 @@ fields:
         object: centre_rattachement
         default_value: 0
     token:
-        label: Token
+        label: Token Ecologic
     id_group:
         label: Groupe associé au centre
         type: id_object

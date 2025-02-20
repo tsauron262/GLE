@@ -2872,6 +2872,7 @@ class BimpCache
 			if((int)BimpCore::getConf('use_centres_sav', null, 'bimpsupport'))	{
 				foreach (BimpCache::getBimpObjectObjects('bimpsupport', 'BS_CentreSav') as $centre)	{
 					self::$cache['centres'][$centre->getData('code')] = array(
+						'id'				=> $centre->getData('id'),
 						'code'				=> $centre->getData('code'),
 						'label'				=> $centre->getData('label'),			// 2
 						'tel'				=> $centre->getData('tel'), 			// 0

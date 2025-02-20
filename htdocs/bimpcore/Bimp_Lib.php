@@ -74,6 +74,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpController.php';
     require_once $dir . 'BimpPublicController.php';
     require_once $dir . 'BimpMailCore.php';
+	require_once $dir . 'BimpUserMsg.php';
     require_once $dir . 'BimpModuleConf.php';
     require_once $dir . 'BimpLayout.php';
 

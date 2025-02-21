@@ -16,6 +16,7 @@ class BC_TextareaInput extends BC_Input
 
     protected static function renderHtml(&$params, $content = '', &$errors = array(), &$debug = array())
     {
+		$html = '';
         $is_context_private = \BimpCore::isContextPrivate();
 
         if ($is_context_private && $params['hashtags']) {

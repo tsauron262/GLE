@@ -909,16 +909,16 @@ class BimpCommission extends BimpObject
 			if (isset($lines[0])) {
 				$line = str_getcsv($lines[0], ';');
 
-				foreach ($cols as $col_idx => &$col_data) {
+				foreach ($cols as $col_idx => $col_data) {
 					if ($line[$col_data[0]] != $col_data[1]) {
 						foreach ($line as $line_col_idx => $line_col_name) {
 							if ($line_col_name == $col_data[1]) {
-								$col_data[0] = $line_col_idx;
+								$cols[$col_idx][0] = $line_col_idx;
 								break;
 							}
 						}
 
-						if ($line[$col_data[0]] != $col_data[1]) {
+						if ($line[$cols[$col_idx][0]] != $col_data[1]) {
 							$errors[] = 'En-tête absent ou invalide : ' . $col_data[1] . ' (colonne ' . ($col_data[0] + 1) . ') - Veuillez vérifier le fichier';
 						}
 					}
@@ -976,7 +976,8 @@ class BimpCommission extends BimpObject
 							}
 
 							$data = array();
-							foreach ($cols as $col_data) {
+							foreach ($cols as $col_idx => $col_data) {
+								echo $col_idx . ' - ' . $col_data[0] . ' - ' . $col_data[1] . ' => ' . $line_data[$col_data[0]] . '<br/>';
 								$data[] = $line_data[$col_data[0]];
 							}
 

@@ -1916,10 +1916,12 @@ class BT_ficheInter extends BimpDolObject
 		$warnings = array();
 		$errors = $new_object->create($warnings);
 
-		$lines_errors = $new_object->createLinesFromOrigin($this, $new_object);
+		if (!count($errors)) {
+			$lines_errors = $new_object->createLinesFromOrigin($this, $new_object);
 
-		if (count($lines_errors)) {
-			$errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
+			if (count($lines_errors)) {
+				$errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
+			}
 		}
 
 		return $errors;
@@ -2546,8 +2548,6 @@ class BT_ficheInter extends BimpDolObject
 			$line_errors = $new_line->create($warnings, true);
 			if (count($line_errors)) {
 				$errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
-
-				continue;
 			}
 		}
 		return $errors;

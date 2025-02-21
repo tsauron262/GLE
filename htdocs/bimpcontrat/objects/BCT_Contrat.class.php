@@ -682,22 +682,22 @@ class BCT_Contrat extends BimpDolObject
             }
 
 			// Désactivé car un même contrat peut être lié à un grand nombre de devis.
-//            $this->dol_object->element = 'bimp_contrat';
-//            $items_propal = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
-//            $this->dol_object->element = 'contrat';
-//            if (isset($items_propal['propal'])) {
-//                foreach ($items_propal['propal'] as $id_propal) {
-//                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
-//                    $items_commandes = BimpTools::getDolObjectLinkedObjectsList($propal->dol_object, $this->db, array('commande'));
-//
-//                    foreach ($items_commandes as $item) {
-//                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $item['id_object']);
-//                        if ($commande->isLoaded() && in_array((int) $commande->getData('fk_statut'), array(0, 1, 2))) {
-//                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $commande->getLink(), 'warning');
-//                        }
-//                    }
-//                }
-//            }
+            $this->dol_object->element = 'bimp_contrat';
+            $items_propal = BimpTools::getDolObjectLinkedObjectsListByTypes($this->dol_object, $this->db, array('propal'));
+            $this->dol_object->element = 'contrat';
+            if (isset($items_propal['propal'])) {
+                foreach ($items_propal['propal'] as $id_propal) {
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+                    $items_commandes = BimpTools::getDolObjectLinkedObjectsList($propal->dol_object, $this->db, array('commande'));
+
+                    foreach ($items_commandes as $item) {
+                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $item['id_object']);
+                        if ($commande->isLoaded() && in_array((int) $commande->getData('fk_statut'), array(0, 1, 2))) {
+                            $html .= BimpRender::renderAlerts('Attention, le devis lié a donné lieu également à une commande ' . $commande->getLink(), 'warning');
+                        }
+                    }
+                }
+            }
         }
 
         return $html;

@@ -2504,10 +2504,10 @@ class BT_ficheInter extends BimpDolObject
 	{
 		$errors = array();
 
-		$params = array(
-			'is_clone' => false
-		);
-
+//		$params = array(
+//			'is_clone' => false
+//		);
+//
 //        $params = BimpTools::overrideArray(array(
 //                    'is_clone' => false,
 //                        ), $params);
@@ -2529,6 +2529,7 @@ class BT_ficheInter extends BimpDolObject
 			// Lignes à ne pas copier en cas de clonage:
 
 			$new_line = clone($line);
+			$new_line->parent = null;
 
 			$new_line->set('fk_fichinter', $newParent->id);
 			$new_line->set('date', $newParent->getData('datei'));

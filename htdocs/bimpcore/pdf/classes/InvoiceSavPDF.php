@@ -35,11 +35,12 @@ class InvoiceSavPDF extends InvoicePDF
                 }
             }
 
-            // Chargement CGV : 
+            // Chargement CGV :
 
             $cgv_file = '';
             switch (BimpCore::getExtendsEntity()) {
-                case 'bimp':
+				case 'bimp':
+				case 'champagne':
                     if (BimpObject::objectLoaded($this->sav)) {
                         $code_centre = $this->sav->getData('code_centre');
                     }

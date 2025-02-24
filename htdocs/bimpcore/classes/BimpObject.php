@@ -7511,7 +7511,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         if (is_string($fk_user_dest) && $fk_user_dest) {
-            eval('if (isset(BimpNote::' . $fk_user_dest . ')) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
+			// Temporaire, en principe on ne devrait plus passer par là :
+			BimpCore::addlog('Deprecated call to BimpObject::addNote() with string $fk_user_dest', 4, 'bimpcore', $this, array());
+//            eval('if (isset(BimpNote::' . $fk_user_dest . ')) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
         }
 
         if (is_null($visibility)) {

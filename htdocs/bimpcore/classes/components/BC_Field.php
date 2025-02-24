@@ -174,7 +174,7 @@ class BC_Field extends BimpComponent
         $current_bc = $prev_bc;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isEditable()
     {
@@ -215,7 +215,7 @@ class BC_Field extends BimpComponent
         return 1;
     }
 
-    // Rendus HTML principaux: 
+    // Rendus HTML principaux:
 
     public function renderHtml()
     {
@@ -337,7 +337,7 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayValue($label_only = false)
     {
@@ -518,7 +518,7 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    // Getters: 
+    // Getters:
 
     public function getLinkedObject()
     {
@@ -675,7 +675,7 @@ class BC_Field extends BimpComponent
         return $field_object;
     }
 
-    // Display_if / Depends_on: 
+    // Display_if / Depends_on:
 
     public function renderDependsOnScript($form_identifier, $force_keep_new_value = false)
     {
@@ -807,7 +807,7 @@ class BC_Field extends BimpComponent
         return 1;
     }
 
-    // Recherches: 
+    // Recherches:
 
     public function getSearchData()
     {
@@ -956,7 +956,7 @@ class BC_Field extends BimpComponent
         return BimpInput::renderSearchInputContainer($input_name, $search_data['search_type'], $search_data['search_on_key_up'], 1, $content, $extra_data);
     }
 
-    // Options d'affichage: 
+    // Options d'affichage:
 
     public function getDisplayTypesArray()
     {
@@ -1004,7 +1004,7 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    // No-HTML: 
+    // No-HTML:
 
     public function getNoHtmlOptions(&$default_value = '')
     {

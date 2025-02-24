@@ -3583,6 +3583,10 @@ class BCT_ContratLine extends BimpObject
 									}
 									$row_html .= '<br/>';
 
+									if (!$periods_data['nb_periods_tobill_today'] && $periods_data['nb_periods_tobill_max'] > 0 && !$canFactAvance) {
+										$line_errors[] = 'Vous n\'avez pas la permission d\'effectuer des facturations anticipées';
+									}
+
 									if (!empty($line_errors)) {
 										$row_html .= BimpRender::renderAlerts($line_errors);
 									} elseif ($periods_data['nb_periods_tobill_today'] > 0 || ($canFactAvance && $periods_data['nb_periods_tobill_max'] > 0)) {

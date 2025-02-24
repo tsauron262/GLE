@@ -63,11 +63,12 @@ class PropalSavPDF extends PropalPDF
                         $this->fromCompany->email = $centre['mail'];
                     }
 
-                    // Chargement CGV : 
+                    // Chargement CGV :
 
                     $cgv_file = '';
                     switch (BimpCore::getExtendsEntity()) {
-                        case 'bimp':
+						case 'bimp':
+						case 'champagne':
                             $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
                             break;
 
@@ -79,7 +80,7 @@ class PropalSavPDF extends PropalPDF
                     if ($cgv_file && file_exists($cgv_file)) {
                         $this->pdf->extra_concat_files[] = $cgv_file;
                     } else {
-                        // CGV par défaut : 
+                        // CGV par défaut :
                         static::$use_cgv = true;
                     }
                 }
@@ -181,7 +182,7 @@ class SavRestitutePDF extends PropalSavPDF
 
     public function renderSignatureBloc()
     {
-        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
+        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique.
 
         $html = '<br/>';
 
@@ -242,6 +243,6 @@ class SavRestitutePDF extends PropalSavPDF
 
     public function getBottomLeftHtml()
     {
-        
+
     }
 }

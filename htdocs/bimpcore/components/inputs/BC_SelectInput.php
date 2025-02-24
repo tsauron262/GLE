@@ -19,7 +19,7 @@ class BC_SelectInput extends BC_Input
         $html = '';
         $value = $params['value'];
 
-        if (is_null($params['options']) || !is_array($params['options'])) {
+        if (!is_array($params['options'])) {
             $params['options'] = array();
         }
 

@@ -1858,6 +1858,7 @@ class BimpController
         $value = BimpTools::getValue('value', null, 'restricthtml');
         $field_prefix = BimpTools::getValue('field_prefix', '', 'aZ09');
         $is_object = (int) BimpTools::getValue('is_object', 0, 'int');
+		$force_edit = (int) BimpTools::getValue('force_edit', 0, 'int');
 
         if ($field_prefix) {
             if (preg_match('/^' . $field_prefix . '(.*)$/', $field_name, $matches)) {
@@ -1931,7 +1932,7 @@ class BimpController
                             $html = BimpRender::renderAlerts('Erreur de configuration - contenu du champ personnalisé non défini');
                         }
                     } elseif ($object->config->isDefined('fields/' . $field_name)) {
-                        $field = new BC_Field($object, $field_name, true);
+                        $field = new BC_Field($object, $field_name, true, 'fields', $force_edit);
                         $field->name_prefix = $field_prefix;
                         $field->display_card_mode = 'visible';
 

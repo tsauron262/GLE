@@ -795,7 +795,8 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         fields: fields,
         custom_field: custom,
         field_prefix: $container.data('field_prefix'),
-        is_object: is_object
+        is_object: is_object,
+		force_edit: $form.data('force_edit')
     };
     if (keep_new_value) {
         data.value = value;

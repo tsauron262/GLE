@@ -885,7 +885,7 @@ class Bimp_User extends BimpObject
 			));
 
 			if (!empty($users)) {
-				$html .= '<div style="margin-top: 15xp">';
+				$html .= '<div style="margin-top: 15px">';
 				foreach ($users as $u) {
 					$html .= BimpRender::renderAlerts('L\'utilisateur ' . $u->getLink() . ' vous a accordé l\'accès à ses messages et tâches', 'info');
 				}
@@ -1559,8 +1559,6 @@ class Bimp_User extends BimpObject
 		$hoverdisabled = '';
 		if (empty($foruserprofile))
 			$hoverdisabled = (isset($conf->global->THEME_ELDY_USE_HOVER) && $conf->global->THEME_ELDY_USE_HOVER == '0');
-		else
-			$hoverdisabled = (is_object($fuser) ? (empty($fuser->conf->THEME_ELDY_USE_HOVER) || $fuser->conf->THEME_ELDY_USE_HOVER == '0') : '');
 
 		$colspan = 2;
 		if ($foruserprofile)
@@ -1663,6 +1661,8 @@ class Bimp_User extends BimpObject
 
 	public function renderInterfaceView()
 	{
+		$html = '';
+
 		global $conf, $langs, $db, $user, $bc;
 		BimpTools::loadDolClass("user");
 
@@ -1676,6 +1676,7 @@ class Bimp_User extends BimpObject
 		$action = GETPOST('action', 'alpha');
 		$contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'userihm';
 
+		$caneditfield = 0;
 		if ($id) {
 			$caneditfield = ((($user->id == $id) && $user->rights->user->self->creer) || (($user->id != $id) && $user->rights->user->user->creer));
 		}
@@ -1747,10 +1748,10 @@ class Bimp_User extends BimpObject
 		$html .= '</thead>';
 
 		$html .= '<tbody>';
-		$htmlP .= '<tr>';
+		$htmlP = '<tr>';
 		$htmlP .= '<td>' . $langs->trans("LandingPage") . '</td>';
 		$htmlP .= '<td>' . (empty($conf->global->MAIN_LANDING_PAGE) ? '' : $conf->global->MAIN_LANDING_PAGE) . '</td>';
-		$htmlP .= '<td><input ' . $bc[$var] . ' name="check_MAIN_LANDING_PAGE" disabled id="check_MAIN_LANDING_PAGE" type="checkbox" ' . (!empty($object->conf->MAIN_LANDING_PAGE) ? " checked" : "");
+		$htmlP .= '<td><input name="check_MAIN_LANDING_PAGE" disabled id="check_MAIN_LANDING_PAGE" type="checkbox" ' . (!empty($object->conf->MAIN_LANDING_PAGE) ? " checked" : "");
 		$htmlP .= empty($dolibarr_main_demo) ? '' : ' disabled="disabled"';
 		$htmlP .= '> ' . $langs->trans("UsePersonalValue") . '</td>';
 		$htmlP .= '<td>';
@@ -1771,7 +1772,7 @@ class Bimp_User extends BimpObject
 		$htmlP .= ((isset($valLang) && $valLang == 'auto' || isset($conf->global->MAIN_LANG_DEFAULT) && $conf->global->MAIN_LANG_DEFAULT == 'auto' ? $langs->trans("AutoDetectLang") : (empty($valLang) ? $langs->trans("Language_" . $conf->global->MAIN_LANG_DEFAULT) : $langs->trans("Language_" . $valLang))));
 		$htmlP .= '</td>';
 		$htmlP .= '<td>';
-		$htmlP .= '<input ' . $bc[$var] . ' type="checkbox" disabled ' . (!empty($valLang) ? " checked" : "") . '> ' . $langs->trans("UsePersonalValue") . '';
+		$htmlP .= '<input  type="checkbox" disabled ' . (!empty($valLang) ? " checked" : "") . '> ' . $langs->trans("UsePersonalValue");
 		$htmlP .= '</td>';
 		$htmlP .= '<td>';
 		$htmlP .= '<td>' . $langs->trans("Language_" . $valLang) . '</td>';
@@ -1784,31 +1785,25 @@ class Bimp_User extends BimpObject
 		$htmlP .= '<td>' . $langs->trans("DefaultSkin") . '</td>';
 		$htmlP .= '<td>' . $conf->global->MAIN_THEME . '</td>';
 		$htmlP .= '<td>';
-		$htmlP .= '<input id="check_MAIN_THEME" name="check_MAIN_THEME"' . ($edit ? '' : ' disabled') . ' type="checkbox" ' . ($selected_theme ? " checked" : "") . '> ' . $langs->trans("UsePersonalValue");
+		// A debug ($selected_theme undefined)
+//		$htmlP .= '<input id="check_MAIN_THEME" name="check_MAIN_THEME"' . ($caneditfield ? '' : ' disabled') . ' type="checkbox" ' . ($selected_theme ? " checked" : "") . '> ' . $langs->trans("UsePersonalValue");
 		$htmlP .= '</td>';
 		$htmlP .= '<td>';
 		$htmlP .= '<td>' . $modThemeVal . '</td>';
 		$htmlP .= '</td>';
 		$htmlP .= '</tr>';
 
-		if ($htmlP == '') {
-			$htmlP .= '<tr>';
-			$htmlP .= '<td colspan="5">' . BimpRender::renderAlerts($no_linked, 'info') . '</td>';
-			$htmlP .= '</tr>';
-		}
+//		if ($htmlP == '') {
+//			$htmlP .= '<tr>';
+//			$htmlP .= '<td colspan="5">' . BimpRender::renderAlerts($no_linked, 'info') . '</td>';
+//			$htmlP .= '</tr>';
+//		}
 
 		$html .= $htmlP;
 		$html .= '</tbody>';
 		$html .= '</table>';
 
-		$interface_instance = BimpObject::getInstance('bimpcore', 'Bimp_ParamsUser');
-
 		$params = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ParamsUser');
-
-		//            $saveButton = array(
-		//                'label' => 'Enregistrer le Thème',
-		//                'onclick' => $this->getJsActionOnclick('test')
-		//            );
 
 		$buttons[] = array(
 			'classes'     => array('btn', 'btn-default'),
@@ -1818,7 +1813,6 @@ class Bimp_User extends BimpObject
 				'onclick' => $params->getJsActionOnclick('editTheme', array(), array(
 					'form_name' => 'theme_edit'
 				))
-				//getJsLoadModalForm('theme_edit', "Modification de l interface", array(), '')
 			)
 		);
 

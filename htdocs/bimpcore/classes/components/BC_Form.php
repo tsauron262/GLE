@@ -56,7 +56,7 @@ class BC_Form extends BC_Panel
         'on_create'   => array('data_type' => 'bool', 'default' => 1),
         'on_edit'     => array('data_type' => 'bool', 'default' => 0)
     );
-    
+
     public function __construct(BimpObject $object, $id_parent = null, $name = '', $level = 1, $content_only = false, $on_save = null)
     {
         $this->params_def['rows_callback'] = array();
@@ -152,7 +152,7 @@ class BC_Form extends BC_Panel
             }
         }
 
-        // $id_parent a pu être fourni via params['values']. 
+        // $id_parent a pu être fourni via params['values'].
 
         if (!is_null($object)) {
             $this->id_parent = (int) $object->getParentId();
@@ -169,6 +169,7 @@ class BC_Form extends BC_Panel
 
         $this->data['on_save'] = $this->params['on_save'];
         $this->data['no_auto_submit'] = $this->params['no_auto_submit'];
+		$this->data['force_edit'] = $this->params['force_edit'];
         $current_bc = $prev_bc;
     }
 
@@ -242,7 +243,7 @@ class BC_Form extends BC_Panel
     }
 
     public function renderHtmlContent($form_tag = true)
-    {        
+    {
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -711,7 +712,7 @@ class BC_Form extends BC_Panel
                     $nb_items++;
 
                     $form->object->reset();
-                    $form->params['values'] = array();                    
+                    $form->params['values'] = array();
                     $form->setValues($params['form_values']);
                     $form->setValues($object_values);
 

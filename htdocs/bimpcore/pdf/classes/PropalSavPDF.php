@@ -49,7 +49,7 @@ class PropalSavPDF extends PropalPDF
             $secteur = $this->bimpCommObject->getData('ef_type');
 
             // SAV
-            if ($secteur == 'S') {
+            //if ($secteur == 'S') {
                 $code_centre = $this->sav->getData('code_centre');
 
                 if ($code_centre == '') {
@@ -84,7 +84,7 @@ class PropalSavPDF extends PropalPDF
                         static::$use_cgv = true;
                     }
                 }
-            }
+            //}
         }
     }
 

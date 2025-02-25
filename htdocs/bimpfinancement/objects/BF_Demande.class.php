@@ -2409,17 +2409,21 @@ class BF_Demande extends BimpObject
 					'operator' => '<',
 					'value'    => 20
 				));
-				$list->addFieldFilterValue('devis_status', array(
-					'operator' => '!=',
-					'value'    => BF_Demande::DOC_ACCEPTED
-				));
-				$list->addFieldFilterValue('contrat_status', array(
-					'operator' => '!=',
-					'value'    => BF_Demande::DOC_ACCEPTED
-				));
-				$list->addFieldFilterValue('pvr_status', array(
-					'operator' => '!=',
-					'value'    => BF_Demande::DOC_ACCEPTED
+				$list->addFieldFilterValue('or_status', array(
+					'or' => array(
+						'devis_status'   => array(
+							'operator' => '!=',
+							'value'    => BF_Demande::DOC_ACCEPTED
+						),
+						'contrat_status' => array(
+							'operator' => '!=',
+							'value'    => BF_Demande::DOC_ACCEPTED
+						),
+						'pvr_status'     => array(
+							'operator' => '!=',
+							'value'    => BF_Demande::DOC_ACCEPTED
+						)
+					)
 				));
 				break;
 

@@ -131,7 +131,7 @@ class BDS_RevueProcess extends BDSProcess
                     $users = $group->getUserGroupUsers(true);
                     if(count($users)){
                         foreach($users as $user){
-                            $this->data_persistante['mail'][$idGr]['users'][] = $user->getFullName();
+                            $this->data_persistante['mail'][$idGr]['users'][$user->id] = $user->getFullName();
                         }
                     }
                     else{
@@ -146,7 +146,7 @@ class BDS_RevueProcess extends BDSProcess
                         foreach ($this->data_persistante['infoRights'] as $module => $module_rights) {
                             foreach ($module_rights as $id_right => $data) {
                                 if(in_array($id_right, $rights)){
-                                    $this->data_persistante['mail'][$idGr]['rights'][] = $module.' - '.$langs->trans($data['libelle']);
+                                    $this->data_persistante['mail'][$idGr]['rights'][$id_right] = $module.' - '.$langs->trans($data['libelle']);
 
                                 }
                             }

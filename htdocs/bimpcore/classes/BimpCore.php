@@ -453,7 +453,7 @@ class BimpCore
 
 		$modules_updates = BimpCore::getModulesUpdates();
 
-		if ($user->login == 'f.martinez') {
+		if ((int) BimpTools::getValue('debug', 0) && $user->login == 'f.martinez') {
 			echo '<pre>' . print_r($modules_updates, 1) . '</pre>';
 			exit;
 		}

@@ -452,6 +452,11 @@ class BimpCore
 		}
 
 		$modules_updates = BimpCore::getModulesUpdates();
+
+		if ($user->login == 'f.martinez') {
+			echo '<pre>' . print_r($modules_updates, 1) . '</pre>';
+			exit;
+		}
 		$modules_extends_updates = BimpCore::getModulesExtendsUpdates();
 		if (self::isModuleActive('bimptheme')) {
 			BimpObject::loadClass('bimptheme', 'Bimp_Menu');

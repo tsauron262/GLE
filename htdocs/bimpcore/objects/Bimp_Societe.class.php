@@ -2081,7 +2081,7 @@ class Bimp_Societe extends BimpDolObject
 
         $encours = $this->getAllEncoursForSiret(true, false, $debug);
 
-        $html .= '<b>Encours sur factures restant dues</b> : ' . BimpTools::displayMoneyValue($encours['factures']['total']) . ' TTC<br/><br/>';
+        $html = '<b>Encours sur factures restant dues</b> : ' . BimpTools::displayMoneyValue($encours['factures']['total']) . ' TTC<br/><br/>';
         $html .= '<b>Encours sur les commandes non facturées</b> : ' . BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]) . ' TTC<br/>';
 
 
@@ -2485,7 +2485,9 @@ class Bimp_Societe extends BimpDolObject
                 $db->begin();
 
                 $soc_origin_id = (int) $id_soc_to_merge;
+				/** @var Societe $soc_origin */
                 $soc_origin = $soc_to_merge->dol_object;
+				/** @var Societe $object */
                 $object = $this->dol_object;
 
                 // Code repris tel quel depuis societe/card.php:
@@ -3527,7 +3529,7 @@ class Bimp_Societe extends BimpDolObject
 
         return Array(
             'errors'   => $errors,
-            'warnings' => $wawrnings,
+            'warnings' => $warnings,
             'success'  => $success
         );
     }

@@ -420,7 +420,7 @@ class GSX_v2 extends GSX_Const
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($this->ch, CURLOPT_TIMEOUT, 120);
+        curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($this->ch, CURLOPT_HEADER, true);
 
         return 1;

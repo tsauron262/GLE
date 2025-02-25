@@ -512,8 +512,6 @@ class devController extends BimpController
 
 	public function renderMailerTab($type_metier)
 	{
-		require_once DOL_DOCUMENT_ROOT . '/bimpusertools/classes/UserMessages.php';
-
 		global $user;
 
 		$onoff = array(
@@ -528,7 +526,7 @@ class devController extends BimpController
 			'code' => array('label' => 'Code'),
 			'label' => array('label' => 'Libellé'),
 			'required' => array('label' => 'Obligatoire', 'search_values' => $oui_non),
-			'type_dest' => array('label' => 'Type destinataire', 'search_values' => UserMessages::$type_dest),
+			'type_dest' => array('label' => 'Type destinataire', 'search_values' => BimpUserMsg::$type_dest),
 			'dest' => array('label' => 'Destinataire'),
 			'mail_active' => array('label' => 'Mail actif', 'search_values' => $onoff),
 			'module' => array('label' => 'Module'),
@@ -537,7 +535,7 @@ class devController extends BimpController
 
 		$lines = array();
 //		$i = 0;
-		$userMessages = UserMessages::getParamsMessageAll();
+		$userMessages = BimpUserMsg::getParamsMessageAll();
 		foreach ($userMessages AS $code => $userMessage) {
 //			$i++;
 //			if( $i > 10 ) {
@@ -568,7 +566,7 @@ class devController extends BimpController
 				),
 
 				'type_dest' => array(
-					'content' => UserMessages::$type_dest[$userMessage['type_dest']],
+					'content' => BimpUserMsg::$type_dest[$userMessage['type_dest']],
 					'value' => $userMessage['type_dest']
 				),
 				'dest' => $userMessage['dest'],

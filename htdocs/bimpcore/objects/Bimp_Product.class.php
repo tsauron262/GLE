@@ -3913,18 +3913,21 @@ class Bimp_Product extends BimpObject
     public function mailValidation($urgent = false)
     {
         global $user;
-        $mail = BimpCore::getConf('mail_achat');
+//        $mail = BimpCore::getConf('mail_achat');
         if ($urgent) {
-            $mail .= "," . BimpCore::getConf('devs_email');
+			$code = 'product_validation_urgente_vente_caisse';
+//            $mail .= "," . BimpCore::getConf('devs_email');
             $msg = 'Bonjour, ' . "\n\n";
             $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
             $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
             $msg .= 'Cordialement.';
         } else {
-            $msg = "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
+			$code = 'product_validation';
+            $msg = "Bonjour " . $user->getNomUrl(0) . " souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
         }
-		$code = 'product_validation_urgente_vente_caisse';
-        if (mailSyn2("Validation produit", $mail, null, $msg)) {
+		$subjet = 'Validation produit';
+
+        if( BimpUserMsg::envoiMsg($code, $subjet, $msg ) ){
             if ($this->getData('date_ask_valid') == null or $this->getData('date_ask_valid') == '') {
                 $datetime = new DateTime();
                 $this->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));

@@ -1570,16 +1570,12 @@ class Bimp_FactureFourn extends BimpCommAchat
         $i = 0;
         while ($ln = $this->db->db->fetch_object($sql)) {
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
-//            $userCreate = new User($this->db->db);
-//            $userCreate->fetch((int) $obj->getData('fk_user_author'));
-			$userCreate = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $obj->getData('fk_user_author'));
 
-//            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 			$code = 'facture_fourn_brouillon';
 			$sujet = 'Facture fournisseur brouillon à régulariser';
 			$msg = 'Bonjour,<br />Vous avez laissé une facture fournisseur en l\'état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.';
 
-            if($userCreate->sendMsg($code, $sujet, $msg))    $i++;
+            if(!count(BimpUserMsg::envoiMsg($code, $sujet, $msg, (int) $obj->getData('fk_user_author'))))    $i++;
         }
         $this->resprints = "OK " . $i . ' mails';
         return "OK " . $i . ' mails';

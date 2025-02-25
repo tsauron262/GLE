@@ -3453,7 +3453,7 @@ class BContract_contrat extends BimpDolObject
         return 0;
     }
 
-    public function mail($destinataire, $type, $cc = "")
+    public function calcul_mail($type)
     {
         switch ($type) {
             case self::MAIL_DEMANDE_VALIDATION:
@@ -3468,7 +3468,7 @@ class BContract_contrat extends BimpDolObject
                 $sujet = "Contrat signé par le client";
                 $action = "Activer le contrat";
                 break;
-            case self::MAIL_ACTIVATION:  //DONE
+            case self::MAIL_ACTIVATION:
                 $sujet = "Contrat activé";
                 $action = "Facturer le contrat";
                 break;
@@ -3478,19 +3478,20 @@ class BContract_contrat extends BimpDolObject
         $commercialContrat = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
-        $extra = "<h3 style='color:#EF7D00'><b>BIMP</b><b style='color:black'>contrat</b></h3>";
-        $extra .= "Action à faire sur le contrat: <b>" . $action . "</b><br /><br />";
-        $extra .= "<u><i>Informations <i></i> </i></u><br />";
-        $extra .= "Contrat: <b>" . $this->getNomUrl() . "</b><br />";
-        $extra .= "Client: <b>" . $client->dol_object->getNomUrl() . " (" . $client->getNomUrl() . ")</b><br /><br />";
-        $extra .= "Commercial du contrat: <b>" . $commercialContrat->dol_object->getNomUrl() . "</b><br />";
-        $extra .= "Commercial du client: <b>" . $commercial->dol_object->getNomUrl() . "</b><br />";
+        $msg = "<h3 style='color:#EF7D00'><b>BIMP</b><b style='color:black'>contrat</b></h3>";
+        $msg .= "Action à faire sur le contrat: <b>" . $action . "</b><br /><br />";
+        $msg .= "<u><i>Informations <i></i> </i></u><br />";
+        $msg .= "Contrat: <b>" . $this->getNomUrl() . "</b><br />";
+        $msg .= "Client: <b>" . $client->dol_object->getNomUrl() . " (" . $client->getNomUrl() . ")</b><br /><br />";
+        $msg .= "Commercial du contrat: <b>" . $commercialContrat->dol_object->getNomUrl() . "</b><br />";
+        $msg .= "Commercial du client: <b>" . $commercial->dol_object->getNomUrl() . "</b><br />";
 
+		return array($sujet, $msg);
         //print_r(['dest' => $destinataire, 'sujet' => $sujet, 'type' => $type, 'msg' => $extra]);
-        if ($cc == "")
-            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra);
-        else
-            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra, array(), array(), array(), $cc);
+//        if ($cc == "")
+//            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra);
+//        else
+//            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra, array(), array(), array(), $cc);
     }
 
     public function autoClose()
@@ -3608,7 +3609,9 @@ class BContract_contrat extends BimpDolObject
 
                 if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
 					$code = 'actionActivateContrat';
-                    $this->mail(BimpCore::getConf('email_facturation', null, 'bimpcore'), self::MAIL_ACTIVATION, $commercial->getData('email'));
+					list($sujet, $message) = $this->calcul_mail(self::MAIL_ACTIVATION);
+					BimpUserMsg::envoiMsg($code, $sujet, $message, $this->getData('fk_commercial_suivi'));
+//                     $this->mail(BimpCore::getConf('email_facturation', null, 'bimpcore'), self::MAIL_ACTIVATION, $commercial->getData('email'));
                 } else {
                     $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
                 }
@@ -4271,7 +4274,9 @@ class BContract_contrat extends BimpDolObject
 
         if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && $sendMail) {
 			$code = 'actionSignedContrat';
-            $this->mail($this->email_group, self::MAIL_SIGNED);
+			list($sujet, $message) = $this->calcul_mail(self::MAIL_SIGNED);
+			BimpUserMsg::envoiMsg($code, $sujet, $message);
+//			$this->mail($this->email_group, self::MAIL_SIGNED);
         }
 
         return [
@@ -4359,7 +4364,9 @@ class BContract_contrat extends BimpDolObject
                 $msg = "Un contrat est en attente de validation de votre part. Merci de faire le nécessaire <br />Contrat : " . $this->getNomUrl();
                 $this->addLog("Demande de validation");
 				$code = 'actionDemandeValidationContrat';
-                $this->mail($this->email_group, self::MAIL_DEMANDE_VALIDATION);
+				list($sujet, $message) = $this->calcul_mail(self::MAIL_DEMANDE_VALIDATION);
+				BimpUserMsg::envoiMsg($code, $sujet, $message);
+//                $this->mail($this->email_group, self::MAIL_DEMANDE_VALIDATION);
             }
         }
 
@@ -4437,9 +4444,9 @@ class BContract_contrat extends BimpDolObject
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
 
-            //mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), null, $body_mail);
 			$code = 'actionValidationContrat';
-            $this->mail($commercial->isMailValid($code), self::MAIL_VALIDATION);
+			list($sujet, $message) = $this->calcul_mail(self::MAIL_VALIDATION);
+			BimpUserMsg::envoiMsg($code, $sujet, $message, $this->getData('fk_commercial_suivi'));
 
             $success = 'Le contrat ' . $ref . " a été validé avec succès";
 

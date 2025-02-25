@@ -7287,12 +7287,9 @@ class Bimp_Facture extends BimpComm
 				$userComm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
 				$code = "rappel_facture_brouillon";
 				$sujet = "Facture brouillon à régulariser";
-				$params = array(
-					'check_disponibility'	=> true,
-					'allow_superior'	=> true
-				);
+
                 $return .= ' - ' . $facs_ids . /*' => Mail to ' . $mail . */ ' : ';
-                if ($userComm->sendMsg($code, $sujet, $msg, $params)) {
+                if (!count(BimpUserMsg::envoiMsg($code, $sujet, $msg, $id_user))) {
                     $return .= ' [OK]';
                     $i++;
                 } else {
@@ -7438,7 +7435,8 @@ class Bimp_Facture extends BimpComm
                                 $out .= ' - Fac ' . $facture->getLink() . ' : ';
 
 								$code = "rappel_facture_financement_impayee";
-                                if (mailSyn2($subject, $to, '', $msg, array(), array(), array(), $cc)) {
+								if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $facture)
+                                //if (mailSyn2($subject, $to, '', $msg, array(), array(), array(), $cc)) {
                                     $out .= '[OK]';
                                 } else {
                                     $out .= '[ECHEC]';

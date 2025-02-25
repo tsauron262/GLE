@@ -550,7 +550,8 @@ class BContract_avenant extends BContract_contrat
             $message = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
 			$code = 'avenant_signe';
-            mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
+			BimpUserMsg::envoiMsg($code, $objet, $message);
+//            mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
         }
 
         return $errors;
@@ -579,7 +580,8 @@ class BContract_avenant extends BContract_contrat
                 $message = 'L\'avenant n°AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
 				$code = "avenant_prolongation_signe";
-                mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
+                BimpUserMsg::envoiMsg($code, $objet, $message);
+//				mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
             }
         }
     }
@@ -620,7 +622,8 @@ class BContract_avenant extends BContract_contrat
                 $message = 'L\'avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' est en attente de signature';
 
 				$code = 'avenant_validation';
-                mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
+				BimpUserMsg::envoiMsg($code, $objet, $message);
+//                mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
             }
         }
 
@@ -687,7 +690,7 @@ class BContract_avenant extends BContract_contrat
                 $message .= '<br /><br />Client: ' . $client->getLink() . '<br />Contrat: ' . $parent->getLink();
 //                mailSyn2($sujet, $dest, null, $message);
 				$code = 'avenant_activation_provisoire';
-				$commercial->sendMail($code, $sujet, $message);
+				BimpUserMsg::envoiMsg($code, $sujet, $message, $parent);
                 $this->updateField('date_activate', date('Y-m-d'));
                 $this->updateField('statut', self::AVENANT_STATUT_PROVISOIR);
             }

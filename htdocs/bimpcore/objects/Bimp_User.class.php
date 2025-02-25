@@ -1240,9 +1240,7 @@ class Bimp_User extends BimpObject
 
 	public function renderMsgErp($type_metier = 'metier')
 	{
-		require_once DOL_DOCUMENT_ROOT . '/bimpusertools/classes/UserMessages.php';
-
-		global $user_messages, $types_dest, $user;
+		global $user;
 
 		$oui_non = array(
 			'yes' => 'Oui',
@@ -1257,7 +1255,7 @@ class Bimp_User extends BimpObject
 		);
 
 		$lines = array();
-		foreach ($user_messages as $code => $userMessage) {
+		foreach (BimpUserMsg::getParamsMessageAll() as $code => $userMessage) {
 			if (!BimpCore::isModuleActive($userMessage['module'])) {
 				continue;
 			}

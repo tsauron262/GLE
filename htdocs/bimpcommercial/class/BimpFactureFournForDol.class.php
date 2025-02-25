@@ -38,10 +38,8 @@ class BimpFactureFournForDol extends Bimp_FactureFourn
             foreach ($data as $link) {
                 $msg .= '<br/>' . $link;
             }
-            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idUser);
-
 			$code_msg = 'relance_fac_sans_expertise_bimp';
-			$user->sendMsg($code_msg, 'Factures sans expertise BIMP', $msg);
+			BimpUserMsg::envoiMsg($code_msg, 'Factures sans expertise BIMP', $msg, $idUser);
             $nbMail++;
         }
         $this->output = $nb . ' factures ' . $nbMail . ' mail';

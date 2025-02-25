@@ -3883,11 +3883,12 @@ class BimpComm extends BimpDolObject
 				$code = 'creation_accompte_client';
 				$sujet = "Acompte sur " . $this->getName(true);
 				$msg = 'Bonjour, un acompte de ' . $amount . ' € a été ajouté à la ' . $this->getLink() . $infoClient;
-				$params = array(
-					'check_disponibility' => true,
-					'allow_superior' => true
-				);
-				$userComm->sendMail($code, $sujet, $msg, $params);
+//				$params = array(
+//					'check_disponibility' => true,
+//					'allow_superior' => true
+//				);
+//				$userComm->sendMail($code, $sujet, $msg, $params);
+				BimpUserMsg::envoiMsg($code, $sujet, $msg, $this);
                 //	mailSyn2("Acompte sur " . $this->getName(true), $email, null, 'Bonjour, un acompte de ' . $amount . ' € a été ajouté à la ' . $this->getLink() . $infoClient);
 
 

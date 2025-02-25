@@ -3358,7 +3358,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 				} elseif (!(string) $this->getData('diagnostic')) {
 					$errors[] = $error_msg . '. Le champ "Diagnostic" doit être complété';
 				} elseif (in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_FERME))) {
-					$errors[] = $errors[] = $error_msg . ' (statut actuel invalide)';
+					$errors[] = $error_msg . ' (statut actuel invalide)';
 				}
 				break;
 
@@ -4819,6 +4819,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 	public function sendClientEmail($subject, $msg, $to = '', $files = array())
 	{
+		global $conf;
 		$errors = array();
 
 		if (!$this->isLoaded($errors)) {

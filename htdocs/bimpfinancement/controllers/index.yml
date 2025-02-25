@@ -18,14 +18,12 @@ sections:
     - type: tabs
       tabs: 
           default: 
-              label: Demandes
+              label: Demandes de location
               icon: fas_comment-dollar
-              sections: 
-                  - type: list
-                    list: 
-                        panel: 1
-                        object: demandes
-                        
+              sections:
+                  - type: custom
+                    custom:
+                        callback: renderDemandesTab
           lignes:
               label: Lignes de financements
               icon: fas_bars

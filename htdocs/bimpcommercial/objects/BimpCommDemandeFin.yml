@@ -3,110 +3,118 @@ controller: demande
 icon: fas_comment-dollar
 common_fields: 0
 
-parent_module: 
+parent_module:
     field_value: obj_module
-parent_object: 
+parent_object:
     field_value: obj_name
 parent_id_property: id_obj
 
-labels: 
+labels:
     name: demande de location
     name_plur: demandes de locations
     is_female: 1
 
-objects: 
-    signature_devis_fin: 
+objects:
+    signature_devis_fin:
         extends: signature
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_signature_devis_fin
-                
-    signature_contrat_fin: 
+    
+    signature_contrat_fin:
         extends: signature
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_signature_contrat_fin
     
-    signature_pvr_fin: 
+    signature_pvr_fin:
         extends: signature
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_signature_pvr_fin
-                
-    contact_suivi: 
+    
+    contact_suivi:
         extends: contact
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_contact_suivi
-                
-    contact_signature: 
+    
+    contact_signature:
         extends: contact
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_contact_signature
-                
+
 fields:
-    obj_module: 
+    obj_module:
         label: Module parent
         required: 1
-        
-    obj_name: 
+    
+    obj_name:
         label: Objet parent
         required: 1
-        
-    id_obj: 
+    
+    id_obj:
         label: ID parent
         type: id_parent
         required: 1
-        
-    target: 
+    
+    target:
         label: Destinataire
         required: 1
-        values: 
+        values:
             array: targets
-            
-    id_ext_df: 
+    
+    id_ext_df:
         label: ID DF externe
         type: id
         default_value: 0
         required: 1
-        
-    ref_ext_df: 
+    
+    ref_ext_df:
         label: Ref. DF externe
         required: 1
-        
-    status: 
+    
+    status:
         label: Statut
         type: int
         default_value: 0
-        values: 
+        values:
             array: status_list
-            
-    id_contact_suivi: 
+    
+    id_contact_suivi:
         label: Contact suivi
         type: id_object
         object: contact_suivi
         create_form: default
+        create_form_values:
+            fields:
+                fk_soc:
+                    callback: getIdClient
         edit_form: default
         depends_on: type_origine,id_origine
-        values: 
+        values:
             array: contacts
-        input: 
+        input:
             help: obligatoire si client pro
-        
-    id_contact_signature: 
+    
+    id_contact_signature:
         label: Contact signataire
         type: id_object
         object: contact_signature
         create_form: default
+        create_form_values:
+            fields:
+                fk_soc:
+                    callback: getIdClient
         edit_form: default
         depends_on: type_origine,id_origine
-        values: 
+        values:
             array: contacts
-        input: 
+        input:
             help: obligatoire si client pro
-        
-    contacts_livraisons: 
+    
+    contacts_livraisons:
         label: Contact(s) livraison(s)
         type: items_list
         items_data_type: id_object
@@ -114,326 +122,365 @@ fields:
         items_sortable: 1
         object: contact
         create_form: default
+        create_form_values:
+            fields:
+                fk_soc:
+                    callback: getIdClient
         edit_form: default
         depends_on: type_origine,id_origine
-        values: 
-            array: contacts        
-        input: 
+        values:
+            array: contacts
+        input:
             extra_content: <p class="inputHelp">Laisser vide si identique au contact destinataire de l'offre de location</p>
-        
-    devis_fin_status: 
+    
+    devis_fin_status:
         label: Statut devis de location
         type: int
         default_value: 0
-        values: 
+        values:
             array: doc_status_list
-            
-    contrat_fin_status: 
+    
+    contrat_fin_status:
         label: Statut contrat de location
         type: int
         default_value: 0
-        values: 
+        values:
             array: doc_status_list
-        
-    pvr_fin_status: 
+    
+    pvr_fin_status:
         label: Statut PVR
         type: int
         default_value: 0
-        values: 
+        values:
             array: doc_status_list
-            
-    id_signature_devis_fin: 
+    
+    id_signature_devis_fin:
         label: Signature devis de location
         type: id_object
         object: signature_devis_fin
-        
+    
     signature_df_params:
         label: Paramètres signature devis de location
         type: json
-        
-    id_signature_contrat_fin: 
+    
+    id_signature_contrat_fin:
         label: Signature contrat de location
         type: id_object
         object: signature_contrat_fin
-        
+    
     signature_cf_params:
         label: Paramètres signature contrat de location
         type: json
-        
-    signataires_cf_data: 
+    
+    signataires_cf_data:
         label: Données signataires contrat
         type: json
-        
-    id_signature_pvr_fin: 
+    
+    id_signature_pvr_fin:
         label: Signature PVR
         type: id_object
         object: signature_pvr_fin
-        
-    signature_pvr_params: 
+    
+    signature_pvr_params:
         label: Paramètres signature PVR
         type: json
-        
-    signataires_pvr_data: 
+    
+    signataires_pvr_data:
         label: Données signataires PVR
         type: json
-        
-    serials_ok: 
+    
+    serials_ok:
         label: Transmition des ns complète
         type: bool
         default_value: 0
-        
-fields_tables: 
-    contacts: 
+
+fields_tables:
+    contacts:
         title: contacts
         icon: far_id-card
-        rows: 
-            - field: id_contact_suivi
-              display: card
-            - field: id_contact_signature
-              display: card
-            - field: contacts_livraisons
-              
-    signatures_fin: 
+        rows:
+            -   field: id_contact_suivi
+                display: card
+            -   field: id_contact_signature
+                display: card
+            -   field: contacts_livraisons
+    
+    signatures_fin:
         title: Signatures
         icon: fas_signature
-        rows: 
-            - field: id_signature_devis_fin
-              display: card
-            - field: id_signature_contrat_fin
-              display: card
-            - field: id_signature_pvr_fin
-              display: card
-    
-forms: 
-    demande_financement: 
+        rows:
+            -   field: id_signature_devis_fin
+                display: card
+            -   field: id_signature_contrat_fin
+                display: card
+            -   field: id_signature_pvr_fin
+                display: card
+
+forms:
+    demande_financement:
         title: Demande de location
-        rows: 
-            - custom: 1
-              label: Type origine
-              input_name: type_origine
-              hidden: 1
-              input: 
-                  type: hidden
-            - custom: 1
-              label: ID Origine
-              input_name: id_origine
-              hidden: 1
-              input: 
-                  type: hidden
-            - custom: 1
-              label: Financeur
-              input_name: target
-              input: 
-                  type: select
-                  options: 
-                      array: targets
-            - field: id_contact_suivi
-              label: Contact client destinataire de l'offre de location              
-            - field: id_contact_signature
-              label: Contact client signataire du devis et du contrat de location
-            - custom: 1
-              label: Fonction Signataire
-              input_name: fonction_signataire
-              input: 
-                  type: text
-                  help: Champ "Poste / fonction" du contact signataire. Information obligatoire pour les clients pro pour l'établissement du contrat de location.
-              depends_on: id_contact_signature
-            - field: contacts_livraisons
-            - custom: 1
-              label: Durée totale de la location
-              input_name: duration
-              input: 
-                  type: select
-                  options: 
-                      callback: getDFDurationsArray
-              depends_on: target
-            - custom: 1
-              label: Périodicité des loyers
-              input_name: periodicity
-              input: 
-                  type: select
-                  options: 
-                      callback: getDFPeriodicitiesArray
-              depends_on: target
-            - custom: 1
-              label: Terme de paiement des loyers
-              input_name: mode_calcul
-              input: 
-                  type: select
-                  options: 
-                      callback: getDFCalcModesArray
-              depends_on: target
-              
-    edit_client: 
-        rows: 
-            - field: id_contact_suivi
-              label: Contact client destinataire de l'offre de location              
-            - field: id_contact_signature
-              label: Contact client signataire du devis et du contrat de location
-            - custom: 1
-              label: Fonction Signataire
-              input_name: fonction_signataire
-              input: 
-                  type: text
-                  help: Champ "Poste / fonction" du contact signataire. Information obligatoire pour les clients pro pour l'établissement du contrat de location.
-              depends_on: id_contact_signature
-            - field: contacts_livraisons
+        rows:
+            -   custom: 1
+                label: Type origine
+                input_name: type_origine
+                hidden: 1
+                input:
+                    type: hidden
+            -   custom: 1
+                label: ID Origine
+                input_name: id_origine
+                hidden: 1
+                input:
+                    type: hidden
+            -   custom: 1
+                label: Financeur
+                input_name: target
+                input:
+                    type: select
+                    options:
+                        array: targets
+            -   title: Contacts client
+            -   field: id_contact_suivi
+                label: Contact client destinataire de l'offre de location
+            -   field: id_contact_signature
+                label: Contact client signataire du devis et du contrat de location
+            -   custom: 1
+                label: N° mobile signataire
+                input_name: phone_signataire
+                required: 1
+                input:
+                    type: text
+                    help: Obligatoire pour la signature du contrat. Doit être un numéro mobile valide.
+                depends_on: id_contact_signature
+            -   custom: 1
+                label: Fonction Signataire
+                input_name: fonction_signataire
+                input:
+                    type: text
+                    help: Champ "Poste / fonction" du contact signataire. Information obligatoire pour les clients pro pour l'établissement du contrat de location.
+                depends_on: id_contact_signature
+            -   field: contacts_livraisons
+            -   title: Informations client pro
+            -   custom: 1
+                label: Forme juridique de l'entreprise
+                show:
+                    callback: isClientPro
+                input_name: forme_juridique
+                input:
+                    type: text
+                    help: Facultatif. Nécessaire pour l'établissement du contrat de location pour les clients pro
+            -   custom: 1
+                label: Capital de l'entreprise
+                show:
+                    callback: isClientPro
+                input_name: capital
+                input:
+                    type: text
+                    help: Facultatif. Nécessaire pour l'établissement du contrat de location pour les clients pro
+            -   custom: 1
+                label: Ville d'enregistrement de l'entreprise au RCS
+                show:
+                    callback: isClientPro
+                input_name: rcs
+                input:
+                    type: text
+                    help: Facultatif. Nécessaire pour l'établissement du contrat de location pour les clients pro
+            -   title: Option location
+            -   custom: 1
+                label: Durée totale de la location
+                input_name: duration
+                input:
+                    type: select
+                    options:
+                        callback: getDFDurationsArray
+                depends_on: target
+            -   custom: 1
+                label: Périodicité des loyers
+                input_name: periodicity
+                input:
+                    type: select
+                    options:
+                        callback: getDFPeriodicitiesArray
+                depends_on: target
+            -   custom: 1
+                label: Terme de paiement des loyers
+                input_name: mode_calcul
+                input:
+                    type: select
+                    options:
+                        callback: getDFCalcModesArray
+                depends_on: target
     
-    note: 
-        rows: 
-            - custom: 1
-              label: Note
-              input_name: note
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
+    edit_client:
+        rows:
+            -   field: id_contact_suivi
+                label: Contact client destinataire de l'offre de location
+            -   field: id_contact_signature
+                label: Contact client signataire du devis et du contrat de location
+            -   custom: 1
+                label: Fonction Signataire
+                input_name: fonction_signataire
+                input:
+                    type: text
+                    help: Champ "Poste / fonction" du contact signataire. Information obligatoire pour les clients pro pour l'établissement du contrat de location.
+                depends_on: id_contact_signature
+            -   field: contacts_livraisons
     
-    cancel: 
+    note:
+        rows:
+            -   custom: 1
+                label: Note
+                input_name: note
+                input:
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+    
+    cancel:
         extends: note
-        rows: 
-            - label: Motif de l'annulation
-            
-    refuse: 
+        rows:
+            -   label: Motif de l'annulation
+    
+    refuse:
         extends: note
-        rows: 
-            - label: Raisons du refus
-            
+        rows:
+            -   label: Raisons du refus
+    
     signature_devis_fin:
-        rows: 
-            contact: 
+        rows:
+            contact:
                 field: id_contact_signature
                 label: Contact signataire du devis de location
-            email_content: 
+            email_content:
                 custom: 1
                 label: Contenu e-mail client pour la signature à distance
                 input_name: email_content
-                input: 
+                input:
                     type: html
                     help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE}, {LIEN_PAGE_SIGNATURE_PUBLIQUE} (remplacé par &quot;en cliquant ici ou&quot;) et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
-                value: 
-                    callback: 
+                value:
+                    callback:
                         method: getSignatureEmailContent
-                        params: 
+                        params:
                             - elec
                             - devis_fin
-                            
-    signature_doc_fin: 
+    
+    signature_doc_fin:
         rows:
-            infos_signataires: 
+            infos_signataires:
                 custom: 1
                 label: Rappel signataires
                 input_name: infos_signataires
-                content: 
-                    callback: 
+                content:
+                    callback:
                         method: renderDocFinSignatairesInfos
-                        
-            signature_type: 
+            
+            signature_type:
                 custom: 1
                 label: Type de signature
                 input_name: signature_type
                 content:
-                    callback: 
+                    callback:
                         method: renderSignatureTypeSelect
-                        
-            phone_auth: 
+            
+            phone_auth:
                 custom: 1
                 label: Demander une authentification par téléphone
                 input_name: signature_phone_auth
                 depends_on: signature_type
                 content:
-                    callback: 
+                    callback:
                         method: renderSignaturePhoneAuthInput
             
-            email_content: 
+            email_content:
                 custom: 1
                 label: Contenu e-mail client pour la signature à distance
                 input_name: email_content
-                input: 
+                input:
                     type: html
                     help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE}, {LIEN_PAGE_SIGNATURE_PUBLIQUE} (remplacé par &quot;en cliquant ici ou&quot;) et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
-                value: 
-                    callback: 
+                value:
+                    callback:
                         method: getSignatureEmailContent
                 depends_on: signature_type
-                
-    signature_contrat_fin: 
+    
+    signature_contrat_fin:
         extends: signature_doc_fin
         title: Demander la signature du contrat de location
-        rows: 
-            infos_signataires: 
-                content: 
-                    callback: 
-                        params: 
-                            - contrat_fin
-            signature_type: 
+        rows:
+            infos_signataires:
                 content:
-                    callback: 
-                        params: 
+                    callback:
+                        params:
                             - contrat_fin
-                            
-            phone_auth: 
+            signature_type:
                 content:
-                    callback: 
-                        params: 
+                    callback:
+                        params:
                             - contrat_fin
-                            
-            email_content: 
-                value: 
-                    callback: 
-                        params: 
+            
+            phone_auth:
+                content:
+                    callback:
+                        params:
+                            - contrat_fin
+            
+            email_content:
+                value:
+                    callback:
+                        params:
                             - ''
                             - contrat_fin
-                
-    signature_pvr_fin: 
+    
+    signature_pvr_fin:
         extends: signature_doc_fin
         title: Demander la signature du contrat de location
-        rows: 
-            infos_signataires: 
-                content: 
-                    callback: 
-                        params: 
-                            - pvr_fin
-                            
-            signature_type: 
+        rows:
+            infos_signataires:
                 content:
-                    callback: 
-                        params: 
+                    callback:
+                        params:
                             - pvr_fin
-                            
-            phone_auth: 
+            
+            signature_type:
+                content:
+                    callback:
+                        params:
+                            - pvr_fin
+            
+            phone_auth:
                 show: 0
-                
-            email_content: 
-                value: 
-                    callback: 
-                        params: 
+            
+            email_content:
+                value:
+                    callback:
+                        params:
                             - ''
                             - pvr_fin
-                            
-    upload_signed_doc: 
+    
+    upload_signed_doc:
         title: déposer un document signé
-        rows: 
-            date_signed: 
+        rows:
+            date_signed:
                 custom: 1
                 label: Date de la signature
                 input_name: date_signed
-                input: 
+                input:
                     type: datetime
                     help: Laisser vide pour utiliser la date et l'heure actuelles
-            signed_doc_file: 
+            signed_doc_file:
                 custom: 1
                 label: Fichier du document signé
                 input_name: signed_doc_file
-                input: 
+                input:
                     type: drop_files
                     max_items: 1
-                
-       
-signatures: 
-    devis_fin: 
+
+
+signatures:
+    devis_fin:
         label: Devis de location
-    contrat_fin: 
+    contrat_fin:
         label: Contrat de location
-    pvr_fin: 
+    pvr_fin:
         label: PV de réception

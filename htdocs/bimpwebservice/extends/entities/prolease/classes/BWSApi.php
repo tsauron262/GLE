@@ -36,6 +36,7 @@ BWSApi::$requests['addDemandeFinancement'] = array(
 						'siren'           => array('label' => 'N° SIREN', 'required_if' => 'data/client/is_company'),
 						'forme_juridique' => array('label' => 'Forme juridique'),
 						'capital'         => array('label' => 'Capital social'),
+						'rcs'             => array('label' => 'Ville d\'enregistrement de l\'entreprise au RCS'),
 						'address'         => array(
 							'label' => 'Adresse client (siège si pro)', 'data_type' => 'array', 'sub_params' => array(
 								'address' => array('label' => 'Lignes adresse', 'required' => 1),

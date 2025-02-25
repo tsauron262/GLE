@@ -136,7 +136,7 @@ class BimpPDF extends TCPDF
         return 1;
     }
 
-    // Outils: 
+    // Outils:
 
     public function addVMargin($margin)
     {
@@ -503,7 +503,7 @@ class BimpConcatPdf extends Fpdi
         return $errors;
     }
 
-    // Gestion de la transparence: 
+    // Gestion de la transparence:
     // alpha: real value from 0 (transparent) to 1 (opaque)
     // bm:    blend mode, one of the following:
     //          Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn,

@@ -9,7 +9,6 @@ common_fields: 1
 
 list_page_url: 
     controller: tiers
-
 nom_url: 
     syntaxe: <ref> - <name>
     card: default
@@ -1006,7 +1005,6 @@ fields_tables:
         rows: 
             - field: note_public
             - field: note_private
-
 views: 
     default:
         title: nom

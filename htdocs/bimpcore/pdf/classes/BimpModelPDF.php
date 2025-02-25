@@ -9,19 +9,19 @@ require_once __DIR__ . '/BimpPDF_AmountsTable.php';
 
 Abstract class BimpModelPDF
 {
-    # Constantes: 
+    # Constantes:
 
     public static $type = '';
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/';
     public static $use_cgv = false;
 
-    # Membres: 
+    # Membres:
     public $langs;
     public $db;
     protected $pdf = null;
     public static $html_purifier = null;
 
-    # Objets liés: 
+    # Objets liés:
     public $object = null;
     public $fromCompany = null; // En-tête
     public $footerCompany = null; // Pied de page
@@ -37,7 +37,7 @@ Abstract class BimpModelPDF
     public $watermark = '';
     public $concat_files = array();
 
-    # Paramètres: 
+    # Paramètres:
     public $add_header = true;
     public $add_footer = true;
     public $typeObject = '';
@@ -76,7 +76,7 @@ Abstract class BimpModelPDF
         $this->pdf->addCgvPages = static::$use_cgv;
 
         $this->fromCompany = clone $mysoc; // Sender (en-tête)
-        $this->footerCompany = clone $mysoc; // Pied de page. 
+        $this->footerCompany = clone $mysoc; // Pied de page.
 
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);
@@ -87,17 +87,17 @@ Abstract class BimpModelPDF
 
     protected function initData()
     {
-        
+
     }
 
     protected function initHeader()
     {
-        
+
     }
 
     protected function initfooter()
     {
-        
+
     }
 
     public function init($object)
@@ -166,7 +166,7 @@ Abstract class BimpModelPDF
         }
     }
 
-    public function writeContent($content)
+    public function writeContent($content, $params = array(), $debug = false)
     {
         $styles = '<style>';
         if (file_exists(static::$tpl_dir . '/styles.css')) {
@@ -182,6 +182,10 @@ Abstract class BimpModelPDF
             }
         }
         $styles .= '</style>' . "\n";
+
+		if (isset($params['styles'])) {
+			$styles .= '<style>' . $params['styles'] . '</style>';
+		}
 
         $this->pdf->writeHTML($styles . $content, false, false, true, false, '');
     }
@@ -234,7 +238,7 @@ Abstract class BimpModelPDF
         }
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderTemplate($file, $vars = array())
     {
@@ -523,7 +527,7 @@ Abstract class BimpModelPDF
         return 1;
     }
 
-    // Affichages erreurs: 
+    // Affichages erreurs:
 
     public function displayErrors()
     {
@@ -594,14 +598,14 @@ Abstract class BimpModelPDF
 
     public static function cleanHtml($html)
     {
-        // Virer caractères invisibles : 
+        // Virer caractères invisibles :
 //        $html = str_replace('?', '[INTPOINT]', $html);
 //        $html = utf8_decode($html);
 //        $html = str_replace('?', '', $html);
 //        $html = str_replace('[INTPOINT]', '?', $html);
 
         if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
-//            echo 'AVANT: <br/>'; 
+//            echo 'AVANT: <br/>';
 //            echo htmlentities($html);
 
             $purifier = self::getHtmlPurifier();
@@ -611,7 +615,7 @@ Abstract class BimpModelPDF
 //            echo htmlentities($html);
 //            exit;
         } else {
-            // Envisager d'autres méthodes... 
+            // Envisager d'autres méthodes...
         }
 
         return $html;

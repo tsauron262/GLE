@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Propal.class.php'
 class BS_SavPropal extends Bimp_Propal
 {
 
+
     public function getModelsPdfArray()
     {
         return array(
@@ -27,7 +28,7 @@ class BS_SavPropal extends Bimp_Propal
     {
         $buttons = array();
 
-        // Remise globale: 
+        // Remise globale:
 //        if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
 //            $buttons[] = array(
 //                'label'       => 'Remise globale',

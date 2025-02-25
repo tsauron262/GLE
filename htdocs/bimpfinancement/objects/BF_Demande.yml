@@ -164,7 +164,7 @@ objects:
                     parent_module: bimpfinancement
                     parent_object_name: BF_Demande
 
-fields: 
+fields:
     id_client:
         label: Client
         type: id_object
@@ -279,6 +279,13 @@ fields:
         values: 
             array: status_list
         
+    ref_devis_source:
+        label: Référence devis source
+        show:
+            callback: !hasSource
+        input:
+            help: A renseigner en l'absence de source externe
+            
     devis_status: 
         label: Statut Devis
         type: int
@@ -500,11 +507,17 @@ fields:
     signature_contrat_params: 
         label: Paramètres signature du contrat
         type: json
-      
+        
     contrat_signataires_data: 
         label: Données signataires contrat
         type: json
         
+    type_contrat:
+        label: Type contrat
+        values:
+            papier: Papier
+            elec: Electronique
+            
     id_signature_pvr: 
         label: Signature du PV de réception
         type: id_object
@@ -519,7 +532,7 @@ fields:
         type: json
         
     closed: 
-        label: Terminée
+        label: Cédée / Fermée
         type: bool
         default_value: 0
         
@@ -573,9 +586,12 @@ fields:
         type: bool
         default_value: 0
         
+        
 forms:
     default: 
-        rows: 
+        rows:
+            ref_devis_source:
+                field: ref_devis_source
             resp: 
                 field: id_user_resp
             label: 
@@ -778,6 +794,22 @@ forms:
                 content:
                     callback: 
                         method: renderSignaturePhoneAuthInput
+                        
+            contact_phone:
+                custom: 1
+                show: 0
+                label: N° mobile du contact client
+                input_name: contact_phone
+                input:
+                    type: text
+                value:
+                    callback:
+                        method: getSourceClientData
+                        params:
+                            - phone
+                display_if:
+                    field_name: signature_phone_auth
+                    show_values: 1
                 
             email_content: 
                 custom: 1
@@ -821,13 +853,34 @@ forms:
                         params: 
                             - contrat
                             
-            phone_auth: 
+            phone_auth:
+                show:
+                    unextends: 1
+                    callback:
+                        method: isDocuSignAllowed
+                        params:
+                            - contrat
+                
                 content:
                     callback:
                         params: 
                             - contrat
+            
+            contact_phone:
+                show:
+                    unextends: 1
+                    callback:
+                        method: isDocuSignAllowed
+                        params:
+                            - contrat
                         
             email_content:
+                show:
+                    unextends: 1
+                    callback:
+                        method: isDocuSignAllowed
+                        params:
+                            - contrat
                 value: 
                     callback: 
                         params: 
@@ -914,7 +967,8 @@ forms:
                   options: 
                       papier: Signature papier
                       elec: Signature électronique
-              value: papier
+              value:
+                  field_value: type_contrat
             - field: formule
               required: 1
               
@@ -1514,7 +1568,8 @@ fields_tables:
     infos: 
         title: Infos
         icon: fas_info-circle
-        rows: 
+        rows:
+            - field: ref_devis_source
             - field: id_user_resp
             - field: date_loyer
               edit: 1
@@ -1565,6 +1620,7 @@ fields_tables:
               label: Formule choisie par le client
               edit: 1
               
+              
     montants: 
         title: Montants
         icon: euro
@@ -1588,6 +1644,7 @@ fields_tables:
               show: 
                   callback: showLoyers
                   
+                  
     signatures: 
         title: Signatures
         icon: fas_signature
@@ -1604,6 +1661,7 @@ fields_tables:
               display: card
               show: 
                   field_value: id_signature_pvr
+                  
                   
     factures: 
         title: Factures
@@ -1623,6 +1681,7 @@ fields_tables:
             - field: vr_vente
               edit: 1
               
+              
     factures_revente: 
         title: Facturation revente
         icon: fas_file-invoice-dollar
@@ -1631,6 +1690,7 @@ fields_tables:
               display: card
             - field: id_facture_cli_rev
               display: card
+        
         
 views:
     default: 
@@ -1764,7 +1824,6 @@ lists:
         sort_way: desc
         n: 10
         add_form_name: default
-        delete_btn: 1
         page_btn: 1
         modal_view: demande
         edit_btn: 1
@@ -1780,8 +1839,26 @@ lists:
             client: 
             status:
             devis_status: 
-            contrat_status: 
-
+            contrat_status:
+    
+    all:
+        extends: default
+        
+    en_cours:
+        extends: default
+        
+    complets:
+        extends: default
+        
+    en_place:
+        extends: default
+        
+    cession_finale:
+        extends: default
+        
+    canceled:
+        extends: default
+        
 signatures: 
     devis: 
         label: Devis de location

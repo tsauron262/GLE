@@ -39,8 +39,9 @@ if (class_exists('BimpComm_ExtEntity')) {
 
 class Bimp_Propal extends Bimp_PropalTemp
 {
-
-    public static $dol_module = 'propal';
+	/** @var Propal */
+	public $dol_object = null;
+	public static $dol_module = 'propal';
     public static $email_type = 'propal_send';
     public static $mail_event_code = 'PROPAL_SENTBYMAIL';
     public static $element_name = 'propal';
@@ -108,6 +109,8 @@ class Bimp_Propal extends Bimp_PropalTemp
         if (isset($user->rights->propal->lire)) {
             return (int) $user->rights->propal->lire;
         }
+
+		return 0;
     }
 
     public function canSetAction($action)
@@ -2350,7 +2353,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 
         if (!count($errors)) {
-
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('docusign');
             if (is_a($api, 'DocusignAPI')) {
@@ -2368,10 +2370,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                         'email'    => $email_client
                     )
                 );
+
+				$warnings = array();
                 $envelope = $api->createEnvelope($params, $this, $errors, $warnings);
 
                 if (!count($errors)) {
                     BimpObject::loadClass('bimpcore', 'BimpSignature');
+					BimpObject::loadClass('bimpcore', 'BimpSignataire');
 
                     $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
                                 'obj_module'            => 'bimpcommercial',
@@ -2380,8 +2385,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 'doc_type'              => 'propal',
                                 'id_client'             => $this->getData('fk_soc'),
                                 'id_contact'            => $id_contact,
-                                'dist_type'             => BimpSignature::DIST_DOCUSIGN,
-                                'type'                  => BimpSignature::TYPE_ELEC,
+//                                'dist_type'             => BimpSignataire::DIST_DOCUSIGN,
+                                'type'                  => BimpSignataire::TYPE_ELEC,
                                 'nom_signataire'        => $prenom_client . ' ' . $nom_client,
                                 'fonction_signataire'   => $fonction_client,
                                 'email_signataire'      => $email_client,

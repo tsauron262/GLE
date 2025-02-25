@@ -258,9 +258,9 @@ class BCT_Contrat extends BimpDolObject
 					"id_obj"        => $this->id,
 					"type_dest"     => $note::BN_DEST_GROUP,
 					"fk_group_dest" => $id_group,
-					"content"       => htmlentities("Merci d\\’activer les lignes inactives de ce contrat.
+					"content"       => htmlentities('Merci d\\\’activer les lignes inactives de ce contrat.
 Indiquez si vous souhaitez un technicien spécifique ou des instructions particulières.
-En cas de renouvellement, précisez les informations nécessaires sur Ninja One (écart entre vendu/installé, ajouts, suppressions ou changements de poste) pour que @dispatch organise l\\’intervention.")
+En cas de renouvellement, précisez les informations nécessaires sur Ninja One (écart entre vendu/installé, ajouts, suppressions ou changements de poste) pour que @dispatch organise l\\\’intervention.')
 				), array(
 					'form_name' => 'rep'
 				))

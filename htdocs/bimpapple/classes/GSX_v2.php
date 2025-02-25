@@ -5,7 +5,7 @@ require_once __DIR__ . '/GSX_Const.php';
 class GSX_v2 extends GSX_Const
 {
 
-//old shipto correspond a altimac   
+//old shipto correspond a altimac
     public static $oldShipTos = array(1134736, 608105, 1185605, 608111);
     protected static $instance = null;
     protected $ch;
@@ -291,7 +291,7 @@ class GSX_v2 extends GSX_Const
 
     public function saveToken($type, $token)
     {
-//        static::debug($this->appleId, 'enregistrement token ' . $type . ' : ' . $token); // Génère trop de logs. 
+//        static::debug($this->appleId, 'enregistrement token ' . $type . ' : ' . $token); // Génère trop de logs.
         $is_default = ($this->appleId === self::$default_ids['apple_id']);
         if ($is_default) {
 //            BimpCore::addlog('Save token, old Token : ' . $this->auth_token . ' <br/>new : ' . $token . ' <br/>appleId : ' . $this->appleId);
@@ -420,7 +420,7 @@ class GSX_v2 extends GSX_Const
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($this->ch, CURLOPT_TIMEOUT, 120);
         curl_setopt($this->ch, CURLOPT_HEADER, true);
 
         return 1;
@@ -554,7 +554,7 @@ class GSX_v2 extends GSX_Const
                 $msg = '';
                 switch ($error['code']) {
                     case 'SESSION_IDLE_TIMEOUT':
-                        // On tente une nouvelle authentification: 
+                        // On tente une nouvelle authentification:
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
                             if ($this->reauthenticate()) {
@@ -583,7 +583,7 @@ class GSX_v2 extends GSX_Const
         return $data;
     }
 
-    // Requêtes - Equipements: 
+    // Requêtes - Equipements:
 
     public function productDetailsBySerial($serial, $requestType = 'repair')
     {
@@ -605,7 +605,7 @@ class GSX_v2 extends GSX_Const
         ));
     }
 
-    // Requêtes - Parts: 
+    // Requêtes - Parts:
 
     public function partsSummaryBySerial($serial)
     {
@@ -657,7 +657,7 @@ class GSX_v2 extends GSX_Const
         ));
     }
 
-    // Requêtes - Repairs: 
+    // Requêtes - Repairs:
 
     public function repairSummaryByIdentifier($identifier, $identifier_type)
     {
@@ -721,7 +721,7 @@ class GSX_v2 extends GSX_Const
         return $this->exec('repairQuestions', $params);
     }
 
-    // Reqêtes - Diagnostiques: 
+    // Reqêtes - Diagnostiques:
 
     public function diagnosticSuites($serial)
     {
@@ -963,7 +963,7 @@ class GSX_v2 extends GSX_Const
         );
     }
 
-    // Requêtes - Réservations: 
+    // Requêtes - Réservations:
 
     public function fetchReservationsSummary($shipTo, $from, $to, $productCode = '')
     {
@@ -1059,7 +1059,7 @@ class GSX_v2 extends GSX_Const
         return $this->exec('updateReservation', $params);
     }
 
-    // Stocks consignés: 
+    // Stocks consignés:
 
     public function consignmentOrdersLookup($type, $status = 'OPEN', $from = '', $to = '', $page = 0)
     {
@@ -1142,12 +1142,12 @@ class GSX_v2 extends GSX_Const
         return $this->exec('consignmentOrderShipment', $params);
     }
 
-    // Commandes de stocks internes : 
+    // Commandes de stocks internes :
 
     public function stockingOrderPartsSummary($params)
     {
         $result = $this->exec('stockingOrderPartsSummary', $params);
-        
+
         if (!empty($this->errors['curl'])) {
             foreach ($this->errors['curl'] as $idx => $error) {
                 if (isset($error['code']) && (string) $error['code'] === 'NO_DATA_FOUND') {
@@ -1159,7 +1159,7 @@ class GSX_v2 extends GSX_Const
 
         return $result;
     }
-    
+
     public function getProductCache(){
         $key = 'productAppleHierarchy';
         if(!BimpCache::cacheServerExists($key)){
@@ -1168,7 +1168,7 @@ class GSX_v2 extends GSX_Const
         }
         return BimpCache::getCacheServeur($key);
     }
-    
+
     public function getProductCacheOption(){
         $option = array();
         $prods = $this->getProductCache();
@@ -1179,7 +1179,7 @@ class GSX_v2 extends GSX_Const
 //        echo '<pre>'; print_r($result);//die;
         return $result;
     }
-    
+
     public function productArrayToOption($prods, $options = array()){
         foreach($prods as $child){
             if(isset($child['children']) && count($child['children'])){
@@ -1222,12 +1222,12 @@ class GSX_v2 extends GSX_Const
 
     public function stockingOrderUpdate()
     {
-        
+
     }
 
     public function stockingOrderDelete()
     {
-        
+
     }
 
     // Requêtes - Divers:
@@ -1285,7 +1285,7 @@ class GSX_v2 extends GSX_Const
             $file_data = array_shift($files);
 
             $ch = curl_init($attachment['uploadUrl']);
-//            
+//
             curl_setopt($ch, CURLOPT_HTTPHEADER, array(
                 'X-Apple-AppToken: ' . $headers['X-Apple-AppToken'],
                 'X-Apple-Gigafiles-Cid: ' . $headers['X-Apple-Gigafiles-Cid']
@@ -1437,7 +1437,7 @@ class GSX_v2 extends GSX_Const
         return $msg;
     }
 
-    // Divers: 
+    // Divers:
 
     public function traiteSerialApple($serial)
     {

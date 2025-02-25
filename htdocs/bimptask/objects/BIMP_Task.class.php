@@ -111,9 +111,14 @@ class BIMP_Task extends BimpAbstractFollow
 
 	public function canSetAction($action)
 	{
+		global $user;
+
 		switch ($action) {
 			case 'addFiles':
 				return $this->canEdit();
+
+//			case '':
+//				return 1;
 		}
 		return parent::canSetAction($action);
 	}

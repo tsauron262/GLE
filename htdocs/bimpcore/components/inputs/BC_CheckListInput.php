@@ -59,7 +59,7 @@ class BC_CheckListInput extends BC_Input
                 $html .= '<p class="small">Max: <span class="check_list_max_label">' . $max . '</span></p>';
 
                 $html .= '<div class="check_list_max_alert"' . ($nb_selected > $max ? '' : ' style="display: none"') . '>';
-                $html .= BimpRender::renderAlerts('Veuillez désélectionner <span class="check_list_nb_items_to_unselect">' . ($nb_selected - $max) . '</span> élément(s)', 'danger');
+                $html .= \BimpRender::renderAlerts('Veuillez désélectionner <span class="check_list_nb_items_to_unselect">' . ($nb_selected - $max) . '</span> élément(s)', 'danger');
                 $html .= '</div>';
             }
             $html .= '</div>';

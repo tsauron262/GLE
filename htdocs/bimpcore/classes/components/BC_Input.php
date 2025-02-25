@@ -301,7 +301,7 @@ class BC_Input extends BimpComponent
             }
         }
 
-        // Ajustement finaux: 
+        // Ajustement finaux:
         switch ($this->params['type']) {
             case 'check_list':
                 if (is_string($this->value) && preg_match('/^\[.*\]$/', $this->value)) {

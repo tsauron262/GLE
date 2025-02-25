@@ -556,7 +556,7 @@ forms:
               content: 
                   callback: renderMergeFormInput
                   
-   etiquettes:
+    etiquettes:
         rows: 
             - custom: 1
               label: Quantité
@@ -804,6 +804,13 @@ lists:
               icon: fas_trash-alt
               onclick: setSelectedObjectsAction($(this), 'list_id', 'removeInventaire', {}, '', 'Retirer de l\'inventaire ?', true)
               
+              
+    entrepot:
+        extends: default
+        cols:
+            place: unset
+            
+            
 searches:
     default:
         has_serial: 1

@@ -9,6 +9,8 @@ icon: far_id-card
 parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
+controller: contact
+
 list_page_url: 
     controller: clients
     url_params: 
@@ -21,6 +23,7 @@ name_syntaxe: <firstname> <lastname>
 nom_url: 
     syntaxe: <name>
     card: default
+    modal_view: default
     
 labels: 
     name: contact
@@ -211,8 +214,6 @@ forms:
                 field: lastname
             address: 
                 field: address
-            address: 
-                field: address
             zip: 
                 field: zip
             town: 
@@ -364,6 +365,7 @@ lists:
         modal_view: default
         edit_btn: 1
         delete_btn: 1
+        page_btn: 1
         extra_btn: 
             callback: getListExtraButtons
         cols: 
@@ -382,6 +384,7 @@ lists:
         pagination: 0
         n: 0
         add_btn: 1
+        page_btn: 1
         add_form_name: default
         cols: 
             fk_soc: unset
@@ -391,6 +394,7 @@ lists:
         enable_search: 0
         configurable: 0
         delete_btn: 0
+        page_btn: 0
         add_form_name: public_create
         edit_form: public_edit
         modal_view: unset

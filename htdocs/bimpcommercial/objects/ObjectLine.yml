@@ -18,6 +18,7 @@ objects:
                 name: DolLine
             id_object: 
                 field_value: id_line
+                
     parent_line: 
         relation: hasOne
         delete: 0
@@ -132,7 +133,6 @@ fields:
         label: Remisable
         type: int
         viewable: 1
-        filterable: 0
         filterable: 0
         default_value: 1
         

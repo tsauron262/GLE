@@ -462,7 +462,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         if ($this->isLoaded()) {
             $status = (int) $this->getData('fk_statut');
 
-            // Valider: 
+            // Valider:
             $errors = array();
             if ($this->isActionAllowed('validate', $errors)) {
                 if ($this->canSetAction('validate')) {
@@ -500,7 +500,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 );
             }
 
-            // Approuver: 
+            // Approuver:
             if ($this->isActionAllowed('approve')) {
                 if ($this->canSetAction('approve')) {
                     $buttons[] = array(
@@ -542,7 +542,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 }
             }
 
-            // Refuser: 
+            // Refuser:
             if ($this->isActionAllowed('refuse')) {
                 if ($this->canSetAction('refuse')) {
                     $buttons[] = array(
@@ -563,7 +563,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 }
             }
 
-            // Envoyer par e-mail: 
+            // Envoyer par e-mail:
             if ($this->isActionAllowed('sendEmail') && $this->canSetAction('sendEmail')) {
                 $onclick = $this->getJsActionOnclick('sendEmail', array(), array(
                     'form_name' => 'email'
@@ -575,7 +575,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 );
             }
 
-            // Réouvrir: 
+            // Réouvrir:
             if ($this->isActionAllowed('reopen')) {
                 $status = (int) $this->getData('fk_statut');
                 if ($status === 1) {
@@ -642,7 +642,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 //                    )),
 //                );
 //            }
-            // Créer facture: 
+            // Créer facture:
             if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
                 $receptions_facturables = $this->getFactureReceptionsArray();
 
@@ -678,7 +678,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 }
             }
 
-            // Classer facturée: 
+            // Classer facturée:
             if ($this->isActionAllowed('classifyBilled') && $this->canSetAction('classifyBilled')) {
                 $buttons[] = array(
                     'label'   => 'Classer facturée',
@@ -687,7 +687,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 );
             }
 
-            // Annuler: 
+            // Annuler:
             if ($this->isActionAllowed('cancel') && $this->canSetAction('cancel')) {
                 $buttons[] = array(
                     'label'   => 'Annuler',
@@ -698,7 +698,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 );
             }
 
-            // Cloner: 
+            // Cloner:
             if ($this->can("create")) {
                 $buttons[] = array(
                     'label'   => 'Cloner',
@@ -709,7 +709,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 );
             }
 
-            // Forcer statut: 
+            // Forcer statut:
             if ($this->isActionAllowed('forceStatus')) {
                 if ($this->canSetAction('forceStatus')) {
                     $data = array(
@@ -763,7 +763,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         return $buttons;
     }
 
-    // Getters Array: 
+    // Getters Array:
 
     public function getReceptionsArray($include_empty = false, $draft_only = false)
     {
@@ -890,7 +890,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         return static::$types_entrepot;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getAdresseLivraison(&$warnings = array())
     {
@@ -1202,7 +1202,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
     public function createFacture()
     {
-        
+
     }
 
     public function onCancelStatus()
@@ -1429,7 +1429,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
     public function onValidate(&$warnings = array())
     {
         if ($this->isLoaded($warnings)) {
-            // Mise à jour des PA courant des produits: 
+            // Mise à jour des PA courant des produits:
             $products = array();
 
             $lines = $this->getLines('not_text');
@@ -1468,7 +1468,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 $product->setCurrentPaHt($pa_ht, $id_fp, 'commande_fourn', (int) $this->id);
             }
 
-            // Mise à jour des PA des lignes de factures associées: 
+            // Mise à jour des PA des lignes de factures associées:
             foreach ($lines as $line) {
                 $line->checkFactureClientLinesPA();
             }
@@ -1502,7 +1502,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 $onclick = $this->getJsActionOnclick('validate', $data, array(
                 ));
 
-                $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $msg = '<span class="btn btn-default" onclick="' . $onclick . '">';
                 $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
                 $msg .= '</span><br/>';
 
@@ -1749,7 +1749,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         $warnings = array();
         $success = '';
 
-        // Check des réceptions: 
+        // Check des réceptions:
         if (!isset($data['receptions']) || !is_array($data['receptions']) || empty($data['receptions'])) {
             $errors[] = 'Aucune réception sélectionnée';
         } else {
@@ -1839,7 +1839,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
             if (!count($errors)) {
                 if (!BimpObject::objectLoaded($facture)) {
 
-                    // Création de la facture: 
+                    // Création de la facture:
                     $ref_supplier = (isset($data['ref_supplier']) ? $data['ref_supplier'] : '');
                     $datef = (isset($data['datef']) ? $data['datef'] : date('Y-m-d'));
                     $date_lim_reglement = (isset($data['date_lim_reglement']) ? $data['date_lim_reglement'] : '');
@@ -1912,7 +1912,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
                 if (!count($errors) && BimpObject::objectLoaded($facture)) {
 
-                    // Ajout des lignes à la facture: 
+                    // Ajout des lignes à la facture:
                     $addOrigineLine = (isset($data['add_origin_line']) ? (int) $data['add_origin_line'] : 0);
 
                     $i = 0;
@@ -1955,7 +1955,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                                         $tva_tx = (float) $tva_tx;
                                         $fac_line = null;
 
-                                        // Recherche d'une ligne existante: 
+                                        // Recherche d'une ligne existante:
                                         $fac_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
 
                                         $rows = $fac_instance->getList(array(
@@ -1982,7 +1982,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                                             }
                                         }
 
-                                        // Si ligne trouvée, ajout des qtés: 
+                                        // Si ligne trouvée, ajout des qtés:
                                         $line_errors = array();
                                         $line_warnings = array();
                                         if (BimpObject::objectLoaded($fac_line)) {
@@ -1997,7 +1997,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                                                 $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la mise à jour des quantités de la ligne de facture n°' . $fac_line->getData('position'));
                                             }
                                         } else {
-                                            // Création d'une nouvelle ligne: 
+                                            // Création d'une nouvelle ligne:
                                             $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
                                             $fac_line->validateArray(array(
                                                 'id_obj'             => (int) $facture->id,
@@ -2033,7 +2033,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
                                         /* NOTE: on n'intègre pas les remises de la ligne de commande: celles-ci sont déjà déduites dans le pu_ht. */
 
-                                        // Ajout des équipements: 
+                                        // Ajout des équipements:
                                         if (!count($line_errors) && $isSerialisable) {
                                             $equipments = (isset($line_data['equipments']) ? $line_data['equipments'] : array());
 
@@ -2261,7 +2261,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         return parent::actionAddContact($data, $success);
     }
 
-    // Overrides - BimpComm: 
+    // Overrides - BimpComm:
 
     public function checkObject($context = '', $field = '')
     {
@@ -2413,10 +2413,10 @@ class Bimp_CommandeFourn extends BimpCommAchat
             }
         }
 
-        // Mise à jour des extra_fields: 
+        // Mise à jour des extra_fields:
         global $user;
         if ($this->dol_object->insertExtraFields('', $user) < 0) {
-            $errors[] = 'Echec de la mise à jour des champs supplémentaires';
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour des champs supplémentaires');
         }
         if (!count($errors)) {
             return 1;
@@ -2425,7 +2425,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         return 1;
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function checkStatusAll()
     {

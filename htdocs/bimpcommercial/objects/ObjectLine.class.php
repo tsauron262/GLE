@@ -114,6 +114,11 @@ class ObjectLine extends BimpObject
 		return 0;
 	}
 
+	public function canEditQty()
+	{
+		return 1;
+	}
+
 	public function canEditRemisePa()
 	{
 		return 0;
@@ -2861,17 +2866,17 @@ class ObjectLine extends BimpObject
 					$class_name = get_class($object);
 					switch ($class_name) {
 						case 'Propal':
-//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0.0, $txlocaltax2=0.0, $fk_product=0, $remise_percent=0.0, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0, $label='',$date_start='', $date_end='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0, $pu_ht_devise=0, $fk_remise_except=0)
+							/** @var Propal $object */
 							$result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 'HT', 0, 0, $type, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht, '', $date_from, $date_to, 0, null, '', 0, 0, (int) $this->id_remise_except);
 							break;
 
 						case 'Facture':
-//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_options=0, $situation_percent=100, $fk_prev_id=0, $fk_unit = null, $pu_ht_devise = 0)
+							/** @var Facture $object */
 							$result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, 0, $this->id_remise_except, 'HT', 0, $type, (int) $this->getData('position'), 0, '', 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
 							break;
 
 						case 'Commande':
-//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $info_bits=0, $fk_remise_except=0, $price_base_type='HT', $pu_ttc=0, $date_start='', $date_end='', $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='',$array_options=0, $fk_unit=null, $origin='', $origin_id=0, $pu_ht_devise = 0)
+							/** @var Commande $object */
 							$result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 0, (int) $this->id_remise_except, 'HT', 0, $date_from, $date_to, $type, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
 							break;
 
@@ -2881,7 +2886,7 @@ class ObjectLine extends BimpObject
 							} else {
 								$ref_supplier = '';
 							}
-//                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0.0, $txlocaltax2=0.0, $fk_product=0, $fk_prod_fourn_price=0, $ref_supplier='', $remise_percent=0.0, $price_base_type='HT', $pu_ttc=0.0, $type=0, $info_bits=0, $notrigger=false, $date_start=null, $date_end=null, $array_options=0, $fk_unit=null, $pu_ht_devise=0, $origin='', $origin_id=0)
+							/** @var CommandeFournisseur $object */
 							$result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (int) $this->id_fourn_price, $ref_supplier, (float) $this->remise, 'HT', 0.0, $type, 0, false, $date_from, $date_to);
 							break;
 
@@ -2891,7 +2896,7 @@ class ObjectLine extends BimpObject
 							} else {
 								$ref_supplier = '';
 							}
-//                            addline($desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits='', $price_base_type='HT', $type=0, $rang=-1, $notrigger=false, $array_options=0, $fk_unit=null, $origin_id=0, $pu_ht_devise=0, $ref_supplier='')
+							/** @var FactureFournisseur $object */
 							$result = $object->addLine((string) $this->desc, (float) $this->pu_ht, (float) $this->tva_tx, 0, 0, $this->qty, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, '', 'HT', $type, (int) $this->getData('position'), false, 0, null, 0, 0, $ref_supplier);
 							break;
 
@@ -2908,13 +2913,25 @@ class ObjectLine extends BimpObject
 					$class_name = get_class($object);
 					switch ($class_name) {
 						case 'Propal':
+							/** @var Propal $object */
+							$result = $object->addLine((string) $this->desc, 0, (float) $this->qty, 0);
+							break;
 						case 'Commande':
+							/** @var Commande $object */
+							$result = $object->addLine((string) $this->desc, 0, (float) $this->qty, 0);
+							break;
 						case 'Facture':
+							/** @var Facture $object */
+							$result = $object->addLine((string) $this->desc, 0, (float) $this->qty, 0);
+							break;
+
 						case 'CommandeFournisseur':
+							/** @var CommandeFournisseur $object */
 							$result = $object->addLine((string) $this->desc, 0, (float) $this->qty, 0);
 							break;
 
 						case 'FactureFournisseur':
+							/** @var FactureFournisseur $object */
 							$result = $object->addLine((string) $this->desc, 0, 0, 0, 0, 1, 0, 0, '', '', '', 0, '');
 							break;
 
@@ -3857,6 +3874,7 @@ class ObjectLine extends BimpObject
 	public function checkRemisesGlobales($rgs = null)
 	{
 		if ($this->isLoaded()) {
+			$warnings = array();
 			$parent = $this->getParentInstance();
 
 			if (BimpObject::objectLoaded($parent)) {
@@ -4511,81 +4529,85 @@ class ObjectLine extends BimpObject
 				break;
 
 			case 'qty':
+				if (!$this->canEditQty()) {
+					$html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
+					$html .= $value;
+				} else {
 //                if (!$force_edit && !$this->isFieldEditable('qty')) {
 //                    return $value;
 //                }
 
-				$product_type = null;
-				if ((int) $this->id_product) {
-					$product_type = (int) $this->db->getValue('product', 'fk_product_type', '`rowid` = ' . (int) $this->id_product);
-				}
+					$product_type = null;
+					if ((int) $this->id_product) {
+						$product_type = (int) $this->db->getValue('product', 'fk_product_type', '`rowid` = ' . (int) $this->id_product);
+					}
 
-				if (is_null($value)) {
-					$value = 1;
-				}
+					if (is_null($value)) {
+						$value = 1;
+					}
 
-				if (BimpObject::objectLoaded($this->post_equipment)) {
-					$html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
-					$html .= '1';
-				} else {
-					if ($product_type == Product::TYPE_SERVICE) {
-						$html = BimpInput::renderInput('qty', $prefixe . 'qty', (float) $value, array(
-							'step' => 1,
-							'data' => array(
-								'data_type' => 'number',
-								'min'       => 'none',
-								'unsigned'  => 0,
-								'decimals'  => 6
-							)
-						));
+					if (BimpObject::objectLoaded($this->post_equipment)) {
+						$html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
+						$html .= '1';
 					} else {
-						$min = $max = 'none';
-						$decimals = $this->getQtyDecimals();
+						if ($product_type == Product::TYPE_SERVICE) {
+							$html = BimpInput::renderInput('qty', $prefixe . 'qty', (float) $value, array(
+								'step' => 1,
+								'data' => array(
+									'data_type' => 'number',
+									'min'       => 'none',
+									'unsigned'  => 0,
+									'decimals'  => 6
+								)
+							));
+						} else {
+							$min = $max = 'none';
+							$decimals = $this->getQtyDecimals();
 
-						if ($this->isLoaded()) {
-							if (method_exists($this, 'getMinQty')) {
-								$min = $this->getMinQty();
-							} else {
-								$equipment_lines = $this->getEquipmentLines();
-								if (count($equipment_lines)) {
-									$min = 0;
-									foreach ($equipment_lines as $line) {
-										if ((int) $line->getData('id_equipment')) {
-											$min++;
+							if ($this->isLoaded()) {
+								if (method_exists($this, 'getMinQty')) {
+									$min = $this->getMinQty();
+								} else {
+									$equipment_lines = $this->getEquipmentLines();
+									if (count($equipment_lines)) {
+										$min = 0;
+										foreach ($equipment_lines as $line) {
+											if ((int) $line->getData('id_equipment')) {
+												$min++;
+											}
 										}
-									}
-									if (!$min) {
-										$min = 'none';
+										if (!$min) {
+											$min = 'none';
+										}
 									}
 								}
 							}
-						}
-						$parent = $this->getParentInstance();
-						if (is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2 && $min != 'none') {
-							$max = -$min;
-							$min = 'none';
+							$parent = $this->getParentInstance();
+							if (is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2 && $min != 'none') {
+								$max = -$min;
+								$min = 'none';
+							}
+
+							$value = round((float) $value, $decimals);
+							$html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
+								'data' => array(
+									'data_type' => 'number',
+									'min'       => $min,
+									'max'       => $max,
+									'unsigned'  => 0,
+									'decimals'  => $decimals
+								)
+							));
 						}
 
-						$value = round((float) $value, $decimals);
-						$html = BimpInput::renderInput('qty', $prefixe . 'qty', $value, array(
-							'data' => array(
-								'data_type' => 'number',
-								'min'       => $min,
-								'max'       => $max,
-								'unsigned'  => 0,
-								'decimals'  => $decimals
-							)
-						));
-					}
-
-					if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
-						$html .= '<div style="margin-top: 6px">';
-						$msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
-						$html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
-						$html .= '</div>';
+						if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
+							$html .= '<div style="margin-top: 6px">';
+							$msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
+							$html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+							$html .= '</div>';
+						}
 					}
 				}
-
 				break;
 
 			case 'pu_ht':

@@ -18,32 +18,58 @@ global $db, $user;
 $bdb = new BimpDb($db);
 
 if (!BimpObject::objectLoaded($user)) {
-    echo BimpRender::renderAlerts('Aucun utilisateur connecté');
-    exit;
+	echo BimpRender::renderAlerts('Aucun utilisateur connecté');
+	exit;
 }
 
 if (!$user->admin) {
-    echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
-    exit;
+	echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
+	exit;
 }
 
-$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 142370);
-foreach (array(
-//	'f.martinez@bimp.fr'
-			 'test-n0sf2zo7p@srv1.mail-tester.com',
-			 'grunchy99@gmail.com'
-		 ) as $to) {
-	echo '<br/>TEST ' . $to . ' : ';
-	$mail = new BimpMail($client, 'TEST', $to, '', 'TEST');
+$num = '06 37 00 08 40';
 
-	$errors = array();
-	$mail->send($errors);
+$infos = '';
+echo 'TEST dur : <br/>';
+echo 'num   : ' . $num .' <br/>';
+echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
+if (!BimpTools::isValidNumMobile($num, $infos)) {
+	echo 'KO - ' . $infos;
+} else {
+	echo 'OK';
+}
+echo '<br/><br/>';
 
-	if (count($errors)) {
-		echo '<pre>' . print_r($errors) . '</pre>';
+/** @var Bimp_Contact $contact */
+$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', 202486);
+if (BimpObject::objectLoaded($contact)) {
+
+	echo 'TEST contact ' . $contact->getLink() .'<br/>';
+
+	$infos = '';
+	$num = $contact->dol_object->phone_mobile;
+	echo 'TEST mobile : <br/>';
+	echo 'num   : ' . $num .' <br/>';
+	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
+	if (!BimpTools::isValidNumMobile($num, $infos)) {
+		echo 'KO - ' . $infos;
 	} else {
 		echo 'OK';
 	}
+	echo '<br/><br/>';
+
+	echo 'preg_replace : <br/>';
+	$num = preg_replace('/[^0-9\+]/u', '', $num);
+	echo 'num   : ' . $num .' <br/>';
+	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
+	if (!BimpTools::isValidNumMobile($num, $infos)) {
+		echo 'KO - ' . $infos;
+	} else {
+		echo 'OK';
+	}
+	echo '<br/><br/>';
+} else {
+	echo 'KO - Contact non chargé';
 }
 
 echo '<br/>FIN';

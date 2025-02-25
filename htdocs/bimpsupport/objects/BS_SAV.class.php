@@ -163,8 +163,8 @@ class BS_SAV extends BimpObject
 
 	public static function getSaveOptionDesc($choice)
 	{
+		global $conf;
 		if (isset(self::$save_options_desc[(int) $choice])) {
-			global $conf;
 			return str_replace('ENTITY_NAME', BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport'), self::$save_options_desc[(int) $choice]);
 		}
 		return null;
@@ -629,7 +629,7 @@ class BS_SAV extends BimpObject
 						return 1;
 					}
 
-					if (!in_array((int) $this->getData('status'), array(0, 1, 2, 3, 5, 6, 7))) {
+					if (!in_array((int) $this->getData('status'), array(0, 1, 2, 3, 5, 6, 7, 9))) {
 						return 0;
 					}
 					break;
@@ -668,6 +668,31 @@ class BS_SAV extends BimpObject
 		$propal = $this->getChildObject('propal');
 		if (BimpObject::objectLoaded($propal)) {
 			if (in_array((int) $propal->getData('fk_mode_reglement'), explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial')))) {
+				return 1;
+			}
+		}
+
+		return 0;
+	}
+
+	public function isEquipmentIphone8Plus()
+	{
+		/** @var Equipment $eq */
+		$eq = $this->getChildObject('equipment');
+		if (BimpObject::objectLoaded($eq)) {
+			$prod_label = $eq->getProductLabel();
+
+			$prod_label = str_replace(' ', '', $prod_label);
+			$prod_label = str_replace('-', '', $prod_label);
+			$prod_label = str_replace('_', '', $prod_label);
+
+			if (preg_match('/iphone(\d+|x|xr|xs)/i', $prod_label, $matches)) {
+				if (preg_match('/^[0-9]$/', $matches[1])) {
+					if ((int) $matches[1] < 0) {
+						return 0;
+					}
+				}
+
 				return 1;
 			}
 		}
@@ -2760,36 +2785,27 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 		$html = '';
 
-		if ((int) BimpCore::getConf('use_gsx_v2', null, 'bimpapple')) {
-			$issue = BimpObject::getInstance('bimpsupport', 'BS_Issue');
-			$list = new BC_ListTable($issue, 'default', 1, $this->id);
-			if ($suffixe) {
-				$list->addIdentifierSuffix($suffixe);
+		$issue = BimpObject::getInstance('bimpsupport', 'BS_Issue');
+		$list = new BC_ListTable($issue, 'default', 1, $this->id);
+		if ($suffixe) {
+			$list->addIdentifierSuffix($suffixe);
+		}
+		$html .= $list->renderHtml();
+
+		$nParts = (int) $this->db->getCount('bs_apple_part', '`id_sav` = ' . (int) $this->id . ' AND (`id_issue` = 0 OR `id_issue` IS NULL)');
+
+		if ($nParts > 0) {
+			if ($nParts > 1) {
+				$msg = $nParts . ' composants ont été ajoutés au panier via l\'ancienne version.<br/>Veuillez attribuer chancun de ces composants à un problème composant';
+			} else {
+				$msg = '1 composant a été ajouté au panier via l\'ancienne version.<br/>Veuillez attribuer ce composant à un problème composant';
 			}
-			$html .= $list->renderHtml();
 
-			$nParts = (int) $this->db->getCount('bs_apple_part', '`id_sav` = ' . (int) $this->id . ' AND (`id_issue` = 0 OR `id_issue` IS NULL)');
+			$html .= BimpRender::renderAlerts($msg, 'warning');
 
-			if ($nParts > 0) {
-				if ($nParts > 1) {
-					$msg = $nParts . ' composants ont été ajoutés au panier via l\'ancienne version.<br/>Veuillez attribuer chancun de ces composants à un problème composant';
-				} else {
-					$msg = '1 composant a été ajouté au panier via l\'ancienne version.<br/>Veuillez attribuer ce composant à un problème composant';
-				}
-
-				$html .= BimpRender::renderAlerts($msg, 'warning');
-
-				$part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
-				$list = new BC_ListTable($part, 'no_issue', 1, $this->id);
-				$list->addFieldFilterValue('id_issue', 0);
-				if ($suffixe) {
-					$list->addIdentifierSuffix($suffixe);
-				}
-				$html .= $list->renderHtml();
-			}
-		} else {
 			$part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
-			$list = new BC_ListTable($part, 'default', 1, $this->id);
+			$list = new BC_ListTable($part, 'no_issue', 1, $this->id);
+			$list->addFieldFilterValue('id_issue', 0);
 			if ($suffixe) {
 				$list->addIdentifierSuffix($suffixe);
 			}
@@ -2801,47 +2817,42 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 	public function renderLoadPartsButton($serial = null, $suffixe = "")
 	{
-		if ((int) BimpCore::getConf('use_gsx_v2', null, 'bimpapple')) {
-			return '';
-		}
+		return '<span class="danger">Obsolète</span>';
 
-		BimpCore::addlog('Apple fonction GSX v1 : renderLoadPartsButton', 1);
-
-		$sav = null;
-		if (!BimpObject::objectLoaded($sav)) {
-			$html = BimpRender::renderAlerts('ID du SAV absent ou invalide');
-		} else {
-			if (is_null($serial)) {
-				$equipment = $sav->getChildObject('equipment');
-				if (BimpObject::objectLoaded($equipment)) {
-					$serial = $equipment->getData('serial');
-				}
-			}
-
-			if (is_null($serial)) {
-				$html = BimpRender::renderAlerts('Numéro de série de l\'équipement absent');
-			} elseif (preg_match('/^S?[A-Z0-9]{11,12}$/', $serial) || preg_match('/^S?[0-9]{15}$/', $serial)) {
-				$html = '<div id="loadPartsButtonContainer' . $suffixe . '" class="buttonsContainer">';
-				$html .= BimpRender::renderButton(array(
-					'label'       => 'Charger la liste des composants compatibles',
-					'icon_before' => 'download',
-					'classes'     => array('btn btn-default'),
-					'attr'        => array(
-						'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $suffixe . '\')'
-					)
-				));
-				$html .= '</div>';
-				$html .= '<div id="partsListContainer' . $suffixe . '" class="partsListContainer" style="display: none"></div>';
-			} else {
-				$html = BimpRender::renderAlerts('Le numéro de série de l\'équipement sélectionné ne correspond pas à un produit Apple: ' . $serial, 'warning');
-			}
-		}
-
-		return BimpRender::renderPanel('Liste des composants Apple comptatibles', $html, '', array(
-			'type'     => 'secondary',
-			'icon'     => 'bars',
-			'foldable' => true
-		));
+//		if (!BimpObject::objectLoaded($sav)) {
+//			$html = BimpRender::renderAlerts('ID du SAV absent ou invalide');
+//		} else {
+//			if (is_null($serial)) {
+//				$equipment = $sav->getChildObject('equipment');
+//				if (BimpObject::objectLoaded($equipment)) {
+//					$serial = $equipment->getData('serial');
+//				}
+//			}
+//
+//			if (is_null($serial)) {
+//				$html = BimpRender::renderAlerts('Numéro de série de l\'équipement absent');
+//			} elseif (preg_match('/^S?[A-Z0-9]{11,12}$/', $serial) || preg_match('/^S?[0-9]{15}$/', $serial)) {
+//				$html = '<div id="loadPartsButtonContainer' . $suffixe . '" class="buttonsContainer">';
+//				$html .= BimpRender::renderButton(array(
+//					'label'       => 'Charger la liste des composants compatibles',
+//					'icon_before' => 'download',
+//					'classes'     => array('btn btn-default'),
+//					'attr'        => array(
+//						'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $suffixe . '\')'
+//					)
+//				));
+//				$html .= '</div>';
+//				$html .= '<div id="partsListContainer' . $suffixe . '" class="partsListContainer" style="display: none"></div>';
+//			} else {
+//				$html = BimpRender::renderAlerts('Le numéro de série de l\'équipement sélectionné ne correspond pas à un produit Apple: ' . $serial, 'warning');
+//			}
+//		}
+//
+//		return BimpRender::renderPanel('Liste des composants Apple comptatibles', $html, '', array(
+//			'type'     => 'secondary',
+//			'icon'     => 'bars',
+//			'foldable' => true
+//		));
 	}
 
 	public function renderEquipmentPlaceOptionInput()
@@ -3614,110 +3625,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 						$errors[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création des lignes du devis');
 					}
 				}
-			}
-		}
-
-		return $errors;
-	}
-
-	public function reviewPropal_old(&$warnings = array())
-	{
-		$errors = array();
-
-		/** @var BS_SavPropal $propal */
-		$propal = $this->getChildObject('propal');
-		$client = $this->getChildObject('client');
-
-		if (!in_array((int) $this->getData('status'), self::$propal_reviewable_status)) {
-			$errors[] = 'Le devis ne peux pas être révisé selon le statut actuel du SAV';
-		} elseif (!(int) $this->getData('id_propal')) {
-			$errors[] = 'Proposition commerciale absente';
-		} elseif (is_null($client) || !$client->isLoaded()) {
-			$errors[] = 'Client absent';
-		} else {
-			if ($propal->dol_object->statut > 0) {
-				require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
-
-				$old_id_propal = $propal->id;
-
-				$revision = new BimpRevisionPropal($propal->dol_object);
-				$new_id_propal = $revision->reviserPropal(false, true, self::$propal_model_pdf, $errors, $this->getData("id_client"));
-
-				$new_propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', (int) $new_id_propal);
-				if (!BimpObject::objectLoaded($new_propal)) {
-					$errors[] = 'Le nouveau devis d\'ID ' . $new_id_propal . ' n\'existe pas';
-				}
-
-				if ($new_id_propal && !count($errors)) {
-					$signature = $propal->getChildObject('signature');
-
-					if (BimpObject::objectLoaded($signature)) {
-						$signature->cancelAllSignatures();
-					}
-
-					//Anulation du montant de la propal
-					$totHt = (float) $propal->dol_object->total_ht;
-					if ($totHt == 0) {
-						$tTva = 0;
-					} else {
-						$tTva = (($propal->dol_object->total_ttc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
-					}
-
-					$propal->fetch($old_id_propal);
-					$propal->dol_object->statut = 0;
-					$propal->dol_object->addline("Devis révisé", -($totHt) / (100 - $client->dol_object->remise_percent) * 100, 1, $tTva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, 0); //-$totPa);
-
-					$errors = BimpTools::merge_array($errors, $this->setNewStatus(self::BS_SAV_EXAM_EN_COURS));
-					global $user, $langs;
-					$this->addNote('Devis mis en révision le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
-					$warnings = BimpTools::merge_array($warnings, $this->removeReservations());
-
-					$this->updateField('id_propal', (int) $new_id_propal, null, true);
-
-					$asso = new BimpAssociation($this, 'propales');
-					$asso->addObjectAssociation((int) $new_id_propal);
-
-					// Copie des lignes:
-					// Maintenant géré dans propal.class.php (maj Dol16)
-					$warnings = BimpTools::merge_array($warnings, $new_propal->createLinesFromOrigin($propal, array(
-						'is_review' => true
-					)));
-
-					// Check des AppleParts:
-					$new_apple_parts_lines = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SavPropalLine', array(
-						'id_obj'             => (int) $new_id_propal,
-						'linked_object_name' => 'sav_apple_part'
-					));
-
-					if (!empty($new_apple_parts_lines)) {
-						foreach ($new_apple_parts_lines as $line) {
-							$apple_part = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_ApplePart', (int) $line->getData('linked_id_object'));
-							if (!BimpObject::objectLoaded($apple_part)) {
-								$line->set('deletable', 1);
-								$line->set('editable', 1);
-								$line->set('remisable', 1);
-								$line->set('linked_id_object', 0);
-								$line->set('linked_object_name', '');
-
-								$w = array();
-								$line->update($w, true);
-							}
-						}
-					}
-
-					// Copie des contacts:
-					$new_propal->copyContactsFromOrigin($propal, $warnings);
-
-					// Copie des remises globales:
-					$new_propal->copyRemisesGlobalesFromOrigin($propal, $warnings);
-
-					// Traitement de la garantie:
-					$this->processPropalGarantie();
-				} else {
-					$errors[] = 'Echec de la mise en révision du devis';
-				}
-			} else {
-				$errors[] = 'Le devis n\'a pas besoin d\'être révisé car il est toujours au statut "Brouillon"';
 			}
 		}
 
@@ -4768,53 +4675,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			return $errors;
 		}
 
-		// Check num tel (avant envoi mail).
-		$to_sms = '';
-		$to_sms_phone_type = '';
-		if ($contact_pref === 3 && $sms && empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
-			if (BimpObject::objectLoaded($contact)) {
-				if (testNumSms($contact->dol_object->phone_mobile)) {
-					$to_sms = $contact->dol_object->phone_mobile;
-					$to_sms_phone_type = 'Tel. mobile du contact';
-				} elseif (testNumSms($contact->dol_object->phone_pro)) {
-					$to_sms = $contact->dol_object->phone_pro;
-					$to_sms_phone_type = 'Tel. pro du contact';
-				} elseif (testNumSms($contact->dol_object->phone_perso)) {
-					$to_sms = $contact->dol_object->phone_perso;
-					$to_sms_phone_type = 'Tel. perso du contact';
-				}
-			}
-
-			if (!$to_sms && (testNumSms($client->dol_object->phone))) {
-				$to_sms = $client->dol_object->phone;
-				$to_sms_phone_type = 'Tel. de la fiche client';
-			}
-
-			if (!$to_sms) {
-				$err_msg = 'Aucun numéro de mobile valide trouvé pour le contact client sélectionné';
-				if (BimpObject::objectLoaded($contact)) {
-					if ($contact->dol_object->phone_mobile) {
-						$err_msg .= '<br/>Num mobile contact invalide (' . $contact->dol_object->phone_mobile . ')';
-					}
-					if ($contact->dol_object->phone_pro) {
-						$err_msg .= '<br/>Num pro contact invalide (' . $contact->dol_object->phone_pro . ')';
-					}
-					if ($contact->dol_object->phone_perso) {
-						$err_msg .= '<br/>Num perso contact invalide (' . $contact->dol_object->phone_perso . ')';
-					}
-				}
-				if ($client->dol_object->phone) {
-					$err_msg .= '<br/>Num fiche client (' . $client->dol_object->phone . ')';
-				}
-
-				$errors[] = $err_msg;
-			}
-
-			if (count($errors)) {
-				return $errors;
-			}
-		}
-
 		if (!$sms_only) {
 			if ($mail_msg) {
 				$toMail = '';
@@ -4877,36 +4737,77 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			}
 		}
 
-		if ($contact_pref === 3 && $sms && $to_sms) {
-//			global $user;
-//			if ((BimpCore::isModeDev() && $user->admin) || $user->login === 'f.martinez') {
-//				die('Envoi SMS au ' . $to_sms . ' (' . $to_sms_phone_type . ')');
-//			}
-
-			require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-
-			if (stripos($sms, $this->getData('ref')) === false) {
-				$sms .= "\n" . $this->getData('ref');
+		// Check num tel (avant envoi mail).
+		$to_sms = '';
+		$to_sms_phone_type = '';
+		if ($contact_pref === 3 && $sms && empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
+			if (BimpObject::objectLoaded($contact)) {
+				if (BimpTools::isValidNumMobile($contact->dol_object->phone_mobile)) {
+					$to_sms = $contact->dol_object->phone_mobile;
+					$to_sms_phone_type = 'Tel. mobile du contact';
+				} elseif (BimpTools::isValidNumMobile($contact->dol_object->phone_pro)) {
+					$to_sms = $contact->dol_object->phone_pro;
+					$to_sms_phone_type = 'Tel. pro du contact';
+				} elseif (BimpTools::isValidNumMobile($contact->dol_object->phone_perso)) {
+					$to_sms = $contact->dol_object->phone_perso;
+					$to_sms_phone_type = 'Tel. perso du contact';
+				}
 			}
 
-			$sms = str_replace('ç', 'c', $sms);
-			$sms = str_replace('ê', 'e', $sms);
-			$sms = str_replace('ë', 'e', $sms);
-			$sms = str_replace('ô', 'o', $sms);
-
-			if (dol_strlen(str_replace('\n', '', $sms)) > 160) {
-				BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
+			if (!$to_sms && (BimpTools::isValidNumMobile($client->dol_object->phone))) {
+				$to_sms = $client->dol_object->phone;
+				$to_sms_phone_type = 'Tel. de la fiche client';
 			}
 
-			$fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+			if (!$to_sms) {
+				$err_msg = 'Aucun numéro de mobile valide trouvé pour le contact client sélectionné';
+				if (BimpObject::objectLoaded($contact)) {
+					if ($contact->dol_object->phone_mobile) {
+						$err_msg .= '<br/>Num mobile contact invalide (' . $contact->dol_object->phone_mobile . ')';
+					}
+					if ($contact->dol_object->phone_pro) {
+						$err_msg .= '<br/>Num pro contact invalide (' . $contact->dol_object->phone_pro . ')';
+					}
+					if ($contact->dol_object->phone_perso) {
+						$err_msg .= '<br/>Num perso contact invalide (' . $contact->dol_object->phone_perso . ')';
+					}
+				}
+				if ($client->dol_object->phone) {
+					$err_msg .= '<br/>Num fiche client (' . $client->dol_object->phone . ')';
+				}
 
-			$to_sms = traiteNumMobile($to_sms);
-
-			$smsfile = new CSMSFile($to_sms, $fromsms, $sms);
-			if (!$smsfile->sendfile()) {
-				$errors[] = 'Echec de l\'envoi du sms';
+				$errors[] = $err_msg;
 			} else {
-				$success .= ($success ? '<br/>' : '') . 'Envoi SMS au n° ' . $to_sms . ' OK (' . $to_sms_phone_type . ')';
+				//			global $user;
+				//			if ((BimpCore::isModeDev() && $user->admin) || $user->login === 'f.martinez') {
+				//				die('Envoi SMS au ' . $to_sms . ' (' . $to_sms_phone_type . ')');
+				//			}
+
+				require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+
+				if (stripos($sms, $this->getData('ref')) === false) {
+					$sms .= "\n" . $this->getData('ref');
+				}
+
+				$sms = str_replace('ç', 'c', $sms);
+				$sms = str_replace('ê', 'e', $sms);
+				$sms = str_replace('ë', 'e', $sms);
+				$sms = str_replace('ô', 'o', $sms);
+
+				if (dol_strlen(str_replace('\n', '', $sms)) > 160) {
+					BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
+				}
+
+				$fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+
+				$to_sms = traiteNumMobile($to_sms);
+
+				$smsfile = new CSMSFile($to_sms, $fromsms, $sms);
+				if (!$smsfile->sendfile()) {
+					$errors[] = 'Echec de l\'envoi du sms';
+				} else {
+					$success .= ($success ? '<br/>' : '') . 'Envoi SMS au n° ' . $to_sms . ' OK (' . $to_sms_phone_type . ')';
+				}
 			}
 		}
 
@@ -5710,6 +5611,35 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		return 0;
 	}
 
+	public function addPartsAuto($id_issue, $ref_added_part, &$warnings = array())
+	{
+		$errors = array();
+		if ($this->isLoaded($errors)) {
+			if ($this->isEquipmentIphone8Plus()) {
+				BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
+				foreach (BS_ApplePart::$iphonesPartsAuto as $part_number => $part_label) {
+					$id_part = (int) $this->db->getValue('bs_apple_part', 'id', 'id_sav = ' . $this->id . ' AND part_number = \'' . $part_number . '\'');
+					if ($id_part) {
+						$warnings[] = 'Le composant ' . $part_number . ' - ' . $part_label . ' a déjà été ajouté';
+					} else {
+						$part_errors = array();
+						$new_part = BimpObject::createBimpObject('bimpsupport', 'BS_ApplePart', array(
+							'id_sav'      => $this->id,
+							'id_issue'    => $id_issue,
+							'part_number' => $part_number,
+							'label'       => $part_label . '. Pour : ' . $ref_added_part
+						), true, $part_errors);
+
+						if (!BimpObject::objectLoaded($new_part) | -count($part_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($part_errors, 'Echec de l\'ajout du composant ' . $part_number . ' - ' . $part_label);
+						}
+					}
+				}
+			}
+		}
+		return $errors;
+	}
+
 	// Actions:
 
 	public function actionWaitClient($data, &$success)
@@ -6258,7 +6188,7 @@ ORDER BY a.val_max DESC");
 						if (!(int) $client_fac->getData('status')) {
 							$errors[] = 'Ce client est désactivé';
 						} elseif (!$client_fac->isSolvable($this->object_name, $warnings)) {
-							$errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $client_fac->getData('solvabilite_status')]['label'] . ')';
+							$errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
 						}
 					}
 				}
@@ -6622,7 +6552,6 @@ ORDER BY a.val_max DESC");
 										$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
 										return array('errors' => $errors);
 									} else {
-										/** @var Bimp_Facture $bimpFacture */
 										$bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture->id);
 
 										if (!BimpObject::objectLoaded($bimpFacture)) {
@@ -7648,7 +7577,7 @@ ORDER BY a.val_max DESC");
 		$success = 'Prise en charge effectuée';
 		$success_callback = '';
 
-		global $user, $langs, $conf;
+		global $user, $langs;
 
 		// Mise à jour SAV:
 		$this->set('status', self::BS_SAV_NEW);
@@ -8018,7 +7947,7 @@ ORDER BY a.val_max DESC");
 					$cur_place = $equipment->getCurrentPlace();
 
 					// Mise en non restitué :
-					if ($cur_place->getData('type') != BE_Place::BE_PLACE_SAV || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
+					if (!BimpObject::objectLoaded($cur_place) || $cur_place->getData('type') != BE_Place::BE_PLACE_SAV || (int) $cur_place->getData('id_entrepot') !== $id_entrepot) {
 						$place = BimpObject::getInstance('bimpequipment', 'BE_Place');
 						$place_errors = $place->validateArray(array(
 							'id_equipment' => $equipment->id,
@@ -8605,8 +8534,6 @@ ORDER BY a.val_max DESC");
 			return 'En développement';
 		}
 
-		global $conf;
-
 		$delay = (int) BimpCore::getConf('delay_alertes_clients_unrestitute_sav', null, 'bimpsupport');
 
 		$delay = 30;
@@ -8957,7 +8884,6 @@ ORDER BY a.val_max DESC");
 
 	public function onSigned($signature)
 	{
-		global $conf;
 		$errors = array();
 
 		if (!$this->isLoaded($errors)) {
@@ -9032,22 +8958,4 @@ ORDER BY a.val_max DESC");
 
 		return $errors;
 	}
-}
-
-function testNumSms($to)
-{
-	$to = str_replace(" ", "", $to);
-	if ($to == "") {
-		return 0;
-	}
-
-	if ((stripos($to, "06") === 0 || stripos($to, "07") === 0) && strlen($to) == 10) {
-		return 1;
-	}
-
-	if ((stripos($to, "+336") === 0 || stripos($to, "+337") === 0) && strlen($to) == 12) {
-		return 1;
-	}
-
-	return 0;
 }

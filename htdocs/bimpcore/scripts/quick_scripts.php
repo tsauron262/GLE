@@ -60,7 +60,8 @@ if (!$action) {
         'maj_marge'                                 => 'Mise a jour des marge liste id facutures',
         'correct_contrat_parent_line'               => 'Correction ligne parente pour les sous-lignes bundle dans les contrats',
         'correct_contrats_bundles'                  => 'Correction des bundles dans les contrats',
-        'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos'
+        'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos',
+        'aj_menu_compta'                            => 'Aj menu compta'
     );
 
     $path = pathinfo(__FILE__);
@@ -112,6 +113,20 @@ switch ($action) {
             echo '<br/><br/><br/>';
         }
         print_r($warnings);
+        break;
+        
+    case 'aj_menu_compta':
+        global $db, $conf;
+        $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."menu` WHERE `titre` = 'Comptabilité' AND entity IN (0, ".$conf->entity.')');
+        $ln = $db->fetch_object($sql); 
+            $db->query('INSERT INTO `'.MAIN_DB_PREFIX.'menu` (`menu_handler`, `entity`, `module`, `type`, `mainmenu`, `leftmenu`, `fk_menu`, `fk_mainmenu`, `fk_leftmenu`, `position`, `url`, `target`, `titre`, `prefix`, `langs`, `level`, `perms`, `enabled`, `usertype`, `tms`, `icon`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`, `allowed_users`)
+VALUES
+	(\'bimptheme\', '.$conf->entity.', \'comptabilite|accounting|assets\', \'top\', \'accountancy\', \'\', '.$ln->rowid.', NULL, NULL, 54, \'/compta/index.php?mainmenu=accountancy&amp;leftmenu=accountancy\', \'\', \'MenuAccountancy\', NULL, \'compta\', -1, \'$user->rights->compta->resultat->lire || $user->rights->accounting->mouvements->lire || $user->rights->assets->read\', \'$conf->comptabilite->enabled || $conf->accounting->enabled || $conf->accounting->assets\', 2, \'2020-06-08 11:26:32\', NULL, \'\', 1, \'\', \'\', \'\', \'\');');
+           
+        $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."menu` WHERE `titre` = 'MenuAccountancy' AND menu_handler = 'bimptheme' AND entity = ".$conf->entity);
+        $ln = $db->fetch_object($sql);  
+        $sql = $db->query('INSERT INTO `'.MAIN_DB_PREFIX.'menu` (`menu_handler`, `entity`, `module`, `type`, `mainmenu`, `leftmenu`, `fk_menu`, `fk_mainmenu`, `fk_leftmenu`, `position`, `url`, `target`, `titre`, `prefix`, `langs`, `level`, `perms`, `enabled`, `usertype`, `tms`, `icon`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`, `allowed_users`)
+(SELECT \'bimptheme\', `entity`, `module`, `type`, `mainmenu`, `leftmenu`, '.$ln->rowid.', `fk_mainmenu`, `fk_leftmenu`, `position`, `url`, `target`, `titre`, `prefix`, `langs`, `level`, `perms`, `enabled`, `usertype`, `tms`, `icon`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`, `allowed_users` FROM `'.MAIN_DB_PREFIX.'menu` WHERE `mainmenu` LIKE \'accountancy\' AND fk_menu > 0 AND menu_handler = \'auguria\' AND entity = '.$conf->entity.');');
         break;
 
     case 'secteur_facture_fourn_with_commande_fourn':

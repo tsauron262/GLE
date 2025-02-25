@@ -67,7 +67,7 @@ class BT_ficheInter_det extends BimpDolObject
 
 		if (BimpObject::objectLoaded($fi)) {
 			if ((int) $fi->getData('fk_statut') !== 0) {
-				$errors[] = 'la fiche inter n\'est plus au statut brouillon';
+				$errors[] = 'la fiche inter n\'est plus au statut brouillon (' . $fi->getRef() . ')';
 				return 0;
 			}
 

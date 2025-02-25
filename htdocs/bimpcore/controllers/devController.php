@@ -108,33 +108,35 @@ class devController extends BimpController
         $html .= '</div>';
 
         // Vérifs comptes user bloqués:
-		/** @var Bimp_User $BimpUser */
-		$BimpUser = BimpObject::getInstance('bimpcore', 'Bimp_User');
-		if ($BimpUser->field_exists('echec_auth')) {
-			$rows = $bdb->getRows('user_extrafields', 'echec_auth >= 3', null, 'array', array(
-				'fk_object as id_user'
-			));
+        /** @var Bimp_User $BimpUser */
+        if(isset($conf->global->MAIN_MODULE_BIMPSECURLOGIN) && $conf->global->MAIN_MODULE_BIMPSECURLOGIN){
+            $BimpUser = BimpObject::getInstance('bimpcore', 'Bimp_User');
+            if ($BimpUser->field_exists('echec_auth')) {
+                    $rows = $bdb->getRows('user_extrafields', 'echec_auth >= 3', null, 'array', array(
+                            'fk_object as id_user'
+                    ));
 
-			if (!empty($rows)) {
-				$html .= '<h4 class="danger">';
-				$html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' compte(s) utilisateur bloqué(s)';
-				$html .= '</h4>';
+                    if (!empty($rows)) {
+                            $html .= '<h4 class="danger">';
+                            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' compte(s) utilisateur bloqué(s)';
+                            $html .= '</h4>';
 
-				$html .= '<ul>';
-				foreach ($rows as $r) {
-					$u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $r['id_user']);
-					$html .= '<li id="user_' . $u->id . '_unlock_container">';
-					$html .= $u->getLink();
-					$html .= '<span style="display: inline-block; margin-left: 15px" class="btn btn-default btn-small" onclick="' . $u->getJsActionOnclick('unlock', array(), array(
-							'success_callback' => 'function() {$(\'#user_' . $u->id . '_unlock_container\').slideUp(250, function() {$(this).remove();})}'
-						)) . '">';
-					$html .= BimpRender::renderIcon('fas_unlock-alt', 'iconLeft') . 'Débloquer';
-					$html .= '</span>';
-					$html .= '</li>';
-				}
-				$html .= '</ul>';
-			}
-		}
+                            $html .= '<ul>';
+                            foreach ($rows as $r) {
+                                    $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $r['id_user']);
+                                    $html .= '<li id="user_' . $u->id . '_unlock_container">';
+                                    $html .= $u->getLink();
+                                    $html .= '<span style="display: inline-block; margin-left: 15px" class="btn btn-default btn-small" onclick="' . $u->getJsActionOnclick('unlock', array(), array(
+                                                    'success_callback' => 'function() {$(\'#user_' . $u->id . '_unlock_container\').slideUp(250, function() {$(this).remove();})}'
+                                            )) . '">';
+                                    $html .= BimpRender::renderIcon('fas_unlock-alt', 'iconLeft') . 'Débloquer';
+                                    $html .= '</span>';
+                                    $html .= '</li>';
+                            }
+                            $html .= '</ul>';
+                    }
+            }
+        }
 
         // Vérif des versions vérouillée:
         if ((int) BimpCore::getConf('check_versions_lock')) {

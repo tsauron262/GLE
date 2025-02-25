@@ -30,7 +30,6 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_product
-    
     fourn_price: 
         relation: hasOne
         delete: 0
@@ -213,12 +212,10 @@ fields:
         label: Terme de facturation
         type: int
         default_value: 1
-        depends_on: id_product,id_linked_line
-        values: 
+        values:
             0: A terme échu
             1: A terme à échoir
-            
-        depends_on: fk_product
+        depends_on: fk_product,id_linked_line
         display_if: 
             field_name: fac_periodicity
             hide_values: 0    
@@ -320,7 +317,9 @@ fields:
                 method: displayNextAchatDate
                 params: 
                     - 1
-        
+    date_achat_stop:
+        label: Date d'arrêt des achats
+        type: date
     fk_user_author: 
         label: Créé par
         type: id_object
@@ -377,15 +376,7 @@ fields:
         filterable: 1
         input: 
             type: hidden
-        
-    linked_id_object: 
-        label: Objet lié
-        type: int
-        default_value: 0
-        
-    linked_object_name:
-        label: Type d\'objet lié
-        
+            
     fac_ended: 
         label: Facturations terminées
         type: bool
@@ -1145,4 +1136,3 @@ lists:
             achat_infos: 
             nb_achats_todo: 
             date_next_achat:
-            

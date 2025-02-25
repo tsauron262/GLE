@@ -247,7 +247,7 @@ class gsxController extends BimpController
                         )
                     );
 
-                    // Données client: 
+                    // Données client:
                     $client = $sav->getChildObject('client');
                     if (BimpObject::objectLoaded($client)) {
                         $is_company = false;
@@ -324,7 +324,7 @@ class gsxController extends BimpController
                         }
                     }
 
-                    // Issues /Parts: 
+                    // Issues /Parts:
                     $issues = $sav->getChildrenObjects('issues');
 
                     if (!empty($issues)) {
@@ -365,10 +365,11 @@ class gsxController extends BimpController
                                         $pricingOption = '';
                                     }
 
-                                    if ($is_tier_parts || in_array($part->getData('part_number'), BS_ApplePart::$partsWithNonIssue)) {
+									$part_number = $part->getData('part_number');
+                                    if ($is_tier_parts || isset(BS_ApplePart::$iphonesPartsAuto[$part_number])) {
                                         $values['parts'][] = array(
                                             'part_label'         => $part->getData('label'),
-                                            'number'             => $part->getData('part_number'),
+                                            'number'             => $part_number,
                                             'pricingOption'      => $pricingOption,
                                             'componentIssue'     => 'hidden',
                                             'fromConsignedStock' => 0
@@ -463,7 +464,7 @@ class gsxController extends BimpController
 
                 if (!count($errors)) {
                     if (is_array($result) && !empty($result)) {
-                        // Pour tests: 
+                        // Pour tests:
                         if (self::$test_mode) {
                             $response = array(
                                 'repairId' => 123456789
@@ -500,7 +501,7 @@ class gsxController extends BimpController
             $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $params['id_sav']);
         }
 
-        // Traitement des fichiers: 
+        // Traitement des fichiers:
         $idx = (int) BimpTools::getValue('attachments_nextIdx', 0, 'int');
         if ($idx) {
             $files = array();
@@ -529,7 +530,7 @@ class gsxController extends BimpController
                         $errors[] = 'Aucun fichier du SAV sélectionné pour l\'ajout de fichier #' . $i;
                     }
                 } elseif (isset($_FILES['attachments_file_' . $i])) {
-                    // Fichier uploadé: 
+                    // Fichier uploadé:
                     $files[] = array(
                         'name' => $_FILES['attachments_file_' . $i]['name'],
                         'size' => $_FILES['attachments_file_' . $i]['size'],
@@ -649,7 +650,7 @@ class gsxController extends BimpController
                     }
                 }
 
-                // Traitement des questions: 
+                // Traitement des questions:
                 if (!isset($params['repairType']) && isset($result['repairType'])) {
                     $params['repairType'] = $result['repairType'];
                 }
@@ -728,7 +729,7 @@ class gsxController extends BimpController
                 }
 
                 if (!count($errors)) {
-                    // Gestion stocks consignés: 
+                    // Gestion stocks consignés:
                     $parts_stock_data = (isset($params['parts_stock_data']) ? $params['parts_stock_data'] : array());
 
                     if (!empty($parts_stock_data)) {
@@ -1122,7 +1123,7 @@ class gsxController extends BimpController
 //                                        'part_type' => 'beginning'
 //                                    )
 //                                        ), true);
-////                        
+////
 //                        if (BimpObject::objectLoaded($product)) {
 //                            $data['id_product'] = (int) $product->id;
 //                        }
@@ -1296,7 +1297,7 @@ class gsxController extends BimpController
         );
     }
 
-    // Gestion des réparations: 
+    // Gestion des réparations:
 
     protected function gsxLoadSavGsxView($params)
     {
@@ -1342,12 +1343,11 @@ class gsxController extends BimpController
 
     public function getInfoSerialHtml($serial)
     {
-
         if (is_null($this->gsx_v2)) {
             $this->gsx_v2 = GSX_v2::getInstance();
         }
-        $tab = $this->gsxLoadSavGsxView(array('serial' => $serial, 'id_sav' => 'none'));
-        return $tab;
+
+        return $this->gsxLoadSavGsxView(array('serial' => $serial, 'id_sav' => 'none'));
     }
 
     protected function gsxLoadSavRepairs($params)
@@ -1419,7 +1419,7 @@ class gsxController extends BimpController
                         $html .= '<tbody>';
 
                         foreach ($data as $repair_data) {
-                            // Check de l\'existence de la réparation: 
+                            // Check de l\'existence de la réparation:
                             $repair = BimpCache::findBimpObjectInstance('bimpapple', 'GSX_Repair', array(
                                         'id_sav'        => $id_sav,
                                         'repair_number' => $repair_data['repairId'],
@@ -1497,7 +1497,7 @@ class gsxController extends BimpController
             $serial = (string) $sav->getSerial();
 
             foreach ($repairs as $repair_data) {
-                // check si la répa existe déjà: 
+                // check si la répa existe déjà:
                 $repair = BimpCache::findBimpObjectInstance('bimpapple', 'GSX_Repair', array(
                             'id_sav'        => $id_sav,
                             'repair_number' => $repair_data['repair_number'],
@@ -1599,7 +1599,7 @@ class gsxController extends BimpController
 
     protected function gsxFetchRepairEligibility($params)
     {
-        // Appellé via le formulaire de création d'une réparation. 
+        // Appellé via le formulaire de création d'une réparation.
 
         $errors = array();
         $warnings = array();
@@ -1670,7 +1670,7 @@ class gsxController extends BimpController
 
     protected function gsxLoadRepairEligibilityDetails($params)
     {
-        // Appellé via le bouton "Tester Eligibilité" 
+        // Appellé via le bouton "Tester Eligibilité"
         $errors = array();
         $warnings = array();
         $html = '';
@@ -2119,7 +2119,7 @@ class gsxController extends BimpController
         );
     }
 
-    // Expéditions UPS: 
+    // Expéditions UPS:
 
     protected function gsxUpsShipmentAction($params)
     {
@@ -2592,7 +2592,7 @@ class gsxController extends BimpController
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function setSerial($serial, $requestType = false)
     {
@@ -2735,7 +2735,7 @@ class gsxController extends BimpController
 
                 $this->checkEquipmentData($sav, $data);
 
-                // Traitement des alertes: 
+                // Traitement des alertes:
                 if (isset($data['messages']) && is_array($data['messages'])) {
                     foreach ($data['messages'] as $msg) {
                         if (isset($msg['type']) && $msg['type'] === 'WARNING') {
@@ -2748,7 +2748,7 @@ class gsxController extends BimpController
 
                 $lookUpContent .= '<div class="row">';
 
-                // Bloc infos produit: 
+                // Bloc infos produit:
                 $infosContent = '';
                 $infosContent .= '<table class="bimp_list_table">';
                 $infosContent .= '<tbody class="headers_col">';
@@ -2794,7 +2794,7 @@ class gsxController extends BimpController
 
                 $lookUpContent .= '</div>';
 
-                // Bloc garantie: 
+                // Bloc garantie:
                 $warrantyContent = '';
                 $warrantyContent .= '<table class="bimp_list_table">';
                 $warrantyContent .= '<tbody class="headers_col">';
@@ -3281,7 +3281,7 @@ class gsxController extends BimpController
         return $html;
     }
 
-    // Rendus HTML GSX V1: 
+    // Rendus HTML GSX V1:
 
     public function renderGSxView($serial, $id_sav)
     {
@@ -3391,7 +3391,7 @@ class gsxController extends BimpController
                                     'foldable' => true
                         ));
 
-                        $gsx_content .= $sav->renderLoadPartsButton($serial, "deux");
+//                        $gsx_content .= $sav->renderLoadPartsButton($serial, "deux");
 
                         $html .= BimpRender::renderPanel($datas['productDescription'], $gsx_content, '', array(
                                     'type'     => 'secondary',
@@ -3699,7 +3699,7 @@ class gsxController extends BimpController
             $html .= '</div>';
             $html .= '</div>';
 
-            // Form Test éligibilité: 
+            // Form Test éligibilité:
             if ($has_parts) {
                 $html .= '<div id="testEligibilityForm" class="gsxRepairViewForm">';
                 $html .= '<div class="testEligibilityFormContent gsxRepairViewFormContent">';
@@ -3943,7 +3943,7 @@ class gsxController extends BimpController
                         $content .= '<td style = "width: 30px; text-align: center">';
                         $content .= '<input type = "checkbox" name = "parts[]" value = "' . $num . '"/>';
                         $content .= '</td>';
-//                        
+//
                         $vente_price = 'N/C';
                         if (BimpObject::objectLoaded($sav)) {
                             $equipment = $sav->getChildObject('equipment');
@@ -3993,7 +3993,7 @@ class gsxController extends BimpController
                 }
 
                 if (BimpObject::objectLoaded($sav)) {
-                    // Pièces stock interne hors Catalogue Apple: 
+                    // Pièces stock interne hors Catalogue Apple:
                     $code_centre = $sav->getData('code_centre_repa');
                     if (!$code_centre) {
                         $code_centre = $sav->getData('code_centre');
@@ -4427,7 +4427,7 @@ class gsxController extends BimpController
         )));
     }
 
-    // Divers: 
+    // Divers:
     public static function dateAppleToDate($date)
     {
         $garantieT = explode("/", $date);

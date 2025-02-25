@@ -437,6 +437,7 @@ class Fichinter extends CommonObject
 		$sql = "UPDATE ".MAIN_DB_PREFIX."fichinter SET ";
 		$sql .= "description  = '".$this->db->escape($this->description)."'";
 		$sql .= ", duree = ".((int) $this->duration);
+		$sql .= ", fk_soc = ".((int) $this->socid);
 		$sql .= ", ref_client = ".($this->ref_client ? "'".$this->db->escape($this->ref_client)."'" : "null");
 		$sql .= ", fk_projet = ".((int) $this->fk_project);
 		$sql .= ", note_private = ".($this->note_private ? "'".$this->db->escape($this->note_private)."'" : "null");

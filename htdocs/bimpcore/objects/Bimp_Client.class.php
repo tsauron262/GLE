@@ -499,6 +499,17 @@ class Bimp_Client extends Bimp_Societe
                 ))
             );
         }
+        
+        if ($user->admin) {
+            $actions[] = array(
+                'label'   => 'Update a vide',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsBulkActionOnclick('updateVide', array(
+                    ), array(
+                    'single_action'    => false,
+                ))
+            );
+        }
 
         if ($this->canSetAction('bulkEditField') && $this->canEditField('status')) {
             $actions[] = array(
@@ -3077,6 +3088,7 @@ class Bimp_Client extends Bimp_Societe
                             $bds_process->Alert($msg, $relance, $client->getRef());
                             $bds_process->incIgnored();
                         }
+                        mailSyn2('Relance non envoyé', BimpCore::getConf('emails_notify_solvabilite_client_change', 'dev@bimp.fr'), null, $msg);
                         continue;
                     }
 
@@ -3982,6 +3994,18 @@ class Bimp_Client extends Bimp_Societe
 
         $errors = $this->setOutstandingAtradius($data['montant_atradius'], $warnings, $success);
 
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function actionUpdateVide($data, &$success){
+        $success = 'ok';
+        $errors = $warnings = array();
+        
+        $this->update();
+        
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

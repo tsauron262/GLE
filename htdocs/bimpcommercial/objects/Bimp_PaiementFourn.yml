@@ -13,8 +13,6 @@ primary: rowid
 labels: 
     name: paiement
     
-    
-    
 objects: 
     user_creat: 
         extends: user

@@ -1,3 +1,6 @@
 - Mises à jour des demandes de location :
     - Mise à jour formulaire demande de location
     - Refonte contrats de location et intégration signature via DocuSign
+
+- Contrats d'abonnement :
+    - Ajout boutons pour demandes d'activation des lignes et messages achats

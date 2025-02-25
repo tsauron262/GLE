@@ -142,6 +142,13 @@ class BCT_Contrat extends BimpDolObject
 				}
 
 				return 1;
+
+			case 'msg_activate':
+				if ((int) $this->getData('statut') > self::STATUS_DRAFT) {
+					$errors[] = 'Ce contrat n\'est pas au statut brouillon';
+					return 0;
+				}
+				return 1;
 		}
 
 		return parent::isActionAllowed($action, $errors);
@@ -236,8 +243,32 @@ class BCT_Contrat extends BimpDolObject
 				);
 			}
 		}
-		$id_group = BimpCore::getUserGroupId('console');
+
 		$note = BimpObject::getInstance("bimpcore", "BimpNote");
+
+		$id_group = (int) BimpCore::getConf('id_user_group_contrat');
+		if ($id_group) {
+			$buttons[] = array(
+				'label'   => 'Demander activation ligne(s)',
+				'icon'    => 'far_paper-plane',
+				'onclick' => $note->getJsActionOnclick('repondre', array(
+					"obj_type"      => "bimp_object",
+					"obj_module"    => $this->module,
+					"obj_name"      => $this->object_name,
+					"id_obj"        => $this->id,
+					"type_dest"     => $note::BN_DEST_GROUP,
+					"fk_group_dest" => $id_group,
+					"content"       => htmlentities("Merci d\\’activer les lignes inactives de ce contrat.
+Indiquez si vous souhaitez un technicien spécifique ou des instructions particulières.
+En cas de renouvellement, précisez les informations nécessaires sur Ninja One (écart entre vendu/installé, ajouts, suppressions ou changements de poste) pour que @dispatch organise l\\’intervention.")
+				), array(
+					'form_name' => 'rep'
+				))
+			);
+		}
+
+		$id_group = BimpCore::getUserGroupId('console');
+
 
 		if ($id_group) {
 			$buttons[] = array(
@@ -270,6 +301,25 @@ class BCT_Contrat extends BimpDolObject
 					"type_dest"     => $note::BN_DEST_GROUP,
 					"fk_group_dest" => $id_group,
 					"content"       => ''
+				), array(
+					'form_name' => 'rep'
+				))
+			);
+		}
+
+		$id_group = (int) BimpCore::getUserGroupId('achat');
+		if ($id_group) {
+			$buttons[] = array(
+				'label'   => 'Message achats',
+				'icon'    => 'far_paper-plane',
+				'onclick' => $note->getJsActionOnclick('repondre', array(
+					"obj_type"      => "bimp_object",
+					"obj_module"    => $this->module,
+					"obj_name"      => $this->object_name,
+					"id_obj"        => $this->id,
+					"type_dest"     => $note::BN_DEST_GROUP,
+					"fk_group_dest" => $id_group,
+					"content"       => "Merci de traiter les achats de ce contrat"
 				), array(
 					'form_name' => 'rep'
 				))

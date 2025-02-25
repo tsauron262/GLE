@@ -97,12 +97,12 @@ class ContratFinancementPDF extends DocFinancementPDF
 
 	public function renderTop()
 	{
+		$errors = array();
 		$is_company = (int) BimpTools::getArrayValueFromPath($this->client_data, 'is_company', 0);
 
 		$html = '<span style="font-size: 9px; font-weight: bold; color: #' . $this->primary . ';border-top: solid 1px #000000;">Le locataire</span><br/>';
 		$html .= '<span style="font-size: 8px; text-align: justify;">';
 		if ($is_company) {
-			$errors = array();
 			$nom = BimpTools::getArrayValueFromPath($this->client_data, 'nom', '', $errors, true, 'Nom du client absent');
 			$address = BimpTools::getArrayValueFromPath($this->client_data, 'address', '', $errors, true, 'Adresse du siège du client absente');
 			$forme_jur = BimpTools::getArrayValueFromPath($this->client_data, 'forme_juridique', '', $errors, true, 'Forme juridique du client absente');

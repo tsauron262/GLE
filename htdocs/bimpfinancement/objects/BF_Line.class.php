@@ -24,7 +24,7 @@ class BF_Line extends BimpObject
     );
     public $product = null;
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = []): int
     {
@@ -51,7 +51,7 @@ class BF_Line extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        // Todo : gérer tous les champs à toutes les étapes. 
+        // Todo : gérer tous les champs à toutes les étapes.
         if ($this->isLoaded()) {
             if (in_array($field, array('type', 'id_product'))) {
                 return 0;
@@ -138,7 +138,7 @@ class BF_Line extends BimpObject
         return 1;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getInputValue($field_name)
     {
@@ -328,7 +328,7 @@ class BF_Line extends BimpObject
         return 0;
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getProductTypesArray()
     {
@@ -362,7 +362,7 @@ class BF_Line extends BimpObject
         );
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getProduct()
     {
@@ -455,9 +455,9 @@ class BF_Line extends BimpObject
         return '';
     }
 
-    // Affichages: 
+    // Affichages:
 
-    public function displayDesc($mode_light = false, $no_link = false, $include_serials = false)
+    public function displayDesc($mode_light = false, $no_link = false, $include_serials = false, $prod_single_line = false)
     {
         $html = '';
 
@@ -466,7 +466,7 @@ class BF_Line extends BimpObject
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {
                     if ($no_link) {
-                        $html .= '<b>' . $product->getRef() . '</b><br/>';
+                        $html .= '<b>' . $product->getRef() . '</b>' . ($prod_single_line ? ' - ' : '<br/>');
                     } else {
                         $html .= $product->getLink() . '<br/>';
                     }
@@ -481,7 +481,7 @@ class BF_Line extends BimpObject
                 }
 
             case self::TYPE_TEXT:
-                $html .= ($html ? '<br/>' : '') . $this->getData('label');
+                $html .= ($html ? ($prod_single_line ? ' - ' : '<br/>') : '') . $this->getData('label');
                 break;
         }
 
@@ -520,7 +520,7 @@ class BF_Line extends BimpObject
         return '<span class="' . $class . '">' . $qty_ordered . '</span>';
     }
 
-    // Traitements : 
+    // Traitements :
 
     public function hydrateBimpCommObjectLine(ObjectLine $objectLine, $qty = null)
     {
@@ -818,7 +818,7 @@ class BF_Line extends BimpObject
         return $errors;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function reset()
     {
@@ -904,7 +904,7 @@ class BF_Line extends BimpObject
         $this->set('total_ht', $this->getTotalHT());
         $this->set('total_ttc', $this->getTotalTTC());
 
-        // Check des serials: 
+        // Check des serials:
         if ($this->isProductSerialisable()) {
             $serials = $this->getData('serials');
             $diff = count($serials) - (int) $this->getData('qty');

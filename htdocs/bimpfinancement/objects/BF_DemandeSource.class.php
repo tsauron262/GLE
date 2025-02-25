@@ -4,19 +4,20 @@ class BF_DemandeSource extends BimpObject
 {
 
     public static $types = array();
+
     public static $types_origines = array(
         'propale'  => array('label' => 'Devis', 'icon' => 'fas_file-invoice', 'is_female' => 0),
         'commande' => array('label' => 'Commmande', 'icon' => 'fas_dolly', 'is_female' => 1)
     );
 
-    // Droits user: 
+    // Droits user:
 
     public function canDelete()
     {
         return BimpCore::isUserDev();
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getIDApi()
     {
@@ -178,8 +179,7 @@ class BF_DemandeSource extends BimpObject
         );
     }
 
-    // Affichages: 
-
+    // Affichages:
     public function displayName()
     {
         $type = $this->getData('type');
@@ -189,6 +189,16 @@ class BF_DemandeSource extends BimpObject
 
         return '';
     }
+
+	public function displayTypeSource()
+	{
+		$type = $this->getData('type');
+		if ($type && isset(self::$types[$type])) {
+			return self::$types[$type];
+		}
+
+		return '';
+	}
 
     public function displayOrigine($with_type_source = false, $with_icon = false, $with_article = false)
     {
@@ -220,20 +230,20 @@ class BF_DemandeSource extends BimpObject
         }
 
         if ($with_type_source) {
-            $type = $this->getData('type');
-            if ($type && isset(self::$types[$type])) {
-                $html .= ($html ? ' ' : '') . self::$types[$type];
+			$type = $this->displayTypeSource();
+            if ($type ) {
+                $html .= ($html ? ' ' : '') . $type;
             }
         }
 
         $origine = $this->getData('origine_data');
 
-        if (isset($origine['id'])) {
-            $html .= ($html ? ' ' : '') . '#' . $origine['id'];
-        }
+//        if (isset($origine['id'])) {
+//            $html .= ($html ? ' ' : '') . '#' . $origine['id'];
+//        }
 
         if (isset($origine['ref'])) {
-            $html .= ($html ? ' - ' : '') . $origine['ref'];
+            $html .= ($html ? ' ' : '') . $origine['ref'];
         }
 
         return $html;
@@ -360,7 +370,7 @@ class BF_DemandeSource extends BimpObject
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderView($view_name = 'default', $panel = false, $level = 1)
     {
@@ -426,7 +436,7 @@ class BF_DemandeSource extends BimpObject
 //        $html .= '<pre>';
 //        $html .= print_r($client_data, 1);
 //        $html .= '</pre>';
-        // Client: 
+        // Client:
         $html .= '<table class="bimp_list_table">';
         $html .= '<thead>';
         $html .= '<tr>';
@@ -450,7 +460,7 @@ class BF_DemandeSource extends BimpObject
             $html .= '</tr>';
 
             if ($is_company) {
-                // SIRET: 
+                // SIRET:
                 $html .= '<tr>';
                 $html .= '<th>N° SIRET</th>';
                 $html .= '<td>';
@@ -458,7 +468,7 @@ class BF_DemandeSource extends BimpObject
                 $html .= '</td>';
                 $html .= '</tr>';
 
-                // SIREN: 
+                // SIREN:
                 $html .= '<tr>';
                 $html .= '<th>N° SIREN</th>';
                 $html .= '<td>';
@@ -466,7 +476,7 @@ class BF_DemandeSource extends BimpObject
                 $html .= '</td>';
                 $html .= '</tr>';
 
-                // Forme juridique: 
+                // Forme juridique:
                 $html .= '<tr>';
                 $html .= '<th>Forme juridique</th>';
                 $html .= '<td>';
@@ -474,16 +484,24 @@ class BF_DemandeSource extends BimpObject
                 $html .= '</td>';
                 $html .= '</tr>';
 
-                // Capital social: 
+                // Capital social:
                 $html .= '<tr>';
                 $html .= '<th>Capital social</th>';
                 $html .= '<td>';
                 $html .= BimpTools::getArrayValueFromPath($client_data, 'capital', '');
                 $html .= '</td>';
                 $html .= '</tr>';
+
+				// Capital social:
+				$html .= '<tr>';
+				$html .= '<th>Ville d\'enregistrement au RCS</th>';
+				$html .= '<td>';
+				$html .= BimpTools::getArrayValueFromPath($client_data, 'rcs', '');
+				$html .= '</td>';
+				$html .= '</tr>';
             }
 
-            // Adresse: 
+            // Adresse:
             $html .= '<tr>';
             $html .= '<th>Adresse' . ($is_company ? ' (siège)' : '') . '</th>';
             $html .= '<td>';
@@ -491,7 +509,7 @@ class BF_DemandeSource extends BimpObject
             $html .= '</td>';
             $html .= '</tr>';
 
-            // Infos contact: 
+            // Infos contact:
             $html .= '<tr>';
             $html .= '<th>Infos de contact</th>';
             $html .= '<td>';
@@ -504,12 +522,14 @@ class BF_DemandeSource extends BimpObject
             $html .= '<td>';
             $prenom = BimpTools::getArrayValueFromPath($client_data, 'signataire/prenom', '');
             $nom = BimpTools::getArrayValueFromPath($client_data, 'signataire/nom', '');
+			$phone = BimpTools::getArrayValueFromPath($client_data, 'signataire/phone', '');
             $fonction = BimpTools::getArrayValueFromPath($client_data, 'signataire/fonction', '');
 
             $html .= $prenom;
             if ($nom) {
                 $html .= ($prenom ? ' ' : '') . strtoupper($nom);
             }
+			$html .= ($prenom || $nom ? '<br/>' : '') . 'Num mobile : ' . ($phone ? $phone : '<span class="danger">Non renseigné</span>');
             if ($fonction) {
                 $html .= ($prenom || $nom ? '<br/>' : '') . 'Fonction : ' . $fonction;
             }
@@ -600,7 +620,7 @@ class BF_DemandeSource extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function setDemandeFinancementStatus($status, $note = '')
     {

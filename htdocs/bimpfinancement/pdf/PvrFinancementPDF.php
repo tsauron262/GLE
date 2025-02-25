@@ -14,32 +14,36 @@ class PvrFinancementPDF extends DocFinancementPDF
     {
         parent::__construct($db, $demande, $extra_data, $options);
 
-        $this->doc_name = '';
+        $this->doc_name = 'PROCES VERBAL DE RECEPTION<br/>ET MISE EN SERVICE DE MATERIEL';
     }
 
     public function initHeader()
     {
         parent::initHeader();
-        $this->header_vars['doc_ref'] = '';
-        $this->header_vars['doc_name'] = '';
-        $this->pdf->topMargin = 30;
+
+		if (BimpObject::objectLoaded($this->demande)) {
+			$doc_ref = $this->demande->getRef();
+			$this->header_vars['doc_ref'] = 'CONTRAT N° ' . str_replace('DF', '', $doc_ref );
+		}
+
+        $this->pdf->topMargin = 35;
     }
-
-    public function renderDocInfos()
-    {
-        $html = '';
-
-        $html .= '<div style="font-size: 12px; font-weight: bold; text-align: center; color: #' . $this->primary . '">';
-        $html .= 'PROCES VERBAL DE RECEPTION ET MISE EN SERVICE DE MATERIEL <br/>';
-        $html .= '<span style="font-size: 10px; font-weight: normal; text-align: center; color: #000000">';
-        $html .= 'CONTRAT N° ' . $this->demande->getRef();
-        $html .= '</span>';
-        $html .= '</div><br/><br/>';
-
-        $this->writeContent($html);
-
-        parent::renderDocInfos();
-    }
+//
+//    public function renderDocInfos()
+//    {
+//        $html = '';
+//
+//        $html .= '<div style="font-size: 12px; font-weight: bold; text-align: center; color: #' . $this->primary . '">';
+//        $html .= 'PROCES VERBAL DE RECEPTION ET MISE EN SERVICE DE MATERIEL <br/>';
+//        $html .= '<span style="font-size: 10px; font-weight: normal; text-align: center; color: #000000">';
+//        $html .= 'CONTRAT N° ' . $this->demande->getRef();
+//        $html .= '</span>';
+//        $html .= '</div><br/><br/>';
+//
+//        $this->writeContent($html);
+//
+//        parent::renderDocInfos();
+//    }
 
     public function renderBottom()
     {
@@ -60,7 +64,7 @@ class PvrFinancementPDF extends DocFinancementPDF
 
         $html .= 'La signature du procès-verbal de réception et mise en service de matériel rend exigible le 1er loyer.<br/><br/>';
 
-        $html .= 'Fait à Limonest, le ' . date('d / m / Y') . '<br/><br/>';
+//        $html .= 'Fait à Limonest, le ' . date('d / m / Y') . '<br/><br/>';
         $html .= '</div>';
 
         $this->writeContent($html);
@@ -68,7 +72,7 @@ class PvrFinancementPDF extends DocFinancementPDF
 
     public function renderSignatureBloc()
     {
-        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
+        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique.
         if ($this->signature_bloc) {
             $is_company = (int) BimpTools::getArrayValueFromPath($this->extra_data, 'client_is_company', 0);
             $locataire_signature_label = 'Signature' . ($is_company ? ' et cachet' : '') . ' :';
@@ -79,7 +83,7 @@ class PvrFinancementPDF extends DocFinancementPDF
             $html = '<table style="width: 95%;font-size: 8px;" cellpadding="3">';
             $html .= '<tr>';
 
-            // Signatue locataire: 
+            // Signatue locataire:
             $html .= '<td style="width: 33%">';
             $html .= '<span style="font-size: 9px; font-weight: bold">Pour le locataire :</span><br/>';
 

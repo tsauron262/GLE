@@ -1,1 +1,1 @@
-ALTER TABLE `llx_bimp_task` ADD `id_task` int(11) DEFAULT NULL;
+-- ALTER TABLE `llx_bimp_task` ADD `id_task` int(11) DEFAULT NULL; => Dépl dans bimptask 1.1

@@ -9,7 +9,7 @@ class Bimp_Contact extends BimpObject
     );
     public static $anonymization_fields = array('lastname', 'firstname', 'address', 'zip', 'town', 'email', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'skype', 'birthday');
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function canClientView()
     {
@@ -103,7 +103,7 @@ class Bimp_Contact extends BimpObject
         return parent::canEditField($field_name);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getSocContactsListTitle()
     {
@@ -213,7 +213,7 @@ class Bimp_Contact extends BimpObject
                         $data['email_origine'] = 'Adresse e-mail de la fiche client';
                     }
                 }
-                
+
                 if (!$data['phone']) {
                     $data['phone'] = $client->getData('phone');
                     if ($data['phone']) {
@@ -226,7 +226,19 @@ class Bimp_Contact extends BimpObject
         return $data;
     }
 
-    // Affichage: 
+	public function getPhoneMobile($with_default = true)
+	{
+		// todo après pull
+
+		$phone = $this->getData('phone_mobile');
+		if ($phone) {
+			return $phone;
+		}
+
+		return '';
+	}
+
+    // Affichage:
 
     public function displayCountry()
     {
@@ -346,7 +358,7 @@ class Bimp_Contact extends BimpObject
         return $return;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function anonymiseData($save_data = true)
     {
@@ -397,7 +409,7 @@ class Bimp_Contact extends BimpObject
 
         if (!count($errors)) {
             if (!empty($data)) {
-                // On fait un update direct en base pour contourner les validations de formats des données: 
+                // On fait un update direct en base pour contourner les validations de formats des données:
                 if ($this->db->update('socpeople', $data, 'rowid = ' . (int) $this->id) <= 0) {
                     $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
                 }
@@ -443,7 +455,7 @@ class Bimp_Contact extends BimpObject
         return $errors;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validate()
     {

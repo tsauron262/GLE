@@ -453,10 +453,6 @@ class BimpCore
 
 		$modules_updates = BimpCore::getModulesUpdates();
 
-		if ((int) BimpTools::getValue('debug', 0) && $user->login == 'f.martinez') {
-			echo '<pre>' . print_r($modules_updates, 1) . '</pre>';
-			exit;
-		}
 		$modules_extends_updates = BimpCore::getModulesExtendsUpdates();
 		if (self::isModuleActive('bimptheme')) {
 			BimpObject::loadClass('bimptheme', 'Bimp_Menu');
@@ -686,13 +682,6 @@ class BimpCore
 					$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/sql';
 					if (file_exists($dir) && is_dir($dir)) {
 						$files = scandir($dir);
-
-						if ((int) BimpTools::getValue('debug', 0) && $user->login == 'f.martinez') {
-							if ($module == 'bimpfinancement') {
-								echo '<pre>' . print_r($files, 1) . '</pre>';
-							}
-						}
-
 
 						foreach ($files as $f) {
 							if (in_array($f, array('.', '..'))) {

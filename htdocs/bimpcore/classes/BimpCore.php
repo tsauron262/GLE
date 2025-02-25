@@ -676,6 +676,8 @@ class BimpCore
 
 		$cache = self::getConfCache();
 
+		global $user;
+
 		if (isset($cache[0]['bimpcore'])) {
 			foreach ($cache[0]['bimpcore'] as $name => $value) {
 				if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
@@ -684,6 +686,13 @@ class BimpCore
 					$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/sql';
 					if (file_exists($dir) && is_dir($dir)) {
 						$files = scandir($dir);
+
+						if ($user->login == 'f.martinez') {
+							if ($module == 'bimpfinancement') {
+								echo '<pre>' . print_r($files, 1) . '</pre>';
+							}
+						}
+
 
 						foreach ($files as $f) {
 							if (in_array($f, array('.', '..'))) {

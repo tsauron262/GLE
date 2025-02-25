@@ -687,7 +687,7 @@ class BimpCore
 					if (file_exists($dir) && is_dir($dir)) {
 						$files = scandir($dir);
 
-						if ($user->login == 'f.martinez') {
+						if ((int) BimpTools::getValue('debug', 0) && $user->login == 'f.martinez') {
 							if ($module == 'bimpfinancement') {
 								echo '<pre>' . print_r($files, 1) . '</pre>';
 							}

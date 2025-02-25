@@ -152,6 +152,18 @@ class Bimp_Contact extends BimpObject
         return $buttons;
     }
 
+	public function getPhoneMobile($with_default = true)
+	{
+		// todo après pull
+
+		$phone = $this->getData('phone_mobile');
+		if ($phone) {
+			return $phone;
+		}
+
+		return '';
+	}
+
     // Getters données:
 
     public function getName($withGeneric = true)

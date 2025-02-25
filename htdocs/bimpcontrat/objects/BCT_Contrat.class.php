@@ -247,7 +247,10 @@ class BCT_Contrat extends BimpDolObject
 		$note = BimpObject::getInstance("bimpcore", "BimpNote");
 
 		$id_group = (int) BimpCore::getConf('id_user_group_contrat');
+		$id_group = 1;
 		if ($id_group) {
+			$content = 'Merci d\’activer les lignes inactives de ce contrat. Indiquez si vous souhaitez un technicien spécifique ou des instructions particulières. En cas de renouvellement, précisez les informations nécessaires sur Ninja One (écart entre vendu/installé, ajouts, suppressions ou changements de poste) pour que @dispatch organise l\’intervention.';
+
 			$buttons[] = array(
 				'label'   => 'Demander activation ligne(s)',
 				'icon'    => 'far_paper-plane',
@@ -258,9 +261,7 @@ class BCT_Contrat extends BimpDolObject
 					"id_obj"        => $this->id,
 					"type_dest"     => $note::BN_DEST_GROUP,
 					"fk_group_dest" => $id_group,
-					"content"       => htmlentities('Merci d\\\’activer les lignes inactives de ce contrat.
-Indiquez si vous souhaitez un technicien spécifique ou des instructions particulières.
-En cas de renouvellement, précisez les informations nécessaires sur Ninja One (écart entre vendu/installé, ajouts, suppressions ou changements de poste) pour que @dispatch organise l\\\’intervention.')
+					"content"       => $content
 				), array(
 					'form_name' => 'rep'
 				))

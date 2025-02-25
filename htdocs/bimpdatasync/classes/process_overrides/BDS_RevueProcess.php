@@ -10,8 +10,8 @@ class BDS_RevueProcess extends BDSProcess
     public static $current_version = 1;
     public static $default_public_title = 'Revue des accées';
 
-    
-    // Install: 
+
+    // Install:
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
@@ -25,7 +25,7 @@ class BDS_RevueProcess extends BDSProcess
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($process)) {
-            // Options: 
+            // Options:
 
             $options = array();
 
@@ -43,11 +43,11 @@ class BDS_RevueProcess extends BDSProcess
 //                $options[] = (int) $opt->id;
 //            }
 
-            
 
-            
 
-            // Vérifs restes à payer factures: 
+
+
+            // Vérifs restes à payer factures:
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'  => (int) $process->id,
                         'title'       => 'Lancer la revue des acces',
@@ -58,16 +58,16 @@ class BDS_RevueProcess extends BDSProcess
                         'use_report'  => 1,
                         'reports_delay' => 300
                             ), true, $warnings, $warnings);
-            
-            
+
+
             $warnings = array_merge($warnings, $op->addAssociates('options', $options));
 
         }
     }
-    
-    
-    
-    
+
+
+
+
 
     public function initRevue(&$data, &$errors = array())
     {
@@ -90,7 +90,7 @@ class BDS_RevueProcess extends BDSProcess
                 $this->data_persistante['infoRights'] = BimpCache::getRightsDefDataByModules();
             }
         }
-        
+
         if(!count($errors)){
             $data['steps'] = array(
                 'init' => array(
@@ -127,7 +127,7 @@ class BDS_RevueProcess extends BDSProcess
                         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $group->getData('fk_user'));
                         $this->data_persistante['mail'][$idGr]['mail'] = $user->getData('email');
                     }
-                    
+
                     $users = $group->getUserGroupUsers(true);
                     if(count($users)){
                         foreach($users as $user){
@@ -138,8 +138,8 @@ class BDS_RevueProcess extends BDSProcess
                         $this->Error('Le group '.$group->getData('nom'). " n'a pas de membres");
                         $this->data_persistante['ok_for_process'] = false;
                     }
-                    
-//                    
+
+//
                     $rights = $group->getRights();
 //                    $rights = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_UserGroupRight', array('fk_usergroup'=> $group->id));
                     if(count($rights)){
@@ -147,7 +147,7 @@ class BDS_RevueProcess extends BDSProcess
                             foreach ($module_rights as $id_right => $data) {
                                 if(in_array($id_right, $rights)){
                                     $this->data_persistante['mail'][$idGr]['rights'][] = $module.' - '.$langs->trans($data['libelle']);
-                                    
+
                                 }
                             }
                         }
@@ -156,10 +156,10 @@ class BDS_RevueProcess extends BDSProcess
                         $this->Error('Le group '.$group->getData('nom'). " n'a pas de droits");
                         $this->data_persistante['ok_for_process'] = false;
                     }
-                    
-                    
-                    
-                    
+
+
+
+
                     $this->DebugData($this->data_persistante['mail'][$idGr], 'Info : '.$group->getData('nom'));
                 }
                 break;
@@ -191,12 +191,12 @@ class BDS_RevueProcess extends BDSProcess
                             $html .= implode('<br/>', $data['rights']);
                             $html .= '<br/>Pour toutes informations ou changement, merci de répondre à ce mail, en revanche si tout est ok pour vous, merci de cliquer sur le lien suivant.';
                             $html .= '<br/><br/><a href="'.DOL_URL_ROOT.'/bimpcore/public/triggers.php?action=confirmGrp&id='.$idGr.'&code='.$code.'">Je confirme que tout est normal</a>';
-                            
+
                             $groupe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $idGr);
                             $errors = BimpTools::merge_array($errors, $groupe->appendField('data_revue', array('Y:'.date('Y') => $data)));
-                            
-                            
-                            $bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', 'tommy@drsi.fr', '', $html);
+
+
+                            $bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', $data['mail'], '', $html);
                             $bimpMail->send($errors);
 
                             $this->Success('Mail OK : Envoyé a '.$data['mail'].'<br/>'.$html);

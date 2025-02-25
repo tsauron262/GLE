@@ -145,6 +145,7 @@ class BimpTools
 								BimpController::addAjaxWarnings($msg);
 							}
 						}
+
 						if ((int) !BimpCore::getConf('post_data_check_log_only') || $key == 'fc') {
 							$value = $val_temp;
 						}

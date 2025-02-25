@@ -1,0 +1,3 @@
+- Mises à jour des demandes de location :
+    - Mise à jour formulaire demande de location
+    - Refonte contrats de location et intégration signature via DocuSign

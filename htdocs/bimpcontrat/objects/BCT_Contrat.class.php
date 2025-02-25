@@ -247,7 +247,6 @@ class BCT_Contrat extends BimpDolObject
 		$note = BimpObject::getInstance("bimpcore", "BimpNote");
 
 		$id_group = (int) BimpCore::getConf('id_user_group_contrat');
-		$id_group = 1;
 		if ($id_group) {
 			$content = 'Merci d\’activer les lignes inactives de ce contrat. Indiquez si vous souhaitez un technicien spécifique ou des instructions particulières. En cas de renouvellement, précisez les informations nécessaires sur Ninja One (écart entre vendu/installé, ajouts, suppressions ou changements de poste) pour que @dispatch organise l\’intervention.';
 

@@ -729,10 +729,8 @@ class BF_Demande extends BimpObject
 
 	public function showSignatureContactPhoneInput()
 	{
-		if ($this->isDocuSignAllowed('contrat')) {
-			if ($this->hasSource()) {
-				return 1;
-			}
+		if ($this->hasSource() && $this->isDocuSignAllowed('contrat')) {
+			return 1;
 		}
 
 		return 0;

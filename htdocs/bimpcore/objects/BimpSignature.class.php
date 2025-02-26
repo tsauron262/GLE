@@ -640,6 +640,7 @@ class BimpSignature extends BimpObject
 			$nom_piece = $obj->getLabel('the');
 			$ref_piece = $obj->getRef();
 			$lien_espace_client = '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>';
+			$extra_file_idx = 1;
 
 			$i = 1;
 			foreach ($signataires as $signataire) {
@@ -846,9 +847,8 @@ class BimpSignature extends BimpObject
 						}
 
 						$params['tabs']['signerAttachmentTabs'] = array();
-						$file_idx = 0;
 						foreach ($signature_params['files'] as $file_key => $file) {
-							$file_idx++;
+							$extra_file_idx++;
 							$params['tabs']['signerAttachmentTabs'][] = array(
 								'tabLabel'      => 'file_' . $file_idx,
 								'name'          => (isset($file['name']) ? $file['name'] : 'Document n°' . $file_idx),
@@ -862,7 +862,7 @@ class BimpSignature extends BimpObject
 								'pageNumber'    => (isset($file['p']) ? $file['p'] : 1)
 							);
 
-							$extra_data['extra_files'][$file_idx] = $file_key;
+							$extra_data['extra_files'][$extra_file_idx] = $file_key;
 						}
 
 						$this->updateField('extra_data', $extra_data);
@@ -1905,17 +1905,6 @@ class BimpSignature extends BimpObject
 									mailSyn2($subject, $email, '', $msg);
 								}
 							}
-
-							$doc_warnings = array();
-							$doc_errors = $this->downloadDocuSignDocument($doc_warnings, $success);
-
-							if (count($doc_errors)) {
-								$warnings[] = BimpTools::getMsgFromArray($doc_errors, 'Echec du téléchargement du document DocuSign');
-							}
-							if (count($doc_warnings)) {
-								$warnings[] = BimpTools::getMsgFromArray($doc_warnings, 'Erreurs suite au téléchargement du document DocuSign');
-							}
-
 							$this->onFullySigned();
 						}
 					}
@@ -1925,10 +1914,20 @@ class BimpSignature extends BimpObject
 			}
 
 //			if ($has_new_completed) {
-			$extra_files_errors = $this->downloadDocusignExtraFiles($warnings, $success);
-			if (count($extra_files_errors)) {
-				$warnings[] = BimpTools::getMsgFromArray($extra_files_errors, 'Echec du téléchargement des fichiers supplémentaires DocuSign');
-			}
+				$doc_warnings = array();
+				$doc_errors = $this->downloadDocuSignDocument($doc_warnings, $success);
+
+				if (count($doc_errors)) {
+					$warnings[] = BimpTools::getMsgFromArray($doc_errors, 'Echec du téléchargement du document DocuSign');
+				}
+				if (count($doc_warnings)) {
+					$warnings[] = BimpTools::getMsgFromArray($doc_warnings, 'Erreurs suite au téléchargement du document DocuSign');
+				}
+
+				$extra_files_errors = $this->downloadDocusignExtraFiles($warnings, $success);
+				if (count($extra_files_errors)) {
+					$warnings[] = BimpTools::getMsgFromArray($extra_files_errors, 'Echec du téléchargement des fichiers supplémentaires DocuSign');
+				}
 //			}
 		}
 

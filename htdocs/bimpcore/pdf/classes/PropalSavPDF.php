@@ -51,12 +51,9 @@ class PropalSavPDF extends PropalPDF
 				case 'bimp':
 				case 'champagne':
 					if (BimpObject::objectLoaded($this->sav)) {
-						$code_centre = '';
-						if (BimpObject::objectLoaded($this->sav)) {
-							$code_centre = $this->sav->getData('code_centre');
-						}
+						$code_centre = $this->sav->getData('code_centre');
 
-						if ($code_centre == '') {
+						if (!$code_centre) {
 							$this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
 						} else {
 							$centres = BimpCache::getCentres();

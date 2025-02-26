@@ -40,12 +40,6 @@ if (!$body) {
 			echo '</pre>';
 		}
 
-		if ((int) BimpCore::getConf('log_docusign_webhook', '', 'bimpapi')) {
-			BimpCore::addlog('Retour DocuSign', Bimp_Log::BIMP_LOG_NOTIF, 'api', null, array(
-				'data' => $data
-			));
-		}
-
 		$envelopeId = BimpTools::getArrayValueFromPath($data, 'data/envelopeId', '');
 		$event = BimpTools::getArrayValueFromPath($data, 'event', '');
 
@@ -59,10 +53,12 @@ if (!$body) {
 			if (!BimpObject::objectLoaded($signature)) {
 				$errors[] = "Aucune signature existante pour l'ID DocuSign " . $envelopeId;
 			} else {
-				BimpCore::addlog('Retour DocuSign', Bimp_Log::BIMP_LOG_NOTIF, 'api', $signature, array(
-					'event' => $event,
-					'data'  => $data
-				));
+				if ((int) BimpCore::getConf('log_docusign_webhook', '', 'bimpapi')) {
+					BimpCore::addlog('Retour DocuSign', Bimp_Log::BIMP_LOG_NOTIF, 'api', $signature, array(
+						'event' => $event,
+						'data'  => $data
+					));
+				}
 
 				if ($event == 'envelope-completed' || $event == 'recipient-completed') {
 					$success = '';
@@ -89,7 +85,7 @@ if (count($errors)) {
 		print_r($errors);
 		echo '</pre>';
 	} else {
-		BimpCore::addlog('Erreurs lors du webhook DocusignEnvelopeSigned', Bimp_Log::BIMP_LOG_URGENT, 'api', $signature, array(
+		BimpCore::addlog('Erreurs lors du webhook DocusignEnvelopeSigned', Bimp_Log::BIMP_LOG_ERREUR, 'api', $signature, array(
 			'Erreurs' => $errors
 		));
 	}

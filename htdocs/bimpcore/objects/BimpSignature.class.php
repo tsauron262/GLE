@@ -1913,7 +1913,7 @@ class BimpSignature extends BimpObject
 				}
 			}
 
-//			if ($has_new_completed) {
+			if ($has_new_completed) {
 				$doc_warnings = array();
 				$doc_errors = $this->downloadDocuSignDocument($doc_warnings, $success);
 
@@ -1928,7 +1928,7 @@ class BimpSignature extends BimpObject
 				if (count($extra_files_errors)) {
 					$warnings[] = BimpTools::getMsgFromArray($extra_files_errors, 'Echec du téléchargement des fichiers supplémentaires DocuSign');
 				}
-//			}
+			}
 		}
 
 		return $errors;

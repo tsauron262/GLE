@@ -680,6 +680,15 @@ class BF_Demande extends BimpObject
 		return (int) ($this->getData('id_facture_fourn_rev') || $this->getData('id_facture_cli_rev'));
 	}
 
+	public function hasSource()
+	{
+		if ((int) $this->getData('id_main_source')) {
+			return 1;
+		}
+
+		return 0;
+	}
+
 	public function isMergeable(&$errors = array())
 	{
 		if (!$this->isLoaded($errors)) {
@@ -718,10 +727,14 @@ class BF_Demande extends BimpObject
 		return 0;
 	}
 
-	public function hasSource()
+
+
+	public function showSignatureContactPhoneInput()
 	{
-		if ((int) $this->getData('id_main_source')) {
-			return 1;
+		if ($this->isDocuSignAllowed('contrat')) {
+			if (!$this->hasSource()) {
+				return 1;
+			}
 		}
 
 		return 0;

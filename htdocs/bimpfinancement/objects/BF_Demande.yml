@@ -869,11 +869,8 @@ forms:
             contact_phone:
                 show:
                     unextends: 1
-                    callback:
-                        method: isDocuSignAllowed
-                        params:
-                            - contrat
-                        
+                    callback: showSignatureContactPhoneInput
+                    
             email_content:
                 show:
                     unextends: 1

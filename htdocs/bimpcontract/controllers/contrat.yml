@@ -118,6 +118,7 @@ sections:
                     object: contrat
           - id: divers
             title: Divers (admin)
+            icon: fas_tools
             show: 
                   callback:
                       method: iAmAdmin

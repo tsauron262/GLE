@@ -2,139 +2,153 @@ bootstrap: 1
 
 js:
     - /bimpfinancement/views/js/bimpfinancement.js
-    
-title: 
-    callback: 
+
+title:
+    callback:
         object: demande
         method: getPageTitle
 
 objects:
-    demande: 
-        instance: 
+    demande:
+        instance:
             bimp_object: BF_Demande
-            id_object: 
+            id_object:
                 request: id
-    
+
 sections:
-    - type: object_header
-      object_header: 
-          object: demande
-          
-    - type: nav_tabs
-      nav_tabs: 
-          - id: card
-            title: Infos
-            icon: fas_info-circle
-            struct: 
-                type: view
-                view: 
-                    panel: 0
-                    name: demande
-                    object: demande
-          - id: sources
-            title: Sources
-            icon: fas_hand-holding-medical
-            show: 
-                field_value: 
-                    object: demande
-                    field_name: id_main_source
-            struct: 
-                type: custom
-                custom: 
-                    callback: 
-                        method: renderSourcesView
+    -   type: object_header
+        object_header:
+            object: demande
+    
+    -   type: nav_tabs
+        nav_tabs:
+            -   id: card
+                title: Infos
+                icon: fas_info-circle
+                struct:
+                    type: view
+                    view:
+                        panel: 0
+                        name: demande
                         object: demande
-          - id: elements
-            title: Elements financés
-            icon: fas_list
-            struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: list
-                          list: 
-                              name: default
-                              object: demande
-                              children: lines
-                    - cols: 
-                        - type: list
-                          col_md: 6
-                          col_lg: 6
-                          show: 
-                              conf: 
-                                  module: bimpfinancement
-                                  name: use_frais_divers
-                          list: 
-                              name: default
-                              object: demande
-                              children: frais_divers
-                        - type: list
-                          col_md: 6
-                          col_lg: 6
-                          show: 
-                              conf: 
-                                  module: bimpfinancement
-                                  name: use_loyers_inter
-                          list: 
-                              name: default
-                              object: demande
-                              children: rents_except
-                              
-          - id: refinanceurs
-            title: Demandes refinanceurs
-            icon: fas_university
-            show: 
-                callback: 
-                    method: showDemandesRefinanceurs
-                    object: demande
-            struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: list
-                          list: 
-                              name: default
-                              object: demande
-                              children: demandes_refinanceurs
-                              
-          - id: revente
-            title: Revente
-            icon: fas_euro-sign
-            show: 
-                callback: 
-                    method: showRevente
-                    object: demande
-            struct: 
-                type: rows
-                rows: 
-                    - cols: 
-                        - type: view
-                          view: 
-                              panel: 0
-                              name: revente
-                              object: demande
-                              
-          - id: files
-            title: Fichiers joints
-            icon: fas_folder-open
-            struct:
-                type: list
-                list: 
-                    title: Fichier joints
-                    name: default
-                    panel: 1
-                    object: demande
-                    children: files
-                    
-    - type: view
-      view: 
-          name: montants
-          object: demande
-          
-    - type: custom
-      custom: 
-          callback: 
-              method: renderNotesList
-              object: demande
-              params:
-                  - 1
+            -   id: sources
+                title: Sources
+                icon: fas_hand-holding-medical
+                show:
+                    field_value:
+                        object: demande
+                        field_name: id_main_source
+                struct:
+                    type: custom
+                    custom:
+                        callback:
+                            method: renderSourcesView
+                            object: demande
+            -   id: elements
+                title: Elements financés
+                icon: fas_list
+                struct:
+                    type: rows
+                    rows:
+                        -   cols:
+                                -   type: list
+                                    list:
+                                        name: default
+                                        object: demande
+                                        children: lines
+                        -   cols:
+                                -   type: list
+                                    col_md: 6
+                                    col_lg: 6
+                                    show:
+                                        conf:
+                                            module: bimpfinancement
+                                            name: use_frais_divers
+                                    list:
+                                        name: default
+                                        object: demande
+                                        children: frais_divers
+                                -   type: list
+                                    col_md: 6
+                                    col_lg: 6
+                                    show:
+                                        conf:
+                                            module: bimpfinancement
+                                            name: use_loyers_inter
+                                    list:
+                                        name: default
+                                        object: demande
+                                        children: rents_except
+            
+            -   id: refinanceurs
+                title: Demandes refinanceurs
+                icon: fas_university
+                show:
+                    callback:
+                        method: showDemandesRefinanceurs
+                        object: demande
+                struct:
+                    type: rows
+                    rows:
+                        -   cols:
+                                -   type: list
+                                    list:
+                                        name: default
+                                        object: demande
+                                        children: demandes_refinanceurs
+            
+            -   id: revente
+                title: Revente
+                icon: fas_euro-sign
+                show:
+                    callback:
+                        method: showRevente
+                        object: demande
+                struct:
+                    type: rows
+                    rows:
+                        -   cols:
+                                -   type: view
+                                    view:
+                                        panel: 0
+                                        name: revente
+                                        object: demande
+            
+            -   id: files
+                title: Fichiers joints
+                icon: fas_folder-open
+                struct:
+                    type: list
+                    list:
+                        title: Fichier joints
+                        name: default
+                        panel: 1
+                        object: demande
+                        children: files
+            
+            -   id: divers
+                title: Divers (admin)
+                icon: fas_tools
+                show:
+                    callback:
+                        method: iAmAdmin
+                        object: client
+                struct:
+                    type: custom
+                    custom:
+                        callback:
+                            method: renderBimpOjectDivers
+                            object: demande
+    
+    -   type: view
+        view:
+            name: montants
+            object: demande
+    
+    -   type: custom
+        custom:
+            callback:
+                method: renderNotesList
+                object: demande
+                params:
+                    - 1

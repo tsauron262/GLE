@@ -1,144 +1,166 @@
-title: 
-    callback: 
+title:
+    callback:
         object: bimp_comm
         method: getPageTitle
-        
+
 bootstrap: 1
 
-js: 
+js:
     0: /bimpcommercial/views/js/mails.js
     1: /bimpequipment/views/js/equipment.js
     2: /bimpcommercial/views/js/object_line.js
     3: /bimpcommercial/views/js/paiement.js
     4: /bimpcommercial/views/js/bimpcomm.js
-    
-objects: 
-    bimp_comm: 
-        instance: 
-            bimp_object: BimpComm
-            id_object: 
-                request: id
-                
-sections: 
-    - type: tabs
-      tabs: 
-          default: 
-              label: Fiche
-              sections: 
-                    - type: object_header
-                      object_header: 
-                          object: bimp_comm
-                    - type: nav_tabs
-                      nav_tabs: 
-                          - id: card
-                            show: 
-                                callback: useMultiOnglet
-                            title: Fiche
-                            struct: 
-                                type: rows
-                                rows: 
-                                    - cols: 
-                                        - type: view
-                                          view: 
-                                              panel: 1
-                                              object: bimp_comm
-                                              name: default
-                                    - cols: 
-                                        - type: view
-                                          view: 
-                                              panel: 1
-                                              object: bimp_comm
-                                              name: extra
-#                                                  
-                          - id: content
-                            show: 
-                                callback: useMultiOnglet
-                            title: Contenu
-                            struct: 
-                                type: view
-                                view: 
-                                    panel: 0
-                                    object: bimp_comm
-                                    name: content
-#                                    
-                          - id: full
-                            show:
-                                callback: notUseMultiOnglet
-                            title: Fiche
-                            struct: 
-                                type: rows
-                                rows: 
-                                    - cols: 
-                                        - type: view
-                                          view: 
-                                              panel: 1
-                                              object: bimp_comm
-                                              name: default
-                                        -   type: view
-                                            view: 
-                                                panel: 0
-                                                object: bimp_comm
-                                                name: content
-                                    - cols: 
-                                        - type: view
-                                          view: 
-                                              panel: 1
-                                              object: bimp_comm
-                                              name: extra
-#                                    
-                          - id: contacts
-                            title: Contacts / Adresses
-                            struct: 
-                                type: custom
-                                custom: 
-                                    callback: 
-                                        method: renderContacts
-                                        object: bimp_comm
 
-                          - id: files
-                            title: Fichiers
-#                            struct: 
-#                                type: rows
-#                                rows:                                                   
-#                                    - cols: 
-#                                        - type: list
-#                                          list: 
-#                                              title: Fichier joints
-#                                              name: default
-#                                              panel: 1
-#                                              object: bimp_comm
-#                                              children: files                                  
-#                                    - cols: 
-#                                        - type: custom
-#                                          custom:
-#                                            callback: 
-                            ajax_render_method:
-                                method: renderExtraFile
-                                object: bimp_comm
-                                
-                          - id: divers
-                            title: Divers (admin)
-                            show: 
-                                callback:
-                                    method: iAmAdmin
+objects:
+    bimp_comm:
+        instance:
+            bimp_object: BimpComm
+            id_object:
+                request: id
+
+sections:
+    maintabs:
+        type: tabs
+        tabs:
+            default:
+                label: Fiche
+                sections:
+                    header:
+                        type: object_header
+                        object_header:
+                            object: bimp_comm
+                    mainnav:
+                        type: nav_tabs
+                        nav_tabs:
+                            card:
+                                id: card
+                                show:
+                                    callback: useMultiOnglet
+                                title: Fiche
+                                struct:
+                                    type: rows
+                                    rows:
+                                        -   cols:
+                                                -   type: view
+                                                    view:
+                                                        panel: 1
+                                                        object: bimp_comm
+                                                        name: default
+                                        -   cols:
+                                                -   type: view
+                                                    view:
+                                                        panel: 1
+                                                        object: bimp_comm
+                                                        name: extra
+                            #
+                            content:
+                                id: content
+                                show:
+                                    callback: useMultiOnglet
+                                title: Contenu
+                                struct:
+                                    type: view
+                                    view:
+                                        panel: 0
+                                        object: bimp_comm
+                                        name: content
+                            #
+                            full:
+                                id: full
+                                show:
+                                    callback: notUseMultiOnglet
+                                title: Fiche
+                                struct:
+                                    type: rows
+                                    rows:
+                                        -   cols:
+                                                -   type: view
+                                                    view:
+                                                        panel: 1
+                                                        object: bimp_comm
+                                                        name: default
+                                                -   type: view
+                                                    view:
+                                                        panel: 0
+                                                        object: bimp_comm
+                                                        name: content
+                                        -   cols:
+                                                -   type: view
+                                                    view:
+                                                        panel: 1
+                                                        object: bimp_comm
+                                                        name: extra
+                            #
+                            contacts:
+                                id: contacts
+                                title: Contacts / Adresses
+                                struct:
+                                    type: custom
+                                    custom:
+                                        callback:
+                                            method: renderContacts
+                                            object: bimp_comm
+                            
+                            files:
+                                id: files
+                                title: Fichiers
+                                #                            struct:
+                                #                                type: rows
+                                #                                rows:
+                                #                                    - cols:
+                                #                                        - type: list
+                                #                                          list:
+                                #                                              title: Fichier joints
+                                #                                              name: default
+                                #                                              panel: 1
+                                #                                              object: bimp_comm
+                                #                                              children: files
+                                #                                    - cols:
+                                #                                        - type: custom
+                                #                                          custom:
+                                #                                            callback:
+                                ajax_render_method:
+                                    method: renderExtraFile
                                     object: bimp_comm
-                            struct: 
-                                  type: custom
-                                  custom: 
-                                      callback: 
-                                          method: renderBimpOjectDivers
-                                          object: bimp_comm
-                    - type: custom
-                      custom: 
-                          callback: 
-                              method: renderDemandesList
-                              object: bimp_comm
-                              params:
-                                  - 1
-                    - type: custom
-                      custom: 
-                          callback: 
-                              method: renderNotesList
-                              object: bimp_comm
-                              params:
-                                  - 1
+                                    
+                            revals:
+                                id: revals
+                                title: Revalorisations
+                                show: 0
+                                
+                            demandes_fin:
+                                id: demande_financement_tab
+                                title: Demande de location
+                                show: 0
+                                
+                            admin:
+                                id: divers
+                                title: Divers (admin)
+                                icon: fas_tools
+                                show:
+                                    callback:
+                                        method: iAmAdmin
+                                        object: bimp_comm
+                                struct:
+                                    type: custom
+                                    custom:
+                                        callback:
+                                            method: renderBimpOjectDivers
+                                            object: bimp_comm
+                    demandes:
+                        type: custom
+                        custom:
+                            callback:
+                                method: renderDemandesList
+                                object: bimp_comm
+                                params:
+                                    - 1
+                    notes:
+                        type: custom
+                        custom:
+                            callback:
+                                method: renderNotesList
+                                object: bimp_comm
+                                params:
+                                    - 1

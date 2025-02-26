@@ -1,39 +1,39 @@
-extends: 
+extends:
     module: bimpcommercial
     object_name: BimpComm
-    
-objects: 
-    bimp_comm: 
-        instance: 
+
+objects:
+    bimp_comm:
+        instance:
             bimp_object: Bimp_CommandeFourn
-            id_object: 
+            id_object:
                 request: id
-                
-    commande_fourn: 
-        instance: 
+    
+    commande_fourn:
+        instance:
             bimp_object: Bimp_CommandeFourn
-            id_object: 
+            id_object:
                 request: id
 
-sections: 
-    0: 
-        tabs: 
-            logistic: 
+sections:
+    maintabs:
+        tabs:
+            logistic:
                 label: Logistique
-                show: 
+                show:
                     callback: showLogistique
                 module: bimplogistique
                 controller: commandeFourn
-                url_params: 
-                    id: 
+                url_params:
+                    id:
                         request: id
-            dol_receptions: 
+            dol_receptions:
                 label: Réceptions
-                hide: 
-                  callback:
-                      method: useLogistique
-                      object: commande_fourn
+                hide:
+                    callback:
+                        method: useLogistique
+                        object: commande_fourn
                 url: ../fourn/commande/dispatch.php?
-                url_params: 
-                    id: 
+                url_params:
+                    id:
                         request: id

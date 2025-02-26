@@ -198,7 +198,7 @@ fields:
         label: Index signature
         type: int
         default_value: 1
-            
+        
 forms:
     edit: 
         rows: 

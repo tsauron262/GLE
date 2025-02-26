@@ -121,7 +121,7 @@ class BIMP_Task extends BimpAbstractFollow
 				if ($user->admin || $user->id === (int) $this->getData('user_create') || $user->id === (int) $this->getData('id_user_owner')) {
 					return 1;
 				}
-				return 0;
+				return $this->canAttribute();
 		}
 		return parent::canSetAction($action);
 	}

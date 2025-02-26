@@ -1165,7 +1165,7 @@ class BDS_VerifsProcess extends BDSProcess
     {
         $filters = array(
             'a.line_type' => 2,
-            'a.statut'    => array('operator' => '>', 'value' => 4),
+            'a.statut'    => array('operator' => '>', 'value' => 0),
             'c.version'   => 2,
         );
 

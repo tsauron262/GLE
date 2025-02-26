@@ -245,6 +245,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 		$this->pdf->writeHTML($html, false);
 		$this->pdf->Ln(1);
 
+		$html = '';
 		switch ($this->demande->getData('formule')) {
 			case 'evo':
 			case 'evo_afs':

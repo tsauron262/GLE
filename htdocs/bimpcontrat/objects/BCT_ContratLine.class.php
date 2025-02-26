@@ -5675,35 +5675,38 @@ class BCT_ContratLine extends BimpObject
 				$date_fin_validite = $this->getData('date_fin_validite');
 				$date_cloture = $this->getData('date_cloture');
 				foreach ($lines as $line) {
+					$line_infos = array();
 					$data_correct = array();
 
 					if ($line->getData('date_ouverture_prevue') != $date_ouv_prev) {
-						$infos[] = 'Correction date ouverture prévue (' . date('d / m / Y', strtotime($date_ouv_prev)) . ')';
+						$line_infos[] = 'Correction date ouverture prévue (' . date('d / m / Y', strtotime($date_ouv_prev)) . ')';
 						$data_correct['date_ouverture_prevue'] = $date_ouv_prev;
 					}
 
 					if ($line->getData('date_ouverture') != $date_ouverture) {
-						$infos[] = 'Correction date ouverture (' . date('d / m / Y', strtotime($date_ouverture)) . ')';
+						$line_infos[] = 'Correction date ouverture (' . date('d / m / Y', strtotime($date_ouverture)) . ')';
 						$data_correct['date_ouverture'] = $date_ouverture;
 					}
 
 					if ($line->getData('date_debut_validite') != $date_debut_validite) {
-						$infos[] = 'Correction date début validité (' . date('d / m / Y', strtotime($date_debut_validite)) . ')';
+						$line_infos[] = 'Correction date début validité (' . date('d / m / Y', strtotime($date_debut_validite)) . ')';
 						$data_correct['date_debut_validite'] = $date_debut_validite;
 					}
 
 					if ($line->getData('date_fin_validite') != $date_fin_validite) {
-						$infos[] = 'Correction date fin validité (' . date('d / m / Y', strtotime($date_fin_validite)) . ')';
+						$line_infos[] = 'Correction date fin validité (' . date('d / m / Y', strtotime($date_fin_validite)) . ')';
 						$data_correct['date_fin_validite'] = $date_fin_validite;
 					}
 
 					if ($line->getData('date_cloture') != $date_cloture) {
-						$infos[] = 'Correction date résiliation (' . date('d / m / Y', strtotime($date_cloture)) . ')';
+						$line_infos[] = 'Correction date résiliation (' . date('d / m / Y', strtotime($date_cloture)) . ')';
 						$data_correct['date_cloture'] = $date_cloture;
 					}
 
 					if (!empty($data_correct)) {
-						$this->db->update('contratdet', $data_correct, 'rowid = ' . $line->id);
+						if ($this->db->update('contratdet', $data_correct, 'rowid = ' . $line->id) > 0) {
+							$infos[] = BimpTools::getMsgFromArray($line_infos, 'Ligne n° ' . $line->getData('rang'));
+						}
 					}
 				}
 			}

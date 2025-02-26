@@ -7542,9 +7542,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			$fk_group_dest = BimpCore::getUserGroupId($fk_group_dest);
 		}
 
-		if (is_string($fk_user_dest) && $fk_user_dest) {
-			eval('if (isset(BimpNote::' . $fk_user_dest . ')) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
-		}
+//		if (is_string($fk_user_dest) && $fk_user_dest) { => Obsolète.
+//			eval('if (isset(BimpNote::' . $fk_user_dest . ')) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
+//		}
 
 		if (is_null($visibility)) {
 			$visibility = BimpNote::BN_MEMBERS;

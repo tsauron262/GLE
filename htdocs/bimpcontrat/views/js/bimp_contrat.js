@@ -327,11 +327,12 @@ function BimpContrat() {
                             total_qty = 0;
                             bimp_msg('Ligne #' + id_line + ' : Quantité totale à acheter invalide', 'danger');
                             has_errors = true;
-                        } else if (!total_qty) {
-                            $line_row.addClass('has_errors');
-                            bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité totale à acheter supérieure à 0', 'danger');
-                            has_errors = true;
                         }
+						// else if (!total_qty) {
+                        //     $line_row.addClass('has_errors');
+                        //     bimp_msg('Ligne #' + id_line + ' : Veuillez saisir une quantité totale à acheter supérieure à 0', 'danger');
+                        //     has_errors = true;
+                        // }
                     }
 
                     fourns[id_fourn][id_entrepot]['lines'].push({

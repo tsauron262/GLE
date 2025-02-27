@@ -6188,7 +6188,7 @@ ORDER BY a.val_max DESC");
 						if (!(int) $client_fac->getData('status')) {
 							$errors[] = 'Ce client est désactivé';
 						} elseif (!$client_fac->isSolvable($this->object_name, $warnings)) {
-							$errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+							$errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $client_fac->getData('solvabilite_status')]['label'] . ')';
 						}
 					}
 				}
@@ -6552,6 +6552,7 @@ ORDER BY a.val_max DESC");
 										$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
 										return array('errors' => $errors);
 									} else {
+										/** @var Bimp_Facture $bimpFacture */
 										$bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture->id);
 
 										if (!BimpObject::objectLoaded($bimpFacture)) {
@@ -7577,7 +7578,7 @@ ORDER BY a.val_max DESC");
 		$success = 'Prise en charge effectuée';
 		$success_callback = '';
 
-		global $user, $langs;
+		global $user, $langs, $conf;
 
 		// Mise à jour SAV:
 		$this->set('status', self::BS_SAV_NEW);
@@ -8534,6 +8535,8 @@ ORDER BY a.val_max DESC");
 			return 'En développement';
 		}
 
+		global $conf;
+
 		$delay = (int) BimpCore::getConf('delay_alertes_clients_unrestitute_sav', null, 'bimpsupport');
 
 		$delay = 30;
@@ -8884,6 +8887,7 @@ ORDER BY a.val_max DESC");
 
 	public function onSigned($signature)
 	{
+		global $conf;
 		$errors = array();
 
 		if (!$this->isLoaded($errors)) {

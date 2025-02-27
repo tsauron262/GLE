@@ -40,7 +40,7 @@ class BimpDolObject extends BimpObject
         100 => "Autre (ne pas utiliser)"
     ];
 
-    // Droits user: 
+    // Droits user:
 
     public function canEditCommercial()
     {
@@ -83,12 +83,12 @@ class BimpDolObject extends BimpObject
 
             self::$cache[$cache_key] = array();
 
-            // User connecté: 
+            // User connecté:
             if (!empty($user->email)) {
                 self::$cache[$cache_key][$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
             }
 
-            // E-mail entrepôt: 
+            // E-mail entrepôt:
             $id_ent = $this->getData('entrepot');
             if ($id_ent > 0) {
                 $ent = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $id_ent);
@@ -115,7 +115,7 @@ class BimpDolObject extends BimpObject
                     }
                 }
 
-                // Société: 
+                // Société:
 
                 if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL)) {
                     self::$cache[$cache_key][$conf->global->MAIN_INFO_SOCIETE_MAIL] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $conf->global->MAIN_INFO_SOCIETE_MAIL . ')';
@@ -134,7 +134,7 @@ class BimpDolObject extends BimpObject
                     }
                 }
 
-                // Contacts pièce: 
+                // Contacts pièce:
 
                 if ($this->isLoaded()) {
                     $c_user = new User($this->db->db);
@@ -254,7 +254,7 @@ class BimpDolObject extends BimpObject
         return $contacts;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getModelPdf()
     {
@@ -538,7 +538,7 @@ class BimpDolObject extends BimpObject
         return $id_client;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
@@ -588,7 +588,7 @@ class BimpDolObject extends BimpObject
         return $html;
     }
 
-    // Rendus: 
+    // Rendus:
 
     public function renderExtraFile($withThisObject = true)
     {
@@ -848,7 +848,7 @@ class BimpDolObject extends BimpObject
                     $htmlP .= '<td>' . $data['total_ht'] . '</td>';
                     $htmlP .= '<td>' . $data['status'] . '</td>';
 //                    $html .= '<td style="text-align: right">';
-//                    
+//
 //                    $html .= BimpRender::renderRowButton('Supprimer le lien', 'trash', '');
 //
 //                    $html .= '</td>';
@@ -1043,11 +1043,12 @@ class BimpDolObject extends BimpObject
         return $html;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionGeneratePdf($data, &$success = '', $errors = array(), $warnings = array())
     {
         $success = 'PDF généré avec succès';
+		$success_callback = '';
 
         if ($this->isLoaded()) {
             if (!$this->isDolObject() || !method_exists($this->dol_object, 'generateDocument')) {
@@ -1190,7 +1191,7 @@ class BimpDolObject extends BimpObject
 //            $filename_list = array();
 //            $mimetype_list = array();
 //            $mimefilename_list = array();
-            // Fichiers joints: 
+            // Fichiers joints:
             if (isset($data['join_files']) && is_array($data['join_files'])) {
                 foreach ($data['join_files'] as $id_file) {
                     $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
@@ -1211,7 +1212,7 @@ class BimpDolObject extends BimpObject
                 }
             }
 
-            // Fichiers joints des objets liés: 
+            // Fichiers joints des objets liés:
             if (isset($data['extra_joins_files']) && is_array($data['extra_joins_files'])) {
                 foreach ($data['extra_joins_files'] as $id_file) {
                     $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);

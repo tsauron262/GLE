@@ -101,7 +101,9 @@ class BIMP_Task extends BimpAbstractFollow
 		switch ($field_name) {
 			case 'id_user_owner':
 			case 'id_task':
+			case 'duree':
 				return $this->canAttribute();
+
 			case 'ok_metier':
 				return ($user->admin && !BimpCore::isUserDev());
 		}

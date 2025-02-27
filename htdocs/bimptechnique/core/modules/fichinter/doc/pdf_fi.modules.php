@@ -152,7 +152,7 @@ class pdf_fi
         global $user, $langs, $conf, $mysoc;
 
 		if ($user->login == 'f.martinez') {
-			return;
+			return 1;
 		}
         $bdb = BimpCache::getBdb();
 

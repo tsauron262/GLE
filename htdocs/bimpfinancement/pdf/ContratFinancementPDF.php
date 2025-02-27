@@ -52,7 +52,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 		parent::initHeader();
 		$this->header_vars['doc_name'] = 'CONTRAT DE LOCATION';
 		$this->header_vars['doc_ref'] = 'N° ' . str_replace('DF', '', $this->demande->getRef());
-		$this->pdf->topMargin = 30;
+		$this->pdf->topMargin = 28;
 	}
 
 //	public function renderHeader()

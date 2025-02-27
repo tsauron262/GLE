@@ -151,9 +151,6 @@ class pdf_fi
     {
         global $user, $langs, $conf, $mysoc;
 
-		if ($user->login == 'f.martinez') {
-			return 1;
-		}
         $bdb = BimpCache::getBdb();
 
         if (!is_object($outputlangs))

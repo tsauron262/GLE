@@ -158,10 +158,13 @@ fields:
         
     duree:
         label: Durée estimée
-        type: int
+        type: timer
         input:
             type: timer
             with_secondes: 0
+        displays:
+            default:
+                type: timer
 
 fields_tables:
     default:

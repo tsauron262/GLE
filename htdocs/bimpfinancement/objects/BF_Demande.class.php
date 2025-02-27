@@ -6490,21 +6490,23 @@ class BF_Demande extends BimpObject
 	public function renderSignatureTypeSelect($doc_type)
 	{
 		$html = '';
-
-		$errors = array();
-		$options = array();
 		$value = '';
 
-		switch ($this->getData('type_contrat')) {
-			case 'elec':
-				$html .= 'Signature via DocuSign';
-				$value = 'docusign';
-				break;
+		if ($doc_type == 'contrat') {
+			switch ($this->getData('type_contrat')) {
+				case 'elec':
+					$html .= 'Signature via DocuSign';
+					$value = 'docusign';
+					break;
 
-			case 'papier':
-				$html .= 'Signature papier';
-				$value = 'papier';
-				break;
+				case 'papier':
+					$html .= 'Signature papier';
+					$value = 'papier';
+					break;
+			}
+		} else {
+			$html .= 'Signature papier';
+			$value = 'papier';
 		}
 
 		$html .= BimpInput::renderInput('hidden', 'signature_type', $value);

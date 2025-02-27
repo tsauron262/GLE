@@ -157,9 +157,6 @@ class BDS_RevueProcess extends BDSProcess
                         $this->data_persistante['ok_for_process'] = false;
                     }
 
-
-
-
                     $this->DebugData($this->data_persistante['mail'][$idGr], 'Info : '.$group->getData('nom'));
                 }
                 break;
@@ -183,7 +180,7 @@ class BDS_RevueProcess extends BDSProcess
                             $code = BimpTools::randomPassword(15);
                             $data['code'] = $code;
                             $data['date'] = date('Y-m-d');
-                            $html = '';
+                            $html = '!!!!! Attention, annule et remplace le mail précédent !!!!!<br/>';
                             $html .= 'Bonjour merci de confirmer les utilisateurs et droits pour le groupe : '.$data['name'];
                             $html .= '<h2>Utilisateurs : </h2>';
                             $html .= implode('<br/>', $data['users']);
@@ -196,7 +193,7 @@ class BDS_RevueProcess extends BDSProcess
                             $errors = BimpTools::merge_array($errors, $groupe->appendField('data_revue', array('Y:'.date('Y') => $data)));
 
 
-                            $bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', $data['mail'], '', $html);
+                            $bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', 'tommy@drsi.fr', '', $html);
                             $bimpMail->send($errors);
 
                             $this->Success('Mail OK : Envoyé a '.$data['mail'].'<br/>'.$html);

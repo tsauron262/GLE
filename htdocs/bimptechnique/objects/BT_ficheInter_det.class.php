@@ -979,10 +979,6 @@ class BT_ficheInter_det extends BimpDolObject
 	{
 		global $user;
 
-		if ($user->login == 'f.martinez') {
-			return array();
-		}
-
 		$errors = parent::validate();
 
 		$fi = $this->getParentInstance();

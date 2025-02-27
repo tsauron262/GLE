@@ -377,7 +377,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 		$html .= '<span style="font-size: 9px; font-weight: bold">Pour le cessionnaire :</span><br/>';
 		$html .= ($raison_cessionnaire ? : 'Nom: ') . '<br/>';
 		$html .= 'SIREN : ' . $siren_cessionnaire . '<br/>';
-		$html .= 'Représenté par : ' . $nom_cessionnaire . '<br/>';
+		$html .= 'Représenté par :<br/>' . $nom_cessionnaire . '<br/>';
 		$html .= 'En qualité de : ' . $qualite_cessionnaire;
 		$html .= '</td>';
 		$html .= '</tr>';
@@ -476,15 +476,18 @@ class ContratFinancementPDF extends DocFinancementPDF
 
 	public function saveSignatureParams($mandat_page)
 	{
+		$sign_off_y = 115;
+		$date_off_y = 65;
+
 		$this->signature_params['locataire'] = array(
 			'docusign' => array(
 				'anch'             => 'Pour le locataire :',
 				'fs'               => 'Size7',
 				'x'                => 5,
-				'y'                => 107,
+				'y'                => $sign_off_y,
 				'date'             => array(
 					'x' => 22,
-					'y' => 57
+					'y' => $date_off_y
 				),
 				'paraphe'          => array(
 					'x' => 0,
@@ -570,10 +573,10 @@ class ContratFinancementPDF extends DocFinancementPDF
 				'anch'    => 'Pour le cessionnaire :',
 				'fs'      => 'Size7',
 				'x'       => 5,
-				'y'       => 107,
+				'y'       => $sign_off_y,
 				'date'    => array(
 					'x' => 22,
-					'y' => 57
+					'y' => $date_off_y
 				),
 				'paraphe' => array(
 					'x' => 60,
@@ -618,10 +621,10 @@ class ContratFinancementPDF extends DocFinancementPDF
 				'anch'    => 'Pour le loueur :',
 				'fs'      => 'Size7',
 				'x'       => 5,
-				'y'       => 107,
+				'y'       => $sign_off_y,
 				'date'    => array(
 					'x' => 22,
-					'y' => 57
+					'y' => $date_off_y
 				),
 				'paraphe' => array(
 					'x' => 30,

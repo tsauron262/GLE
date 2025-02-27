@@ -5445,6 +5445,10 @@ class BF_Demande extends BimpObject
 				)
 			));
 
+			if (strlen($cessionnaire_data['nom']) > 30) {
+				$errors[] = 'Le nom du cessionnaire ne doit pas dépasser 30 caractères. Veuillez le raccourcir.';
+			}
+
 			if ($this->isDemandeValid($errors)) {
 				global $db;
 				$files_dir = $this->getFilesDir();

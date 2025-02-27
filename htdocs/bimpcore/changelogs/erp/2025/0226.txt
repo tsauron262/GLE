@@ -1,1 +1,2 @@
 Tâches : ajout du champ "Durée estimée" (réservé aux tâches développeurs)
+Contrats d'abonnement : quantité nulle autorisée pour les achats pour éviter les décalages dans les périodes.

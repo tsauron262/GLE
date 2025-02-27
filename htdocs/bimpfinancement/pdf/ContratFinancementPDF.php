@@ -43,6 +43,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 		parent::__construct($db, $demande);
 
 		$this->doc_name = 'Contrat de location';
+		$this->pdf->headerMargin = 8;
 	}
 
 	public function initData() {}

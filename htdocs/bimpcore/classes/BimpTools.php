@@ -2272,17 +2272,28 @@ class BimpTools
 			$timer['hours'] += 24 * $timer['days'];
 			$timer['days'] = 0;
 		}
+
+//		if ($timer['days'] > 0) {
+//			$html .= $timer['days'] . ' j ';
+//			$html .= $timer['hours'] . ' h ';
+//			$html .= $timer['minutes'] . ' min ';
+//		} elseif ($timer['hours'] > 0) {
+//			$html .= $timer['hours'] . ' h ';
+//			$html .= $timer['minutes'] . ' min ';
+//		} elseif ($timer['minutes'] > 0) {
+//			$html .= $timer['minutes'] . ' min ';
+//		}
+
 		if ($timer['days'] > 0) {
 			$html .= $timer['days'] . ' j ';
+		}
+		if ($timer['hours'] > 0) {
 			$html .= $timer['hours'] . ' h ';
-			$html .= $timer['minutes'] . ' min ';
-		} elseif ($timer['hours'] > 0) {
-			$html .= $timer['hours'] . ' h ';
-			$html .= $timer['minutes'] . ' min ';
-		} elseif ($timer['minutes'] > 0) {
+		}
+		if ($timer['minutes'] > 0) {
 			$html .= $timer['minutes'] . ' min ';
 		}
-		if ($withSecondes && $timer['secondes']) {
+		if ($withSecondes && $timer['secondes'] > 0) {
 			$html .= $timer['secondes'] . ' sec ';
 		}
 		$html .= '</span>';
@@ -4388,7 +4399,8 @@ if (!function_exists('mime_content_type')) {
 			'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
 		);
 
-		$ext = strtolower(array_pop(explode('.', $filename)));
+		$array = explode('.', $filename);
+		$ext = strtolower(array_pop($array));
 		if (array_key_exists($ext, $mime_types)) {
 			return $mime_types[$ext];
 		} elseif (function_exists('finfo_open')) {

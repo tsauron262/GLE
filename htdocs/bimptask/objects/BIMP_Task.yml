@@ -1,10 +1,10 @@
 table: bimp_task
 controller: task
 
-extends: 
+extends:
     module: bimpcore
     object_name: BimpAbstractFollow
-    
+
 entity_name: bimpcore
 
 positions: 1
@@ -15,26 +15,26 @@ header_list_name: default
 header_edit_form: default
 header_btn:
     callback: getButtons
-    
-nom_url: 
+
+nom_url:
     modal_view: full
-    
-list_page_url: 
+
+list_page_url:
     controller: index
-        
+
 labels:
     name: tâche
     name_plur: tâches
-    is_female: 1    
+    is_female: 1
 
-objects: 
+objects:
     task_fille:
         relation: hasMany
         instance:
             bimp_object:
                 module: bimptask
                 name: BIMP_Task
-#                
+    #
     task_mere:
         relation: hasOne
         delete: 0
@@ -44,76 +44,76 @@ objects:
                 name: BIMP_Task
             id_object:
                 field_value: id_task
-                
+    
     user_owner:
         extends: user
         instance:
             id_object:
                 field_value: id_user_owner
-                
+    
     files:
         instance:
             bimp_object:
                 module: bimpcore
                 name: BimpFile
-        list: 
+        list:
             filters:
                 parent_module: bimptask
                 parent_object_name: BIMP_Task
-        add_form: 
+        add_form:
             name: upload
             values:
-                fields: 
+                fields:
                     parent_module: bimptask
                     parent_object_name: BIMP_Task
-                    
-fields: 
+
+fields:
     src:
         label: Source email
         type: text
-        
+    
     dst:
         label: Destinataire email
         type: text
-        
+    
     subj:
         label: Titre
-        input: 
+        input:
             help: Merci d'indiquer un titre court. Utliser le champ "Description" pour les détails
-        
+    
     txt:
         label: Description
         type: html
         hashtags: 1
-        
+    
     comment:
         label: Commentaire
         type: text
         hashtags: 1
         no_strip_tags: 1
-        
+    
     status:
         label: Statut
         type: int
-        values: 
+        values:
             array: status_list_task
-            
+    
     prio:
         label: Priorité
         type: int
-        values: 
+        values:
             array: prio_list_task
-            
+    
     sous_type:
         label: Sous Type
         depends_on: type_manuel
-        values: 
+        values:
             array: allSousTypes
-        input: 
+        input:
             type: select
-            options: 
+            options:
                 array: sous_type_list_task
-            
+    
     id_user_owner:
         label: Attribuée à
         type: id_object
@@ -122,254 +122,271 @@ fields:
             type: search_user
             include_empty: 1
         depends_on: type_manuel
-            
+    
     test_ferme:
         label: Test pour Fermeture
         type: text
         no_strip_tags: 1
-        
+    
     auto:
         label: Tâche automatique
         type: bool
-        
+    
     type_manuel:
         label: Type de tâche manuel
-        values: 
+        values:
             array: types_manuel
-            
+    
     id_task:
         label: Tache mére
         type: id_object
         object: task_mere
         depends_on: type_manuel
-        
-    url: 
+    
+    url:
         label: Page
-        displays: 
-            link: 
+        displays:
+            link:
                 label: Avec lien
                 type: callback
                 method: displayPageLink
         type: html
-        
-    ok_metier: 
+    
+    ok_metier:
         label: Acceptation métier
         type: bool
- 
+        
+    duree:
+        label: Durée estimée
+        type: timer
+        input:
+            type: timer
+            with_secondes: 0
+        displays:
+            default:
+                type: timer
+
 fields_tables:
-    default: 
+    default:
         title: Tâche
-        footer_extra_btn: 
+        footer_extra_btn:
             callback: getInfosExtraBtn
         icon: fas_tasks
-        rows: 
-            - field: status
-            - field: prio
-              edit: 0
-            - field: id_task
-            - field: src
-            - field: dst
-            - label: Type de tâche
-              value: 
-                  callback: displayType
-            - field: subj
-            - field: txt
-            - field: ok_metier
-              show:
-                  callback: isDev
-              edit: 1
-                  
-            - field: url
-              display: link
-            - field: comment
-            - field: id_user_owner
-              edit: 1
-            - label: Notifier
-              value: 
-                  callback: displayFollower
-        
-forms:
-    default: 
-        rows: 
-            - field: id_task
-            - field: status
-            - field: sous_type
-            - field: prio
-            - field: src
-              show: 
-                 callback: canEditAll
-            - field: dst
-              edit: 0
-            - field: subj
-            - field: txt
-            - field: comment
-            - field: id_user_owner
-            - field: users_follow
-            - field: url
-            - field: ok_metier
-              show:
-                  callback: isDev
+        rows:
+            -   field: status
+            -   field: prio
+                edit: 0
+            -   field: duree
+                edit: 1
+                show:
+                    callback: isDev
+            -   field: id_task
+            -   field: src
+            -   field: dst
+            -   label: Type de tâche
+                value:
+                    callback: displayType
+            -   field: subj
+            -   field: txt
+            -   field: ok_metier
+                show:
+                    callback: isDev
+                edit: 1
             
+            -   field: url
+                display: link
+            -   field: comment
+            -   field: id_user_owner
+                edit: 1
+            -   label: Notifier
+                value:
+                    callback: displayFollower
+
+forms:
+    default:
+        rows:
+            -   field: id_task
+            -   field: status
+            -   field: sous_type
+            -   field: prio
+            -   field: src
+                show:
+                    callback: canEditAll
+            -   field: dst
+                edit: 0
+            -   field: subj
+            -   field: txt
+            -   field: comment
+            -   field: id_user_owner
+            -   field: users_follow
+            -   field: url
+            -   field: ok_metier
+                show:
+                    callback: isDev
+            -   field: duree
+                show:
+                    callback: isDev
+    
     add:
         rows:
-            - field: id_task
-            - field: type_manuel
-            - field: sous_type
-            - field: prio
-            - field: subj
-            - field: txt
-            - field: comment
-            - field: id_user_owner
-            - field: url
-            - custom: 1
-              label: Fichiers
-              input_name: task_files
-              input: 
-                  type: drop_files
-            - field: ok_metier
-              display_if:
-                field_name: type_manuel
-                show_values: dev
-              
+            -   field: id_task
+            -   field: type_manuel
+            -   field: sous_type
+            -   field: prio
+            -   field: subj
+            -   field: txt
+            -   field: comment
+            -   field: id_user_owner
+            -   field: url
+            -   custom: 1
+                label: Fichiers
+                input_name: task_files
+                input:
+                    type: drop_files
+            -   field: ok_metier
+                display_if:
+                    field_name: type_manuel
+                    show_values: dev
+    
     addUser:
         extends: add
-#        rows:
-#            6: unset
-            
+          #        rows:
+          #            6: unset
+    
     newMail:
         rows:
-            - custom: 1
-              input_name: email
-              data_type: text
-              label: Email
-              input:
-                  type: textarea
-            - custom: 1
-              input_name: include_file
-              data_type: bool
-              label: Inclure les fils de conversations
-              input: 
-                  type: toggle
-              value: 1
-              
+            -   custom: 1
+                input_name: email
+                data_type: text
+                label: Email
+                input:
+                    type: textarea
+            -   custom: 1
+                input_name: include_file
+                data_type: bool
+                label: Inclure les fils de conversations
+                input:
+                    type: toggle
+                value: 1
+    
     attribute:
         rows:
-            - field: id_user_owner
-            
+            -   field: id_user_owner
+    
     changeStatut:
         rows:
-            - custom: 1
-              input_name: status
-              input: 
-                  type: select
-              label: Statut
-              values:
-                  callback: getStatusPossible
-            - custom: 1
-              input_name: comment
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
-              hashtags: 1
-              label: Commentaire
-            - custom: 1
-              input_name: notif
-              data_type: bool
-              label: Notifier
-              input: 
-                  type: toggle
-              value: 1
-            - custom: 1
-              label: Fichiers joints
-              input_name: join_files
-              data_type: id_object
-              input: 
-                  type: check_list
-                  items: 
-                      callback: 
-                          method: getAllFiles
-                          params: 
-                              - 0
-              depends_on: id_model
-              object: files
-              create_form: upload
-              create_form_label: Ajouter
-              create_form_values: 
-                  fields: 
-                      parent_module: 
-                          prop: module
-                      parent_object_name: 
-                          prop: object_name
-                      id_parent: 
-                          prop: id
-              
-    bug: 
+            -   custom: 1
+                input_name: status
+                input:
+                    type: select
+                label: Statut
+                values:
+                    callback: getStatusPossible
+            -   custom: 1
+                input_name: comment
+                input:
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+                hashtags: 1
+                label: Commentaire
+            -   custom: 1
+                input_name: notif
+                data_type: bool
+                label: Notifier
+                input:
+                    type: toggle
+                value: 1
+            -   custom: 1
+                label: Fichiers joints
+                input_name: join_files
+                data_type: id_object
+                input:
+                    type: check_list
+                    items:
+                        callback:
+                            method: getAllFiles
+                            params:
+                                - 0
+                depends_on: id_model
+                object: files
+                create_form: upload
+                create_form_label: Ajouter
+                create_form_values:
+                    fields:
+                        parent_module:
+                            prop: module
+                        parent_object_name:
+                            prop: object_name
+                        id_parent:
+                            prop: id
+    
+    bug:
         title: Signaler un bug
-        msgs: 
-            - type: warning
-              content: "NOTE IMPORTANTE : afin que les développeurs puissent répondre au mieux à votre demande, merci d'être aussi précis et détaillé que possible.<br/>"
-        rows: 
-            - field: type_manuel
-              hidden: 1
-              value: dev
-            - field: sous_type
-              hidden: 1
-              value: bug
-            - field: prio
-              value: 20
-            - field: subj
-            - field: txt
-            - field: url
-            - custom: 1
-              label: Fichiers
-              input_name: task_files
-              input: 
-                  type: drop_files
-                  
-    close: 
-        rows: 
-            - custom: 1
-              label: Notifier
-              input_name: notify
-              input: 
-                  type: toggle
-              value: 1
-            - custom: 1
-              label: Commentaire
-              input_name: comment
-              input: 
-                  type: textarea
-                  rows: 3
-                  auto_expand: 1
-              hashtags: 1
-           
-lists_cols: 
+        msgs:
+            -   type: warning
+                content: "NOTE IMPORTANTE : afin que les développeurs puissent répondre au mieux à votre demande, merci d'être aussi précis et détaillé que possible.<br/>"
+        rows:
+            -   field: type_manuel
+                hidden: 1
+                value: dev
+            -   field: sous_type
+                hidden: 1
+                value: bug
+            -   field: prio
+                value: 20
+            -   field: subj
+            -   field: txt
+            -   field: url
+            -   custom: 1
+                label: Fichiers
+                input_name: task_files
+                input:
+                    type: drop_files
+    
+    close:
+        rows:
+            -   custom: 1
+                label: Notifier
+                input_name: notify
+                input:
+                    type: toggle
+                value: 1
+            -   custom: 1
+                label: Commentaire
+                input_name: comment
+                input:
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+                hashtags: 1
+
+lists_cols:
     typeTache:
         label: Type de tâche
         value:
             callback: displayType
         search:
-          input:
-              type: select
-              options:
+            input:
+                type: select
                 options:
-                    callback: getTypeArray
-                            
-    nb_sous_taches: 
+                    options:
+                        callback: getTypeArray
+    
+    nb_sous_taches:
         label: Sous-tâches
-        value: 
+        value:
             callback: displaySousTachesCounts
-        
+
 lists:
     default:
         checkboxes: 1
         configurable: 1
         bulk_actions:
             del:
-              label: supprimer les tâches sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
+                label: supprimer les tâches sélectionnées
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
             force_logi:
                 label: Classer terminée
                 icon: far_check-square
@@ -385,30 +402,30 @@ lists:
         modal_view: full
         edit_form: default
         update_btn: 1
-        extra_btn: 
+        extra_btn:
             callback: getButtons
         header_buttons:
-            callback: 
+            callback:
                 method: getListHeaderExtraBtn
         cols:
             date_create:
-            prio: 
+            prio:
             status:
                 edit: 1
             id_task:
             src:
             dst:
-            typeTache:                    
+            typeTache:
             subj:
             txt:
             id_user_owner:
             nb_sous_taches:
-                
-    main: 
+    
+    main:
         extends: default
-        cols: 
+        cols:
             id_task: unset
-                
+    
     sousTache:
         extends: main
     sortable:
@@ -417,89 +434,88 @@ lists:
         positions_open: 1
 
 views:
-    full: 
+    full:
         objects_change_reload: BIMP_Task,BimpNote
         edit_form: default
         delete_btn: 1
-        rows:    
-            header: 
-                cols: 
-                    - type: object_header
-                    
-            data: 
-                cols: 
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    col_sm: 12
-                    fields_table:
-                        name: default
-                  - type: custom
-                    col_lg: 6
-                    col_md: 6
-                    col_sm: 12
-                    custom: 
-                        callback: renderLogsList
-            images: 
-                cols: 
-                    - type: custom
-                      custom: 
-                          callback: 
-                              method: renderImages
-                              params: 
-                                  - 1
-            sous_taches: 
+        rows:
+            header:
                 cols:
-                  - type: custom
-                    custom: 
-                        callback: renderSousTachesList
-            notes: 
-                cols:
-                  - type: custom
-                    custom: 
-                        callback: renderNotesList
-            files: 
-                cols: 
-                  - type: list
-                    list: 
-                        children: files
-                      
-    default: 
-        extends: full
-        rows: 
-            header: unset
+                    -   type: object_header
             
-    notes: 
+            data:
+                cols:
+                    -   type: fields_table
+                        col_lg: 6
+                        col_md: 6
+                        col_sm: 12
+                        fields_table:
+                            name: default
+                    -   type: custom
+                        col_lg: 6
+                        col_md: 6
+                        col_sm: 12
+                        custom:
+                            callback: renderLogsList
+            images:
+                cols:
+                    -   type: custom
+                        custom:
+                            callback:
+                                method: renderImages
+                                params:
+                                    - 1
+            sous_taches:
+                cols:
+                    -   type: custom
+                        custom:
+                            callback: renderSousTachesList
+            notes:
+                cols:
+                    -   type: custom
+                        custom:
+                            callback: renderNotesList
+            files:
+                cols:
+                    -   type: list
+                        list:
+                            children: files
+    
+    default:
+        extends: full
+        rows:
+            header: unset
+    
+    notes:
         edit_form: 0
         delete_btn: 0
-        rows:    
-            - cols:
-                  - type: custom
-                    custom: 
-                        callback: renderNotesList
+        rows:
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderNotesList
 
-searches: 
-    default: 
-        fields_search: 
+searches:
+    default:
+        fields_search:
             - a.id
             - u.firstname
             - u.lastname
             - a.subj
-        fields_return: 
+        fields_return:
             - a.id
             - u.firstname
             - u.lastname
             - a.subj
         label_syntaxe: 'Tâche #<a.id> (<a.subj>) - Utilisateur: <u.firstname> <u.lastname>'
-        joins: 
-            - table: user
-              on: a.id_user_owner = u.rowid
-              alias: u
-              
+        joins:
+            -   table: user
+                on: a.id_user_owner = u.rowid
+                alias: u
+
 filters_panels:
     default:
-        filters: 
+        filters:
             type_manuel:
             subj:
             status:
-        

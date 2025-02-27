@@ -152,6 +152,36 @@ class Bimp_Contact extends BimpObject
         return $buttons;
     }
 
+	public function getPhoneMobile($with_default = true)
+	{
+		$phone = $this->getData('phone_mobile');
+		if (BimpTools::isValidNumMobile($phone)) {
+			return $phone;
+		}
+
+		$phone = $this->getData('phone'); // Pro
+		if (BimpTools::isValidNumMobile($phone)) {
+			return $phone;
+		}
+
+		$phone = $this->getData('phone_perso');
+		if (BimpTools::isValidNumMobile($phone)) {
+			return $phone;
+		}
+
+		if ($with_default) {
+			$soc = $this->getParentInstance();
+			if (BimpObject::objectLoaded($soc)) {
+				$phone = $soc->getData('phone');
+				if (BimpTools::isValidNumMobile($phone)) {
+					return $phone;
+				}
+			}
+		}
+
+		return '';
+	}
+
     // Getters données:
 
     public function getName($withGeneric = true)

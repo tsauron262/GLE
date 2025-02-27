@@ -640,6 +640,7 @@ class BimpSignature extends BimpObject
 			$nom_piece = $obj->getLabel('the');
 			$ref_piece = $obj->getRef();
 			$lien_espace_client = '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>';
+			$extra_file_idx = 1;
 
 			$i = 1;
 			foreach ($signataires as $signataire) {
@@ -840,14 +841,18 @@ class BimpSignature extends BimpObject
 					}
 
 					if (isset($signature_params['files'])) {
+						$extra_data = $this->getData('extra_data');
+						if (!isset($extra_data['extra_files'])) {
+							$extra_data['extra_files'] = array();
+						}
+
 						$params['tabs']['signerAttachmentTabs'] = array();
-						$file_idx = 0;
 						foreach ($signature_params['files'] as $file_key => $file) {
-							$file_idx++;
+							$extra_file_idx++;
 							$params['tabs']['signerAttachmentTabs'][] = array(
 								'tabLabel'      => 'file_' . $file_idx,
 								'name'          => (isset($file['name']) ? $file['name'] : 'Document n°' . $file_idx),
-								'documentId'    => $file_key,
+								'documentId'    => $file_idx,
 								'anchorString'  => $file['anch'],
 								'anchorXOffset' => (isset($file['x']) ? $file['x'] : 0),
 								'anchorYOffset' => (isset($file['y']) ? $file['y'] : 0),
@@ -856,7 +861,11 @@ class BimpSignature extends BimpObject
 								'optional'      => (isset($file['opt']) ? (bool) $file['opt'] : false),
 								'pageNumber'    => (isset($file['p']) ? $file['p'] : 1)
 							);
+
+							$extra_data['extra_files'][$extra_file_idx] = $file_key;
 						}
+
+						$this->updateField('extra_data', $extra_data);
 					}
 
 					if ((int) $signataire->getData('need_sms_code')) {
@@ -1896,17 +1905,6 @@ class BimpSignature extends BimpObject
 									mailSyn2($subject, $email, '', $msg);
 								}
 							}
-
-							$doc_warnings = array();
-							$doc_errors = $this->downloadDocuSignDocument($doc_warnings, $success);
-
-							if (count($doc_errors)) {
-								$warnings[] = BimpTools::getMsgFromArray($doc_errors, 'Echec du téléchargement du document DocuSign');
-							}
-							if (count($doc_warnings)) {
-								$warnings[] = BimpTools::getMsgFromArray($doc_warnings, 'Erreurs suite au téléchargement du document DocuSign');
-							}
-
 							$this->onFullySigned();
 						}
 					}
@@ -1915,12 +1913,22 @@ class BimpSignature extends BimpObject
 				}
 			}
 
-//			if ($has_new_completed) {
-			$extra_files_errors = $this->downloadDocusignExtraFiles($warnings, $success);
-			if (count($extra_files_errors)) {
-				$warnings[] = BimpTools::getMsgFromArray($extra_files_errors, 'Echec du téléchargement des fichiers supplémentaires DocuSign');
+			if ($has_new_completed) {
+				$doc_warnings = array();
+				$doc_errors = $this->downloadDocuSignDocument($doc_warnings, $success);
+
+				if (count($doc_errors)) {
+					$warnings[] = BimpTools::getMsgFromArray($doc_errors, 'Echec du téléchargement du document DocuSign');
+				}
+				if (count($doc_warnings)) {
+					$warnings[] = BimpTools::getMsgFromArray($doc_warnings, 'Erreurs suite au téléchargement du document DocuSign');
+				}
+
+				$extra_files_errors = $this->downloadDocusignExtraFiles($warnings, $success);
+				if (count($extra_files_errors)) {
+					$warnings[] = BimpTools::getMsgFromArray($extra_files_errors, 'Echec du téléchargement des fichiers supplémentaires DocuSign');
+				}
 			}
-//			}
 		}
 
 		return $errors;
@@ -2021,8 +2029,23 @@ class BimpSignature extends BimpObject
 
 			if (isset($docs['envelopeDocuments'])) {
 				$files_dir = $this->getDocumentFileDir();
+				$extra_data = $this->getData('extra_data');
+
 				foreach ($docs['envelopeDocuments'] as $doc) {
 					if (in_array($doc['documentId'], array(1, 'certificate'))) {
+						continue;
+					}
+
+					$file_name = $this->getData('doc_type') . '_';
+
+					if (isset($extra_data['extra_files'][$doc['documentId']])) {
+						$file_name .= $extra_data['extra_files'][$doc['documentId']];
+					} else {
+						$file_name .= 'extra_file_' . $doc['documentId'];
+					}
+					$file_name .= '.pdf';
+
+					if (file_exists($files_dir . $file_name)) {
 						continue;
 					}
 
@@ -2032,7 +2055,6 @@ class BimpSignature extends BimpObject
 						$warnings[] = BimpTools::getMsgFromArray($request_errors, 'Echec du téléchargement du fichier supplémentaire #' . $doc['documentId']);
 					} else {
 						$file_content = base64_decode($result);
-						$file_name = $this->getData('doc_type') . '_extra_file_' . $doc['documentId'] . '.pdf';
 
 						if (!is_dir($files_dir)) {
 							$dir_err = BimpTools::makeDirectories($files_dir);
@@ -2042,12 +2064,6 @@ class BimpSignature extends BimpObject
 						}
 
 						if (!count($errors)) {
-							if (file_exists($files_dir . $file_name)) {
-								if (!unlink($files_dir . $file_name)) {
-									$warnings[] = "Echec de la suppression de l\'ancien fichier supplémentaire #" . $doc['documentId'];
-								}
-							}
-
 							if (!file_put_contents($files_dir . $file_name, $file_content)) {
 								$warnings[] = "Echec de l\'enregistrement du fichier supplémentaire #" . $doc['documentId'];
 							} else {

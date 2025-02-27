@@ -638,6 +638,31 @@ class BT_ficheInter extends BimpDolObject
 		return 'FI ' . $this->getRef();
 	}
 
+	public function getUpdateJsCallback()
+	{
+		$js = '';
+		if (!empty($this->newDocGenerated)) {
+			$file_name = '';
+			if (is_file(DOL_DATA_ROOT . '/ficheinter/' . $this->getRef() . "/" . $this->getRef() . '_sign_e.pdf')) {
+				$file_name = $this->getRef() . '_sign_e.pdf';
+			} elseif (is_file(DOL_DATA_ROOT . '/ficheinter/' . $this->getRef() . "/" . $this->getRef() . '.pdf')) {
+				$file_name = $this->getRef() . '.pdf';
+			}
+
+			if ($file_name) {
+				$file_url = $this->getFileUrl($file_name);
+
+				if ($file_url) {
+					$js .= 'window.open(\'' . $file_url . '\');';
+				}
+			}
+
+			$js .= 'bimp_reloadPage();';
+		}
+
+		return $js;
+	}
+
 	// Getters données:
 
 	public function getCommercialClient()
@@ -2468,13 +2493,15 @@ class BT_ficheInter extends BimpDolObject
 		$success = 'Mise à jour effectuée';
 
 		$this->addLog("Le client à signé la FI et le fichier est déposé");
-		$this->updateField('type_signature', self::TYPE_SIGN_PAPIER);
+		$errors = $this->updateField('type_signature', self::TYPE_SIGN_PAPIER);
 
 		if (!count($errors)) {
 			$errors = $this->setSigned($warnings);
 		}
 
-		$this->updateField('fk_statut', 1);
+		if (!count($errors)) {
+			$this->updateField('fk_statut', 1);
+		}
 
 		return [
 			'errors'   => $errors,
@@ -2596,7 +2623,13 @@ class BT_ficheInter extends BimpDolObject
 
 	public function actionGeneratePdf($data, &$success = '', $errors = array(), $warnings = array())
 	{
-		return parent::actionGeneratePdf(['model' => 'fi'], $success);
+		$result = parent::actionGeneratePdf(['model' => 'fi'], $success);
+
+		if (!count($result['errors'])) {
+			$this->newDocGenerated = true; // pour getUpdateJsCallback()
+		}
+
+		return $result;
 	}
 
 	public function actionResendFarSignEmail($data, &$success)

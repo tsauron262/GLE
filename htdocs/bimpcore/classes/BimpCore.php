@@ -1638,7 +1638,8 @@ class BimpCore
 		$period = (int) BimpCore::getConf('rate_limiting_' . $type . '_period', 60);
 		$reset_delay = (int) BimpCore::getConf('rate_limiting_' . $type . '_reset_delay', 30);
 
-		$is_mode_dev = (BimpCore::isModeDev() || $user->login == 'f.martinez');
+//		$is_mode_dev = (BimpCore::isModeDev() || $user->login == 'f.martinez');
+		$is_mode_dev = false;
 //		if ($is_mode_dev) {
 //			$limit = 3;
 //			$reset_delay = 10;

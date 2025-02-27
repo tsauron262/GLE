@@ -82,12 +82,14 @@ fields:
         
     id_envelope_docu_sign:
         label: Id de l'envelope DocuSign
-    
     id_account_docu_sign:
         label: Id du compte utilisateur DocuSign
         
     selected_file: 
         label: Fichier sélectionné
+    extra_data:
+        label: Données supplémentaires
+        type: json
         
 forms: 
     sign_papier: 
@@ -205,6 +207,7 @@ fields_tables:
                   callback: displayDocRef
             - field: allow_no_scan
               edit: 1
+            - field: extra_data
             
 views:
     default: 
@@ -291,4 +294,3 @@ cards:
               
             
             
-        

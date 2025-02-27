@@ -198,7 +198,7 @@ fields:
         label: Index signature
         type: int
         default_value: 1
-            
+        
 forms:
     edit: 
         rows: 
@@ -301,7 +301,6 @@ forms:
                       object: parent
             - field: nom
             - field: email
-            - field: phone
             - field: fonction
               show: 
                   callback: isFonctionRequired
@@ -357,7 +356,6 @@ forms:
                   field_value: need_sms_code
               required: 1
             - field: nom
-            - field: phone
             - field: fonction
               show: 
                   callback: isClientCompany

@@ -120,6 +120,7 @@ sections:
                               children: files
           - id: divers
             title: Divers (admin)
+            icon: fas_tools
             show: 
                 callback:
                     method: iAmAdmin

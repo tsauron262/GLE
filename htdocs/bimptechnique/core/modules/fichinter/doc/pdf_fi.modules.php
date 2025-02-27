@@ -343,7 +343,6 @@ class pdf_fi
 
                 if (count($tick) > 0 || count($comm) > 0 || $fiche->getData('fk_contrat')) {
                     $pdf->ln();
-
 					global $user;
 
                     $dir_output = DOL_DOCUMENT_ROOT . '/bimptechnique/views/images/';
@@ -708,9 +707,14 @@ class pdf_fi
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Email du signataire: " . $fiche->getData('email_signature'), 0, 'L');
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "", 0, 'L');
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "SIGNATURE CLIENT", 0, 'L');
-                    $img_base64_encoded = $fiche->getData('base_64_signature');
-                    $img = '<img src="@' . preg_replace('#^data:image/[^;]+;base64,#', '', $img_base64_encoded) . '" width="300px">';
-                    $pdf->writeHTML($img, true, false, true, false, '');
+
+					global $user;
+					if ($user->login != 'f.martinez') {
+						$img_base64_encoded = $fiche->getData('base_64_signature');
+						$img = '<img src="@' . preg_replace('#^data:image/[^;]+;base64,#', '', $img_base64_encoded) . '" width="300px">';
+						$pdf->writeHTML($img, true, false, true, false, '');
+					}
+
                 } elseif ($fiche->getData('fk_statut') != 0) {
                     if ($pdf->GetY() > 250) {
                         $pdf->addPage();

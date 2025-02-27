@@ -46,6 +46,13 @@ class pdf_fi
 
     public function addLogo(&$pdf, $size, $pdf1 = null)
     {
+		global $user;
+
+		if ($user->login == 'f.martinez') {
+			return;
+		}
+
+
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
 
@@ -560,12 +567,12 @@ class pdf_fi
                         $pdf->SetFont(''/* 'Arial' */, '', 9);
                         // Tarif
 //                        $id_service = ($child->getData('type') == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique');
-                        
+
                         $arrayCode = BT_ficheInter_det::$servicesForFacturation;
                         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
                         $product->find(Array('ref' => $arrayCode[$type]));
                         $id_service = $product->id;
-                        
+
                         $servicePlus = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $id_service);
 
                         $time = $fiche->timestamp_to_time($child->getData('duree'));

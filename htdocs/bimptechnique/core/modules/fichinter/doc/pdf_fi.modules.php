@@ -344,19 +344,26 @@ class pdf_fi
                 if (count($tick) > 0 || count($comm) > 0 || $fiche->getData('fk_contrat')) {
                     $pdf->ln();
 
+					global $user;
+
                     $dir_output = DOL_DOCUMENT_ROOT . '/bimptechnique/views/images/';
-                    if (count($comm) > 0) {
-                        $fileName = 'commande_fi.png';
-                        $pdf->Image($dir_output . $fileName, /* x */ 38, /* y */ 80, 0, 15, '', '', '', false, 250, '');
-                    }
-                    if ($fiche->getData('fk_contrat')) {
-                        $fileName = 'contrat_fi.png';
-                        $pdf->Image($dir_output . $fileName, /* x */ 100, /* y */ 80, 0, 15, '', '', '', false, 250, '');
-                    }
-                    if (is_array($tickets) && count($tickets) > 0) {
-                        $fileName = 'ticket_fi.png';
-                        $pdf->Image($dir_output . $fileName, /* x */ 158, /* y */ 80, 0, 15, '', '', '', false, 250, '');
-                    }
+
+
+					if ($user->login != 'f.martinez') {
+						if (count($comm) > 0) {
+							$fileName = 'commande_fi.png';
+							$pdf->Image($dir_output . $fileName, /* x */ 38, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+						}
+						if ($fiche->getData('fk_contrat')) {
+							$fileName = 'contrat_fi.png';
+							$pdf->Image($dir_output . $fileName, /* x */ 100, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+						}
+						if (is_array($tickets) && count($tickets) > 0) {
+							$fileName = 'ticket_fi.png';
+							$pdf->Image($dir_output . $fileName, /* x */ 158, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+						}
+					}
+
                     $title = '';
                     if (count($comm) > 0) {
                         $title = (count($commandes) > 1) ? "Références commandes" : "Référence commande";

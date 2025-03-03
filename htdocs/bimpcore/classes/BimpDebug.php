@@ -163,15 +163,16 @@ class BimpDebug
         if (!(float) $bimp_start_time) {
             $msg .= 'Variable bimp_start_time absente du fichier index.php';
 			$code = 'page_time_indeterminer';
-            mailSyn2('Page time indeterminer', 'tommy@bimp.fr', null, $debMail . $msg);
+			$sujet = 'Page time indeterminer';
+            BimpUserMsg::envoiMsg($code, $sujet, $debMail . $msg);
         } else {
             if (!defined('DISABLE_LONG_PAGE_NOTIFICATION') && (microtime(1) - $bimp_start_time) > 40) {
                 $msg .= (microtime(1) - $bimp_start_time) . ' sec';
 
                 $msg .= self::renderDebugTimes();
 				$code = 'page_tres_lourde';
-                mailSyn2('Page trés lourde', 'tommy@bimp.fr,f.martinez@bimp.fr', null, $debMail . $msg);
-                BimpCore::addlog('Page trop lourde ' . microtime(1) - $bimp_start_time, Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info' => $msg));
+				BimpUserMsg::envoiMsg($code, 'Page très lourde', $debMail . $msg);
+                BimpCore::addlog('Page trop lourde ' . (microtime(1) - $bimp_start_time), Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info' => $msg));
             }
         }
 

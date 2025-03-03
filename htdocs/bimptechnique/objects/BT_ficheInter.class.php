@@ -1977,8 +1977,7 @@ class BT_ficheInter extends BimpDolObject
 
                 if (BimpObject::objectLoaded($tech)) {
 					$code = 'attribution_FI';
-					$tech->sendMsg($code, $sujet, $message);
-//                    mailSyn2($sujet, BimpTools::cleanEmailsStr($tech->getData('email')), $this->mailSender, $message);
+					BimpUserMsg::envoiMsg($code, $sujet, $message, $tech->id);
                 }
             }
         }
@@ -2160,17 +2159,13 @@ class BT_ficheInter extends BimpDolObject
                     $email_comm = '';
 
                     if (BimpObject::objectLoaded($tech)) {
-//                        $email_tech = BimpTools::cleanEmailsStr($tech->getData('email'));
-						$bimpTech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $tech->getData('id'));
-						$email_tech = $bimpTech->isMailValid();
+                        $email_tech = BimpTools::cleanEmailsStr($tech->getData('email'));
                     }
 
                     $commercial = $this->getCommercialClient();
                     //$commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', 460);
                     if (BimpObject::objectLoaded($commercial)) {
-//                        $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
-						$bimpCommercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $commercial->getData('id'));
-						$email_comm = $bimpCommercial->isMailValid();
+                        $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
                     }
 
                     $pdf_file = $conf->ficheinter->dir_output . '/' . $ref . '/' . $ref . '.pdf';
@@ -2195,11 +2190,10 @@ class BT_ficheInter extends BimpDolObject
                             );
                             $errors = BimpTools::merge_array($errors, $task->validateArray($data));
                             $errors = BimpTools::merge_array($errors, $task->create());
-                            if ($email_comm != '')
-                                $data["dst"] .= ',' . $email_comm;
+
                             if (!count($errors)) {
 								$code = 'fiche_inter_non_liee';
-                                mailSyn2($data['subj'], $data['dst'], null, $data['txt']);
+								BimpUserMsg::envoiMsg($code, $data['subj'], $data['txt'], $this);
                             }
                         }
                     }
@@ -2308,12 +2302,13 @@ class BT_ficheInter extends BimpDolObject
                                 $message .= '<br/><br/>';
                             }
 
-                            $to = $email_comm ? $email_comm : $email_tech;
-                            $cc = ($email_comm ? $email_tech : '');
+//                            $to = $email_comm ? $email_comm : $email_tech;
+//                            $cc = ($email_comm ? $email_tech : '');
 
 //                            $cc .= ($cc ? ', ' : '') . 'f.martinez@bimp.fr';
 							$code = 'envoi_CR_fiche_inter';
-                            if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
+//                            if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
+                            if (count(BimpUserMsg::envoiMsg($code, $subject, $message, $this, array(array($pdf_file), array('application/pdf'), array($ref . '.pdf')) ))) {
                                 $warnings[] = 'Echec de l\'envoi de l\'e-mail de notification au commercial du client';
                             }
                         }
@@ -2544,36 +2539,31 @@ class BT_ficheInter extends BimpDolObject
         $errors = [];
         $warnings = [];
 
-        $email = BimpCore::getConf('email_facturation', null, 'bimpcore');
+        $success = "Service facturation prévenu";
 
-        if ($email) {
-            $errors[] = 'Adresse e-mail du service facturation non configuré';
-        } else {
-            $success = "Service facturation prévenu";
+		$client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
-            $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+		$subject = '[FI] ' . $this->getRef();
 
-            $subject = '[FI] ' . $this->getRef();
+		if (BimpObject::objectLoaded($client)) {
+			$subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
+		}
 
-            if (BimpObject::objectLoaded($client)) {
-                $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
-            }
+		$msg = 'Bonjour,<br/><br/>';
+		$msg .= 'Pour information, la FI ' . $this->getLink();
 
-            $msg = 'Bonjour,<br/><br/>';
-            $msg .= 'Pour information, la FI ' . $this->getLink();
+		if (BimpObject::objectLoaded($client)) {
+			$msg .= ' pour le client ' . $client->getRef() . ' ' . $client->getName();
+		}
 
-            if (BimpObject::objectLoaded($client)) {
-                $msg .= ' pour le client ' . $client->getRef() . ' ' . $client->getName();
-            }
+		$msg .= ' a été signée par le client.<br/><br/>';
 
-            $msg .= ' a été signée par le client.<br/><br/>';
+		$code = 'notification_facturation_signature_FI';
+		BimpUserMsg::envoiMsg($code, $subject, $msg);
 
-			$code = 'notification_facturation_signature_FI';
-            mailSyn2($subject, $email, '', $msg);
+		$this->addLog("Facturation client prévenue");
+		$this->updateField('fk_statut', 2);
 
-            $this->addLog("Facturation client prévenue");
-            $this->updateField('fk_statut', 2);
-        }
 
         return [
             'errors'   => $errors,
@@ -3198,8 +3188,7 @@ class BT_ficheInter extends BimpDolObject
 
                     $this->addLog("Fiche d'intervention créée");
 					$code = 'notif_create_FI';
-					$tech->sendMsg($code, $sujet, $message);
-//                    mailSyn2($sujet, BimpTools::cleanEmailsStr($tech->getData('email')), "gle@bimp.fr", $message);
+					BimpUserMsg::envoiMsg($code, $sujet, $message, $tech);
                 } else {
                     $warnings[] = 'L\'e-mail n\'a pas pu être envoyé au technicien (Technicien sélectionné invalide)';
                 }
@@ -3329,8 +3318,7 @@ class BT_ficheInter extends BimpDolObject
                 $this->addLog('Changement de technicien: ' . $ancienTech->getName() . ' => ' . $currentTech->getName());
 
 				$code = 'notif_change_tech_FI';
-				$currentTech->sendMsg($code, $sujet, $message);
-//                mailSyn2($sujet, $currentTech->getData('email'), null, $message);
+				BimpUserMsg::envoiMsg($code, $sujet, $message, $currentTech);
             }
 
             // Changement de date et d'horaire
@@ -3360,8 +3348,7 @@ class BT_ficheInter extends BimpDolObject
                 $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_tech'));
 
 				$code = 'notif_change_horaire_FI';
-				$tech->sendMsg($code, $sujet, $message);
-//                mailSyn2($sujet, $tech->getData('email'), null, $message);
+				BimpUserMsg::envoiMsg($code, $sujet, $message, $tech);
             }
         }
 
@@ -3388,7 +3375,6 @@ class BT_ficheInter extends BimpDolObject
             global $user;
 
             $actionCommList = $this->db->getRows("actioncomm", 'fk_soc = ' . $id_soc . " AND elementtype = 'fichinter' AND fk_element = " . $id_fi);
-            $emailControl = "v.gilbert@bimp.fr";
             $tech = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_User", $id_tech);
             BimpTools::loadDolClass("comm/action", "actioncomm");
 
@@ -3425,10 +3411,8 @@ class BT_ficheInter extends BimpDolObject
                     $message .= 'pas de contrat';
                 }
 
-                $to = ($tech->getData('email') != $emailControl) ? $tech->getData('email') . ',' . $emailControl : $tech->getData('email');
-
 				$code = 'notif_delete_FI';
-                mailSyn2("[FI] " . $ref . " supprimée - " . $client->getName(), $to, null, $message);
+				BimpUserMsg::envoiMsg($code, "[FI] " . $ref . " supprimée - " . $client->getName(), $message, $tech);
             }
         }
 

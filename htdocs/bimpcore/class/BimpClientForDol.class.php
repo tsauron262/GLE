@@ -40,7 +40,9 @@ class BimpClientForDol extends Bimp_Client
 
                 if ((int) $this->db->getCount('bimpcore_note', $where_check . $c->id) > 0) {
 					$code = 'MAJ_ICBA_encours_non_supprime';
-                    mailSyn2('Probléme MAJ ICBA '.$c->id, BimpCore::getConf('devs_email'), null, 'L\'encours devrait deja être supprimer');
+					$sujet = 'Probléme MAJ ICBA '.$c->id;
+					$msg = 'L\'encours devrait deja être supprimer';
+					BimpUserMsg::envoiMsg($code, $sujet, $msg);
                     continue;
                 }
 

@@ -3678,20 +3678,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             $infoClient = " du client " . $client->getLink();
                         }
 
-
-//						$idComm = $this->getIdCommercial();
-//                        $email = BimpTools::getUserEmailOrSuperiorEmail($idComm);
-
-//						$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
-
 						$code = 'logistique_ok';
 						$sujet = "Logistique commande OK";
 						$msg = 'Bonjour, la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ';
-//						$params = array(
-//							'check_disponibility' => 1,
-//							'allow_superior' => 1
-//						);
-//						$user->sendMsg($code, $sujet, $msg, $params);
 						BimpUserMsg::envoiMsg($code, $sujet, $msg, $this);
                     }
                 }
@@ -3845,17 +3834,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         $infoClient = " du client " . $client->getLink();
                     }
 
-//					$idComm = $this->getIdCommercial();
-//					$userComm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
-
 					$code = 'change_statut_facturation';
 					$sujet = "Statut facturation";
 					$msg = 'Bonjour, le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status');
-//					$params = array(
-//						'check_disponibility' => 1,
-//						'allow_superior' => 1
-//					);
-//					$userComm->sendMsg($code, $sujet, $msg, $params);
 					BimpUserMsg::envoiMsg($code, $sujet, $msg, $this);
                 }
             }
@@ -4622,7 +4603,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $this->addNote($success . '<br/>' . $msg);
 
 					$code = "action_late_paiement";
-                    mailSyn2($subject, $data['user_ask_email'], null, $msg);
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $data['user_ask_email']);
                 } else
                     $errors[] = 'Client ' . $this->getLabel('of_the') . 'inconnu';
             }
@@ -4715,22 +4696,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 // Validation encours
                 if (empty($errors)) {
                     if ($this->field_exists('paiement_comptant') and $this->getData('paiement_comptant')) {
-						$to = BimpCore::getConf('email_valid_paiement_comptant');
-						if ($to) {
-							$vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-							$demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
-							if ($demande) {
-								$demande->delete($warnings, 1);
-							}
-							$warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée.";
-							$msg_mail = "Bonjour, <br/><br/>La commande " . $this->getNomUrl(1, true);
-							$msg_mail .= " a été validée financièrement par paiement comptant ou mandat SEPA par ";
-							$msg_mail .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
-							$msg_mail .= "<br/>Merci de vérifier le paiement ultérieurement.";
-
-							$code = "valid_paiement_comptant_ou_sepa";
-							mailSyn2("Validation par paiement comptant ou mandat SEPA", $to, "", $msg_mail);
+						$vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+						$demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
+						if ($demande) {
+							$demande->delete($warnings, 1);
 						}
+						$warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée.";
+						$msg_mail = "Bonjour, <br/><br/>La commande " . $this->getNomUrl(1, true);
+						$msg_mail .= " a été validée financièrement par paiement comptant ou mandat SEPA par ";
+						$msg_mail .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
+						$msg_mail .= "<br/>Merci de vérifier le paiement ultérieurement.";
+
+						$code = "valid_paiement_comptant_ou_sepa";
+						$subject = 'Validation par paiement comptant ou mandat SEPA';
+						BimpUserMsg::envoiMsg($code, $subject, $msg_mail);
                     } else {
                         $client_facture = $this->getClientFacture();
                         if (!$client_facture->getData('validation_financiere')) {
@@ -5115,7 +5094,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
 				$suject = 'Commande(s) brouillon à régulariser';
 
                 $return .= ' - Mail to ' . $id_user . ' : ';
-//				if ($userComm->sendMsg('rappel_commande_brouillon', $suject, $msg)) {
 				if (!count(BimpUserMsg::envoiMsg('rappel_commande_brouillon', $suject, $msg, $id_user))) {
                     $return .= ' [OK]';
                     $i++;
@@ -5168,10 +5146,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
 						$msg .= 'Merci de la régulariser au plus vite.';
 
 						$out .= ' - Mail to ' . $id_user . ' : ';
-//						$userComm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
 						$code = "rappel_commande_non_facturee";
 						$sujet = 'Commande ' . $commande->getRef() . ' non facturée';
-//						if ( $userComm->sendMsg($code, $sujet, $msg, $params) ) {
 						if (!count(BimpUserMsg::envoiMsg($code, $sujet, $msg, $id_user))) {
 							$out .= '[OK]';
 							$nOk++;
@@ -5353,7 +5329,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
 					$msg .= $html;
 
 					$return .= 'Mail to ' . ($id_commercial) . ' (' . $nProds . ' produit(s)) => ';
-//					if ($user->sendMsg('product_duree_limitee_expire_soon', $subject, $msg)) {
 					if (!count(BimpUserMsg::envoiMsg('product_duree_limitee_expire_soon', $subject, $msg, $id_commercial))) {
 						$return .= '[OK]';
 						$bdb->update('bimp_commande_line', array(

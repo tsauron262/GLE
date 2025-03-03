@@ -2,500 +2,635 @@
 
 class BimpUserMsg
 {
-	public static $canaux_diff_msg = array(
-		'mail' => 'Email',
-		'msgerp' => 'Message interne'
-	);
+    public static $userMessages = array(
+        'relance_fac_sans_expertise_bimp'            => array(        // \BimpFactureFournForDol::sendRelanceExpertiseBimp
+            'label'  => 'Factures sans expertise BIMP',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpcommercial'
+        ),
+        'logistique_ok'                              => array(    // \Bimp_Commande::checkLogistiqueStatus
+            'label'  => 'La logistique complétée pour de votre commande XXX du client ...',
+            'dests'  => 'object::commercial',
+            'module' => 'bimpcommercial',
+        ),
+        'change_statut_facturation'                  => array(    // \Bimp_Commande::checkInvoiceStatus
+            'label'  => 'Changement de statut de facturation',
+            'dests'  => 'object::commercial',
+            'module' => 'bimpcommercial',
+        ),
+        'valide_commande_client'                     => array(    // \Bimp_Commande::onValidate
+            'label'  => 'Commande XXX pour le client ... a été validée',
+            'dests'  => 'object::commercial',
+            'module' => 'bimpcommercial',
+        ),
+        'rappel_commande_brouillon'                  => array(    // \Bimp_Commande::sendRappelCommandesBrouillons
+            'label'  => 'X factures en brouillon depuis ... jours, merci de les valider',
+            'dests'  => 'object::id_user',
+            'params' => array('allow_default' => 1),
+            'module' => 'bimpcommercial',
+        ),
+        'rappel_commande_non_facturee'               => array(    // \Bimp_Commande::sendRappelsNotBilled
+            'label'  => 'La commande XXX créée le ... n\'a pas été facturée. Merci de la régulariser au plus vite.',
+            'dests'  => 'object::id_user',
+            'params' => array('allow_default' => 1),
+            'module' => 'bimpcommercial',
+        ),
+        'product_duree_limitee_expire_soon'          => array(    // \Bimp_Commande::checkLinesEcheances
+            'label'  => 'Produits à durée limitée arrivant bientôt à échéance',
+            'dests'  => 'object::commercial',
+            'module' => 'bimpcommercial',
+        ),
+        'facture_fourn_brouillon'                    => array(        // \Bimp_FactureFourn::sendInvoiceDraftWhithMail
+            'label'  => 'Une facture fournisseur en brouillon depuis X jours. Merci de bien vouloir la régulariser au plus vite.',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpcommercial',
+        ),
+        'creation_accompte_client'                   => array(    // \BimpComm::createAcompte
+            'label'  => 'Un acompte de X € a été ajouté à la facture XXX',
+            'dests'  => 'object::commercial',
+            'module' => 'bimpcommercial',
+        ),
+        'rappel_facture_brouillon'                   => array( // \Bimp_Facture::sendRappelFacturesBrouillons
+            'label'  => 'X factures en brouillon depuis ... jours, merci de les valider',
+            'dests'  => 'object::id_user',
+            'params' => array('allow_superior' => 1),
+            'module' => 'bimpcommercial',
+        ),
+        'rappel_facture_financement_impayee'         => array(    // \Bimp_Facture::sendRappelFacturesFinancementImpayees
+            'label'  => 'La facture xxx dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le d / m / Y',
+            'dests'  => 'conf::rappels_factures_financement_impayees_emails/bimpcommercial,object::client_commerciaux',
+            'module' => 'bimpcommercial'
+        ),
+        'relance_avenant_provisoire'                 => array(    // \cron::relanceAvenantProvisoir
+            'label'  => 'Abandon d\'un avenant ou relance d\'un avenant non signé',
+            'dests'  => 'object::client_commercial',
+            'module' => 'bimpcontract',
+        ),
+        'suspension_contrat_auto'                    => array(    // \cron::relanceActivationProvisoire
+            'label'  => 'L\'activation provisoire de votre contrat xxx pour le client xxx, vient d\'être suspendue. Il ne sera réactivé que lorsque nous recevrons la version dûment signée par le client',
+            'dests'  => 'object::client_commercial',
+            'module' => 'bimpcontract',
+        ),
+        'relance_contrat_provisoire'                 => array(    // \cron::relanceActivationProvisoire
+            'label'  => 'Votre contrat xxx pour le client xxx est activé provisoirement car il n\'est pas revenu signé. Il sera automatiquement désactivé le d / m / Y si le nécessaire n\'a pas été fait.',
+            'dests'  => 'object::client_commercial',
+            'module' => 'bimpcontract',
+        ),
+        'tacit_renewal_contract'                     => array(    // \cron::relanceActivationProvisoire
+            'label'  => 'Le contrat xxx a été renouvellé tacitement. client xxx',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpcontract',
+        ),
+        'relance_contrat_brouillon'                  => array(    // \cron::sendMailCommercial
+            'label'  => 'Le contrat xxx dont vous êtes le commercial est au statut BROUILLON depuis: x jours',
+            'dests'  => 'object::id_user',
+            'params' => array('allow_superior' => 1),
+            'module' => 'bimpcontract',
+        ),
+        'liste_contrat_activation_cejour'            => array(    // \cron::mailJourActivation
+            'label'  => 'Voici la liste des contrats à activer ce jour',
+            'dests'  => 'conf::email_groupe/bimpcontract',
+            'module' => 'bimpcontract',
+        ),
+        'liste_contrat_attente_validation'           => array(    // \cron::relance_demande
+            'label'  => 'Liste des contrats en attente de validation de votre part',
+            'dests'  => 'conf::email_groupe/bimpcontract',
+            'module' => 'bimpcontract',
+        ),
+        'avenant_activation_provisoire'              => array(    // \BContract_avenant::actionActivation
+            'label'  => 'L\'avenant N° XXX a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement.',
+            'dests'  => 'object::commercial',
+            'module' => 'bimpcontract',
+        ),
+        'avenant_signe'                              => array(    // \BContract_avenant::signed
+            'label'  => 'L\'avenant N°AV XXX sur le contrat XXX a été sigé le d/m/Y.',
+            'dests'  => 'conf::email_groupe/bimpcontract',
+            'module' => 'bimpcontract',
+        ),
+        'avenant_prolongation_signe'                 => array(    // \BContract_avenant::signedProlongation
+            'label'  => 'L\'avenant N°AVP XXX sur le contrat XXX a été sigé le d/m/Y.',
+            'dests'  => 'conf::email_groupe/bimpcontract',
+            'module' => 'bimpcontract',
+        ),
+        'avenant_validation'                         => array(    // \BContract_avenant::actionValidate
+            'label'  => 'L\'avenant N°AV XXX sur le contrat est en attente de signature',
+            'dests'  => 'conf::email_groupe/bimpcontract',
+            'module' => 'bimpcontract',
+        ),
+        'actionActivateContrat'                      => array(    //	\BContract_contrat::actionActivateContrat
+            'label'  => 'Contrat activé. Action à faire sur le contrat: "Facturer le contrat"',
+            'dests'  => 'conf::email_facturation,object::id_user',
+            'module' => 'bimpcontract',
+        ),
+        'actionSignedContrat'                        => array(    //	\BContract_contrat::actionSigned
+            'label'  => 'Contrat signé par le client. Action à faire sur le contrat: "Activer le contrat"',
+            'dests'  => 'conf::email_groupe/bimpcontract',
+            'module' => 'bimpcontract',
+        ),
+        'actionDemandeValidationContrat'             => array(    //	\BContract_contrat::actionDemandeValidation
+            'label'  => 'Contrat en attente de validation. Action à faire sur le contrat: "Valider la conformité du contrat"',
+            'dests'  => 'conf::email_groupe/bimpcontract',
+            'module' => 'bimpcontract',
+        ),
+        'actionValidationContrat'                    => array(    //	\BContract_contrat::actionValidation
+            'label'  => 'Ce contrat a été validé par le service technique. Vous devez maintenant utiliser l\'action "Créer signature" afin de le faire signer par le client, puis par votre direction commerciale',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpcontract',
+        ),
+        'erreur_auth_gsx'                            => array(        // \GSX_v2::authenticate
+            'label'       => 'Erreur d\'authentification GSX',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpapple',
+            'type_metier' => 'devs'
+        ),
+        'erreur_auth_phantom'                        => array(     // \GSX_v2::phantomAuth
+            'label'       => 'Erreur d\'authentification Phantom',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpapple',
+            'type_metier' => 'devs'
+        ),
+        'erreur_stock_consigne_apple'                => array(    // \ConsignedStock::actionReceive
+            'label'  => 'Erreurs stocks consignes apple. X erreur(s) à corriger manuellement  - Voir les logs',
+            'dests'  => 'conf::devs_email',
+            'module' => 'bimpapple',
+            'metier' => 'devs'
+        ),
+        'user_create_bienvenue'                      => array(    // \InterfaceBimpbimp::runTrigger
+            'label'  => 'Nouveau collaborateur',
+            'dests'  => 'to::bimpgroupe@bimp.fr',
+            'module' => 'bimpbimp',
+        ),
+        'commande_ldlc_errors'                       => array(    // \Bimp_CommandeFourn_LdlcFiliale::verifMajLdlc
+            'label'  => 'Commande(s) LDLC avec erreurs',
+            'dests'  => 'conf::mail_achat::debugerp_email',
+            'module' => 'bimpcommercial',
+        ),
+        'commande_ldlc_facture'                      => array(    // \Bimp_CommandeFourn_LdlcFiliale::verifMajLdlc
+            'label'  => 'La facture XXX de la commande XXX en livraison directe a été téléchargée',
+            'dests'  => 'conf::mail_achat',
+            'module' => 'bimpcommercial',
+        ),
+        'suppression_paiement'                       => array(    // \Bimp_Paiement::onDelete
+            'label'       => 'Suppression de paiement',
+            'dests'       => 'conf::email_compta',
+            'module'      => 'bimpcommercial',
+            'type_metier' => 'devs'
+        ),
+        'modification_paiement_export_compta'        => array(    // \Bimp_Paiement::actionMoveAmount
+            'label'  => 'Réference de paiement XXX. Montant initial de paiement : XXX €, nouveau montant de paiement : XXX €',
+            'dests'  => 'conf::email_compta',
+            'module' => 'bimpcommercial',
+        ),
+        'modification_paiement_export_compta_urgent' => array(    // \Bimp_Paiement::actionMoveAmount
+            'label'  => 'Réference de paiement XXX. Montant initial de paiement : XXX €, nouveau montant de paiement : XXX €',
+            'dests'  => 'conf::devs_email',
+            'module' => 'bimpcommercial',
+        ),
+        'alerte_abonnement_unpaid'                   => array(    // \BCT_Contrat::sendAlertUnpaidFacsAbo
+            'label'  => 'Le client xxx n\'a pas réularisé sa facture. Vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.',
+            'dests'  => 'conf::unpaid_factures_abonnement_notification_email/bimpcontrat',
+            'module' => 'bimpcontrat',
+        ),
+        'PATH_EXTENDS_a_modifier'                    => array(    // \Bimp_Lib.php
+            'label'       => 'Dans conf, constante PATH_EXTENDS à remplacer par BIMP_EXTENDS_ENTITY avec la valeur "XXX" ...',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'MAJ_ICBA_encours_non_supprime'              => array(    // \BimpClientForDol::updateICBA
+            'label'       => 'Probléme MAJ ICBA xxx. L\'encours devrait deja être supprimer',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'erreur_cron'                                => array(    // \BimpCoreCronExec::mailCronErreur
+            'label'       => 'Alerte X crons en erreur',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'bimpcore_to_much_logs_email'                => array(    // \BimpCache::getBimpLogsData
+            'label'       => 'Il y a plus de 500 entrées à traiter dans les logs',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'erreur_fatale'                              => array(    // \BimpController::handleError
+            'label'       => 'Erreur fatale ...',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'erreur_fatale_cron'                         => array(    // \BimpCron::onExit
+            'label'       => 'ERREUR FATALE CRON - ...',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'page_time_indeterminer'                     => array(    // \BimpDebug::testLogDebug
+            'label'       => 'USER XXX. Variable bimp_start_time absente du fichier index.php',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'page_tres_lourde'                           => array(    // \BimpDebug::testLogDebug
+            'label'       => 'Page trés lourde - X sec.',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'relance_paiement_acompte'                   => array(    // \Bimp_Client::relancePaiements
+            'label'  => 'L\'acompte xxx pour le client xxx est impayé. Merci d\'en vérifier la raison et de procéder à sa régularisation.',
+            'dests'  => 'conf::rappels_factures_financement_impayees_emails/bimpcommercial',
+            'module' => 'bimpcore',
+        ),
+        'relances_deactivated_to_notify'             => array(    // \Bimp_Client::checkRelancesDeactivatedToNotify
+            'label'  => 'Les relances du client xxx ont été désactivées le d / m / Y. Il convient de vérifier ce compte et en réactiver les relances dès que possible',
+            'dests'  => 'conf::rappels_factures_financement_impayees_emails/bimpcommercial',
+            'module' => 'bimpcore',
+        ),
+        'send_log_to_dev'                            => array(    // \Bimp_Log::actionSendToDev
+            'label'       => 'Une nouvelle entrée dans les logs à traiter...',
+            'dests'       => 'to::obj',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'send_log_to_dev_urgent'                     => array(    // \Bimp_Log::create
+            'label'       => 'Une nouvelle entrée dans les logs à traiter d\'urgence...',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'prod_non_categorise'                        => array(    // \Bimp_Product::isVendable
+            'label'  => 'Le produit xxx n\'est pas categorisé comme il faut, il manque...',
+            'dests'  => 'conf::mail_achat',
+            'module' => 'bimpcore',
+        ),
+        'code_compta_inconnu_ACHAT'                  => array( // \Bimp_Product::getCodeComptableAchat
+            'label'       => 'Attention Code comptable inconnu XXX',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'code_compta_inconnu_VENTE'                  => array( // \Bimp_Product::getCodeComptableVente
+            'label'       => 'Attention Code comptable inconnu XXX',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpcore',
+            'type_metier' => 'devs'
+        ),
+        'product_validated'                          => array(    // \Bimp_Product::validateProduct
+            'label'  => 'Le produit XXX a été validé par ...',
+            'dests'  => 'conf::product_validated_notif_email',
+            'module' => 'bimpcore',
+        ),
+        'product_validation_urgente_vente_caisse'    => array(    // \Bimp_Product::mailValidation
+            'label'  => 'Le produit XXX a été ajouté à une vente en caisse. Merci de le valider d\'urgence pour finliser la vente.',
+            'dests'  => 'conf::mail_achat::devs_email',
+            'module' => 'bimpcore',
+        ),
+        'product_validation'                         => array(    // \Bimp_Product::mailValidation
+            'label'  => 'XXX souhaite que vous validiez le produit XXX.',
+            'dests'  => 'conf::mail_achat',
+            'module' => 'bimpcore',
+        ),
+        'encours_client_modif'                       => array(    //\Bimp_Societe::onNewOutstanding_limit
+            'label'  => 'L\'encours du client a été modifié. Nouvel encours: xxx €. Ancien encours: xxx €',
+            'dests'  => 'object::client_commerciaux',
+            'module' => 'bimpcore',
+        ),
+        'solvabilite_client_modif'                   => array(    //\Bimp_Societe::onNewSolvabiliteStatus
+            'label'  => 'Le client XXX a été mis au statur de la solvabilité xxx',
+            'dests'  => 'object::client_commerciaux',
+            'module' => 'bimpcore',
+        ),
+        'activation_onoff_on_demand'                 => array(    // \Bimp_Commande::onNewStatus
+            'label'  => 'Suite à votre demande, le client XXX a été activer/Désactiver par ...',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpcore',
+        ),
+        'demande_modif_status_client_fourn'          => array(    // \Bimp_Commande::actionStatusChangeDemand
+            'label'  => 'L\'utilisateur xxx demande l\'activation/la désactivation du client/fournisseur xxx',
+            'dests'  => 'conf::emails_notify_status_client_change',
+            'module' => 'bimpcore',
+        ),
+        'action_late_paiement'                       => array(    //	\Bimp_Commande::actionSendMailLatePayment
+            'label'  => 'Ce client présente un retard de paiement de XXX dont détail ci-après... Vos commandes en cours ne peuvent donc pas recevoir la validation financière.',
+            'dests'  => 'to::obj',
+            'module' => 'bimpcore',
+        ),
+        'valid_paiement_comptant_ou_sepa'            => array( // \Bimp_Commande::onValidate
+            'label'  => 'La commande XXX a été validée financièrement par paiement comptant ou mandat SEPA par XXX. Merci de vérifier le paiement ultérieurement',
+            'dests'  => 'conf::email_valid_paiement_comptant',
+            'module' => 'bimpcore',
+        ),
+        'check_validation_solvabilite'               => array(    //	\BimpComm::checkValidationSolvabilite
+            'label'  => 'Demande de validation d\'une commande dont le client est au statut XXX',
+            'dests'  => 'conf::solvabilite_validation_emails/bimpcommercial',
+            'module' => 'bimpcommercial',
+        ),
+        'notif_facturation_contrat_demain'           => array(    // \cron::notifDemainFacturation
+            'label'  => 'Pour rappel, le contrat N° xxx doit être facturé le $demain. ref contrat xxx, Commercial suivi de contrat : XXX',
+            'dests'  => 'conf::email_facturation',
+            'module' => 'bimpcontract',
+        ),
+        'facture_auto'                               => array(    // \cron::facturation_auto
+            'label'  => 'Une facture a été créée automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider. Client : XXX, contrat : XXX, commercial : XXX',
+            'dests'  => 'conf::email_facturation',
+            'module' => 'bimpcontract',
+        ),
+        'message_ERP_nonlu'                          => array(    // \BimpNote::cronNonLu
+            'label'  => 'Vous avez X message(s) non lu. Pour désactiver cette relance, vous pouvez soit répondre au message de la pièce émettrice (dans les notes de pied de page) soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.',
+            'dests'  => 'to::obj',
+            'module' => 'bimpcore',
+        ),
+        'update_prices_file_marge_neg'               => array( // \BDS_ImportsLdlcProcess::executeUpdateFromFile
+            'label'       => 'Voici la liste des produits avec une marge négative',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpdatasync',
+            'type_metier' => 'devs'
+        ),
+        'notif_commercial_courrier_retard_regl'      => array( // \BDS_RelancesClientsProcess::processNotifsCommerciaux
+            'label'  => 'LE client XXX va recevoir sous 5 jours une letre de rappel / une mise en demeure concernant les retards de réglement ci-après. Si vous pensez que cette relance/mise en demeure n\'a pas lieu d\'être, merci d\'en informer immédiatement Recouvrement en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.) ...',
+            'dests'  => 'to::obj',
+            'module' => 'bimpdatasync',
+        ),
+        'probleme_stock'                             => array( //	\controlStock::go
+            'label'       => 'Entrepot xxx. ATTENTION +/- d\'équipement (X | xxx xxxx) que de prod (X) total des mouvement ("...")',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpequipement',
+            'type_metier' => 'devs'
+        ),
+        'paiements_non_identif_auto'                 => array( //	\Bimp_ImportPaiement::toCompteAttente
+            'label'  => 'Les paiements suivants n\'ont pu être identifiés automatiquement par le système',
+            'dests'  => 'conf::email_paync/bimpfinanc',
+            'module' => 'bimpfinanc',
+        ),
+        'react_client_prise_rdv_online'              => array( //	\savFormController::ajaxProcessSavFormSubmit
+            'label'  => 'Le client xxx a été réactivé automatiquement suite à sa prise de rendez-vous SAV en ligne',
+            'dests'  => 'conf::react_client_prise_rdv_online/bimpinterfaceclient',
+            'module' => 'bimpinterfaceclient',
+        ),
+        'sav_online_by_client'                       => array( //	\savFormController::ajaxProcessSavFormSubmit
+            'label'  => 'Un nouveau SAV a été créé en ligne par un client...',
+            'dests'  => 'object::centre_sav',
+            'params' => array('allow_shipToUsers' => 1, 'allow_user_default_sav_email' => 1),
+            'module' => 'bimpinterfaceclient',
+        ),
+        'inventaire_incoherence'                     => array( //	\Inventory2::renderHeaderExtraLeft
+            'label'       => 'Inchoérence detecté dans inventaire : Ln Expected : XXX ...',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimplogistique',
+            'type_metier' => 'devs'
+        ),
+        'inventaire_incoherence_scan'                => array( //	\Inventory2::renderHeaderExtraLeft
+            'label'       => 'Inchoérence detecté dans les scann de l\'inventaire : Ln Expected : XXX ...',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimplogistique',
+            'type_metier' => 'devs'
+        ),
+        'inventaire_incoherence_donnees'             => array( //	\InventoryExpected::renderEquipments
+            'label'       => 'ATTENTION INCOHERENCE DES DONNEES',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimplogistique',
+            'type_metier' => 'devs'
+        ),
+        'code_BIMP'                                  => array( //	\securLogSms::createSendCode
+            'label'  => 'Le code est XXXX',
+            'dests'  => 'mail_secondaire',
+            'params' => array(
+                'allow_deleguation' => 0,
+                'allow_superior'    => 1
+            ),
+            'module' => 'bimpsecurlogin'
+        ),
+        'add_note_by_client'                         => array( //	\BS_Note::sendNotificationEmails
+            'label'  => 'Un message a été ajouté sur votre ticket hotline XXX. Message : XXX',
+            'dests'  => 'object::client_commerciaux::user_resp_ticket',
+            'module' => 'bimpsupport',
+        ),
+        'acceptation_devis_sav'                      => array(    // \BS_SAV::onPropalSigned
+            'label'  => 'Le devis XXX a été accepté par le client XXX',
+            'dests'  => 'object::centre_sav',
+            'module' => 'bimpsupport',
+        ),
+        'refus_devis_sav'                            => array(        // \BS_SAV::sendMsg
+            'label'  => 'Notre client XXX a refusé le devis réparation sur son XXX pour un montant de X €',
+            'dests'  => 'to::obj',
+            'module' => 'bimpsupport',
+        ),
+        'accompte_sav_enregitre'                     => array(    // \BS_SAV::actionAddAcompte
+            'label'  => 'Un acompte de X € du client XXX a été ajouté pour le devis XXX',
+            'dests'  => 'to::obj',
+            'module' => 'bimpsupport',
+        ),
+        'sav_non_restitue_pas_email_client'          => array(    // \BS_SAV::sendAlertesClientsUnrestituteSav
+            'label'  => 'Aucune adresse e-mail valide enregistrée pour le client du SAV XXX. Il n\'est donc pas possible d\'alerter le client pour la non restitution de son matériel',
+            'dests'  => 'object::centre_sav',
+            'params' => array('allow_user_default_sav_email' => 1),
+            'module' => 'bimpsupport',
+        ),
+        'ticket_sav_non_couvert_contrat'             => array(    // \BS_Ticket::update
+            'label'  => 'Le ticket SAV XXX n\'est pas couvert par le contrat',
+            'dests'  => 'object::userClient_commercial',
+            'module' => 'bimpsupport',
+        ),
+        'task_not_exist'                             => array(    // \webservice_kghjddsljbfldfsvl453454kgg.php
+            'label'       => 'Un mail a était recu avec une tache inexistante : XXX',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimptask',
+            'type_metier' => 'devs'
+        ),
+        'relance_FI_brouillon_Jplus1'                => array(    // \Cron::relanceTechBrouillonJplus1etPlus
+            'label'  => 'Voici la liste de vos fiches d’interventions en brouillon dont la date d’intervention est dépassée',
+            'dests'  => 'object::user_tech',
+            'module' => 'bimptechnique',
+        ),
+        'relance_FI_aFact_impoderable'               => array(    // \Cron::relanceCommercial
+            'label'  => 'voici la liste de vos fiches d’interventions en attente de facturation/comportant de l\'impodérable',
+            'dests'  => 'object::user_tech',
+            'module' => 'bimptechnique',
+        ),
+        'attribution_FI'                             => array(    // \BT_ficheInter::setSigned
+            'label'  => 'L\'intervention xxx vous à été attribuée',
+            'dests'  => 'object::id_user',
+            'module' => 'bimptechnique',
+        ),
+        'fiche_inter_non_liee'                       => array(    // \BT_ficheInter::setSigned
+            'label'  => 'Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur.',
+            'dests'  => 'to::dispatch@bimpf.fr,object::client_commercial',
+            'module' => 'bimptechnique',
+        ),
+        'envoi_CR_fiche_inter'                       => array(    // \BT_ficheInter::setSigned
+            'label'  => 'Pour information, l\'intervention XXX pour le client XXX (en interne a été signé par le technicien. La FI à été marquée comme terminée automatiquement.)/(n\'a pas pu être envoyée par e-mail au client)/(a été envoyée par e-mail au client) (pour signature électronique à distance.)/(suite à sa signature électronique.)/(pour signature papier à renvoyer par e-mail.)',
+            'dests'  => 'objet::client_commercial::tech_sav',
+            'module' => 'bimptechnique',
+        ),
+        'notification_facturation_signature_FI'      => array(    // \BT_ficheInter::actionSendfacturation
+            'label'  => 'Pour information, la FI xxx pour le client XXX a été signée par le client',
+            'dests'  => 'conf::email_facturation',
+            'module' => 'bimptechnique',
+        ),
+        'notif_create_FI'                            => array(    // \BT_ficheInter::create
+            'label'  => 'Une fiche d\'intervention vous a été attribuée. Fiche d\'intervention: XXX, Date prévue de l\'intervention: d/m/Y',
+            'dests'  => 'object::user_tech,conf::debugerp_email',
+            'module' => 'bimptechnique',
+        ),
+        'notif_change_tech_FI'                       => array(    // \BT_ficheInter::update
+            'label'  => 'La fiche d\'intervention XXX vous a été attribuée. Ref XXX. Client: XXX. Changement par : XXX. Pour plus de détails rendez-vous sur la fiche d\'intervention',
+            'dests'  => 'object::user_tech',
+            'module' => 'bimptechnique',
+        ),
+        'notif_change_horaire_FI'                    => array(    // \BT_ficheInter::update
+            'label'  => 'La fiche d\'intervention XXX a été modifiée au niveau des horaires. Nouveaux horaires du ... au ...',
+            'dests'  => 'object::user_tech',
+            'module' => 'bimptechnique',
+        ),
+        'notif_delete_FI'                            => array(    // \BT_ficheInter::delete
+            'label'  => 'La fiche d\'intervention XXX a été supprimée par client XXX. Commandes: ...',
+            'dests'  => 'object::user_tech,to::v.gilbert@bimp.fr',
+            'module' => 'bimptechnique',
+        ),
+        'depassement_heure_contrat_delegation'       => array(    // \BT_ficheInter_det::validate
+            'label'  => 'XXX a renseigné une ligne dans sa fiche d\'intervention qui crée un dépassement des heures prévues dans le contrat.',
+            'dests'  => 'object::client_commercial,to::contrat@bimp.fr',
+            'module' => 'bimptechnique',
+        ),
+        'CEGID_ROLLBACK_compta_aucune_action'        => array(    // 		\Cron::automatique
+            'label'       => 'ROLLBACK de la compta. Aucune action n\'à été faites pour remonter la compta d\'Aujourd\'hui, les fichiers ont étés transférés  dans le dossier rollback',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimptocegid',
+            'type_metier' => 'devs'
+        ),
+        'CEGID_dossier_export_non_vide'              => array(    // 		\Cron::automatique
+            'label'       => 'Dossier d\'export non vide. Rien à été fait...',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimptocegid',
+            'type_metier' => 'devs'
+        ),
+        'CEGID_fichier_tra_non_conforme'             => array(    // \Cron::checkFiles
+            'label'       => 'Fichier TRA non conforme',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimptocegid',
+            'type_metier' => 'devs'
+        ),
+        'CEGID_impossible_ecrire_fichier'            => array(    // \Cron::send_rapport
+            'label'       => 'Vous trouverez en pièce jointe le rapport des exports comptable existant, et voici le nouveau : ',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimptocegid',
+            'type_metier' => 'devs'
+        ),
+        'CEGID_erreur_copie_fichier'                 => array(    // \Cron::FTP
+            'label'       => 'Le fichier xxx ne s\'est pas copié dans le dossier d\'import',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimptocegid',
+            'type_metier' => 'devs'
+        ),
+        'CEGID_export_compta_manuel'                 => array(    // \newExportController::displayHeaderInterface
+            'label'       => 'Liste des pièces exportées manuellement par XXX ... ',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimptocegid',
+            'type_metier' => 'devs'
+        ),
+        'demande_validation_commande'                => array(    // bimpvalidateorder.class.php
+            'label'  => 'L\'utilisateur XXX souhaite que vous validiez de la commande XXX du client XXX',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidateorder',
+        ),
+        'rappel_demande_validation_encours'          => array(    // \BimpValidateOrderCronExec::sendRappel
+            'label'  => 'Vous avez X commandes en attente de validation, voici le(s) lien(s)',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidateorder',
+        ),
+        'create_demande_validation_comm'             => array(    // \DemandeValidComm::onCreate
+            'label'  => 'Merci de valider la piece XXX',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidateorder',
+        ),
+        'onvalidate_demande_validation_piece'        => array(    // \DemandeValidComm::onValidate
+            'label'  => 'La piece XXX du client a été passée au status X par XXX',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidateorder',
+        ),
+        'absence_valideur_secteur'                   => array(    // \ValidComm::createDemande
+            'label'       => 'Aucun utilisateur ne peut valider commercialement/financierement/les impayés de/sur service la piece XXX (pour le secteur XXX, ...)',
+            'dests'       => 'conf::debugerp_email',
+            'module'      => 'bimpvalidateorder',
+            'type_metier' => 'devs'
+        ),
+        'liste_demandes_validees_et_encours'         => array(    // \ValidComm::sendMailValidation
+            'label'  => 'Liste des demandes validées et en attente de validation',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidateorder',
+        ),
+        'general_valid_paiement_comptant_ou_sepa'    => array(    // \BimpValidation::checkDemandesAutoAccept
+            'label'  => 'La piece XXX a été validée financièrement par paiement comptant ou mandat SEPA par XXX. Merci de vérifier le paiement ultérieurement',
+            'dests'  => 'conf::notif_paiement_comptant_email/bimpvalidation',
+            'module' => 'bimpvalidation',
+        ),
+        'general_valid_auto'                         => array( // \BimpValidation::checkObjectValidations
+            'label'  => 'Toutes les demandes de validation de la piece XXX ont été acceptées...',
+            'dests'  => 'object::array_id_users',
+            'module' => 'bimpvalidation',
+        ),
+        'rappel_demandes_validation'                 => array(    // \BimpValidationCronExec::sendRappels
+            'label'  => 'X demandes de validation sont toujours en attente d\'acceptation',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidation',
+        ),
+        'validation_piece_acceptee'                  => array( // \BV_Demande::setAccepted
+            'label'  => 'La validation de la piece XXX a été acceptée par XXX',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidation',
+        ),
+        'check_affected_user'                        => array( // \BV_Demande::checkAffectedUser
+            'label'  => 'La validation de la piece PROVXXX est en attente ...',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidation',
+        ),
+        'validation_piece_refusee'                   => array( // \BV_Demande::actionRefused
+            'label'  => 'La validation de la piece XXX a été refusée par XXX',
+            'dests'  => 'object::id_user',
+            'module' => 'bimpvalidation',
+        ),
+        'webservice_error_fatal'                     => array( // \BimpWebservice::handleError
+            'label'       => 'ERP XXX. Requête: XXX. Utilisateur WS: ...',
+            'dests'       => 'conf::devs_email',
+            'module'      => 'bimpwebservice',
+            'type_metier' => 'devs'
+        ),
+        'create_inter_ticket'                        => array( // \BS_Inter::create
+            'label'  => 'Un ticket d\'intervention a été créé sur votre ticket N° XXX',
+            'dests'   => 'object::client_commercial',
+            'module' => 'bimpsupport',
+        ),
 
-	public static $type_dest = array(
-		'commercial_piece' => 'Commercial pièce',
-		'commercial_client' => 'Commercial client',
-		'acheteur_piece' => 'Acheteur pièce',
-		'compta_commercial_societe' => 'Compta + Commercial Client',
-		'conf' => 'Email paramétré dans la configuration',
-		'text_perso' => 'email(s) perso en dur dans le code (ex : tommy@bimp.fr)',
-		'text_generic_commercial_client' => 'email generique en dur + commercial client',
-		'tech_sav' => 'Technicien SAV',
-		'data_formulaire' => 'Email issu d\'un formulaire',
-		'user_erp' => 'Utilisateur de l\'ERP',
-		'centre_sav' => 'Centre SAV',
-		'usergroup_extrafield' => 'Champ extrafield des groupes utilisateur SAV',
-		'tech_sav_commercial_client' => 'Technicien SAV OU Commercial Client',
-		'text_perso_tech_sav' => 'Technicien SAV et email perso',
-	);
+        'tentativeFermetureAuto_non_ferme_GSX'       => array( // \test_sav::tentativeFermetureAuto
+            'label'  => 'Le SAV xxx n\'arrive pas etre fermé',
+            'dests' => 'object::array_id_users',
+            'params' => array('allow_user_default_sav_email' => 1),
+            'module' => 'bimpapple',
+        ),
+        'tentativeFermetureAuto_non_RFPU_GSX'        => array( // \test_sav::tentativeFermetureAuto
+            'label'     => 'Le SAV xxx n\'arrive pas a être passé a RFPU dans GSX',
+            'dests' => 'object::array_id_users',
+            'params' => array('allow_user_default_sav_email' => 1),
+            'module'    => 'bimpapple',
+        ),
+        'tentativeARestitueAuto_non_ferme_GSX'       => array( // \test_sav::tentativeARestitueAuto
+            'label'     => 'Le SAV xxx n\'arrive pas etre fermé',
+            'dests' => 'object::array_id_users',
+            'params' => array('allow_user_default_sav_email' => 1),
+            'module'    => 'bimpapple',
+        ),
+        'tentativeARestitueAuto_non_RFPU_GSX'        => array( // \test_sav::tentativeARestitueAuto
+            'label'     => 'Le SAV xxx n\'arrive pas a être passé a RFPU dans GSX',
+            'type_dest' => 'tech_sav',
+            'params' => array('allow_user_default_sav_email' => 1),
+            'module'    => 'bimpapple',
+        ),
 
-	public static $valeur_default = array(
-		'active'          => 1,
-		'required'        => 1,
-		'canal_diffusion' => 'email',
-		'def_abo'         => 1,
-		'type_metier'     => 'metier',
-		'params'          => array('check_availability' => 1,
-								   'allow_deleguation' => 1,
-								   'allow_superior' => 0,
-								   'allow_default' => 0,
-								),
-	);
-
-	public static $userMessages = array(
-		'relance_fac_sans_expertise_bimp'    => array(        // \BimpFactureFournForDol::sendRelanceExpertiseBimp
-			'label'  => 'Factures sans expertise BIMP',
-			'dests'  => 'object::id_user',
-			'module' => 'bimpcommercial'
-		),
-		'logistique_ok'                      => array(    // \Bimp_Commande::checkLogistiqueStatus
-			'label'  => 'La logistique complétée pour de votre commande XXX du client ...',
-			'dests'  => 'object::commercial',
-			'module' => 'bimpcommercial',
-		),
-		'change_statut_facturation'          => array(    // \Bimp_Commande::checkInvoiceStatus
-			'label'  => 'Changement de statut de facturation',
-			'dests'  => 'object::commercial',
-			'module' => 'bimpcommercial',
-		),
-		'valide_commande_client'             => array(    // \Bimp_Commande::onValidate
-			'label'  => 'Commande XXX pour le client ... a été validée',
-			'dests'  => 'object::commercial',
-			'module' => 'bimpcommercial',
-		),
-		'rappel_commande_brouillon'          => array(    // \Bimp_Commande::sendRappelCommandesBrouillons
-			'label'  => 'X factures en brouillon depuis ... jours, merci de les valider',
-			'dests'  => 'object::id_user',
-			'params' => array('allow_default' => 1),
-			'module' => 'bimpcommercial',
-		),
-		'rappel_commande_non_facturee'       => array(    // \Bimp_Commande::sendRappelsNotBilled
-			'label'  => 'La commande XXX créée le ... n\'a pas été facturée. Merci de la régulariser au plus vite.',
-			'dests'  => 'object::id_user',
-			'params' => array('allow_default' => 1),
-			'module' => 'bimpcommercial',
-		),
-		'product_duree_limitee_expire_soon'  => array(    // \Bimp_Commande::checkLinesEcheances
-			'label'  => 'Produits à durée limitée arrivant bientôt à échéance',
-			'dests'  => 'commercial_piece',
-			'module' => 'bimpcommercial',
-		),
-		'facture_fourn_brouillon'            => array(        // \Bimp_FactureFourn::sendInvoiceDraftWhithMail
-			'label'  => 'Une facture fournisseur en brouillon depuis X jours. Merci de bien vouloir la régulariser au plus vite.',
-			'dests'  => 'object::id_user',
-			'module' => 'bimpcommercial',
-		),
-		'creation_accompte_client'           => array(    // \BimpComm::createAcompte
-			'label'  => 'Un acompte de X € a été ajouté à la facture XXX',
-			'dests'  => 'object::commercial',
-			'module' => 'bimpcommercial',
-		),
-		'rappel_facture_brouillon'           => array( // \Bimp_Facture::sendRappelFacturesBrouillons
-			'label'  => 'X factures en brouillon depuis ... jours, merci de les valider',
-			'dests'  => 'object::id_user',
-			'params' => array('allow_superior' => 1),
-			'module' => 'bimpcommercial',
-		),
-		'rappel_facture_financement_impayee' => array(    // \Bimp_Facture::sendRappelFacturesFinancementImpayees
-			'label'  => 'La facture xxx dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le d / m / Y',
-			'dests'  => 'conf::rappels_factures_financement_impayees_emails/bimpcommercial,object::client_commerciaux',
-			'module' => 'bimpcommercial'
-		),
-		'relance_avenant_provisoire'         => array(    // \cron::relanceAvenantProvisoir
-			'label'  => 'Abandon d\'un avenant ou relance d\'un avenant non signé',
-			'dests'  => 'object::client_commercial',
-			'module' => 'bimpcontract',
-		),
-		'suspension_contrat_auto'            => array(    // \cron::relanceActivationProvisoire
-			'label'  => 'L\'activation provisoire de votre contrat xxx pour le client xxx, vient d\'être suspendue. Il ne sera réactivé que lorsque nous recevrons la version dûment signée par le client',
-			'dests'  => 'object::client_commercial',
-			'module' => 'bimpcontract',
-		),
-		'relance_contrat_provisoire'         => array(    // \cron::relanceActivationProvisoire
-			'label'  => 'Votre contrat xxx pour le client xxx est activé provisoirement car il n\'est pas revenu signé. Il sera automatiquement désactivé le d / m / Y si le nécessaire n\'a pas été fait.',
-			'dests'  => 'object::client_commercial',
-			'module' => 'bimpcontract',
-		),
-		'tacit_renewal_contract'             => array(    // \cron::relanceActivationProvisoire
-			'label'  => 'Le contrat xxx a été renouvellé tacitement. client xxx',
-			'dests'  => 'object::id_user',
-			'module' => 'bimpcontract',
-		),
-		'relance_contrat_brouillon'          => array(    // \cron::sendMailCommercial
-			'label'  => 'Le contrat xxx dont vous êtes le commercial est au statut BROUILLON depuis: x jours',
-			'dests'  => 'object::id_user',
-			'module' => 'bimpcontract',
-		),
-		'liste_contrat_activation_cejour'    => array(    // \cron::mailJourActivation
-			'label'  => 'Voici la liste des contrats à activer ce jour',
-			'dests'  => 'conf::email_groupe/bimpcontract',
-			'module' => 'bimpcontract',
-		),
-		'liste_contrat_attente_validation'   => array(    // \cron::relance_demande
-			'label'  => 'Liste des contrats en attente de validation de votre part',
-			'dests'  => 'conf::email_groupe/bimpcontract',
-			'module' => 'bimpcontract',
-		),
-		'avenant_activation_provisoire'      => array(    // \BContract_avenant::actionActivation
-			'label'  => 'L\'avenant N° XXX a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement.',
-			'dests'  => 'object::commercial',
-			'module' => 'bimpcontract',
-		),
-		'avenant_signe'                      => array(    // \BContract_avenant::signed
-			'label'  => 'L\'avenant N°AV XXX sur le contrat XXX a été sigé le d/m/Y.',
-			'dests'  => 'conf::email_groupe/bimpcontract',
-			'module' => 'bimpcontract',
-		),
-		'avenant_prolongation_signe'         => array(    // \BContract_avenant::signedProlongation
-			'label'  => 'L\'avenant N°AVP XXX sur le contrat XXX a été sigé le d/m/Y.',
-			'dests'  => 'conf::email_groupe/bimpcontract',
-			'module' => 'bimpcontract',
-		),
-		'avenant_validation'                 => array(    // \BContract_avenant::actionValidate
-			'label'  => 'L\'avenant N°AV XXX sur le contrat est en attente de signature',
-			'dests'  => 'conf::email_groupe/bimpcontract',
-			'module' => 'bimpcontract',
-		),
-		'actionActivateContrat'              => array(    //	\BContract_contrat::actionActivateContrat
-			'label'  => 'Contrat activé. Action à faire sur le contrat: "Facturer le contrat"',
-			'dests'  => 'conf::email_facturation,object::id_user',
-			'module' => 'bimpcontract',
-		),
-		'actionSignedContrat'                => array(    //	\BContract_contrat::actionSigned
-			'label'  => 'Contrat signé par le client. Action à faire sur le contrat: "Activer le contrat"',
-			'dests'  => 'conf::email_groupe/bimpcontract',
-			'module' => 'bimpcontract',
-		),
-		'actionDemandeValidationContrat'     => array(    //	\BContract_contrat::actionDemandeValidation
-			'label'  => 'Contrat en attente de validation. Action à faire sur le contrat: "Valider la conformité du contrat"',
-			'dests'  => 'conf::email_groupe/bimpcontract',
-			'module' => 'bimpcontract',
-		),
-		'actionValidationContrat'            => array(    //	\BContract_contrat::actionValidation
-			'label'     => 'Ce contrat a été validé par le service technique. Vous devez maintenant utiliser l\'action "Créer signature" afin de le faire signer par le client, puis par votre direction commerciale',
-			'type_dest' => 'object::id_user',
-			'module'    => 'bimpcontract',
-		),
-
-
-
-		'tentativeFermetureAuto_non_ferme_GSX' => array( // \test_sav::tentativeFermetureAuto
-			'label'           => 'Le SAV xxx n\'arrive pas etre fermé',
-			'dests' => 'conf::default_sav_email/bimpsupport',
-			'module'          => 'bimpapple',
-		),
-		'tentativeFermetureAuto_non_RFPU_GSX'  => array( // \test_sav::tentativeFermetureAuto
-			'label'           => 'Le SAV xxx n\'arrive pas a être passé a RFPU dans GSX',
-			'type_dest'       => 'tech_sav',
-			'module'          => 'bimpapple',
-		),
-		'tentativeARestitueAuto_non_ferme_GSX' => array( // \test_sav::tentativeARestitueAuto
-			'label'           => 'Le SAV xxx n\'arrive pas etre fermé',
-			'type_dest'       => 'tech_sav',
-			'module'          => 'bimpapple',
-		),
-		'tentativeARestitueAuto_non_RFPU_GSX'  => array( // \test_sav::tentativeARestitueAuto
-			'label'           => 'Le SAV xxx n\'arrive pas a être passé a RFPU dans GSX',
-			'type_dest'       => 'tech_sav',
-			'module'          => 'bimpapple',
-		),
-
-		'erreur_auth_gsx'     => array(        // \GSX_v2::authenticate
-			'label'           => 'Erreur d\'authentification GSX',
-			'type_dest'       => 'text_perso',
-			'dest'            => 'tommy@bimp.fr, f.martinez@bimp.fr',
-			'module'          => 'bimpapple',
-			'type_metier'     => 'devs'
-		),
-		'erreur_auth_phantom' => array(     // \GSX_v2::phantomAuth
-			'label'           => 'Erreur d\'authentification Phantom',
-			'type_dest'       => 'conf',
-			'dest'            => 'debugerp_email',
-			'module'          => 'bimpapple',
-			'type_metier'     => 'devs'
-		),
-
-		'erreur_stock_consigne_apple' => array(    // \ConsignedStock::actionReceive
-			'label'           => 'Erreurs stocks consignes apple. X erreur(s) à corriger manuellement  - Voir les logs',
-			'type_dest'       => 'tech_sav',
-			'module'          => 'bimpapple',
-		),
-
-		'user_create_bienvenue' => array(    // \InterfaceBimpbimp::runTrigger
-			'label'           => 'Nouveau collaborateur',
-			'type_dest'       => 'conf',
-			'dest'            => 'all_user_email',
-			'module'          => 'bimpbimp',
-		),
-
-		'commande_ldlc_errors'  => array(    // \Bimp_CommandeFourn_LdlcFiliale::verifMajLdlc
-			'label'           => 'Commande(s) LDLC avec erreurs',
-			'type_dest'       => 'conf',
-			'dest'            => 'mail_achat',
-			'module'          => 'bimpcommercial',
-		),
-		'commande_ldlc_facture' => array(    // \Bimp_CommandeFourn_LdlcFiliale::verifMajLdlc
-			'label'           => 'La facture XXX de la commande XXX en livraison directe a été téléchargée',
-			'type_dest'       => 'conf',
-			'dest'            => 'mail_achat',
-			'module'          => 'bimpcommercial',
-		),
-
-		'suppression_paiement'               => array(    // \Bimp_Paiement::onDelete
-			'label'           => 'Suppression de paiement',
-			'type_dest'       => 'text_perso',
-			'dest'            => 'tommy@bimp.fr, comptamaugio@bimp.fr',
-			'module'          => 'bimpcommercial',
-			'type_metier'     => 'devs'
-		),
-		'modification_paiement_expot_compta' => array(    // \Bimp_Paiement::actionMoveAmount
-			'label'           => 'Réference de paiement XXX. Montant initial de paiement : XXX €, nouveau montant de paiement : XXX €',
-			'type_dest'       => 'conf',
-			'dest'            => 'email_compta',
-			'module'          => 'bimpcommercial',
-		),
-
-		'alerte_abonnement_unpaid' => array(    // \BCT_Contrat::sendAlertUnpaidFacsAbo
-			'label'           => 'Le client xxx n\'a pas réularisé sa facture. Vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.',
-			'type_dest'       => 'conf',
-			'dest'            => 'unpaid_factures_abonnement_notification_email',
-			'module'          => 'bimpcontrat',
-		),
-
-		'PATH_EXTENDS_a_modifier' => array(    // \Bimp_Lib.php
-			'label'           => 'Dans conf, constante PATH_EXTENDS à remplacer par BIMP_EXTENDS_ENTITY avec la valeur "XXX" ...',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'MAJ_ICBA_encours_non_supprime' => array(    // \BimpClientForDol::updateICBA
-			'label'           => 'Probléme MAJ ICBA xxx. L\'encours devrait deja être supprimer',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'erreur_cron' => array(    // \BimpCoreCronExec::mailCronErreur
-			'label'           => 'Alerte X crons en erreur',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'bimpcore_to_much_logs_email' => array(    // \BimpCache::getBimpLogsData
-			'label'           => 'Il y a plus de 500 entrées à traiter dans les logs',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'erreur_fatale' => array(    // \BimpController::handleError
-			'label'           => 'Erreur fatale ...',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'erreur_fatale_cron' => array(    // \BimpCron::onExit
-			'label'           => 'ERREUR FATALE CRON - ...',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'page_time_indeterminer' => array(    // \BimpDebug::testLogDebug
-			'label'           => 'USER XXX. Variable bimp_start_time absente du fichier index.php',
-			'type_dest'       => 'text_perso',
-			'dest'            => 'tommy@bimp.fr',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-		'page_tres_lourde'       => array(    // \BimpDebug::testLogDebug
-			'label'           => 'Page trés lourde - X sec.',
-			'type_dest'       => 'text_perso',
-			'dest'            => 'tommy@bimp.fr, f.martinez@bimp.fr',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'relance_paiement_acompte' => array(    // \Bimp_Client::relancePaiements
-			'label'           => 'L\'acompte xxx pour le client xxx est impayé. Merci d\'en vérifier la raison et de procéder à sa régularisation.',
-			'type_dest'       => 'conf',
-			'dest'            => 'rappels_factures_financement_impayees_emails',
-			'module'          => 'bimpcore',
-		),
-
-		'relances_deactivated_to_notify' => array(    // \Bimp_Client::checkRelancesDeactivatedToNotify
-			'label'           => 'Les relances du client xxx ont été désactivées le d / m / Y. Il convient de vérifier ce compte et en réactiver les relances dès que possible',
-			'type_dest'       => 'conf',
-			'dest'            => 'rappels_factures_financement_impayees_emails',
-			'module'          => 'bimpcore',
-		),
-
-		'send_log_to_dev' => array(    // \Bimp_Log::actionSendToDev
-			'label'           => 'Une nouvelle entrée dans les logs à traiter...',
-			'type_dest'       => 'conf',
-			'dest'            => 'BimpCore::$ dev_mails[$ dev]',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'send_log_to_dev_urgent' => array(    // \Bimp_Log::create
-			'label'           => 'Une nouvelle entrée dans les logs à traiter d\'urgence...',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-
-		'prod_non_categorise'                     => array(    // \Bimp_Product::isVendable
-			'label'           => 'Le produit xxx n\'est pas categorisé comme il faut, il manque...',
-			'type_dest'       => 'conf',
-			'dest'            => 'mail_achat',
-			'module'          => 'bimpcore',
-		),
-		'code_compta_inconnu_ACHAT'               => array( // \Bimp_Product::getCodeComptableAchat
-			'label'           => 'Attention Code comptable inconnu XXX',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-		'code_compta_inconnu_VENTE'               => array( // \Bimp_Product::getCodeComptableVente
-			'label'           => 'Attention Code comptable inconnu XXX',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpcore',
-			'type_metier'     => 'devs'
-		),
-		'product_validated'                       => array(    // \Bimp_Product::validateProduct
-			'label'           => 'Le produit XXX a été validé par ...',
-			'type_dest'       => 'conf',
-			'dest'            => 'product_validated_notif_email',
-			'module'          => 'bimpcore',
-		),
-		'product_validation_urgente_vente_caisse' => array(    // \Bimp_Product::mailValidation
-			'label'           => 'Le produit XXX a été ajouté à une vente en caisse. Merci de le valider d\'urgence pour finliser la vente.',
-			'dests'            => 'conf::mail_achat::devs_email',
-			'module'          => 'bimpcore',
-		),
-		'product_validation' => array(    // \Bimp_Product::mailValidation
-			'label'           => 'XXX souhaite que vous validiez le produit XXX.',
-			'dests'       	=> 'conf::mail_achat',
-			'module'          => 'bimpcore',
-		),
-
-		'encours_client_modif' => array(    //\Bimp_Societe::onNewOutstanding_limit
-			'label'           => 'L\'encours du client a été modifié. Nouvel encours: xxx €. Ancien encours: xxx €',
-			'type_dest'       => 'commercial_client',
-			'module'          => 'bimpcore',
-		),
-
-		'solvabilite_client_modif' => array(    //\Bimp_Societe::onNewSolvabiliteStatus
-			'label'           => 'Le client XXX a été mis au statur de la solvabilité xxx',
-			'type_dest'       => 'commercial_client',
-			'module'          => 'bimpcore',
-		),
-
-		'activation_onoff_on_demand' => array(    // \Bimp_Commande::onNewStatus
-			'label'           => 'Suite à votre demande, le client XXX a été activer/Désactiver par ...',
-			'type_dest'       => 'commercial_client',
-			'module'          => 'bimpcore',
-		),
-
-		'demande_modif_status_client_fourn' => array(    // \Bimp_Commande::actionStatusChangeDemand
-			'label'           => 'L\'utilisateur xxx demande l\'activation/la désactivation du client/fournisseur xxx',
-			'type_dest'       => 'conf',
-			'dest'            => 'emails_notify_status_client_change',
-			'module'          => 'bimpcore',
-		),
-
-		'action_late_paiement' => array(    //	\Bimp_Commande::actionSendMailLatePayment
-			'label'           => 'Ce client présente un retard de paiement de XXX dont détail ci-après... Vos commandes en cours ne peuvent donc pas recevoir la validation financière.',
-			'type_dest'       => 'data_formulaire',
-			'module'          => 'bimpcore',
-		),
-
-		'valid_paiement_comptant_ou_sepa' => array( // \Bimp_Commande::onValidate
-			'label'           => 'La commande XXX a été validée financièrement par paiement comptant ou mandat SEPA par XXX. Merci de vérifier le paiement ultérieurement',
-			'type_dest'       => 'conf',
-			'dest'            => 'email_valid_paiement_comptant',
-			'module'          => 'bimpcore',
-		),
-
-		'check_validation_solvabilite' => array(    //	\BimpComm::checkValidationSolvabilite
-			'label'           => 'Demande de validation d\'une commande dont le client est au statut XXX',
-			'type_dest'       => 'conf',
-			'dest'            => 'solvabilite_validation_emails',
-			'module'          => 'bimpcommercial',
-		),
-
-		'notif_facturation_contrat_demain' => array(    // \cron::notifDemainFacturation
-			'label'           => 'Pour rappel, le contrat N° xxx doit être facturé le $demain. ref contrat xxx, Commercial suivi de contrat : XXX',
-			'type_dest'       => 'conf',
-			'dest'            => 'email_facturation',
-			'module'          => 'bimpcontract',
-		),
-
-		'facture_auto' => array(    // \cron::facturation_auto
-			'label'           => 'Une facture a été créée automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider. Client : XXX, contrat : XXX, commercial : XXX',
-			'type_dest'       => 'conf',
-			'dest'            => 'email_facturation',
-			'module'          => 'bimpcontract',
-		),
-
-		'message_ERP_nonlu' => array(    // \BimpNote::cronNonLu
-			'label'           => 'Vous avez X message(s) non lu. Pour désactiver cette relance, vous pouvez soit répondre au message de la pièce émettrice (dans les notes de pied de page) soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.',
-			'type_dest'       => 'user_erp',
-			'module'          => 'bimpcore',
-		),
-
-		'update_prices_file_marge_neg' => array( // \BDS_ImportsLdlcProcess::executeUpdateFromFile
-			'label'           => 'Voici la liste des produits avec une marge négative',
-			'type_dest'       => 'text_perso',
-			'dest'            => 'tommy@bimp.fr',
-			'module'          => 'bimpdatasync',
-			'type_metier'     => 'devs'
-		),
-
-		'notif_commercial_courrier_retard_regl' => array( // \BDS_RelancesClientsProcess::processNotifsCommerciaux
-			'label'           => 'LE client XXX va recevoir sous 5 jours une letre de rappel / une mise en demeure concernant les retards de réglement ci-après. Si vous pensez que cette relance/mise en demeure n\'a pas lieu d\'être, merci d\'en informer immédiatement Recouvrement en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.) ...',
-			'type_dest'       => 'commercial_client',
-			'module'          => 'bimpdatasync',
-		),
-
-		'probleme_stock' => array( //	\controlStock::go
-			'label'           => 'Entrepot xxx. ATTENTION +/- d\'équipement (X | xxx xxxx) que de prod (X) total des mouvement ("...")',
-			'type_dest'       => 'text_perso',
-			'dest'            => 'tommy@bimp.fr',
-			'module'          => 'bimpequipement',
-			'type_metier'     => 'devs'
-		),
-
-		'paiements_non_identif_auto' => array( //	\Bimp_ImportPaiement::toCompteAttente
-			'label'           => 'Les paiements suivants n\'ont pu être identifiés automatiquement par le système',
-			'type_dest'       => 'conf',
-			'dest'            => 'email_paync',
-			'module'          => 'bimpfinanc',
-		),
-
-		'react_client_prise_rdv_online' => array( //	\savFormController::ajaxProcessSavFormSubmit
-			'label'           => 'Le client xxx a été réactivé automatiquement suite à sa prise de rendez-vous SAV en ligne',
-			'type_dest'       => 'conf',
-			'dest'            => 'react_client_prise_rdv_online',
-			'module'          => 'bimpinterfaceclient',
-		),
-
-		'sav_online_by_client' => array( //	\savFormController::ajaxProcessSavFormSubmit
-			'label'           => 'Un nouveau SAV a été créé en ligne par un client...',
-			'type_dest'       => 'centre_sav',
-			'module'          => 'bimpinterfaceclient',
-		),
-
-
-		/*
+        // todo tommy : separer mail client et mail interne :
+        /*
 			'creation_ticket_support_view'	=> array( //	views\interfaces
 				'label' => 'Ticket Support N° XXX. Sujet du ticket : XXX. Demandeur : XXX. Contrat : XXX',
 				'type_dest' => '???????????',
@@ -521,338 +656,84 @@ class BimpUserMsg
 				'active' => (int) BimpCore::getConf('bimpsupport', null, 'use_tickets')
 			),*/
 
+    );
 
-		'inventaire_incoherence'      => array( //	\Inventory2::renderHeaderExtraLeft
-			'label'           => 'Inchoérence detecté dans inventaire : Ln Expected : XXX ...',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimplogistique',
-			'type_metier'     => 'devs'
-		),
-		'inventaire_incoherence_scan' => array( //	\Inventory2::renderHeaderExtraLeft
-			'label'           => 'Inchoérence detecté dans les scann de l\'inventaire : Ln Expected : XXX ...',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimplogistique',
-			'type_metier'     => 'devs'
-		),
+    public static $canaux_diff_msg = array(
+		'mail' => 'Email',
+		'msgerp' => 'Message interne'
+	);
 
-		'inventaire_incoherence_donnees' => array( //	\InventoryExpected::renderEquipments
-			'label'           => 'ATTENTION INCOHERENCE DES DONNEES',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimplogistique',
-			'type_metier'     => 'devs'
-		),
-
-		'code_BIMP' => array( //	\securLogSms::createSendCode
-			'label'           => 'Le code est XXXX',
-			'type_dest'       => 'user_erp',
-			'module'          => 'bimpsecurlogin',
-		),
-
-		'pb_envoi_ecologic' => array( //	\BimpSupportCronExec::sendEcologic
-			'label'           => 'Probléme envoie ecologic',
-			'type_dest'       => 'conf',
-			'dest'            => 'default_sav_email',
-			'module'          => 'bimpsupport',
-		),
-
-		'add_note_by_client' => array( //	\BS_Note::sendNotificationEmails
-			'label'           => 'Un message a été ajouté sur votre ticket hotline XXX. Message : XXX',
-			'type_dest'       => 'commercial_piece',
-			'module'          => 'bimpsupport',
-		),
-
-		'acceptation_devis_sav' => array(    // \BS_SAV::onPropalSigned
-			'label'           => 'Le devis XXX a été accepté par le client XXX',
-			'type_dest'       => 'centre_sav',
-			'module'          => 'bimpsupport',
-		),
-
-		'refus_devis_sav' => array(        // \BS_SAV::sendMsg
-			'label'           => 'Notre client XXX a refusé le devis réparation sur son XXX pour un montant de X €',
-			'type_dest'       => 'usergroup_extrafield',
-			'module'          => 'bimpsupport',
-		),
-
-		'accompte_sav_enregitre' => array(    // \BS_SAV::actionAddAcompte
-			'label'           => 'Un acompte de X € du client XXX a été ajouté pour le devis XXX',
-			'type_dest'       => 'centre_sav',
-			'module'          => 'bimpsupport',
-		),
-
-		'sav_non_restitue_pas_email_client' => array(    // \BS_SAV::sendAlertesClientsUnrestituteSav
-			'label'           => 'Aucune adresse e-mail valide enregistrée pour le client du SAV XXX. Il n\'est donc pas possible d\'alerter le client pour la non restitution de son matériel',
-			'type_dest'       => 'centre_sav',
-			'module'          => 'bimpsupport',
-		),
-
-		'ticket_sav_non_couvert_contrat' => array(    // \BS_Ticket::update
-			'label'           => 'Le ticket SAV XXX n\'est pas couvert par le contrat',
-			'type_dest'       => 'commercial_client',
-			'module'          => 'bimpsupport',
-		),
-
-		'task_not_exist' => array(    // \webservice_kghjddsljbfldfsvl453454kgg.php
-			'label'           => 'Un mail a était recu avec une tache inexistante : XXX',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimptask',
-			'type_metier'     => 'devs'
-		),
-
-		'relance_FI_brouillon_Jplus1'  => array(    // \Cron::relanceTechBrouillonJplus1etPlus
-			'label'           => 'Voici la liste de vos fiches d’interventions en brouillon dont la date d’intervention est dépassée',
-			'type_dest'       => 'tech_sav',
-			'module'          => 'bimptechnique',
-		),
-		'relance_FI_aFact_impoderable' => array(    // \Cron::relanceCommercial
-			'label'           => 'voici la liste de vos fiches d’interventions en attente de facturation/comportant de l\'impodérable',
-			'type_dest'       => 'commercial_piece',
-			'module'          => 'bimptechnique',
-		),
-
-		'fiche_inter_non_liee' => array(    // \BT_ficheInter::setSigned
-			'label'           => 'Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur.',
-			'type_dest'       => 'text_generic_commercial_client',
-			'dest'            => 'dispatch@bimp.fr',
-			'module'          => 'bimptechnique',
-		),
-
-		'envoi_CR_fiche_inter' => array(    // \BT_ficheInter::setSigned
-			'label'           => 'Pour information, l\'intervention XXX pour le client XXX (en interne a été signé par le technicien. La FI à été marquée comme terminée automatiquement.)/(n\'a pas pu être envoyée par e-mail au client)/(a été envoyée par e-mail au client) (pour signature électronique à distance.)/(suite à sa signature électronique.)/(pour signature papier à renvoyer par e-mail.)',
-			'type_dest'       => 'tech_sav_commercial_client',
-			'module'          => 'bimptechnique',
-		),
-
-		'notification_facturation_signature_FI' => array(    // \BT_ficheInter::actionSendfacturation
-			'label'           => 'Pour information, la FI xxx pour le client XXX a été signée par le client',
-			'type_dest'       => 'conf',
-			'dest'            => 'email_facturation',
-			'module'          => 'bimptechnique',
-		),
-
-		'notif_create_FI' => array(    // \BT_ficheInter::create
-			'label'           => 'Une fiche d\'intervention vous a été attribuée. Fiche d\'intervention: XXX, Date prévue de l\'intervention: d/m/Y',
-			'type_dest'       => 'tech_sav',
-			'module'          => 'bimptechnique',
-		),
-
-		'notif_change_tech_FI'    => array(    // \BT_ficheInter::update
-			'label'           => 'La fiche d\'intervention XXX vous a été attribuée. Ref XXX. Client: XXX. Changement par : XXX. Pour plus de détails rendez-vous sur la fiche d\'intervention',
-			'type_dest'       => 'tech_sav',
-			'module'          => 'bimptechnique',
-		),
-		'notif_change_horaire_FI' => array(    // \BT_ficheInter::update
-			'label'           => 'La fiche d\'intervention XXX a été modifiée au niveau des horaires. Nouveaux horaires du ... au ...',
-			'type_dest'       => 'tech_sav',
-			'module'          => 'bimptechnique',
-		),
-		'notif_delete_FI'         => array(    // \BT_ficheInter::delete
-			'label'           => 'La fiche d\'intervention XXX a été supprimée par client XXX. Commandes: ...',
-			'type_dest'       => 'text_perso_tech_sav',
-			'dest'            => 'v.gilbert@bimp.fr',
-			'module'          => 'bimptechnique',
-		),
-
-		'depassement_heure_contrat_delegation' => array(    // \BT_ficheInter_det::validate
-			'label'           => 'XXX a renseigné une ligne dans sa fiche d\'intervention qui crée un dépassement des heures prévues dans le contrat.',
-			'type_dest'       => 'commercial_piece',
-			'module'          => 'bimptechnique',
-		),
-
-		'CEGID_ROLLBACK_compta_aucune_action' => array(    // 		\Cron::automatique
-			'label'           => 'ROLLBACK de la compta. Aucune action n\'à été faites pour remonter la compta d\'Aujourd\'hui, les fichiers ont étés transférés  dans le dossier rollback',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimptocegid',
-			'type_metier'     => 'devs'
-		),
-		'CEGID_dossier_export_non_vide'       => array(    // 		\Cron::automatique
-			'label'           => 'Dossier d\'export non vide. Rien à été fait...',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimptocegid',
-			'type_metier'     => 'devs'
-		),
-		'CEGID_fichier_tra_non_conforme'      => array(    // \Cron::checkFiles
-			'label'           => 'Fichier TRA non conforme',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimptocegid',
-			'type_metier'     => 'devs'
-		),
-		'CEGID_impossible_ecrire_fichier'     => array(    // \Cron::send_rapport
-			'label'           => 'ous trouverez en pièce jointe le rapport des exports comptable existant, et voici le nouveau : ',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimptocegid',
-			'type_metier'     => 'devs'
-		),
-		'CEGID_erreur_copie_fichier'          => array(    // \Cron::FTP
-			'label'           => 'Le fichier xxx ne s\'est pas copié dans le dossier d\'import',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimptocegid',
-			'type_metier'     => 'devs'
-		),
-		'CEGID_export_compta_manuel'          => array(    // \newExportController::displayHeaderInterface
-			'label'           => 'Liste des pièces exportées manuellement par XXX ... ',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimptocegid',
-			'type_metier'     => 'devs'
-		),
-
-		'demande_validation_commande' => array(    // bimpvalidateorder.class.php
-			'label'           => 'L\'utilisateur XXX souhaite que vous validiez de la commande XXX du client XXX',
-			'type_dest'       => 'user_erp',
-			'module'          => 'bimpvalidateorder',
-		),
-
-		'rappel_demande_validation_encours' => array(    // \BimpValidateOrderCronExec::sendRappel
-			'label'           => 'Vous avez X commandes en attente de validation, voici le(s) lien(s)',
-			'type_dest'       => 'user_erp',
-			'module'          => 'bimpvalidateorder',
-		),
-
-		'create_demande_validation_comm'      => array(    // \DemandeValidComm::onCreate
-			'label'           => 'Merci de valider la piece XXX',
-			'type_dest'       => 'commercial_piece',
-			'module'          => 'bimpvalidateorder',
-		),
-		'onvalidate_demande_validation_piece' => array(    // \DemandeValidComm::onValidate
-			'label'           => 'La piece XXX du client a été passée au status X par XXX',
-			'type_dest'       => 'commercial_piece',
-			'module'          => 'bimpvalidateorder',
-		),
-
-		'absence_valideur_secteur' => array(    // \ValidComm::createDemande
-			'label'           => 'Aucun utilisateur ne peut valider commercialement/financierement/les impayés de/sur service la piece XXX (pour le secteur XXX, ...)',
-			'type_dest'       => 'conf',
-			'dest'            => 'debugerp_email',
-			'module'          => 'bimpvalidateorder',
-			'type_metier'     => 'devs'
-		),
-
-		'liste_demandes_validees_et_encours' => array(    // \ValidComm::sendMailValidation
-			'label'           => 'Liste des demandes validées et en attente de validation',
-			'type_dest'       => 'user_erp',
-			'module'          => 'bimpvalidateorder',
-		),
-
-		'general_valid_paiement_comptant_ou_sepa' => array(    // \BimpValidation::checkDemandesAutoAccept
-			'label'           => 'La piece XXX a été validée financièrement par paiement comptant ou mandat SEPA par XXX. Merci de vérifier le paiement ultérieurement',
-			'type_dest'       => 'conf',
-			'dest'            => 'notif_paiement_comptant_email',
-			'module'          => 'bimpvalidation',
-		),
-
-		'general_valid_auto' => array( // \BimpValidation::checkObjectValidations
-			'label'           => 'Toutes les demandes de validation de la piece XXX ont été acceptées...',
-			'type_dest'       => 'commercial_piece',
-			'module'          => 'bimpvalidation',
-		),
-
-		'rappel_demandes_validation' => array(    // \BimpValidationCronExec::sendRappels
-			'label'           => 'X demandes de validation sont toujours en attente d\'acceptation',
-			'type_dest'       => 'user_erp',
-			'module'          => 'bimpvalidation',
-		),
-
-		'validation_piece_acceptee' => array( // \BV_Demande::setAccepted
-			'label'           => 'La validation de la piece XXX a été acceptée par XXX',
-			'type_dest'       => 'commercial_piece',
-			'module'          => 'bimpvalidation',
-		),
-
-		'check_affected_user'      => array( // \BV_Demande::checkAffectedUser
-			'label'           => 'La validation de la piece PROVXXX est en attente ...',
-			'type_dest'       => 'user_erp',
-			'module'          => 'bimpvalidation',
-		),
-		'validation_piece_refusee' => array( // \BV_Demande::actionRefused
-			'label'           => 'La validation de la piece XXX a été refusée par XXX',
-			'type_dest'       => 'commercial_piece',
-			'module'          => 'bimpvalidation',
-		),
-
-		'webservice_error_fatal' => array( // \BimpWebservice::handleError
-			'label'           => 'ERP XXX. Requête: XXX. Utilisateur WS: ...',
-			'type_dest'       => 'conf',
-			'dest'            => 'devs_email',
-			'module'          => 'bimpwebservice',
-			'type_metier'     => 'devs'
-		),
-
-		'create_inter_ticket' => array( // \BS_Inter::create
-			'label'           => 'Un ticket d\'intervention a été créé sur votre ticket N° XXX',
-			'type_dest'       => 'commerical_client',
-			'module'          => 'bimpsupport',
-		)
+    public static $valeur_default = array(
+		'active'          => 1,
+		'required'        => 1,
+		'canal_diffusion' => 'email',
+		'def_abo'         => 1,
+		'type_metier'     => 'metier',
+		'check_availability' => 1,
+        'allow_deleguation' => 1,
+        'allow_superior'    => 0,
+        'allow_default'     => 0,
 	);
 
 	public static function getParamsMessage($code)
 	{
 		if (!isset(static::$userMessages[$code])) {
-			BimpCore::addlog('Erreur : code message inconnu : ' . $code);
+			BimpCore::addlog('Erreur BimpUserMsg getParamsMessage : code message inconnu : ' . $code);
 			return false;
 		}
 		else {
-			return BimpTools::overrideArray(static::$valeur_default, static::$userMessages[$code]);
+            $um = static::$userMessages[$code];
+            $ret = BimpTools::overrideArray( static::$valeur_default, $um['params']);
+            $ret['active'] = self::isMsgActive($code);
+            $um['params'] = $ret;
+            return $um;
 		}
 	}
 
 	public static function getParamsMessageAll()
 	{
 		$list = array();
-		foreach (static::$userMessages as $code => $message) {
-			$list[$code] = BimpTools::overrideArray(static::$valeur_default, $message);
+        foreach (static::$userMessages as $code => $message) {
+			$list[$code] = self::getParamsMessage($code);
 		}
 		return $list;
 	}
 
 	public static function isMsgActive($code) {
-		$active = self::getParamsMessage($code)['active'];
-		if($active) {
-			$active = BimpCore::getConf('userMessages__' . $code . '__msgActive', 1);
-		}
-		return $active;
+		return  BimpCore::getConf('userMessages__' . $code . '__msgActive', 1);
 	}
 
-	public static function envoiMsg($code, $sujet, $contenu, $obj=null)
+	public static function envoiMsg($code, $sujet, $contenu, $obj=null, $piecejointe=array())
 	{
 		if (!isset(static::$userMessages[$code])) {
-			BimpCore::addlog('Erreur : code message inconnu : ' . $code);
-			return false;
+			BimpCore::addlog('Erreur BimpUserMsg envoiMsg : code message inconnu : ' . $code);
+			return array('Erreur : code message inconnu : ' . $code);
 		}
 
 		$errors = array();
+        $id_users = array(); // pour y stocker les id des users
+        $userDestinataires = array(); // pour y stocker les objets Bimp_User
+        $arr_to = array(); // pour y stocker les mails de conf, de gr, en dur
 
-		if (!self::isMsgActive($code)) {
-			return false;
+        $datasMessage = self::getParamsMessage($code);
+		if (!$datasMessage['active']) {
+			return array(); // message non actif, pas d'erreur
 		}
-
-		$arr_to = array(); // pour y stocker les mails de conf, de gr, en dur
-		$userDestinataires = array(); // pour y stocker les objets Bimp_User
-
-		$datasMessage = self::getParamsMessage($code);
 		$dests = explode(',', $datasMessage['dests']);
 		$params = $datasMessage['params'];
 
-		$id_users = array();
 		foreach ($dests as $d)	{
 			$elements = explode('::', $d);
 			$destType = $elements[0];
 			unset($elements[0]);
 			switch ($destType) {
 				case 'to':
-					foreach ($elements as $e) {
-						if( ! in_array($e, $arr_to)) {
+                    foreach ($elements as $e) {
+                        if ($e == 'obj') $e = $obj; // cas particulier comme send_log_to_dev ou refus_devis_sav ou accompte_sav_enregitre
+                        if( ! in_array($e, $arr_to)) {
 							$arr_to[] = $e;
 						}
-					}
+                    }
 					break;
 
 				case 'conf':
@@ -866,7 +747,7 @@ class BimpUserMsg
 					}
 					break;
 
-				case 'gr':
+				case 'gr': // inutilié pour l'instant
 					// recup du mail de chaque groupe
 					foreach ($elements as $e)	{
 						$group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $e);
@@ -885,7 +766,7 @@ class BimpUserMsg
 						// e = client_commercial
 						switch ($e) {
 							case 'user_tech':
-//								$user = $obj->getChildObject('user_tech');
+								$id_users[] = $obj->id();
 								break;
 
 							case 'commercial':
@@ -897,129 +778,185 @@ class BimpUserMsg
 								$id_users[] = $obj;
 								break;
 
+                            case 'array_id_users':
+								$id_users[] = array_merge($id_users, $obj);
+                                if(empty($obj)) {
+                                    if( $params['allow_user_default_sav_email']) {
+                                        $arr_to[] = BimpCore::getConf('default_sav_email', 'jc.cannet@bimp.fr', 'bimpsupport');
+                                    }
+                                }
+								break;
+
 							case 'client_commercial':
 								// recup du/des commercial du client lié à l'obj
-								$soc = $obj->getChildObject('client');
+                                if ($obj->dol_object->element != 'societe')
+                                    $soc = $obj->getChildObject('client');
+                                else $soc = $obj;
 								$id_users[] = $soc->getCommercials(false, true); // que le 1er
 								break;
 
 							case 'client_commerciaux':
 								// recup des commerciaux du client lié à l'obj
-								$soc = $obj->getChildObject('client');
-								$users = $soc->getCommercials(false);
+                                if ($obj->dol_object->element != 'societe')
+                                    $soc = $obj->getChildObject('client');
+                                else $soc = $obj;
+                                $users = $soc->getCommercials(false);
 								foreach ($users as $u)	{
 									$id_users[] = $u->id;
 								}
 								break;
 
-							default:
+							case 'centre_sav':
+                                $centre = $obj; // attention, obj c'est un array (cf getCentres() dans BimpCache)
+                                if(isset($centre['mail']) && $centre['mail']) {     // utiliser d'abord l'email du centre
+                                    if (!in_array($centre['mail'], $arr_to)) {
+                                        $arr_to[] = $centre['mail'];
+                                    }
+                                } else {
+                                    if( $params['allow_shipToUsers']) {
+                                        // sinon, recup des user du centre et les mettre dans id_users
+                                        BimpObject::loadClass('bimpcore', 'Bimp_User');
+                                        $shipToUsers = Bimp_User::getUsersByShipto($centre['shipTo']);
+                                        if (!empty($shipToUsers)) {
+                                            foreach ($shipToUsers as $u) {
+                                                $id_users[] = $u->id;
+                                            }
+                                        }
+                                    }
+                                    if( empty($shipToUsers) && $params['allow_user_default_sav_email']) {
+                                        $arr_to[] = BimpCore::getConf('default_sav_email', null, 'bimpsupport');
+                                    }
+                                }
+                                break;
+
+                            case 'user_resp_ticket':
+                                $resp = $obj->getChildObject('user_resp');
+                                if ($resp) {
+                                    $id_users[] = $resp->id;
+                                }
+                                break;
+
+                            case 'userClient_commercial':
+                                $coms = BimpCache::getSocieteCommerciauxObjectsList($obj->id);
+                                foreach ($coms as $com) {
+                                    $id_users[] = $com->id;
+                                }
+                                break;
+
+                            default:
 								$errors[] = 'Erreur : type de destinataire imprevu : ' . $e;
-//								TODO : ajouter un log
+                                BimpCore::addlog('Erreur : type de destinataire imprevu : ' . $e);
 								break;
 						}
 
 						if (count($id_users))	{
+                            $idsDejaAjoutes = array();
 							foreach ($id_users as $id_user) {
-								$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-								if (BimpObject::objectLoaded($user)) {
-									if ($user->getData('statut')) {    // actif
-										if (!$params['check_availability'] || $user->isAvailable()) {
-											$userDestinataires[] = $user; // TODO, j'ai oublier la notion d'abonnement
-										} else {
-											if ($params['allow_deleguation']) {
-												// délégation premise et mise en place :
-												$delegations = $user->getData('delegations');
-												if (count($delegations)) {
-													$userDestinataires = array_merge($userDestinataires, self::ajoutDeleg($delegations));
-													$contenu = 'Message recu par délégation de ' . $user->getFullName() . ":\n\n" . $contenu;
-												}
-											}
-											if ($params['allow_superior']) {
-												// supérieur hiérarchique
-												$id_sup = $user->getData('fk_user');
-												$superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_sup);
-												if (BimpObject::objectLoaded($superior) && $superior->isActive() && $superior->isAvilable()) {
-													$userDestinataires[] = $superior;
-													$contenu = 'Message recu a cause de l\'absence de ' . $user->getFullName() . ":\n\n" . $contenu;
-												}
-											}
-										}
-									} else {                    // inactif
-										if ($params['allow_deleguation']) {
-											$delegations = $user->getData('delegations');
-											if (count($delegations)) {
-												$userDestinataires = array_merge($userDestinataires, self::ajoutDeleg($delegations));
-												$contenu = 'Message recu par délégation de ' . $user->getFullName() . ":\n\n" . $contenu;
-											} else {
-												$err = 'Erreur : utilisateur inactif SANS délégation: ' . $user->getFullName();
-												$errors[] = $err;
-												BimpCore::addlog($err);
-												return false;
-											}
-										}
-										if ($params['allow_superior']) {
-											// supérieur hiérarchique
-											$id_sup = $user->getData('fk_user');
-											$superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_sup);
-											if (BimpObject::objectLoaded($superior) && $superior->isActive() && $superior->isAvilable()) {
-												$userDestinataires[] = $superior;
-												$contenu = 'Message recu car ' . $user->getFullName() . " n'est plus dans le groupe:\n\n" . $contenu;
-											}
-										}
-									}
-								}
+                                if (!in_array($id_user, $idsDejaAjoutes)) {
+                                    $idsDejaAjoutes[] = $id_user;
+                                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                                    if (BimpObject::objectLoaded($user)) {
+                                        if ($user->getData('statut')) {    // actif
+                                            if (!$params['check_availability'] || $user->isAvailable()) {
+                                                $userDestinataires[] = $user;
+                                            } else {
+                                                if ($params['allow_deleguation']) {
+                                                    // délégation premise et mise en place :
+                                                    $delegations = $user->getData('delegations');
+                                                    if (count($delegations)) {
+                                                        $userDestinataires = array_merge($userDestinataires, self::ajoutDeleg($delegations));
+                                                        $contenu = 'Message recu par délégation de ' . $user->getFullName() . ":\n\n" . $contenu;
+                                                    }
+                                                }
+                                                if ($params['allow_superior']) {
+                                                    // supérieur hiérarchique
+                                                    $id_sup = $user->getData('fk_user');
+                                                    $superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_sup);
+                                                    if (BimpObject::objectLoaded($superior) && $superior->isActive() && $superior->isAvilable()) {
+                                                        $userDestinataires[] = $superior;
+                                                        $contenu = 'Message recu a cause de l\'absence de ' . $user->getFullName() . ":\n\n" . $contenu;
+                                                    }
+                                                }
+                                            }
+                                        } else {                    // inactif
+                                            if ($params['allow_deleguation']) {
+                                                $delegations = $user->getData('delegations');
+                                                if (count($delegations)) {
+                                                    $userDestinataires = array_merge($userDestinataires, self::ajoutDeleg($delegations));
+                                                    $contenu = 'Message recu par délégation de ' . $user->getFullName() . ":\n\n" . $contenu;
+                                                } else {
+                                                    $err = 'Erreur : utilisateur inactif SANS délégation: ' . $user->getFullName();
+                                                    $errors[] = $err;
+                                                    BimpCore::addlog($err);
+                                                }
+                                            }
+                                            if ($params['allow_superior']) {
+                                                // supérieur hiérarchique
+                                                $id_sup = $user->getData('fk_user');
+                                                $superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_sup);
+                                                if (BimpObject::objectLoaded($superior) && $superior->isActive() && $superior->isAvilable()) {
+                                                    $userDestinataires[] = $superior;
+                                                    $contenu = 'Message recu car ' . $user->getFullName() . " n'est plus dans le groupe:\n\n" . $contenu;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
 							}
 						}
 						else {
 							if($params['allow_default'])	{
-								// TODO FL : verifier si allow_default_ . $e, sinon prendre default_user tout court
-								$arr_to[] = BimpCore::getConf('default_user_' . $e, '');
+								$arr_to[] = BimpCore::getConf('default_user_' . $e, '')
+                                            ? BimpCore::getConf('default_user_' . $e, '')
+                                            : BimpCore::getConf('default_user', '');
 							}
 							else {
-								$err = 'Erreur : Aucun utilisateur lié à la piece ' . $obj->getNomUrl();
+								$err = 'Erreur BimpUserMsg : Aucun utilisateur lié à la piece ' . $obj->getNomUrl() . ' pour le type ' . $code;
 								$errors[] = $err;
 								BimpCore::addlog($err);
-								return false;
 							}
 						}
-
-						echo '<pre>';
-						print_r($params);
-						echo '</pre>';
-						exit;
-
-
-								// en fonction des params, chercher les bimpuser lies à l'obj transmis
-						// 		'dests'       => 'gr::4', 'object::commercial::client_commercial', 'to::tommy@bimp.fr', 'conf::groupe_mail::devs_email',
-						//		params : array('allow_default' => 0 / 1, franck Pineri
-						//	)
-						// dans tous les cas utiliser isAbonne()
-
-						// getContactsByCodes('internal') -> recup les contacts internes d'une piece commerciale
 					}
 					break;
 
+                case 'mail_secondaire':
+                    $mail_sec = $obj->traiteMail(); // obj = securLogSms
+                    if($obj->isMail($mail_sec)) {
+                        $arr_to[] = $mail_sec;
+                    }
+                    else {
+                        if ($params['allow_superior']) {
+                            $superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $obj->user->fk_user);
+                            if (BimpObject::objectLoaded($superior) && $superior->isActive() && $superior->isAvilable()) {
+                                $userDestinataires[] = $superior;
+                                $contenu = "Message recu a cause de l\'absence d\'email secondaire :\n\n" . $contenu;
+                            }
+                        }
+                    }
+                    break;
 
 				default:
 					$errors[] = 'Erreur : type de destinataire inconnu : ' . $destType;
+                    BimpCore::addlog('Erreur BimpUserMsg : type de destinataire inconnu : ' . $destType, 4, '', $obj, array('code' => $code, 'dests' => $dests));
 					break;
 			}
 		}
 
-		if (count($userDestinataires))	{
-			foreach ($userDestinataires as $u) {
-				if( ! in_array($u->getData('mail'), $arr_to)) {
-					$arr_to[] = $u->getData('mail');
-				}
-			}
-		}
-
-		// Si à la fin du process, aucun user dispo et si $userMessages[$code]['params']['allow_default_XXX'] => $to = BimpCore::getConf('default_user_XXX', null);
+        if (count($userDestinataires)) {
+            foreach ($userDestinataires as $u) {
+                if (!in_array($u->getData('mail'), $arr_to) && $u->isAbonne($code)) {
+                    $arr_to[] = $u->getData('mail');
+                }
+            }
+        }
 
 		$to = implode(', ', $arr_to);
 		$to = BimpTools::cleanEmailsStr($to);
+        $filename_list = ($piecejointe ? $piecejointe[0] : array());
+        $mimetype_list = ($piecejointe ? $piecejointe[1] : array());
+        $mimefilename_list = ($piecejointe ? $piecejointe[2] : array());
 
-		mailSyn2($sujet, $to, null, $contenu);
+		mailSyn2($sujet, $to, null, $contenu, $filename_list, $mimetype_list, $mimefilename_list);
 
 		// todo flo : gérer les transactions db.
 
@@ -1036,57 +973,4 @@ class BimpUserMsg
 		}
 		return $u;
 	}
-
-
-
-
-
-	public static function sendUsersMsg($code, $users, $subjet, $msg, $params = array()) {
-		$errors = array();
-
-//		$users = tableau d'ID users
-
-		// isMsgActive()
-
-		// Foreach users
-		// $user->isMsgAllowed()
-		// Sinon : $user->getSubstituteUsers() => vérif de chaque retour (si pas déjà dans $users valides) / récup les infos et les ajouter à la fin de $msg.
-
-		// Si à la fin du process, aucun user dispo et si $user_msg['allow_default_user'] => $email = BimpCore::getConf('default_user_email', null);
-
-		// récup e-mail(s)
-
-		// sendEmail()
-		return $errors;
-	}
-
-	public static function sendUserGroupsMsg($code, $user_groups, $subjet, $msg, $params = array()) {
-		$errors = array();
-
-		// $users = tableau d'ID groupes (Bimp_UserGroup)
-
-		// isMsgActive()
-		// Pas de vérif pour chaque groupe pour l'instant.
-		// récup e-mail(s)
-		// sendEmail()
-
-		return $errors;
-
-	}
-
-	public static function sendEmail($code, $subjet, $msg, $to, $params = array())
-	{
-		// Cas des addresse e-mails en conf ou en dur
-		$errors = array();
-
-		// isMsgActive()
-		// BimpTools::cleanEmail(to)
-		// mailsSyn2()
-
-		// todo flo : gérer les transactions db.
-
-		return $errors;
-	}
-
-
 }

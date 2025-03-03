@@ -7407,8 +7407,7 @@ class Bimp_Facture extends BimpComm
                                 $soc = $facture->getChildObject('client');
 
                                 // Envoi e-mail:
-//                                $cc = '';
-								$cc_ids = array();
+                                $cc = '';
                                 $subject = 'Facture financement impayée - ' . $facture->getRef();
 
                                 if (BimpObject::objectLoaded($soc)) {
@@ -7419,14 +7418,15 @@ class Bimp_Facture extends BimpComm
                                     'fk_user'
                                 ));
 
-								if (is_array($comms)) {
-									foreach ($comms as $c) {
-										$commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $c['fk_user']);
-                                        if (BimpObject::objectLoaded($commercial) && $commercial->isMailValid()) {
-                                            $cc .= ($cc ? ', ' : '') . $commercial->isMailValid();
-										}
-									}
-								}
+                                if (is_array($comms)) {
+                                    foreach ($comms as $c) {
+                                        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $c['fk_user']);
+
+                                        if (BimpObject::objectLoaded($commercial)) {
+                                            $cc .= ($cc ? ', ' : '') . BimpTools::cleanEmailsStr($commercial->getData('email'));
+                                        }
+                                    }
+                                }
 
                                 $msg = 'Bonjour, ' . "\n\n";
                                 $msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
@@ -7435,8 +7435,7 @@ class Bimp_Facture extends BimpComm
                                 $out .= ' - Fac ' . $facture->getLink() . ' : ';
 
 								$code = "rappel_facture_financement_impayee";
-								if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $facture)
-                                //if (mailSyn2($subject, $to, '', $msg, array(), array(), array(), $cc)) {
+								if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $facture)))	{
                                     $out .= '[OK]';
                                 } else {
                                     $out .= '[ECHEC]';

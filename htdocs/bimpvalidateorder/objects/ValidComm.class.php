@@ -642,7 +642,8 @@ class ValidComm extends BimpObject
                 $message_mail .= "Debug: pourtant la règle de validation $val_comm_demande ";
 
 			$code = 'absence_valideur_secteur';
-            mailSyn2("Droits validation commerciale requis", BimpCore::getConf('debugerp_email'), null, $message_mail);
+            $sujet = 'Droits validation commerciale requis';
+			BimpUserMsg::envoiMsg($code, $sujet, $message_mail);
             return 0;
         }
 
@@ -956,7 +957,7 @@ class ValidComm extends BimpObject
         $subject .= $bimp_object->getRef() . ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
 
 		$code = 'liste_demandes_validees_et_encours';
-        mailSyn2($subject, $user->getData('email'), null, $m);
+		BimpUserMsg::envoiMsg($code, $subject, $m, $user->id);
         return 1;
     }
 

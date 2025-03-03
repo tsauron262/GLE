@@ -449,30 +449,24 @@ class BV_Demande extends BimpObject
             $user_demande = $this->getChildObject('user_demande');
 
             if (BimpObject::objectLoaded($user_demande) && $user_demande->id !== $user->id && BimpObject::objectLoaded($obj)) {
-//                $email = BimpTools::cleanEmailsStr($user_demande->getData('email'));
-//                if ($email) {
-                    global $langs;
+				global $langs;
+				$validation_type = $this->displayValidationType();
+				$subject = $this->getObjLabel(true) . ' - Validation ' . $validation_type . ' acceptée';
 
-                    $validation_type = $this->displayValidationType();
-                    $subject = $this->getObjLabel(true) . ' - Validation ' . $validation_type . ' acceptée';
+				$msg = 'Bonjour,<br/><br/>';
+				$msg .= 'La validation ' . $validation_type . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
+				$msg .= ' a été acceptée par ' . $user->getFullName($langs) . '<br/><br/>';
 
-                    $msg = 'Bonjour,<br/><br/>';
-                    $msg .= 'La validation ' . $validation_type . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
-                    $msg .= ' a été acceptée par ' . $user->getFullName($langs) . '<br/><br/>';
-
-//                    if (mailSyn2($subject, $email, '', $msg)) {
-					$code = 'validation_piece_acceptee';
-//                    if (mailSyn2($subject, $email, '', $msg)) {
-                    if ($user_demande->sendMsg($code, $subject, $msg)) {
-                        if (is_a($obj, 'BimpObject')) {
-                            $obj->addObjectLog('Notification de validation ' . $validation_type . ' envoyée à "' . $email . '"');
-                        }
-                    } else {
-                        if (is_a($obj, 'BimpObject')) {
-                            $obj->addObjectLog('Echec de l\'envoi de la notification de validation ' . $validation_type . ' à "' . $email . '"');
-                        }
-                    }
-//                }
+				$code = 'validation_piece_acceptee';
+				if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $user_demande->id))) {
+					if (is_a($obj, 'BimpObject')) {
+						$obj->addObjectLog('Notification de validation ' . $validation_type . ' envoyée à "' . $user_demande->getData('email') . '"');
+					}
+				} else {
+					if (is_a($obj, 'BimpObject')) {
+						$obj->addObjectLog('Echec de l\'envoi de la notification de validation ' . $validation_type . ' à "' . $user_demande->getData('email') . '"');
+					}
+				}
             }
 
             if ($check_object) {
@@ -560,53 +554,45 @@ class BV_Demande extends BimpObject
                     if (!BimpObject::objectLoaded($obj)) {
                         $errors[] = 'Objet lié invalide';
                     } else {
+						$subject = 'Demande de validation ' . $types[$type]['label2'];
+						$msg = 'Bonjour, <br/><br/>';
+
+						$msg .= 'La validation ' . $types[$type]['label2'] . ' <a href="' . $obj->getUrl() . '">' . $obj->getLabel('of_the') . ' (PROV' . $obj->id . ')</a>';
+						$msg .= ' est en attente.<br/>';
+
+						$user_demande = $this->getChildObject('user_demande');
+						if (BimpObject::objectLoaded($user_demande)) {
+							$msg .= '<br/><b>Demandeur : </b>' . $user_demande->getName();
+						}
+
+						$client = $this->getClient();
+						if (BimpObject::objectLoaded($client)) {
+							$msg .= '<br/><b>Client : </b>' . $client->getLink();
+
+							if ($this->getData('type_validation') === 'rtp') {
+								$url = str_replace('client&', 'client&navtab-maintabs=commercial&navtab-commercial_view=client_relances_list_tab&', $client->getUrl());
+								if ($url) {
+									$msg .= ' - <a href="' . $url . '">Onglet relances de paiement</a>';
+								}
+							}
+						}
+
+						$val = $this->displayObjVal();
+						if ($val) {
+							$msg .= '<br/>' . $val;
+						}
+
+						if ($infos) {
+							$msg .= '<br/><br/>Cette demande de validation vous a été attribuée pour les motifs suivants : <br/><br/>';
+							$msg .= $infos;
+						}
+
+						$this->addObjectLog('Demande attribuée à {{Utilisateur:' . $id_new_user_affected . '}}' . ($infos ? '<br/><b>Motif : </b>' . $infos : ''));
 						$code = "check_affected_user";
-//                        $email = BimpTools::cleanEmailsStr($user->getData('email'));
-						$email = $user->isMailValid($code);
-
-                        if (!$email) {
-                            $errors[] = 'Adresse e-mail absente pour l\'utilisateur ' . $user->getLink();
-                        } else {
-                            $subject = 'Demande de validation ' . $types[$type]['label2'];
-                            $msg = 'Bonjour, <br/><br/>';
-
-                            $msg .= 'La validation ' . $types[$type]['label2'] . ' <a href="' . $obj->getUrl() . '">' . $obj->getLabel('of_the') . ' (PROV' . $obj->id . ')</a>';
-                            $msg .= ' est en attente.<br/>';
-
-                            $user_demande = $this->getChildObject('user_demande');
-                            if (BimpObject::objectLoaded($user_demande)) {
-                                $msg .= '<br/><b>Demandeur : </b>' . $user_demande->getName();
-                            }
-
-                            $client = $this->getClient();
-                            if (BimpObject::objectLoaded($client)) {
-                                $msg .= '<br/><b>Client : </b>' . $client->getLink();
-
-                                if ($this->getData('type_validation') === 'rtp') {
-                                    $url = str_replace('client&', 'client&navtab-maintabs=commercial&navtab-commercial_view=client_relances_list_tab&', $client->getUrl());
-                                    if ($url) {
-                                        $msg .= ' - <a href="' . $url . '">Onglet relances de paiement</a>';
-                                    }
-                                }
-                            }
-
-                            $val = $this->displayObjVal();
-                            if ($val) {
-                                $msg .= '<br/>' . $val;
-                            }
-
-                            if ($infos) {
-                                $msg .= '<br/><br/>Cette demande de validation vous a été attribuée pour les motifs suivants : <br/><br/>';
-                                $msg .= $infos;
-                            }
-
-                            $this->addObjectLog('Demande attribuée à {{Utilisateur:' . $id_new_user_affected . '}}' . ($infos ? '<br/><b>Motif : </b>' . $infos : ''));
-//                            if (!mailSyn2($subject, $email, '', $msg)) {
-                            if (!$user->sendMsg($code, $subject, $msg)) {
-                                $errors[] = 'Echec de l\'envoi de l\'e-mail de notification à ' . $user->getName();
-                                $this->addObjectLog('Echec de l\'envoi de la notification à ' . $user->getName());
-                            }
-                        }
+						if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $id_new_user_affected))) {
+							$errors[] = 'Echec de l\'envoi de l\'e-mail de notification à ' . $user->getName();
+							$this->addObjectLog('Echec de l\'envoi de la notification à ' . $user->getName());
+						}
                     }
                 }
             }
@@ -707,21 +693,18 @@ class BV_Demande extends BimpObject
             $obj = $this->getObjInstance();
 
             if (BimpObject::objectLoaded($user_demande) && BimpObject::objectLoaded($obj)) {
+				global $langs;
+
+				$subject = $this->getObjLabel(true) . ' - Validation ' . $this->displayValidationType() . ' refusée';
+				$msg = 'Bonjour,<br/><br/>';
+				$msg .= 'La validation ' . $this->displayValidationType() . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
+				$msg .= ' a été refusée par ' . $user->getFullName($langs) . '<br/><br/>';
+
+				if ($motif) {
+					$msg .= '<b>Motif : </b><br/>' . $motif;
+				}
 				$code = "validation_piece_refusee";
-                $email = BimpTools::cleanEmailsStr($user_demande->getData('email'));
-                if ($email) {
-                    global $langs;
-
-                    $subject = $this->getObjLabel(true) . ' - Validation ' . $this->displayValidationType() . ' refusée';
-                    $msg = 'Bonjour,<br/><br/>';
-                    $msg .= 'La validation ' . $this->displayValidationType() . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
-                    $msg .= ' a été refusée par ' . $user->getFullName($langs) . '<br/><br/>';
-
-                    if ($motif) {
-                        $msg .= '<b>Motif : </b><br/>' . $motif;
-                    }
-                    mailSyn2($subject, $email, '', $msg);
-                }
+				BimpUserMsg::envoiMsg($code, $subject,$msg, $user_demande->id);
             }
         }
 

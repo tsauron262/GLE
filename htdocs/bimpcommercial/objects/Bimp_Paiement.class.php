@@ -718,7 +718,9 @@ class Bimp_Paiement extends BimpObject
             if (!$this->isNormalementEditable()) {//mode forcage
                 global $user;
 				$code = 'suppression_paiement';
-                mailSyn2('Suppression paiement forcée', 'tommy@bimp.fr, comptamaugio@bimp.fr', null, 'Bonjour un paiement ' . $this->getData('ref') . ' a été supprimé par ' . $user->getNomUrl(1) . ($this->getData('exported') ? ' Attention ce paiement été exporté' : ''));
+				$sujet = 'Suppression paiement forcée';
+				$msg = 'Bonjour un paiement ' . $this->getData('ref') . ' a été supprimé par ' . $user->getNomUrl(1) . ($this->getData('exported') ? ' Attention ce paiement été exporté' : '');
+                BimpUserMsg::envoiMsg($code, $sujet, $msg);
             }
         }
 
@@ -887,16 +889,16 @@ class Bimp_Paiement extends BimpObject
                                             $errors[] = 'Echec de l\'enregistrement du changement de facture du paiement dans la table d\'export';
                                         }
                                     }
-									$code = 'modification_paiement_expot_compta';
-                                    if(!count($errors)) {
-                                        $mail_to = BimpCore::getConf('email_compta', '');
-                                        if ($mail_to) {
-                                            mailSyn2('Modification d\'un paiement exporté en compta, l\'écriture correspondante sera importée dans cégid lors du prochain export.', $mail_to, '', $mail);
-                                        }
-                                    } else {
-                                        mailSyn2('COMPTA URGENT', BimpCore::getConf('devs_email'), null, 'PB enregistrement déplacement paiements ' . $this->getNomUrl());
-                                    }
 
+                                    if(!count($errors)) {
+										$code = 'modification_paiement_export_compta';
+										$sujet = 'Modification paiement exporté en compta, l\'écriture correspondante sera importée dans cégid lors du prochain export.';
+                                        BimpUserMsg::envoiMsg($code, $sujet, $mail);
+                                    } else {
+										$code = 'modification_paiement_export_compta_urgent';
+										$sujet = 'COMPTA URGENT';
+										BimpUserMsg::envoiMsg($code, $sujet, 'PB enregistrement déplacement paiements ' . $this->getNomUrl());
+                                    }
                                 }
                             }
                         }

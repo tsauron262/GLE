@@ -45,15 +45,9 @@ class BimpValidationCronExec extends BimpCron
         } else {
 			$code = 'rappel_demandes_validation';
             foreach ($users_demandes as $id_user => $demandes) {
-//                $email = $bdb->getValue('user', 'email', 'rowid = ' . $id_user);
-				$u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-				$email = $u->isMailValid($code);
-                if (!$email) {
-                    $errors[] = 'Aucun adresse email pour user #' . $id_user;
-                    continue;
-                }
+                // $id_user
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'BimpUser', $id_user);
 
-                $email = BimpTools::cleanEmailsStr($email);
                 $nb_demandes = count($demandes);
                 $s = ($nb_demandes > 1 ? 's' : '');
                 $subject = 'Rappel : ' . $nb_demandes . " demande$s de validation en attente d'acceptation";
@@ -70,10 +64,10 @@ class BimpValidationCronExec extends BimpCron
                     }
                 }
 
-                if (!mailSyn2($subject, $email, '', $msg)) {
-                    $errors[] = 'Echec envoi mail à ' . $email . " ($nb_demandes validation$s)";
+                if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $id_user))) {
+                    $errors[] = 'Echec envoi mail à ' . $user->getData('email') . " ($nb_demandes validation$s)";
                 } else {
-                    $this->output .= $email . ' - Envoi ok ' . " ($nb_demandes validation$s)<br/>";
+                    $this->output .= $user->getData('email') . ' - Envoi ok ' . " ($nb_demandes validation$s)<br/>";
                 }
             }
         }

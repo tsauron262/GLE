@@ -245,7 +245,8 @@ class BS_Inter extends BimpObject
                     $link = $ticket->getLink(array(), 'private');
                     $msg = 'Une intervention a été créée sur le ticket support ' . $link;
 					$code = "create_inter_ticket";
-                    mailSyn2("BIMP - Intervention sur le ticket : " . $ticket->getData('ticket_number'), $to, '', $msg);
+					$sujet = "BIMP - Intervention sur le ticket : " . $ticket->getData('ticket_number');
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $this);
                 }
             }
 

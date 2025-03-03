@@ -257,9 +257,8 @@ class securLogSms
                 }
             }
 
-            $toM = $this->traiteMail();
-            if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, null, $text . ' IP : ' . $this->ip)) {
-                $this->message[] = 'Code envoyé à ' . substr($toM, 0, 4) . "*******" . substr($toM, -7) . "<br/><br/>";
+			if (!count(BimpUserMsg::envoiMsg('code_BIMP', "Code BIMP", $text . ' IP : ' . $this->ip, $this))) {
+                $this->message[] = 'Code envoyé par mail<br/><br/>';
                 $okMail = true;
             }
             //            }

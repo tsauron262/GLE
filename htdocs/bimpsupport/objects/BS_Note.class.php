@@ -190,7 +190,6 @@ class BS_Note extends BimpObject
     public function sendNotificationEmails()
     {
         global $userClient;
-
         $ticket = $this->getParentInstance();
 
         $client = null;
@@ -200,53 +199,24 @@ class BS_Note extends BimpObject
             $client = $ticket->getChildObject('user_client');
         }
 
-//        $dests = array();
-        $userDests = array();
         if (BimpCore::isContextPublic()) {
-            if (BimpObject::objectLoaded($client)) {
-//                $dests = BimpTools::merge_array($dests, $client->get_dest('commerciaux'));
-				$userDests = BimpTools::merge_array(
-					$userDests,
-					BimpCache::getSocieteCommerciauxObjectsList($client->getData('id'))->id
-				);
-            }
+			$link = '';
+			if (BimpObject::objectLoaded($ticket)) {
+				$link = $ticket->getLink(array(), 'private');
+			}
+			$msg = 'Un message a été ajouté sur votre ticket hotline ';
+			if ($link) {
+				$msg .= $link;
+			} else {
+				$msg .= '<b>' . $ticket->getData('ticket_number') . '</b>';
+			}
+			$msg .= '<br/><br/>';
+			$msg .= 'Message : ' . $this->getData('content');
+			$code = 'add_note_by_client';
+			$subject = 'BIMP - Message client sur ticket hotline #' . $ticket->id;
 
-            $resp = $ticket->getChildObject('user_resp');
-            if (is_object($resp) && $resp->isLoaded()) {
-//                $dests[] = $resp->getData('email');
-				$userDests[] = $resp->getData('id');
-            }
+			BimpUserMsg::envoiMsg($code, $subject, $msg, $ticket);
 
-//            if (count($dests)) {
-            if (count($userDests)) {
-                $dests = array();
-				foreach ($userDests as $idDest) {
-					$u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idDest);
-					$m = $u->isMailValid();
-					if ($m) {
-						$dests[] = $m;
-					}
-				}
-
-
-                $link = '';
-                if (BimpObject::objectLoaded($ticket)) {
-                    $link = $ticket->getLink(array(), 'private');
-                }
-
-                $msg = 'Un message a été ajouté sur votre ticket hotline ';
-                if ($link) {
-                    $msg .= $link;
-                } else {
-                    $msg .= '<b>' . $ticket->getData('ticket_number') . '</b>';
-                }
-
-                $msg .= '<br/><br/>';
-                $msg .= 'Message : ' . $this->getData('content');
-
-				$code = 'add_note_by_client';
-                mailSyn2('BIMP - Message client sur ticket hotline #' . $ticket->id, implode(', ', $dests), '', $msg);
-            }
         } elseif (BimpObject::objectLoaded($client) && $this->getData('visibility') == 1) {
             $to = $client->getData('email');
             $cc = implode(',', $client->get_dest('admin'));

@@ -914,7 +914,7 @@ class Bimp_User extends BimpObject
 			));
 
 			if (!empty($users)) {
-				$html .= '<div style="margin-top: 15xp">';
+				$html .= '<div style="margin-top: 15px">';
 				foreach ($users as $u) {
 					$html .= BimpRender::renderAlerts('L\'utilisateur ' . $u->getLink() . ' vous a accordé l\'accès à ses messages et tâches', 'info');
 				}
@@ -1240,8 +1240,6 @@ class Bimp_User extends BimpObject
 
 	public function renderMsgErp($type_metier = 'metier')
 	{
-		global $user;
-
 		$oui_non = array(
 			'yes' => 'Oui',
 			'no'  => 'Non',
@@ -1250,7 +1248,6 @@ class Bimp_User extends BimpObject
 		$headers = array(
 			'label'    => array('label' => 'Libellé'),
 			'required' => array('label' => 'Obligatoire', 'search_values' => $oui_non),
-			'dest'     => array('label' => 'Destinataire'),
 			'resil'    => array('label' => 'Abonné', 'search_values' => $oui_non),
 		);
 
@@ -1259,12 +1256,11 @@ class Bimp_User extends BimpObject
 			if (!BimpCore::isModuleActive($userMessage['module'])) {
 				continue;
 			}
-			if ($userMessage['type_metier'] != $type_metier) {
+			if ($userMessage['params']['type_metier'] != $type_metier) {
 				continue;
 			}
-			$required = BimpCore::getConf('userMessages__' . $code . '__required', '') != '' ? BimpCore::getConf('userMessages__' . $code . '__required', '') : $userMessage['required'];
-			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', '') != '' ? BimpCore::getConf('userMessages__' . $code . '__msgActive', '') : $userMessage['active'];
-			// $abonner = BimpCore::getConf('userMessages__' . $code . '_' . GETPOST('id', 'int') . '__abonner', '') != '' ? BimpCore::getConf('userMessages__' . $code . '_' . GETPOST('id', 'int') . '__abonner', '') : 1;
+			$required = BimpCore::getConf('userMessages__' . $code . '__required', $userMessage['params']['required']);
+			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', $userMessage['params']['active']);
 			$abonner = ($this->getUserParamValue('userMessages__' . $code . '__abonner') != '' ? $this->getUserParamValue('userMessages__' . $code . '__abonner') : 'yes');
 
 			if (!$msg_active) {
@@ -1273,15 +1269,11 @@ class Bimp_User extends BimpObject
 
 			$lines[] = array(
 				'label' => $userMessage['label'],
-
 				'required' => array(
 					'content' => '<span class="' . ($required ? 'danger' : 'success') . '">' . ($required ? $oui_non['yes'] : $oui_non['no']) . '</span>',
 					'value'   => $required ? 'yes' : 'no'
 				),
-
-				'dest' => $userMessage['dest'],
-
-				'resil' => $required ? '' : array(
+				'resil' => $required ? array('content' => 'Oui par défaut', 'value' => 'yes') : array(
 					'content' => BimpInput::renderInput('toggle', 'resil', ($abonner == 'yes' ? 1 : 0),
 						array(
 							'extra_attr' => array('onchange' => $this->getJsActionOnclick(
@@ -1291,7 +1283,7 @@ class Bimp_User extends BimpObject
 						)
 					),
 					'value'   => ($abonner == 'yes' ? 'yes' : 'no')
-				)
+				),
 			);
 		}
 		$params = array(
@@ -2427,72 +2419,11 @@ class Bimp_User extends BimpObject
 		return $errors;
 	}
 
-	public function isMailValid($code_mail = "", $params = array())
+	public function isAbonne($code)
 	{
-		// todo franck
-		$params = BimpTools::overrideArray(array(
-			'check_active'        => true,
-			'check_disponibility' => false,
-			'allow_superior'      => false
-		), $params);
-
-		$to = '';
-
-		if ($params['check_active']) {        // check si l'utilisateur est encore dans l'entreprise
-			if ((int) $this->getData('statut')) {    // statut = 1 => actif (on récup son email)
-				$to = $this->getData('email');
-			}
-		}
-
-		if ($params['check_disponibility']) {    // check si l'utilisateur est disponible (pas Off, ni en vacances, ...)
-			if ($this->isAvailable()) {    // il l'est, on récupere son email si $to est vide
-				if (!$to) {
-					$to = $this->getData('email');
-				}
-			} else {
-				$to = '';    // si pas disponible, on ne lui envoie pas de mail
-			}
-		}
-
-		if ($params['allow_superior'] && !$to) {    // on envoie à son supérieur si pas d'email
-			$to = $this->getEmailOrSuperiorEmail(true);
-		}
-
-		return BimpTools::cleanEmailsStr($to);
-	}
-
-	public function sendMsg($code, $subject, $msg, $params = array())
-	{
-		global $user_messages;
-		if ($code) {
-			$active = (isset($user_messages[$code]['active']) ? $user_messages[$code]['active'] : 1);
-			// TODO / gerer les désactivation depuis l'interface
-			if (!$active) {
-				return false;
-			}
-		}
-		$to = $this->isMailValid($code, $params);
-		if ($to) {
-			return mailSyn2($subject, $to, '', $msg);
-		}
-	}
-
-	static public function getListEmailsVerifies($users)
-	{
-		if (!is_array($users)) {
-			$users = array($users);
-		}
-		$listEmais = array();
-		foreach ($users as $user) {
-			if (is_int($user)) {
-				$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user);
-			}
-			$to = $user->isMailValid();
-			if (!in_array($to, $listEmais) && $to != '') {
-				$listEmais[] = $to;
-			}
-		}
-		return implode(',', $listEmais);
+		// mail obligatoire por ce code ?
+		$obligatoire = BimpCore::getConf('userMessages__' .$code . '__required', BimpUserMsg::$userMessages[$code]['required'], 'bimpcore');
+		return ($obligatoire || $this->getUserParamValue('userMessages__' . $code . '__abonner', 1));
 	}
 
 	// Actions:

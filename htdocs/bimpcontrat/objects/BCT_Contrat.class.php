@@ -2503,12 +2503,6 @@ class BCT_Contrat extends BimpDolObject
             return '';
         }
 
-        $email = BimpCore::getConf('unpaid_factures_abonnement_notification_email', null, 'bimpcontrat');
-
-        if (!$email) {
-            return '';
-        }
-
         $out = '';
         $bdb = self::getBdb();
         $date_lim = new DateTime();
@@ -2561,7 +2555,7 @@ class BCT_Contrat extends BimpDolObject
                         $msg .= '<br/><br/>Par conséquent, vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.';
 
                         $code = 'alerte_abonnement_unpaid';
-						if (mailSyn2($subject, $email, '', $msg)) {
+						if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg))) {
                             $out .= ' [OK]';
                             $fac->updateField('alert_abonnement_unpaid_send', 1);
                         } else {

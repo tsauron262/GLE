@@ -3547,7 +3547,8 @@ class BimpCache
                             $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=dev&tab=logs' . "\n\n";
 
 							$code = 'bimpcore_to_much_logs_email';
-                            mailSyn2("TROP DE LOGS", BimpCore::getConf('devs_email'), null, $message);
+							$sujet = 'TROP DE LOGS';
+                            BimpUserMsg::envoiMsg($code, $sujet, $message);
                             BimpCore::setConf('bimpcore_to_much_logs_email_send', 1);
                         }
                     } elseif ($mail_send) {

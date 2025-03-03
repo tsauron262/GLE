@@ -533,7 +533,8 @@ class BWSApi
                 }
 
 				$code = 'webservice_error_fatal';
-                mailSyn2('ERREUR FATALE WEBSERVICE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email', 'f.martinez@bimp.fr'), '', $txt);
+                $sujet = 'ERREUR FATALE WEBSERVICE - ' . str_replace('/', '', DOL_URL_ROOT);
+				BimpUserMsg::envoiMsg($code, $sujet, $txt);
 
                 BimpCore::addlog('ERREUR FATALE WEBSERVICE - ' . $msg, Bimp_Log::BIMP_LOG_URGENT, 'ws', null, array(
                     'Requête' => $this->request_name,

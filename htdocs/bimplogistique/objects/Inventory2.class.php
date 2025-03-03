@@ -63,7 +63,7 @@ HAVING scan_exp != scan_det";
                     $text .= "<br/>Ln expected " . $ln->id . ' : ' . $ln->scan_det . " det / " . $ln->scan_exp . " exp " . $prod->getLink();
                 }
 				$code = 'inventaire_incoherence';
-                mailSyn2('Incohérence inventaire', BimpCore::getConf('devs_email'), null, $text);
+				BimpUserMsg::envoiMsg($code, 'Incohérence inventaire', $text);
                 $errors[] = 'attention ' . $text;
             }
 
@@ -79,7 +79,7 @@ HAVING scan_exp != scan_det";
                     $text .= "<br/>Ln de scanne " . $ln->minId . " et ln de scann " . $ln->maxId . " identique";
 
 				$code = 'inventaire_incoherence_scan';
-				mailSyn2('Incohérence inventaire', BimpCore::getConf('devs_email'), null, $text);
+				BimpUserMsg::envoiMsg($code, 'Incohérence inventaire', $text);
                 $errors[] = 'attention ' . $text;
             }
         }

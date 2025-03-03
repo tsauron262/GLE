@@ -442,16 +442,14 @@ class BimpValidation
 
                         if (!count($accept_errors)) {
                             $email = BimpCore::getConf('notif_paiement_comptant_email', null, 'bimpvalidation');
-                            if ($email) {
-                                global $user;
-                                $msg = "Bonjour,<br/><br/> " . ucfirst($object->getLabel('the')) . ' ' . $object->getLink();
-                                $msg .= " a été validé" . $object->e() . " financièrement par paiement comptant ou mandat SEPA par ";
-                                $msg .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
-                                $msg .= "<br/>Merci de vérifier le paiement ultérieurement.";
-								$code = "general_valid_paiement_comptant_ou_sepa";
-                                mailSyn2('Validation par paiement comptant ou mandat SEPA - ' . $object->getLabel() . ' ' . $object->getLink(), $email, "", $msg);
-                            }
-
+							global $user;
+							$msg = "Bonjour,<br/><br/> " . ucfirst($object->getLabel('the')) . ' ' . $object->getLink();
+							$msg .= " a été validé" . $object->e() . " financièrement par paiement comptant ou mandat SEPA par ";
+							$msg .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
+							$msg .= "<br/>Merci de vérifier le paiement ultérieurement.";
+							$code = "general_valid_paiement_comptant_ou_sepa";
+							$sujet = 'Validation par paiement comptant ou mandat SEPA - ' . $object->getLabel() . ' ' . $object->getLink();
+							BimpUserMsg::envoiMsg($code, $sujet, $msg);
                             $infos[] = 'La demande de validation ' . BV_Rule::$types[$type]['label2'] . ' a été acceptée automatiquement pour le motif : "Paiement comptant"';
                         } else {
                             $errors[] = BimpTools::getMsgFromArray($accept_errors, 'Echec accepation auto pour la validation de type ' . BV_Rule::$types[$type]['label']);
@@ -546,20 +544,6 @@ class BimpValidation
             return array();
         }
 
-        $to = '';
-		$code = "general_valid_auto";
-
-        foreach ($users as $id_user) {
-            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-            if (BimpObject::objectLoaded($user)) {
-                $email = BimpTools::cleanEmailsStr($user->getData('email'));
-
-				$email = $user->isMailValid($code);
-				if ($email) {
-                    $to .= ($to ? ', ' : '') . $email;
-                }
-            }
-        }
 
         $validated = false;
         if (method_exists($object, 'actionValidate')) {
@@ -572,7 +556,7 @@ class BimpValidation
             }
         }
 
-        if ($to) {
+        if ($users) {
             $subject = BimpTools::ucfirst($object->getLabel('')) . ' ' . $object->getRef() . ($validated ? ' validé' . $object->e() : ' - demandes de validation acceptées');
             $msg = 'Bonjour,<br/><br/>';
             $msg .= 'Toutes les demandes de validation ' . $object->getLabel('of_the') . ' ' . $object->getLink() . ' ont été acceptées.<br/><br/>';
@@ -583,10 +567,12 @@ class BimpValidation
                 $msg .= 'Vous devez à présent terminer manuellement la validation de ' . $object->getLabel('this');
             }
 
-            if (mailSyn2($subject, $to, '', $msg)) {
-                $object->addObjectLog('Notification de validation complète envoyée à "' . $to . '"');
+//            if (mailSyn2($subject, $to, '', $msg)) {
+			$code = "general_valid_auto";
+            if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $users))) {
+                $object->addObjectLog('Notification de validation complète envoyée à "' . print_r($users, 1) . '"');
             } else {
-                $object->addObjectLog('Echec de l\'envoi de la notification de validation complète à "' . $to . '"');
+                $object->addObjectLog('Echec de l\'envoi de la notification de validation complète à "' . print_r($users, 1). '"');
             }
         }
 

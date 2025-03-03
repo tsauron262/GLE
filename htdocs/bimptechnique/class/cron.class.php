@@ -56,20 +56,12 @@ class Cron
             }
             $mail .= "<br />Si la régularisation a été faite entre temps, merci de ne pas tenir compte de cet email.<br />Cordialement.";
 
-//            $emailSendTo = BimpTools::cleanEmailsStr($tech->getData('email'));
             $sujet = 'Fiches d\'intervention en brouillon';
-
-            /*if(in_array($id_tech, $this->idTechForVanina)) {
-                $sujet = 'Fiche d\'intervention en brouillon de ' . $tech->getName();
-                $emailSendTo = $this->sendEmailDefault;
-                $mail .= '<br /><br />Ceci est un mail de redirection de ' . $tech->getData('email') . ' vers ' . $this->sendEmailDefault;
-            }*/
 
             global $langs;
             echo '<h1>'.$tech->dol_object->getFullName($langs).'</h1><br/>'.$mail;
 			$code = 'relance_FI_brouillon_Jplus1';
-			$tech->sendMsg($code, $sujet, $mail);
-//            mailSyn2($sujet, $emailSendTo, null, $mail);
+			BimpUserMsg::envoiMsg($code, $sujet, $mail, $tech);
         }
     }
 
@@ -124,20 +116,12 @@ FROM llx_fichinterdet a LEFT JOIN llx_fichinter a___parent ON a___parent.rowid =
             }
             $mail .= "<br />Si la régularisation a été faite entre temps, merci de ne pas tenir compte de cet email.<br />Cordialement.";
 
-            $emailSendTo = BimpTools::cleanEmailsStr($tech->getData('email'));
             $sujet = 'Fiches d\'intervention(s) posant problème';
-
-            if(in_array($id_tech, $this->idTechForVanina)) {
-                $sujet = 'Fiche d\'intervention(s) posant problème de ' . $tech->getName();
-                $emailSendTo = $this->sendEmailDefault;
-                $mail .= '<br /><br />Ceci est un mail de redirection de ' . $tech->getData('email') . ' vers ' . $this->sendEmailDefault;
-            }
 
             global $langs;
             echo '<h1>'.$tech->dol_object->getFullName($langs).'</h1><br/>'.$mail;
 			$code = 'relance_FI_aFact_impoderable';
-			$tech->sendMsg($code, $sujet, $mail);
-//            mailSyn2($sujet, $emailSendTo, null, $mail);
+			BimpUserMsg::envoiMsg($code, $sujet, $mail, $tech);
         }
     }
 }

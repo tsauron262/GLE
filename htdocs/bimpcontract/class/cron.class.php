@@ -85,8 +85,6 @@ class cron extends BimpCron
                 }
 
                 $msg .= '<br ><br />Contrat: ' . $contrat->getLink();
-//                mailSyn2($subject, $commercial->getData('email'), null, $msg);
-//				$commercial->sendMsg('relance_avenant_provisoire', $subject, $msg);
 				BimpUserMsg::envoiMsg('relance_avenant_provisoire', $subject, $msg, $contrat);
             }
 
@@ -117,14 +115,11 @@ class cron extends BimpCron
                                 . '<u>Informations</u><br />'
                                 . 'Référence du contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />'
                                 . 'Commercial suivi de contrat: ' . $commercial_suivi->getName() . '<br />Commercial signataire du contrat: ' . $commercial_signa->getName();
-                        $mustSend = ($echeancier->isLoaded() && $echeancier->getData('validate')) ? false : true;
-                        if (($mustSend)) {
-                            $email = BimpCore::getConf('email_facturation', null, 'bimpcore');
-                            if ($email) {
-								$code = 'notif_facturation_contrat_demain';
-                                mailSyn2($sujet, $email, null, $message);
-                                $this->output .= $contrat->getRef() . ' => FAIT: RELANCE FACTURATION DEMAIN';
-                            }
+                        $mustSend = $echeancier->isLoaded() && $echeancier->getData('validate') ? false : true;
+                        if ($mustSend) {
+                            $code = 'notif_facturation_contrat_demain';
+							BimpUserMsg::envoiMsg($code, $sujet, $message);
+                            $this->output .= $contrat->getRef() . ' => FAIT: RELANCE FACTURATION DEMAIN';
                         }
                     }
                 }
@@ -157,10 +152,7 @@ class cron extends BimpCron
         }
         if ($to_send) {
 			$code = "liste_contrat_activation_cejour";
-			BimpUserMsg::envoiMsg($code, "Contrats en attente de validation", $msg);
-//			$to = BimpCore::getConf('email_groupe', 'contrats@bimp.fr', 'bimpcontract');
-//			mailSyn2("Contrats en attente de validation", $to, null, $msg);
-        }
+			BimpUserMsg::envoiMsg($code, "Contrats en attente de validation", $msg);        }
     }
 
     public function relanceActivationProvisoire()
@@ -180,8 +172,6 @@ class cron extends BimpCron
 //                $commercial = $contrat->getCommercialClient(true);
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
                 $msg = "L'activation provisoire de votre contrat " . $contrat->getNomUrl() . " pour le client " . $client->getNomUrl() . " " . $client->getName() . ", vient d'être suspendue. Il ne sera réactivé que lorsque nous recevrons la version dûment signée par le client";
-//                mailSyn2("Contrat suspendu", $commercial->getData('email'), null, $msg);
-//				$commercial->sendMsg('suspension_contrat_auto', 'Contrat suspendu', $msg);
                 BimpUserMsg::envoiMsg('suspension_contrat_auto', 'Contrat suspendu', $msg, $contrat);
 				$contrat->addLog("Contrat suspendu automatiquement pour cause de non signature");
                 $contrat->updateField('statut', self::CONTRAT_ACTIVER_SUP);
@@ -192,8 +182,6 @@ class cron extends BimpCron
 //                    $commercial = $contrat->getCommercialClient(true);
                     $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
                     $msg = "Votre contrat " . $contrat->getNomUrl() . " pour le client " . $client->getNomUrl() . " " . $client->getName() . " est activé provisoirement car il n'est pas revenu signé. Il sera automatiquement désactivé le " . $end_prov->format('d / m / Y') . " si le nécessaire n'a pas été fait.";
-//                    mailSyn2("Contrat en attente de signature", $commercial->getData('email'), null, $msg);
-//					$commercial->sendMsg('relance_contrat_provisoire', 'Contrat en attente de signature', $msg);
 					BimpUserMsg::envoiMsg('relance_contrat_provisoire', 'Contrat en attente de signature', $msg, $contrat);
                 } elseif ($diff->d > 0) {
                     $this->output .= ": Pas de relance car tout les deux jours";
@@ -259,7 +247,6 @@ class cron extends BimpCron
 							$sujet = "Renouvellement tacite du contrat " . $contrats->getRef();
 							$msg = "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement.<br /> Client: " . $client->getData('code_client') . " " . $client->getName();
 							BimpUserMsg::envoiMsg($code, $sujet, $msg, $contrats->getData('fk_commercial_suivi'));
-//		                    mailSyn2("[Contrat] - Renouvellement tacite - " . $contrats->getRef(), $email_commercial, null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement.<br /> Client: " . $client->getData('code_client') . " " . $client->getName());
                         }
 //                            else
 //                                $this->output .= ' ne sembla pas avoir était renouvelle correctment';
@@ -377,11 +364,9 @@ class cron extends BimpCron
                     $w = array();
                     $note_errors = $note->create($w, true);
                     if (count($note_errors)) {
-                        $email = BimpCore::getConf('email_facturation', null, 'bimpcore');
-                        if ($email) {
-							$code = "facture_auto";
-                            mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), $email, null, $msg);
-                        }
+                        $code = "facture_auto";
+						$sujet = "Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName();
+						BimpUserMsg::envoiMsg($code, $sujet, $msg);
                     }
 
                     $bdb->db->commit();
@@ -580,23 +565,6 @@ class cron extends BimpCron
         $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_commercial);
         $email = $commercial->getData('email');
 
-        /*if ($commercial->getData('statut') == 0) {
-            $supp_h = BimpObject::getInstance('bimpcore', 'Bimp_User', $commercial->getData('fk_user'));
-            $email = $supp_h->getData('email');
-
-            if ($supp_h->getData('statut') == 0) {
-
-                // Vérifier si le commercial client est actif
-                $id_commercial_client = $bimp->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $contrat->getData('fk_soc'));
-                $commercial_client = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_commercial_client);
-
-                if ($commercial_client->getData('statut') == 1) {
-                    $email = $commercial_client->getData('email');
-                } else {
-                    $email = 'debugerp@bimp.fr';
-                }
-            }
-        }*/
 		if (!count(BimpUserMsg::envoiMsg('relance_contrat_brouillon', $sujet, $message, $id_commercial)))
        		$this->output .= "Relance => " . $email . " -> " . $contrat->getData('ref') . '<br />';
     }

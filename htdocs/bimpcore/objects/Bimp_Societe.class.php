@@ -3061,26 +3061,14 @@ class Bimp_Societe extends BimpDolObject
     {
         global $conf;
         if ($this->isLoaded()) {
-            $emails = '';
-            $commerciaux = $this->getIdCommercials();
+            $subject = 'Modification encours client ' . $this->getName();
+			$msg = 'L\'encours du client ' . $this->getLink() . ' a été modifié';
+			$msg .= '<br/>Nouvel encours : ' . $this->getData('outstanding_limit') . ' €';
+			$msg .= '<br/>Ancien encours : ' . $oldLimit . ' €';
 
-            foreach ($commerciaux as $id_user) {
-                $userComm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-				$email = $userComm->isValidate();
-                if ($email) {
-                    $emails .= ($emails ? ',' : '') . $email;
-                }
-            }
+			$code = "encours_client_modif";
+			BimpUserMsg::envoiMsg($code, $subject, $msg, $this);
 
-			if($emails != '') {
-				$subject = 'Modification encours client ' . $this->getName();
-				$msg = 'L\'encours du client ' . $this->getLink() . ' a été modifié
-<br/>Nouvel encours : ' . $this->getData('outstanding_limit') . ' €
-<br/>Ancien encours : ' . $oldLimit . ' €';
-
-				$code = "encours_client_modif";
-				mailSyn2($subject, $emails, '', $msg);
-			}
             if (strlen($this->getData('siren')) == 9) {
                 $this->db->db->query("UPDATE " . MAIN_DB_PREFIX . "societe_atradius SET outstanding_limit = '" . $this->getData('outstanding_limit') . "' WHERE entity = " . $conf->entity . " AND id_soc IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "societe WHERE siren = '" . $this->getData('siren') . "')");
             }
@@ -3128,22 +3116,8 @@ class Bimp_Societe extends BimpDolObject
                 }
 
                 $subject = 'Mise à jour solvabilité client ' . $this->getRef();
-
-//                mailSyn2($subject, $emails, '', $msg);
-//
-//                $emails = '';
-                $commerciaux = $this->getIdCommercials();
-
-				foreach ($commerciaux as $id_user) {
-					$userComm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-					$email = $userComm->isValidate();
-					if ($email) {
-						$emails .= ($emails ? ',' : '') . $email;
-					}
-				}
-
 				$code = "solvabilite_client_modif";
-                mailSyn2($subject, $emails, '', $msg);
+				BimpUserMsg::envoiMsg($code, $subject, $msg, $this);
             }
         }
 //        if (!in_array($field, array('solvabilite_status', 'status'))) {
@@ -3183,29 +3157,21 @@ class Bimp_Societe extends BimpDolObject
             $id_user = (int) $this->getData('id_user_status_demand');
 
             if ($id_user) {
-                $demand_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                global $user;
+				$msg = 'Bonjour, ' . "\n\n";
+				$msg .= 'Suite à votre demande, le client ' . $this->getLink() . ' a été ';
+				if ((int) $this->getData('status')) {
+					$subject = 'Client activé';
+					$msg .= 'activé';
+				} else {
+					$subject = 'Client désactivé';
+					$msg .= 'désactivé';
+				}
 
-                if (BimpObject::objectLoaded($demand_user)) {
-//                    $email = $demand_user->getData('email');
-
-                    global $user;
-//					$email = BimpTools::cleanEmailsStr($email);
-					$msg = 'Bonjour, ' . "\n\n";
-					$msg .= 'Suite à votre demande, le client ' . $this->getLink() . ' a été ';
-					if ((int) $this->getData('status')) {
-						$subject = 'Client activé';
-						$msg .= 'activé';
-					} else {
-						$subject = 'Client désactivé';
-						$msg .= 'désactivé';
-					}
-
-					$msg .= ' par ' . $user->getNomUrl();
-
-//                  mailSyn2($subject, $email, '', $msg);
-					$demand_user->sendMsg('activation_onoff_on_demand', $subject, $msg);
-					$this->updateField('id_user_status_demand', 0);
-                }
+				$msg .= ' par ' . $user->getNomUrl();
+				$code = 'activation_onoff_on_demand';
+				BimpUserMsg::envoiMsg($code, $subject, $msg, $id_user);
+				$this->updateField('id_user_status_demand', 0);
             }
         }
     }
@@ -3591,36 +3557,31 @@ class Bimp_Societe extends BimpDolObject
         if ($this->isLoaded($errors)) {
             global $user;
 
-            $emails = BimpCore::getConf('emails_notify_status_client_change', '');
-            if ($emails) {
-                $status = (int) $this->getData('status');
+            $status = (int) $this->getData('status');
 
-                if ($status) {
-                    $op = 'déactivation';
-                } else {
-                    $op = 'activation';
-                }
+			if ($status) {
+				$op = 'déactivation';
+			} else {
+				$op = 'activation';
+			}
 
-                if ($this->isClient()) {
-                    $label = 'client';
-                } else {
-                    $label = 'fournisseur';
-                }
+			if ($this->isClient()) {
+				$label = 'client';
+			} else {
+				$label = 'fournisseur';
+			}
 
-                $subject = 'Demande ' . $op . ' ' . $label . ' ' . $this->getRef();
-                ;
-                $msg = 'Bonjour, ' . "\n\n";
-                $msg .= 'L\'utilisateur ' . $user->getNomUrl() . ' demande ' . ($status ? 'la' : 'l\'') . ' ' . $op;
-                $msg .= ' du ' . $label . ' ' . $this->getLink();
+			$subject = 'Demande ' . $op . ' ' . $label . ' ' . $this->getRef();
+			;
+			$msg = 'Bonjour, ' . "\n\n";
+			$msg .= 'L\'utilisateur ' . $user->getNomUrl() . ' demande ' . ($status ? 'la' : 'l\'') . ' ' . $op;
+			$msg .= ' du ' . $label . ' ' . $this->getLink();
 
-				$code = "demande_modif_status_client_fourn";
-                mailSyn2($subject, $emails, '', $msg);
-                $this->updateField('id_user_status_demand', $user->id);
+			$code = "demande_modif_status_client_fourn";
+			BimpUserMsg::envoiMsg($code, $subject, $msg);
+            $this->updateField('id_user_status_demand', $user->id);
 
-                $success = 'Demande envoyée';
-            } else {
-                $errors[] = 'Aucune adresse email configurée pour cette demande';
-            }
+            $success = 'Demande envoyée';
         }
 
         return array(

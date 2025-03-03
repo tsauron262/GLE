@@ -91,7 +91,7 @@ function createTicket($data) {
     //return print_r($new, 1);
 
     if($new->create($warnings, false) > 0) {
-
+		// todo: utiliser bimpMail pour envoyer le mail au client (et donc séparer les utilisateurs internes et externes)
         $tmpContrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $data->contrat);
         $tmpUserClient = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $data->userClient);
 

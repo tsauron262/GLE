@@ -346,15 +346,7 @@ class BimpValidateOrder
 
     private function sendEmailToResponsible($id_responsible, $user, $order)
     {
-
-//        $doli_user_responsible = new User($this->db);
-//        $doli_user_responsible->fetch($id_responsible);
-		$bimp_user_responsible = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_responsible);
-
-
         $subject = "BIMP ERP - Demande de validation de commande client";
-
-
 
         $msg = "Bonjour, \n\n";
         $msg .= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
@@ -370,6 +362,7 @@ class BimpValidateOrder
 
 //        return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
 		$code = 'demande_validation_commande';
-		return $bimp_user_responsible->sendMail($code, $subject, $msg);
+		$err = BimpUserMsg::envoiMsg($code, $subject, $msg, $id_responsible);
+		return count($err) == 0;
     }
 }

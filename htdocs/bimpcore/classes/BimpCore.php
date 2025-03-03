@@ -58,7 +58,8 @@ class BimpCore
         'florian' => 'f.martinez@bimp.fr',
         'alexis'  => 'al.bernard@bimp.fr',
         'romain'  => 'r.PELEGRIN@bimp.fr',
-        'peter'   => 'p.tkatchenko@bimp.fr'
+        'peter'   => 'p.tkatchenko@bimp.fr',
+		'franck'  => 'f.lauby@ldlc.com'
     );
     public static $html_purifier = null;
 
@@ -295,7 +296,7 @@ class BimpCore
                         }
 
                         if (!$err && !file_exists($out_dir . '/' . $out_file)) {
-                            // Suppr du fichier existant: 
+                            // Suppr du fichier existant:
                             foreach (scandir($out_dir) as $f) {
                                 if (in_array($f, array('.', '..'))) {
                                     continue;
@@ -873,7 +874,7 @@ class BimpCore
         return $errors;
     }
 
-    // Gestion BimpCore Conf: 
+    // Gestion BimpCore Conf:
 
     public static function getConfCache()
     {

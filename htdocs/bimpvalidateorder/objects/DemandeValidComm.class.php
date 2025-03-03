@@ -202,8 +202,7 @@ class DemandeValidComm extends BimpObject
         }
 
 		$code = "create_demande_validation_comm";
-//        mailSyn2($subject_mail, $user_affected->getData('email'), null, $message_mail);
-		$user_affected->sendMsg($code, $subject_mail, $message_mail);
+		BimpUserMsg::envoiMsg($code, $subject_mail, $message_mail, $user_affected->id);
 
         return $errors;
     }
@@ -296,7 +295,7 @@ class DemandeValidComm extends BimpObject
                 }
 //                mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
 				$code = "onvalidate_demande_validation_piece";
-				$user_ask->sendMsg($code, $subject, $message_mail);
+				BimpUserMsg::envoiMsg($code, $subject, $message_mail, $user_ask->id);
             }
         }
     }

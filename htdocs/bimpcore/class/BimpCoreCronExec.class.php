@@ -143,11 +143,8 @@ class BimpCoreCronExec extends BimpCron
             $msg = $i . ' Cron(s) en erreur : <br/>' . $msg;
             $this->output = 'Envoi mail pour ' . $i . ' erreur(s) : ';
 			$code = 'erreur_cron';
-            if (mailSyn2($i . ' Cron(s) en erreur', BimpCore::getConf('devs_email', 'dev@bimp.fr'), null, $msg)) {
-                $this->output .= '[OK]';
-            } else {
-                $this->output .= '[ECHEC]';
-            }
+			$sujet = $i . ' Cron(s) en erreur';
+			$this->output .= !count(BimpUserMsg::envoiMsg($code, $sujet, $msg)) ? '[OK]' : '[ECHEC]';
         } else {
             $this->output .= 'Aucun cron en erreur';
         }

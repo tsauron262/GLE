@@ -3611,7 +3611,6 @@ class BContract_contrat extends BimpDolObject
 					$code = 'actionActivateContrat';
 					list($sujet, $message) = $this->calcul_mail(self::MAIL_ACTIVATION);
 					BimpUserMsg::envoiMsg($code, $sujet, $message, $this->getData('fk_commercial_suivi'));
-//                     $this->mail(BimpCore::getConf('email_facturation', null, 'bimpcore'), self::MAIL_ACTIVATION, $commercial->getData('email'));
                 } else {
                     $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
                 }
@@ -4276,7 +4275,6 @@ class BContract_contrat extends BimpDolObject
 			$code = 'actionSignedContrat';
 			list($sujet, $message) = $this->calcul_mail(self::MAIL_SIGNED);
 			BimpUserMsg::envoiMsg($code, $sujet, $message);
-//			$this->mail($this->email_group, self::MAIL_SIGNED);
         }
 
         return [
@@ -4366,7 +4364,6 @@ class BContract_contrat extends BimpDolObject
 				$code = 'actionDemandeValidationContrat';
 				list($sujet, $message) = $this->calcul_mail(self::MAIL_DEMANDE_VALIDATION);
 				BimpUserMsg::envoiMsg($code, $sujet, $message);
-//                $this->mail($this->email_group, self::MAIL_DEMANDE_VALIDATION);
             }
         }
 

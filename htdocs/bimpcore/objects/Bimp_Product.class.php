@@ -575,7 +575,9 @@ class Bimp_Product extends BimpObject
             }
             if (count($null) > 2 && BimpCore::getConf('mail_achat', '') != '') {
 				$code = 'prod_non_categorise';
-                mailSyn2("Prod non catagorisé", BimpCore::getConf('mail_achat'), null, "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
+				$msg = "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null);
+				BimpUserMsg::envoiMsg($code, "Prod non catagorisé", $msg);
+                // BimpCore::getConf('mail_achat'), null,
             }
         }
 
@@ -821,7 +823,7 @@ class Bimp_Product extends BimpObject
             return BimpCore::getConf($confName, null, "bimptocegid");
         else {
 			$code = 'code_compta_inconnu_ACHAT';
-            mailSyn2('Probléme compta', bimpcore::getConf('devs_email'), null, 'Attention code compta inconnue ' . $confName);
+			BimpUserMsg::envoiMsg($code, 'Problème compta', 'Attention code compta inconnue ' . $confName);
             die;
         }
 
@@ -923,7 +925,7 @@ class Bimp_Product extends BimpObject
             return BimpCore::getConf($confName, null, "bimptocegid");
         else {
 			$code = 'code_compta_inconnu_VENTE';
-            mailSyn2('Probléme compta', BimpCore::getConf('devs_email'), null, 'Attention code compta inconnue ' . $confName);
+			BimpUserMsg::envoiMsg($code, 'Problème compta', 'Attention code compta inconnue ' . $confName);
             die;
         }
 
@@ -3569,14 +3571,12 @@ class Bimp_Product extends BimpObject
             return $errors;
         }
 
-        $email = BimpCore::getConf('product_validated_notif_email', '', 'bimpcore');
+		global $langs;
+		$msg = 'Bonjour, <br/><br/>Le produit ' . $this->getLink() . ' a été validé par ' . $user->getFullName($langs);
+		$code = 'product_validated';
+		$sujet = 'Produit ' . $this->getRef() . ' validé';
+		BimpUserMsg::envoiMsg($code, $sujet, $msg);
 
-        if ($email) {
-            global $langs;
-            $msg = 'Bonjour, <br/><br/>Le produit ' . $this->getLink() . ' a été validé par ' . $user->getFullName($langs);
-            $code = 'product_validated';
-			mailSyn2('Produit ' . $this->getRef() . ' validé', $email, '', $msg);
-        }
 
         // COMMAND
         $commandes_c = $this->getCommandes();
@@ -3926,8 +3926,7 @@ class Bimp_Product extends BimpObject
             $msg = "Bonjour " . $user->getNomUrl(0) . " souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
         }
 		$subjet = 'Validation produit';
-
-        if( BimpUserMsg::envoiMsg($code, $subjet, $msg ) ){
+		if (!count(BimpUserMsg::envoiMsg($code, $subjet, $msg))) {
             if ($this->getData('date_ask_valid') == null or $this->getData('date_ask_valid') == '') {
                 $datetime = new DateTime();
                 $this->updateField('date_ask_valid', $datetime->format('Y-m-d H:i:s'));

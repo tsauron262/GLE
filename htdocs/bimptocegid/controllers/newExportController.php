@@ -67,8 +67,7 @@ class newExportController extends BimpController {
             }
             echo $msg . '<br /><br />';
 			$code = 'CEGID_export_compta_manuel';
-            mailSyn2("Export compta MANUEL", BimpCore::getConf('devs_email'), null, $msg);
-
+			BimpUserMsg::envoiMsg($code, 'Export compta MANUEL', $msg);
         }
 
         if($_GET['test'] == 'true') {

@@ -1766,8 +1766,8 @@ class savFormController extends BimpPublicController
                         $msg .= 'Le client ' . $client->getLink(array(), 'private') . ' a été réactivé automatiquement suite à sa prise de rendez-vous SAV en ligne';
 
 						$code = 'react_client_prise_rdv_online';
-						$module = $this->module;
-						mailSyn2('Client activé automatiquement', BimpCore::getConf('react_client_prise_rdv_online', '', $module), '', $msg);
+						$sujet = 'Client activé automatiquement';
+						BimpUserMsg::envoiMsg($code, $sujet, $msg);
                     }
 
                     if (BimpObject::objectLoaded($client)) {
@@ -2166,85 +2166,84 @@ class savFormController extends BimpPublicController
                     }
 
                     if (!$reservation_exists) {
-                        // Envoi e-mail users:
+						// Envoi e-mail users:
 
-                        $emails = '';
+//                        $emails = '';
+//                        if (isset($centre['mail'])) {
+//                            $emails = $centre['mail'];
+//                        } elseif (!empty($shipToUsers)) {
+//                            foreach ($shipToUsers as $u) {
+//                                if (isset($u['email']) && $u['email']) {
+//                                    $emails .= ($emails ? ',' : '') . $u['email'];
+//                                }
+//                            }
+//                            $emails = BimpTools::cleanEmailsStr($emails);
+//                        }
+//
+//                        if ($emails) {
+							$msg = 'Bonjour,' . "\n\n";
+							$msg .= 'Un nouveau SAV a été créé en ligne par un client' . "\n\n";
 
-                        if (isset($centre['mail'])) {
-                            $emails = $centre['mail'];
-                        } elseif (!empty($shipToUsers)) {
-                            foreach ($shipToUsers as $u) {
-                                if (isset($u['email']) && $u['email']) {
-                                    $emails .= ($emails ? ',' : '') . $u['email'];
-                                }
-                            }
-                            $emails = BimpTools::cleanEmailsStr($emails);
-                        }
+							if ($id_ac) {
+								$msg .= '<a href="' . DOL_URL_ROOT . '/comm/action/card.php?id=' . $id_ac . '">Fiche événement du rendez-vous</a>' . "\n";
+							} else {
+								$msg .= 'Ce SAV a été créé sans rendez-vous (Raison: ' . ($noRdvReason ? $noRdvReason : 'non spécifiée') . ')' . "\n";
+							}
 
-                        if ($emails) {
-                            $msg = 'Bonjour,' . "\n\n";
-                            $msg .= 'Un nouveau SAV a été créé en ligne par un client' . "\n\n";
+							if (!is_null($dateBegin)) {
+								$msg .= 'Date: ' . $dateBegin->format('d / m / Y à H:i') . "\n";
+							}
 
-                            if ($id_ac) {
-                                $msg .= '<a href="' . DOL_URL_ROOT . '/comm/action/card.php?id=' . $id_ac . '">Fiche événement du rendez-vous</a>' . "\n";
-                            } else {
-                                $msg .= 'Ce SAV a été créé sans rendez-vous (Raison: ' . ($noRdvReason ? $noRdvReason : 'non spécifiée') . ')' . "\n";
-                            }
+							$msg .= "\n";
 
-                            if (!is_null($dateBegin)) {
-                                $msg .= 'Date: ' . $dateBegin->format('d / m / Y à H:i') . "\n";
-                            }
+							if (BimpObject::objectLoaded($sav)) {
+								$msg .= 'SAV: ' . $sav->getLink(array(), 'private') . "\n";
+							} else {
+								$msg .= 'Le SAV n\'a pas pu être créé (une erreur est survenue)' . "\n";
+								$msg .= '<b>Infos SAV: </b>' . "\n";
+								$msg .= 'Symptomes: ' . $data['eq_symptomes'] . "\n";
+								$msg .= 'Etat matériel: ' . BS_SAV::$etats_materiel[(int) $data['eq_etat']]['label'] . "\n";
+								$msg .= 'Système: ' . $systems[(int) $data['eq_system']] . "\n";
+							}
 
-                            $msg .= "\n";
+							if (BimpObject::objectLoaded($client)) {
+								$msg .= 'Client: ' . $client->getLink(array(), 'private') . "\n";
+							} else {
+								$msg .= 'Le client n\'a pas pu être créé (Une erreur est survenue)' . "\n";
+							}
 
-                            if (BimpObject::objectLoaded($sav)) {
-                                $msg .= 'SAV: ' . $sav->getLink(array(), 'private') . "\n";
-                            } else {
-                                $msg .= 'Le SAV n\'a pas pu être créé (une erreur est survenue)' . "\n";
-                                $msg .= '<b>Infos SAV: </b>' . "\n";
-                                $msg .= 'Symptomes: ' . $data['eq_symptomes'] . "\n";
-                                $msg .= 'Etat matériel: ' . BS_SAV::$etats_materiel[(int) $data['eq_etat']]['label'] . "\n";
-                                $msg .= 'Système: ' . $systems[(int) $data['eq_system']] . "\n";
-                            }
+							if (BimpObject::objectLoaded($contact)) {
+								$msg .= 'Contact: ' . $contact->getLink(array(), 'private') . "\n";
+							} else {
+								$msg .= 'Nom du contact client: ' . $data['client_firstname'] . ' ' . $data['client_lastname'] . '<br/>';
 
-                            if (BimpObject::objectLoaded($client)) {
-                                $msg .= 'Client: ' . $client->getLink(array(), 'private') . "\n";
-                            } else {
-                                $msg .= 'Le client n\'a pas pu être créé (Une erreur est survenue)' . "\n";
-                            }
+								if ($data['client_phone_pro']) {
+									$msg .= 'Tél. pro: ' . $data['client_phone_pro'] . '<br/>';
+								}
+								if ($data['client_phone_mobile']) {
+									$msg .= 'Tél. mobile: ' . $data['client_phone_mobile'] . '<br/>';
+								}
+								if ($data['client_phone_perso']) {
+									$msg .= 'Tél. domicile: ' . $data['client_phone_perso'] . '<br/>';
+								}
+							}
 
-                            if (BimpObject::objectLoaded($contact)) {
-                                $msg .= 'Contact: ' . $contact->getLink(array(), 'private') . "\n";
-                            } else {
-                                $msg .= 'Nom du contact client: ' . $data['client_firstname'] . ' ' . $data['client_lastname'] . '<br/>';
+							if (BimpObject::objectLoaded($userClient)) {
+								$msg .= 'Adresse e-mail de contact: ' . $userClient->getData('email') . "\n";
+							} else {
+								$msg .= 'Adresse e-mail de contact: ' . $data['client_email'] . "\n";
+							}
 
-                                if ($data['client_phone_pro']) {
-                                    $msg .= 'Tél. pro: ' . $data['client_phone_pro'] . '<br/>';
-                                }
-                                if ($data['client_phone_mobile']) {
-                                    $msg .= 'Tél. mobile: ' . $data['client_phone_mobile'] . '<br/>';
-                                }
-                                if ($data['client_phone_perso']) {
-                                    $msg .= 'Tél. domicile: ' . $data['client_phone_perso'] . '<br/>';
-                                }
-                            }
-
-                            if (BimpObject::objectLoaded($userClient)) {
-                                $msg .= 'Adresse e-mail de contact: ' . $userClient->getData('email') . "\n";
-                            } else {
-                                $msg .= 'Adresse e-mail de contact: ' . $data['client_email'] . "\n";
-                            }
-
-                            if (BimpObject::objectLoaded($equipment)) {
-                                $msg .= 'Equipement: ' . $equipment->getLink(array(), 'private') . "\n";
-                            } else {
-                                $msg .= 'L\'équipement n\'a pas pu être créé (une erreur est survenue)<br/>';
-                                $msg .= 'N° de série: ' . $data['eq_serial'] . '<br/>';
-                            }
+							if (BimpObject::objectLoaded($equipment)) {
+								$msg .= 'Equipement: ' . $equipment->getLink(array(), 'private') . "\n";
+							} else {
+								$msg .= 'L\'équipement n\'a pas pu être créé (une erreur est survenue)<br/>';
+								$msg .= 'N° de série: ' . $data['eq_serial'] . '<br/>';
+							}
 
 							$code = 'sav_online_by_client';
-                            mailSyn2('Nouveau SAV créé en ligne', $emails, '', $msg);
-                        }
+							BimpUserMsg::envoiMsg($code, 'Nouveau SAV créé en ligne', $msg, $centre);
+//						}
                     }
 
                     // Envoi e-mail client:

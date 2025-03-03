@@ -293,13 +293,12 @@ class BDS_RelancesClientsProcess extends BDSProcess
                             $html .= '</tbody>';
                             $html .= '</table>';
 
-							$userCommercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
+
 							$code = 'notif_commercial_courrier_retard_regl';
-							if ($userCommercial->sendMsg($code, $subject, $html)) {
-//                            if (mailSyn2($subject, $email, '', $html)) {
-                                $this->Success('Envoi alerte au commercial OK (' . $email . ')', $client, $facs_refs);
+							if (!count(BimpUserMsg::envoiMsg($code, $subject, $html, $idComm))) {
+                                $this->Success('Envoi alerte au commercial OK', $client, $facs_refs);
                             } else {
-                                $this->Error('Echec envoi alerte au commercial (' . $email . ')', $client, $facs_refs);
+                                $this->Error('Echec envoi alerte au commercial', $client, $facs_refs);
                             }
                         }
                     }

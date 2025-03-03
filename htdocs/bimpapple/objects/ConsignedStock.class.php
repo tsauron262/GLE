@@ -616,8 +616,8 @@ class ConsignedStock extends PartStock
 
                         if ($nFails) {
 							$code = 'erreur_stock_consigne_apple';
-                            mailSyn2('ERREURS STOCKS CONSIGNES APPLE', BimpCore::getConf('devs_email'), '', $nFails . ' erreur(s) à corriger manuellement  - Voir les logs');
-                        }
+							BimpUserMsg::envoiMsg($code, 'ERREURS STOCKS CONSIGNES APPLE', $nFails . ' erreur(s) à corriger manuellement  - Voir les logs');
+						}
                     }
                 }
             }

@@ -219,7 +219,7 @@ class Bimp_ImportPaiement extends BimpObject
             if(count($mailRep))
                 $msg .= '<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer '.implode(' ou ', $mailRep).'<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées';
             $code = 'paiements_non_identif_auto';
-			mailSyn2('Paiements non identifiés', BimpCore::getConf('email_paync', '', 'bimpfinanc'), null,  $msg);
+			BimpUserMsg::envoiMsg($code, 'Paiements non identifiés', $msg);
         }
 
         return $return;

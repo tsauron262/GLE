@@ -34,6 +34,8 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
 //                    if(ftp_chdir($conn, $folder)){
                 $tab = ftp_nlist($conn, $folder);
 
+				$nb_errors = 0;
+				$msg_mail_errors = '';
                 foreach ($tab as $fileEx) {
                     if (stripos($fileEx, '.xml') !== false) {
                         $errorLn = array();
@@ -143,14 +145,19 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
                             } else {
                                 $commFourn->addObjectLog('Erreur EDI : ' . print_r($errorLn, 1));
-                                $code = 'commande_ldlc_errors';
-								mailSyn2('Probléme commande LDLC', BimpCore::getConf('mail_achat', '') . ', debugerp@bimp.fr', null, 'Commande ' . $commFourn->getLink() . '<br/>' . print_r($errorLn, 1));
+								$msg_mail_errors .= '<br />Commande ' . $commFourn->getLink() . '<br/>' . print_r($errorLn, 1);
+								$nb_errors++;
                                 ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
                             }
                         }
                         $errors = BimpTools::merge_array($errors, $errorLn);
                     }
                 }
+				if ($nb_errors) {
+					$code = 'commande_ldlc_errors';
+					$sujet = $nb_errors . ' problème(s) commande LDLC';
+					BimpUserMsg::envoiMsg($code, $sujet, $msg_mail_errors);
+				}
             } else
                 $errors[] = 'Login impossible';
 
@@ -181,7 +188,9 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                     $ok = true;
                     if ($this->getData('entrepot') == 164) {
 						$code = 'commande_ldlc_facture';
-                        mailSyn2("Nouvelle facture LDLC", BimpCore::getConf('mail_achat'), null, "Bonjour la facture " . $facNumber . " de la commande : " . $this->getLink() . " en livraison directe a été téléchargée");
+						$sujet = "Nouvelle facture LDLC";
+						$msg = "Bonjour la facture " . $facNumber . " de la commande : " . $this->getLink() . " en livraison directe a été téléchargée";
+                        BimpUserMsg::envoiMsg($code, $sujet, $msg);
                     }
                 }
             }

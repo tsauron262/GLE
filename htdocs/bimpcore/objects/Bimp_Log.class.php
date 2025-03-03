@@ -666,7 +666,7 @@ class Bimp_Log extends BimpObject
             }
 
 			$code = 'send_log_to_dev';
-            if (!mailSyn2("LOG A TRAITER", BimpCore::$dev_mails[$dev], null, $message)) {
+			if (count(BimpUserMsg::envoiMsg($code, 'LOG A TRAITER', $message, BimpCore::$dev_mails[$dev]))) {
                 $errors[] = 'Echec de l\'envoi du mail';
             } else {
                 $this->updateField('send_to', $dev);
@@ -755,7 +755,7 @@ class Bimp_Log extends BimpObject
 
                     if ((int) BimpCore::getConf('send_logs_urgents_emails')) {
 						$code = 'send_log_to_dev_urgent';
-                        mailSyn2("LOG URGENT", BimpCore::getConf('devs_email'), null, $message);
+						BimpUserMsg::envoiMsg($code, 'LOG URGENT', $message);
                     }
                 }
             }

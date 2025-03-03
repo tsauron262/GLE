@@ -551,7 +551,6 @@ class BContract_avenant extends BContract_contrat
 
 			$code = 'avenant_signe';
 			BimpUserMsg::envoiMsg($code, $objet, $message);
-//            mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
         }
 
         return $errors;
@@ -581,7 +580,6 @@ class BContract_avenant extends BContract_contrat
 
 				$code = "avenant_prolongation_signe";
                 BimpUserMsg::envoiMsg($code, $objet, $message);
-//				mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
             }
         }
     }
@@ -623,7 +621,6 @@ class BContract_avenant extends BContract_contrat
 
 				$code = 'avenant_validation';
 				BimpUserMsg::envoiMsg($code, $objet, $message);
-//                mailSyn2($objet, BimpCore::getConf('contrat_mail', '', $this->module), null, $message);
             }
         }
 
@@ -688,7 +685,7 @@ class BContract_avenant extends BContract_contrat
                 $message = 'Bonjour ' . $commercial->getName() . '<br />';
                 $message .= 'L\'avenant N°' . $this->getRefAv() . ' a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement. Vous recevrez une alerte par jour, à partir des derniers 5 jours de l\'activation provisoire.';
                 $message .= '<br /><br />Client: ' . $client->getLink() . '<br />Contrat: ' . $parent->getLink();
-//                mailSyn2($sujet, $dest, null, $message);
+
 				$code = 'avenant_activation_provisoire';
 				BimpUserMsg::envoiMsg($code, $sujet, $message, $parent);
                 $this->updateField('date_activate', date('Y-m-d'));

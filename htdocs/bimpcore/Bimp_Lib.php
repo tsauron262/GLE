@@ -100,7 +100,8 @@ if (!defined('BIMP_LIB')) {
                     $msg .= '<br/><br/>';
                     $msg .= 'ERP: <b>' . DOL_URL_ROOT . '</b>';
 					$code = 'PATH_EXTENDS_a_modifier';
-                    mailSyn2('PATH_ENTENDS à modifier', BimpCore::getConf('devs_email'), '', $msg);
+					$sujet = 'PATH_ENTENDS à modifier';
+					BimpUserMsg::envoiMsg($code, $sujet, $msg);
                     BimpCore::setConf('obsolete_extends_notif_date_send', date('Y-m-d'));
                 }
             }

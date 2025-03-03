@@ -226,7 +226,10 @@ class GSX_v2 extends GSX_Const
             if (!$gsx_logout_mail_send) {
                 global $user, $langs;
 				$code = 'erreur_auth_gsx';
-                mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad' . date('l jS \of F Y h:i:s A'));
+				$sujet = 'auth GSX bad';
+				$msg = $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad ' . date('l jS \of F Y h:i:s A');
+				BimpUserMsg::envoiMsg($code, $sujet, $msg);
+                //mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad' . date('l jS \of F Y h:i:s A'));
                 BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
                 $gsx_logout_mail_send = true;
             }
@@ -274,9 +277,13 @@ class GSX_v2 extends GSX_Const
                 $retour .= $line . "<br />";
             }
             return $retour;
-        } else
+        }
+		else {
 			$code = 'erreur_auth_phantom';
-            mailSyn2('Pas de fonction ssh2_connect', BimpCore::getConf('debugerp_email'), null, 'Attention la fonction ssh2_connect n\'existe pas ' . (defined('ID_ERP') ? 'sur erp' . ID_ERP : ''));
+			$sujet = 'Pas de fonction ssh2_connect';
+			$msg = 'Attention la fonction ssh2_connect n\'existe pas ' . (defined('ID_ERP') ? 'sur erp' . ID_ERP : '');
+			BimpUserMsg::envoiMsg($code, $sujet, $msg);
+		}
     }
 
     public function reauthenticate()

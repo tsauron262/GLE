@@ -4390,7 +4390,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $msg = 'Bonjour,<br/><br/>';
                     $msg .= 'Le devis ' . $propal->getLink() . ' pour le SAV ' . $this->getLink() . ' a été accepté et signé par le client';
                     $code = 'acceptation_devis_sav';
-					mailSyn2('Devis ' . $propal->getRef() . ' signé par le client', $centre['mail'], '', $msg);
+					$sujet = 'Devis ' . $propal->getRef() . ' signé par le client';
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $centre);
                 }
             }
         }
@@ -4656,7 +4657,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             if (isset($ln->mail) && $ln->mail != "") {
                                 $toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@" . BimpCore::getConf('default_domaine', '', 'bimpsupport');
 								$code = 'refus_devis_sav';
-                                mailSyn2($subject, $toMail, $fromMail, $text);
+								BimpUserMsg::envoiMsg($code, $subject, $text, $toMail);
                                 $mailOk = true;
                             }
                         }
@@ -4668,7 +4669,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             foreach ($rows2 as $r) {
                                 $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@" . BimpCore::getConf('default_domaine', '', 'bimpsupport');
 								$code = 'refus_devis_sav';
-                                mailSyn2($subject, $toMail, $fromMail, $text);
+								BimpUserMsg::envoiMsg($code, $subject, $text, $toMail);
                             }
                         }
                     }
@@ -7427,7 +7428,7 @@ ORDER BY a.val_max DESC");
                     $centre = $this->getCentreData();
                     $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                     $code = 'accompte_sav_enregitre';
-					mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
+					BimpUserMsg::envoiMsg($code, 'Acompte enregistré ' . $this->getData('ref'), 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink(), $toMail);
                 }
             } else {
                 $data['amount'] = $amount;
@@ -7441,7 +7442,7 @@ ORDER BY a.val_max DESC");
                 if (!count($return['errors'])) {
                     $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 					$code = 'accompte_sav_enregitre';
-					mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
+					BimpUserMsg::envoiMsg($code, 'Acompte enregistré ' . $this->getData('ref'), 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink(), $toMail);
                 }
 
                 return $return;
@@ -8636,13 +8637,11 @@ ORDER BY a.val_max DESC");
                 $out .= '<br/>';
             } else {
                 // Envoi mail au centre SAV:
-                if (!$centre_email) {
-                    $centre_email = BimpCore::getConf('default_sav_email', null, 'bimpsupport');
-                }
-
                 $msg = 'Bonjour, <br/><br/>Aucune adresse e-mail valide enregistrée pour le client du SAV ' . $sav->getLink();
                 $msg .= '<br/><br/>Il n\'est donc pas possible d\'alerter le client pour la non restitution de son matériel';
                 $code = "sav_non_restitue_pas_email_client";
+				$sujet = 'Adresse e-mail client absente (SAV ' . $sav->getRef() . ')';
+				BimpUserMsg::envoiMsg($code, $sujet, $msg, $centre_data);
 				mailSyn2('Adresse e-mail client absente (SAV ' . $sav->getRef() . ')', $centre_email, '', $msg);
             }
 

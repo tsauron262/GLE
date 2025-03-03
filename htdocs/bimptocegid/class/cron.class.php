@@ -136,12 +136,15 @@
                                 }
                             }
 							$code = 'CEGID_ROLLBACK_compta_aucune_action';
-                            mailSyn2("Urgent - COMPTA ROLLBACK", BimpCore::getConf('devs_email'), null, $message);
+							$sujet = 'Urgent - COMPTA ROLLBACK';
+							BimpUserMsg::envoiMsg($code, $sujet, $message);
                         //}
                     }
                 } else {
 					$code = 'CEGID_dossier_export_non_vide';
-                    mailSyn2('URGENT COMPTA', BimpCore::getConf('devs_email'), null, 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire), 1));
+					$sujet = 'URGENT COMPTA';
+					$message = 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire), 1);
+					BimpUserMsg::envoiMsg($code, $sujet, $message);
                 }
             } else {
                 die('Pas sur la bonne instance de l\'ERP');
@@ -222,7 +225,8 @@
 
                 if($mustSend) {
 					$code = 'CEGID_fichier_tra_non_conforme';
-                    mailSyn2('Urgent - Fichiers TRA non conformes', BimpCore::getConf('devs_email'), null, $message);
+					$sujet = 'Urgent - Fichiers TRA non conformes';
+					BimpUserMsg::envoiMsg($code, $sujet, $message);
                 }
 
             }
@@ -252,9 +256,7 @@
         protected function send_rapport($mode = 1) {
 
             $sujet = "Rapport export comptable du " . date('d/m/Y');
-            $to = BimpCore::getConf('devs_email');
-            $from = null;
-            $logs = '';
+			$logs = '';
 
             if($mode == 1){
                 // Message type de pièce automatique
@@ -475,7 +477,10 @@
             $log_file = fopen($filePath . $fileName, 'a');
             if(!fwrite($log_file, $logs . "\n\n"))	{
 				$code = 'CEGID_impossible_ecrire_fichier';
-                 mailSyn2($sujet. ' impossible d\'écrire le fichier', $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable existant, et voici le nouveau : ".$logs, array($filePath . $fileName),array('text/plain'), array($fileName));
+				$sujet .= ' impossible d\'écrire le fichier';
+				$message = "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable existant, et voici le nouveau : ".$logs;
+				$pj = array(array($filePath . $fileName),array('text/plain'), array($fileName));
+				BimpUserMsg::envoiMsg($code, $sujet, $message, null, $pj);
 			}
             fclose($log_file);
             chmod($filePath . $fileName, 777);
@@ -569,7 +574,9 @@
                                                 unlink($file_path);
                                             } else {
 												$code = 'CEGID_erreur_copie_fichier';
-                                                mailSyn2("Compta - Erreur de copie", BimpCore::getConf('devs_email'), null, 'Le fichier ' . $filename . ' ne s\'est pas copié dans le dossier d\'import');
+                                                $sujet = "Compta - Erreur de copie";
+                                                $message = 'Le fichier ' . $filename . ' ne s\'est pas copié dans le dossier d\'import';
+												BimpUserMsg::envoiMsg($code, $sujet, $message);
                                             }
                                         } else {
                                             $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";

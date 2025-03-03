@@ -92,8 +92,7 @@ class BimpValidateOrderCronExec extends BimpCron
 
 
 				$code = 'rappel_demande_validation_encours';
-//                mailSyn2($subject, $user->getData('email'), null, $message);
-				$user->sendMsg($code, $subject, $message);
+				BimpUserMsg::envoiMsg($code, $subject, $message, $id_user);
 
                 $nb_validation_rappeler += $nb_demand;
                 ++$nb_mail_envoyer;

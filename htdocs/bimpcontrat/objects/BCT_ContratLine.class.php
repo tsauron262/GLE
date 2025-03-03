@@ -8219,11 +8219,11 @@ class BCT_ContratLine extends BimpObject
 									}
 								}
 
-								if (!$qty) {
-									$process->incIgnored();
-									$process->Alert('Aucune unité à commander', $cf, $line_ref);
-									continue;
-								}
+//								if (!$qty) {
+//									$process->incIgnored();
+//									$process->Alert('Aucune unité à commander', $cf, $line_ref);
+//									continue;
+//								}
 
 								$qty = round($qty, 6);
 

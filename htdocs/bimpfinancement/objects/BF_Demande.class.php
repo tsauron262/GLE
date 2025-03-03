@@ -5445,6 +5445,10 @@ class BF_Demande extends BimpObject
 				)
 			));
 
+			if (strlen($cessionnaire_data['nom']) > 30) {
+				$errors[] = 'Le nom du cessionnaire ne doit pas dépasser 30 caractères. Veuillez le raccourcir.';
+			}
+
 			if ($this->isDemandeValid($errors)) {
 				global $db;
 				$files_dir = $this->getFilesDir();
@@ -6490,21 +6494,23 @@ class BF_Demande extends BimpObject
 	public function renderSignatureTypeSelect($doc_type)
 	{
 		$html = '';
-
-		$errors = array();
-		$options = array();
 		$value = '';
 
-		switch ($this->getData('type_contrat')) {
-			case 'elec':
-				$html .= 'Signature via DocuSign';
-				$value = 'docusign';
-				break;
+		if ($doc_type == 'contrat') {
+			switch ($this->getData('type_contrat')) {
+				case 'elec':
+					$html .= 'Signature via DocuSign';
+					$value = 'docusign';
+					break;
 
-			case 'papier':
-				$html .= 'Signature papier';
-				$value = 'papier';
-				break;
+				case 'papier':
+					$html .= 'Signature papier';
+					$value = 'papier';
+					break;
+			}
+		} else {
+			$html .= 'Signature papier';
+			$value = 'papier';
 		}
 
 		$html .= BimpInput::renderInput('hidden', 'signature_type', $value);

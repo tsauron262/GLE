@@ -1824,9 +1824,9 @@ class BCT_Contrat extends BimpDolObject
 				$line_warnings = array();
 				$line_qty = (float) $line_data['qty'];
 
-				if (!$line_qty) {
-					continue;
-				}
+//				if (!$line_qty) {
+//					continue;
+//				}
 
 				$cf_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
 

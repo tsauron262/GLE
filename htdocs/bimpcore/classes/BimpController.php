@@ -412,6 +412,9 @@ class BimpController
     public function displayHeader()
     {
         llxHeader('', $this->getPageTitle(), '', false, false, false);
+
+		$alert = BimpObject::getBimpObjectInstance('bimpcore', 'BimpAlert');
+		echo $alert::getMsgs();
     }
 
     public function displayFooter()

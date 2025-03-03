@@ -411,9 +411,9 @@ class devController extends BimpController
                     foreach ($datas2 as $pull) {
                         $htmlT2 .= $pull;
                     }
-                    $htmlT .= BimpRender::renderPanel($m, $htmlT2, '', array('open' => false));
+                    $htmlT .= BimpRender::renderPanel($m, $htmlT2, '', array('open' => true));
                 }
-                $html .= BimpRender::renderPanel($y, $htmlT, '', array('open' => false));
+                $html .= BimpRender::renderPanel($y, $htmlT, '', array('open' => true));
             }
         } else {
             $html .= BimpRender::renderAlerts('Quelque chose n\'est pas en place');

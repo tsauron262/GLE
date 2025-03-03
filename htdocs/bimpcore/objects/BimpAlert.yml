@@ -21,18 +21,20 @@ fields:
     conditionExec:
         label: Code de condition
         type: text
+        data_check: restricthtml
         input: 
             auto_expand: 1
             help: Positionné $exec a 1 pour activer l'alert
     execution:
         label: Code a exécuter
         type: text
+        data_check: restricthtml
         no_strip_tags: 1
         input: 
             auto_expand: 1
             help: Vous pouvez positionné $msg et $niveau
     niveau:
-        label: Niveau d'alert
+        label: Niveau d'alerte
         type: int
         values: 
             array: niveaux

@@ -401,7 +401,7 @@ class devController extends BimpController
                     }
 
 
-                    $tabHtml[date("Y", $timeSt)][date("m", $timeSt)][] = BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), $content, '', array('open' => false));
+                    $tabHtml[date("Y", $timeSt)][date("m", $timeSt)][] = BimpRender::renderPanel(date("Y-m-d H:i:s", $timeSt), $content, '', array('open' => true));
                 }
             }
             foreach ($tabHtml as $y => $datas) {
@@ -413,7 +413,7 @@ class devController extends BimpController
                     }
                     $htmlT .= BimpRender::renderPanel($m, $htmlT2, '', array('open' => true));
                 }
-                $html .= BimpRender::renderPanel($y, $htmlT, '', array('open' => true));
+                $html .= BimpRender::renderPanel($y, $htmlT, '', array('open' => false));
             }
         } else {
             $html .= BimpRender::renderAlerts('Quelque chose n\'est pas en place');

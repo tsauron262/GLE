@@ -894,7 +894,7 @@ lists:
         sort_field: date_creation
         sort_way: desc
         add_btn: 0
-        #        add_form_values:
+#        add_form_values:
 #            fields:
 #                entrepot:
 #                    request: id_entrepot

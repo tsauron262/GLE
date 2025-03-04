@@ -2302,13 +2302,14 @@ class BimpObject extends BimpCache
 
 	public function printData($return_html = false)
 	{
+		$html = '<pre>' . print_r($this->data, 1) . '</pre>';
 		if ($return_html) {
-			return '<pre>' . print_r($this->data, 1) . '</pre>';
+			return $html;
 		}
-
-		echo '<pre>';
-		print_r($this->data);
-		echo '</pre>';
+		else{
+			echo $html;
+			return '';
+		}
 	}
 
 	public function resetMsgs()
@@ -4485,6 +4486,7 @@ class BimpObject extends BimpCache
 		if ($conf && $conf->id > 0) {
 			return $conf->id;
 		}
+		return 0;
 	}
 
 	// Gestion des signatures:
@@ -5634,7 +5636,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 	{
 		$oldValue = $this->getData($field);
 		$newValue = BimpTools::merge_array($oldValue, $value);
-		$this->updateField($field, $newValue, $id_object, $force_update, $do_not_validate, $no_triggers);
+		return $this->updateField($field, $newValue, $id_object, $force_update, $do_not_validate, $no_triggers);
 	}
 
 	public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
@@ -6119,6 +6121,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		}
 
 		$errors[] = 'Erreur technique: propriété contenant l\'ID du parent absente';
+		return false;
 	}
 
 	public function deleteBy($filters, &$errors = array(), $force_delete = false)
@@ -6564,7 +6567,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$errors[] = $this->dol_object->error;
 			}
 
-			$err_sql = $this->dol_object->db->lasterror();
+			$err_sql = $this->dol_object->db->db->lasterror();
 			if ($err_sql) {
 				$errors[] = $err_sql;
 			}
@@ -6792,7 +6795,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 	public function deleteExtraFields($id_object)
 	{
 		if (!$id_object) {
-			return;
+			return '';
 		}
 
 		// Suppression des entrées correspondant aux extrafields
@@ -7288,7 +7291,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			if (method_exists($this, 'getPositionsFilters')) {
 				$filters = $this->getPositionsFilters();
 				if (is_null($filters)) {
-					return;
+					return '';
 				}
 			} else {
 				$filters = array();
@@ -7297,7 +7300,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			if (!is_null($parent_id_property)) {
 				$id_parent = $this->getData($parent_id_property);
 				if (is_null($id_parent) || !$id_parent) {
-					return;
+					return '';
 				}
 				$filters[$parent_id_property] = $id_parent;
 			}
@@ -8624,6 +8627,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				return BimpRender::renderAlerts('Erreur de configuration: données objet invalide (' . $object_data . ')');
 			}
 		}
+		return false;
 	}
 
 	public function renderHeaderBtnRedir()
@@ -10184,7 +10188,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		}
 
 		if (isset($params['disabled']) && $params['disabled']) {
-			$label = '<strike>' . $label . '</strike>';
+			$label = '<span style="text-decoration: line-through;">' . $label . '</span>';
 		}
 
 		if ($is_public) {
@@ -10510,9 +10514,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		$warnings = array();
 		$success = 'Lien supprimé avec succès';
 
-		if (!isset($data['id_link']) || !(int) $data['link_id']) {
-
-		}
+//		if (!isset($data['id_link']) || !(int) $data['link_id']) {
+//			TODO
+//		}
 
 		return array(
 			'errors'   => $errors,
@@ -10777,9 +10781,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		}
 
 		$list = new BC_ListTable($this, $list_name);
-		if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint')) {
-			$list->initForGraph();
-		}
 		$nameGraph = $list->getParam('graph')[$data['idGraph']];
 
 		$options = array();
@@ -10799,6 +10800,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 
 		$dataGraphe = $this->getInfoGraph($nameGraph, $userOption);
+		if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint')) {
+			$list->initForGraph();
+		}
 		$options['animationEnabled'] = true;
 		$options['theme'] = "light2";
 		$options['title'] = array("text" => $dataGraphe['title']);
@@ -11884,9 +11888,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			} elseif ($btn && $url != "") {
 				return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";
 			}
-
-			return '';
 		}
+		return '';
 	}
 
 	public function iAmAdminRedirect()

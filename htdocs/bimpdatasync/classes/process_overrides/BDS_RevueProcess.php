@@ -29,19 +29,19 @@ class BDS_RevueProcess extends BDSProcess
 
             $options = array();
 
-//            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
-//                        'id_process'    => (int) $process->id,
-//                        'label'         => 'A partir du',
-//                        'name'          => 'date_from',
-//                        'info'          => '',
-//                        'type'          => 'date',
-//                        'default_value' => '',
-//                        'required'      => 0
-//                            ), true, $warnings, $warnings);
-//
-//            if (BimpObject::objectLoaded($opt)) {
-//                $options[] = (int) $opt->id;
-//            }
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Refaire la revue si existant mais pas validé',
+                        'name'          => 're_revue_not_validate',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => 0,
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
 
 
 
@@ -190,13 +190,17 @@ class BDS_RevueProcess extends BDSProcess
                             $html .= '<br/><br/><a href="'.DOL_URL_ROOT.'/bimpcore/public/triggers.php?action=confirmGrp&id='.$idGr.'&code='.$code.'">Je confirme que tout est normal</a>';
 
                             $groupe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $idGr);
-                            $errors = BimpTools::merge_array($errors, $groupe->appendField('data_revue', array('Y:'.date('Y') => $data)));
 							$datarevue = $groupe->getData('data_revue');
-							if(isset($datarevue['Y:'.date('Y')])){
+
+							if(isset($datarevue['Y:'.date('Y')]) && isset($datarevue['Y:'.date('Y')]['validation_date'])){
+								$this->Alert('Data revue déjà validé '.$data['name']);
+							}
+							elseif(!isset($this->options['re_revue_not_validate']) || $this->options['re_revue_not_validate'] < 1){
 								$this->Alert('Data revue déjà existante pour '.$data['name']);
 							}
 							else {
-								$bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', 't.sauron@bimp.fr', '', $html);
+								$errors = BimpTools::merge_array($errors, $groupe->appendField('data_revue', array('Y:'.date('Y') => $data)));
+								$bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', $data['mail'], '', $html);
 								$bimpMail->send($errors);
 
 								$this->Success('Mail OK : Envoyé a ' . $data['mail'] . '<br/>' . $html);

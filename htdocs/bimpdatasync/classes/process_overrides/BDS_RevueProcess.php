@@ -195,7 +195,7 @@ class BDS_RevueProcess extends BDSProcess
 							if(isset($datarevue['Y:'.date('Y')]) && isset($datarevue['Y:'.date('Y')]['validation_date'])){
 								$this->Alert('Data revue déjà validé '.$data['name']);
 							}
-							elseif(!isset($this->options['re_revue_not_validate']) || $this->options['re_revue_not_validate'] < 1){
+							elseif(isset($datarevue['Y:'.date('Y')]) && (!isset($this->options['re_revue_not_validate']) || $this->options['re_revue_not_validate'] < 1)){
 								$this->Alert('Data revue déjà existante pour '.$data['name']);
 							}
 							else {

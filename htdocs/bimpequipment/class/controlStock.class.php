@@ -93,7 +93,7 @@ class controlStock{
                         }
                         elseif(isset($_REQUEST['mail'])) {
 							$code = 'probleme_stock';
-							mailSyn2("Probléme stock", "tommy@bimp.fr", '', $text);
+							BimpUserMsg::envoiMsg($code, 'Problème stock', $text);
 						}
 						elseif($corigable)
                             $text .= "<span style='color:green'>Corigeable</span><br/><br/>";

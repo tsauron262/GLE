@@ -8642,7 +8642,6 @@ ORDER BY a.val_max DESC");
                 $code = "sav_non_restitue_pas_email_client";
 				$sujet = 'Adresse e-mail client absente (SAV ' . $sav->getRef() . ')';
 				BimpUserMsg::envoiMsg($code, $sujet, $msg, $centre_data);
-				mailSyn2('Adresse e-mail client absente (SAV ' . $sav->getRef() . ')', $centre_email, '', $msg);
             }
 
             break; // Poir tests

@@ -3626,11 +3626,11 @@ class BContract_contrat extends BimpDolObject
                     $dateForCloseNoSigned = new DateTime();
                     $dateForCloseNoSigned->add(new DateInterval("P14D"));
                     $this->addLog('Activation provisoire');
-                    $commercialContrat = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
                     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
                     $msg = "Votre contrat " . $this->getNomUrl() . " pour le client " . $client->getNomUrl() . " " . $client->getName() . " est activé provisoirement car il n'est pas revenu signé. Il sera automatiquement désactivé le " . $dateForCloseNoSigned->format('d / m / Y') . " si le nécessaire n'a pas été fait.";
-                    //$errors[] = $msg;
-                    mailSyn2("[CONTRAT] - Activation provisoire", $commercialContrat->getData('email'), null, $msg);
+					$code = 'Activation_contrat_provisoire';
+					$sujet = "[CONTRAT] - Activation provisoire";
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_commercial_suivi'));
                     $this->addLog('Activation provisoire');
                 } else {
                     $errors[] = "Ce contrat est déjà en activation provisoire";
@@ -4561,7 +4561,9 @@ class BContract_contrat extends BimpDolObject
                             $msg .= "Client : " . $s->dol_object->getNomUrl() . '<br />';
                             $msg .= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : " . $comm->getNomUrl() . "<br />";
                             $msg .= "Facture : " . $f->dol_object->getNomUrl();
-                            mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", BimpCore::getConf('email_facturation', null, 'bimpcore'), BimpCore::getConf('devs_email'), $msg);
+							$code = 'valid_factureBrouillon_sur_contrat';
+							$sujet = 'Facturation Contrat [' . $contrat->getRef() . ']';
+							BimpUserMsg::envoiMsg($code, $sujet,$msg);
                             $success .= ($success ? '<br/>' : '') . "Le contrat " . $contrat->getRef() . " facturé avec succès";
                         }
                     }
@@ -4824,9 +4826,12 @@ class BContract_contrat extends BimpDolObject
                     if (!rename($dir . $file, $newdir . $file))
                         $ok = false;
             }
-            if (!$ok)
-                mailSyn2("Probléme déplacement fichiers", 'tommy@bimp.fr', null, 'Probléme dep ' . $dir . $file . " to " . $newdir . $file);
-            else
+            if (!$ok) {
+				$code = 'fetchContrat_pb_deplacement_fichier';
+				$sujet = 'Problème déplacement fichiers';
+				$msg = 'Probléme dep ' . $dir . $file . " to " . $newdir . $file;
+				BimpUserMsg::envoiMsg($code, $sujet, $msg);
+			}else
                 rmdir($dir);
         }
 

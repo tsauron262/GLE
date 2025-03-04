@@ -388,8 +388,8 @@ class cron extends BimpCron
         }
         if ($relance) {
 			$code = "liste_contrat_attente_validation";
-			$to = BimpCore::getConf('email_groupe', 'contrats@bimp.fr', 'bimpcontract');
-			mailSyn2('Contrat en attentes de validation', $to, null, $message);
+			$sujet = "Contrats en attente de validation";
+			BimpUserMsg::envoiMsg($code, $sujet, $message);
             $this->output .= "Relance au groupe contrat pour les demandes de validation<br />";
         }
     }

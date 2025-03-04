@@ -4,13 +4,13 @@ class BimpSignature extends BimpObject
 {
     /*
      * *** Mémo ajout signature pour un objet: ***
-     * 
+     *
      * /!\ ATTENTION: le doc_type doit être unique : voir les doc_types utilisés dans bimpinterfaceclient > docController::display()
-     * 
-     * - Ajouter les champs "id_signature" et "signature_params" dans l'objet (+ définitions de l'objet BimpSignature) 
+     *
+     * - Ajouter les champs "id_signature" et "signature_params" dans l'objet (+ définitions de l'objet BimpSignature)
      * - Ajouter le tableau static $default_signature_params
      * - Ajouter une procédure pour créer la signature (action/fonction etc.)
-     * - Ajouter les méthodes: 
+     * - Ajouter les méthodes:
      *      - getSignatureDocFileDir($doc_type): dossier fichier signé ou à signer
      *      - getSignatureDocFileName($doc_type, $signed = false): nom fichier signé ou à signer
      *      - getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false): URL fichier
@@ -18,15 +18,15 @@ class BimpSignature extends BimpObject
      *      - getSignatureParams($doc_type): Paramètres position signature sur PDF
      *      - onSigned($bimpSignature): Traitement post signature effectuée
      *      - onSignatureCancelled($bimpSignature): Traitement post signature annulée
-     *      - isSignatureReopenable($doc_type, &$errors = array()): la signature peut-elle être réouverte (suite annulation) 
+     *      - isSignatureReopenable($doc_type, &$errors = array()): la signature peut-elle être réouverte (suite annulation)
      *      - onSignatureReopened($bimpSignature): Traitement post réouverture signature
-     * 
+     *
      * - Gérer l'enregistrement des paramètres de position de la signature sur le PDF au moment de sa génération (Si besoin) / ou régler par défaut pour les PDF fixes
-     * - Intégrer selon le context: marqueur signé (champ booléen ou statut) / indicateur signature dans l'en-tête / etc. 
+     * - Intégrer selon le context: marqueur signé (champ booléen ou statut) / indicateur signature dans l'en-tête / etc.
      * - Gérer Annulation signature si besoin
-     * - Gérer Duplication / Révision / Etc. 
-     * - Gérer la visualisation du docuement sur l'interface publique (bimpinterfaceclient > docController) 
-     * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
+     * - Gérer Duplication / Révision / Etc.
+     * - Gérer la visualisation du docuement sur l'interface publique (bimpinterfaceclient > docController)
+     * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public.
      */
 
     const STATUS_REFUSED = -2;
@@ -258,7 +258,7 @@ class BimpSignature extends BimpObject
         return (count($files) > 1 ? 1 : 0);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons($include_link = false)
     {
@@ -376,7 +376,7 @@ class BimpSignature extends BimpObject
         return $this->getActionsButtons();
     }
 
-    // Getters arrays: 
+    // Getters arrays:
 
     public function getSignatairesArray()
     {
@@ -404,7 +404,7 @@ class BimpSignature extends BimpObject
         return $files;
     }
 
-    // Getters defaults: 
+    // Getters defaults:
 
     public static function getDefaultSignDistEmailContent($type = 'elec')
     {
@@ -441,7 +441,7 @@ class BimpSignature extends BimpObject
         return $message;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getInputValue($field_name)
     {
@@ -866,7 +866,7 @@ class BimpSignature extends BimpObject
         return $file_idx;
     }
 
-    // Getters Doc infos: 
+    // Getters Doc infos:
 
     public function getDocumentFileName($signed = false)
     {
@@ -1020,7 +1020,7 @@ class BimpSignature extends BimpObject
         return $files;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayObj()
     {
@@ -1674,7 +1674,7 @@ class BimpSignature extends BimpObject
                         'id_envelope_docu_sign' => $envelopeId
                     ));
                     if (count($up_errors)) {
-                        // Par précaution: 
+                        // Par précaution:
                         BimpCore::addlog('Echec enregistrement ID enveloppe DocuSign - Correction manuelle nécessaire', Bimp_Log::BIMP_LOG_URGENT, 'signature', $this, array(
                             'ID enveloppe' => $envelopeId,
                             'Erreurs'      => $up_errors
@@ -1759,7 +1759,8 @@ class BimpSignature extends BimpObject
                                     $msg .= '<b>Objet lié: </b>' . $obj->getLink() . '<br/>';
                                 }
                                 $msg .= '<b>Fiche signature: </b>' . $this->getLink(array(), 'private') . '<br/><br/>';
-                                mailSyn2($subject, $email, '', $msg);
+                                $code = 'confirm_sign_docusign';
+								BimpUserMsg::envoiMsg($code, $subject, $msg, $email);
                             }
                         }
 
@@ -1949,7 +1950,7 @@ class BimpSignature extends BimpObject
         return $errors;
     }
 
-    // Traitements statiques: 
+    // Traitements statiques:
 
     public static function checkMultipleFiles($files, $object, $dir, $file_name_base, $params_field_name, &$next_file_idx = 1, $force_new_next_file = false)
     {
@@ -2061,7 +2062,7 @@ class BimpSignature extends BimpObject
         }
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionSignPapier($data, &$success)
     {
@@ -2326,12 +2327,12 @@ class BimpSignature extends BimpObject
         );
     }
 
-    // Overrides : 
+    // Overrides :
 
     public function update(&$warnings = [], $force_update = false)
     {
         if ((int) $this->getData('status') <= 0 && BimpTools::getPostFieldValue('sign_papier', 0, 'int')) {
-            // Procédure nécessaire pour téléchargement du fichier: 
+            // Procédure nécessaire pour téléchargement du fichier:
             $result = $this->setObjectAction('signPapier');
             $errors = BimpTools::getArrayValueFromPath($result, 'errors', array());
             $warnings = BimpTools::getArrayValueFromPath($result, 'warnings', array());

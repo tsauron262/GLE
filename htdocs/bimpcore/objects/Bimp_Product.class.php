@@ -3813,11 +3813,11 @@ class Bimp_Product extends BimpObject
         }
 
         $errors = array();
+		$code = 'product_validated_command';
         $subject = 'Produit validé pour la commande ' . $commande->ref;
-        $from = 'gle@bimp.fr';
         $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la commande ' . $commande->getNomUrl(0);
         $msg .= ' est peut-être validable.';
-        if (!mailSyn2($subject, $to, $from, $msg))
+        if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $to)))
             $errors[] = "Envoi email à " . $to . " pour la commande " . $commande->getNomUrl(0) . " impossible.";
         return $errors;
     }
@@ -3828,11 +3828,10 @@ class Bimp_Product extends BimpObject
             return array();
         }
         $errors = array();
+		$code = 'product_validated_propal';
         $subject = 'Produit validé pour la propale ' . $propal->ref;
-        $from = 'gle@bimp.fr';
 
-        $infoClient = "";
-
+		$infoClient = "";
         if (isset($propal->socid)) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $propal->socid);
             if (is_object($client) && $client->isLoaded())
@@ -3841,7 +3840,7 @@ class Bimp_Product extends BimpObject
 
         $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl(0) . $infoClient;
         $msg .= ' est peut-être validable.';
-        if (!mailSyn2($subject, $to, $from, $msg))
+		if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $to)))
             $errors[] = "Envoi email à " . $to . " pour la propale " . $propal->getNomUrl(0) . " impossible.";
         return $errors;
     }
@@ -3854,10 +3853,10 @@ class Bimp_Product extends BimpObject
 
         $errors = array();
         $subject = 'Produit refusé pour la commande ' . $commande->ref;
-        $from = 'gle@bimp.fr';
+		$code = 'product_refused_command';
         $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été refusé, la commande ' . $commande->getNomUrl(0);
         $msg .= ' doit être modifiée.';
-        if (!mailSyn2($subject, $to, $from, $msg))
+		if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $to)))
             $errors[] = "Envoi email vers " . $to . " pour la commande " . $commande->getNomUrl(0) . " impossible.";
         return $errors;
     }
@@ -3869,11 +3868,12 @@ class Bimp_Product extends BimpObject
         }
 
         $errors = array();
+		$code = 'product_validated_vente';
         $subject = 'Produit validé pour la vente #' . $vente->id;
-        $from = 'gle@bimp.fr';
+
         $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la vente #' . $vente->id;
         $msg .= ' peut être validée.';
-        if (!mailSyn2($subject, $to, $from, $msg))
+		if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $to)))
             $errors[] = "Echec envoi email à " . $to . " pour la vente #" . $vente->id;
         return $errors;
     }
@@ -3886,10 +3886,10 @@ class Bimp_Product extends BimpObject
 
         $errors = array();
         $subject = 'Produit refusé pour la vente #' . $vente->id;
-        $from = 'gle@bimp.fr';
+        $code = 'product_refused_vente';
         $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été refusé.';
         $msg .= ' Veuillez retirer ce produit de cette vente.';
-        if (!mailSyn2($subject, $to, $from, $msg))
+        if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $to)))
             $errors[] = "Echec envoi email à " . $to . " pour la vente #" . $vente->id;
         return $errors;
     }
@@ -3902,10 +3902,10 @@ class Bimp_Product extends BimpObject
 
         $errors = array();
         $subject = 'Produit refusé pour la propale ' . $propal->ref;
-        $from = 'gle@bimp.fr';
+        $code = 'product_refused_propal';
         $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été refusé, la propale ' . $propal->getNomUrl(0);
         $msg .= ' doit être modifiée.';
-        if (!mailSyn2($subject, $to, $from, $msg))
+        if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $to)))
             $errors[] = "Envoi email vers " . $to . " pour la propale " . $propal->getNomUrl(0) . " impossible.";
         return $errors;
     }

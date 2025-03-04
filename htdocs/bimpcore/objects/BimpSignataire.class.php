@@ -43,7 +43,7 @@ class BimpSignataire extends BimpObject
         self::TYPE_DOCUSIGN       => array('label' => 'DocuSign', 'icon' => 'fas_arrow-to-bottom')
     );
 
-    // Droits user: 
+    // Droits user:
 
     public function canClientView()
     {
@@ -151,7 +151,7 @@ class BimpSignataire extends BimpObject
         return 0;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isFieldEditable($field, $force_edit = false)
     {
@@ -303,9 +303,9 @@ class BimpSignataire extends BimpObject
     public function isFonctionRequired()
     {
         if (in_array((int) $this->getData('type'), array(self::TYPE_NONE, self::TYPE_PAPIER, self::TYPE_PAPIER_NO_SCAN))) {
-            return 0;            
+            return 0;
         }
-        
+
         if ((int) $this->getData('type') === self::TYPE_CLIENT) {
             return $this->isClientCompany();
         }
@@ -370,7 +370,7 @@ class BimpSignataire extends BimpObject
         return 0;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons($with_signataire_label = true)
     {
@@ -433,7 +433,7 @@ class BimpSignataire extends BimpObject
         return $buttons;
     }
 
-    // Getters defaults: 
+    // Getters defaults:
 
     public function getDefaultAllowedUsersClient()
     {
@@ -618,7 +618,7 @@ class BimpSignataire extends BimpObject
         return '';
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getNameProperties()
     {
@@ -998,7 +998,7 @@ class BimpSignataire extends BimpObject
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderStatusExtra()
     {
@@ -1282,7 +1282,7 @@ class BimpSignataire extends BimpObject
                         }
                     }
 
-                    // Envoi e-mails de notification au client: 
+                    // Envoi e-mails de notification au client:
                     if ($send_email && count($email_users)) {
                         $email_errors = $this->sendSignDistEmail($email_users, $email_content, $success);
 
@@ -1397,7 +1397,7 @@ class BimpSignataire extends BimpObject
         return $errors;
     }
 
-    // Envois des e-mails: 
+    // Envois des e-mails:
 
     public function sendSignDistEmail($users = null, $email_content = '', &$success = '', &$warnings = array())
     {
@@ -1622,8 +1622,9 @@ class BimpSignataire extends BimpObject
                         break;
                 }
 
-                if ($subject && $msg) {
-                    mailSyn2($subject, $comm_email, '', $msg);
+                $code = 'notif_signature_' . $type;
+				if ($subject && $msg) {
+					BimpUserMsg::envoiMsg($code, $subject, $msg, $comm_email);
                 }
             }
         }
@@ -1677,7 +1678,7 @@ class BimpSignataire extends BimpObject
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionSignDistAccess($data, &$success)
     {
@@ -2123,7 +2124,7 @@ class BimpSignataire extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validate()
     {

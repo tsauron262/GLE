@@ -1699,8 +1699,6 @@ class BimpTools
 
 		return $sql;
 	}
-		return $sql;
-	}
 
 	public static function getSqlLike($value, $part_type = 'middle', $not = false, $braces = false, $escape = true)
 	{

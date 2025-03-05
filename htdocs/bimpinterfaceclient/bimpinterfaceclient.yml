@@ -22,4 +22,10 @@ params:
         label: activer la page de signature électronique à distance publique directe
         type: bool
         def: 0
-  
+        
+# E-mails:
+    react_client_prise_rdv_online:
+        label: Email pour notifier les réctivations suite à une prise de rdv en ligne
+        cat: emails
+        def: ''
+        required: 1

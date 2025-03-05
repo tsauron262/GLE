@@ -3456,7 +3456,7 @@ class BContract_contrat extends BimpDolObject
         return 0;
     }
 
-    public function mail($destinataire, $type, $cc = "")
+    public function calcul_mail($type)
     {
         switch ($type) {
             case self::MAIL_DEMANDE_VALIDATION:
@@ -3481,19 +3481,20 @@ class BContract_contrat extends BimpDolObject
         $commercialContrat = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
-        $extra = "<h3 style='color:#EF7D00'><b>BIMP</b><b style='color:black'>contrat</b></h3>";
-        $extra .= "Action à faire sur le contrat: <b>" . $action . "</b><br /><br />";
-        $extra .= "<u><i>Informations <i></i> </i></u><br />";
-        $extra .= "Contrat: <b>" . $this->getNomUrl() . "</b><br />";
-        $extra .= "Client: <b>" . $client->dol_object->getNomUrl() . " (" . $client->getNomUrl() . ")</b><br /><br />";
-        $extra .= "Commercial du contrat: <b>" . $commercialContrat->dol_object->getNomUrl() . "</b><br />";
-        $extra .= "Commercial du client: <b>" . $commercial->dol_object->getNomUrl() . "</b><br />";
+        $msg = "<h3 style='color:#EF7D00'><b>BIMP</b><b style='color:black'>contrat</b></h3>";
+        $msg .= "Action à faire sur le contrat: <b>" . $action . "</b><br /><br />";
+        $msg .= "<u><i>Informations <i></i> </i></u><br />";
+        $msg .= "Contrat: <b>" . $this->getNomUrl() . "</b><br />";
+        $msg .= "Client: <b>" . $client->dol_object->getNomUrl() . " (" . $client->getNomUrl() . ")</b><br /><br />";
+        $msg .= "Commercial du contrat: <b>" . $commercialContrat->dol_object->getNomUrl() . "</b><br />";
+        $msg .= "Commercial du client: <b>" . $commercial->dol_object->getNomUrl() . "</b><br />";
 
+		return array($sujet, $msg);
         //print_r(['dest' => $destinataire, 'sujet' => $sujet, 'type' => $type, 'msg' => $extra]);
-        if ($cc == "")
-            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra);
-        else
-            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra, array(), array(), array(), $cc);
+//        if ($cc == "")
+//            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra);
+//        else
+//            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra, array(), array(), array(), $cc);
     }
 
     public function autoClose()
@@ -3610,7 +3611,9 @@ class BContract_contrat extends BimpDolObject
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
                 if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
-                    $this->mail(BimpCore::getConf('email_facturation', null, 'bimpcore'), self::MAIL_ACTIVATION, $commercial->getData('email'));
+					$code = 'actionActivateContrat';
+					list($sujet, $message) = $this->calcul_mail(self::MAIL_ACTIVATION);
+					BimpUserMsg::envoiMsg($code, $sujet, $message, $this->getData('fk_commercial_suivi'));
                 } else {
                     $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
                 }
@@ -3626,11 +3629,11 @@ class BContract_contrat extends BimpDolObject
                     $dateForCloseNoSigned = new DateTime();
                     $dateForCloseNoSigned->add(new DateInterval("P14D"));
                     $this->addLog('Activation provisoire');
-                    $commercialContrat = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
                     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
                     $msg = "Votre contrat " . $this->getNomUrl() . " pour le client " . $client->getNomUrl() . " " . $client->getName() . " est activé provisoirement car il n'est pas revenu signé. Il sera automatiquement désactivé le " . $dateForCloseNoSigned->format('d / m / Y') . " si le nécessaire n'a pas été fait.";
-                    //$errors[] = $msg;
-                    mailSyn2("[CONTRAT] - Activation provisoire", $commercialContrat->getData('email'), null, $msg);
+					$code = 'Activation_contrat_provisoire';
+					$sujet = "[CONTRAT] - Activation provisoire";
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_commercial_suivi'));
                     $this->addLog('Activation provisoire');
                 } else {
                     $errors[] = "Ce contrat est déjà en activation provisoire";
@@ -4272,7 +4275,9 @@ class BContract_contrat extends BimpDolObject
         $sendMail = (strtotime($effect->format('Y-m-d')) > strtotime($now->format('Y-m-d'))) ? false : true;
 
         if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && $sendMail) {
-            $this->mail($this->email_group, self::MAIL_SIGNED);
+			$code = 'actionSignedContrat';
+			list($sujet, $message) = $this->calcul_mail(self::MAIL_SIGNED);
+			BimpUserMsg::envoiMsg($code, $sujet, $message);
         }
 
         return [
@@ -4359,7 +4364,9 @@ class BContract_contrat extends BimpDolObject
                 $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
                 $msg = "Un contrat est en attente de validation de votre part. Merci de faire le nécessaire <br />Contrat : " . $this->getNomUrl();
                 $this->addLog("Demande de validation");
-                $this->mail($this->email_group, self::MAIL_DEMANDE_VALIDATION);
+				$code = 'actionDemandeValidationContrat';
+				list($sujet, $message) = $this->calcul_mail(self::MAIL_DEMANDE_VALIDATION);
+				BimpUserMsg::envoiMsg($code, $sujet, $message);
             }
         }
 
@@ -4437,9 +4444,9 @@ class BContract_contrat extends BimpDolObject
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
 
-            //mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), null, $body_mail);
-
-            $this->mail($commercial->getData('email'), self::MAIL_VALIDATION);
+			$code = 'actionValidationContrat';
+			list($sujet, $message) = $this->calcul_mail(self::MAIL_VALIDATION);
+			BimpUserMsg::envoiMsg($code, $sujet, $message, $this->getData('fk_commercial_suivi'));
 
             $success = 'Le contrat ' . $ref . " a été validé avec succès";
 
@@ -4557,7 +4564,9 @@ class BContract_contrat extends BimpDolObject
                             $msg .= "Client : " . $s->dol_object->getNomUrl() . '<br />';
                             $msg .= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : " . $comm->getNomUrl() . "<br />";
                             $msg .= "Facture : " . $f->dol_object->getNomUrl();
-                            mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", BimpCore::getConf('email_facturation', null, 'bimpcore'), BimpCore::getConf('devs_email'), $msg);
+							$code = 'valid_factureBrouillon_sur_contrat';
+							$sujet = 'Facturation Contrat [' . $contrat->getRef() . ']';
+							BimpUserMsg::envoiMsg($code, $sujet,$msg);
                             $success .= ($success ? '<br/>' : '') . "Le contrat " . $contrat->getRef() . " facturé avec succès";
                         }
                     }
@@ -4820,9 +4829,12 @@ class BContract_contrat extends BimpDolObject
                     if (!rename($dir . $file, $newdir . $file))
                         $ok = false;
             }
-            if (!$ok)
-                mailSyn2("Probléme déplacement fichiers", 'tommy@bimp.fr', null, 'Probléme dep ' . $dir . $file . " to " . $newdir . $file);
-            else
+            if (!$ok) {
+				$code = 'fetchContrat_pb_deplacement_fichier';
+				$sujet = 'Problème déplacement fichiers';
+				$msg = 'Probléme dep ' . $dir . $file . " to " . $newdir . $file;
+				BimpUserMsg::envoiMsg($code, $sujet, $msg);
+			}else
                 rmdir($dir);
         }
 

@@ -50,3 +50,8 @@ params:
     mail_from_sav:
         label: Expediteur SAV
         required: 1
+
+    use_centres_sav:
+        label: Activer les centre SAV
+        type: bool
+        def: 0

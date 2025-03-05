@@ -109,7 +109,7 @@ class BS_Ticket extends BimpAbstractFollow
         return 0;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -231,7 +231,7 @@ class BS_Ticket extends BimpAbstractFollow
         return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getClient_contactsArray()
     {
@@ -326,7 +326,7 @@ class BS_Ticket extends BimpAbstractFollow
         return $tickets;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getExtraBtnListInterfaceClient()
     {
@@ -536,7 +536,7 @@ class BS_Ticket extends BimpAbstractFollow
         return null;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayDureeTotale()
     {
@@ -679,7 +679,7 @@ class BS_Ticket extends BimpAbstractFollow
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function onInterUpdate()
     {
@@ -793,7 +793,7 @@ class BS_Ticket extends BimpAbstractFollow
             'warnings' => $warnings
         );
     }
-    
+
     public function getEmailFollow($mode = 0){
         $mails = parent::getEmailFollow($mode);
         if($mode != 1){
@@ -846,7 +846,7 @@ class BS_Ticket extends BimpAbstractFollow
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validatePost()
     {
@@ -1012,7 +1012,8 @@ class BS_Ticket extends BimpAbstractFollow
                             . 'Priorité : ' . $this->displayData('priorite', 'default', false, true) . '<br />'
                             . 'Impact : ' . $this->displayData('impact', 'default', false, true) . '<br />';
 
-                    if (!mailSyn2($subject, $to, '', $msg, array(), array(), array(), $liste_destinataire_interne_contrat_spare)) {
+                    $code = 'creation_ticket_support';
+					if (!mailSyn2($subject, $to, '', $msg, array(), array(), array(), $liste_destinataire_interne_contrat_spare)) {
                         $warnings[] = 'Echec de l\'envoi de l\'e-mail de confirmation';
                     }
                 } else {
@@ -1075,7 +1076,9 @@ class BS_Ticket extends BimpAbstractFollow
                     }
                     $msg .= '<br/><b style="color:red" >N\'est pas couvert par le contrat</b>';
 
-                    mailSyn2('Demande support client non couverte', implode(', ', $destinaitaire_commercial), null, $msg);
+					$code = 'ticket_sav_non_couvert_contrat';
+					$sujet = 'Demande support client non couverte';
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $userClient);
                 }
 
                 if ($init_status !== (int) $this->getData('status')) {

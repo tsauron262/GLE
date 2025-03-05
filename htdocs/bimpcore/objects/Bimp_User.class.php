@@ -1209,6 +1209,62 @@ class Bimp_User extends BimpObject
 		return $html;
 	}
 
+	public function renderMsgErp($type_metier = 'metier')
+	{
+		$oui_non = array(
+			'yes' => 'Oui',
+			'no'  => 'Non',
+		);
+
+		$headers = array(
+			'label'    => array('label' => 'Libellé'),
+			'required' => array('label' => 'Obligatoire', 'search_values' => $oui_non),
+			'resil'    => array('label' => 'Abonné', 'search_values' => $oui_non),
+		);
+
+		$lines = array();
+		foreach (BimpUserMsg::getParamsMessageAll() as $code => $userMessage) {
+			if (!BimpCore::isModuleActive($userMessage['module'])) {
+				continue;
+			}
+			if ($userMessage['params']['type_metier'] != $type_metier) {
+				continue;
+			}
+			$required = BimpCore::getConf('userMessages__' . $code . '__required', $userMessage['params']['required']);
+			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', $userMessage['params']['active']);
+			$abonner = ($this->getUserParamValue('userMessages__' . $code . '__abonner') != '' ? $this->getUserParamValue('userMessages__' . $code . '__abonner') : 'yes');
+
+			if (!$msg_active) {
+				continue;
+			}
+
+			$lines[] = array(
+				'label' => $userMessage['label'],
+				'required' => array(
+					'content' => '<span class="' . ($required ? 'danger' : 'success') . '">' . ($required ? $oui_non['yes'] : $oui_non['no']) . '</span>',
+					'value'   => $required ? 'yes' : 'no'
+				),
+				'resil' => $required ? array('content' => 'Oui par défaut', 'value' => 'yes') : array(
+					'content' => BimpInput::renderInput('toggle', 'resil', ($abonner == 'yes' ? 1 : 0),
+						array(
+							'extra_attr' => array('onchange' => $this->getJsActionOnclick(
+								'saveMsgErpUserParam',
+								array('param' => 'userMessages__' . $code . '__abonner', 'value' => array('js_function' => 'parseInt($(this).val())'))
+							))
+						)
+					),
+					'value'   => ($abonner == 'yes' ? 'yes' : 'no')
+				),
+			);
+		}
+		$params = array(
+			'searchable' => true,
+			'sortable'   => true,
+		);
+
+		return BimpRender::renderBimpListTable($lines, $headers, $params);
+	}
+
 	public function renderMaterielView()
 	{
 		$tabs = array();
@@ -1275,6 +1331,12 @@ class Bimp_User extends BimpObject
 				'title'         => 'Filtres enregistrés',
 				'ajax'          => 1,
 				'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#lists_filters_tab .nav_tab_ajax_result\')', array('lists_filters'), array('button' => ''))
+			);
+
+			$tabs[] = array(
+				'id'      => 'msgErp',
+				'title'   => BimpRender::renderIcon('fas_mail-bulk', 'iconLeft') . 'Message ERP',
+				'content' => $this->renderMsgErp()
 			);
 
 			return BimpRender::renderNavTabs($tabs, 'params_tabs');
@@ -2199,7 +2261,7 @@ class Bimp_User extends BimpObject
 
 	// Traitements:
 
-	public function saveInterfaceParam($param_name, $value)
+	public function saveUserParam($param_name, $value)
 	{
 		$errors = array();
 
@@ -2300,6 +2362,13 @@ class Bimp_User extends BimpObject
 		}
 
 		return $errors;
+	}
+
+	public function isAbonne($code)
+	{
+		// mail obligatoire por ce code ?
+		$obligatoire = BimpCore::getConf('userMessages__' .$code . '__required', BimpUserMsg::$userMessages[$code]['required'], 'bimpcore');
+		return ($obligatoire || $this->getUserParamValue('userMessages__' . $code . '__abonner', 1));
 	}
 
 	// Actions:
@@ -2685,7 +2754,7 @@ class Bimp_User extends BimpObject
 			$value = BimpTools::getArrayValueFromPath($data, $param_name);
 
 			if (!is_null($value)) {
-				$save_errors = $this->saveInterfaceParam($param_name, $value);
+				$save_errors = $this->saveUserParam($param_name, $value);
 
 				if (count($save_errors)) {
 					$warnings[] = BimpTools::getMsgFromArray($save_errors, $param_label);
@@ -2815,6 +2884,27 @@ class Bimp_User extends BimpObject
 		);
 	}
 
+	public function actionSaveMsgErpUserParam($data, &$success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		$param_name = BimpTools::getArrayValueFromPath($data, 'param', null);
+		$value = BimpTools::getArrayValueFromPath($data, 'value', null);
+		if ($this->isLoaded($errors)) {
+			$errors = $this->saveUserParam($param_name, ($value ? 'yes' : 'no'));
+		}
+
+		if (!count($errors)) {
+			$success = 'Paramètre enregistré avec succès';
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
 	// Overrides:
 
 	public function validate()

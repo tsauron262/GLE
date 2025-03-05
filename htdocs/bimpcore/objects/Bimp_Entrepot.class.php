@@ -2,7 +2,7 @@
 
 class Bimp_Entrepot extends BimpObject
 {
-	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
 	public static $status_list = array(
 		0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -57,7 +57,7 @@ class Bimp_Entrepot extends BimpObject
 		}
 	}
 
-	// Affichages:
+    // Affichages:
 
 	public function displayFullAdress()
 	{
@@ -80,17 +80,17 @@ class Bimp_Entrepot extends BimpObject
 		return $html;
 	}
 
-	// Overrides:
+    // Overrides:
 
 	public function getDolObjectUpdateParams()
 	{
 		global $user;
 
-		return array(
-			($this->isLoaded() ? (int) $this->id : 0),
-			$user
-		);
-	}
+        return array(
+            ($this->isLoaded() ? (int) $this->id : 0),
+            $user
+        );
+    }
 
 	public function renderStocksView()
 	{
@@ -153,7 +153,7 @@ class Bimp_Entrepot extends BimpObject
 
 			case 'stocks_equipment':
 				$list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'entrepot', 1, null, 'Equipements en stock du produit "' . $product_label . '"', 'fas_desktop');
-				$list->addFieldFilterValue('epl.id_entrepot', $this->id);
+					$list->addFieldFilterValue('epl.id_entrepot', $this->id);
 				$list->addFieldFilterValue('epl.position', 1);
 				$list->addFieldFilterValue('epl.type', BE_Place::BE_PLACE_ENTREPOT);
 				$list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
@@ -200,7 +200,7 @@ class Bimp_Entrepot extends BimpObject
 		global $user;
 		switch ($action) {
 			case 'CorrectionStock':
-				return ($user->admin || $user->rights->bimpcommercial->correct_stocks);
+				return $user->rights->bimpcommercial->correct_stocks;
 		}
 
 		return (int) parent::canSetAction($action);

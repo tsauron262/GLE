@@ -236,7 +236,7 @@ lists:
         filters_panel: product
         cols:
             fk_entrepot: unset
-            
+
 searches:
     default: 
         fields_search: 

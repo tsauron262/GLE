@@ -39,28 +39,28 @@ class InterfaceBimpbimp extends DolibarrTriggers {
 //                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/scripts/edit_signature.php';
 //                }
 //        }
-        
-        
-        
+
+
+
         if($action == "USER_CREATE" && $object->array_options['options_mail_bienvenue']){
 //            $msg = "Bonjour, un nouveau collaborateur : ".$object->getFullName($langs)." viens de rejoindre l'équipe";
-            
+
             $genre = ($object->gender == "man"? "Mr " : ($object->gender == "woman" ? "Mme " : ""));
             $msg = "Bonjour à tous, <br/><br/>Un nouveau collaborateur  ".$genre.$object->getFullName($langs)." vient d'intégrer les équipes";
-            
+
             if($object->town != "")
                 $msg .= " de ".$object->town;
             if($object->job != "")
                 $msg .= " en qualité de ".$object->job;
-            
+
             $msg .= "<br/>Nous lui souhaitons la bienvenue.<br/><br/>Bien cordialement";
-            
+
             $msg .= '<br/><br/><strong><a href="http://www.bimp.fr/contact"><strong>Le service RH<br />
 0 812 211 211</strong></a></strong><br />
 <strong><a href="http://www.bimp.fr/contact"><strong>2 Rue des Erables 69760 Limonest</strong></a></strong>';
             $msg .= '<br/><strong><span style="color:#ff9300"><span style="font-size:36px">Bimp</span><span style="font-size:x-large">&nbsp;</span></span></strong><span style="font-size:x-large"><span style="color:#919191">Groupe LDLC</span></span>';
-            
-            mailSyn2("Nouveau Collaborateur", "bimpgroupe@bimp.fr", "rh@bimp.fr", $msg);
+            $code = 'user_create_bienvenue';
+			BimpUserMsg::envoiMsg($code, 'Nouveau Collaborateur', $msg);
         }
     }
 

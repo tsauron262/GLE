@@ -3,32 +3,34 @@
 if (!defined('BIMP_LIB')) {
     require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 }
-BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+$tabCentre = BimpCache::getCentres();
 
 class shipToList
 {
 
     public static $list = array();
-    
+
     static function init()
     {
-        global $tabCentre;
+//        global $tabCentre;
+		$tabCentre = BimpCache::getCentres();
         foreach ($tabCentre as $centre)
-            if (isset($centre['7']))
+            if (isset($centre['address']))
                 self::$list[$centre['4']] = array(
                     'Name'          => 'BIMP',
                     'AttentionName' => 'SAV',
                     'ShipperNumber' => 'R8X411',
 //            'ShipperNumber' => '4W63V6VCVF8',
                     'Address'       => array(
-                        'AddressLine'       => $centre['7'],
-                        'City'              => $centre['6'],
-                        'StateProvinceCode' => substr($centre['5'], 0, 2),
-                        'PostalCode'        => $centre['5'],
+                        'AddressLine'       => $centre['address'],
+                        'City'              => $centre['town'],
+                        'StateProvinceCode' => substr($centre['zip'], 0, 2),
+                        'PostalCode'        => $centre['zip'],
                         'CountryCode'       => 'FR',
                     ),
                     'Phone'         => array(
-                        'Number' => $centre['0']
+                        'Number' => $centre['tel']
                 )); /* echo "<pre>";
                   print_r(self::$list); */
     }

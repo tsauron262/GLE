@@ -95,7 +95,7 @@ class Bimp_Log extends BimpObject
 //
 //        return $result;
 //    }
-    // Droits user: 
+    // Droits user:
 
     public function canView()
     {
@@ -128,7 +128,7 @@ class Bimp_Log extends BimpObject
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -183,7 +183,7 @@ class Bimp_Log extends BimpObject
         return (int) parent::isActionAllowed($action, $errors);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {
@@ -231,7 +231,7 @@ class Bimp_Log extends BimpObject
         return $buttons;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getObj()
     {
@@ -250,7 +250,7 @@ class Bimp_Log extends BimpObject
         return null;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayObj()
     {
@@ -326,7 +326,7 @@ class Bimp_Log extends BimpObject
         return '';
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
@@ -353,7 +353,7 @@ class Bimp_Log extends BimpObject
         $panel1 = '';
         $panel2 = '';
 
-        // Logs à traiter non attribués:  
+        // Logs à traiter non attribués:
         $sql = 'SELECT a.type,';
         $sql .= ' SUM(' . BimpTools::getSqlCase(array(
                     'a.level' => 1
@@ -373,7 +373,7 @@ class Bimp_Log extends BimpObject
         $sql .= ' GROUP BY a.type';
 
         $rows = self::getBdb()->executeS($sql, 'array');
-//        
+//
         if (!empty($rows)) {
             $content = '<table class="bimp_list_table">';
             $content .= '<thead>';
@@ -427,7 +427,7 @@ class Bimp_Log extends BimpObject
             ));
         }
 
-        // Logs à traités par dév: 
+        // Logs à traités par dév:
         $sql = 'SELECT a.send_to,';
         $sql .= ' SUM(' . BimpTools::getSqlCase(array(
                     'a.level' => 1
@@ -447,7 +447,7 @@ class Bimp_Log extends BimpObject
         $sql .= ' GROUP BY a.send_to';
 
         $rows = self::getBdb()->executeS($sql, 'array');
-//        
+//
         if (!empty($rows)) {
             $content = '<table class="bimp_list_table">';
             $content .= '<thead>';
@@ -665,7 +665,8 @@ class Bimp_Log extends BimpObject
                 $this->addNote($note);
             }
 
-            if (!mailSyn2("LOG A TRAITER", BimpCore::$dev_mails[$dev], null, $message)) {
+			$code = 'send_log_to_dev';
+			if (count(BimpUserMsg::envoiMsg($code, 'LOG A TRAITER', $message, BimpCore::$dev_mails[$dev]))) {
                 $errors[] = 'Echec de l\'envoi du mail';
             } else {
                 $this->updateField('send_to', $dev);
@@ -692,7 +693,7 @@ class Bimp_Log extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -753,7 +754,8 @@ class Bimp_Log extends BimpObject
                     $message .= "\n\n" . "Extra Data : " . $this->displayExtraData();
 
                     if ((int) BimpCore::getConf('send_logs_urgents_emails')) {
-                        mailSyn2("LOG URGENT", BimpCore::getConf('devs_email'), null, $message);
+						$code = 'send_log_to_dev_urgent';
+						BimpUserMsg::envoiMsg($code, 'LOG URGENT', $message);
                     }
                 }
             }

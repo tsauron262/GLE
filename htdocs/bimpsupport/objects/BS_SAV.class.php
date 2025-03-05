@@ -1,7 +1,8 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
-BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+$tabCentre = BimpCache::getCentres();
 
 class BS_SAV extends BimpObject
 {
@@ -1579,13 +1580,19 @@ class BS_SAV extends BimpObject
 		return ($tmp->getNextValue($objsoc, $this, $mask));
 	}
 
-	public function getDefaultCodeCentreRepa()
-	{
-		global $tabCentre;
-		if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][10])) {
-			return $tabCentre[$this->getData('code_centre')][10];
+    public function getDefaultCodeCentreRepa()
+    {
+//        global $tabCentre;
+		$tabCentre = BimpCache::getCentres();
+        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['id_centre_rattachement'])) {
+			$idCentre =  $tabCentre[$this->getData('code_centre')]['id_centre_rattachement'];
+			foreach ($tabCentre as $centre)	{
+				if($centre['id'] == $idCentre)	{
+					return $centre['code'];
+				}
+			}
 		}
-	}
+    }
 
 	public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
 	{
@@ -1662,23 +1669,23 @@ class BS_SAV extends BimpObject
 			$code_centre = (string) $this->getData('code_centre');
 		}
 
-		if ($code_centre) {
-			global $tabCentre;
-
-			if (isset($tabCentre[$code_centre])) {
-				return array(
-					'tel'         => $tabCentre[$code_centre][0],
-					'mail'        => $tabCentre[$code_centre][1],
-					'label'       => $tabCentre[$code_centre][2],
-					'shipTo'      => $tabCentre[$code_centre][4],
-					'zip'         => $tabCentre[$code_centre][5],
-					'town'        => $tabCentre[$code_centre][6],
-					'address'     => $tabCentre[$code_centre][7],
-					'id_entrepot' => $tabCentre[$code_centre][8],
-					'ship_to'     => $tabCentre[$code_centre][4]
-				);
-			}
-		}
+        if ($code_centre) {
+            BimpObject::loadClass('bimpsupport', 'BS_CentreSav');
+			$centre = BS_CentreSav::getCentreSav($code_centre);
+            if (BimpObject::objectLoaded($centre)) {
+                return array(
+                    'tel'         => $centre->getData('tel'),
+                    'mail'        => $centre->getData('email'),
+                    'label'       => $centre->getData('label'),
+                    'shipTo'      => $centre->getData('shipTo'),
+                    'zip'         => $centre->getData('zip'),
+                    'town'        => $centre->getData('town'),
+                    'address'     => $centre->getData('address'),
+                    'id_entrepot' => $centre->getData('id_entrepot'),
+                    'ship_to'     => $centre->getData('shipTo')
+                );
+            }
+        }
 
 		return null;
 	}
@@ -1940,17 +1947,17 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 	{
 		$codeCentre = $this->getCodeCentre();
 
-		BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-		global $tabCentre;
-		if (isset($tabCentre[$codeCentre])) {
-			if (isset($tabCentre[$codeCentre]['idGroup'])) {
-				return $tabCentre[$codeCentre]['idGroup'];
-			} else {
-				BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
-			}
-		} else {
-			BimpCore::addlog('Pas de centre dans centre.inc pour ' . $codeCentre);
-		}
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+        global $tabCentre;
+        if (isset($tabCentre[$codeCentre])) {
+            if (isset($tabCentre[$codeCentre]['idGroup'])) {
+                return $tabCentre[$codeCentre]['idGroup'];
+            } else {
+                BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
+            }
+        } else {
+            BimpCore::addlog('Pas de centre dans centre.inc pour ' . $codeCentre);
+        }
 
 		return 0;
 	}
@@ -3141,22 +3148,20 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
 			$hrefFin = "";
 
-			global $tabCentre;
-			if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
-				$centreUser = array();
-				foreach ($tabCentre as $idT2 => $tabCT) {
-					$centreUser[] = $idT2;
-				}
-			} else {
-				$centreUser = explode(" ", trim($user->array_options['options_apple_centre'])); //Transforme lettre centre en id centre
-				foreach ($centreUser as $idT => $CT) {//Va devenir inutille
-					foreach ($tabCentre as $idT2 => $tabCT) {
-						if ($tabCT[8] == $CT) {
-							$centreUser[$idT] = $idT2;
-						}
-					}
-				}
-			}
+//            global $tabCentre;
+			$tabCentre = BimpCache::getCentres();
+            if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
+                $centreUser = array();
+                foreach ($tabCentre as $idT2 => $tabCT)
+                    $centreUser[] = $idT2;
+            } else {
+                $centreUser = explode(" ", trim($user->array_options['options_apple_centre'])); //Transforme lettre centre en id centre
+                foreach ($centreUser as $idT => $CT) {//Va devenir inutille
+                    foreach ($tabCentre as $idT2 => $tabCT)
+                        if ($tabCT['id_entrepot'] == $CT)
+                            $centreUser[$idT] = $idT2;
+                }
+            }
 
 			$tabGroupe = array();
 
@@ -3166,12 +3171,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 				$urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav&code_centre=" . implode($centreUser, "-");
 			}
 
-			foreach ($tabCentre as $idGr => $tabOneCentr) {
-				if (count($centreUser) == 0 || in_array($idGr, $centreUser)) {
-					$tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
-				}
-			}
-			$tabResult = array();
+            foreach ($tabCentre as $idGr => $tabOneCentr) {
+                if (count($centreUser) == 0 || in_array($idGr, $centreUser))
+                    $tabGroupe[] = array("label" => $tabOneCentr['label'], "valeur" => $idGr, "forUrl" => $idGr);
+            }
+            $tabResult = array();
 
 			if (!$mode_eco) {
 				$result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE status >= -1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
@@ -4317,13 +4321,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 				$centre = $this->getCentreData();
 
-				if (isset($centre['mail']) && $centre['mail']) {
-					$msg = 'Bonjour,<br/><br/>';
-					$msg .= 'Le devis ' . $propal->getLink() . ' pour le SAV ' . $this->getLink() . ' a été accepté et signé par le client';
-					mailSyn2('Devis ' . $propal->getRef() . ' signé par le client', $centre['mail'], '', $msg);
-				}
-			}
-		}
+                if (isset($centre['mail']) && $centre['mail']) {
+                    $msg = 'Bonjour,<br/><br/>';
+                    $msg .= 'Le devis ' . $propal->getLink() . ' pour le SAV ' . $this->getLink() . ' a été accepté et signé par le client';
+                    $code = 'acceptation_devis_sav';
+					$sujet = 'Devis ' . $propal->getRef() . ' signé par le client';
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $centre);
+                }
+            }
+        }
 
 		return $errors;
 	}
@@ -4583,28 +4589,30 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 					$sql = $this->db->db->query("SELECT `mail` FROM " . MAIN_DB_PREFIX . "usergroup_extrafields ge, " . MAIN_DB_PREFIX . "usergroup g WHERE fk_object IN  (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE ge.fk_object = g.rowid AND `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'");
 
-					$mailOk = false;
-					if ($this->db->db->num_rows($sql) > 0) {
-						while ($ln = $this->db->db->fetch_object($sql)) {
-							if (isset($ln->mail) && $ln->mail != "") {
-								$toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@" . BimpCore::getConf('default_domaine', '', 'bimpsupport');
-								mailSyn2($subject, $toMail, $fromMail, $text);
-								$mailOk = true;
-							}
-						}
-					}
+                    $mailOk = false;
+                    if ($this->db->db->num_rows($sql) > 0) {
+                        while ($ln = $this->db->db->fetch_object($sql)) {
+                            if (isset($ln->mail) && $ln->mail != "") {
+                                $toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@" . BimpCore::getConf('default_domaine', '', 'bimpsupport');
+								$code = 'refus_devis_sav';
+								BimpUserMsg::envoiMsg($code, $subject, $text, $toMail);
+                                $mailOk = true;
+                            }
+                        }
+                    }
 
-					if (!$mailOk) {
-						$rows2 = $this->db->getRows('usergroup', "rowid IN " . $where, null, 'object', array('nom'));
-						if (!is_null($rows2)) {
-							foreach ($rows2 as $r) {
-								$toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@" . BimpCore::getConf('default_domaine', '', 'bimpsupport');
-								mailSyn2($subject, $toMail, $fromMail, $text);
-							}
-						}
-					}
-				}
-				break;
+                    if (!$mailOk) {
+                        $rows2 = $this->db->getRows('usergroup', "rowid IN " . $where, null, 'object', array('nom'));
+                        if (!is_null($rows2)) {
+                            foreach ($rows2 as $r) {
+                                $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@" . BimpCore::getConf('default_domaine', '', 'bimpsupport');
+								$code = 'refus_devis_sav';
+								BimpUserMsg::envoiMsg($code, $subject, $text, $toMail);
+                            }
+                        }
+                    }
+                }
+                break;
 
 			case 'sav_closed':
 				break;
@@ -7421,30 +7429,32 @@ ORDER BY a.val_max DESC");
 				$id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', 'code = \'' . $id_mode_paiement . '\'');
 			}
 
-			if ((int) $this->getData("id_facture_acompte") < 1 && $this->isActionAllowed('validate_propal')) {
-				$fac_errors = $this->createAccompte($amount, false, $id_mode_paiement, BimpTools::getArrayValueFromPath($data, 'bank_account', null));
-				if (count($fac_errors)) {
-					$errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
-				} else {
-					$this->updateField('acompte', $data['amount'], null, true);
-					$client = $this->getChildObject('client');
-					$centre = $this->getCentreData();
-					$toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
-					mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
-				}
-			} else {
-				$data['amount'] = $amount;
-				$data['id_mode_paiement'] = $id_mode_paiement;
-				$data['bank_account'] = (isset($data['bank_account']) ? (int) $data['bank_account'] : (int) BimpCore::getConf('id_default_bank_account'));
+            if ((int) $this->getData("id_facture_acompte") < 1 && $this->isActionAllowed('validate_propal')) {
+                $fac_errors = $this->createAccompte($amount, false, $id_mode_paiement, BimpTools::getArrayValueFromPath($data, 'bank_account', null));
+                if (count($fac_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+                } else {
+                    $this->updateField('acompte', $data['amount'], null, true);
+                    $client = $this->getChildObject('client');
+                    $centre = $this->getCentreData();
+                    $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                    $code = 'accompte_sav_enregitre';
+					BimpUserMsg::envoiMsg($code, 'Acompte enregistré ' . $this->getData('ref'), 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink(), $toMail);
+                }
+            } else {
+                $data['amount'] = $amount;
+                $data['id_mode_paiement'] = $id_mode_paiement;
+                $data['bank_account'] = (isset($data['bank_account']) ? (int) $data['bank_account'] : (int) BimpCore::getConf('id_default_bank_account'));
 
-				$propal = $this->getChildObject('propal');
-				$client = $this->getChildObject('client');
-				$centre = $this->getCentreData();
-				$return = $propal->actionAddAcompte($data, $success);
-				if (!count($return['errors'])) {
-					$toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
-					mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
-				}
+                $propal = $this->getChildObject('propal');
+                $client = $this->getChildObject('client');
+                $centre = $this->getCentreData();
+                $return = $propal->actionAddAcompte($data, $success);
+                if (!count($return['errors'])) {
+                    $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+					$code = 'accompte_sav_enregitre';
+					BimpUserMsg::envoiMsg($code, 'Acompte enregistré ' . $this->getData('ref'), 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink(), $toMail);
+                }
 
 				return $return;
 			}
@@ -8627,29 +8637,27 @@ ORDER BY a.val_max DESC");
 
 				$out .= $sav->getLink() . ' - Mail to ' . $client_email . ' : ';
 
-				$bimpMail = new BimpMail($sav, $subject, $client_email, $centre_email, $msg);
-				$bimpMail->setFromType('ldlc');
-				if ($bimpMail->send($mail_errors)) {
-					$out .= '[OK]';
-					$sav->updateField('alert_unrestitute', 1);
-					$sav->addNote('Alerte e-mail de non restitution envoyée avec succès le ' . date('d / m / Y à H:i') . ' à l\'adresse e-mail "' . $client_email . '"', BimpNote::BN_ALL);
-				} else {
-					$out .= '[ECHEC]';
-					if (count($mail_errors)) {
-						$out .= BimpRender::renderAlerts($mail_errors);
-					}
-				}
-				$out .= '<br/>';
-			} else {
-				// Envoi mail au centre SAV:
-				if (!$centre_email) {
-					$centre_email = BimpCore::getConf('default_sav_email', null, 'bimpsupport');
-				}
-
-				$msg = 'Bonjour, <br/><br/>Aucune adresse e-mail valide enregistrée pour le client du SAV ' . $sav->getLink();
-				$msg .= '<br/><br/>Il n\'est donc pas possible d\'alerter le client pour la non restitution de son matériel';
-				mailSyn2('Adresse e-mail client absente (SAV ' . $sav->getRef() . ')', $centre_email, '', $msg);
-			}
+                $bimpMail = new BimpMail($sav, $subject, $client_email, $centre_email, $msg);
+                $bimpMail->setFromType('ldlc');
+                if ($bimpMail->send($mail_errors)) {
+                    $out .= '[OK]';
+                    $sav->updateField('alert_unrestitute', 1);
+                    $sav->addNote('Alerte e-mail de non restitution envoyée avec succès le ' . date('d / m / Y à H:i') . ' à l\'adresse e-mail "' . $client_email . '"', BimpNote::BN_ALL);
+                } else {
+                    $out .= '[ECHEC]';
+                    if (count($mail_errors)) {
+                        $out .= BimpRender::renderAlerts($mail_errors);
+                    }
+                }
+                $out .= '<br/>';
+            } else {
+                // Envoi mail au centre SAV:
+                $msg = 'Bonjour, <br/><br/>Aucune adresse e-mail valide enregistrée pour le client du SAV ' . $sav->getLink();
+                $msg .= '<br/><br/>Il n\'est donc pas possible d\'alerter le client pour la non restitution de son matériel';
+                $code = "sav_non_restitue_pas_email_client";
+				$sujet = 'Adresse e-mail client absente (SAV ' . $sav->getRef() . ')';
+				BimpUserMsg::envoiMsg($code, $sujet, $msg, $centre_data);
+            }
 
 			break; // Poir tests
 		}

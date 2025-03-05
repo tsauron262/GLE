@@ -185,7 +185,7 @@ class pdf_azurSAV extends ModelePDFPropales
 		if ($conf->propal->dir_output)
 		{
 			$object->fetch_thirdparty();
-			
+
 			// $deja_regle = 0;
 
 			// Definition of $dir and $file
@@ -245,7 +245,7 @@ class pdf_azurSAV extends ModelePDFPropales
 				if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
 
 				$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                                
+
 				// Positionne $this->atleastonediscount si on a au moins une remise
 				for ($i = 0 ; $i < $nblignes ; $i++)
 				{
@@ -272,14 +272,14 @@ class pdf_azurSAV extends ModelePDFPropales
 				$pdf->SetFont('','', $default_font_size - 1);
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
 				$pdf->SetTextColor(0,0,0);
-                                
-                                
-                                
+
+
+
                                 //img agree
                                 $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg", 80, 6, 60, null);
-                                
-                                
-                                
+
+
+
 
 				$tab_top = 90;
 				$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?42:10);
@@ -323,11 +323,11 @@ class pdf_azurSAV extends ModelePDFPropales
 				$iniY = $tab_top + 7;
 				$curY = $tab_top + 7;
 				$nexY = $tab_top + 7;
-                                
-                                
-                                
-                                
-                                
+
+
+
+
+
                                 /*moddrsi (20.2)*/
                                 global $accTht, $accTtva;
                                 $accTht = $accTtva = 0;
@@ -336,8 +336,8 @@ class pdf_azurSAV extends ModelePDFPropales
 				// Loop on each lines
 				for ($i = 0 ; $i < $nblignes ; $i++)
 				{
-                                    
-                                    
+
+
                                         /*moddrsi (20.2)*/
                                         if($object->lines[$i]->desc == "Acompte" && $object->lines[$i]->total < 0){
                                             $accTht = $object->lines[$i]->total_ht;
@@ -345,10 +345,10 @@ class pdf_azurSAV extends ModelePDFPropales
                                             continue;
                                         }
                                         /*fmoddrsi*/
-                                        
-                                        
-			
-                                    
+
+
+
+
 					$curY = $nexY;
 					$pdf->SetFont('','', $default_font_size - 1);   // Into loop to work with multipage
 					$pdf->SetTextColor(0,0,0);
@@ -580,17 +580,17 @@ class pdf_azurSAV extends ModelePDFPropales
 					$posy=$this->_tableau_versements($pdf, $object, $posy, $outputlangs);
 				}
 				*/
-                                
-                                
+
+
                                 /*moddrsi (20.2) ajout signature*/
                                     $pdf->SetFont('','', $default_font_size);
                                     $pdf->SetXY("159", "243");
                                     $pdf->MultiCell("50", "10", "Bon pour Accord\nLe : ", 0, 'L');
                                     $pdf->SetXY("160", "253");
                                     $pdf->MultiCell("40", "25", "", 1);
-                                
+
                                 /*fmoddrsi*/
-                                
+
 
 				// Pied de page
 				$this->_pagefoot($pdf,$object,$outputlangs);
@@ -599,7 +599,7 @@ class pdf_azurSAV extends ModelePDFPropales
 				$pdf->Close();
 
 				$pdf->Output($file,'F');
-                    
+
                                 $this->result["fullpath"] = $file;
 
 				//Add pdfgeneration hook
@@ -1038,7 +1038,7 @@ class pdf_azurSAV extends ModelePDFPropales
 
 				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc/*moddrsi (20.2)*/-$accTht -$accTtva/*fmoddrsi*/, 0, $outputlangs), $useborder, 'R', 1);
-                                
+
                                  /*moddrsi (20.2)*/
                                 if(-$accTht > 0){
                                         $pdf->SetFillColor(248,248,248);
@@ -1049,8 +1049,8 @@ class pdf_azurSAV extends ModelePDFPropales
                                         $pdf->MultiCell($largcol2, $tab2_hl, price(-($accTht+$accTtva), 0, $outputlangs), 0, 'R', 0);
                                 }
                                 /*fmoddrsi*/
-                                
-                                
+
+
                                 $pdf->SetFont('','', $default_font_size - 3);
                                 $pdf->MultiCell(148, 20, "\n\n\n\n\n\n\n\nLes informations personnelles requises suivantes (nom, adresse, téléphone et adresse mail) sont nécessaires pour poursuivre la demande de réparation. Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront transférées au tiers pour vérification et des objectifs de qualité, notamment la confirmation de la transaction de réparation et la soumission d’une enquéte client. En signant, vous acceptez ce transfert ainsi que l’utilisation de ces informations par un tiers.", 0, 'L', 0);
                                 $pdf->MultiCell(148, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
@@ -1329,12 +1329,13 @@ class pdf_azurSAV extends ModelePDFPropales
 		 		$carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$outputlangs->transnoentities("Name").": ".$outputlangs->convToOutputCharset($object->user->getFullName($outputlangs))."\n";
 		 	}
                         $conf->global->MAIN_PDF_DISABLESOURCEDETAILS = true;
-                        
+
                         $result = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_chrono_105 ct, ".MAIN_DB_PREFIX."synopsischrono c WHERE ct.id = c.id AND propalid = ".$object->id);
                         if($this->db->num_rows($result) > 0 ){
                             $ligne = $this->db->fetch_object($result);
                             if(isset($ligne->Centre)){
-                                global $tabCentre;
+//                                global $tabCentre;
+								$tabCentre = BimpCache::getCentres();
                                 $centre = $tabCentre[$ligne->Centre];
                                 $tech = "";
                                 if (isset($ligne->Technicien) && $ligne->Technicien > 0) {
@@ -1342,11 +1343,11 @@ class pdf_azurSAV extends ModelePDFPropales
                                     $userT->fetch($ligne->Technicien);
                                     $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
                                 }
-                                
+
                                 $pdf->SetXY(12,64);
-                                $pdf->MultiCell(80, 10, "Centre SAV : ".$centre[2]."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
-                                $req = "SELECT N__Serie 
-FROM  `llx_element_element`, llx_synopsischrono_chrono_101 v 
+                                $pdf->MultiCell(80, 10, "Centre SAV : ".$centre['label']."\nTél : ".$centre['tel']."\nMail : ".$centre['mail'].$tech, 0, '', 0);
+                                $req = "SELECT N__Serie
+FROM  `llx_element_element`, llx_synopsischrono_chrono_101 v
 WHERE  `sourcetype` LIKE  'sav' AND v.id = fk_target AND fk_source = ".$ligne->id."
 AND  `targettype` LIKE  'productCli'";
                                         $result2 = $this->db->query($req);
@@ -1361,9 +1362,9 @@ AND  `targettype` LIKE  'productCli'";
                                         }
                             }
                         }
-                        
-                        
-                        
+
+
+
 		 	$carac_emetteur .= pdf_build_address($outputlangs,$this->emetteur);
 
 			// Show sender

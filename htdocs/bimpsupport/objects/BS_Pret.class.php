@@ -1,13 +1,14 @@
 <?php
 
-BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+$tabCentre = BimpCache::getCentres();
 
 class BS_Pret extends BimpObject
 {
 
     public $module = 'sav';
 
-    // Getters: 
+    // Getters:
 
     public function getCreateJsCallback()
     {
@@ -214,7 +215,7 @@ class BS_Pret extends BimpObject
         return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
     }
 
-    // Actions: 
+    // Actions:
 
     public function getFilesDir()
     {
@@ -245,7 +246,7 @@ class BS_Pret extends BimpObject
 
         if ((int) BimpCore::getConf('bs_pret_use_pdf_v2', null, 'bimpsupport')) {
             require_once DOL_DOCUMENT_ROOT . "/bimpsupport/pdf/PretPDF.php";
-            
+
             global $db;
             $pdf = new PretPDF($this, $db);
 
@@ -274,7 +275,7 @@ class BS_Pret extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function checkObject($context = '', $field = '')
     {
@@ -283,10 +284,10 @@ class BS_Pret extends BimpObject
         }
 
         if (!(int) $this->getData('id_entrepot') && $this->getData('code_centre')) {
-            global $tabCentre;
-
-            if (isset($tabCentre[$this->getData('code_centre')][8])) {
-                $id_entrepot = (int) $tabCentre[$this->getData('code_centre')][8];
+//            global $tabCentre;
+			$tabCentre = BimpCache::getCentres();
+            if (isset($tabCentre[$this->getData('code_centre')]['id_entrepot'])) {
+                $id_entrepot = (int) $tabCentre[$this->getData('code_centre')]['id_entrepot'];
                 $this->updateField('id_entrepot', $id_entrepot);
             }
         }

@@ -1821,7 +1821,7 @@ lists:
             callback: getListExtraBtn
         cols: 
             ref:
-            code_centre: 
+            code_centre:
             status: 
             date_create:
             id_user_tech:
@@ -1832,6 +1832,11 @@ lists:
         extends: default
         cols:
             client: unset
+            
+    centre:
+        extends: default
+        cols:
+            code_centre: unset
     
     public_client: 
         title: Liste des SAV

@@ -72,7 +72,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
 
 
-            
+
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -104,7 +104,8 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         }
 
         global $user, $langs, $conf;
-        global $tabCentre;
+//        global $tabCentre;
+		$tabCentre = BimpCache::getCentres();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -195,7 +196,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 return 0;
             }
 
-            // Listes des équipements: 
+            // Listes des équipements:
             if (!empty($equipments)) {
                 foreach ($equipments as $id_equipment) {
                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
@@ -253,7 +254,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 }
             }
 
-            // Liste des produits: 
+            // Liste des produits:
             if (!empty($products_lines)) {
                 foreach ($products_lines as $product_line) {
                     $product = $product_line->getChildObject('product');
@@ -292,11 +293,11 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 if ($code_centre && isset($tabCentre[$code_centre])) {
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                     $pdf->SetXY('147', '39.5');
-                    $pdf->MultiCell(100, 6, $tabCentre[$code_centre][2], 0, 'L');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_centre]['label'], 0, 'L');
                     $pdf->SetXY('147', '45.5');
-                    $pdf->MultiCell(100, 6, $tabCentre[$code_centre][0], 0, 'L');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_centre]['tel'], 0, 'L');
                     $pdf->SetXY('147', '51.3');
-                    $pdf->MultiCell(100, 6, $tabCentre[$code_centre][1], 0, 'L');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_centre]['mail'], 0, 'L');
                 }
             } else {
                 $entrepot = $pret->getChildObject('entrepot');

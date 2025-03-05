@@ -196,24 +196,19 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                     } elseif ($this->repair->repairLookUp['repairStatus'] == "SPCM") {//"Fermée et complétée"){
                         echo "fermé dans GSX Impossible de Fermé dans GLE ";
                         $this->nbErr++;
-                    } else {
-                        $mailTech = "jc.cannet@bimp.fr";
-                        if ($ligne->Technicien > 0) {
-                            $user = new User($db);
-                            $user->fetch($ligne->Technicien);
-                            if ($user->statut == 1 && $user->email != "")
-                                $mailTech = $user->email;
-                        }
+                    }
+					else {
+						$techDest = array();
+                        if ($ligne->Technicien > 0) $techDest[] = $ligne->Technicien;
                         BimpObject::loadClass('bimpcore', 'Bimp_User');
                         $shipToUsers = Bimp_User::getUsersByShipto($this->repair->getData('ship_to'));
                         if (!empty($shipToUsers)) {
-                            foreach ($shipToUsers as $u) {
-                                if (isset($u['email']) && $u['email']) {
-                                    $mailTech .= ($mailTech ? ',' : '') . $u['email'];
-                                }
-                            }
-                        }
-                        $mailTech = BimpTools::cleanEmailsStr($mailTech);
+							foreach ($shipToUsers as $u) {
+								if (!in_array($u['id'], $techDest)) {
+									$techDest[] = $u['id'];
+								}
+							}
+						}
 
                         if (in_array($this->repair->repairLookUp['repairStatus'], GSX_Repair::$readyForPickupCodes)) {
                             $erreurSOAP = $this->repair->close(1, 0);
@@ -227,9 +222,9 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                                 $this->nbErr++;
                                 $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $this->repair, $erreurSOAP);
                                 echo $messErreur;
-//                                $mailTech .= ",tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
-                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+									$code = 'tentativeFermetureAuto_non_ferme_GSX';
+									BimpUserMsg::envoiMsg($code, 'SAV non fermé dans GSX', 'Bonjour le SAV ' . $messErreur, $techDest);
                                     $this->nbMail++;
                                 }
                             }
@@ -245,7 +240,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
 //                                $mailTech .= ", tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+									$code = 'tentativeFermetureAuto_non_RFPU_GSX';
+									BimpUserMsg::envoiMsg($code, 'SAV non RFPU dans GSX', 'Bonjour le SAV ' . $messErreur, $techDest);
                                     $this->nbMail++;
                                 }
                             }
@@ -293,23 +289,18 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                 if (count($erreurSOAP) == 0) {
                     echo "Tentative de maj de " . $ligne->ref;
 
-                    $mailTech = "jc.cannet@bimp.fr";
-                    if ($ligne->Technicien > 0) {
-                        $user = new User($db);
-                        $user->fetch($ligne->Technicien);
-                        if ($user->statut == 1 && $user->email != "")
-                            $mailTech = $user->email;
-                    }
+//                    $mailTech = "jc.cannet@bimp.fr";
+					$techDest = array();
+                    if ($ligne->Technicien > 0) $techDest[] = $ligne->Technicien;
                     BimpObject::loadClass('bimpcore', 'Bimp_User');
                     $shipToUsers = Bimp_User::getUsersByShipto($this->repair->getData('ship_to'));
                     if (!empty($shipToUsers)) {
                         foreach ($shipToUsers as $u) {
-                            if (isset($u['email']) && $u['email']) {
-                                $mailTech .= ($mailTech ? ',' : '') . $u['email'];
-                            }
+                            if(!in_array($u['id'], $techDest)) {
+								$techDest[] = $u['id'];
+							}
                         }
                     }
-                    $mailTech = BimpTools::cleanEmailsStr($mailTech);
 
                     if ($this->repair->repairLookUp['repairStatus'] == "RFPU" || $this->repair->getData('ready_for_pick_up')) {
                         echo "Passage dans GLE a RFPU<br/>";
@@ -330,7 +321,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                             echo $messErreur;
 //                                $mailTech .= ",tommy@bimp.fr";
                             if (isset($_GET['envoieMail'])) {
-                                mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+								$code = 'tentativeARestitueAuto_non_ferme_GSX';
+								BimpUserMsg::envoiMsg($code, 'SAV non fermé dans GSX', 'Bonjour le SAV ' . $messErreur, $techDest);
                                 $this->nbMail++;
                             }
                         }
@@ -345,7 +337,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                             echo $messErreur;
 
                             if (isset($_GET['envoieMail'])) {
-                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+								$code = 'tentativeARestitueAuto_non_RFPU_GSX';
+								BimpUserMsg::envoiMsg($code, 'SAV non RFPU dans GSX', 'Bonjour le SAV ' . $messErreur, $techDest);
                                 $this->nbMail++;
                             }
                         }

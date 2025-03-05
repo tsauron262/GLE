@@ -516,6 +516,78 @@ class devController extends BimpController
         return $menu->renderItemsList();
     }
 
+	public function renderMailerTab($type_metier)
+	{
+		global $user;
+
+		$onoff = array(
+			'no_active' => 'Inactif',
+			'active' => 'Actif',
+		);
+		$oui_non = array(
+			'yes' => 'Oui',
+			'no' => 'Non',
+		);
+		$headers = array(
+			'code' => array('label' => 'Code'),
+			'label' => array('label' => 'Libellé'),
+			'required' => array('label' => 'Obligatoire', 'search_values' => $oui_non),
+			'mail_active' => array('label' => 'Mail actif', 'search_values' => $onoff),
+			'module' => array('label' => 'Module'),
+		);
+		error_reporting(E_ALL);
+		ini_set("display_errors", 1);
+		$lines = array();
+		$userMessages = BimpUserMsg::getParamsMessageAll();
+		foreach ($userMessages AS $code => $userMessage) {
+			if (!BimpCore::isModuleActive($userMessage['module'])) {
+				continue;
+			}
+			if ($userMessage['params']['type_metier'] != $type_metier)	{
+				continue;
+			}
+			$required = BimpCore::getConf('userMessages__' . $code . '__required', $userMessage['params']['required']);
+			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', $userMessage['params']['active']);
+
+			$lines[] = array(
+				'code'        => $code,
+				'label'       => $userMessage['label'],
+				'required'    => $user->admin ? array(
+					'content' => BimpInput::renderInput('toggle', 'required', $required,
+						array(
+							'extra_attr' =>
+								array('onchange' => 'saveBimpcoreConf(\'bimpcore\', \'userMessages__' . $code . '__required\', $(this).val(), \'\', \'\')')
+						)
+					),
+					'value'   => $required ? 'yes' : 'no'
+				) : array(
+					'content' => '<span class="' . ($required ? 'success' : 'danger') . '">' . ($required ? $oui_non['yes'] : $oui_non['no']) . '</span>',
+					'value'   => $required ? 'yes' : 'no'
+				),
+				'mail_active' => $user->admin ? array(
+					'content' => BimpInput::renderInput('toggle', 'required', $msg_active,
+						array(
+							'extra_attr' =>
+								array('onchange' => 'saveBimpcoreConf(\'bimpcore\', \'userMessages__' . $code . '__msgActive\', $(this).val(), \'\', \'\')')
+						)
+					),
+					'value'   => ($msg_active ? 'active' : 'no_active')
+				) : array(
+					'content' => '<span class="' . ($msg_active ? 'success' : 'danger') . '">' . ($msg_active ? $onoff['active'] : $onoff['no_active']) . '</span>',
+					'value'   => ($msg_active ? 'active' : 'no_active')
+				),
+				'module'      => $userMessage['module'],
+			);
+		}
+
+		$params = array(
+			'searchable' => true,
+			'sortable' => true,
+		);
+
+		return BimpRender::renderBimpListTable($lines, $headers, $params);
+	}
+
     // Ajax processes - Config modules:
 
     public function ajaxProcessLoadModuleConfForm()

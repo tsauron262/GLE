@@ -195,7 +195,7 @@ class BimpCommission extends BimpObject
 		return '';
 	}
 
-	// Getters cache:
+    // Getters cache:
 
 	public function getRevalorisationsListCacheKey()
 	{
@@ -483,8 +483,8 @@ class BimpCommission extends BimpObject
 			$data['total_marges_serv'] = $data['total_ca_serv'] - $data['total_pa_serv'];
 			$data['total_marges_prod'] = $data['total_ca_prod'] - $data['total_pa_prod'];
 
-			// Revalorisations:
-			$revals_list = $this->getRevalorisationsList(true);
+            // Revalorisations:
+            $revals_list = $this->getRevalorisationsList(true);
 
 			foreach ($revals_list as $id_reval) {
 				$reval = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', (int) $id_reval);
@@ -518,7 +518,7 @@ class BimpCommission extends BimpObject
 		return self::$cache[$cache_key];
 	}
 
-	// Affichages:
+    // Affichages:
 
 	public function displayTaux($type = "marque")
 	{
@@ -1563,7 +1563,7 @@ class BimpCommission extends BimpObject
 		return $result;
 	}
 
-	// Overrides:
+    // Overrides:
 
 	public function create(&$warnings = array(), $force_create = false)
 	{

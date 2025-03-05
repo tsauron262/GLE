@@ -687,6 +687,12 @@ class BimpUserMsg
 			'label' => 'La (ou les) signature(s) via DocuSign du document XXX a été complètée le d / m / Y',
 			'type_dest' => 'to::obj',
 			'module' => 'bimpcore',
+		),
+		'relance_not_sent'	=> array(
+			'label' => 'Le client XXX ne peut pas être relancé car ...',
+			'type_dest' => 'conf::emails_notify_solvabilite_client_change',
+			'module' => 'bimpcore',
+			'metier' => 'devs'
 		)
 
 		// todo tommy : separer mail client et mail interne :

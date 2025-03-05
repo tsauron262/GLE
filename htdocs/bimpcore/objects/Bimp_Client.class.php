@@ -499,7 +499,7 @@ class Bimp_Client extends Bimp_Societe
                 ))
             );
         }
-        
+
         if ($user->admin) {
             $actions[] = array(
                 'label'   => 'Update a vide',
@@ -3088,7 +3088,8 @@ class Bimp_Client extends Bimp_Societe
                             $bds_process->Alert($msg, $relance, $client->getRef());
                             $bds_process->incIgnored();
                         }
-                        mailSyn2('Relance non envoyé', BimpCore::getConf('emails_notify_solvabilite_client_change', 'dev@bimp.fr'), null, $msg);
+						$code = 'relance_not_sent';
+						BimpUserMsg::envoiMsg($code, 'Relance non envoyée', $msg);
                         continue;
                     }
 
@@ -4000,13 +4001,13 @@ class Bimp_Client extends Bimp_Societe
             'warnings' => $warnings
         );
     }
-    
+
     public function actionUpdateVide($data, &$success){
         $success = 'ok';
         $errors = $warnings = array();
-        
+
         $this->update();
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

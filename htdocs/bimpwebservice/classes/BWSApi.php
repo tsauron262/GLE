@@ -206,13 +206,16 @@ class BWSApi
 							$this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
 						} elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
 							(0)) {
-							$this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permissionnnnnnnn d\'obtenir les données des objets enfants "' . $child_name . '"');
+							$this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
 						} else {
 							$data = $child->getDataArray(true, $this->check_erp_user_rights);
-							$data['children'] = (is_array($child_data) ? $this->getChildrenData($child_object, $child_data) : array());
+							$data['children'] = (is_array($child_data) ? $this->getChildrenData($child, $child_data) : array());
 							$children_data[$child_name] = $data;
 						}
 					}
+                                        else{
+                                            $this->addError('INVALID_PARAMETER', 'Pas de relations avec '.$child_name);
+                                        }
 				}
 			}
 		}
@@ -608,7 +611,7 @@ class BWSApi
 				// Check des children:
 				$children = BimpTools::getArrayValueFromPath($this->params, 'children', '');
 				if ($children) {
-					$children = json_decode($children);
+					$children = json_decode($children, true);
 				}
 
 				/*

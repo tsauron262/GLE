@@ -133,8 +133,8 @@ lists:
             - label: supprimer les droits sélectionnés
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
-        extra_btn: 
-            callback: getListExtraBtn
+#        extra_btn: 
+#            callback: getListExtraBtn
         cols: 
             id_profile: 
             request_name: 

@@ -206,7 +206,7 @@ abstract class DoliDB implements Database
                     ));
                 }
                 /*fmoddrsi*/
-                
+
 		if (!$this->transaction_opened && !$this->noTransaction)
 		{
 			$ret = $this->query("BEGIN");
@@ -242,7 +242,7 @@ abstract class DoliDB implements Database
 	{
             dol_syslog('', 0, -1);
             /*moddrsi (20.2)*/
-//                
+//
 //		if ($this->transaction_opened <= 1) {
 //			$ret = $this->query("COMMIT");
 //			if ($ret) {
@@ -256,14 +256,14 @@ abstract class DoliDB implements Database
 //			$this->transaction_opened--;
 //			return 1;
 //		}
-                
+
             if (!$this->noTransaction && defined('BIMP_LIB') && BimpDebug::isActive()) {
                 $content = '<span class="success">COMMIT #' . ($this->transaction_opened). '</span><br/><br/>';
                 BimpDebug::addDebug('sql', '', $content, array(
                     'foldable' => false
                 ));
             }
-                
+
             if ($this->transaction_opened==1 && !$this->noTransaction) {
                 if ($this->has_rollback) {
                     if (!defined('BIMP_LIB')) {
@@ -273,13 +273,13 @@ abstract class DoliDB implements Database
                     $this->rollback();
                     return 0;
                 }
-                        
+
                 $ret=$this->query("COMMIT");
-                        
+
                 if (class_exists('BimpTools')) {
                     BimpTools::deloqueAll ();
                 }
-        
+
                 if ($ret) {
                         $this->transaction_opened=0;
                         dol_syslog("COMMIT Transaction".($log?' '.$log:''),LOG_DEBUG);
@@ -318,9 +318,9 @@ abstract class DoliDB implements Database
 	public function rollback($log = '')
 	{
 		dol_syslog('', 0, -1);
-                
+
                 /*moddrsi (20.2)*/
-                
+
 //		if ($this->transaction_opened <= 1) {
 //			$ret = $this->query("ROLLBACK");
 //			$this->transaction_opened = 0;
@@ -330,7 +330,7 @@ abstract class DoliDB implements Database
 //			$this->transaction_opened--;
 //			return 1;
 //		}
-                
+
                 if (defined('BIMP_LIB') && BimpDebug::isActive()) {
                     $id_trans = $this->transaction_opened;
                     $content = '<span class="danger">ROLLBACK #' . $id_trans . '</span><br/><br/>';
@@ -343,11 +343,11 @@ abstract class DoliDB implements Database
                 if ($this->transaction_opened <= 1 && !$this->noTransaction) {
                     $ret = $this->query("ROLLBACK");
                     $this->transaction_opened = 0;
-                    
+
                     if (class_exists('BimpTools')){
                         BimpTools::deloqueAll();
                     }
-                    
+
                     $this->has_rollback = false;
 
                     if (defined('BIMP_LIB') && BimpDebug::isActive()) {
@@ -358,21 +358,21 @@ abstract class DoliDB implements Database
                             ));
                         }
                     }
-                    
+
                     dol_syslog("ROLLBACK Transaction" . ($log ? ' ' . $log : ''), LOG_DEBUG);
                     return $ret;
                 } elseif ($this->noTransaction) {
-                    // Pas besoin de loguer, de nombreux cas où c'est normal d'arriver là (Quand on veut contourner un comportement par défaut). 
-//                    BimpCore::addlog('Tentative de ROLLBACK sur instance sans transactions', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                    // Pas besoin de loguer, de nombreux cas où c'est normal d'arriver là (Quand on veut contourner un comportement par défaut).
+                    BimpCore::addlog('Tentative de ROLLBACK sur instance sans transactions', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
                     return 1;
                 } else {
                     $this->transaction_opened--;
                     $this->has_rollback = true;
                     // Idem
-//                    BimpCore::addLogs_debug_trace('Tentative de ROLLBACK sur transaction d\'id ' . ($this->transaction_opened + 1));
+                    BimpCore::addLogs_debug_trace('Tentative de ROLLBACK sur transaction d\'id ' . ($this->transaction_opened + 1));
                     return 1;
                 }
-                
+
                 /*fmoddrsi*/
 	}
 
@@ -559,10 +559,10 @@ abstract class DoliDB implements Database
 
 		return false;
 	}
-        
-        
+
+
     // moddrsi (20.2) : Ajouts
-        
+
     public function commitAll()
     {
         if (!$this->noTransaction) {
@@ -573,17 +573,17 @@ abstract class DoliDB implements Database
                         BimpDebug::addDebug('sql', '', $content, array(
                             'foldable' => false
                         ));
-                    }        
+                    }
                     $this->transaction_opened--;
                 }
-                
+
                 $this->commit();
             }
         }
-        
+
         $this->transaction_opened = 0;
     }
-    
+
     static function stopAll($msg = ''){
         $errors = array('Problème réseau, merci de relancer l\'opération ('.$msg.')');
         if (BimpTools::isSubmit('ajax')) {

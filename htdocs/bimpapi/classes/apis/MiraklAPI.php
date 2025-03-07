@@ -13,7 +13,7 @@ class MiraklAPI extends BimpAPI
 
 
 	public static $asUser = false;
-	public static $name = 'Mirakl';
+	public static $name = 'Mirakl API';
 	public static $include_debug_json = false;
 	public static $urls_bases = array(
 		'default' => array(

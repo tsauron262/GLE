@@ -3,7 +3,7 @@
 class Bimpcoopmvt extends BimpObject
 {
     public function renderCoopUserView($idUser){
-        
+
         global $user;
 
 //        if ($user->admin || $user->id === $this->id) {
@@ -27,7 +27,7 @@ class Bimpcoopmvt extends BimpObject
 
         return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
     }
-    
+
     public function renderCapitalCCA(){
         global $db;
         $panels = array();
@@ -43,8 +43,8 @@ class Bimpcoopmvt extends BimpObject
                 );
             }
         }
-        
-        
+
+
         $sql = $db->query('SELECT SUM(value) as value, fk_user, type FROM '.MAIN_DB_PREFIX.'bimp_coop_mvt GROUP BY type;');
         while ($ln = $db->fetch_object($sql)){
             $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $ln->fk_user);
@@ -62,58 +62,58 @@ class Bimpcoopmvt extends BimpObject
         }
 //        echo '<pre>';
 //        print_r($rows);die;
-        
-        
+
+
         $header = array(
             'name'     => 'Nom',
             'montant'   => 'Value'
         );
-        
+
         $panels['Capital'] = array('content'=>BimpRender::renderBimpListTable($rows[1], $header, array(
                             'searchable'  => true,
                             'sortable'    => true,
                             'search_mode' => 'show'
                 )).'TOTAL : '.$totals[1], 'xs'=>12,'sm'=>12,'md'=>6);
-        
-        
+
+
         $panels['CCA'] = array('content'=>BimpRender::renderBimpListTable($rows[2], $header, array(
                             'searchable'  => true,
                             'sortable'    => true,
                             'search_mode' => 'show'
             )).'TOTAL : '.$totals[2].'<br/>Dont '.$totUrg.' de compte d\'urgence', 'xs'=>12,'sm'=>12,'md'=>6);
-        
+
         return $panels;
     }
-    
+
     public function renderStat(){
         global $db;
         $panels = array();
-        
-        
-        
-        
+
+
+
+
         //bank
         $sql = $db->query("SELECT * FROM `".MAIN_DB_PREFIX."bank_account`;");
         $bank  = array();
         while($ln = $db->fetch_object($sql)){
             $bank[$ln->rowid] = $ln->label;
         }
-        
+
 //        $html .= BimpRender::renderPanel('Chiffres ', $content, '', array('open' => 1));
         //47000
-        
-        
-        
-        
-        
+
+
+
+
+
         //categorie
         $sql = $db->query("SELECT * FROM `".MAIN_DB_PREFIX."bimp_c_values8sens` WHERE `type` = 'categorie';");
         $categ  = array();
         while($ln = $db->fetch_object($sql)){
             $categ[$ln->id] = $ln->label;
         }
-        
-        
+
+
         //Recette (stat vente)
         $tabInfoR = array();
         $sql = $db->query('SELECT a_product_ef.categorie AS categorie,  SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
@@ -133,7 +133,7 @@ ORDER BY a.rowid DESC;');
                 $tabInfoR[$label] = $ln->tot;
             }
         }
-        
+
         $sql = $db->query('SELECT categorie AS categorie,  SUM(value) AS tot
 FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep a
 WHERE value > 0 AND date IS NOT NULL '.
@@ -148,7 +148,7 @@ WHERE value > 0 AND date IS NOT NULL '.
                 $tabInfoR[$label] += $ln->tot;
             }
         }
-        
+
         $sql = $db->query('SELECT SUM(amount_ttc) as tot FROM `'.MAIN_DB_PREFIX.'societe_remise_except` WHERE (fk_facture < 0 OR fk_facture IS NULL) AND fk_facture_source > 0'.
                 (BimpTools::getPostFieldValue('dateD', null)? ' AND datec >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND datec < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
@@ -157,9 +157,9 @@ WHERE value > 0 AND date IS NOT NULL '.
             if($ln->tot != 0)
                 $tabInfoR['Acompte'] += $ln->tot;
         }
-        
-        
-        
+
+
+
         //depensse (stat achat)
         $tabInfoD = array();
         $tabInfoAPrevoir = array();
@@ -180,7 +180,7 @@ GROUP BY categorie;');
                 $tabInfoD[$label] = $ln->tot;
             }
         }
-        
+
         $sql = $db->query('SELECT categorie AS categorie,  SUM(value) AS tot
 FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep a
 WHERE value < 0 AND date IS NOT NULL '.
@@ -195,9 +195,9 @@ WHERE value < 0 AND date IS NOT NULL '.
                 $tabInfoD[$label] += -$ln->tot;
             }
         }
-        
-        
-        
+
+
+
         $sql = $db->query('SELECT SUM(total_ttc) as tot, categorie
 FROM '.MAIN_DB_PREFIX.'expensereport e LEFT JOIN '.MAIN_DB_PREFIX.'expensereport_extrafields le ON le.fk_object = e.rowid WHERE paid = 1 '.
                 (BimpTools::getPostFieldValue('dateD', null)? ' AND date_approve >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
@@ -211,8 +211,8 @@ FROM '.MAIN_DB_PREFIX.'expensereport e LEFT JOIN '.MAIN_DB_PREFIX.'expensereport
                 $tabInfoD[$label] += $ln->tot;
             }
         }
-        
-        
+
+
         $sql = $db->query('SELECT SUM(total_ttc) as tot, categorie
 FROM '.MAIN_DB_PREFIX.'expensereport e LEFT JOIN '.MAIN_DB_PREFIX.'expensereport_extrafields le ON le.fk_object = e.rowid WHERE paid = 0  GROUP BY categorie;');
         while($ln = $db->fetch_object($sql)){
@@ -235,19 +235,19 @@ WHERE date IS NULL '.
                 $tabInfoAPrevoir[$label] += $ln->tot;
             }
         }
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
         $sql = $db->query('SELECT SUM(amount)as solde, fk_account FROM '.MAIN_DB_PREFIX.'bank'
                 . ' WHERE 1 '.
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND datev < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
                  ' GROUP BY fk_account');
         $tot = 0;
-        
+
         $tabInfoSolde = array();
         while($ln = $db->fetch_object($sql)){
             if($ln->solde != 0){
@@ -264,8 +264,8 @@ WHERE date IS NULL '.
             $tabInfoSolde['Solde NEF'] -= 1430.73;
             $tot -= 1430.73;
         }
-        
-        
+
+
         $sql = $db->query('SELECT SUM(value) as solde FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep'
                 . ' WHERE date IS NOT NULL '.
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
@@ -274,34 +274,34 @@ WHERE date IS NULL '.
             $tabInfoSolde['Solde Bl'] =$ln->solde;
             $tot += $ln->solde;
         }
-        
+
         $tabInfoSolde[''] = '';
         $tabInfoSolde['TOTAL'] = $tot;
         $tabInfoSolde[' '] = '';
         $tabInfoSolde['DEPUIS DEBUT'] = $tot - 47000;
-        
+
         if(!BimpTools::getPostFieldValue('dateF', null) && !BimpTools::getPostFieldValue('dateD', null)){
             $tabInfoSolde['  '] = '';
             $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
         }
-        
-        
-        
-        
+
+
+
+
         $contentSolde = '<a class="btn btn-default" href="'.DOL_URL_ROOT.'/compta/bank/list.php">Comptes</a>';
         $contentSolde .= '<table class="bimp_list_table">';
         foreach($tabInfoSolde as $nom => $val){
             $contentSolde .= '<tr><th>'.$nom.'</th><td>'.BimpTools::displayMoneyValue($val).'</td></tr>';
         }
         $contentSolde .= '</table>';
-        
-        
-        
-        
-        
+
+
+
+
+
         $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">Simuler un prelevement d\'emprunt dans les soldes : '.BimpInput::renderInput('toggle', 'ajPret', BimpTools::getPostFieldValue('ajPret')).'<br/>Du'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).'<br/>Au'.BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form><br/>'.BimpRender::renderAlerts(BimpCore::getConf('b_comment', '', 'bimpcoop'), 'warning'), 'xs'=>12,'sm'=>12,'md'=>12);
         $panels['Compta']['Soldes'] = $contentSolde;
-        
+
         if(BimpTools::getPostFieldValue('dateD', null)){//mouvement sur comptes
             $tabInfoSolde = array();
              $sql = $db->query('SELECT SUM(amount)as solde, fk_account FROM '.MAIN_DB_PREFIX.'bank'
@@ -325,7 +325,7 @@ WHERE date IS NULL '.
                 $tabInfoSolde['Mouvement NEF'] -= 1430.73;
                 $tot -= 1430.73;
             }
-            
+
             $sql = $db->query('SELECT SUM(value) as solde FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep'
                     . ' WHERE  date IS NOT NULL '.
                     (BimpTools::getPostFieldValue('dateD', null)? ' AND date >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
@@ -335,7 +335,7 @@ WHERE date IS NULL '.
                 $tabInfoSolde['Solde Bl'] =$ln->solde;
                 $tot += $ln->solde;
             }
-            
+
             $tabInfoSolde[''] = '';
             $tabInfoSolde['TOTAL'] = $tot;
 
@@ -348,21 +348,21 @@ WHERE date IS NULL '.
             $contentSolde .= '</table>';
             $panels['Compta']['Mouvement compte'] = $contentSolde;
         }
-        
-        
-        
+
+
+
         $panels['Compta']['Recette'] = '<a class="btn btn-default" href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=ventes&tab=stats">Stat Ventes</a>'.$this->traiteTab($tabInfoR);
         $panels['Compta']['Dépenses'] = '<a class="btn btn-default" href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=achats&tab=stats_achats">Stat Achats</a>'.$this->traiteTab($tabInfoD);
         $panels['Compta']['A prevoir'] = '<a class="btn btn-default" href="'.DOL_URL_ROOT.'/hrm/index.php">Note de frais</a>'.$this->traiteTab($tabInfoAPrevoir);
-        
-        
-        
+
+
+
         $panels['Repartition Capital CCA'] = array('content'=>$this->renderCapitalCCA(), 'xs'=>12,'sm'=>8,'md'=>8);
-        
-        
+
+
         return $this->renderPanels($panels);
     }
-    
+
     public function renderPanels($panels, $xsD=6, $smD=4, $mdD=4, $open = 1){
         $html = '';
         foreach($panels as $name => $content){
@@ -389,12 +389,12 @@ WHERE date IS NULL '.
             }
 //            else
                 $content = BimpRender::renderPanel($name, $content, '', array('open' => $open));
-            
+
             $html .= '<div class="col_xs-'.$xs.' col-sm-'.$sm.' col-md-'.$md.'">'.$content.'</div>';
         }
         return $html;
     }
-    
+
     public function traiteTab($tab){
         $tot = 0;
         foreach($tab as $nom => $val){
@@ -409,7 +409,7 @@ WHERE date IS NULL '.
         $content .= '</table>';
         return $content;
     }
-    
+
     public function renderListObjects($userId, $type){
         $list = new BC_ListTable($this, 'default', 1, null, 'Mouvements', 'fas_users');
         $list->addFieldFilterValue('type', $type);
@@ -417,7 +417,7 @@ WHERE date IS NULL '.
         $list->addIdentifierSuffix('type_'.$type);
         return $list->renderHtml();
     }
-    
+
     public function displayPaiement(){
         if($this->getData('id_paiement')){
             $paiement = $this->getChildObject('paiementDiv');
@@ -432,7 +432,7 @@ WHERE date IS NULL '.
         }
         return 'bouton';
     }
-    
+
     public function getListsExtraBulkActions(){
         $buttons = array();
         $buttons[] = array(
@@ -442,13 +442,13 @@ WHERE date IS NULL '.
             );
         return $buttons;
     }
-    
+
     public function actionCreate_paiement($data, &$success = ''){
         global $user;
         $success = 'Paiement créer avec succés';
         $errors = array();
-        
-        
+
+
         if($this->isLoaded()){
             $objs = array($this);
         }
@@ -458,7 +458,7 @@ WHERE date IS NULL '.
                 $objs[] = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
             }
         }
-             
+
         $amount = 0;
         $userM = null;
         $paiement = $this->getChildObject('paiementDiv');
@@ -491,7 +491,7 @@ WHERE date IS NULL '.
         $paiement->accountancy_code = '422';
         $paiement->subledger_account = $userM->getData('code_compta');
         $paiement->note = implode('\n', $notes);
-        
+
         if($paiement->create($user) < 1)
             $errors[] = 'erreur '.$paiement->error;
         else{
@@ -499,24 +499,24 @@ WHERE date IS NULL '.
                 $obj->updateField('id_paiement', $paiement->id);
             }
         }
-        
+
         return array('errors'=> $errors, 'warnings'=>array());
     }
-    
+
     public function isEditable($force_edit = false, &$errors = []): int {
         $paiementTemp = $this->getChildObject('paiementDiv');
         if($paiementTemp->id > 0)
             return 0;
-        
-        
+
+
         return parent::isEditable($force_edit, $errors);
     }
-    
+
     public function isDeletable($force_delete = false, &$errors = []) {
         return $this->isEditable($force_delete, $errors);
     }
-    
-    
+
+
     //graph
     public function getFieldsGraphRep($type = 1, $label = ''){
         $fields = array();
@@ -532,7 +532,7 @@ WHERE date IS NULL '.
                 $title = $userM->getFullName();
             else
                 $title = 'n/c';
-            
+
             $filter2 = array_merge($filter, array('fk_user' => $userM->id));
             $fields[$userM->id] = array(
                "title"      => $title,

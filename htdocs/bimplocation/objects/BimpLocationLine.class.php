@@ -16,7 +16,7 @@ class BimpLocationLine extends BimpObject
     );
     protected $amounts = null;
 
-    // Getters booléens : 
+    // Getters booléens :
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -73,7 +73,7 @@ class BimpLocationLine extends BimpObject
             $date_to = $this->getData('date_to');
         }
 
-        $where = 'l.status >= 0 AND a.status >= 0 AND a.id_equipment = ' . $id_eq . ' AND a.date_from <= \'' . $date_to . '\' AND a.date_to >= \'' . $date_from . '\'';
+        $where = 'l.status >= 0 AND a.status >= 0 AND a.status < '.static::STATUS_RESTITUTED.' AND a.id_equipment = ' . $id_eq . ' AND a.date_from <= \'' . $date_to . '\' AND a.date_to >= \'' . $date_from . '\'';
 
         if ($this->isLoaded()) {
             $where .= ' AND a.id != ' . $this->id;
@@ -136,7 +136,7 @@ class BimpLocationLine extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getListExtraBtn()
     {
@@ -372,7 +372,7 @@ class BimpLocationLine extends BimpObject
         return $this->getData($field_name);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getSelectForfaitsArray()
     {
@@ -411,7 +411,7 @@ class BimpLocationLine extends BimpObject
         return $forfaits;
     }
 
-    // Affichages : 
+    // Affichages :
 
     public function displayEquipment($no_html = false)
     {
@@ -647,7 +647,7 @@ class BimpLocationLine extends BimpObject
         return $html;
     }
 
-    // Traitements : 
+    // Traitements :
 
     public function onSave(&$errors = array(), &$warnings = array())
     {

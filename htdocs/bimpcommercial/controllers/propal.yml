@@ -16,16 +16,14 @@ objects:
                 request: id
                 
                 
-sections: 
-    0: 
+sections:
+    maintabs:
         tabs: 
             default: 
-                sections: 
-                    1:
+                sections:
+                    mainnav:
                         nav_tabs: 
-                            5: 
-                                id: demande_financement_tab
-                                title: Demande de location
+                            demandes_fin:
                                 show: 
                                     field_value: 
                                         object: propal

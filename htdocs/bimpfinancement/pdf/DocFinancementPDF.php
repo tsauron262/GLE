@@ -6,246 +6,283 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/BF_Lib.php';
 class DocFinancementPDF extends BimpDocumentPDF
 {
 
-    public static $doc_type = '';
-    public $demande = null;
-    public $demande_refin = null;
-    public $client_data = array();
-    public $sources = array();
-    public $values = array();
-    public $extra_data = array();
-    public $options = array();
-    public $target_label = 'Destinataire';
-    public $display_line_amounts = false;
+	public static $doc_type = '';
+	/** @var BF_Demande */
+	public $demande = null;
+	/** @var BF_DemandeRefinanceur */
+	public $demande_refin = null;
+	public $client_data = array();
+	public $sources = array();
+	public $values = array();
+	public $extra_data = array();
+	public $options = array();
+	public $target_label = 'Destinataire';
+	public $display_line_amounts = false;
 
-    public function __construct($db, $demande, $extra_data = array(), $options = array())
-    {
-        parent::__construct($db);
-        $this->demande = $demande;
-        $this->bimpObject = $demande;
-        $this->extra_data = $extra_data;
-        $this->options = $options;
+	public function __construct($db, $demande, $extra_data = array(), $options = array())
+	{
+		parent::__construct($db);
+		$this->demande = $demande;
+		$this->bimpObject = $demande;
+		$this->extra_data = $extra_data;
+		$this->options = $options;
 
-        if (!BimpObject::objectLoaded($this->demande)) {
-            $this->errors[] = 'Demande invalide';
-        } else {
-            if (isset($extra_data['id_df']) && (int) $extra_data['id_df']) {
-                $this->demande_refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_DemandeRefinanceur', (int) $extra_data['id_df']);
-                if (BimpObject::objectLoaded($this->demande_refin)) {
-                    $this->values = $this->demande_refin->getCalcValues(false, $this->errors);
-                } else {
-                    $this->errors[] = 'La demande refinanceur #' . $extra_data['id_df'] . ' n\'existe plus';
-                }
-            } else {
-                $this->values = $this->demande->getCalcValues(false, $this->errors);
-            }
-        }
+		if (!BimpObject::objectLoaded($this->demande)) {
+			$this->errors[] = 'Demande invalide';
+		} else {
+			if (isset($extra_data['id_df']) && (int) $extra_data['id_df']) {
+				$this->demande_refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_DemandeRefinanceur', (int) $extra_data['id_df']);
+				if (BimpObject::objectLoaded($this->demande_refin)) {
+					$this->values = $this->demande_refin->getCalcValues(false, $this->errors);
+				} else {
+					$this->errors[] = 'La demande refinanceur #' . $extra_data['id_df'] . ' n\'existe plus';
+				}
+			} else {
+				$this->values = $this->demande->getCalcValues(false, $this->errors);
+			}
+		}
 
-        $this->object_signature_params_field_name = 'signature_' . static::$doc_type . '_params';
-    }
+		$this->object_signature_params_field_name = 'signature_' . static::$doc_type . '_params';
+	}
 
-    public function initData()
-    {
-        if (!count($this->errors)) {
-            if ((int) $this->demande->getData('id_main_source')) {
-                $source = $this->demande->getSource();
-                if (BimpObject::objectLoaded($source)) {
-                    $this->client_data = $source->getClientPdfData();
-                }
-            } else {
-                $client = $this->demande->getChildObject('client');
+	public function initData()
+	{
+		if (!count($this->errors)) {
+			if ((int) $this->demande->getData('id_main_source')) {
+				$source = $this->demande->getSource();
+				if (BimpObject::objectLoaded($source)) {
+					$this->client_data = $source->getClientPdfData();
+				}
+			} else {
+				$client = $this->demande->getChildObject('client');
 
-                if (BimpObject::objectLoaded($client)) {
-                    $this->thirdparty = $client->dol_object;
-                } else {
-                    $this->errors[] = 'Aucun client';
-                }
-                $contact = $this->demande->getChildObject('contact_client');
-                if (BimpObject::objectLoaded($contact)) {
-                    $this->contact = $contact->dol_object;
-                }
-            }
+				if (BimpObject::objectLoaded($client)) {
+					$this->thirdparty = $client->dol_object;
+				} else {
+					$this->errors[] = 'Aucun client';
+				}
+				$contact = $this->demande->getChildObject('contact_client');
+				if (BimpObject::objectLoaded($contact)) {
+					$this->contact = $contact->dol_object;
+				}
+			}
 
-            $this->sources = $this->demande->getChildrenObjects('sources');
-        }
+			$this->sources = $this->demande->getChildrenObjects('sources');
+		}
 
-        parent::initData();
-    }
+		parent::initData();
+	}
 
-    public function initHeader()
-    {
-        parent::initHeader();
-        $doc_ref = '';
+	public function initHeader()
+	{
+		parent::initHeader();
+		$doc_ref = '';
 
-        if (BimpObject::objectLoaded($this->demande)) {
-            $doc_ref = $this->demande->getRef();
-        }
-        $this->header_vars['doc_ref'] = $doc_ref;
-        $this->header_vars['doc_name'] = $this->doc_name;
-    }
+		if (BimpObject::objectLoaded($this->demande)) {
+			$doc_ref = $this->demande->getRef();
+		}
 
-    public function renderHeader()
-    {
-        $html = '';
+		$this->header_vars['doc_ref'] = 'N° ' . str_replace('DF', '', $doc_ref );
+		$this->header_vars['doc_name'] = $this->doc_name;
+		$this->header_vars['ref_extra'] = (isset($this->extra_data['devis_source_label']) ? $this->extra_data['devis_source_label'] : '');
+		$this->pdf->topMargin = 35;
+	}
 
-        $html .= '<table>';
-        $html .= '<tr>';
-        $html .= '<td style="width: 80%">';
-        if (isset($this->header_vars['logo_img']) && $this->header_vars['logo_img']) {
-            $html .= '<img src="' . $this->header_vars['logo_img'] . '" style="width: auto; height: 45px;"/>';
-        }
-        if (isset($this->header_vars['doc_name'])) {
-            $html .= '<br/><br/><span style="font-size: 11px; color: #' . $this->primary . '">' . $this->header_vars['doc_name'] . '</span>';
-        }
+	public function renderHeader()
+	{
+		$html = '<table>';
+		$html .= '<tr>';
+		$html .= '<td style="width: 20%">';
+		if (isset($this->header_vars['logo_img']) && $this->header_vars['logo_img']) {
+			$html .= '<img src="' . $this->header_vars['logo_img'] . '" style="width: auto; height: 45px;"/>';
+		}
+		$html .= '</td>';
+		$html .= '<td style="width: 60%; text-align: center;">';
 
-        if (isset($this->header_vars['doc_ref'])) {
-            $html .= '<br/><span style="font-size: 9px;">' . $this->header_vars['doc_ref'] . '</span>';
-        }
+		if (isset($this->header_vars['doc_name'])) {
+			$html .= '<span style="font-size: 12px; color: #' . $this->primary . '">' . $this->header_vars['doc_name'] . '</span>';
+		}
 
-        if (isset($this->header_vars['ref_extra'])) {
-            $html .= '<br/>' . $this->header_vars['ref_extra'];
-        }
-        $html .= '</td>';
+		if (isset($this->header_vars['doc_ref'])) {
+			$html .= '<br/><span style="font-size: 9px;">' . $this->header_vars['doc_ref'] . '</span>';
+		}
+		if (isset($this->header_vars['ref_extra'])) {
+			$html .= '<br/><span style="font-size: 8px;">' . $this->header_vars['ref_extra'] . '</span>';
+		}
+		$html .= '</td>';
 
-        $html .= '<td style="20%;">';
-        if (isset($this->header_vars['header_infos'])) {
-            $html .= $this->header_vars['header_infos'];
-        }
-        $html .= '</td>';
-        $html .= '</tr>';
-        $html .= '</table>';
+		$html .= '<td style="20%;">';
+		if (isset($this->header_vars['header_infos'])) {
+			$html .= $this->header_vars['header_infos'];
+		}
+		$html .= '</td>';
+		$html .= '</tr>';
+		$html .= '</table>';
 
-        return $html;
-    }
+		return $html;
+	}
 
-    public function isTargetCompany()
-    {
-        if (isset($this->client_data['is_company'])) {
-            return (int) $this->client_data['is_company'];
-        }
+//	public function renderHeader()
+//	{
+//		$html = '<table>';
+//		$html .= '<tr>';
+//		$html .= '<td style="width: 80%">';
+//		if (isset($this->header_vars['logo_img']) && $this->header_vars['logo_img']) {
+//			$html .= '<img src="' . $this->header_vars['logo_img'] . '" style="width: auto; height: 45px;"/>';
+//		}
+//		if (isset($this->header_vars['doc_name'])) {
+//			$html .= '<br/><br/><span style="font-size: 11px; color: #' . $this->primary . '">' . $this->header_vars['doc_name'] . '</span>';
+//		}
+//
+//		if (isset($this->header_vars['doc_ref'])) {
+//			$html .= '<br/><span style="font-size: 9px;">' . $this->header_vars['doc_ref'] . '</span>';
+//		}
+//
+//		if (isset($this->header_vars['ref_extra'])) {
+//			$html .= '<br/>' . $this->header_vars['ref_extra'];
+//		}
+//		$html .= '</td>';
+//
+//		$html .= '<td style="20%;">';
+//		if (isset($this->header_vars['header_infos'])) {
+//			$html .= $this->header_vars['header_infos'];
+//		}
+//		$html .= '</td>';
+//		$html .= '</tr>';
+//		$html .= '</table>';
+//
+//		return $html;
+//	}
 
-        return parent::isTargetCompany();
-    }
+	public function isTargetCompany()
+	{
+		if (isset($this->client_data['is_company'])) {
+			return (int) $this->client_data['is_company'];
+		}
 
-    public function getFromUsers()
-    {
-        $users = array();
+		return parent::isTargetCompany();
+	}
 
-        if (BimpObject::objectLoaded($this->demande)) {
-            $id_user = (int) $this->demande->getData('id_user_resp');
-            if ($id_user) {
-                $users[$id_user] = 'Interlocuteur';
-            }
-        }
+	public function getFromUsers()
+	{
+		$users = array();
 
-        return $users;
-    }
+		if (BimpObject::objectLoaded($this->demande)) {
+			$id_user = (int) $this->demande->getData('id_user_resp');
+			if ($id_user) {
+				$users[$id_user] = 'Interlocuteur';
+			}
+		}
 
-    public function getDocInfosHtml()
-    {
-        $html = '<div>';
+		return $users;
+	}
 
-        // Réf. client: 
-        if (isset($this->client_data['ref']) && $this->client_data['ref']) {
-            $html .= '<span style="font-weight: bold;">Référence client : </span>' . $this->client_data['ref'] . '<br/>';
-        } else {
-            $client = $this->demande->getChildObject('client');
+	public function getDocInfosHtml()
+	{
+		$html = '<div>';
 
-            if (BimpObject::objectLoaded($client)) {
-                $html .= '<span style="font-weight: bold;">Référence client : </span>' . $client->getRef() . '<br/>';
-            }
-        }
-        $html .= '</div>';
+		// Réf. client:
+		if (isset($this->client_data['ref']) && $this->client_data['ref']) {
+			$html .= '<span style="font-weight: bold;">Référence client : </span>' . $this->client_data['ref'] . '<br/>';
+		} else {
+			$client = $this->demande->getChildObject('client');
 
-        $html .= parent::getDocInfosHtml();
+			if (BimpObject::objectLoaded($client)) {
+				$html .= '<span style="font-weight: bold;">Référence client : </span>' . $client->getRef() . '<br/>';
+			}
+		}
+		$html .= '</div>';
 
-        return $html;
-    }
+		$html .= parent::getDocInfosHtml();
 
-    public function getTargetInfosHtml()
-    {
-        if (empty($this->client_data)) {
-            return parent::getTargetInfosHtml();
-        }
+		return $html;
+	}
 
-        $html = '';
+	public function getTargetInfosHtml()
+	{
+		if (empty($this->client_data)) {
+			return parent::getTargetInfosHtml();
+		}
 
-        if ($this->client_data['is_company']) {
-            $html .= $this->client_data['nom'] . '<br/>';
-        }
+		$html = '';
 
-        $html .= $this->client_data['full_adress'];
-        $html = str_replace("\n", '<br/>', $html);
+		if ($this->client_data['is_company']) {
+			$html .= $this->client_data['nom'] . '<br/>';
+		}
 
-        return $html;
-    }
+		$html .= $this->client_data['full_adress'];
+		$html = str_replace("\n", '<br/>', $html);
 
-    public function renderLines()
-    {
-        $table = new BimpPDF_Table($this->pdf, true, $this->primary);
-        $table->addCol('desc', 'Désignation', 0, 'vertical-align: middle', '', '');
-        $table->addCol('qte', 'Quantité', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
+		return $html;
+	}
 
-        if ($this->display_line_amounts) {
-            $table->addCol('pu_ht', 'PU HT', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
-            $table->addCol('remise', 'Remise', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
-            $table->addCol('tva_tx', 'TVA', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
-            $table->addCol('total_ttc', 'Total TTC', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
-        }
+	public function renderLines()
+	{
+		$table = new BimpPDF_Table($this->pdf, true, $this->primary);
+		$table->addCol('desc', 'Désignation', 0, 'vertical-align: middle', '', '');
+		$table->addCol('qte', 'Quantité', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
 
-        $lines = $this->demande->getLines();
+		if ($this->display_line_amounts) {
+			$table->addCol('pu_ht', 'PU HT', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
+			$table->addCol('remise', 'Remise', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
+			$table->addCol('tva_tx', 'TVA', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
+			$table->addCol('total_ttc', 'Total TTC', 20, 'text-align: center; vertical-align: middle', '', 'text-align: center');
+		}
 
-        $total_ttc = 0;
+		$lines = $this->demande->getLines();
 
-        foreach ($lines as $line) {
-            $row = array();
-            $desc = $line->displayDesc(false, true);
-            $desc = $this->cleanHtml($desc);
-            $desc = $this->replaceHtmlStyles($desc);
+		$total_ttc = 0;
 
-            if ((int) $line->getData('type') === BF_Line::TYPE_TEXT) {
-                $row['desc'] = array(
-                    'colspan' => 99,
-                    'style'   => 'background-color: #F5F5F5;',
-                    'content' => $desc
-                );
-            } else {
-                $row['desc'] = $desc;
-                $row['qte'] = $line->getData('qty');
+		foreach ($lines as $line) {
+			$row = array();
+			$desc = $line->displayDesc(false, true);
+			$desc = $this->cleanHtml($desc);
+			$desc = $this->replaceHtmlStyles($desc);
 
-                if ($this->display_line_amounts) {
-                    $row['pu_ht'] = BimpTools::displayFloatValue($line->getData('pu_ht'));
-                    $row['remise'] = BimpTools::displayFloatValue($line->getData('remise')) . ' %';
-                    $row['tva_tx'] = BimpTools::displayFloatValue($line->getData('tva_tx')) . ' %';
-                    $row['total_ttc'] = BimpTools::displayFloatValue($line->getData('total_ttc'));
-                }
+			if ((int) $line->getData('type') === BF_Line::TYPE_TEXT) {
+				$row['desc'] = array(
+					'colspan' => 99,
+					'style'   => 'background-color: #F5F5F5;',
+					'content' => $desc
+				);
+			} else {
+				$row['desc'] = $desc;
+				$row['qte'] = $line->getData('qty');
 
-                $total_ttc += (float) $line->getData('total_ttc');
-            }
+				if ($this->display_line_amounts) {
+					$row['pu_ht'] = BimpTools::displayFloatValue($line->getData('pu_ht'));
+					$row['remise'] = BimpTools::displayFloatValue($line->getData('remise')) . ' %';
+					$row['tva_tx'] = BimpTools::displayFloatValue($line->getData('tva_tx')) . ' %';
+					$row['total_ttc'] = BimpTools::displayFloatValue($line->getData('total_ttc'));
+				}
 
-            $table->rows[] = $row;
-        }
+				$total_ttc += (float) $line->getData('total_ttc');
+			}
 
-        if ($this->display_line_amounts) {
-            $table->rows[] = array(
-                'desc'      => array(
-                    'colspan' => 5,
-                    'style'   => 'background-color: #F0EFEF; font-weight: bold; font-size: 8px; text-align: right',
-                    'content' => 'TOTAL TTC'
-                ),
-                'total_ttc' => array(
-                    'style'   => 'background-color: #F0EFEF; font-weight: bold; font-size: 8px',
-                    'content' => BimpTools::displayFloatValue($total_ttc)
-                )
-            );
-        }
+			$table->rows[] = $row;
+		}
+
+		if ($this->display_line_amounts) {
+			$table->rows[] = array(
+				'desc'      => array(
+					'colspan' => 5,
+					'style'   => 'background-color: #F0EFEF; font-weight: bold; font-size: 8px; text-align: right',
+					'content' => 'TOTAL TTC'
+				),
+				'total_ttc' => array(
+					'style'   => 'background-color: #F0EFEF; font-weight: bold; font-size: 8px',
+					'content' => BimpTools::displayFloatValue($total_ttc)
+				)
+			);
+		}
 
 
-        if (count($table->rows)) {
-            $this->writeContent('<div style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Description des équipements et quantités : <br/></div>');
-            $this->pdf->addVMargin(1);
-            $table->write();
-        }
+		if (count($table->rows)) {
+			$this->writeContent('<div style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Description des équipements et quantités : <br/></div>');
+			$this->pdf->addVMargin(1);
+			$table->write();
+		}
 
-        unset($table);
-    }
+		unset($table);
+	}
 }

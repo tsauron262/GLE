@@ -96,7 +96,7 @@ class Bimp_Societe extends BimpDolObject
         parent::__construct($module, $object_name);
     }
 
-    // Droits user: 
+    // Droits user:
 
     public function canCreate()
     {
@@ -114,6 +114,14 @@ class Bimp_Societe extends BimpDolObject
         global $user;
 
         return (int) ($user->admin || $user->rights->societe->supprimer);
+    }
+    
+    public function isFieldEditable($field, $force_edit = false) {
+        if($field == 'siren'){
+            if($this->getData('id_atradius') != '' && $this->getData('id_atradius') != 0)
+                return 0;
+        }
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     public function canEditField($field_name)
@@ -218,7 +226,7 @@ class Bimp_Societe extends BimpDolObject
         return (int) ($user->admin || $user->login == 'jc.cannet' || $user->rights->commande->supprimer);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCompany($default = 1)
     {
@@ -358,7 +366,7 @@ class Bimp_Societe extends BimpDolObject
     {
         if ($this->isAnonymised())
             return 0;
-        
+
         if ($this->isFournisseur() && !$this->isClient()) {
             return 0;
         }
@@ -506,7 +514,7 @@ class Bimp_Societe extends BimpDolObject
         1; //return ($this->useEncours() && BimpCore::getConf('useAtradius'));
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getFilesDir()
     {
@@ -885,7 +893,7 @@ class Bimp_Societe extends BimpDolObject
         return $fields;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getRefProperty()
     {
@@ -1035,7 +1043,7 @@ class Bimp_Societe extends BimpDolObject
                 }
             } else {
                 // Remise client
-                // On ne tient pas compte de $allowed dans les deux cas suivants: 
+                // On ne tient pas compte de $allowed dans les deux cas suivants:
                 $id_facture = 0;
                 if ((isset($discount->fk_facture) && (int) $discount->fk_facture)) {
                     $id_facture = (int) $discount->fk_facture;
@@ -1233,7 +1241,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                     if ($class != "") {
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
-//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
+//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale.
                         if (BimpObject::objectLoaded($objT)) {
                             $objects[] = $objT;
                         }
@@ -1633,7 +1641,7 @@ class Bimp_Societe extends BimpDolObject
         return substr($this->getData('siret'), 0, 14);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getContactsArray($include_empty = true, $empty_label = '')
     {
@@ -1759,19 +1767,19 @@ class Bimp_Societe extends BimpDolObject
 
         return ModeleThirdPartyDoc::liste_modeles($this->db->db);
     }
-    
+
     public function getSepaDatesPrelevArray()
     {
         $dates = array();
-        
+
         foreach (explode(',', BimpCore::getConf('sepa_date_prelevement', null, 'bimpcommercial')) as $date) {
             $dates[$date] = $date;
         }
-        
+
         return $dates;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayJuridicalStatus()
     {
@@ -2080,8 +2088,8 @@ class Bimp_Societe extends BimpDolObject
         $debug = '';
 
         $encours = $this->getAllEncoursForSiret(true, false, $debug);
-        
-        $html .= '<b>Encours sur factures restant dues</b> : ' . BimpTools::displayMoneyValue($encours['factures']['total']) . ' TTC<br/><br/>';
+
+        $html = '<b>Encours sur factures restant dues</b> : ' . BimpTools::displayMoneyValue($encours['factures']['total']) . ' TTC<br/><br/>';
         $html .= '<b>Encours sur les commandes non facturées</b> : ' . BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]) . ' TTC<br/>';
 
 
@@ -2120,7 +2128,7 @@ class Bimp_Societe extends BimpDolObject
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
@@ -2285,7 +2293,7 @@ class Bimp_Societe extends BimpDolObject
         return $html;
     }
 
-    // Trtaitements: 
+    // Trtaitements:
 
     public function checkValidity()
     {
@@ -2296,6 +2304,10 @@ class Bimp_Societe extends BimpDolObject
 
     public function Luhn($numero, $longueur)
     {
+		if (BimpCore::isModeDev()) {
+			return 1;
+		}
+
         // On passe à la fonction la variable contenant le numéro à vérifier
         // et la longueur qu'il doit impérativement avoir
         $tableauChiffresNumero = array();
@@ -2419,7 +2431,7 @@ class Bimp_Societe extends BimpDolObject
             if (is_array($new_comms)) {
                 $current_comms = $this->getCommerciauxArray(false, false);
 
-                // Ajout des nouveaux commerciaux: 
+                // Ajout des nouveaux commerciaux:
                 foreach ($new_comms as $id_comm) {
                     if (!(int) $id_comm) {
                         continue;
@@ -2440,7 +2452,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
-                // Suppr des commerciaux: 
+                // Suppr des commerciaux:
                 foreach ($current_comms as $id_comm => $comm_label) {
                     if (!in_array((int) $id_comm, $new_comms)) {
                         $comm_errors = $this->removeCommercial($id_comm);
@@ -2481,11 +2493,13 @@ class Bimp_Societe extends BimpDolObject
                 $db->begin();
 
                 $soc_origin_id = (int) $id_soc_to_merge;
+				/** @var Societe $soc_origin */
                 $soc_origin = $soc_to_merge->dol_object;
+				/** @var Societe $object */
                 $object = $this->dol_object;
 
-                // Code repris tel quel depuis societe/card.php: 
-                
+                // Code repris tel quel depuis societe/card.php:
+
                 $sql = $db->query('SELECT Count(*) as nb, `ref_fourn`, `fk_product` FROM `'.MAIN_DB_PREFIX.'product_fournisseur_price` WHERE `fk_soc` IN (' . $soc_origin_id . ', ' . $object->id . ') GROUP BY `ref_fourn`, `fk_product` HAVING nb > 1');
                 while ($ln = $db->fetch_object($sql)) {
                     $db->query('UPDATE `'.MAIN_DB_PREFIX.'product_fournisseur_price` SET ref_fourn = CONCAT(ref_fourn, "-B") WHERE fk_product = ' . $ln->fk_product . ' AND ref_fourn = "' . $ln->ref_fourn . '" AND fk_soc = ' . $soc_origin_id . ' ');
@@ -2758,7 +2772,7 @@ class Bimp_Societe extends BimpDolObject
 
             case 'siren':
             default:
-//                if (!$this->Luhn($value, 9)) { // Apparemment ça bug... 
+//                if (!$this->Luhn($value, 9)) { // Apparemment ça bug...
 //                    $errors[] = 'SIREN invalide (' . $value . ')';
 //                }
                 if (strlen($value) != 9) {
@@ -2796,7 +2810,7 @@ class Bimp_Societe extends BimpDolObject
                         $bimpLogPhpWarnings = true;
                     }
 
-                    // On déactive les logs warnings php (Trop de logs). 
+                    // On déactive les logs warnings php (Trop de logs).
                     $prevLogWarnings = $bimpLogPhpWarnings;
                     $bimpLogPhpWarnings = false;
 
@@ -2948,7 +2962,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function traiteNoteCreditSafe()
     {
-        
+
     }
 
     public function checkSolvabiliteStatus(&$warnings = array(), &$errors = array())
@@ -3258,7 +3272,7 @@ class Bimp_Societe extends BimpDolObject
             if (!empty($data)) {
                 $data['is_anonymized'] = 1;
 
-                // On fait un update direct en base pour contourner les validations de formats des données: 
+                // On fait un update direct en base pour contourner les validations de formats des données:
                 if ($this->db->update('societe', $data, 'rowid = ' . (int) $this->id) <= 0) {
                     $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
                 }
@@ -3272,7 +3286,7 @@ class Bimp_Societe extends BimpDolObject
                 }
                 $this->addObjectLog($msg, 'ANONYMISED');
 
-                // Anonymisation des contacts: 
+                // Anonymisation des contacts:
                 $contacts = $this->getContactsArray(false);
                 if (!empty($contacts)) {
                     foreach ($contacts as $id_contact => $contact_label) {
@@ -3288,7 +3302,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
-                // Anonymisation des comptes utilisateurs: 
+                // Anonymisation des comptes utilisateurs:
                 $bic_users = BimpCache::getBimpObjectObjects('bimpinterfaceclient', 'BIC_UserClient', array(
                             'id_client' => $this->id
                 ));
@@ -3303,7 +3317,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
-                // Traitement fichiers client: 
+                // Traitement fichiers client:
                 $dir = $this->getFilesDir();
                 if (preg_match('/^(.+)\/+$/', $dir, $matches)) {
                     $dir = $matches[1];
@@ -3311,7 +3325,7 @@ class Bimp_Societe extends BimpDolObject
 
                 if (is_dir($dir)) {
                     if (count(scandir($dir)) > 2) {
-                        // Renommage dossier: 
+                        // Renommage dossier:
                         global $bimp_errors_handle_locked;
                         $bimp_errors_handle_locked = true;
 
@@ -3393,7 +3407,7 @@ class Bimp_Societe extends BimpDolObject
                         $this->db->delete('societe_saved_data', 'id = ' . (int) $rows[0]['id']);
                     }
 
-                    // Annulation contacts: 
+                    // Annulation contacts:
                     $contacts = $this->getContactsArray(false);
                     foreach ($contacts as $id_contact => $contact_label) {
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
@@ -3407,7 +3421,7 @@ class Bimp_Societe extends BimpDolObject
                         }
                     }
 
-                    // Annulation comptes utilisateurs: 
+                    // Annulation comptes utilisateurs:
                     $bic_users = BimpCache::getBimpObjectObjects('bimpinterfaceclient', 'BIC_UserClient', array(
                                 'id_client' => $this->id
                     ));
@@ -3523,7 +3537,7 @@ class Bimp_Societe extends BimpDolObject
 
         return Array(
             'errors'   => $errors,
-            'warnings' => $wawrnings,
+            'warnings' => $warnings,
             'success'  => $success
         );
     }
@@ -3936,7 +3950,7 @@ class Bimp_Societe extends BimpDolObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function fetch($id, $parent = null)
     {
@@ -4141,7 +4155,7 @@ class Bimp_Societe extends BimpDolObject
         if ($this->isLoaded($errors)) {
             $count_errors = array();
 
-            // Vérifs clients: 
+            // Vérifs clients:
             $nb = $this->db->getCount('propal', 'fk_soc = ' . (int) $this->id, 'rowid');
             if ($nb) {
                 $count_errors[] = $nb . ' proposition(s) commerciale(s) créée(s)';
@@ -4198,7 +4212,7 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function checkSolvabiliteStatusAll()
     {

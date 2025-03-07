@@ -5,12 +5,12 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class BimpDocumentPDF extends BimpModelPDF
 {
-    # Constantes: 
+    # Constantes:
 
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/document/';
     public static $use_cgv = false;
 
-    # Params: 
+    # Params:
     public static $full_blocs = array(
         'renderAfterLines'  => 1,
         'renderBottom'      => 1,
@@ -18,20 +18,20 @@ class BimpDocumentPDF extends BimpModelPDF
         'renderAnnexes'     => 1
     );
 
-    # Objets liés: 
+    # Objets liés:
     public $bimpObject = null;
     public $thirdparty = null;
     public $contact = null;
     public $contactFinal = null;
     public $targetBimpSoc = null;
 
-    # Données: 
+    # Données:
     public $target_label = 'Destinataire';
     public $next_annexe_idx = 1;
     public $annexe_listings = array();
     public $file_logo = '';
 
-    # Paramètres signature: 
+    # Paramètres signature:
     public $signature_bloc = false;
     public $use_docsign = false;
     public $object_signature_params_field_name = 'signature_params';
@@ -200,7 +200,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $field = 'APE';
 //            if (preg_match('/\((.*)\)/i', $field, $reg)) {
 //                $field = $reg[1];
-//                
+//
 //            }
                 $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof3);
             }
@@ -232,11 +232,11 @@ class BimpDocumentPDF extends BimpModelPDF
         );
     }
 
-    // Getters: 
+    // Getters:
 
     public function getFromUsers()
     {
-        // Renvoyer sous la forme id_user => label (label = désignation utilisateur, ex: commercial, interlocuteur, emetteur, etc.) 
+        // Renvoyer sous la forme id_user => label (label = désignation utilisateur, ex: commercial, interlocuteur, emetteur, etc.)
         return array();
     }
 
@@ -435,22 +435,22 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderTop()
     {
-        
+
     }
 
     public function renderBeforeLines()
     {
-        
+
     }
 
     public function renderLines()
     {
-        
+
     }
 
     public function renderAfterLines()
     {
-        
+
     }
 
     public function renderBottom()
@@ -483,12 +483,12 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderAfterBottom()
     {
-        
+
     }
 
     public function renderSignatureBloc()
     {
-        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
+        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique.
 
         if ($this->signature_bloc) {
             $this->signature_params['default'] = array();
@@ -644,7 +644,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function renderAnnexes()
     {
-        
+
     }
 
     public function renderAnnexeListings()

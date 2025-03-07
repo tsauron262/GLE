@@ -101,7 +101,9 @@ class BIMP_Task extends BimpAbstractFollow
 		switch ($field_name) {
 			case 'id_user_owner':
 			case 'id_task':
+			case 'duree':
 				return $this->canAttribute();
+
 			case 'ok_metier':
 				return ($user->admin && !BimpCore::isUserDev());
 		}
@@ -111,9 +113,17 @@ class BIMP_Task extends BimpAbstractFollow
 
 	public function canSetAction($action)
 	{
+		global $user;
+
 		switch ($action) {
 			case 'addFiles':
 				return $this->canEdit();
+
+			case 'close':
+				if ($user->admin || $user->id === (int) $this->getData('user_create') || $user->id === (int) $this->getData('id_user_owner')) {
+					return 1;
+				}
+				return $this->canAttribute();
 		}
 		return parent::canSetAction($action);
 	}

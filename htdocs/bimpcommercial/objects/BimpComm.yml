@@ -28,9 +28,26 @@ objects:
             id_object: 
                 field_value: fk_soc
                 
-    contact: 
+    commercial: 
+        relation: hasMany
+        delete: 0
         instance: 
-            id_object: unset
+            bimp_object: 
+                module: bimpcommercial
+                name: BimpCommContactI
+        list: 
+            filters:
+                element_id:
+                    callback: 
+                        method: getData
+                        params:
+                            - rowid
+                fk_c_type_contact: 
+                    callback:
+                        method: getIdTypeContact
+                        params:
+                            - 0
+                            - SALESREPFOLL
                 
     files:
         relation: hasMany

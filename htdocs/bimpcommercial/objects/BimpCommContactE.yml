@@ -1,0 +1,35 @@
+abstract: 1
+
+primary: rowid
+
+parent_module: bimpcommercial
+parent_object: BimpComm
+    
+table: element_contact
+
+labels: 
+    name: Contact pièce
+    name_plur: Contacts pièces
+    
+objects: 
+    commande: 
+        instance: 
+            id_object: 
+                field_value: fk_commande
+    contact: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Contact
+            id_object: 
+                field_value: fk_socpeople
+            
+fields: 
+    element_id: 
+        label: Commande
+        type: id_object
+        object: commande
+    fk_socpeople: 
+        label: Contact
+        type: id_object
+        object: contact

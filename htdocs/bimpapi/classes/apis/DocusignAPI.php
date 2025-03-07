@@ -41,11 +41,17 @@ class DocusignAPI extends BimpAPI
             'label' => 'Envoie signature'
         ),
         'getEnvelope'     => array(
-            'label' => 'Obtention signature'
+            'label' => 'Obtention enveloppe'
         ),
+		'getEnvelopeRecipients'     => array(
+			'label' => 'Obtention infos signataires enveloppe'
+		),
         'getEnvelopeFile' => array(
             'label' => 'Obtention d\'un fichier de signature',
         ),
+		'getEnveloppeDocumentsList' => array(
+			'label' => 'Liste des documents d\'une enveloppe'
+		),
         'getTemplates'    => array(
             'label' => 'Obtention des modèles'
         ),
@@ -57,7 +63,7 @@ class DocusignAPI extends BimpAPI
         )
     );
     // Liste des requêtes où l'utilisateur doit utiliser SON compte et pas celui par défaut
-    public static $user_requests = array('createEnvelope', 'getEnvelope', 'getEnvelopeFile', 'getTemplates');
+    public static $user_requests = array('createEnvelope', 'getEnvelope', 'getEnvelopeRecipients', 'getEnvelopeFile', 'getTemplates');
     public static $tokens_types = array(
         'access'  => 'Token d\'accès',
         'code'    => 'Code pour obtenir les tokens',
@@ -118,13 +124,34 @@ class DocusignAPI extends BimpAPI
         }
 
         if (!count($errors)) {
-            return $this->execCurl('getEnvelope', array(
+            return $this->execCurl('getEnvelopeRecipients', array(
                         'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes/' . $id_envelope // . '/consumer_disclosure/FR' // . '/comments/transcript'
                             ), $errors);
         }
 
         return array();
     }
+
+	public function getEnvelopeRecipients($id_envelope, &$errors = array(), &$warnings = array())
+	{
+		if (!$id_envelope) {
+			$errors[] = 'ID Enveloppe DocuSign absent';
+		}
+
+		$id_account = $this->getParam($this->getOption('mode', 'test') . '_id_compte_api', '');
+
+		if (!$id_account) {
+			$errors[] = 'ID compte DocuSign non configuré pour le mode "' . $this->getOption('mode', 'test') . '"';
+		}
+
+		if (!count($errors)) {
+			return $this->execCurl('getEnvelope', array(
+				'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes/' . $id_envelope .'/recipients'
+			), $errors);
+		}
+
+		return array();
+	}
 
     public function getEnvelopeFile($id_envelope, $id_document = 1, &$errors = array(), &$warnings = array())
     {
@@ -144,6 +171,23 @@ class DocusignAPI extends BimpAPI
                     )
                         ), $errors);
     }
+
+	public function getEnveloppeDocumentsList($id_envelope, &$errors = array(), &$warnings = array())
+	{
+		if (!$id_envelope) {
+			$errors[] = 'ID envelope DocuSign absent';
+			return array();
+		}
+
+		$id_account = $this->getParam($this->getOption('mode', 'test') . '_id_compte_api', '');
+
+		return $this->execCurl('getEnveloppeDocumentsList', array(
+			'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes/' . $id_envelope . '/documents',
+//			'headers' => array(
+//				'Content-Transfer-Encoding' => 'base64'
+//			)
+		), $errors);
+	}
 
     public function setUserIdAccount($id_user, &$errors = array(), &$warnings = array())
     {
@@ -167,7 +211,7 @@ class DocusignAPI extends BimpAPI
                             ), true, false);
 
             if (BimpObject::objectLoaded($userAccount)) {
-                // Le compte utilisateur existe déjà. 
+                // Le compte utilisateur existe déjà.
                 // On ne déclenche pas d'erreur
                 $this->userAccount = $userAccount;
                 return $userAccount->getData('login');
@@ -366,20 +410,20 @@ class DocusignAPI extends BimpAPI
     {
 //        return $this->setUserIdAccount(242, $errors, $warnings);
 //        $id_account = $this->userAccount->getData('login');
-//        
-//        
+//
+//
 //        $params = array();
 //        $params['id_account'] = $id_account;
 ////        $params['id_envelope'] = '829172a0-2169-4716-8b72-89f7ed6b7cec';
-////        
+////
 ////        $this->getEnvelope($params);
-//        
+//
 ////        $this->getTemplates($params);
-//        
+//
 ////        $this->setUserIdAccount(1224, $errors);
 //
 ////        $this->reqCreateEnvelope($params, $errors);
-//        
+//
         $this->createHook($errors);
     }
 
@@ -413,7 +457,7 @@ class DocusignAPI extends BimpAPI
                     )), $errors);
             }
 
-            // Si échec, test avec code: 
+            // Si échec, test avec code:
             $access_token = BimpTools::getArrayValueFromPath($result, 'access_token', '');
             if (!$access_token) {
                 $result = $this->execCurl('authenticate', array(
@@ -454,7 +498,7 @@ class DocusignAPI extends BimpAPI
                     } else {
                         $url_redirect = 'https://' . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
                     }
-                    
+
 //                    die($url_redirect);
 
                     $_SESSION['id_user_docusign'] = $this->userAccount->id;
@@ -510,7 +554,7 @@ class DocusignAPI extends BimpAPI
     {
         $errors = array();
 
-        // Pas de valeurs en dur dans le code !! 
+        // Pas de valeurs en dur dans le code !!
 
         $api = BimpObject::createBimpObject('bimpapi', 'API_Api', array(
                     'name'  => self::$name,

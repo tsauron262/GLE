@@ -893,12 +893,13 @@ lists:
             callback: getFilteredListActions
         sort_field: date_creation
         sort_way: desc
-        add_form_values: 
-            fields: 
-                entrepot: 
-                    request: id_entrepot
-                fk_soc:
-                    request: id_client
+        add_btn: 0
+#        add_form_values:
+#            fields:
+#                entrepot:
+#                    request: id_entrepot
+#                fk_soc:
+#                    request: id_client
         cols: 
             ref: 
             fk_statut: 

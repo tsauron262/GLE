@@ -74,6 +74,7 @@ sections:
             
           - id: divers
             title: Divers (admin)
+            icon: fas_tools
             show: 
                 callback:
                     method: iAmAdmin
@@ -85,4 +86,3 @@ sections:
                         method: renderBimpOjectDivers
                         object: fournisseur
 
-    

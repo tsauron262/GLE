@@ -48,7 +48,7 @@ class BF_DemandeRefinanceur extends BimpObject
     );
     protected $values = null;
 
-    // getters booléens: 
+    // getters booléens:
 
     public function isActionAllowed($action, &$errors = [])
     {
@@ -187,7 +187,7 @@ class BF_DemandeRefinanceur extends BimpObject
         return parent::isFieldEditable($field, $force_edit);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {
@@ -259,7 +259,7 @@ class BF_DemandeRefinanceur extends BimpObject
             );
         }
 
-        // Remises au statut précédent: 
+        // Remises au statut précédent:
         foreach (array(self::STATUS_TODO, self::STATUS_ATTENTE) as $reset_status) {
             if ($this->isNewStatusAllowed($reset_status) && $this->canSetStatus($reset_status)) {
                 $buttons[] = array(
@@ -297,7 +297,7 @@ class BF_DemandeRefinanceur extends BimpObject
             }
 
             $items = $instance->getList($filters, null, null, 'id', 'asc', 'array', array('id', 'id_societe'));
-            
+
             foreach ($items as $item) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['id_societe']);
                 if ($soc->isLoaded()) {
@@ -397,7 +397,7 @@ class BF_DemandeRefinanceur extends BimpObject
         return $this->values;
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayRefinanceur($display_name = 'nom_url')
     {
@@ -455,7 +455,7 @@ class BF_DemandeRefinanceur extends BimpObject
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderAmountInputExtraContent()
     {
@@ -494,7 +494,7 @@ class BF_DemandeRefinanceur extends BimpObject
         ));
     }
 
-    // Traitements : 
+    // Traitements :
 
     public function setSelected(&$warnings = array())
     {
@@ -527,9 +527,9 @@ class BF_DemandeRefinanceur extends BimpObject
                     $up_errors = $demande->update($up_warnings, true);
 
                     if (count($up_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des données de la demande de location');
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des données de la demande de location');
                     } else {
-                        // Par précaution : 
+                        // Par précaution :
                         $this->db->update($this->getTable(), array(
                             'status' => self::STATUS_ACCEPTEE
                                 ), 'id_demande = ' . (int) $this->getData('id_demande') . ' AND id != ' . $this->id . ' AND status = ' . self::STATUS_SELECTIONNEE);
@@ -616,9 +616,22 @@ class BF_DemandeRefinanceur extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
-    public function onSave(&$errors = [], &$warnings = [])
+	public function validate()
+	{
+		$errors =  parent::validate();
+
+		if ((int) $this->getData('status') === self::STATUS_SELECTIONNEE) {
+			if (!$this->getData('num_accord')) {
+				$errors[] = 'Numéro d\'accord non spécifié';
+			}
+		}
+
+		return $errors;
+	}
+
+	public function onSave(&$errors = [], &$warnings = [])
     {
         if ((int) $this->getData('status') === self::STATUS_SELECTIONNEE) {
             $demande = $this->getParentInstance();
@@ -708,7 +721,7 @@ class BF_DemandeRefinanceur extends BimpObject
                 $select_errors = $this->setSelected();
 
                 if (!empty($select_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($select_errors, 'Echec de la sélection de ce refinancement');
+                    $errors[] = BimpTools::getMsgFromArray($select_errors, 'Echec de la sélection de ce refinancement');
                 }
             }
         }

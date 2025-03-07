@@ -1833,11 +1833,11 @@ class BS_SAV extends BimpObject
 		if ($id_user_client) {
 			$url = $this->getPublicUrl(false);
 
-			if ($url) {
-				return $url;
-			}
+//			if ($url) {
+//				return $url;
+//			}
 		}
-		return BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . "a = ss&serial = " . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav = " . $this->id . "&user_name = " . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
+		return BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . "a=ss&serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
 //        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
 	}
@@ -3358,7 +3358,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 				} elseif (!(string) $this->getData('diagnostic')) {
 					$errors[] = $error_msg . '. Le champ "Diagnostic" doit être complété';
 				} elseif (in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_FERME))) {
-					$errors[] = $errors[] = $error_msg . ' (statut actuel invalide)';
+					$errors[] = $error_msg . ' (statut actuel invalide)';
 				}
 				break;
 
@@ -4819,6 +4819,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 	public function sendClientEmail($subject, $msg, $to = '', $files = array())
 	{
+		global $conf;
 		$errors = array();
 
 		if (!$this->isLoaded($errors)) {
@@ -6187,7 +6188,7 @@ ORDER BY a.val_max DESC");
 						if (!(int) $client_fac->getData('status')) {
 							$errors[] = 'Ce client est désactivé';
 						} elseif (!$client_fac->isSolvable($this->object_name, $warnings)) {
-							$errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+							$errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $client_fac->getData('solvabilite_status')]['label'] . ')';
 						}
 					}
 				}
@@ -6551,6 +6552,7 @@ ORDER BY a.val_max DESC");
 										$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
 										return array('errors' => $errors);
 									} else {
+										/** @var Bimp_Facture $bimpFacture */
 										$bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture->id);
 
 										if (!BimpObject::objectLoaded($bimpFacture)) {
@@ -7576,7 +7578,7 @@ ORDER BY a.val_max DESC");
 		$success = 'Prise en charge effectuée';
 		$success_callback = '';
 
-		global $user, $langs;
+		global $user, $langs, $conf;
 
 		// Mise à jour SAV:
 		$this->set('status', self::BS_SAV_NEW);
@@ -8533,6 +8535,8 @@ ORDER BY a.val_max DESC");
 			return 'En développement';
 		}
 
+		global $conf;
+
 		$delay = (int) BimpCore::getConf('delay_alertes_clients_unrestitute_sav', null, 'bimpsupport');
 
 		$delay = 30;
@@ -8883,6 +8887,7 @@ ORDER BY a.val_max DESC");
 
 	public function onSigned($signature)
 	{
+		global $conf;
 		$errors = array();
 
 		if (!$this->isLoaded($errors)) {

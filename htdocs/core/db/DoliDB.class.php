@@ -340,6 +340,7 @@ abstract class DoliDB implements Database
                 }
 
 
+		dol_syslog("ROLLBACK Transaction" . ($log ? ' ' . $log : ''), LOG_DEBUG);
                 if ($this->transaction_opened <= 1 && !$this->noTransaction) {
                     $ret = $this->query("ROLLBACK");
                     $this->transaction_opened = 0;

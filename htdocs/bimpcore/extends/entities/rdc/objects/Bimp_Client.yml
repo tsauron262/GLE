@@ -1,0 +1,15 @@
+extrafields:
+    client_rdc:
+        table: societe_rdc
+        id_prop: fk_soc
+        delete_db_row: 1
+
+fields:
+    fournisseur: unset
+    #    code_client: unset
+    code_compta: unset
+    date_der_contact:
+        label: Date dernier contact
+        type: date
+        extrafields: client_rdc
+        extra: 1

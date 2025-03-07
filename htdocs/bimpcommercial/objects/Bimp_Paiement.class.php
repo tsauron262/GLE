@@ -24,7 +24,7 @@ class Bimp_Paiement extends BimpObject
         parent::__construct($module, $object_name);
     }
 
-    // Droits user: 
+    // Droits user:
 
     public function canSetAction($action)
     {
@@ -60,7 +60,7 @@ class Bimp_Paiement extends BimpObject
         return ($user->rights->bimpcommercial->paiement_cheque ? 1 : 0);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isNormalementEditable($force_edit = false, &$errors = array())
     {
@@ -115,7 +115,7 @@ class Bimp_Paiement extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters: 
+    // Getters:
 
     public function getAmountFromFacture()
     {
@@ -309,7 +309,7 @@ class Bimp_Paiement extends BimpObject
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayType()
     {
@@ -417,7 +417,7 @@ class Bimp_Paiement extends BimpObject
         return $html;
     }
 
-    // Rendus: 
+    // Rendus:
 
     public function renderUseCaisseInput()
     {
@@ -493,7 +493,7 @@ class Bimp_Paiement extends BimpObject
             'style'       => 'max-width: 90px'
         );
 
-        $html .= '<div id="factures_payments_' . $rand . '" class="factures_payment_container" data-is_rbt="' . (int) $is_rbt . '">';
+        $html = '<div id="factures_payments_' . $rand . '" class="factures_payment_container" data-is_rbt="' . (int) $is_rbt . '">';
 
         $html .= '<div style="margin: 15px 0; text-align: right">';
         $html .= '<span style="font-weight: bold;">Somme totale ' . ($is_rbt ? 'remboursée' : 'versée') . ':&nbsp;&nbsp;</span>';
@@ -695,7 +695,7 @@ class Bimp_Paiement extends BimpObject
         return BimpRender::renderAlerts('Aucun montant déplaçable disponible');
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function onDelete()
     {
@@ -724,28 +724,28 @@ class Bimp_Paiement extends BimpObject
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionMoveAmount($data, &$success)
     {
         $errors = array();
         $warnings = array();
         $success = 'Paiement transféré avec succès';
-        
-        
-        
-        
+
+
+
+
         $id_facture_from = isset($data['id_facture_from']) ? (int) $data['id_facture_from'] : 0;
         $id_facture_to = isset($data['id_facture_to']) ? (int) $data['id_facture_to'] : 0;
         $amount = isset($data['amount_to_move']) ? $data['amount_to_move'] : 0;
         $id_discount = 0;
-        
+
         $for_mvt = new stdClass();
         $for_mvt->id_paiement = $this->id;
         $for_mvt->id_facture_from = $id_facture_from;
         $for_mvt->id_facture_to = $id_facture_to;
         $for_mvt->montant = $amount;
-        
+
         if (!$id_facture_from) {
             $errors[] = 'Veuillez sélectionner la facture d\'origine';
         } else {
@@ -894,7 +894,7 @@ class Bimp_Paiement extends BimpObject
                                     } else {
                                         mailSyn2('COMPTA URGENT', BimpCore::getConf('devs_email'), null, 'PB enregistrement déplacement paiements ' . $this->getNomUrl());
                                     }
-                                    
+
                                 }
                             }
                         }
@@ -909,7 +909,7 @@ class Bimp_Paiement extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function reset()
     {
@@ -1005,7 +1005,7 @@ class Bimp_Paiement extends BimpObject
             return $errors;
         }
 
-        // Check du mode de paiement: 
+        // Check du mode de paiement:
         $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $this->dol_object->paiementid);
 
         if (is_null($type_paiement) || !(string) $type_paiement) {
@@ -1039,14 +1039,14 @@ class Bimp_Paiement extends BimpObject
         $single_amount = BimpTools::getPostFieldValue('single_amount', null, 'float');
 
         if (is_null($single_amount)) {
-            // Paiement de plusieurs factures 
+            // Paiement de plusieurs factures
             $is_rbt = BimpTools::getValue('is_rbt', null);
 
             if (is_null($is_rbt)) {
                 return array('Type d\'opération absent');
             }
 
-            // Check montants: 
+            // Check montants:
             $total_paid = (float) BimpTools::getValue('total_paid_amount', null, 'float');
 
             $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', '', 'json_nohtml'), true);
@@ -1066,7 +1066,7 @@ class Bimp_Paiement extends BimpObject
             $to_return_amounts = array();
             $facs_to_convert = array();
 
-            // Calcul du total payé par facture. 
+            // Calcul du total payé par facture.
             while (BimpTools::isSubmit('amount_' . $i)) {
                 $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');
                 $amount = (float) BimpTools::getValue('amount_' . $i, 0, 'int');
@@ -1159,7 +1159,7 @@ class Bimp_Paiement extends BimpObject
             }
 
             if (!count($errors)) {
-                // Check paiements factures: 
+                // Check paiements factures:
                 foreach ($this->dol_object->amounts as $id_facture => $amount) {
                     if (BimpObject::objectLoaded($factures[(int) $id_facture])) {
                         $factures[(int) $id_facture]->fetch((int) $id_facture);
@@ -1167,7 +1167,7 @@ class Bimp_Paiement extends BimpObject
                     }
                 }
 
-                // Insertion des avoirs éventuels: 
+                // Insertion des avoirs éventuels:
                 if (!empty($avoirs) && !$is_rbt) {
                     BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                     $i = 1;
@@ -1187,7 +1187,7 @@ class Bimp_Paiement extends BimpObject
                                     } elseif ((int) $discount->fk_facture || (int) $discount->fk_facture_line) {
                                         $warnings[] = 'L\'avoir client d\'ID ' . $avoir['id_discount'] . ' a déjà été consommé et n\'a donc pas pu être utilisé en paiement de la facture ' . $facture->getNomUrl(0, 1, 1, 'full');
                                     } else {
-                                        // Ajout de l'avoir à la facture: 
+                                        // Ajout de l'avoir à la facture:
                                         if ($discount->link_to_invoice(0, (int) $facture->id) < 0) {
                                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec de l\'utilisation de l\'avoir client #' . $discount->id . ' en paiement de la facture ' . $facture->getNomUrl(0, 1, 1, 'full'));
                                         } else {
@@ -1205,9 +1205,9 @@ class Bimp_Paiement extends BimpObject
 
 
                 if ($this->isLoaded()) {
-                    // Création du paiement pour le rendu monnaie si nécessaire: 
+                    // Création du paiement pour le rendu monnaie si nécessaire:
                     if ($to_return_option === 'return' && $total_to_return > 0) {
-                        // Création du paiement: 
+                        // Création du paiement:
                         $p = new Paiement($db);
 //                        $p->datepaye = dol_now();
                         $p->datepaye = strtotime($this->getData('datep'));
@@ -1219,7 +1219,7 @@ class Bimp_Paiement extends BimpObject
                             $msg = 'Echec de la création du paiement pour le rendu monnaie de ' . BimpTools::displayMoneyValue($total_to_return, 'EUR');
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
                         } else {
-                            // Ajout du paiement au compte financier: 
+                            // Ajout du paiement au compte financier:
                             if (!empty($conf->banque->enabled)) {
                                 if ($p->addPaymentToBank($user, 'payment', 'Rendu monnaie du trop perçu (Paiement #' . $this->id . ')', $account->id, '', '') < 0) {
                                     $msg = 'Echec de l\'ajout du rendu monnaire de ' . BimpTools::displayMoneyValue($total_to_return, 'EUR') . ' au compte bancaire ' . $account->bank;
@@ -1227,7 +1227,7 @@ class Bimp_Paiement extends BimpObject
                                 }
                             }
 
-                            // Enregistrement du paiement dans la caisse: 
+                            // Enregistrement du paiement dans la caisse:
                             $paiement_errors = $caisse->addPaiement($p);
                             if (count($paiement_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survenues lors de l\'enregistrement en caisse du rendu monnaie de ' . BimpTools::displayMoneyValue($total_to_return, 'EUR'));
@@ -1235,7 +1235,7 @@ class Bimp_Paiement extends BimpObject
                         }
                     }
 
-                    // Conversion des trop-perçus en remises si nécessaire: 
+                    // Conversion des trop-perçus en remises si nécessaire:
                     if ($to_return_option === 'remise') {
                         foreach ($facs_to_convert as $id_facture) {
                             $facture = isset($factures[(int) $id_facture]) ? $factures[(int) $id_facture] : null;
@@ -1250,7 +1250,7 @@ class Bimp_Paiement extends BimpObject
                 }
             }
         } else {
-            // Paiement unique pour une seule facture: 
+            // Paiement unique pour une seule facture:
             if (!$single_amount) {
                 $errors[] = 'Veuillez indiquer un montant pour ce paiement';
             }
@@ -1299,7 +1299,7 @@ class Bimp_Paiement extends BimpObject
                 }
             }
 
-            // Enregistrement du paiement dans la caisse: 
+            // Enregistrement du paiement dans la caisse:
             if ($use_caisse) {
                 $paiement_errors = $caisse->addPaiement($this->dol_object);
                 if (count($paiement_errors)) {
@@ -1336,4 +1336,82 @@ class Bimp_Paiement extends BimpObject
 
         return (count($errors) ? 0 : 1);
     }
+
+	public function getDefaultListHeaderButton()
+	{
+		$buttons = array();
+
+		$buttons[] = array(
+			'classes'     => array('btn', 'btn-default'),
+			'label'       => 'Générer export des paiements',
+			'icon_before' => 'fas_file-excel',
+			'attr'        => array(
+				'type'    => 'button',
+				'onclick' => $this->getJsActionOnclick('exportPaiement', array(
+				), array(
+					'form_name' => 'export_paiement'
+				))
+			)
+		);
+
+		return $buttons;
+	}
+
+	public function actionExportPaiement($data, &$success){
+		$errors = array();
+		$warnings = array();
+		$success = 'Export des paiements effectué avec succès';
+
+		$req = '
+		SELECT cp.libelle, a___facture___bimp_entrepot.lieu, SUM(a.`amount`) as total, date_format(a___parent.datep, \'%Y-%m-%d\') as dateP
+FROM '.MAIN_DB_PREFIX.'paiement_facture a
+LEFT JOIN '.MAIN_DB_PREFIX.'paiement a___parent ON a___parent.rowid = a.fk_paiement
+LEFT JOIN '.MAIN_DB_PREFIX.'facture a___facture ON a___facture.rowid = a.fk_facture
+LEFT JOIN '.MAIN_DB_PREFIX.'facture_extrafields a___facture__ef ON a___facture.rowid = a___facture__ef.fk_object
+LEFT JOIN '.MAIN_DB_PREFIX.'entrepot a___facture___bimp_entrepot ON a___facture___bimp_entrepot.rowid = a___facture__ef.entrepot
+LEFT JOIN '.MAIN_DB_PREFIX.'paiement parent ON a.fk_paiement = parent.rowid
+LEFT JOIN '.MAIN_DB_PREFIX.'c_paiement cp ON cp.id = a___parent.fk_paiement
+WHERE a___parent.entity IN (' . getEntity('propal') . ')';
+		if($data['du'])
+			$req .= ' AND a___parent.datep >= \''.$data['du'].'\'';
+		if($data['au'])
+			$req .= ' AND a___parent.datep <= \''.$data['au'].'\'';
+$req .= 'GROUP BY a___parent.fk_paiement, a___facture___bimp_entrepot.lieu  , dateP
+ORDER BY dateP, `a___facture___bimp_entrepot`.`lieu` ASC;
+		';
+
+		$data = array(array('Mode', 'Entrepot', 'Montant', 'Date'));
+		$sql = $this->db->db->query($req);
+		while($row = $this->db->db->fetch_object($sql)){
+			$data[] = array($row->libelle, $row->lieu, $row->total, $row->dateP);
+		}
+
+		foreach ($data as $line) {
+			$fl = true;
+			foreach ($line as $data) {
+				if (!$fl) {
+					$str .= ';';
+				} else {
+					$fl = false;
+				}
+				$str .= '"' . $data . '"';
+			}
+			$str .= "\n";
+		}
+
+		mkdir(DOL_DATA_ROOT . '/bimpcore');
+		if (file_put_contents(DOL_DATA_ROOT . '/bimpcore/export_tmp.csv', $str)) {
+			$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode('export_tmp.csv');
+			$success_callback = 'window.open(\'' . $url . '\');';
+		}
+		else{
+			$errors[]	= 'Erreur lors de la génération du fichier';
+		}
+
+		return array(
+			'errors' => $errors,
+			'warnings' => $warnings,
+			'success_callback' => $success_callback
+		);
+	}
 }

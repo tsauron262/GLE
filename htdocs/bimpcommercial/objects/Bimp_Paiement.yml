@@ -265,6 +265,22 @@ forms:
                   type: search_object
                   object: facture
                   card: detail
+                  
+    export_paiement:
+        title: Export journalier des paiements
+        rows:
+            - custom: 1
+              label: Du
+              input_name: du
+              data_type: date
+              input:
+                  type: date
+            - custom: 1
+              input_name: au
+              label: Au
+              data_type: date
+              input:
+                  type: date
       
 fields_tables: 
     infos: 
@@ -359,6 +375,8 @@ lists:
         checkboxes: 0
         sort_field: id
         sort_way: desc
+        header_buttons:
+            callback: getDefaultListHeaderButton
         n: 10
         extra_btn: 
             callback: getListsExtraButtons

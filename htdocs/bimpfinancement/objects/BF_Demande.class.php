@@ -231,7 +231,7 @@ class BF_Demande extends BimpObject
 			return 0;
 		}
 
-		if (!in_array($action, array('reopen')) && $this->isClosed()) {
+		if (!in_array($action, array('reopen', 'createFacturesRevente')) && $this->isClosed()) {
 			$errors[] = 'Cette demande de location est fermée';
 			return 0;
 		}

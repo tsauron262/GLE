@@ -151,7 +151,7 @@ class Session {
 
             $data = $_SESSION;
             $login = $_SESSION['dol_login'];
-			if($login != $this->loginBase )
+			if($login != $this->loginBase && $this->loginBase != '')
 				mailSyn2('probléme session', 'dev@bimp.fr', null, 'Atention changement de login dans la session avant : '.$this->loginBase.' aprés : '.$login);
             unset($data['dol_login']);
             $data = addslashes(json_encode($data));

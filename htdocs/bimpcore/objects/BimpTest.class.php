@@ -3,18 +3,20 @@
 class BimpTest extends BimpObject{
     function actionTestSpeed($data, &$success, $errors = array(), $warnings = array()){
         $success = 'Test Terminé';
-        
+
         $tabTxt = array();
-        
+
         $timeDeb = $this->microtime_float();
-        
+
         $commande = '/usr/local/bin/curl -o /dev/null -s -w %{time_total}\  http://google.fr';
         exec($commande);
         exec($commande);
         exec($commande);
         $timeFinGoogle = $this->microtime_float();
         $timeGoogle = $timeFinGoogle - $timeDeb;
-        
+
+		$tabTxt[] = 'Session ID : '.session_id();
+
         if(defined('ID_ERP'))
             $tabTxt[] = 'Acuelle : '.ID_ERP;
         $str = '';
@@ -25,12 +27,12 @@ class BimpTest extends BimpObject{
         }
         $timeFinPhp = $this->microtime_float();
         $timePhp = $timeFinPhp - $timeFinGoogle;
-        
+
         file_put_contents(PATH_TMP.'/testFile.txt', $str);//=<> 360Mo
         $inut = file_get_contents(PATH_TMP.'/testFile.txt');
         $timeFinFile = $this->microtime_float();
         $timeFile = $timeFinFile - $timeFinPhp;
-        
+
         global $db;
         $tabTxt[] = $db->db->host_info;
         $db->query("SELECT * FROM llx_facture LIMIT 0,100000");
@@ -44,16 +46,16 @@ class BimpTest extends BimpObject{
         foreach($tabServ as $idS => $valS)
                 $tabTxt[] = 'Serveur : '.$idS.' : '.$valS.' requetes ('.round($valS / $tot * 100).' %)';
         $timeMySql = $this->microtime_float() - $timeFinFile;
-        
-        
-        
+
+
+
 //        $time = $this->microtime_float() - $timeDeb;
 //        $html .= $this->getMsgTime('google', $timeGoogle,1);
 //        $html .= $this->getMsgTime('file', $timeFile,1);
 //        $html .= $this->getMsgTime('PHP', $timePhp);
 //        $html .= $this->getMsgTime('MySql', $timeMySql);
 //        $html .= $this->getMsgTime('Total', $time, 3);
-        
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -69,7 +71,7 @@ class BimpTest extends BimpObject{
     }
 //    public function getMsgTime($nom, $time, $max = 1.5){
 //        $html = '<br/><br/>';
-//        
+//
 //        $class = '';
 //        if($time > $max)
 //            $class .= ' error';

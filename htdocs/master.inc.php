@@ -184,7 +184,7 @@ if (!defined('NOSESSION')) {
 	}
 
 
-        if(0 && defined('USE_BDD_FOR_SESSION') && USE_BDD_FOR_SESSION){
+        if(defined('USE_BDD_FOR_SESSION') && USE_BDD_FOR_SESSION){
             global $db;
 
 

@@ -16,6 +16,7 @@ class BimpTest extends BimpObject{
         $timeGoogle = $timeFinGoogle - $timeDeb;
 
 		$tabTxt[] = 'Session ID : '.session_id();
+		$tabTxt[] = 'IP User : '.BimpTools::getUserIp();
 
         if(defined('ID_ERP'))
             $tabTxt[] = 'Acuelle : '.ID_ERP;

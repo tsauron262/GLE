@@ -132,7 +132,7 @@ sections:
                 show:
                     callback:
                         method: iAmAdmin
-                        object: client
+                        object: demande
                 struct:
                     type: custom
                     custom:

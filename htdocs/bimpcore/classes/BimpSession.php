@@ -9,6 +9,7 @@ class Session {
     private $timeDeb = 0;
 
 	private $loginBase = '';
+	private $ipBase = '';
 //    public static $timeValidBimpHash = (60 * 60 * 1);
     public static $timeValidBimpHash = (60 * 60 * 12);
     // Initialisation de la session lors de l'appel de la classe
@@ -105,6 +106,7 @@ class Session {
             if($ln->login != '')
             $_SESSION['dol_login'] = $ln->login;
 			$this->loginBase = $ln->login;
+			$this->ipBase = $ln->ip;
         }
 
         if(isset($_SESSION['bimp_hash'][0])){
@@ -147,8 +149,16 @@ class Session {
             unset($diff2['time']);
         }
 
-        if(count($diff1) > 0 || count($diff2) > 0){
+		$ip = static::getUserIp();
+		if($ip != $this->ipBase && $this->ipBase != '0' && $this->ipBase != ''){
+			if(class_exists('BimpCore'))
+				BimpCore::addlog('Changement d\'ip dans la session, ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip, 3);
+			else
+				mailSyn2('Changement d\'ip dans la session', 'dev@bimp.fr', null, 'ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip);
+		}
 
+        if(count($diff1) > 0 || count($diff2) > 0){
+			$ip = static::getUserIp();
             $data = $_SESSION;
             $login = $_SESSION['dol_login'];
 			if($login != $this->loginBase && $this->loginBase != '')
@@ -156,7 +166,7 @@ class Session {
             unset($data['dol_login']);
             $data = addslashes(json_encode($data));
             if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != '')){
-                $req = "INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$timeTot."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = '".$timeTot."'";
+                $req = "INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time, ip) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$timeTot."', '".$ip."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = '".$timeTot."'";
                 $this->db->query($req);
             }
     //        else{
@@ -258,6 +268,24 @@ class Session {
     public function info($str){
 //        echo $str."<br/>";
     }
+
+
+	static function getUserIp()
+	{
+		if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			$tmp = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
+			$ipUser = $tmp[0];
+		}
+		$tmp = explode(".", $ipUser);
+		if (count($tmp) < 4) {
+			$ipUser = $_SERVER['REMOTE_ADDR'];
+		}
+		$tmp = explode(".", $ipUser);
+		if (count($tmp) < 4) {
+			$ipUser = $_SERVER['HTTP_X_REAL_IP'];
+		}
+		return $ipUser;
+	}
 }
 
 

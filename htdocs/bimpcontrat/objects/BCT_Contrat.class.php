@@ -251,7 +251,7 @@ class BCT_Contrat extends BimpDolObject
 			$content = 'Merci d\’activer les lignes inactives de ce contrat. Indiquez si vous souhaitez un technicien spécifique ou des instructions particulières. En cas de renouvellement, précisez les informations nécessaires sur Ninja One (écart entre vendu/installé, ajouts, suppressions ou changements de poste) pour que @dispatch organise l\’intervention.';
 
 			$buttons[] = array(
-				'label'   => 'Demander activation ligne(s)',
+				'label'   => 'Message contrat',
 				'icon'    => 'far_paper-plane',
 				'onclick' => $note->getJsActionOnclick('repondre', array(
 					"obj_type"      => "bimp_object",

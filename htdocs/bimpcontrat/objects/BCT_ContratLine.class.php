@@ -92,7 +92,7 @@ class BCT_ContratLine extends BimpObject
 	public function canEditField($field_name)
 	{
 		global $user;
-		if (in_array($field_name, array('statut'))) {
+		if (in_array($field_name, array('statut', 'force_fac_ended', 'force_achat_ended'))) {
 			if (!$user->admin) {
 				return 0;
 			}
@@ -1414,6 +1414,12 @@ class BCT_ContratLine extends BimpObject
 								$data['nb_periods_tobill_today'] = $data['nb_periods_tobill_max'];
 							}
 						}
+					}
+
+					if ($data['nb_periods_tobill_max'] > 0 && (int) $this->getData('force_fac_ended')) {
+						$data['nb_periods_never_billed'] += $data['nb_periods_tobill_max'];
+						$data['nb_periods_tobill_max'] = 0;
+						$data['nb_periods_tobill_today'] = 0;
 					}
 				}
 			}
@@ -2791,7 +2797,14 @@ class BCT_ContratLine extends BimpObject
 			if ($periods_data['nb_periods_never_billed'] > 0) {
 				$date_cloture = $this->getData('date_cloture');
 
-				$msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+				if ((int) $this->getData('force_fac_ended')) {
+					$msg = '<span style="font-size: 11px; font-style: italic">Facturation arrêtée</span>';
+				}
+
+				if ($date_cloture) {
+					$msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+				}
+
 				$msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
 				$html .= BimpRender::renderAlerts($msg, 'warning');
 			}
@@ -5720,10 +5733,13 @@ class BCT_ContratLine extends BimpObject
 				if ($date_fin) {
 					// Vérif facturation terminée:
 					$fac_ended = true;
-					if ((int) $this->getData('fac_periodicity')) {
-						$fac_data = $this->getPeriodsToBillData();
-						if ((int) $fac_data['nb_periods_tobill_max']) {
-							$fac_ended = false;
+
+					if (!(int) $this->getData('force_fac_ended')) {
+						if ((int) $this->getData('fac_periodicity')) {
+							$fac_data = $this->getPeriodsToBillData();
+							if ((int) $fac_data['nb_periods_tobill_max']) {
+								$fac_ended = false;
+							}
 						}
 					}
 
@@ -5734,10 +5750,12 @@ class BCT_ContratLine extends BimpObject
 
 					// Vérif achats terminés:
 					$achat_ended = true;
-					if ((int) $this->getData('achat_periodicity')) {
-						$fac_data = $this->getPeriodsToBuyData();
-						if ((int) $fac_data['nb_periods_tobuy_max']) {
-							$achat_ended = false;
+					if (!(int) $this->getData('force_achat_ended')) {
+						if ((int) $this->getData('achat_periodicity')) {
+							$fac_data = $this->getPeriodsToBuyData();
+							if ((int) $fac_data['nb_periods_tobuy_max']) {
+								$achat_ended = false;
+							}
 						}
 					}
 

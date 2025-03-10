@@ -7,6 +7,8 @@ class Session {
     private $sessionId = '';
     private $db = null;
     private $timeDeb = 0;
+
+	private $loginBase = '';
 //    public static $timeValidBimpHash = (60 * 60 * 1);
     public static $timeValidBimpHash = (60 * 60 * 12);
     // Initialisation de la session lors de l'appel de la classe
@@ -36,12 +38,12 @@ class Session {
     public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
     {
         for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
-            
+
         }
         return $s;
     }
-    
-    
+
+
 //    function general_connexion_bdd($dolibarr_main_db_host, $dolibarr_main_db_name, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_port) {
 //        $bdd_dns='mysql:host='.$dolibarr_main_db_host.';port='.$dolibarr_main_db_port.';dbname='.$dolibarr_main_db_name.';charset=utf8';
 //
@@ -84,26 +86,27 @@ class Session {
     // Lecture des sessions
     public function session_lecture($sessionID) {
         $this->sessionId = $sessionID;
-        
+
 //        $sql = $this->db->query("SELECT `data` FROM ".$this->table." WHERE `id_session` = '".$sessionID."' LIMIT 1");
 //        if($this->db->num_rows($sql) > 0){
 //            $ln = $this->db->fetch_object($sql);
 //            return $ln->data;
 //        }
-        
+
         return '';
     }
-    
+
     public function alimentSession(){
         $sql = $this->db->query("SELECT * FROM ".$this->table." WHERE `id_session` = '".$this->sessionId."' LIMIT 1");
         if($this->db->num_rows($sql) > 0){
             $ln = $this->db->fetch_object($sql);
-            
+
             $_SESSION = json_decode($ln->data, true);
             if($ln->login != '')
             $_SESSION['dol_login'] = $ln->login;
+			$this->loginBase = $ln->login;
         }
-        
+
         if(isset($_SESSION['bimp_hash'][0])){
             if(($_SESSION['bimp_hash'][0]['time']+(static::$timeValidBimpHash/2)) < time()){
                 $_SESSION['bimp_hash'][1] = $_SESSION['bimp_hash'][0];
@@ -113,7 +116,7 @@ class Session {
         else
             $this->addBimpHash();
 //        echo '<pre>';print_r($_SESSION['bimp_hash']);
-        
+
         self::$sessionBase = $_SESSION;
     }
     // Ecriture des sessions
@@ -132,7 +135,7 @@ class Session {
         }
 //        $sessionData = addslashes($sessionData);
 //        $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, `update`) VALUES ('".$sessionID."', '".$sessionData."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$sessionData."'");
-        
+
         $diff1 = $this->arrayRecursiveDiff($_SESSION, self::$sessionBase);
         $diff2 = $this->arrayRecursiveDiff(self::$sessionBase, $_SESSION);
         unset($diff1['newtoken']);
@@ -143,11 +146,13 @@ class Session {
             unset($diff1['time']);
             unset($diff2['time']);
         }
-        
+
         if(count($diff1) > 0 || count($diff2) > 0){
 
             $data = $_SESSION;
             $login = $_SESSION['dol_login'];
+			if($login != $this->loginBase )
+				mailSyn2('probléme session', 'dev@bimp.fr', null, 'Atention changement de login dans la session avant : '.$this->loginBase.' aprés : '.$login);
             unset($data['dol_login']);
             $data = addslashes(json_encode($data));
             if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != '')){
@@ -160,12 +165,12 @@ class Session {
         }
         return true;
     }
-    
+
     static function getHash(){
         if(isset($_SESSION['bimp_hash'][0]))
             return $_SESSION['bimp_hash'][0]['hash'];
     }
-    
+
     static function isHashValid($hash){
         global $user;
         if(!BimpCore::getConf('use_bimp_hash') && !in_array($user->id, json_decode(BimpCore::getConf('user_bimp_hash'),true)))
@@ -178,14 +183,14 @@ class Session {
             BimpCore::addlog ('Token invalide action = '.BimpTools::getPostFieldValue('action', '', 'aZ09'). ' <br/>a verifier : '.$hash.' <br/>token enregistré : <pre>'.print_r($_SESSION['bimp_hash'],1).'</pre>', 3);
         return false;
     }
-    
+
     function addBimpHash(){
         $_SESSION['bimp_hash'][0] = array(
             'time' => time(),
             'hash' => static::randomPassword('25')
         );
     }
-    
+
     function arrayRecursiveDiff($aArray1, $aArray2) {
         $aReturn = array();
 
@@ -204,16 +209,16 @@ class Session {
           }
         }
         return $aReturn;
-      } 
-    
+      }
+
     // Destruction des sessions
     public function session_destruction($sessionID) {
-        
+
         $resultat = $this->db->query("DELETE FROM ".$this->table." WHERE `id_session` = '".$sessionID."'");
         return true;
-        
-        
-        
+
+
+
         $this->info('destruction<br/>');
         // Préparation de la requête
 //        $requete = $this->_Connexion_BDD->prepare("DELETE FROM ".$this->table." WHERE `id_session` = ?");
@@ -249,7 +254,7 @@ class Session {
         }
         return true;
     }
-    
+
     public function info($str){
 //        echo $str."<br/>";
     }

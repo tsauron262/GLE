@@ -2797,7 +2797,14 @@ class BCT_ContratLine extends BimpObject
 			if ($periods_data['nb_periods_never_billed'] > 0) {
 				$date_cloture = $this->getData('date_cloture');
 
-				$msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+				if ((int) $this->getData('force_fac_ended')) {
+					$msg = '<span style="font-size: 11px; font-style: italic">Facturation arrêtée</span>';
+				}
+
+				if ($date_cloture) {
+					$msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+				}
+
 				$msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
 				$html .= BimpRender::renderAlerts($msg, 'warning');
 			}

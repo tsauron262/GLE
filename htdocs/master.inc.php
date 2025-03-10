@@ -182,9 +182,9 @@ if (!defined('NOSESSION')) {
 		);
 		session_set_cookie_params($sessioncookieparams);
 	}
-        
-        
-        if(defined('USE_BDD_FOR_SESSION') && USE_BDD_FOR_SESSION){
+
+
+        if(0 && defined('USE_BDD_FOR_SESSION') && USE_BDD_FOR_SESSION){
             global $db;
 
 

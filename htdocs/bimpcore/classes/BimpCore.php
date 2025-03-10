@@ -1687,7 +1687,7 @@ class BimpCore
 		// Vérif limite atteinte :
 		if ($data['count'] >= $limit) {
 			if ($data['count'] == $limit) {
-				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ')', 4, 'secu', null, array(
+				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ') debut : '.$data['start_time'].' maintenant : '.$current_time, 4, 'secu', null, array(
 					'Utilisateur' => $user->id,
 					'Limit'       => $limit,
 					'Count'       => $data['count'],

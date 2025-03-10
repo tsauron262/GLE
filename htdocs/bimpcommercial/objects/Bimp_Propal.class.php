@@ -279,7 +279,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 case 'addAcompte':
                     if (in_array($action, array('createOrder', 'createInvoice'))) {
                         if (!(int) $this->getData('id_demande_fin')) {
-                            if ((int) BimpCore::getConf('propal_signature_required', 0, 'bimpcommercial')) {
+                            if ((int) BimpCore::getConf('propal_signature_required', 0, 'bimpcommercial') && !in_array($this->getData('fk_soc'), json_decode(BimpCore::getConf('client_sans_signature', '[]', 'bimpcommercial'),1))) {
                                 if (!(int) $this->getData('id_signature')) {
                                     $errors[] = 'Fiche signature obligatoire';
                                     return 0;

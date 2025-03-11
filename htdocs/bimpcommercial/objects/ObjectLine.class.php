@@ -1375,6 +1375,7 @@ class ObjectLine extends BimpObject
 				case 'pa_ht':
 					$pa_ht = $this->pa_ht;
 					if ($id_product && (is_null($pa_ht) || (int) $this->id_product !== $id_product) && $product->hasFixePa()) {
+						$id_fourn = null;
 						if ($this->object_name == 'Bimp_PropalLine' && $product->isAbonnement()) {
 							$id_fourn = (int) $product->getData('achat_def_id_fourn');
 							if ($id_fourn) {

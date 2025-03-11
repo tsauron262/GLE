@@ -1,21 +1,24 @@
 bootstrap: 1
-title: Utilisateurs
+title: Événements
 
-objects:              
-
+objects:
     actioncomm: 
         instance: 
             bimp_object: 
                 module: bimpcore
                 name: Bimp_ActionComm
-                    
+                
 sections:
-                - type: custom
-                  custom: 
-                    callback: 
-                        method: renderDolTabs
-                        object: actioncomm
-                - type: list
-                  list: 
-                      name: global
-                      object: actioncomm
+    maintabs:
+        type: tabs
+        tabs:
+            default:
+                label: Vue liste
+                icon: fas_bars
+                sections:
+                    default:
+                        type: list
+                        list:
+                            name: global
+                            object: actioncomm
+      

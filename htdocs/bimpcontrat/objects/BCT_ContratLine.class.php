@@ -84,6 +84,7 @@ class BCT_ContratLine extends BimpObject
 				return BimpCore::isUserDev();
 
 			case 'checkStatus':
+			case 'stopFacAchat':
 				return $user->admin;
 		}
 		return parent::canSetAction($action);
@@ -340,6 +341,21 @@ class BCT_ContratLine extends BimpObject
 					}
 				}
 				return 1;
+
+			case 'stopFacAchat':
+				if ($this->isLoaded()) {
+					if ($status <= 0) {
+						$errors[] = 'Cet abonnement n\'est pas actif';
+						return 0;
+					}
+
+					if ((int) $this->getData('line_type') !== self::TYPE_ABO) {
+						$errors[] = 'Cette ligne n\'est pas un abonnement';
+						return 0;
+					}
+				}
+
+				return 1;
 		}
 		return parent::isActionAllowed($action, $errors);
 	}
@@ -590,6 +606,16 @@ class BCT_ContratLine extends BimpObject
 			);
 		}
 
+		if ($this->isActionAllowed('stopFacAchat') && $this->canSetAction('stopFacAchat')) {
+			$buttons[] = array(
+				'label'   => 'Arrêter les facturations / achats',
+				'icon'    => 'fas_ban',
+				'onclick' => $this->getJsActionOnclick('stopFacAchat', array(), array(
+					'form_name' => 'stop_fac_achat'
+				))
+			);
+		}
+
 		return $buttons;
 	}
 
@@ -705,6 +731,17 @@ class BCT_ContratLine extends BimpObject
 					))
 				);
 			}
+		}
+
+		if ($this->canSetAction('stopFacAchat')) {
+			$actions[] = array(
+				'label'   => 'Arrêter les facturations / achats',
+				'icon'    => 'fas_ban',
+				'onclick' => $this->getJsBulkActionOnclick('stopFacAchat', array(), array(
+					'form_name'     => 'stop_fac_achat',
+					'single_action' => false
+				))
+			);
 		}
 
 		return $actions;
@@ -1415,12 +1452,12 @@ class BCT_ContratLine extends BimpObject
 							}
 						}
 					}
+				}
 
-					if ($data['nb_periods_tobill_max'] > 0 && (int) $this->getData('force_fac_ended')) {
-						$data['nb_periods_never_billed'] += $data['nb_periods_tobill_max'];
-						$data['nb_periods_tobill_max'] = 0;
-						$data['nb_periods_tobill_today'] = 0;
-					}
+				if ($data['nb_periods_tobill_max'] > 0 && (int) $this->getData('force_fac_ended')) {
+					$data['nb_periods_never_billed'] += $data['nb_periods_tobill_max'];
+					$data['nb_periods_tobill_max'] = 0;
+					$data['nb_periods_tobill_today'] = 0;
 				}
 			}
 
@@ -1623,6 +1660,12 @@ class BCT_ContratLine extends BimpObject
 							}
 						}
 					}
+				}
+
+				if ($data['nb_periods_tobuy_max'] > 0 && (int) $this->getData('force_fac_ended')) {
+					$data['nb_periods_never_bought'] += $data['nb_periods_tobuy_max'];
+					$data['nb_periods_tobuy_max'] = 0;
+					$data['nb_periods_tobuy_today'] = 0;
 				}
 			}
 
@@ -2795,17 +2838,19 @@ class BCT_ContratLine extends BimpObject
 			}
 
 			if ($periods_data['nb_periods_never_billed'] > 0) {
+				$msg = '';
+
 				$date_cloture = $this->getData('date_cloture');
 
-				if ((int) $this->getData('force_fac_ended')) {
-					$msg = '<span style="font-size: 11px; font-style: italic">Facturation arrêtée</span>';
-				}
-
 				if ($date_cloture) {
-					$msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+					$msg .= '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span><br/>';
 				}
 
-				$msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
+				if ((int) $this->getData('force_fac_ended')) {
+					$msg .= '<span style="font-size: 11px; font-style: italic">Facturation arrêtée</span><br/>';
+				}
+
+				$msg .= '<span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_billed'] . ' période' . ($periods_data['nb_periods_never_billed'] > 1 ? 's ne seront pas facturées' : ' ne sera pas facturée') . '</span>';
 				$html .= BimpRender::renderAlerts($msg, 'warning');
 			}
 		} else {
@@ -2840,16 +2885,23 @@ class BCT_ContratLine extends BimpObject
 			}
 
 			if ($periods_data['nb_periods_never_bought'] > 0 || $periods_data['nb_periods_bought_never_fac'] > 0) {
+				$msg = '';
 				$date_cloture = $this->getData('date_cloture');
 
-				$msg = '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+				if ($date_cloture) {
+					$msg .= '<span style="font-size: 11px; font-style: italic">Abonnement résilié au <b>' . date('d / m / Y', strtotime($date_cloture)) . '</b></span>';
+				}
+
+				if ((int) $this->getData('force_achat_ended')) {
+					$msg .= ($msg ? '<br/>' : '') . '<span style="font-size: 11px; font-style: italic">Achats arrêtés</span>';
+				}
 
 				if ($periods_data['nb_periods_bought_never_fac'] > 0) {
-					$msg .= '<br/><span style="font-size: 11px; font-style: italic" class="warning">' . $periods_data['nb_periods_bought_never_fac'] . ' période' . ($periods_data['nb_periods_bought_never_fac'] > 1 ? 's achetées ne seront pas facturées' : ' achetée ne sera facturée') . '</span>';
+					$msg .= ($msg ? '<br/>' : '') . '<span style="font-size: 11px; font-style: italic" class="warning">' . $periods_data['nb_periods_bought_never_fac'] . ' période' . ($periods_data['nb_periods_bought_never_fac'] > 1 ? 's achetées ne seront pas facturées' : ' achetée ne sera facturée') . '</span>';
 				}
 
 				if ($periods_data['nb_periods_never_bought'] > 0) {
-					$msg .= '<br/><span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_bought'] . ' période' . ($periods_data['nb_periods_never_bought'] > 1 ? 's ne seront pas achetées' : ' ne sera pas achetée') . '</span>';
+					$msg .= ($msg ? '<br/>' : '') . '<span style="font-size: 11px; font-style: italic" class="danger">' . $periods_data['nb_periods_never_bought'] . ' période' . ($periods_data['nb_periods_never_bought'] > 1 ? 's ne seront pas achetées' : ' ne sera pas achetée') . '</span>';
 				}
 				$html .= BimpRender::renderAlerts($msg, 'warning');
 			}
@@ -5692,27 +5744,27 @@ class BCT_ContratLine extends BimpObject
 					$data_correct = array();
 
 					if ($line->getData('date_ouverture_prevue') != $date_ouv_prev) {
-						$line_infos[] = 'Correction date ouverture prévue (' . date('d / m / Y', strtotime($date_ouv_prev)) . ')';
+						$line_infos[] = 'Correction date ouverture prévue (' . date('d / m / Y', strtotime($line->getData('date_ouverture_prevue'))) . ' => ' . date('d / m / Y', strtotime($date_ouv_prev)) . ')';
 						$data_correct['date_ouverture_prevue'] = $date_ouv_prev;
 					}
 
 					if ($line->getData('date_ouverture') != $date_ouverture) {
-						$line_infos[] = 'Correction date ouverture (' . date('d / m / Y', strtotime($date_ouverture)) . ')';
+						$line_infos[] = 'Correction date ouverture (' . date('d / m / Y', strtotime($line->getData('date_ouverture'))) . ' => ' . date('d / m / Y', strtotime($date_ouverture)) . ')';
 						$data_correct['date_ouverture'] = $date_ouverture;
 					}
 
 					if ($line->getData('date_debut_validite') != $date_debut_validite) {
-						$line_infos[] = 'Correction date début validité (' . date('d / m / Y', strtotime($date_debut_validite)) . ')';
+						$line_infos[] = 'Correction date début validité (' . date('d / m / Y', strtotime($line->getData('date_debut_validite'))) . ' => ' . date('d / m / Y', strtotime($date_debut_validite)) . ')';
 						$data_correct['date_debut_validite'] = $date_debut_validite;
 					}
 
 					if ($line->getData('date_fin_validite') != $date_fin_validite) {
-						$line_infos[] = 'Correction date fin validité (' . date('d / m / Y', strtotime($date_fin_validite)) . ')';
+						$line_infos[] = 'Correction date fin validité (' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . ' => ' . date('d / m / Y', strtotime($date_fin_validite)) . ')';
 						$data_correct['date_fin_validite'] = $date_fin_validite;
 					}
 
 					if ($line->getData('date_cloture') != $date_cloture) {
-						$line_infos[] = 'Correction date résiliation (' . date('d / m / Y', strtotime($date_cloture)) . ')';
+						$line_infos[] = 'Correction date résiliation (' . date('d / m / Y', strtotime($line->getData('date_cloture'))) . ' => ' . date('d / m / Y', strtotime($date_cloture)) . ')';
 						$data_correct['date_cloture'] = $date_cloture;
 					}
 
@@ -6471,6 +6523,56 @@ class BCT_ContratLine extends BimpObject
 		}
 
 		return null;
+	}
+
+	public function stopFacAchat($force_fac_ended, $force_achat_ended)
+	{
+		$errors = array();
+
+		if ($this->isLoaded($errors)) {
+			$updated = false;
+
+			if ($force_fac_ended !== (int) $this->getData('force_fac_ended')) {
+				$this->updateField('force_fac_ended', $force_fac_ended);
+				$updated = true;
+			}
+
+			if ($force_achat_ended !== (int) $this->getData('force_achat_ended')) {
+				$this->updateField('force_achat_ended', $force_achat_ended);
+				$updated = true;
+			}
+
+			if ($updated) {
+				$this->checkStatus();
+
+				if ((int) $this->getData('id_parent_line')) {
+					/** @var BCT_ContratLine $parent_line */
+					$parent_line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', (int) $this->getData('id_parent_line'));
+					if (BimpObject::objectLoaded($parent_line)) {
+						$parent_line->checkStatus();
+					}
+				}
+			}
+
+			$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+				'id_parent_line'     => $this->id,
+				'linked_object_name' => array('bundle', 'bundleCorrect')
+			));
+			if (!empty($lines)) {
+				foreach ($lines as $line) {
+					$line_errors = array();
+					if ($line->isActionAllowed('stopFacAchat', $line_errors)) {
+						$line_errors = $line->stopFacAchat($force_fac_ended, $force_achat_ended);
+					}
+
+					if (count($line_errors)) {
+						$errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour pour la sous-ligne n° ' . $line->getData('rang'));
+					}
+				}
+			}
+		}
+
+		return $errors;
 	}
 
 	// Gestion positions:
@@ -7452,6 +7554,56 @@ class BCT_ContratLine extends BimpObject
 		$success = 'Vérification du statut effectuée';
 
 		$this->checkStatus($warnings);
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function actionStopFacAchat($data, &$success = '')
+	{
+		$errors = array();
+		$warnings = array();
+
+		$force_fac_ended = (int) BimpTools::getArrayValueFromPath($data, 'force_fac_ended', 0);
+		$force_achat_ended = (int) BimpTools::getArrayValueFromPath($data, 'force_achat_ended', 0);
+
+		if ($this->isLoaded()) {
+			$success = 'Mise à jour effectuée';
+			$errors = $this->stopFacAchat($force_fac_ended, $force_achat_ended);
+		} else {
+			$nOk = 0;
+			$ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+			if (empty($ids)) {
+				$errors[] = 'Aucune ligne sélectionnée';
+			} else {
+				foreach ($ids as $id) {
+					$line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id);
+
+					if (!BimpObject::objectLoaded($line)) {
+						$warnings[] = 'La ligne #' . $id . ' n\'existe plus';
+					} else {
+						if (!$line->isActionAllowed('stopFacAchat', $line_errors)) {
+							$warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('rang'));
+						} else {
+							$line_errors = $line->stopFacAchat($force_fac_ended, $force_achat_ended);
+
+							if (count($line_errors)) {
+								$warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne n°' . $line->getData('rang'));
+							} else {
+								$nOk++;
+							}
+						}
+
+						if ($nOk) {
+							$success = $nOk . ' ligne(s) mise(s) à jour avec succès';
+						}
+					}
+				}
+			}
+		}
 
 		return array(
 			'errors'   => $errors,

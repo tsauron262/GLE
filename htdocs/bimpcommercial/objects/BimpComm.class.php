@@ -114,6 +114,9 @@ class BimpComm extends BimpDolObject
         switch ($action) {
             case 'checkMarge':
                 return ($user->admin ? 1 : 0);
+
+			case 'updateProductsPrices':
+				return (int) $user->rights->bimpcommercial->priceVente;
         }
 
         return parent::canSetAction($action);
@@ -431,6 +434,23 @@ class BimpComm extends BimpDolObject
                     return 0;
                 }
                 return 1;
+
+			case 'updateProductsPrices':
+				if (!$this->isLoaded($errors)) {
+					return 0;
+				}
+
+				if ((int) $this->getData('fk_statut') !== 0) {
+					$errors[] = ucfirst($this->getLabel('this')) . ' n\'est plus au statut brouillon';
+					return 0;
+				}
+
+				if (!in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal'))) {
+					$errors[] = 'Actualisation des prix produits non autorisée pour les ' . $this->getLabel('name_plur');
+					return 0;
+				}
+
+				return 1;
         }
 
         return parent::isActionAllowed($action, $errors);
@@ -637,7 +657,19 @@ class BimpComm extends BimpDolObject
     {
         $buttons = array();
 
-        // Ajout acompte:
+		// Actualisation des prix produits:
+
+//		if ($this->isActionAllowed('updateProductsPrices') && $this->canSetAction('updateProductsPrices')) {
+//			$buttons[] = array(
+//				'label'   => 'Actualiser les prix produits',
+//				'icon'    => 'fas_euro-sign',
+//				'onclick' => $this->getJsActionOnclick('updateProductsPrices', array(), array(
+//					'confirm_msg' => 'Veuillez confirmer'
+//				))
+//			);
+//		}
+
+		// Ajout acompte:
         if ($this->isActionAllowed('addAcompte') && $this->canSetAction('addAcompte')) {
             $id_mode_paiement = 0;
             $id_rib = (int) $this->getData('rib_client');

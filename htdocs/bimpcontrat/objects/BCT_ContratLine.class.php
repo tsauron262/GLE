@@ -738,7 +738,7 @@ class BCT_ContratLine extends BimpObject
 				'label'   => 'Arrêter les facturations / achats',
 				'icon'    => 'fas_ban',
 				'onclick' => $this->getJsBulkActionOnclick('stopFacAchat', array(), array(
-					'form_name' => 'stop_fac_achat',
+					'form_name'     => 'stop_fac_achat',
 					'single_action' => false
 				))
 			);
@@ -5744,27 +5744,27 @@ class BCT_ContratLine extends BimpObject
 					$data_correct = array();
 
 					if ($line->getData('date_ouverture_prevue') != $date_ouv_prev) {
-						$line_infos[] = 'Correction date ouverture prévue (' . date('d / m / Y', strtotime($date_ouv_prev)) . ')';
+						$line_infos[] = 'Correction date ouverture prévue (' . date('d / m / Y', strtotime($line->getData('date_ouverture_prevue'))) . ' => ' . date('d / m / Y', strtotime($date_ouv_prev)) . ')';
 						$data_correct['date_ouverture_prevue'] = $date_ouv_prev;
 					}
 
 					if ($line->getData('date_ouverture') != $date_ouverture) {
-						$line_infos[] = 'Correction date ouverture (' . date('d / m / Y', strtotime($date_ouverture)) . ')';
+						$line_infos[] = 'Correction date ouverture (' . date('d / m / Y', strtotime($line->getData('date_ouverture'))) . ' => ' . date('d / m / Y', strtotime($date_ouverture)) . ')';
 						$data_correct['date_ouverture'] = $date_ouverture;
 					}
 
 					if ($line->getData('date_debut_validite') != $date_debut_validite) {
-						$line_infos[] = 'Correction date début validité (' . date('d / m / Y', strtotime($date_debut_validite)) . ')';
+						$line_infos[] = 'Correction date début validité (' . date('d / m / Y', strtotime($line->getData('date_debut_validite'))) . ' => ' . date('d / m / Y', strtotime($date_debut_validite)) . ')';
 						$data_correct['date_debut_validite'] = $date_debut_validite;
 					}
 
 					if ($line->getData('date_fin_validite') != $date_fin_validite) {
-						$line_infos[] = 'Correction date fin validité (' . date('d / m / Y', strtotime($date_fin_validite)) . ')';
+						$line_infos[] = 'Correction date fin validité (' . date('d / m / Y', strtotime($line->getData('date_fin_validite'))) . ' => ' . date('d / m / Y', strtotime($date_fin_validite)) . ')';
 						$data_correct['date_fin_validite'] = $date_fin_validite;
 					}
 
 					if ($line->getData('date_cloture') != $date_cloture) {
-						$line_infos[] = 'Correction date résiliation (' . date('d / m / Y', strtotime($date_cloture)) . ')';
+						$line_infos[] = 'Correction date résiliation (' . date('d / m / Y', strtotime($line->getData('date_cloture'))) . ' => ' . date('d / m / Y', strtotime($date_cloture)) . ')';
 						$data_correct['date_cloture'] = $date_cloture;
 					}
 

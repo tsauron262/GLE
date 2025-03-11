@@ -612,6 +612,9 @@ class BWSApi
 				$children = BimpTools::getArrayValueFromPath($this->params, 'children', '');
 				if ($children) {
 					$children = json_decode($children, true);
+					if(!is_array($children)){
+						$this->addError('INVALID_PARAMETER', 'Paramètre "children" invalide');
+					}
 				}
 
 				/*

@@ -67,7 +67,7 @@ objects:
         extends: client
         instance: 
             id_object: 
-                field_value: id_client_facture
+                field_value: id_client_facture-
                 
     demande_fin: 
         relation: hasOne
@@ -78,6 +78,23 @@ objects:
                 name: BimpCommDemandeFin
             id_object: 
                 field_value: id_demande_fin
+                
+    piece_parent:
+        relation: hasMany
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: BimpCommElementElement
+        list:
+            filters:
+                sourcetype: propal
+                targettype: commande
+                fk_target:
+                    callback:
+                        method: getData
+                        params:
+                            - rowid
                 
 associations: 
     factures: 

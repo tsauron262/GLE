@@ -1470,6 +1470,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         $html = parent::renderHeaderExtraLeft();
 
+
+		$html.= print_r($this->getChildrenObjects('piece_parent'),1);
+
         if ($this->isLoaded()) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->dol_object->user_author_id);
 

@@ -322,7 +322,7 @@ class Bimp_ActionComm extends BimpObject
 			$dt_from = new DateTime($from);
 
 			if (!$to) {
-				$html .= 'Le ' . $dt_from->format('d / m / Y');
+				$html .= 'Le ' . $dt_from->format('d/m/Y');
 
 				if ($fullday) {
 					$html .= ' (Journée)';
@@ -333,7 +333,7 @@ class Bimp_ActionComm extends BimpObject
 				$dt_to = new DateTime($to);
 
 				if ($dt_from->format('Y-m-d') == $dt_to->format('Y-m-d')) {
-					$html .= 'Le ' . $dt_from->format('d / m / Y');
+					$html .= 'Le ' . $dt_from->format('d/m/Y');
 
 					if ($fullday) {
 						$html .= ' (Journée)';
@@ -596,8 +596,8 @@ class Bimp_ActionComm extends BimpObject
 		);
 
 		$filters = array(
-			'a.fk_user_author' => $id_user,
-			'or_todo'          => array(
+			'a.fk_user_author'   => $id_user,
+			'or_todo'            => array(
 				'or' => array(
 					'and_no_percent' => array(
 						'and_fields' => array(
@@ -626,7 +626,7 @@ class Bimp_ActionComm extends BimpObject
 					)
 				)
 			),
-			'ac_type.user_notif'  => 1
+			'ac_type.user_notif' => 1
 		);
 
 		if ($tms) {
@@ -653,7 +653,7 @@ class Bimp_ActionComm extends BimpObject
 				'date_end'   => $ac->getData('datep2'),
 				'dates_str'  => $ac->displayDates(),
 				'code'       => $ac->getData('code'),
-				'label'      => $ac->getData('label'),
+//				'label'      => $ac->getData('label'),
 				'tiers'      => (BimpObject::objectLoaded($tiers) ? $tiers->getLink() : ''),
 				'obj'        => $ac->displayElement()
 			);
@@ -675,13 +675,13 @@ class Bimp_ActionComm extends BimpObject
 					$user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
 
 					$user_events = self::getActionCommEventsForUser($id_user_delegation, $tms, array(
-						'excluded_events'      => $events_ids,
+						'excluded_events'     => $events_ids,
 						'include_delegations' => 0
 					), $errors);
 
 					if (!empty($user_events)) {
 						foreach ($user_events['elements'] as $idx => $event) {
-							$events_ids[] = $task['id'];
+							$events_ids[] = $event['id'];
 							$user_events['elements'][$idx]['dest'] = $user_name;
 						}
 

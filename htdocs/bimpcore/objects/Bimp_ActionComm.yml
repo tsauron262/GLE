@@ -13,7 +13,7 @@ dol_object:
             class: ActionComm
 
 nom_url: 
-    syntaxe: <id>
+    syntaxe: <label>
     
 labels: 
     name: événement

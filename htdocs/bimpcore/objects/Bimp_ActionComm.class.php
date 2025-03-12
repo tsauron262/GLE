@@ -219,7 +219,9 @@ class Bimp_ActionComm extends BimpObject
 		$html = '';
 		$instance = $this->getLinkedElement();
 		if (is_null($instance)) {
-			$html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
+			if ($this->getData('elementtype') && (int) $this->getData('fk_element')) {
+				$html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
+			}
 		} elseif (BimpObject::objectLoaded($instance)) {
 			if ($externe) {
 				$html .= $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['SERVER_NAME'];
@@ -267,7 +269,9 @@ class Bimp_ActionComm extends BimpObject
 		$instance = $this->getLinkedElement();
 
 		if (is_null($instance)) {
-			$html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
+			if ($this->getData('elementtype') && (int) $this->getData('fk_element')) {
+				$html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
+			}
 		} elseif (BimpObject::objectLoaded($instance)) {
 			$html .= BimpObject::getInstanceNomUrl($instance);
 		} else {

@@ -205,22 +205,28 @@ class Bimp_ActionComm extends BimpObject
 
 	// Getters données:
 
+	public function getLinkedElement()
+	{
+		if ((int) $this->getData('fk_element') && $this->getData('elementtype')) {
+			return BimpTools::getInstanceByElementType($this->getData('elementtype'), (int) $this->getData('fk_element'));
+		}
+
+		return null;
+	}
+
 	public function getLinkedUrl($externe = false)
 	{
 		$html = '';
-		if ((int) $this->getData('fk_element') && $this->getData('elementtype')) {
-			$instance = BimpTools::getInstanceByElementType($this->getData('elementtype'), (int) $this->getData('fk_element'));
-
-			if (is_null($instance)) {
-				$html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
-			} elseif (BimpObject::objectLoaded($instance)) {
-				if ($externe) {
-					$html .= $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['SERVER_NAME'];
-				}
-				$html .= BimpObject::getInstanceUrl($instance);
-			} else {
-				$html .= BimpTools::ucfirst(BimpObject::getInstanceLabel($instance) . ' #' . $this->getData('fk_element'));
+		$instance = $this->getLinkedElement();
+		if (is_null($instance)) {
+			$html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
+		} elseif (BimpObject::objectLoaded($instance)) {
+			if ($externe) {
+				$html .= $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['SERVER_NAME'];
 			}
+			$html .= BimpObject::getInstanceUrl($instance);
+		} else {
+			$html .= BimpTools::ucfirst(BimpObject::getInstanceLabel($instance) . ' #' . $this->getData('fk_element'));
 		}
 
 		return $html;
@@ -255,20 +261,17 @@ class Bimp_ActionComm extends BimpObject
 		return $return;
 	}
 
-
 	public function displayElement()
 	{
 		$html = '';
-		if ((int) $this->getData('fk_element') && $this->getData('elementtype')) {
-			$instance = BimpTools::getInstanceByElementType($this->getData('elementtype'), (int) $this->getData('fk_element'));
+		$instance = $this->getLinkedElement();
 
-			if (is_null($instance)) {
-				$html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
-			} elseif (BimpObject::objectLoaded($instance)) {
-				$html .= BimpObject::getInstanceNomUrl($instance);
-			} else {
-				$html .= BimpTools::ucfirst(BimpObject::getInstanceLabel($instance) . ' #' . $this->getData('fk_element'));
-			}
+		if (is_null($instance)) {
+			$html .= '<span class="danger">Type "' . $this->getData('elementtype') . '" inconnu</span>';
+		} elseif (BimpObject::objectLoaded($instance)) {
+			$html .= BimpObject::getInstanceNomUrl($instance);
+		} else {
+			$html .= BimpTools::ucfirst(BimpObject::getInstanceLabel($instance) . ' #' . $this->getData('fk_element'));
 		}
 
 		return $html;
@@ -282,14 +285,14 @@ class Bimp_ActionComm extends BimpObject
 			if ($percent < 0) {
 				$date_begin = $this->getData('datep');
 				$date_end = $this->getData('datep2');
-				$date_now = date('Y-m-d H:i:');
+				$date_now = date('Y-m-d H:i:s');
 
 				if ($date_now < $date_begin) {
-					return '<span class="warning">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'A faire</span>';
+					return '<span class="warning">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'A venir</span>';
 				} elseif ($date_now < $date_end) {
 					return '<span class="info">' . BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'En cours</span>';
 				} else {
-					return '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Fait</span>';
+					return '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Terminé</span>';
 				}
 			} else {
 				if (!$percent) {
@@ -297,12 +300,54 @@ class Bimp_ActionComm extends BimpObject
 				} elseif ($percent < 100) {
 					return '<span class="info">' . BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'En cours (' . $percent . ' %)</span>';
 				} else {
-					return '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Fait</span>';
+					return '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Terminé</span>';
 				}
 			}
 		}
 
 		return '';
+	}
+
+	public function displayDates()
+	{
+		$html = '';
+		$from = $this->getData('datep');
+		$to = $this->getData('datep2');
+		$fullday = (int) $this->getData('fulldayevent');
+		if ($from) {
+			$dt_from = new DateTime($from);
+
+			if (!$to) {
+				$html .= 'Le ' . $dt_from->format('d / m / Y');
+
+				if ($fullday) {
+					$html .= ' (Journée)';
+				} else {
+					$html .= ' à ' . $dt_from->format('H:i');
+				}
+			} else {
+				$dt_to = new DateTime($to);
+
+				if ($dt_from->format('Y-m-d') == $dt_to->format('Y-m-d')) {
+					$html .= 'Le ' . $dt_from->format('d / m / Y');
+
+					if ($fullday) {
+						$html .= ' (Journée)';
+					} else {
+						$html .= ' de ' . $dt_from->format('H:i') . ' à ' . $dt_to->format('H:i');
+					}
+				} else {
+					$html .= 'Du ' . $dt_from->format('d/m/Y') . ($fullday ? ' ' . $dt_from->format('H:i') : '');
+					$html .= ' au ' . $dt_to->format('d/m/Y') . ($fullday ? ' ' . $dt_to->format('H:i') : '');
+
+					if ($fullday) {
+						$html .= ' (Journées entières)';
+					}
+				}
+			}
+		}
+
+		return $html;
 	}
 
 	// Rendus HTML:
@@ -519,5 +564,129 @@ class Bimp_ActionComm extends BimpObject
 		return $errors;
 	}
 
+	// Méthodes statiques :
 
+	public static function getActionCommEventsForUser($id_user, $tms, $options = array(), &$errors = array())
+	{
+		if ((int) BimpCore::getConf('mode_eco')) {
+			return array();
+		}
+
+		$data = array(
+			'tms'      => date('Y-m-d H:i:s'),
+			'elements' => array()
+		);
+
+		$bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+		if (!BimpObject::objectLoaded($bimp_user)) {
+			return $data;
+		}
+
+		$date_now = date('Y-m-d H:i:s');
+
+		$joins = array(
+			'ac_type' => array(
+				'table' => 'c_actioncomm',
+				'on'    => 'ac_type.id = a.fk_action'
+			)
+		);
+
+		$filters = array(
+			'a.fk_user_author' => $id_user,
+			'or_todo'          => array(
+				'or' => array(
+					'and_no_percent' => array(
+						'and_fields' => array(
+							'a.percent' => array(
+								'operator' => '<',
+								'value'    => 0
+							),
+							'a.datep'   => array(
+								'operator' => '>=',
+								'value'    => $date_now
+							)
+						)
+					),
+					'a.percent'      => array(
+						'and' => array(
+							array(
+								'operator' => '>=',
+								'value'    => 0
+							),
+							array(
+								'operator' => '<',
+								'value'    => 100
+							)
+						)
+
+					)
+				)
+			),
+			'type.user_notif'  => 1
+		);
+
+		if ($tms) {
+			$filters['a.tms'] = array(
+				'operator' => '>',
+				'value'    => $tms
+			);
+		}
+
+		if (!empty($options['excluded_events'])) {
+			$filters['a.id'] = array(
+				'not_in' => $options['excluded_events']
+			);
+		}
+
+		foreach (BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_ActionComm', $filters, 'a.id', 'desc', $joins) as $ac) {
+			$tiers = $ac->getChildObject('societe');
+
+			$data['elements'][] = array(
+				'id'         => $ac->id,
+				'link'       => $ac->getLink(),
+				'type'       => $ac->displayDataDefault('fk_action'),
+				'date_start' => $ac->getData('datep'),
+				'date_end'   => $ac->getData('datep2'),
+				'dates_str'  => $ac->displayDates(),
+				'code'       => $ac->getData('code'),
+				'label'      => $ac->getData('label'),
+				'tiers'      => (BimpObject::objectLoaded($tiers) ? $tiers->getLink() : ''),
+				'obj'        => $ac->displayElement()
+			);
+		}
+
+		if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
+			$bdb = self::getBdb();
+			$users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+
+			if (!empty($users_delegations)) {
+				$events_ids = array();
+
+				foreach ($data['elements'] as $event) {
+					$events_ids[] = $event['id'];
+				}
+
+				foreach ($users_delegations as $id_user_delegation) {
+					$user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
+					$user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
+
+					$user_events = self::getActionCommEventsForUser($id_user_delegation, $tms, array(
+						'excluded_events'      => $events_ids,
+						'include_delegations' => 0
+					), $errors);
+
+					if (!empty($user_events)) {
+						foreach ($user_events['elements'] as $idx => $event) {
+							$events_ids[] = $task['id'];
+							$user_events['elements'][$idx]['dest'] = $user_name;
+						}
+
+						$data['elements'] = BimpTools::merge_array($data['elements'], $user_events['elements']);
+					}
+				}
+			}
+		}
+
+		return $data;
+	}
 }

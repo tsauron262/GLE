@@ -642,7 +642,7 @@ class Bimp_ActionComm extends BimpObject
 			);
 		}
 
-		foreach (BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_ActionComm', $filters, 'a.id', 'desc', $joins) as $ac) {
+		foreach (BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_ActionComm', $filters, 'a.id', 'desc', $joins, 30) as $ac) {
 			$tiers = $ac->getChildObject('societe');
 
 			$data['elements'][] = array(
@@ -659,37 +659,37 @@ class Bimp_ActionComm extends BimpObject
 			);
 		}
 
-		if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
-			$bdb = self::getBdb();
-			$users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+//		if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
+//			$bdb = self::getBdb();
+//			$users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
 
-			if (!empty($users_delegations)) {
-				$events_ids = array();
-
-				foreach ($data['elements'] as $event) {
-					$events_ids[] = $event['id'];
-				}
-
-				foreach ($users_delegations as $id_user_delegation) {
-					$user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
-					$user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
-
-					$user_events = self::getActionCommEventsForUser($id_user_delegation, $tms, array(
-						'excluded_events'     => $events_ids,
-						'include_delegations' => 0
-					), $errors);
-
-					if (!empty($user_events)) {
-						foreach ($user_events['elements'] as $idx => $event) {
-							$events_ids[] = $event['id'];
-							$user_events['elements'][$idx]['dest'] = $user_name;
-						}
-
-						$data['elements'] = BimpTools::merge_array($data['elements'], $user_events['elements']);
-					}
-				}
-			}
-		}
+//			if (!empty($users_delegations)) {
+//				$events_ids = array();
+//
+//				foreach ($data['elements'] as $event) {
+//					$events_ids[] = $event['id'];
+//				}
+//
+//				foreach ($users_delegations as $id_user_delegation) {
+//					$user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
+//					$user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
+//
+//					$user_events = self::getActionCommEventsForUser($id_user_delegation, $tms, array(
+//						'excluded_events'     => $events_ids,
+//						'include_delegations' => 0
+//					), $errors);
+//
+//					if (!empty($user_events)) {
+//						foreach ($user_events['elements'] as $idx => $event) {
+//							$events_ids[] = $event['id'];
+//							$user_events['elements'][$idx]['dest'] = $user_name;
+//						}
+//
+//						$data['elements'] = BimpTools::merge_array($data['elements'], $user_events['elements']);
+//					}
+//				}
+//			}
+//		}
 
 		return $data;
 	}

@@ -3,6 +3,21 @@
 class BimpNotification extends BimpObject
 {
 
+	public function canCreate()
+	{
+		return (int) BimpCore::isUserDev();
+	}
+
+	public function canEdit()
+	{
+		return $this->canCreate();
+	}
+
+	public function canDelete()
+	{
+		return $this->canCreate();
+	}
+
     public function getUserNotifications($id_user, $notif_data = array())
     {
         $errors = array();
@@ -13,12 +28,12 @@ class BimpNotification extends BimpObject
         if (method_exists($obj_name, $methode)) {
             $tms = BimpTools::getArrayValueFromPath($notif_data, 'tms', '');
             $options = BimpTools::getArrayValueFromPath($notif_data, 'options', array());
-            
+
             return $obj_name::$methode($id_user, $tms, $options, $errors);
         } else {
             $errors[] = "Méthode " . $methode . " introuvable dans " . $obj_name;
         }
-        
+
         return array();
     }
 

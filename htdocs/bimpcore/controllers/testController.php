@@ -9,7 +9,7 @@ class testController extends BimpController
 			return BimpRender::renderAlerts('Page réservée aux développeurs');
 		}
 
-		$id_user = BimpTools::getValue('id_user', 270);
+		$id_user = BimpTools::getValue('id_user', 1);
 
 		$html = '';
 		BimpObject::loadClass('bimpcore', 'Bimp_ActionComm');

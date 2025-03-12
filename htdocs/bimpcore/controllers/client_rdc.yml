@@ -1,0 +1,73 @@
+bootstrap: 1
+
+title:
+    callback:
+        object: client
+        method: getPageTitle
+
+objects:
+    client:
+        instance:
+            bimp_object: Bimp_Client
+            id_object:
+                request: id
+                
+sections:
+    - type: object_header
+      object_header:
+          object: client
+    - type: nav_tabs
+      nav_tabs:
+          - id: card
+            title: Fiche
+            icon: fas_info-circle
+            struct:
+                type: view
+                view:
+                    object: client
+                    name: default
+          - id: contact
+            title: Contacts
+            icon: fas_address-book
+            struct:
+                type: list
+                list:
+                    object: client
+                    children: contacts
+                    name: soc
+                    
+          - id: events
+            title: Événements
+            icon: fas_calendar-check
+            struct:
+                type: custom
+                custom:
+                    callback:
+                        method: renderLinkedObjectList
+                        object: client
+                        params:
+                            - events
+
+          - id: all_files
+            title: Fichiers
+            struct:
+                type: list
+                list:
+                    title: Fichier joints
+                    object: client
+                    children: files
+                    name: default
+        
+          - id: divers
+            title: Divers (admin)
+            icon: fas_tools
+            show:
+                callback:
+                    method: iAmAdmin
+                    object: client
+            struct:
+                type: custom
+                custom:
+                    callback:
+                        method: renderBimpOjectDivers
+                        object: client

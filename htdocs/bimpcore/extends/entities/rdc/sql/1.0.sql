@@ -11,7 +11,7 @@ llx_societe_rdc (
 	delai_ouv int(11) NOT NULL DEFAULT '0',
 	commentaire text NULL,
 	fk_source int(11) NOT NULL DEFAULT '0',
-	fk_user int(11) NOT NULL DEFAULT '0', -- Attribution
+	fk_user_attr int(11) NOT NULL DEFAULT '0', -- Attribution
 	fk_group int(11) NOT NULL DEFAULT '0', -- Team RDC
 	shopid int(11) NOT NULL DEFAULT '0',
 	fk_master_cat int(11) NOT NULL DEFAULT '0', -- catégorie maitre

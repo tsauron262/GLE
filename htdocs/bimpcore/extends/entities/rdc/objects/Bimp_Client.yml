@@ -1,3 +1,15 @@
+table: societe
+controller: client_rdc
+
+header_edit_form: form_client_rdc
+
+objects:
+    user_attr:
+        extends: user
+        instance:
+            id_object:
+                request: fk_user
+                
 extrafields:
     client_rdc:
         table: societe_rdc
@@ -6,10 +18,224 @@ extrafields:
 
 fields:
     fournisseur: unset
-    #    code_client: unset
     code_compta: unset
+    shopid:
+        label: Shop ID
+        extrafields: client_rdc
+        extra: 1
+        
     date_der_contact:
-        label: Date dernier contact
+        label: Dernier contact
         type: date
         extrafields: client_rdc
         extra: 1
+    date_debut_prospect:
+        label: Début prospection
+        type: date
+        extrafields: client_rdc
+        extra: 1
+    date_ouverture:
+        label: Ouverture
+        type: date
+        extrafields: client_rdc
+        extra: 1
+    fk_priorite:
+        label: Priorité
+        extrafields: client_rdc
+        extra: 1
+        values:
+            array:
+                callback: 
+                    method: getPriorities
+    fk_statut_rdc:
+        label: Prospection
+        extrafields: client_rdc
+        extra: 1
+        values:
+            array:
+                callback: 
+                    method: getStatutsRdc
+    date_changement_statut_rdc:
+        label: Changement de statut
+        type: date
+        extrafields: client_rdc
+        extra: 1
+    delai_ouv:
+        label: Délai ouverture
+        type: number
+        extrafields: client_rdc
+        extra: 1
+    fk_source:
+        label: Source
+        extrafields: client_rdc
+        extra: 1
+        values:
+            array:
+                callback: 
+                    method: getSourcesRdc                   
+    contrefacon:
+        label: Suspition de contrefaçon
+        extrafields: client_rdc
+        extra: 1
+        type: bool
+        
+    fk_group:
+        label: Groupe
+        extrafields: client_rdc
+        extra: 1
+        values:
+            array:
+                callback: 
+                    method: getUserGroupsArray 
+    fk_user_attr:
+        label: Attribué à
+        type: id_object
+        object: user_attr
+        input: 
+            type: select
+            options:
+                callback: 
+                    method: getUserAttrByGroupArray
+        extrafields: client_rdc
+        extra: 1
+        depends_on: fk_group
+    
+    commentaire:
+        label: Commentaires
+        type: text
+        extrafields: client_rdc
+        extra: 1
+
+fields_tables:
+    identity_rdc:
+        title: Identité
+        icon: id-card
+        rows:
+            - field: nom
+            - field: code_compta
+              show:
+                  callback: isClient
+            - field: code_compta_fournisseur
+              show:
+                  callback: isFournisseur
+            - field: is_subsidiary
+            - label: Infos contact
+              value:
+                  callback: displayFullContactInfos
+            - label: Adresse
+              value:
+                  callback: displayFullAddress
+    
+    param_rdc:
+        title: Paramètres RDC
+        icon: fas_briefcase
+        rows:
+            - field: shopid
+            - field: name_alias
+              label: Nom de la boutique
+              edit: 1
+            - field: date_der_contact
+            - field: date_debut_prospect
+            - field: date_ouverture
+            - field: fk_priorite
+              edit: 1
+            - field: fk_statut_rdc
+            - field: date_changement_statut_rdc
+            - field: delai_ouv
+            - field: fk_source
+            - field: contrefacon
+            - field: fk_group
+            - field: fk_user_attr
+    
+    commentaires:
+        title: Commentaires
+        icon: fas_comment
+        rows:
+            - field: commentaire
+    
+    infos_comm:
+        show: 0
+    encours:
+        show: 0
+    encours_infos:
+        show: 0
+    contact:
+        show: 0
+    identifiers:
+        show: 0
+    infos:
+        show: 0
+    notes:
+        show: 0
+
+views:
+    default:
+        title: nom
+        rows:
+            - cols:
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    fields_table:
+                        name: identity_rdc
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    fields_table:
+                        name: param_rdc
+                        
+                  - type: fields_table
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    fields_table:
+                        name: commentaires
+
+forms:
+    default:
+        extends: form_client_rdc
+    form_client_rdc:
+        title: Ajout d'un client
+        rows:
+            Nom:
+                field: nom
+            Filiale:
+                field: is_subsidiary
+            Téléphone:
+                field: phone
+            Email:
+                field: email
+            Adresse:
+                field: address
+            Code postal:
+                field: zip
+            Ville:
+                field: town
+            Pays:
+                field: fk_pays
+            Shop ID:
+                field: shopid
+            Priorité:
+                field: fk_priorite
+            Prospection:
+                field: fk_statut_rdc
+            Source:
+                field: fk_source
+            Suspition de contrefaçon:
+                field: contrefacon
+            Groupe:
+                field: fk_group
+            Attribué à:
+                field: fk_user_attr
+            Commentaires:
+                field: commentaire
+
+lists:
+    default:
+        title: Liste des clients
+        object: client
+        add_btn_label: Nouvelle société
+        add_form_name: form_client_rdc

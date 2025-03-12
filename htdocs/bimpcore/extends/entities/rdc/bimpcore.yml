@@ -1,0 +1,9 @@
+params:
+    id_user_group_KAM:
+        label: id du Group KAM
+        def: 0
+        cat: groups
+    id_user_group_BD:
+        label: id du Group BD
+        def: 0
+        cat: groups

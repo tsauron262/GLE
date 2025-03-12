@@ -5,7 +5,7 @@ BimpCore::requireFileForEntity('bimpapple', '/classes/GSX_Const_entity.php');
 class GSX_Const extends GSX_Const_entity
 {
 
-    // Toutes les données en dur pour GSX V2 sont à mettre ici: 
+    // Toutes les données en dur pour GSX V2 sont à mettre ici:
     public static $mode = 'prod'; // test ou prod
     public static $debug_mode = false;
     public static $log_errors = true;
@@ -34,7 +34,7 @@ class GSX_Const extends GSX_Const_entity
         ),
         'req'              => array(
             'authenticate'                   => 'api/authenticate/token',
-            // Réparations: 
+            // Réparations:
             'productDetails'                 => 'gsx/api/repair/product/details',
             'componentIssue'                 => 'gsx/api/repair/product/componentissue',
             'repairSummary'                  => 'gsx/api/repair/summary',
@@ -43,16 +43,16 @@ class GSX_Const extends GSX_Const_entity
             'repairCreate'                   => 'gsx/api/repair/create',
             'repairUpdate'                   => 'gsx/api/repair/update',
             'repairQuestions'                => 'gsx/api/repair/questions',
-            // Diagnostiques: 
+            // Diagnostiques:
             'diagnosticSuites'               => 'gsx/api/diagnostics/suites',
             'diagnosticTest'                 => 'gsx/api/diagnostics/initiate-test',
             'diagnosticStatus'               => 'gsx/api/diagnostics/status',
             'diagnosticsLookup'              => 'gsx/api/diagnostics/lookup',
-            // Retours: 
+            // Retours:
             'returnsManage'                  => 'gsx/api/returns/manage',
             'returnsLookup'                  => 'gsx/api/returns/lookup',
             'returnsConfirmshipment'         => 'gsx/api/returns/confirmshipment',
-            // Réservations: 
+            // Réservations:
             'fetchReservationsSummary'       => 'gsx/api/reservation/summary',
             'fetchReservation'               => 'gsx/api/reservation/details',
             'fetchAvailableSlots'            => 'gsx/api/reservation/fetch-available-slots',
@@ -72,7 +72,7 @@ class GSX_Const extends GSX_Const_entity
             'stockingOrderDetails'           => 'gsx/api/order/stocking/details',
 //            'stockingOrderUpdate'            => 'gsx/api/order/stocking/update',
 //            'stockingOrderDelete'            => 'gsx/api/order/stocking/delete',
-            // Autre: 
+            // Autre:
             'partsSummary'                   => 'gsx/api/parts/summary',
             'filesUpload'                    => 'gsx/api/attachment/upload-access',
             'articleLookup'                  => 'gsx/api/content/article/lookup',
@@ -124,7 +124,7 @@ class GSX_Const extends GSX_Const_entity
         'serial'   => 'Numéro de série',
         'repairId' => 'ID réparation'
     );
-    // Codes GSX: 
+    // Codes GSX:
     public static $deviceIdentifiers = array(
         'meid'   => 'MEID',
         'imei2'  => 'IMEI2',
@@ -206,7 +206,7 @@ class GSX_Const extends GSX_Const_entity
         'APPLECARE_PLUS'     => array('label' => 'AppleCare+ covered incident', 'classes' => array('success')),
         'VMI_RED'            => array('label' => 'VMI Red, full price', 'classes' => array('danger')),
         'VMI_GREEN'          => array('label' => 'VMI Green', 'classes' => array('success')),
-        // V6 : 
+        // V6 :
 //        'THEFTLOSS'          => array('label' => 'THEFTLOSS', 'classes' => array('info')),
 //        'DAMAGE_NOT_COVERED' => array('label' => 'Dégâts non couverts', 'classes' => array('danger')),
 //        'OTHER'              => array('label' => 'Autre', 'classes' => array('info')),
@@ -236,7 +236,11 @@ class GSX_Const extends GSX_Const_entity
         'txt', 'doc', 'docx', 'csv', 'pdf', 'jpg', 'png', 'jpeg', 'zip'
     );
 
-    // Méthodes statiques: 
+	public static $pricing_options = array(
+		'ADDON' => 'Prix additionnel'
+	);
+
+	// Méthodes statiques:
 
     public static function getCertifInfo($soldTo, &$errors = array())
     {

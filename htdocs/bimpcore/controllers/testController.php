@@ -15,6 +15,8 @@ class testController extends BimpController
 		BimpObject::loadClass('bimpcore', 'Bimp_ActionComm');
 		$data = Bimp_ActionComm::getActionCommEventsForUser($id_user, '');
 
+		$html .= '<pre>' . print_r($data, 1) . '</pre>';
+
 		return $html;
     }
 }

@@ -2,7 +2,7 @@
 
 class Bimp_ActionComm extends BimpObject
 {
-
+	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 	public static $transparencies = array(
 		0 => 'Disponible',
 		1 => 'Occupé',

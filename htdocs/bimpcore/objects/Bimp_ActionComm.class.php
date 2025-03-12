@@ -15,7 +15,7 @@ class Bimp_ActionComm extends BimpObject
         100 => 'Terminé'
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function getRight($code)
     {
@@ -41,7 +41,7 @@ class Bimp_ActionComm extends BimpObject
 
         return 0;
     }
-    
+
     public function renderDolTabs(){
         global $langs;
         require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
@@ -67,7 +67,7 @@ class Bimp_ActionComm extends BimpObject
         return $this->getRight('create');
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -76,17 +76,17 @@ class Bimp_ActionComm extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-//        return $this->getRight('create');// pas de droits user ici 
+//        return $this->getRight('create');// pas de droits user ici
         return 1;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-//        return $this->getRight('delete');// pas de droits user ici 
+//        return $this->getRight('delete');// pas de droits user ici
         return 1;
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getTypesArray($include_empty = false)
     {
@@ -126,7 +126,7 @@ class Bimp_ActionComm extends BimpObject
         return $socpeople;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getRefProperty()
     {
@@ -182,7 +182,7 @@ class Bimp_ActionComm extends BimpObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayExternalUsers()
     {
@@ -210,7 +210,7 @@ class Bimp_ActionComm extends BimpObject
         }
         return $return;
     }
-    
+
     public function getLinkedUrl($externe = false){
         $html = '';
         if ((int) $this->getData('fk_element') && $this->getData('elementtype')) {
@@ -279,7 +279,7 @@ class Bimp_ActionComm extends BimpObject
         return $filters;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderDateInput($field_name)
     {
@@ -362,7 +362,7 @@ class Bimp_ActionComm extends BimpObject
                     }
                 }
             }
-            
+
             if (empty($this->dol_object->userassigned)) {
                 $this->set('fk_user_action', 0);
             } else {
@@ -492,4 +492,105 @@ class Bimp_ActionComm extends BimpObject
 
         return $errors;
     }
+
+	// Méthodes statiques :
+
+//	public static function getActionCommEventsForUser($id_user, $tms, $options = array(), &$errors = array())
+//	{
+//		if ((int) BimpCore::getConf('mode_eco')) {
+//			return array();
+//		}
+//
+//		$data = array(
+//			'tms'      => date('Y-m-d H:i:s'),
+//			'elements' => array()
+//		);
+//
+//		$bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+//		if (!BimpObject::objectLoaded($bimp_user)) {
+//			return $data;
+//		}
+//
+//		$filters = array();
+//
+//		if ($tms) {
+//			$filters['tms'] = array(
+//				'operator' => '>',
+//				'value'    => $tms
+//			);
+//		}
+//
+////		if (isset($options['excluded_tasks']) && !empty($options['excluded_tasks'])) {
+////			$filters['id'] = array(
+////				'not_in' => $options['excluded_tasks']
+////			);
+////		}
+//
+//		$filters['or_user'] = array(
+//			'or' => array(
+//				'owner'  => array(
+//					'and_fields' => array(
+//						'id_user_owner' => (int) $id_user,
+//						'status'        => array(0, 1, 3)
+//					)
+//				),
+//				'author' => array(
+//					'and_fields' => array(
+//						'user_create' => (int) $id_user,
+//						'status'      => 2
+//					)
+//				)
+//			)
+//		);
+//
+//		$affected_elements = self::getNewTasks($filters, 'affected');
+//
+//		$filters_rights = self::getFiltreRightArray($bimp_user->dol_object);
+//
+//		if (!empty($filters_rights)) {
+//			unset($filters['or_user']);
+//			$filters['id_user_owner'] = 0;
+//			$filters['status'] = array(0, 1, 3);
+//			$filters = BimpTools::merge_array($filters, $filters_rights);
+//
+//			$unaffected_elements = self::getNewTasks($filters, 'unaffected');
+//			$data['elements'] = BimpTools::merge_array($affected_elements, $unaffected_elements);
+//		} else {
+//			$data['elements'] = $affected_elements;
+//		}
+//
+//		if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
+//			$bdb = self::getBdb();
+//			$users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+//
+//			if (!empty($users_delegations)) {
+//				$taks_ids = array();
+//
+//				foreach ($data['elements'] as &$task) {
+//					$taks_ids[] = $task['id'];
+//				}
+//
+//				foreach ($users_delegations as $id_user_delegation) {
+//					$user_delegation = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_delegation);
+//					$user_name = (BimpObject::objectLoaded($user_delegation) ? $user_delegation->getName() : 'Utilisateur #' . $id_user_delegation);
+//
+//					$user_tasks = self::getTaskForUser($id_user_delegation, $tms, array(
+//						'excluded_tasks'      => $taks_ids,
+//						'include_delegations' => 0
+//					), $errors);
+//
+//					if (!empty($user_tasks)) {
+//						foreach ($user_tasks['elements'] as &$task) {
+//							$taks_ids[] = $task['id'];
+//							$task['dest'] = $user_name;
+//						}
+//
+//						$data['elements'] = BimpTools::merge_array($data['elements'], $user_tasks['elements']);
+//					}
+//				}
+//			}
+//		}
+//
+//		return $data;
+//	}
 }

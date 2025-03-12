@@ -1,0 +1,1 @@
+INSERT INTO `llx_bimp_notification` (`label`, `nom`, `module`, `class`, `method`, `user_create`, `user_update`, `active`) VALUES ('Événements', 'actoncomm_events', 'bimpcore', 'Bimp_ActionComm', 'getActionCommEventsForUser', 1, 1, 0);

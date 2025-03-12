@@ -421,6 +421,7 @@ class Ldap
 						if ($this->result) {
 							$this->bind = $this->result;
 							$connected = 2;
+							session_regenerate_id();
 							$this->connectedServer = $host;
 							break;
 						} else {
@@ -1221,10 +1222,10 @@ class Ldap
 		} else {						// Use a filter forged using the $search value
 			$filter = '('.ldap_escape($useridentifier, '', LDAP_ESCAPE_FILTER).'='.ldap_escape($search, '', LDAP_ESCAPE_FILTER).')';
 		}
-                
-                
+
+
                 $info = array();
-                
+
 /*
  * moddrsi pour arricher plus de 2000 users
  */
@@ -1287,7 +1288,7 @@ class Ldap
 
                  * fmoddrsi
                  *                  */
-                
+
 		// Warning: Dans info, les noms d'attributs sont en minuscule meme si passe
 		// a ldap_search en majuscule !!!
 		//print_r($info);
@@ -1356,9 +1357,9 @@ class Ldap
                 $ldapUserTab = explode('@', $ldapUser);
                 if(isset($ldapUserTab[1]))
                     $ldapUser = $ldapUserTab[0];
-            
-            
-            
+
+
+
 		$criteria = '('.$this->getUserIdentifier().'='.$ldapUser.')';
 		$justthese = array("objectsid");
 

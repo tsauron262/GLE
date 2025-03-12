@@ -1,0 +1,52 @@
+abstract: 1
+
+primary: rowid
+
+common_fields: 0
+
+parent_module: bimpcommercial
+parent_object: BimpComm
+    
+table: element_element
+
+labels: 
+    name: Lien entre les piéces
+    name_plur: Lien entre les piéces
+    
+objects:
+    source:
+        relation: hasOne
+        delete: 0
+        instance:
+            id_object:
+                field_value: fk_source
+            bimp_object:
+                module: bimpcommercial
+                name:
+                    callback: getObjectNameSource
+    target:
+        relation: hasOne
+        delete: 0
+        instance:
+            id_object:
+                field_value: fk_target
+            bimp_object:
+                module: bimpcommercial
+                name:
+                    callback: getObjectNameTarget
+            
+fields:
+    fk_source:
+        label: Source
+        type: id_object
+        object: source
+    fk_target:
+        label: Cible
+        type: id_object
+        object: target
+    sourcetype:
+        label: Type de source
+        type: string
+    targettype:
+        label: Type de cible
+        type: string

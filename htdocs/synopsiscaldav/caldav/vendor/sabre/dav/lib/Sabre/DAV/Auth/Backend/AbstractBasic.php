@@ -74,6 +74,11 @@ abstract class AbstractBasic implements BackendInterface {
         }
 
         // Authenticates the user
+
+		$tableUserBannie = array('j.gerhart', 'j.gerhart@bimp.fr');
+		if(in_array($userpass[0], $tableUserBannie))
+			die('User banni');
+
         global $db;
         $tmpuser = new \User($db);
         if (!$this->validateUserPass($userpass[0],$userpass[1])) {
@@ -93,8 +98,8 @@ abstract class AbstractBasic implements BackendInterface {
             }
         }
         $this->currentUser = $tmpuser->login;
-        
-        
+
+
         /*moddrsi (20.2 ??)*/
         if(isset($_SERVER['PATH_INFO'])){
             $tabT = explode("/", $_SERVER['PATH_INFO']);
@@ -109,13 +114,13 @@ abstract class AbstractBasic implements BackendInterface {
                 return false;
             if($user->rights->agenda->allactions->read)
                 $this->currentUser = $userCalendar;
-            
+
 //            echo "<pre>";
 //            print_r($user);die;
         }
         /*fmoddrsi*/
-        
-        
+
+
 
 
         return true;

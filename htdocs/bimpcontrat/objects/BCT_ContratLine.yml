@@ -387,6 +387,16 @@ fields:
         type: bool
         default_value: 0
         
+    force_fac_ended:
+        label: Forcer l'arrêt de la facturation
+        type: bool
+        default_value: 0
+        
+    force_achat_ended:
+        label: Forcer l'arrêt des achats
+        type: bool
+        default_value: 0
+        
     renouv_task: 
         label: Tâche de renouvellement créée
         type: bool
@@ -807,6 +817,11 @@ forms:
               content: 
                   callback: renderMoveToOtherContratInput
               
+    stop_fac_achat:
+        rows:
+            - field: force_fac_ended
+            - field: force_achat_ended
+            
 fields_tables: 
     infos: 
         title: Informations

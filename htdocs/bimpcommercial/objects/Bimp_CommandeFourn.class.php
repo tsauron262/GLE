@@ -2220,7 +2220,9 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 if (isset($statutActu)) {
                     if ($statutActu != $data['status']) {
                         $nbOk++;
-                        $errors = BimpTools::merge_array($errors, $instance->actionForceStatus(array($data['type'] => $data['status']), $inut));
+						$result = $instance->actionForceStatus(array($data['type'] => $data['status']), $inut);
+						$errors = BimpTools::merge_array($errors, $result['errors']);
+						$warnings = BimpTools::merge_array($errors, $result['warnings']);
                     } else
                         $warnings[] = $instance->getLink() . ' à déja ce statut';
                 } else {

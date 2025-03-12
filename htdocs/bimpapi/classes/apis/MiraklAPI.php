@@ -37,7 +37,7 @@ class MiraklAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$data = $this->getShopInfo(2037, $errors);
+		$data = $this->getShopInfo('', $errors);
 
 		if(isset($data['shops']))
 			$warnings[] = count($data['shops']).' résultats';

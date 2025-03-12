@@ -11,7 +11,7 @@ class indexController extends BimpController
 
 		foreach (array(
 					 'en_cours'       => 'En cours d\'élaboration',
-					 'complets'       => 'Contrats complets non cédés',
+//					 'complets'       => 'Contrats complets non cédés',
 					 'en_place'       => 'Contrats mis en place',
 					 'cession_finale' => 'Cessions finales faites',
 					 'canceled'       => 'Demandes abandonnées',

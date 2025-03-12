@@ -217,11 +217,6 @@ class BimpPDF_Table
         $html .= '</tr>';
         $html .= '</table>';
 
-//        global $user; 
-//        if ($user->login = 'f.martinez') {
-//            echo htmlentities($html);
-//        }
-
         $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html . "", false, false, true, false, '');
     }
 
@@ -260,7 +255,7 @@ class BimpPDF_Table
 
     public function write()
     {
-        // Vérification de l'affichage des colonnes: 
+        // Vérification de l'affichage des colonnes:
         $cols = array();
         foreach ($this->cols as $key => $col) {
             if ($this->remove_empty_cols) {
@@ -279,7 +274,7 @@ class BimpPDF_Table
             return;
         }
 
-        // Affichage du titre: 
+        // Affichage du titre:
         if ($this->title) {
             $this->pdf->writeHTML($this->title . '<br/>');
         }
@@ -365,7 +360,7 @@ class BimpPDF_Table
         $html = '';
         $head = '';
 
-        // Vérification de l'affichage des colonnes: 
+        // Vérification de l'affichage des colonnes:
         $cols = array();
 
         foreach ($this->cols as $key => $col) {

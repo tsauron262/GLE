@@ -115,6 +115,14 @@ class Bimp_Societe extends BimpDolObject
 
         return (int) ($user->admin || $user->rights->societe->supprimer);
     }
+    
+    public function isFieldEditable($field, $force_edit = false) {
+        if($field == 'siren'){
+            if($this->getData('id_atradius') != '' && $this->getData('id_atradius') != 0)
+                return 0;
+        }
+        return parent::isFieldEditable($field, $force_edit);
+    }
 
     public function canEditField($field_name)
     {

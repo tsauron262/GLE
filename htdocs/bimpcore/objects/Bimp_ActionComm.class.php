@@ -622,7 +622,7 @@ class Bimp_ActionComm extends BimpObject
 					)
 				)
 			),
-			'type.user_notif'  => 1
+			'ac_type.user_notif'  => 1
 		);
 
 		if ($tms) {

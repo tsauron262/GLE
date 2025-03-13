@@ -11793,7 +11793,7 @@ a.nav-link.dropdown-toggle:not(.notif_white) > i {
 }
 
 .list_notification {
-  line-height: 22px;
+  line-height: 20px;
   font-size: 12px;
 }
 .list_notification .list_part {
@@ -12050,6 +12050,12 @@ ul#nav_task > li.reload {
   width: 520px !important;
   min-width: 520px !important;
 }
+.bimp_notification_dropdown.dropdown_actioncomm_event .part_list_header {
+  line-height: 26px;
+}
+.bimp_notification_dropdown.dropdown_actioncomm_event .date_notif {
+  font-size: 13px;
+}
 .bimp_notification_dropdown.dropdown_actioncomm_event .type {
   font-size: 12px;
   color: #0a78cb;
@@ -12070,6 +12076,7 @@ ul#nav_task > li.reload {
 }
 .bimp_notification_dropdown.dropdown_actioncomm_event .desc {
   font-size: 12px;
+  line-height: 14px;
   margin-top: 8px;
   padding: 8px 15px;
   border-radius: 25px;

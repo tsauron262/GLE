@@ -102,6 +102,10 @@ class BimpCore
 				}
 			}
 
+			if ($use_css_v2) {
+				self::$files['css']['fonts'] = '/bimpcore/views/css_v2/fonts.css';
+			}
+
 			// Traitements JS :
 			if ($is_context_private) {
 				self::$files['js']['notification'] = '/bimpcore/views/js/notification.js';

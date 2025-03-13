@@ -349,4 +349,37 @@ ul#nav_task > li.reload {
 .bimp_notification_dropdown.dropdown_actioncomm_event {
   width: 520px !important;
   min-width: 520px !important;
+
+  .type {
+    font-size: 12px;
+    color: #0a78cb;
+  }
+
+  .state {
+    .badge {
+      font-size: 10px !important;
+
+      i.iconLeft {
+        margin-right: 6px;
+      }
+    }
+  }
+
+  .lieu {
+    font-size: 12px;
+  }
+
+  .title {
+    font-size: 13px;
+    font-weight: bold;
+    margin: 8px;
+  }
+
+  .desc {
+    font-size: 12px;
+    margin-top: 8px;
+    padding: 8px 15px;
+    border-radius: 25px;
+    background-color: #e0f3ff;
+  }
 }

@@ -51,7 +51,7 @@ objects:
     contact: 
         instance: 
             id_object: 
-                field_value: fk_soc
+                field_value: fk_contact
                 
     
     projet:

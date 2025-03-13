@@ -281,7 +281,7 @@ class Bimp_ActionComm extends BimpObject
 		return $html;
 	}
 
-	public function displayState()
+	public function displayState($badge = false)
 	{
 		if ($this->isLoaded()) {
 			$percent = (float) $this->getData('percent');
@@ -292,19 +292,19 @@ class Bimp_ActionComm extends BimpObject
 				$date_now = date('Y-m-d H:i:s');
 
 				if ($date_now < $date_begin) {
-					return '<span class="warning">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'A venir</span>';
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'warning">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'A venir</span>';
 				} elseif ($date_now < $date_end) {
-					return '<span class="info">' . BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'En cours</span>';
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'info">' . BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'En cours</span>';
 				} else {
-					return '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Terminé</span>';
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Terminé</span>';
 				}
 			} else {
 				if (!$percent) {
-					return '<span class="warning">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'A faire</span>';
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'warning">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'A faire</span>';
 				} elseif ($percent < 100) {
-					return '<span class="info">' . BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'En cours (' . $percent . ' %)</span>';
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'info">' . BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'En cours (' . $percent . ' %)</span>';
 				} else {
-					return '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Terminé</span>';
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Terminé</span>';
 				}
 			}
 		}
@@ -312,12 +312,14 @@ class Bimp_ActionComm extends BimpObject
 		return '';
 	}
 
-	public function displayDates()
+	public function displayDates($with_icon = false)
 	{
 		$html = '';
 		$from = $this->getData('datep');
 		$to = $this->getData('datep2');
 		$fullday = (int) $this->getData('fulldayevent');
+		$multiple_days = false;
+
 		if ($from) {
 			$dt_from = new DateTime($from);
 
@@ -341,6 +343,7 @@ class Bimp_ActionComm extends BimpObject
 						$html .= ' de ' . $dt_from->format('H:i') . ' à ' . $dt_to->format('H:i');
 					}
 				} else {
+					$multiple_days = true;
 					$html .= 'Du ' . $dt_from->format('d/m/Y') . ($fullday ? ' ' . $dt_from->format('H:i') : '');
 					$html .= ' au ' . $dt_to->format('d/m/Y') . ($fullday ? ' ' . $dt_to->format('H:i') : '');
 
@@ -349,6 +352,11 @@ class Bimp_ActionComm extends BimpObject
 					}
 				}
 			}
+		}
+
+		if ($with_icon) {
+			$icon = 'fas_' . ($multiple_days ? 'calendar-week' : ($fullday ? 'calendar-day' : 'clock'));
+			$html = BimpRender::renderIcon($icon, 'iconLeft') . $html;
 		}
 
 		return $html;
@@ -586,7 +594,7 @@ class Bimp_ActionComm extends BimpObject
 			return $data;
 		}
 
-		$date_now = date('Y-m-d H:i:s');
+		$date_now = date('Y-m-d');
 
 		$joins = array(
 			'ac_type' => array(
@@ -596,7 +604,7 @@ class Bimp_ActionComm extends BimpObject
 		);
 
 		$filters = array(
-			'a.fk_user_author'   => $id_user,
+			'a.fk_user_action'   => $id_user,
 			'or_todo'            => array(
 				'or' => array(
 					'and_no_percent' => array(
@@ -605,9 +613,17 @@ class Bimp_ActionComm extends BimpObject
 								'operator' => '<',
 								'value'    => 0
 							),
-							'a.datep'   => array(
-								'operator' => '>=',
-								'value'    => $date_now
+							'or_date'   => array(
+								'or' => array(
+									'a.datep'  => array(
+										'operator' => '>=',
+										'value'    => $date_now . ' 00:00:00'
+									),
+									'a.datep2' => array(
+										'operator' => '>=',
+										'value'    => $date_now . ' 00:00:00'
+									)
+								)
 							)
 						)
 					),
@@ -642,21 +658,53 @@ class Bimp_ActionComm extends BimpObject
 			);
 		}
 
-		foreach (BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_ActionComm', $filters, 'a.id', 'desc', $joins, 30) as $ac) {
+		$datetime_now = date('Y-m-d H:i:s');
+		foreach (BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_ActionComm', $filters, 'a.datep', 'asc', $joins, 30) as $ac) {
+			$tiers_str = '';
 			$tiers = $ac->getChildObject('societe');
 
+			if (BimpObject::objectLoaded($tiers)) {
+				if ($tiers->isClient()) {
+					$tiers = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $tiers->id);
+					$tiers_str = '<b>Client : </b>' . $tiers->getLink();
+				} else {
+					$tiers_str = '<b>Tiers : </b>' . $tiers->getLink();
+				}
+			}
+
+			$contact = $ac->getChildObject('contact');
+
+			$today = 0;
+			$bg_type = '';
+			$icon = '';
+
+			$dt_start = new DateTime($ac->getData('datep'));
+			if ($dt_start->format('Y-m-d H:i:s') < $datetime_now) {
+				$today = 1;
+				$icon = 'exclamation-circle';
+				$bg_type = 'danger';
+			} elseif ($dt_start->format('Y-m-d') == $date_now) {
+				$today = 1;
+				$icon = 'exclamation';
+				$bg_type = 'warning';
+			}
+
 			$data['elements'][] = array(
-				'id'         => $ac->id,
-//				'link'       => $ac->getLink(),
-				'url'        => $ac->getUrl(),
-				'label'      => $ac->getData('label'),
-				'type'       => $ac->displayDataDefault('fk_action'),
-				'date_start' => $ac->getData('datep'),
-				'date_end'   => $ac->getData('datep2'),
-				'date_str'   => $ac->displayDates(),
-				'code'       => $ac->getData('code'),
-				'tiers'      => (BimpObject::objectLoaded($tiers) ? $tiers->getLink() : ''),
-				'obj'        => $ac->displayElement()
+				'id'       => $ac->id,
+				'url'      => $ac->getUrl(),
+				'icon'     => $icon,
+				'label'    => $ac->getData('label'),
+				'type'     => $ac->displayDataDefault('fk_action'),
+				'date_str' => $ac->displayDates(true),
+				'code'     => $ac->getData('code'),
+				'tiers'    => $tiers_str,
+				'contact'  => (BimpObject::objectLoaded($contact) ? $contact->getLink() : ''),
+				'obj'      => $ac->displayElement(),
+				'bg_type'  => $bg_type,
+				'today'    => $today,
+				'state'    => $ac->displayState(true),
+				'lieu'     => $ac->getData('location'),
+				'desc'     => $ac->getData('note')
 			);
 		}
 

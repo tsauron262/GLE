@@ -179,14 +179,14 @@ class AbstractNotification {
                     nb_unread++;
                 }
 
-                html += '<div class="list_part ' + (url ? 'notif_link ' : '') + this.elements[i].class + '" key="' + this.elements[i].id + '">';
+                html += '<div class="list_part ' + (url ? 'notif_link ' : '') + this.elements[i].class + /*(this.elements[i].bg_type ? ' bg-' + this.elements[i].bg_type : '')*/ + '" key="' + this.elements[i].id + '">';
 
                 var header = '';
 
                 if (this.elements[i].date_create) {
                     header += '<span class="date_notif">' + this.formatDate(this.elements[i].date_create) + '</span>';
                 } else if (this.elements[i].date_str) {
-					header += '<span class="date_notif"><i class="fas fa5-calendar-day iconLeft"></i>' + this.elements[i].date_str + '</span>';
+					header += '<span class="date_notif">' + this.elements[i].date_str + '</span>';
 				}
 
                 var header_buttons = this.getElementHeaderButtons(this.elements[i], this.elements[i].id);
@@ -478,7 +478,7 @@ function BimpNotifications() {
 //    }
 
     this.reload = function (reiterate = true, id_notification_type = 0) {
-//        return;
+       // return;
 
         if (!bn.active || bn.processing) {
             bn.iterate();

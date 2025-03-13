@@ -12050,6 +12050,31 @@ ul#nav_task > li.reload {
   width: 520px !important;
   min-width: 520px !important;
 }
+.bimp_notification_dropdown.dropdown_actioncomm_event .type {
+  font-size: 12px;
+  color: #0a78cb;
+}
+.bimp_notification_dropdown.dropdown_actioncomm_event .state .badge {
+  font-size: 10px !important;
+}
+.bimp_notification_dropdown.dropdown_actioncomm_event .state .badge i.iconLeft {
+  margin-right: 6px;
+}
+.bimp_notification_dropdown.dropdown_actioncomm_event .lieu {
+  font-size: 12px;
+}
+.bimp_notification_dropdown.dropdown_actioncomm_event .title {
+  font-size: 13px;
+  font-weight: bold;
+  margin: 8px;
+}
+.bimp_notification_dropdown.dropdown_actioncomm_event .desc {
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 8px 15px;
+  border-radius: 25px;
+  background-color: #e0f3ff;
+}
 
 #BimpThemeWrapper {
   /*.page-wrap .app-sidebar .sidebar-content .nav-container .navigation-main .nav-item.open a::before { -moz-transform: rotate(90deg); -o-transform: rotate(90deg); -ms-transform: rotate(90deg); -webkit-transform: rotate(90deg); transform: rotate(90deg); }*/

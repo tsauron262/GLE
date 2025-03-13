@@ -12086,7 +12086,8 @@ ul#nav_task > li.reload {
 
 /* Rendez-vous agenda */
 .bimp_notification_dropdown.dropdown_actioncomm_event {
-  width: 520px;
+  width: 520px !important;
+  min-width: 520px !important;
 }
 
 #BimpThemeWrapper {
@@ -13345,4 +13346,55 @@ ul#nav_task > li.reload {
   #BimpThemeWrapper #id-right {
     position: relative !important;
   }
+}
+.BimpComponent.BCV2.debug {
+  border: 2px solid #BF3427;
+  padding: 0 10px 10px 10px;
+  margin: 2px;
+  display: inline-block;
+  text-align: left;
+}
+.BimpComponent.BCV2.debug .debugContainer {
+  margin: 0 -10px 10px -10px;
+  font-size: 11px;
+}
+.BimpComponent.BCV2.debug .debugCaption {
+  color: #fff;
+  background-color: #BF3427;
+  padding: 5px;
+  margin: 0;
+}
+.BimpComponent.BCV2.debug .debugCaption .foldable-caret {
+  font-size: 11px;
+  display: inline-block;
+}
+.BimpComponent.BCV2.debug .debugContent {
+  padding: 5px;
+  display: none;
+  background-color: #DCDCDC;
+}
+.BimpComponent.BCV2.debug .debugContent .foldable_content {
+  min-width: 400px;
+}
+
+.BC_TimerInput .timer_input_value {
+  width: 45px !important;
+}
+
+.BCTest_Group {
+  display: inline-block;
+}
+.BCTest_Group > .bcv2_containter {
+  border: 1px solid #DCDCDC;
+  background-color: #FAFAFA;
+  padding: 5px 15px;
+}
+
+.BCTest_Element {
+  display: inline-block;
+}
+.BCTest_Element > .bcv2_containter {
+  border: 1px solid #DCDCDC;
+  padding: 15px;
+  margin: 5px;
 }

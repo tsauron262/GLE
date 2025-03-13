@@ -347,5 +347,6 @@ ul#nav_task > li.reload {
 
 /* Rendez-vous agenda */
 .bimp_notification_dropdown.dropdown_actioncomm_event {
-  width: 520px;
+  width: 520px !important;
+  min-width: 520px !important;
 }

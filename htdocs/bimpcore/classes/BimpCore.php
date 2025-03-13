@@ -79,7 +79,7 @@ class BimpCore
 			$extends_entity = BimpCore::getExtendsEntity();
 
 			global $user;
-			$use_css_v2 = ((int) self::getConf('use_css_v2') && $user->login == 'f.martinez' || $user->login == 'e.sirodot');
+			$use_css_v2 = ((int) self::getConf('use_css_v2') && ($user->login == 'f.martinez' || $user->login == 'e.sirodot' || $user->login == 'admin'));
 
 			$is_context_private = self::isContextPrivate();
 
@@ -90,20 +90,34 @@ class BimpCore
 			// Traitements CSS :
 			$css_dir = 'css' . ($use_css_v2 ? '_v2' : '');
 
-			if ($is_context_private) {
-				if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/bimpcore_' . $extends_entity . '.css')) {
-					self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_' . $extends_entity . '.css';
-				}
-			} else {
-				if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/bimpcore_public_' . $extends_entity . '.css')) {
-					self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public_' . $extends_entity . '.css';
-				} else {
-					self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public.css';
-				}
-			}
-
 			if ($use_css_v2) {
 				self::$files['css']['fonts'] = '/bimpcore/views/css_v2/fonts.css';
+
+				if ($is_context_private) {
+					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/entities/' . $extends_entity . '/bimpcore.css')) {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/entities/' . $extends_entity . '/bimpcore.css';
+					} else {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore.css';
+					}
+				} else {
+					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/entities/' . $extends_entity . '/bimpcore_public.css')) {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/entities/' . $extends_entity . '/bimpcore_public.css';
+					} else {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public.css';
+					}
+				}
+			} else {
+				if ($is_context_private) {
+					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/bimpcore_' . $extends_entity . '.css')) {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_' . $extends_entity . '.css';
+					}
+				} else {
+					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/bimpcore_public_' . $extends_entity . '.css')) {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public_' . $extends_entity . '.css';
+					} else {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public.css';
+					}
+				}
 			}
 
 			// Traitements JS :

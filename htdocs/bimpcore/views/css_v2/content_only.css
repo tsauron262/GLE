@@ -1,0 +1,11 @@
+div#id-container {
+    width: 100%;
+}
+
+div#id-top, div#id-left, div#but-menu, div#bimp_fixe_tabs{
+    display: none;
+}
+
+div#id-right{
+    top: 0;
+}

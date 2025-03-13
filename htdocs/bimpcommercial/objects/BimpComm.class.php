@@ -297,7 +297,7 @@ class BimpComm extends BimpDolObject
 				}
 
 				if (!BimpObject::objectLoaded($client)) {
-					$errors[] = 'Client absent (1)';
+					$errors[] = 'Client absent';
 				} else {
 					if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0) {
 						$errors[] = 'Type de tiers obligatoire';
@@ -370,7 +370,7 @@ class BimpComm extends BimpDolObject
 				$client = $this->getChildObject('client');
 
 				if (!BimpObject::objectLoaded($client)) {
-					$errors[] = 'Client absent (2)';
+					$errors[] = 'Client absent';
 					return 0;
 				}
 				return 1;
@@ -3862,7 +3862,7 @@ class BimpComm extends BimpDolObject
 		$client = $this->getClientFacture();
 
 		if (!BimpObject::objectLoaded($client)) {
-			$errors[] = 'Client absent (3)';
+			$errors[] = 'Client absent';
 			return $errors;
 		}
 

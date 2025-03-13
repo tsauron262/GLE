@@ -67,7 +67,7 @@ objects:
         extends: client
         instance: 
             id_object: 
-                field_value: id_client_facture-
+                field_value: id_client_facture
                 
     demande_fin: 
         relation: hasOne

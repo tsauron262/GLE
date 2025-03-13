@@ -387,7 +387,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             return 0;
                         }
                     } else {
-                        $errors[] = "Client absent (4)";
+                        $errors[] = "Client absent";
                         return 0;
                     }
                 } else {
@@ -3918,7 +3918,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $client = $this->getChildObject('client');
 
             if (!BimpObject::objectLoaded($client)) {
-                $errors[] = 'Client absent (5)';
+                $errors[] = 'Client absent';
             } else {
                 $old_ref = $this->getRef();
                 if (preg_match('/^[\(]?PROV/i', $old_ref)) {

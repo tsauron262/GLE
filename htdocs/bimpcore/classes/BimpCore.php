@@ -67,6 +67,7 @@ class BimpCore
 	public static function init()
 	{
 		if (!self::$is_init) {
+
 			$_SESSION['dol_tz_string'] = BimpCore::getConf('main_timezone');
 
 			BimpDebug::addDebugTime('Début affichage page');
@@ -76,7 +77,10 @@ class BimpCore
 			global $noBootstrap;
 
 			$extends_entity = BimpCore::getExtendsEntity();
-			$use_css_v2 = (int) self::getConf('use_css_v2');
+
+			global $user;
+			$use_css_v2 = ((int) self::getConf('use_css_v2') && $user->login == 'f.martinez');
+
 			$is_context_private = self::isContextPrivate();
 
 			if ($noBootstrap) {

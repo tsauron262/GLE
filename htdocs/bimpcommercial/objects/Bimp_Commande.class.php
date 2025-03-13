@@ -447,7 +447,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $client = $this->getChildObject('client');
             $client_facture = $this->getClientFacture();
             if (!BimpObject::objectLoaded($client)) {
-                $errors[] = 'Client absent';
+                $errors[] = 'Client absent - ' . (int) $this->getData('fk_soc');
             }
 
             $this->checkValidationSolvabilite($client, $errors);

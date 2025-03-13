@@ -79,7 +79,7 @@ class BimpCore
 			$extends_entity = BimpCore::getExtendsEntity();
 
 			global $user;
-			$use_css_v2 = ((int) self::getConf('use_css_v2') && $user->login == 'f.martinez');
+			$use_css_v2 = ((int) self::getConf('use_css_v2') && $user->login == 'f.martinez' || $user->login == 'e.sirodot');
 
 			$is_context_private = self::isContextPrivate();
 

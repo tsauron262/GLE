@@ -584,7 +584,7 @@ class Bimp_ActionComm extends BimpObject
 			return array();
 		}
 
-		$id_user = 317;
+		$id_user = 375;
 
 		$data = array(
 			'tms'      => date('Y-m-d H:i:s'),

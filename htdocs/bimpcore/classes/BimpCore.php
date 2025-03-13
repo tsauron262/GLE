@@ -187,12 +187,12 @@ class BimpCore
 		if (self::isContextPrivate() && BimpObject::objectLoaded($user)) {
 			$notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
 
-			global $user;
-			if ($user->login == 'f.martinez') {
-				$config_notification = $notification->getList(array());
-			} else {
+//			global $user;
+//			if ($user->login == 'f.martinez') {
+//				$config_notification = $notification->getList(array());
+//			} else {
 				$config_notification = $notification->getList(array('active' => 1));
-			}
+//			}
 
 
 			foreach ($config_notification as $cn) {

@@ -12074,6 +12074,7 @@ ul#nav_task > li.reload {
   margin-top: 8px;
   padding: 8px 15px;
   border-radius: 25px;
+  border-top-left-radius: 0;
   background-color: #e0f3ff;
 }
 

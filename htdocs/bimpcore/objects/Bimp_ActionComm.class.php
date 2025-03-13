@@ -647,13 +647,14 @@ class Bimp_ActionComm extends BimpObject
 
 			$data['elements'][] = array(
 				'id'         => $ac->id,
-				'link'       => $ac->getLink(),
+//				'link'       => $ac->getLink(),
+				'url'        => $ac->getUrl(),
+				'label'      => $ac->getData('label'),
 				'type'       => $ac->displayDataDefault('fk_action'),
 				'date_start' => $ac->getData('datep'),
 				'date_end'   => $ac->getData('datep2'),
-				'dates_str'  => $ac->displayDates(),
+				'date_str'   => $ac->displayDates(),
 				'code'       => $ac->getData('code'),
-//				'label'      => $ac->getData('label'),
 				'tiers'      => (BimpObject::objectLoaded($tiers) ? $tiers->getLink() : ''),
 				'obj'        => $ac->displayElement()
 			);

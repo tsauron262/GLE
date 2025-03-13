@@ -84,31 +84,17 @@ class BimpCore
 			}
 
 			// Traitements CSS :
-			if ($use_css_v2) {
-				if ($is_context_private) {
-					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css')) {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css';
-					} else {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/default/bimpcore.css';
-					}
-				} else {
-					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore_public.css')) {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore_public.css';
-					} else {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/default/bimpcore_public.css';
-					}
+			$css_dir = 'css' . ($use_css_v2 ? '_v2' : '');
+
+			if ($is_context_private) {
+				if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/bimpcore_' . $extends_entity . '.css')) {
+					self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_' . $extends_entity . '.css';
 				}
 			} else {
-				if ($is_context_private) {
-					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css')) {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css';
-					}
+				if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/bimpcore_public_' . $extends_entity . '.css')) {
+					self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public_' . $extends_entity . '.css';
 				} else {
-					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css')) {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css';
-					} else {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
-					}
+					self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public.css';
 				}
 			}
 
@@ -126,9 +112,10 @@ class BimpCore
 		}
 	}
 
-	// Gestion Layout / js / css:
+// Gestion Layout / js / css:
 
-	public static function initLayout()
+	public
+	static function initLayout()
 	{
 		if (!self::$layoutInit) {
 			self::$layoutInit = true;
@@ -159,7 +146,8 @@ class BimpCore
 		self::$filesInit = true;
 	}
 
-	public static function getJsVars()
+	public
+	static function getJsVars()
 	{
 		global $user, $conf, $dolibarr_main_url_root;
 		$vars = array(
@@ -198,7 +186,8 @@ class BimpCore
 		return $vars;
 	}
 
-	public static function displayHeaderFiles($echo = true)
+	public
+	static function displayHeaderFiles($echo = true)
 	{
 		$html = '';
 		if (!self::$filesInit) {
@@ -242,7 +231,8 @@ class BimpCore
 		return $html;
 	}
 
-	public static function getFileUrl($file_path, $use_tms = true, $include_root = true)
+	public
+	static function getFileUrl($file_path, $use_tms = true, $include_root = true)
 	{
 		$url = '';
 
@@ -366,7 +356,8 @@ class BimpCore
 		return '';
 	}
 
-	public static function checkRessourcesDir($dir = '', &$errors = array(), &$success = '')
+	public
+	static function checkRessourcesDir($dir = '', &$errors = array(), &$success = '')
 	{
 		if (is_dir(DOL_DOCUMENT_ROOT . '/' . $dir)) {
 			foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $dir) as $f) {
@@ -405,9 +396,10 @@ class BimpCore
 		}
 	}
 
-	// Gestion Versions et mises à jours:
+// Gestion Versions et mises à jours:
 
-	public static function checkSqlUpdates($execute = false)
+	public
+	static function checkSqlUpdates($execute = false)
 	{
 		if (BimpTools::isSubmit('ajax')) {
 			return;
@@ -666,7 +658,8 @@ class BimpCore
 		}
 	}
 
-	public static function getModulesUpdates()
+	public
+	static function getModulesUpdates()
 	{
 		$updates = array();
 
@@ -705,7 +698,8 @@ class BimpCore
 		return $updates;
 	}
 
-	public static function getModulesExtendsUpdates()
+	public
+	static function getModulesExtendsUpdates()
 	{
 		if (!BimpCore::getVersion() && BimpCore::getExtendsEntity() == '') {
 			return array();
@@ -788,7 +782,8 @@ class BimpCore
 		return $updates;
 	}
 
-	public static function getBimpCoreSqlVersion($dev = '')
+	public
+	static function getBimpCoreSqlVersion($dev = '')
 	{
 		$versions = self::getConf('bimpcore_version');
 
@@ -849,7 +844,8 @@ class BimpCore
 		return $versions;
 	}
 
-	public static function setVersion($dev, $version)
+	public
+	static function setVersion($dev, $version)
 	{
 		$versions = self::getBimpCoreSqlVersion();
 
@@ -862,7 +858,8 @@ class BimpCore
 		self::setConf('bimpcore_version', $versions);
 	}
 
-	public static function afterGitPullProcess($force_process = false, &$success = '')
+	public
+	static function afterGitPullProcess($force_process = false, &$success = '')
 	{
 		$errors = array();
 
@@ -877,9 +874,10 @@ class BimpCore
 		return $errors;
 	}
 
-	// Gestion BimpCore Conf:
+// Gestion BimpCore Conf:
 
-	public static function getConfCache()
+	public
+	static function getConfCache()
 	{
 		if (is_null(self::$conf_cache)) {
 			self::$conf_cache = array();
@@ -906,7 +904,8 @@ class BimpCore
 		return self::$conf_cache;
 	}
 
-	public static function getConf($name, $default = null, $module = 'bimpcore', &$source = '', $entity = null)
+	public
+	static function getConf($name, $default = null, $module = 'bimpcore', &$source = '', $entity = null)
 	{
 		// Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
 		// passée en argument de la fonction.
@@ -967,7 +966,8 @@ class BimpCore
 		return self::$conf_cache_def_values[$module][$name];
 	}
 
-	public static function setConf($name, $value, $module = 'bimpcore', $entity = -1)
+	public
+	static function setConf($name, $value, $module = 'bimpcore', $entity = -1)
 	{
 		if (!$module) {
 			$module = 'bimpcore';
@@ -1014,7 +1014,8 @@ class BimpCore
 		return $errors;
 	}
 
-	public static function RemoveConf($name, $module = 'bimpcore', $entity = -1)
+	public
+	static function RemoveConf($name, $module = 'bimpcore', $entity = -1)
 	{
 		if (!$module) {
 			$module = 'bimpcore';
@@ -1054,16 +1055,18 @@ class BimpCore
 		return $errors;
 	}
 
-	public static function getUserGroupId($group_code)
+	public
+	static function getUserGroupId($group_code)
 	{
 		// Codes groupes possibles: logistique / facturation / atradius / contrat / achat
 
 		return (int) self::getConf('id_user_group_' . $group_code);
 	}
 
-	// Gestion params yml globaux:
+// Gestion params yml globaux:
 
-	public static function getParam($full_path, $default_value = '', $type = 'string')
+	public
+	static function getParam($full_path, $default_value = '', $type = 'string')
 	{
 		if (is_null(self::$config)) {
 			self::$config = new BimpConfig('bimpcore', '', 'config');
@@ -1076,9 +1079,10 @@ class BimpCore
 		return $default_value;
 	}
 
-	// Getters divers:
+// Getters divers:
 
-	public static function getBimpUser()
+	public
+	static function getBimpUser()
 	{
 		global $bimpUser;
 
@@ -1096,9 +1100,10 @@ class BimpCore
 		return null;
 	}
 
-	// Getters booléens:
+// Getters booléens:
 
-	public static function isModuleActive($module)
+	public
+	static function isModuleActive($module)
 	{
 		global $conf;
 		$name = strtoupper('MAIN_MODULE_' . $module);
@@ -1109,7 +1114,8 @@ class BimpCore
 		return 0;
 	}
 
-	public static function isModeDev()
+	public
+	static function isModeDev()
 	{
 		if (defined('MOD_DEV') && MOD_DEV) {
 			return 1;
@@ -1118,7 +1124,8 @@ class BimpCore
 		return 0;
 	}
 
-	public static function isUserDev()
+	public
+	static function isUserDev()
 	{
 		global $user;
 		if (BimpObject::objectLoaded($user)) {
@@ -1132,9 +1139,10 @@ class BimpCore
 		return 0;
 	}
 
-	// Gestion ini:
+// Gestion ini:
 
-	public static function setMaxExecutionTime($time)
+	public
+	static function setMaxExecutionTime($time)
 	{
 		set_time_limit(0);
 
@@ -1144,7 +1152,8 @@ class BimpCore
 		}
 	}
 
-	public static function setMemoryLimit($limit)
+	public
+	static function setMemoryLimit($limit)
 	{
 		if ($limit > self::$memory_limit) {
 			ini_set('memory_limit', $limit . 'M');
@@ -1152,9 +1161,10 @@ class BimpCore
 		}
 	}
 
-	// Gestion extends:
+// Gestion extends:
 
-	public static function getExtendsEntity()
+	public
+	static function getExtendsEntity()
 	{
 		$entity = BimpCore::getConf('extends_entity', '');
 
@@ -1165,7 +1175,8 @@ class BimpCore
 		return $entity;
 	}
 
-	public static function getVersion()
+	public
+	static function getVersion()
 	{
 		$version = BimpCore::getConf('extends_version', '');
 
@@ -1176,7 +1187,8 @@ class BimpCore
 		return $version;
 	}
 
-	public static function isEntity($entity)
+	public
+	static function isEntity($entity)
 	{
 		if (BimpCore::getExtendsEntity() != '') {
 			if (is_array($entity)) {
@@ -1193,7 +1205,8 @@ class BimpCore
 		return 0;
 	}
 
-	public static function isVersion($version)
+	public
+	static function isVersion($version)
 	{
 		if (BimpCore::getVersion()) {
 			if (is_array($version)) {
@@ -1210,7 +1223,8 @@ class BimpCore
 		return 0;
 	}
 
-	public static function requireFileForEntity($module, $file_name, $return_only = false)
+	public
+	static function requireFileForEntity($module, $file_name, $return_only = false)
 	{
 		// Priorités:
 		// - Fichier "Entité"
@@ -1244,9 +1258,10 @@ class BimpCore
 		return false;
 	}
 
-	// Gestion du contexte:
+// Gestion du contexte:
 
-	public static function getContext()
+	public
+	static function getContext()
 	{
 		if (self::$context) {
 			return self::$context;
@@ -1260,24 +1275,28 @@ class BimpCore
 		return "private";
 	}
 
-	public static function setContext($context)
+	public
+	static function setContext($context)
 	{
 		self::$context = $context;
 	}
 
-	public static function isContextPublic()
+	public
+	static function isContextPublic()
 	{
 		return (self::getContext() == 'public' ? 1 : 0);
 	}
 
-	public static function isContextPrivate()
+	public
+	static function isContextPrivate()
 	{
 		return (self::getContext() != 'public' ? 1 : 0);
 	}
 
-	// Gestion des logs:
+// Gestion des logs:
 
-	public static function addLogs_debug_trace($msg)
+	public
+	static function addLogs_debug_trace($msg)
 	{
 		$bt = debug_backtrace(null, 30);
 		if (is_array($msg)) {
@@ -1286,7 +1305,8 @@ class BimpCore
 		static::addLogs_extra_data([$msg => BimpTools::getBacktraceArray($bt)]);
 	}
 
-	public static function addLogs_extra_data($array)
+	public
+	static function addLogs_extra_data($array)
 	{
 		if (!is_array($array)) {
 			$array = array($array);
@@ -1295,7 +1315,8 @@ class BimpCore
 		static::$logs_extra_data = BimpTools::merge_array(static::$logs_extra_data, $array);
 	}
 
-	public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
+	public
+	static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
 	{
 		// $bimp_logs_locked: Eviter boucles infinies
 
@@ -1449,9 +1470,10 @@ class BimpCore
 		return $errors;
 	}
 
-	// Gestion des locks
+// Gestion des locks
 
-	public static function checkObjectLock($object, &$token = '')
+	public
+	static function checkObjectLock($object, &$token = '')
 	{
 		// On retourne un message d'erreur si blocage nécessaire. false sinon.
 
@@ -1574,7 +1596,8 @@ class BimpCore
 		return $msg;
 	}
 
-	public static function unlockObject($module, $object_name, $id_object, $token = '')
+	public
+	static function unlockObject($module, $object_name, $id_object, $token = '')
 	{
 		if (!(int) self::getConf('use_objects_locks') || static::isModeDev()) {
 			return array();
@@ -1613,7 +1636,8 @@ class BimpCore
 		return $errors;
 	}
 
-	public static function forceUnlockCurrentObject()
+	public
+	static function forceUnlockCurrentObject()
 	{
 		global $bimp_object_locked_id;
 
@@ -1623,9 +1647,10 @@ class BimpCore
 		}
 	}
 
-	// Sécurité :
+// Sécurité :
 
-	public static function checkRateLimit($type, &$errors = array())
+	public
+	static function checkRateLimit($type, &$errors = array())
 	{
 		global $user, $langs;
 
@@ -1687,7 +1712,7 @@ class BimpCore
 		// Vérif limite atteinte :
 		if ($data['count'] >= $limit) {
 			if ($data['count'] == $limit) {
-				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ') debut : '.$data['start_time'].' maintenant : '.$current_time, 4, 'secu', null, array(
+				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ') debut : ' . $data['start_time'] . ' maintenant : ' . $current_time, 4, 'secu', null, array(
 					'Utilisateur' => $user->id,
 					'Limit'       => $limit,
 					'Count'       => $data['count'],
@@ -1705,14 +1730,16 @@ class BimpCore
 		return 1;
 	}
 
-	// Chargements librairies:
+// Chargements librairies:
 
-	public static function loadPhpExcel()
+	public
+	static function loadPhpExcel()
 	{
 		require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/PHPExcel-1.8/Classes/PHPExcel.php';
 	}
 
-	public static function loadPhpSpreadsheet()
+	public
+	static function loadPhpSpreadsheet()
 	{
 		if (!defined('PHPEXCELNEW_PATH')) {
 			define('PHPEXCELNEW_PATH', DOL_DOCUMENT_ROOT . '/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/');
@@ -1723,12 +1750,14 @@ class BimpCore
 		require_once PHPEXCELNEW_PATH . 'Spreadsheet.php';
 	}
 
-	public static function LoadHtmlPurifier()
+	public
+	static function LoadHtmlPurifier()
 	{
 		require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/htmlpurifier-4.13.0/HTMLPurifier.auto.php';
 	}
 
-	public static function getHtmlPurifier()
+	public
+	static function getHtmlPurifier()
 	{
 		if (is_null(self::$html_purifier)) {
 			self::LoadHtmlPurifier();
@@ -1757,14 +1786,16 @@ class BimpCore
 		return self::$html_purifier;
 	}
 
-	public static function loadBimpApiLib()
+	public
+	static function loadBimpApiLib()
 	{
 		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 	}
 
-	// Rendus HTML Globaux:
+// Rendus HTML Globaux:
 
-	public static function renderUserTopExtraToolsHtml()
+	public
+	static function renderUserTopExtraToolsHtml()
 	{
 		$html = '';
 
@@ -1829,7 +1860,8 @@ class BimpCore
 		return '';
 	}
 
-	public static function renderUserTopAccountHtml()
+	public
+	static function renderUserTopAccountHtml()
 	{
 		global $user;
 		$label = Form::showphoto('userphoto', $user, 28, 28, 0, '', 'mini', 0);

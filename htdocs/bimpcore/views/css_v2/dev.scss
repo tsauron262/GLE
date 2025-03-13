@@ -1,0 +1,209 @@
+@mixin transition($transition...) {
+    -webkit-transition: $transition;
+    -o-transition: $transition;
+    transition: $transition;
+}
+
+#moduleConf {
+    .module_select_container {
+        padding: 15px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        background-color: #F2F2F2;
+        border-bottom: 1px solid #000;
+    }
+
+    .all_modules_search_result_container {
+        display: none;
+    }
+
+    .category_params_container {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #000;
+    }
+
+    .module_params_header {
+        margin-bottom: 15px;
+    }
+
+    .sub_params_container {
+        margin-left: 10px;
+        padding-left: 10px;
+        border-left: 3px solid #676565;
+    }
+
+    .all_modules_search_input, 
+    .cur_module_search_input {
+        border: 1px solid #999999;
+        width: 300px;
+    }
+}
+
+#bimpYmlManager {
+    .mainToolsBar {
+        padding: 15px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        background-color: #F2F2F2;
+        border-bottom: 1px solid #000;
+    }
+
+    .toolsBarInput {
+        display: inline-block;
+        margin-right: 15px;
+
+        label {
+            display: block;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        select {
+            min-width: 120px;
+        }
+
+        .loading-spin {
+            font-size: 18px;
+            margin: 0;
+        }
+    }
+
+    .yml_analyser_files_tree {
+        margin: 30px 0;
+
+        table {
+            th, td {
+                text-align: center;
+                vertical-align: middle;
+                padding: 3px 10px;
+
+                &.chevron {
+                    padding: 3px;
+                }
+            }
+
+            tr.chevrons {
+                th, td {
+                    padding-top: 0;
+                    padding-bottom: 0;
+                }
+            }
+
+            th {
+                color: #B2B3B3;
+                font-style: italic;
+                font-size: 11px;
+
+                border-right: 1px solid #B2B3B3;
+            }
+
+            thead {
+                th, td {
+                    background-color: #F3F2F2;
+                    border-bottom: 1px solid #000;
+                    font-weight: normal;
+                    font-style: italic;
+                    font-size: 11px;
+                }
+            }
+        }
+
+        .yml_file_label {
+            @include transition(all 0.3s ease);
+            display: inline-block;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 4px 6px;
+            cursor: pointer;
+        }
+    }
+
+    .yml_analyser_params_container {
+        margin-top: 15px;
+        padding: 5px;
+
+        .section_name {
+            font-weight: normal;
+            font-style: italic;
+            color: #7F7F80;
+        }
+    }
+
+    .yml_analyser_sections {
+        border: 1px solid #999;
+        padding: 0;
+
+        .yml_analyser_section {
+            @include transition(all 0.3s ease);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 8px 5px;
+
+            &:hover {
+                background-color: #E5F0FF;   
+            }
+
+            &.active, 
+            &.active:hover {
+                background-color: #3388FF;
+                color: #fff;
+
+                .section_name {
+                    color: #fff;
+                }
+            }
+        }
+    }
+
+    .yml_analyser_params {
+        .foldable_content {
+            border-left: none;
+            margin-left: 0;
+            padding-left: 0;
+        }
+        .yml_analyser_section_params {
+            h4 {
+                margin-top: 0;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #000000;
+            }
+        }
+
+        .unset {
+            text-decoration: line-through;
+        }
+
+        .yml_analyser_param {
+            padding: 3px 5px;
+            margin: 0;
+
+            .name {
+                font-weight: bold;
+            }
+        }
+
+        .foldable_caption {
+            padding: 3px 5px;
+            margin-bottom: 0;
+            background-color: #F5F9FF;
+
+            &:hover {
+                background-color: #E5F0FF;
+            }
+
+            & > .foldable-caret {
+                float: none;
+            }
+        }
+
+        .yml_anayser_sub_params {
+            padding-left: 25px;
+            margin-left: 5px;
+            border-left: 1px dotted #999999;
+        }
+    }
+}

@@ -1,0 +1,65 @@
+// Button variants
+//
+// Easily pump out default styles, as well as :hover, :focus, :active,
+// and disabled options for all buttons
+
+@mixin button-variant($color, $background, $border) {
+  color: $color!important;
+  background-color: $background!important;
+  border-color: $border!important;
+
+  &:focus,
+  &.focus {
+    color: $color!important;
+    background-color: darken($background, 10%)!important;
+        border-color: darken($border, 25%)!important;
+  }
+  &:hover {
+    color: $color;
+    background-color: darken($background, 10%)!important;
+        border-color: darken($border, 12%)!important;
+  }
+  &:active,
+  &.active,
+  .open > &.dropdown-toggle {
+    color: $color!important;
+    background-color: darken($background, 10%)!important;
+        border-color: darken($border, 12%)!important;
+
+    &:hover,
+    &:focus,
+    &.focus {
+      color: $color!important;
+      background-color: darken($background, 17%)!important;
+          border-color: darken($border, 25%)!important;
+    }
+  }
+  &:active,
+  &.active,
+  .open > &.dropdown-toggle {
+    background-image: none;
+  }
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    &:hover,
+    &:focus,
+    &.focus {
+      background-color: $background!important;
+          border-color: $border!important;
+    }
+  }
+
+  .badge {
+    color: $background!important;
+    background-color: $color!important;
+  }
+}
+
+// Button sizes
+@mixin button-size($padding-vertical, $padding-horizontal, $font-size, $line-height, $border-radius) {
+  padding: $padding-vertical $padding-horizontal;
+  font-size: $font-size;
+  line-height: $line-height;
+  border-radius: $border-radius;
+}

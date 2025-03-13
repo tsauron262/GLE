@@ -17,7 +17,7 @@ class actioncomm_event extends AbstractNotification {
 
 			var html = '<a class="nav-link dropdown-toggle header-icon ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
 			html += '<i class="fas fa5-calendar-alt atoplogin"></i></a>';
-			html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id + '">';
+			html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown dropdown_actioncomm_event" aria-labelledby="' + this.dropdown_id + '">';
 			html += '<h4 class="header">';
 			html += 'Mes rendez-vous' + this.getBoutonReload(this.dropdown_id);
 			html += '<a style="float:right" href="' + dol_url_root + '/synopsistools/agenda/vue.php"><i class="fas fa5-calendar-alt iconLeft"></i>Mon agenda</a>';
@@ -46,7 +46,8 @@ class actioncomm_event extends AbstractNotification {
 		element.is_new = this.isNew(element);
 
 		html += '<div style="padding: 10px">';
-		html += element.link;
+		html += element.link + '<br/>';
+		html += element.link + '<br/>';
 		html += '<div/>';
 
 		return html;

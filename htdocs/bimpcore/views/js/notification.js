@@ -185,7 +185,9 @@ class AbstractNotification {
 
                 if (this.elements[i].date_create) {
                     header += '<span class="date_notif">' + this.formatDate(this.elements[i].date_create) + '</span>';
-                }
+                } else if (this.elements[i].date_str) {
+					header += '<span class="date_notif"><i class="fas fa5-calendar-day iconLeft"></i>' + this.elements[i].date_str + '</span>';
+				}
 
                 var header_buttons = this.getElementHeaderButtons(this.elements[i], this.elements[i].id);
 

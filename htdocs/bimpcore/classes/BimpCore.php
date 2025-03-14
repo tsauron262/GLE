@@ -67,6 +67,7 @@ class BimpCore
 	public static function init()
 	{
 		if (!self::$is_init) {
+
 			$_SESSION['dol_tz_string'] = BimpCore::getConf('main_timezone');
 
 			BimpDebug::addDebugTime('Début affichage page');
@@ -76,7 +77,10 @@ class BimpCore
 			global $noBootstrap;
 
 			$extends_entity = BimpCore::getExtendsEntity();
-			$use_css_v2 = (int) self::getConf('use_css_v2');
+
+			global $user;
+			$use_css_v2 = ((int) self::getConf('use_css_v2') && ($user->login == 'f.martinez' || $user->login == 'e.sirodot' || $user->login == 'admin'));
+
 			$is_context_private = self::isContextPrivate();
 
 			if ($noBootstrap) {
@@ -84,30 +88,34 @@ class BimpCore
 			}
 
 			// Traitements CSS :
+			$css_dir = 'css' . ($use_css_v2 ? '_v2' : '');
+
 			if ($use_css_v2) {
+				self::$files['css']['fonts'] = '/bimpcore/views/css_v2/fonts.css';
+
 				if ($is_context_private) {
-					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css')) {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore.css';
+					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/entities/' . $extends_entity . '/bimpcore.css')) {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/entities/' . $extends_entity . '/bimpcore.css';
 					} else {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/default/bimpcore.css';
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore.css';
 					}
 				} else {
-					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore_public.css')) {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/' . $extends_entity . '/bimpcore_public.css';
+					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/entities/' . $extends_entity . '/bimpcore_public.css')) {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/entities/' . $extends_entity . '/bimpcore_public.css';
 					} else {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/v2/entities/default/bimpcore_public.css';
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public.css';
 					}
 				}
 			} else {
 				if ($is_context_private) {
-					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css')) {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . $extends_entity . '.css';
+					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/bimpcore_' . $extends_entity . '.css')) {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_' . $extends_entity . '.css';
 					}
 				} else {
-					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css')) {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . $extends_entity . '.css';
+					if ($extends_entity && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/' . $css_dir . '/bimpcore_public_' . $extends_entity . '.css')) {
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public_' . $extends_entity . '.css';
 					} else {
-						self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+						self::$files['css']['bimpcore'] = '/bimpcore/views/' . $css_dir . '/bimpcore_public.css';
 					}
 				}
 			}
@@ -178,7 +186,14 @@ class BimpCore
 		$notifs = '{';
 		if (self::isContextPrivate() && BimpObject::objectLoaded($user)) {
 			$notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-			$config_notification = $notification->getList(array('active' => 1));
+
+//			global $user;
+//			if ($user->login == 'f.martinez') {
+//				$config_notification = $notification->getList(array());
+//			} else {
+				$config_notification = $notification->getList(array('active' => 1));
+//			}
+
 
 			foreach ($config_notification as $cn) {
 				if (BimpCore::isModuleActive($cn['module'])) {
@@ -1244,7 +1259,7 @@ class BimpCore
 		return false;
 	}
 
-	// Gestion du contexte:
+// Gestion du contexte:
 
 	public static function getContext()
 	{
@@ -1687,7 +1702,7 @@ class BimpCore
 		// Vérif limite atteinte :
 		if ($data['count'] >= $limit) {
 			if ($data['count'] == $limit) {
-				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ') debut : '.$data['start_time'].' maintenant : '.$current_time, 4, 'secu', null, array(
+				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ') debut : ' . $data['start_time'] . ' maintenant : ' . $current_time, 4, 'secu', null, array(
 					'Utilisateur' => $user->id,
 					'Limit'       => $limit,
 					'Count'       => $data['count'],

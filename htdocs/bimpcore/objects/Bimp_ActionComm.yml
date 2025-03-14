@@ -13,7 +13,7 @@ dol_object:
             class: ActionComm
 
 nom_url: 
-    syntaxe: <id>
+    syntaxe: <label>
     
 labels: 
     name: événement
@@ -51,7 +51,7 @@ objects:
     contact: 
         instance: 
             id_object: 
-                field_value: fk_soc
+                field_value: fk_contact
                 
     
     projet:
@@ -65,7 +65,7 @@ objects:
             id_object: 
                 field_value: fk_project
                 
-fields: 
+fields:
     label: 
         label: Libellé
         required: 1
@@ -144,7 +144,6 @@ fields:
         search: 
             input: 
                 type: search_user
-    
     fk_user_action: 
         label: Assigné à
         type: id_object
@@ -152,18 +151,8 @@ fields:
         dol_prop: userownerid
         input: 
             type: search_user
-        
-#    fk_user_done: (removed) 
-#        label: Traité par
-#        type: id_object
-#        object: user_done
-#        dol_prop: userdoneid
-#        search: 
-#            input: 
-#                type: search_user
-        
     fk_soc: 
-        label: Société
+        label: Tiers
         dol_prop: socid
         type: id_object
         object: societe
@@ -196,16 +185,6 @@ fields:
         input: 
             type: search_projet
             include_empty: 1
-            
-    fk_project: 
-        label: Projet
-        type: id_object
-        default_value: 0
-        object: projet
-        input: 
-            type: search_projet
-            include_empty: 1
-        
     fk_element: 
         label: ID élément
         type: id
@@ -455,12 +434,10 @@ filters_panels:
             facture: 
             fk_soc: 
             fk_contact: 
-            datep: 
-                field: datep
+            datep:
             datep2: 
             fk_user_author: 
-            fk_user_action: 
-#            fk_user_done: 
+            fk_user_action:
                 
     soc: 
         extends: default
@@ -504,16 +481,26 @@ lists:
             fk_user_action: 
             element: 
             fk_soc: 
-            fk_contact: 
+            fk_contact:
             state: 
                 
     global: 
         extends: default
         add_form_name: add
         add_btn: 1
-#        add_form_values: 
-#            callback: getFormValues
         n: 10
+        cols:
+            unextends: 1
+            ref:
+            fk_user_action:
+            fk_action:
+            label:
+            datep:
+            datep2:
+            fk_soc:
+            element:
+            state:
+            
         
     soc: 
         extends: default

@@ -140,7 +140,7 @@ class GSX_Repair extends BimpObject
         return $this->getData('repair_number');
     }
 
-    // Méthodes V2: 
+    // Méthodes V2:
 
     public static function processRepairRequestOutcome($result, &$warnings = array(), $excluded_msgs_types = array())
     {
@@ -293,7 +293,7 @@ class GSX_Repair extends BimpObject
 //                    'onclick' => $onclick
 //                );
 //            }
-            // doc repa: 
+            // doc repa:
             $onclick = '';
             $filePath = $this->getDocRepaFilePath();
             if (file_exists($filePath)) {
@@ -515,7 +515,7 @@ class GSX_Repair extends BimpObject
         return $errors;
     }
 
-    // Méthodes V1 / V2: 
+    // Méthodes V1 / V2:
 
     public function load()
     {
@@ -564,7 +564,7 @@ class GSX_Repair extends BimpObject
                             }
                         }
 
-                        // Check type: 
+                        // Check type:
                         if (!(string) $this->getData('repair_type') && isset($this->repairLookUp['repairTypeCode']) && (string) $this->repairLookUp['repairTypeCode']) {
                             $this->updateField('repair_type', $this->repairLookUp['repairTypeCode']);
                         }
@@ -574,7 +574,7 @@ class GSX_Repair extends BimpObject
                             $this->updateField('total_from_order', (float) $this->repairLookUp['price']['totalAmount']);
                         }
 
-                        // Check du statut: 
+                        // Check du statut:
                         if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
                             $ready_for_pick_up = 0;
                             $complete = 0;
@@ -1073,7 +1073,7 @@ class GSX_Repair extends BimpObject
         }
     }
 
-    // Méthodes V1: 
+    // Méthodes V1:
 
     public function import($id_sav, $number, $numberType)
     {
@@ -1562,13 +1562,18 @@ class GSX_Repair extends BimpObject
                 'fromConsignedStock'                 => 'Provient du stock consigné',
                 'netPrice'                           => 'Prix net',
                 'currency'                           => 'Devise',
-                'pricingOption'                      => 'Prix spécial appliqué',
+                'pricingOption'                      => 'Options de Tarification',
                 'billable'                           => 'Facturable'
                     ) as $path => $label) {
                         $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
                                     'value2String' => true
                         ));
                         if ($value) {
+							if ($path == 'pricingOption') {
+								if (isset(GSX_Const::$pricing_options[$value])) {
+									$value = GSX_Const::$pricing_options[$value];
+								}
+							}
                             $html .= '<tr>';
                             $html .= '<th>' . $label . '</th>';
                             $html .= '<td>' . $value . '</td>';
@@ -2013,7 +2018,7 @@ class GSX_Repair extends BimpObject
         return '';
     }
 
-    // Rendus HTML V1: 
+    // Rendus HTML V1:
 
     public function renderActions()
     {
@@ -2099,7 +2104,7 @@ class GSX_Repair extends BimpObject
                 $html .= BimpRender::renderAlerts($errors);
             } else {
                 if ($this->use_gsx_v2) {
-                    
+
                 } elseif (count($this->gsx->errors['soap'])) {
                     $html .= '<p class="alert alert-info">Aucun composant en attente de retour n\'a été trouvé. <span class="displaySoapMsg" onclick="$(\'#partsPendingSoapMessages\').slideDown(250);">Voir le message soap</span></p>';
                     $html .= '<div id="partsPendingSoapMessages" style="margin: 15px 0; padding: 10px; display: none">';
@@ -2182,7 +2187,7 @@ class GSX_Repair extends BimpObject
         ));
     }
 
-    // Rendus JS: 
+    // Rendus JS:
 
     public function getJsGsxAjaxOnClick($method, $data = array(), $params = array(), $resultContainer = 'null')
     {
@@ -2223,7 +2228,7 @@ class GSX_Repair extends BimpObject
         return $js;
     }
 
-    // Actions V2 
+    // Actions V2
 
     public function actionReviewPropal($data, &$success)
     {
@@ -2243,7 +2248,7 @@ class GSX_Repair extends BimpObject
                 if (BimpObject::objectLoaded($propal)) {
                     $propal_status = (int) $propal->getData('fk_statut');
                     if ($propal_status > 0) {
-                        // révision de la propale: 
+                        // révision de la propale:
                         $prop_warnings = array();
                         $prop_errors = $sav->reviewPropal($prop_warnings);
 
@@ -2261,7 +2266,7 @@ class GSX_Repair extends BimpObject
                     }
 
                     if (!count($errors)) {
-                        // Mise à jour des pièces Apple: 
+                        // Mise à jour des pièces Apple:
                         foreach ($parts as $part) {
                             $savPart = null;
 
@@ -2325,7 +2330,7 @@ class GSX_Repair extends BimpObject
                                         $propalLine->update();
                                     }
                                 } else {
-                                    // Ajout au devis (pièce absente du panier) : 
+                                    // Ajout au devis (pièce absente du panier) :
 
                                     $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
 
@@ -2372,7 +2377,7 @@ class GSX_Repair extends BimpObject
         );
     }
 
-    // Actions V1 (obsolètes pour la V2 : ces actions sont traitées dans gsxController): 
+    // Actions V1 (obsolètes pour la V2 : ces actions sont traitées dans gsxController):
 
     public function actionImportRepair($data, &$success = '')
     {
@@ -2525,7 +2530,7 @@ class GSX_Repair extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -2571,7 +2576,7 @@ class GSX_Repair extends BimpObject
         return false;
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function checkShipToAll()
     {

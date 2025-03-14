@@ -180,7 +180,8 @@ class BimpCore
 			'bimp_use_local_storage'     => (int) BimpCore::getConf('use_browser_local_storage'),
 			'bimp_local_storage_prefixe' => '\'' . BimpCore::getConf('bimp_local_storage_prefixe') . '\'',
 			'bimp_debug_local_storage'   => (int) BimpCore::getConf('js_debug_local_storage'),
-			'bimp_debug_notifs'          => (int) BimpCore::getConf('js_debug_notifs')
+			'bimp_debug_notifs'          => (int) BimpCore::getConf('js_debug_notifs'),
+			'dol_token'          => '\'' .newToken(). '\''
 		);
 
 		$notifs = '{';

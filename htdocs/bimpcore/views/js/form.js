@@ -761,7 +761,7 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
             custom = 1;
         }
         if ($container.hasClass('is_reloading')) {
-            setTimeout(reloadObjectInput,200, form_id, input_name, fields, keep_new_value);
+            setTimeout(reloadObjectInput,50, form_id, input_name, fields, keep_new_value);
             return;
         }
 

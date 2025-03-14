@@ -28,6 +28,28 @@ nom_url:
 labels: 
     name: contact
     
+objects:
+    ticket:
+        relation: hasMany
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_Ticket
+        list:
+            filters:
+                id_contact:
+                    callback:
+                        method: getData
+                        params:
+                            - rowid
+                id_client:
+                    callback:
+                        method: getData
+                        params:
+                            - fk_soc
+                    
+    
 fields: 
     fk_soc: 
         label: Societe
@@ -313,6 +335,12 @@ views:
                   col_lg: 12
                   fields_table: 
                       name: notes
+                      
+            - cols:
+                -   type: list
+                    col_lg: 12
+                    list:
+                        children: ticket
 
 filters_panel: 
     default: 

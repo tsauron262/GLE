@@ -114,25 +114,40 @@ class Bimpcoopmvt extends BimpObject
         }
 
 
-        //Recette (stat vente)
-        $tabInfoR = array();
-        $sql = $db->query('SELECT a_product_ef.categorie AS categorie,  SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
+		//Recette (stat vente)
+		$tabInfoR = array();
+		$sql = $db->query('SELECT a_product_ef.categorie AS categorie,  SUM( CASE WHEN f.fk_statut IN ("1","2") THEN a.total_ttc ELSE 0 END) AS tot
 FROM '.MAIN_DB_PREFIX.'facturedet a
 LEFT JOIN '.MAIN_DB_PREFIX.'facture f ON f.rowid = a.fk_facture
 LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
-WHERE f.type IN ("0","1","2") AND paye=1'.
-                (BimpTools::getPostFieldValue('dateD', null)? ' AND f.datef >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
-                (BimpTools::getPostFieldValue('dateF', null)? ' AND f.datef < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
-' GROUP BY categorie
+WHERE f.type IN ("0","1","2") AND f.remain_to_pay < f.total_ttc'.
+			(BimpTools::getPostFieldValue('dateD', null)? ' AND f.datef >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+			(BimpTools::getPostFieldValue('dateF', null)? ' AND f.datef < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+			' GROUP BY categorie
 ORDER BY a.rowid DESC;');
-        while($ln = $db->fetch_object($sql)){
-            if($ln->tot != 0){
-                $label = $categ[$ln->categorie];
-                if($label == '')
-                    $label = 'Categ inconnue '.$ln->categorie;
-                $tabInfoR[$label] = $ln->tot;
-            }
-        }
+		while($ln = $db->fetch_object($sql)){
+			if($ln->tot != 0){
+				$label = $categ[$ln->categorie];
+				if($label == '')
+					$label = 'Categ inconnue '.$ln->categorie;
+				$tabInfoR[$label] = $ln->tot;
+			}
+		}
+
+
+		//Impaye (stat vente)
+		$sql = $db->query('SELECT SUM(`remain_to_pay`) as tot
+FROM '.MAIN_DB_PREFIX.'facture f
+WHERE f.type IN ("0","1","2") AND paye=0 AND remain_to_pay < total_ttc'.
+			(BimpTools::getPostFieldValue('dateD', null)? ' AND f.datef >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
+			(BimpTools::getPostFieldValue('dateF', null)? ' AND f.datef < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+			';');
+		while($ln = $db->fetch_object($sql)){
+			if($ln->tot != 0){
+				$label = 'Impaye ';
+				$tabInfoR[$label] = -$ln->tot;
+			}
+		}
 
         $sql = $db->query('SELECT categorie AS categorie,  SUM(value) AS tot
 FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep a
@@ -263,6 +278,7 @@ WHERE date IS NULL '.
             $tot -= 1446.38;
             $tabInfoSolde['Solde NEF'] -= 1430.73;
             $tot -= 1430.73;
+			$tabInfoD['Banque'] += (1446.38 + 1430.73);
         }
 
 
@@ -278,7 +294,7 @@ WHERE date IS NULL '.
         $tabInfoSolde[''] = '';
         $tabInfoSolde['TOTAL'] = $tot;
         $tabInfoSolde[' '] = '';
-        $tabInfoSolde['DEPUIS DEBUT'] = $tot - 47000;
+        $tabInfoSolde['DEPUIS DEBUT'] = $tot - 49344.26;
 
         if(!BimpTools::getPostFieldValue('dateF', null) && !BimpTools::getPostFieldValue('dateD', null)){
             $tabInfoSolde['  '] = '';

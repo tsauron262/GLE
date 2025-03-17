@@ -1,0 +1,1 @@
+Contrats d'abonnement : ajout fonction arrêts anticipés des facturations et / ou achats (réservée aux admins)

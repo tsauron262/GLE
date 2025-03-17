@@ -392,3 +392,8 @@ params:
     use_light_fourn:
         label: Utiliser le formulaire de création simplifié
         def: 0
+        
+    client_sans_signature:
+        label: Client n'ayant pas besoin de signer
+        info: Tableau json de type [1,2]
+        

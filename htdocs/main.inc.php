@@ -409,7 +409,7 @@ if (!empty($php_session_save_handler) && $php_session_save_handler == 'db') {
 // Must be done after the include of filefunc.inc.php so global variables of conf file are defined (like $dolibarr_main_instance_unique_id or $dolibarr_main_force_https).
 // Note: the function dol_getprefix() is defined into functions.lib.php but may have been defined to return a different key to manage another area to protect.
 $prefix = dol_getprefix('');
-$sessionname = 'DOLSESSID_'.$prefix;
+$sessionname = 'DOLSESSID2_'.$prefix;
 $sessiontimeout = 'DOLSESSTIMEOUT_'.$prefix;
 if (!empty($_COOKIE[$sessiontimeout])) {
 	ini_set('session.gc_maxlifetime', $_COOKIE[$sessiontimeout]);
@@ -2179,17 +2179,17 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
 					}
 				}
 			}
-                        
-                        
+
+
                         /*moddrsi (20.2)*/
-                        global $bimp_layout_js_vars; 
+                        global $bimp_layout_js_vars;
                         if ($bimp_layout_js_vars) {
                             print $bimp_layout_js_vars;
                         }
                         /*fmoddrsi*/
-                        
-                        
-                        
+
+
+
 			// JS forced by page in top_htmlhead (relative url starting with /)
 			if (is_array($arrayofjs)) {
 				print '<!-- Includes JS added by page -->'."\n";
@@ -3995,8 +3995,8 @@ if (!function_exists("llxFooter")) {
 		if ($reshook > 0) {
 			print $hookmanager->resPrint;
 		}
-                
-                
+
+
                 /*moddrsi (20.2)*/
                 if (class_exists('BimpLayout') && BimpLayout::hasInstance()) {
                     BimpLayout::getInstance()->end();

@@ -4,7 +4,7 @@ require_once __DIR__ . '/BimpDocumentPDF.php';
 
 class BimpCommDocumentPDF extends BimpDocumentPDF
 {
-    # Constantes: 
+    # Constantes:
 
     public static $label_prime = "Apport externe";
     public static $label_prime2 = "Apport externe2";
@@ -12,10 +12,10 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     public static $use_cgv = true;
     public static $type = 'pdf';
 
-    # Objets: 
+    # Objets:
     public $bimpCommObject = null;
 
-    # Totaux: 
+    # Totaux:
     public $total_remises = 0;
     public $localtax1 = array();
     public $localtax2 = array();
@@ -26,7 +26,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     public $ht = array();
     public $totals = array("DEEE" => 0, "RPCP" => 0);
 
-    # Paramètres: 
+    # Paramètres:
     public $proforma = 0;
     public $periodicity = 0;
     public $nbPeriods = 0;
@@ -130,7 +130,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                             if (isset($this->object->array_options['options_type']) && (string) $this->object->array_options['options_type']) {
                                 $secteur = $this->object->array_options['options_type'];
                                 if ($secteur == 'S') {
-                                    // DOCS SAV : 
+                                    // DOCS SAV :
                                     $this->fromCompany->name = 'OLYS LDLC';
                                     if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
                                         $entrepot = new Entrepot($this->db);
@@ -148,7 +148,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                                 } else {
                                     $this->fromCompany->name = 'BIMP';
                                     if (in_array($secteur, array('C', 'CTC', 'E', 'CTE'))) {
-                                        // DOCS EDUC: 
+                                        // DOCS EDUC:
                                         $this->fromCompany->url = 'www.bimp-pro.fr - www.bimp-education.fr';
                                     }
                                 }
@@ -213,7 +213,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         $this->header_vars['ref_extra'] = $ref_extra;
     }
 
-    // Getters: 
+    // Getters:
 
     public function getFromUsers()
     {
@@ -356,7 +356,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
         $html .= '<table style="width: 100%" cellpadding="5">';
 
-        // Total remises: 
+        // Total remises:
         $this->total_remises = round($this->total_remises, 4);
         if (!$this->hideReduc && $this->total_remises > 0) {
             $total_remises = $this->total_remises;
@@ -512,7 +512,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                             $html .= '</td>';
                             $html .= '</tr>';
 
-                            //todo phrase suivant tva 
+                            //todo phrase suivant tva
 //                            $infos =  array();
 //                                    $infos[] ="mmmffff30";
 //                            switch ($tvakey){
@@ -767,7 +767,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         return $html;
     }
 
-    // Rendus: 
+    // Rendus:
 
     public function renderTop()
     {
@@ -1009,10 +1009,10 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, 'full', false, ',', true, $nb_max_decimales);
 
                     if (BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('abo_fac_periodicity')) {
-                        $this->object->lines[$i]->qty = round($this->object->lines[$i]->qty, 2);
-                    }
-
-                    $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
+						$row['qte'] = round($this->object->lines[$i]->qty, 2);
+                    } else {
+						$row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
+					}
 
                     if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
                         $row['progress'] = pdf_getlineprogress($this->object, $i, $this->langs);
@@ -1174,7 +1174,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     {
         if (BimpCore::getExtendsEntity() === 'bimp') {
             $url_cgv = 'https://www.bimp.fr/wp-content/uploads/2024/08/20240807_CGV-BIMP-PRO.pdf';
-            
+
             $this->pdf->addVMargin(2);
             $html = '';
 
@@ -1194,9 +1194,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 if (is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF')) {
                     $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et en boutique pour les particuliers.';
                 } elseif ($this->pdf->addCgvPages) {
-                    $html .= 'Le présent devis est soumis aux conditions générales de ventes annexées et consultables sur le site (<a href="' . $url_cgv . '">' . str_replace('https://', '', $url_cgv) . '</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)'; 
+                    $html .= 'Le présent devis est soumis aux conditions générales de ventes annexées et consultables sur le site (<a href="' . $url_cgv . '">' . str_replace('https://', '', $url_cgv) . '</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)';
                 } else {
-                    $html .= 'Le présent devis est soumis aux conditions générales de ventes (<a href="' . $url_cgv . '">' . str_replace('https://', '', $url_cgv) . '</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)'; 
+                    $html .= 'Le présent devis est soumis aux conditions générales de ventes (<a href="' . $url_cgv . '">' . str_replace('https://', '', $url_cgv) . '</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)';
                 }
 
                 $html .= "</span>";
@@ -1217,6 +1217,8 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
             $this->writeContent($html);
         } elseif (BimpCore::getExtendsEntity() === 'champagne') {
+			$html = '';
+
             $html .= '<p style="font-size: 6px; font-style: italic">';
             $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
 En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
@@ -1242,7 +1244,7 @@ En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intér
         }
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function traitePeriodicity($row, $champs)
     {
@@ -1274,7 +1276,7 @@ En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intér
         global $conf, $mysoc;
 
         // /!\ ATTENTION: ne surtout pas oublier de réinitialiser toutes les variables de classe définies ici
-        // La fonction peut être appellée plusieurs fois dans certain cas. 
+        // La fonction peut être appellée plusieurs fois dans certain cas.
 
         $this->total_remises = 0;
         $this->localtax1 = array();

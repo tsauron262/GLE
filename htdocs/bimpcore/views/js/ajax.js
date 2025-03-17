@@ -85,10 +85,17 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
         if (typeof (bimp_hash) !== 'undefined' && bimp_hash) {
             if (typeof (data.append) == 'function')
-                data.append("bimp_hash", bimpAjax.bimp_storage.get('bimp_hash'));
+                data.append("bimp_hash", bimp_hash);
             else
                 data['bimp_hash'] = bimp_hash;
         }
+
+		if (typeof (dol_token) !== 'undefined' && dol_token) {
+			if (typeof (data.append) == 'function')
+				data.append("token", dol_token);
+			else
+				data['token'] = dol_token;
+		}
     };
 
     // Surchage des paramètres par défaut: 

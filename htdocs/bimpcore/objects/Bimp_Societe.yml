@@ -10,7 +10,7 @@ common_fields: 1
 list_page_url: 
     controller: tiers
 nom_url: 
-    syntaxe: <ref> - <name>
+    syntaxe: <name>
     card: default
     
 header_btn: 

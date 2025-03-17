@@ -1,0 +1,3 @@
+Devis :
+    - Ajout bouton "Actualiser les prix produits" - Met à jour tous les prix de vente et d'achat en fonction des prix actuels des produits.
+    - Option "Acualiser les prix produits" lors du clonage ou de la révision d'un devis.

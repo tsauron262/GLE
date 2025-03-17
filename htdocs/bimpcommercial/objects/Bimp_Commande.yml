@@ -79,6 +79,23 @@ objects:
             id_object: 
                 field_value: id_demande_fin
                 
+    piece_parent:
+        relation: hasMany
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: BimpCommElementElement
+        list:
+            filters:
+                sourcetype: propal
+                targettype: commande
+                fk_target:
+                    callback:
+                        method: getData
+                        params:
+                            - rowid
+                
 associations: 
     factures: 
         object: facture

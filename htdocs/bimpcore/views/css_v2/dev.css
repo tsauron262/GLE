@@ -1,0 +1,160 @@
+#moduleConf .module_select_container {
+  padding: 15px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  background-color: #F2F2F2;
+  border-bottom: 1px solid #000;
+}
+#moduleConf .all_modules_search_result_container {
+  display: none;
+}
+#moduleConf .category_params_container {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #000;
+}
+#moduleConf .module_params_header {
+  margin-bottom: 15px;
+}
+#moduleConf .sub_params_container {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 3px solid #676565;
+}
+#moduleConf .all_modules_search_input,
+#moduleConf .cur_module_search_input {
+  border: 1px solid #999999;
+  width: 300px;
+}
+
+#bimpYmlManager .mainToolsBar {
+  padding: 15px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  background-color: #F2F2F2;
+  border-bottom: 1px solid #000;
+}
+#bimpYmlManager .toolsBarInput {
+  display: inline-block;
+  margin-right: 15px;
+}
+#bimpYmlManager .toolsBarInput label {
+  display: block;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+#bimpYmlManager .toolsBarInput select {
+  min-width: 120px;
+}
+#bimpYmlManager .toolsBarInput .loading-spin {
+  font-size: 18px;
+  margin: 0;
+}
+#bimpYmlManager .yml_analyser_files_tree {
+  margin: 30px 0;
+}
+#bimpYmlManager .yml_analyser_files_tree table th, #bimpYmlManager .yml_analyser_files_tree table td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 3px 10px;
+}
+#bimpYmlManager .yml_analyser_files_tree table th.chevron, #bimpYmlManager .yml_analyser_files_tree table td.chevron {
+  padding: 3px;
+}
+#bimpYmlManager .yml_analyser_files_tree table tr.chevrons th, #bimpYmlManager .yml_analyser_files_tree table tr.chevrons td {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+#bimpYmlManager .yml_analyser_files_tree table th {
+  color: #B2B3B3;
+  font-style: italic;
+  font-size: 11px;
+  border-right: 1px solid #B2B3B3;
+}
+#bimpYmlManager .yml_analyser_files_tree table thead th, #bimpYmlManager .yml_analyser_files_tree table thead td {
+  background-color: #F3F2F2;
+  border-bottom: 1px solid #000;
+  font-weight: normal;
+  font-style: italic;
+  font-size: 11px;
+}
+#bimpYmlManager .yml_analyser_files_tree .yml_file_label {
+  -webkit-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  display: inline-block;
+  font-weight: bold;
+  font-size: 13px;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+#bimpYmlManager .yml_analyser_params_container {
+  margin-top: 15px;
+  padding: 5px;
+}
+#bimpYmlManager .yml_analyser_params_container .section_name {
+  font-weight: normal;
+  font-style: italic;
+  color: #7F7F80;
+}
+#bimpYmlManager .yml_analyser_sections {
+  border: 1px solid #999;
+  padding: 0;
+}
+#bimpYmlManager .yml_analyser_sections .yml_analyser_section {
+  -webkit-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 8px 5px;
+}
+#bimpYmlManager .yml_analyser_sections .yml_analyser_section:hover {
+  background-color: #E5F0FF;
+}
+#bimpYmlManager .yml_analyser_sections .yml_analyser_section.active, #bimpYmlManager .yml_analyser_sections .yml_analyser_section.active:hover {
+  background-color: #3388FF;
+  color: #fff;
+}
+#bimpYmlManager .yml_analyser_sections .yml_analyser_section.active .section_name, #bimpYmlManager .yml_analyser_sections .yml_analyser_section.active:hover .section_name {
+  color: #fff;
+}
+#bimpYmlManager .yml_analyser_params .foldable_content {
+  border-left: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+#bimpYmlManager .yml_analyser_params .yml_analyser_section_params h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #000000;
+}
+#bimpYmlManager .yml_analyser_params .unset {
+  text-decoration: line-through;
+}
+#bimpYmlManager .yml_analyser_params .yml_analyser_param {
+  padding: 3px 5px;
+  margin: 0;
+}
+#bimpYmlManager .yml_analyser_params .yml_analyser_param .name {
+  font-weight: bold;
+}
+#bimpYmlManager .yml_analyser_params .foldable_caption {
+  padding: 3px 5px;
+  margin-bottom: 0;
+  background-color: #F5F9FF;
+}
+#bimpYmlManager .yml_analyser_params .foldable_caption:hover {
+  background-color: #E5F0FF;
+}
+#bimpYmlManager .yml_analyser_params .foldable_caption > .foldable-caret {
+  float: none;
+}
+#bimpYmlManager .yml_analyser_params .yml_anayser_sub_params {
+  padding-left: 25px;
+  margin-left: 5px;
+  border-left: 1px dotted #999999;
+}

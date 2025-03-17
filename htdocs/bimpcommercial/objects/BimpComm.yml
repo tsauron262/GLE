@@ -467,6 +467,17 @@ forms:
             expertise:
                 field: expertise
                 required: 1
+            update_products_prices:
+                show:
+                    callback: isProductsPricesUpdateAllowed
+                custom: 1
+                label: Acualiser les prix des produits
+                input_name: update_products_prices
+                input:
+                    type: toggle
+                    help: Si OUI, les prix d'achat et de vente seront mis à jour en fonction des prix actuels de chaque produit
+                value: 1
+                
     
     releverFacturation:
         msgs:

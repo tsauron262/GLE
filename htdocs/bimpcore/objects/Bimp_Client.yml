@@ -14,7 +14,10 @@ header_edit_form: default
 header_delete_btn: 1
                     
 public_header_edit_form: public
-           
+
+nom_url:
+    syntaxe: <ref> - <name>
+    
 objects: 
     public_users: 
         relation: hasMany

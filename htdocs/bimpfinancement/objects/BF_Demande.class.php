@@ -231,7 +231,7 @@ class BF_Demande extends BimpObject
 			return 0;
 		}
 
-		if (!in_array($action, array('reopen')) && $this->isClosed()) {
+		if (!in_array($action, array('reopen', 'createFacturesRevente')) && $this->isClosed()) {
 			$errors[] = 'Cette demande de location est fermée';
 			return 0;
 		}
@@ -2418,29 +2418,22 @@ class BF_Demande extends BimpObject
 					'operator' => '<',
 					'value'    => 20
 				));
-				$list->addFieldFilterValue('or_status', array(
-					'or' => array(
-						'devis_status'   => array(
-							'operator' => '!=',
-							'value'    => BF_Demande::DOC_ACCEPTED
-						),
-						'contrat_status' => array(
-							'operator' => '!=',
-							'value'    => BF_Demande::DOC_ACCEPTED
-						),
-						'pvr_status'     => array(
-							'operator' => '!=',
-							'value'    => BF_Demande::DOC_ACCEPTED
-						)
-					)
-				));
-				break;
-
-			case 'complets':
-				$list->addFieldFilterValue('status', BF_Demande::STATUS_ACCEPTED);
-				$list->addFieldFilterValue('devis_status', BF_Demande::DOC_ACCEPTED);
-				$list->addFieldFilterValue('contrat_status', BF_Demande::DOC_ACCEPTED);
-				$list->addFieldFilterValue('pvr_status', BF_Demande::DOC_ACCEPTED);
+//				$list->addFieldFilterValue('or_status', array(
+//					'or' => array(
+//						'devis_status'   => array(
+//							'operator' => '!=',
+//							'value'    => BF_Demande::DOC_ACCEPTED
+//						),
+//						'contrat_status' => array(
+//							'operator' => '!=',
+//							'value'    => BF_Demande::DOC_ACCEPTED
+//						),
+//						'pvr_status'     => array(
+//							'operator' => '!=',
+//							'value'    => BF_Demande::DOC_ACCEPTED
+//						)
+//					)
+//				));
 				$list->addFieldFilterValue('or_fac', array(
 					'or' => array(
 						'id_facture_fin'   => 0,
@@ -2448,6 +2441,19 @@ class BF_Demande extends BimpObject
 					)
 				));
 				break;
+
+//			case 'complets':
+//				$list->addFieldFilterValue('status', BF_Demande::STATUS_ACCEPTED);
+//				$list->addFieldFilterValue('devis_status', BF_Demande::DOC_ACCEPTED);
+//				$list->addFieldFilterValue('contrat_status', BF_Demande::DOC_ACCEPTED);
+//				$list->addFieldFilterValue('pvr_status', BF_Demande::DOC_ACCEPTED);
+//				$list->addFieldFilterValue('or_fac', array(
+//					'or' => array(
+//						'id_facture_fin'   => 0,
+//						'id_facture_fourn' => 0
+//					)
+//				));
+//				break;
 
 			case 'en_place':
 				$list->addFieldFilterValue('status', BF_Demande::STATUS_ACCEPTED);

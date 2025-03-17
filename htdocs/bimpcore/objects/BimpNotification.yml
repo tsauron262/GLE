@@ -44,3 +44,4 @@ lists:
             class:
             method:
             active:
+                edit: 1

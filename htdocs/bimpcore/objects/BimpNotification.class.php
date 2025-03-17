@@ -3,54 +3,69 @@
 class BimpNotification extends BimpObject
 {
 
-    public function getUserNotifications($id_user, $notif_data = array())
-    {
-        $errors = array();
-        $obj_name = $this->getData('class');
-        BimpObject::loadClass($this->getData('module'), $this->getData('class'));
+	public function canCreate()
+	{
+		return (int) BimpCore::isUserDev();
+	}
 
-        $methode = $this->getData('method');
-        if (method_exists($obj_name, $methode)) {
-            $tms = BimpTools::getArrayValueFromPath($notif_data, 'tms', '');
-            $options = BimpTools::getArrayValueFromPath($notif_data, 'options', array());
-            
-            return $obj_name::$methode($id_user, $tms, $options, $errors);
-        } else {
-            $errors[] = "Méthode " . $methode . " introuvable dans " . $obj_name;
-        }
-        
-        return array();
-    }
+	public function canEdit()
+	{
+		return $this->canCreate();
+	}
 
-    public function getNotifObject($id_object = null)
-    {
-        $module = $this->getData('module');
-        $object_name = $this->getData('class');
+	public function canDelete()
+	{
+		return $this->canCreate();
+	}
 
-        if ($module && $object_name) {
-            return BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
-        }
+	public function getUserNotifications($id_user, $notif_data = array())
+	{
+		$errors = array();
+		$obj_name = $this->getData('class');
+		BimpObject::loadClass($this->getData('module'), $this->getData('class'));
 
-        return null;
-    }
+		$methode = $this->getData('method');
+		if (method_exists($obj_name, $methode)) {
+			$tms = BimpTools::getArrayValueFromPath($notif_data, 'tms', '');
+			$options = BimpTools::getArrayValueFromPath($notif_data, 'options', array());
 
-    // Méthodes statiques :
+			return $obj_name::$methode($id_user, $tms, $options, $errors);
+		} else {
+			$errors[] = "Méthode " . $methode . " introuvable dans " . $obj_name;
+		}
 
-    public static function getNotificationsForUser($id_user, $notifs_data)
-    {
-        $notifs = array();
+		return array();
+	}
 
-        // Ajout notif is :
-        foreach ($notifs_data as $n) {
-            if(is_array($n)){
-                $bn = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', $n['id_notification']);
+	public function getNotifObject($id_object = null)
+	{
+		$module = $this->getData('module');
+		$object_name = $this->getData('class');
 
-                if (BimpObject::objectLoaded($bn)) {
-                    $notifs[$n['id_notification']] = $bn->getUserNotifications($id_user, $n);
-                }
-            }
-        }
+		if ($module && $object_name) {
+			return BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
+		}
 
-        return $notifs;
-    }
+		return null;
+	}
+
+	// Méthodes statiques :
+
+	public static function getNotificationsForUser($id_user, $notifs_data)
+	{
+		$notifs = array();
+
+		// Ajout notif is :
+		foreach ($notifs_data as $n) {
+			if (is_array($n)) {
+				$bn = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', $n['id_notification']);
+
+				if (BimpObject::objectLoaded($bn)) {
+					$notifs[$n['id_notification']] = $bn->getUserNotifications($id_user, $n);
+				}
+			}
+		}
+
+		return $notifs;
+	}
 }

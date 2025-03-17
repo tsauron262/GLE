@@ -18,6 +18,11 @@ if (isset($_REQUEST['timeTranche']))
     $_REQUEST['workHour'] = (isset($_REQUEST['workHour']) && $_REQUEST['workHour'] == 'on') ? 'true' : 'false';
 if (isset($_REQUEST['timeTranche']))
     $_REQUEST['chevauche'] = (isset($_REQUEST['chevauche']) && $_REQUEST['chevauche'] == 'on') ? 'true' : 'false';
+
+
+$timeTranche = (isset($_SESSION['paraAgenda']['timeTranche'])? $_SESSION['paraAgenda']['timeTranche'] : 30);
+$timeTranche = (isset($_REQUEST['timeTranche'])? $_REQUEST['timeTranche'] : $timeTranche);
+
 $tabPara = getPara();
 $i = 0;
 $tabJsIdUser = 'chevauche = ' . $_SESSION['paraAgenda']['chevauche'] . ';';
@@ -43,25 +48,31 @@ $js .= <<<EOF
         <!--<script type="text/javascript" src="../jquery/chosen/chosen.jquery.min.js"></script>-->
         <!--<link rel="stylesheet" type="text/css" href="../jquery/chosen/chosen.css" />-->
         <script type="text/javascript" src="../agenda/agenda.js"></script>
-    
+
         <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
         <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
         <link rel="stylesheet" type="text/css" href="./calendar/jquery.weekcalendar.css" />
         <link rel="stylesheet" type="text/css" href="./calendar/skins/default.css" />
         <link rel="stylesheet" type="text/css" href="./calendar/skins/gcalendar.css" />
-        
+
   <style type="text/css">
     body {
       font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
       margin: 0;
     }
- 
+
+    .wc-hour-header.ui-state-active, .wc-hour-header.ui-state-default{
+EOF;
+    	$js .= 'height: '.(1500/(60 / $timeTranche)).'px;';
+$js .= <<<EOF
+    }
+
     h1 {
       margin:0 0 2em;
       padding: 0.5em;
       font-size: 1.3em;
     }
- 
+
     p.description {
       font-size: 0.8em;
       padding: 1em;
@@ -69,7 +80,7 @@ $js .= <<<EOF
       top: 1.2em;
       margin-right: 400px;
     }
- 
+
     #calendar_selection {
       font-size: 0.7em;
 //      position: absolute;
@@ -80,7 +91,7 @@ $js .= <<<EOF
       border: 1px solid #dda;
       width: 270px;
     }
- 
+
     #message {
       font-size: 0.7em;
 //      position: absolute;
@@ -91,21 +102,21 @@ $js .= <<<EOF
       border: 1px solid #aad;
       width: 270px;
     }
-        
+
     .wc-header .wc-user-header a, .wc-header .wc-user-header{
         overflow: visible;
         height: 60px;
         width: 60px;
         -moz-transform:rotate(-45deg);
-        -webkit-transform:rotate(-45deg); 
+        -webkit-transform:rotate(-45deg);
         -o-transform:rotate(-90deg);
-        -ms-transform : rotate(-90deg) 
+        -ms-transform : rotate(-90deg)
     }
     .ui-widget-content td.ui-state-active{
         background: none;
     }
-        
-        
+
+
         .form {
 
 	// Reset default Chosen.js styles
@@ -129,7 +140,7 @@ $js .= <<<EOF
 		.chosen-choices {
 			border: none;
 			border-radius: 0;
-			box-shadow: none;		
+			box-shadow: none;
 		}
 
 		.chosen-results {
@@ -148,22 +159,22 @@ $js .= '<script type="text/javascript" src="./calendar/jquery.weekcalendar.js"><
 $js .= '<script type="text/javascript">';
 $js .= $tabJsIdUser;
 $js .= <<<EOF
-        
+
   (function($) {
-                
+
     var d = new Date();
     d.setDate(d.getDate() - d.getDay());
     var year = d.getFullYear();
     var month = d.getMonth();
     var day = d.getDate();
- 
- 
+
+
     d = new Date();
     d.setDate(d.getDate() -(d.getDay() - 3));
     year = d.getFullYear();
     month = d.getMonth();
     day = d.getDate();
- 
+
         function save(calEvent){
             jQuery.ajax({
                 url: dol_url_root + "/synopsistools/agenda/ajax.php",
@@ -178,12 +189,12 @@ $js .= <<<EOF
                 }
             });
         }
- 
+
     $(document).ready(function() {
       var Ocalendar = $('#calendar').weekCalendar({
 EOF;
 $js .= "
-        timeslotsPerHour: " . $_SESSION['paraAgenda']['timeTranche'] . ",
+        timeslotsPerHour: " . $timeTranche . ",
         businessHours: {start: 8, end: 20, limitDisplay: " . $_SESSION['paraAgenda']['workHour'] . "},
         timeslotHeight: 25,
         ";
@@ -241,30 +252,30 @@ EOF;
 if($conf->global->MAIN_MODULE_BIMPCORE){
     $js .= '
             loadModalForm(
-                $(this), 
+                $(this),
                 {
-                    module: "bimpcore", 
-                    object_name: "Bimp_ActionComm", 
-                    id_object: "0", id_parent: "0", 
-                    form_name: "add", 
+                    module: "bimpcore",
+                    object_name: "Bimp_ActionComm",
+                    id_object: "0", id_parent: "0",
+                    form_name: "add",
                     param_values: {
                         "fields":{
                             "datep":formatedTimestamp(start),
                             "datep2":formatedTimestamp(end),
                             "users_assigned":[tabUserId[parseInt(calEvent.userId)]]
                          }
-                    }, 
+                    },
                     force_edit: 0
-                }, 
-                "Ajout d\'un événement",  
-                function(){ 
-                    $(\'#calendar\').weekCalendar(\'refresh\'); 
                 },
-                "", 
-                null, 
-                function(){ 
-                    $(\'#calendar\').weekCalendar(\'refresh\'); 
-                }, 
+                "Ajout d\'un événement",
+                function(){
+                    $(\'#calendar\').weekCalendar(\'refresh\');
+                },
+                "",
+                null,
+                function(){
+                    $(\'#calendar\').weekCalendar(\'refresh\');
+                },
                 null
             );';
 }
@@ -281,7 +292,7 @@ else{
     $js .= <<<EOF
             }
         },
-        
+
         data: 'events.json.php?users=$userIdStr',
         users: [$userStr],
         showAsSeparateUser: false,
@@ -323,8 +334,8 @@ $js .= <<<EOF
       });
     });
   })(jQuery);
-        
-        
+
+
     function toDateUrl(time, option) {
         time = new Date(time);
         result = time.getFullYear();
@@ -349,8 +360,8 @@ $js .= <<<EOF
         result = result +""+ time.getMinutes();
         return result;
     }
-        
-        
+
+
 divActCli = initCtrlV = null;
 setInterval("blink(divActCli)",500);
 function initCopyColler(){
@@ -358,19 +369,19 @@ function initCopyColler(){
         var ctrlDown = false;
         var ctrlKey = 17, pommeKey = 91, pommeKey2 = 222, vKey = 86, cKey = 67, xKey = 88, zKey = 90;
         var survol = false;
-        
+
         $(".wc-cal-event").mouseover(function()
         {
             survol = $(this).find(".idAction").attr("value");
         }).mouseout(function() {
             survol = null;
         });
-        
+
         $(document).keydown(function(e)
         {
             if (e.keyCode == ctrlKey || e.keyCode == pommeKey || e.keyCode == pommeKey2)
                 ctrlDown = true;
-        
+
 //        alert(e.keyCode+" | "+ctrlDown);
             if (ctrlDown && (((e.keyCode == cKey || e.keyCode == xKey) && survol) || e.keyCode == zKey)){
 //        alert("copiecoupe");
@@ -399,26 +410,26 @@ function initCopyColler(){
             if (e.keyCode == ctrlKey || e.keyCode == pommeKey || e.keyCode == pommeKey2)
                 ctrlDown = false;
         });
-        
-        
-        
+
+
+
         $(".percent[value='-2']").each(function(){
-            $(this).parent().parent().css("background-image", "url("+dol_url_root+"/synopsistools/agenda/barrer.png)");  
+            $(this).parent().parent().css("background-image", "url("+dol_url_root+"/synopsistools/agenda/barrer.png)");
         });
         $(".percent[value='0']").each(function(){
-            $(this).parent().parent().css("background-image", "url("+dol_url_root+"/synopsistools/agenda/point.png)");  
+            $(this).parent().parent().css("background-image", "url("+dol_url_root+"/synopsistools/agenda/point.png)");
         });
 }
-        
-function blink(ob) { 
+
+function blink(ob) {
         if(ob !== null){
-    if (ob.is(':visible')) 
-        ob.hide(); 
+    if (ob.is(':visible'))
+        ob.hide();
     else
-        ob.show();  
+        ob.show();
         }
-}  
-        
+}
+
   </script>
 EOF;
 
@@ -437,9 +448,9 @@ echo "</div>";
 
 
 echo "<div class='floatL'>";
-echo '<form>Interval : <select name="timeTranche">';
+echo '<form method="POST">Interval : <select name="timeTranche">';
 foreach (array(5, 10, 15, 20, 30) as $time)
-    echo '<option value="' . (60 / $time) . '" ' . ((60 / $time) == $_SESSION['paraAgenda']['timeTranche'] ? 'selected="selected"' : "") . '>' . $time . '</option>';
+    echo '<option value="' . (60 / $time) . '" ' . ((60 / $time) == $timeTranche ? 'selected="selected"' : "") . '>' . $time . '</option>';
 echo '</select>';
 echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><input type='checkbox' id='workHour' name='workHour' " . ("true" == $_SESSION['paraAgenda']['workHour'] ? 'checked="checked"' : "") . '/>';
 echo "<label style='margin-left:11px' for='chevauche'>Chevaucher rdv : </label><input type='checkbox' id='chevauche' name='chevauche' " . ("true" == $_SESSION['paraAgenda']['chevauche'] ? 'checked="checked"' : "") . '/>';
@@ -460,7 +471,7 @@ echo "</div><div class='clear'></div>";
 
 
 echo '
- 
+
   <div id="calendar"></div>
 </body>
 </html>';
@@ -484,16 +495,17 @@ function printMenu($tabUser) {
     while ($result = $db->fetch_object($sql)) {
         $select .= "<option value='" . $result->rowid . "'>" . $result->nom;
         if (is_array($tabGroup[$result->rowid])) {
-            $select .= "   [" . count($tabGroup[$result->rowid]) . "]";    
+            $select .= "   [" . count($tabGroup[$result->rowid]) . "]";
         }
         $select .= "</option>";
     }
-    
+
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");
     $newJs ='';
 
     echo '<br/><br/><div>';
     echo '<form action="" method="post" class="form" id="customForm" >';
+    echo '<input type="hidden" name="token" value="'.newToken().'">';
     echo '<select id="group" class="dropdown_chosen" data-placeholder="Indiquez le groupe">';
     echo "<option value='0'>Groupes</option><option value='-1'>Moi</option>" . $select . "</select>";
     echo "<div class='contentListUser'><text><span class='nbGroup'></span></text><br/><br/>";

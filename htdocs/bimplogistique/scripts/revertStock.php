@@ -10,7 +10,7 @@ echo 'debut';
     $warnings = array();
 
     $sql = 'SELECT COUNT(*) as nb, label, fk_product, value, fk_entrepot ';
-    $sql .= 'FROM llx_stock_mouvement ';
+    $sql .= 'FROM '.MAIN_DB_PREFIX.'stock_mouvement ';
     $sql .= 'WHERE bimp_origin = \'inventory2\' AND datem BETWEEN "2021-11-22" AND "2021-11-23" AND inventorycode = "inventory2-577"';
     $sql .= 'GROUP By label, fk_product, value, fk_entrepot ';
     $sql .= 'HAVING nb > 1 ORDER BY nb DESC';
@@ -45,7 +45,7 @@ echo 'debut';
 function revertMove($label, $fk_product, $value, $fk_entrepot, &$warnings) {
 
     $sql  = 'SELECT rowid ';
-    $sql .= 'FROM llx_stock_mouvement ';
+    $sql .= 'FROM '.MAIN_DB_PREFIX.'stock_mouvement ';
     $sql .= 'WHERE bimp_origin = \'inventory2\' ';
     $sql .= 'AND label="' . addslashes($label) . '" ';
     $sql .= 'AND fk_product="' . $fk_product . '" ';
@@ -65,8 +65,8 @@ function revertMove($label, $fk_product, $value, $fk_entrepot, &$warnings) {
 
 // Test si il y a des service dans les lignes de scan pour les inventaires ouvert
 //SELECT d.id as id_scan_det, p.ref as p_ref, i.id as id_inv
-//FROM llx_bl_inventory_det_2 as d
-//LEFT JOIN llx_product as p ON d.fk_product = p.rowid
-//LEFT JOIN llx_bl_inventory_2 as i ON d.fk_inventory = i.id
+//FROM '.MAIN_DB_PREFIX.'bl_inventory_det_2 as d
+//LEFT JOIN '.MAIN_DB_PREFIX.'product as p ON d.fk_product = p.rowid
+//LEFT JOIN '.MAIN_DB_PREFIX.'bl_inventory_2 as i ON d.fk_inventory = i.id
 //WHERE p.fk_product_type=1
 //AND i.status=1

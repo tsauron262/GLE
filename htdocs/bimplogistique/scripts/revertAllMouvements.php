@@ -10,7 +10,7 @@ echo 'debut';
     $warnings = array();
 
     $sql = "SELECT DISTINCT a.rowid as id
-FROM llx_stock_mouvement a
+FROM ".MAIN_DB_PREFIX."stock_mouvement a
 WHERE a.datem BETWEEN '2021-09-30' AND '2021-10-02' AND a.fk_user_author = '242' ";
     $rows = BimpObject::getBdb()->executeS($sql, 'array');
 

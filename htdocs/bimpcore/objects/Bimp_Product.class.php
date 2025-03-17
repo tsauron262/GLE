@@ -1044,9 +1044,28 @@ class Bimp_Product extends BimpObject
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
+            case 'categ_doli':
+                $alias = $main_alias . '___cat_prod_doli';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'categorie_product',
+                    'on'    => $alias . '.fk_product = ' . $main_alias . '.rowid'
+                );
+                $filters[$alias . '.fk_categorie'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
+                );
+                break;
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+    }
+    
+    public function getCustomFilterValueLabel($field_name, $value) {
+        if($field_name == 'categ_doli'){
+            $categ = $this->getCategoriesArray();
+            return $categ[$value];
+        }
+        return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
     public function getActionsButtons()
@@ -1895,6 +1914,19 @@ class Bimp_Product extends BimpObject
 
         if ($this->isLoaded()) {
             foreach (self::getProductCategoriesArray((int) $this->id) as $id_category => $label) {
+                $categories[(int) $id_category] = $label;
+            }
+        }
+
+        return $categories;
+    }
+
+    public function getCategoriesListId()
+    {
+        $categories = array();
+
+        if ($this->isLoaded()) {
+            foreach (self::getProductCategoriesArray((int) $this->id) as $id_category => $label) {
                 $categories[] = (int) $id_category;
             }
         }
@@ -2403,12 +2435,6 @@ class Bimp_Product extends BimpObject
         }
 
         return $html;
-    }
-
-    public function displayCategories()
-    {
-        // todo
-        return '';
     }
 
     public function displayRefShort()
@@ -4882,6 +4908,9 @@ class Bimp_Product extends BimpObject
         }
         if ($mailValid)
             $this->mailValidation();
+        
+        $categ = BimpTools::getValue('categ_doli', array(), 'array');
+        $this->dol_object->setCategories($categ);
 
         return parent::validatePost();
     }

@@ -723,6 +723,7 @@ fields:
             type: select
             options: 
                 callback: getAvailableForfaitsLocationArray
+                
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -767,6 +768,19 @@ forms:
             - field: forfaits_location
               show: 
                   is_module_active: bimplocation
+            - custom: 1
+              input_name: categ_doli
+              label: Categories doli
+              value:
+                callback: getCategoriesListId
+              input: 
+                  type: select
+                  multiple: 1
+                  options: 
+                      callback: getCategoriesArray
+              search: 1
+              add_btn: 1
+              add_form_name: addCateg
             
     create:
         extends: default
@@ -1481,8 +1495,29 @@ filters_panels:
             collection:
             nature:
             famille:
+                
+filters: 
+    categ_doli: 
+        label: Categorie doli
+        type: value
+        input: 
+          type: select
+          options: 
+              callback: getCategoriesArray
+#filters: 
+#    origin_type: 
+#        label: Type origine
+#        type: value
+#        input: 
+#            type: select
+#            options: 
+#                array: originetypes
       
 lists_cols: 
+    categ_doli:
+        label: Categorie doli
+        value:
+            callback: getCategories
     seuil_stock_alerte: 
         label: Lim. stock
     stock_picto: 

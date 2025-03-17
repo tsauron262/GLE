@@ -153,13 +153,13 @@ class Session {
             unset($diff2['time']);
         }
 
-		$ip = static::getUserIp();
-		if($ip != $this->ipBase && $this->ipBase != '0' && $this->ipBase != ''){
-			if(class_exists('BimpCore'))
-				BimpCore::addlog('Changement d\'ip dans la session, ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip, 3);
-			else
-				mailSyn2('Changement d\'ip dans la session', 'dev@bimp.fr', null, 'ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip);
-		}
+//		$ip = static::getUserIp();
+//		if($ip != $this->ipBase && $this->ipBase != '0' && $this->ipBase != ''){
+//			if(class_exists('BimpCore'))
+//				BimpCore::addlog('Changement d\'ip dans la session, ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip, 3);
+//			else
+//				mailSyn2('Changement d\'ip dans la session', 'dev@bimp.fr', null, 'ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip);
+//		}
 
 		$login = $_SESSION['dol_login'];
         if(count($diff1) > 0 || count($diff2) > 0 || $login != $this->loginBase){

@@ -3,6 +3,8 @@ table: bl_inventory_2
 controller: inventory2
 icon: fas_clipboard-list
 
+entity_name: product
+
 header_btn:
     callback: getActionsButtons
 

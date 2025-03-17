@@ -246,6 +246,12 @@ HAVING scan_exp != scan_det";
                         )));
                         $errors = BimpTools::merge_array($errors, $expected->create());
                     }
+                    else{
+                            $ln = $db->fetch_object($sql);
+                            $expected = BimpObject::getInstance($this->module, 'InventoryExpected', $ln->id);
+                            if($expected->getData('qty') != $datas['qty'])
+                                $expected->updateField('qty', $datas['qty']);
+                    }
                 }
             }
 

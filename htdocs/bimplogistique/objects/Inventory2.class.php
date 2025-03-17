@@ -251,7 +251,6 @@ HAVING scan_exp != scan_det";
                             $expected = BimpObject::getInstance($this->module, 'InventoryExpected', $ln->id);
                             if($expected->getData('qty') != $datas['qty'])
                                 $expected->updateField('qty', $datas['qty']);
-						$errors[] = 'maj'.$datas['qty'];
                     }
                 }
             }

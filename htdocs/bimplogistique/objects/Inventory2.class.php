@@ -46,11 +46,11 @@ class Inventory2 extends BimpObject
         $errors = array();
         if (!defined('MOD_DEV') || MOD_DEV < 1) {
 
-            $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/IF(count(DISTINCT(d.id)) >= 1,count(DISTINCT(d.id)),1)) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product 
-FROM `llx_bl_inventory_expected` e 
-LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product` 
-WHERE id_inventory = " . $this->id . " 
-GROUP BY id_wt, id_product 
+            $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/IF(count(DISTINCT(d.id)) >= 1,count(DISTINCT(d.id)),1)) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product
+FROM `llx_bl_inventory_expected` e
+LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product`
+WHERE id_inventory = " . $this->id . "
+GROUP BY id_wt, id_product
 HAVING scan_exp != scan_det";
 
             $sql1 = $this->db->db->query($requete);
@@ -251,6 +251,7 @@ HAVING scan_exp != scan_det";
                             $expected = BimpObject::getInstance($this->module, 'InventoryExpected', $ln->id);
                             if($expected->getData('qty') != $datas['qty'])
                                 $expected->updateField('qty', $datas['qty']);
+						$errors[] = 'maj'.$datas['qty'];
                     }
                 }
             }
@@ -667,7 +668,7 @@ HAVING scan_exp != scan_det";
     }
 
     /**
-     * 
+     *
      * @param string $input_name
      * @param type $type (gamme, collection, famille etc)
      */
@@ -929,7 +930,7 @@ HAVING scan_exp != scan_det";
     }
 
     /**
-     * Search the $fk_warehouse_type befor inserting it 
+     * Search the $fk_warehouse_type befor inserting it
      */
     public function insertLineProduct($id_product, $qty_input, &$errors)
     {
@@ -938,7 +939,7 @@ HAVING scan_exp != scan_det";
         $qty_input = (int) $qty_input;
 
         $diff = $this->getDiffProduct();
-//        
+//
         end($diff);
         $fk_main_wt = key($diff);
 
@@ -976,7 +977,7 @@ HAVING scan_exp != scan_det";
 
                     // Qty négative
                 } else {
-                    $values['nb_scan'] = (int) $values['nb_scan']; // Err fatale bizzare... 
+                    $values['nb_scan'] = (int) $values['nb_scan']; // Err fatale bizzare...
                     // On ne peut pas enlever de quantité ici
                     if ($values['nb_scan'] <= 0)
                         continue;
@@ -1007,7 +1008,7 @@ HAVING scan_exp != scan_det";
     }
 
     /**
-     * Search the $fk_warehouse_type befor inserting it 
+     * Search the $fk_warehouse_type befor inserting it
      */
     public function insertLineEquipment($id_product, $id_equipment, &$errors)
     {
@@ -1636,7 +1637,7 @@ AND i.id=' . (int) $this->id;
         // Création du tableau lines_status[id_line] = is_deletable (boolean)
         foreach ($prods as $pack_lines) {
 
-            // Il y a des lignes dans package nouveau, uniquement celle-ci 
+            // Il y a des lignes dans package nouveau, uniquement celle-ci
             // seront supprimable
             if (isset($pack_lines[$id_package_nouveau])) {
 
@@ -1821,7 +1822,7 @@ AND i.id=' . (int) $this->id;
     }
 
     /**
-     * 
+     *
      * @param type $has_filter
      * @param type $called_from 'create' ou 'update'
      * @return type

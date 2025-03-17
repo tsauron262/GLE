@@ -347,7 +347,7 @@ HAVING scan_exp != scan_det";
                 'label'   => 'Recalculer attendu',
                 'icon'    => 'fas_box',
                 'onclick' => $this->getJsActionOnclick('createExpected', array(), array(
-                    'success_callback' => 'function(result) {bimp_reloadPage();}')
+                    'success_callback' => 'function(result) {}')
                 )
             );
         }

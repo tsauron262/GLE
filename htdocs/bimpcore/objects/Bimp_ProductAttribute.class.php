@@ -62,7 +62,7 @@ class Bimp_ProductAttribute extends BimpObject
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $rows = self::getBdb()->getRows('product_attribute', '1', null, 'array', array('rowid', 'ref', 'label'), 'position', 'asc');
+            $rows = self::getBdb()->getRows('product_attribute', 'entity IN ('. getEntity('product').')', null, 'array', array('rowid', 'ref', 'label'), 'position', 'asc');
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {

@@ -2794,7 +2794,9 @@ class Bimp_Societe extends BimpDolObject
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
 
 //                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
-                $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
+                $data = array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data));
+                print_r($data);
+                $objReturn = $sClient->GetData($data);
 
                 if (isset($objReturn->GetDataResult) && !empty($objReturn->GetDataResult)) {
                     $returnData = $objReturn->GetDataResult;

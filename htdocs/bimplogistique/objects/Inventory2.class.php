@@ -47,8 +47,8 @@ class Inventory2 extends BimpObject
         if (!defined('MOD_DEV') || MOD_DEV < 1) {
 
             $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/IF(count(DISTINCT(d.id)) >= 1,count(DISTINCT(d.id)),1)) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product
-FROM `llx_bl_inventory_expected` e
-LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product`
+FROM `'.MAIN_DB_PREFIX.'bl_inventory_expected` e
+LEFT JOIN '.MAIN_DB_PREFIX.'bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product`
 WHERE id_inventory = " . $this->id . "
 GROUP BY id_wt, id_product
 HAVING scan_exp != scan_det";
@@ -68,7 +68,7 @@ HAVING scan_exp != scan_det";
 
             $sql2 = $this->db->db->query(
                     "SELECT COUNT(*), min(id) as minId, max(id) as maxId "
-                    . "FROM `llx_bl_inventory_det_2` "
+                    . "FROM `".MAIN_DB_PREFIX."bl_inventory_det_2` "
                     . "WHERE `fk_inventory` = " . $this->getData('id') . " AND `fk_equipment` > 0 "
                     . "GROUP BY `fk_equipment` HAVING COUNT(*) > 1");
             if ($this->db->db->num_rows($sql2) > 0) {
@@ -90,7 +90,7 @@ HAVING scan_exp != scan_det";
         $return = '';
         $info = "";
 
-        $sql = $this->db->db->query('SELECT SUM(IF(`qty_scanned` > 0, qty_scanned, 0)) as scan, SUM(IF(`qty` > 0, qty, 0)) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = ' . $this->id);
+        $sql = $this->db->db->query('SELECT SUM(IF(`qty_scanned` > 0, qty_scanned, 0)) as scan, SUM(IF(`qty` > 0, qty, 0)) as att FROM `'.MAIN_DB_PREFIX.'bl_inventory_expected` WHERE `id_inventory` = ' . $this->id);
 
         if (is_object($sql)) {
             if ($this->db->db->num_rows($sql)) {
@@ -232,7 +232,7 @@ HAVING scan_exp != scan_det";
             foreach ($prods as $id_prod => $prod) {
                 foreach ($prod as $datas) {
                     global $db;
-                    $sql = $db->query("SELECT * FROM llx_bl_inventory_expected WHERE id_inventory = " . $this->getData('id') . " AND id_wt = " . $wt->getData('id') . " AND id_package = " . $datas['id_package'] . " AND id_product = " . $id_prod);
+                    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."bl_inventory_expected WHERE id_inventory = " . $this->getData('id') . " AND id_wt = " . $wt->getData('id') . " AND id_package = " . $datas['id_package'] . " AND id_product = " . $id_prod);
                     if ($db->num_rows($sql) == 0) {
                         $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
                         $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
@@ -266,7 +266,7 @@ HAVING scan_exp != scan_det";
 
                 foreach ($prod_eq as $id_prod => $ids_equipments) {
                     global $db;
-                    $sql = $db->query("SELECT * FROM llx_bl_inventory_expected WHERE id_inventory = " . $this->getData('id') . " AND id_wt = " . $wt->getData('id') . " AND id_package = " . $id_package . " AND id_product = " . $id_prod);
+                    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."bl_inventory_expected WHERE id_inventory = " . $this->getData('id') . " AND id_wt = " . $wt->getData('id') . " AND id_package = " . $id_package . " AND id_product = " . $id_prod);
                     if ($db->num_rows($sql) == 0) {
 
                         $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
@@ -1280,9 +1280,9 @@ HAVING scan_exp != scan_det";
         $errors = array();
 
         $sql = 'SELECT d.id as id_det, p.ref as p_ref, i.id as id_inv
-FROM llx_bl_inventory_det_2 as d
-LEFT JOIN llx_product as p ON d.fk_product = p.rowid
-LEFT JOIN llx_bl_inventory_2 as i ON d.fk_inventory = i.id
+FROM '.MAIN_DB_PREFIX.'bl_inventory_det_2 as d
+LEFT JOIN '.MAIN_DB_PREFIX.'product as p ON d.fk_product = p.rowid
+LEFT JOIN '.MAIN_DB_PREFIX.'bl_inventory_2 as i ON d.fk_inventory = i.id
 WHERE p.fk_product_type=1
 AND i.id=' . (int) $this->id;
 

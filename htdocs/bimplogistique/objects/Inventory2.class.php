@@ -232,7 +232,10 @@ HAVING scan_exp != scan_det";
             foreach ($prods as $id_prod => $prod) {
                 foreach ($prod as $datas) {
                     global $db;
-                    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."bl_inventory_expected WHERE id_inventory = " . $this->getData('id') . " AND id_wt = " . $wt->getData('id') . " AND id_package = " . $datas['id_package'] . " AND id_product = " . $id_prod);
+                    $req = "SELECT * FROM ".MAIN_DB_PREFIX."bl_inventory_expected WHERE id_inventory = " . $this->getData('id') . " AND id_wt = " . $wt->getData('id')." AND id_product = " . $id_prod;
+                    if($datas['id_package'] && $datas['id_package'] != 0)
+                        $req .= " AND id_package = " . $datas['id_package'];
+                    $sql = $db->query($req);
                     if ($db->num_rows($sql) == 0) {
                         $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
                         $errors = BimpTools::merge_array($errors, $expected->validateArray(array(

@@ -173,8 +173,8 @@ class Session {
                 $req = "INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time, ip) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$timeTot."', '".$ip."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = '".$timeTot."'";
                 $result = $this->db->query($req);
 
-			$login = $_SESSION['dol_login'];
-			mailSyn2('enregistr session', 'tommy@bimp.fr', null, 'enregistre session : '.$this->loginBase.' aprés : '.$login.' sessionId : '.$sessionID.$result.'<br/>'.print_r($_SESSION,1));
+//			$login = $_SESSION['dol_login'];
+//			mailSyn2('enregistr session', 'tommy@bimp.fr', null, 'enregistre session : '.$this->loginBase.' aprés : '.$login.' sessionId : '.$sessionID.$result.'<br/>'.print_r($_SESSION,1));
 //            }
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);

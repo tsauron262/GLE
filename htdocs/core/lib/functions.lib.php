@@ -434,7 +434,7 @@ function getEntity($element, $shared = 1, $currentobject = null)
 		$out = $mc->getEntity($element, $shared, $currentobject);
 	} else {
 		$out = '';
-		$addzero = array('user', 'usergroup', 'cronjob', 'c_email_templates', 'c_holiday_types', 'email_template', 'default_values', 'overwrite_trans');
+		$addzero = array('product', 'user', 'usergroup', 'cronjob', 'c_email_templates', 'c_holiday_types', 'email_template', 'default_values', 'overwrite_trans');
 		if (in_array($element, $addzero)) {
 			$out .= '0,';
 		}
@@ -641,7 +641,7 @@ function dol_shutdown()
         if(class_exists('BimpController'))
             BimpController::bimp_shutdown();
         /*fmoddrsi*/
-        
+
 	global $db;
 	$disconnectdone = false;
 	$depth = 0;

@@ -2795,7 +2795,7 @@ class Bimp_Societe extends BimpDolObject
 
 //                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
                 $data = array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data));
-                print_r($data);
+//                print_r($data);
                 $objReturn = $sClient->GetData($data);
 
                 if (isset($objReturn->GetDataResult) && !empty($objReturn->GetDataResult)) {

@@ -107,6 +107,9 @@ class BimpObject extends BimpCache
 		$className = '';
 		$instance = null;
 
+		$ext_version = BimpCore::getVersion();
+		$ext_entity = BimpCore::getExtendsEntity();
+
 		if (!$module || !$object_name) {
 			$module = 'bimpcore';
 			$object_name = 'BimpObject';
@@ -124,6 +127,7 @@ class BimpObject extends BimpCache
 
 		if (is_null($instance)) {
 			if ($object_name !== 'BimpObject') {
+
 				$file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
 				if (file_exists($file)) {
 					if (!class_exists($object_name)) {
@@ -133,8 +137,8 @@ class BimpObject extends BimpCache
 				}
 
 				// Surcharge version:
-				if (BimpCore::getVersion()) {
-					$version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/objects/' . $object_name . '.class.php';
+				if ($ext_version) {
+					$version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . $ext_version . '/objects/' . $object_name . '.class.php';
 					if (file_exists($version_file)) {
 						$className = $object_name . '_ExtVersion';
 						if (!class_exists($className)) {
@@ -144,8 +148,8 @@ class BimpObject extends BimpCache
 				}
 
 				// Surcharge entité:
-				if (BimpCore::getExtendsEntity() != '') {
-					$entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $object_name . '.class.php';
+				if ($ext_entity) {
+					$entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . $ext_entity . '/objects/' . $object_name . '.class.php';
 					if (file_exists($entity_file)) {
 						$className = $object_name . '_ExtEntity';
 						if (!class_exists($className)) {
@@ -193,8 +197,8 @@ class BimpObject extends BimpCache
 							}
 
 							// Surcharge version:
-							if (BimpCore::getVersion()) {
-								$ext_version_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/versions/' . BimpCore::getVersion() . '/objects/' . $ext_object_name . '.class.php';
+							if ($ext_version) {
+								$ext_version_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/versions/' . $ext_version . '/objects/' . $ext_object_name . '.class.php';
 								if (file_exists($ext_version_file)) {
 									$ext_className = $ext_object_name . '_ExtVersion';
 									if (!class_exists($ext_className)) {
@@ -204,8 +208,8 @@ class BimpObject extends BimpCache
 							}
 
 							// Surcharge entité:
-							if (BimpCore::getExtendsEntity() != '') {
-								$ext_entity_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/' . $ext_object_name . '.class.php';
+							if ($ext_entity) {
+								$ext_entity_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/entities/' . $ext_entity . '/objects/' . $ext_object_name . '.class.php';
 								if (file_exists($ext_entity_file)) {
 									$ext_className = $ext_object_name . '_ExtEntity';
 									if (!class_exists($ext_className)) {
@@ -2305,8 +2309,7 @@ class BimpObject extends BimpCache
 		$html = '<pre>' . print_r($this->data, 1) . '</pre>';
 		if ($return_html) {
 			return $html;
-		}
-		else{
+		} else {
 			echo $html;
 			return '';
 		}

@@ -16,8 +16,8 @@ class actioncomm_event extends AbstractNotification {
 			}
 
 			var html = '<a class="nav-link dropdown-toggle header-icon ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
-			html += '<i class="fas fa5-calendar-alt atoplogin"></i></a>';
-			html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id + '">';
+			html += '<i class="far fa5-calendar-alt atoplogin"></i></a>';
+			html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown dropdown_actioncomm_event" aria-labelledby="' + this.dropdown_id + '">';
 			html += '<h4 class="header">';
 			html += 'Mes rendez-vous' + this.getBoutonReload(this.dropdown_id);
 			html += '<a style="float:right" href="' + dol_url_root + '/synopsistools/agenda/vue.php"><i class="fas fa5-calendar-alt iconLeft"></i>Mon agenda</a>';
@@ -45,8 +45,46 @@ class actioncomm_event extends AbstractNotification {
 
 		element.is_new = this.isNew(element);
 
-		html += '<div style="padding: 10px">';
-		html += element.link;
+		html += '<div style="padding: 8px">';
+		html += '<div style="display: inline-block; width: 50%">';
+		if (element.type) {
+			html += '<span class="type" style="margin-right: 12px;">' + element.type + '</span>';
+		}
+		if (element.lieu) {
+			html += '<span class="lieu"><i class="fas fa5-map-marker-alt iconLeft"></i>' + element.lieu + '</span>';
+		}
+		html += '</div>';
+		html += '<div style="display: inline-block; width: 49%; text-align: right">';
+		if (element.state) {
+			html += '<span class="state" style="font-size: 12px">' + element.state + '</span>';
+		}
+		html += '</div>';
+
+
+		html += '<div class="title">';
+		if (element.icon) {
+			html += '<span class="' + element.bg_type + '"><i class="fas fa5-' + element.icon + ' iconLeft"></i></span>';
+		}
+		if (element.label) {
+			html += element.label;
+		}
+		html += '</div>';
+
+		if (element.obj) {
+			html += '<div>' + element.obj + '</div>';
+		}
+
+		if (element.tiers) {
+			html += '<div>' + element.tiers + '</div>';
+		}
+		if (element.contact) {
+			html += '<div><b>Contact : </b>' + element.contact + '</div>';
+		}
+
+		if (element.desc) {
+			html += '<div class="desc">' + element.desc + '</div>';
+		}
+
 		html += '<div/>';
 
 		return html;
@@ -57,7 +95,7 @@ class actioncomm_event extends AbstractNotification {
 	}
 
 	isNew(element) {
-		return 1;
+		return element.today;
 	}
 
 	getKey(element) {

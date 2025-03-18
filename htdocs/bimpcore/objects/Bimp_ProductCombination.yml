@@ -68,6 +68,8 @@ forms:
             - field: variation_price
             - field: variation_weight
             - field: variation_ref_ext
+        after_content:
+            callback: displayCombination
             
 lists_cols: 
     combination: 

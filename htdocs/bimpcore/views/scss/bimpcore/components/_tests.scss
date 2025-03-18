@@ -1,0 +1,20 @@
+
+.BCTest_Group {
+  display: inline-block;
+
+  & > .bcv2_containter {
+    border: 1px solid #DCDCDC;
+    background-color: #FAFAFA;
+    padding: 5px 15px;
+  }
+}
+
+.BCTest_Element {
+  display: inline-block;
+
+  & > .bcv2_containter {
+    border: 1px solid #DCDCDC;
+    padding: 15px;
+    margin: 5px;
+  }
+}

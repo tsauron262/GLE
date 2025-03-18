@@ -553,6 +553,9 @@ class GSX_v2 extends GSX_Const
             foreach ($data['errors'] as $error) {
                 $msg = '';
                 switch ($error['code']) {
+					case 'RESERVATIONS_NOT_FOUND':
+						return array();
+						break;
                     case 'SESSION_IDLE_TIMEOUT':
                         // On tente une nouvelle authentification:
                         if ($request_name !== 'authenticate') {

@@ -6570,7 +6570,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$errors[] = $this->dol_object->error;
 			}
 
-			$err_sql = $this->dol_object->db->db->lasterror();
+			$err_sql = $this->dol_object->db->lasterror();
 			if ($err_sql) {
 				$errors[] = $err_sql;
 			}

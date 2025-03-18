@@ -7,7 +7,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public static $actions_selon_statut_rdc = array(
 		1 => array( // Prospection: demande entrante
-			2, 3, 4, 5 // les autres statuts de prospection
+			2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 // les autres statuts de prospection
 		),
 		2 => array(
 			1, 3, 4, 5
@@ -22,8 +22,31 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			1, 2, 3, 4, 11
 		),
 		11 => array( // Live
-			12, 13, 14, // résilié, suspendu, férmé
+			13, 14, // suspendu, férmé
 		),
+		13 => array( // suspendu
+			12
+		),
+		14 => array( // Fermé
+			12
+		),
+	);
+
+	public static $group_allowed_actions = array(
+		1 => array('BD'),
+		2 => array('BD'),
+		3 => array('KAM'), // en fait c'est BD, c juste pour le test
+		4 => array('BD', 'KAM'), // en fait c'est BD, c juste pour le test
+		5 => array('BD'),
+		6 => array('BD'),
+		7 => array('BD'),
+		8 => array('BD'),
+		9 => array('TECH_RDC'),
+		10 => array('TECH_RDC'),
+		11 => array(),
+		12 => array('BD'),
+		13 => array(),
+		14 => array(),
 	);
 
 	public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
@@ -65,11 +88,28 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		if (isset(self::$actions_selon_statut_rdc[$this->getData('fk_statut_rdc')])) {
 			foreach (self::$actions_selon_statut_rdc[$this->getData('fk_statut_rdc')] as $statut) {
-				$buttons[] = array(
-					'label'   => 'Passer le statut à ' . $statuts_rdc[$statut]['libelle'],
-					'icon'    => 'fas_edit',
-					'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
-				);
+				$listGroup_allowed = self::$group_allowed_actions[$statut];
+				$user_in_group = false;
+				foreach ($listGroup_allowed as $group) {
+					if ($this->isUserInGroup($group)) {
+						$user_in_group = true;
+						break;
+					}
+				}
+				if($user_in_group)
+					$buttons[] = array(
+						'label'   => 'Passer le statut à ' . $statuts_rdc[$statut]['libelle'],
+						'icon'    => 'fas_edit',
+						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
+					);
+				else
+					$buttons[] = array(
+						'label'   => 'Passer le statut à ' . $statuts_rdc[$statut]['libelle'],
+						'icon'    => 'fas_times',
+						'onclick' => '',
+						'disabled' => 1,
+						'popover' => 'Vous n\'avez pas les droits pour effectuer cette action'
+					);
 			}
 		}
 
@@ -100,6 +140,16 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		else return true;
 	}
 
+	public function isUserInGroup($g)
+	{
+		global $user;
+		$id_group = BimpCore::getConf('id_user_group_' . $g);
+		$groups = $this->db->getRow('usergroup_user', 'fk_user = ' . $user->id . ' AND fk_usergroup = ' . $id_group , array('rowid'), 'array');
+		if($groups)
+			return true;
+
+		return false;
+	}
 	public function renderHeaderStatusExtra()	{
 		return '';
 	}

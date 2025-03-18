@@ -760,6 +760,10 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         if ($container.hasClass('customField')) {
             custom = 1;
         }
+        if ($container.hasClass('is_reloading')) {
+            setTimeout(reloadObjectInput,50, form_id, input_name, fields, keep_new_value);
+            return;
+        }
 
         value = getInputValue($container);
         if (typeof (value) === 'undefined') {

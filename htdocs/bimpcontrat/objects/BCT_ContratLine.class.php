@@ -1662,7 +1662,7 @@ class BCT_ContratLine extends BimpObject
 					}
 				}
 
-				if ($data['nb_periods_tobuy_max'] > 0 && (int) $this->getData('force_fac_ended')) {
+				if ($data['nb_periods_tobuy_max'] > 0 && (int) $this->getData('force_achat_ended')) {
 					$data['nb_periods_never_bought'] += $data['nb_periods_tobuy_max'];
 					$data['nb_periods_tobuy_max'] = 0;
 					$data['nb_periods_tobuy_today'] = 0;

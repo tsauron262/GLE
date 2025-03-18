@@ -1286,7 +1286,7 @@ class BIMP_Task extends BimpAbstractFollow
 			if (!empty($users_delegations)) {
 				$taks_ids = array();
 
-				foreach ($data['elements'] as &$task) {
+				foreach ($data['elements'] as $task) {
 					$taks_ids[] = $task['id'];
 				}
 
@@ -1300,9 +1300,9 @@ class BIMP_Task extends BimpAbstractFollow
 					), $errors);
 
 					if (!empty($user_tasks)) {
-						foreach ($user_tasks['elements'] as &$task) {
+						foreach ($user_tasks['elements'] as $idx => $task) {
 							$taks_ids[] = $task['id'];
-							$task['dest'] = $user_name;
+							$user_tasks['elements'][$idx]['dest'] = $user_name;
 						}
 
 						$data['elements'] = BimpTools::merge_array($data['elements'], $user_tasks['elements']);

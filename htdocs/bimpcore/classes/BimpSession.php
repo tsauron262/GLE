@@ -123,6 +123,10 @@ class Session {
     }
     // Ecriture des sessions
     public function session_ecriture($sessionID, $sessionData) {
+
+
+
+
         $datetime_actuel = new DateTime("now", new DateTimeZone('Europe/Paris'));
         $time = (hrtime(true)-$this->timeDeb) / 1000000000;
         if(!isset($_SESSION['time']))
@@ -149,26 +153,29 @@ class Session {
             unset($diff2['time']);
         }
 
-		$ip = static::getUserIp();
-		if($ip != $this->ipBase && $this->ipBase != '0' && $this->ipBase != ''){
-			if(class_exists('BimpCore'))
-				BimpCore::addlog('Changement d\'ip dans la session, ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip, 3);
-			else
-				mailSyn2('Changement d\'ip dans la session', 'dev@bimp.fr', null, 'ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip);
-		}
+//		$ip = static::getUserIp();
+//		if($ip != $this->ipBase && $this->ipBase != '0' && $this->ipBase != ''){
+//			if(class_exists('BimpCore'))
+//				BimpCore::addlog('Changement d\'ip dans la session, ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip, 3);
+//			else
+//				mailSyn2('Changement d\'ip dans la session', 'dev@bimp.fr', null, 'ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip);
+//		}
 
-        if(count($diff1) > 0 || count($diff2) > 0){
+		$login = $_SESSION['dol_login'];
+        if(count($diff1) > 0 || count($diff2) > 0 || $login != $this->loginBase){
 			$ip = static::getUserIp();
             $data = $_SESSION;
-            $login = $_SESSION['dol_login'];
 			if($login != $this->loginBase && $this->loginBase != '')
 				mailSyn2('probléme session', 'dev@bimp.fr', null, 'Atention changement de login dans la session avant : '.$this->loginBase.' aprés : '.$login);
             unset($data['dol_login']);
             $data = addslashes(json_encode($data));
-            if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != '')){
+//            if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != '')){
                 $req = "INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time, ip) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$timeTot."', '".$ip."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = '".$timeTot."'";
-                $this->db->query($req);
-            }
+                $result = $this->db->query($req);
+
+//			$login = $_SESSION['dol_login'];
+//			mailSyn2('enregistr session', 'tommy@bimp.fr', null, 'enregistre session : '.$this->loginBase.' aprés : '.$login.' sessionId : '.$sessionID.$result.'<br/>'.print_r($_SESSION,1));
+//            }
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);
     //        }

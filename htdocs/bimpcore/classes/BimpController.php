@@ -44,9 +44,12 @@ class BimpController
             }
         }
 
+		$ext_version = BimpCore::getVersion();
+		$ext_entity = BimpCore::getExtendsEntity();
+
         // Surcharge Version:
-        if (BimpCore::getVersion()) {
-            $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/controllers/' . $controllerClassBase . '.php';
+        if ($ext_version) {
+            $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . $ext_version . '/controllers/' . $controllerClassBase . '.php';
             if (file_exists($version_file)) {
                 $className = $controllerClassBase . '_ExtVersion';
                 if (!class_exists($className)) {
@@ -56,8 +59,8 @@ class BimpController
         }
 
         // Surcharge entité:
-        if (BimpCore::getExtendsEntity() != '') {
-            $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/controllers/' . $controllerClassBase . '.php';
+        if ($ext_entity) {
+            $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . $ext_entity . '/controllers/' . $controllerClassBase . '.php';
             if (file_exists($entity_file)) {
                 $className = $controllerClassBase . '_ExtEntity';
                 if (!class_exists($className)) {

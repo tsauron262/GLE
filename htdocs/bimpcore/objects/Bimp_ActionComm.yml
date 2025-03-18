@@ -18,7 +18,7 @@ dol_object:
             class: ActionComm
 
 nom_url: 
-    syntaxe: <id>
+    syntaxe: <label>
     
 labels: 
     name: événement
@@ -56,7 +56,7 @@ objects:
     contact: 
         instance: 
             id_object: 
-                field_value: fk_soc
+                field_value: fk_contact
                 
     
     projet:
@@ -70,7 +70,7 @@ objects:
             id_object: 
                 field_value: fk_project
                 
-fields: 
+fields:
     label: 
         label: Libellé
         required: 1
@@ -88,11 +88,6 @@ fields:
         label: Statut
         type: int
         default_value: 0
-        displays:
-            default:
-                label: Affichage par défaut
-                type: callback
-                method: displayState
         
     fk_action: 
         label: Type
@@ -496,7 +491,7 @@ lists:
             fk_user_action: 
             element: 
             fk_soc: 
-            fk_contact: 
+            fk_contact:
             state: 
                 
     global: 
@@ -513,7 +508,8 @@ lists:
             datep:
             datep2:
             fk_soc:
-            status:
+            element:
+            state:
             
         
     soc: 

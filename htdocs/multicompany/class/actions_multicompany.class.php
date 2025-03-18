@@ -86,7 +86,8 @@ class ActionsMulticompany
 			'usergroup',
 			'c_email_templates',
 			'email_template',
-			'default_values'
+			'default_values',
+                        'product'
 		);
 
 		// Default sharing elements

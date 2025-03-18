@@ -1,0 +1,123 @@
+body {
+  margin: 0;
+}
+
+#ticket {
+  font-family: roboto, arial, tahoma, verdana, helvetica;
+  color: #282828;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-size: 15px;
+  line-height: 15px;
+}
+#ticket div {
+  box-sizing: border-box;
+}
+#ticket .bold {
+  font-weight: bold;
+}
+#ticket .ticket_header {
+  margin-bottom: 20px;
+}
+#ticket .ticket_footer {
+  margin-top: 10px;
+  border-top: 4px solid #282828;
+  border-bottom: 4px solid #282828;
+}
+#ticket .ticket_footer p {
+  margin: 5px 0;
+}
+#ticket .header_block {
+  display: inline-block;
+  padding: 0 10px 10px 0;
+  vertical-align: top;
+  width: 50%;
+}
+#ticket .header_block img {
+  width: 100%;
+  height: auto;
+}
+#ticket .header_block:last-child {
+  padding-left: 25px;
+  padding-top: 25px;
+}
+#ticket .footer_block {
+  text-align: center;
+  display: inline-block;
+  padding: 0 0 5px 0;
+  vertical-align: middle;
+  width: 20%;
+}
+#ticket .footer_block img {
+  width: 100%;
+  height: auto;
+}
+#ticket .footer_block:last-child {
+  width: 80%;
+  padding-left: 10px;
+}
+#ticket #ticket_lines {
+  font-size: 14px;
+  border-collapse: collapse;
+  margin: 20px 0 5px 0;
+  width: 100%;
+}
+#ticket #ticket_lines thead tr th {
+  text-align: center;
+  font-weight: bold;
+  border-bottom: 2px solid #282828;
+}
+#ticket #ticket_lines thead tr th:first-child {
+  text-align: left;
+}
+#ticket #ticket_lines tbody tr td {
+  font-weight: bold;
+  font-size: 13px;
+  overflow: hidden;
+  text-align: center;
+}
+#ticket #ticket_lines tbody tr.article_desc td {
+  text-align: left;
+}
+#ticket #ticket_lines tbody tr.article_amounts td {
+  border-bottom: 1px solid rgb(78.25, 78.25, 78.25);
+  padding: 3px;
+}
+#ticket #ticket_lines tbody tr.article_amounts td:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+#ticket #ticket_lines tbody tr.article_amounts td:last-child {
+  text-align: right;
+  padding-right: 0;
+}
+#ticket #ticket_totaux {
+  font-size: 17px;
+  line-height: 19px;
+  margin-bottom: 15px;
+  width: 100%;
+  text-align: right;
+}
+#ticket #ticket_totaux tbody tr td:first-child {
+  width: 80%;
+}
+#ticket #ticket_totaux tbody tr td:last-child {
+  width: 20%;
+}
+#ticket #ticket_payments,
+#ticket #ticket_rendus {
+  margin-bottom: 15px;
+}
+#ticket #ticket_payments tbody tr td,
+#ticket #ticket_rendus tbody tr td {
+  font-size: 14px;
+}
+#ticket #ticket_payments tbody tr td:first-child,
+#ticket #ticket_rendus tbody tr td:first-child {
+  padding-right: 15px;
+}
+#ticket #ticket_payments tbody tr td:last-child,
+#ticket #ticket_rendus tbody tr td:last-child {
+  text-align: right;
+}

@@ -99,7 +99,6 @@ fields:
         extrafields: client_rdc
         extra: 1
         depends_on: fk_group
-    
     commentaire:
         label: Commentaires
         type: text
@@ -193,7 +192,7 @@ views:
                     col_sm: 12
                     fields_table:
                         name: commentaires
-
+                        
 forms:
     default:
         extends: form_client_rdc
@@ -218,10 +217,13 @@ forms:
                 field: fk_pays
             Shop ID:
                 field: shopid
+                edit:
+                    callback: isShopIdVisible
             Priorité:
                 field: fk_priorite
             Prospection:
                 field: fk_statut_rdc
+                edit: 0
             Source:
                 field: fk_source
             Suspition de contrefaçon:

@@ -7,3 +7,7 @@ params:
         label: id du Group BD
         def: 0
         cat: groups
+    actions_date_der_contact:
+        label: ids c_actioncomm / dernier contact
+        help: ids du dico actioncomm provoquant la mise à jour de la date de dernier contact
+        cat: Agenda

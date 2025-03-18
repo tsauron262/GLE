@@ -113,12 +113,16 @@ class Bimp_ActionComm extends BimpObject
 
 	public function getUsersAssigned()
 	{
+		global $user;
 		$users = array();
 		foreach ($this->dol_object->userassigned as $userassigned) {
 			$users[] = $userassigned['id'];
 		}
 		if (!count($users)) {
 			$users = BimpTools::getPostFieldValue('param_values/fields/users_assigned', array(), 'array');
+			if (!count($users)) {
+				$users[] = $user->id;
+			}
 		}
 		return $users;
 	}
@@ -324,7 +328,7 @@ class Bimp_ActionComm extends BimpObject
 				$init_date = $this->getInitData($field_name);
 				$date = date('Y-m-d', strtotime($date)) . ' ' . date('H:i:s', strtotime($init_date));
 			} else {
-				$date = date('Y-m-d H:i:s', strtotime($date));
+				$date = date('Y-m-d H:i:s', $date ? strtotime($date) : time());
 			}
 		}
 

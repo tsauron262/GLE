@@ -11,7 +11,7 @@ objects:
             bimp_object: Bimp_Client
             id_object:
                 request: id
-                
+        
 sections:
     - type: object_header
       object_header:
@@ -36,18 +36,25 @@ sections:
                     children: contacts
                     name: soc
                     
-          - id: events
+          - id: actioncomm
             title: Événements
             icon: fas_calendar-check
             struct:
                 type: custom
                 custom:
                     callback:
-                        method: renderLinkedObjectList
+                        method: renderPageView
                         object: client
-                        params:
-                            - events
 
+          - id: tickets
+            title: Tickets
+            icon: fas_calendar-check
+            ajax_render_method:
+                object: client
+                method: renderLinkedObjectList
+                params:
+                    - tickets
+                        
           - id: all_files
             title: Fichiers
             struct:
@@ -57,7 +64,6 @@ sections:
                     object: client
                     children: files
                     name: default
-        
           - id: divers
             title: Divers (admin)
             icon: fas_tools

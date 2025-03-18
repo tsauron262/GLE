@@ -295,6 +295,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			if($err) return 0;
 			else return 1;
 		}
+		return 1;
 	}
 	public function checkAttr($onSave = false) {
 		global $user;

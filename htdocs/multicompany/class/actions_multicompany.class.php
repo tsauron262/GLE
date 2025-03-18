@@ -86,8 +86,7 @@ class ActionsMulticompany
 			'usergroup',
 			'c_email_templates',
 			'email_template',
-			'default_values',
-                        'product'
+			'default_values'
 		);
 
 		// Default sharing elements
@@ -4921,18 +4920,23 @@ class ActionsMulticompany
 			}
 		}
 
+		$withZero = '';
+		if($element == 'product'){
+			$withZero = '0,';
+		}
+
 		if (!empty($element)) {
 			if (!empty($this->sharingnamecompatibility[$element])) {
 				$element = $this->sharingnamecompatibility[$element];
 			}
 			if (!empty($this->entities[$element])) {
 				if (!empty($shared)) {
-					return $this->entities[$element];
+					return $withZero.$this->entities[$element];
 				}
 			}
 		}
 
-		return $conf->entity;
+		return $withZero.$conf->entity;
 	}
 
 	/**

@@ -6975,7 +6975,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 	public function isFieldUsed($field_name, &$infos = '')
 	{
 		if ($this->config->isDefined('fields/' . $field_name)) {
-			if ((int) $this->getConf('fields/' . $field_name . '/unused', 0, false, 'bool')) {
+			if ((int) $this->getConf('fields/' . $field_name . '/unused', 0, false, 'bool') || (int) !$this->getConf('fields/' . $field_name . '/used', 1, false, 'bool')) {
 				$infos = 'Champ "' . $field_name . '" défini comme non utilisé';
 				return 0;
 			}

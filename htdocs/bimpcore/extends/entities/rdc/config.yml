@@ -1,0 +1,20 @@
+colors:
+    default: 'B4B4B4'
+    primary: '001d3d'
+    secondary: '636363'
+    success: '07c546'
+    info: '3B6EA0'
+    warning: 'E69900'
+    danger: 'A00000'
+    important: '963E96'
+    selection: '5897FB'
+
+pdf:
+    primary: '001d3d'
+    primary_sav: '0096c8'
+
+interface_client:
+    primary: '001d3d'
+
+public_email:
+    primary: '001d3d'

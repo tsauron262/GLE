@@ -36,16 +36,15 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
 
 				$nb_errors = 0;
 				$msg_mail_errors = '';
-				foreach ($tab as $fileEx) {
-					if (stripos($fileEx, '.xml') !== false) {
-						$errorLn = array();
-						$dir = PATH_TMP . "/bimpcore/";
-						$file = "tmpftp.xml";
-						if (ftp_get($conn, $dir . $file, $fileEx, FTP_BINARY)) {
-							if (!stripos($fileEx, ".xml")) {
-								continue;
-							}
-							$data = simplexml_load_string(file_get_contents($dir . $file));
+                foreach ($tab as $fileEx) {
+                    if (stripos($fileEx, '.xml') !== false) {
+                        $errorLn = array();
+                        $dir = PATH_TMP . "/bimpcore/";
+                        $file = "tmpftp.xml";
+                        if (ftp_get($conn, $dir . $file, $fileEx, FTP_BINARY)) {
+                            if (!stripos($fileEx, ".xml"))
+                                continue;
+                            $data = simplexml_load_string(file_get_contents($dir . $file));
 
 							if (isset($data->attributes()['date'])) {
 								$date = (string) $data->attributes()['date'];
@@ -152,33 +151,32 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
 										$success .= "<br/>" . count($colis) . " Colis envoyées ";
 									}
 
-									$success .= "<br/>Comm : " . $ref . "<br/>Status " . static::$edi_status[(int) $statusCode]['label'];
-								} else {
-									$errorLn[] = 'pas de comm ' . $ref;
-								}
-							} else {
-								$errorLn[] = 'Structure XML non reconnue';
-							}
-							if (!count($errorLn)) {
-								ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
-							} else {
-								$commFourn->addObjectLog('Erreur EDI : ' . print_r($errorLn, 1));
+                                    $success .= "<br/>Comm : " . $ref . "<br/>Status " . static::$edi_status[(int) $statusCode]['label'];
+                                } else {
+                                    $errorLn[] = 'pas de comm ' . $ref;
+                                }
+                            } else {
+                                $errorLn[] = 'Structure XML non reconnue';
+                            }
+                            if (!count($errorLn)) {
+                                ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
+                            } else {
+                                $commFourn->addObjectLog('Erreur EDI : ' . print_r($errorLn, 1));
 								$msg_mail_errors .= '<br />Commande ' . $commFourn->getLink() . '<br/>' . print_r($errorLn, 1);
 								$nb_errors++;
-								ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
-							}
-						}
-						$errors = BimpTools::merge_array($errors, $errorLn);
-					}
-				}
+                                ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
+                            }
+                        }
+                        $errors = BimpTools::merge_array($errors, $errorLn);
+                    }
+                }
 				if ($nb_errors) {
 					$code = 'commande_ldlc_errors';
 					$sujet = $nb_errors . ' problème(s) commande LDLC';
 					BimpUserMsg::envoiMsg($code, $sujet, $msg_mail_errors);
 				}
             } else
-				$errors[] = 'Login impossible';
-			}
+                $errors[] = 'Login impossible';
 
 			ftp_close($conn);
 		} else {
@@ -193,30 +191,29 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
 		$tab = ftp_nlist($conn, $folder);
 		$errors = array();
 
-		$list = $this->getFilesArray();
-		$ok = false;
-		foreach ($list as $nom) {
-			if (stripos($nom, (string) $facNumber)) {
-				$ok = true;
-			}
-		}
-		if (!$ok) {
-			$newName = (string) $facNumber . ".pdf";
-			foreach ($tab as $fileEx) {
-				if (!$ok && stripos($fileEx, (string) $facNumber) !== false) {
-					ftp_get($conn, $this->getFilesDir() . "/" . $newName, $fileEx, FTP_BINARY);
-					$this->addObjectLog('Le fichier PDF fournisseur ' . $newName . ' à été ajouté.');
-					$ok = true;
-					if ($this->getData('entrepot') == 164) {
+        $list = $this->getFilesArray();
+        $ok = false;
+        foreach ($list as $nom) {
+            if (stripos($nom, (string) $facNumber))
+                $ok = true;
+        }
+        if (!$ok) {
+            $newName = (string) $facNumber . ".pdf";
+            foreach ($tab as $fileEx) {
+                if (!$ok && stripos($fileEx, (string) $facNumber) !== false) {
+                    ftp_get($conn, $this->getFilesDir() . "/" . $newName, $fileEx, FTP_BINARY);
+                    $this->addObjectLog('Le fichier PDF fournisseur ' . $newName . ' à été ajouté.');
+                    $ok = true;
+                    if ($this->getData('entrepot') == 164) {
 						$code = 'commande_ldlc_facture';
 						$sujet = "Nouvelle facture LDLC";
 						$msg = "Bonjour la facture " . $facNumber . " de la commande : " . $this->getLink() . " en livraison directe a été téléchargée";
                         BimpUserMsg::envoiMsg($code, $sujet, $msg);
-					}
-				}
-			}
-			if (!$ok) {
-				$errors[] = "Fichier " . $newName . ' introuvable';
+                    }
+                }
+            }
+            if (!$ok) {
+                $errors[] = "Fichier " . $newName . ' introuvable';
 //                mailSyn2('fichier pdf introuvable', 'dev@bimp.fr', null, "Fichier " . $newName . ' introuvable');
 			}
 		}

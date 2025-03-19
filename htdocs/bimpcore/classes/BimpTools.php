@@ -1378,17 +1378,17 @@ class BimpTools
 			}
 			$sql = ' FROM ' . MAIN_DB_PREFIX . $table . ($default_alias ? ' ' . $default_alias : '');
 
-			if (!is_null($joins) && is_array($joins) && count($joins)) {
-				foreach ($joins as $key => $join) {
-					$alias = (isset($join['alias']) ? $join['alias'] : $key);
-					if (isset($join['table']) && isset($join['on'])) {
+            if (!is_null($joins) && is_array($joins) && count($joins)) {
+                foreach ($joins as $key => $join) {
+                    $alias = (isset($join['alias']) ? $join['alias'] : $key);
+                    if (isset($join['table']) && isset($join['on'])) {
 						$sql .= ' ' . (isset($join['join_type']) ? $join['join_type'] : 'LEFT') . ' JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $alias . ' ON ' . $join['on'];
-					}
-				}
-			}
-		}
-		return $sql;
-	}
+                    }
+                }
+            }
+        }
+        return $sql;
+    }
 
 	public static function getSqlWhere($filters, $default_alias = 'a', $operator = 'WHERE')
 	{

@@ -1473,10 +1473,8 @@ class BIMP_Task extends BimpAbstractFollow
 	}
 }
 
-//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-//global $tabCentre;
-$tabCentre = BimpCache::getCentres();
-
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+global $tabCentre;
 if (is_array($tabCentre)) {
 	foreach ($tabCentre as $code => $centre) {
 		BIMP_Task::$sous_types['sav'][$code] = array('label' => 'SAV' . $code);

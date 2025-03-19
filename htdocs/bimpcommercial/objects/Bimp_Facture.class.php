@@ -7339,14 +7339,14 @@ class Bimp_Facture extends BimpComm
 
                 $return .= ' - ' . $facs_ids . /*' => Mail to ' . $mail . */ ' : ';
                 if (!count(BimpUserMsg::envoiMsg($code, $sujet, $msg, $id_user))) {
-					$return .= ' [OK]';
-					$i++;
-				} else {
-					$return .= ' [ECHEC]';
-				}
-				$return .= '<br/>';
-			}
-		}
+                    $return .= ' [OK]';
+                    $i++;
+                } else {
+                    $return .= ' [ECHEC]';
+                }
+                $return .= '<br/>';
+            }
+        }
 
 		return "OK " . $i . ' mail(s)<br/><br/>' . $return;
 	}
@@ -7481,17 +7481,17 @@ class Bimp_Facture extends BimpComm
 								$msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
 								$msg .= date('d / m / Y', strtotime($fac_date_lim));
 
-								$out .= ' - Fac ' . $facture->getLink() . ' : ';
+                                $out .= ' - Fac ' . $facture->getLink() . ' : ';
 
 								$code = "rappel_facture_financement_impayee";
 								if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $facture)))	{
-									$out .= '[OK]';
-								} else {
-									$out .= '[ECHEC]';
-								}
-								$out .= '<br/>';
-								break;
-							}
+                                    $out .= '[OK]';
+                                } else {
+                                    $out .= '[ECHEC]';
+                                }
+                                $out .= '<br/>';
+                                break;
+                            }
 
 							$date_check->add(new DateInterval('P15D'));
 						}

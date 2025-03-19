@@ -9384,43 +9384,43 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			$options .= ($options ? ', ' : '') . 'display_processing: ' . ((int) $params['display_processing'] ? 1 : 0);
 		}
 
-		$js = 'setObjectAction(';
-		if (!isset($params['no_button']) || !$params['no_button']) {
-			$js .= '$(this), ';
-		} else {
-			$js .= 'null, ';
-		}
-		$js .= $this->getJsObjectData();
-		$js .= ', \'' . $action . '\', {';
-		$fl = true;
-		foreach ($data as $key => $value) {
-			if (!$fl) {
-				$js .= ', ';
-			} else {
-				$fl = false;
-			}
+        $js = 'setObjectAction(';
+        if (!isset($params['no_button']) || !$params['no_button']) {
+            $js .= '$(this), ';
+        } else {
+            $js .= 'null, ';
+        }
+        $js .= $this->getJsObjectData();
+        $js .= ', \'' . $action . '\', {';
+        $fl = true;
+        foreach ($data as $key => $value) {
+            if (!$fl) {
+                $js .= ', ';
+            } else {
+                $fl = false;
+            }
 			$js .= $key .': ';
 			if (isset($value['js_function'])) {
 				$js .= $value['js_function'];
 			} else {
 				$js .= (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */$value/* )) */ . '\''));
 			}
-		}
-		$js .= '}, ';
-		if (isset($params['result_container'])) {
-			$js .= $params['result_container'];
-		} else {
-			$js .= 'null';
-		}
-		$js .= ', ';
-		if (isset($params['success_callback'])) {
-			$js .= $params['success_callback'];
-		} else {
-			$js .= 'null';
-		}
-		$js .= ', ';
-		$js .= '{' . $options . '}';
-		$js .= ');';
+        }
+        $js .= '}, ';
+        if (isset($params['result_container'])) {
+            $js .= $params['result_container'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['success_callback'])) {
+            $js .= $params['success_callback'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        $js .= '{' . $options . '}';
+        $js .= ');';
 
 		return $js;
 	}
@@ -11986,11 +11986,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				}
 			}
 
-			$id_entrepot = (int) $this->getData('id_entrepot');
-			if (!$id_entrepot) {
-				$id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
-			}
-			if ($id_entrepot) {
+            $id_entrepot = (int) $this->getData('id_entrepot');
+            if (!$id_entrepot) {
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
+            }
+            if ($id_entrepot) {
 //                global $tabCentre;
 //                foreach ($tabCentre as $code_centre => $centre) {
 //                    if ((int) $centre[8] === $id_entrepot) {
@@ -12003,8 +12003,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 						return $centre['code'];
 					}
 				}
-			}
-		}
+            }
+        }
 //        global $tabCentre;
 //        if (count($tabCentre) == 1) {
 //            foreach ($tabCentre as $code_centre => $centre) {

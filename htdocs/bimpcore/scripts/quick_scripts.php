@@ -61,9 +61,8 @@ if (!$action) {
         'correct_contrat_parent_line'               => 'Correction ligne parente pour les sous-lignes bundle dans les contrats',
         'correct_contrats_bundles'                  => 'Correction des bundles dans les contrats',
         'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos',
-        'aj_menu_compta'                            => 'Aj menu compta'
-        'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos',
-		'convert_centre_sav'						=> 'Convertion des centres sav'
+        'aj_menu_compta'                            => 'Aj menu compta',
+		'convert_centre_sav'						=> 'Convertion des centres sav',
     );
 
     $path = pathinfo(__FILE__);

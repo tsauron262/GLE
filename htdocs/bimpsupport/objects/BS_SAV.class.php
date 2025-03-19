@@ -1584,15 +1584,16 @@ class BS_SAV extends BimpObject
 	{
 //        global $tabCentre;
 		$tabCentre = BimpCache::getCentres();
-        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['id_centre_rattachement'])) {
-			$idCentre =  $tabCentre[$this->getData('code_centre')]['id_centre_rattachement'];
-			foreach ($tabCentre as $centre)	{
-				if($centre['id'] == $idCentre)	{
+		if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['id_centre_rattachement'])) {
+			$idCentre = $tabCentre[$this->getData('code_centre')]['id_centre_rattachement'];
+			foreach ($tabCentre as $centre) {
+				if ($centre['id'] == $idCentre) {
 					return $centre['code'];
 				}
 			}
 		}
-		}
+
+		return '';
 	}
 
 	public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
@@ -1671,19 +1672,19 @@ class BS_SAV extends BimpObject
 		}
 
 		if ($code_centre) {
-            BimpObject::loadClass('bimpsupport', 'BS_CentreSav');
+			BimpObject::loadClass('bimpsupport', 'BS_CentreSav');
 			$centre = BS_CentreSav::getCentreSav($code_centre);
-            if (BimpObject::objectLoaded($centre)) {
+			if (BimpObject::objectLoaded($centre)) {
 				return array(
-                    'tel'         => $centre->getData('tel'),
-                    'mail'        => $centre->getData('email'),
-                    'label'       => $centre->getData('label'),
-                    'shipTo'      => $centre->getData('shipTo'),
-                    'zip'         => $centre->getData('zip'),
-                    'town'        => $centre->getData('town'),
-                    'address'     => $centre->getData('address'),
-                    'id_entrepot' => $centre->getData('id_entrepot'),
-                    'ship_to'     => $centre->getData('shipTo')
+					'tel'         => $centre->getData('tel'),
+					'mail'        => $centre->getData('email'),
+					'label'       => $centre->getData('label'),
+					'shipTo'      => $centre->getData('shipTo'),
+					'zip'         => $centre->getData('zip'),
+					'town'        => $centre->getData('town'),
+					'address'     => $centre->getData('address'),
+					'id_entrepot' => $centre->getData('id_entrepot'),
+					'ship_to'     => $centre->getData('shipTo')
 				);
 			}
 		}
@@ -1952,8 +1953,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 //        global $tabCentre;
 		$tabCentre = BimpCache::getCentres();
 		if (isset($tabCentre[$codeCentre])) {
-            if (isset($tabCentre[$codeCentre]['id_group'])) {
-                return $tabCentre[$codeCentre]['id_group'];
+			if (isset($tabCentre[$codeCentre]['id_group'])) {
+				return $tabCentre[$codeCentre]['id_group'];
 			} else {
 				BimpCore::addlog('Pas de groupe dans centre.inc pour ' . $codeCentre);
 			}
@@ -3160,8 +3161,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			} else {
 				$centreUser = explode(" ", trim($user->array_options['options_apple_centre'])); //Transforme lettre centre en id centre
 				foreach ($centreUser as $idT => $CT) {//Va devenir inutille
-                    foreach ($tabCentre as $idT2 => $tabCT)
-                        if ($tabCT['id_entrepot'] == $CT)
+					foreach ($tabCentre as $idT2 => $tabCT) {
+						if ($tabCT['id_entrepot'] == $CT) {
 							$centreUser[$idT] = $idT2;
 						}
 					}
@@ -3177,76 +3178,76 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			}
 
 			foreach ($tabCentre as $idGr => $tabOneCentr) {
-                if (count($centreUser) == 0 || in_array($idGr, $centreUser))
-                    $tabGroupe[] = array("label" => $tabOneCentr['label'], "valeur" => $idGr, "forUrl" => $idGr);
+				if (count($centreUser) == 0 || in_array($idGr, $centreUser)) {
+					$tabGroupe[] = array("label" => $tabOneCentr['label'], "valeur" => $idGr, "forUrl" => $idGr);
 				}
 			}
-			$tabResult = array();
+		}
+		$tabResult = array();
 
-			if (!$mode_eco) {
-				$result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE status >= -1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
-				while ($ligne2 = $db->fetch_object($result2)) {
-					$tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
-					if (!isset($tabResult['Tous'][$ligne2->EtatVal])) {
-						$tabResult['Tous'][$ligne2->EtatVal] = 0;
-					}
-					$tabResult['Tous'][$ligne2->EtatVal] += $ligne2->nb;
+		if (!$mode_eco) {
+			$result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE status >= -1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
+			while ($ligne2 = $db->fetch_object($result2)) {
+				$tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
+				if (!isset($tabResult['Tous'][$ligne2->EtatVal])) {
+					$tabResult['Tous'][$ligne2->EtatVal] = 0;
 				}
+				$tabResult['Tous'][$ligne2->EtatVal] += $ligne2->nb;
 			}
+		}
 
-			require_once DOL_DOCUMENT_ROOT . "/bimpsupport/objects/BS_SAV.class.php";
-			$tabStatutSav = BS_SAV::$status_list;
+		require_once DOL_DOCUMENT_ROOT . "/bimpsupport/objects/BS_SAV.class.php";
+		$tabStatutSav = BS_SAV::$status_list;
 
-			if (!empty($tabGroupe)) {
-				$html .= '<div class="bimptheme_menu_extra_sections_title">';
-				$html .= 'Accès rapides SAV';
+		if (!empty($tabGroupe)) {
+			$html .= '<div class="bimptheme_menu_extra_sections_title">';
+			$html .= 'Accès rapides SAV';
+			$html .= '</div>';
+
+			foreach ($tabGroupe as $ligne3) {
+				$html .= '<div class="bimptheme_menu_extra_section' . ($ligne3['valeur'] != "Tous" ? ' menu_contenueCache2' : '') . '">';
+
+				$centre = $ligne3['valeur'];
+				$href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] ? '&code_centre=' . $ligne3['forUrl'] : "");
+
+				$html .= '<div class="title">';
+				$html .= '<a href="' . $href . $hrefFin . '">' . BimpRender::renderIcon('fas_flag', 'iconLeft') . $ligne3['label'] . '</a>';
 				$html .= '</div>';
 
-				foreach ($tabGroupe as $ligne3) {
-					$html .= '<div class="bimptheme_menu_extra_section' . ($ligne3['valeur'] != "Tous" ? ' menu_contenueCache2' : '') . '">';
-
-					$centre = $ligne3['valeur'];
-					$href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] ? '&code_centre=' . $ligne3['forUrl'] : "");
-
-					$html .= '<div class="title">';
-					$html .= '<a href="' . $href . $hrefFin . '">' . BimpRender::renderIcon('fas_flag', 'iconLeft') . $ligne3['label'] . '</a>';
-					$html .= '</div>';
-
-					foreach ($tabStatutSav as $idStat => $tabStat) {
-						if ($idStat >= -1) {
-							if ($mode_eco) {
-								$nb = '';
-							} else {
-								$nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
-								if ($nb == "") {
-									$nb = "0";
-								}
+				foreach ($tabStatutSav as $idStat => $tabStat) {
+					if ($idStat >= -1) {
+						if ($mode_eco) {
+							$nb = '';
+						} else {
+							$nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
+							if ($nb == "") {
+								$nb = "0";
 							}
-
-							$html .= '<span href="#" class="item" style="font-size: 10px; margin-left:12px">';
-							if ($mode_eco) {
-								$nbStr = '';
-							} else {
-								$nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>" . $nb . "</span> : ";
-							}
-							$html .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . $tabStat['label'] . "</a>";
-							$html .= "</span><br/>";
 						}
+
+						$html .= '<span href="#" class="item" style="font-size: 10px; margin-left:12px">';
+						if ($mode_eco) {
+							$nbStr = '';
+						} else {
+							$nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>" . $nb . "</span> : ";
+						}
+						$html .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . $tabStat['label'] . "</a>";
+						$html .= "</span><br/>";
 					}
-					$html .= '</div>';
 				}
+				$html .= '</div>';
+			}
 
-				if (count($tabGroupe) > 2) {
-					$html .= "<div style='width:100%;text-align:center;'><span id='showDetailChrono2'>(...)</span></div>";
+			if (count($tabGroupe) > 2) {
+				$html .= "<div style='width:100%;text-align:center;'><span id='showDetailChrono2'>(...)</span></div>";
 
-					$html .= "<script type='text/javascript'>$(document).ready(function(){"
-						. "$('.menu_contenueCache2').hide();"
-						. "$('#showDetailChrono2').click(function(){"
-						. "$('.menu_contenueCache2').show();"
-						. "$(this).hide();"
-						. "});"
-						. "});</script>";
-				}
+				$html .= "<script type='text/javascript'>$(document).ready(function(){"
+					. "$('.menu_contenueCache2').hide();"
+					. "$('#showDetailChrono2').click(function(){"
+					. "$('.menu_contenueCache2').show();"
+					. "$(this).hide();"
+					. "});"
+					. "});</script>";
 			}
 		}
 
@@ -4330,7 +4331,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 				if (isset($centre['mail']) && $centre['mail']) {
 					$msg = 'Bonjour,<br/><br/>';
 					$msg .= 'Le devis ' . $propal->getLink() . ' pour le SAV ' . $this->getLink() . ' a été accepté et signé par le client';
-                    $code = 'acceptation_devis_sav';
+					$code = 'acceptation_devis_sav';
 					$sujet = 'Devis ' . $propal->getRef() . ' signé par le client';
 					BimpUserMsg::envoiMsg($code, $sujet, $msg, $centre);
 				}
@@ -7444,7 +7445,7 @@ ORDER BY a.val_max DESC");
 					$client = $this->getChildObject('client');
 					$centre = $this->getCentreData();
 					$toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
-                    $code = 'accompte_sav_enregitre';
+					$code = 'accompte_sav_enregitre';
 					BimpUserMsg::envoiMsg($code, 'Acompte enregistré ' . $this->getData('ref'), 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink(), $toMail);
 				}
 			} else {
@@ -8660,7 +8661,7 @@ ORDER BY a.val_max DESC");
 				// Envoi mail au centre SAV:
 				$msg = 'Bonjour, <br/><br/>Aucune adresse e-mail valide enregistrée pour le client du SAV ' . $sav->getLink();
 				$msg .= '<br/><br/>Il n\'est donc pas possible d\'alerter le client pour la non restitution de son matériel';
-                $code = "sav_non_restitue_pas_email_client";
+				$code = "sav_non_restitue_pas_email_client";
 				$sujet = 'Adresse e-mail client absente (SAV ' . $sav->getRef() . ')';
 				BimpUserMsg::envoiMsg($code, $sujet, $msg, $centre_data);
 			}

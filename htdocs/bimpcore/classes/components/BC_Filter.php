@@ -94,7 +94,7 @@ class BC_Filter extends BimpComponent
             }
         }
 
-        // Surchage des paramètres si le filtre appartient à un objet enfant:
+        // Surcharge des paramètres si le filtre appartient à un objet enfant:
         if ($this->filter_name !== $this->name) {
             // Todo: FLO déco lorsque les filtres customs enfants seront gérés:   TOMMY décommenter, ça semble bien géré, j'ai juste ajouté $this->config_path = 'filters/' . $this->filter_name;
             if ($this->object->config->isDefined('filters/' . $this->filter_name)) {
@@ -198,7 +198,7 @@ class BC_Filter extends BimpComponent
                 $this->params[$p_name] = $value;
             }
 
-            // Surchage des paramètres selon le type si le filtre appartient à un objet enfant:
+            // Surcharge des paramètres selon le type si le filtre appartient à un objet enfant:
             if ($this->filter_name !== $this->name) {
                 if ($this->base_object->config->isDefined('filters/' . $this->name)) {
                     $errors = array();
@@ -676,17 +676,30 @@ class BC_Filter extends BimpComponent
                     break;
 
                 case 'check_list':
-                    if (!empty($values)) {
-                        $filters[$filter_key] = array(
-                            'in' => $this->values
-                        );
-                    }
+					if (!empty($values)) {
+						if ($this->is_items_list) {
+							$filters[$filter_key] = array(
+								'in_braces' => $this->values
+							);
+						} else {
+							$filters[$filter_key] = array(
+								'in' => $this->values
+							);
+						}
+					}
 
-                    if (!empty($excluded_values)) {
-                        $filters[$filter_key] = array(
-                            'not_in' => $this->values
-                        );
-                    }
+					// Pas de valeurs exclues pour les check_lists (A vérifier)
+//                    if (!empty($excluded_values)) {
+//						if ($this->is_items_list) {
+//							$filters[$filter_key] = array(
+//								'not_in_braces' => $this->values
+//							);
+//						} else {
+//							$filters[$filter_key] = array(
+//								'not_in' => $this->values
+//							);
+//						}
+//                    }
                     break;
             }
 

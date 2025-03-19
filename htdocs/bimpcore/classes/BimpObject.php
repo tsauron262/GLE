@@ -9399,8 +9399,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			} else {
 				$fl = false;
 			}
-			$js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */
-					$value/* )) */ . '\''));
+			$js .= $key .': ';
+			if (isset($value['js_function'])) {
+				$js .= $value['js_function'];
+			} else {
+				$js .= (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */$value/* )) */ . '\''));
+			}
 		}
 		$js .= '}, ';
 		if (isset($params['result_container'])) {
@@ -11987,18 +11991,30 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
 			}
 			if ($id_entrepot) {
-				global $tabCentre;
-				foreach ($tabCentre as $code_centre => $centre) {
-					if ((int) $centre[8] === $id_entrepot) {
-						return $code_centre;
+//                global $tabCentre;
+//                foreach ($tabCentre as $code_centre => $centre) {
+//                    if ((int) $centre[8] === $id_entrepot) {
+//                         return $code_centre;
+//                    }
+//                }
+				$lescentres = BimpCache::getCentres();
+				foreach ($lescentres as $centre)	{
+					if((int) $centre['id_entrepot'] === $id_entrepot)	{
+						return $centre['code'];
 					}
 				}
 			}
 		}
-		global $tabCentre;
-		if (count($tabCentre) == 1) {
-			foreach ($tabCentre as $code_centre => $centre) {
-				return $code_centre;
+//        global $tabCentre;
+//        if (count($tabCentre) == 1) {
+//            foreach ($tabCentre as $code_centre => $centre) {
+//                return $code_centre;
+//            }
+//        }
+		$lescentres = BimpCache::getCentres();
+		if (count($lescentres) == 1) {
+			foreach ($lescentres as $centre) {
+				return $centre['code'];
 			}
 		}
 

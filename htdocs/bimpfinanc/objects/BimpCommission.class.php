@@ -782,7 +782,6 @@ class BimpCommission extends BimpObject
 			'warnings' => $warnings
 		);
 	}
-
 	public function actionValidate($data, &$success)
 	{
 		$errors = array();

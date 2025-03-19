@@ -127,7 +127,7 @@ class BC_List extends BC_Panel
         $current_bc = $prev_bc;
     }
 
-    // Gestion des configurations utilisateur: 
+    // Gestion des configurations utilisateur:
 
     public function fetchUserConfig($id_config)
     {
@@ -193,7 +193,7 @@ class BC_List extends BC_Panel
         }
     }
 
-    // Gestion des filtres: 
+    // Gestion des filtres:
 
     protected function mergeFilter($name, $filter, $no_alias = false)
     {
@@ -229,13 +229,14 @@ class BC_List extends BC_Panel
         $this->initial_filters = BimpTools::mergeSqlFilter($this->initial_filters, $field_name, $value);
     }
 
-    public function addJoin($table, $on, $alias)
+    public function addJoin($table, $on, $alias, $join_type = 'LEFT')
     {
         if (!isset($this->params['joins'][$alias])) {
             $this->params['joins'][$alias] = array(
                 'table' => $table,
                 'on'    => $on,
-                'alias' => $alias
+                'alias' => $alias,
+				'join_type' => $join_type
             );
 
             $this->initial_joins = $this->params['joins'];
@@ -428,7 +429,7 @@ class BC_List extends BC_Panel
         $id_config = 0;
         $use_default_filters = false;
 
-        // Si une nouvelle config de liste est démandée, on utilise en prio la config de filtres associée: 
+        // Si une nouvelle config de liste est démandée, on utilise en prio la config de filtres associée:
 //        if ($this->newUserConfigSet && BimpObject::objectLoaded($this->userConfig) && (int) $this->userConfig::$has_filters) {
 //            $id_config = (int) $this->userConfig->getData('id_default_filters_config');
 //        }
@@ -504,10 +505,10 @@ class BC_List extends BC_Panel
 
         $primary = $this->object->getPrimary();
 
-        // Jointures: 
+        // Jointures:
         $joins = $this->params['joins'];
 
-        // Filtres: 
+        // Filtres:
         if (count($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $list_filter) {
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);
@@ -576,7 +577,7 @@ class BC_List extends BC_Panel
             }
         }
 
-        // Trie: 
+        // Trie:
         $order_by = '';
         $extra_order_by = null;
         $extra_order_way = null;
@@ -779,7 +780,7 @@ class BC_List extends BC_Panel
             $html .= ' sur <span>' . $this->nbItems . '</span>';
             $html .= '</div>';
 
-            
+
             if(!$this->params['mode_append']){
                 $html .= '<span class="navButton prevButton' . (((int) $this->params['p'] === 1) ? ' disabled' : '') . '">Précédent</span>';
                 $html .= '<div class="pages">';

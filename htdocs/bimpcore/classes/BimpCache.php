@@ -392,7 +392,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false, $force_delete = false)
+    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false, $force_delete = false, $order_by = 'primary', $order_way = 'desc')
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -403,7 +403,9 @@ class BimpCache
             $table = $instance->getTable();
             $primary = $instance->getPrimary();
 
-            if ($instance->isDolObject()) {
+			if ($order_by == 'primary') {    $order_by = $primary; }
+
+			if ($instance->isDolObject()) {
                 $filters = $instance->checkSqlFilters($filters, $joins, 'a');
             }
 
@@ -414,7 +416,7 @@ class BimpCache
             $sql = BimpTools::getSqlSelect('a.' . $primary);
             $sql .= BimpTools::getSqlFrom($table, $joins);
             $sql .= BimpTools::getSqlWhere($filters);
-            $sql .= BimpTools::getSqlOrderBy('a.' . $primary, 'DESC');
+            $sql .= BimpTools::getSqlOrderBy('a.' . $order_by, $order_way);
 
             $rows = self::getBdb()->executeS($sql, 'array');
 
@@ -2936,29 +2938,53 @@ class BimpCache
     public static function getCentres()
     {
         if (!isset(self::$cache['centres'])) {
-            global $tabCentre;
+			self::$cache['centres'] = array();
 
-            if (!is_array($tabCentre)) {
-                BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-            }
-
-            self::$cache['centres'] = array();
-
-            foreach ($tabCentre as $code => $centre) {
-                self::$cache['centres'][$code] = array(
-                    'code'        => $code,
-                    'label'       => $centre[2],
-                    'tel'         => $centre[0],
-                    'mail'        => $centre[1],
-                    'address'     => $centre[7],
-                    'zip'         => $centre[5],
-                    'town'        => $centre[6],
-                    'id_entrepot' => $centre[8],
-                    'shipTo'      => $centre[4],
-                    'active'      => (isset($centre[9]) ? $centre[9] : 1),
-                    'infos'       => (isset($centre['infos']) ? $centre['infos'] : '')
-                );
-            }
+			if((int)BimpCore::getConf('use_centres_sav', null, 'bimpsupport'))	{
+				foreach (BimpCache::getBimpObjectObjects('bimpsupport', 'BS_CentreSav') as $centre)	{
+					self::$cache['centres'][$centre->getData('code')] = array(
+						'id'				=> $centre->getData('id'),
+						'code'				=> $centre->getData('code'),
+						'label'				=> $centre->getData('label'),			// 2
+						'tel'				=> $centre->getData('tel'), 			// 0
+						'mail'				=> $centre->getData('mail'),			// 1
+						'address'			=> $centre->getData('address'),		// 7
+						'zip'				=> $centre->getData('zip'),			// 5
+						'town'				=> $centre->getData('town'),			// 6
+						'id_entrepot'		=> $centre->getData('id_entrepot'),	// 8
+						'shipTo'			=> $centre->getData('shipTo'),		// 4
+						'active'			=> $centre->getData('active'),		// 9
+						'id_centre_rattachement' => $centre->getData('id_centre_rattachement'),		// 10
+						'token'				=> $centre->getData('token'),		// 11
+						'id_group'			=> $centre->getData('id_group'),
+						'infos'       => ""
+					);
+				}
+			}
+			else	{
+				global $tabCentre;
+				if (!is_array($tabCentre)) {
+					BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+				}
+				foreach ($tabCentre as $code => $centre) {
+					self::$cache['centres'][$code] = array(
+						'code'				=> $code,
+						'label'				=> $centre[2],
+						'tel'				=> $centre[0],
+						'mail'				=> $centre[1],
+						'address'			=> $centre[7],
+						'zip'				=> $centre[5],
+						'town'				=> $centre[6],
+						'id_entrepot'		=> $centre[8],
+						'shipTo'			=> $centre[4],
+						'active'			=> (isset($centre[9]) ? $centre[9] : 1),
+						'id_centre_rattachement' => $centre[10],
+						'token'				=> $centre[11],
+						'id_group'			=> $centre['idGroup'],
+						'infos'       => ""
+					);
+				}
+			}
         }
 
         return self::$cache['centres'];
@@ -3591,7 +3617,9 @@ class BimpCache
                             $message = 'Il y a plus de 500 entrées à traiter dans les logs.' . "\n\n";
                             $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=dev&tab=logs' . "\n\n";
 
-                            mailSyn2("TROP DE LOGS", BimpCore::getConf('devs_email'), null, $message);
+							$code = 'bimpcore_to_much_logs_email';
+							$sujet = 'TROP DE LOGS';
+                            BimpUserMsg::envoiMsg($code, $sujet, $message);
                             BimpCore::setConf('bimpcore_to_much_logs_email_send', 1);
                         }
                     } elseif ($mail_send) {

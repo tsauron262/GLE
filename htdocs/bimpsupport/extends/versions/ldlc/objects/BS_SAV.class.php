@@ -55,7 +55,7 @@ class BS_SAV_ExtVersion extends BS_SAV
             foreach ($this->getPropalLines() as $line) {
                 $dolLine = $line->getChildObject('line');
                 if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
-                    
+
 //                    if(- $dolLine->subprice == 45)
 //                        return 50;
 //                    print_r($dolLine);die;
@@ -193,10 +193,10 @@ class BS_SAV_ExtVersion extends BS_SAV
 //        $name = ucfirst(strtolower($name));
         return $name;
     }
-    
+
     public function renderHeaderExtraLeft() {
         $html = parent::renderHeaderExtraLeft();
-        
+
         $client = $this->getChildObject('client');
         $nomClient = str_replace('  ', ' ', $client->getData('nom'));
         $tabName = explode(' ', $nomClient);
@@ -204,7 +204,7 @@ class BS_SAV_ExtVersion extends BS_SAV
             $html .= BimpRender::renderAlerts('! Attention les PROS ne sont pas concernés par le programme QualiRepair !');
             $this->isClosable = false;
         }
-        
+
         if ($this->asProdEcologic()) {
             $ok = false;
             $sav_dir = $this->getFilesDir();
@@ -233,7 +233,7 @@ class BS_SAV_ExtVersion extends BS_SAV
         }
         return $html;
     }
-    
+
     public function convertHeic($fileSansExt){
         $tab = array('heic', 'HEIC');
         foreach($tab as $ext){
@@ -244,7 +244,7 @@ class BS_SAV_ExtVersion extends BS_SAV
             }
         }
     }
-    
+
 
     public function actionInfoMateriel($data, &$success)
     {
@@ -387,14 +387,15 @@ class BS_SAV_ExtVersion extends BS_SAV
             'warnings' => $warnings
         );
     }
-    
+
     public function getDefaultSiteId()
     {
-        global $tabCentre;
-        if (isset($tabCentre[$this->getData('code_centre_repa')]) && isset($tabCentre[$this->getData('code_centre_repa')][11]))
-            return $tabCentre[$this->getData('code_centre_repa')][11];
-        elseif (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][11]))
-            return $tabCentre[$this->getData('code_centre')][11];
+//        global $tabCentre;
+        $tabCentre = BimpCache::getCentres();
+		if (isset($tabCentre[$this->getData('code_centre_repa')]) && isset($tabCentre[$this->getData('code_centre_repa')]['token']))
+            return $tabCentre[$this->getData('code_centre_repa')]['token'];
+        elseif (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['token']))
+            return $tabCentre[$this->getData('code_centre')]['token'];
     }
 
     public function getActionsButtons()
@@ -415,7 +416,7 @@ class BS_SAV_ExtVersion extends BS_SAV
                         'form_name' => 'ecologic'
                     ))
                 );
-            
+
         }
         if ($this->asProdEcologic()){
             $btn[] = array(

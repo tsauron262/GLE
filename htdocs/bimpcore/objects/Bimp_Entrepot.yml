@@ -1,6 +1,6 @@
-dol_object:
-    instance:
-        dol_object:
+dol_object: 
+    instance: 
+        dol_object: 
             module: product/stock
             file: entrepot
 

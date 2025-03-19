@@ -1902,7 +1902,8 @@ class BimpSignature extends BimpObject
 										$msg .= '<b>Objet lié: </b>' . $obj->getLink() . '<br/>';
 									}
 									$msg .= '<b>Fiche signature: </b>' . $this->getLink(array(), 'private') . '<br/><br/>';
-									mailSyn2($subject, $email, '', $msg);
+                                $code = 'confirm_sign_docusign';
+								BimpUserMsg::envoiMsg($code, $subject, $msg, $email);
 								}
 							}
 							$this->onFullySigned();

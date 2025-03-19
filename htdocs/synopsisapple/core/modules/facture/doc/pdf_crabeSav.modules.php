@@ -244,24 +244,24 @@ class pdf_crabeSav extends ModelePDFFactures
 				$pagenb++;
 
 				$this->_pagehead($pdf, $object, 1, $outputlangs);
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
+
+
+
+
+
+
+
+
+
+
+
 				$pdf->SetFont('','', $default_font_size - 1);
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
 				$pdf->SetTextColor(0,0,0);
-                                
-                                
-                                
-                                
+
+
+
+
                                 //img agree
                                 $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg", 80, 6, 60, null);
 
@@ -307,17 +307,17 @@ class pdf_crabeSav extends ModelePDFFactures
 				$iniY = $tab_top + 7;
 				$curY = $tab_top + 7;
 				$nexY = $tab_top + 7;
-                                
+
                                 /*moddrsi (20.2)*/
                                 global $accTht, $accTtva;
                                 $accTht = $accTtva = 0;
                                 /*fmoddrsi*/
-                                
+
 
 				// Loop on each lines
 				for ($i = 0; $i < $nblignes; $i++)
 				{
-                                    
+
                                         /*moddrsi (20.2)*/
                                         if($object->lines[$i]->desc == "Acompte" && $object->lines[$i]->total < 0){
                                             $accTht = $object->lines[$i]->total_ht;
@@ -325,7 +325,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                             continue;
                                         }
                                         /*fmoddrsi*/
-        
+
 					$curY = $nexY;
 					$pdf->SetFont('','', $default_font_size - 1);   // Into loop to work with multipage
 					$pdf->SetTextColor(0,0,0);
@@ -386,7 +386,7 @@ class pdf_crabeSav extends ModelePDFFactures
 
 					$pdf->SetFont('','', $default_font_size - 1);   // On repositionne la police par defaut
 
-                                        
+
                                         /*moddrsi (20.2)*/if($object->lines[$i]->product_type < 100){
 					// VAT Rate
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
@@ -526,9 +526,9 @@ class pdf_crabeSav extends ModelePDFFactures
 				{
 					$posy=$this->_tableau_versements($pdf, $object, $posy, $outputlangs);
 				}
-                                
-                                
-                                               
+
+
+
                                 /*moddrsi (20.2) ajout signature*/
                                 if(stripos($object->ref, "FA") !== false){
                                     $pdf->SetFont('','', $default_font_size);
@@ -537,15 +537,15 @@ class pdf_crabeSav extends ModelePDFFactures
                                     $pdf->SetXY("90", "245");
                                     $pdf->MultiCell("25", "25", "", 1);
                                 }
-                                
-                                
+
+
                                 $pdf->SetXY("13", "272");
                                 $pdf->SetFont('','', $default_font_size - 3);
                                 $pdf->MultiCell(300, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
-	
+
                                 /*fmoddrsi*/
-                                
-                                
+
+
 
 				// Pied de page
 				$this->_pagefoot($pdf,$object,$outputlangs);
@@ -1116,7 +1116,7 @@ class pdf_crabeSav extends ModelePDFFactures
 
 				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 				$pdf->MultiCell($largcol2, $tab2_hl, price($sign * $object->total_ttc /*moddrsi (20.2)*/-$accTht -$accTtva/*fmoddrsi*/, 0, $outputlangs), $useborder, 'R', 1);
-                                
+
                                 /*moddrsi (20.2)*/
                                 if(-$accTht > 0){
                                         $pdf->SetFillColor(248,248,248);
@@ -1127,7 +1127,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                         $pdf->MultiCell($largcol2, $tab2_hl, price(-($accTht+$accTtva), 0, $outputlangs), 0, 'R', 0);
                                 }
                                 /*fmoddrsi*/
-                                
+
 			}
 		}
 
@@ -1138,7 +1138,7 @@ class pdf_crabeSav extends ModelePDFFactures
 		//print "x".$creditnoteamount."-".$depositsamount;exit;
 		$resteapayer = price2num($object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 'MT');
 //                die($accTht);
-                
+
 		if ($object->paye) $resteapayer=0;
 
 		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0  /*moddrsi (20.2)*/|| -$accTht > 0/*fmoddrsi*/)
@@ -1176,7 +1176,7 @@ class pdf_crabeSav extends ModelePDFFactures
 				$resteapayer=0;
 			}
 
-                        
+
                         if($resteapayer != 0){
 			$index++;
 			$pdf->SetTextColor(0,0,60);
@@ -1440,14 +1440,15 @@ class pdf_crabeSav extends ModelePDFFactures
 			// Sender properties
                         $conf->global->MAIN_PDF_DISABLESOURCEDETAILS = true;
 			$carac_emetteur = pdf_build_address($outputlangs,$this->emetteur);
-                        
+
                         $tabT = getElementElement("propal", "facture", null, $object->id);
                                 if(count($tabT) > 0){
                                 $result = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_chrono_105 ct, ".MAIN_DB_PREFIX."synopsischrono c WHERE ct.id = c.id AND propalid = ".$tabT[0]['s']);
                                 if($this->db->num_rows($result) > 0 ){
                                     $ligne = $this->db->fetch_object($result);
                                     if(isset($ligne->Centre)){
-                                        global $tabCentre;
+//                                        global $tabCentre;
+										$tabCentre = BimpCache::getCentres();
                                         $centre = $tabCentre[$ligne->Centre];
                                         $tech = "";
                                         if (isset($ligne->Technicien) && $ligne->Technicien > 0) {
@@ -1455,11 +1456,11 @@ class pdf_crabeSav extends ModelePDFFactures
                                             $userT->fetch($ligne->Technicien);
                                             $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
                                         }
-                                        
+
                                 $pdf->SetXY(12,64);
-                                $pdf->MultiCell(80, 10, "Centre SAV : ".$centre[2]."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
-                                        $req = "SELECT N__Serie 
-FROM  `".MAIN_DB_PREFIX."element_element`, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 v 
+                                $pdf->MultiCell(80, 10, "Centre SAV : ".$centre['label']."\nTél : ".$centre['tel']."\nMail : ".$centre['mail'].$tech, 0, '', 0);
+                                        $req = "SELECT N__Serie
+FROM  `".MAIN_DB_PREFIX."element_element`, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 v
 WHERE  `sourcetype` LIKE  'sav' AND v.id = fk_target AND fk_source = ".$ligne->id."
 AND  `targettype` LIKE  'productCli'";
                                         $result2 = $this->db->query($req);
@@ -1472,10 +1473,10 @@ AND  `targettype` LIKE  'productCli'";
                                             $pdf->SetTextColor(234,119,2);
                                             $pdf->MultiCell(157, 10, $ligne->ref."\n".$ligne2->N__Serie, 0, 'C', 0);
                                         }
-                                        
-                                        
-                                        $req = "SELECT * 
-FROM  `".MAIN_DB_PREFIX."synopsis_apple_repair` 
+
+
+                                        $req = "SELECT *
+FROM  `".MAIN_DB_PREFIX."synopsis_apple_repair`
 WHERE  `chronoId` = ".$ligne->id;
                                         $result2 = $this->db->query($req);
                                         if($this->db->num_rows($result2) > 0){

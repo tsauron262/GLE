@@ -2016,7 +2016,8 @@ class BT_ficheInter extends BimpDolObject
 				$tech = $fi->getChildObject('user_tech');
 
 				if (BimpObject::objectLoaded($tech)) {
-					mailSyn2($sujet, BimpTools::cleanEmailsStr($tech->getData('email')), $this->mailSender, $message);
+					$code = 'attribution_FI';
+					BimpUserMsg::envoiMsg($code, $sujet, $message, $tech->id);
 				}
 			}
 		}
@@ -2233,8 +2234,10 @@ class BT_ficheInter extends BimpDolObject
 							if ($email_comm != '') {
 								$data["dst"] .= ',' . $email_comm;
 							}
+
 							if (!count($errors)) {
-								mailSyn2($data['subj'], $data['dst'], null, $data['txt']);
+								$code = 'fiche_inter_non_liee';
+								BimpUserMsg::envoiMsg($code, $data['subj'], $data['txt'], $this);
 							}
 						}
 					}
@@ -2343,12 +2346,13 @@ class BT_ficheInter extends BimpDolObject
 								$message .= '<br/><br/>';
 							}
 
-							$to = $email_comm ? $email_comm : $email_tech;
-							$cc = ($email_comm ? $email_tech : '');
+//                            $to = $email_comm ? $email_comm : $email_tech;
+//                            $cc = ($email_comm ? $email_tech : '');
 
 //                            $cc .= ($cc ? ', ' : '') . 'f.martinez@bimp.fr';
-
-							if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
+							$code = 'envoi_CR_fiche_inter';
+//                            if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
+                            if (count(BimpUserMsg::envoiMsg($code, $subject, $message, $this, array(array($pdf_file), array('application/pdf'), array($ref . '.pdf')) ))) {
 								$warnings[] = 'Echec de l\'envoi de l\'e-mail de notification au commercial du client';
 							}
 						}
@@ -2585,11 +2589,6 @@ class BT_ficheInter extends BimpDolObject
 		$errors = [];
 		$warnings = [];
 
-		$email = BimpCore::getConf('email_facturation', null, 'bimpcore');
-
-		if ($email) {
-			$errors[] = 'Adresse e-mail du service facturation non configuré';
-		} else {
 			$success = "Service facturation prévenu";
 
 			$client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
@@ -2609,11 +2608,12 @@ class BT_ficheInter extends BimpDolObject
 
 			$msg .= ' a été signée par le client.<br/><br/>';
 
-			mailSyn2($subject, $email, '', $msg);
+		$code = 'notification_facturation_signature_FI';
+		BimpUserMsg::envoiMsg($code, $subject, $msg);
 
 			$this->addLog("Facturation client prévenue");
 			$this->updateField('fk_statut', 2);
-		}
+
 
 		return [
 			'errors'   => $errors,
@@ -3259,7 +3259,8 @@ class BT_ficheInter extends BimpDolObject
 					$message .= '<br/><br/>';
 
 					$this->addLog("Fiche d'intervention créée");
-					mailSyn2($sujet, BimpTools::cleanEmailsStr($tech->getData('email')), "gle@bimp.fr", $message);
+					$code = 'notif_create_FI';
+					BimpUserMsg::envoiMsg($code, $sujet, $message, $tech);
 				} else {
 					$warnings[] = 'L\'e-mail n\'a pas pu être envoyé au technicien (Technicien sélectionné invalide)';
 				}
@@ -3386,7 +3387,8 @@ class BT_ficheInter extends BimpDolObject
 
 				$this->addLog('Changement de technicien: ' . $ancienTech->getName() . ' => ' . $currentTech->getName());
 
-				mailSyn2($sujet, $currentTech->getData('email'), null, $message);
+				$code = 'notif_change_tech_FI';
+				BimpUserMsg::envoiMsg($code, $sujet, $message, $currentTech);
 			}
 
 			// Changement de date et d'horaire
@@ -3415,7 +3417,8 @@ class BT_ficheInter extends BimpDolObject
 				$message .= 'Client: ' . $client->getNomUrl() . ' ' . $client->getName();
 				$tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_tech'));
 
-				mailSyn2($sujet, $tech->getData('email'), null, $message);
+				$code = 'notif_change_horaire_FI';
+				BimpUserMsg::envoiMsg($code, $sujet, $message, $tech);
 			}
 		}
 
@@ -3446,7 +3449,6 @@ class BT_ficheInter extends BimpDolObject
 			global $user;
 
 			$actionCommList = $this->db->getRows("actioncomm", 'fk_soc = ' . $id_soc . " AND elementtype = 'fichinter' AND fk_element = " . $id_fi);
-			$emailControl = "v.gilbert@bimp.fr";
 			$tech = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_User", $id_tech);
 			BimpTools::loadDolClass("comm/action", "actioncomm");
 
@@ -3483,9 +3485,8 @@ class BT_ficheInter extends BimpDolObject
 					$message .= 'pas de contrat';
 				}
 
-				$to = ($tech->getData('email') != $emailControl) ? $tech->getData('email') . ',' . $emailControl : $tech->getData('email');
-
-				mailSyn2("[FI] " . $ref . " supprimée - " . $client->getName(), $to, null, $message);
+				$code = 'notif_delete_FI';
+				BimpUserMsg::envoiMsg($code, "[FI] " . $ref . " supprimée - " . $client->getName(), $message, $tech);
 			}
 		}
 

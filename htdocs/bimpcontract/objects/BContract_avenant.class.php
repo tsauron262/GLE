@@ -549,7 +549,8 @@ class BContract_avenant extends BContract_contrat
             $objet = 'Signature avenant n°' . 'AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' client ' . $client->getData('code_client') . ' ' . $client->getName();
             $message = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
-            mailSyn2($objet, 'contrat@bimp.fr', null, $message);
+			$code = 'avenant_signe';
+			BimpUserMsg::envoiMsg($code, $objet, $message);
         }
 
         return $errors;
@@ -577,7 +578,8 @@ class BContract_avenant extends BContract_contrat
                 $objet = 'Signature avenant n°' . 'AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' client ' . $client->getData('code_client') . ' ' . $client->getName();
                 $message = 'L\'avenant n°AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
-                mailSyn2($objet, 'contrat@bimp.fr', null, $message);
+				$code = "avenant_prolongation_signe";
+                BimpUserMsg::envoiMsg($code, $objet, $message);
             }
         }
     }
@@ -617,7 +619,8 @@ class BContract_avenant extends BContract_contrat
                 $objet = 'Avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' Client ' . $client->getData('code_client') . ' ' . $client->getName();
                 $message = 'L\'avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' est en attente de signature';
 
-                mailSyn2($objet, "contrat@bimp.fr", null, $message);
+				$code = 'avenant_validation';
+				BimpUserMsg::envoiMsg($code, $objet, $message);
             }
         }
 
@@ -677,12 +680,14 @@ class BContract_avenant extends BContract_contrat
                 $commercial = $parent->getCommercialClient(true);
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getdata('fk_soc'));
                 $sujet = 'AVENANT ' . $this->getRefAv() . ' - ACTIVATION PROVISOIRE - ' . $client->getName();
-                $dest = $commercial->getData('email');
+//                $dest = $commercial->getData('email');
 
                 $message = 'Bonjour ' . $commercial->getName() . '<br />';
                 $message .= 'L\'avenant N°' . $this->getRefAv() . ' a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement. Vous recevrez une alerte par jour, à partir des derniers 5 jours de l\'activation provisoire.';
                 $message .= '<br /><br />Client: ' . $client->getLink() . '<br />Contrat: ' . $parent->getLink();
-                mailSyn2($sujet, $dest, null, $message);
+
+				$code = 'avenant_activation_provisoire';
+				BimpUserMsg::envoiMsg($code, $sujet, $message, $parent);
                 $this->updateField('date_activate', date('Y-m-d'));
                 $this->updateField('statut', self::AVENANT_STATUT_PROVISOIR);
             }

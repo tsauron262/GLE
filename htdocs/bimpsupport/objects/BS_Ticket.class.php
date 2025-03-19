@@ -1019,7 +1019,8 @@ class BS_Ticket extends BimpAbstractFollow
                             . 'Priorité : ' . $this->displayData('priorite', 'default', false, true) . '<br />'
                             . 'Impact : ' . $this->displayData('impact', 'default', false, true) . '<br />';
 
-                    if (!mailSyn2($subject, $to, '', $msg, array(), array(), array(), $liste_destinataire_interne_contrat_spare)) {
+                    $code = 'creation_ticket_support';
+					if (!mailSyn2($subject, $to, '', $msg, array(), array(), array(), $liste_destinataire_interne_contrat_spare)) {
                         $warnings[] = 'Echec de l\'envoi de l\'e-mail de confirmation';
                     }
                 } else {
@@ -1082,7 +1083,9 @@ class BS_Ticket extends BimpAbstractFollow
                     }
                     $msg .= '<br/><b style="color:red" >N\'est pas couvert par le contrat</b>';
 
-                    mailSyn2('Demande support client non couverte', implode(', ', $destinaitaire_commercial), null, $msg);
+					$code = 'ticket_sav_non_couvert_contrat';
+					$sujet = 'Demande support client non couverte';
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $userClient);
                 }
 
                 if ($init_status !== (int) $this->getData('status')) {

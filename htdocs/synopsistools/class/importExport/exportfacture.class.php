@@ -10,7 +10,7 @@ class exportfacture extends export8sens
 {
 
 //    var $sep = "    -   ";
-//    var $saut = "<br/>";   
+//    var $saut = "<br/>";
     public $info = array();
     public $type = "";
     public $id8sens = 0;
@@ -119,8 +119,8 @@ class exportfacture extends export8sens
     public function exportFactureNewSav()
     {
         $this->type = "sav";
-        $result = $this->db->query("SELECT fact.rowid as id, idtech8sens as id8Sens, sav.code_centre as Centre 
-FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "bs_sav sav , " . MAIN_DB_PREFIX . "user_extrafields ue 
+        $result = $this->db->query("SELECT fact.rowid as id, idtech8sens as id8Sens, sav.code_centre as Centre
+FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "bs_sav sav , " . MAIN_DB_PREFIX . "user_extrafields ue
 WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.rowid = sav.id_propal AND  ue.`fk_object` = IF(id_user_tech > 0, id_user_tech, fact.fk_user_author) "
                 . $this->where);
 

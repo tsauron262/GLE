@@ -2590,14 +2590,26 @@ class GSX_Repair extends BimpObject
 
         $nOk = 0;
         if (is_array($rows)) {
-            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-            global $tabCentre;
+//            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//            global $tabCentre;
 
-            foreach ($rows as $r) {
+//            foreach ($rows as $r) {
+//                if ($r['code_centre']) {
+//                    if (isset($tabCentre[$r['code_centre']])) {
+//                        if ($bdb->update('bimp_gsx_repair', array(
+//                                    'ship_to' => $tabCentre[$r['code_centre']][4]
+//                                        ), 'id = ' . $r['id']) > 0) {
+//                            $nOk++;
+//                        }
+//                    }
+//                }
+//            }
+			$lescentres = BimpCache::getCentres();
+			foreach ($rows as $r) {
                 if ($r['code_centre']) {
-                    if (isset($tabCentre[$r['code_centre']])) {
+                    if (isset($lescentres[$r['code_centre']])) {
                         if ($bdb->update('bimp_gsx_repair', array(
-                                    'ship_to' => $tabCentre[$r['code_centre']][4]
+                                    'ship_to' => $lescentres[$r['code_centre']]['shipTo']
                                         ), 'id = ' . $r['id']) > 0) {
                             $nOk++;
                         }

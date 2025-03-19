@@ -104,7 +104,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
         return array();
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function createRelance(&$errors = array())
     {
@@ -157,7 +157,9 @@ class BDS_RelancesClientsProcess extends BDSProcess
                 if (!BimpObject::objectLoaded($client)) {
                     continue;
                 }
-                $email_comm_client = $client->getCommercialEmail(false, true);
+//                $email_comm_client = $client->getCommercialEmail(false, true);
+				$comm_client = $client->getCommercial(false);
+				$id_comm_client = (int) $comm_client['id'];
 
                 foreach ($factures as $id_fac => $fac_data) {
                     $relance_idx = (int) $fac_data['relance_idx'];
@@ -170,34 +172,35 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
                     if (BimpObject::objectLoaded($facture)) {
                         $comm_fac = $facture->getCommercial();
+						$comm_fac_id = (int) $comm_fac['id'];
 
                         if (BimpObject::objectLoaded($comm_fac)) {
-                            $email_comm_fac = $comm_fac->getData('email');
+//                            $email_comm_fac = $comm_fac->getData('email');
 
-                            if ($email_comm_fac) {
-                                if (!isset($data[$relance_idx][$email_comm_fac])) {
-                                    $data[$relance_idx][$email_comm_fac] = array();
+                            if ($comm_fac_id) {
+                                if (!isset($data[$relance_idx][$comm_fac_id])) {
+                                    $data[$relance_idx][$comm_fac_id] = array();
                                 }
 
-                                if (!isset($data[$relance_idx][$email_comm_fac][$id_client])) {
-                                    $data[$relance_idx][$email_comm_fac][$id_client] = array();
+                                if (!isset($data[$relance_idx][$comm_fac_id][$id_client])) {
+                                    $data[$relance_idx][$comm_fac_id][$id_client] = array();
                                 }
 
-                                $data[$relance_idx][$email_comm_fac][$id_client][$id_fac] = $fac_data;
+                                $data[$relance_idx][$comm_fac_id][$id_client][$id_fac] = $fac_data;
                                 continue;
                             }
                         }
 
-                        if ($email_comm_client) {
-                            if (!isset($data[$relance_idx][$email_comm_client])) {
-                                $data[$relance_idx][$email_comm_client] = array();
+                        if ($id_comm_client) {
+                            if (!isset($data[$relance_idx][$id_comm_client])) {
+                                $data[$relance_idx][$id_comm_client] = array();
                             }
 
-                            if (!isset($data[$relance_idx][$email_comm_client][(int) $id_client])) {
-                                $data[$relance_idx][$email_comm_client][(int) $id_client] = array();
+                            if (!isset($data[$relance_idx][$id_comm_client][(int) $id_client])) {
+                                $data[$relance_idx][$id_comm_client][(int) $id_client] = array();
                             }
 
-                            $data[$relance_idx][$email_comm_client][$id_client][$id_fac] = $fac_data;
+                            $data[$relance_idx][$id_comm_client][$id_client][$id_fac] = $fac_data;
                         }
                     }
                 }
@@ -212,8 +215,8 @@ class BDS_RelancesClientsProcess extends BDSProcess
             $dt_relance = $dt_relance->format('d / m / Y');
 
             foreach ($data as $relance_idx => $relance_data) {
-                foreach ($relance_data as $email => $clients) {
-                    $email = BimpTools::cleanEmailsStr($email);
+                foreach ($relance_data as $idComm => $clients) {
+//                    $email = BimpTools::cleanEmailsStr($email);
 
                     foreach ($clients as $id_client => $factures) {
                         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
@@ -290,10 +293,12 @@ class BDS_RelancesClientsProcess extends BDSProcess
                             $html .= '</tbody>';
                             $html .= '</table>';
 
-                            if (mailSyn2($subject, $email, '', $html)) {
-                                $this->Success('Envoi alerte au commercial OK (' . $email . ')', $client, $facs_refs);
+
+							$code = 'notif_commercial_courrier_retard_regl';
+							if (!count(BimpUserMsg::envoiMsg($code, $subject, $html, $idComm))) {
+                                $this->Success('Envoi alerte au commercial OK', $client, $facs_refs);
                             } else {
-                                $this->Error('Echec envoi alerte au commercial (' . $email . ')', $client, $facs_refs);
+                                $this->Error('Echec envoi alerte au commercial', $client, $facs_refs);
                             }
                         }
                     }
@@ -302,7 +307,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
         }
     }
 
-    // Install: 
+    // Install:
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {

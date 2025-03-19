@@ -3259,7 +3259,8 @@ class Bimp_Client extends Bimp_Societe
                             $msg .= 'Merci d\'en vérifier la raison et de procéder à sa régularisation.<br/>';
                             $msg .= 'Lien acompte: ' . $fac->getLink();
 
-                            if (mailSyn2($subject, BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial'), '', $msg)) {
+							$code = 'relance_paiement_acompte';
+							if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg)))	{
                                 $fac->updateField('relance_active', 0);
                             } else {
                                 $msg = 'Echec de l\'envoi du mail de notification au service recouvrement pour l\'acompte ' . $fac->getRef();
@@ -4122,31 +4123,16 @@ class Bimp_Client extends Bimp_Societe
                         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $r['rowid']);
 
                         if (BimpObject::objectLoaded($client) && $client->getData('is_subsidiary') == 0) {
-//                            $is_comm_default = false;
-//                            $email = $client->getCommercialEmail(false, false);
-//
-//                            if (!$email) {
-//                                $email = $client->getCommercialEmail(true, true);
-//                                $is_comm_default = true;
-//                            }
-                            $email = BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial');
+							$subject = 'Client ' . $client->getRef() . ' ' . $client->getName() . ' - Vérifier relances à réactiver';
 
-                            if ($email) {
-                                $subject = 'Client ' . $client->getRef() . ' ' . $client->getName() . ' - Vérifier relances à réactiver';
+							$html = 'Bonjour,<br/><br/>';
+							$html .= 'Les relances du client ' . $client->getLink();
+							$html .= ' ont été désactivées le ' . $dt->format('d / m / Y') . '<br/><br/>';
 
-                                $html = 'Bonjour,<br/><br/>';
-                                $html .= 'Les relances du client ' . $client->getLink();
-                                $html .= ' ont été désactivées le ' . $dt->format('d / m / Y') . '<br/><br/>';
+							$html .= '<b>Il convient de vérifier ce compte et en réactiver les relances dès que possible</b>';
 
-                                $html .= '<b>Il convient de vérifier ce compte et en réactiver les relances dès que possible</b>';
-
-//                                if ($is_comm_default) {
-//                                    $html .= '<br/><br/>Note: vous avez reçu ce message car vous êtes commercial par défaut.<br/>';
-//                                    $html .= 'Pour ne plus recevoir de type de notification pour ce client, il est nécessaire de lui attribuer un commercial attitré';
-//                                }
-
-                                mailSyn2($subject, $email, '', $html);
-                            }
+							$code = 'relances_deactivated_to_notify';
+							BimpUserMsg::envoiMsg($code, $subject, $html);
                         }
                         break;
                     }

@@ -239,7 +239,9 @@ class BimpController
 //                            $erp_name = BimpCore::getConf('erp_name', '');
 //                            BimpTools::sendSmsAdmin('10 erreurs fatales en moins de 30 secondes');
 //                        } elseif ($nb < 10) {
-                            mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
+                        $code = 'erreur_fatale';
+						$subject = 'ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT);
+						BimpUserMsg::envoiMsg($code, $subject, $txt);
 //                        }
                     }
                 }

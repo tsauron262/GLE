@@ -72,7 +72,7 @@ class BimpDebug
     public static function checkUser()
     {
         // /!\ Attention aux appels ici - risque élevé de boucle infinie !! /!\
-        
+
         if (is_null(self::$user_checked)) {
             global $user;
             if (BimpObject::objectLoaded($user)) {
@@ -162,14 +162,17 @@ class BimpDebug
         $debMail = 'User ' . $user->login . '<br/>';
         if (!(float) $bimp_start_time) {
             $msg .= 'Variable bimp_start_time absente du fichier index.php';
-            mailSyn2('Page time indeterminer', 'tommy@bimp.fr', null, $debMail . $msg);
+			$code = 'page_time_indeterminer';
+			$sujet = 'Page time indeterminer';
+            BimpUserMsg::envoiMsg($code, $sujet, $debMail . $msg);
         } else {
             if (!defined('DISABLE_LONG_PAGE_NOTIFICATION') && (microtime(1) - $bimp_start_time) > 40) {
                 $msg .= (microtime(1) - $bimp_start_time) . ' sec';
 
                 $msg .= self::renderDebugTimes();
-                mailSyn2('Page trés lourde', 'tommy@bimp.fr,f.martinez@bimp.fr', null, $debMail . $msg);
-                BimpCore::addlog('Page trop lourde ' . microtime(1) - $bimp_start_time, Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info' => $msg));
+				$code = 'page_tres_lourde';
+				BimpUserMsg::envoiMsg($code, 'Page très lourde', $debMail . $msg);
+                BimpCore::addlog('Page trop lourde ' . (microtime(1) - $bimp_start_time), Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info' => $msg));
             }
         }
 
@@ -184,7 +187,7 @@ class BimpDebug
 
         $html = '';
 
-        // Ajout des timers: 
+        // Ajout des timers:
         $content = self::renderDebugTimes();
 
         if ($content) {
@@ -193,28 +196,28 @@ class BimpDebug
             ));
         }
 
-        // Ajout des infos du cache: 
+        // Ajout des infos du cache:
         $content = self::renderCacheInfosDebug();
 
         if ($content) {
             self::addDebug('cache', 'Utilisation du cache', $content, array('foldable' => 0));
         }
 
-        // Ajout des infos collections: 
+        // Ajout des infos collections:
 
         $content = self::renderCollectionsDebug();
         if ($content) {
             self::addDebug('collections', '', $content, array('foldable' => 0));
         }
 
-        // Ajout des requêtes SQL: 
+        // Ajout des requêtes SQL:
         $content = self::renderSqlDebug();
 
         if ($content) {
             self::addDebug('sql_count', '', $content, array('foldable' => 0));
         }
 
-        // Rendu HTML des infos de débug: 
+        // Rendu HTML des infos de débug:
         if (!empty(self::$debugs)) {
             $tabs = array();
             foreach (self::$types as $type => $type_label) {
@@ -413,7 +416,7 @@ class BimpDebug
         return $html;
     }
 
-    // Cache infos: 
+    // Cache infos:
 
     public static function addCacheObjectInfos($module, $object_name, $is_fetched = true, $obj_type = 'bimp_object')
     {
@@ -679,7 +682,7 @@ class BimpDebug
         self::$cache_infos['server'][$key]++;
     }
 
-    // Collections infos: 
+    // Collections infos:
 
     public static function incCollectionInfo($object_name, $type, $number, $ok = true)
     {
@@ -809,7 +812,7 @@ class BimpDebug
         return $html;
     }
 
-    // SQL: 
+    // SQL:
 
     public static function addSqlDebug($sql, $num_request, $num_transaction, $duration_sec)
     {

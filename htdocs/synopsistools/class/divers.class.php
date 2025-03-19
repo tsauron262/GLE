@@ -39,7 +39,8 @@ class synopsisHook
 //                $conf->entity = $entity;
         }
 
-        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+		$tabCentre = BimpCache::getCentres();
 
         //Pour les logiciel externe.
         $dbBIMPERP = $db;

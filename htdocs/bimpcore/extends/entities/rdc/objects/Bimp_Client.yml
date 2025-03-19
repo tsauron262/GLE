@@ -9,48 +9,30 @@ objects:
         instance:
             id_object:
                 request: fk_user
-                
-extrafields:
-    client_rdc:
-        table: societe_rdc
-        id_prop: fk_soc
-        delete_db_row: 1
 
 fields:
     fournisseur: unset
     code_compta: unset
     shopid:
         label: Shop ID
-        extrafields: client_rdc
-        extra: 1
         
     date_der_contact:
         label: Dernier contact
         type: date
-        extrafields: client_rdc
-        extra: 1
     date_debut_prospect:
         label: Début prospection
         type: date
-        extrafields: client_rdc
-        extra: 1
     date_ouverture:
         label: Ouverture
         type: date
-        extrafields: client_rdc
-        extra: 1
     fk_priorite:
         label: Priorité
-        extrafields: client_rdc
-        extra: 1
         values:
             array:
                 callback: 
                     method: getPriorities
     fk_statut_rdc:
         label: Prospection
-        extrafields: client_rdc
-        extra: 1
         values:
             array:
                 callback: 
@@ -58,36 +40,26 @@ fields:
     date_changement_statut_rdc:
         label: Changement de statut
         type: date
-        extrafields: client_rdc
-        extra: 1
     delai_ouv:
         label: Délai ouverture
         type: number
-        extrafields: client_rdc
-        extra: 1
-    fk_source:
+    fk_source_rdc:
         label: Source
-        extrafields: client_rdc
-        extra: 1
         values:
             array:
                 callback: 
                     method: getSourcesRdc                   
     contrefacon:
         label: Suspition de contrefaçon
-        extrafields: client_rdc
-        extra: 1
         type: bool
         
-    fk_group:
+    fk_group_rdc:
         label: Groupe
-        extrafields: client_rdc
-        extra: 1
         values:
             array:
                 callback: 
                     method: getUserGroupsArray 
-    fk_user_attr:
+    fk_user_attr_rdc:
         label: Attribué à
         type: id_object
         object: user_attr
@@ -96,14 +68,10 @@ fields:
             options:
                 callback: 
                     method: getUserAttrByGroupArray
-        extrafields: client_rdc
-        extra: 1
-        depends_on: fk_group
-    commentaire:
+        depends_on: fk_group_rdc
+    commentaire_rdc:
         label: Commentaires
         type: text
-        extrafields: client_rdc
-        extra: 1
 
 fields_tables:
     identity_rdc:
@@ -137,20 +105,24 @@ fields_tables:
             - field: date_debut_prospect
             - field: date_ouverture
             - field: fk_priorite
-              edit: 1
+              edit: 
+                callback:
+                    method: isUserInGroup
+                    params:
+                        - BD
             - field: fk_statut_rdc
             - field: date_changement_statut_rdc
             - field: delai_ouv
-            - field: fk_source
+            - field: fk_source_rdc
             - field: contrefacon
-            - field: fk_group
-            - field: fk_user_attr
+            - field: fk_group_rdc
+            - field: fk_user_attr_rdc
     
     commentaires:
         title: Commentaires
         icon: fas_comment
         rows:
-            - field: commentaire
+            - field: commentaire_rdc
     
     infos_comm:
         show: 0
@@ -218,22 +190,39 @@ forms:
             Shop ID:
                 field: shopid
                 edit:
-                    callback: isShopIdVisible
+                    callback: isShopIdEditable
             Priorité:
                 field: fk_priorite
+                edit: 
+                  callback:
+                      method: isUserInGroup
+                      params:
+                          - BD
             Prospection:
                 field: fk_statut_rdc
-                edit: 0
+                edit: 
+                    callback: isProspectionEditable
             Source:
                 field: fk_source
             Suspition de contrefaçon:
                 field: contrefacon
             Groupe:
-                field: fk_group
+                field: fk_group_rdc
             Attribué à:
-                field: fk_user_attr
+                field: fk_user_attr_rdc
             Commentaires:
-                field: commentaire
+                field: commentaire_rdc
+                
+    formActionRdc:
+        title: Choisir une action
+        rows:
+            - custom: 1
+              label: Actions
+              input_name: status
+              input: 
+                  type: select
+                  options: 
+                      callback: getListButtons
 
 lists:
     default:

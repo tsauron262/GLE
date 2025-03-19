@@ -1370,10 +1370,93 @@ class Bimp_User extends BimpObject
 				'content' => $this->renderMsgErp()
 			);
 
+			$tabs[] = array(
+				'id'            => 'choix_UI_tab',
+				'title'         => 'Interface utilisateur',
+				'content'		=> $this->renderChoixUi()
+			);
+
 			return BimpRender::renderNavTabs($tabs, 'params_tabs');
 		}
 
 		return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
+	}
+
+	public function renderChoixUi()
+	{
+		global $conf;
+
+		$selectedTheme = $this->getUserParamValue('MAIN_THEME', 'BimpTheme');
+		$defaultTheme = $conf->global->MAIN_THEME;
+
+		$headers = array(
+			'titre' => 'Thème',
+			'apercu' => 'Aperçu',
+			'action' => 'Action'
+		);
+
+		$dirthemes = array('/theme');
+		if (!empty($conf->modules_parts['theme'])) {		// Using this feature slow down application
+			foreach ($conf->modules_parts['theme'] as $reldir) {
+				var_dump($reldir);
+				$dirthemes = array_merge($dirthemes, (array) ($reldir.'theme'));
+			}
+		}
+		$dirthemes = array_unique($dirthemes);
+
+		foreach ($dirthemes as $dir) {
+			$dirtheme = dol_buildpath($dir, 0); // This include loop on $conf->file->dol_document_root
+			$urltheme = dol_buildpath($dir, 1);
+
+			if (is_dir($dirtheme)) {
+				$handle = opendir($dirtheme);
+				if (is_resource($handle)) {
+					while (($subdir = readdir($handle)) !== false) {
+						if (is_dir($dirtheme . "/" . $subdir) && substr($subdir, 0, 1) != '.'
+							&& substr($subdir, 0, 3) != 'CVS' && !preg_match('/common|phones/i', $subdir)) {
+							$file = $dirtheme . "/" . $subdir . "/thumb.png";
+							$url = $urltheme . "/" . $subdir . "/thumb.png";
+							if (!file_exists($file)) {
+								$url = DOL_URL_ROOT . '/public/theme/common/nophoto.png';
+							}
+							$actif = ($selectedTheme && $selectedTheme == $subdir);
+							$themes[] = array(
+								'titre'  => $subdir,
+								'apercu' => '<img class="img-skinthumb shadow" src="' . $url . '" style="border: none; margin-bottom: 5px;">',
+								'action' => array(
+									'content' => BimpInput::renderInput('toggle', 'theme', ($actif ? 1 : 0),
+										array(
+											'extra_attr' => array(
+												'onchange' => $this->getJsActionOnclick(
+													'saveUserChoixUi',
+													array('param' => 'MAIN_THEME', 'value' => $subdir)
+												)
+											)
+										)
+									)
+								),
+							);
+						}
+					}
+				}
+			}
+		}
+
+
+/*
+ * 'resil' => array(
+					'content' => BimpInput::renderInput('toggle', 'resil', ($abonner == 'yes' ? 1 : 0),
+						array(
+							'extra_attr' => array('onchange' => $this->getJsActionOnclick(
+								'saveMsgErpUserParam',
+								array('param' => 'userMessages__' . $code . '__abonner', 'value' => array('js_function' => 'parseInt($(this).val())'))
+							))
+						)
+					),
+					'value'   => ($abonner == 'yes' ? 'yes' : 'no')
+				),
+ */
+		return BimpRender::renderBimpListTable($themes, $headers );
 	}
 
 	public function renderPermsView()
@@ -2930,6 +3013,30 @@ class Bimp_User extends BimpObject
 		$success = 'Compte débloqué';
 
 		$errors = $this->updateField('echec_auth', 0);
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function actionSaveUserChoixUi($data, &$success)	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		$param_name = BimpTools::getArrayValueFromPath($data, 'param', null);
+		$value = BimpTools::getArrayValueFromPath($data, 'value', null);
+		if ($this->isLoaded($errors)) {
+			$errors = $this->saveUserParam($param_name, $value);
+		}
+
+		if (!count($errors)) {
+			$success = 'Paramètre enregistré avec succès';
+		}
+
+		echo '<script>window.location.reload();</script>';
+
 
 		return array(
 			'errors'   => $errors,

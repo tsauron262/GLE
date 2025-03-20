@@ -8,7 +8,7 @@ labels:
     name_plur: Concurrents
     
 parent_module: bimpcore
-parent_object: Bimp_societe
+parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
 objects:

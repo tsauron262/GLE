@@ -3471,7 +3471,14 @@ class BimpTools
 
 		if (is_array($url_params)) {
 			foreach ($url_params as $key => $value) {
-				$str .= ($str ? '&' : '') . $key . '=' . urlencode($value);
+				if(is_array($value)){
+					foreach($value as $v) {
+						$str .= ($str ? '&' : '') . $key . '[]=' . urlencode($v);
+					}
+				}
+				else{
+					$str .= ($str ? '&' : '') . $key . '=' . urlencode($value);
+				}
 			}
 		}
 

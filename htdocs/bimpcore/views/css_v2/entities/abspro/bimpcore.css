@@ -12242,7 +12242,7 @@ ul#nav_task > li.reload {
 #BimpThemeWrapper .header-top .top-menu .mobile-nav-toggle span {
   height: 2px;
   width: 20px;
-  background-color: rgb(78.4843373494, 97.1710843373, 128.3156626506);
+  background-color: rgb(23.68, 102.12, 87.32);
   display: inline-block;
   border-radius: 4px;
   position: absolute;
@@ -12254,7 +12254,7 @@ ul#nav_task > li.reload {
   height: 2px;
   width: 20px;
   border-radius: 4px;
-  background-color: rgb(78.4843373494, 97.1710843373, 128.3156626506);
+  background-color: rgb(23.68, 102.12, 87.32);
   display: inline-block;
   position: absolute;
 }
@@ -12524,7 +12524,7 @@ ul#nav_task > li.reload {
   display: none;
 }
 #BimpThemeWrapper .page-wrap .app-sidebar .sidebar-content .nav-container .navigation-main .nav-item.open::after {
-  background: rgb(92.0331325301, 113.9457831325, 150.4668674699);
+  background: rgb(30.4, 131.1, 112.1);
   border-radius: 10px;
   color: #fff;
   content: " ";
@@ -12535,7 +12535,7 @@ ul#nav_task > li.reload {
   width: 3px;
 }
 #BimpThemeWrapper .page-wrap .app-sidebar .sidebar-content .nav-container .navigation-main .nav-item.active::after {
-  background: rgb(92.0331325301, 113.9457831325, 150.4668674699);
+  background: rgb(30.4, 131.1, 112.1);
   border-radius: 10px;
   color: #fff;
   content: " ";
@@ -12554,29 +12554,29 @@ ul#nav_task > li.reload {
   visibility: visible;
   width: 100%;
   color: #999;
-  background: rgb(33.9668674699, 42.0542168675, 55.5331325301);
+  background: rgb(1.6, 6.9, 5.9);
 }
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-header {
-  background-color: rgb(33.9668674699, 42.0542168675, 55.5331325301);
+  background-color: rgb(1.6, 6.9, 5.9);
 }
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-header .header-brand {
   color: #ffffff;
 }
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-content {
-  background-color: #3F4E67;
+  background-color: #10453b;
 }
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-content .nav-container .navigation-main .nav-item {
-  background-color: #3F4E67;
+  background-color: #10453b;
 }
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-content .nav-container .navigation-main .nav-item a {
   color: #ffffff;
 }
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-content .nav-container .navigation-main .nav-item a i {
-  color: rgb(168.1325301205, 180.7831325301, 201.8674698795);
+  color: rgb(75.6, 213.4, 187.4);
 }
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-content .nav-container .navigation-main .nav-item .submenu-content,
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-content .nav-container .navigation-main .nav-item .submenu-content .nav-item {
-  background-color: rgb(78.4843373494, 97.1710843373, 128.3156626506) !important;
+  background-color: rgb(23.68, 102.12, 87.32) !important;
 }
 #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-content .nav-container .navigation-main .nav-item.open::after, #BimpThemeWrapper .page-wrap .app-sidebar.colored .sidebar-content .nav-container .navigation-main .nav-item.active::after {
   background-color: #23ac93;

@@ -842,7 +842,7 @@ class BimpCommission extends BimpObject
 					'desc'        => array(6, 'Material'),
 					'ref_cf'      => array(7, 'Customer PO number'),
 					'serial'      => array(8, 'Serial Number'),
-//					'price_ht'    => array(10, 'SO Net Sell Price (Loc )'),
+					'price_ht'    => array(10, 'SO Net Sell Price (Loc )'),
 					'comm_amount' => array(11, 'AC+ Reseller Commission Value (LC)')
 				);
 				$fourn_label = 'TECHDATA';
@@ -910,6 +910,9 @@ class BimpCommission extends BimpObject
 				$line = str_getcsv($lines[0], ';');
 
 				foreach ($cols as $col_idx => $col_data) {
+					if ($col_idx == 'price_ht') {
+						continue;
+					}
 					if ($line[$col_data[0]] != $col_data[1]) {
 						foreach ($line as $line_col_idx => $line_col_name) {
 							if ($line_col_name == $col_data[1]) {
@@ -978,7 +981,11 @@ class BimpCommission extends BimpObject
 
 							$data = array();
 							foreach ($cols as $col_idx => $col_data) {
-								echo $col_idx . ' - ' . $col_data[0] . ' - ' . $col_data[1] . ' => ' . $line_data[$col_data[0]] . '<br/>';
+								if ($col_idx == 'price_ht') {
+									$data[] = 0;
+									continue;
+								}
+//								echo $col_idx . ' - ' . $col_data[0] . ' - ' . $col_data[1] . ' => ' . $line_data[$col_data[0]] . '<br/>';
 								$data[] = $line_data[$col_data[0]];
 							}
 
@@ -1149,7 +1156,7 @@ class BimpCommission extends BimpObject
 										'desc'          => 2,
 										'ref_commande'  => 3,
 										'serial'        => 4,
-//										'price_ht'      => 5,
+										'price_ht'      => 5,
 										'comm_amount'   => 6
 									);
 									break;
@@ -1189,7 +1196,7 @@ class BimpCommission extends BimpObject
 										$line_desc = '<b>' . $line_data[$keys['desc']] . '</b><br/>';
 										$line_desc .= 'Ref BR: ' . $line_data[$keys['ref_fac_fourn']] . '<br/>';
 										$line_desc .= 'Ref CF : ' . $line_data[$keys['ref_commande']] . '<br/>';
-//										$line_desc .= 'Montant initial HT : ' . $line_data[$keys['price_ht']];
+										$line_desc .= 'Montant initial HT : ' . $line_data[$keys['price_ht']];
 
 										$serial = $line_data[$keys['serial']];
 

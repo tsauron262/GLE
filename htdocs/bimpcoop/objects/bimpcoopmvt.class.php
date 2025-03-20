@@ -164,7 +164,7 @@ WHERE value > 0 AND date IS NOT NULL '.
             }
         }
 
-        $sql = $db->query('SELECT SUM(amount_ttc) as tot FROM `'.MAIN_DB_PREFIX.'societe_remise_except` WHERE (fk_facture < 0 OR fk_facture IS NULL) AND fk_facture_source > 0'.
+        $sql = $db->query('SELECT SUM(amount_ttc) as tot FROM `'.MAIN_DB_PREFIX.'societe_remise_except` r LEFT JOIN '.MAIN_DB_PREFIX.'facture f ON r.fk_facture_source = f.rowid WHERE (fk_facture < 0 OR fk_facture IS NULL) AND f.paye = 1'.
                 (BimpTools::getPostFieldValue('dateD', null)? ' AND datec >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND datec < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
 '');

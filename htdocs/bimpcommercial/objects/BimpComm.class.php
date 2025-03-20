@@ -4731,6 +4731,41 @@ class BimpComm extends BimpDolObject
 		return $errors;
 	}
 
+	public function checkZoneVente($init_id_entrepot, $update = true, &$errors = array())
+	{
+		if (!$this->field_exists('zone_vente') || (int) $this->getData('fk_statut') || !static::$use_zone_vente_for_tva) {
+			return;
+		}
+
+		$client = $this->getClientFacture();
+		$cur_zone = $this->getData('zone_vente');
+		$new_zone = '';
+
+		if (BimpObject::objectLoaded($client)) {
+			if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande')) && $cur_zone != self::BC_ZONE_HORS_UE) {
+				if (BimpObject::objectLoaded($client) && BimpTools::getTypeSocieteCodeById($client->getData('fk_typent')) === 'TE_RETAIL_EX') {
+					$new_zone = self::BC_ZONE_HORS_UE;
+				}
+			}
+
+			if (!$new_zone) {
+				if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
+					(BimpCore::isEntity('bimp') && ((int) $this->getData('entrepot') == 164 || $init_id_entrepot == 164))) {
+					$new_zone = $this->getZoneByCountry($client);
+				}
+			}
+		}
+
+		if ($new_zone && $new_zone != $cur_zone) {
+			if ($update) {
+				$err = $this->updateField('zone_vente', $new_zone);
+				$this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true) . ' (Client revendeur export) ');
+			} else {
+				$this->set('zone_vente', $new_zone);
+			}
+		}
+	}
+
 	// post process:
 
 	public function onCreate(&$warnings = array())
@@ -5273,28 +5308,11 @@ class BimpComm extends BimpDolObject
 			}
 		}
 
-		$cur_zone = '';
-		$new_zone = '';
-		if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente') && !(int) $this->getData('fk_statut')) {
-			$cur_zone = $this->getData('zone_vente');
-			// Check zone vente :
-			if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || (int) $this->getData('entrepot') == 164)) {
-				$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
-				if (BimpObject::objectLoaded($soc)) {
-					$new_zone = $this->getZoneByCountry($soc);
-					if ($new_zone && $new_zone != $cur_zone) {
-						$this->set('zone_vente', $new_zone);
-					}
-				}
-			}
-		}
+		$this->checkZoneVente(0, false);
 
 		$errors = parent::create($warnings, $force_create);
 
 		if (!count($errors)) {
-			if ($new_zone && $new_zone != $cur_zone) {
-				$this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
-			}
 			switch ($this->object_name) {
 				case 'Bimp_Propal':
 				case 'Bimp_Facture':
@@ -5388,61 +5406,33 @@ class BimpComm extends BimpDolObject
 		}
 
 		$init_id_entrepot = (int) $this->getInitData('entrepot');
-		$init_fk_soc = (int) $this->getInitData('fk_soc');
-		$init_zone = '';
-		$cur_zone = '';
-		$new_zone = '';
+		$init_zone = $this->getInitData('zone_vente');
 
 		if ($this->getInitData('id_client_facture') != $this->getData('id_client_facture')) {
 			$this->addObjectLog('Client facturation modifié, de ' . $this->getInitData('id_client_facture') . ' a ' . $this->getData('id_client_facture'));
 		}
 
-		if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente')) {
-			$init_zone = $this->getInitData('zone_vente');
-			$cur_zone = $this->getData('zone_vente');
-
-			if (!(int) $this->getData('fk_statut')) {
-				if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
-						$this->getData('entrepot') == 164 || $init_id_entrepot == 164) &&
-					(((int) $this->getData('fk_soc') !== $init_fk_soc) || (int) $this->getData('entrepot') !== $init_id_entrepot)) {
-					$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
-					if (BimpObject::objectLoaded($soc)) {
-						$new_zone = $this->getZoneByCountry($soc);
-
-						if ($new_zone && $new_zone != $cur_zone) {
-							$this->set('zone_vente', $new_zone);
-						}
-					}
-				}
-			}
-		}
-
 		$errors = parent::update($warnings, $force_update);
 
+		if (!count($errors)) { // Si la zone n'a pas été modifiée manuellement
+			$this->checkZoneVente($init_id_entrepot, true, $errors);
+		}
+
 		if (!count($errors)) {
-			if ($new_zone && $cur_zone != $new_zone) {
-				$this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', 0, 1));
-			}
-
-			if ($init_zone && $this->areLinesEditable()) {
-				$cur_zone = (int) $this->getData('zone_vente');
-
-				if ($cur_zone != $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE))) {
-					$lines_errors = $this->removeLinesTvaTx();
-					if (count($lines_errors)) {
-						$warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');
-					}
+			$zone = $this->getData('zone_vente');
+			if ($zone != $init_zone && $zone == self::BC_ZONE_HORS_UE && $this->areLinesEditable()) {
+				$lines_errors = $this->removeLinesTvaTx();
+				if (count($lines_errors)) {
+					$errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');
 				}
 			}
 		}
-
 		return $errors;
 	}
 
 	public function onSave(&$errors = array(), &$warnings = array())
 	{
 		parent::onSave($errors, $warnings);
-
 		$this->processRemisesGlobales();
 	}
 

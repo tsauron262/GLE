@@ -682,6 +682,15 @@ class BimpTools
 		return '';
 	}
 
+	public static function getTypeSocieteCodeById($id_type)
+	{
+		if ((int) $id_type) {
+			return BimpCache::getBdb()->getValue('c_typent', 'code', '`id` = ' . (int) $id_type);
+		}
+
+		return '';
+	}
+
 	public static function getDolObjectActionsComm($dol_object, $contact = null, $code_filter = '', $done_filter = '', $label_search = '', $order_by = 'a.datep,a.id', $order_way = 'DESC')
 	{
 		global $conf;

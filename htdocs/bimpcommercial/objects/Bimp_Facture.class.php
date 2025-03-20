@@ -941,7 +941,8 @@ class Bimp_Facture extends BimpComm
 		if (in_array($user->id, array(7)) || $user->admin) {
 			return true;
 		}
-		parent::iAmAdminRedirect();
+
+		return parent::iAmAdminRedirect();
 	}
 
 	public function isIrrecouvrable()
@@ -1722,7 +1723,7 @@ class Bimp_Facture extends BimpComm
 				break;
 		}
 
-		return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+		parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
 	}
 
 	public function getInfosExtraBtn()
@@ -2110,6 +2111,8 @@ class Bimp_Facture extends BimpComm
 
 			return $paid;
 		}
+
+		return 0;
 	}
 
 	public function getRemainToPay($true_value = false, $round = true)
@@ -2534,6 +2537,8 @@ class Bimp_Facture extends BimpComm
 		if ($mode == "ok") {
 			return BimpTools::displayMoneyValue($revals['accepted'], '', 0, 0, 0, 2, 1);
 		}
+
+		return '';
 	}
 
 	public function displayTxMarge()
@@ -3092,8 +3097,9 @@ class Bimp_Facture extends BimpComm
 				}
 			}
 			return implode('<br/>', $return);
-			//        die;
 		}
+
+		return '';
 	}
 
 	public function displayIrrecouvrableInfos($with_note = true)
@@ -7900,7 +7906,7 @@ class Bimp_Facture extends BimpComm
 		foreach ($data2 as $temp) {
 			if ($temp[1] > 100000000) {
 				$unit = 'M€';
-				brek;
+				break;
 			} elseif ($temp[1] > 100000) {
 				$unit = 'K€';
 			}

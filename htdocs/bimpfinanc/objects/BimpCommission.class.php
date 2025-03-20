@@ -963,7 +963,8 @@ class BimpCommission extends BimpObject
 								continue;
 							}
 
-							$price = (float) str_replace(',', '.', $line_data[$cols['price_ht'][0]]);
+//							$price = (float) str_replace(',', '.', $line_data[$cols['price_ht'][0]]);
+							$price = 0;
 
 							if ($price) {
 								$ref_br = $line_data[$cols['ref_br'][0]];
@@ -1148,7 +1149,7 @@ class BimpCommission extends BimpObject
 										'desc'          => 2,
 										'ref_commande'  => 3,
 										'serial'        => 4,
-										'price_ht'      => 5,
+//										'price_ht'      => 5,
 										'comm_amount'   => 6
 									);
 									break;
@@ -1188,7 +1189,7 @@ class BimpCommission extends BimpObject
 										$line_desc = '<b>' . $line_data[$keys['desc']] . '</b><br/>';
 										$line_desc .= 'Ref BR: ' . $line_data[$keys['ref_fac_fourn']] . '<br/>';
 										$line_desc .= 'Ref CF : ' . $line_data[$keys['ref_commande']] . '<br/>';
-										$line_desc .= 'Montant initial HT : ' . $line_data[$keys['price_ht']];
+//										$line_desc .= 'Montant initial HT : ' . $line_data[$keys['price_ht']];
 
 										$serial = $line_data[$keys['serial']];
 

@@ -3,7 +3,12 @@ primary: id
 icon: fas_calendar-check
 common_fields: 0
 
+header_btn:
+    callback: getActionsButtons
+    
 entity_name: agenda
+
+controller: actioncomm
 
 dol_object: 
     instance: 
@@ -258,7 +263,7 @@ fields:
         dol_extra_field: 1
                   
 forms: 
-    add: 
+    default: 
         before_content: 
             callback: renderDeleteButton
         rows: 
@@ -341,6 +346,9 @@ forms:
                 field: note
             confidentiel: 
                 field: ef_conf
+                
+    add:
+        extends: default
     
 fields_tables: 
     infos: 
@@ -383,9 +391,7 @@ fields_tables:
               
 views: 
     default: 
-        rows: 
-            - cols: 
-                - type: object_header
+        rows:
             - cols: 
                 - type: fields_table
                   fields_table: 
@@ -473,6 +479,10 @@ lists:
         sort_way: desc
         n: 20
         modal_view: default
+        page_btn: 1
+        add_btn: 1
+        add_form_name: add
+        edit_btn: 1
         cols: 
             type: 
             label: 
@@ -525,3 +535,5 @@ lists:
                     - ficheInter
         cols:
             element: unset
+    
+header_list_name: default

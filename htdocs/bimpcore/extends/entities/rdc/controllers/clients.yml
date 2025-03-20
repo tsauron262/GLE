@@ -1,0 +1,7 @@
+sections:
+    -   type: tabs
+        tabs:
+            remises: unset
+            stat_client: unset
+            ribs: unset
+            stats: unset

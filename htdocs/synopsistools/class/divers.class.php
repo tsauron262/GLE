@@ -275,7 +275,10 @@ class synopsisHook
         }
 
         if (defined('URL_REDIRECT') && !$admin) {
-            header("Location:" . URL_REDIRECT);
+            $url = $_SERVER['REQUEST_URI'];
+            $url = str_replace(DOL_URL_ROOT, '', $url);
+            $url = URL_REDIRECT.$url;
+            header("Location:" . $url);
         }
 
         $useragent = $_SERVER['HTTP_USER_AGENT'];

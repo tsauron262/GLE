@@ -6,7 +6,6 @@ common_fields: 0
 positions: 1
 position_insert: after
 
-
 entity_name: menu
 
 labels: 
@@ -65,8 +64,13 @@ fields:
         items_data_type: id_object
         items_braces: 1
         object: user
-            
-            
+        
+    synchronised:
+        label: Synchronisé
+        type: bool
+        default_value: 1
+        input:
+            help: Si Oui, sera inclus dans le fichier de la version complète du menu.
 forms:
     add_sub_item: 
         rows: 
@@ -114,6 +118,13 @@ forms:
               input: 
                   type: toggle
               value: 1
+            -   custom: 1
+                label: Actif
+                input_name: synchronised
+                data_type: bool
+                input:
+                    type: toggle
+                value: 1
             
     default: 
         rows: 
@@ -125,7 +136,7 @@ forms:
             - field: bimp_icon
             - field: bimp_object
             - field: active
-            - field: allowed_users
+            - field: synchronised
             
 lists: 
     default: 
@@ -174,11 +185,12 @@ lists:
                 edit: 1
             active: 
                 edit: 1
+            synchronised:
+                edit: 1
             
             
              
     
 
         
-    
     

@@ -115,7 +115,7 @@ class Bimp_Societe extends BimpDolObject
 
         return (int) ($user->admin || $user->rights->societe->supprimer);
     }
-    
+
     public function isFieldEditable($field, $force_edit = false) {
         if($field == 'siren'){
             if($this->getData('id_atradius') != '' && $this->getData('id_atradius') != 0)
@@ -2745,203 +2745,255 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
-    public function checkSiren($field, $value, &$data = array(), &$warnings = array())
-    {
-        if ($value == "356000000")
-            return array('Siren de la Poste, trop de résultats');
+	public function getApiResultSiren()
+	{
+//		print_r($_SESSION['last_inpi_api']);die('ttt');
+		$result = array();
+		if (BimpTools::getPostFieldValue('search_name') != '' || BimpTools::getPostFieldValue('search_siret') != '') {
+			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+			$api = BimpAPI::getApiInstance('Inpi');
+			$api->getCompany(BimpTools::getPostFieldValue('search_name'), BimpTools::getPostFieldValue('search_siret'));
+			$result = $api->getSocSiren();
+		}
+		if(count($result) > 1)
+			$result[0] = '';
+		asort($result);
+		session_write_close();
+		return $result;
+	}
+	public function getApiResultSiret()
+	{
+		if (BimpTools::getPostFieldValue('result_siren') != '' && BimpTools::getPostFieldValue('result_siren') != 0) {
+			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+			$api = BimpAPI::getApiInstance('Inpi');
+			$result = $api->getSocSiret(BimpTools::getPostFieldValue('result_siren'));
+			return $result;
+		}
+		return array();
+	}
 
-        $errors = array();
+	public function actionCreat_auto($data, &$success = array()){
+		$success = array();
+		$errors = array();
 
-        $siret = '';
-        $siren = '';
+		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+		$api = BimpAPI::getApiInstance('Inpi');
+		$result = $api->getSiret($data['result_siret']);
+$onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result));
+//		$errors[] = $data.'<pre>'.print_r($dataR, true).'</pre>';
 
-        $value = str_replace(' ', '', $value);
-        if (strlen($value) == 9 && $field == 'siret')
-            $field = 'siren';
+		return array('errors' => $errors, 'success' => $success, 'success_callback' => 'setTimeout(function(){'.html_entity_decode($onSuccess).'},500);');
+	}
 
-        switch ($field) {
-            case 'siret':
-                if (!$this->Luhn($value, 14)) {
-                    $errors[] = 'SIRET invalide';
-                }
-                $siret = $value;
-                $siren = substr($siret, 0, 9);
-                $data['siret'] = $siret;
-                $data['siren'] = $siren;
-                break;
+	public function checkSiren($field, $value, &$data = array(), &$warnings = array())
+	{
+		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+		$api = BimpAPI::getApiInstance('Inpi');
+		$api->getCompany('', $value);
+		$data = $api->getSiret($value);
+		return array();
+	}
 
-            case 'siren':
-            default:
-//                if (!$this->Luhn($value, 9)) { // Apparemment ça bug...
-//                    $errors[] = 'SIREN invalide (' . $value . ')';
+
+//		public function checkSirenOLDOLD($field, $value, &$data = array(), &$warnings = array())
+//	{
+//        if ($value == "356000000")
+//            return array('Siren de la Poste, trop de résultats');
+//
+//        $errors = array();
+//
+//        $siret = '';
+//        $siren = '';
+//
+//        $value = str_replace(' ', '', $value);
+//        if (strlen($value) == 9 && $field == 'siret')
+//            $field = 'siren';
+//
+//        switch ($field) {
+//            case 'siret':
+//                if (!$this->Luhn($value, 14)) {
+//                    $errors[] = 'SIRET invalide';
 //                }
-                if (strlen($value) != 9) {
-                    $errors[] = 'SIREN invalide';
-                }
-                $siren = $value;
-                $data['siren'] = $siren;
-                break;
-        }
-
-        if (!count($errors) && BimpTools::isModuleDoliActif('BIMPCREDITSAFE')) {
-            if ($siret || $siren) {
-                require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
-
-                $xml_data = file_get_contents(DOL_DOCUMENT_ROOT . '/bimpcreditsafe/request.xml');
-
-                $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
-
-                $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
-
-//                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
-                $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
-
-                if (isset($objReturn->GetDataResult) && !empty($objReturn->GetDataResult)) {
-                    $returnData = $objReturn->GetDataResult;
-                    //                $returnData = htmlspecialchars_decode($returnData);
-                    //
-                    //                $returnData = BimpTools::replaceBr($returnData, '<br/>');
-                    //                $returnData = str_replace("&", "et", $returnData);
-                    //                $returnData = str_replace(" < ", " ", $returnData);
-                    //                $returnData = str_replace(" > ", " ", $returnData);
-
-                    global $bimpLogPhpWarnings;
-                    if (is_null($bimpLogPhpWarnings)) {
-                        $bimpLogPhpWarnings = true;
-                    }
-
-                    // On déactive les logs warnings php (Trop de logs).
-                    $prevLogWarnings = $bimpLogPhpWarnings;
-                    $bimpLogPhpWarnings = false;
-
-                    $result = simplexml_load_string($returnData);
-                    $bimpLogPhpWarnings = $prevLogWarnings;
-
-                    if (!is_object($result)) {
-                        $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
-                    } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                        switch ($result->body->errors->errordetail->code) {
-                            case 130:
-                                $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible (Compte invalide). Le problème est en cours de résolution.';
-                                break;
-
-                            case 132:
-                                $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible (Crédits épuisés). Le problème est en cours de résolution.';
-                                break;
-
-                            case 171:
-                                $warnings[] = 'Le n° ' . ($siret ? 'SIRET' : 'SIREN') . ' demandé n\'existe pas (' . ($siret ? $siret : $siren) . ')';
-                                break;
-
-                            default:
-                                $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
-                                break;
-                        }
-                    } else {
-                        $ville = '';
-                        $codeP = '';
-                        $tel = '';
-                        $nom = '';
-                        $note = $alert = "";
-                        $limit = 0;
-
-                        $summary = $result->body->company->summary;
-                        $base = $result->body->company->baseinformation;
-                        $branches = $base->branches->branch;
-                        $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
-
-                        $rcs = $summary->courtregistrydescription . ' ' . $siren;
-                        if ($summary->status == 'Fermé') {
-                            $note = 'Fermé';
-                            $alert = 'Fermé';
-                            $lettrecreditsafe = 0;
-                        } else {
-                            $lettrecreditsafe = 0;
-                            foreach (array("", "2013") as $annee) {
-                                $champ = "rating" . $annee;
-                                if ($summary->$champ > 0) {
-                                    $lettrecreditsafe = $summary->$champ;
-                                    $note = dol_print_date(dol_now()) . ($annee == '' ? '' : '(Methode ' . $annee . ')') . " : " . $summary->$champ . "/100";
-                                    foreach (array("", "desc1", "desc2", 'commentaries') as $champ2) {
-                                        $champT = $champ . $champ2;
-                                        if (isset($summary->$champT))
-                                            $note .= " " . str_replace($summary->$champ, "", $summary->$champT);
-                                    }
-                                }
-                                $champ2 = "creditlimit" . $annee;
-                                if (isset($summary->$champ2))
-                                    $limit = $summary->$champ2;
-                            }
-
-                            $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
-                            $codeP = $tabCodeP[0];
-                            $ville = str_replace($tabCodeP[0] . " ", "", $summary->postaladdress->distributionline);
-                            $tel = $summary->telephone;
-                            $nom = $summary->companyname;
-
-                            if (is_array($branches)) {
-                                foreach ($branches as $branche) {
-                                    if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
-//                                    die('gggggg');
-                                        $adress = $branche->full_address->address;
-                                        //$nom = $branche->full_address->name;
-                                        $codeP = $branche->postcode;
-                                        $ville = $branche->municipality;
-                                        if (!$siret) {
-                                            $siret = (string) $branche->companynumber;
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if ($limit) {
-                                $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
-                            }
-
-                            //                        if ($limit < 1 && $lettrecreditsafe == 100)
-                            //                            $limit = 10000000;
-                        }
-                        if (isset($result->body->company->ratings2013->commentaries->comment)) {
-                            if (is_array($result->body->company->ratings2013->commentaries->comment))
-                                foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
-                                    $note .= "
-    " . $comment;
-                            else
-                                $note .= "
-    " . $result->body->company->ratings2013->commentaries->comment;
-                        }
-
-                        $data = array(
-                            'siren'             => $siren,
-                            'siret'             => $siret,
-                            "nom"               => "" . $nom,
-                            "tva_intra"         => "" . $base->vatnumber,
-                            "phone"             => "" . $tel,
-                            "ape"               => "" . $summary->activitycode,
-                            "alert"             => "" . $alert,
-                            "notecreditsafe"    => "" . $note,
-                            "lettrecreditsafe"  => "" . $lettrecreditsafe,
-                            "address"           => "" . $adress,
-                            "zip"               => "" . $codeP,
-                            "town"              => "" . $ville,
-                            "outstanding_limit" => "" . intval($limit),
-                            "rcs"               => "" . $rcs,
-                            "capital"           => "" . trim(str_replace(array(" Euros", '-'), "", $summary->sharecapital)));
-                    }
-
-                    if ($this->field_exists('date_check_credit_safe')) {
-                        $this->updateField('date_check_credit_safe', date('Y-m-d H:i:s'));
-                        return $errors;
-                    }
-                } else {
-                    $warnings[] = 'Echec de la connexion à Credit Safe. Les données Credit Safe n\'ont pas pu être récupérées';
-                }
-            }
-        }
-
-        return $errors;
-    }
+//                $siret = $value;
+//                $siren = substr($siret, 0, 9);
+//                $data['siret'] = $siret;
+//                $data['siren'] = $siren;
+//                break;
+//
+//            case 'siren':
+//            default:
+////                if (!$this->Luhn($value, 9)) { // Apparemment ça bug...
+////                    $errors[] = 'SIREN invalide (' . $value . ')';
+////                }
+//                if (strlen($value) != 9) {
+//                    $errors[] = 'SIREN invalide';
+//                }
+//                $siren = $value;
+//                $data['siren'] = $siren;
+//                break;
+//        }
+//
+//        if (!count($errors) && BimpTools::isModuleDoliActif('BIMPCREDITSAFE')) {
+//            if ($siret || $siren) {
+//                require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
+//
+//                $xml_data = file_get_contents(DOL_DOCUMENT_ROOT . '/bimpcreditsafe/request.xml');
+//
+//                $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
+//
+//                $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
+//
+////                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
+//                $data = array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data));
+////                print_r($data);
+//                $objReturn = $sClient->GetData($data);
+//
+//                if (isset($objReturn->GetDataResult) && !empty($objReturn->GetDataResult)) {
+//                    $returnData = $objReturn->GetDataResult;
+//                    //                $returnData = htmlspecialchars_decode($returnData);
+//                    //
+//                    //                $returnData = BimpTools::replaceBr($returnData, '<br/>');
+//                    //                $returnData = str_replace("&", "et", $returnData);
+//                    //                $returnData = str_replace(" < ", " ", $returnData);
+//                    //                $returnData = str_replace(" > ", " ", $returnData);
+//
+//                    global $bimpLogPhpWarnings;
+//                    if (is_null($bimpLogPhpWarnings)) {
+//                        $bimpLogPhpWarnings = true;
+//                    }
+//
+//                    // On déactive les logs warnings php (Trop de logs).
+//                    $prevLogWarnings = $bimpLogPhpWarnings;
+//                    $bimpLogPhpWarnings = false;
+//
+//                    $result = simplexml_load_string($returnData);
+//                    $bimpLogPhpWarnings = $prevLogWarnings;
+//
+//                    if (!is_object($result)) {
+//                        $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
+//                    } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
+//                        switch ($result->body->errors->errordetail->code) {
+//                            case 130:
+//                                $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible (Compte invalide). Le problème est en cours de résolution.';
+//                                break;
+//
+//                            case 132:
+//                                $warnings[] = 'La vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' est temporairement indisponible (Crédits épuisés). Le problème est en cours de résolution.';
+//                                break;
+//
+//                            case 171:
+//                                $warnings[] = 'Le n° ' . ($siret ? 'SIRET' : 'SIREN') . ' demandé n\'existe pas (' . ($siret ? $siret : $siren) . ')';
+//                                break;
+//
+//                            default:
+//                                $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+//                                break;
+//                        }
+//                    } else {
+//                        $ville = '';
+//                        $codeP = '';
+//                        $tel = '';
+//                        $nom = '';
+//                        $note = $alert = "";
+//                        $limit = 0;
+//
+//                        $summary = $result->body->company->summary;
+//                        $base = $result->body->company->baseinformation;
+//                        $branches = $base->branches->branch;
+//                        $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
+//
+//                        $rcs = $summary->courtregistrydescription . ' ' . $siren;
+//                        if ($summary->status == 'Fermé') {
+//                            $note = 'Fermé';
+//                            $alert = 'Fermé';
+//                            $lettrecreditsafe = 0;
+//                        } else {
+//                            $lettrecreditsafe = 0;
+//                            foreach (array("", "2013") as $annee) {
+//                                $champ = "rating" . $annee;
+//                                if ($summary->$champ > 0) {
+//                                    $lettrecreditsafe = $summary->$champ;
+//                                    $note = dol_print_date(dol_now()) . ($annee == '' ? '' : '(Methode ' . $annee . ')') . " : " . $summary->$champ . "/100";
+//                                    foreach (array("", "desc1", "desc2", 'commentaries') as $champ2) {
+//                                        $champT = $champ . $champ2;
+//                                        if (isset($summary->$champT))
+//                                            $note .= " " . str_replace($summary->$champ, "", $summary->$champT);
+//                                    }
+//                                }
+//                                $champ2 = "creditlimit" . $annee;
+//                                if (isset($summary->$champ2))
+//                                    $limit = $summary->$champ2;
+//                            }
+//
+//                            $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
+//                            $codeP = $tabCodeP[0];
+//                            $ville = str_replace($tabCodeP[0] . " ", "", $summary->postaladdress->distributionline);
+//                            $tel = $summary->telephone;
+//                            $nom = $summary->companyname;
+//
+//                            if (is_array($branches)) {
+//                                foreach ($branches as $branche) {
+//                                    if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
+////                                    die('gggggg');
+//                                        $adress = $branche->full_address->address;
+//                                        //$nom = $branche->full_address->name;
+//                                        $codeP = $branche->postcode;
+//                                        $ville = $branche->municipality;
+//                                        if (!$siret) {
+//                                            $siret = (string) $branche->companynumber;
+//                                        }
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//
+//                            if ($limit) {
+//                                $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
+//                            }
+//
+//                            //                        if ($limit < 1 && $lettrecreditsafe == 100)
+//                            //                            $limit = 10000000;
+//                        }
+//                        if (isset($result->body->company->ratings2013->commentaries->comment)) {
+//                            if (is_array($result->body->company->ratings2013->commentaries->comment))
+//                                foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
+//                                    $note .= "
+//    " . $comment;
+//                            else
+//                                $note .= "
+//    " . $result->body->company->ratings2013->commentaries->comment;
+//                        }
+//
+//                        $data = array(
+//                            'siren'             => $siren,
+//                            'siret'             => $siret,
+//                            "nom"               => "" . $nom,
+//                            "tva_intra"         => "" . $base->vatnumber,
+//                            "phone"             => "" . $tel,
+//                            "ape"               => "" . $summary->activitycode,
+//                            "alert"             => "" . $alert,
+//                            "notecreditsafe"    => "" . $note,
+//                            "lettrecreditsafe"  => "" . $lettrecreditsafe,
+//                            "address"           => "" . $adress,
+//                            "zip"               => "" . $codeP,
+//                            "town"              => "" . $ville,
+//                            "outstanding_limit" => "" . intval($limit),
+//                            "rcs"               => "" . $rcs,
+//                            "capital"           => "" . trim(str_replace(array(" Euros", '-'), "", $summary->sharecapital)));
+//                    }
+//
+//                    if ($this->field_exists('date_check_credit_safe')) {
+//                        $this->updateField('date_check_credit_safe', date('Y-m-d H:i:s'));
+//                        return $errors;
+//                    }
+//                } else {
+//                    $warnings[] = 'Echec de la connexion à Credit Safe. Les données Credit Safe n\'ont pas pu être récupérées';
+//                }
+//            }
+//        }
+//
+//        return $errors;
+//    }
 
     public function getCreditSafeLettre($noHtml = false)
     {

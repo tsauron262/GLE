@@ -1481,6 +1481,43 @@ forms:
                 display_if: 
                     field_name: model
                     show_values: cepa
+                    
+    creat_auto:
+        rows:
+            search_siret:
+                custom: 1
+                label: SIRET / SIREN
+                input_name: search_siret
+                input:
+                    type: text
+            search_name:
+                custom: 1
+                label: Nom
+                input_name: search_name
+                input:
+                    type: text
+            result_siren:
+                custom: 1
+                label: SIRET
+                input_name: result_siren
+                data_type: list
+                input:
+                    type: select
+                values:
+                    callback: getApiResultSiren
+                depends_on: search_siret,search_name
+            result_siret:
+                custom: 1
+                label: SIREN
+                input_name: result_siret
+                data_type: list
+                input:
+                    type: select
+                values:
+                    callback: getApiResultSiret
+                depends_on: result_siren
+                required: 1
+            
                   
              
 filters: 

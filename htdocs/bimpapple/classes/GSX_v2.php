@@ -203,7 +203,8 @@ class GSX_v2 extends GSX_Const
         $this->initError('Echec authentification (oldToken : ' . $oldToken . ' newToken :  ' . $this->acti_token . ')');
 
         if ($this->appleId == self::$default_ids['apple_id']) {
-//            global $gsx_logout_mail_send, $phantomAuthTest;
+            global $gsx_logout_mail_send;
+//            global $phantomAuthTest;
 //            if($phantomAuthTest < 10 || !$phantomAuthTest){
 //                $oldDate = new DateTime(BimpCore::getConf('old_date_reco_apple', '2020-01-01'));
 //                $oldDate->add(new DateInterval('PT4M'));
@@ -553,6 +554,10 @@ class GSX_v2 extends GSX_Const
             foreach ($data['errors'] as $error) {
                 $msg = '';
                 switch ($error['code']) {
+					case 'RESERVATIONS_NOT_FOUND':
+					case 'NO_SLOTS_AVAILABLE':
+						return array();
+						break;
                     case 'SESSION_IDLE_TIMEOUT':
                         // On tente une nouvelle authentification:
                         if ($request_name !== 'authenticate') {
@@ -873,7 +878,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $shipTo = BimpTools::addZeros($shipTo, 10);
-        $this->setShipTo($shipto);
+        $this->setShipTo($shipTo);
         $head = array();
         return $this->exec('returnsLookup', array(
                     'returnStatusType' => 'RETURN_REPORT',
@@ -1048,6 +1053,7 @@ class GSX_v2 extends GSX_Const
             $shipTo = BimpTools::addZeros($shipTo, 10);
         }
 
+		$params = array();
         $params = BimpTools::overrideArray(array(
                     'cancelReason' => 'CUSTOMER_CANCELLED'
                         ), $params);

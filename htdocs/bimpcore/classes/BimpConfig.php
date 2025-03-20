@@ -39,7 +39,7 @@ class BimpConfig
 
     public static function getModuleConfigInstance($module, $instance = null)
     {
-        // Note: $instance est mis ici en prévision d'une possible création de classes modules. 
+        // Note: $instance est mis ici en prévision d'une possible création de classes modules.
 
         return new BimpConfig($module, '', $module, $instance);
     }
@@ -81,7 +81,7 @@ class BimpConfig
         $this->file = $this->dir . $file_name . '.yml';
         $this->cache_key = $this->module . ($this->module_dir ? '/' . $this->module_dir : '') . '/' . $this->file_name;
 
-        // Chargements depuis le cache serveur: 
+        // Chargements depuis le cache serveur:
         if (self::$cache_mode === 'per_file') {
             if (!isset(self::$values_cache[$this->cache_key])) {
                 self::$values_cache[$this->cache_key] = BimpCache::getCacheServeur('bimp_config_values_' . $this->cache_key);
@@ -113,7 +113,7 @@ class BimpConfig
             return true;
         }
 
-        // Chargement des paramètres depuis le fichier: 
+        // Chargement des paramètres depuis le fichier:
         if (!file_exists($this->file)) {
             $this->errors[] = 'Fichier de configuration "' . $this->file_name . '" absent';
             $this->logConfigError('Erreur technique: le fichier de configuration "' . $this->file_name . '.yml" n\'existe pas');
@@ -152,7 +152,7 @@ class BimpConfig
 
     public function getParamsFromFile($module, $module_dir, $file_name, &$errors = array(), $check_extends = true)
     {
-        // $check_extensions: true pour les fichiers de base (core) / false pour les fichiers versions et entité. 
+        // $check_extensions: true pour les fichiers de base (core) / false pour les fichiers versions et entité.
 
         if (!$module) {
             $errors[] = 'Module non spécifié';
@@ -191,7 +191,7 @@ class BimpConfig
                     ));
                 }
 
-                // Traitement des fichiers étendus: 
+                // Traitement des fichiers étendus:
                 if ($check_extends && isset($params['extends'])) {
                     $sub_dir = '';
                     if (!is_null($this->instance)) {
@@ -240,7 +240,7 @@ class BimpConfig
                                 $params = $this->mergeParams($parent_params, $params, false);
 
                                 if (self::$debug) {
-                                    $html .= BimpRender::renderFoldableContainer('PARAMS AFTER PARENT EXTENDS', '<pre>' . print_r($entity_params, 1) . '</pre>', array(
+                                    $html .= BimpRender::renderFoldableContainer('PARAMS AFTER PARENT EXTENDS', '<pre>' . print_r($params, 1) . '</pre>', array(
                                                 'open'        => false,
                                                 'offset_left' => true
                                     ));
@@ -280,7 +280,7 @@ class BimpConfig
                     }
                 }
 
-                // Surcharge entité: 
+                // Surcharge entité:
                 if (BimpCore::getExtendsEntity() != '') {
                     $entity_module_dir = 'extends/entities/' . BimpCore::getExtendsEntity() . ($module_dir ? '/' . $module_dir : '');
                     $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $entity_module_dir . '/' . $file_name . '.yml';
@@ -425,7 +425,7 @@ class BimpConfig
         }
     }
 
-    // Gestion des chemins de configuration: 
+    // Gestion des chemins de configuration:
 
     public function isDefined($path)
     {
@@ -486,7 +486,7 @@ class BimpConfig
         return implode('/', $path);
     }
 
-    // récupération des données de configuration: 
+    // récupération des données de configuration:
 
     public function get($full_path, $default_value = null, $required = false, $data_type = 'string')
     {
@@ -494,7 +494,7 @@ class BimpConfig
             return $default_value;
         }
 
-        // Récup depuis le cache s'il existe: 
+        // Récup depuis le cache s'il existe:
         if (isset(self::$values_cache[$this->cache_key][$full_path])) {
             if (BimpDebug::isActive()) {
                 BimpDebug::$cache_infos['counts']['yml']['s']++;
@@ -550,7 +550,7 @@ class BimpConfig
             }
         }
 
-        // On ne met pas $default_value en cache car elle peut être potentiellement variable pour un même $full_path selon le context d'appel à get(). 
+        // On ne met pas $default_value en cache car elle peut être potentiellement variable pour un même $full_path selon le context d'appel à get().
         self::$values_cache[$this->cache_key][$full_path] = (is_null($current) ? 'NOT_DEF' : $current);
         self::$values_cache_changes[$this->cache_key] = 1;
 
@@ -646,10 +646,10 @@ class BimpConfig
 
     public function addParams($path, $params, $mode = 'overrides', $del_cache = false)
     {
-        // Modes: 
-        // - overrides: surcharge les (éventuels) paramètres actuels. 
-        // - replace: remplace les (éventuels) paramètres actuels. 
-        // - initial: paramètres initiaux devant être surchargés par les paramètres actuels. 
+        // Modes:
+        // - overrides: surcharge les (éventuels) paramètres actuels.
+        // - replace: remplace les (éventuels) paramètres actuels.
+        // - initial: paramètres initiaux devant être surchargés par les paramètres actuels.
 
         if (is_null($path) || !$path) {
             return false;
@@ -734,7 +734,7 @@ class BimpConfig
         echo '</pre>';
     }
 
-    // Getters interne: 
+    // Getters interne:
 
     protected function getvalue($value, $path)
     {
@@ -1245,11 +1245,11 @@ class BimpConfig
                             $instance, $method
                                 ), $args);
                     }
-                    
+
                     if ($not) {
                         return !$result;
                     }
-                    
+
                     return $result;
                 }
             }
@@ -1268,7 +1268,7 @@ class BimpConfig
         return (int) BimpCore::isModuleActive($module);
     }
 
-    // Gestion des objets: 
+    // Gestion des objets:
 
     public function getObjectOld($path = '', $object_name = null)
     {
@@ -1384,7 +1384,7 @@ class BimpConfig
             }
         }
 
-//        $this->logConfigUndefinedValue($path); // (Peut éventuellement être null) 
+//        $this->logConfigUndefinedValue($path); // (Peut éventuellement être null)
         return null;
     }
 
@@ -1603,7 +1603,7 @@ class BimpConfig
         return null;
     }
 
-    // Logs: 
+    // Logs:
 
     protected function logInvalideDataType($param_path, $data_type, $value = null)
     {
@@ -1635,7 +1635,7 @@ class BimpConfig
 
         global $user;
 
-        if (BimpCore::isModeDev() || $user->id == 1) { // Pour éviter trop de logs... 
+        if (BimpCore::isModeDev() || $user->id == 1) { // Pour éviter trop de logs...
             BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
                 'Fichier' => $this->file
             ));

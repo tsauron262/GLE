@@ -153,13 +153,13 @@ class Session {
             unset($diff2['time']);
         }
 
-		$ip = static::getUserIp();
-		if($ip != $this->ipBase && $this->ipBase != '0' && $this->ipBase != ''){
-			if(class_exists('BimpCore'))
-				BimpCore::addlog('Changement d\'ip dans la session, ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip, 3);
-			else
-				mailSyn2('Changement d\'ip dans la session', 'dev@bimp.fr', null, 'ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip);
-		}
+//		$ip = static::getUserIp();
+//		if($ip != $this->ipBase && $this->ipBase != '0' && $this->ipBase != ''){
+//			if(class_exists('BimpCore'))
+//				BimpCore::addlog('Changement d\'ip dans la session, ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip, 3);
+//			else
+//				mailSyn2('Changement d\'ip dans la session', 'dev@bimp.fr', null, 'ancienne ip : ' . $this->ipBase . ' nouvelle ip : ' . $ip);
+//		}
 
 		$login = $_SESSION['dol_login'];
         if(count($diff1) > 0 || count($diff2) > 0 || $login != $this->loginBase){
@@ -173,8 +173,8 @@ class Session {
                 $req = "INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time, ip) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$timeTot."', '".$ip."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = '".$timeTot."'";
                 $result = $this->db->query($req);
 
-			$login = $_SESSION['dol_login'];
-			mailSyn2('enregistr session', 'tommy@bimp.fr', null, 'enregistre session : '.$this->loginBase.' aprés : '.$login.' sessionId : '.$sessionID.$result.'<br/>'.print_r($_SESSION,1));
+//			$login = $_SESSION['dol_login'];
+//			mailSyn2('enregistr session', 'tommy@bimp.fr', null, 'enregistre session : '.$this->loginBase.' aprés : '.$login.' sessionId : '.$sessionID.$result.'<br/>'.print_r($_SESSION,1));
 //            }
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);
@@ -213,7 +213,7 @@ class Session {
 
         foreach ($aArray1 as $mKey => $mValue) {
           if (array_key_exists($mKey, $aArray2)) {
-            if (is_array($mValue)) {
+            if (is_array($mValue) && is_array($aArray2[$mKey])) {
               $aRecursiveDiff = $this->arrayRecursiveDiff($mValue, $aArray2[$mKey]);
               if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
             } else {

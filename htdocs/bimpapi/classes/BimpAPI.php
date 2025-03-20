@@ -248,6 +248,21 @@ abstract class BimpAPI
 		return BimpTools::getArrayValueFromPath($this->params, $param_name, $default_value);
 	}
 
+	public function updateParam($param_name, $param_value)
+	{
+		$errors = array();
+		$param = BimpCache::findBimpObjectInstance('bimpapi', 'API_ApiParam', array('name' => $param_name), true);
+
+		if (BimpObject::objectLoaded($param)) {
+			$this->params[$param_name] = $param_value;
+			$param->updateField('value', $param_value);
+		} else {
+			$errors[] = 'Paramètre "' . $param_name . '" non trouvé';
+		}
+
+		return $errors;
+	}
+
 	public function getOption($option_name, $default_value = null)
 	{
 		return BimpTools::getArrayValueFromPath($this->options, $option_name, $default_value);

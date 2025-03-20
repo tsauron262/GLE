@@ -7,12 +7,16 @@ common_fields: 0
 
 fields:
     obj_module:
+        label: Module
         type: string
     obj_name:
+        label: Nom de l'objet
         type: string
     id_obj:
+        label: ID de l'objet
         type: int
-    field_name: 
+    field_name:
+        label: Nom du champ
         type: string
     time_session:
         label: Durée de la session
@@ -22,5 +26,5 @@ fields:
         label: Début de la session
         type: int
     id_user:
+        label: ID de l'utilisateur
         type: int
-    

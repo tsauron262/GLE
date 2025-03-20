@@ -3478,7 +3478,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 				}
 			}
 
-			$client = $this->getChildObject('client');
 			if (BimpObject::objectLoaded($client)) {
 				$client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Devis:' . $this->id . '}}');
 			}

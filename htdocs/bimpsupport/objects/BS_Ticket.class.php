@@ -109,7 +109,7 @@ class BS_Ticket extends BimpAbstractFollow
         return 0;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -164,6 +164,9 @@ class BS_Ticket extends BimpAbstractFollow
 
         return parent::isFieldEditable($field);
     }
+	public function useWithContrat(){
+		return ($this->isDolModuleActif('bimpcontract') || $this->isDolModuleActif('bimpcontrat'));
+	}
 
     public function hasNoContrat()
     {
@@ -171,9 +174,13 @@ class BS_Ticket extends BimpAbstractFollow
             if (!(int) $this->getData('id_contrat')) {
                 return 1;
             }
-        }
+			else{
+				return 0;
+			}
+		}
 
-        return 0;
+
+		return !$this->useWithContrat();
     }
 
     public function hasNoClient()
@@ -231,7 +238,7 @@ class BS_Ticket extends BimpAbstractFollow
         return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getClient_contactsArray()
     {
@@ -326,7 +333,7 @@ class BS_Ticket extends BimpAbstractFollow
         return $tickets;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getExtraBtnListInterfaceClient()
     {
@@ -536,7 +543,7 @@ class BS_Ticket extends BimpAbstractFollow
         return null;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayDureeTotale()
     {
@@ -578,7 +585,7 @@ class BS_Ticket extends BimpAbstractFollow
 
         global $modeCSV;
         if ($modeCSV || $data == $dataTrunc) {
-            return $data;
+            return $this->replaceHastags($data, true);
         } else {
             $return = '<span class=" bs-popover"';
             $return .= BimpRender::renderPopoverData($data, 'top', true);
@@ -587,7 +594,7 @@ class BS_Ticket extends BimpAbstractFollow
             $return .= '</span>';
         }
 
-        return $return;
+        return $this->replaceHastags($return);
     }
 
     // Rendus HTML:
@@ -679,7 +686,7 @@ class BS_Ticket extends BimpAbstractFollow
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function onInterUpdate()
     {
@@ -793,7 +800,7 @@ class BS_Ticket extends BimpAbstractFollow
             'warnings' => $warnings
         );
     }
-    
+
     public function getEmailFollow($mode = 0){
         $mails = parent::getEmailFollow($mode);
         if($mode != 1){
@@ -846,7 +853,7 @@ class BS_Ticket extends BimpAbstractFollow
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validatePost()
     {

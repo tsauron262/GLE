@@ -1,0 +1,1 @@
+- Changement automatique de la zone de vente en "Hors UE" pour les devis et les commandes avec client facturation de type "Revendeur export"

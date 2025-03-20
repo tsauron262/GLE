@@ -1,0 +1,78 @@
+table: ca_rdc
+icon: fas_euro-sign
+
+header_list_name: default
+
+labels:
+    name: Chiffre d'affaire
+    name_plur: Chiffres d'affaire
+    
+parent_module: bimpcore
+parent_object: Bimp_societe
+parent_id_property: fk_soc
+
+objects:
+    chiffre_affaire:
+        relation: hasOne
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_ChiffreAffaire
+                
+fields:
+    fk_soc:
+        label: Société
+    ca_category:
+        label: Catégorie CA<br />(llx_c_ ?)
+        values:
+            array:
+                callback: 
+                    method: getCaCategories
+    ca_ytd:
+        label: CA Year To Date
+        type: number
+    ca_ytd_n1:
+        label: CA Year To Date N-1
+        type: number
+    evol_ytd_n1:
+        label: Evolution CA YTD N-1<br />(%age ?)
+        type: percent
+    ca_n1:
+        label: CA N-1
+        type: number
+    ca_s1:
+        label: CA Semestre Précédent
+        type: number
+    ca_m1:
+        label: CA Mois Précédent<br />(callback?)
+    ca_m2:
+        label: CA Mois -2<br />(callback?)
+    evol_m1_m2:
+        label: Evolution CA M1/M2<br />(%age ?)
+        type: percent
+    ca_total:
+        label: CA Total
+        type: number
+
+
+lists:
+    default:
+        title: liste des chiffres d'affaire
+        n: 3
+#        add_form_name: default
+#        add_btn_label: Ajouter un chiffre d'affaire
+#        edit_btn: 1
+#        edit_form: default
+#        delete_btn: 1
+        cols:
+            ca_category:
+            ca_ytd:
+            ca_ytd_n1:
+            evol_ytd_n1:
+            ca_n1:
+            ca_s1:
+            ca_m1:
+            ca_m2:
+            evol_m1_m2:
+            ca_total:

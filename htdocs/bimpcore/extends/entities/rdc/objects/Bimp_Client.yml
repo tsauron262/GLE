@@ -9,7 +9,17 @@ objects:
         instance:
             id_object:
                 request: fk_user
-
+    concurrence:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: Bimp_Concurrence
+    chiffre_affaire:
+        relation: hasOne
+        delete: 1
+        instance:
+            bimp_object: Bimp_ChiffreAffaire
+    
 fields:
     fournisseur: unset
     code_compta: unset
@@ -92,6 +102,7 @@ fields_tables:
             - label: Adresse
               value:
                   callback: displayFullAddress
+            - field: commentaire_rdc
     
     param_rdc:
         title: Paramètres RDC
@@ -158,12 +169,34 @@ views:
                     fields_table:
                         name: param_rdc
                         
-                  - type: fields_table
-                    col_lg: 12
-                    col_md: 12
+#                  - type: fields_table
+#                    col_lg: 12
+#                    col_md: 12
+#                    col_sm: 12
+#                    fields_table:
+#                        name: commentaires
+                        
+#                  - type: custom
+#                    col_lg: 12
+#                    col_md: 12
+#                    col_sm: 12
+#                    custom:
+#                        callback:
+#                            method: renderChildrenList
+#                            params:
+#                                - chiffre_affaire
+#                                - default
+                        
+                  - type: custom
+                    col_lg: 6
+                    col_md: 6
                     col_sm: 12
-                    fields_table:
-                        name: commentaires
+                    custom:
+                        callback:
+                            method: renderChildrenList
+                            params:
+                                - concurrence
+                                - default
                         
 forms:
     default:

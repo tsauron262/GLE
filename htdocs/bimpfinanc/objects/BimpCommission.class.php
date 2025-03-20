@@ -842,7 +842,7 @@ class BimpCommission extends BimpObject
 					'desc'        => array(6, 'Material'),
 					'ref_cf'      => array(7, 'Customer PO number'),
 					'serial'      => array(8, 'Serial Number'),
-					'price_ht'    => array(10, 'SO Net Sell Price (Loc )'),
+//					'price_ht'    => array(10, 'SO Net Sell Price (Loc )'),
 					'comm_amount' => array(11, 'AC+ Reseller Commission Value (LC)')
 				);
 				$fourn_label = 'TECHDATA';

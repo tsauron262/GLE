@@ -96,6 +96,22 @@ objects:
                         params:
                             - rowid
                 
+    piece_enfant:
+        relation: hasMany
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: BimpCommElementElement
+        list:
+            filters:
+                sourcetype: commande
+                targettype: facture
+                fk_source:
+                    callback:
+                        method: getData
+                        params:
+                            - rowid
 associations: 
     factures: 
         object: facture

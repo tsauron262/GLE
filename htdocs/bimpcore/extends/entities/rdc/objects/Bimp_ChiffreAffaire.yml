@@ -8,7 +8,7 @@ labels:
     name_plur: Chiffres d'affaire
     
 parent_module: bimpcore
-parent_object: Bimp_societe
+parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
 objects:
@@ -24,7 +24,7 @@ fields:
     fk_soc:
         label: Société
     ca_category:
-        label: Catégorie CA<br />(llx_c_ ?)
+        label: Catégorie CA<br />(llx_c_ oui)
         values:
             array:
                 callback: 

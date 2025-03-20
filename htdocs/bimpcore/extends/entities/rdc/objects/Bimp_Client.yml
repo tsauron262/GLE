@@ -169,23 +169,16 @@ views:
                     fields_table:
                         name: param_rdc
                         
-#                  - type: fields_table
-#                    col_lg: 12
-#                    col_md: 12
-#                    col_sm: 12
-#                    fields_table:
-#                        name: commentaires
-                        
-#                  - type: custom
-#                    col_lg: 12
-#                    col_md: 12
-#                    col_sm: 12
-#                    custom:
-#                        callback:
-#                            method: renderChildrenList
-#                            params:
-#                                - chiffre_affaire
-#                                - default
+                  - type: custom
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenList
+                            params:
+                                - chiffre_affaire
+                                - default
                         
                   - type: custom
                     col_lg: 6

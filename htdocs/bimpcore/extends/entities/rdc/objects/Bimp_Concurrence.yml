@@ -1,0 +1,51 @@
+table: concurrence_rdc
+icon: fas_bolt
+
+header_list_name: default
+
+labels:
+    name: Concurrent
+    name_plur: Concurrents
+    
+parent_module: bimpcore
+parent_object: Bimp_societe
+parent_id_property: fk_soc
+
+objects:
+    concurrent:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Concurrence
+
+fields:
+    nom:
+        label: Nom
+        required: 1
+    site:
+        label: Site
+    fk_soc:
+        label: Société
+    
+forms:
+    default:
+        rows:
+            Nom:
+                field: nom
+            Site:
+                field: site
+
+lists:
+    default:
+        title: liste des concurrents
+        n: 3
+        add_form_name: default
+        add_btn_label: Ajouter un concurrent
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        cols:
+            nom:
+            site:

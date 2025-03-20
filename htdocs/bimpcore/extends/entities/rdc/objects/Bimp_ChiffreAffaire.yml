@@ -8,12 +8,20 @@ labels:
     name_plur: Chiffres d'affaire
     
 parent_module: bimpcore
-parent_object: Bimp_Societe
-parent_id_property: fk_soc
+parent_object: 
+    callback: 
+        method: getParentObject
+        params:
+            - type_obj
+parent_id_property:
+    callback: 
+        method: getParent_IdProperty
+        params:
+            - type_obj
 
 objects:
     chiffre_affaire:
-        relation: hasOne
+        relation: hasMany
         delete: 1
         instance:
             bimp_object:
@@ -21,58 +29,46 @@ objects:
                 name: Bimp_ChiffreAffaire
                 
 fields:
-    fk_soc:
-        label: Société
-    ca_category:
-        label: Catégorie CA<br />(llx_c_ oui)
+    id_objet:
+        label: ID Objet
+        type: number
+    
+    type_obj:
+        label: Type
         values:
             array:
-                callback: 
-                    method: getCaCategories
-    ca_ytd:
-        label: CA Year To Date
-        type: number
-    ca_ytd_n1:
-        label: CA Year To Date N-1
-        type: number
-    evol_ytd_n1:
-        label: Evolution CA YTD N-1<br />(%age ?)
-        type: percent
-    ca_n1:
-        label: CA N-1
-        type: number
-    ca_s1:
-        label: CA Semestre Précédent
-        type: number
-    ca_m1:
-        label: CA Mois Précédent<br />(callback?)
-    ca_m2:
-        label: CA Mois -2<br />(callback?)
-    evol_m1_m2:
-        label: Evolution CA M1/M2<br />(%age ?)
-        type: percent
-    ca_total:
-        label: CA Total
-        type: number
+                callback:
+                    method: getTypesObjetsRdc
+    ca:
+        label: Chiffre d'Affaire
+        type: money
+        
+    fk_category:
+        label: Catégorie CA
+        values:
+            array:
+                callback:
+                    method: getCategoriesRdc
+    fk_period:
+        label: Période
+        values:
+            array:
+                callback:
+                    method: getPeriodsRdc
+                    
+    debut_period:
+        label: Début Période
+        type: date
+    
 
 
 lists:
     default:
         title: liste des chiffres d'affaire
-        n: 3
-#        add_form_name: default
-#        add_btn_label: Ajouter un chiffre d'affaire
-#        edit_btn: 1
-#        edit_form: default
-#        delete_btn: 1
+        n: 10
         cols:
-            ca_category:
-            ca_ytd:
-            ca_ytd_n1:
-            evol_ytd_n1:
-            ca_n1:
-            ca_s1:
-            ca_m1:
-            ca_m2:
-            evol_m1_m2:
-            ca_total:
+            type_obj:
+            fk_category:
+            ca:
+            fk_period:
+            debut_period:

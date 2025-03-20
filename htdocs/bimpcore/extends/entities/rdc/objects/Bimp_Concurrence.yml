@@ -26,6 +26,7 @@ fields:
         required: 1
     site:
         label: Site
+        type: url
     fk_soc:
         label: Société
     

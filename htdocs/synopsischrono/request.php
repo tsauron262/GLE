@@ -4,7 +4,7 @@ require '../main.inc.php';
 
 
 //global $tabCentre;
-$tabCentre = BimpCache::getCentres();
+$tabCentre = BimpCache::getCentresData();
 
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 

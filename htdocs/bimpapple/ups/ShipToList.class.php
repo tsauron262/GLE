@@ -28,7 +28,7 @@ class shipToList
 //                        'Number' => $centre['0']
 //                ));
 
-		$lescentres = BimpCache::getCentres();
+		$lescentres = BimpCache::getCentresData();
 		foreach ($lescentres as $centre)	{
 			if(isset($centre['address']))
 				self::$list[$centre['shipTo']] = array(

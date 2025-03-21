@@ -4,7 +4,7 @@ if (!defined('BIMP_LIB')) {
     require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 }
 //BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-$tabCentre = BimpCache::getCentres();
+$tabCentre = BimpCache::getCentresData();
 
 class shipToList
 {
@@ -14,7 +14,7 @@ class shipToList
     static function init()
     {
 //        global $tabCentre;
-		$tabCentre = BimpCache::getCentres();
+		$tabCentre = BimpCache::getCentresData();
         foreach ($tabCentre as $centre)
             if (isset($centre['address']))
                 self::$list[$centre['4']] = array(

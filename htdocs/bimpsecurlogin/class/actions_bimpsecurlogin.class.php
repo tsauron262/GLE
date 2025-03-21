@@ -249,7 +249,7 @@ class securLogSms
                 if ($this->isPhoneMobile($to)) {
                     require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
 
-                    $smsfile = new CSMSFile($to, "BIMP ERP", $text);
+                    $smsfile = new CSMSFile($to, "ERP GLE", $text);
                     if ($smsfile->sendfile()) {
                         $this->message[] = 'Code envoyé au 0' . substr($to, 3, 5) . "****<br/><br/>";
                         $okSms = true;
@@ -257,7 +257,7 @@ class securLogSms
                 }
             }
 
-			if (!count(BimpUserMsg::envoiMsg('code_BIMP', "Code BIMP", $text . ' IP : ' . $this->ip, $this))) {
+			if (!count(BimpUserMsg::envoiMsg('code_erp', "Code ERP", $text . ' IP : ' . $this->ip, $this))) {
                 $this->message[] = 'Code envoyé par mail<br/><br/>';
                 $okMail = true;
             }

@@ -1335,7 +1335,7 @@ class pdf_azurSAV extends ModelePDFPropales
                             $ligne = $this->db->fetch_object($result);
                             if(isset($ligne->Centre)){
 //                                global $tabCentre;
-								$tabCentre = BimpCache::getCentres();
+								$tabCentre = BimpCache::getCentresData();
                                 $centre = $tabCentre[$ligne->Centre];
                                 $tech = "";
                                 if (isset($ligne->Technicien) && $ligne->Technicien > 0) {

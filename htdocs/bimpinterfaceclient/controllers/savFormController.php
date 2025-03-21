@@ -23,7 +23,7 @@ class savFormController extends BimpPublicController
             $code_centre = BimpTools::getValue('centre', '', 'aZ09');
 
             if ($code_centre) {
-                $centres = BimpCache::getCentres();
+                $centres = BimpCache::getCentresData();
 
                 if (isset($centres[$code_centre])) {
                     $centre = $centres[$code_centre];
@@ -41,7 +41,7 @@ class savFormController extends BimpPublicController
                 $errors[] = 'Identifiant du centre LDLC Apple absent';
             } elseif (!count($errors)) {
                 $shipto = BimpTools::addZeros($shipto, 10);
-                $centres = BimpCache::getCentres();
+                $centres = BimpCache::getCentresData();
                 $centre = null;
                 $code_centre = '';
 
@@ -840,7 +840,7 @@ class savFormController extends BimpPublicController
             $html .= '<input type="hidden" name="sav_centre" value="' . $code_centre . '"/>';
 
             if (!is_null($reservation)) {
-                $centres_data = BimpCache::getCentres();
+                $centres_data = BimpCache::getCentresData();
                 if (isset($centres_data[$code_centre])) {
                     $html .= '<div style="margin: 5px 0 15px 10px; padding-left: 10px; border-left: 2px solid #4D4C4C; font-weight: bold">';
                     $html .= $centres_data[$code_centre]['address'] . '<br/>';
@@ -985,7 +985,7 @@ class savFormController extends BimpPublicController
             }
 
             if ($code_centre) {
-                $centres = BimpCache::getCentres();
+                $centres = BimpCache::getCentresData();
 
                 if (isset($centres[$code_centre])) {
                     $html .= 'Lieu: <br/><b>' . $centres[$code_centre]['label'] . '</b><br/>';
@@ -1241,7 +1241,7 @@ class savFormController extends BimpPublicController
         $code_centre = BimpTools::getValue('code_centre', '', 'aZ09');
 
         if ($code_product && $code_centre) {
-            $centres = BimpCache::getCentres();
+            $centres = BimpCache::getCentresData();
 
             $html .= '<div style="margin: 5px 0 15px 10px; padding-left: 10px; border-left: 2px solid #4D4C4C; font-weight: bold">';
             $html .= $centres[$code_centre]['address'] . '<br/>';
@@ -1571,7 +1571,7 @@ class savFormController extends BimpPublicController
         }
 
         if (!count($errors)) {
-            $centres = BimpCache::getCentres();
+            $centres = BimpCache::getCentresData();
 
             if (!isset($centres[$data['sav_centre']])) {
                 $errors[] = 'Veuillez sélectionner le centre SAV BIMP';

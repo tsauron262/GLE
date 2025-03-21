@@ -541,47 +541,49 @@ VALUES
         break;
 
 	case 'convert_centre_sav':
-		BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-		global $tabCentre;
+		if ((int) BimpCore::getConf('', 0)) {
+			echo 'Centres SAV déjà activés';
+		} else {
+			$centres = BimpCache::getCentresData();
 
-		echo '<pre>';
-		print_r($tabCentre);
-		echo '</pre>';
+			echo 'CENTRES : <pre>' . print_r($centres, 1) . '</pre>';
 
-		$bdb = BimpCache::getBdb();
-		foreach ($tabCentre as $code => $centre) {
-			$errors = array();
-			if(isset($centre[10]))	{
-				$id_centre_rattache = $bdb->getValue('bs_centre_sav', "id", 'code = "'.$centre[10].'"');
+			$bdb = BimpCache::getBdb();
+			foreach ($centres as $code => $centre) {
+				$errors = array();
+				if (isset($centre['id_centre_rattachement']) && $centre['id_centre_rattachement']) {
+					$id_centre_rattache = $bdb->getValue('bs_centre_sav', "id", 'code = "' . $centre['id_centre_rattachement'] . '"');
+				} else {
+					$id_centre_rattache = 0;
+				}
+
+				echo 'Aj ' . $code . ' : ';
+
+				BimpObject::createBimpObject('bimpsupport', 'BS_CentreSav', array(
+					'code'                   => $code,
+					'label'                  => $centre['label'],
+					'id_entrepot'            => $centre['id_entrepot'],
+					'id_centre_rattachement' => $id_centre_rattache,
+					'address'                => $centre['address'],
+					'zip'                    => $centre['zip'],
+					'town'                   => $centre['town'],
+					'shipTo'                 => $centre['shipTo'],
+					'email'                  => $centre['mail'],
+					'tel'                    => $centre['tel'],
+					'active'                 => $centre['active'],
+					'token'                  => (isset($centre['token']) ? $centre['token'] : ''),
+					'id_group'               => (isset($centre['id_group']) ? $centre['id_group'] : 0),
+					'warning'                => (isset($centre['infos']) ? $centre['infos'] : ''),
+				), true, $errors);
+
+				if (count($errors)) {
+					echo 'Erreurs : <pre>';
+					print_r($errors);
+					echo '</pre>';
+				} else {
+					echo '<br />OK';
+				}
 			}
-			else $id_centre_rattache = 0;
-
-			BimpObject::createBimpObject('bimpsupport', 'BS_CentreSav', array(
-				'code' => $code,
-				'label' => $centre[2],
-				'id_entrepot' => $centre[8],
-				'id_centre_rattachement' => $id_centre_rattache,
-				'address' => $centre[7],
-				'zip' => $centre[5],
-				'town' => $centre[6],
-				'shipTo' => $centre[4],
-				'email' => $centre[1],
-				'tel' => $centre[0],
-				'active' => $centre[9],
-				'token' => (isset($centre[11]) ? $centre[11] : ''),
-				'id_group' => (isset($centre['idGroup']) ? $centre['idGroup'] : 0),
-				'warning' => (isset($centre[12]) ? $centre[12] : ''),
-			), true, $errors);
-
-			if(count($errors)) {
-				echo '<pre>';
-				print_r($errors);
-				echo '</pre>';
-			}
-			else	{
-				echo '<br />OK ' . $code;
-			}
-
 		}
 
 	break;

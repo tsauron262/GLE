@@ -4549,24 +4549,24 @@ class BimpComm extends BimpDolObject
 	public function checkValidationSolvabilite($client, &$errors = array())
 	{
 		if ($this->isLoaded()) {
-				if (BimpObject::objectLoaded($client) && is_a($client, 'Bimp_Societe')) {
-					if (!$client->isSolvable($this->object_name)) {
-						global $user;
-						if (!$user->rights->bimpcommercial->admin_recouvrement) {
-							$solv_label = Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'];
-							$errors[] = 'Vous n\'avez pas la possiblité de valider ' . $this->getLabel('this') . ' car le client est au statut "' . $solv_label . '"<br/>Un e-mail a été envoyé à un responsable pour validation de la commande';
+			if (BimpObject::objectLoaded($client) && is_a($client, 'Bimp_Societe')) {
+				if (!$client->isSolvable($this->object_name)) {
+					global $user;
+					if (!$user->rights->bimpcommercial->admin_recouvrement) {
+						$solv_label = Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'];
+						$errors[] = 'Vous n\'avez pas la possiblité de valider ' . $this->getLabel('this') . ' car le client est au statut "' . $solv_label . '"<br/>Un e-mail a été envoyé à un responsable pour validation de la commande';
 
 						$code = 'check_validation_solvabilite';
 						$sujet = 'Validation de commande Client ' . $client->getData('code_client') . ' - ' . $client->getName();
-							$msg = 'Demande de validation d\'une commande dont le client est au statut "' . $solv_label . '"' . "\n\n";
-							$url = $this->getUrl();
-							$msg .= '<a href="' . $url . '">Commande ' . $this->getRef() . '</a>';
+						$msg = 'Demande de validation d\'une commande dont le client est au statut "' . $solv_label . '"' . "\n\n";
+						$url = $this->getUrl();
+						$msg .= '<a href="' . $url . '">Commande ' . $this->getRef() . '</a>';
 						BimpUserMsg::envoiMsg($code, $sujet, $msg);
-							return 0;
-						}
+						return 0;
 					}
 				}
 			}
+		}
 
 		return 1;
 	}

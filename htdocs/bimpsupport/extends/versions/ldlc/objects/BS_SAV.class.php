@@ -391,7 +391,7 @@ class BS_SAV_ExtVersion extends BS_SAV
     public function getDefaultSiteId()
     {
 //        global $tabCentre;
-        $tabCentre = BimpCache::getCentres();
+        $tabCentre = BimpCache::getCentresData();
 		if (isset($tabCentre[$this->getData('code_centre_repa')]) && isset($tabCentre[$this->getData('code_centre_repa')]['token']))
             return $tabCentre[$this->getData('code_centre_repa')]['token'];
         elseif (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['token']))

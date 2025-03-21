@@ -1,7 +1,7 @@
 <?php
 
 //BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-$tabCentre = BimpCache::getCentres();
+$tabCentre = BimpCache::getCentresData();
 
 class BE_Place extends BimpObject
 {
@@ -445,7 +445,7 @@ class BE_Place extends BimpObject
                         }
 //                        global $tabCentre;
 //                        $this->set('id_entrepot', (int) $tabCentre[$this->getData('code_centre')][8]);
-						$lescentres = BimpCache::getCentres();
+						$lescentres = BimpCache::getCentresData();
 						$this->set('id_entrepot', (int) $lescentres[$this->getData('code_centre')]['id_entrepot']);
                     }
 

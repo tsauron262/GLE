@@ -534,7 +534,7 @@ L’équipe BIMP";
             if ($mailsCli && $mailsCli != ""){
 //                BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 //                global $tabCentre;
-				$tabCentre = BimpCache::getCentres();
+				$tabCentre = BimpCache::getCentresData();
                 $centreData = isset($tabCentre[$centre])? $tabCentre[$centre] : array();
                 $fromMail = "SAV BIMP<" . ($centreData['mail'] ? $centreData['mail'] : 'savbimp@bimp.fr') . ">";
 

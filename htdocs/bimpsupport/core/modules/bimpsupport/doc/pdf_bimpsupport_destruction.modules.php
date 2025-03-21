@@ -89,7 +89,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
         global $user, $langs, $conf;
 
 //        global $tabCentre;
-		$lescentres = BimpCache::getCentres();
+		$lescentres = BimpCache::getCentresData();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;

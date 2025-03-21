@@ -822,7 +822,7 @@ class Bimp_Product extends BimpObject
         if (BimpCore::getConf($confName, null, "bimptocegid"))
             return BimpCore::getConf($confName, null, "bimptocegid");
         else {
-			$code = 'code_compta_inconnu_ACHAT';
+			$code = 'code_compta_inconnu';
 			BimpUserMsg::envoiMsg($code, 'Problème compta', 'Attention code compta inconnue ' . $confName);
             die;
         }
@@ -924,7 +924,7 @@ class Bimp_Product extends BimpObject
         if (BimpCore::getConf($confName, null, "bimptocegid"))
             return BimpCore::getConf($confName, null, "bimptocegid");
         else {
-			$code = 'code_compta_inconnu_VENTE';
+			$code = 'code_compta_inconnu';
 			BimpUserMsg::envoiMsg($code, 'Problème compta', 'Attention code compta inconnue ' . $confName);
             die;
         }
@@ -1064,7 +1064,7 @@ class Bimp_Product extends BimpObject
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
-    
+
     public function getCustomFilterValueLabel($field_name, $value) {
         if($field_name == 'categ_doli'){
             $categ = $this->getCategoriesArray();
@@ -4915,7 +4915,7 @@ class Bimp_Product extends BimpObject
         }
         if ($mailValid)
             $this->mailValidation();
-        
+
         $categ = BimpTools::getValue('categ_doli', array(), 'array');
         $this->dol_object->setCategories($categ);
 

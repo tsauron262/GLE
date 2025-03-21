@@ -38,7 +38,7 @@ class BS_Sac extends BimpObject
             }
             if ($id_entrepot) {
 //                global $tabCentre;
-				$tabCentre = BimpCache::getCentres();
+				$tabCentre = BimpCache::getCentresData();
                 foreach ($tabCentre as $code_centre => $centre) {
                     if ((int) $centre['id_entrepot'] === $id_entrepot) {
                         return $code_centre;

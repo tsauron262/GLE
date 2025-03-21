@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 //BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-$tabCentre = BimpCache::getCentres();
+$tabCentre = BimpCache::getCentresData();
 
 class BS_SAV extends BimpObject
 {
@@ -1583,7 +1583,7 @@ class BS_SAV extends BimpObject
 	public function getDefaultCodeCentreRepa()
 	{
 //        global $tabCentre;
-		$tabCentre = BimpCache::getCentres();
+		$tabCentre = BimpCache::getCentresData();
 		if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['id_centre_rattachement'])) {
 			$idCentre = $tabCentre[$this->getData('code_centre')]['id_centre_rattachement'];
 			foreach ($tabCentre as $centre) {
@@ -1951,7 +1951,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 //        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 //        global $tabCentre;
-		$tabCentre = BimpCache::getCentres();
+		$tabCentre = BimpCache::getCentresData();
 		if (isset($tabCentre[$codeCentre])) {
 			if (isset($tabCentre[$codeCentre]['id_group'])) {
 				return $tabCentre[$codeCentre]['id_group'];
@@ -2111,7 +2111,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 	public function displayMoySav($ios = true)
 	{
 		$time = 31;
-		$centres = BimpCache::getCentres();
+		$centres = BimpCache::getCentresData();
 		$html = '';
 		$table = BimpCache::getDureeMoySav($time, $ios);
 
@@ -2148,7 +2148,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 	public function displayMaxDiago($ios = true)
 	{
 		$time = 31;
-		$centres = BimpCache::getCentres();
+		$centres = BimpCache::getCentresData();
 		$html = '';
 		$table = BimpCache::getDureeDiago($ios);
 
@@ -3152,7 +3152,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			$hrefFin = "";
 
 //            global $tabCentre;
-			$tabCentre = BimpCache::getCentres();
+			$tabCentre = BimpCache::getCentresData();
 			if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
 				$centreUser = array();
 				foreach ($tabCentre as $idT2 => $tabCT) {
@@ -8402,7 +8402,7 @@ ORDER BY a.val_max DESC");
 	{
 		global $conf;
 		$bdb = self::getBdb();
-		$centres = BimpCache::getCentres();
+		$centres = BimpCache::getCentresData();
 
 		// Traitements des RDV dépassés:
 		$dt = new DateTime();

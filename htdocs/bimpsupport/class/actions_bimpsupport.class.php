@@ -115,7 +115,7 @@ class ActionsBimpsupport
 //                }
 //            }
 
-			$lescentres = BimpCache::getCentres();
+			$lescentres = BimpCache::getCentresData();
 			$allCentre = false;
             if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
                 $allCentre = true;

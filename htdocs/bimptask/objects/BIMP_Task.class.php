@@ -492,7 +492,7 @@ class BIMP_Task extends BimpAbstractFollow
 		}
 
 		return $return;
-    }
+	}
 
 	public function getParentTask()
 	{
@@ -1473,10 +1473,17 @@ class BIMP_Task extends BimpAbstractFollow
 	}
 }
 
-BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-global $tabCentre;
-if (is_array($tabCentre)) {
-	foreach ($tabCentre as $code => $centre) {
+//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//global $tabCentre;
+//if (is_array($tabCentre)) {
+//	foreach ($tabCentre as $code => $centre) {
+//		BIMP_Task::$sous_types['sav'][$code] = array('label' => 'SAV' . $code);
+//	}
+//}
+
+$centres = BimpCache::getCentresData();
+if (!empty($centres)) {
+	foreach ($centres as $code => $centre) {
 		BIMP_Task::$sous_types['sav'][$code] = array('label' => 'SAV' . $code);
 	}
 }

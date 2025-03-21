@@ -267,11 +267,29 @@ class Bimp_User extends BimpObject
 		return 0;
 	}
 
-	public function isMsgAllowed($code_msg, &$errors = array())
+	public function isMsgAllowed($code_msg, $check_availability = true, &$unallowed_reason = '')
 	{
-		// todo franck
-		// checker actif / dispo / abonné
-		// alimenter $errors pour chaque vérif.
+		if (!(int) $this->getData('statut')) {
+			$unallowed_reason = 'est inactif';
+			return 0;
+		}
+
+		if ($check_availability) {
+			$err = array();
+			if (!$this->isAvailable(null, $err, $unallowed_reason)) {
+				$unallowed_reason = 'est ' . $unallowed_reason;
+				return 0;
+			}
+		}
+
+		$obligatoire = (int) BimpCore::getConf('userMessages__' .$code_msg . '__required', BimpUserMsg::$userMessages[$code_msg]['required'], 'bimpcore');
+
+		if (!$obligatoire) {
+			if (!(int) $this->getUserParamValue('userMessages__' . $code_msg . '__abonner', 1)) {
+				$unallowed_reason = 'ne souhaite pas recevoir ce type de message';
+				return 0;
+			}
+		}
 
 		return 1;
 	}
@@ -1726,7 +1744,7 @@ class Bimp_User extends BimpObject
 		if (empty($foruserprofile)) {
 			$hoverdisabled = (isset($conf->global->THEME_ELDY_USE_HOVER) && $conf->global->THEME_ELDY_USE_HOVER == '0');
 		} else {
-			$hoverdisabled = (is_object($fuser) ? (empty($fuser->conf->THEME_ELDY_USE_HOVER) || $fuser->conf->THEME_ELDY_USE_HOVER == '0') : '');
+			$hoverdisabled = (is_object($foruserprofile) ? (empty($foruserprofile->conf->THEME_ELDY_USE_HOVER) || $foruserprofile->conf->THEME_ELDY_USE_HOVER == '0') : '');
 		}
 
 		$colspan = 2;
@@ -2498,13 +2516,6 @@ class Bimp_User extends BimpObject
 		}
 
 		return $errors;
-	}
-
-	public function isAbonne($code)
-	{
-		// mail obligatoire por ce code ?
-		$obligatoire = BimpCore::getConf('userMessages__' .$code . '__required', BimpUserMsg::$userMessages[$code]['required'], 'bimpcore');
-		return ($obligatoire || $this->getUserParamValue('userMessages__' . $code . '__abonner', 1));
 	}
 
 	// Actions:

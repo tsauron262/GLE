@@ -11997,7 +11997,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 //                         return $code_centre;
 //                    }
 //                }
-				$lescentres = BimpCache::getCentres();
+				$lescentres = BimpCache::getCentresData();
 				foreach ($lescentres as $centre)	{
 					if((int) $centre['id_entrepot'] === $id_entrepot)	{
 						return $centre['code'];
@@ -12011,7 +12011,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 //                return $code_centre;
 //            }
 //        }
-		$lescentres = BimpCache::getCentres();
+		$lescentres = BimpCache::getCentresData();
 		if (count($lescentres) == 1) {
 			foreach ($lescentres as $centre) {
 				return $centre['code'];

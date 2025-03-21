@@ -15,8 +15,7 @@ class BimpFactureFournForDol extends Bimp_FactureFourn
 
     public function sendRelanceExpertiseBimp()
     {
-
-        $sends = array();
+		// todo user_msg => rempl. par note
         $filtres = array('expertise' => 0, 'datef' => array('operator' => '>=', 'value' => '2022-04-01'), 'a__ef.type' => array('operator' => '!=', 'value' => 'S'), 'exported' => 1);
         $joins = array();
 //        $joins['ef'] = array(
@@ -26,10 +25,15 @@ class BimpFactureFournForDol extends Bimp_FactureFourn
 //                    );
 //        die('count : '.count(BimpObject::getBimpObjectList('bimpcommercial', 'Bimp_Facture', $filtres, $joins)));
         $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filtres, null, null, $joins);
+
         $nb = 0;
+		$sends = array();
         foreach ($facts as $fact) {
-            $nb++;
-            $sends[$fact->getCommercialId()][] = $fact->getLink();
+			$id_user = $fact->getCommercialId();
+			if ($id_user) {
+				$nb++;
+				$sends[$id_user][] = $fact->getLink();
+			}
         }
 
         $nbMail = 0;

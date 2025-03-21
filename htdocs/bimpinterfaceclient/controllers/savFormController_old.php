@@ -23,7 +23,7 @@ class savFormController extends BimpPublicController
             $code_centre = BimpTools::getValue('centre', '', 'aZ09');
 
             if ($code_centre) {
-                $centres = BimpCache::getCentres();
+                $centres = BimpCache::getCentresData();
 
                 if (isset($centres[$code_centre])) {
                     $centre = $centres[$code_centre];
@@ -41,7 +41,7 @@ class savFormController extends BimpPublicController
                 $errors[] = 'Identifiant du centre LDLC Apple absent';
             } elseif (!count($errors)) {
                 $shipto = BimpTools::addZeros($shipto, 10);
-                $centres = BimpCache::getCentres();
+                $centres = BimpCache::getCentresData();
                 $centre = null;
                 $code_centre = '';
 
@@ -114,7 +114,7 @@ class savFormController extends BimpPublicController
                 }
             }
         }
-        
+
         $html = '';
 
 //        if (!is_null($reservation)) {
@@ -241,7 +241,7 @@ class savFormController extends BimpPublicController
         $html .= '<div id="customer_infos" class="form_section" data-client_email="' . $email . '">';
 
         if (!BimpObject::objectLoaded($userClient)) {
-            // Recherche d'un compte utilisateur client: 
+            // Recherche d'un compte utilisateur client:
 
             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                         'email_custom' => array(
@@ -278,7 +278,7 @@ class savFormController extends BimpPublicController
                 }
                 return $html;
             } else {
-                // Recherche d'un contact client:                 
+                // Recherche d'un contact client:
                 $contact = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Contact', array(
                             'email' => $email
                                 ), true);
@@ -286,7 +286,7 @@ class savFormController extends BimpPublicController
                 if (BimpObject::objectLoaded($contact)) {
                     $client = $contact->getParentInstance();
                 } else {
-                    // Recheche d'un client: 
+                    // Recheche d'un client:
                     $client = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array(
                                 'email' => $email
                                     ), true);
@@ -317,7 +317,7 @@ class savFormController extends BimpPublicController
                     }
 
                     if (!count($uc_errors)) {
-                        // E-mail de notification à l'adresse e-mail principale de client: 
+                        // E-mail de notification à l'adresse e-mail principale de client:
                         if ($email != $client->getData('email')) {
                             // todo...
                         }
@@ -382,7 +382,7 @@ class savFormController extends BimpPublicController
                 $html .= $client->displayData('fk_typent', 'default', false, false);
                 $html .= '</div>';
 //                $html .= '</div>';
-                // N° SIRET: 
+                // N° SIRET:
                 $html .= '<div class="col-xs-12 col-md-5" style="display: none">';
                 $html .= '<label>SIRET</label><br/>';
                 $html .= $client->getData('siret');
@@ -403,13 +403,13 @@ class savFormController extends BimpPublicController
             ));
             $html .= '</div>';
 
-            // Nom société: 
+            // Nom société:
             $html .= '<div class="col-xs-12 col-md-5" style="display: none">';
             $html .= '<label>Nom société</label><sup>*</sup><br/>';
             $html .= BimpInput::renderInput('text', 'client_nom_societe', '');
             $html .= '</div>';
 
-            // N° SIRET: 
+            // N° SIRET:
             $html .= '<div class="col-xs-12 col-md-4" style="display: none">';
             $html .= '<label>SIRET</label><sup>*</sup><br/>';
             $html .= BimpInput::renderInput('text', 'client_siret', '');
@@ -554,7 +554,7 @@ class savFormController extends BimpPublicController
         if (count($contact_array) > 1) {
             $html .= '<div class="row">';
 
-            // Contact: 
+            // Contact:
             $html .= '<div class="col-xs-12 col-md-5">';
             $html .= '<label>Contact</label><br/>';
             $html .= BimpInput::renderInput('select', 'client_id_contact', (BimpObject::objectLoaded($contact) ? (int) $contact->id : 0), array(
@@ -574,7 +574,7 @@ class savFormController extends BimpPublicController
         }
 
         $html .= '<div class="row">';
-        // Titre: 
+        // Titre:
         $html .= '<div class="col-xs-4 col-md-2">';
         $html .= '<label>Titre de civilité</label><br/>';
         $html .= BimpInput::renderInput('select', 'client_civility', $civility, array(
@@ -588,7 +588,7 @@ class savFormController extends BimpPublicController
         $html .= BimpInput::renderInput('text', 'client_firstname', $firstname, array('extra_class' => 'required'));
         $html .= '</div>';
 
-        // Nom: 
+        // Nom:
         $html .= '<div class="col-xs-12 col-md-5 col-lg-4">';
         $html .= '<label>Nom</label><sup>*</sup><br/>';
         $html .= BimpInput::renderInput('text', 'client_lastname', $lastname, array('extra_class' => 'required'));
@@ -599,7 +599,7 @@ class savFormController extends BimpPublicController
         // *****
 
         $html .= '<div class="row">';
-        // Adresse: 
+        // Adresse:
         $html .= '<div class="col-xs-12 col-md-6">';
         $html .= '<label>Adresse</label><sup>*</sup><br/>';
         $html .= BimpInput::renderInput('textarea', 'client_address', $address, array(
@@ -614,19 +614,19 @@ class savFormController extends BimpPublicController
         // *****
 
         $html .= '<div class="row">';
-        // Code postal: 
+        // Code postal:
         $html .= '<div class="col-xs-6 col-md-3 col-lg-2">';
         $html .= '<label>Code postal</label><sup>*</sup><br/>';
         $html .= BimpInput::renderInput('text', 'client_zip', $zip, array('extra_class' => 'required'));
         $html .= '</div>';
 
-        // Ville: 
+        // Ville:
         $html .= '<div class="col-xs-6 col-md-5 col-lg-4">';
         $html .= '<label>Ville</label><sup>*</sup><br/>';
         $html .= BimpInput::renderInput('text', 'client_town', $town, array('extra_class' => 'required'));
         $html .= '</div>';
 
-        // Pays: 
+        // Pays:
         $html .= '<div class="col-xs-6 col-md-5 col-lg-4">';
         $html .= '<label>Pays</label><sup>*</sup><br/>';
         $html .= BimpInput::renderInput('select', 'client_pays', $fk_country, array(
@@ -639,19 +639,19 @@ class savFormController extends BimpPublicController
         // *****
 
         $html .= '<div class="row">';
-        // Tel mobile: 
+        // Tel mobile:
         $html .= '<div class="col-xs-12 col-md-4">';
         $html .= '<label>Tél. mobile</label><br/>';
         $html .= BimpInput::renderInput('text', 'client_phone_mobile', $tel_mobile);
         $html .= '</div>';
 
-        // Tel domicile: 
+        // Tel domicile:
         $html .= '<div class="col-xs-12 col-md-4">';
         $html .= '<label>Tél. domicile</label><br/>';
         $html .= BimpInput::renderInput('text', 'client_phone_perso', $tel_perso);
         $html .= '</div>';
 
-        // Tel pro: 
+        // Tel pro:
         $html .= '<div class="col-xs-12 col-md-4">';
         $html .= '<label>Tél. pro</label><br/>';
         $html .= BimpInput::renderInput('text', 'client_phone_pro', $tel_pro);
@@ -662,7 +662,7 @@ class savFormController extends BimpPublicController
         // *****
 
         $html .= '<div class="row">';
-        // Préf contact: 
+        // Préf contact:
         $html .= '<div class="col-xs-12 col-md-4">';
         $html .= '<label>Préférence de contact pour le suivi</label><br/>';
         $html .= BimpInput::renderInput('select', 'client_pref_contact', 3, array(
@@ -726,7 +726,7 @@ class savFormController extends BimpPublicController
 
         $html .= '<div class="row">';
 
-        // Type matériel: 
+        // Type matériel:
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
         $types = array();
 
@@ -749,7 +749,7 @@ class savFormController extends BimpPublicController
         $html .= BimpInput::renderInput('text', 'eq_serial', $serial, array('extra_class' => 'required'));
         $html .= '</div>';
 
-        // Lien sérial: 
+        // Lien sérial:
         $html .= '<div class="col-xs-12 col-md-4 col-lg-5" style="padding-top: 25px">';
         $html .= '<a href="https://support.apple.com/fr-fr/HT204308" target="_blank" style="padding-top: 15px;">';
         $html .= 'Où trouver votre numéro de série?' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
@@ -779,7 +779,7 @@ class savFormController extends BimpPublicController
 
         $html .= '<div class="row">';
 
-        // Etat matériel: 
+        // Etat matériel:
         $html .= '<div class="col-xs-12 col-md-4 col-lg-3">';
         $html .= '<label>Etat matériel</label><br/>';
         $html .= BimpInput::renderInput('select', 'eq_etat', '', array(
@@ -791,7 +791,7 @@ class savFormController extends BimpPublicController
         ));
         $html .= '</div>';
 
-        // Système: 
+        // Système:
         $html .= '<div class="col-xs-12 col-md-4 col-lg-3">';
         $html .= '<label>Système</label><sup>*</sup><br/>';
         $html .= BimpInput::renderInput('select', 'eq_system', null, array(
@@ -819,7 +819,7 @@ class savFormController extends BimpPublicController
     {
         $html = '';
 
-        $no_reservation_allowed = false; // En prévision... 
+        $no_reservation_allowed = false; // En prévision...
 
         $html .= '<div id="rdv_infos" class="form_section">';
         $html .= '<div class="form_section_title">Lieu et date de votre rendez-vous</div>';
@@ -828,7 +828,7 @@ class savFormController extends BimpPublicController
 
         $html .= '<div class="row">';
 
-        // Lieu: 
+        // Lieu:
         $centres = BimpCache::getCentresArray(true, 'label', true);
         asort($centres);
 
@@ -840,7 +840,7 @@ class savFormController extends BimpPublicController
             $html .= '<input type="hidden" name="sav_centre" value="' . $code_centre . '"/>';
 
             if (!is_null($reservation)) {
-                $centres_data = BimpCache::getCentres();
+                $centres_data = BimpCache::getCentresData();
                 if (isset($centres_data[$code_centre])) {
                     $html .= '<div style="margin: 5px 0 15px 10px; padding-left: 10px; border-left: 2px solid #4D4C4C; font-weight: bold">';
                     $html .= $centres_data[$code_centre]['address'] . '<br/>';
@@ -985,7 +985,7 @@ class savFormController extends BimpPublicController
             }
 
             if ($code_centre) {
-                $centres = BimpCache::getCentres();
+                $centres = BimpCache::getCentresData();
 
                 if (isset($centres[$code_centre])) {
                     $html .= 'Lieu: <br/><b>' . $centres[$code_centre]['label'] . '</b><br/>';
@@ -1137,7 +1137,7 @@ Conditions particulières aux iPhones
 La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation consultez notre site internet.
 
 
-Si votre produit à plus de cinq ans, il est possible que celui-ci soit classé « obsolète » par Apple et que nous ne puissions pas réparer une panne matériel. 
+Si votre produit à plus de cinq ans, il est possible que celui-ci soit classé « obsolète » par Apple et que nous ne puissions pas réparer une panne matériel.
 Nous pourrons toutefois vous proposer, si cela est nécessaire et possible, une  récupération, transfert ou sauvegarde de vos données.
 
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
@@ -1251,7 +1251,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         $code_centre = BimpTools::getValue('code_centre', '', 'aZ09');
 
         if ($code_product && $code_centre) {
-            $centres = BimpCache::getCentres();
+            $centres = BimpCache::getCentresData();
 
             $html .= '<div style="margin: 5px 0 15px 10px; padding-left: 10px; border-left: 2px solid #4D4C4C; font-weight: bold">';
             $html .= $centres[$code_centre]['address'] . '<br/>';
@@ -1304,7 +1304,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             if (!empty($slots)) {
                 $days = array('' => '');
                 $days_slots = array();
-//                
+//
 //                echo '<pre>';
 //                print_r($slots);
 //                exit;
@@ -1424,7 +1424,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BimpObject::loadClass('bimpcore', 'Bimp_User');
 
-        // Check Inputs: 
+        // Check Inputs:
 
         $inputs = array(
             'client_email'        => array('label' => 'Adresse e-mail de contact', 'required' => 1),
@@ -1518,7 +1518,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         }
 
         if (!count($errors)) {
-            // Check Client: 
+            // Check Client:
             $id_client = (int) BimpTools::getValue('id_client', 0, 'int');
 
             if ($id_client) {
@@ -1581,7 +1581,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         }
 
         if (!count($errors)) {
-            $centres = BimpCache::getCentres();
+            $centres = BimpCache::getCentresData();
 
             if (!isset($centres[$data['sav_centre']])) {
                 $errors[] = 'Veuillez sélectionner le centre SAV BIMP';
@@ -1607,7 +1607,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             )
                         );
                     } else {
-                        // Création de la réservation: 
+                        // Création de la réservation:
                         require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
                         $countries = BimpCache::getCountriesArray();
@@ -1751,7 +1751,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         $dateEnd->add(new DateInterval('PT20M'));
                     }
 
-                    // Création client: 
+                    // Création client:
                     if (!BimpObject::objectLoaded($client)) {
                         $client_errors = array();
                         $client_warnings = array();
@@ -1778,7 +1778,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     }
 
                     if (BimpObject::objectLoaded($client)) {
-                        // Création / maj contact: 
+                        // Création / maj contact:
                         if ((int) $data['client_id_contact']) {
                             $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $data['client_id_contact']);
 
@@ -1877,7 +1877,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 $_POST = $post_tmp;
 
                                 if (!BimpObject::objectLoaded($userClient)) {
-                                    // On recherche à nouveau le userClient: 
+                                    // On recherche à nouveau le userClient:
                                     $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                                                 'email_custom' => array(
                                                     'custom' => 'LOWER(a.email) = \'' . strtolower($data['client_email']) . '\''
@@ -1956,7 +1956,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             }
                         }
 
-                        // Création SAV: 
+                        // Création SAV:
                         if (BimpObject::objectLoaded($equipment)) {
                             $sav_errors = array();
                             $sav_warnings = array();
@@ -2084,7 +2084,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
 
                         if ($reservation_exists) {
-                            // Recherche et màj ActionComm existante: 
+                            // Recherche et màj ActionComm existante:
                             $id_action_comm = (int) BimpCache::getBdb()->getValue('actioncomm_extrafields', 'fk_object', 'resgsx = \'' . $reservationId . '\'');
 
                             if ($id_action_comm) {
@@ -2106,7 +2106,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 $debug .= '<br/><br/>ActionComm non trouvée pour réservation ' . $reservationId;
                             }
                         } else {
-                            // Création ActionComm: 
+                            // Création ActionComm:
                             $usersAssigned = array();
 
                             if (!empty($shipToUsers)) {
@@ -2174,7 +2174,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     }
 
                     if (!$reservation_exists) {
-                        // Envoi e-mail users: 
+                        // Envoi e-mail users:
 
                         $emails = '';
 
@@ -2254,11 +2254,11 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
                     }
 
-                    // Envoi e-mail client: 
+                    // Envoi e-mail client:
                     $email_client = BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email'];
                     $email_client_ok = $this->sendRDVEmailToClient($email_client, $reservationId, $dateBegin, $sav, $centre, $data['eq_serial'], $reservation_exists);
 
-                    // HTML Succès: 
+                    // HTML Succès:
                     $success_html = '<div class="form_section" id="client_email" style="text-align: center">';
 
                     if (BimpObject::objectLoaded($sav)) {
@@ -2367,7 +2367,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
 
                         if (!count($errors)) {
-                            // Annulation de la requête: 
+                            // Annulation de la requête:
                             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
                             $result = GSX_Reservation::cancelReservation(1442050, $centre['ship_to'], $reservation_id, $errors);
@@ -2400,7 +2400,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         $success_html = '<h2 class="success">Votre rendez-vous SAV a été annulé avec succès</h2>';
                         $success_html .= '<p><a href="' . BimpObject::getPublicBaseUrl() . '">Retour à votre espace client</a></p>';
 
-                        // Maj SAV: 
+                        // Maj SAV:
                         $sav->updateField('status', -2);
                         $sav->addNote('Annulé par le client le ' . date('d / m / Y à H:i'), BImpNote::BN_ALL);
                     }

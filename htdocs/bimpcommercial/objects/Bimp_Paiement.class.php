@@ -6,6 +6,9 @@ BimpTools::loadDolClass('compta/facture', 'facture');
 class Bimp_Paiement extends BimpObject
 {
 
+	/* @var Paiement */
+	public $dol_object = null;
+
     public $useCaisse = false;
     public $facs_amounts = null;
     public static $paiement_factures_types = array(Facture::TYPE_STANDARD, Facture::TYPE_DEPOSIT, Facture::TYPE_REPLACEMENT, Facture::TYPE_SITUATION);
@@ -316,6 +319,8 @@ class Bimp_Paiement extends BimpObject
         if ($this->isLoaded()) {
             return $this->displayData('fk_paiement');
         }
+
+		return '';
     }
 
     public function displayAccount()
@@ -493,7 +498,7 @@ class Bimp_Paiement extends BimpObject
             'style'       => 'max-width: 90px'
         );
 
-        $html .= '<div id="factures_payments_' . $rand . '" class="factures_payment_container" data-is_rbt="' . (int) $is_rbt . '">';
+        $html = '<div id="factures_payments_' . $rand . '" class="factures_payment_container" data-is_rbt="' . (int) $is_rbt . '">';
 
         $html .= '<div style="margin: 15px 0; text-align: right">';
         $html .= '<span style="font-weight: bold;">Somme totale ' . ($is_rbt ? 'remboursée' : 'versée') . ':&nbsp;&nbsp;</span>';

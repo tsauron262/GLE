@@ -6,7 +6,8 @@ class BimpUserMsg
 		'relance_fac_sans_expertise_bimp'            => array(        // \BimpFactureFournForDol::sendRelanceExpertiseBimp
 			'label'  => 'Factures sans expertise BIMP',
 			'dests'  => 'object::id_user',
-			'module' => 'bimpcommercial'
+			'module' => 'bimpcommercial',
+			'params' => array('allow_default' => 1),
 		),
 		'logistique_ok'                              => array(    // \Bimp_Commande::checkLogistiqueStatus
 			'label'  => 'La logistique complétée pour de votre commande XXX du client ...',
@@ -63,17 +64,20 @@ class BimpUserMsg
 		),
 		'relance_avenant_provisoire'                 => array(    // \cron::relanceAvenantProvisoir
 			'label'  => 'Abandon d\'un avenant ou relance d\'un avenant non signé',
-			'dests'  => 'object::client_commercial',
+			'dests'  => 'object::client_commerciaux',
+			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimpcontract',
 		),
 		'suspension_contrat_auto'                    => array(    // \cron::relanceActivationProvisoire
 			'label'  => 'L\'activation provisoire de votre contrat xxx pour le client xxx, vient d\'être suspendue. Il ne sera réactivé que lorsque nous recevrons la version dûment signée par le client',
-			'dests'  => 'object::client_commercial',
+			'dests'  => 'object::client_commerciaux',
+			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimpcontract',
 		),
 		'relance_contrat_provisoire'                 => array(    // \cron::relanceActivationProvisoire
 			'label'  => 'Votre contrat xxx pour le client xxx est activé provisoirement car il n\'est pas revenu signé. Il sera automatiquement désactivé le d / m / Y si le nécessaire n\'a pas été fait.',
-			'dests'  => 'object::client_commercial',
+			'dests'  => 'object::client_commerciaux',
+			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimpcontract',
 		),
 		'tacit_renewal_contract'                     => array(    // \cron::relanceActivationProvisoire
@@ -187,7 +191,7 @@ class BimpUserMsg
 			'module' => 'bimpcommercial',
 		),
 		'alerte_abonnement_unpaid'                   => array(    // \BCT_Contrat::sendAlertUnpaidFacsAbo
-			'label'  => 'Le client xxx n\'a pas réularisé sa facture. Vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.',
+			'label'  => 'Le client xxx n\'a pas régularisé sa facture. Vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.',
 			'dests'  => 'conf::unpaid_factures_abonnement_notification_email/bimpcontrat',
 			'module' => 'bimpcontrat',
 		),
@@ -266,13 +270,7 @@ class BimpUserMsg
 			'dests'  => 'conf::mail_achat',
 			'module' => 'bimpcore',
 		),
-		'code_compta_inconnu_ACHAT'                  => array( // \Bimp_Product::getCodeComptableAchat
-			'label'       => 'Attention Code comptable inconnu XXX',
-			'dests'       => 'conf::devs_email',
-			'module'      => 'bimpcore',
-			'type_metier' => 'devs'
-		),
-		'code_compta_inconnu_VENTE'                  => array( // \Bimp_Product::getCodeComptableVente
+		'code_compta_inconnu'                        => array( // \Bimp_Product::getCodeComptableAchat
 			'label'       => 'Attention Code comptable inconnu XXX',
 			'dests'       => 'conf::devs_email',
 			'module'      => 'bimpcore',
@@ -304,7 +302,7 @@ class BimpUserMsg
 			'module' => 'bimpcore',
 		),
 		'activation_onoff_on_demand'                 => array(    // \Bimp_Commande::onNewStatus
-			'label'  => 'Suite à votre demande, le client XXX a été activer/Désactiver par ...',
+			'label'  => 'Suite à votre demande, le client XXX a été activé/Désactivé par ...',
 			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 		),
@@ -394,11 +392,11 @@ class BimpUserMsg
 			'module'      => 'bimplogistique',
 			'type_metier' => 'devs'
 		),
-		'code_BIMP'                                  => array( //	\securLogSms::createSendCode
+		'code_erp'                                   => array( //	\securLogSms::createSendCode
 			'label'  => 'Le code est XXXX',
 			'dests'  => 'mail_secondaire',
 			'params' => array(
-				'allow_deleguation' => 0,
+				'allow_delegations' => 0,
 				'allow_superior'    => 1
 			),
 			'module' => 'bimpsecurlogin'
@@ -431,7 +429,7 @@ class BimpUserMsg
 		),
 		'ticket_sav_non_couvert_contrat'             => array(    // \BS_Ticket::update
 			'label'  => 'Le ticket SAV XXX n\'est pas couvert par le contrat',
-			'dests'  => 'object::userClient_commercial',
+			'dests'  => 'object::client_commerciaux',
 			'module' => 'bimpsupport',
 		),
 		'task_not_exist'                             => array(    // \webservice_kghjddsljbfldfsvl453454kgg.php
@@ -457,12 +455,14 @@ class BimpUserMsg
 		),
 		'fiche_inter_non_liee'                       => array(    // \BT_ficheInter::setSigned
 			'label'  => 'Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur.',
-			'dests'  => 'to::dispatch@bimpf.fr,object::client_commercial',
+			'dests'  => 'to::dispatch@bimpf.fr,object::client_commerciaux',
+			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimptechnique',
 		),
 		'envoi_CR_fiche_inter'                       => array(    // \BT_ficheInter::setSigned
 			'label'  => 'Pour information, l\'intervention XXX pour le client XXX (en interne a été signé par le technicien. La FI à été marquée comme terminée automatiquement.)/(n\'a pas pu être envoyée par e-mail au client)/(a été envoyée par e-mail au client) (pour signature électronique à distance.)/(suite à sa signature électronique.)/(pour signature papier à renvoyer par e-mail.)',
-			'dests'  => 'objet::client_commercial::tech_sav',
+			'dests'  => 'objet::client_commerciaux',
+			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimptechnique',
 		),
 		'notification_facturation_signature_FI'      => array(    // \BT_ficheInter::actionSendfacturation
@@ -492,7 +492,8 @@ class BimpUserMsg
 		),
 		'depassement_heure_contrat_delegation'       => array(    // \BT_ficheInter_det::validate
 			'label'  => 'XXX a renseigné une ligne dans sa fiche d\'intervention qui crée un dépassement des heures prévues dans le contrat.',
-			'dests'  => 'object::client_commercial,to::contrat@bimp.fr',
+			'dests'  => 'object::client_commerciaux'/*,to::contrat@bimp.fr*/,
+			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimptechnique',
 		),
 		'CEGID_ROLLBACK_compta_aucune_action'        => array(    // 		\Cron::automatique
@@ -600,7 +601,8 @@ class BimpUserMsg
 		),
 		'create_inter_ticket'                        => array( // \BS_Inter::create
 			'label'  => 'Un ticket d\'intervention a été créé sur votre ticket N° XXX',
-			'dests'  => 'object::client_commercial',
+			'dests'  => 'object::client_commerciaux',
+			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimpsupport',
 		),
 		'tentativeFermetureAuto_non_ferme_GSX'       => array( // \test_sav::tentativeFermetureAuto
@@ -622,75 +624,75 @@ class BimpUserMsg
 			'module' => 'bimpapple',
 		),
 		'tentativeARestitueAuto_non_RFPU_GSX'        => array( // \test_sav::tentativeARestitueAuto
-			'label'     => 'Le SAV xxx n\'arrive pas a être passé a RFPU dans GSX',
-			'type_dest' => 'tech_sav',
-			'params'    => array('allow_user_default_sav_email' => 1),
-			'module'    => 'bimpapple',
+			'label'  => 'Le SAV xxx n\'arrive pas a être passé a RFPU dans GSX',
+			'dests'  => 'object::user',
+			'params' => array('allow_user_default_sav_email' => 1),
+			'module' => 'bimpapple',
 		),
-		'emailOnMiseEnDemeure' => array(
+		'emailOnMiseEnDemeure'                       => array(
 			'label'  => 'Nous venons de mettre en demeure le client XXX. Son compte est désormais bloqué. Voici l\'état actuel des créances y compris les factures non échues ...',
-			'type_dest' => 'object::client_commerciaux',
+			'dests'  => 'object::client_commerciaux',
 			'module' => 'bimpcommercial',
 		),
-		'notif_signature_signed'	=> array(
-			'label'	=> 'La signature du document XXX a été effectuée.',
-			'type_dest' => 'to::obj',
+		'notif_signature_signed'                     => array(
+			'label'  => 'La signature du document XXX a été effectuée.',
+			'dests'  => 'to::obj',
 			'module' => 'bimpcore',
 		),
-		'notif_signature_refused'	=> array(
-			'label'	=> 'La signature du document XXX a été refusée par le signataire XXX.',
-			'type_dest' => 'to::obj',
+		'notif_signature_refused'                    => array(
+			'label'  => 'La signature du document XXX a été refusée par le signataire XXX.',
+			'dests'  => 'to::obj',
 			'module' => 'bimpcore',
 		),
-		'Activation_contrat_provisoire'	=> array(
-			'label' => 'Votre contrat XXX pour le client XXX est activé provisoirement car il n\'est pas revenu signé. Il sera automatiquement désactivé le d / m / Y si le nécessaire n\'a pas été fait.',
-			'type_dest' => 'object::id_user',
+		'Activation_contrat_provisoire'              => array(
+			'label'  => 'Votre contrat XXX pour le client XXX est activé provisoirement car il n\'est pas revenu signé. Il sera automatiquement désactivé le d / m / Y si le nécessaire n\'a pas été fait.',
+			'dests'  => 'object::id_user',
 			'module' => 'bimpcontract',
 		),
-		'valid_factureBrouillon_sur_contrat'	=> array(
-			'label' => 'Une facture a été créée sur le contrat XXX. Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.',
-			'type_dest' => 'conf::email_facturation',
+		'valid_factureBrouillon_sur_contrat'         => array(
+			'label'  => 'Une facture a été créée sur le contrat XXX. Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.',
+			'dests'  => 'conf::email_facturation',
 			'module' => 'bimpcontract',
 		),
-		'fetchContrat_pb_deplacement_fichier'	=> array(
-			'label' => 'Problème de déplacement de dir/file vers newdir/file',
-			'type_dest' => 'conf::devs_email',
+		'fetchContrat_pb_deplacement_fichier'        => array(
+			'label'  => 'Problème de déplacement de dir/file vers newdir/file',
+			'dests'  => 'conf::devs_email',
 			'module' => 'bimpcontract',
 			'metier' => 'devs'
 		),
-		'product_validated_command'	=> array(
-			'label' => 'Le produit xxx a été validé, la commande xxx est peut-être validable',
-			'type_dest' => 'to::obj',
+		'product_validated_command'                  => array(
+			'label'  => 'Le produit xxx a été validé, la commande xxx est peut-être validable',
+			'dests'  => 'to::obj',
 			'module' => 'bimpcore',
 		),
-		'product_validated_propal'	=> array(
-			'label' => 'Le produit xxx a été validé, la propale xxx est peut-être validable',
-			'type_dest' => 'to::obj',
+		'product_validated_propal'                   => array(
+			'label'  => 'Le produit xxx a été validé, la propale xxx est peut-être validable',
+			'dests'  => 'to::obj',
 			'module' => 'bimpcore',
 		),
-		'product_refused_command'	=> array(
-			'label' => 'le produit xxx a été refusé, la commande xxx doit etre modifiée',
-			'type_dest' => 'to::obj',
+		'product_refused_command'                    => array(
+			'label'  => 'le produit xxx a été refusé, la commande xxx doit etre modifiée',
+			'dests'  => 'to::obj',
 			'module' => 'bimpcore',
 		),
-		'product_validated_vente'	=> array(
-			'label' => 'Le produit xxx a été validé, la vente xxx est peut-être validée',
-			'type_dest' => 'to::obj',
+		'product_validated_vente'                    => array(
+			'label'  => 'Le produit xxx a été validé, la vente xxx est peut-être validée',
+			'dests'  => 'to::obj',
 			'module' => 'bimpcore',
 		),
-		'product_refused_propal'	=> array(
-			'label' => 'Le produit xxx a été refusé, la propale xxx doit etre modifiée',
-			'type_dest' => 'to::obj',
+		'product_refused_propal'                     => array(
+			'label'  => 'Le produit xxx a été refusé, la propale xxx doit etre modifiée',
+			'dests'  => 'to::obj',
 			'module' => 'bimpcore',
 		),
-		'confirm_sign_docusign'	=> array(
-			'label' => 'La (ou les) signature(s) via DocuSign du document XXX a été complètée le d / m / Y',
-			'type_dest' => 'to::obj',
+		'confirm_sign_docusign'                      => array(
+			'label'  => 'La (ou les) signature(s) via DocuSign du document XXX a été complètée le d / m / Y',
+			'dests'  => 'to::obj',
 			'module' => 'bimpcore',
 		),
-		'relance_not_sent'	=> array(
-			'label' => 'Le client XXX ne peut pas être relancé car ...',
-			'type_dest' => 'conf::emails_notify_solvabilite_client_change',
+		'relance_not_sent'                           => array(
+			'label'  => 'Le client XXX ne peut pas être relancé car ...',
+			'dests'  => 'conf::emails_notify_solvabilite_client_change',
 			'module' => 'bimpcore',
 			'metier' => 'devs'
 		)
@@ -699,7 +701,7 @@ class BimpUserMsg
 		/*
 			'creation_ticket_support_view'	=> array( //	views\interfaces
 				'label' => 'Ticket Support N° XXX. Sujet du ticket : XXX. Demandeur : XXX. Contrat : XXX',
-				'type_dest' => '???????????',
+				'dests' => '???????????',
 				'dest' => '????????',
 				'cc' => 'j.garnier@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr',
 				'module' => 'bimpinterfaceclient',
@@ -707,7 +709,7 @@ class BimpUserMsg
 			),
 			'creation_ticket_support_html'	=> array( //	html\interfaces
 				'label' => 'Ticket Support N° XXX. Sujet du ticket : XXX. Demandeur : XXX. Contrat : XXX',
-				'type_dest' => '???????????',
+				'dests' => '???????????',
 				'dest' => '????????',
 				'cc' => 'j.garnier@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr',
 				'module' => 'bimpinterfaceclient',
@@ -715,13 +717,12 @@ class BimpUserMsg
 			),
 			'creation_ticket_support'	=> array( //	\BS_Ticket::create
 				'label' => 'Ticket Support N° XXX. Sujet du ticket : XXX. Demandeur : XXX. Contrat : XXX',
-				'type_dest' => '???????????',
+				'dests' => '???????????',
 				'dest' => '????????',
 				'cc' => 'c.conort@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr, d.debarnaud@bimp.fr, v.gaillard@bimp.fr',
 				'module' => 'bimpsupport',
 				'active' => (int) BimpCore::getConf('bimpsupport', null, 'use_tickets')
 			),*/
-
 	);
 
 	public static $canaux_diff_msg = array(
@@ -729,30 +730,36 @@ class BimpUserMsg
 		'msgerp' => 'Message interne'
 	);
 
-	public static $valeur_default = array(
+	public static $default_params = array(
 		'active'             => 1,
 		'required'           => 1,
 		'canal_diffusion'    => 'email',
 		'def_abo'            => 1,
 		'type_metier'        => 'metier',
 		'check_availability' => 1,
-		'allow_deleguation'  => 1,
+		'allow_delegations'  => 1,
 		'allow_superior'     => 0,
-		'allow_default'      => 0,
+		'allow_default'      => 0
 	);
 
-	public static function getParamsMessage($code)
+	public static function getParamsMessage($code, &$errors = array())
 	{
 		if (!isset(static::$userMessages[$code])) {
-			BimpCore::addlog('Erreur BimpUserMsg getParamsMessage : code message inconnu : ' . $code);
-			return false;
+			$errors[] = 'Code message inconnu : ' . $code;
 		} else {
 			$um = static::$userMessages[$code];
-			$ret = BimpTools::overrideArray(static::$valeur_default, $um['params']);
-			$ret['active'] = self::isMsgActive($code);
-			$um['params'] = $ret;
+			$params = static::$default_params;
+
+			if (isset($um['params'])) {
+				$params = BimpTools::overrideArray($params, $um['params']);
+			}
+
+			$params['active'] = self::isMsgActive($code);
+			$um['params'] = $params;
 			return $um;
 		}
+
+		return array();
 	}
 
 	public static function getParamsMessageAll()
@@ -766,136 +773,166 @@ class BimpUserMsg
 
 	public static function isMsgActive($code)
 	{
-		return BimpCore::getConf('userMessages__' . $code . '__msgActive', 1);
+		return (int) BimpCore::getConf('userMessages__' . $code . '__msgActive', 1);
 	}
 
 	public static function envoiMsg($code, $sujet, $contenu, $obj = null, $piecejointe = array())
 	{
-		if (!isset(static::$userMessages[$code])) {
-			BimpCore::addlog('Erreur BimpUserMsg envoiMsg : code message inconnu : ' . $code);
-			return array('Erreur : code message inconnu : ' . $code);
-		}
-
 		$errors = array();
-		$id_users = array(); // pour y stocker les id des users
-		$userDestinataires = array(); // pour y stocker les objets Bimp_User
-		$arr_to = array(); // pour y stocker les mails de conf, de gr, en dur
 
-		$datasMessage = self::getParamsMessage($code);
-		if (!$datasMessage['active']) {
-			return array(); // message non actif, pas d'erreur
-		}
-		$dests = explode(',', $datasMessage['dests']);
-		$params = $datasMessage['params'];
+		if (!isset(static::$userMessages[$code])) {
+			$errors[] = 'Code message inconnu : ' . $code;
+		} else {
+			$id_users = array(); // pour y stocker les id des users
+			$userDestinataires = array(); // pour y stocker les objets Bimp_User
+			$idsDejaAjoutes = array();
+			$to_emails = array(); // Liste finale des emails
 
-		foreach ($dests as $d) {
-			$elements = explode('::', $d);
-			$destType = $elements[0];
-			unset($elements[0]);
-			switch ($destType) {
-				case 'to':
-					foreach ($elements as $e) {
-						if ($e == 'obj') {
-							$e = $obj;
-						} // cas particulier comme send_log_to_dev ou refus_devis_sav ou accompte_sav_enregitre
-						if (!in_array($e, $arr_to)) {
-							$arr_to[] = $e;
-						}
-					}
-					break;
+			$datasMessage = self::getParamsMessage($code);
 
-				case 'conf':
-					foreach ($elements as $e) {
-						$n = explode('/', $e)[0];
-						$m = explode('/', $e)[1];
-						$mail_e = BimpCore::getConf($n, '', $m);
-						if (!in_array($mail_e, $arr_to)) {
-							$arr_to[] = $mail_e;
-						}
-					}
-					break;
+			if (!$datasMessage['params']['active']) {
+				return array(); // message non actif, pas d'erreur
+			}
 
-				case 'gr': // inutilié pour l'instant
-					// recup du mail de chaque groupe
-					foreach ($elements as $e) {
-						$group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $e);
-						if (BimpObject::objectLoaded($group)) {
-							$mail = $group->getData('mail');
-							if ($mail && !in_array($mail, $arr_to)) {
-								$arr_to[] = $mail;
+			$dests = explode(',', $datasMessage['dests']);
+			$params = $datasMessage['params'];
+			$redir_reasons = array();
+
+			foreach ($dests as $d) {
+				$elements = explode('::', $d);
+				$destType = $elements[0];
+				unset($elements[0]);
+				switch ($destType) {
+					case 'to':
+						foreach ($elements as $e) {
+							if ($e == 'obj') {
+								$e = $obj;
+							} // cas particulier comme send_log_to_dev ou refus_devis_sav ou accompte_sav_enregitre
+							if (!in_array($e, $to_emails)) {
+								$to_emails[] = $e;
 							}
 						}
-					}
-					break;
+						break;
 
-				case 'object':
-					foreach ($elements as $e) {
-						// e = commercial
-						// e = client_commercial
-						switch ($e) {
-							case 'user_tech':
-								$id_users[] = $obj->id();
-								break;
-
-							case 'commercial':
-								// recup du/des commercial lié à l'obj transmis (devis, commande, etc)
-								$id_users[] = $obj->getIdCommercial();
-								break;
-
-							case 'id_user':
-								$id_users[] = $obj;
-								break;
-
-							case 'array_id_users':
-								$id_users[] = array_merge($id_users, $obj);
-								if (empty($obj)) {
-									if ($params['allow_user_default_sav_email']) {
-										$arr_to[] = BimpCore::getConf('default_sav_email', 'jc.cannet@bimp.fr', 'bimpsupport');
-									}
-								}
-								break;
-
-							case 'client_commercial':
-								// recup du/des commercial du client lié à l'obj
-								if (BimpObject::objectLoaded($obj)) {
-									if ($obj->dol_object->element != 'societe') {
-										$soc = $obj->getChildObject('client');
-										if (!BimpObject::objectLoaded($soc))
-											BimpCore::addlog('Erreur : client_commercial : objet ENFANT non chargé - code mail : ' . $code);
-									} else {
-										$soc = $obj;
-									}
-									$id_users[] = $soc->getCommercials(false, true); // que le 1er
-								}
-								else BimpCore::addlog('Erreur : client_commercial : objet non chargé - code mail : ' . $code);
-								break;
-
-							case 'client_commerciaux':
-								// recup des commerciaux du client lié à l'obj
-								if (BimpObject::objectLoaded($obj)) {
-									if ($obj->dol_object->element != 'societe') {
-										$soc = $obj->getChildObject('client');
-										if (!BimpObject::objectLoaded($soc))
-											BimpCore::addlog('Erreur : client_commerciaux : objet ENFANT non chargé - code mail : ' . $code);
-									} else {
-										$soc = $obj;
-									}
-									$users = $soc->getCommercials(false);
-									foreach ($users as $u) {
-										$id_users[] = $u->id;
-									}
-								}
-								else BimpCore::addlog('Erreur : client_commerciaux : objet non chargé - code mail : ' . $code);
-								break;
-
-							case 'centre_sav':
-								$centre = $obj; // attention, obj c'est un array (cf getCentres() dans BimpCache)
-								if (isset($centre['mail']) && $centre['mail']) {     // utiliser d'abord l'email du centre
-									if (!in_array($centre['mail'], $arr_to)) {
-										$arr_to[] = $centre['mail'];
-									}
+					case 'conf':
+						foreach ($elements as $e) {
+							if (preg_match('/^([^\/]+)\/?(.+)?$/', $e, $matches)) {
+								$conf_name = $matches[1];
+								if (isset($matches[2]) && $matches[2]) {
+									$module = $matches[2];
 								} else {
-									if ($params['allow_shipToUsers']) {
+									$module = 'bimpcore';
+								}
+
+								$email = BimpCore::getConf($conf_name, '', $module);
+								if ($email && !in_array($email, $to_emails)) {
+									$to_emails[] = $email;
+								}
+							} else {
+								$errors[] = 'Paramètre conf invalide : ' . $e;
+							}
+						}
+						break;
+
+					case 'user_group':
+						foreach ($elements as $e) {
+							$id_group = BimpCore::getUserGroupId($e);
+
+							if ($id_group) {
+								$group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
+								if (BimpObject::objectLoaded($group)) {
+									$email = $group->getData('mail');
+									if ($email && !in_array($email, $to_emails)) {
+										$to_emails[] = $email;
+									}
+								}
+							}
+						}
+						break;
+
+					case 'object':
+						foreach ($elements as $e) {
+							switch ($e) {
+								case 'user':
+									$id_users[] = $obj->id();
+									break;
+
+								case 'commercial':
+									// recup du/des commercial lié à l'obj transmis (devis, commande, etc)
+									if (is_object($obj) && method_exists($obj, 'getIdCommercial')) {
+										$id_user = $obj->getIdCommercial();
+
+										if ($id_user && !in_array($id_user, $id_users)) {
+											$id_users[] = $id_user;
+										}
+									} else {
+										$errors[] = 'Commercial pièce : objet invalide';
+									}
+									break;
+
+								case 'id_user':
+									if ((int) $obj) {
+										if (!in_array($obj, $id_users)) {
+											$id_users[] = (int) $obj;
+										}
+									} else {
+										$errors[] = 'id_user : id invalide';
+									}
+									break;
+
+								case 'array_id_users':
+									if (is_array($obj)) {
+										foreach ($obj as $id_user) {
+											if ((int) $id_user) {
+												if (!in_array($id_user, $id_users)) {
+													$id_users[] = $id_user;
+												}
+											} else {
+												$errors[] = 'array_id_users : id invalide (' . (string) $id_user . ')';
+											}
+										}
+									}
+									break;
+
+								case 'client_commerciaux':
+									// recup des commerciaux du client lié à l'obj
+									if (BimpObject::objectLoaded($obj) && is_a($obj, 'BimpObject')) {
+										if (is_a($obj, 'Bimp_Societe')) {
+											$soc = $obj;
+										} else {
+											$soc = $obj->getChildObject('client');
+											if (!BimpObject::objectLoaded($soc)) {
+												$errors[] = 'Commercial client : client lié invalide';
+											}
+										}
+
+										if (empty($errors)) {
+											$users = $soc->getCommercials($params['allow_default'], (isset($params['only_first_commercial']) ? $params['only_first_commercial'] : false));
+											foreach ($users as $u) {
+												if (!in_array($u->id, $id_users)) {
+													$id_users[] = $u->id;
+												}
+											}
+										}
+									} else {
+										$errors[] = 'Commercial client : objet invalide';
+									}
+									break;
+
+								case 'centre_sav':
+									$centre = $obj; // attention, obj c'est un array (cf getCentresData() dans BimpCache)
+									if (is_array($centre) && isset($centre['mail']) && $centre['mail']) {     // utiliser d'abord l'email du centre
+										if (!in_array($centre['mail'], $to_emails)) {
+											$to_emails[] = $centre['mail'];
+										}
+									} elseif (is_a($centre, 'BS_CentreSav')) {
+										$email = $centre->getData('email');
+										if ($email && !in_array($email, $to_emails)) {
+											$to_emails[] = $email;
+										}
+									}
+
+									if (empty($to_emails) && isset($params['allow_shipToUsers']) && $params['allow_shipToUsers']) {
 										// sinon, recup des user du centre et les mettre dans id_users
 										BimpObject::loadClass('bimpcore', 'Bimp_User');
 										$shipToUsers = Bimp_User::getUsersByShipto($centre['shipTo']);
@@ -905,152 +942,160 @@ class BimpUserMsg
 											}
 										}
 									}
-									if (empty($shipToUsers) && $params['allow_user_default_sav_email']) {
-										$arr_to[] = BimpCore::getConf('default_sav_email', null, 'bimpsupport');
+
+									if (empty($to_emails) && empty($id_users) && isset($params['allow_user_default_sav_email']) && $params['allow_user_default_sav_email']) {
+										$email = BimpCore::getConf('default_sav_email', null, 'bimpsupport');
+										if ($email && !in_array($email, $to_emails)) {
+											$to_emails[] = $email;
+										}
 									}
-								}
-								break;
+									break;
 
-							case 'user_resp_ticket':
-								$resp = $obj->getChildObject('user_resp');
-								if ($resp) {
-									$id_users[] = $resp->id;
-								}
-								break;
-
-							case 'userClient_commercial':
-								$coms = BimpCache::getSocieteCommerciauxObjectsList($obj->id);
-								foreach ($coms as $com) {
-									$id_users[] = $com->id;
-								}
-								break;
-
-							default:
-								$errors[] = 'Erreur : type de destinataire imprevu : ' . $e;
-								BimpCore::addlog('Erreur : type de destinataire imprevu : ' . $e);
-								break;
+								default:
+									$errors[] = 'Type de destinataire imprevu : ' . $e;
+									break;
+							}
 						}
+						break;
 
-						if (count($id_users)) {
-							$idsDejaAjoutes = array();
-							foreach ($id_users as $id_user) {
-								if (!in_array($id_user, $idsDejaAjoutes)) {
-									$idsDejaAjoutes[] = $id_user;
-									$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-									if (BimpObject::objectLoaded($user)) {
-										if ($user->getData('statut')) {    // actif
-											if (!$params['check_availability'] || $user->isAvailable()) {
-												$userDestinataires[] = $user;
-											} else {
-												if ($params['allow_deleguation']) {
-													// délégation premise et mise en place :
-													$delegations = $user->getData('delegations');
-													if (count($delegations)) {
-														$userDestinataires = array_merge($userDestinataires, self::ajoutDeleg($delegations));
-														$contenu = 'Message recu par délégation de ' . $user->getFullName() . ":\n\n" . $contenu;
-													}
-												}
-												if ($params['allow_superior']) {
-													// supérieur hiérarchique
-													$id_sup = $user->getData('fk_user');
-													$superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_sup);
-													if (BimpObject::objectLoaded($superior) && $superior->isActive() && $superior->isAvilable()) {
-														$userDestinataires[] = $superior;
-														$contenu = 'Message recu a cause de l\'absence de ' . $user->getFullName() . ":\n\n" . $contenu;
-													}
-												}
-											}
-										} else {                    // inactif
-											if ($params['allow_deleguation']) {
-												$delegations = $user->getData('delegations');
-												if (count($delegations)) {
-													$userDestinataires = array_merge($userDestinataires, self::ajoutDeleg($delegations));
-													$contenu = 'Message recu par délégation de ' . $user->getFullName() . ":\n\n" . $contenu;
-												} else {
-													$err = 'Erreur : utilisateur inactif SANS délégation: ' . $user->getFullName();
-													$errors[] = $err;
-													BimpCore::addlog($err);
-												}
-											}
-											if ($params['allow_superior']) {
-												// supérieur hiérarchique
-												$id_sup = $user->getData('fk_user');
-												$superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_sup);
-												if (BimpObject::objectLoaded($superior) && $superior->isActive() && $superior->isAvilable()) {
-													$userDestinataires[] = $superior;
-													$contenu = 'Message recu car ' . $user->getFullName() . " n'est plus dans le groupe:\n\n" . $contenu;
-												}
-											}
+					case 'mail_secondaire':
+						$mail_sec = $obj->traiteMail(); // obj = securLogSms
+						if ($obj->isMail($mail_sec)) {
+							$to_emails[] = $mail_sec;
+						} else {
+							if ($params['allow_superior'] && !in_array($obj->user->fk_user, $idsDejaAjoutes)) {
+								$superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $obj->user->fk_user);
+								if (BimpObject::objectLoaded($superior) && (int) $superior->getData('statut')) {
+									$userDestinataires[] = $superior;
+									$idsDejaAjoutes[] = $superior->id;
+									global $langs;
+									$redir_reasons[$superior->id] = "Message recu en l\'absence d\'adresse e-mail secondaire enregistreé pour " . $obj->user->getFullName($langs);
+								}
+							}
+						}
+						break;
+
+					default:
+						$errors[] = 'Type de destinataire inconnu : ' . $destType;
+						break;
+				}
+			}
+
+			if (!empty($id_users)) {
+				foreach ($id_users as $id_user) {
+					if (!in_array($id_user, $idsDejaAjoutes)) {
+						$idsDejaAjoutes[] = $id_user;
+
+						$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+
+						if (BimpObject::objectLoaded($user)) {
+							$unallowed_reason = '';
+							if ($user->isMsgAllowed($code, $params['check_availability'], $unallowed_reason)) {
+								$userDestinataires[] = $user;
+							} else {
+								if ($params['allow_superior']) {
+									// supérieur hiérarchique
+									$id_sup = $user->getData('fk_user');
+
+									if (!in_array($id_sup, $idsDejaAjoutes)) {
+										$superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_sup);
+										if (BimpObject::objectLoaded($superior) && $superior->getData('statut') && (!$params['check_availability'] || $superior->isAvailable())) {
+											$userDestinataires[] = $superior;
+											$idsDejaAjoutes[] = $superior->id;
+											$redir_reasons[$superior->id] = 'Message recu par délégation de ' . $user->getFullName();
 										}
 									}
 								}
 							}
-						} else {
-							if ($params['allow_default']) {
-								$arr_to[] = BimpCore::getConf('default_user_' . $e, '')
-									? BimpCore::getConf('default_user_' . $e, '')
-									: BimpCore::getConf('default_user', '');
-							} else {
-								$err = 'Erreur BimpUserMsg : Aucun utilisateur lié à la piece ' . $obj->getNomUrl() . ' pour le type ' . $code;
-								$errors[] = $err;
-								BimpCore::addlog($err);
+
+							if ($params['allow_delegations']) {
+								// délégation premise et mise en place :
+								$delegations = $user->getData('delegations');
+								if (count($delegations)) {
+									foreach ($delegations as $id_user_deleg) {
+										if (in_array($id_user_deleg, $idsDejaAjoutes) || in_array($id_user_deleg, $id_users)) {
+											continue;
+										}
+
+										$user_deleg = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_deleg);
+										if (BimpObject::objectLoaded($user_deleg) && (int) $user_deleg->getData('statut')) {
+											$userDestinataires[] = $user_deleg;
+											$idsDejaAjoutes[] = $id_user_deleg;
+											$redir_reasons[$id_user_deleg] = 'Message recu par délégation de ' . $user->getFullName();
+										}
+									}
+								}
 							}
 						}
 					}
-					break;
-
-				case 'mail_secondaire':
-					$mail_sec = $obj->traiteMail(); // obj = securLogSms
-					if ($obj->isMail($mail_sec)) {
-						$arr_to[] = $mail_sec;
-					} else {
-						if ($params['allow_superior']) {
-							$superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $obj->user->fk_user);
-							if (BimpObject::objectLoaded($superior) && $superior->isActive() && $superior->isAvilable()) {
-								$userDestinataires[] = $superior;
-								$contenu = "Message recu a cause de l\'absence d\'email secondaire :\n\n" . $contenu;
-							}
-						}
-					}
-					break;
-
-				default:
-					$errors[] = 'Erreur : type de destinataire inconnu : ' . $destType;
-					BimpCore::addlog('Erreur BimpUserMsg : type de destinataire inconnu : ' . $destType, 4, '', $obj, array('code' => $code, 'dests' => $dests));
-					break;
-			}
-		}
-
-		if (count($userDestinataires)) {
-			foreach ($userDestinataires as $u) {
-				if (!in_array($u->getData('mail'), $arr_to) && $u->isAbonne($code)) {
-					$arr_to[] = $u->getData('mail');
 				}
 			}
-		}
 
-		$to = implode(', ', $arr_to);
-		$to = BimpTools::cleanEmailsStr($to);
-		$filename_list = ($piecejointe ? $piecejointe[0] : array());
-		$mimetype_list = ($piecejointe ? $piecejointe[1] : array());
-		$mimefilename_list = ($piecejointe ? $piecejointe[2] : array());
+			if (!count($errors)) {
+				if (count($userDestinataires)) {
+					foreach ($userDestinataires as $u) {
+						if (!in_array($u->getData('email'), $to_emails)) {
+							$to_emails[] = $u->getData('email');
+						}
+					}
+				}
 
-		mailSyn2($sujet, $to, null, $contenu, $filename_list, $mimetype_list, $mimefilename_list);
+				if (empty($to_emails)) {
+					if (isset($params['allow_user_default_sav_email']) && $params['allow_user_default_sav_email']) {
+						$email = BimpCore::getConf('default_sav_email', '', 'bimpsupport');
+						if ($email) {
+							$to_emails[] = $email;
+							$redir_reasons[$email] = 'Message recu en tant que destinataire par défaut pour le SAV (aucun autre utilisateur disponible)';
+						}
+					} elseif ($params['allow_default']) {
+						$email = BimpCore::getConf('default_user_email', null);
+						if ($email) {
+							$to_emails[] = $email;
+							$redir_reasons[$email] = 'Message recu en tant que destinataire par défaut (aucun autre utilisateur disponible)';
+						}
+					}
+				}
 
-		// todo flo : gérer les transactions db.
+				if (!empty($to_emails)) {
+					$to = implode(', ', $to_emails);
+					$to = BimpTools::cleanEmailsStr($to);
+					$filename_list = ($piecejointe ? $piecejointe[0] : array());
+					$mimetype_list = ($piecejointe ? $piecejointe[1] : array());
+					$mimefilename_list = ($piecejointe ? $piecejointe[2] : array());
 
-		return $errors;
-	}
+					if (!empty($redir_reasons)) {
+						$header = '';
 
-	public static function ajoutDeleg($d)
-	{
-		$u = array();
-		foreach ($d as $id_deleg) {
-			$deleg = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_deleg);
-			if (BimpObject::objectLoaded($deleg)) {
-				$u[] = $deleg;
+						foreach ($redir_reasons as $key => $redir_reason) {
+							if (is_string($key)) {
+								$header .= $key .' : ' . $redir_reason . "\n";
+							} elseif (is_int($key)) {
+								$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $key);
+								if (BimpObject::objectLoaded($user)) {
+									$header .= $user->getData('email') . ' : ' . $redir_reason . "\n";
+								}
+							}
+						}
+
+						$contenu = $header . "\n" . $contenu;
+					}
+
+					// todo flo : gérer les transactions db.
+					if (!mailSyn2($sujet, $to, null, $contenu, $filename_list, $mimetype_list, $mimefilename_list)) {
+						$errors[] = 'Echec de l\'envoi du message par e-mail';
+					}
+				} else {
+					$errors[] = 'Aucun destinataire trouvé pour le message "' . $code . '"';
+				}
+			}
+
+			if (count($errors)) {
+				BimpCore::addlog('Erreurs envoi message utilisateur "' . $code . '"', 3, 'email', (is_a($obj, 'BimpObject') ? $obj : ''), array(
+					'Erreurs' => $errors
+				));
 			}
 		}
-		return $u;
+
+		return $errors;
 	}
 }

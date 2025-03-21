@@ -105,7 +105,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
         global $user, $langs, $conf;
 //        global $tabCentre;
-		$tabCentre = BimpCache::getCentres();
+		$tabCentre = BimpCache::getCentresData();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;

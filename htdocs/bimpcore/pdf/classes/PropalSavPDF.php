@@ -56,7 +56,7 @@ class PropalSavPDF extends PropalPDF
 						if (!$code_centre) {
 							$this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
 						} else {
-							$centres = BimpCache::getCentres();
+							$centres = BimpCache::getCentresData();
 							if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
 								$centre = $centres[$code_centre];
 								$this->fromCompany->phone = $centre['tel'];

@@ -116,7 +116,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
         global $user, $langs, $conf;
 
 //        global $tabCentre;
-		$tabCentre = BimpCache::getCentres();
+		$tabCentre = BimpCache::getCentresData();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;

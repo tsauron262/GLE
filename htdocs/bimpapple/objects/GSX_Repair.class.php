@@ -2604,7 +2604,7 @@ class GSX_Repair extends BimpObject
 //                    }
 //                }
 //            }
-			$lescentres = BimpCache::getCentres();
+			$lescentres = BimpCache::getCentresData();
 			foreach ($rows as $r) {
                 if ($r['code_centre']) {
                     if (isset($lescentres[$r['code_centre']])) {

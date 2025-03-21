@@ -3,7 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php';
 //BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-$tabCentre = BimpCache::getCentres();
+$tabCentre = BimpCache::getCentresData();
 
 class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 {
@@ -832,7 +832,7 @@ L’équipe " . $soc_name;
                     }
                 }
 
-                $centres = BimpCache::getCentres();
+                $centres = BimpCache::getCentresData();
                 if (isset($centres[$centre]) && isset($centres[$centre]['mail'])) {
                     $from = $centres[$centre]['mail'];
                 }
@@ -875,7 +875,7 @@ L’équipe " . $soc_name;
     {
         if (is_null($this->apple_ids)) {
             $this->apple_ids = array();
-            $centres = BimpCache::getCentres();
+            $centres = BimpCache::getCentresData();
 
             foreach ($centres as $code_centre => $centre_data) {
                 $shipTo = BimpTools::getArrayValueFromPath($centre_data, 'shipTo', '');

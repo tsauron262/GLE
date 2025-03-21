@@ -117,7 +117,7 @@ class InternalStock extends PartStock
 		$code_centre = $this->getData('code_centre');
 
 		if ($code_centre) {
-			$centres = BimpCache::getCentres();
+			$centres = BimpCache::getCentresData();
 			if (isset($centres[$code_centre]['id_entrepot'])) {
 				return $centres[$code_centre]['id_entrepot'];
 			}
@@ -258,7 +258,7 @@ class InternalStock extends PartStock
 
 		$code_centre = BimpTools::getArrayValueFromPath($data, 'code_centre', '', $errors, true, 'Code centre absent');
 		if ($code_centre) {
-			$centres = BimpCache::getCentres();
+			$centres = BimpCache::getCentresData();
 			if (!isset($centres[$code_centre])) {
 				$errors[] = 'Code centre invalide';
 			}
@@ -525,7 +525,7 @@ class InternalStock extends PartStock
 					}
 
 					if (!count($errors) && BimpObject::objectLoaded($stock_dest)) {
-						$centres = BimpCache::getCentres();
+						$centres = BimpCache::getCentresData();
 						$code_centre_src = $this->getData('code_centre');
 						$centre_label = (isset($centres[$code_centre_src]['label']) ? 'de ' . $centres[$code_centre_src]['label'] : 'du centre ' . $code_centre_src);
 						$stock_errors = $stock_dest->correctStock($qty, '', 'TRANSFERT_INTERNE', 'Transfert depuis stock interne ' . $centre_label, $warnings);

@@ -509,7 +509,7 @@ class AppleShipment extends BimpObject
 //                    }
 //                }
 //            }
-			$lescentres = BimpCache::getCentres();
+			$lescentres = BimpCache::getCentresData();
 			foreach ($lescentres as $centre) {
 				self::$cache[$cache_key][$centre['shipTo']] = array(
 					'Name'          => 'BIMP',

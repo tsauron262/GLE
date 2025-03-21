@@ -115,7 +115,7 @@ class pdf_synopsischrono_destruction extends ModeleSynopsischrono {
         global $user, $langs, $conf;
 
 //        global $tabCentre;
-		$tabCentre = BimpCache::getCentres();
+		$tabCentre = BimpCache::getCentresData();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;

@@ -310,8 +310,8 @@ class GSX_Const extends GSX_Const_entity
 //            foreach ($tabCentre as $code => $centre) {
 //                self::$centres_array[$code] = $centre[2] . ' (' . $centre[4] . ')';
 //            }
-			$lescentres = BimpCache::getCentres();
-			foreach ($lescentres as $centre) {
+			$centres = BimpCache::getCentresData();
+			foreach ($centres as $centre) {
 				self::$centres_array[$centre['code']] = $centre['label'] . ' (' . $centre['shipTo'] . ')';
 			}
         }

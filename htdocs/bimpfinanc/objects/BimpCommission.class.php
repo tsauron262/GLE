@@ -909,6 +909,9 @@ class BimpCommission extends BimpObject
 				$line = str_getcsv($lines[0], ';');
 
 				foreach ($cols as $col_idx => $col_data) {
+//					if ($col_idx == 'price_ht') {
+//						continue;
+//					}
 					if ($line[$col_data[0]] != $col_data[1]) {
 						foreach ($line as $line_col_idx => $line_col_name) {
 							if ($line_col_name == $col_data[1]) {
@@ -963,6 +966,7 @@ class BimpCommission extends BimpObject
 							}
 
 							$price = (float) str_replace(',', '.', $line_data[$cols['price_ht'][0]]);
+//							$price = 0;
 
 							if ($price) {
 								$ref_br = $line_data[$cols['ref_br'][0]];
@@ -976,7 +980,11 @@ class BimpCommission extends BimpObject
 
 							$data = array();
 							foreach ($cols as $col_idx => $col_data) {
-								echo $col_idx . ' - ' . $col_data[0] . ' - ' . $col_data[1] . ' => ' . $line_data[$col_data[0]] . '<br/>';
+//								if ($col_idx == 'price_ht') {
+//									$data[] = 0;
+//									continue;
+//								}
+//								echo $col_idx . ' - ' . $col_data[0] . ' - ' . $col_data[1] . ' => ' . $line_data[$col_data[0]] . '<br/>';
 								$data[] = $line_data[$col_data[0]];
 							}
 

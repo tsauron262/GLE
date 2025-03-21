@@ -609,17 +609,28 @@ class Bimp_Client extends Bimp_Societe
 
         if ($this->canSetAction('relancePaiements') && $this->isActionAllowed('relancePaiements') &&
                 $user->rights->bimpcommercial->admin_relance_global) {
-            $buttons[] = array(
-                'label'       => 'Relance impayés',
-                'icon_before' => 'fas_cogs',
-                'classes'     => array('btn', 'btn-default'),
-                'attr'        => array(
-                    'onclick' => $this->getJsActionOnclick('relancePaiements', array(), array(
-                        'form_name' => 'relance_paiements',
+			$buttons[] = array(
+				'label'       => 'Relance impayés',
+				'icon_before' => 'fas_cogs',
+				'classes'     => array('btn', 'btn-default'),
+				'attr'        => array(
+					'onclick' => $this->getJsActionOnclick('relancePaiements', array(), array(
+						'form_name' => 'relance_paiements',
 //                        'on_form_submit' => 'function($form, extra_data) {return onRelanceClientsPaiementsFormSubmit($form, extra_data);}'
-                    ))
-                )
-            );
+					))
+				)
+			);
+			$buttons[] = array(
+				'label'       => 'Création automatique',
+				'icon_before' => 'fas_cogs',
+				'classes'     => array('btn', 'btn-default'),
+				'attr'        => array(
+					'onclick' => $this->getJsActionOnclick('creat_auto', array(), array(
+						'form_name' => 'creat_auto',
+//                        'on_form_submit' => 'function($form, extra_data) {return onRelanceClientsPaiementsFormSubmit($form, extra_data);}'
+					))
+				)
+			);
         }
 
         if (BimpCore::isEntity('bimp') && $this->canSetAction('listClientsToExcludeForCreditLimits')) {

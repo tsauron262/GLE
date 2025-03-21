@@ -213,7 +213,7 @@ class Session {
 
         foreach ($aArray1 as $mKey => $mValue) {
           if (array_key_exists($mKey, $aArray2)) {
-            if (is_array($mValue)) {
+            if (is_array($mValue) && is_array($aArray2[$mKey])) {
               $aRecursiveDiff = $this->arrayRecursiveDiff($mValue, $aArray2[$mKey]);
               if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
             } else {

@@ -6,6 +6,7 @@
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
+//require_once(DOL_DOCUMENT_ROOT.'/synopsistools/class/divers.class.php');
 
 global $isMobile;
 //if ($isMobile)
@@ -48,6 +49,7 @@ $js .= <<<EOF
         <!--<script type="text/javascript" src="../jquery/chosen/chosen.jquery.min.js"></script>-->
         <!--<link rel="stylesheet" type="text/css" href="../jquery/chosen/chosen.css" />-->
         <script type="text/javascript" src="../agenda/agenda.js"></script>
+        <script type="text/javascript" src="../js/global.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
         <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />

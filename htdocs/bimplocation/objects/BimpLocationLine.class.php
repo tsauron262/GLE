@@ -213,7 +213,10 @@ class BimpLocationLine extends BimpObject
             if (BimpCore::getConf('round_price', 0, 'bimplocation')) {
                 $tempTotTtc = $this->getData('pu_ht') * $this->amounts['qty'] * (1 + ($this->getData('tva_tx') / 100));
                 $difToArrondieHt = (round($tempTotTtc) - $tempTotTtc) / (1 + ($this->getData('tva_tx') / 100));
-                $puCorrigé = (float) $this->getData('pu_ht') + ($difToArrondieHt / $this->amounts['qty']);
+				if($this->amounts['qty'] != 0)
+					$puCorrigé = (float) $this->getData('pu_ht') + ($difToArrondieHt / $this->amounts['qty']);
+				else
+					$puCorrigé = 0;
             } else {
                 $puCorrigé = $this->getData('pu_ht');
             }

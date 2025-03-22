@@ -14,7 +14,7 @@ header_btn:
 nom_url: 
     with_status: 1
     syntaxe: <ref>
-    card: default
+#    card: default
     
 labels:
     name: location

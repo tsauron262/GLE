@@ -4731,7 +4731,7 @@ class BimpComm extends BimpDolObject
 		return $errors;
 	}
 
-	public function checkZoneVente($init_id_entrepot, $update = true, &$errors = array())
+	public function checkZoneVente($init_id_client = 0, $init_id_entrepot = 0, $update = false, &$errors = array())
 	{
 		if (!$this->field_exists('zone_vente') || (int) $this->getData('fk_statut') || !static::$use_zone_vente_for_tva) {
 			return;
@@ -4742,8 +4742,8 @@ class BimpComm extends BimpDolObject
 		$new_zone = '';
 
 		if (BimpObject::objectLoaded($client)) {
-			if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande')) && $cur_zone != self::BC_ZONE_HORS_UE) {
-				if (BimpObject::objectLoaded($client) && BimpTools::getTypeSocieteCodeById($client->getData('fk_typent')) === 'TE_RETAIL_EX') {
+			if ($init_id_client !== (int) $client->id && in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande')) && $cur_zone != self::BC_ZONE_HORS_UE) {
+				if (BimpTools::getTypeSocieteCodeById($client->getData('fk_typent')) === 'TE_RETAIL_EX') {
 					$new_zone = self::BC_ZONE_HORS_UE;
 				}
 			}
@@ -5308,7 +5308,7 @@ class BimpComm extends BimpDolObject
 			}
 		}
 
-		$this->checkZoneVente(0, false);
+		$this->checkZoneVente();
 
 		$errors = parent::create($warnings, $force_create);
 
@@ -5407,15 +5407,24 @@ class BimpComm extends BimpDolObject
 
 		$init_id_entrepot = (int) $this->getInitData('entrepot');
 		$init_zone = $this->getInitData('zone_vente');
+		$init_id_client_fac = 0;
 
-		if ($this->getInitData('id_client_facture') != $this->getData('id_client_facture')) {
-			$this->addObjectLog('Client facturation modifié, de ' . $this->getInitData('id_client_facture') . ' a ' . $this->getData('id_client_facture'));
+		if ($this->field_exists('id_client_facture')) {
+			$init_id_client_fac = (int) $this->getInitData('id_client_facture');
+
+			if ($init_id_client_fac != $this->getData('id_client_facture')) {
+				$this->addObjectLog('Client facturation modifié, de ' . $init_id_client_fac . ' a ' . $this->getData('id_client_facture'));
+			}
+		}
+
+		if (!$init_id_client_fac) {
+			$init_id_client_fac = (int) $this->getInitData('fk_soc');
 		}
 
 		$errors = parent::update($warnings, $force_update);
 
 		if (!count($errors)) { // Si la zone n'a pas été modifiée manuellement
-			$this->checkZoneVente($init_id_entrepot, true, $errors);
+			$this->checkZoneVente($init_id_client_fac, $init_id_entrepot, true, $errors);
 		}
 
 		if (!count($errors)) {

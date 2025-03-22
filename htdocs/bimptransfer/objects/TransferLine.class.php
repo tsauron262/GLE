@@ -93,7 +93,7 @@ class TransferLine extends BimpObject
         $is_product = $this->isProduct($input, $id_product);
         $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
         if (!$is_equipment and!$is_product)
-            $errors[] = "Produit inconnu";
+            $errors[] = "Produit inconnu (". $input .")";
         else if (/* rajout de ici */!$is_equipment and /* a la */$this->isSerialisable($id_product))
             $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";
         return $errors;
@@ -101,7 +101,8 @@ class TransferLine extends BimpObject
 
     public function isProduct($search, &$id_product)
     {
-        $sql = 'SELECT rowid';
+		$search = str_replace("\"", "\\\"", $search);
+		$sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE ref="' . $search . '"';
         $sql .= ' OR ref="' . str_replace("/", "_", $search) . '"';
@@ -121,6 +122,7 @@ class TransferLine extends BimpObject
 
     public function isEquipment($input, &$id_equipment, &$id_product)
     {
+		$input = str_replace("\"", "\\\"", $input);
         $sql = 'SELECT id, id_product';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
         $sql .= ' WHERE serial="' . $input . '" || concat("S", serial)="' . $input . '"';
@@ -231,7 +233,7 @@ class TransferLine extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        // A Eviter (getParentInstance() peut renvoyer null): 
+        // A Eviter (getParentInstance() peut renvoyer null):
 //        return $this->getParentInstance()->isEditable($force_edit);
 
         $parent = $this->getParentInstance();
@@ -298,7 +300,7 @@ class TransferLine extends BimpObject
         $id_equipment = $this->getData('id_equipment');
 
         if ($id_equipment > 0) {
-            // Equipment: 
+            // Equipment:
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
 
             $place_errors = array();
@@ -308,7 +310,7 @@ class TransferLine extends BimpObject
                 $place_errors = $equipment->moveToPlace(BE_Place::BE_PLACE_ENTREPOT, $transfer->getData('id_warehouse_source'), $codemove . '_EQ' . $id_equipment . '_ANNUL', 'Annulation transfert #' . $transfer->id, 1, null, 'transfert', (int) $transfer->id);
             }
         } else {
-            // Produit: 
+            // Produit:
             $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('id_product'));
 
             $label_move = 'Transfert #' . $transfer->id . ' - Produit ' . $product->getRef();

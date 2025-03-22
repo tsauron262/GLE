@@ -187,9 +187,9 @@ lists_cols:
         value: 
             callback: displayDates
 
-filters_panel: 
-    filters: 
-        default: 
+filters_panel:
+    default:
+        filters:  
             id_location: 
             id_equipment: 
             id_equipment:id_product:

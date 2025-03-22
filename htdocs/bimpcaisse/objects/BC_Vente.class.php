@@ -95,7 +95,7 @@ class BC_Vente extends BimpObject
         return $buttons;
     }
 
-    // Getters données : 
+    // Getters données :
 
     public function getAjaxData()
     {
@@ -407,7 +407,7 @@ class BC_Vente extends BimpObject
         return 0;
     }
 
-    // Getters array : 
+    // Getters array :
 
     public function getAvailableCustomerDiscountsArray()
     {
@@ -478,7 +478,7 @@ class BC_Vente extends BimpObject
         return self::getCondReglementsArray();
     }
 
-    // Afficages: 
+    // Afficages:
 
     public function displayDate()
     {
@@ -583,7 +583,7 @@ class BC_Vente extends BimpObject
         $html .= '<div class="col-lg-12">';
         $html .= '<div id="curVenteInfos" class="venteSection">';
 
-        // Bouton "Actualiser": 
+        // Bouton "Actualiser":
         $html .= '<span class="btn btn-default refreshVenteButton" style="float: right; display: inline-block; margin-top: -2px" onclick="Vente.refresh();">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser la vente';
         $html .= '</span>';
@@ -591,7 +591,7 @@ class BC_Vente extends BimpObject
         $html .= '<i class="fa fa-spinner fa-spin"></i>';
         $html .= '</span>';
 
-        // Boutons sons: 
+        // Boutons sons:
         $sounds_on = (int) BimpCore::getConf('sounds_on', null, 'bimpcaisse');
         $html .= '<span class="caisseSoundsOn bs-popover"' . (!$sounds_on ? ' style="display: none"' : '') . ' onclick="caisseSoundsOff();" ' . BimpRender::renderPopoverData('Désactiver les sons') . '>';
         $html .= BimpRender::renderIcon('fas_volume-up');
@@ -601,7 +601,7 @@ class BC_Vente extends BimpObject
         $html .= BimpRender::renderIcon('fas_volume-mute');
         $html .= '</span>';
 
-        // Choix Commercial: 
+        // Choix Commercial:
         $html .= '<div class="curVenteInfo">';
         $html .= '<span style="font-weight: bold; font-size: 14px;">';
         $html .= BimpRender::renderIcon('fas_user-circle', 'iconLeft');
@@ -610,7 +610,7 @@ class BC_Vente extends BimpObject
         $html .= BimpInput::renderInput('search_user', 'id_user_resp', $id_user_resp);
         $html .= '</div>';
 
-        // Note privée: 
+        // Note privée:
         $html .= '<br/><div class="curVenteInfo">';
         $html .= '<span style="font-weight: bold; font-size: 14px;">';
         $html .= BimpRender::renderIcon('pencil', 'iconLeft');
@@ -619,7 +619,7 @@ class BC_Vente extends BimpObject
         $html .= BimpInput::renderInput('text', 'note_plus', $this->getData('note_plus'));
         $html .= '</div>';
 
-        // Note publique: 
+        // Note publique:
         $html .= '<br/><div class="curVenteInfo">';
         $html .= '<span style="font-weight: bold; font-size: 14px;">';
         $html .= BimpRender::renderIcon('pencil', 'iconLeft');
@@ -631,11 +631,11 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
 
-        // Partie de gauche (Choix Client / Ajout produit / paiements)         
+        // Partie de gauche (Choix Client / Ajout produit / paiements)
         $html .= '<div id="curVenteLeft" class="col-sm-12 col-md-7 col-lg-8">';
         $html .= '<div class="row">';
 
-        // Client: 
+        // Client:
         $html .= '<div class="col-sm-12 col-md-6">';
         $html .= '<div id="curVentePanier" class="venteSection">';
         $html .= '<div class="venteSectionHeader">';
@@ -648,7 +648,7 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
 
-        // Ajout produit: 
+        // Ajout produit:
         $html .= '<div class="col-sm-12 col-md-6">';
         $html .= '<div id="curVenteAddProduct" class="venteSection">';
         $html .= '<div class="venteSectionHeader">';
@@ -660,10 +660,10 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-//        
+//
         $html .= '</div>';
 
-        // Paiement: 
+        // Paiement:
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
         $html .= '<div id="curVentePanier" class="venteSection">';
@@ -680,7 +680,7 @@ class BC_Vente extends BimpObject
 
         $html .= '</div>';
 
-        // Partie de droite (Panier produits) 
+        // Partie de droite (Panier produits)
         $html .= '<div id="curVenteRight" class="col-sm-12 col-md-5 col-lg-4">';
 
         // Panier:
@@ -694,7 +694,7 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
 
-        // Retours produits: 
+        // Retours produits:
         $html .= '<div id="curVenteRetours" class="venteSection">';
         $html .= '<div class="venteSectionHeader">';
         $html .= '<i class="fa fa-reply iconLeft"></i>';
@@ -707,7 +707,7 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
 
-        // Locations: 
+        // Locations:
         if (BimpCore::isModuleActive('bimplocation')) {
             $html .= '<div id="curVenteLocations" class="venteSection" style="margin-bottom: 10px">';
             $html .= '<div class="venteSectionHeader">';
@@ -1176,7 +1176,7 @@ class BC_Vente extends BimpObject
 
         $toPay = 0;
 
-        // Reste à payer: 
+        // Reste à payer:
         $html .= '<div id="venteToPay">';
         $html .= 'Reste à payer: <span>' . BimpTools::displayMoneyValue($toPay, 'EUR') . '</span>';
         $html .= '</div>';
@@ -1184,7 +1184,7 @@ class BC_Vente extends BimpObject
         // A rendre:
         $html .= '<div id="venteToReturn" style="display: none">A rendre: <span>0,00 &euro;</span></div>';
 
-        // Avoir client: 
+        // Avoir client:
         $html .= '<div id="venteAvoir" style="display: none">Avoir client: <span>0,00 &euro;</span></div>';
 
         // Boutons paiement:
@@ -1258,7 +1258,7 @@ class BC_Vente extends BimpObject
 
         $html .= '</div>';
 
-        // Formulaire d'ajout de paiement: 
+        // Formulaire d'ajout de paiement:
         $html .= '<div id="venteAddPaiementFormContainer">';
         $html .= '<input type="hidden" id="ventePaiementCode" name="ventePaiementCode" value=""/>';
 
@@ -1284,7 +1284,7 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
 
-        // Paiements enregistrés: 
+        // Paiements enregistrés:
         $html .= '<div id="ventePaimentsLines">';
         $html .= $this->renderPaiementsLines();
         $html .= '</div>';
@@ -1319,7 +1319,7 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
 
-        // Utilisation remises client: 
+        // Utilisation remises client:
         $id_client = (int) $this->getData('id_client');
         $html .= '<div id="customerDiscountsContainer"' . (!$id_client ? 'style="display: none"' : '') . '>';
         $html .= '<div class="title"><i class="fas fa5-money-check-alt iconLeft"></i>Remises client disponibles à utiliser :</div>';
@@ -1331,7 +1331,7 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
 
-        // Conditions de réglement: 
+        // Conditions de réglement:
         $id_cond = (int) $this->getData('id_cond_reglement');
         $html .= '<div id="condReglement" style="font-size: 14px">';
         $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
@@ -1342,7 +1342,7 @@ class BC_Vente extends BimpObject
         $html .= '</select>';
         $html .= '</div>';
 
-        // Vente au prix HT: 
+        // Vente au prix HT:
         $vente_ht = (int) $this->getData('vente_ht');
         $html .= '<div id="venteHt" style="font-size: 14px">';
         $html .= '<span style="font-weight: bold">Vendre au prix hors-taxes : </span>';
@@ -1559,11 +1559,11 @@ class BC_Vente extends BimpObject
         $html .= '<div class="product_info"><strong>Equipement ' . $equipment->id . ' - n° de série: ' . $equipment->getData('serial') . '</strong></div>';
         $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->getRef() . '</div>';
 
-        // Options article: 
+        // Options article:
         $html .= '<div class="article_options">';
         $html .= '<div class="article_qty">&nbsp;</div>';
 
-        // Champ Remise CRT: 
+        // Champ Remise CRT:
         $remise_crt = (float) $product->getRemiseCrt();
         if ($remise_crt) {
             $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
@@ -1588,7 +1588,7 @@ class BC_Vente extends BimpObject
             $html .= '</div>';
         }
 
-        // Remises: 
+        // Remises:
         $html .= '<div class="article_remises">';
         $html .= '<div class="title">Remises: </div>';
         $html .= '<div class="content"></div>';
@@ -1665,7 +1665,7 @@ class BC_Vente extends BimpObject
         }
 
 
-        // Options article: 
+        // Options article:
         $html .= '<div class="article_options">';
         $html .= '<div class="article_qty">';
         $html .= '<strong>Qté: </strong>';
@@ -1682,7 +1682,7 @@ class BC_Vente extends BimpObject
         $html .= '<i class="fa fa-plus-circle iconRight"></i></span>';
         $html .= '</div>';
 
-        // Champ Remise CRT: 
+        // Champ Remise CRT:
         $remise_crt = (float) $product->getRemiseCrt();
         if ($remise_crt) {
             $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
@@ -1707,7 +1707,7 @@ class BC_Vente extends BimpObject
             $html .= '</div>';
         }
 
-        // Remises: 
+        // Remises:
         $html .= '<div class="article_remises">';
         $html .= '<div class="title">Remises: </div>';
         $html .= '<div class="content"></div>';
@@ -1727,7 +1727,7 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '</div>';
 
-        // Check du stock dispo: 
+        // Check du stock dispo:
         if ($product->isTypeProduct()) {
             $stock_dispo = (int) $article->getProductStock((int) $this->getData('id_entrepot'));
             $html .= '<div class="stockAlert"' . (($stock_dispo >= $qty) ? ' style="display: none"' : '') . '>';
@@ -1735,7 +1735,7 @@ class BC_Vente extends BimpObject
             $html .= '</div>';
         }
 
-        // Check validation du produit: 
+        // Check validation du produit:
         $errors2 = array();
         if (!(int) $product->isVendable($errors2, true, false)) {
             $html .= '<div style="margin: 10px 0">';
@@ -1836,7 +1836,7 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
-    // Traitements : 
+    // Traitements :
 
     public function checkEquipment($id_equipment, &$errors, &$is_location = false, $no_location = false)
     {
@@ -1877,7 +1877,7 @@ class BC_Vente extends BimpObject
                     }
                 }
 
-                if (!$equipment->isAvailable(0, $errors, array(// On ne vérifie pas l'emplacement de l'équipement pour éviter le blocage de la vente. 
+                if (!$equipment->isAvailable(0, $errors, array(// On ne vérifie pas l'emplacement de l'équipement pour éviter le blocage de la vente.
                             'id_vente'   => (int) $this->id,
                             'id_facture' => (int) $this->getData('id_facture')
                         ))) {
@@ -1962,7 +1962,7 @@ class BC_Vente extends BimpObject
 //                        if (BimpObject::ObjectLoaded($place)) {
 //                            $msg .= "\t" . 'Emplacement de l\'équipement: ' . $place->getPlaceName();
 //                        }
-//                        
+//
 //                        mailSyn2($subject, 'Admin_stock@bimp.fr', '', $msg);
 //                    }
 
@@ -2025,7 +2025,8 @@ class BC_Vente extends BimpObject
 
         $equipements = array();
 
-        // Recherche d'équipement via n° de série: 
+        // Recherche d'équipement via n° de série:
+		$search = str_replace("\"", "\\\"", $search);
         $rows = $this->db->getValues('be_equipment', 'id', 'serial = "' . $search . '" || concat("S", serial) = "' . $search . '"');
         if (!is_null($rows)) {
             foreach ($rows as $id_eq) {
@@ -2038,7 +2039,7 @@ class BC_Vente extends BimpObject
         $products = array();
         $products_warnings = array();
 
-        // Recherche Produits: 
+        // Recherche Produits:
         $sql = 'SELECT p.rowid as id, p.label, p.ref, pe.serialisable FROM ' . MAIN_DB_PREFIX . 'product p ';
         $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields pe ';
         $sql .= ' ON p.rowid = pe.fk_object';
@@ -2063,7 +2064,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Affichage des résultats: 
+        // Affichage des résultats:
 
         if (!count($equipements) && !count($products)) {
             $result_html .= BimpRender::renderAlerts('Aucun produit ni équipement trouvé pour la recherche "' . $search . '"');
@@ -2080,7 +2081,7 @@ class BC_Vente extends BimpObject
                         $cart_html = $this->addCartEquipement($equipements[0], $errors);
                     }
                 } else {
-                    // Liste des équipements à sélectionner: 
+                    // Liste des équipements à sélectionner:
                     $result_html .= '<h3>Equipements: </h3>';
                     $msg = count($equipements) . ' équipements trouvés pour le numéro de série "' . $search . '"';
                     $result_html .= BimpRender::renderAlerts($msg, 'info');
@@ -2097,7 +2098,7 @@ class BC_Vente extends BimpObject
 
             if (count($products) || count($products_warnings)) {
                 if (count($products) === 1 && !count($equipements) && !count($products_warnings)) {
-                    // Un seul produit trouvé, ajout direct au panier: 
+                    // Un seul produit trouvé, ajout direct au panier:
                     $check = false;
                     if (array_key_exists((int) $products[0], $current_products)) {
                         $article = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteArticle', (int) $current_products[(int) $products[0]]);
@@ -2220,13 +2221,13 @@ class BC_Vente extends BimpObject
         $returns = $this->getChildrenObjects('returns');
         $total_ttc = (float) round($this->getData('total_ttc'));
 
-        // Check de la caisse: 
+        // Check de la caisse:
 
         if (is_null($caisse) || !$caisse->isLoaded()) {
             $errors[] = 'Caisse absente ou invalide';
         }
 
-        // Check du client: 
+        // Check du client:
         $id_client = (int) $this->getData('id_client');
         $client = $this->getChildObject('client');
 
@@ -2238,7 +2239,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Check des articles: 
+        // Check des articles:
 
         $has_equipment = false;
         foreach ($articles as $article) {
@@ -2262,7 +2263,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Checks des retours: 
+        // Checks des retours:
         $i = 1;
         $has_returns = false;
         foreach ($returns as $return) {
@@ -2340,7 +2341,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Autres checks: 
+        // Autres checks:
         $data = $this->getAjaxData();
 
         if (($has_equipment || $has_returns || ((int) $data['paiement_differe'] && BimpCore::getConf('use_mode_reglement_caisse', null, 'bimpcaisse'))) && !BimpObject::objectLoaded($client)) {
@@ -2386,7 +2387,7 @@ class BC_Vente extends BimpObject
                 return false;
             }
 
-            // Vérification de la validité de la vente: 
+            // Vérification de la validité de la vente:
 
             if (!$this->checkVente($errors)) {
                 return false;
@@ -2425,7 +2426,7 @@ class BC_Vente extends BimpObject
             $this->set('status', 2);
             $update_errors = $this->update();
 
-            // Mise à jour du statut de la vente: 
+            // Mise à jour du statut de la vente:
 
             if (count($update_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour du statut de la vente');
@@ -2457,19 +2458,19 @@ class BC_Vente extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray($up_errors, $msg);
             }
 
-            // Gestion des stocks et emplacements des articles vendus: 
+            // Gestion des stocks et emplacements des articles vendus:
             foreach ($articles as $article) {
                 $equipment = $article->getChildObject('equipment');
                 if (BimpObject::objectLoaded($equipment)) {
 
-                    // Retrait du package si nécessaire: 
+                    // Retrait du package si nécessaire:
                     if ((int) $equipment->getData('id_package')) {
                         $equipment->updateField('id_package', 0);
                     }
 
                     $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                     if (!$article->checkPlace($id_entrepot)) {
-                        // Correction de l'emplacement initial en cas d'erreur: 
+                        // Correction de l'emplacement initial en cas d'erreur:
                         $place_errors = $place->validateArray(array(
                             'id_equipment' => (int) $equipment->id,
                             'type'         => BE_Place::BE_PLACE_ENTREPOT,
@@ -2489,7 +2490,7 @@ class BC_Vente extends BimpObject
                         }
                     }
 
-                    // Création du nouvel emplacement: 
+                    // Création du nouvel emplacement:
                     $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                     if ($id_client) {
                         $place_errors = $place->validateArray(array(
@@ -2536,7 +2537,7 @@ class BC_Vente extends BimpObject
                 }
             }
 
-            // Gestion des stocks et emplacement des produits retournés: 
+            // Gestion des stocks et emplacement des produits retournés:
             if (count($returns)) {
                 $id_defective_entrepot = (int) BimpCore::getConf('defective_id_entrepot');
                 $i = 1;
@@ -2546,7 +2547,7 @@ class BC_Vente extends BimpObject
                     if (BimpObject::objectLoaded($equipment)) {
                         $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
 
-                        // Création du nouvel emplacement: 
+                        // Création du nouvel emplacement:
                         if ((int) $return->getData('defective')) {
                             $place_errors = $place->validateArray(array(
                                 'id_equipment' => (int) $equipment->id,
@@ -2720,12 +2721,12 @@ class BC_Vente extends BimpObject
             return $errors;
         }
 
-        // Ajout contact client: 
+        // Ajout contact client:
         if ($id_contact) {
             $facture->dol_object->add_contact($id_contact, 'BILLING', 'external');
         }
 
-        // Ajout Commercial: 
+        // Ajout Commercial:
         $id_user_resp = (int) $this->getData('id_user_resp');
         if (!$id_user_resp) {
             global $user;
@@ -2733,7 +2734,7 @@ class BC_Vente extends BimpObject
         }
         $facture->dol_object->add_contact($id_user_resp, 'SALESREPFOLL', 'internal');
 
-        // Ajout des avoirs client utilisés: 
+        // Ajout des avoirs client utilisés:
         BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
         $asso = new BimpAssociation($this, 'discounts');
         $discounts = $asso->getAssociatesList();
@@ -2754,7 +2755,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Ajout des retours produits: 
+        // Ajout des retours produits:
         $returns = $this->getChildrenObjects('returns');
         $i = 0;
         foreach ($returns as $return) {
@@ -2821,7 +2822,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Ajout des lignes articles: 
+        // Ajout des lignes articles:
         $articles = $this->getChildrenObjects('articles');
         $total_articles_ttc = 0;
 
@@ -2829,7 +2830,7 @@ class BC_Vente extends BimpObject
             $total_articles_ttc += (int) $article->getData('qty') * (float) $article->getData('unit_price_tax_in');
         }
 
-        // Calcul du total des remises globales en pourcentage: 
+        // Calcul du total des remises globales en pourcentage:
         $globale_remise_percent = 0;
         $remises = BimpObject::getInstance($this->module, 'BC_VenteRemise');
 
@@ -2851,7 +2852,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Ajout des produits vendus: 
+        // Ajout des produits vendus:
         foreach ($articles as $article) {
             $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $article->getData('id_product'));
             $serial = '';
@@ -2926,7 +2927,7 @@ class BC_Vente extends BimpObject
             if (count($line_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de l\'article #' . $article->id . ' à la facture');
             } else {
-                // Ajout de la remise 
+                // Ajout de la remise
                 $remise_percent = (float) $article->getTotalRemisesPercent($globale_remise_percent);
 
                 if ($remise_percent) {
@@ -2936,7 +2937,7 @@ class BC_Vente extends BimpObject
                     }
                 }
 
-                // Ajout de l\'équipement: 
+                // Ajout de l\'équipement:
                 if (BimpObject::ObjectLoaded($equipment)) {
                     $eq_errors = $line->attributeEquipment((int) $equipment->id);
                     if (count($eq_errors)) {
@@ -2947,7 +2948,7 @@ class BC_Vente extends BimpObject
         }
 
         // Validation de la facture:
-        //forcage du droit 
+        //forcage du droit
         $user->rights->facture->creer = 1;
         if ($facture->dol_object->validate($user) <= 0) {
             $msg = 'Echec de la validation de la facture';
@@ -2973,7 +2974,7 @@ class BC_Vente extends BimpObject
         $total_facture_ttc = (float) $this->getData('total_ttc');
 
         if (!$is_avoir) {
-            // Ajout des paiements: 
+            // Ajout des paiements:
             $n = 0;
             foreach ($paiements as $paiement) {
                 $n++;
@@ -3058,7 +3059,7 @@ class BC_Vente extends BimpObject
                 }
             }
         } else {
-//            // On est dans le cas d'un avoir, suppression des paiements éventuels: 
+//            // On est dans le cas d'un avoir, suppression des paiements éventuels:
             $paiement = BimpObject::getInstance('bimpcaisse', 'BC_VentePaiement');
             $paiement->deleteByParent($this->id);
 
@@ -3117,7 +3118,7 @@ class BC_Vente extends BimpObject
         return $facture->id;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionAddLocation($data, &$success)
     {

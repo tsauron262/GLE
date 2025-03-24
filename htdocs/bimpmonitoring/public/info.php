@@ -19,6 +19,8 @@ if($db->num_rows($sql) > 0){
 	$array['lastlogin'] = $ln->max;
 }
 
+$array['check_versions_lock'] = BimpCore::getConf('check_versions_lock');
+
 
 
 if($echo)

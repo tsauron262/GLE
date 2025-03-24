@@ -84,6 +84,21 @@ class Bimp_ActionComm extends BimpObject
 		return 0;
 	}
 
+	public function isActionAllowed($action, &$errors = array())
+	{
+		switch ($action) {
+			case 'done':
+				$percent = (int)$this->getData('percent');
+				if ($percent < 0 || $percent >= 100) {
+					$errors[] = 'Cet événement n\'est pas en attente d\'être terminé';
+					return 0;
+				}
+				return 1;
+		}
+
+		return parent::isActionAllowed($action, $errors);
+	}
+
 	// Getters array:
 
 	public function getTypesArray($include_empty = false)
@@ -256,6 +271,23 @@ class Bimp_ActionComm extends BimpObject
 		$file = $this->id . '/' . $file_name;
 
 		return DOL_URL_ROOT . '/' . $page . '.php?modulepart=actions&entity=' . $this->dol_object->entity . '&file=' . urlencode($file);
+	}
+
+	public function getActionsButtons()
+	{
+		$buttons = array();
+
+		if ($this->isActionAllowed('done') && $this->canSetAction('done')) {
+			$buttons[] = array(
+				'label'   => 'Terminé',
+				'icon'    => 'fas_check',
+				'onclick' => $this->getJsActionOnclick('done', array(), array(
+					'confirm_msg' => 'Veuillez confirmer'
+				))
+			);
+		}
+
+		return $buttons;
 	}
 
 	// Getters données:
@@ -531,6 +563,22 @@ class Bimp_ActionComm extends BimpObject
 		dol_fiche_head($head, "list", $langs->trans('Agenda'), 0, 'action');
 	}
 
+	// Actions:
+
+	public function actionDone($data, &$success = '')
+	{
+		$warnings = array();
+//		$success = 'Événément marqué terminé';
+
+		$this->set('percent', 100);
+		$errors = $this->update($warnings, true);
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
 	// Overrides:
 
 	public function validatePost()
@@ -729,47 +777,7 @@ class Bimp_ActionComm extends BimpObject
 			)
 		);
 
-		$filters = array(
-			'a.fk_user_action'   => $id_user,
-			'or_todo'            => array(
-				'or' => array(
-					'and_no_percent' => array(
-						'and_fields' => array(
-							'a.percent' => array(
-								'operator' => '<',
-								'value'    => 0
-							),
-							'or_date'   => array(
-								'or' => array(
-									'a.datep'  => array(
-										'operator' => '>=',
-										'value'    => $date_now . ' 00:00:00'
-									),
-									'a.datep2' => array(
-										'operator' => '>=',
-										'value'    => $date_now . ' 00:00:00'
-									)
-								)
-							)
-						)
-					),
-					'a.percent'      => array(
-						'and' => array(
-							array(
-								'operator' => '>=',
-								'value'    => 0
-							),
-							array(
-								'operator' => '<',
-								'value'    => 100
-							)
-						)
-
-					)
-				)
-			),
-			'ac_type.user_notif' => 1
-		);
+		$filters = array();
 
 		if ($tms) {
 			$filters['a.tms'] = array(
@@ -777,6 +785,56 @@ class Bimp_ActionComm extends BimpObject
 				'value'    => $tms
 			);
 		}
+
+		$filters['ac_type.user_notif'] = 1;
+
+		$filters['or_user'] = array(
+			'or' => array(
+				'a.fk_user_action'   => $id_user,
+				'(SELECT COUNT(acr.rowid) FROM ' . MAIN_DB_PREFIX . 'actioncomm_resources acr WHERE acr.fk_actioncomm = a.id AND acr.fk_element = ' . $id_user . ' AND acr.element_type = \'user\')' => array(
+					'operator' => '>',
+					'value'    => 0
+				)
+			)
+		);
+
+		$filters['or_todo'] = array(
+			'or' => array(
+				'and_no_percent' => array(
+					'and_fields' => array(
+						'a.percent' => array(
+							'operator' => '<',
+							'value'    => 0
+						),
+						'or_date'   => array(
+							'or' => array(
+								'a.datep'  => array(
+									'operator' => '>=',
+									'value'    => $date_now . ' 00:00:00'
+								),
+								'a.datep2' => array(
+									'operator' => '>=',
+									'value'    => $date_now . ' 00:00:00'
+								)
+							)
+						)
+					)
+				),
+				'a.percent'      => array(
+					'and' => array(
+						array(
+							'operator' => '>=',
+							'value'    => 0
+						),
+						array(
+							'operator' => '<',
+							'value'    => 100
+						)
+					)
+
+				)
+			)
+		);
 
 		if (!empty($options['excluded_events'])) {
 			$filters['a.id'] = array(
@@ -830,7 +888,8 @@ class Bimp_ActionComm extends BimpObject
 				'today'    => $today,
 				'state'    => $ac->displayState(true),
 				'lieu'     => $ac->getData('location'),
-				'desc'     => $ac->getData('note')
+				'desc'     => $ac->getData('note'),
+				'close_btn' => (int) ($ac->isActionAllowed('done') && $ac->canSetAction('done'))
 			);
 		}
 

@@ -379,6 +379,8 @@ fields_tables:
         rows:
             -   field: fk_user_author
                 display: nom_url
+            -   field: fk_user_action
+                display: nom_url
             -   label: Assigné à
                 value:
                     callback: displayUsersAssigned
@@ -554,7 +556,6 @@ lists:
             element:
             state:
     
-    
     soc:
         extends: default
         filters_panel: soc
@@ -578,5 +579,8 @@ lists:
                     - ficheInter
         cols:
             element: unset
+            
+    user: 
+        extends: default
 
 header_list_name: default

@@ -1,0 +1,24 @@
+bootstrap: 1
+title: Mon Agenda
+
+objects:
+    actioncomm:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_ActionComm
+
+sections:
+    maintabs:
+        type: tabs
+        tabs:
+            default:
+                label: Mes Événements
+                icon: fas_bars
+                sections:
+                    default:
+                        type: custom
+                        custom:
+                            callback: renderUserEventsTab
+                    
+      

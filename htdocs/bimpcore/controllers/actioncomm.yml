@@ -29,5 +29,3 @@ sections:
                 view:
                     object: actioncomm
                     name: default
-#          - id: documents
-#            title: Fichiers joints (a finir)

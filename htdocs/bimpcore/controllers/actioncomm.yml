@@ -1,5 +1,10 @@
 bootstrap: 1
 
+title:
+    callback:
+        object: actioncomm
+        method: getPageTitle
+
 js:
     - /bimpsupport/views/js/sav.js
 
@@ -29,5 +34,3 @@ sections:
                 view:
                     object: actioncomm
                     name: default
-#          - id: documents
-#            title: Fichiers joints (a finir)

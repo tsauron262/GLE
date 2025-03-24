@@ -3,6 +3,7 @@
 class Bimp_ActionComm extends BimpObject
 {
 	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+
 	public static $transparencies = array(
 		0 => 'Disponible',
 		1 => 'Occupé',
@@ -143,6 +144,11 @@ class Bimp_ActionComm extends BimpObject
 		return '';
 	}
 
+	public function getStatusProperty()
+	{
+		return '';
+	}
+
 	public function getCustomFilterValueLabel($field_name, $value)
 	{
 		switch ($field_name) {
@@ -205,6 +211,32 @@ class Bimp_ActionComm extends BimpObject
 		}
 
 		return $filters;
+	}
+
+	public function getFilesDir()
+	{
+		global $conf;
+		if ($this->isLoaded()) {
+			return $conf->agenda->multidir_output[$this->dol_object->entity] . '/' . dol_sanitizeFileName($this->dol_object->ref);
+		} else {
+			echo 'NOT LOADED';
+			exit;
+		}
+	}
+
+	public function getFileUrl($file_name, $page = 'document')
+	{
+		if (!$file_name) {
+			return '';
+		}
+
+		if (!$this->isLoaded()) {
+			return '';
+		}
+
+		$file = $this->id . '/' . $file_name;
+
+		return DOL_URL_ROOT . '/' . $page . '.php?modulepart=actions&entity=' . $this->dol_object->entity . '&file=' . urlencode($file);
 	}
 
 	// Getters données:
@@ -367,6 +399,29 @@ class Bimp_ActionComm extends BimpObject
 	}
 
 	// Rendus HTML:
+
+	public function renderHeaderStatusExtra()
+	{
+		return $this->displayState(true);
+	}
+
+	public function renderHeaderExtraLeft()
+	{
+		$html = '';
+
+		$html .= '<div>';
+		$html .= '<psan class="info" style="font-size: 14px">' . $this->displayDates(true) . '</span>';
+		$html .= '</div>';
+
+		$loc = $this->getData('location');
+		if ($loc) {
+			$html .= '<div>';
+			$html .= BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $loc;
+			$html .= '</div>';
+		}
+
+		return $html;
+	}
 
 	public function renderDateInput($field_name)
 	{

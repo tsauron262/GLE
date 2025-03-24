@@ -30,6 +30,10 @@ class BimpObject extends BimpCache
 	public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
 	public static $ref_properties = array('ref', 'reference', 'code');
 	public static $status_properties = array('status', 'fk_statut', 'statut');
+
+	public static $date_create_properties = array('date_create');
+
+	public static $user_create_properties = array('user_create', 'fk_user_author');
 	public static $date_update_properties = array('date_update', 'tms');
 	public static $user_update_properties = array('user_update', 'fk_user_modif');
 	public static $allowedDbNullValueDataTypes = array('date', 'datetime', 'time');
@@ -816,6 +820,28 @@ class BimpObject extends BimpCache
 	public function getRefProperty()
 	{
 		foreach (static::$ref_properties as $prop) {
+			if ($this->field_exists($prop)) {
+				return $prop;
+			}
+		}
+
+		return '';
+	}
+
+	public function getDateCreateProperty()
+	{
+		foreach (static::$date_create_properties as $prop) {
+			if ($this->field_exists($prop)) {
+				return $prop;
+			}
+		}
+
+		return '';
+	}
+
+	public function getUserCreateProperty()
+	{
+		foreach (static::$user_create_properties as $prop) {
 			if ($this->field_exists($prop)) {
 				return $prop;
 			}
@@ -5348,7 +5374,7 @@ class BimpObject extends BimpCache
 					}
 
 					$uc = (int) $this->getData('user_create');
-					if (is_null($uc) || !$uc) {
+					if (!$uc) {
 						global $user;
 						if (isset($user->id)) {
 							$uc = (int) $user->id;
@@ -5357,6 +5383,19 @@ class BimpObject extends BimpCache
 						}
 					}
 					$this->set('user_create', $uc);
+				} else {
+					$date_create_field = $this->getDateCreateProperty();
+					if ($date_create_field) {
+						$this->data[$date_create_field] = date('Y-m-d H:i:s');
+					}
+
+					$user_create_field = $this->getUserCreateProperty();
+					if ($user_create_field) {
+						global $user;
+						if (BimpObject::objectLoaded($user)) {
+							$this->data[$user_create_field] = $user->id;
+						}
+					}
 				}
 
 				if ($this->params['positions'] && $this->params['position_insert'] === 'after') {

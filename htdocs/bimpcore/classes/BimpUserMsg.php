@@ -461,7 +461,7 @@ class BimpUserMsg
 		),
 		'envoi_CR_fiche_inter'                       => array(    // \BT_ficheInter::setSigned
 			'label'  => 'Pour information, l\'intervention XXX pour le client XXX (en interne a été signé par le technicien. La FI à été marquée comme terminée automatiquement.)/(n\'a pas pu être envoyée par e-mail au client)/(a été envoyée par e-mail au client) (pour signature électronique à distance.)/(suite à sa signature électronique.)/(pour signature papier à renvoyer par e-mail.)',
-			'dests'  => 'objet::client_commerciaux',
+			'dests'  => 'object::client_commerciaux',
 			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimptechnique',
 		),

@@ -282,7 +282,7 @@ class Bimp_User extends BimpObject
 			}
 		}
 
-		$obligatoire = (int) BimpCore::getConf('userMessages__' .$code_msg . '__required', BimpUserMsg::$userMessages[$code_msg]['required'], 'bimpcore');
+		$obligatoire = (int) BimpCore::getConf('userMessages__' .$code_msg . '__required', (isset(BimpUserMsg::$userMessages[$code_msg]['required']) ? (int) BimpUserMsg::$userMessages[$code_msg]['required'] : 1), 'bimpcore');
 
 		if (!$obligatoire) {
 			if (!(int) $this->getUserParamValue('userMessages__' . $code_msg . '__abonner', 1)) {
@@ -1279,9 +1279,9 @@ class Bimp_User extends BimpObject
 			if ($userMessage['params']['type_metier'] != $type_metier) {
 				continue;
 			}
-			$required = BimpCore::getConf('userMessages__' . $code . '__required', $userMessage['params']['required']);
-			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', $userMessage['params']['active']);
-			$abonner = ($this->getUserParamValue('userMessages__' . $code . '__abonner') != '' ? $this->getUserParamValue('userMessages__' . $code . '__abonner') : 'yes');
+			$required = BimpCore::getConf('userMessages__' . $code . '__required', $userMessage['params']['required'], 1);
+			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', $userMessage['params']['active'], 1);
+			$abonner = ($this->getUserParamValue('userMessages__' . $code . '__abonner') != '' ? $this->getUserParamValue('userMessages__' . $code . '__abonner', 1) : 'yes');
 
 			if (!$msg_active) {
 				continue;

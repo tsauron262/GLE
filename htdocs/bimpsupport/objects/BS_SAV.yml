@@ -1832,6 +1832,11 @@ lists:
         extends: default
         cols:
             client: unset
+            
+    centre:
+        extends: default
+        cols:
+            code_centre: unset
     
     public_client:
         title: Liste des SAV

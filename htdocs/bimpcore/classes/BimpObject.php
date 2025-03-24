@@ -30,6 +30,10 @@ class BimpObject extends BimpCache
 	public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
 	public static $ref_properties = array('ref', 'reference', 'code');
 	public static $status_properties = array('status', 'fk_statut', 'statut');
+
+	public static $date_create_properties = array('date_create');
+
+	public static $user_create_properties = array('user_create', 'fk_user_author');
 	public static $date_update_properties = array('date_update', 'tms');
 	public static $user_update_properties = array('user_update', 'fk_user_modif');
 	public static $allowedDbNullValueDataTypes = array('date', 'datetime', 'time');
@@ -816,6 +820,28 @@ class BimpObject extends BimpCache
 	public function getRefProperty()
 	{
 		foreach (static::$ref_properties as $prop) {
+			if ($this->field_exists($prop)) {
+				return $prop;
+			}
+		}
+
+		return '';
+	}
+
+	public function getDateCreateProperty()
+	{
+		foreach (static::$date_create_properties as $prop) {
+			if ($this->field_exists($prop)) {
+				return $prop;
+			}
+		}
+
+		return '';
+	}
+
+	public function getUserCreateProperty()
+	{
+		foreach (static::$user_create_properties as $prop) {
 			if ($this->field_exists($prop)) {
 				return $prop;
 			}
@@ -5348,7 +5374,7 @@ class BimpObject extends BimpCache
 					}
 
 					$uc = (int) $this->getData('user_create');
-					if (is_null($uc) || !$uc) {
+					if (!$uc) {
 						global $user;
 						if (isset($user->id)) {
 							$uc = (int) $user->id;
@@ -5357,6 +5383,19 @@ class BimpObject extends BimpCache
 						}
 					}
 					$this->set('user_create', $uc);
+				} else {
+					$date_create_field = $this->getDateCreateProperty();
+					if ($date_create_field) {
+						$this->data[$date_create_field] = date('Y-m-d H:i:s');
+					}
+
+					$user_create_field = $this->getUserCreateProperty();
+					if ($user_create_field) {
+						global $user;
+						if (BimpObject::objectLoaded($user)) {
+							$this->data[$user_create_field] = $user->id;
+						}
+					}
 				}
 
 				if ($this->params['positions'] && $this->params['position_insert'] === 'after') {
@@ -9384,39 +9423,43 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			$options .= ($options ? ', ' : '') . 'display_processing: ' . ((int) $params['display_processing'] ? 1 : 0);
 		}
 
-		$js = 'setObjectAction(';
-		if (!isset($params['no_button']) || !$params['no_button']) {
-			$js .= '$(this), ';
-		} else {
-			$js .= 'null, ';
-		}
-		$js .= $this->getJsObjectData();
-		$js .= ', \'' . $action . '\', {';
-		$fl = true;
-		foreach ($data as $key => $value) {
-			if (!$fl) {
-				$js .= ', ';
+        $js = 'setObjectAction(';
+        if (!isset($params['no_button']) || !$params['no_button']) {
+            $js .= '$(this), ';
+        } else {
+            $js .= 'null, ';
+        }
+        $js .= $this->getJsObjectData();
+        $js .= ', \'' . $action . '\', {';
+        $fl = true;
+        foreach ($data as $key => $value) {
+            if (!$fl) {
+                $js .= ', ';
+            } else {
+                $fl = false;
+            }
+			$js .= $key .': ';
+			if (isset($value['js_function'])) {
+				$js .= $value['js_function'];
 			} else {
-				$fl = false;
+				$js .= (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */$value/* )) */ . '\''));
 			}
-			$js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */
-					$value/* )) */ . '\''));
-		}
-		$js .= '}, ';
-		if (isset($params['result_container'])) {
-			$js .= $params['result_container'];
-		} else {
-			$js .= 'null';
-		}
-		$js .= ', ';
-		if (isset($params['success_callback'])) {
-			$js .= $params['success_callback'];
-		} else {
-			$js .= 'null';
-		}
-		$js .= ', ';
-		$js .= '{' . $options . '}';
-		$js .= ');';
+        }
+        $js .= '}, ';
+        if (isset($params['result_container'])) {
+            $js .= $params['result_container'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['success_callback'])) {
+            $js .= $params['success_callback'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        $js .= '{' . $options . '}';
+        $js .= ');';
 
 		return $js;
 	}
@@ -11982,23 +12025,35 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				}
 			}
 
-			$id_entrepot = (int) $this->getData('id_entrepot');
-			if (!$id_entrepot) {
-				$id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
-			}
-			if ($id_entrepot) {
-				global $tabCentre;
-				foreach ($tabCentre as $code_centre => $centre) {
-					if ((int) $centre[8] === $id_entrepot) {
-						return $code_centre;
+            $id_entrepot = (int) $this->getData('id_entrepot');
+            if (!$id_entrepot) {
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
+            }
+            if ($id_entrepot) {
+//                global $tabCentre;
+//                foreach ($tabCentre as $code_centre => $centre) {
+//                    if ((int) $centre[8] === $id_entrepot) {
+//                         return $code_centre;
+//                    }
+//                }
+				$lescentres = BimpCache::getCentresData();
+				foreach ($lescentres as $centre)	{
+					if((int) $centre['id_entrepot'] === $id_entrepot)	{
+						return $centre['code'];
 					}
 				}
-			}
-		}
-		global $tabCentre;
-		if (count($tabCentre) == 1) {
-			foreach ($tabCentre as $code_centre => $centre) {
-				return $code_centre;
+            }
+        }
+//        global $tabCentre;
+//        if (count($tabCentre) == 1) {
+//            foreach ($tabCentre as $code_centre => $centre) {
+//                return $code_centre;
+//            }
+//        }
+		$lescentres = BimpCache::getCentresData();
+		if (count($lescentres) == 1) {
+			foreach ($lescentres as $centre) {
+				return $centre['code'];
 			}
 		}
 

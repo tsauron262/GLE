@@ -1010,11 +1010,6 @@ class BimpNote extends BimpObject
         $erp_name = BimpCore::getConf('erp_name');
 
         foreach ($listUser as $idUser) {
-            $email = $bdb->getValue('user', 'email', 'rowid = ' . $idUser);
-            if (!$email) {
-                continue;
-            }
-
             $html = '';
             $notes = BimpNote::getUserNewNotes('', 500, $idUser, true);
 
@@ -1049,8 +1044,8 @@ class BimpNote extends BimpObject
                     $html .= '<i>' . $note->displayDataDefault('content') . '</i>';
                 }
 
-                $email = BimpTools::cleanEmailsStr($email);
-                mailSyn2($subject, $email, null, $html);
+				$code = 'message_ERP_nonlu';
+				BimpUserMsg::envoiMsg($code, $subject, $html, $idUser);
             }
         }
 

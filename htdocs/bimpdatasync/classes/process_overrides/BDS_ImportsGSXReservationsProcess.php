@@ -2,7 +2,8 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php';
-BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+$tabCentre = BimpCache::getCentresData();
 
 class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 {
@@ -293,14 +294,14 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             } else {
                 $client = null;
 
-                // Création du client: 
+                // Création du client:
                 if (isset($data['customer']) && !empty($data['customer'])) {
                     $client = $this->getExistingClient($data['customer'], $resId);
                 }
 
-                // Création de l'équipement: 
+                // Création de l'équipement:
 //                $equipment = $this->getOrCreateEquipment(BimpTools::getArrayValueFromPath($data, 'product/serialNumber', ''), $resId);
-                // Création du SAV: 
+                // Création du SAV:
 //                $centre = '';
 //                foreach ($users as $u) {
 //                    if (!empty($u['centre'])) {
@@ -352,7 +353,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             $this->Alert('Impossible de créer ou récupérer le client (e-mail absent)', null, $resId);
             $this->report->increaseObjectData('bimpcore', 'Bimp_Client', 'nbIgnored');
         } else {
-            // Recherche via UserClient: 
+            // Recherche via UserClient:
             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                         'email_custom' => array(
                             'custom' => 'LOWER(a.email) = \'' . strtolower($email) . '\''
@@ -368,7 +369,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                 }
             }
 
-            // Recherche via contact client: 
+            // Recherche via contact client:
             $contact = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Contact', array(
                         'email' => $email
                             ), true);
@@ -382,7 +383,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                 }
             }
 
-            // Recherche client: 
+            // Recherche client:
             $client = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Client', array(
                         'client' => array(
                             'in' => array(1, 2, 3)
@@ -698,7 +699,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
             $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
 
-            // Envoi e-mails users: 
+            // Envoi e-mails users:
 //            $subject = 'Nouvelle Reservation SAV le ' . $dateBegin->format('d / m / Y') . ' à ' . $dateBegin->format('H\Hi');
 //            $message = 'Bonjour,' . "\n\n";
 //            $message .= 'Une nouvelle réservation SAV a été ajouté à votre agenda:' . "\n\n";
@@ -753,7 +754,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 //                $this->Alert('Aucun e-mail utilisateur pour notification RDV SAV', $sav, $resId);
 //                BimpCore::addlog('Aucun e-mail utilisateur pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav);
 //            }
-            // Envoi e-mail client: 
+            // Envoi e-mail client:
             $email_client = '';
             $soc_name = '';
             $from_type = '';
@@ -766,12 +767,12 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                     $from_type = 'ldlc';
                     $from = 'savbimp@bimp.fr';
                     break;
-                
-                case 'actimac': 
+
+                case 'actimac':
                     $soc_name = 'Actimag';
                     break;
-                
-                case 'champagne': 
+
+                case 'champagne':
                     $soc_name = 'LDLC';
                     $from = 'sav_ch@ldlc.com';
                     break;
@@ -831,7 +832,7 @@ L’équipe " . $soc_name;
                     }
                 }
 
-                $centres = BimpCache::getCentres();
+                $centres = BimpCache::getCentresData();
                 if (isset($centres[$centre]) && isset($centres[$centre]['mail'])) {
                     $from = $centres[$centre]['mail'];
                 }
@@ -874,7 +875,7 @@ L’équipe " . $soc_name;
     {
         if (is_null($this->apple_ids)) {
             $this->apple_ids = array();
-            $centres = BimpCache::getCentres();
+            $centres = BimpCache::getCentresData();
 
             foreach ($centres as $code_centre => $centre_data) {
                 $shipTo = BimpTools::getArrayValueFromPath($centre_data, 'shipTo', '');
@@ -927,7 +928,7 @@ L’équipe " . $soc_name;
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
-        // Process: 
+        // Process:
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ImportsGSXReservations',
                     'title'       => ($title ? $title : static::$default_public_title),
@@ -937,7 +938,7 @@ L’équipe " . $soc_name;
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($process)) {
-            // Params: 
+            // Params:
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'sold_to',
@@ -945,7 +946,7 @@ L’équipe " . $soc_name;
                 'value'      => ''
                     ), true, $warnings, $warnings);
 
-            // Options: 
+            // Options:
 
             $options = array();
 
@@ -993,7 +994,7 @@ L’équipe " . $soc_name;
                 $warnings = array_merge($warnings, $op->addAssociates('options', $options));
             }
 
-            // Options suppl. process: 
+            // Options suppl. process:
 
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,
@@ -1048,7 +1049,7 @@ L’équipe " . $soc_name;
 //            if (BimpObject::objectLoaded($opt)) {
 //                $options[] = (int) $opt->id;
 //            }
-            // Opération Process: 
+            // Opération Process:
 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $process->id,

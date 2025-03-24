@@ -262,6 +262,10 @@ lists_cols:
         label: Dernier PA HT réel
         value: 
             callback: getLastTruePaHt
+#    type_materiel:
+#        label: Type matériel
+#        value:
+#            callback: displayTypeMateriel
                 
 lists: 
     default: 

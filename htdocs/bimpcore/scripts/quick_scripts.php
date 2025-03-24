@@ -61,7 +61,8 @@ if (!$action) {
         'correct_contrat_parent_line'               => 'Correction ligne parente pour les sous-lignes bundle dans les contrats',
         'correct_contrats_bundles'                  => 'Correction des bundles dans les contrats',
         'correct_contrats_commerciaux'              => 'Correction commerciaux contrats abos',
-        'aj_menu_compta'                            => 'Aj menu compta'
+        'aj_menu_compta'                            => 'Aj menu compta',
+		'convert_centre_sav'						=> 'Convertion des centres sav',
     );
 
     $path = pathinfo(__FILE__);
@@ -114,17 +115,17 @@ switch ($action) {
         }
         print_r($warnings);
         break;
-        
+
     case 'aj_menu_compta':
         global $db, $conf;
         $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."menu` WHERE `titre` = 'Comptabilité' AND entity IN (0, ".$conf->entity.')');
-        $ln = $db->fetch_object($sql); 
+        $ln = $db->fetch_object($sql);
             $db->query('INSERT INTO `'.MAIN_DB_PREFIX.'menu` (`menu_handler`, `entity`, `module`, `type`, `mainmenu`, `leftmenu`, `fk_menu`, `fk_mainmenu`, `fk_leftmenu`, `position`, `url`, `target`, `titre`, `prefix`, `langs`, `level`, `perms`, `enabled`, `usertype`, `tms`, `icon`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`, `allowed_users`)
 VALUES
 	(\'bimptheme\', '.$conf->entity.', \'comptabilite|accounting|assets\', \'top\', \'accountancy\', \'\', '.$ln->rowid.', NULL, NULL, 54, \'/compta/index.php?mainmenu=accountancy&amp;leftmenu=accountancy\', \'\', \'MenuAccountancy\', NULL, \'compta\', -1, \'$user->rights->compta->resultat->lire || $user->rights->accounting->mouvements->lire || $user->rights->assets->read\', \'$conf->comptabilite->enabled || $conf->accounting->enabled || $conf->accounting->assets\', 2, \'2020-06-08 11:26:32\', NULL, \'\', 1, \'\', \'\', \'\', \'\');');
-           
+
         $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."menu` WHERE `titre` = 'MenuAccountancy' AND menu_handler = 'bimptheme' AND entity = ".$conf->entity);
-        $ln = $db->fetch_object($sql);  
+        $ln = $db->fetch_object($sql);
         $sql = $db->query('INSERT INTO `'.MAIN_DB_PREFIX.'menu` (`menu_handler`, `entity`, `module`, `type`, `mainmenu`, `leftmenu`, `fk_menu`, `fk_mainmenu`, `fk_leftmenu`, `position`, `url`, `target`, `titre`, `prefix`, `langs`, `level`, `perms`, `enabled`, `usertype`, `tms`, `icon`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`, `allowed_users`)
 (SELECT \'bimptheme\', `entity`, `module`, `type`, `mainmenu`, `leftmenu`, '.$ln->rowid.', `fk_mainmenu`, `fk_leftmenu`, `position`, `url`, `target`, `titre`, `prefix`, `langs`, `level`, `perms`, `enabled`, `usertype`, `tms`, `icon`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`, `allowed_users` FROM `'.MAIN_DB_PREFIX.'menu` WHERE `mainmenu` LIKE \'accountancy\' AND fk_menu > 0 AND menu_handler = \'auguria\' AND entity = '.$conf->entity.');');
         break;
@@ -538,6 +539,54 @@ VALUES
             }
         }
         break;
+
+	case 'convert_centre_sav':
+		if ((int) BimpCore::getConf('', 0)) {
+			echo 'Centres SAV déjà activés';
+		} else {
+			$centres = BimpCache::getCentresData();
+
+			echo 'CENTRES : <pre>' . print_r($centres, 1) . '</pre>';
+
+			$bdb = BimpCache::getBdb();
+			foreach ($centres as $code => $centre) {
+				$errors = array();
+				if (isset($centre['id_centre_rattachement']) && $centre['id_centre_rattachement']) {
+					$id_centre_rattache = $bdb->getValue('bs_centre_sav', "id", 'code = "' . $centre['id_centre_rattachement'] . '"');
+				} else {
+					$id_centre_rattache = 0;
+				}
+
+				echo 'Aj ' . $code . ' : ';
+
+				BimpObject::createBimpObject('bimpsupport', 'BS_CentreSav', array(
+					'code'                   => $code,
+					'label'                  => $centre['label'],
+					'id_entrepot'            => $centre['id_entrepot'],
+					'id_centre_rattachement' => $id_centre_rattache,
+					'address'                => $centre['address'],
+					'zip'                    => $centre['zip'],
+					'town'                   => $centre['town'],
+					'shipTo'                 => $centre['shipTo'],
+					'email'                  => $centre['mail'],
+					'tel'                    => $centre['tel'],
+					'active'                 => $centre['active'],
+					'token'                  => (isset($centre['token']) ? $centre['token'] : ''),
+					'id_group'               => (isset($centre['id_group']) ? $centre['id_group'] : 0),
+					'warning'                => (isset($centre['infos']) ? $centre['infos'] : ''),
+				), true, $errors);
+
+				if (count($errors)) {
+					echo 'Erreurs : <pre>';
+					print_r($errors);
+					echo '</pre>';
+				} else {
+					echo '<br />OK';
+				}
+			}
+		}
+
+	break;
 
     default:
         echo 'Action invalide';

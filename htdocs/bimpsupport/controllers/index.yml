@@ -218,6 +218,10 @@ sections:
         centre:
             label: Centres SAV
             icon: fas_store
+            show:
+                conf:
+                    name: use_centres_sav
+                    module: bimpsupport
             sections:
                 - type: list
                   list:

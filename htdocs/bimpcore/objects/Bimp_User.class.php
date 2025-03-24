@@ -267,6 +267,32 @@ class Bimp_User extends BimpObject
 		return 0;
 	}
 
+	public function isMsgAllowed($code_msg, $check_availability = true, &$unallowed_reason = '')
+	{
+		if (!(int) $this->getData('statut')) {
+			$unallowed_reason = 'est inactif';
+			return 0;
+		}
+
+		if ($check_availability) {
+			$err = array();
+			if (!$this->isAvailable(null, $err, $unallowed_reason)) {
+				$unallowed_reason = 'est ' . $unallowed_reason;
+				return 0;
+			}
+		}
+
+		$obligatoire = (int) BimpCore::getConf('userMessages__' .$code_msg . '__required', (isset(BimpUserMsg::$userMessages[$code_msg]['required']) ? (int) BimpUserMsg::$userMessages[$code_msg]['required'] : 1), 'bimpcore');
+
+		if (!$obligatoire) {
+			if (!(int) $this->getUserParamValue('userMessages__' . $code_msg . '__abonner', 1)) {
+				$unallowed_reason = 'ne souhaite pas recevoir ce type de message';
+				return 0;
+			}
+		}
+
+		return 1;
+	}
 	// Getters données:
 
 	public function getCardFields($card_name)
@@ -363,6 +389,7 @@ class Bimp_User extends BimpObject
 
 	public function getEmailOrSuperiorEmail($allow_default = true)
 	{
+		// Franck : on laisse cette fonction qui est peut-être utile
 		$email = '';
 
 		if ((int) $this->getData('statut')) {
@@ -392,6 +419,27 @@ class Bimp_User extends BimpObject
 		return $this->getData('firstname') . ' ' . $this->getData('lastname');
 	}
 
+	public function getSubstituteUsers()
+	{
+		$users = array();
+
+		// checker délégués (on doit ajouter tous les délégués si plusieurs)
+
+		// si aucun délégué valide => checker supérieurs
+
+		// Pour les supérieurs : parcourir toute la hiérarchie et sélectionner le premier valide
+		// Pour l'instant on va éviter d'envoyer les mails au PDG : donc on sélectionne un supérieur que s'il possède lui-même un supérieur.
+		// On peut envisager une variable de conf (ex: max_superior_level_for_user_msg_substitute)
+		// = nombre minimum de supérieurs que doit posséder le user pour être sélectionné
+
+		// Ajouter chaque user comme ceci :
+//		$users[] = array(
+//			'id' => $id_user_subst,
+//			'info' => 'xxx reçoit ce message car il est délégué / supérieur de xxx' ($user->getName())
+//		);
+
+		return $users;
+	}
 	// Getters Statics:
 
 	public static function getUserGroupsRights($id_user, $id_entity = 0)
@@ -698,10 +746,11 @@ class Bimp_User extends BimpObject
 		foreach ($tabs[$this->id] as $id) {
 			$obj = $collection->getObjectInstance((int) $id);
 			global $modeCSV;
-			if ($modeCSV)
+			if ($modeCSV) {
 				$tabHtml[] = $obj->getData('nom');
-			else
+			} else {
 				$tabHtml[] = $obj->getLink();
+		}
 		}
 
 		return implode('<br/>', $tabHtml);
@@ -989,12 +1038,13 @@ class Bimp_User extends BimpObject
 				);
 			}
 
-			if (BimpCore::isModuleActive('BIMPTASK'))
+			if (BimpCore::isModuleActive('BIMPTASK')) {
 				$tabs[] = array(
 					'id'      => 'tasks',
 					'title'   => BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Mes tâches',
 					'content' => $this->renderTasksView()
 				);
+		}
 		}
 
 		if ($isAdmin || $isItself || $this->canViewUserCommissions()) {
@@ -1175,7 +1225,6 @@ class Bimp_User extends BimpObject
 		}
 
 
-
 		// Affichage attributs LDAP
 		print load_fiche_titre($langs->trans("LDAPInformationsForThisUser"));
 
@@ -1218,6 +1267,62 @@ class Bimp_User extends BimpObject
 		$html = ob_get_clean();
 
 		return $html;
+	}
+
+	public function renderMsgErp($type_metier = 'metier')
+	{
+		$oui_non = array(
+			'yes' => 'Oui',
+			'no'  => 'Non',
+		);
+
+		$headers = array(
+			'label'    => array('label' => 'Libellé'),
+			'required' => array('label' => 'Obligatoire', 'search_values' => $oui_non),
+			'resil'    => array('label' => 'Abonné', 'search_values' => $oui_non),
+		);
+
+		$lines = array();
+		foreach (BimpUserMsg::getParamsMessageAll() as $code => $userMessage) {
+			if (!BimpCore::isModuleActive($userMessage['module'])) {
+				continue;
+			}
+			if ($userMessage['params']['type_metier'] != $type_metier) {
+				continue;
+			}
+			$required = BimpCore::getConf('userMessages__' . $code . '__required', $userMessage['params']['required'], 1);
+			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', $userMessage['params']['active'], 1);
+			$abonner = ($this->getUserParamValue('userMessages__' . $code . '__abonner') != '' ? $this->getUserParamValue('userMessages__' . $code . '__abonner', 1) : 'yes');
+
+			if (!$msg_active) {
+				continue;
+			}
+
+			$lines[] = array(
+				'label' => $userMessage['label'],
+				'required' => array(
+					'content' => '<span class="' . ($required ? 'danger' : 'success') . '">' . ($required ? $oui_non['yes'] : $oui_non['no']) . '</span>',
+					'value'   => $required ? 'yes' : 'no'
+				),
+				'resil' => $required ? array('content' => 'Oui par défaut', 'value' => 'yes') : array(
+					'content' => BimpInput::renderInput('toggle', 'resil', ($abonner == 'yes' ? 1 : 0),
+						array(
+							'extra_attr' => array('onchange' => $this->getJsActionOnclick(
+								'saveMsgErpUserParam',
+								array('param' => 'userMessages__' . $code . '__abonner', 'value' => array('js_function' => 'parseInt($(this).val())'))
+							))
+						)
+					),
+					'value'   => ($abonner == 'yes' ? 'yes' : 'no')
+				),
+			);
+		}
+		$params = array(
+			'searchable' => true,
+			'sortable'   => true,
+		);
+
+		return BimpRender::renderBimpListTable($lines, $headers, $params);
 	}
 
 	public function renderMaterielView()
@@ -1288,10 +1393,99 @@ class Bimp_User extends BimpObject
 				'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#lists_filters_tab .nav_tab_ajax_result\')', array('lists_filters'), array('button' => ''))
 			);
 
+			$tabs[] = array(
+				'id'      => 'msgErp',
+				'title'   => BimpRender::renderIcon('fas_mail-bulk', 'iconLeft') . 'Message ERP',
+				'content' => $this->renderMsgErp()
+			);
+
+//			$tabs[] = array(
+//				'id'            => 'choix_UI_tab',
+//				'title'         => 'Interface utilisateur',
+//				'content'		=> $this->renderChoixUi()
+//			);
+
 			return BimpRender::renderNavTabs($tabs, 'params_tabs');
 		}
 
 		return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
+	}
+
+	public function renderChoixUi()
+	{
+		global $conf;
+
+		$selectedTheme = $this->getUserParamValue('MAIN_THEME', 'BimpTheme');
+		$defaultTheme = $conf->global->MAIN_THEME;
+
+		$headers = array(
+			'titre' => 'Thème',
+			'apercu' => 'Aperçu',
+			'action' => 'Action'
+		);
+
+		$dirthemes = array('/theme');
+		if (!empty($conf->modules_parts['theme'])) {		// Using this feature slow down application
+			foreach ($conf->modules_parts['theme'] as $reldir) {
+				var_dump($reldir);
+				$dirthemes = array_merge($dirthemes, (array) ($reldir.'theme'));
+			}
+		}
+		$dirthemes = array_unique($dirthemes);
+
+		foreach ($dirthemes as $dir) {
+			$dirtheme = dol_buildpath($dir, 0); // This include loop on $conf->file->dol_document_root
+			$urltheme = dol_buildpath($dir, 1);
+
+			if (is_dir($dirtheme)) {
+				$handle = opendir($dirtheme);
+				if (is_resource($handle)) {
+					while (($subdir = readdir($handle)) !== false) {
+						if (is_dir($dirtheme . "/" . $subdir) && substr($subdir, 0, 1) != '.'
+							&& substr($subdir, 0, 3) != 'CVS' && !preg_match('/common|phones/i', $subdir)) {
+							$file = $dirtheme . "/" . $subdir . "/thumb.png";
+							$url = $urltheme . "/" . $subdir . "/thumb.png";
+							if (!file_exists($file)) {
+								$url = DOL_URL_ROOT . '/public/theme/common/nophoto.png';
+							}
+							$actif = ($selectedTheme && $selectedTheme == $subdir);
+							$themes[] = array(
+								'titre'  => $subdir,
+								'apercu' => '<img class="img-skinthumb shadow" src="' . $url . '" style="border: none; margin-bottom: 5px;">',
+								'action' => array(
+									'content' => BimpInput::renderInput('toggle', 'theme', ($actif ? 1 : 0),
+										array(
+											'extra_attr' => array(
+												'onchange' => $this->getJsActionOnclick(
+													'saveUserChoixUi',
+													array('param' => 'MAIN_THEME', 'value' => $subdir)
+												)
+											)
+										)
+									)
+								),
+							);
+						}
+					}
+				}
+			}
+		}
+
+
+/*
+ * 'resil' => array(
+					'content' => BimpInput::renderInput('toggle', 'resil', ($abonner == 'yes' ? 1 : 0),
+						array(
+							'extra_attr' => array('onchange' => $this->getJsActionOnclick(
+								'saveMsgErpUserParam',
+								array('param' => 'userMessages__' . $code . '__abonner', 'value' => array('js_function' => 'parseInt($(this).val())'))
+							))
+						)
+					),
+					'value'   => ($abonner == 'yes' ? 'yes' : 'no')
+				),
+ */
+		return BimpRender::renderBimpListTable($themes, $headers );
 	}
 
 	public function renderPermsView()
@@ -1551,18 +1745,23 @@ class Bimp_User extends BimpObject
 		$selected_theme = '';
 		$title = '';
 
-		if (empty($foruserprofile))
+		if (empty($foruserprofile)) {
 			$selected_theme = $conf->global->MAIN_THEME;
-		else
+		} else {
 			$selected_theme = ((is_object($object) && !empty($object->conf->MAIN_THEME)) ? $object->conf->MAIN_THEME : '');
+		}
 
 		$hoverdisabled = '';
-		if (empty($foruserprofile))
+		if (empty($foruserprofile)) {
 			$hoverdisabled = (isset($conf->global->THEME_ELDY_USE_HOVER) && $conf->global->THEME_ELDY_USE_HOVER == '0');
+		} else {
+			$hoverdisabled = (is_object($foruserprofile) ? (empty($foruserprofile->conf->THEME_ELDY_USE_HOVER) || $foruserprofile->conf->THEME_ELDY_USE_HOVER == '0') : '');
+		}
 
 		$colspan = 2;
-		if ($foruserprofile)
+		if ($foruserprofile) {
 			$colspan = 4;
+		}
 
 		$thumbsbyrow = 6;
 		$html .= '<table class="noborder" width="100%">';
@@ -1583,8 +1782,9 @@ class Bimp_User extends BimpObject
 			$html .= '<tr class="liste_titre"><th class="titlefield">' . $langs->trans("DefaultSkin") . '</th>';
 			$html .= '<th align="right">';
 			$url = 'https://www.dolistore.com/lang-en/4-skins';
-			if (preg_match('/fr/i', $langs->defaultlang))
+			if (preg_match('/fr/i', $langs->defaultlang)) {
 				$url = 'https://www.dolistore.com/fr/4-themes';
+			}
 			//if (preg_match('/es/i',$langs->defaultlang)) $url='http://www.dolistore.com/lang-es/4-themes';
 			$html .= '<a href="' . $url . '" target="_blank">';
 			$html .= $langs->trans('DownloadMoreSkins');
@@ -1614,26 +1814,30 @@ class Bimp_User extends BimpObject
 					while (($subdir = readdir($handle)) !== false) {
 						if (is_dir($dirtheme . "/" . $subdir) && substr($subdir, 0, 1) <> '.' && substr($subdir, 0, 3) <> 'CVS' && !preg_match('/common|phones/i', $subdir)) {
 							// Disable not stable themes (dir ends with _exp or _dev)
-							if ($conf->global->MAIN_FEATURES_LEVEL < 2 && preg_match('/_dev$/i', $subdir))
+							if ($conf->global->MAIN_FEATURES_LEVEL < 2 && preg_match('/_dev$/i', $subdir)) {
 								continue;
-							if ($conf->global->MAIN_FEATURES_LEVEL < 1 && preg_match('/_exp$/i', $subdir))
+							}
+							if ($conf->global->MAIN_FEATURES_LEVEL < 1 && preg_match('/_exp$/i', $subdir)) {
 								continue;
+							}
 
 							$html .= '<div class="inline-block" style="margin-top: 10px; margin-bottom: 10px; margin-right: 20px; margin-left: 20px;">';
 
 							$file = $dirtheme . "/" . $subdir . "/thumb.png";
 							$url = $urltheme . "/" . $subdir . "/thumb.png";
 
-							if (!file_exists($file))
+							if (!file_exists($file)) {
 								$url = DOL_URL_ROOT . '/public/theme/common/nophoto.png';
+							}
 
 							$html .= '<a href="' . DOL_URL_ROOT . '/bimpcore/?fc=user&id=' . $this->id . '&theme=' . $subdir . '&navtab-maintabs=params&navtab-params_tabs=interface_tab">';
 							//$html .= '<a href="' .  ["PHP_SELF"] . ($edit ? '?action=edit&theme=' : '?theme=') . $subdir . (GETPOST('optioncss', 'alpha', 1) ? '&optioncss=' . GETPOST('optioncss', 'alpha', 1) : '') . ($object ? '&id=' . $object->id : '') . '" style="font-weight: normal;" alt="' . $langs->trans("Preview") . '">';
 
-							if ($subdir == $conf->global->MAIN_THEME)
+							if ($subdir == $conf->global->MAIN_THEME) {
 								$title = $langs->trans("ThemeCurrentlyActive");
-							else
+							} else {
 								$title = $langs->trans("ShowPreview");
+							}
 
 							$html .= '<img src="' . $url . '" border="0" width="80" height="60" alt="' . $title . '" title="' . $title . '" style="margin-bottom: 5px;">';
 							$html .= '</a><br>';
@@ -1683,16 +1887,18 @@ class Bimp_User extends BimpObject
 
 		// Security check
 		$socid = 0;
-		if ($user->societe_id > 0)
+		if ($user->societe_id > 0) {
 			$socid = $user->societe_id;
+		}
 		$feature2 = (($socid && $user->rights->user->self->creer) ? '' : 'user');
 		if ($user->id == $id) {
 			$feature2 = '';
 			$canreaduser = 1;
 		}
 		$result = restrictedArea($user, 'user', $id, 'user&user', $feature2);
-		if ($user->id <> $id && !$canreaduser)
+		if ($user->id <> $id && !$canreaduser) {
 			accessforbidden();
+		}
 
 		$dirtop = "../core/menus/standard";
 		$dirleft = "../core/menus/standard";
@@ -1710,29 +1916,38 @@ class Bimp_User extends BimpObject
 
 		$parameters = array('id' => $socid);
 		$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
-		if ($reshook < 0)
+		if ($reshook < 0) {
 			setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+		}
 
 		$valLang = $this->db->getValue('user_param', 'value', 'fk_user = ' . (int) $user->id . ' AND param = "MAIN_LANG_DEFAULT"');
 
 		// List of possible landing pages
 		$tmparray = array('index.php' => 'Dashboard');
-		if (!empty($conf->societe->enabled))
+		if (!empty($conf->societe->enabled)) {
 			$tmparray['societe/index.php?mainmenu=companies&leftmenu='] = 'ThirdPartiesArea';
-		if (!empty($conf->projet->enabled))
+		}
+		if (!empty($conf->projet->enabled)) {
 			$tmparray['projet/index.php?mainmenu=project&leftmenu='] = 'ProjectsArea';
-		if (!empty($conf->holiday->enabled) || !empty($conf->expensereport->enabled))
-			$tmparray['hrm/index.php?mainmenu=hrm&leftmenu='] = 'HRMArea';   // TODO Complete list with first level of menus
-		if (!empty($conf->product->enabled) || !empty($conf->service->enabled))
+		}
+		if (!empty($conf->holiday->enabled) || !empty($conf->expensereport->enabled)) {
+			$tmparray['hrm/index.php?mainmenu=hrm&leftmenu='] = 'HRMArea';
+		}   // TODO Complete list with first level of menus
+		if (!empty($conf->product->enabled) || !empty($conf->service->enabled)) {
 			$tmparray['bimpcore/?fc=products&mainmenu=products'] = 'ProductsAndServicesArea';
-		if (!empty($conf->propal->enabled) || !empty($conf->commande->enabled) || !empty($conf->ficheinter->enabled) || !empty($conf->contrat->enabled))
+		}
+		if (!empty($conf->propal->enabled) || !empty($conf->commande->enabled) || !empty($conf->ficheinter->enabled) || !empty($conf->contrat->enabled)) {
 			$tmparray['bimpcommercial/index.php?fc=tabCommercial'] = 'CommercialArea';
-		if (!empty($conf->compta->enabled) || !empty($conf->accounting->enabled))
+		}
+		if (!empty($conf->compta->enabled) || !empty($conf->accounting->enabled)) {
 			$tmparray['compta/index.php?mainmenu=compta&leftmenu='] = 'AccountancyTreasuryArea';
-		if (!empty($conf->adherent->enabled))
+		}
+		if (!empty($conf->adherent->enabled)) {
 			$tmparray['adherents/index.php?mainmenu=members&leftmenu='] = 'MembersArea';
-		if (!empty($conf->agenda->enabled))
+		}
+		if (!empty($conf->agenda->enabled)) {
 			$tmparray['comm/action/index.php?mainmenu=agenda&leftmenu='] = 'Agenda';
+		}
 
 
 		$html .= '<table class="bimp_list_table">';
@@ -1758,8 +1973,9 @@ class Bimp_User extends BimpObject
 		$htmlP .= '<td>';
 		if (empty($tmparray[$object->conf->MAIN_LANDING_PAGE])) {
 			$htmlP .= $langs->trans($tmparray[$object->conf->MAIN_LANDING_PAGE] ? 'Pas de modif apportée' : $object->conf->MAIN_LANDING_PAGE);
-		} else
+		} else {
 			$htmlP .= $tmparray[$object->conf->MAIN_LANDING_PAGE];
+		}
 		$html .= '</td>';
 		$html .= '</td>';
 		$htmlP .= '</tr>';
@@ -2210,7 +2426,7 @@ class Bimp_User extends BimpObject
 
 	// Traitements:
 
-	public function saveInterfaceParam($param_name, $value)
+	public function saveUserParam($param_name, $value)
 	{
 		$errors = array();
 
@@ -2352,13 +2568,13 @@ class Bimp_User extends BimpObject
 			$where .= ' AND date_fin >= \'' . $date_from . '\'';
 
 			$where .= ' AND type_conges IN (' . implode(',', $types_conges) . ')';
-			if (in_array(0, $types_valide) AND in_array(1, $types_valide))
+			if (in_array(0, $types_valide) and in_array(1, $types_valide)) {
 				$where .= '';
-			elseif (in_array(1, $types_valide))
+			} elseif (in_array(1, $types_valide)) {
 				$where .= ' AND statut IN (1, 2, 3)';
-			elseif (in_array(0, $types_valide))
+			} elseif (in_array(0, $types_valide)) {
 				$where .= ' AND statut IN (6)';
-
+			}
 
 
 			$rows = $this->db->getRows('holiday', $where, null, 'array', null, 'rowid', 'desc');
@@ -2696,7 +2912,7 @@ class Bimp_User extends BimpObject
 			$value = BimpTools::getArrayValueFromPath($data, $param_name);
 
 			if (!is_null($value)) {
-				$save_errors = $this->saveInterfaceParam($param_name, $value);
+				$save_errors = $this->saveUserParam($param_name, $value);
 
 				if (count($save_errors)) {
 					$warnings[] = BimpTools::getMsgFromArray($save_errors, $param_label);
@@ -2826,6 +3042,51 @@ class Bimp_User extends BimpObject
 		);
 	}
 
+	public function actionSaveUserChoixUi($data, &$success)	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		$param_name = BimpTools::getArrayValueFromPath($data, 'param', null);
+		$value = BimpTools::getArrayValueFromPath($data, 'value', null);
+		if ($this->isLoaded($errors)) {
+			$errors = $this->saveUserParam($param_name, $value);
+		}
+
+		if (!count($errors)) {
+			$success = 'Paramètre enregistré avec succès';
+		}
+
+		echo '<script>window.location.reload();</script>';
+
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function actionSaveMsgErpUserParam($data, &$success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		$param_name = BimpTools::getArrayValueFromPath($data, 'param', null);
+		$value = BimpTools::getArrayValueFromPath($data, 'value', null);
+		if ($this->isLoaded($errors)) {
+			$errors = $this->saveUserParam($param_name, ($value ? 'yes' : 'no'));
+		}
+
+		if (!count($errors)) {
+			$success = 'Paramètre enregistré avec succès';
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
 	// Overrides:
 
 	public function validate()
@@ -3007,8 +3268,9 @@ class Bimp_User extends BimpObject
 		global $user;
 		$boxObj->boxlabel = 'Création client par commercial';
 
-		if ($context == 'init')
+		if ($context == 'init') {
 			return 1;
+		}
 
 		$boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
 		$boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values' => array(0 => 'Tout le monde', 1 => 'N-1'));
@@ -3024,8 +3286,9 @@ class Bimp_User extends BimpObject
     WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= " . $nbJ . " ";
 
 		$userId = $user->id;
-		if ($my)
+		if ($my) {
 			$sql .= "AND (u.fk_user = " . $userId . " || u2.fk_user = " . $userId . " || u.rowid = " . $userId . ") ";
+		}
 		$sql .= "GROUP BY sc.fk_user ORDER BY nb DESC";
 
 		$lns = BimpCache::getBdb()->executeS($sql);
@@ -3037,8 +3300,9 @@ class Bimp_User extends BimpObject
 			$data2[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'nb' => $ln->nb);
 		}
 
-		if (count($data) > 0)
+		if (count($data) > 0) {
 			$boxObj->addCamenbere('', $data);
+		}
 
 		$boxObj->addList(array('user' => 'Utilisateur', 'nb' => 'Nombre de créations'), $data2);
 		return 1;
@@ -3049,8 +3313,9 @@ class Bimp_User extends BimpObject
 		global $user;
 		$boxObj->boxlabel = 'Répartition service par commercial';
 
-		if ($context == 'init')
+		if ($context == 'init') {
 			return 1;
+		}
 
 		$boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
 		$boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values' => array(0 => 'Tout le monde', 1 => 'N-1 + N-2'));
@@ -3071,8 +3336,9 @@ class Bimp_User extends BimpObject
 		$sql .= "AND  DATEDIFF(now(), f.datef ) <= " . $nbJ . " ";
 
 		$userId = $user->id;
-		if ($my)
+		if ($my) {
 			$sql .= "AND (u.fk_user = " . $userId . " || u2.fk_user = " . $userId . " || u.rowid = " . $userId . ") ";
+		}
 		$sql .= "GROUP BY elemcont.fk_socpeople ORDER BY lastname ASC";
 
 		$lns = BimpCache::getBdb()->executeS($sql);
@@ -3080,10 +3346,11 @@ class Bimp_User extends BimpObject
 		$data = array();
 		$i = 0;
 		foreach ($lns as $ln) {
-			if ($ln->total != 0)
+			if ($ln->total != 0) {
 				$pourc = price($ln->totalServ / $ln->total * 100);
-			else
+			} else {
 				$pourc = 'n/c';
+			}
 			$data[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'total' => price($ln->total), 'totalServ' => price($ln->totalServ), 'pourc' => $pourc . ' %', 'qty' => round($ln->qtyTot), 'qtyServ' => round($ln->qtyServ));
 		}
 

@@ -7,8 +7,8 @@ class shipToList
 
     static function init()
     {
-        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-
+//        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//
 //        global $tabCentre;
 //        foreach ($tabCentre as $centre)
 //            if (isset($centre['7']))
@@ -26,8 +26,27 @@ class shipToList
 //                    ),
 //                    'Phone'         => array(
 //                        'Number' => $centre['0']
-//                )); /* echo "<pre>";
-//                  print_r(self::$list); */
+//                ));
+
+		$lescentres = BimpCache::getCentresData();
+		foreach ($lescentres as $centre)	{
+			if(isset($centre['address']))
+				self::$list[$centre['shipTo']] = array(
+					'Name'          => 'BIMP',
+					'AttentionName' => 'SAV',
+					'ShipperNumber' => 'R8X411',
+					'Address'       => array(
+						'AddressLine'       => $centre['address'],
+						'City'              => $centre['town'],
+						'StateProvinceCode' => substr($centre['zip'], 0, 2),
+						'PostalCode'        => $centre['zip'],
+						'CountryCode'       => 'FR',
+					),
+					'Phone'         => array(
+						'Number' => $centre['tel']
+					)
+				);
+		}
     }
 
     /* public static $list = array(

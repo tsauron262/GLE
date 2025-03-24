@@ -1,7 +1,7 @@
-<?php 
+<?php
 
     require_once __DIR__ . '/../../bimpcore/Bimp_Lib.php';
-    require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';    
+    require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/controle.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/bimptocegid.lib.php';
@@ -9,9 +9,9 @@
 //ini_set('display_startup_errors', 1);
 //error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
     class Cron {
-        
+
         protected $modeTest      = false;
-        
+
         protected $export_class  = null;
         protected $stopCompta    = false;
         protected $filesNotFtp   = [];
@@ -22,7 +22,7 @@
         protected $ldlc_ftp_host = '';
         protected $ldlc_ftp_user = '';
         protected $ldlc_ftp_pass = '';
-        protected $ldlc_ftp_path = ''; 
+        protected $ldlc_ftp_path = '';
         protected $local_path    = '';
         protected $size_vide_tra = 149;
         protected $rollback = false;
@@ -37,7 +37,7 @@
         private $auto_importPaiement    = true;
         private $auto_deplacementPay    = true;
         private $auto_bordereauCHK      = true;
-        
+
         private $export_ventes          = true;
         private $export_paiements       = true;
         private $export_achats          = true;
@@ -46,14 +46,14 @@
         private $export_deplacementPay  = true;
         private $export_bordereauCHK    = true;
         public $output = '';
-        
+
         public function __construct() {// Bien penssé a changer pour les test à /accountingtest/
             $this->ldlc_ftp_path = "/".BimpCore::getConf('exports_ldlc_ftp_dir').'/accounting';
             $this->local_path = bimptocegidLib::getDirOutput().'BY_DATE/';
             $this->ldlc_ftp_host = BimpCore::getConf('exports_ldlc_ftp_serv');
             $this->ldlc_ftp_user = BimpCore::getConf('exports_ldlc_ftp_user');
             $this->ldlc_ftp_pass = BimpCore::getConf('exports_ldlc_ftp_mdp');
-            
+
             if($this->modeTest) {
                 $this->ldlc_ftp_path .= 'test/';
             }
@@ -61,14 +61,14 @@
                 $this->ldlc_ftp_path .= '/';
             }
         }
-        
+
         public function manualSendTRA() {
             $errors = $warnings = Array();
-            
+
             $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
             $this->extendsEntity = BimpCore::getExtendsEntity();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();
-            
+
             if(!count($errors)) {
                 $this->renameFileAvantFTP();
                 $this->checkFiles();
@@ -78,13 +78,13 @@
                     $success = 'Fichiers transférés avec succès';
                 }
             }
-                        
+
             return Array('success' => $success, 'errors' => $errors, 'warnings' => $warnings);
         }
-        
+
         public function automatique() {
             global $db;
-            
+
             if(((defined('ID_ERP') && ID_ERP == 6) || $this->modeTest)) {
                 $this->export_class = new export($db);
                 if(!is_dir($this->local_path))
@@ -97,11 +97,11 @@
 
                     $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
                     $this->extendsEntity = BimpCore::getExtendsEntity();
-                    
+
                     $this->export_class->create_daily_files();
                     $this->files_for_ftp = $this->getFilesArrayForTranfert();
 
-                    
+
                     if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
                     if(!BimpCore::getConf('export_only_fact', 0, 'bimptocegid')){
                         if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
@@ -127,7 +127,7 @@
                             $db->rollback(); // Annule la transaction
                             $this->fichiersToRollback();
 
-                            $message = 'Bonjour, ROLLBACK de la compta. Aucune action n\'à été faites pour remonter la compta d\'Aujourd\'hui, les fichiers ont étés tran sférés  dans le dossier rollback';
+                            $message = 'Bonjour, ROLLBACK de la compta. Aucune action n\'à été faites pour remonter la compta d\'Aujourd\'hui, les fichiers ont étés transférés  dans le dossier rollback';
 
                             if(count($this->copyErrors) > 0) {
                                 $message .= ' SAUF: ';
@@ -135,18 +135,23 @@
                                     $message .= $file . ',';
                                 }
                             }
-                            mailSyn2("Urgent - COMPTA ROLLBACK", 'dev@bimp.fr', null, $message);
+							$code = 'CEGID_ROLLBACK_compta_aucune_action';
+							$sujet = 'Urgent - COMPTA ROLLBACK';
+							BimpUserMsg::envoiMsg($code, $sujet, $message);
                         //}
                     }
                 } else {
-                    mailSyn2('URGENT COMPTA', 'dev@bimp.fr', null, 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire), 1));
+					$code = 'CEGID_dossier_export_non_vide';
+					$sujet = 'URGENT COMPTA';
+					$message = 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire), 1);
+					BimpUserMsg::envoiMsg($code, $sujet, $message);
                 }
             } else {
                 die('Pas sur la bonne instance de l\'ERP');
             }
             return 0;
         }
-        
+
         protected function checkFiles():void {
             $files = $this->getFilesArrayForTranfert();
             $checkControle = Array();
@@ -163,13 +168,13 @@
                         }
                     }
                 }
-                
+
                 $mustSend = false;
                 $message = '';
                 if(count($checkControle) > 0)  {
-                    foreach($checkControle as $fileName => $controle) {                       
+                    foreach($checkControle as $fileName => $controle) {
                         $error = 0;
-                        
+
                         $message .= '<b>' . $fileName . '</b><br />';
                         if($controle->header != '') {
                             if(!in_array($fileName, $this->filesNotFtp)) $this->filesNotFtp[] = $fileName;
@@ -200,16 +205,16 @@
                             }
                         }
                         $message .= '<br /><br />';
-                        
+
                         if($error) {
                             $mustSend = true;
                             if(stripos($fileName, '(TIERS)')) {
                                 $this->stopCompta = true;
                             }
                         }
-                        
+
                     }
-                    
+
                     if($this->stopCompta) {
                         $message .= 'Une erreur à été détectée dans le fichier TIERS donc AUCUN fichier n\'a été transféré en compta';
                     } else {
@@ -219,18 +224,20 @@
                 }
 
                 if($mustSend) {
-                    mailSyn2('Urgent - Fichiers TRA non conformes', 'dev@bimp.fr', null, $message);
+					$code = 'CEGID_fichier_tra_non_conforme';
+					$sujet = 'Urgent - Fichiers TRA non conformes';
+					BimpUserMsg::envoiMsg($code, $sujet, $message);
                 }
- 
+
             }
         }
-        
+
         protected function fichiersToRollback():void {
             // TODO
             $listFichierLocal = array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire);
-            
+
             $copyErrors = Array();
-            
+
             foreach($listFichierLocal as $fileName){
                 if(!is_dir($this->local_path . 'rollback/' . date('Y-m-d'))) {
                     mkdir($this->local_path . "rollback/" . date('Y-m-d'), 0777, true);
@@ -241,18 +248,16 @@
                     $copyErrors[] = $fileName;
                 }
             }
-            
+
             $this->copyErrors = $copyErrors;
-            
+
         }
 
         protected function send_rapport($mode = 1) {
 
             $sujet = "Rapport export comptable du " . date('d/m/Y');
-            $to = BimpCore::getConf('devs_email');
-            $from = null;
-            $logs = '';
-            
+			$logs = '';
+
             if($mode == 1){
                 // Message type de pièce automatique
                 if(array_key_exists('FILES_FTP', $this->rapport)) {
@@ -436,7 +441,7 @@
                         $logs .= '' . $aux . ': ' . $log . "\n";
                         $saveTiersArray[] = $aux;
                     }
-                } 
+                }
 
                 $logs .= "\n\n";
 
@@ -450,10 +455,10 @@
                 $logs .= "Liste des paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiement) . "\n";
                 $logs .= "Liste des import paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiementImport) . "\n";
                 $logs .= "Liste des tiers en cas d'erreurs: \n" . implode(',' , $saveTiersArray) . "\n";
-            
+
             }
             else{
-            
+
                 $logs .= "\n\n";
 
                 // Message FTP
@@ -462,25 +467,30 @@
                     $logs .= implode("\n", $this->rapport['FTP']);
                 }
             }
-            
+
             $this->output .= $logs;
-            
+
             $filePath = bimptocegidLib::getDirOutput() . 'rapports' . '/';
             if(!is_dir($filePath))
                 mkdir($filePath);
             $fileName = date('d_m_Y') . '_'.$this->export_class->moment.'.log';
             $log_file = fopen($filePath . $fileName, 'a');
-            if(!fwrite($log_file, $logs . "\n\n"))
-                 mailSyn2($sujet. ' impossible d\'écrire le fichier', $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable existant, et voici le nouveau : ".$logs, array($filePath . $fileName),array('text/plain'), array($fileName));
+            if(!fwrite($log_file, $logs . "\n\n"))	{
+				$code = 'CEGID_impossible_ecrire_fichier';
+				$sujet .= ' impossible d\'écrire le fichier';
+				$message = "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable existant, et voici le nouveau : ".$logs;
+				$pj = array(array($filePath . $fileName),array('text/plain'), array($fileName));
+				BimpUserMsg::envoiMsg($code, $sujet, $message, null, $pj);
+			}
             fclose($log_file);
             chmod($filePath . $fileName, 777);
 
-            
+
         }
-        
+
         protected function getFilesArrayForTranfert():array {
             $files = [];
-                        
+
             if($this->auto_tiers)       $files[] = "0_" . $this->extendsEntity . '_(TIERS)_' . '*'   . $this->version_tra . '.tra';
             if($this->auto_ventes)      $files[] = "1_" . $this->extendsEntity . '_(VENTES)_' . '*' .  $this->version_tra . '.tra';
             if($this->auto_paiements)   $files[] = "2_" . $this->extendsEntity . '_(PAIEMENTS)_' . '*' .  $this->version_tra . '.tra';
@@ -493,13 +503,13 @@
             if($this->auto_importPaiement)                                          $files[] = 'IP*.tra';
             if($this->auto_deplacementPay)                                          $files[] = "7_" . $this->extendsEntity . '_(DEPLACEMENTPAIEMENTS)' . '*' .  $this->version_tra . '.tra';
             if($this->auto_bordereauCHK)                                            $files[] = "8_" . $this->extendsEntity . '_(BORDEREAUXCHK)' . '*'  . $this->version_tra . '.tra';
-            
+
             $this->rapport['FILES_FTP'] = 'Liste des fichiers transférés automatiquement sur le FTP de LDLC' . "\n"
                     . implode("\n", $files) . "\n";
-            
+
             return $files;
         }
-        
+
         public function renameFileAvantFTP() {
             $renamed = Array();
             foreach($this->files_for_ftp as $file) {
@@ -520,7 +530,7 @@
                 }
             }
         }
-        
+
         public function FTP() {
 
             $files = [];
@@ -528,27 +538,27 @@
             foreach ($this->files_for_ftp as $pattern) {
                 $files = array_merge($files, glob($this->local_path . $pattern));
             }
-                                    
+
             $ftp = ftp_connect($this->ldlc_ftp_host, 21);
-            if($ftp === false) { 
+            if($ftp === false) {
                 $this->rapport['FTP'][] = "Erreur de connexion au FTP LDLC";
-                
-            } 
-            else { 
+
+            }
+            else {
                 $this->rapport['FTP'][] = 'Connexion avec le FTP LDLC Ok';
-                if(!ftp_login($ftp, $this->ldlc_ftp_user, $this->ldlc_ftp_pass)){ 
-                    $this->rapport['FTP'][] = 'Erreur de login FTP LDLC'; 
-                } 
-                else { 
-                    $this->rapport['FTP'][] = 'Login avec le FTP LDLC Ok'; 
-                    
-                    if (defined('FTP_SORTANT_MODE_PASSIF')) { 
-                        ftp_pasv($ftp, true); 
-                        
-                    } else { 
-                        ftp_pasv($ftp, false); 
+                if(!ftp_login($ftp, $this->ldlc_ftp_user, $this->ldlc_ftp_pass)){
+                    $this->rapport['FTP'][] = 'Erreur de login FTP LDLC';
+                }
+                else {
+                    $this->rapport['FTP'][] = 'Login avec le FTP LDLC Ok';
+
+                    if (defined('FTP_SORTANT_MODE_PASSIF')) {
+                        ftp_pasv($ftp, true);
+
+                    } else {
+                        ftp_pasv($ftp, false);
                     }
-                    
+
                     $present_sur_ftp_ldlc = ftp_nlist($ftp, $this->ldlc_ftp_path);
                     if(count($files) > 0) {
                         foreach($files as $file_path) {
@@ -563,7 +573,10 @@
                                             if(copy($file_path, $this->local_path . 'imported_auto/' . $filename)) {
                                                 unlink($file_path);
                                             } else {
-                                                mailSyn2("Compta - Erreur de copie", 'dev@bimP.fr', null, 'Le fichier ' . $filename . ' ne c\'est pas copié dans ledossier d\'import');
+												$code = 'CEGID_erreur_copie_fichier';
+                                                $sujet = "Compta - Erreur de copie";
+                                                $message = 'Le fichier ' . $filename . ' ne s\'est pas copié dans le dossier d\'import';
+												BimpUserMsg::envoiMsg($code, $sujet, $message);
                                             }
                                         } else {
                                             $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
@@ -583,11 +596,11 @@
                 }
             }
         }
-        
+
         protected function menage() {
-            
+
             $liste_files = scandir($this->local_path);
-            
+
             if(count($liste_files) > 0) {
                 foreach($liste_files as $filename) {
                     if(filesize($this->local_path . $filename) == $this->size_vide_tra) {
@@ -598,8 +611,8 @@
             } else {
                 $this->rapport['MENAGE'][] = "Auncun fichiers vide à supprimer";
             }
-            
+
         }
-       
-        
+
+
     }

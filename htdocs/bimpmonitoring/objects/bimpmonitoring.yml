@@ -1,0 +1,54 @@
+table: bimp_monitoring
+
+labels: 
+    name: Monitoring
+    name_plur: Non repertoriés
+    is_female: 1
+    
+objects:
+    
+fields:
+    url:
+        label: Url
+    test:
+        label: Chaine a tester
+#    dateV: 
+#        label: Date de valeur
+#        type: date
+    is_bimperp:
+        label: Bimp ERP
+        type: bool
+    actif:
+        label: Actif
+        type: bool
+        default_value: 1
+    
+    
+    
+forms: 
+    
+                
+            
+lists: 
+    default: 
+        title: Monitoring
+        icon: fas_percent
+        configurable: 0
+        enable_search: 1
+        pagination: 0
+        checkboxes: 1
+        add_btn: 1
+        has_total: 1
+        add_form_name: default
+        edit_btn: 1
+        delete_btn: 1
+        total_row: 1
+        n: 0
+        cols:  
+            url:
+            test:
+            is_bimperp:
+            actif:
+                
+        
+        

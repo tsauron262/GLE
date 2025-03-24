@@ -58,7 +58,8 @@ class BimpCore
 		'florian' => 'f.martinez@bimp.fr',
 		'alexis'  => 'al.bernard@bimp.fr',
 		'romain'  => 'r.PELEGRIN@bimp.fr',
-		'peter'   => 'p.tkatchenko@bimp.fr'
+        'peter'   => 'p.tkatchenko@bimp.fr',
+		'franck'  => 'f.lauby@ldlc.com'
 	);
 	public static $html_purifier = null;
 

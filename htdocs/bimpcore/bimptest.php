@@ -27,9 +27,13 @@ if (!$user->admin) {
 	exit;
 }
 
-echo 'TEST 1 : ' . (int) getDolGlobalString('COMPANY_USE_SEARCH_TO_SELECT') . '<br/>';
-echo 'TEST 2 : ' . (int) empty($conf->use_javascript_ajax) . '<br/>';
+//echo 'Envoi : <br/>';
 
+///** @var Bimp_Commande $obj */
+////$obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', 104540);
+//$errors = BimpUserMsg::envoiMsg('code_erp', 'TEST MSG', 'Test test');
+//
+//echo '<pre>' . print_r($errors, 1) . '</pre>';
 
 echo '<br/>FIN';
 echo '</body></html>';

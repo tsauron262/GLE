@@ -13,12 +13,12 @@ class BS_Sac extends BimpObject
                 $errors = BimpTools::merge_array($errors, parent::create());
                 $this->tmp_ids[] = $this->id;
             }
-            
+
         }
-        
+
         return $errors;
     }
-    
+
     public function getDefaultCodeCentre()
     {
         if (BimpTools::isSubmit('code_centre')) {
@@ -37,9 +37,10 @@ class BS_Sac extends BimpObject
                 $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0, 'int');
             }
             if ($id_entrepot) {
-                global $tabCentre;
+//                global $tabCentre;
+				$tabCentre = BimpCache::getCentresData();
                 foreach ($tabCentre as $code_centre => $centre) {
-                    if ((int) $centre[8] === $id_entrepot) {
+                    if ((int) $centre['id_entrepot'] === $id_entrepot) {
                         return $code_centre;
                     }
                 }
@@ -48,7 +49,7 @@ class BS_Sac extends BimpObject
 
         return '';
     }
-    
+
 
     public function getListCentre($field, $include_empty = false)
     {
@@ -59,13 +60,13 @@ class BS_Sac extends BimpObject
 
         return static::getUserCentresArray($value, $include_empty);
     }
-    
+
     public function getCreateJsCallback()
     {
         $data = $this->createEtiquette($this->tmp_ids, 'normal');
         return $data['success_callback'];
     }
-    
+
     public function getHeaderButtons()
     {
         $buttons = array();
@@ -81,13 +82,13 @@ class BS_Sac extends BimpObject
                         ))
             );
 
-           
+
         }
 
         return $buttons;
     }
-    
-    
+
+
     public function createEtiquette($ids, $type, $qty = 1){
         $errors = array();
         $warnings = array();
@@ -114,7 +115,7 @@ class BS_Sac extends BimpObject
             'success_callback' => $success_callback
         );
     }
-    
+
     public function displaySav(){
         $html = '';
         $list = $this->getSav(false);
@@ -122,14 +123,14 @@ class BS_Sac extends BimpObject
             $html .= $sav->getLink().'<br/>';
         return $html;
     }
-    
+
     public function getSav($open = true){
         $filter = array('sacs'=>array('part_type'=>'middle', 'part' => '['.$this->id.']'));
         if($open)
             $filter['status'] = array('operator'=> '!=', 'value'=>999);
         return BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', $filter);
     }
-    
+
     public function actionPrintEtiquettes($data, &$success)
     {
         if(!is_array($data['id_objects']))
@@ -138,5 +139,5 @@ class BS_Sac extends BimpObject
 
     }
 
-  
+
 }

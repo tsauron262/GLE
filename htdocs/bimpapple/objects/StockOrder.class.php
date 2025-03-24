@@ -14,7 +14,7 @@ class StockOrder extends BimpObject
               self::STATUT_RECEIVED  => array('label' => 'Réceptionnée', */ 'icon'    => 'fas_check', 'classes' => array('success')),
     );
 
-    // Droits Users: 
+    // Droits Users:
 
     public function canSetAction($action)
     {
@@ -32,7 +32,7 @@ class StockOrder extends BimpObject
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -122,7 +122,7 @@ class StockOrder extends BimpObject
         return 0;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {
@@ -152,7 +152,7 @@ class StockOrder extends BimpObject
         return $buttons;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getShipTo(&$errors = array())
     {
@@ -162,7 +162,7 @@ class StockOrder extends BimpObject
         if (!$centre) {
             $errors[] = 'Centre absent';
         } else {
-            $centres = BimpCache::getCentres();
+            $centres = BimpCache::getCentresData();
 
             if (!isset($centres[$centre])) {
                 $errors[] = 'Aucun centre pour le code "' . $centre . '"';
@@ -178,7 +178,7 @@ class StockOrder extends BimpObject
         return $shipTo;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
@@ -359,7 +359,7 @@ class StockOrder extends BimpObject
 //                        $errors[] = $gsx->displayNoLogged();
 //                    } else {
 //                        $errors = $gsx->getErrors();
-//                        
+//
 //                        if (!count($errors)) {
 //                            $html .= 'RESULT : <pre>';
 //                            $html .= print_r($result, 1);
@@ -380,7 +380,7 @@ class StockOrder extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function checkParts($new_parts, &$errors = array(), &$warnings = array())
     {
@@ -504,7 +504,7 @@ class StockOrder extends BimpObject
         return $new_parts;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionAddPart($data, &$success = '')
     {
@@ -730,7 +730,7 @@ class StockOrder extends BimpObject
                     'Erreurs' => $errors
                 ));
 
-                // Pour éviter de commander à nouveau sur GSX : 
+                // Pour éviter de commander à nouveau sur GSX :
                 BimpCache::getBdb(true)->update('bimp_apple_stock_order', array(
                     'status' => self::STATUT_ORDERED
                         ), 'id = ' . $this->id);

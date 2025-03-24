@@ -62,7 +62,8 @@ HAVING scan_exp != scan_det";
                     $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $ln->id_product);
                     $text .= "<br/>Ln expected " . $ln->id . ' : ' . $ln->scan_det . " det / " . $ln->scan_exp . " exp " . $prod->getLink();
                 }
-                mailSyn2('Incohérence inventaire', BimpCore::getConf('devs_email'), null, $text);
+				$code = 'inventaire_incoherence';
+				BimpUserMsg::envoiMsg($code, 'Incohérence inventaire', $text);
                 $errors[] = 'attention ' . $text;
             }
 
@@ -76,7 +77,9 @@ HAVING scan_exp != scan_det";
                 $text = "Inchoérence detecté dans les scann de l'inventaire : " . $this->getData('id');
                 while ($ln = $this->db->db->fetch_object($sql2))
                     $text .= "<br/>Ln de scanne " . $ln->minId . " et ln de scann " . $ln->maxId . " identique";
-                mailSyn2('Incohérence inventaire', BimpCore::getConf('devs_email'), null, $text);
+
+				$code = 'inventaire_incoherence_scan';
+				BimpUserMsg::envoiMsg($code, 'Incohérence inventaire', $text);
                 $errors[] = 'attention ' . $text;
             }
         }

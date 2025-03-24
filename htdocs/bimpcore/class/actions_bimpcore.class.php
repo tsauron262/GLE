@@ -102,7 +102,7 @@ class ActionsBimpcore
 			$_REQUEST['id'] = $_REQUEST['socid'];
 		}
 
-		if (stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false) {
+		if (stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false &&  stripos($url, 'stats')== false) {
 			if (stripos($url, '/commande/') !== false) {
 				$tabObj = array("bimpcommercial", "Bimp_Commande");
 			}
@@ -112,6 +112,11 @@ class ActionsBimpcore
 			if (stripos($url, '/contrat/') !== false && BimpTools::isModuleDoliActif('bimpcontract')) {
 				$tabObj = array("bimpcontract", "BContract_contrat");
 			}
+
+			if (stripos($url, '/comm/action/') !== false) {
+				$tabObj = array("bimpcore", "Bimp_ActionComm");
+			}
+
 			if (stripos($url, '/comm/action') === false && stripos($url, '/comm/index.php') === false && stripos($url, '/comm/rem') === false && stripos($url, 'admin') === false
 				&& (stripos($url, '/comm/') !== false || stripos($url, '/societe/') !== false)) {
 				if (stripos($url, 'societe/list.php?leftmenu=thirdparties') || stripos($url, 'societe/index.php?mainmenu=companies&leftmenu=')) {

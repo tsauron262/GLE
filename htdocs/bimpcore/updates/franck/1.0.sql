@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS llx_bimpcore_cgv (
+	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	types_pieces TEXT NOT NULL DEFAULT '',
+	secteurs TEXT NOT NULL DEFAULT '',
+	date_start date NOT NULL DEFAULT CURRENT_DATE,
+	id_centre int(10) UNSIGNED NOT NULL DEFAULT '0',
+	date_create datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	user_create int(10) UNSIGNED NOT NULL DEFAULT '0',
+	date_update datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	user_update int(10) UNSIGNED NOT NULL DEFAULT '0'
+)

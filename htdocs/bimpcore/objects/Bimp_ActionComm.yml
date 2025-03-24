@@ -312,6 +312,7 @@ forms:
                 input_name: users_assigned
                 input:
                     multiple: 1
+                    sortable: 1
                     type: search_user
                     help:
                         callback: displayExternalUsers

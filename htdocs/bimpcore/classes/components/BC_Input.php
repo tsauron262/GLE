@@ -3,853 +3,857 @@
 class BC_Input extends BimpComponent
 {
 
-    public $component_name = 'Champ de saisi';
-    public static $type = 'input';
-    public static $config_required = false;
-    public $data_type = '';
-    public $input_name = '';
-    public $input_id = '';
-    public $value = null;
-    public $new_value = null;
-    public $field_params = array();
-    public $option = null;
-    public $extraClasses = array();
-    public $extraData = array();
-    public $name_prefix = '';
-    public $display_card_mode = 'none'; // hint / visible
-    protected $input_extra_classes = array();
-    protected $input_extra_data = array();
-    public static $type_params_def = array(
-        'text'                        => array(
-            'values'          => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-            'allow_custom'    => array('data_type' => 'bool', 'default' => 1),
-            'hashtags'        => array('data_type' => 'bool', 'default' => 0),
-            'scanner'         => array('data_type' => 'bool', 'default' => 0),
-            'no_autocorrect'  => array('data_type' => 'bool', 'default' => 0),
-            'possible_values' => array('data_type' => 'array', 'default' => array()),
-            'strip_tags'      => array('data_type' => 'bool', 'default' => 1)
-        ),
-        'password'                    => array(
-            'min_length'       => array('data_type' => 'int', 'default' => 12), // Nombre de caractères minimum
-            'special_required' => array('data_type' => 'bool', 'default' => 1), // Caractère spécial obligatoire
-            'maj_required'     => array('data_type' => 'bool', 'default' => 1), // Caractère majuscule obligatoire
-            'num_required'     => array('data_type' => 'bool', 'default' => 1), // Caractère numérique obligatoire
-        ),
-        'qty'                         => array(
-            'step'            => array('data_type' => 'float', 'default' => 1),
-            'min_label'       => array('data_type' => 'bool', 'default' => 0),
-            'max_label'       => array('data_type' => 'bool', 'default' => 0),
-            'possible_values' => array('data_type' => 'array', 'default' => array())
-        ),
-        'time'                        => array(
-            'display_now'   => array('data_type' => 'bool', 'default' => 0),
-            'with_secondes' => array('data_type' => 'bool', 'default' => 0)
-        ),
-        'date'                        => array(
-            'display_now' => array('data_type' => 'bool', 'default' => 0)
-        ),
-        'datetime'                    => array(
-            'display_now'   => array('data_type' => 'bool', 'default' => 0),
-            'with_hours'    => array('data_type' => 'bool', 'default' => 1),
-            'with_secondes' => array('data_type' => 'bool', 'default' => 0)
-        ),
-        'timer'                       => array(
-            'with_days'     => array('data_type' => 'bool', 'default' => 1), // A implémenter
-            'with_hours'    => array('data_type' => 'bool', 'default' => 1), // A implémenter
-            'with_minutes'  => array('data_type' => 'bool', 'default' => 1), // A implémenter
-            'with_secondes' => array('data_type' => 'bool', 'default' => 1)
-        ),
-        'textarea'                    => array(
-            'rows'             => array('data_type' => 'int', 'default' => 3),
-            'auto_expand'      => array('data_type' => 'bool', 'default' => 0),
-            'note'             => array('data_type' => 'bool', 'default' => 0),
-            'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
-            'maxlength'        => array('data_type' => 'int'),
-            'possible_values'  => array('data_type' => 'array', 'default' => array()),
-            'hashtags'         => array('data_type' => 'bool', 'default' => 0),
-            'scanner'          => array('data_type' => 'bool', 'default' => 0),
-            'strip_tags'       => array('data_type' => 'bool', 'default' => 1)
-        ),
-        'html'                        => array(
-            'hashtags'        => array('data_type' => 'bool', 'default' => 0),
-            'possible_values' => array('data_type' => 'array', 'default' => array())
+	public $component_name = 'Champ de saisi';
+	public static $type = 'input';
+	public static $config_required = false;
+	public $data_type = '';
+	public $input_name = '';
+	public $input_id = '';
+	public $value = null;
+	public $new_value = null;
+	public $field_params = array();
+	public $option = null;
+	public $extraClasses = array();
+	public $extraData = array();
+	public $name_prefix = '';
+	public $display_card_mode = 'none'; // hint / visible
+	protected $input_extra_classes = array();
+	protected $input_extra_data = array();
+	public static $type_params_def = array(
+		'text'                        => array(
+			'values'          => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+			'allow_custom'    => array('data_type' => 'bool', 'default' => 1),
+			'hashtags'        => array('data_type' => 'bool', 'default' => 0),
+			'scanner'         => array('data_type' => 'bool', 'default' => 0),
+			'no_autocorrect'  => array('data_type' => 'bool', 'default' => 0),
+			'possible_values' => array('data_type' => 'array', 'default' => array()),
+			'strip_tags'      => array('data_type' => 'bool', 'default' => 1)
+		),
+		'password'                    => array(
+			'min_length'       => array('data_type' => 'int', 'default' => 12), // Nombre de caractères minimum
+			'special_required' => array('data_type' => 'bool', 'default' => 1), // Caractère spécial obligatoire
+			'maj_required'     => array('data_type' => 'bool', 'default' => 1), // Caractère majuscule obligatoire
+			'num_required'     => array('data_type' => 'bool', 'default' => 1), // Caractère numérique obligatoire
+		),
+		'qty'                         => array(
+			'step'            => array('data_type' => 'float', 'default' => 1),
+			'min_label'       => array('data_type' => 'bool', 'default' => 0),
+			'max_label'       => array('data_type' => 'bool', 'default' => 0),
+			'possible_values' => array('data_type' => 'array', 'default' => array())
+		),
+		'time'                        => array(
+			'display_now'   => array('data_type' => 'bool', 'default' => 0),
+			'with_secondes' => array('data_type' => 'bool', 'default' => 0)
+		),
+		'date'                        => array(
+			'display_now' => array('data_type' => 'bool', 'default' => 0)
+		),
+		'datetime'                    => array(
+			'display_now'   => array('data_type' => 'bool', 'default' => 0),
+			'with_hours'    => array('data_type' => 'bool', 'default' => 1),
+			'with_secondes' => array('data_type' => 'bool', 'default' => 0)
+		),
+		'timer'                       => array(
+			'with_days'     => array('data_type' => 'bool', 'default' => 1), // A implémenter
+			'with_hours'    => array('data_type' => 'bool', 'default' => 1), // A implémenter
+			'with_minutes'  => array('data_type' => 'bool', 'default' => 1), // A implémenter
+			'with_secondes' => array('data_type' => 'bool', 'default' => 1)
+		),
+		'textarea'                    => array(
+			'rows'             => array('data_type' => 'int', 'default' => 3),
+			'auto_expand'      => array('data_type' => 'bool', 'default' => 0),
+			'note'             => array('data_type' => 'bool', 'default' => 0),
+			'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
+			'maxlength'        => array('data_type' => 'int'),
+			'possible_values'  => array('data_type' => 'array', 'default' => array()),
+			'hashtags'         => array('data_type' => 'bool', 'default' => 0),
+			'scanner'          => array('data_type' => 'bool', 'default' => 0),
+			'strip_tags'       => array('data_type' => 'bool', 'default' => 1)
+		),
+		'html'                        => array(
+			'hashtags'        => array('data_type' => 'bool', 'default' => 0),
+			'possible_values' => array('data_type' => 'array', 'default' => array())
 //            'scanner'  => array('data_type' => 'bool', 'default' => 0) // A implémenter
-        ),
-        'select'                      => array(
-            'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-            'select_first' => array('data_type' => 'bool', 'default_value' => 0)
-        ),
-        'switch_options'              => array(
-            'options'  => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-            'vertical' => array('data_type' => 'bool', 'default_value' => 0)
-        ),
-        'toggle'                      => array(
-            'toggle_on'  => array('default' => 'OUI'),
-            'toggle_off' => array('default' => 'NON')
-        ),
-        'check_list'                  => array(
-            'items'              => array('data_type' => 'array', 'default' => array(), 'compile' => true),
-            'select_all_buttons' => array('data_type' => 'bool', 'default' => 1),
-            'search_input'       => array('data_type' => 'bool', 'default' => 0),
-            'max_input_name'     => array('default' => ''),
-            'max_input_abs'      => array('data_type' => 'bool', 'default' => 0),
-            'max'                => array('data_type' => 'any', 'default' => 'none')
-        ),
-        'custom'                      => array(
-            'content' => array('default' => '')
-        ),
-        'search_user'                 => array(
-            'include_current' => array('data_type' => 'bool', 'default' => 0),
-            'include_empty'   => array('data_type' => 'bool', 'default' => 1),
-            'active_only'     => array('data_type' => 'bool', 'default' => null),
-            'empty_label'     => array('default' => '')
-        ),
-        'search_group'                => array(
-            'include_empty' => array('data_type' => 'bool', 'default' => 1)
-        ),
-        'search_product'              => array(
-            'filter_type' => array('data_type' => 'any', 'default' => 0)
-        ),
-        'search_societe'              => array(
-            'societe_type' => array('default' => '')
-        ),
-        'search_state'                => array(
-            'id_country'        => array('data_type' => 'int', 'default' => 0),
-            'active_only'       => array('data_type' => 'bool', 'default' => 1),
-            'country_key_field' => array('default' => 'rowid'),
-            'include_empty'     => array('data_type' => 'bool', 'default' => 1)
-        ),
-        'search_country'              => array(
-            'active_only' => array('data_type' => 'bool', 'default' => 1),
-            'key_field'   => array('default' => 'rowid')
-        ),
-        'search_juridicalstatus'      => array(
-            'country_code'      => array('default' => ''),
-            'active_only'       => array('data_type' => 'bool', 'default' => 1),
-            'country_key_field' => array('default' => 'code'),
-            'include_empty'     => array('data_type' => 'bool', 'default' => 1)
-        ),
-        'search_commande_client'      => array(
-            'id_client' => array('data_type' => 'int', 'default' => 0)
-        ),
-        'search_commande_fournisseur' => array(
-            'id_fournisseur' => array('data_type' => 'int', 'default' => 0)
-        ),
-        'select_payment'              => array(
-            'value_type'    => array('default' => 'id'),
-            'active_only'   => array('data_type' => 'bool', 'default' => 1),
-            'include_empty' => array('data_type' => 'bool', 'default' => 0)
-        ),
-        'search_ziptown'              => array(
-            'field_type'    => array('default' => ''),
-            'town_field'    => array('default' => ''),
-            'zip_field'     => array('default' => ''),
-            'state_field'   => array('default' => ''),
-            'country_field' => array('default' => '')
-        ),
-        'select_remises'              => array(
-            'id_client'     => array('data_type' => 'int', 'default' => 0),
-            'extra_filters' => array('default' => '')
-        ),
-        'select_remises_fourn'        => array(
-            'id_fourn'      => array('data_type' => 'int', 'required' => 1),
-            'extra_filters' => array('default' => '')
-        ),
-        'search_entrepot'             => array(
-            'include_empty'        => array('data_type' => 'bool', 'default' => 0),
-            'has_commissions_only' => array('data_type' => 'bool', 'default' => 0),
-            'with_caisse_close'    => array('data_type' => 'bool', 'default' => 0),
-            'with_caisse_open'     => array('data_type' => 'bool', 'default' => 0)
-        ),
-        'search_object'               => array(
-            'object'          => array('default' => ''),
-            'search_name'     => array('default' => 'default'),
-            'card'            => array('default', ''),
-            'max_results'     => array('data_type' => 'int', 'default' => 200),
-            'display_results' => array('data_type' => 'bool', 'default' => 1),
-            'scanner'         => array('data_type' => 'bool', 'default' => 0),
-        ),
-        'object_filters'              => array(
-            'obj_input_name' => array('default' => ''),
-            'obj_module'     => array('default' => ''),
-            'obj_name'       => array('default' => '')
-        ),
-        'signature_pad'               => array(
-            'expand'         => array('data_type' => 'bool', 'default' => 0),
-            'check_mentions' => array('data_type' => 'array', 'compile' => true, 'default' => array())
-        ),
-        'drop_files'                  => array(
-            'max_items'     => array('data_type' => 'int', 'default' => 0),
-            'files_dir'     => array('default' => ''),
-            'allowed_types' => array('default' => ''),
-            'allowed_ext'   => array('default' => '')
-        )
-    );
+		),
+		'select'                      => array(
+			'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+			'select_first' => array('data_type' => 'bool', 'default_value' => 0)
+		),
+		'switch_options'              => array(
+			'options'  => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+			'vertical' => array('data_type' => 'bool', 'default_value' => 0)
+		),
+		'toggle'                      => array(
+			'toggle_on'  => array('default' => 'OUI'),
+			'toggle_off' => array('default' => 'NON')
+		),
+		'check_list'                  => array(
+			'items'              => array('data_type' => 'array', 'default' => array(), 'compile' => true),
+			'select_all_buttons' => array('data_type' => 'bool', 'default' => 1),
+			'search_input'       => array('data_type' => 'bool', 'default' => 0),
+			'max_input_name'     => array('default' => ''),
+			'max_input_abs'      => array('data_type' => 'bool', 'default' => 0),
+			'max'                => array('data_type' => 'any', 'default' => 'none')
+		),
+		'custom'                      => array(
+			'content' => array('default' => '')
+		),
+		'search_user'                 => array(
+			'include_current' => array('data_type' => 'bool', 'default' => 0),
+			'include_empty'   => array('data_type' => 'bool', 'default' => 1),
+			'active_only'     => array('data_type' => 'bool', 'default' => null),
+			'empty_label'     => array('default' => '')
+		),
+		'search_group'                => array(
+			'include_empty' => array('data_type' => 'bool', 'default' => 1)
+		),
+		'search_product'              => array(
+			'filter_type' => array('data_type' => 'any', 'default' => 0)
+		),
+		'search_societe'              => array(
+			'societe_type' => array('default' => '')
+		),
+		'search_state'                => array(
+			'id_country'        => array('data_type' => 'int', 'default' => 0),
+			'active_only'       => array('data_type' => 'bool', 'default' => 1),
+			'country_key_field' => array('default' => 'rowid'),
+			'include_empty'     => array('data_type' => 'bool', 'default' => 1)
+		),
+		'search_country'              => array(
+			'active_only' => array('data_type' => 'bool', 'default' => 1),
+			'key_field'   => array('default' => 'rowid')
+		),
+		'search_juridicalstatus'      => array(
+			'country_code'      => array('default' => ''),
+			'active_only'       => array('data_type' => 'bool', 'default' => 1),
+			'country_key_field' => array('default' => 'code'),
+			'include_empty'     => array('data_type' => 'bool', 'default' => 1)
+		),
+		'search_commande_client'      => array(
+			'id_client' => array('data_type' => 'int', 'default' => 0)
+		),
+		'search_commande_fournisseur' => array(
+			'id_fournisseur' => array('data_type' => 'int', 'default' => 0)
+		),
+		'select_payment'              => array(
+			'value_type'    => array('default' => 'id'),
+			'active_only'   => array('data_type' => 'bool', 'default' => 1),
+			'include_empty' => array('data_type' => 'bool', 'default' => 0)
+		),
+		'search_ziptown'              => array(
+			'field_type'    => array('default' => ''),
+			'town_field'    => array('default' => ''),
+			'zip_field'     => array('default' => ''),
+			'state_field'   => array('default' => ''),
+			'country_field' => array('default' => '')
+		),
+		'select_remises'              => array(
+			'id_client'     => array('data_type' => 'int', 'default' => 0),
+			'extra_filters' => array('default' => '')
+		),
+		'select_remises_fourn'        => array(
+			'id_fourn'      => array('data_type' => 'int', 'required' => 1),
+			'extra_filters' => array('default' => '')
+		),
+		'search_entrepot'             => array(
+			'include_empty'        => array('data_type' => 'bool', 'default' => 0),
+			'has_commissions_only' => array('data_type' => 'bool', 'default' => 0),
+			'with_caisse_close'    => array('data_type' => 'bool', 'default' => 0),
+			'with_caisse_open'     => array('data_type' => 'bool', 'default' => 0)
+		),
+		'search_object'               => array(
+			'object'          => array('default' => ''),
+			'search_name'     => array('default' => 'default'),
+			'card'            => array('default', ''),
+			'max_results'     => array('data_type' => 'int', 'default' => 200),
+			'display_results' => array('data_type' => 'bool', 'default' => 1),
+			'scanner'         => array('data_type' => 'bool', 'default' => 0),
+		),
+		'object_filters'              => array(
+			'obj_input_name' => array('default' => ''),
+			'obj_module'     => array('default' => ''),
+			'obj_name'       => array('default' => '')
+		),
+		'signature_pad'               => array(
+			'expand'         => array('data_type' => 'bool', 'default' => 0),
+			'check_mentions' => array('data_type' => 'array', 'compile' => true, 'default' => array())
+		),
+		'drop_files'                  => array(
+			'max_items'     => array('data_type' => 'int', 'default' => 0),
+			'files_dir'     => array('default' => ''),
+			'allowed_types' => array('default' => ''),
+			'allowed_ext'   => array('default' => '')
+		)
+	);
 
-    public function __construct(BimpObject $object, $data_type, $input_name, $path, $value = null, &$field_params = array(), $option = null)
-    {
-        $this->data_type = $data_type;
-        $this->input_name = $input_name;
-        $this->value = $value;
-        $this->field_params = $field_params;
-        $this->option = $option;
+	public function __construct(BimpObject $object, $data_type, $input_name, $path, $value = null, &$field_params = array(), $option = null)
+	{
+		$this->data_type = $data_type;
+		$this->input_name = $input_name;
+		$this->value = $value;
+		$this->field_params = $field_params;
+		$this->option = $option;
 
-        $this->params_def['type'] = array();
-        $this->params_def['addon_right'] = array('data_type' => 'array');
-        $this->params_def['addon_left'] = array('data_type' => 'array');
-        $this->params_def['multiple'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['help'] = array('default' => '');
-        $this->params_def['card'] = array('default' => '');
-        $this->params_def['auto_save'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['extra_content'] = array('default' => '');
+		$this->params_def['type'] = array();
+		$this->params_def['addon_right'] = array('data_type' => 'array');
+		$this->params_def['addon_left'] = array('data_type' => 'array');
+		$this->params_def['multiple'] = array('data_type' => 'bool', 'default' => 0);
+		$this->params_def['help'] = array('default' => '');
+		$this->params_def['card'] = array('default' => '');
+		$this->params_def['auto_save'] = array('data_type' => 'bool', 'default' => 0);
+		$this->params_def['extra_content'] = array('default' => '');
 
-        global $current_bc;
-        if (!is_object($current_bc)) {
-            $current_bc = null;
-        }
-        $prev_bc = $current_bc;
-        $current_bc = $this;
+		global $current_bc;
+		if (!is_object($current_bc)) {
+			$current_bc = null;
+		}
+		$prev_bc = $current_bc;
+		$current_bc = $this;
 
-        parent::__construct($object, '', $path);
+		parent::__construct($object, '', $path);
 
-        if ($this->data_type === 'items_list' && $this->params['type'] !== 'check_list') {
-//            if (is_null($this->params['type']) || $this->params['type'] === 'items_list') {
-            $this->params['multiple'] = 1;
-            $this->params['sortable'] = (isset($field_params['items_sortable']) ? (int) $field_params['items_sortable'] : 0);
-            $this->params['add_all_btn'] = (isset($field_params['items_add_all_btn']) ? (int) $field_params['items_add_all_btn'] : 0);
-            $this->params['items_data_type'] = (isset($field_params['items_data_type']) ? $field_params['items_data_type'] : 'string');
-//            }
-        }
+		if ($this->params['type'] !== 'check_list') {
+			if ($this->data_type === 'items_list') {
+				$this->params['multiple'] = 1;
+				$this->params['sortable'] = (isset($field_params['items_sortable']) ? (int) $field_params['items_sortable'] : 0);
+				$this->params['add_all_btn'] = (isset($field_params['items_add_all_btn']) ? (int) $field_params['items_add_all_btn'] : 0);
+				$this->params['items_data_type'] = (isset($field_params['items_data_type']) ? $field_params['items_data_type'] : 'string');
+			} elseif ((int) $this->params['multiple']) {
+				$this->params['sortable'] = (int) $this->object->getConf($this->config_path . '/sortable', 0, false, 'bool');
+				$this->params['add_all_btn'] = (int) $this->object->getConf($this->config_path . '/add_all_btn', 0, false, 'bool');
+			}
+		}
 
-        if (is_null($this->params['type'])) {
-            if (isset($this->field_params['values']) && !is_null($this->field_params['values'])) {
-                $this->params['type'] = 'select';
-            } else {
-                if ($this->data_type === 'items_list') {
-                    $data_type = $this->params['items_data_type'];
-                } else {
-                    $data_type = $this->data_type;
-                }
-                switch ($data_type) {
-                    case 'int':
-                    case 'id':
-                    case 'float':
-                    case 'string':
-                    case 'percent':
-                    case 'money':
-                    case 'color':
-                        $this->params['type'] = 'text';
-                        break;
+		if (is_null($this->params['type'])) {
+			if (isset($this->field_params['values']) && !is_null($this->field_params['values'])) {
+				$this->params['type'] = 'select';
+			} else {
+				if ($this->data_type === 'items_list') {
+					$data_type = $this->params['items_data_type'];
+				} else {
+					$data_type = $this->data_type;
+				}
+				switch ($data_type) {
+					case 'int':
+					case 'id':
+					case 'float':
+					case 'string':
+					case 'percent':
+					case 'money':
+					case 'color':
+						$this->params['type'] = 'text';
+						break;
 
-                    case 'text':
-                        $this->params['type'] = 'textarea';
-                        break;
+					case 'text':
+						$this->params['type'] = 'textarea';
+						break;
 
-                    case 'bool':
-                        $this->params['type'] = 'toggle';
-                        break;
+					case 'bool':
+						$this->params['type'] = 'toggle';
+						break;
 
-                    case 'qty':
-                    case 'html':
-                    case 'time':
-                    case 'date':
-                    case 'datetime':
-                    case 'password':
-                    case 'object_filters':
-                        $this->params['type'] = $data_type;
-                        break;
+					case 'qty':
+					case 'html':
+					case 'time':
+					case 'date':
+					case 'datetime':
+					case 'password':
+					case 'object_filters':
+						$this->params['type'] = $data_type;
+						break;
 
-                    case 'id_object':
-                    case 'id_parent':
-                        $this->params['type'] = 'search_object';
-                        break;
-                }
-            }
-            if (!is_null($this->params['type'])) {
-                if (array_key_exists($this->params['type'], self::$type_params_def)) {
-                    foreach ($this->fetchParams($this->config_path, static::$type_params_def[$this->params['type']]) as $p_name => $p_value) {
-                        $this->params[$p_name] = $p_value;
-                    }
-                }
-            }
-        }
+					case 'id_object':
+					case 'id_parent':
+						$this->params['type'] = 'search_object';
+						break;
+				}
+			}
+			if (!is_null($this->params['type'])) {
+				if (array_key_exists($this->params['type'], self::$type_params_def)) {
+					foreach ($this->fetchParams($this->config_path, static::$type_params_def[$this->params['type']]) as $p_name => $p_value) {
+						$this->params[$p_name] = $p_value;
+					}
+				}
+			}
+		}
 
-        switch ($this->params['type']) {
-            case 'select':
-            case 'switch_options':
-                if (is_null($this->params['options']) || !count($this->params['options'])) {
-                    if (isset($this->field_params['values']) && !is_null($this->field_params['values'])) {
-                        $this->params['options'] = $this->field_params['values'];
-                    } else {
-                        $this->params['options'] = array();
-                    }
-                }
-                break;
-        }
+		switch ($this->params['type']) {
+			case 'select':
+			case 'switch_options':
+				if (is_null($this->params['options']) || !count($this->params['options'])) {
+					if (isset($this->field_params['values']) && !is_null($this->field_params['values'])) {
+						$this->params['options'] = $this->field_params['values'];
+					} else {
+						$this->params['options'] = array();
+					}
+				}
+				break;
+		}
 
-        $this->input_id = $this->object->object_name;
-        if ($this->object->isLoaded()) {
-            $this->input_id .= '_' . $this->object->id;
-        }
-        $this->input_id .= '_' . $input_name;
+		$this->input_id = $this->object->object_name;
+		if ($this->object->isLoaded()) {
+			$this->input_id .= '_' . $this->object->id;
+		}
+		$this->input_id .= '_' . $input_name;
 
-        if (is_a($this->object, 'BimpObject') &&
-                method_exists($this->object, 'getInputValue') /* && is_null($this->value) */) {//TODO && is_null($this->value) a verifier, mais sinon la valeur envoyé ce fait écraser
-            $input_value = $this->object->getInputValue($this->input_name);
-            if (!is_null($input_value)) {
-                $this->value = $input_value;
-            }
-        }
+		if (is_a($this->object, 'BimpObject') &&
+			method_exists($this->object, 'getInputValue') /* && is_null($this->value) */) {//TODO && is_null($this->value) a verifier, mais sinon la valeur envoyé ce fait écraser
+			$input_value = $this->object->getInputValue($this->input_name);
+			if (!is_null($input_value)) {
+				$this->value = $input_value;
+			}
+		}
 
-        // Ajustement finaux:
-        switch ($this->params['type']) {
-            case 'check_list':
-                if (is_string($this->value) && preg_match('/^\[.*\]$/', $this->value)) {
-                    $this->value = json_decode($this->value, 1);
-                }
-                break;
+		// Ajustement finaux:
+		switch ($this->params['type']) {
+			case 'check_list':
+				if (is_string($this->value) && preg_match('/^\[.*\]$/', $this->value)) {
+					$this->value = json_decode($this->value, 1);
+				}
+				break;
 
-            case 'object_filters':
-                if (!$this->params['obj_input_name']) {
-                    if (!$this->params['obj_module']) {
-                        $this->params['obj_module'] = BimpTools::getArrayValueFromPath($this->field_params, 'obj_module', '');
-                    }
-                    if (!$this->params['obj_name']) {
-                        $this->params['obj_name'] = BimpTools::getArrayValueFromPath($this->field_params, 'obj_name', '');
-                    }
-                }
-                break;
-        }
+			case 'object_filters':
+				if (!$this->params['obj_input_name']) {
+					if (!$this->params['obj_module']) {
+						$this->params['obj_module'] = BimpTools::getArrayValueFromPath($this->field_params, 'obj_module', '');
+					}
+					if (!$this->params['obj_name']) {
+						$this->params['obj_name'] = BimpTools::getArrayValueFromPath($this->field_params, 'obj_name', '');
+					}
+				}
+				break;
+		}
 
-        $current_bc = $prev_bc;
-    }
+		$current_bc = $prev_bc;
+	}
 
-    public function setNamePrefix($prefix)
-    {
-        $this->name_prefix = $prefix;
-        $this->input_id = $this->object->object_name;
-        if ($this->object->isLoaded()) {
-            $this->input_id .= '_' . $this->object->id;
-        }
-        $this->input_id .= '_' . $prefix . $this->input_name;
-    }
+	public function setNamePrefix($prefix)
+	{
+		$this->name_prefix = $prefix;
+		$this->input_id = $this->object->object_name;
+		if ($this->object->isLoaded()) {
+			$this->input_id .= '_' . $this->object->id;
+		}
+		$this->input_id .= '_' . $prefix . $this->input_name;
+	}
 
-    public function addInputExtraClass($class)
-    {
-        $this->input_extra_classes[] = $class;
-    }
+	public function addInputExtraClass($class)
+	{
+		$this->input_extra_classes[] = $class;
+	}
 
-    public function addInputExtraData($data_name, $data_value)
-    {
-        $this->input_extra_data[$data_name] = $data_value;
-    }
+	public function addInputExtraData($data_name, $data_value)
+	{
+		$this->input_extra_data[$data_name] = $data_value;
+	}
 
-    public function getOptions()
-    {
-        $options = array();
+	public function getOptions()
+	{
+		$options = array();
 
-        switch ($this->params['type']) {
-            case 'text':
-                $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
-                $options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
-                $options['hashtags'] = ((isset($this->params['hashtags']) && (int) $this->params['hashtags']) ? (int) $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? (int) $this->field_params['hashtags'] : 0));
-                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
-                $options['no_autocorrect'] = ((isset($this->params['no_autocorrect'])) ? (int) $this->params['no_autocorrect'] : 0);
-                $options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
-                $options['strip_tags'] = (isset($this->field_params['no_strip_tags']) ? !(int) $this->field_params['no_strip_tags'] : (isset($this->params['strip_tags']) ? (int) $this->params['strip_tags'] : 1));
+		switch ($this->params['type']) {
+			case 'text':
+				$options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
+				$options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
+				$options['hashtags'] = ((isset($this->params['hashtags']) && (int) $this->params['hashtags']) ? (int) $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? (int) $this->field_params['hashtags'] : 0));
+				$options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
+				$options['no_autocorrect'] = ((isset($this->params['no_autocorrect'])) ? (int) $this->params['no_autocorrect'] : 0);
+				$options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
+				$options['strip_tags'] = (isset($this->field_params['no_strip_tags']) ? !(int) $this->field_params['no_strip_tags'] : (isset($this->params['strip_tags']) ? (int) $this->params['strip_tags'] : 1));
 
-            case 'qty':
-                $options['data'] = array();
-                $options['step'] = isset($this->params['step']) ? $this->params['step'] : 1;
-                $options['min_label'] = isset($this->params['min_label']) ? $this->params['min_label'] : 0;
-                $options['max_label'] = isset($this->params['max_label']) ? $this->params['max_label'] : 0;
-                $options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
+			case 'qty':
+				$options['data'] = array();
+				$options['step'] = isset($this->params['step']) ? $this->params['step'] : 1;
+				$options['min_label'] = isset($this->params['min_label']) ? $this->params['min_label'] : 0;
+				$options['max_label'] = isset($this->params['max_label']) ? $this->params['max_label'] : 0;
+				$options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
 
-                $min = 'none';
-                $max = 'none';
-                $decimals = 0;
-                switch ($this->data_type) {
-                    case 'percent':
-                    case 'money':
-                    case 'float':
-                    case 'qty':
-                    case 'int':
-                    case 'id':
-                        switch ($this->data_type) {
-                            case 'percent':
-                                $min = '0';
-                                $max = '100';
-                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
-                                break;
+				$min = 'none';
+				$max = 'none';
+				$decimals = 0;
+				switch ($this->data_type) {
+					case 'percent':
+					case 'money':
+					case 'float':
+					case 'qty':
+					case 'int':
+					case 'id':
+						switch ($this->data_type) {
+							case 'percent':
+								$min = '0';
+								$max = '100';
+								$decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
+								break;
 
-                            case 'money':
-                            case 'float':
-                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
-                                break;
+							case 'money':
+							case 'float':
+								$decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
+								break;
 
-                            case 'qty':
-                                $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 0;
-                                break;
-                        }
-                        $options['data']['data_type'] = 'number';
-                        $options['data']['decimals'] = $decimals;
-                        $options['data']['min'] = isset($this->field_params['min']) ? $this->field_params['min'] : $min;
-                        $options['data']['max'] = isset($this->field_params['max']) ? $this->field_params['max'] : $max;
-                        $options['data']['unsigned'] = isset($this->field_params['unsigned']) ? (int) $this->field_params['unsigned'] : 0;
-                        break;
+							case 'qty':
+								$decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 0;
+								break;
+						}
+						$options['data']['data_type'] = 'number';
+						$options['data']['decimals'] = $decimals;
+						$options['data']['min'] = isset($this->field_params['min']) ? $this->field_params['min'] : $min;
+						$options['data']['max'] = isset($this->field_params['max']) ? $this->field_params['max'] : $max;
+						$options['data']['unsigned'] = isset($this->field_params['unsigned']) ? (int) $this->field_params['unsigned'] : 0;
+						break;
 
-                    case 'string':
-                        $options['data']['data_type'] = 'string';
-                        $options['data']['size'] = isset($this->field_params['size']) ? $this->field_params['size'] : 128;
-                        $options['data']['forbidden_chars'] = isset($this->field_params['forbidden_chars']) ? $this->field_params['forbidden_chars'] : '';
-                        $options['data']['regexp'] = isset($this->field_params['regexp']) ? $this->field_params['regexp'] : '';
-                        $options['data']['invalid_msg'] = isset($this->field_params['invalid_msg']) ? $this->field_params['invalid_msg'] : '';
-                        $options['data']['uppercase'] = isset($this->field_params['uppercase']) ? $this->field_params['uppercase'] : 0;
-                        $options['data']['lowercase'] = isset($this->field_params['lowercase']) ? $this->field_params['lowercase'] : 0;
-                        break;
-                }
-                break;
+					case 'string':
+						$options['data']['data_type'] = 'string';
+						$options['data']['size'] = isset($this->field_params['size']) ? $this->field_params['size'] : 128;
+						$options['data']['forbidden_chars'] = isset($this->field_params['forbidden_chars']) ? $this->field_params['forbidden_chars'] : '';
+						$options['data']['regexp'] = isset($this->field_params['regexp']) ? $this->field_params['regexp'] : '';
+						$options['data']['invalid_msg'] = isset($this->field_params['invalid_msg']) ? $this->field_params['invalid_msg'] : '';
+						$options['data']['uppercase'] = isset($this->field_params['uppercase']) ? $this->field_params['uppercase'] : 0;
+						$options['data']['lowercase'] = isset($this->field_params['lowercase']) ? $this->field_params['lowercase'] : 0;
+						break;
+				}
+				break;
 
-            case 'datetime':
-                $options['with_hours'] = isset($this->params['with_hours']) ? $this->params['with_hours'] : 1;
-            case 'time':
-                $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 0;
-            case 'date':
-                $options['display_now'] = isset($this->params['display_now']) ? $this->params['display_now'] : 0;
-                break;
+			case 'datetime':
+				$options['with_hours'] = isset($this->params['with_hours']) ? $this->params['with_hours'] : 1;
+			case 'time':
+				$options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 0;
+			case 'date':
+				$options['display_now'] = isset($this->params['display_now']) ? $this->params['display_now'] : 0;
+				break;
 
-            case 'timer':
-                $options['with_days'] = isset($this->params['with_days']) ? $this->params['with_days'] : 1;
-                $options['with_hours'] = isset($this->params['with_hours']) ? $this->params['with_hours'] : 1;
-                $options['with_minutes'] = isset($this->params['with_minutes']) ? $this->params['with_minutes'] : 1;
-                $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 1;
-                break;
+			case 'timer':
+				$options['with_days'] = isset($this->params['with_days']) ? $this->params['with_days'] : 1;
+				$options['with_hours'] = isset($this->params['with_hours']) ? $this->params['with_hours'] : 1;
+				$options['with_minutes'] = isset($this->params['with_minutes']) ? $this->params['with_minutes'] : 1;
+				$options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 1;
+				break;
 
-            case 'textarea':
-                $options['strip_tags'] = (isset($this->field_params['no_strip_tags']) ? !(int) $this->field_params['no_strip_tags'] : (isset($this->params['strip_tags']) ? (int) $this->params['strip_tags'] : 1));
+			case 'textarea':
+				$options['strip_tags'] = (isset($this->field_params['no_strip_tags']) ? !(int) $this->field_params['no_strip_tags'] : (isset($this->params['strip_tags']) ? (int) $this->params['strip_tags'] : 1));
 
-            case 'html':
-                $options['rows'] = isset($this->params['rows']) ? $this->params['rows'] : 3;
-                $options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
-                $options['note'] = isset($this->params['note']) ? $this->params['note'] : 0;
-                $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
-                $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
-                $options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
-                $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
+			case 'html':
+				$options['rows'] = isset($this->params['rows']) ? $this->params['rows'] : 3;
+				$options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
+				$options['note'] = isset($this->params['note']) ? $this->params['note'] : 0;
+				$options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
+				$options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
+				$options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
+				$options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
 //                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
-                break;
-
-            case 'select':
-                $options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
-                $options['select_first'] = isset($this->params['select_first']) ? $this->params['select_first'] : 0;
-                break;
-
-            case 'switch_options':
-                $options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
-                $options['vertical'] = isset($this->params['vertical']) ? $this->params['vertical'] : 0;
-                break;
-
-            case 'toggle':
-                $options['toggle_on'] = isset($this->params['toggle_on']) ? $this->params['toggle_on'] : 'OUI';
-                $options['toggle_off'] = isset($this->params['toggle_off']) ? $this->params['toggle_off'] : 'NON';
-                break;
-
-            case 'check_list':
-                $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
-                $options['select_all_buttons'] = isset($this->params['select_all_buttons']) ? $this->params['select_all_buttons'] : 1;
-                $options['search_input'] = isset($this->params['search_input']) ? (int) $this->params['search_input'] : 0;
-                $options['max_input_name'] = isset($this->params['max_input_name']) ? (int) $this->params['max_input_name'] : '';
-                $options['max_input_abs'] = isset($this->params['max_input_abs']) ? (int) $this->params['max_input_abs'] : 0;
-                $options['max'] = (isset($this->params['max']) && $this->params['max'] !== 'none') ? (int) $this->params['max'] : 'none';
-                break;
-
-            case 'items_list':
-                $options['sortable'] = isset($this->params['sortable']) ? $this->params['sortable'] : 0;
-                $options['add_input'] = isset($this->params['add_input']) ? $this->params['add_input'] : null;
-                break;
-
-            case 'search_object':
-                $options['object'] = null;
-                $obj_name = '';
-
-                if (isset($this->params['object']) && $this->params['object']) {
-                    $obj_name = $this->params['object'];
-                } elseif (isset($this->field_params['object'])) {
-                    $obj_name = $this->field_params['object'];
-                }
-
-                if ($obj_name) {
-                    $object = $this->object->config->getObject('', $obj_name);
-                    if (!is_null($object) && is_a($object, 'BimpObject')) {
-                        $options['object'] = $object;
-                    }
-                } elseif (isset($this->field_params['type']) && $this->field_params['type'] === 'id_parent') {
-                    $parent_module = $this->object->getParentModule();
-                    $parent_obj_name = $this->object->getParentObjectName();
-
-                    if ($parent_module && $parent_obj_name) {
-                        $object = BimpObject::getInstance($parent_module, $parent_obj_name);
-                        if (is_a($object, 'BimpObject')) {
-                            $options['object'] = $object;
-                        }
-                    }
-                }
-
-                $options['search_name'] = isset($this->params['search_name']) ? $this->params['search_name'] : 'default';
-                $options['card'] = isset($this->params['card']) ? $this->params['card'] : '';
-                $options['max_results'] = isset($this->params['max_results']) ? (int) $this->params['max_results'] : 200;
-                $options['display_results'] = isset($this->params['display_results']) ? (int) $this->params['display_results'] : 1;
-                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
-                break;
-
-            case 'search_user':
-                $options['include_current'] = isset($this->params['include_current']) ? $this->params['include_current'] : 0;
-                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
-                $options['empty_label'] = isset($this->params['empty_label']) ? $this->params['empty_label'] : '';
-                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : null; // null important si non défini
-                break;
-
-            case 'search_group':
-                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
-                break;
-
-            case 'search_product':
-                $options['filter_type'] = isset($this->params['filter_type']) ? $this->params['filter_type'] : 0;
-                break;
-
-            case 'search_societe':
-                $options['type'] = isset($this->params['societe_type']) ? $this->params['societe_type'] : '';
-                break;
-
-            case 'search_state':
-                $options['id_country'] = isset($this->params['id_country']) ? $this->params['id_country'] : 0;
-                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
-                $options['country_key_field'] = isset($this->params['country_key_field']) ? $this->params['country_key_field'] : 'rowid';
-                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
-                break;
-
-            case 'search_country':
-                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
-                $options['key_field'] = isset($this->params['key_field']) ? $this->params['key_field'] : 'rowid';
-                break;
-
-            case 'search_juridicalstatus':
-                $options['country_code'] = isset($this->params['country_code']) ? $this->params['country_code'] : '';
-                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
-                $options['country_key_field'] = isset($this->params['country_key_field']) ? $this->params['country_key_field'] : 'code';
-                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
-                break;
-
-            case 'search_commande_client':
-                $options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : '';
-                break;
-
-            case 'search_commande_fournisseur':
-                $options['id_fournisseur'] = isset($this->params['id_fournisseur']) ? $this->params['id_fournisseur'] : '';
-                break;
-
-            case 'select_payment':
-                $options['value_type'] = isset($this->params['value_type']) ? $this->params['value_type'] : 'id';
-                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
-                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
-                break;
-
-            case 'search_ziptown':
-                $options['field_type'] = isset($this->params['field_type']) ? $this->params['field_type'] : '';
-                $options['town_field'] = isset($this->params['town_field']) ? $this->params['town_field'] : '';
-                $options['zip_field'] = isset($this->params['zip_field']) ? $this->params['zip_field'] : '';
-                $options['state_field'] = isset($this->params['state_field']) ? $this->params['state_field'] : '';
-                $options['country_field'] = isset($this->params['country_field']) ? $this->params['country_field'] : '';
-                break;
-
-            case 'select_remises':
-                $options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : 0;
-                $options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
-                break;
-
-            case 'select_remises_fourn':
-                $options['id_fourn'] = isset($this->params['id_fourn']) ? $this->params['id_fourn'] : 0;
-                $options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
-                break;
-
-            case 'search_entrepot':
-                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
-                $options['has_commissions_only'] = isset($this->params['has_commissions_only']) ? $this->params['has_commissions_only'] : 0;
-                $options['with_caisse_close'] = isset($this->params['with_caisse_close']) ? $this->params['with_caisse_close'] : 0;
-                $options['with_caisse_open'] = isset($this->params['with_caisse_open']) ? $this->params['with_caisse_open'] : 0;
-                break;
-
-            case 'object_filters':
-                $options['obj_input_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_input_name'] : '';
-                $options['obj_module'] = isset($this->params['obj_module']) ? $this->params['obj_module'] : '';
-                $options['obj_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_name'] : '';
-                break;
-
-            case 'signature_pad':
-                $options['expand'] = isset($this->params['expand']) ? (int) $this->params['expand'] : 0;
-                $options['check_mentions'] = isset($this->params['check_mentions']) ? $this->params['check_mentions'] : array();
-                break;
-
-            case 'drop_files':
-                $options['max_items'] = isset($this->params['max_items']) ? (int) $this->params['max_items'] : 0;
-                $options['files_dir'] = isset($this->params['files_dir']) ? $this->params['check_mentions'] : '';
-                $options['allowed_types'] = isset($this->params['allowed_types']) ? $this->params['allowed_types'] : '';
-                $options['allowed_ext'] = isset($this->params['allowed_ext']) ? $this->params['allowed_ext'] : '';
-                break;
-
-            case 'password':
-                $options['min_length'] = isset($this->params['min_length']) ? (int) $this->params['min_length'] : (isset($this->field_params['min_length']) ? $this->field_params['min_length'] : 12);
-                $options['special_required'] = isset($this->params['special_required']) ? (int) $this->params['special_required'] : (isset($this->field_params['special_required']) ? $this->field_params['special_required'] : 1);
-                $options['maj_required'] = isset($this->params['maj_required']) ? (int) $this->params['maj_required'] : (isset($this->field_params['maj_required']) ? $this->field_params['maj_required'] : 1);
-                $options['num_required'] = isset($this->params['num_required']) ? (int) $this->params['num_required'] : (isset($this->field_params['num_required']) ? $this->field_params['num_required'] : 1);
-                break;
-        }
-
-        return $options;
-    }
-
-    public function getMultipleValuesItems($input_options)
-    {
-        if (isset($this->field_params['multiple_values_matches'])) {
-            return $this->field_params['multiple_values_matches'];
-        } elseif ($this->params['type'] === 'select' && isset($input_options['options'])) {
-            return $input_options['options'];
-        } elseif (isset($this->field_params['values'])) {
-            return $this->field_params['values'];
-        } elseif ($this->params['type'] === 'search_user') {
-            return BimpCache::getUsersArray();
-        }
-
-        return null;
-    }
-
-    public function renderHtml()
-    {
-        $html = parent::renderHtml();
-
-        if (count($this->errors)) {
-            return $html;
-        }
-
-        global $current_bc;
-        if (!is_object($current_bc)) {
-            $current_bc = null;
-        }
-        $prev_bc = $current_bc;
-        $current_bc = $this;
-
-        if (is_null($this->value)) {
-            $this->value = '';
-        }
-
-        $input_value = $this->value;
-
-        if (is_array($input_value)) {
-            if (in_array($this->data_type, array('json', 'object_filters'))) {
-                $input_value = json_encode($input_value);
-            } else {
-                $input_value = implode(',', $input_value);
-            }
-        }
-
-        if (is_null($this->new_value)) {
-            $this->new_value = $input_value;
-        } elseif (is_array($this->new_value)) {
-            if (in_array($this->data_type, array('json', 'object_filters'))) {
-                $this->new_value = json_encode($this->new_value);
-            } else {
-                $this->new_value = implode(',', $this->new_value);
-            }
-        }
-
-        $required = isset($this->field_params['required']) ? (int) $this->field_params['required'] : 0;
-        $input_name = $this->name_prefix . $this->input_name;
-        $input_id = $this->input_id;
-        $content = '';
-
-        $options = $this->getOptions();
-        $option = '';
-
-        if (!is_null($this->params['addon_right'])) {
-            if (isset($this->params['addon_right']['text'])) {
-                $options['addon_right'] = $this->params['addon_right']['text'];
-            } elseif (isset($this->params['addon_right']['icon'])) {
-                $options['addon_right'] = '<i class="fa fa-' . $this->params['addon_right']['icon'] . '"></i>';
-            }
-        } else {
-            switch ($this->data_type) {
-                case 'money':
-                    $currency = isset($this->params['currency']) ? $this->params['currency'] : 'EUR';
-                    $options['addon_right'] = '<i class="fa fa-' . BimpTools::getCurrencyIcon($currency) . '"></i>';
-                    break;
-
-                case 'percent':
-                    $options['addon_right'] = '<i class="fa fa-percent"></i>';
-                    break;
-            }
-        }
-
-        if (!is_null($this->params['addon_left'])) {
-            if (isset($this->params['addon_left']['text'])) {
-                $options['addon_left'] = $this->params['addon_left']['text'];
-            } elseif (isset($this->params['addon_left']['icon'])) {
-                $options['addon_left'] = '<i class="fa fa-' . $this->params['addon_left']['icon'] . '"></i>';
-            }
-        }
-
-        if (!empty($this->input_extra_classes)) {
-            if (!isset($options['extra_class'])) {
-                $options['extra_class'] = '';
-            }
-
-            $options['extra_class'] = ($options['extra_class'] ? ' ' : implode(' ', $this->input_extra_classes));
-        }
-
-        if (!empty($this->input_extra_data)) {
-            if (!isset($options['data'])) {
-                $options['data'] = array();
-            }
-
-            foreach ($this->input_extra_data as $data_name => $data_value) {
-                $options['data'][$data_name] = $data_value;
-            }
-        }
-
-        if ($this->params['multiple']) {
-            $this->extraData['values_field'] = $input_name;
-            $this->extraClasses[] = $input_name . '_inputContainer';
-            $input_name .= '_add_value';
-            $input_id .= '_add_value';
-            $this->new_value = '';
-        }
-
-        switch ($this->params['type']) {
-            case 'search_list':
-                $content = $this->renderSearchListInput($input_name);
-                break;
-
-            case 'custom':
-                $content = isset($this->params['content']) ? $this->params['content'] : '';
-                break;
-
-            default:
-                $content = BimpInput::renderInput($this->params['type'], $input_name, $this->new_value, $options, null, $option, $input_id);
-                break;
-        }
-
-        if ($this->params['help']) {
-            $content .= '<p class="inputHelp">' . $this->params['help'] . '</p>';
-        }
-
-        if ((int) $this->params['multiple']) {
-            $label_input_suffixe = '';
-            if ($this->params['type'] === 'search_list') {
-                $label_input_suffixe = '_label';
-            }
-            $sortable = (isset($this->params['sortable']) ? (int) $this->params['sortable'] : 0);
-            $autosave = (isset($this->params['auto_save']) ? (int) $this->params['auto_save'] : 0);
-            $add_all_btn = (isset($this->params['add_all_btn']) ? (int) $this->params['add_all_btn'] : 0);
-            $values = array();
-
-            if (is_null($this->value)) {
-                $this->value = array();
-            }
-
-            if (is_string($this->value)) {
-                if ($this->value) {
-                    $this->value = explode(',', $this->value);
-                } else {
-                    $this->value = array();
-                }
-            }
-
-            if (is_array($this->value) && !empty($this->value)) {
-                $items = $this->getMultipleValuesItems($options);
-                foreach ($this->value as $value) {
-                    if (!is_null($items)) {
-                        if (isset($items[$value])) {
-                            if (is_array($value)) {
-                                $label = BimpTools::getArrayValueFromPath($items, $value . '/label', $value);
-                                $icon = BimpTools::getArrayValueFromPath($items, $value . '/label', $value);
-
-                                $values[$value] = ($icon ? BimpRender::renderIcon($icon, 'iconLeft') : '') . $label;
-                            } else {
-                                $values[$value] = $items[$value];
-                            }
-                        }
-                    } elseif (!isset($values[$value])) {
-                        $values[$value] = $value;
-                    }
-                }
-            }
-            $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable, 'none', array(), $add_all_btn);
-        }
-
-        $extra_data = $this->extraData;
-        $extra_data['data_type'] = $this->data_type;
-
-        if ($this->data_type === 'id_object' && isset($this->field_params['object'])) {
-            $module = '';
-            $object_name = '';
-
-            if (is_object($this->field_params['object']) && is_a($this->field_params['object'], 'BimpObject')) {
-                $module = $this->field_params['object']->module;
-                $object_name = $this->field_params['object']->object_name;
-            } elseif (is_string($this->field_params['object']) && $this->field_params['object']) {
-                $instance = $this->object->config->getObject('', $this->field_params['object']);
-                if (is_a($instance, 'BimpObject') && get_class($instance) !== 'BimpObject') {
-                    $module = $instance->module;
-                    $object_name = $instance->object_name;
-                }
-            } else {
-                $path = 'fields/' . $this->input_name . '/object';
-                if ($this->object->config->isDefined($path)) {
-                    $module = $this->object->config->getObjectModule($path);
-                    $object_name = $this->object->config->getObjectName($path);
-                }
-            }
-
-            if ($module && $object_name) {
-                $extra_data['object_module'] = $module;
-                $extra_data['object_name'] = $object_name;
-
-                if ($this->params['type'] !== 'search_object') {
-                    $extra_data['card'] = $this->params['card'];
-                    $extra_data['display_card_mode'] = $this->display_card_mode;
-                }
-            }
-        }
-
-        if (isset($this->params['extra_content'])) {
-            $content .= $this->params['extra_content'];
-        }
-
-        $html .= BimpInput::renderInputContainer($this->input_name, $this->value, $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), $extra_data);
-
-        $current_bc = $prev_bc;
-        return $html;
-    }
-
-    protected function renderSearchListInput($input_name = null)
-    {
-        global $current_bc;
-        if (!is_object($current_bc)) {
-            $current_bc = null;
-        }
-        $prev_bc = $current_bc;
-        $current_bc = $this;
-
-        if (is_null($this->value)) {
-            $this->value = '';
-        }
-
-        if (is_null($input_name)) {
-            $input_name = $this->name_prefix . $this->input_name;
-        }
-
-        $html = BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $input_name, $this->new_value, $this->option);
-
-        $current_bc = $prev_bc;
-        return $html;
-    }
+				break;
+
+			case 'select':
+				$options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
+				$options['select_first'] = isset($this->params['select_first']) ? $this->params['select_first'] : 0;
+				break;
+
+			case 'switch_options':
+				$options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
+				$options['vertical'] = isset($this->params['vertical']) ? $this->params['vertical'] : 0;
+				break;
+
+			case 'toggle':
+				$options['toggle_on'] = isset($this->params['toggle_on']) ? $this->params['toggle_on'] : 'OUI';
+				$options['toggle_off'] = isset($this->params['toggle_off']) ? $this->params['toggle_off'] : 'NON';
+				break;
+
+			case 'check_list':
+				$options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
+				$options['select_all_buttons'] = isset($this->params['select_all_buttons']) ? $this->params['select_all_buttons'] : 1;
+				$options['search_input'] = isset($this->params['search_input']) ? (int) $this->params['search_input'] : 0;
+				$options['max_input_name'] = isset($this->params['max_input_name']) ? (int) $this->params['max_input_name'] : '';
+				$options['max_input_abs'] = isset($this->params['max_input_abs']) ? (int) $this->params['max_input_abs'] : 0;
+				$options['max'] = (isset($this->params['max']) && $this->params['max'] !== 'none') ? (int) $this->params['max'] : 'none';
+				break;
+
+			case 'items_list':
+				$options['sortable'] = isset($this->params['sortable']) ? $this->params['sortable'] : 0;
+				$options['add_input'] = isset($this->params['add_input']) ? $this->params['add_input'] : null;
+				break;
+
+			case 'search_object':
+				$options['object'] = null;
+				$obj_name = '';
+
+				if (isset($this->params['object']) && $this->params['object']) {
+					$obj_name = $this->params['object'];
+				} elseif (isset($this->field_params['object'])) {
+					$obj_name = $this->field_params['object'];
+				}
+
+				if ($obj_name) {
+					$object = $this->object->config->getObject('', $obj_name);
+					if (!is_null($object) && is_a($object, 'BimpObject')) {
+						$options['object'] = $object;
+					}
+				} elseif (isset($this->field_params['type']) && $this->field_params['type'] === 'id_parent') {
+					$parent_module = $this->object->getParentModule();
+					$parent_obj_name = $this->object->getParentObjectName();
+
+					if ($parent_module && $parent_obj_name) {
+						$object = BimpObject::getInstance($parent_module, $parent_obj_name);
+						if (is_a($object, 'BimpObject')) {
+							$options['object'] = $object;
+						}
+					}
+				}
+
+				$options['search_name'] = isset($this->params['search_name']) ? $this->params['search_name'] : 'default';
+				$options['card'] = isset($this->params['card']) ? $this->params['card'] : '';
+				$options['max_results'] = isset($this->params['max_results']) ? (int) $this->params['max_results'] : 200;
+				$options['display_results'] = isset($this->params['display_results']) ? (int) $this->params['display_results'] : 1;
+				$options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
+				break;
+
+			case 'search_user':
+				$options['include_current'] = isset($this->params['include_current']) ? $this->params['include_current'] : 0;
+				$options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
+				$options['empty_label'] = isset($this->params['empty_label']) ? $this->params['empty_label'] : '';
+				$options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : null; // null important si non défini
+				break;
+
+			case 'search_group':
+				$options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
+				break;
+
+			case 'search_product':
+				$options['filter_type'] = isset($this->params['filter_type']) ? $this->params['filter_type'] : 0;
+				break;
+
+			case 'search_societe':
+				$options['type'] = isset($this->params['societe_type']) ? $this->params['societe_type'] : '';
+				break;
+
+			case 'search_state':
+				$options['id_country'] = isset($this->params['id_country']) ? $this->params['id_country'] : 0;
+				$options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+				$options['country_key_field'] = isset($this->params['country_key_field']) ? $this->params['country_key_field'] : 'rowid';
+				$options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
+				break;
+
+			case 'search_country':
+				$options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+				$options['key_field'] = isset($this->params['key_field']) ? $this->params['key_field'] : 'rowid';
+				break;
+
+			case 'search_juridicalstatus':
+				$options['country_code'] = isset($this->params['country_code']) ? $this->params['country_code'] : '';
+				$options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+				$options['country_key_field'] = isset($this->params['country_key_field']) ? $this->params['country_key_field'] : 'code';
+				$options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
+				break;
+
+			case 'search_commande_client':
+				$options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : '';
+				break;
+
+			case 'search_commande_fournisseur':
+				$options['id_fournisseur'] = isset($this->params['id_fournisseur']) ? $this->params['id_fournisseur'] : '';
+				break;
+
+			case 'select_payment':
+				$options['value_type'] = isset($this->params['value_type']) ? $this->params['value_type'] : 'id';
+				$options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+				$options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
+				break;
+
+			case 'search_ziptown':
+				$options['field_type'] = isset($this->params['field_type']) ? $this->params['field_type'] : '';
+				$options['town_field'] = isset($this->params['town_field']) ? $this->params['town_field'] : '';
+				$options['zip_field'] = isset($this->params['zip_field']) ? $this->params['zip_field'] : '';
+				$options['state_field'] = isset($this->params['state_field']) ? $this->params['state_field'] : '';
+				$options['country_field'] = isset($this->params['country_field']) ? $this->params['country_field'] : '';
+				break;
+
+			case 'select_remises':
+				$options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : 0;
+				$options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
+				break;
+
+			case 'select_remises_fourn':
+				$options['id_fourn'] = isset($this->params['id_fourn']) ? $this->params['id_fourn'] : 0;
+				$options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
+				break;
+
+			case 'search_entrepot':
+				$options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
+				$options['has_commissions_only'] = isset($this->params['has_commissions_only']) ? $this->params['has_commissions_only'] : 0;
+				$options['with_caisse_close'] = isset($this->params['with_caisse_close']) ? $this->params['with_caisse_close'] : 0;
+				$options['with_caisse_open'] = isset($this->params['with_caisse_open']) ? $this->params['with_caisse_open'] : 0;
+				break;
+
+			case 'object_filters':
+				$options['obj_input_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_input_name'] : '';
+				$options['obj_module'] = isset($this->params['obj_module']) ? $this->params['obj_module'] : '';
+				$options['obj_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_name'] : '';
+				break;
+
+			case 'signature_pad':
+				$options['expand'] = isset($this->params['expand']) ? (int) $this->params['expand'] : 0;
+				$options['check_mentions'] = isset($this->params['check_mentions']) ? $this->params['check_mentions'] : array();
+				break;
+
+			case 'drop_files':
+				$options['max_items'] = isset($this->params['max_items']) ? (int) $this->params['max_items'] : 0;
+				$options['files_dir'] = isset($this->params['files_dir']) ? $this->params['check_mentions'] : '';
+				$options['allowed_types'] = isset($this->params['allowed_types']) ? $this->params['allowed_types'] : '';
+				$options['allowed_ext'] = isset($this->params['allowed_ext']) ? $this->params['allowed_ext'] : '';
+				break;
+
+			case 'password':
+				$options['min_length'] = isset($this->params['min_length']) ? (int) $this->params['min_length'] : (isset($this->field_params['min_length']) ? $this->field_params['min_length'] : 12);
+				$options['special_required'] = isset($this->params['special_required']) ? (int) $this->params['special_required'] : (isset($this->field_params['special_required']) ? $this->field_params['special_required'] : 1);
+				$options['maj_required'] = isset($this->params['maj_required']) ? (int) $this->params['maj_required'] : (isset($this->field_params['maj_required']) ? $this->field_params['maj_required'] : 1);
+				$options['num_required'] = isset($this->params['num_required']) ? (int) $this->params['num_required'] : (isset($this->field_params['num_required']) ? $this->field_params['num_required'] : 1);
+				break;
+		}
+
+		return $options;
+	}
+
+	public function getMultipleValuesItems($input_options)
+	{
+		if (isset($this->field_params['multiple_values_matches'])) {
+			return $this->field_params['multiple_values_matches'];
+		} elseif ($this->params['type'] === 'select' && isset($input_options['options'])) {
+			return $input_options['options'];
+		} elseif (isset($this->field_params['values'])) {
+			return $this->field_params['values'];
+		} elseif ($this->params['type'] === 'search_user') {
+			return BimpCache::getUsersArray();
+		}
+
+		return null;
+	}
+
+	public function renderHtml()
+	{
+		$html = parent::renderHtml();
+
+		if (count($this->errors)) {
+			return $html;
+		}
+
+		global $current_bc;
+		if (!is_object($current_bc)) {
+			$current_bc = null;
+		}
+		$prev_bc = $current_bc;
+		$current_bc = $this;
+
+		if (is_null($this->value)) {
+			$this->value = '';
+		}
+
+		$input_value = $this->value;
+
+		if (is_array($input_value)) {
+			if (in_array($this->data_type, array('json', 'object_filters'))) {
+				$input_value = json_encode($input_value);
+			} else {
+				$input_value = implode(',', $input_value);
+			}
+		}
+
+		if (is_null($this->new_value)) {
+			$this->new_value = $input_value;
+		} elseif (is_array($this->new_value)) {
+			if (in_array($this->data_type, array('json', 'object_filters'))) {
+				$this->new_value = json_encode($this->new_value);
+			} else {
+				$this->new_value = implode(',', $this->new_value);
+			}
+		}
+
+		$required = isset($this->field_params['required']) ? (int) $this->field_params['required'] : 0;
+		$input_name = $this->name_prefix . $this->input_name;
+		$input_id = $this->input_id;
+		$content = '';
+
+		$options = $this->getOptions();
+		$option = '';
+
+		if (!is_null($this->params['addon_right'])) {
+			if (isset($this->params['addon_right']['text'])) {
+				$options['addon_right'] = $this->params['addon_right']['text'];
+			} elseif (isset($this->params['addon_right']['icon'])) {
+				$options['addon_right'] = '<i class="fa fa-' . $this->params['addon_right']['icon'] . '"></i>';
+			}
+		} else {
+			switch ($this->data_type) {
+				case 'money':
+					$currency = isset($this->params['currency']) ? $this->params['currency'] : 'EUR';
+					$options['addon_right'] = '<i class="fa fa-' . BimpTools::getCurrencyIcon($currency) . '"></i>';
+					break;
+
+				case 'percent':
+					$options['addon_right'] = '<i class="fa fa-percent"></i>';
+					break;
+			}
+		}
+
+		if (!is_null($this->params['addon_left'])) {
+			if (isset($this->params['addon_left']['text'])) {
+				$options['addon_left'] = $this->params['addon_left']['text'];
+			} elseif (isset($this->params['addon_left']['icon'])) {
+				$options['addon_left'] = '<i class="fa fa-' . $this->params['addon_left']['icon'] . '"></i>';
+			}
+		}
+
+		if (!empty($this->input_extra_classes)) {
+			if (!isset($options['extra_class'])) {
+				$options['extra_class'] = '';
+			}
+
+			$options['extra_class'] = ($options['extra_class'] ? ' ' : implode(' ', $this->input_extra_classes));
+		}
+
+		if (!empty($this->input_extra_data)) {
+			if (!isset($options['data'])) {
+				$options['data'] = array();
+			}
+
+			foreach ($this->input_extra_data as $data_name => $data_value) {
+				$options['data'][$data_name] = $data_value;
+			}
+		}
+
+		if ($this->params['multiple']) {
+			$this->extraData['values_field'] = $input_name;
+			$this->extraClasses[] = $input_name . '_inputContainer';
+			$input_name .= '_add_value';
+			$input_id .= '_add_value';
+			$this->new_value = '';
+		}
+
+		switch ($this->params['type']) {
+			case 'search_list':
+				$content = $this->renderSearchListInput($input_name);
+				break;
+
+			case 'custom':
+				$content = isset($this->params['content']) ? $this->params['content'] : '';
+				break;
+
+			default:
+				$content = BimpInput::renderInput($this->params['type'], $input_name, $this->new_value, $options, null, $option, $input_id);
+				break;
+		}
+
+		if ($this->params['help']) {
+			$content .= '<p class="inputHelp">' . $this->params['help'] . '</p>';
+		}
+
+		if ((int) $this->params['multiple']) {
+			$label_input_suffixe = '';
+			if ($this->params['type'] === 'search_list') {
+				$label_input_suffixe = '_label';
+			}
+
+			$sortable = (isset($this->params['sortable']) ? (int) $this->params['sortable'] : 0);
+			$autosave = (isset($this->params['auto_save']) ? (int) $this->params['auto_save'] : 0);
+			$add_all_btn = (isset($this->params['add_all_btn']) ? (int) $this->params['add_all_btn'] : 0);
+			$values = array();
+
+			if (is_null($this->value)) {
+				$this->value = array();
+			}
+
+			if (is_string($this->value)) {
+				if ($this->value) {
+					$this->value = explode(',', $this->value);
+				} else {
+					$this->value = array();
+				}
+			}
+
+			if (is_array($this->value) && !empty($this->value)) {
+				$items = $this->getMultipleValuesItems($options);
+				foreach ($this->value as $value) {
+					if (!is_null($items)) {
+						if (isset($items[$value])) {
+							if (is_array($value)) {
+								$label = BimpTools::getArrayValueFromPath($items, $value . '/label', $value);
+								$icon = BimpTools::getArrayValueFromPath($items, $value . '/label', $value);
+
+								$values[$value] = ($icon ? BimpRender::renderIcon($icon, 'iconLeft') : '') . $label;
+							} else {
+								$values[$value] = $items[$value];
+							}
+						}
+					} elseif (!isset($values[$value])) {
+						$values[$value] = $value;
+					}
+				}
+			}
+			$content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable, 'none', array(), $add_all_btn);
+		}
+
+		$extra_data = $this->extraData;
+		$extra_data['data_type'] = $this->data_type;
+
+		if ($this->data_type === 'id_object' && isset($this->field_params['object'])) {
+			$module = '';
+			$object_name = '';
+
+			if (is_object($this->field_params['object']) && is_a($this->field_params['object'], 'BimpObject')) {
+				$module = $this->field_params['object']->module;
+				$object_name = $this->field_params['object']->object_name;
+			} elseif (is_string($this->field_params['object']) && $this->field_params['object']) {
+				$instance = $this->object->config->getObject('', $this->field_params['object']);
+				if (is_a($instance, 'BimpObject') && get_class($instance) !== 'BimpObject') {
+					$module = $instance->module;
+					$object_name = $instance->object_name;
+				}
+			} else {
+				$path = 'fields/' . $this->input_name . '/object';
+				if ($this->object->config->isDefined($path)) {
+					$module = $this->object->config->getObjectModule($path);
+					$object_name = $this->object->config->getObjectName($path);
+				}
+			}
+
+			if ($module && $object_name) {
+				$extra_data['object_module'] = $module;
+				$extra_data['object_name'] = $object_name;
+
+				if ($this->params['type'] !== 'search_object') {
+					$extra_data['card'] = $this->params['card'];
+					$extra_data['display_card_mode'] = $this->display_card_mode;
+				}
+			}
+		}
+
+		if (isset($this->params['extra_content'])) {
+			$content .= $this->params['extra_content'];
+		}
+
+		$html .= BimpInput::renderInputContainer($this->input_name, $this->value, $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), $extra_data);
+
+		$current_bc = $prev_bc;
+		return $html;
+	}
+
+	protected function renderSearchListInput($input_name = null)
+	{
+		global $current_bc;
+		if (!is_object($current_bc)) {
+			$current_bc = null;
+		}
+		$prev_bc = $current_bc;
+		$current_bc = $this;
+
+		if (is_null($this->value)) {
+			$this->value = '';
+		}
+
+		if (is_null($input_name)) {
+			$input_name = $this->name_prefix . $this->input_name;
+		}
+
+		$html = BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $input_name, $this->new_value, $this->option);
+
+		$current_bc = $prev_bc;
+		return $html;
+	}
 }

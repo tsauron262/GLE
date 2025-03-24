@@ -846,6 +846,8 @@ class BimpUserMsg
 										$to_emails[] = $email;
 									}
 								}
+							} else {
+								$errors[] = 'ID Groupe non défini en conf : ' . $e;
 							}
 						}
 						break;
@@ -854,7 +856,13 @@ class BimpUserMsg
 						foreach ($elements as $e) {
 							switch ($e) {
 								case 'user':
-									$id_users[] = $obj->id();
+									if ((is_a($obj, 'Bimp_User') || is_a($obj, 'User')) && BimpObject::objectLoaded($obj)) {
+										if (!in_array($obj->id, $id_users)) {
+											$id_users[] = $obj->id();
+										}
+									} else {
+										$errors[] = 'User : objet invalide';
+									}
 									break;
 
 								case 'commercial':

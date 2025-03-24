@@ -1388,11 +1388,11 @@ class Bimp_User extends BimpObject
 				'content' => $this->renderMsgErp()
 			);
 
-			$tabs[] = array(
-				'id'            => 'choix_UI_tab',
-				'title'         => 'Interface utilisateur',
-				'content'		=> $this->renderChoixUi()
-			);
+//			$tabs[] = array(
+//				'id'            => 'choix_UI_tab',
+//				'title'         => 'Interface utilisateur',
+//				'content'		=> $this->renderChoixUi()
+//			);
 
 			return BimpRender::renderNavTabs($tabs, 'params_tabs');
 		}

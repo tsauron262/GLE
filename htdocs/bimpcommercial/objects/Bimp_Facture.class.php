@@ -4008,7 +4008,9 @@ class Bimp_Facture extends BimpComm
 				if ($this->getData('fk_statut') > 0) {
 					$html .= '<div class="buttonsContainer" style="margin: 15px 0;">';
 
-					$onclick = $reval->getJsActionOnclick('checkAppleCareSerials', array(), array());
+					$onclick = $reval->getJsActionOnclick('checkAppleCareSerials', array(
+						'id_facture' => $this->id
+					), array());
 					$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
 					$html .= BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'Vérifier les n° de série';
 					$html .= '</span>';

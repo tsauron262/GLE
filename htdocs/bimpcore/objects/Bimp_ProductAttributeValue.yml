@@ -25,7 +25,7 @@ header_delete_btn: 1
 
 nom_url: 
     syntaxe: <ref> - <value>
-    card: unset
+#    card: unset
 
 labels: 
     name: valeur d'attribut

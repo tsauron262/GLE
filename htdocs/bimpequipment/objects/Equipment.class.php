@@ -39,7 +39,7 @@ class Equipment extends BimpObject
         $this->iconeDef = "fa-laptop";
     }
 
-    // Gestion des droits: 
+    // Gestion des droits:
     // Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
 
     public function canCreate()
@@ -111,8 +111,8 @@ class Equipment extends BimpObject
         // id_vente (vente caisse)
         // id_sav
         // id_propal
-        // id_facture 
-        // id_commande_line_return (ligne de commande client (Bimp_CommandeLine) pour un retour. 
+        // id_facture
+        // id_commande_line_return (ligne de commande client (Bimp_CommandeLine) pour un retour.
         // id_commande_fourn (retour)
         // id_commande_fourn_line (retour)
         // id_reception (retour)
@@ -123,14 +123,14 @@ class Equipment extends BimpObject
             return 0;
         }
 
-        // Check de la présence dans l\'entrepôt. 
+        // Check de la présence dans l\'entrepôt.
         if ((int) $id_entrepot) {
             if (!$this->isInEntrepot($id_entrepot, $errors)) {
                 return 0;
             }
         }
 
-        // Check des réservations en cours: 
+        // Check des réservations en cours:
         $reservations = $this->getReservationsList();
         if (count($reservations)) {
             if (!isset($allowed['id_reservation']) || !(int) $allowed['id_reservation'] || !in_array((int) $allowed['id_reservation'], $reservations)) {
@@ -138,11 +138,11 @@ class Equipment extends BimpObject
             }
         }
 
-        // Check des ventes caisse en cours (Brouillons): 
+        // Check des ventes caisse en cours (Brouillons):
         $this->isNotInVenteBrouillon($errors, isset($allowed['id_vente']) ? (int) $allowed['id_vente'] : 0);
 
-        // Check des SAV: 
-        if (!in_array('sav', $no_check)) {
+        // Check des SAV:
+        if (!in_array('sav', $no_check) && self::isDolModuleActif('bimpsupport')) {
             $filters = array(
                 'status'       => array(
                     'operator' => '<',
@@ -164,29 +164,31 @@ class Equipment extends BimpObject
             }
         }
 
-        // Check des ajouts aux devis SAV non validés: 
-        $sql = 'SELECT sav.id FROM ' . MAIN_DB_PREFIX . 'bs_sav sav';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal p on sav.id_propal = p.rowid';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = sav.id_propal ';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'sav_propal\') ';
-        $sql .= ' WHERE leq.id_equipment = ' . (int) $this->id;
-        $sql .= ' AND sav.status < 6';
+        // Check des ajouts aux devis SAV non validés:
+		if(self::isDolModuleActif('bimpsupport')) {
+			$sql = 'SELECT sav.id FROM ' . MAIN_DB_PREFIX . 'bs_sav sav';
+			$sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal p on sav.id_propal = p.rowid';
+			$sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav_propal_line l ON l.id_obj = sav.id_propal ';
+			$sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'sav_propal\') ';
+			$sql .= ' WHERE leq.id_equipment = ' . (int) $this->id;
+			$sql .= ' AND sav.status < 6';
 
-        if (isset($allowed['id_propal']) && (int) $allowed['id_propal']) {
-            $sql .= ' AND sav.id_propal != ' . (int) $allowed['id_propal'];
-        }
+			if (isset($allowed['id_propal']) && (int) $allowed['id_propal']) {
+				$sql .= ' AND sav.id_propal != ' . (int) $allowed['id_propal'];
+			}
 
-        $rows = $this->db->executeS($sql, 'array');
-        if (!is_null($rows) && !empty($rows)) {
-            foreach ($rows as $r) {
-                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $r['id']);
-                if (BimpObject::objectLoaded($sav)) {
-                    $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à un devis SAV non terminé: ' . $sav->getNomUrl(0, 1, 1, 'default');
-                }
-            }
-        }
+			$rows = $this->db->executeS($sql, 'array');
+			if (!is_null($rows) && !empty($rows)) {
+				foreach ($rows as $r) {
+					$sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $r['id']);
+					if (BimpObject::objectLoaded($sav)) {
+						$errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' a été ajouté à un devis SAV non terminé: ' . $sav->getNomUrl(0, 1, 1, 'default');
+					}
+				}
+			}
+		}
 
-        // Check des ajouts aux factures non validées. 
+        // Check des ajouts aux factures non validées.
 //        $sql = 'SELECT f.rowid  as id FROM ' . MAIN_DB_PREFIX . 'facture f';
 //        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_facture_line l ON l.id_obj = f.rowid ';
 //        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'object_line_equipment leq ON (leq.id_object_line = l.id AND leq.object_type = \'facture\') ';
@@ -206,14 +208,14 @@ class Equipment extends BimpObject
 //                }
 //            }
 //        }
-//        
-        // Check retour en commande client: 
+//
+        // Check retour en commande client:
         if ((int) $this->getData('id_commande_line_return')) {
             if (!isset($allowed['id_commande_line_return']) || ((int) $allowed['id_commande_line_return'] !== (int) $this->getData('id_commande_line_return'))) {
                 $line_check = false;
                 $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_line_return'));
                 if (BimpObject::objectLoaded($line) && $line->getFullQty() < 0) {
-                    // On verifie que l'équipement est bien attribué en retour à la ligne de commande: 
+                    // On verifie que l'équipement est bien attribué en retour à la ligne de commande:
                     $equipments_returns = $line->getData('equipments_returned');
                     if (array_key_exists((int) $this->id, $equipments_returns)) {
                         $line_check = true;
@@ -232,7 +234,7 @@ class Equipment extends BimpObject
             }
         }
 
-        // Check retour fournisseur: 
+        // Check retour fournisseur:
         $id_product = (int) $this->getData('id_product');
         if ($id_product) {
             $sql = 'SELECT l.id FROM ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line l';
@@ -280,7 +282,7 @@ class Equipment extends BimpObject
         }
 
 
-        // Check des retours caisse: 
+        // Check des retours caisse:
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpcaisse', 'BC_Vente');
 
@@ -402,7 +404,7 @@ class Equipment extends BimpObject
         return 1;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getDefaultListExtraBtn()
     {
@@ -468,7 +470,7 @@ class Equipment extends BimpObject
         return $buttons;
     }
 
-    // Getters filters: 
+    // Getters filters:
 
     public function getProductSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
@@ -633,7 +635,7 @@ class Equipment extends BimpObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getHasReservationsArray()
     {
@@ -713,7 +715,7 @@ class Equipment extends BimpObject
         return $equipments;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getName($withGeneric = true)
     {
@@ -890,7 +892,7 @@ class Equipment extends BimpObject
         return '';
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayOriginElement()
     {
@@ -1136,7 +1138,7 @@ class Equipment extends BimpObject
         return '';
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function onNewPlace()
     {
@@ -1238,7 +1240,7 @@ class Equipment extends BimpObject
 
         $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple');
 
-        if (!$use_gsx_v2) { // V2 => gsxController::gsxGetEquipmentInfos(). 
+        if (!$use_gsx_v2) { // V2 => gsxController::gsxGetEquipmentInfos().
             $gsx = new GSX($isIphone);
             if (!$gsx->connect) {
                 $errors[] = BimpTools::getMsgFromArray($gsx->errors['init'], 'Echec de la connexion GSX');
@@ -1439,7 +1441,7 @@ class Equipment extends BimpObject
         }
 
         if (!count($errors)) {
-            // Correction de l'emplacement initial en cas d'erreur: 
+            // Correction de l'emplacement initial en cas d'erreur:
             $text = "Transfert auto via inventaire";
             if ($id_inventaire > 0) {
                 $text .= ' - ' . $id_inventaire;
@@ -1686,7 +1688,7 @@ class Equipment extends BimpObject
         return $identifiers;
     }
 
-    // Renders: 
+    // Renders:
 
     public function renderHeader($content_only = false, $params = array())
     {
@@ -1843,7 +1845,7 @@ class Equipment extends BimpObject
         if (count($errors)) {
             $html .= BimpRender::renderAlerts($errors);
         }
-        
+
         return $html;
     }
 
@@ -1860,7 +1862,7 @@ class Equipment extends BimpObject
         return BimpRender::renderAlerts('ID équipement absent');
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionGenerateEtiquette($data, &$success)
     {
@@ -1972,7 +1974,7 @@ class Equipment extends BimpObject
                     }
                 }
 
-                // Fusion des données : 
+                // Fusion des données :
                 $fields_to_merge = array('old_serial');
                 $fields = $this->getFieldsList();
                 $merged_ids = $eq_to_keep->getData('merged_ids');
@@ -2005,7 +2007,7 @@ class Equipment extends BimpObject
                 $errors = $eq_to_keep->update($warnings, true);
 
                 if (!count($errors)) {
-                    // Changement des IDs dans les objets liés et suppr des équipements: 
+                    // Changement des IDs dans les objets liés et suppr des équipements:
                     foreach ($eqs as $eq) {
                         if ($eq->id == $eq_to_keep->id) {
                             continue;
@@ -2016,7 +2018,7 @@ class Equipment extends BimpObject
                         $eq->delete($w, true);
                     }
 
-                    // Réintialisation des positions des emplacement : 
+                    // Réintialisation des positions des emplacement :
                     $place = BimpCache::findBimpObjectInstance('bimpequipment', 'BE_Place', array(
                                 'id_equipment' => $eq_to_keep->id
                                     ), true);
@@ -2151,7 +2153,7 @@ class Equipment extends BimpObject
 
         if (!count($errors)) {
             if (!$init_id_product && (int) $this->getData('id_product')) {
-                // Pour la gestion des stocks: 
+                // Pour la gestion des stocks:
                 $this->onNewPlace();
             }
         }

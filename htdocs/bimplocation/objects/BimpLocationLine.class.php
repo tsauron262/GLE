@@ -16,7 +16,7 @@ class BimpLocationLine extends BimpObject
     );
     protected $amounts = null;
 
-    // Getters booléens : 
+    // Getters booléens :
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -136,7 +136,7 @@ class BimpLocationLine extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getListExtraBtn()
     {
@@ -213,7 +213,10 @@ class BimpLocationLine extends BimpObject
             if (BimpCore::getConf('round_price', 0, 'bimplocation')) {
                 $tempTotTtc = $this->getData('pu_ht') * $this->amounts['qty'] * (1 + ($this->getData('tva_tx') / 100));
                 $difToArrondieHt = (round($tempTotTtc) - $tempTotTtc) / (1 + ($this->getData('tva_tx') / 100));
-                $puCorrigé = (float) $this->getData('pu_ht') + ($difToArrondieHt / $this->amounts['qty']);
+				if($this->amounts['qty'] != 0)
+					$puCorrigé = (float) $this->getData('pu_ht') + ($difToArrondieHt / $this->amounts['qty']);
+				else
+					$puCorrigé = 0;
             } else {
                 $puCorrigé = $this->getData('pu_ht');
             }
@@ -372,7 +375,7 @@ class BimpLocationLine extends BimpObject
         return $this->getData($field_name);
     }
 
-    // Getters array: 
+    // Getters array:
 
     public function getSelectForfaitsArray()
     {
@@ -411,7 +414,7 @@ class BimpLocationLine extends BimpObject
         return $forfaits;
     }
 
-    // Affichages : 
+    // Affichages :
 
     public function displayEquipment($no_html = false)
     {
@@ -647,7 +650,7 @@ class BimpLocationLine extends BimpObject
         return $html;
     }
 
-    // Traitements : 
+    // Traitements :
 
     public function onSave(&$errors = array(), &$warnings = array())
     {

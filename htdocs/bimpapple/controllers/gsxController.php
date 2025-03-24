@@ -584,7 +584,7 @@ class gsxController extends BimpController
             case 'repairEligibility':
                 if (isset($result['code_centre'])) {
                     if ((string) $result['code_centre']) {
-                        $centres = BimpCache::getCentres();
+                        $centres = BimpCache::getCentresData();
 
                         if (isset($centres[$result['code_centre']])) {
                             $this->gsx_v2->setShipTo($centres[$result['code_centre']]['shipTo']);

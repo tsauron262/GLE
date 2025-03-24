@@ -16,7 +16,7 @@ class BimpCoreCronExec extends BimpCron
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BS_SAV::checkSavToCancel();
 
-        // Vérifs des notifs relances client désactivées. 
+        // Vérifs des notifs relances client désactivées.
         if ((int) BimpCore::getConf('use_relances_paiements_clients', null, 'bimpcommercial')) {
             BimpObject::loadClass('bimpcore', 'Bimp_Client');
             Bimp_Client::checkRelancesDeactivatedToNotify();
@@ -35,7 +35,7 @@ class BimpCoreCronExec extends BimpCron
         $dt = new DateTime();
         $dow = (int) $dt->format('w');
         if ($dow > 0) {
-            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent. 
+            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent.
         }
         $date_to = $dt->format('Y-m-d');
 
@@ -47,7 +47,7 @@ class BimpCoreCronExec extends BimpCron
             'sales'     => 1,
         );
 
-        // Génération des fichiers: 
+        // Génération des fichiers:
 
         $errors = array();
         $result = $vente->generateAppleCSV($csv_types, $date_from, $date_to, false, $errors, true);
@@ -65,7 +65,7 @@ class BimpCoreCronExec extends BimpCron
             return -1;
         }
 
-        // Envoi FTP: 
+        // Envoi FTP:
         $host = BimpCore::getConf('exports_ldlc_ftp_serv');
         $port = 21;
         $login = BimpCore::getConf('exports_ldlc_ftp_user');
@@ -142,11 +142,9 @@ class BimpCoreCronExec extends BimpCron
         if ($msg) {
             $msg = $i . ' Cron(s) en erreur : <br/>' . $msg;
             $this->output = 'Envoi mail pour ' . $i . ' erreur(s) : ';
-            if (mailSyn2($i . ' Cron(s) en erreur', BimpCore::getConf('devs_email', 'dev@bimp.fr'), null, $msg)) {
-                $this->output .= '[OK]';
-            } else {
-                $this->output .= '[ECHEC]';
-            }
+			$code = 'erreur_cron';
+			$sujet = $i . ' Cron(s) en erreur';
+			$this->output .= !count(BimpUserMsg::envoiMsg($code, $sujet, $msg)) ? '[OK]' : '[ECHEC]';
         } else {
             $this->output .= 'Aucun cron en erreur';
         }

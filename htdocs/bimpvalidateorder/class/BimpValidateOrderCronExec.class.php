@@ -11,7 +11,7 @@ class BimpValidateOrderCronExec extends BimpCron
     public function sendRappel()
     {
         // Envoie un rappel aux valideur d'objet commerciaux (devis, commande, facture ...)
-        
+
         $nb_mail_envoyer = 0;
         $nb_validation_rappeler = 0;
         $now = new DateTime();
@@ -46,7 +46,7 @@ class BimpValidateOrderCronExec extends BimpCron
                     $user_demands[$r['id_user_affected']] = array();
                 }
 
-                // Cet utilisateur doit recevoir un mail même si il n'a pas beaucoup 
+                // Cet utilisateur doit recevoir un mail même si il n'a pas beaucoup
                 // de demande en cours, car l'un d'entre elles est trop ancienne
                 if (self::LIMIT_DAYS < $r['diff']) {
                     $user_demands[$r['id_user_affected']]['urgent'] = 1;
@@ -91,7 +91,8 @@ class BimpValidateOrderCronExec extends BimpCron
                 }
 
 
-                mailSyn2($subject, $user->getData('email'), null, $message);
+				$code = 'rappel_demande_validation_encours';
+				BimpUserMsg::envoiMsg($code, $subject, $message, $id_user);
 
                 $nb_validation_rappeler += $nb_demand;
                 ++$nb_mail_envoyer;

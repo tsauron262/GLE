@@ -47,7 +47,9 @@ class BimpCron
 
                 echo '<br/><br/>' . str_replace("\n", '<br/>', $txt);
 
-                mailSyn2('ERREUR FATALE CRON - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
+				$code = 'erreur_fatale_cron';
+				$sujet = 'ERREUR FATALE CRON - ' . str_replace('/', '', DOL_URL_ROOT);
+				BimpUserMsg::envoiMsg($code, $sujet, $txt);
             }
         }
     }

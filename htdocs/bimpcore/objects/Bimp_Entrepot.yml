@@ -1,6 +1,6 @@
-dol_object:
-    instance:
-        dol_object:
+dol_object: 
+    instance: 
+        dol_object: 
             module: product/stock
             file: entrepot
 
@@ -186,10 +186,11 @@ forms:
             -   custom: 1
                 input_name: id_product
                 label: Produit
-                type: id_object
+                type: id_product
+                object: product
                 input:
-                    type: search_object
-                    object: product
+                    type: search_product
+            
             -   custom: 1
                 input_name: comment
                 label: Infos

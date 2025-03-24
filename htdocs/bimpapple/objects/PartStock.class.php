@@ -55,7 +55,7 @@ class PartStock extends BimpObject
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -70,11 +70,11 @@ class PartStock extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getCentreData($code_centre, &$errors = array())
     {
-        $centres = BimpCache::getCentres();
+        $centres = BimpCache::getCentresData();
 
         if (!isset($centres[$code_centre])) {
             $errors[] = 'Aucun centre pour le code "' . $code_centre . '"';
@@ -84,14 +84,14 @@ class PartStock extends BimpObject
         return $centres[$code_centre];
     }
 
-    // Getters statics: 
+    // Getters statics:
 
     public static function getStockInstance($code_centre, $part_number)
     {
-        
+
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getListExtraButtons()
     {
@@ -214,7 +214,7 @@ class PartStock extends BimpObject
         return $this->correctStock($qty_received, '', 'DELIVERY' . ($reception_number ? '_' . $reception_number : ''), 'Réception' . ($reception_number ? ' n° ' . $reception_number : ''));
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionCorrect($data, &$success)
     {
@@ -310,7 +310,7 @@ class PartStock extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validate()
     {

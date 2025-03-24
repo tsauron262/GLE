@@ -4,7 +4,7 @@ class Bimp_ImportPaiement extends BimpObject
 {
 
     var $id_mode_paiement = 'VIR';
-    
+
     function getFiltreWithBanque($type = '04'){
         $bdb = BimpCache::getBdb();
         $row = $bdb->getRow('bank_account', 'rowid = '.$this->getData('banque'));
@@ -218,7 +218,8 @@ class Bimp_ImportPaiement extends BimpObject
             $msg = 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés automatiquement par le système :<br/><br/>' . implode('<br/>', $dataMsg);
             if(count($mailRep))
                 $msg .= '<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer '.implode(' ou ', $mailRep).'<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées';
-            mailSyn2('Paiements non identifiés', BimpCore::getConf('email_paync', '', 'bimpfinanc'), null,  $msg);
+            $code = 'paiements_non_identif_auto';
+			BimpUserMsg::envoiMsg($code, 'Paiements non identifiés', $msg);
         }
 
         return $return;
@@ -235,7 +236,7 @@ class Bimp_ImportPaiement extends BimpObject
         return 0;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {

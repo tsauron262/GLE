@@ -810,7 +810,7 @@ lists:
         cols:
             place: unset
             
-            
+        
 searches:
     default:
         has_serial: 1

@@ -25,12 +25,12 @@ class synopsisexport
     {
         if ($print)
             echo "Debut export : <br/>";
-//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
+//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid
 //, email , total, total_ttc, id8Sens FROM  `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "societe soc
-//LEFT JOIN " . MAIN_DB_PREFIX . "element_element el, " . MAIN_DB_PREFIX . "user_extrafields ue, " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono 
+//LEFT JOIN " . MAIN_DB_PREFIX . "element_element el, " . MAIN_DB_PREFIX . "user_extrafields ue, " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono
 // WHERE `fk_object` = IF(chrono.Technicien > 0, chrono.Technicien, fact.fk_user_author) AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND el.fk_source = chrono.propalid AND fk_target = fact.rowid
 //  AND  fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null GROUP BY fact.rowid");
-//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
+//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid
 //, email , total, total_ttc, idtech8sens as id8Sens, chronoT.Centre FROM  `" . MAIN_DB_PREFIX . "facture` fact
 //
 //
@@ -125,7 +125,7 @@ class synopsisexport
 //        $partReq5 = " FROM  `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "element_element el1, " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono, " .
 ////                "" . MAIN_DB_PREFIX . "synopsischrono_view_101 chrono2, " . MAIN_DB_PREFIX . "element_element el2, ".
 ////                "" . MAIN_DB_PREFIX . "synopsischrono_view_101 chrono2, ".
-//                "" . MAIN_DB_PREFIX . "facturedet factdet left join " . MAIN_DB_PREFIX . "product prod on factdet.fk_product = prod.rowid 
+//                "" . MAIN_DB_PREFIX . "facturedet factdet left join " . MAIN_DB_PREFIX . "product prod on factdet.fk_product = prod.rowid
 //WHERE fact.rowid = el1.fk_target AND prop.rowid = el1.fk_source AND el1.sourcetype='propal' AND el1.targettype='facture'
 //AND chrono.propalid = prop.rowid AND factdet.fk_facture = fact.Rowid
 //AND  fact.close_code is null " .
@@ -177,7 +177,7 @@ class synopsisexport
             $partReq1 .= ", p1.fk_paiement, p1.amount as payeTTC";
             $partReq5 = " FROM " . MAIN_DB_PREFIX . "societe soc, " . MAIN_DB_PREFIX . "facturedet det, " . MAIN_DB_PREFIX . "facture fact ";
             $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "paiement_facture p2
-                            ON p2.fk_facture = fact.rowid 
+                            ON p2.fk_facture = fact.rowid
 
                             LEFT JOIN `" . MAIN_DB_PREFIX . "paiement` p1
                              ON p1.rowid = p2.fk_paiement";

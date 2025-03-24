@@ -64,7 +64,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                     }
                 }
 
-                // Commandes: 
+                // Commandes:
                 $items = BimpTools::getDolObjectLinkedObjectsList($this->facture, null, array('commande'));
 
                 foreach ($items as $item) {
@@ -78,7 +78,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                     }
                 }
 
-                // Livraisons: 
+                // Livraisons:
                 if (!(int) $this->bimpCommObject->getData('pdf_hide_livraisons')) {
                     $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
                                 'id_facture' => (int) $this->facture->id
@@ -171,7 +171,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                         if ($secteur == 'S') {
                             $code_centre = $this->bimpCommObject->getData('centre');
                             if ($code_centre) {
-                                $centres = BimpCache::getCentres();
+                                $centres = BimpCache::getCentresData();
                                 if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
                                     $centre = $centres[$code_centre];
                                     $this->fromCompany->address = $centre['address'];
@@ -240,7 +240,7 @@ class InvoicePDF extends BimpCommDocumentPDF
 //        if ($this->sitationinvoice) {
 //            $docName = $this->langs->transnoentities('InvoiceSituation');
 //        }
-        // Réf facture: 
+        // Réf facture:
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->facture->ref);
         if ($this->facture->statut == Facture::STATUS_DRAFT) {
             $docRef = '<span style="color: #800000"> ' . $docRef . ' - Non validé' . (BimpObject::objectLoaded($this->bimpCommObject) ? $this->bimpCommObject->e() : '') . '</span>';
@@ -270,7 +270,7 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('RefCustomer') . ' : </span>' . $this->langs->convToOutputCharset($this->facture->ref_client) . '<br/>';
         }
 
-        // Ref facture de remplacement: 
+        // Ref facture de remplacement:
         $objectidnext = $this->facture->getIdReplacingInvoice('validated');
         if ($this->facture->type == 0 && $objectidnext) {
             $factureReplacing = new Facture($db);
@@ -291,7 +291,7 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('CorrectionInvoice') . ' : </span>' . $this->langs->convToOutputCharset($factureReplaced->ref) . '<br/>';
         }
 
-        // Dates: 
+        // Dates:
         $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateInvoice') . ' : </span>' . dol_print_date($this->facture->date, "day", false, $this->langs) . '<br/>';
 
         if (!empty($conf->global->INVOICE_POINTOFTAX_DATE)) {
@@ -302,12 +302,12 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateDue') . ' : </span>' . dol_print_date($this->facture->date_lim_reglement, "day", false, $this->langs) . '<br/>';
         }
 
-        // Code client: 
+        // Code client:
         if (isset($soc->code_client)) {
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('CustomerCode') . ' : </span>' . $this->langs->transnoentities($soc->code_client) . '<br/>';
         }
 
-        // Num TVA Client: // deja présente dans l'adresse => Non, pas toujours apparemment... 
+        // Num TVA Client: // deja présente dans l'adresse => Non, pas toujours apparemment...
         if ($soc->tva_intra) {
             $html .= '<span style="font-weight: bold;">N° TVA client: </span>' . $this->langs->transnoentities($soc->tva_intra) . '<br/>';
         }
@@ -391,7 +391,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                         if (((int) $id_client === (int) $this->facture->socid) &&
                                 ((!$id_contact && !BimpObject::objectLoaded($this->contact)) ||
                                 $id_contact && BimpObject::objectLoaded($this->contact) && (int) $id_contact === (int) $this->contact->id)) {
-                            // même société et même contact. 
+                            // même société et même contact.
                             break;
                         }
 
@@ -439,7 +439,7 @@ class InvoicePDF extends BimpCommDocumentPDF
         $html = '<div style="font-size: 7px; line-height: 8px;">';
         $html .= '<table style="width: 100%" cellpadding="5">';
 
-        // Conditions de paiement: 
+        // Conditions de paiement:
         if ($this->facture->type != 2) {
             if ($this->facture->cond_reglement_code || $this->facture->cond_reglement) {
                 $html .= '<tr><td>';
@@ -464,7 +464,7 @@ class InvoicePDF extends BimpCommDocumentPDF
             }
         }
 
-        // Mode de paiement: 
+        // Mode de paiement:
         if ($this->object->mode_reglement_code) { // && $this->object->mode_reglement_code != 'CHQ' && $this->object->mode_reglement_code != 'VIR') {
             $html .= '<tr><td>';
             $html .= '<strong>' . $this->langs->transnoentities("PaymentMode") . '</strong>:<br/>';
@@ -723,7 +723,7 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '<table cellspacing="10px">';
             $html .= '<tr>';
 
-            // Annexe Réf. livraison: 
+            // Annexe Réf. livraison:
             $html .= '<td style="width: 50%">';
             if (count($this->shipments) > 3) {
                 $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';

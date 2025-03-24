@@ -39,17 +39,14 @@ class synopsisHook
 //                $conf->entity = $entity;
         }
 
-        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+		$tabCentre = BimpCache::getCentresData();
 
         //Pour les logiciel externe.
         $dbBIMPERP = $db;
 
         if (defined('MAX_TIME_LOG'))
             self::$MAX_TIME_LOG = MAX_TIME_LOG;
-
-
-
-
 
         if (is_object($db) && isset($conf->global->MAIN_MODULE_SYNOPSISTOOLS)) {
             include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/fileInfo.class.php");

@@ -2557,16 +2557,10 @@ class BCT_Contrat extends BimpDolObject
 			return '';
 		}
 
-		$email = BimpCore::getConf('unpaid_factures_abonnement_notification_email', null, 'bimpcontrat');
-
-		if (!$email) {
-			return '';
-		}
-
-		$out = '';
-		$bdb = self::getBdb();
-		$date_lim = new DateTime();
-		$date_lim->sub(new DateInterval('P3M'));
+        $out = '';
+        $bdb = self::getBdb();
+        $date_lim = new DateTime();
+        $date_lim->sub(new DateInterval('P3M'));
 
 		$rows = $bdb->executeS(BimpTools::getSqlFullSelectQuery('facture', array('a.rowid as id_facture'), array(
 			'fk_statut'                    => 1,
@@ -2614,20 +2608,21 @@ class BCT_Contrat extends BimpDolObject
 						}
 						$msg .= '<br/><br/>Par conséquent, vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.';
 
-						if (mailSyn2($subject, $email, '', $msg)) {
-							$out .= ' [OK]';
-							$fac->updateField('alert_abonnement_unpaid_send', 1);
-						} else {
-							$out .= ' [ECHEC]';
-						}
-					} else {
-						$out .= '<span class="danger">Fac #' . (int) $r['id_facture'] . ' non trouvée</span>';
-					}
-				}
-			}
-		} else {
-			$out .= 'Erreur SQL - ' . $bdb->err();
-		}
+                        $code = 'alerte_abonnement_unpaid';
+						if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg))) {
+                            $out .= ' [OK]';
+                            $fac->updateField('alert_abonnement_unpaid_send', 1);
+                        } else {
+                            $out .= ' [ECHEC]';
+                        }
+                    } else {
+                        $out .= '<span class="danger">Fac #' . (int) $r['id_facture'] . ' non trouvée</span>';
+                    }
+                }
+            }
+        } else {
+            $out .= 'Erreur SQL - ' . $bdb->err();
+        }
 
 		return $out;
 	}

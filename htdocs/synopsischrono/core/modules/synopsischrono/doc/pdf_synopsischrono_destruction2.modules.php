@@ -95,7 +95,7 @@ class pdf_synopsischrono_destruction2 extends ModeleSynopsischrono {
 
 
 
-            
+
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -114,7 +114,8 @@ class pdf_synopsischrono_destruction2 extends ModeleSynopsischrono {
     function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
 
-        global $tabCentre;
+//        global $tabCentre;
+//		$tabCentre = BimpCache::getCentresData();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -193,8 +194,8 @@ class pdf_synopsischrono_destruction2 extends ModeleSynopsischrono {
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-// 
-//                
+//
+//
 
 
 
@@ -222,9 +223,9 @@ class pdf_synopsischrono_destruction2 extends ModeleSynopsischrono {
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->SetXY('49', '171.4');
                 $pdf->MultiCell(100, 6, "BIMP ".$chrono->valuesPlus[1060]->valueStr, 0, 'L');
-                
+
                 $adresseDest = "Palais de justice «  Novarina »
-51 rue Sommeiller 
+51 rue Sommeiller
 BP 2321
 74011 Annecy le vieux";
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
@@ -279,13 +280,13 @@ BP 2321
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $chrono2->description." - ".$chrono2->valuesPlus[1011]->value, 0, 'L');
 ////
-//                
-//                
-//                
+//
+//
+//
 //                $pdf->SetXY('32', '148.3');
 //                $pdf->MultiCell(100, 6, $contact, 0, 'L');
-                    
-                    
+
+
 //
 //                $pdf->SetXY('137', '79.4');
 //                $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1064]->value, 0, 'L');
@@ -353,12 +354,12 @@ BP 2321
 //                $pdf->MultiCell(90, 6, "Mdp : ".$chrono2->valuesPlus[1057]->valueStr, 0, '');
 //                $pdf->SetXY(100, 260);
 //                $pdf->MultiCell(90, 6, "Systéme : ".$chrono2->valuesPlus[1067]->valueStr, 0, '');
-                
+
 //                $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
 //                for($i=0;$i<1000;$i = $i+5){
 //                $pdf->SetXY($i,$i);
 //                $pdf->MultiCell(155, 6, $i, 0, 'L');
-//                
+//
 //                }
 
 

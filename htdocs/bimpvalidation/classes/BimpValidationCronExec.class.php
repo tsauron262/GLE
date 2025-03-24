@@ -12,10 +12,10 @@ class BimpValidationCronExec extends BimpCron
             $this->output = 'Pas d\'éxécution le dimanche';
             return 0;
         }
-        
+
         $this->current_cron_name = 'Rappel demandes de validation en attente';
         $this->output = '';
-        
+
         $errors = array();
 
         $bdb = BimpCache::getBdb();
@@ -43,19 +43,16 @@ class BimpValidationCronExec extends BimpCron
         if (empty($users_demandes)) {
             $this->output .= 'Aucune demande de validation à traiter';
         } else {
+			$code = 'rappel_demandes_validation';
             foreach ($users_demandes as $id_user => $demandes) {
-                $email = $bdb->getValue('user', 'email', 'rowid = ' . $id_user);
-                if (!$email) {
-                    $errors[] = 'Aucun adresse email pour user #' . $id_user;
-                    continue;
-                }
+                // $id_user
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'BimpUser', $id_user);
 
-                $email = BimpTools::cleanEmailsStr($email);
                 $nb_demandes = count($demandes);
                 $s = ($nb_demandes > 1 ? 's' : '');
                 $subject = 'Rappel : ' . $nb_demandes . " demande$s de validation en attente d'acceptation";
                 $msg = "Bonjour,<br/><br/>";
-                $msg .= "$nb_demandes demande$s de validation sont tojours en attente de traitement : <br/><br/>";
+                $msg .= "$nb_demandes demande$s de validation sont toujours en attente de traitement : <br/><br/>";
 
                 foreach ($demandes as $demande) {
                     $obj = $demande->getObjInstance();
@@ -67,10 +64,10 @@ class BimpValidationCronExec extends BimpCron
                     }
                 }
 
-                if (!mailSyn2($subject, $email, '', $msg)) {
-                    $errors[] = 'Echec envoi mail à ' . $email . " ($nb_demandes validation$s)";
+                if (count(BimpUserMsg::envoiMsg($code, $subject, $msg, $id_user))) {
+                    $errors[] = 'Echec envoi mail à ' . $user->getData('email') . " ($nb_demandes validation$s)";
                 } else {
-                    $this->output .= $email . ' - Envoi ok ' . " ($nb_demandes validation$s)<br/>";
+                    $this->output .= $user->getData('email') . ' - Envoi ok ' . " ($nb_demandes validation$s)<br/>";
                 }
             }
         }
@@ -87,7 +84,7 @@ class BimpValidationCronExec extends BimpCron
         $this->current_cron_name = 'Vérif disponibilité utilisateurs affectés aux demandes de validation';
         $this->output = '';
         $errors = array();
-        
+
         if (in_array(date('N'), array(6,7))) {
             $this->output = 'Pas d\'éxécution le week-end';
             return 0;

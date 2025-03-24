@@ -1387,17 +1387,17 @@ class BimpTools
 			}
 			$sql = ' FROM ' . MAIN_DB_PREFIX . $table . ($default_alias ? ' ' . $default_alias : '');
 
-			if (!is_null($joins) && is_array($joins) && count($joins)) {
-				foreach ($joins as $key => $join) {
-					$alias = (isset($join['alias']) ? $join['alias'] : $key);
-					if (isset($join['table']) && isset($join['on'])) {
-						$sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $alias . ' ON ' . $join['on'];
-					}
-				}
-			}
-		}
-		return $sql;
-	}
+            if (!is_null($joins) && is_array($joins) && count($joins)) {
+                foreach ($joins as $key => $join) {
+                    $alias = (isset($join['alias']) ? $join['alias'] : $key);
+                    if (isset($join['table']) && isset($join['on'])) {
+						$sql .= ' ' . (isset($join['join_type']) ? $join['join_type'] : 'LEFT') . ' JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $alias . ' ON ' . $join['on'];
+                    }
+                }
+            }
+        }
+        return $sql;
+    }
 
 	public static function getSqlWhere($filters, $default_alias = 'a', $operator = 'WHERE')
 	{
@@ -1516,7 +1516,7 @@ class BimpTools
 			$sql_field = '';
 			if (preg_match('/\./', $field)) {
 				$sql_field = $field;
-			} elseif (!is_null($default_alias) && $default_alias) {
+			} elseif ($default_alias) {
 				$sql_field = $default_alias . '.' . $field;
 			} else {
 				$sql_field = '`' . $field . '`';
@@ -1556,44 +1556,7 @@ class BimpTools
 						}
 					}
 				} elseif (isset($filter['part_type']) && isset($filter['part'])) {
-					$escape_char = '';
-					foreach (array('$', '|', '&', '@') as $char) {
-						if (strpos($filter['part'], $char) === false) {
-							$escape_char = $char;
-							break;
-						}
-					}
-					$filter['part'] = addslashes($filter['part']);
-					if ($escape_char) {
-						$filter['part'] = str_replace('%', $escape_char . '%', $filter['part']);
-						$filter['part'] = str_replace('_', $escape_char . '_', $filter['part']);
-					}
-					if (isset($filter['not']) && (int) $filter['not']) {
-						$sql .= ' NOT';
-					}
-					$sql .= ' LIKE \'';
-					switch ($filter['part_type']) {
-						case 'full':
-							$sql .= $filter['part'];
-							break;
-
-						case 'beginning':
-							$sql .= $filter['part'] . '%';
-							break;
-
-						case 'end':
-							$sql .= '%' . $filter['part'];
-							break;
-
-						default:
-						case 'middle':
-							$sql .= '%' . $filter['part'] . '%';
-							break;
-					}
-					$sql .= '\'';
-					if ($escape_char) {
-						$sql .= ' ESCAPE \'' . $escape_char . '\'';
-					}
+					$sql .= self::getSqlLike($filter['part'], $filter['part_type'], (isset($filter['not']) ? $filter['not'] : 0));
 				} elseif (isset($filter['in'])) {
 					if (is_array($filter['in'])) {
 						$has_null = false;
@@ -1652,6 +1615,36 @@ class BimpTools
 					} else {
 						$sql .= ' NOT IN (' . $filter['not_in'] . ')';
 					}
+				} elseif (isset($filter['in_braces']))	{
+					if (is_array($filter['in_braces'])) {
+						$firstLoop = true;
+						$sql = '(';
+						foreach ($filter['in_braces'] as $key => $in_braces_value) {
+							if( !$firstLoop )	{
+								$sql .= ' OR ';
+							}
+							$sql .= $sql_field . self::getSqlLike($in_braces_value, 'middle', false, true);
+							$firstLoop = false;
+						}
+						$sql .= ')';
+					} else {
+						$sql .= self::getSqlLike($filter['in_braces'], 'middle', false, true);
+					}
+				} elseif (isset($filter['not_in_braces'])) {
+					if (is_array($filter['not_in_braces'])) {
+						$firstLoop = true;
+						$sql = '(';
+						foreach ($filter['not_in_braces'] as $key => $in_braces_value) {
+							if( !$firstLoop )	{
+								$sql .= ' AND ';
+							}
+							$sql .= $sql_field . self::getSqlLike($in_braces_value, 'middle', true, true);
+							$firstLoop = false;
+						}
+						$sql .= ')';
+					} else {
+						$sql .= self::getSqlLike($filter['in_braces'], 'middle', true, true);
+					}
 				} else {
 					if (is_array($filter) && count($filter) > 0) {
 						$sql .= ' IN ("' . implode('","', $filter) . '")';
@@ -1676,6 +1669,61 @@ class BimpTools
 			}
 		}
 
+		return $sql;
+	}
+
+	public static function getSqlLike($value, $part_type = 'middle', $not = false, $braces = false, $escape = true)
+	{
+		$sql = '';
+		$escape_char = '';
+
+		if ($escape && strpos($value, '%') !== false || strpos($value, '_') !== false) {
+			foreach (array('$', '|', '&', '@') as $char) {
+				if (strpos($value, $char) === false) {
+					$escape_char = $char;
+					break;
+				}
+			}
+			if ($escape_char) {
+				$value = str_replace('%', $escape_char . '%', $value);
+				$value = str_replace('_', $escape_char . '_', $value);
+			}
+		}
+
+		$value = addslashes($value);
+
+		if ($braces) {
+			$value = '[' . $value . ']';
+		}
+
+		if ($not) {
+			$sql .= ' NOT';
+		}
+
+		$sql .= ' LIKE \'';
+		switch ($part_type) {
+			case 'full':
+				$sql .= $value;
+				break;
+
+			case 'beginning':
+				$sql .= $value . '%';
+				break;
+
+			case 'end':
+				$sql .= '%' . $value;
+				break;
+
+			default:
+			case 'middle':
+				$sql .= '%' . $value . '%';
+				break;
+		}
+		$sql .= '\'';
+
+		if ($escape_char) {
+			$sql .= ' ESCAPE \'' . $escape_char . '\'';
+		}
 		return $sql;
 	}
 
@@ -4005,7 +4053,7 @@ class BimpTools
 
 	// Autres:
 
-	public static $nbMax = 15 * 4;
+	public static $nbMax = 60;
 
 	public static function lockNum($type, $nb = 0, $errors = array())
 	{

@@ -85,7 +85,7 @@ class BimpRelanceClientsLine extends BimpObject
         return 0;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -609,7 +609,7 @@ class BimpRelanceClientsLine extends BimpObject
         return 'edit';
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getRelanceLineLabel()
     {
@@ -645,7 +645,7 @@ class BimpRelanceClientsLine extends BimpObject
         return $value;
     }
 
-    // Getters Array: 
+    // Getters Array:
 
     public function getAvailableFacturesArray()
     {
@@ -706,7 +706,7 @@ class BimpRelanceClientsLine extends BimpObject
         return $facs;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayFactures()
     {
@@ -729,7 +729,7 @@ class BimpRelanceClientsLine extends BimpObject
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderBeforeClientListHtml($bc_List)
     {
@@ -752,7 +752,7 @@ class BimpRelanceClientsLine extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function generatePdf(&$errors = array(), &$warnings = array(), &$facs_done = array(), $force = false)
     {
@@ -783,7 +783,7 @@ class BimpRelanceClientsLine extends BimpObject
         if (!count($errors)) {
             $dir = $client->getFilesDir();
 
-            // Création des données du PDF: 
+            // Création des données du PDF:
             $pdf_data = array(
                 'relance_idx'  => (int) $relance_idx,
                 'factures'     => array(),
@@ -793,7 +793,7 @@ class BimpRelanceClientsLine extends BimpObject
                 'total_credit' => 0
             );
 
-            // Vérification et ajout des données de chaque facture: 
+            // Vérification et ajout des données de chaque facture:
             foreach ($factures as $id_facture) {
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
 
@@ -816,7 +816,7 @@ class BimpRelanceClientsLine extends BimpObject
             }
 
             if (!empty($pdf_data['factures'])) {
-                // Création du PDF: 
+                // Création du PDF:
                 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
                 $pdf = new RelancePaiementPDF($this->db->db);
                 $pdf->client = $client;
@@ -824,7 +824,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $pdf->data = $pdf_data;
 
                 if (!count($pdf->errors)) {
-                    // Génération du PDF: 
+                    // Génération du PDF:
                     $pdf->render($dir . '/' . $this->getPdfFileName(), false);
                 }
 
@@ -868,7 +868,7 @@ class BimpRelanceClientsLine extends BimpObject
             }
         }
 
-        // Total facture: 
+        // Total facture:
         $facture_label = $facture->getData('libelle');
         $pdf_data['rows'][] = array(
             'date'           => date('d/m/Y', strtotime($facture->getData('datef'))),
@@ -937,7 +937,7 @@ class BimpRelanceClientsLine extends BimpObject
             }
         }
 
-        // Ajout des paiements de la facture: 
+        // Ajout des paiements de la facture:
         $rows = $this->db->getRows('paiement_facture', '`fk_facture` = ' . (int) $facture->id, null, 'array');
         if (is_array($rows)) {
             foreach ($rows as $r) {
@@ -1019,7 +1019,7 @@ class BimpRelanceClientsLine extends BimpObject
                 }
 
                 if (!count($errors)) {
-                    // Envoi du mail: 
+                    // Envoi du mail:
                     $mail_body = $pdf->content_html;
                     $duplicata_notif = '';
 
@@ -1093,7 +1093,7 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
-                    
+
                     if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), implode(',', $cc), '', 0, 1, '', '', implode(',', $replyTo))) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';
@@ -1185,7 +1185,7 @@ class BimpRelanceClientsLine extends BimpObject
                     }
                 }
 
-                // Envoi du mail de notification de mise en demeure au commercial: 
+                // Envoi du mail de notification de mise en demeure au commercial:
                 if ($relance_idx == 4 && $new_status >= 10 && $new_status < 20 && ($current_status < 10 || $current_status >= 20)) {
                     $mail_errors = $this->sendCommercialEmailOnMiseEnDemeure();
 
@@ -1269,7 +1269,7 @@ class BimpRelanceClientsLine extends BimpObject
         if (BimpObject::objectLoaded($client)) {
             $email = $client->getCommercialEmail(false, false);
 
-            if ($email) {
+//            if ($email) {
                 $subject = 'Client ' . $client->getRef() . ' - ' . $client->getName() . ' mis en demeure';
 
                 $html = 'Bonjour,<br/><br/>';
@@ -1365,18 +1365,19 @@ class BimpRelanceClientsLine extends BimpObject
                 $html .= 'Nous vous recommandons donc vivement de prendre contact avec votre client afin de traiter au plus vite ';
                 $html .= 'cet incident de paiement';
 
-                if (!mailSyn2($subject, $email, '', $html)) {
-                    $errors[] = 'Echec de l\'envoi du mail (e-mail: ' . $email . ')';
+				$code = 'emailOnMiseEnDemeure';
+				if (count(BimpUserMsg::envoiMsg($code, $subject, $html, $client))) {
+                    $errors[] = 'Echec de l\'envoi du mail';
                 }
-            } else {
-                $errors[] = 'Aucun commercial enregistré pour ce client';
-            }
+//            } else {
+//                $errors[] = 'Aucun commercial enregistré pour ce client';
+//            }
         }
 
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionGeneratePdf($data, &$success)
     {
@@ -1671,7 +1672,7 @@ class BimpRelanceClientsLine extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validate()
     {

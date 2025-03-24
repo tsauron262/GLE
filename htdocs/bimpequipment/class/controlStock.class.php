@@ -15,22 +15,22 @@ class controlStock{
     private $entrepot = array();
     private $prodS = array();
     private $db;
-    
-    
+
+
     function __construct($db){
         $this->db = $db;
     }
-    
+
     function go(){
         global $user;
         $this->getEntrepot();
         $this->getProductSerialisable();
-        
+
         echo "Debut : <br/>";
-        
+
         $i = 0;
-        
-        
+
+
         $stocks = $this->getStocksProds();
         $stocksEqui = $this->getNbEquips();
 //        echo "<pre>";print_r($stocks);die;
@@ -43,9 +43,9 @@ class controlStock{
 
                 $nbE = isset($stocksEqui[$idEn][$idPr])? $stocksEqui[$idEn][$idPr] : 0;
                 $nbS = isset($stocks[$idEn][$idPr])? $stocks[$idEn][$idPr] : 0;
-                
-               $light = true; 
-                
+
+               $light = true;
+
                 if($nbE != $nbS || $nbE != 0){
                     $millieuText = $debutText. "  -  Produit : ".$labPr;
                     if($nbE == $nbS){
@@ -55,33 +55,33 @@ class controlStock{
                     else{
                         $text = "";
                         $tabSerials = array();
-                        
-                        
+
+
                         if($nbE > $nbS)
                             $ope = "+";
                         else
                             $ope = "-";
-                        
+
                         if($light){
                         echo $millieuText." ATTENTION ".$ope." d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
                             continue;
                         }
-                        
-                        
-    
+
+
+
                         if($nbE > 0){
                             $tabSerials = $this->getTabSerials($idEn, $idPr, $ope);
                         }
-                        
-                        
+
+
                         $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE fk_entrepot = ".$idEn." AND fk_product = ".$idPr);
                         $ln2 = $this->db->fetch_object($sql2);
-                        
+
                         $text =  $millieuText." ATTENTION ".$ope." d'equipement (".$nbE." | ".implode(" ", $tabSerials).") que de prod (".$nbS.") total des mouvement (".$ln2->value.")<br/>";
-                        
+
                         $corigable = ($nbE == $ln2->value);
                         $corigable = 1;
-                            
+
                         $nbCorrection = $nbE - $nbS;
                         if($nbCorrection != 0 && $_REQUEST['action'] == "corriger" && $corigable){
                             echo "  correction de  ".$nbCorrection."<br/>";
@@ -91,16 +91,18 @@ class controlStock{
                             $codemove = dol_print_date($now, '%y%m%d%H%M%S');
                             $product->correct_stock($user, $idEn, $nbCorrection, 0, "correction Auto Stock en fonction des equipments", 0, $codemove);
                         }
-                        elseif(isset($_REQUEST['mail']))
-                            mailSyn2("Probléme stock", "tommy@bimp.fr", '', $text);
-                        elseif($corigable)
+                        elseif(isset($_REQUEST['mail'])) {
+							$code = 'probleme_stock';
+							BimpUserMsg::envoiMsg($code, 'Problème stock', $text);
+						}
+						elseif($corigable)
                             $text .= "<span style='color:green'>Corigeable</span><br/><br/>";
                         echo $text;
                     }
                 }
             }
         }
-        
+
         $this->getEquipmentNonSerialisable();
         if(count($this->equipNonS) == 0)
             echo "<br/>AUCUN Equipment NON Serialisable.... OK";
@@ -112,24 +114,24 @@ class controlStock{
                 echo "<br/>Equipment non Serilisé ref : ".$prod->getNomUrl(). " SN : ". implode(" - ", $tabSn);
             }
         }
-        
+
         echo "<br/><br/>Fin du test";
     }
-    
-    
+
+
     private function getEntrepot(){
         $sql = $this->db->query("SELECT `rowid`, `ref` FROM `".MAIN_DB_PREFIX."entrepot`");// WHERE ref LIKE 'SAV%'");
         while($ligne = $this->db->fetch_object($sql))
                 $this->entrepot[$ligne->rowid] = $ligne->ref;
     }
-    
+
     private function getProductSerialisable(){
         $sql = $this->db->query("SELECT p.rowid, p.label as label, ref FROM `".MAIN_DB_PREFIX."product` p, ".MAIN_DB_PREFIX."product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
         while($ligne = $this->db->fetch_object($sql))
                 $this->prodS[$ligne->rowid] = $ligne->ref." ".$ligne->label;
     }
-    
-    
+
+
     private function getEquipmentNonSerialisable(){
         $this->equipNonS = array();
         $sql = $this->db->query("SELECT serial, id_product FROM `".MAIN_DB_PREFIX."be_equipment` be, `".MAIN_DB_PREFIX."be_equipment_place` bep WHERE bep.id_equipment = be.id AND bep.`type` = 2 AND bep.`position` = 1 AND be.id_product > 0 AND be.id_product NOT IN (SELECT pe.fk_object FROM ".MAIN_DB_PREFIX."product_extrafields pe WHERE pe.serialisable = 1)");
@@ -137,26 +139,26 @@ class controlStock{
         while($ligne = $this->db->fetch_object($sql))
                 $this->equipNonS[$ligne->id_product][] = $ligne->serial;
     }
-    
-    
-    
+
+
+
 //    private function getNbEquip($prod, $entrepot){
 //        $sql = $this->db->query("SELECT COUNT(*) as nb FROM `".MAIN_DB_PREFIX."be_equipment` be, `".MAIN_DB_PREFIX."be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 AND `id_entrepot` = ".$entrepot." AND id_product = ".$prod);
 //        while($ligne = $this->db->fetch_object($sql))
 //                return $ligne->nb;
 //        return 0;
 //    }
-//    
-//    
-//    
+//
+//
+//
 //    private function getStockProd($prod, $entrepot){
 //        $sql = $this->db->query("SELECT reel as nb FROM `".MAIN_DB_PREFIX."product_stock` WHERE `fk_entrepot` = ".$entrepot." AND fk_product = ".$prod);
 //        while($ligne = $this->db->fetch_object($sql))
 //                return $ligne->nb;
 //        return 0;
 //    }
-    
-    
+
+
     private function getStocksProds(){
         $result = array();
         $sql = $this->db->query("SELECT reel as nb, fk_entrepot, fk_product FROM `".MAIN_DB_PREFIX."product_stock`");
@@ -164,18 +166,18 @@ class controlStock{
                 $result[$ligne->fk_entrepot][$ligne->fk_product] = $ligne->nb;
         return $result;
     }
-    
-    
-    
+
+
+
     private function getNbEquips(){
         $result = array();
         $sql = $this->db->query("SELECT COUNT(*) as nb, `id_entrepot`, id_product FROM `".MAIN_DB_PREFIX."be_equipment` be, `".MAIN_DB_PREFIX."be_equipment_place` bep WHERE be.id = bep.`id_equipment` AND bep.type = 2 AND position = 1 GROUP BY `id_entrepot`, id_product ");
-        
+
         while($ligne = $this->db->fetch_object($sql))
                 $result[$ligne->id_entrepot][$ligne->id_product] = $ligne->nb;
         return $result;
     }
-    
+
     private function getTabSerials($idEn, $idPr, $ope){
         $return = array();
         if($ope == "+"){
@@ -196,11 +198,11 @@ class controlStock{
             }
         }
 //        else{
-            $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value, serial 
+            $sql2 = $this->db->query("SELECT count(*) as nb, sum(value) as value, serial
 
-FROM ".MAIN_DB_PREFIX."be_equipment_place ep, `".MAIN_DB_PREFIX."be_equipment` e 
+FROM ".MAIN_DB_PREFIX."be_equipment_place ep, `".MAIN_DB_PREFIX."be_equipment` e
 
-LEFT JOIN `".MAIN_DB_PREFIX."stock_mouvement` sm 
+LEFT JOIN `".MAIN_DB_PREFIX."stock_mouvement` sm
 ON sm.`label` LIKE concat('%', concat(serial, '%')) AND sm.`fk_product` = e.`id_product`
 
 WHERE e.id = `id_equipment` AND `position` > 1 AND ep.`type` = 2 AND `id_entrepot` = ".$idEn." AND id_product = ".$idPr." AND sm.`fk_entrepot` = ep.`id_entrepot`
@@ -215,8 +217,8 @@ GROUP BY serial
                     if($ln2->value != 0)
                         $return[] = "<span style='color:red'>".$ln2->serial."</span>";
             }
-            
-            
+
+
 //        }
         return $return;
     }

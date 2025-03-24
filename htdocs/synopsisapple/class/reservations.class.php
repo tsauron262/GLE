@@ -11,14 +11,14 @@ require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 class Reservations
 {
 
-    // Active tous les echos et désactive les logs: 
+    // Active tous les echos et désactive les logs:
     var $display_debug = false;
     // mettre à false pour envoyer les mails aux bons destinataires:
     var $debugMails = false;
     public $createProductAndChrono = false;
-    
+
     private $currentReservations = array();
-    
+
     var $nbNew = 0;
 
     function __construct($db)
@@ -76,7 +76,7 @@ class Reservations
                 }
             }
         }
-        
+
         $this->output .= ($this->nbNew>0)? $this->nbNew." nouvelle réservations" : "Pas de nouvelle reservations";
 
         return "OK";
@@ -388,7 +388,7 @@ class Reservations
             $id_product = 0;
         }
 
-        // Liaison SAV / produit: 
+        // Liaison SAV / produit:
         if ($id_product && $chrono_id) {
             $lien = new lien($this->db);
             $lien->cssClassM = "type:SAV";
@@ -452,7 +452,7 @@ class Reservations
         $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
         $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
 
-        // Envoi mails: 
+        // Envoi mails:
         $subject = 'Nouvelle Reservation GSX le ' . $dateBegin->format('d/m/Y') . ' a ' . $dateBegin->format('H\Hi');
         $message = 'Bonjour,' . "\n\n";
         $message .= 'Une nouvelle réservation GSX a été ajouté à votre agenda:' . "\n\n";
@@ -532,11 +532,12 @@ Bien cordialement
 L’équipe BIMP";
             $mailsCli = $customer->email;
             if ($mailsCli && $mailsCli != ""){
-                BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-                global $tabCentre;
+//                BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//                global $tabCentre;
+				$tabCentre = BimpCache::getCentresData();
                 $centreData = isset($tabCentre[$centre])? $tabCentre[$centre] : array();
-                $fromMail = "SAV BIMP<" . ($centreData[1] ? $centreData[1] : 'savbimp@bimp.fr') . ">";
-                
+                $fromMail = "SAV BIMP<" . ($centreData['mail'] ? $centreData['mail'] : 'savbimp@bimp.fr') . ">";
+
                 if(mailSyn2("RDV SAV BIMP", $mailsCli, $fromMail, str_replace("\n", "<br/>", $messageClient))) {
                     if ($this->display_debug) {
                         echo '[OK].<br/>';
@@ -605,7 +606,7 @@ L’équipe BIMP";
                             if ($this->display_debug) {
                                 echo 'Aucune réservation<br/>';
                             }
-                            $continue = true; // Aucune réservation pour la période donnée et le type de produit. 
+                            $continue = true; // Aucune réservation pour la période donnée et le type de produit.
                             break;
                         } else if (in_array($fault->code, array('SYS.STR.002', 'SYS.STR.006', 'SYS.STR.005'))) {
                             if ($this->display_debug) {

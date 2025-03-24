@@ -3,6 +3,8 @@ categories:
         label: Fichiers PDF
     signatures: 
         label: Signatures
+    emails:
+        label: E-mails
         
 params: 
     email_groupe: 
@@ -65,3 +67,10 @@ params:
                       label: ID du responsable éducation
                   id_responsable_commercial: 
                       label: ID du responsable commercial
+
+    # Emails:
+    contrat_email:
+        label: Adresses e-mail pour les contrats
+        cat: emails
+        def: ''
+        required: 1

@@ -226,5 +226,41 @@ sections:
                   custom: 
                       callback: renderPullTab
                                     
+        mailerp:
+            label: Message Erp
+            icon: fas_mail-bulk
+            sections:
+                - type: nav_tabs
+                  nav_tabs:
+                      tabs_id: mailerp
+                      tabs:
+                          - id: mailerp_metiers
+                            title: Métiers
+                            struct:
+                                type: custom
+                                custom:
+                                    callback:
+                                        method: renderMailerTab
+                                        params:
+                                            - metier
+                          - id: mailerp_dev
+                            title: Dévs
+                            struct:
+                                type: custom
+                                custom:
+                                    callback:
+                                        method: renderMailerTab
+                                        params:
+                                            - devs
+
                             
+                            
+                            
+#        mailerp:
+#            label: Mail Erp
+#            icon: fas_mail-bulk
+#            sections:
+#                - type: custom
+#                  custom:
+#                      callback: renderMailerTab
                       

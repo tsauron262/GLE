@@ -5,7 +5,7 @@ class BimpRender
 
     public static function displayTagData($data)
     {
-        // Obsolète ne pas utilliser 
+        // Obsolète ne pas utilliser
         return self::renderTagData($data);
     }
 
@@ -42,7 +42,7 @@ class BimpRender
 
     public static function displayTagAttrs($params)
     {
-        // Obsolète / A suppr... 
+        // Obsolète / A suppr...
         return self::renderTagAttrs($params);
     }
 
@@ -53,7 +53,7 @@ class BimpRender
         if (isset($params['id'])) {
             $html .= ' id="' . $params['id'] . '"';
         }
-        
+
         if (isset($params['attr'])) {
             foreach ($params['attr'] as $name => $value) {
                 $html .= ' ' . $name . '="' . $value . '"';
@@ -455,7 +455,7 @@ class BimpRender
             if (isset($params['header_icons']) && is_array($params['header_icons']) && count($params['header_icons'])) {
                 foreach ($params['header_icons'] as $icon_data) {
                     if (isset($icon_data['icon'])) {
-                        
+
                     }
                 }
                 $html .= '<span class="panel_header_icon bs-popover"';
@@ -1117,7 +1117,7 @@ class BimpRender
 
     public static function renderImage($module_part, $file_name, $max_width = 'none', $max_height = 'none', $with_preview = true)
     {
-        
+
     }
 
     public static function renderInfoCard($title, $value, $params)
@@ -1242,7 +1242,7 @@ class BimpRender
                     'main_class'  => '',
                     'data'        => array(),
                     'searchable'  => false,
-                    'search_mode' => 'show', // lighten (surbrillance des éléments trouvés) / show (affichage uniquement des élements trouvés)  
+                    'search_mode' => 'show', // lighten (surbrillance des éléments trouvés) / show (affichage uniquement des élements trouvés)
                     'sortable'    => false,
                     'sort_col'    => '',
                     'sort_way'    => 'asc', // asc / desc
@@ -1273,7 +1273,8 @@ class BimpRender
                         'col_style'  => '',
                         'searchable' => true,
                         'sortable'   => true,
-                        'colspan'    => 1
+                        'colspan'    => 1,
+						'select_default' => ''
                             ), $header_params);
         }
 
@@ -1288,7 +1289,7 @@ class BimpRender
         if (!empty($headers)) {
             $html .= '<thead>';
 
-            // En-têtes: 
+            // En-têtes:
             $html .= '<tr class="header_row">';
 
             if ($empty_first_col) {
@@ -1324,7 +1325,7 @@ class BimpRender
             }
             $html .= '</tr>';
 
-            // Ligne de recherche: 
+            // Ligne de recherche:
             if ($params['searchable']) {
                 $html .= '<tr class="listSearchRow">';
                 $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
@@ -1342,7 +1343,7 @@ class BimpRender
                     $html .= '<div class="searchInputContainer">';
                     if ($header['searchable']) {
                         if (isset($header['search_values'])) {
-                            $html .= BimpInput::renderInput('select', 'search_col_' . $col_name, '', array(
+                            $html .= BimpInput::renderInput('select', 'search_col_' . $col_name, $header['select_default'], array(
                                         'options'     => array_merge(array('' => ''), $header['search_values']),
                                         'extra_class' => 'bimp_list_table_search_input',
                                         'data'        => array('col' => $col_name)
@@ -1362,7 +1363,7 @@ class BimpRender
 
         $html .= '<tbody class="headers_col">';
 
-        // Lignes: 
+        // Lignes:
         foreach ($rows as $row) {
             $html .= '<tr class="bimp_list_table_row' . (isset($row['row_extra_class']) ? ' ' . $row['row_extra_class'] : '') . '"';
             $html .= ' style="';
@@ -1540,7 +1541,7 @@ class BimpRender
         return $html;
     }
 
-    // Form elements: 
+    // Form elements:
 
     public static function renderFormGroupMultiple($items_contents, $inputName, $title, $params = array())
     {

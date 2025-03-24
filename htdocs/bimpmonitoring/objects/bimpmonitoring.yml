@@ -7,15 +7,21 @@ labels:
     
 objects:
     
-fields: 
-    url: 
+fields:
+    url:
         label: Url
+    test:
+        label: Chaine a tester
 #    dateV: 
 #        label: Date de valeur
 #        type: date
     is_bimperp:
         label: Bimp ERP
         type: bool
+    actif:
+        label: Actif
+        type: bool
+        default_value: 1
     
     
     
@@ -39,8 +45,10 @@ lists:
         total_row: 1
         n: 0
         cols:  
-            url: 
+            url:
+            test:
             is_bimperp:
+            actif:
                 
         
         

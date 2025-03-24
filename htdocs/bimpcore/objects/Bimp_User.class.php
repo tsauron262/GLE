@@ -282,7 +282,7 @@ class Bimp_User extends BimpObject
 			}
 		}
 
-		$obligatoire = (int) BimpCore::getConf('userMessages__' .$code_msg . '__required', BimpUserMsg::$userMessages[$code_msg]['required'], 'bimpcore');
+		$obligatoire = (int) BimpCore::getConf('userMessages__' .$code_msg . '__required', (isset(BimpUserMsg::$userMessages[$code_msg]['required']) ? (int) BimpUserMsg::$userMessages[$code_msg]['required'] : 1), 'bimpcore');
 
 		if (!$obligatoire) {
 			if (!(int) $this->getUserParamValue('userMessages__' . $code_msg . '__abonner', 1)) {

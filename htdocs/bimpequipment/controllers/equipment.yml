@@ -83,8 +83,10 @@ sections:
                     callback: renderPretsList
             show:
                 callback:
-                    method: useReservations
+                    method: isDolModuleActif
                     object: equipment
+                    params:
+                        - bimpsupport
                     
           - id: sav
             title: SAV
@@ -102,6 +104,12 @@ sections:
                 type: custom
                 custom: 
                     callback: renderHotlineList
+            show:
+                callback:
+                    method: isDolModuleActif
+                    object: equipment
+                    params:
+                        - bimpsupport
                     
           - id: inventory
             title: Inventaires

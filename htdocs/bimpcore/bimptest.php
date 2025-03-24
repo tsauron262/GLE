@@ -27,50 +27,13 @@ if (!$user->admin) {
 	exit;
 }
 
-$num = '06 37 00 08 40';
+//echo 'Envoi : <br/>';
 
-$infos = '';
-echo 'TEST dur : <br/>';
-echo 'num   : ' . $num .' <br/>';
-echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
-if (!BimpTools::isValidNumMobile($num, $infos)) {
-	echo 'KO - ' . $infos;
-} else {
-	echo 'OK';
-}
-echo '<br/><br/>';
-
-/** @var Bimp_Contact $contact */
-$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', 202486);
-if (BimpObject::objectLoaded($contact)) {
-
-	echo 'TEST contact ' . $contact->getLink() .'<br/>';
-
-	$infos = '';
-	$num = $contact->dol_object->phone_mobile;
-	echo 'TEST mobile : <br/>';
-	echo 'num   : ' . $num .' <br/>';
-	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
-	if (!BimpTools::isValidNumMobile($num, $infos)) {
-		echo 'KO - ' . $infos;
-	} else {
-		echo 'OK';
-	}
-	echo '<br/><br/>';
-
-	echo 'preg_replace : <br/>';
-	$num = preg_replace('/[^0-9\+]/u', '', $num);
-	echo 'num   : ' . $num .' <br/>';
-	echo 'ascii : ' . BimpTools::toAscii($num) .' <br/>';
-	if (!BimpTools::isValidNumMobile($num, $infos)) {
-		echo 'KO - ' . $infos;
-	} else {
-		echo 'OK';
-	}
-	echo '<br/><br/>';
-} else {
-	echo 'KO - Contact non chargé';
-}
+///** @var Bimp_Commande $obj */
+////$obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', 104540);
+//$errors = BimpUserMsg::envoiMsg('code_erp', 'TEST MSG', 'Test test');
+//
+//echo '<pre>' . print_r($errors, 1) . '</pre>';
 
 echo '<br/>FIN';
 echo '</body></html>';

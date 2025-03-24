@@ -24,7 +24,7 @@ class BimpClientForDol extends Bimp_Client
             $dt = new DateTime();
             $dt->sub(new DateInterval('P1M'));
             $where_check = 'obj_name = \'Bimp_Client\' AND content = \'' . $msg . '\' AND date_create >= \'' . $dt->format('Y-m-d') . '\' AND id_obj = ';
-            
+
             BimpObject::loadClass('bimpcore', 'BimpNote');
             foreach ($clients as $c) {
                 $c->set('outstanding_limit_icba', 0);
@@ -37,9 +37,12 @@ class BimpClientForDol extends Bimp_Client
 
                 $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
                 $nb_rappels++;
-                
+
                 if ((int) $this->db->getCount('bimpcore_note', $where_check . $c->id) > 0) {
-                    mailSyn2('Probléme MAJ ICBA '.$c->id, 'dev@bimp.fr', null, 'L\'encours devrait deja être supprimer');
+					$code = 'MAJ_ICBA_encours_non_supprime';
+					$sujet = 'Probléme MAJ ICBA '.$c->id;
+					$msg = 'L\'encours devrait deja être supprimer';
+					BimpUserMsg::envoiMsg($code, $sujet, $msg);
                     continue;
                 }
 

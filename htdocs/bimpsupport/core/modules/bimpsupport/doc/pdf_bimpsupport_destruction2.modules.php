@@ -66,7 +66,7 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
-            
+
     // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -86,7 +86,8 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
     {
         global $user, $langs, $conf;
 
-        global $tabCentre;
+//        global $tabCentre;
+		$lescentres = BimpCache::getCentresData();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -137,7 +138,7 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
 //                    $pdf->setPrintHeader(false);
 //                    $pdf->setPrintFooter(false);
 //                }
-                
+
                 $pdf->Open();
                 $pdf1->Open();
                 $pdf->AddPage();
@@ -171,10 +172,10 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
                 //centre
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->SetXY('49', '171.4');
-                $pdf->MultiCell(100, 6, "BIMP " . $tabCentre[$code_entrepot][2], 0, 'L');
+                $pdf->MultiCell(100, 6, "BIMP " . $lescentres[$code_entrepot]['label'], 0, 'L');
 
                 $adresseDest = "Palais de justice «  Novarina »
-51 rue Sommeiller 
+51 rue Sommeiller
 BP 2321
 74011 Annecy le vieux";
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
@@ -220,7 +221,7 @@ BP 2321
                 $pdf->Close();
 
                 $this->file = $file;
-                
+
                 $pdf->Output($file, 'F');
 //
 ////                ////$langs->setPhpLang();    // On restaure langue session

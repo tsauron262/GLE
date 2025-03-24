@@ -102,7 +102,7 @@ class ActionsBimpcore
 			$_REQUEST['id'] = $_REQUEST['socid'];
 		}
 
-		if (stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false) {
+		if (stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false &&  stripos($url, 'stats')== false) {
 			if (stripos($url, '/commande/') !== false) {
 				$tabObj = array("bimpcommercial", "Bimp_Commande");
 			}

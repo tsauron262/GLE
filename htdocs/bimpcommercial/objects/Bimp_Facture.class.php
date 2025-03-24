@@ -1,7 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
-BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 global $langs;
 $langs->load('bills');
@@ -7340,18 +7340,21 @@ class Bimp_Facture extends BimpComm
 					$facs_ids .= ($facs_ids ? ', ' : '') . $fac_data['id'];
 				}
 
-				$mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
+//                $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
+				$userComm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+				$code = "rappel_facture_brouillon";
+				$sujet = "Facture brouillon à régulariser";
 
-				$return .= ' - ' . $facs_ids . ' => Mail to ' . $mail . ' : ';
-				if (mailSyn2('Facture brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
-					$return .= ' [OK]';
-					$i++;
-				} else {
-					$return .= ' [ECHEC]';
-				}
-				$return .= '<br/>';
-			}
-		}
+                $return .= ' - ' . $facs_ids . /*' => Mail to ' . $mail . */ ' : ';
+                if (!count(BimpUserMsg::envoiMsg($code, $sujet, $msg, $id_user))) {
+                    $return .= ' [OK]';
+                    $i++;
+                } else {
+                    $return .= ' [ECHEC]';
+                }
+                $return .= '<br/>';
+            }
+        }
 
 		return "OK " . $i . ' mail(s)<br/><br/>' . $return;
 	}
@@ -7486,15 +7489,17 @@ class Bimp_Facture extends BimpComm
 								$msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
 								$msg .= date('d / m / Y', strtotime($fac_date_lim));
 
-								$out .= ' - Fac ' . $facture->getLink() . ' : ';
-								if (mailSyn2($subject, $to, '', $msg, array(), array(), array(), $cc)) {
-									$out .= '[OK]';
-								} else {
-									$out .= '[ECHEC]';
-								}
-								$out .= '<br/>';
-								break;
-							}
+                                $out .= ' - Fac ' . $facture->getLink() . ' : ';
+
+								$code = "rappel_facture_financement_impayee";
+								if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $facture)))	{
+                                    $out .= '[OK]';
+                                } else {
+                                    $out .= '[ECHEC]';
+                                }
+                                $out .= '<br/>';
+                                break;
+                            }
 
 							$date_check->add(new DateInterval('P15D'));
 						}

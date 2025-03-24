@@ -18,7 +18,7 @@ class ConsignedStockShipment extends BimpObject
         'UPSWW065' => 'UPS'
     );
 
-    // Droits Users: 
+    // Droits Users:
 
     public function canSetAction($action)
     {
@@ -31,7 +31,7 @@ class ConsignedStockShipment extends BimpObject
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -89,7 +89,7 @@ class ConsignedStockShipment extends BimpObject
         return 0;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getListHeaderButtons()
     {
@@ -137,7 +137,7 @@ class ConsignedStockShipment extends BimpObject
         return $buttons;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getShipTo(&$errors = array())
     {
@@ -147,7 +147,7 @@ class ConsignedStockShipment extends BimpObject
         if (!$centre) {
             $errors[] = 'Centre absent';
         } else {
-            $centres = BimpCache::getCentres();
+            $centres = BimpCache::getCentresData();
 
             if (!isset($centres[$centre])) {
                 $errors[] = 'Aucun centre pour le code "' . $centre . '"';
@@ -163,7 +163,7 @@ class ConsignedStockShipment extends BimpObject
         return $shipTo;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
@@ -402,7 +402,7 @@ class ConsignedStockShipment extends BimpObject
         ));
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function checkParts($new_parts, &$errors = array(), &$warnings = array())
     {
@@ -526,7 +526,7 @@ class ConsignedStockShipment extends BimpObject
         return $new_parts;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionSaveParts($data, &$success = '')
     {

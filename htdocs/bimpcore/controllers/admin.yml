@@ -67,6 +67,11 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: BimpSecuIp
+    cgv:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpCGV
     
                 
 sections:
@@ -208,3 +213,11 @@ sections:
                             - droit
            
                             
+        cgv:
+            label: CGV
+            sections:
+                - type: list
+                  list:
+                      panel: 1
+                      object: cgv
+                      name: default

@@ -304,12 +304,16 @@ class GSX_Const extends GSX_Const_entity
         if (is_null(self::$centres_array)) {
             self::$centres_array = array();
 
-            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
-
-            global $tabCentre;
-            foreach ($tabCentre as $code => $centre) {
-                self::$centres_array[$code] = $centre[2] . ' (' . $centre[4] . ')';
-            }
+//            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+//
+//            global $tabCentre;
+//            foreach ($tabCentre as $code => $centre) {
+//                self::$centres_array[$code] = $centre[2] . ' (' . $centre[4] . ')';
+//            }
+			$centres = BimpCache::getCentresData();
+			foreach ($centres as $centre) {
+				self::$centres_array[$centre['code']] = $centre['label'] . ' (' . $centre['shipTo'] . ')';
+			}
         }
 
         return self::$centres_array;

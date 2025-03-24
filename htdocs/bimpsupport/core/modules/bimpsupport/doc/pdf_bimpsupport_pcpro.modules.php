@@ -96,7 +96,7 @@ class pdf_synopsischrono_pcpro extends ModeleSynopsischrono {
 
 
 
-            
+
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -115,7 +115,8 @@ class pdf_synopsischrono_pcpro extends ModeleSynopsischrono {
     function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
 
-        global $tabCentre;
+//        global $tabCentre;
+		$tabCentre = BimpCache::getCentresData();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -194,8 +195,8 @@ class pdf_synopsischrono_pcpro extends ModeleSynopsischrono {
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-// 
-//                
+//
+//
 
 
 
@@ -224,10 +225,10 @@ class pdf_synopsischrono_pcpro extends ModeleSynopsischrono {
                 $pdf->SetXY('147', '32.5');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1060]->valueStr, 0, 'L');
                 $pdf->SetXY('147', '38.5');
-                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][0], 0, 'L');
+                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value]['tel'], 0, 'L');
                 $pdf->SetXY('147', '44.1');
-                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][1], 0, 'L');
-//                $tabCentre
+                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value]['mail'], 0, 'L');
+
                 //client
                 $contact = "";
                 if ($chrono->contact_id > 0) {
@@ -363,11 +364,11 @@ class pdf_synopsischrono_pcpro extends ModeleSynopsischrono {
 //                for($i=0;$i<1000;$i = $i+5){
 //                $pdf->SetXY($i,$i);
 //                $pdf->MultiCell(155, 6, $i, 0, 'L');
-//                
+//
 //                }
 
 
-                //QR suivie        
+                //QR suivie
                 $dir .= "/temp/";
                 $data = DOL_MAIN_URL_ROOT."/synopsis_chrono_public/page.php?back_serial=".$chrono->id."&user_name=".substr($chrono->societe->name,0,3);
                 $this->getQrCode($data, $dir, "suivie.png");
@@ -572,8 +573,8 @@ class pdf_synopsischrono_pcpro extends ModeleSynopsischrono {
             $pdf->Rect($this->marge_gauche - 3, 39, $largCadre, 235);
             $pdf->SetXY($this->marge_gauche, 42);
         }
-        
-        
+
+
 
 
 

@@ -73,7 +73,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
 
 
-            
+
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -86,7 +86,8 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
     function write_file($sav, $outputlangs = '')
     {
         global $user, $langs, $conf;
-        global $tabCentre;
+//        global $tabCentre;
+		$lescentres = BimpCache::getCentresData();
 
         if (!is_object($outputlangs)) {
             $outputlangs = $langs;
@@ -165,18 +166,18 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
 
             if ($code_entrepot) {
-                if (isset($tabCentre[$code_entrepot])) {
+                if (isset($lescentres[$code_entrepot])) {
                     // Nom centre
                     $pdf->SetXY('144', '36.4');
-                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][2], 0, 'L');
+                    $pdf->MultiCell(100, 6, $lescentres[$code_entrepot]['label'], 0, 'L');
 
                     // Tel centre
                     $pdf->SetXY('133.5', '41.5');
-                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][0], 0, 'L');
+                    $pdf->MultiCell(100, 6, $lescentres[$code_entrepot]['tel'], 0, 'L');
 
                    // Mail centre
                     $pdf->SetXY('136', '47');
-                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][1], 0, 'L');
+                    $pdf->MultiCell(100, 6, $lescentres[$code_entrepot]['mail'], 0, 'L');
                 } else {
                     $pdf->SetXY('144', '36.4');
                     $pdf->MultiCell(100, 6, $code_entrepot, 0, 'L');
@@ -228,12 +229,12 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $sav->getData('prestataire_number'), 0, 'L');
             }
 
-            // Produit: 
+            // Produit:
             $equipment = $sav->getChildObject('equipment');
             $product_label = '';
             if (!is_null($equipment) && $equipment->isLoaded()) {
                 $product_label = $equipment->displayProduct('nom', true);
-                
+
                 if (strlen($product_label) > 50) {
                     $product_label = substr($product_label, 0, 50) . '...';
                 }
@@ -272,7 +273,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             //Systeme
             $pdf->SetXY(124, 109.5);
             $pdf->MultiCell(80, 6, $sav->displayData('system', 'default', false, true), 0, '');
-            
+
             // Message suivi
             $pdf->SetXY(35, 119);
             $pdf->setColor('text', 237, 124, 29);
@@ -295,13 +296,13 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 $pdf->SetTextColor(256, 0, 0);
 
             $pdf->SetXY('9.3', '165.3');
-            
+
             if (BS_SAV::getSaveOptionDesc($save) != null) {
                 $text = BS_SAV::getSaveOptionDesc($save);
             } else {
                 $text = $sav->displayData('save_option', 'default', false, true);
             }
-            
+
             $pdf->MultiCell(175, 6, $text, 0, 'L');
 
             $cgv = "";
@@ -369,15 +370,15 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 //                for($i=0;$i<1000;$i = $i+5){
 //                $pdf->SetXY($i,$i);
 //                $pdf->MultiCell(155, 6, $i, 0, 'L');
-//                
+//
 //                }
-            //QR suivie        
+            //QR suivie
             $qr_dir = $dir . "temp";
             $data = $sav->getPublicLink();
 //            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $sav->getChildObject("equipment")->getData("serial")."&id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
             $this->getQrCode($data, $qr_dir, "suivie.png");
             $pdf->Image($qr_dir . "/suivie.png", 100, 33, 0, 24);
-            
+
             // Logo
             $logo = false;
             if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
@@ -388,7 +389,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $testFile = str_replace(array(".jpg", ".png", /*"_RESEAUNANCE.png", "_RESEAUNANCE_SAV.png"*/), "_SAV.png", $logo);
             if (is_file($testFile))
                 $logo = $testFile;
-            
+
     //        $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
             if ($logo && is_readable($logo))
                     $pdf->Image($logo, 10, 16, 0, 22);

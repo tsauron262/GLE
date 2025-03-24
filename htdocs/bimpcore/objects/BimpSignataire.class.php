@@ -1673,12 +1673,13 @@ class BimpSignataire extends BimpObject
 						break;
 				}
 
+                $code = 'notif_signature_' . $type;
 				if ($subject && $msg) {
-					mailSyn2($subject, $comm_email, '', $msg);
-				}
-			}
-		}
-	}
+					BimpUserMsg::envoiMsg($code, $subject, $msg, $comm_email);
+                }
+            }
+        }
+    }
 
 	public function sendEmail($content, $subject = '')
 	{

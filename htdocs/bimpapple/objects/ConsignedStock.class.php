@@ -7,8 +7,8 @@ class ConsignedStock extends PartStock
 
     public static $stock_type = 'consigned';
 
-    // Droits user: 
-    
+    // Droits user:
+
     public function canSetAction($action)
     {
         switch ($action) {
@@ -22,7 +22,7 @@ class ConsignedStock extends PartStock
         return parent::canSetAction($action);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getListHeaderButtons()
     {
@@ -42,7 +42,7 @@ class ConsignedStock extends PartStock
         return $buttons;
     }
 
-    // Getters statics: 
+    // Getters statics:
 
     public static function getStockInstance($code_centre, $part_number)
     {
@@ -52,7 +52,7 @@ class ConsignedStock extends PartStock
                         ), true);
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderReceptionDeliveryNumberSelect()
     {
@@ -229,7 +229,7 @@ class ConsignedStock extends PartStock
                             $html .= '<td>';
                             if ($qty_to_receive > 0) {
                                 if ((bool) $part['serialized']) {
-                                    // Check stock existant: 
+                                    // Check stock existant:
 
                                     $cur_stock = self::getStockInstance($code_centre, $part['number']);
                                     if (BimpObject::objectLoaded($cur_stock) && !((int) $cur_stock->getData('serialized')) && (int) $cur_stock->getData('qty')) {
@@ -392,7 +392,7 @@ class ConsignedStock extends PartStock
         return $html;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionReceive($data, &$success = '')
     {
@@ -460,7 +460,7 @@ class ConsignedStock extends PartStock
                 if (empty($parts)) {
                     $errors[] = 'Aucun utité à réceptionner saisie ou sélectionnée';
                 } else {
-                    // Requête GSX: 
+                    // Requête GSX:
                     require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
 
                     $gsx = new GSX_v2($shipTo);
@@ -479,7 +479,7 @@ class ConsignedStock extends PartStock
                     if (!count($errors)) {
                         $success .= 'Enregistrement des unités reçues sur GSX effectuée avec succès';
 
-                        // Enregistrement parts: 
+                        // Enregistrement parts:
                         $nOk = 0;
                         $nFails = 0;
 
@@ -513,11 +513,11 @@ class ConsignedStock extends PartStock
                                         continue;
                                     }
 
-                                    // Recherche entrée existante: 
+                                    // Recherche entrée existante:
                                     $stock = self::getStockInstance($code_centre, $part['number']);
 
                                     if (!BimpObject::objectLoaded($stock)) {
-                                        // Création: 
+                                        // Création:
                                         $cs_data = array(
                                             'part_number' => $part['number'],
                                             'code_centre' => $code_centre,
@@ -541,7 +541,7 @@ class ConsignedStock extends PartStock
                                     }
 
                                     if (BimpObject::objectLoaded($stock)) {
-                                        // mise à jour stock: 
+                                        // mise à jour stock:
                                         $qty_modif = (int) BimpTools::getArrayValueFromPath($part, 'quantity', 0);
                                         if ($serial) {
                                             $qty_modif = 1;
@@ -569,13 +569,13 @@ class ConsignedStock extends PartStock
                             }
                         }
 
-                        // Traitement des extra_serials: 
+                        // Traitement des extra_serials:
                         if (!empty($extra_serials)) {
                             foreach ($extra_serials as $part_number => $serials) {
                                 $stock = self::getStockInstance($code_centre, $part_number);
 
                                 if (!BimpObject::objectLoaded($stock)) {
-                                    // Création du stock: 
+                                    // Création du stock:
                                     $create_errors = array();
                                     $create_warnings = array();
                                     $stock = BimpObject::createBimpObject('bimpapple', 'ConsignedStock', array(
@@ -615,8 +615,9 @@ class ConsignedStock extends PartStock
                         }
 
                         if ($nFails) {
-                            mailSyn2('ERREURS STOCKS CONSIGNES APPLE', BimpCore::getConf('devs_email'), '', $nFails . ' erreur(s) à corriger manuellement  - Voir les logs');
-                        }
+							$code = 'erreur_stock_consigne_apple';
+							BimpUserMsg::envoiMsg($code, 'ERREURS STOCKS CONSIGNES APPLE', $nFails . ' erreur(s) à corriger manuellement  - Voir les logs');
+						}
                     }
                 }
             }

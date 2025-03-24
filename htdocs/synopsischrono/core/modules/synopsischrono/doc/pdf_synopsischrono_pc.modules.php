@@ -96,7 +96,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
 
-            
+
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -115,7 +115,8 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
     function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
 
-        global $tabCentre;
+//        global $tabCentre;
+		$tabCentre = BimpCache::getCentresData();
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -194,8 +195,8 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-// 
-//                
+//
+//
 
 
 
@@ -224,9 +225,9 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetXY('147', '32.5');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1060]->valueStr, 0, 'L');
                 $pdf->SetXY('147', '38.5');
-                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][0], 0, 'L');
+                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value]['tel'], 0, 'L');
                 $pdf->SetXY('147', '44.1');
-                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][1], 0, 'L');
+                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value]['mail'], 0, 'L');
 //                $tabCentre
                 //client
                 $contact = "";
@@ -280,11 +281,11 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetXY('137', '79.4');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1064]->value, 0, 'L');
 
-                
+
                 //Date achat
                 $pdf->SetXY('147', '83.7');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1014]->value, 0, 'L');
-                
+
                 //Fin de ga
                 $pdf->SetXY('147', '87.7');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1015]->value, 0, 'L');
@@ -322,7 +323,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $prixRefusOrdi = "49";
                 if($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
                     $prixRefusOrdi = "39";
-                
+
                 if (stripos($chrono2->description, "Iphone") !== false) {
                     $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
                     $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE. Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
@@ -335,10 +336,10 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 //                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
 //                $pdf->SetX(6);
                 $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 0.75€ par jour.\n\n";
-                
-                $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas 
+
+                $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas
 été retirés dans le délai de un an pourront être détruit, après accord du tribunal.\n
--BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: 
+-BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont:
 en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 
                 if ($chrono->valuesPlus[1068]->value == 1 && stripos($chrono2->description, "Iphone") === false) {
@@ -381,11 +382,11 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 //                for($i=0;$i<1000;$i = $i+5){
 //                $pdf->SetXY($i,$i);
 //                $pdf->MultiCell(155, 6, $i, 0, 'L');
-//                
+//
 //                }
 
 
-                //QR suivie        
+                //QR suivie
                 $dir .= "/temp/";
                 $data = DOL_MAIN_URL_ROOT."/synopsis_chrono_public/page.php?back_serial=".$chrono->id."&user_name=".substr($chrono->societe->name,0,3);
                 $this->getQrCode($data, $dir, "suivie.png");
@@ -590,8 +591,8 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
             $pdf->Rect($this->marge_gauche - 3, 39, $largCadre, 235);
             $pdf->SetXY($this->marge_gauche, 42);
         }
-        
-        
+
+
 
 
 

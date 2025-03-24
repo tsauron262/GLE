@@ -5,7 +5,7 @@ class Actionsbimpsecurlogin
 
     function doActions($parameters, &$object, &$action, $hookmanager)
     {
-        
+
     }
 
     function setContentSecurityPolicy($parameters, &$object, &$action, $hookmanager)
@@ -63,8 +63,8 @@ class securLogSms
                 $dateFinBloquage = time() - (60 * 5);
 
                 $secondeRestante = (int) $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
-                
-                
+
+
                 if ((empty($code) && $secondeRestante < 0) || $this->user->array_options['options_code_sms'] == '')
                     $this->createSendCode();
                 elseif (!empty($code))
@@ -124,8 +124,8 @@ class securLogSms
         $int = 60 * 60 * 24 * 7;
         $_COOKIE[$this->nomCookie] = $codeR;
         $arr_cookie_options = array (
-            'expires' =>  time() + $int, 
-            'path' => '/',//$conf->file->dol_url_root['main'], 
+            'expires' =>  time() + $int,
+            'path' => '/',//$conf->file->dol_url_root['main'],
 //            'domain' => '', // leading dot for compatibility or use subdomain
             'secure' => true,     // or false
             'httponly' => true,    // or false
@@ -159,7 +159,7 @@ class securLogSms
 
         if ($this->asSecureCokie())
             return 1;
-        
+
         if ($this->isIpWhite($this->ip))
             return 1;
 
@@ -185,13 +185,13 @@ class securLogSms
 
         if (stripos($this->ip, '10.20.') !== false)//interne
             return 1;
-        
+
         if (stripos($this->ip, '10.212.13') === 0)//vpn
             return 1;
-        
+
         if (stripos($this->ip, '10.8.12.') === 0)//vpn
             return 1;
-        
+
         if (is_file($this->filename)) {//ip white liste
             $tmp = file_get_contents($this->filename);
             $tab = explode("\n", $tmp);
@@ -249,7 +249,7 @@ class securLogSms
                 if ($this->isPhoneMobile($to)) {
                     require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
 
-                    $smsfile = new CSMSFile($to, "BIMP ERP", $text);
+                    $smsfile = new CSMSFile($to, "ERP GLE", $text);
                     if ($smsfile->sendfile()) {
                         $this->message[] = 'Code envoyé au 0' . substr($to, 3, 5) . "****<br/><br/>";
                         $okSms = true;
@@ -257,9 +257,8 @@ class securLogSms
                 }
             }
 
-            $toM = $this->traiteMail();
-            if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, null, $text . ' IP : ' . $this->ip)) {
-                $this->message[] = 'Code envoyé à ' . substr($toM, 0, 4) . "*******" . substr($toM, -7) . "<br/><br/>";
+			if (!count(BimpUserMsg::envoiMsg('code_erp', "Code ERP", $text . ' IP : ' . $this->ip, $this))) {
+                $this->message[] = 'Code envoyé par mail<br/><br/>';
                 $okMail = true;
             }
             //            }
@@ -328,7 +327,7 @@ class securLogSms
 //            if (stripos($phone, "0") === 0)
 //                $phone = "+33" . substr($phone, 1);
 //        }
-//        if (!$this->isPhoneMobile($phone) && $this->user->array_options['options_phone_perso'] != "") {//Si pas trouver 
+//        if (!$this->isPhoneMobile($phone) && $this->user->array_options['options_phone_perso'] != "") {//Si pas trouver
 //            $phone = str_replace(array(" ", "-", ":"), "", $this->user->array_options['options_phone_perso']);
 //            if (stripos($phone, "+") === false) {
 //                if (stripos($phone, "0") === 0)
@@ -382,4 +381,4 @@ class securLogSms
     }
 }
 
-// 
+//

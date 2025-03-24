@@ -68,7 +68,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
 
-            
+
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
@@ -87,7 +87,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
     function write_file($sav, $outputlangs = '') {
         global $user, $langs, $conf;
 
-        global $tabCentre;
+//        global $tabCentre;
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -164,15 +164,15 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-// 
-//                
+//
+//
 
 
 
                 $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/europe20202.pdf');
                 $tplidx1 = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx1, 0, 0, 0, 0, true);
-                
+
 
 
 //                $equipment = $sav->getChildObject('equipment');
@@ -185,7 +185,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 ////                $pdf->MultiCell(100, 6, $sav->getData('ref'), 0, 'L');
 ////
 ////
-////                
+////
 ////                $code_entrepot = $sav->getData('code_centre');
 ////
 ////                //centre
@@ -220,7 +220,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 ////                $pdf->SetXY('20', '71');
 ////                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
 ////                $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
-//                
+//
 //                $pdf->SetXY('50', '64.8');//60
 //                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
 //                $pdf->MultiCell(300, 6, $client->name, 0, 'L');
@@ -242,9 +242,9 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 //                $pdf->SetXY('77', '95.3');
 //                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
 //                $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->phone), 0, 'L');
-//                
-//                
-//                
+//
+//
+//
 //                $product_label = $equipment->displayProduct('nom', true);
 //                //le prod
 //                $pdf->SetXY('140', '111.5');
@@ -253,13 +253,13 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 ////
 //                $pdf->SetXY('53', '111.5');
 //                $pdf->MultiCell(100, 6, $equipment->getData('serial'), 0, 'L');
-//                
+//
 //                $pdf->SetXY('64', '119');
 //                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
 //                $date_purchase = new DateTime($equipment->getData("date_purchase"));
 //                $pdf->MultiCell(300, 6, str_replace("\n", " ", $date_purchase->format('d-m-Y')), 0, 'L');
-//                
-//                
+//
+//
 //                $pdf->SetXY('30', '200.6');
 //                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
 //                $pdf->MultiCell(300, 6, str_replace("\n", " ", $sav->getData("diagnostic")), 0, 'L');
@@ -309,71 +309,71 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                     $address .= "\n" . $contact;
 
                 $address .= "\n" . $client->address . "\n" . $client->zip . " " . $client->town;
-                
+
                 /* PAGE 1 : À remplir par le client */
                 /* Informations sur le client */
                 // Nom du client
                 $pdf->SetXY('35', '85.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, $client->name, 0, 'L');
-                
-                // Adresse postale 
+
+                // Adresse postale
                 $pdf->SetXY('38', '93.7');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->address), 0, 'L');
-//               
+//
                 // Ville
                 $pdf->SetXY('18', '102.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->town), 0, 'L');
-//                
+//
 //              // Pays/région
                 $pdf->SetXY('129', '102.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->country), 0, 'L');
-//               
+//
                 // Code postal
                 $pdf->SetXY('31', '111');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->zip), 0, 'L');
-               
+
                 // Adresse e-mail
                 $pdf->SetXY('112', '110.7');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->email), 0, 'L');
-                
+
                 // Numéro de téléphone du client
                 $pdf->SetXY('63', '119.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, str_replace("\n", " ", $client->phone), 0, 'L');
-                
-                
-                
+
+
+
                 /* Informations sur le produit */
                 $equipment = $sav->getChildObject('equipment');
 //                $product = $equipment->getChildObject('product');
-                
+
                 // Numéro de série
                 $pdf->SetXY('39', '137.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(100, 6, $equipment->getData('serial'), 0, 'L');
-                
+
                 // Type de produit
                 $pdf->SetXY('127', '137.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
 //                $pdf->MultiCell(100, 6, $equipment->displayData('fk_product_type', 'default', true, false), 0, 'L');
                 $pdf->MultiCell(100, 6, $equipment->displayProduct('nom', true), 0, 'L');
-                
-//              // Date d’achat 
+
+//              // Date d’achat
                 $pdf->SetXY('34', '147.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                
+
                 if(!is_null(BimpTools::getPostFieldValue('date_purchase', null, 'date')))
                     $date_purchase = new DateTime(BimpTools::getPostFieldValue('date_purchase', null, 'date'));
                 else
                     $date_purchase = new DateTime($equipment->getData("date_purchase"));
                 $pdf->MultiCell(300, 6, $date_purchase->format('d-m-Y'), 0, 'L');
-                
+
                 // Nom du revendeur
                 $pdf->SetXY('134', '146.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
@@ -387,8 +387,8 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 } else
                     $name_reseller = $sav->getData('name_reseller');
                 $pdf->MultiCell(100, 6, $name_reseller, 0, 'L');
-                
-                
+
+
                 // Description du problème
                 $pdf->SetMargins(0, 15);
                 $pdf->SetXY('11.5', '153.5');
@@ -396,17 +396,17 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(188, 1, '                                      ' . str_replace("\n", ' ', $sav->getData('symptomes')), 0, 'L');
                 $pdf->setCellHeightRatio(1);
-                
+
                 // Check Avez-vous acheté une extension de garantie tierce pour ce produit
                 $this->addCheck($pdf, 144, 174);
-                
-                
-                
+
+
+
                 //signature client
                 $sign = '';
                 if($sav->getData('id_signature_pc')){
                     $signatureObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', $sav->getData('id_signature_pc'));
-                    
+
                     if (BimpObject::objectLoaded($signatureObj) && $signatureObj->isSigned()) {
                         $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
                                     'id_signature' => $sav->getData('id_signature_pc'),
@@ -420,26 +420,26 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                                 $data = explode(',', $sign);
                                 fwrite($ifp, base64_decode($data[1]));
                                 fclose($ifp);
-                                
+
                                 $pdf->Image($output_file, 12, 217, 45, 22);
                             }
                         }
                     }
                 }
-                
-                
+
+
                 if (!$sign) {
                      $this->error = 'Pas de signature client';
                      return 0;
                 }
-                
-                
+
+
                 /* PAGE 1 : À remplir par le technicien */
                 /* Informations sur la validation par le centre de services */
                 $pdf->AddPage();
                 $tplidx2 = $pdf->importPage(2, "/MediaBox");
                 $pdf->useTemplate($tplidx2, 0, 0, 0, 0, true);
-                
+
                 //Cette réclamation concerne-t-elle un consommateur ? (sans lien avec son entreprise ou sa profession)
                 $this->addCheck($pdf, 180, 56.3);
 
@@ -450,11 +450,11 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                         $this->addCheck($pdf, 80.5, 66); // Checkbox à "Non"
                     else
                         $this->addCheck($pdf, 65.4, 66); // Checkbox à "Oui"
-                    
+
                 } else {
                     $this->addCheck($pdf, 70.5, 66); // Checkbox à "Non"
                 }
-                
+
                 //Le produit présente-t-il des signes visibles de dommage accidentel ?
                 $this->addCheck($pdf, 149.2, 75.8);
 
@@ -462,17 +462,17 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 if ($sav->getChildObject('user_tech')->id > 0) {
                     $tech = $sav->getChildObject('user_tech')->dol_object;
                     $tech->fetch_optionals();
-                    
+
                     // Description du problème
                     $pdf->SetXY('15', '82.5');
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                     $pdf->setCellHeightRatio(1.51);
                     $pdf->MultiCell(185, 6, '                                  ' . str_replace("\n", ' ', $sav->getData('diagnostic')), 0, 'L');
                     $pdf->setCellHeightRatio(1);
-                    
+
                     // Cette réclamation de réparation vous a-t-elle été envoyée par un revendeur ?
                     $this->addCheck($pdf, 163.7, 116.9);
-                
+
                     // Nom du technicien
                     $pdf->SetXY('12.5', '160');
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
@@ -492,11 +492,11 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                     $pdf->SetXY('107', '186.5');
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                     $pdf->MultiCell(100, 6, date('d/m/Y H:i:s'), 0, 'L');
-                    
-                    
+
+
                     //signature tech
                     $userTech = $sav->getChildObject('user_tech');
-                    
+
                     if (BimpObject::objectLoaded($userTech)) {
                         $sign = $userTech->getData('signature_papier');
                         if($sign && strlen($sign) > 10000){
@@ -507,13 +507,13 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                             $data = explode(',', $base64_image);
                             fwrite($ifp, base64_decode($data[1]));
                             fclose($ifp);
-                            
+
                             $pdf->Image($output_file, 20, 198, 50, 28);
                         }
                         else{
                             $this->error = 'Le technicien n\'a pas de signature';
                             return 0;
-                        }   
+                        }
                     } else {
                         $this->error = 'Technicien absent';
                         return 0;
@@ -797,12 +797,12 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
         }
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
-    
+
     function addCheck($pdf, $x, $y, $t = 4) {
         $style = array(
             'width' => 0.7
         );
-        
+
         $pdf->Line($x     , $y, $x + $t, $y + $t, $style);
         $pdf->Line($x + $t, $y, $x     , $y + $t, $style);
     }

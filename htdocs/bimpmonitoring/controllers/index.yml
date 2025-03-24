@@ -1,0 +1,24 @@
+bootstrap: 1
+title: Bimp Monitoring
+
+objects:
+    bimpmonitoring:
+        instance:
+            bimp_object: bimpmonitoring
+    
+sections:
+    - type: tabs
+      tabs:  
+        default:
+            label: Config
+            sections:
+                - type: list
+                  list:
+                      panel: 1
+                      object: bimpmonitoring
+        view:
+            label: Monitoring
+            sections:
+                - type: custom
+                  custom:
+                      callback: renderMonitoringView

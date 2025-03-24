@@ -18,45 +18,6 @@ class Bimp_ActionComm extends BimpObject
 
 	// Droits users:
 
-	public function getRight($code)
-	{
-		global $user;
-
-		if ($user->rights->agenda->allactions->$code) {
-			return 1;
-		}
-
-		$usersAssigned = BimpTools::getPostFieldValue('users_assigned', $this->getUsersAssigned(), 'array');
-
-		if (!$this->isLoaded()) {
-			$idUserCreate = $user->id;
-			if (count($usersAssigned) != 1 || !in_array($user->id, $usersAssigned))//n'est pas l'utilisateur assignée, et na pas le droit de créer des action pour d'autres.
-			{
-				return false;
-			}
-		} else {
-			$idUserCreate = $this->getData('fk_user_author');
-		}
-
-		if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersAssigned) && in_array($user->id, $usersAssigned))) &&
-			$user->rights->agenda->myactions->$code) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	public function renderDolTabs()
-	{
-		global $langs;
-		require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
-
-		$paramnoaction = '';
-		$head = calendars_prepare_head($paramnoaction);
-
-		dol_fiche_head($head, "list", $langs->trans('Agenda'), 0, 'action');
-	}
-
 	public function canView()
 	{
 		//ne fonctionne pas
@@ -72,6 +33,20 @@ class Bimp_ActionComm extends BimpObject
 	public function canEdit()
 	{
 		return $this->getRight('create');
+	}
+
+	public function canSetAction($action)
+	{
+		global $user;
+		switch ($action) {
+			case 'done':
+				if ($this->isUserAssigned()) {
+					return 1;
+				}
+
+				return $this->canEdit();
+		}
+		return parent::canSetAction($action);
 	}
 
 	// Getters booléens:
@@ -91,6 +66,22 @@ class Bimp_ActionComm extends BimpObject
 	{
 //        return $this->getRight('delete');// pas de droits user ici
 		return 1;
+	}
+
+	public function isUserAssigned()
+	{
+		global $user;
+
+		if ($user->id == $this->getData('fk_user_action')) {
+			return 1;
+		}
+
+		foreach ($this->dol_object->userassigned as $userassigned) {
+			if ($user->id == $userassigned['id']) {
+				return 1;
+			}
+		}
+		return 0;
 	}
 
 	// Getters array:
@@ -138,6 +129,34 @@ class Bimp_ActionComm extends BimpObject
 	}
 
 	// Getters params:
+
+	public function getRight($code)
+	{
+		global $user;
+
+		if ($user->rights->agenda->allactions->$code) {
+			return 1;
+		}
+
+		$usersAssigned = BimpTools::getPostFieldValue('users_assigned', $this->getUsersAssigned(), 'array');
+
+		if (!$this->isLoaded()) {
+			$idUserCreate = $user->id;
+			if (count($usersAssigned) != 1 || !in_array($user->id, $usersAssigned)) //n'est pas l'utilisateur assignée, et n'a pas le droit de créer des action pour d'autres.
+			{
+				return 0;
+			}
+		} else {
+			$idUserCreate = $this->getData('fk_user_author');
+		}
+
+		if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersAssigned) && in_array($user->id, $usersAssigned))) &&
+			$user->rights->agenda->myactions->$code) {
+			return 1;
+		}
+
+		return 0;
+	}
 
 	public function getRefProperty()
 	{
@@ -398,6 +417,43 @@ class Bimp_ActionComm extends BimpObject
 		return $html;
 	}
 
+	public function displayUsersAssigned()
+	{
+		$html = '';
+
+		if ($this->isLoaded()) {
+			$main_user = $this->getChildObject('user_action');
+			$users = $this->dol_object->userassigned;
+
+			if (BimpObject::objectLoaded($main_user)) {
+				if (!empty($users)) {
+					foreach ($users as $key => $u) {
+						if ($u['id'] == $main_user->id) {
+							unset($users[$key]);
+						}
+					}
+				}
+
+				$html .= (!empty($users) ? 'Principal : ' : '') . $main_user->getLink();
+
+				if (!empty($users)) {
+					$html .= '<br/><br/>' . 'Autres utilisateurs:<br/>';
+				}
+			}
+
+			if (!empty($users)) {
+				$html .= '<ul>';
+				foreach ($users as $user) {
+					$user_instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user['id']);
+					$html .= '<li>' . $user_instance->getLink() . '</li>';
+				}
+				$html .= '</ul>';
+			}
+		}
+
+		return $html;
+	}
+
 	// Rendus HTML:
 
 	public function renderHeaderStatusExtra()
@@ -462,6 +518,17 @@ class Bimp_ActionComm extends BimpObject
 		}
 
 		return $html;
+	}
+
+	public function renderDolTabs()
+	{
+		global $langs;
+		require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
+
+		$paramnoaction = '';
+		$head = calendars_prepare_head($paramnoaction);
+
+		dol_fiche_head($head, "list", $langs->trans('Agenda'), 0, 'action');
 	}
 
 	// Overrides:

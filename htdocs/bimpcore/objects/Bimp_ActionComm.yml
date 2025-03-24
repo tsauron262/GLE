@@ -59,7 +59,6 @@ objects:
             id_object:
                 field_value: fk_contact
     
-    
     projet:
         relation: hasOne
         delete: 0
@@ -368,7 +367,6 @@ forms:
                 field: ef_conf
     add:
         extends: default
-    
     edit:
         extends: default
         before_content: unset
@@ -380,8 +378,9 @@ fields_tables:
         rows:
             -   field: fk_user_author
                 display: nom_url
-            -   field: fk_user_action
-                display: nom_url
+            -   label: Assigné à
+                value:
+                    callback: displayUsersAssigned
             -   field: code
             -   field: label
             -   field: fk_action
